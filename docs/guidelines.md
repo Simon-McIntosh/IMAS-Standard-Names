@@ -41,7 +41,6 @@ compose the general quantity named by omitting the phrase. Some examples are
 
 ## Transformations
 
-
 Standard names may be derived from other standard names (represented here by X,
 Y and Z) by the following rules. Successive transformations may be applied.
 Transformations may alter the units as shown.
