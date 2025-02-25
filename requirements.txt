@@ -1,3 +1,4 @@
 mkdocs
 mkdocs-material
 mkdocs-data-plugin
+mkdocs-table-reader-plugin
