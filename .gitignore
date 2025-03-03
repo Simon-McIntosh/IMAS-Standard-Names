@@ -1,2 +1,9 @@
 # mkdocs generated site
 site
+
+# pycache 
+__pycache__/
+
+# coverage
+.coverage 
+coverage.json
