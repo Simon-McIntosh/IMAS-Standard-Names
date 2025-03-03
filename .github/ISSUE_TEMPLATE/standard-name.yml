@@ -1,11 +1,11 @@
 name: IMAS Standard Name
 description: Propose an IMAS Standard Name addition or modification.
+labels: standard-name
 
 body:
   - type: markdown
     attributes:
       value: |
-      
         Guidelines for the construction of IMAS Standard Names can be found [here](https://github.com/iterorganization/IMAS-Standard-Names/blob/main/docs/guidelines.md). These guidelines should be followed when proposing a new Standard Name.
         
   - type: input
@@ -57,16 +57,10 @@ body:
       placeholder: flux-coordinates, equilibrium/time_slice/profiles_2d/psi
     validations:
       required: false
-      
 
   - type: checkboxes
     id: options
     attributes:
       label: options
-      description: |
-        Select the appropriate options:
-          - `overwrite`: Overwrite an existing Standard Name.
-          - `high priority`: Assign a high priority to the treatment of the proposed Standard Name.
       options:
-        - label: overwrite
-        - label: high priority
+        - label: This proposal is ready to commit to the Standard Names repository.

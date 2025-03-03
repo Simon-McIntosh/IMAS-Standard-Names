@@ -1,12 +1,17 @@
+import csv
+import itertools
+
 import json
+import pint
 import pydantic
 import pytest
 import strictyaml as syaml
 
 from imas_standard_names.standard_name import (
-    StandardName,
-    ParseYaml,
+    GenericNames,
     ParseJson,
+    ParseYaml,
+    StandardName,
     StandardNameFile,
     StandardInput,
 )
@@ -69,12 +74,49 @@ def test_alias_validator():
         StandardName(name="plasma_current", units="A", documentation="docs", alias=1)
 
 
+def test_units_parser():
+    assert (
+        StandardName(
+            name="electron_temperature", units="electron_volt", documentation="docs"
+        ).units
+        == "eV"
+    )
+
+
+@pytest.mark.parametrize(
+    "units,unit_format",
+    itertools.product(["eV", "electron_volt", "m/s^2"], ["~P", "P", "D", "~D", "H"]),
+)
+def test_units_unit_format(units, unit_format):
+    standard_name = StandardName(
+        **standard_name_data | {"units": f"{units}:{unit_format}"}
+    )
+    assert standard_name.units == f"{pint.Unit(units):{unit_format}}"
+
+
+def test_units_parser_error():
+    with pytest.raises(pint.errors.UndefinedUnitError):
+        StandardName(name="electron_temperature", units="eVv", documentation="docs")
+
+
 def test_yaml_input():
     standard_name = ParseYaml(yaml_single.as_yaml())[standard_name_data["name"]]
     for key, value in standard_name_data.items():
         if key == "name":
             continue
         assert getattr(standard_name, key) == value
+
+
+@pytest.mark.parametrize("unit_format", ["~P", "P", "D", "~D", "H", "", None])
+def test_yaml_unit_format(unit_format):
+    standard_name = ParseYaml(yaml_single.as_yaml(), unit_format=unit_format)[
+        standard_name_data["name"]
+    ]
+    if not unit_format:
+        unit_format = "~P"
+    assert (
+        standard_name.units == f"{pint.Unit(standard_name_data['units']):{unit_format}}"
+    )
 
 
 def test_json_input():
@@ -106,7 +148,7 @@ def test_yaml_roundtrip():
         )
 
 
-@pytest.fixture()
+@pytest.fixture(scope="session")
 def standardnames(tmp_path_factory):
     filepath = tmp_path_factory.mktemp("data") / "standardnames.yaml"
     with open(filepath, "w") as f:
@@ -174,12 +216,33 @@ def test_file_update_overwrite_error(standardnames):
         standard_names.update(standard_name)
 
 
+@pytest.fixture(scope="session")
+def generic_names(tmp_path_factory):
+    filepath = tmp_path_factory.mktemp("data") / "generic_names.csv"
+    data = [("m^2", "area"), ("A", "current"), ("J", "energy")]
+    with open(filepath, "w", newline="") as f:
+        writer = csv.writer(f, delimiter=",")
+        writer.writerow(["Unit", "Generic Name"])
+        writer.writerows(data)
+    return GenericNames(filepath)
+
+
+@pytest.mark.parametrize("name", ["area", "current", "energy"])
+def test_is_generic_name(generic_names, name):
+    assert name in generic_names
+
+
+@pytest.mark.parametrize("name", ["plasma_current", "electron_temperature"])
+def test_is_not_generic_name(generic_names, name):
+    assert name not in generic_names
+
+
 @pytest.mark.parametrize(
     "options", ["overwrite", "high priority", "overwrite,high priority"]
 )
 def test_json_overwrite(tmp_path, options):
     filename = tmp_path / "test.json"
-    with open(filename, "w") as f:
+    with open(filename, "w", newline="") as f:
         json.dump(standard_name_data | {"options": options}, f)
     standard_input = StandardInput(filename)
     assert standard_input.standard_name.overwrite is ("overwrite" in options)

@@ -1,0 +1,71 @@
+name: Parse Issue
+description: Parse Standard Name issue body and extract submission data.
+
+inputs:
+  template_path:
+    description: 'Path to the issue template.'
+    required: true
+    default: '.github/ISSUE_TEMPLATE/standard-name.yml'
+outputs:
+  standard-name:
+    description: 'Proposed Standard Name.'
+    value: ${{ steps.issue-parser.outputs.issueparser_name }}
+  standard-name-entry:
+    description: 'Proposed Standard Name entry.'
+    value: ${{ steps.imas-standard-name.outputs.standard-name-entry }}
+  duplicate-name:
+    description: 'A boolean flag indicating if the proposal is a duplicate.'
+    value: ${{ steps.flags.outputs.duplicate-name }}
+  update-message:
+    description: 'Update Standard Names update message.'
+    value: ${{ steps.imas-standard-name.outputs.update-message }} 
+  update-error:
+    description: 'A boolean flag indicating if the Standard Name update failed.'
+    value: ${{ steps.flags.outputs.update-error }}
+  valid-commit:
+    description: 'A boolean flag indicating if the proposal is ready to commit.'
+    value: ${{ steps.flags.outputs.valid-commit }}
+
+runs:
+  using: 'composite'
+  steps:
+  
+    - id: issue-parser
+      uses: stefanbuck/github-issue-parser@v3
+      with:
+        template-path: ${{ inputs.template_path }}
+
+    - name: Run scripts
+      id: imas-standard-name
+      shell: bash
+      run: |
+        echo '${{ steps.issue-parser.outputs.jsonString }}' > submission.json
+        {
+        echo 'has_name<<EOF'
+        has_standardname standardnames.yml ${{ steps.issue-parser.outputs.issueparser_name }} 
+        echo EOF
+        } >> "$GITHUB_ENV"
+        {
+        echo 'update-message<<EOF'
+        update_standardnames standardnames.yml docs/generic_names.csv submission.json
+        echo EOF
+        } | tee -a "$GITHUB_ENV" "$GITHUB_OUTPUT"
+        {
+        echo 'standard-name-entry<<EOF'
+        get_standardname standardnames.yml ${{ steps.issue-parser.outputs.issueparser_name }} --unit-format 'L'
+        echo EOF
+        } | tee -a "$GITHUB_ENV" "$GITHUB_OUTPUT"
+
+    - name: Comment on issue 
+      shell: bash
+      env:
+        update_message: ${{ steps.imas-standard-name.outputs.update-message }}
+      run: echo -e "$update_message" | gh issue comment $ISSUE_URL --body-file -
+
+    - name: Output boolean flags
+      id: flags
+      shell: bash
+      run: |
+        echo duplicate-name=${{ contains(env.has_name, 'True') }} >> "$GITHUB_OUTPUT"
+        echo update-error=${{ contains(env.update-message, 'Error') }} >> "$GITHUB_OUTPUT"
+        echo valid-commit=${{ !contains(env.update-message, 'Error') && contains(steps.issue-parser.outputs.issueparser_options, 'ready to commit') }} >> "$GITHUB_OUTPUT"

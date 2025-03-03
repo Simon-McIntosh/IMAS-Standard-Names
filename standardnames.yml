@@ -1,33 +1,40 @@
 time:
-    units: s
-    tags: time
-    documentation: |
-        Number of elapsed seconds. Typically this expresses the number of
-        seconds since the start of the pulse.
+  units: s
+  tags: time
+  documentation: |
+    Number of elapsed seconds. Typically this expresses the number of
+    seconds since the start of the pulse.
 radial_distance:
-    units: m
-    tags: cylindrical-coordinates
-    documentation: Distance from the central axis of the cylindrical coordinate system.
+  units: m
+  tags: cylindrical-coordinates
+  documentation: Distance from the central axis of the cylindrical coordinate system.
 vertical_distance:
-    units: m
-    tags: cylindrical-coordinates cartesian-cooordinates
-    documentation: Vertical distance to the horizontal reference plane of the coordinate system.
+  units: m
+  tags: cylindrical-coordinates cartesian-cooordinates
+  documentation: Vertical distance to the horizontal reference plane of the coordinate
+    system.
 poloidal_flux:
-    units: Wb
-    tags: flux-coordinates
-    documentation: |
-        Poloidal flux. Integral of magnetic field passing through a contour
-        defined by the intersection of a flux surface passing through the point
-        of interest and a $Z=\mathrm{constant}$ plane. The surface normal is in
-        the same direction as increasing
-        [`vertical_distance`](#vertical_distance).
+  units: Wb
+  tags: flux-coordinates
+  documentation: |
+    Poloidal flux. Integral of magnetic field passing through a contour
+    defined by the intersection of a flux surface passing through the point
+    of interest and a $Z=\mathrm{constant}$ plane. The surface normal is in
+    the same direction as increasing
+    [`vertical_distance`](#vertical_distance).
 
-        $$
-        \psi_{pol} = \oint_S \textbf{B} \cdot d\textbf{S}
-        $$
+    $$
+    \psi_{pol} = \oint_S \textbf{B} \cdot d\textbf{S}
+    $$
 
-        ![Example surface to calculate poloidal flux.](img/poloidal_flux.png)
+    ![Example surface to calculate poloidal flux.](img/poloidal_flux.png)
 
-        Illustration of an integration surface (blue) to calculate the poloidal
-        flux and the flux surface (grey). By definition, all points on the flux
-        surface have the same value for the poloidal flux.
+    Illustration of an integration surface (blue) to calculate the poloidal
+    flux and the flux surface (grey). By definition, all points on the flux
+    surface have the same value for the poloidal flux.
+plasma_current:
+  units: ampere
+  documentation: docs
+  tags:
+  alias:
+  overwrite: no

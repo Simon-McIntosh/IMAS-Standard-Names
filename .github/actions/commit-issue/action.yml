@@ -1,0 +1,37 @@
+name: commit-issue
+description: Commit valid Standard Name to branch.
+
+inputs:
+  standard-name:
+    description: "The proposed Standard Name."
+    required: true
+  standard-name-entry:
+    description: "Proposed Standard Name entry."
+    required: true
+  # valid-commit:
+  #   description: "A boolean flag indicating if the proposal is ready to commit."
+  #   required: true
+  topic-branch:
+    description: "GitHub actions development branch."
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Merge Standard Name proposal to ${{ inputs.topic-branch }}
+      id: merge-standard-name
+      # if: inputs.valid-commit == 'true'
+      shell: bash
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        git fetch origin
+        git add standardnames.yml
+        git commit -m "Add ${{ inputs.standard-name }} to standardnames.yml"
+        git push origin ${{ inputs.topic-branch }}
+
+    - name: Close issue
+      # if: inputs.valid-commit == 'true'
+      uses: peter-evans/close-issue@v1
+      with:
+        comment: Commited **${{ inputs.standard-name }}** to ${{ inputs.topic-branch }} branch.

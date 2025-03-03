@@ -1,45 +1,67 @@
 from dataclasses import dataclass, field, InitVar
+from functools import cached_property
 import json
 from pathlib import Path
 from typing import ClassVar
-from typing_extensions import Annotated
 
-
+import pandas
+import pint
 import pydantic
 import strictyaml as syaml
 import yaml
 
 
-def is_standard_name(name: str) -> bool:
-    """Check if name is a valid IMAS standard name."""
-    try:
-        assert name.islower()  # Standard names are all lowercase
-        assert name[0].isalpha()  # Standard names start with a letter
-        assert " " not in name  # Standard names do not contain whitespace
-    except AssertionError:
-        raise NameError(f"Error: **{name}** is not a valid standard name.")
-    return name
-
-
 class StandardName(pydantic.BaseModel):
-    name: Annotated[str, pydantic.AfterValidator(is_standard_name)]
+    name: str
     units: str
     documentation: str
     tags: str = ""
     alias: str = ""
     overwrite: bool = False
 
+    attrs: ClassVar[list[str]] = [
+        "units",
+        "documentation",
+        "tags",
+        "alias",
+        "overwrite",
+    ]
+
+    @pydantic.field_validator("name", mode="after")
+    @classmethod
+    def validate_standard_name(cls, name: str) -> str:
+        """Validate name against IMAS standard name ruleset."""
+        try:
+            assert name.islower()  # Standard names are lowercase
+            assert name[0].isalpha()  # Standard names start with a letter
+            assert " " not in name  # Standard names do not contain whitespace
+        except AssertionError:
+            raise NameError(
+                f"The proposed Standard Name **{name}** is *not* valid."
+                "\n\nStandard names must:\n"
+                "- be lowercase;\n"
+                "- start with a letter;\n"
+                "- and not contain whitespace."
+            )
+        return name
+
+    @pydantic.field_validator("units", mode="after")
+    @classmethod
+    def parse_units(cls, units: str) -> str:
+        """Return units validated and formated with pint"""
+        match units.split(":"):
+            case [str(units), str(unit_format)]:
+                pass
+            case [str(units)]:
+                unit_format = "~P"
+        if "L" in unit_format:  # LaTeX format
+            return f"$`{pint.Unit(units):{unit_format}}`$"
+        return f"{pint.Unit(units):{unit_format}}"
+
     def as_document(self) -> syaml.representation.YAML:
         """Return standard name as a YAML document."""
-        return syaml.as_document(
-            {
-                self.name: {
-                    key: getattr(self, key)
-                    for key in ["units", "documentation", "tags", "alias", "overwrite"]
-                }
-            },
-            schema=ParseYaml.schema,
-        )
+        data = {key: getattr(self, key) for key in self.attrs}
+        return syaml.as_document({self.name: data}, schema=ParseYaml.schema)
 
     def as_yaml(self) -> str:
         """Return standard name as YAML string."""
@@ -58,6 +80,7 @@ class ParseYaml:
 
     input_: InitVar[str]
     data: syaml.representation.YAML = field(init=False, repr=False)
+    unit_format: str | None = None
 
     schema: ClassVar = syaml.MapPattern(
         syaml.Str(),
@@ -76,11 +99,50 @@ class ParseYaml:
         """Load yaml data."""
         self.data = syaml.load(input_, self.schema)
 
+    def _append_unit_format(
+        self, data: syaml.representation.YAML
+    ) -> syaml.representation.YAML:
+        """Append unit formatter to units string."""
+        if self.unit_format:
+            data["units"] = data["units"].split(":")[0] + f":{self.unit_format}"
+        return data
+
     def __getitem__(self, standard_name: str) -> StandardName:
         """Return StandardName instance for the requested standard name."""
-        return StandardName(
-            name=standard_name, **self.data[standard_name].as_marked_up()
-        )
+        data = self._append_unit_format(self.data[standard_name].as_marked_up())
+        return StandardName(name=standard_name, **data)
+
+
+@dataclass
+class GenericNames:
+    """Manage generic standard names via a csv file."""
+
+    input_: InitVar[str]
+    data: pandas.DataFrame = field(init=False, repr=False)
+
+    def __post_init__(self, input_: str):
+        """Load csv data."""
+        with open(input_, "r", newline="") as f:
+            self.data = pandas.read_csv(f)
+
+    @cached_property
+    def names(self) -> list[str]:
+        """Return generic standard name list."""
+        return self.data["Generic Name"].tolist()
+
+    def __contains__(self, name: str) -> bool:
+        """Check if name is inlcuded the the generic standard name list."""
+        return name in self.names
+
+    def check(self, standard_name: str) -> None:
+        """Check proposed standard name against generic name list."""
+        if standard_name in self:
+            raise KeyError(
+                f"The proposed standard name **{standard_name}** "
+                "is a generic name."
+                f"\n\n{self.data.to_markdown()}.\n\n"
+                "Please choose a different name."
+            )
 
 
 @dataclass
@@ -117,7 +179,7 @@ class StandardNameFile(ParseYaml):
 
     @property
     def filename(self) -> Path:
-        """Return yaml file path."""
+        """Return standardnames yaml file path."""
         if self._filename.suffix in [".yml", ".yaml"]:
             return self._filename
         return self._filename.with_suffix(".yaml")
@@ -139,7 +201,7 @@ class StandardNameFile(ParseYaml):
                 assert standard_name.name not in self.data
             except AssertionError:
                 raise KeyError(
-                    f"Error: The proposed standard name **{standard_name.name}** "
+                    f"The proposed standard name **{standard_name.name}** "
                     f"is already present in {self.filename} "
                     "with the following content:"
                     f"\n\n{self[standard_name.name].as_yaml()}\n\n"
@@ -151,7 +213,7 @@ class StandardNameFile(ParseYaml):
                 assert standard_name.alias in self.data
             except AssertionError:
                 raise KeyError(
-                    f"Error: The proposed alias **{standard_name.alias}** "
+                    f"The proposed alias **{standard_name.alias}** "
                     f"is not present in {self.filename}."
                 )
         self += standard_name.as_document()

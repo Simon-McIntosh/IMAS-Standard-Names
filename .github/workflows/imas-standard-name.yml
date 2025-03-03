@@ -1,0 +1,56 @@
+name: IMAS Standard Name
+
+on:
+  issues:
+    types: [opened, edited]
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  ISSUE_URL: ${{ github.event.issue.html_url }}
+  BASE_BRANCH: "develop"
+  TOPIC_BRANCH: "gh-develop"
+
+jobs:
+  imas-standard_name:
+    if: contains(github.event.issue.labels.*.name, 'standard-name')
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.BASE_BRANCH }}
+      - uses: actions/setup-python@v3
+        with:
+          python-version: "3.12"
+      - name: Install imas-standard-names
+        run: |
+          python -m pip install --upgrade pip
+          pip install .
+
+      - id: parse-issue
+        uses: ./.github/actions/parse-issue
+        with:
+          template_path: ".github/ISSUE_TEMPLATE/standard-name.yml"
+
+      - id: label-issue
+        uses: ./.github/actions/label-issue
+        with:
+          standard-name: ${{ steps.parse-issue.outputs.standard-name }}
+          duplicate-name: ${{ steps.parse-issue.outputs.duplicate-name }}
+          update-error: ${{ steps.parse-issue.outputs.update-error }}
+
+      - id: commit-issue
+        if: steps.parse-issue.outputs.valid-commit == 'true'
+        uses: ./.github/actions/commit-issue
+        with:
+          standard-name: ${{ steps.parse-issue.outputs.standard-name }}
+          standard-name-entry: ${{ steps.parse-issue.outputs.standard-name-entry }}
+          topic-branch: ${{ env.TOPIC_BRANCH }}
+          # valid-commit: ${{ steps.parse-issue.outputs.valid-commit }}
+
+      - id: raise-pull-request
+        if: steps.parse-issue.outputs.valid-commit == 'true'
+        uses: ./.github/actions/raise-pull-request
+        with:
+          base-branch: ${{ env.BASE_BRANCH }}
+          topic-branch: ${{ env.TOPIC_BRANCH }}

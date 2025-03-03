@@ -1,0 +1,40 @@
+name: label-issue
+description: Manage issue labels.
+
+inputs:
+  standard-name:
+    description: "The proposed Standard Name."
+    required: true
+  duplicate-name:
+    description: "A boolean flag indicating if the proposal is a duplicate."
+    required: true
+  update-error:
+    description: "A boolean flag indicating if the Standard Name update failed."
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Add duplicate label
+      if: inputs.duplicate-name == 'true'
+      shell: bash
+      run: gh issue edit $ISSUE_URL --add-label "duplicate"
+
+    - name: Remove dulicalte label
+      if: |
+        inputs.duplicate-name == 'false' && 
+        contains(github.event.issue.labels.*.name, 'duplicate')
+      shell: bash
+      run: gh issue edit $ISSUE_URL --remove-label "duplicate"
+
+    - name: Add needswork label
+      if: inputs.update-error == 'true'
+      shell: bash
+      run: gh issue edit $ISSUE_URL --add-label "needswork"
+
+    - name: Remove needswork label
+      if: |
+        inputs.update-error == 'false' && 
+        contains(github.event.issue.labels.*.name, 'needswork')
+      shell: bash
+      run: gh issue edit $ISSUE_URL --remove-label "needswork"
