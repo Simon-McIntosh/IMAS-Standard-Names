@@ -1,22 +1,45 @@
 import click
 
-from imas_standard_names.standard_name import StandardInput, StandardNameFile
+from imas_standard_names.standard_name import (
+    GenericNames,
+    StandardInput,
+    StandardNameFile,
+)
+
+
+def format_error(error):
+    """Return formatted error message."""
+    return f"{type(error).__name__}: {error}"
 
 
 @click.command()
 @click.argument("standardnames_file")
+@click.argument("genericnames_file")
 @click.argument("submission_file")
-def update_standardnames(standardnames_file: str, submission_file: str):
+@click.option("--unit-format", default="P", help="Pint unit string formatter")
+def update_standardnames(
+    standardnames_file: str,
+    genericnames_file: str,
+    submission_file: str,
+    unit_format: str,
+):
     """Add a standard name to the project's standard name file."""
-    standardnames = StandardNameFile(standardnames_file)
+    standardnames = StandardNameFile(standardnames_file, unit_format=unit_format)
+    genericnames = GenericNames(genericnames_file)
     try:
-        standard_name = StandardInput(submission_file).standard_name
+        standard_name = StandardInput(
+            submission_file, unit_format=unit_format
+        ).standard_name
+        genericnames.check(standard_name.name)
         standardnames.update(standard_name)
     except (NameError, KeyError, Exception) as error:
-        click.echo(error)
+        click.echo(format_error(error))
     else:
         click.echo(
-            f"Success: **{standard_name.name}** appended to {standardnames.filename}."
+            f"The proposed Standard Name **{standard_name.name}** is valid.\n"
+            f"\n{standard_name.as_document()[standard_name.name].as_yaml()}\n"
+            f"This proposal is ready for submission to "
+            "the Standard Names repository."
         )
 
 
@@ -28,3 +51,28 @@ def has_standardname(standardnames_file: str, standard_name: str):
     standardnames = StandardNameFile(standardnames_file)
     standard_name = " ".join(standard_name)
     click.echo(f"{standard_name in standardnames.data}")
+
+
+@click.command()
+@click.argument("genericnames_file")
+@click.argument("standard_name", nargs=-1)
+def is_genericname(genericnames_file: str, standard_name: str):
+    """Check if a standard name is already present in the generic names file."""
+    standard_name = " ".join(standard_name)
+    click.echo(f"{standard_name in GenericNames(genericnames_file)}")
+
+
+@click.command()
+@click.argument("standardnames_file")
+@click.argument("standard_name", nargs=-1)
+@click.option("--unit-format", default="P", help="Pint unit string formatter")
+def get_standardname(standardnames_file: str, standard_name: str, unit_format: str):
+    """Return the standard name entry from the project's standard name file."""
+    standardnames = StandardNameFile(standardnames_file, unit_format=unit_format)
+    standard_name = " ".join(standard_name)
+    try:
+        submission = standardnames[standard_name].as_document()[standard_name].as_yaml()
+    except (KeyError, Exception) as error:
+        click.echo(format_error(error))
+    else:
+        click.echo(submission)

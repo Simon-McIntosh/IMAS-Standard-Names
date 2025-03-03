@@ -1,0 +1,26 @@
+name: pull-request
+description: Raise pull-request to synchronize commit-branch with develop.
+
+inputs:
+  base-branch:
+    description: "Pull request base branch."
+    value: "develop"
+  topic-branch:
+    description: "Pull request topic branch."
+    value: "gh-develop"
+
+runs:
+  using: "composite"
+  steps:
+
+      - name: Reset base branch to the remote state
+        run: |
+          git fetch origin ${{ inputs.topic-branch }}:${{ inputs.topic-branch }}
+          git reset --hard ${{ inputs.topic-branch }}
+
+      - name: Create pull request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch: ${{ inputs.topic-branch }}
+          title: Update Standard Names from ${{ inputs.topic-branch }} to standardnames.yml
+          body: Update Standard Names from GitHub Issues to standardnames.yml.
