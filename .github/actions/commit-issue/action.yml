@@ -27,7 +27,7 @@ runs:
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
         git fetch origin
         git add standardnames.yml
-        git commit -m "Add ${{ inputs.standard-name }} to standardnames.yml"
+        git commit -m "Add ${{ inputs.standard-name }} to standardnames.yml file"
         git push origin ${{ inputs.topic-branch }}
 
     - name: Close issue

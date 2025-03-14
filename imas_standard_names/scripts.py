@@ -65,7 +65,7 @@ def is_genericname(genericnames_file: str, standard_name: str):
 @click.command()
 @click.argument("standardnames_file")
 @click.argument("standard_name", nargs=-1)
-@click.option("--unit-format", default="L", help="Pint unit string formatter")
+@click.option("--unit-format", default="P", help="Pint unit string formatter")
 def get_standardname(standardnames_file: str, standard_name: str, unit_format: str):
     """Return the standard name entry from the project's standard name file."""
     standardnames = StandardNameFile(standardnames_file, unit_format=unit_format)
