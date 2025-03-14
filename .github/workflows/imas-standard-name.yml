@@ -8,7 +8,7 @@ env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   ISSUE_URL: ${{ github.event.issue.html_url }}
   BASE_BRANCH: "develop"
-  TOPIC_BRANCH: "gh-develop"
+  TOPIC_BRANCH: "submit"
 
 jobs:
   imas-standard_name:
@@ -18,7 +18,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ env.BASE_BRANCH }}
+          ref: main
+          fetch-depth: 0
+
+      - uses: ./.github/actions/check-branch
+        with: 
+          branch-name: ${{ env.BASE_BRANCH }}
+
+      - uses: ./.github/actions/check-branch
+        with: 
+          branch-name: ${{ env.TOPIC_BRANCH }}
+
+      - uses: ./.github/actions/fetch-standardnames
+        with:
+          branch-name: ${{ env.BASE_BRANCH }}
+
       - uses: actions/setup-python@v3
         with:
           python-version: "3.12"
@@ -26,6 +40,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install .
+
 
       - id: parse-issue
         uses: ./.github/actions/parse-issue
@@ -45,8 +60,8 @@ jobs:
         with:
           standard-name: ${{ steps.parse-issue.outputs.standard-name }}
           standard-name-entry: ${{ steps.parse-issue.outputs.standard-name-entry }}
+          base-branch: ${{ env.BASE_BRANCH }}
           topic-branch: ${{ env.TOPIC_BRANCH }}
-          # valid-commit: ${{ steps.parse-issue.outputs.valid-commit }}
 
       - id: raise-pull-request
         if: steps.parse-issue.outputs.valid-commit == 'true'

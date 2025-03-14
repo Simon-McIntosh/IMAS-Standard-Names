@@ -12,15 +12,11 @@ inputs:
 runs:
   using: "composite"
   steps:
-
-      - name: Reset base branch to the remote state
-        run: |
-          git fetch origin ${{ inputs.topic-branch }}:${{ inputs.topic-branch }}
-          git reset --hard ${{ inputs.topic-branch }}
-
-      - name: Create pull request
-        uses: peter-evans/create-pull-request@v7
-        with:
-          branch: ${{ inputs.topic-branch }}
-          title: Update Standard Names from ${{ inputs.topic-branch }} to standardnames.yml
-          body: Update Standard Names from GitHub Issues to standardnames.yml.
+    - name: Create pull request
+      uses: peter-evans/create-pull-request@v7
+      with:
+        base: ${{ inputs.base-branch }}
+        branch: ${{ inputs.topic-branch }}
+        title: Update Standard Names from ${{ inputs.topic-branch }} branch
+        body: |
+          Merge Standard Names submissions collected from GitHub Issues forms and commited to the **${{ inputs.topic-branch }}** branch.

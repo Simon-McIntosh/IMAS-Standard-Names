@@ -249,7 +249,7 @@ def test_get_standardname_default_unit_format(tmp_path):
     ):
         result = runner.invoke(
             get_standardname,
-            (standardnames_file, "plasma_current_density"),
+            (standardnames_file, "plasma_current_density", "--unit-format", "L"),
         )
     assert result.exit_code == 0
     assert "$`\\frac{\\mathrm{ampere}}{\\mathrm{meter}^{2}}`$" in result.output

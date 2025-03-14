@@ -8,9 +8,9 @@ inputs:
   standard-name-entry:
     description: "Proposed Standard Name entry."
     required: true
-  # valid-commit:
-  #   description: "A boolean flag indicating if the proposal is ready to commit."
-  #   required: true
+  base-branch:
+    description: "GitHub actions base branch."
+    required: true
   topic-branch:
     description: "GitHub actions development branch."
     required: true
@@ -18,20 +18,43 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Merge Standard Name proposal to ${{ inputs.topic-branch }}
-      id: merge-standard-name
-      # if: inputs.valid-commit == 'true'
+    - name: fetch base standard names
+      shell: bash
+      run: |
+        git fetch origin ${{ inputs.base-branch }}:${{ inputs.base-branch }}
+        git show ${{ inputs.base-branch }}:standardnames.yml > base_standardnames.yml
+
+    - name: fetch topic standard names
+      shell: bash
+      run: |
+        git fetch origin ${{ inputs.topic-branch }}:${{ inputs.topic-branch }}
+        git show ${{ inputs.topic-branch }}:standardnames.yml > topic_standardnames.yml
+
+    - name: merge standardnames.yml with edits on topic branch
+      shell: bash
+      run: |
+        git merge-file --ours standardnames.yml base_standardnames.yml topic_standardnames.yml
+        rm base_standardnames.yml topic_standardnames.yml
+
+    - name: commit standardnames.yml to main branch
       shell: bash
       run: |
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
-        git fetch origin
         git add standardnames.yml
-        git commit -m "Add ${{ inputs.standard-name }} to standardnames.yml file"
-        git push origin ${{ inputs.topic-branch }}
+        git commit -m "${{ inputs.standard-name }} Standard Name entry."
+
+    - name: switch to topic branch, checkout standardnames.yml, and push
+      shell: bash
+      run: |
+        git stash
+        git switch ${{ inputs.topic-branch }}
+        git checkout main -- standardnames.yml
+        git pull origin ${{ inputs.topic-branch }} --no-edit
+        git push --set-upstream origin ${{ inputs.topic-branch }}
+        git switch main
 
     - name: Close issue
-      # if: inputs.valid-commit == 'true'
       uses: peter-evans/close-issue@v1
       with:
-        comment: Commited **${{ inputs.standard-name }}** to ${{ inputs.topic-branch }} branch.
+        comment: Pushed **${{ inputs.standard-name }}** to the ${{ inputs.topic-branch }} branch.

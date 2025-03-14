@@ -1,0 +1,15 @@
+name: fetch-standardnames
+description: Fetch standardnames from base branch.
+
+inputs:
+  branch-name:
+    description: "Branch to fetch standardnames.yml from."
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - shell: bash
+      run: |
+        git fetch origin ${{ inputs.branch-name }}:${{ inputs.branch-name }} 
+        git checkout ${{ inputs.branch-name }} -- standardnames.yml
