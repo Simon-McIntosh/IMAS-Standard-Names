@@ -5,10 +5,11 @@ on:
     types: [opened, edited]
 
 env:
-  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  ISSUE_URL: ${{ github.event.issue.html_url }}
+  ISSUE_TITLE: "Standard Name Proposal"
   BASE_BRANCH: "develop"
   TOPIC_BRANCH: "submit"
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  ISSUE_URL: ${{ github.event.issue.html_url }}
 
 jobs:
   imas-standard_name:
@@ -19,19 +20,11 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: main
-          fetch-depth: 0
-
-      - uses: ./.github/actions/check-branch
-        with: 
-          branch-name: ${{ env.BASE_BRANCH }}
-
-      - uses: ./.github/actions/check-branch
-        with: 
-          branch-name: ${{ env.TOPIC_BRANCH }}
-
-      - uses: ./.github/actions/fetch-standardnames
+      
+      - id: parse-issue
+        uses: ./.github/actions/parse-issue
         with:
-          branch-name: ${{ env.BASE_BRANCH }}
+          template_path: ".github/ISSUE_TEMPLATE/standard-name.yml"
 
       - uses: actions/setup-python@v3
         with:
@@ -41,30 +34,30 @@ jobs:
           python -m pip install --upgrade pip
           pip install .
 
-
-      - id: parse-issue
-        uses: ./.github/actions/parse-issue
+      - id: process-issue
+        uses: ./.github/actions/process-issue 
         with:
-          template_path: ".github/ISSUE_TEMPLATE/standard-name.yml"
+          standard-name: ${{ steps.parse-issue.outputs.standard-name }}
+          ready-to-commit: ${{ steps.parse-issue.outputs.ready-to-commit }}
 
       - id: label-issue
         uses: ./.github/actions/label-issue
         with:
           standard-name: ${{ steps.parse-issue.outputs.standard-name }}
-          duplicate-name: ${{ steps.parse-issue.outputs.duplicate-name }}
-          update-error: ${{ steps.parse-issue.outputs.update-error }}
+          duplicate-name: ${{ steps.process-issue.outputs.duplicate-name }}
+          update-error: ${{ steps.process-issue.outputs.update-error }}
 
       - id: commit-issue
-        if: steps.parse-issue.outputs.valid-commit == 'true'
+        if: steps.process-issue.outputs.valid-commit == 'true'
         uses: ./.github/actions/commit-issue
         with:
           standard-name: ${{ steps.parse-issue.outputs.standard-name }}
-          standard-name-entry: ${{ steps.parse-issue.outputs.standard-name-entry }}
+          standard-name-entry: ${{ steps.process-issue.outputs.standard-name-entry }}
           base-branch: ${{ env.BASE_BRANCH }}
           topic-branch: ${{ env.TOPIC_BRANCH }}
 
       - id: raise-pull-request
-        if: steps.parse-issue.outputs.valid-commit == 'true'
+        if: steps.process-issue.outputs.valid-commit == 'true'
         uses: ./.github/actions/raise-pull-request
         with:
           base-branch: ${{ env.BASE_BRANCH }}

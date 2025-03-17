@@ -57,4 +57,4 @@ runs:
     - name: Close issue
       uses: peter-evans/close-issue@v1
       with:
-        comment: Pushed **${{ inputs.standard-name }}** to the ${{ inputs.topic-branch }} branch.
+        comment: Pushed the **${{ inputs.standard-name }}** Standard Name proposal to the ${{ inputs.topic-branch }} branch for review.

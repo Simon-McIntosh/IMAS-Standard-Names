@@ -1,0 +1,76 @@
+name: Process Issue using imas-standard-name scripts
+description: Parse Standard Name issue body and extract submission data.
+
+inputs:
+  standard-name:
+    description: "Proposed Standard Name."
+    required: true
+  ready-to-commit:
+    description: "A boolean flag indicating if the proposal is ready to commit."
+    required: true
+
+outputs:
+  standard-name-entry:
+    description: "Proposed Standard Name entry."
+    value: ${{ steps.imas-standard-name.outputs.standard-name-entry }}
+  duplicate-name:
+    description: "A boolean flag indicating if the proposal is a duplicate."
+    value: ${{ steps.flags.outputs.duplicate-name }}
+  update-message:
+    description: "Update Standard Names update message."
+    value: ${{ steps.imas-standard-name.outputs.update-message }}
+  update-error:
+    description: "A boolean flag indicating if the Standard Name update failed."
+    value: ${{ steps.flags.outputs.update-error }}
+  valid-commit:
+    description: "A boolean flag indicating if the proposal is ready to commit."
+    value: ${{ steps.flags.outputs.valid-commit }}
+
+runs:
+  using: "composite"
+  steps:
+    - uses: ./.github/actions/check-branch
+      with:
+        branch-name: ${{ env.BASE_BRANCH }}
+
+    - uses: ./.github/actions/check-branch
+      with:
+        branch-name: ${{ env.TOPIC_BRANCH }}
+
+    - uses: ./.github/actions/fetch-standardnames
+      with:
+        branch-name: ${{ env.BASE_BRANCH }}
+
+    - name: Run scripts
+      id: imas-standard-name
+      shell: bash
+      run: |
+        {
+        echo 'has_name<<EOF'
+        has_standardname standardnames.yml ${{ inputs.standard-name }} 
+        echo EOF
+        } >> "$GITHUB_OUTPUT"
+        {
+        echo 'update-message<<EOF'
+        update_standardnames standardnames.yml docs/generic_names.csv submission.json
+        echo EOF
+        } >> "$GITHUB_OUTPUT"
+        {
+        echo 'standard-name-entry<<EOF'
+        get_standardname standardnames.yml ${{ inputs.standard-name }} --unit-format 'P' 
+        echo EOF
+        } >> "$GITHUB_OUTPUT"
+
+    - name: Comment on issue
+      shell: bash
+      env:
+        update_message: ${{ steps.imas-standard-name.outputs.update-message }}
+      run: echo -e "$update_message" | gh issue comment $ISSUE_URL --body-file -
+
+    - name: Output boolean flags
+      id: flags
+      shell: bash
+      run: |
+        echo duplicate-name=${{ contains(steps.imas-standard-name.outputs.has_name, 'True') }} >> "$GITHUB_OUTPUT"
+        echo update-error=${{ contains(steps.imas-standard-name.outputs.update-message, 'Error') }} >> "$GITHUB_OUTPUT"
+        echo valid-commit=${{ !contains(steps.imas-standard-name.outputs.update-message, 'Error') && inputs.ready-to-commit == 'true' }} >> "$GITHUB_OUTPUT"

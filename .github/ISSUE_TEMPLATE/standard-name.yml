@@ -1,4 +1,5 @@
 name: IMAS Standard Name
+title: Standard Name Proposal
 description: Propose an IMAS Standard Name addition or modification.
 labels: standard-name
 
@@ -6,15 +7,18 @@ body:
   - type: markdown
     attributes:
       value: |
+        Issues submitted with the default title will be automatically labeled with the given Standard Name.
+
+        Issues submitted with this template will be automatically processed by the IMAS Standard Name GitHub Actions workflow. The workflow will check the proposed Standard Name against the existing Standard Names repository and update the repository if the proposed Standard Name is compliant.
+
         Guidelines for the construction of IMAS Standard Names can be found [here](https://github.com/iterorganization/IMAS-Standard-Names/blob/main/docs/guidelines.md). These guidelines should be followed when proposing a new Standard Name.
-        
+
   - type: input
     id: name
     attributes:
-      label: name
+      label: Standard Name
       description: |
-        Standard names consist of lower case letters, digits and underscores,
-        and begin with a letter. Upper case is not used.
+        Standard names consist of lower case letters, digits and underscores, begin with a letter, and must not contain whitespace.
       placeholder: ex. poloidal_flux
     validations:
       required: true
@@ -22,7 +26,7 @@ body:
   - type: input
     id: units
     attributes:
-      label: units
+      label: Units
       description: |
         Define SI units unless an alternative is widely used in the community.
         note: e (elementary charge unit), u (Dalton / atomic mass unit),
@@ -34,7 +38,7 @@ body:
   - type: textarea
     id: documentation
     attributes:
-      label: documentation
+      label: Documentation
       description: Documentation for the proposed Standard Name.
       placeholder: |
         Poloidal flux. Integral of magnetic field passing through a contour
@@ -52,7 +56,7 @@ body:
   - type: input
     id: tags
     attributes:
-      label: tags
+      label: Tags
       description: Comma seperated list of tags.
       placeholder: flux-coordinates, equilibrium/time_slice/profiles_2d/psi
     validations:
@@ -61,6 +65,6 @@ body:
   - type: checkboxes
     id: options
     attributes:
-      label: options
+      label: Options
       options:
         - label: This proposal is ready to commit to the Standard Names repository.
