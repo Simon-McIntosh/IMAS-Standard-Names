@@ -31,15 +31,17 @@ runs:
   steps:
     - uses: ./.github/actions/check-branch
       with:
-        branch-name: ${{ env.BASE_BRANCH }}
+        source-branch: main
+        target-branch: ${{ env.BASE_BRANCH }}
 
     - uses: ./.github/actions/check-branch
       with:
-        branch-name: ${{ env.TOPIC_BRANCH }}
+        source-branch: ${{ env.BASE_BRANCH }}
+        target-branch: ${{ env.TOPIC_BRANCH }}
 
     - uses: ./.github/actions/fetch-standardnames
       with:
-        branch-name: ${{ env.BASE_BRANCH }}
+        branch-name: ${{ env.TOPIC_BRANCH }}
 
     - name: Run scripts
       id: imas-standard-name

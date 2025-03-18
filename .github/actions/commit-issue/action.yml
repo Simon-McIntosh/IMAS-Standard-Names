@@ -21,28 +21,25 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: fetch base standard names
-      shell: bash
-      run: |
-        git fetch origin ${{ inputs.base-branch }}:${{ inputs.base-branch }}
-        git show ${{ inputs.base-branch }}:standardnames.yml > base_standardnames.yml
-        cat base_standardnames.yml
+    # - name: fetch base standard names
+    #   shell: bash
+    #   run: |
+    #     git fetch origin ${{ inputs.base-branch }}:${{ inputs.base-branch }}
+    #     git show ${{ inputs.base-branch }}:standardnames.yml > base_standardnames.yml
 
-    - name: fetch topic standard names
-      shell: bash
-      run: |
-        git fetch origin ${{ inputs.topic-branch }}:${{ inputs.topic-branch }}
-        git show ${{ inputs.topic-branch }}:standardnames.yml > topic_standardnames.yml
-        cat topic_standardnames.yml
+    # - name: fetch topic standard names
+    #   shell: bash
+    #   run: |
+    #     git fetch origin ${{ inputs.topic-branch }}:${{ inputs.topic-branch }}
+    #     git show ${{ inputs.topic-branch }}:standardnames.yml > topic_standardnames.yml
 
-    - name: merge standardnames.yml with edits on topic branch
-      shell: bash
-      run: |
-        git merge-file --union standardnames.yml base_standardnames.yml topic_standardnames.yml
-        rm base_standardnames.yml topic_standardnames.yml
-        cat standardnames.yml
+    # - name: merge standardnames.yml with edits on topic branch
+    #   shell: bash
+    #   run: |
+    #     git merge-file --union standardnames.yml base_standardnames.yml topic_standardnames.yml
+    #     rm base_standardnames.yml topic_standardnames.yml
 
-    - name: commit standardnames.yml to main branch
+    - name: commit standardnames.yml to current branch
       shell: bash
       run: |
         git config --global user.name "github-actions[bot]"

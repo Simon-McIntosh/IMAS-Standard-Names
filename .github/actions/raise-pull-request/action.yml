@@ -19,4 +19,4 @@ runs:
         branch: ${{ inputs.topic-branch }}
         title: Update Standard Names from ${{ inputs.topic-branch }} branch
         body: |
-          Merge Standard Names submissions collected from GitHub Issues forms and commited to the **${{ inputs.topic-branch }}** branch.
+          Merge Standard Names submissions collected from the IMAS Standard Name Issue template and commited into the **${{ inputs.topic-branch }}** branch.

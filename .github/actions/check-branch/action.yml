@@ -2,16 +2,29 @@ name: check-branch
 description: Check branch, create if it does not exist.
 
 inputs:
-  branch-name:
-    description: "The proposed branch name."
+  source-branch:
+    description: "The source branch to pull or branch from."
     required: true
+  target-branch:
+    description: "The target branch name."
+    required: true
+
 
 runs:
   using: "composite"
   steps:
     - shell: bash
       run: |
-        if ! git ls-remote --exit-code --heads origin ${{ inputs.branch-name }}; then
-          git branch ${{ inputs.branch-name }}
-          git push origin ${{ inputs.branch-name }}
+        current_branch=$(git branch --show-current)
+        if ! git ls-remote --exit-code --heads origin ${{ inputs.target-branch }}; then
+          git fetch origin ${{ inputs.source-branch }}:${{ inputs.source-branch }}
+          git switch ${{ inputs.source-branch }}
+          git branch ${{ inputs.target-branch }}
+          git push origin ${{ inputs.target-branch }}
+        else
+          git fetch origin ${{ inputs.target-branch }}:${{ inputs.target-branch }}
+          git switch ${{ inputs.target-branch }}
+          git pull origin ${{ inputs.source-branch }} --no-edit
         fi
+        git switch $current_branch
+
