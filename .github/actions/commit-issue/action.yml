@@ -14,6 +14,9 @@ inputs:
   topic-branch:
     description: "GitHub actions development branch."
     required: true
+  issue-number:
+    description: "GitHub issue number."
+    required: true
 
 runs:
   using: "composite"
@@ -23,18 +26,21 @@ runs:
       run: |
         git fetch origin ${{ inputs.base-branch }}:${{ inputs.base-branch }}
         git show ${{ inputs.base-branch }}:standardnames.yml > base_standardnames.yml
+        cat base_standardnames.yml
 
     - name: fetch topic standard names
       shell: bash
       run: |
         git fetch origin ${{ inputs.topic-branch }}:${{ inputs.topic-branch }}
         git show ${{ inputs.topic-branch }}:standardnames.yml > topic_standardnames.yml
+        cat topic_standardnames.yml
 
     - name: merge standardnames.yml with edits on topic branch
       shell: bash
       run: |
-        git merge-file --ours standardnames.yml base_standardnames.yml topic_standardnames.yml
+        git merge-file --union standardnames.yml base_standardnames.yml topic_standardnames.yml
         rm base_standardnames.yml topic_standardnames.yml
+        cat standardnames.yml
 
     - name: commit standardnames.yml to main branch
       shell: bash
@@ -42,7 +48,7 @@ runs:
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
         git add standardnames.yml
-        git commit -m "${{ inputs.standard-name }} Standard Name entry."
+        git commit -m "Proposal for a ${{ inputs.standard-name }} Standard Name. Closes #${{ inputs.issue-number }}."
 
     - name: switch to topic branch, checkout standardnames.yml, and push
       shell: bash

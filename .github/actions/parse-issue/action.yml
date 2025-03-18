@@ -11,6 +11,9 @@ outputs:
   standard-name:
     description: "Proposed Standard Name."
     value: ${{ steps.issue-data.outputs.standard_name }}
+  issue-number:
+    description: "The issue number."
+    value: ${{ steps.issue-info.outputs.issue_number }}
   ready-to-commit:
     description: "A boolean flag indicating if the proposal is ready to commit."
     value: ${{ steps.issue-data.outputs.ready_to_commit }}
@@ -33,9 +36,11 @@ runs:
         echo '${{ steps.issue-parser.outputs.jsonString }}' > submission.json
 
     - name: Edit issue title
+      id: issue-info
       shell: bash
       run: |
         issue_number=${{ github.event.issue.number }}
+        echo issue_number=$issue_number >> "$GITHUB_OUTPUT"
         issue_title=$(gh issue view $issue_number --json title --jq '.title')
         if [ "$issue_title" == "${{ env.ISSUE_TITLE }}" ]; then
           gh issue edit "$issue_number" --title "${{ env.standard_name }}"

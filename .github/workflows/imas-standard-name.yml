@@ -55,6 +55,7 @@ jobs:
           standard-name-entry: ${{ steps.process-issue.outputs.standard-name-entry }}
           base-branch: ${{ env.BASE_BRANCH }}
           topic-branch: ${{ env.TOPIC_BRANCH }}
+          issue-number: ${{ steps.parse-issue.outputs.issue-number}}
 
       - id: raise-pull-request
         if: steps.process-issue.outputs.valid-commit == 'true'
