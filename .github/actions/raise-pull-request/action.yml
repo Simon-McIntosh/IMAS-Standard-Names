@@ -13,11 +13,18 @@ runs:
   using: "composite"
   steps:
     - name: Create pull request
-      uses: peter-evans/create-pull-request@v7
-      with:
-        add-paths: "standardnames.yml"
-        base: ${{ inputs.base-branch }}
-        branch: ${{ inputs.topic-branch }}
-        title: Update Standard Names from ${{ inputs.topic-branch }} branch
-        body: |
-          Merge Standard Names submissions collected from the IMAS Standard Name Issue template and commited into the **${{ inputs.topic-branch }}** branch.
+      shell: bash
+      run: |
+        pr_count=$(gh pr list \
+          --base ${{ inputs.base-branch }} \
+          --head ${{ inputs.topic-branch }} \
+          --state open \
+          --json number \
+          --jq 'length')
+        if [ "$pr_count" -eq 0 ]; then
+          gh pr create \
+            --base ${{ inputs.base-branch }} \
+            --head ${{ inputs.topic-branch }} \
+            --title 'Review Standard Names proposals pushed to the ${{ inputs.topic-branch }} branch' \
+            --body 'Merge Standard Names submissions input with the IMAS Standard Name Issue template and committed into the **${{ inputs.topic-branch }}** branch.'
+        fi

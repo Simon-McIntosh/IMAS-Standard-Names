@@ -205,8 +205,7 @@ class StandardNameFile(ParseYaml):
                     f"is already present in {self.filename} "
                     "with the following content:"
                     f"\n\n{self[standard_name.name].as_yaml()}\n\n"
-                    "Mark the **overwrite** checkbox to overwrite this standard name "
-                    "with the proposed content."
+                    "Mark the **overwrite** checkbox to overwrite this standard name."
                 )
         if standard_name.alias:
             try:

@@ -5,9 +5,6 @@ inputs:
   standard-name:
     description: "The proposed Standard Name."
     required: true
-  standard-name-entry:
-    description: "Proposed Standard Name entry."
-    required: true
   base-branch:
     description: "GitHub actions base branch."
     required: true
@@ -21,43 +18,14 @@ inputs:
 runs:
   using: "composite"
   steps:
-    # - name: fetch base standard names
-    #   shell: bash
-    #   run: |
-    #     git fetch origin ${{ inputs.base-branch }}:${{ inputs.base-branch }}
-    #     git show ${{ inputs.base-branch }}:standardnames.yml > base_standardnames.yml
-
-    # - name: fetch topic standard names
-    #   shell: bash
-    #   run: |
-    #     git fetch origin ${{ inputs.topic-branch }}:${{ inputs.topic-branch }}
-    #     git show ${{ inputs.topic-branch }}:standardnames.yml > topic_standardnames.yml
-
-    # - name: merge standardnames.yml with edits on topic branch
-    #   shell: bash
-    #   run: |
-    #     git merge-file --union standardnames.yml base_standardnames.yml topic_standardnames.yml
-    #     rm base_standardnames.yml topic_standardnames.yml
-
-    - name: commit standardnames.yml to current branch
+    - name: commit standardnames.yml to topic branch
       shell: bash
       run: |
+        git fetch origin ${{ inputs.topic-branch }}:${{ inputs.topic-branch }}
+        git switch ${{ inputs.topic-branch }}
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
         git add standardnames.yml
-        git commit -m "Proposal for a ${{ inputs.standard-name }} Standard Name. Closes #${{ inputs.issue-number }}."
-
-    - name: switch to topic branch, checkout standardnames.yml, and push
-      shell: bash
-      run: |
-        git stash
-        git switch ${{ inputs.topic-branch }}
-        git checkout main -- standardnames.yml
-        git pull origin ${{ inputs.topic-branch }} --no-edit
+        git commit -m "Add ${{ inputs.standard-name }} to the Standard Name database: Closes #${{ inputs.issue-number }}."
         git push --set-upstream origin ${{ inputs.topic-branch }}
         git switch main
-
-    - name: Close issue
-      uses: peter-evans/close-issue@v1
-      with:
-        comment: Pushed the **${{ inputs.standard-name }}** Standard Name proposal to the ${{ inputs.topic-branch }} branch for review.

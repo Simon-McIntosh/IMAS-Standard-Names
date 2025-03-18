@@ -52,7 +52,6 @@ jobs:
         uses: ./.github/actions/commit-issue
         with:
           standard-name: ${{ steps.parse-issue.outputs.standard-name }}
-          standard-name-entry: ${{ steps.process-issue.outputs.standard-name-entry }}
           base-branch: ${{ env.BASE_BRANCH }}
           topic-branch: ${{ env.TOPIC_BRANCH }}
           issue-number: ${{ steps.parse-issue.outputs.issue-number}}

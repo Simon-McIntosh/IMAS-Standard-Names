@@ -10,9 +10,6 @@ inputs:
     required: true
 
 outputs:
-  standard-name-entry:
-    description: "Proposed Standard Name entry."
-    value: ${{ steps.imas-standard-name.outputs.standard-name-entry }}
   duplicate-name:
     description: "A boolean flag indicating if the proposal is a duplicate."
     value: ${{ steps.flags.outputs.duplicate-name }}
@@ -58,11 +55,6 @@ runs:
         echo EOF
         } >> "$GITHUB_OUTPUT"
         rm submission.json
-        {
-        echo 'standard-name-entry<<EOF'
-        get_standardname standardnames.yml ${{ inputs.standard-name }} --unit-format 'P' 
-        echo EOF
-        } >> "$GITHUB_OUTPUT"
 
     - name: Comment on issue
       shell: bash
