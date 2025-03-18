@@ -51,7 +51,7 @@ runs:
         } >> "$GITHUB_OUTPUT"
         {
         echo 'update-message<<EOF'
-        update_standardnames standardnames.yml docs/generic_names.csv submission.json
+        update_standardnames standardnames.yml docs/generic_names.csv submission.json --url ${{ github.event.issue.html_url }} 
         echo EOF
         } >> "$GITHUB_OUTPUT"
         rm submission.json

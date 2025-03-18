@@ -5,26 +5,27 @@ from pathlib import Path
 from typing import ClassVar
 
 import pandas
-import pint
 import pydantic
 import strictyaml as syaml
 import yaml
 
+from imas_standard_names import pint
+
 
 class StandardName(pydantic.BaseModel):
     name: str
-    units: str
     documentation: str
-    tags: str = ""
+    units: str = "none"
     alias: str = ""
-    overwrite: bool = False
+    tags: str | list[str] = ""
+    links: str | list[str] = ""
 
     attrs: ClassVar[list[str]] = [
-        "units",
         "documentation",
-        "tags",
+        "units",
         "alias",
-        "overwrite",
+        "tags",
+        "links",
     ]
 
     @pydantic.field_validator("name", mode="after")
@@ -53,14 +54,30 @@ class StandardName(pydantic.BaseModel):
             case [str(units), str(unit_format)]:
                 pass
             case [str(units)]:
-                unit_format = "~P"
+                unit_format = "~F"
+        if units == "none":
+            return units
         if "L" in unit_format:  # LaTeX format
             return f"$`{pint.Unit(units):{unit_format}}`$"
         return f"{pint.Unit(units):{unit_format}}"
 
+    @pydantic.field_validator("tags", "links", mode="after")
+    @classmethod
+    def parse_list(cls, value: str | list[str]) -> str | list[str]:
+        """Return list of comma seperated strings."""
+        if value == "" or isinstance(value, list):
+            return value
+        return [item.strip() for item in value.split(",")]
+
     def as_document(self) -> syaml.representation.YAML:
         """Return standard name as a YAML document."""
-        data = {key: getattr(self, key) for key in self.attrs}
+        data = {
+            key: value
+            for key, value in self.items()
+            if (key == "units" and value != "none")
+            or (key != "units" and value != [] and value != "")
+        }
+        syaml.as_document({self.name: data}, schema=ParseYaml.schema)
         return syaml.as_document({self.name: data}, schema=ParseYaml.schema)
 
     def as_yaml(self) -> str:
@@ -72,6 +89,10 @@ class StandardName(pydantic.BaseModel):
         return json.dumps(
             self.as_document().as_marked_up()[self.name] | {"name": self.name}
         )
+
+    def items(self):
+        """Return key-value pairs with keys defined by self.attrs."""
+        return {attr: getattr(self, attr) for attr in self.attrs}.items()
 
 
 @dataclass
@@ -86,11 +107,12 @@ class ParseYaml:
         syaml.Str(),
         syaml.Map(
             {
-                "units": syaml.Str(),
                 "documentation": syaml.Str(),
-                syaml.Optional("tags"): syaml.Str(),
+                syaml.Optional("units"): syaml.Str(),
                 syaml.Optional("alias"): syaml.Str(),
-                syaml.Optional("overwrite"): syaml.Bool(),
+                syaml.Optional("tags"): syaml.Str() | syaml.Seq(syaml.Str()),
+                syaml.Optional("links"): syaml.Str() | syaml.Seq(syaml.Str()),
+                syaml.Optional("options"): syaml.EmptyList() | syaml.Seq(syaml.Str()),
             }
         ),
     )
@@ -111,6 +133,121 @@ class ParseYaml:
         """Return StandardName instance for the requested standard name."""
         data = self._append_unit_format(self.data[standard_name].as_marked_up())
         return StandardName(name=standard_name, **data)
+
+    def as_yaml(self) -> str:
+        """Return yaml data as string."""
+        yaml_data = ""
+        for name in self.data:
+            yaml_data += self[str(name)].as_yaml()
+        return yaml_data
+
+
+@dataclass
+class ParseJson(ParseYaml):
+    """Process single JSON GitHub issue response as a YAML schema."""
+
+    name: str = field(init=False)
+
+    def __post_init__(self, input_: str):
+        """Load JSON data, extract standard name and convert to YAML."""
+        response = json.loads(input_)
+        response = {
+            key: "" if value == [] else value
+            for key, value in response.items()
+            if value
+        }
+        self.name = response.pop("name")
+        yaml_data = yaml.dump({self.name: response}, default_flow_style=False)
+        super().__post_init__(yaml_data)
+
+    @property
+    def standard_name(self) -> StandardName:
+        """Return StandardName instance for input JSON data."""
+        return self[self.name]
+
+
+@dataclass
+class StandardInput(ParseJson):
+    """Process standard name input from a GitHub issue form."""
+
+    input_: InitVar[str | Path]
+    issue_link: InitVar[str] = ""
+
+    def __post_init__(self, input_: str | Path, issue_link: str):
+        """Load JSON data and Format Overwrite flag."""
+        self.filename = Path(input_).with_suffix(".json")
+        with open(self.filename, "r") as f:
+            json_data = f.read()
+        data = json.loads(json_data)
+        data["links"] = issue_link
+        # filter attributes to match StandardName dataclass
+        data = {
+            attr: data[attr]
+            for attr in list(StandardName.__annotations__)
+            if attr in data
+        }
+        super().__post_init__(json.dumps(data))
+
+
+@dataclass
+class StandardNameFile(ParseYaml):
+    """Manage the project's standard name file."""
+
+    input_: InitVar[str | Path]
+
+    def __post_init__(self, input_: str | Path):
+        """Load standard name data from yaml file."""
+        self._filename = Path(input_)
+        with open(self.filename, "r") as f:
+            yaml_data = syaml.load(f.read(), self.schema)
+        super().__post_init__(yaml_data.as_yaml())
+
+    @property
+    def filename(self) -> Path:
+        """Return standardnames yaml file path."""
+        if self._filename.suffix in [".yml", ".yaml"]:
+            return self._filename
+        return self._filename.with_suffix(".yaml")
+
+    def __add__(self, other):
+        """Add content of other to self, overiding existing keys."""
+        for key, value in other.data.items():
+            # append issue links to existing list
+            if key in self.data:
+                value["links"] = self.data.data[key].get("links", "") + value.get(
+                    "links", ""
+                )
+            self.data[key] = value
+        return self
+
+    def __iadd__(self, other):
+        """Add content of other to self, overiding existing keys."""
+        return self.__add__(other)
+
+    def update(self, standard_name: StandardName, overwrite: bool = False):
+        """Add json data to self and update standard names file."""
+        if not overwrite:  # check for existing standard name
+            try:
+                assert standard_name.name not in self.data
+            except AssertionError:
+                raise KeyError(
+                    f"The proposed standard name **{standard_name.name}** "
+                    f"is already present in {self.filename} "
+                    "with the following content:"
+                    f"\n\n{self[standard_name.name].as_yaml()}\n\n"
+                    "Mark the **overwrite** checkbox to overwrite this standard name."
+                )
+        if standard_name.alias:
+            try:
+                assert standard_name.alias in self.data
+            except AssertionError:
+                raise KeyError(
+                    f"The proposed alias **{standard_name.alias}** "
+                    f"is not present in {self.filename}."
+                )
+        self += standard_name.as_document()
+        with open(self.filename, "w") as f:
+            f.write(self.data.as_yaml())
 
 
 @dataclass
@@ -143,105 +280,6 @@ class GenericNames:
                 f"\n\n{self.data.to_markdown()}.\n\n"
                 "Please choose a different name."
             )
-
-
-@dataclass
-class ParseJson(ParseYaml):
-    """Process single JSON GitHub issue response as a YAML schema."""
-
-    name: str = field(init=False)
-
-    def __post_init__(self, input_: str):
-        """Load JSON data, extract standard name and convert to YAML."""
-        response = json.loads(input_)
-        self.name = response.pop("name")
-        yaml_data = yaml.dump({self.name: response}, default_flow_style=False)
-        super().__post_init__(yaml_data)
-
-    @property
-    def standard_name(self) -> StandardName:
-        """Return StandardName instance for input JSON data."""
-        return self[self.name]
-
-
-@dataclass
-class StandardNameFile(ParseYaml):
-    """Manage the project's standard name file."""
-
-    input_: InitVar[str | Path]
-
-    def __post_init__(self, input_: str | Path):
-        """Load standard name data from yaml file."""
-        self._filename = Path(input_)
-        with open(self.filename, "r") as f:
-            yaml_data = syaml.load(f.read(), self.schema)
-        super().__post_init__(yaml_data.as_yaml())
-
-    @property
-    def filename(self) -> Path:
-        """Return standardnames yaml file path."""
-        if self._filename.suffix in [".yml", ".yaml"]:
-            return self._filename
-        return self._filename.with_suffix(".yaml")
-
-    def __add__(self, other):
-        """Add content of other to self, overiding existing keys."""
-        for key, value in other.data.items():
-            self.data[key] = value
-        return self
-
-    def __iadd__(self, other):
-        """Add content of other to self, overiding existing keys."""
-        return self.__add__(other)
-
-    def update(self, standard_name: StandardName):
-        """Add json data to self and update standard names file."""
-        if not standard_name.overwrite:  # check for existing standard name
-            try:
-                assert standard_name.name not in self.data
-            except AssertionError:
-                raise KeyError(
-                    f"The proposed standard name **{standard_name.name}** "
-                    f"is already present in {self.filename} "
-                    "with the following content:"
-                    f"\n\n{self[standard_name.name].as_yaml()}\n\n"
-                    "Mark the **overwrite** checkbox to overwrite this standard name."
-                )
-        if standard_name.alias:
-            try:
-                assert standard_name.alias in self.data
-            except AssertionError:
-                raise KeyError(
-                    f"The proposed alias **{standard_name.alias}** "
-                    f"is not present in {self.filename}."
-                )
-        self += standard_name.as_document()
-        with open(self.filename, "w") as f:
-            f.write(self.data.as_yaml())
-
-
-@dataclass
-class StandardInput(ParseJson):
-    """Process standard name input from a GitHub issue form."""
-
-    input_: InitVar[str | Path]
-
-    def __post_init__(self, input_: str | Path):
-        """Load JSON data and Format Overwrite flag."""
-        self.filename = Path(input_).with_suffix(".json")
-        with open(self.filename, "r") as f:
-            json_data = f.read()
-        data = json.loads(json_data)
-        options = data.pop("options", [])
-        # filter attributes to match StandardName dataclass
-        data = {
-            attr: data[attr]
-            for attr in list(StandardName.__annotations__)
-            if attr in data
-        }
-        # set overwrite flag
-        data["overwrite"] = "overwrite" in options
-        super().__post_init__(json.dumps(data))
 
 
 if __name__ == "__main__":  # pragma: no cover

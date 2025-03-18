@@ -18,36 +18,104 @@ from imas_standard_names.standard_name import (
 
 standard_name_data = {
     "name": "ion_temperature",
-    "units": "A",
     "documentation": "multi-line\ndoc string",
-    "tags": "",
+    "units": "A",
     "alias": "",
-    "overwrite": False,
+    "tags": "",
+    "options": [],
 }
+
 
 yaml_single = syaml.as_document(
     {
         standard_name_data["name"]: {
-            key: value for key, value in standard_name_data.items() if key != "name"
+            key: standard_name_data[key]
+            for key in StandardName.attrs
+            if key != "name" and key in standard_name_data
         }
-    }
+    },
+    schema=ParseYaml.schema,
 )
 
 yaml_multi = syaml.as_document(
     {
-        name: {"units": units, "documentation": "docs"}
+        name: {
+            "units": units,
+            "documentation": "docs",
+            "links": "https://github.com/iterorganization/IMAS-Standard-Names/issues/5,"
+            "https://github.com/iterorganization/IMAS-Standard-Names/issues/6",
+        }
         for name, units in zip(
             ["plasma_current", "plasma_current_density", "electron_temperature"],
             ["A", "A/m^2", "eV"],
         )
-    }
+    },
+    schema=ParseYaml.schema,
 )
 
 
 def test_standard_name():
     standard_name = StandardName(**standard_name_data)
-    for key, value in standard_name_data.items():
-        assert getattr(standard_name, key) == value
+    for key, value in standard_name.items():
+        if value != "":
+            assert getattr(standard_name, key) == value
+
+
+@pytest.mark.parametrize("key", ["alias", "tags", "links"])
+def test_standard_name_empty_string(key):
+    name = "plasma_current"
+    standard_name = StandardName(name=name, documentation="docs", **{key: ""})
+    assert key not in standard_name.as_document()[name]
+
+
+@pytest.mark.parametrize("key", ["tags", "links"])
+def test_standard_name_empty_list(key):
+    name = "plasma_current"
+    standard_name = StandardName(name=name, documentation="docs", **{key: []})
+    assert key not in standard_name.as_document()[name]
+
+
+@pytest.mark.parametrize(
+    "data",
+    [
+        {"tags": "pf_active,equilibrium, tag with white space "},
+        {
+            "links": "https://github.com/iterorganization/IMAS-Standard-Names/issues/5,"
+            "https://github.com/iterorganization/IMAS-Standard-Names/issues/8"
+        },
+    ],
+)
+def test_standard_name_lists(data):
+    key, value = next(iter(data.items()))
+    name = "plasma_current"
+    standard_name = StandardName(name=name, documentation="docs", **{key: value})
+    assert standard_name.as_document()[name][key] == [
+        item.strip() for item in value.split(",")
+    ]
+
+
+@pytest.mark.parametrize("units", ["", "m.s^2"])
+def test_standard_name_with_units(units):
+    name = "plasma_current"
+    standard_name = StandardName(name=name, documentation="docs", units=units)
+    assert "units" in standard_name.as_document()[name]
+    assert units == standard_name.as_document()[name]["units"]
+
+
+@pytest.mark.parametrize("units", ["none"])
+def test_standard_name_without_units(units):
+    name = "plasma_current"
+    standard_name = StandardName(name=name, documentation="docs", units=units)
+    assert "units" not in standard_name.as_document()[name]
+
+
+@pytest.mark.parametrize(
+    "units", ["m/s", "m.s^-1", "meters per second", "meters/second", "m/s:~F"]
+)
+def test_standard_name_units(units):
+    name = "plasma_current"
+    standard_name = StandardName(name=name, documentation="docs", units=units)
+    assert standard_name.as_document()[name]["units"] == "m.s^-1"
 
 
 @pytest.mark.parametrize(
@@ -101,8 +169,8 @@ def test_units_parser_error():
 
 def test_yaml_input():
     standard_name = ParseYaml(yaml_single.as_yaml())[standard_name_data["name"]]
-    for key, value in standard_name_data.items():
-        if key == "name":
+    for key, value in standard_name.items():
+        if key == "name" or value == "":
             continue
         assert getattr(standard_name, key) == value
 
@@ -122,8 +190,8 @@ def test_yaml_unit_format(unit_format):
 def test_json_input():
     github_response = json.dumps(standard_name_data)
     standard_name = ParseJson(github_response)[standard_name_data["name"]]
-    for key, value in standard_name_data.items():
-        if key == "name":
+    for key, value in standard_name.items():
+        if key == "name" or value == "":
             continue
         assert getattr(standard_name, key) == value
 
@@ -152,7 +220,7 @@ def test_yaml_roundtrip():
 def standardnames(tmp_path_factory):
     filepath = tmp_path_factory.mktemp("data") / "standardnames.yaml"
     with open(filepath, "w") as f:
-        f.write(yaml_multi.as_yaml())
+        f.write(ParseYaml(yaml_multi.as_yaml()).as_yaml())
     return filepath
 
 
@@ -208,12 +276,28 @@ def test_alias_update_error(standardnames):
 
 def test_file_update_overwrite_error(standardnames):
     standard_names = StandardNameFile(standardnames)
-    github_response = json.dumps(
-        standard_name_data | {"name": "plasma_current", "overwrite": False}
-    )
+    github_response = json.dumps(standard_name_data | {"name": "plasma_current"})
     standard_name = ParseJson(github_response).standard_name
     with pytest.raises(KeyError):
-        standard_names.update(standard_name)
+        standard_names.update(standard_name, overwrite=False)
+
+
+def test_link_update(standardnames):
+    standard_names = StandardNameFile(standardnames)
+    assert len(standard_names["plasma_current"].links) == 2
+    github_response = json.dumps(
+        standard_name_data
+        | {
+            "name": "plasma_current",
+            "links": "https://github.com/iterorganization/IMAS-Standard-Names/issues/7",
+        }
+    )
+    standard_name = ParseJson(github_response).standard_name
+    standard_names.update(standard_name, overwrite=True)
+    assert len(standard_names["plasma_current"].links) == 3
+    assert [
+        int(link.split("/")[-1]) for link in standard_names["plasma_current"].links
+    ] == [5, 6, 7]
 
 
 @pytest.fixture(scope="session")
@@ -237,22 +321,11 @@ def test_is_not_generic_name(generic_names, name):
     assert name not in generic_names
 
 
-@pytest.mark.parametrize(
-    "options", ["overwrite", "high priority", "overwrite,high priority"]
-)
-def test_json_overwrite(tmp_path, options):
-    filename = tmp_path / "test.json"
-    with open(filename, "w", newline="") as f:
-        json.dump(standard_name_data | {"options": options}, f)
-    standard_input = StandardInput(filename)
-    assert standard_input.standard_name.overwrite is ("overwrite" in options)
-
-
 def test_json_extra_priority_attr(tmp_path):
     filename = tmp_path / "test.json"
     with open(filename, "w") as f:
         json.dump(standard_name_data | {"options": "high priority"}, f)
-    StandardInput(filename)
+    StandardInput(filename)[standard_name_data["name"]]
 
 
 def test_json_roundtrip():

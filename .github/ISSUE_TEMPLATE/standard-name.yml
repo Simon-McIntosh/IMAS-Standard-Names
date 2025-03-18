@@ -28,8 +28,10 @@ body:
     attributes:
       label: Units
       description: |
-        Define SI units unless an alternative is widely used in the community.
-        note: e (elementary charge unit), u (Dalton / atomic mass unit),
+        Use SI units unless an alternative is widely adopted by the community. 
+        Enter dimensionless if the physical quantity is dimensionless 
+        and none if Standard Name is unitless.
+        note: e (elementary charge unit), u (Dalton / atomic mass unit), 
         and eV for electron/ion/neutral temperatures
       placeholder: Wb
     validations:
@@ -57,8 +59,8 @@ body:
     id: tags
     attributes:
       label: Tags
-      description: Comma seperated list of tags.
-      placeholder: flux-coordinates, equilibrium/time_slice/profiles_2d/psi
+      description: A comma separated list of tags.
+      placeholder: flux-coordinates, equilibrium
     validations:
       required: false
 
@@ -67,4 +69,4 @@ body:
     attributes:
       label: Options
       options:
-        - label: This proposal is ready to commit to the Standard Names repository.
+        - label: This proposal overwrites a duplicate Standard Name.

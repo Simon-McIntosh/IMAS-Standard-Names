@@ -1,22 +1,27 @@
 time:
   units: s
-  tags: time
+  tags:
+    - time
   documentation: |
     Number of elapsed seconds. Typically this expresses the number of
     seconds since the start of the pulse.
 radial_distance:
   units: m
-  tags: cylindrical-coordinates
+  tags:
+    - cylindrical-coordinates
   documentation: Distance from the central axis of the cylindrical coordinate system.
 vertical_distance:
   units: m
-  tags: cylindrical-coordinates cartesian-cooordinates
+  tags:
+    - cylindrical-coordinates
+    - cartesian-cooordinates
   documentation:
     Vertical distance to the horizontal reference plane of the coordinate
     system.
 poloidal_flux:
   units: Wb
-  tags: flux-coordinates
+  tags:
+    - flux-coordinates
   documentation: |
     Poloidal flux. Integral of magnetic field passing through a contour
     defined by the intersection of a flux surface passing through the point

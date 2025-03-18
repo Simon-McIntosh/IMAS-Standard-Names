@@ -16,7 +16,7 @@ outputs:
     value: ${{ steps.issue-info.outputs.issue_number }}
   ready-to-commit:
     description: "A boolean flag indicating if the proposal is ready to commit."
-    value: ${{ steps.issue-data.outputs.ready_to_commit }}
+    value: ${{ steps.labels.outputs.ready_to_commit }}
 
 runs:
   using: "composite"
@@ -32,7 +32,6 @@ runs:
       run: |
         standard_name=${{ steps.issue-parser.outputs.issueparser_name }}
         echo standard_name=$standard_name | tee -a "$GITHUB_ENV" "$GITHUB_OUTPUT"
-        echo ready_to_commit=${{ contains(steps.issue-parser.outputs.issueparser_options, 'ready to commit') }} >> "$GITHUB_OUTPUT"
         echo '${{ steps.issue-parser.outputs.jsonString }}' > submission.json
 
     - name: Edit issue title
@@ -45,3 +44,16 @@ runs:
         if [ "$issue_title" == "${{ env.ISSUE_TITLE }}" ]; then
           gh issue edit "$issue_number" --title "${{ env.standard_name }}"
         fi
+
+    - name: Check labels
+      id: labels
+      shell: bash
+      run: |
+        issue_number=${{ github.event.issue.number }}
+        labels=$(gh issue view $issue_number --json labels --jq '.labels[].name')
+        if echo "$labels" | grep -q "approve"; then
+          echo "ready_to_commit=true" >> "$GITHUB_OUTPUT"
+        else
+          echo "ready_to_commit=false" >> "$GITHUB_OUTPUT"
+        fi
+

@@ -99,22 +99,18 @@ def test_add_standard_name(tmp_path):
         args,
     ):
         result = runner.invoke(update_standardnames, args)
-    assert (
-        f"The proposed Standard Name **{github_input['name']}** is valid."
-        in result.output
-    )
+    assert "The proposed Standard Name is valid." in result.output
 
 
 def test_overwrite(tmp_path):
     _github_input = github_input.copy()
     _github_input["name"] = "plasma_current"
-    _github_input["options"] = "overwrite"
     with launch_cli(standardnames, genericnames, _github_input, tmp_path) as (
         runner,
         args,
     ):
-        result = runner.invoke(update_standardnames, args)
-    assert "The proposed Standard Name **plasma_current** is valid." in result.output
+        result = runner.invoke(update_standardnames, args + ("--overwrite",))
+    assert "The proposed Standard Name is valid." in result.output
 
 
 def test_overwrite_error(tmp_path):
@@ -149,10 +145,7 @@ def test_standard_name_alias(tmp_path):
         args,
     ):
         result = runner.invoke(update_standardnames, args)
-    assert (
-        f"The proposed Standard Name **{_github_input['name']}** is valid."
-        in result.output
-    )
+    assert "The proposed Standard Name is valid." in result.output
 
 
 def test_standard_name_alias_error(tmp_path):

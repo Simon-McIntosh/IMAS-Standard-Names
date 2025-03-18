@@ -56,6 +56,8 @@ ipykernel = "^6.29.5"
 pandas = "^2.2.3"
 ruff = "^0.9.8"
 pre-commit = "^4.1.0"
+pandas-stubs = "^2.2.3.250308"
+types-pyyaml = "^6.0.12.20241230"
 
 [tool.poetry.requires-plugins]
 poetry-dynamic-versioning = { version = ">=1.0.0,<2.0.0", extras = ["plugin"] }
@@ -67,3 +69,10 @@ vcs = "git"
 style = "semver"
 pattern = "^(?P<base>\\d+\\.\\d+\\.\\d+)(-?((?P<stage>[a-zA-Z]+)\\.?(?P<revision>\\d+)?))?"
 format = "{base}+{distance}.{commit}"
+
+[[tool.mypy.overrides]]
+module = ["strictyaml"] 
+ignore_missing_imports = true
+
+[tool.coverage.run]
+omit = ['__init__.py']
