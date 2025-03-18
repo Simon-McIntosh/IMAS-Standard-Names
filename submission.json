@@ -1,9 +1,0 @@
-{
-  "name": "plasma_current",
-  "units": "A",
-  "documentation": "docs",
-  "tags": "",
-  "options": [
-    "This proposal is ready to commit to the Standard Names repository."
-  ]
-}

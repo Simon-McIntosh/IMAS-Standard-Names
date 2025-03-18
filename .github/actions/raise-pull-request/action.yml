@@ -15,6 +15,7 @@ runs:
     - name: Create pull request
       uses: peter-evans/create-pull-request@v7
       with:
+        add-paths: "standardnames.yml"
         base: ${{ inputs.base-branch }}
         branch: ${{ inputs.topic-branch }}
         title: Update Standard Names from ${{ inputs.topic-branch }} branch

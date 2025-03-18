@@ -57,6 +57,7 @@ runs:
         update_standardnames standardnames.yml docs/generic_names.csv submission.json
         echo EOF
         } >> "$GITHUB_OUTPUT"
+        rm submission.json
         {
         echo 'standard-name-entry<<EOF'
         get_standardname standardnames.yml ${{ inputs.standard-name }} --unit-format 'P' 

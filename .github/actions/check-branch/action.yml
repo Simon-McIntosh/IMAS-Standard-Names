@@ -15,16 +15,13 @@ runs:
   steps:
     - shell: bash
       run: |
-        current_branch=$(git branch --show-current)
         if ! git ls-remote --exit-code --heads origin ${{ inputs.target-branch }}; then
+          current_branch=$(git branch --show-current)
           git fetch origin ${{ inputs.source-branch }}:${{ inputs.source-branch }}
           git switch ${{ inputs.source-branch }}
           git branch ${{ inputs.target-branch }}
           git push origin ${{ inputs.target-branch }}
-        else
-          git fetch origin ${{ inputs.target-branch }}:${{ inputs.target-branch }}
-          git switch ${{ inputs.target-branch }}
-          git pull origin ${{ inputs.source-branch }} --no-edit
+          git switch $current_branch
         fi
-        git switch $current_branch
+        
 
