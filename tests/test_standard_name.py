@@ -293,11 +293,29 @@ def test_link_update(standardnames):
         }
     )
     standard_name = ParseJson(github_response).standard_name
-    standard_names.update(standard_name, overwrite=True)
+    standard_names.update(standard_name, overwrite=True, update_file=False)
     assert len(standard_names["plasma_current"].links) == 3
     assert [
         int(link.split("/")[-1]) for link in standard_names["plasma_current"].links
     ] == [5, 6, 7]
+
+
+def test_unique_links(standardnames):
+    standard_names = StandardNameFile(standardnames)
+    assert len(standard_names["plasma_current"].links) == 2
+    github_response = json.dumps(
+        standard_name_data
+        | {
+            "name": "plasma_current",
+            "links": "https://github.com/iterorganization/IMAS-Standard-Names/issues/7,"
+            "https://github.com/iterorganization/IMAS-Standard-Names/issues/7,"
+            "https://github.com/iterorganization/IMAS-Standard-Names/issues/8,"
+            "https://github.com/iterorganization/IMAS-Standard-Names/issues/7",
+        }
+    )
+    standard_name = ParseJson(github_response).standard_name
+    standard_names.update(standard_name, overwrite=True, update_file=False)
+    assert len(standard_names["plasma_current"].links) == 4
 
 
 @pytest.fixture(scope="session")

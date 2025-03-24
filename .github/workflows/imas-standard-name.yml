@@ -2,7 +2,8 @@ name: IMAS Standard Name
 
 on:
   issues:
-    types: [opened, edited]
+    types: [edited, labeled]
+  workflow_dispatch:
 
 env:
   ISSUE_TITLE: "Standard Name Proposal"
@@ -17,10 +18,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Comment on issue
+        shell: bash
+        if: ${{ ! contains(github.event.issue.labels.*.name, 'approve') }}
+        env:
+          update_message: ":construction: Automatic processing of this Standard Name proposal has been triggered. This process typically takes 30 seconds to complete."
+        run: echo -e "$update_message" | gh issue comment $ISSUE_URL --body-file -
+
       - uses: actions/checkout@v4
         with:
           ref: main
-      
+
       - id: parse-issue
         uses: ./.github/actions/parse-issue
         with:
@@ -35,9 +43,10 @@ jobs:
           pip install .
 
       - id: process-issue
-        uses: ./.github/actions/process-issue 
+        uses: ./.github/actions/process-issue
         with:
           standard-name: ${{ steps.parse-issue.outputs.standard-name }}
+          overwrite-standard-name: ${{ steps.parse-issue.outputs.overwrite-standard-name }}
           ready-to-commit: ${{ steps.parse-issue.outputs.ready-to-commit }}
 
       - id: label-issue

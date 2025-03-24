@@ -47,7 +47,7 @@ def launch_cli(
     github_input: dict[str, str],
     path: str | Path,
 ):
-    """Lanuch CLI to update a temporary standard names file with input data."""
+    """Launch CLI to update a temporary standard names file with input data."""
     with (
         click_runner(path) as (runner, temp_dir),
         write_standardnames(standardnames, temp_dir) as standardnames_file,
@@ -59,7 +59,7 @@ def launch_cli(
 
 @contextmanager
 def click_runner(path: str | Path):
-    """Lanuch click runner within isolated filesystem."""
+    """Launch click runner within isolated filesystem."""
     runner = CliRunner()
     with runner.isolated_filesystem(temp_dir=path) as temp_dir:
         yield runner, temp_dir
