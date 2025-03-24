@@ -9,17 +9,13 @@ body:
       value: |
         Issues submitted with the default title will be automatically labeled with the given Standard Name.
 
-        Issues submitted with this template will be automatically processed by the IMAS Standard Name GitHub Actions workflow. The workflow will check the proposed Standard Name against the existing Standard Names repository and update the repository if the proposed Standard Name is compliant.
-
-        Guidelines for the construction of IMAS Standard Names can be found [here](https://github.com/iterorganization/IMAS-Standard-Names/blob/main/docs/guidelines.md). These guidelines should be followed when proposing a new Standard Name.
-
   - type: input
     id: name
     attributes:
       label: Standard Name
       description: |
-        Standard names consist of lower case letters, digits and underscores, begin with a letter, and must not contain whitespace.
-      placeholder: ex. poloidal_flux
+        Standard names consist of lower case letters, digits and underscores, begin with a letter, and must not contain whitespace. Guidelines for the construction of IMAS Standard Names can be found [here](https://github.com/iterorganization/IMAS-Standard-Names/blob/main/docs/guidelines.md).
+      placeholder: ex. radial_magnetic_field_due_to_plasma_current
     validations:
       required: true
 
@@ -33,7 +29,7 @@ body:
         and none if Standard Name is unitless.
         note: e (elementary charge unit), u (Dalton / atomic mass unit), 
         and eV for electron/ion/neutral temperatures
-      placeholder: Wb
+      placeholder: T
     validations:
       required: true
 
@@ -43,15 +39,7 @@ body:
       label: Documentation
       description: Documentation for the proposed Standard Name.
       placeholder: |
-        Poloidal flux. Integral of magnetic field passing through a contour
-        defined by the intersection of a flux surface passing through the point
-        of interest and a $Z=\mathrm{constant}$ plane. The surface normal is in
-        the same direction as increasing
-        [`vertical_distance`](#vertical_distance).
-
-        $$
-        \psi_{pol} = \oint_S \textbf{B} \cdot d\textbf{S}
-        $$
+        The radial component of the magnetic field due to electrical current flowing in the plasma.
     validations:
       required: true
 
@@ -60,7 +48,7 @@ body:
     attributes:
       label: Tags
       description: A comma separated list of tags.
-      placeholder: flux-coordinates, equilibrium
+      placeholder: equilibrium, magnetic_field
     validations:
       required: false
 
@@ -70,3 +58,13 @@ body:
       label: Options
       options:
         - label: This proposal overwrites a duplicate Standard Name.
+
+  - type: markdown
+    attributes:
+      value: |
+        ### Review Process
+        Issues submitted using the IMAS Standard Name template will be automatically processed by a GitHub Actions workflow. This workflow will check that the proposed Standard Name is compliant with the Fusion Conventions guidelines and, if the overwrite flag is not set, unique.
+
+        The Standard Name author should ensure that at least one reviewer is assigned to this issue. The review is concluded when a reviewer with sufficient privileges affixes the `approve` label to the issue.
+
+        Valid Standard Names will be committed to the `submit` branch. A pull request to the `develop` branch will be raised or updated. Batches of Standard Names will be pushed from the `develop` branch to the `main` branch as tagged commits.

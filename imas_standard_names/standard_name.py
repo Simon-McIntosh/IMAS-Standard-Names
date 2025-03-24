@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 from typing import ClassVar
 
+import numpy as np
 import pandas
 import pydantic
 import strictyaml as syaml
@@ -38,7 +39,7 @@ class StandardName(pydantic.BaseModel):
             assert " " not in name  # Standard names do not contain whitespace
         except AssertionError:
             raise NameError(
-                f"The proposed Standard Name **{name}** is *not* valid."
+                f":see_no_evil: The proposed Standard Name **{name}** is *not* valid."
                 "\n\nStandard names must:\n"
                 "- be lowercase;\n"
                 "- start with a letter;\n"
@@ -49,7 +50,7 @@ class StandardName(pydantic.BaseModel):
     @pydantic.field_validator("units", mode="after")
     @classmethod
     def parse_units(cls, units: str) -> str:
-        """Return units validated and formated with pint"""
+        """Return units validated and formatted with pint"""
         match units.split(":"):
             case [str(units), str(unit_format)]:
                 pass
@@ -64,7 +65,7 @@ class StandardName(pydantic.BaseModel):
     @pydantic.field_validator("tags", "links", mode="after")
     @classmethod
     def parse_list(cls, value: str | list[str]) -> str | list[str]:
-        """Return list of comma seperated strings."""
+        """Return list of comma separated strings."""
         if value == "" or isinstance(value, list):
             return value
         return [item.strip() for item in value.split(",")]
@@ -77,7 +78,6 @@ class StandardName(pydantic.BaseModel):
             if (key == "units" and value != "none")
             or (key != "units" and value != [] and value != "")
         }
-        syaml.as_document({self.name: data}, schema=ParseYaml.schema)
         return syaml.as_document({self.name: data}, schema=ParseYaml.schema)
 
     def as_yaml(self) -> str:
@@ -121,17 +121,16 @@ class ParseYaml:
         """Load yaml data."""
         self.data = syaml.load(input_, self.schema)
 
-    def _append_unit_format(
-        self, data: syaml.representation.YAML
-    ) -> syaml.representation.YAML:
+    def _append_unit_format(self, data: syaml.representation.YAML):
         """Append unit formatter to units string."""
         if self.unit_format:
             data["units"] = data["units"].split(":")[0] + f":{self.unit_format}"
-        return data
 
     def __getitem__(self, standard_name: str) -> StandardName:
         """Return StandardName instance for the requested standard name."""
-        data = self._append_unit_format(self.data[standard_name].as_marked_up())
+        data = self.data[standard_name].as_marked_up()
+        if "units" in data:
+            self._append_unit_format(data)
         return StandardName(name=standard_name, **data)
 
     def as_yaml(self) -> str:
@@ -214,9 +213,8 @@ class StandardNameFile(ParseYaml):
         for key, value in other.data.items():
             # append issue links to existing list
             if key in self.data:
-                value["links"] = self.data.data[key].get("links", "") + value.get(
-                    "links", ""
-                )
+                links = self.data.data[key].get("links", "") + value.get("links", "")
+                value["links"] = np.unique(links).tolist()
             self.data[key] = value
         return self
 
@@ -224,30 +222,35 @@ class StandardNameFile(ParseYaml):
         """Add content of other to self, overiding existing keys."""
         return self.__add__(other)
 
-    def update(self, standard_name: StandardName, overwrite: bool = False):
+    def update(
+        self,
+        standard_name: StandardName,
+        overwrite: bool = False,
+        update_file: bool = True,
+    ):
         """Add json data to self and update standard names file."""
         if not overwrite:  # check for existing standard name
             try:
                 assert standard_name.name not in self.data
             except AssertionError:
                 raise KeyError(
-                    f"The proposed standard name **{standard_name.name}** "
-                    f"is already present in {self.filename} "
-                    "with the following content:"
+                    f":busts_in_silhouette: The proposed standard name **{standard_name.name}** "
+                    f"is already present in the {self.filename} file."
                     f"\n\n{self[standard_name.name].as_yaml()}\n\n"
-                    "Mark the **overwrite** checkbox to overwrite this standard name."
+                    "Mark the :white_check_mark: **overwrite** checkbox to overwrite this standard name."
                 )
         if standard_name.alias:
             try:
                 assert standard_name.alias in self.data
             except AssertionError:
                 raise KeyError(
-                    f"The proposed alias **{standard_name.alias}** "
+                    f":alien: The proposed alias **{standard_name.alias}** "
                     f"is not present in {self.filename}."
                 )
         self += standard_name.as_document()
-        with open(self.filename, "w") as f:
-            f.write(self.data.as_yaml())
+        if update_file:
+            with open(self.filename, "w") as f:
+                f.write(self.data.as_yaml())
 
 
 @dataclass
@@ -268,7 +271,7 @@ class GenericNames:
         return self.data["Generic Name"].tolist()
 
     def __contains__(self, name: str) -> bool:
-        """Check if name is inlcuded the the generic standard name list."""
+        """Check if name is included the the generic standard name list."""
         return name in self.names
 
     def check(self, standard_name: str) -> None:
@@ -278,7 +281,7 @@ class GenericNames:
                 f"The proposed standard name **{standard_name}** "
                 "is a generic name."
                 f"\n\n{self.data.to_markdown()}.\n\n"
-                "Please choose a different name."
+                ":card_file_box: Please propose a different name. See [guidelines](https://github.com/iterorganization/IMAS-Standard-Names/blob/main/docs/guidelines.md) for advice on Standard Name construction."
             )
 
 

@@ -1,4 +1,8 @@
+from io import StringIO
+
 import click
+import json
+from strictyaml.ruamel import YAML
 
 from imas_standard_names.standard_name import (
     GenericNames,
@@ -6,10 +10,27 @@ from imas_standard_names.standard_name import (
     StandardNameFile,
 )
 
+yaml = YAML()
+yaml.indent(mapping=2, sequence=4, offset=2)
+yaml.preserve_quotes = True
+yaml.width = 80  # Line width
 
-def format_error(error):
+
+def format_error(error, submission_file=None):
     """Return formatted error message."""
-    return f"{type(error).__name__}: {error}"
+    error_message = f"**{type(error).__name__}**: {error}"
+    if submission_file:
+        with open(submission_file, "r") as f:
+            submission = json.load(f)
+        yaml_str = StringIO()
+        yaml.dump(submission, yaml_str)
+        error_message = (
+            ":boom: The proposed Standard Name is not valid.\n"
+            f"\n{error_message}\n"
+            "\n:pencil: Please correct the error by editing the Issue Body at the top of the page.\n"
+            f"\n{yaml_str.getvalue()}\n"
+        )
+    return error_message
 
 
 @click.command()
@@ -37,16 +58,16 @@ def update_standardnames(
             submission_file, unit_format=unit_format, issue_link=issue_link
         ).standard_name
         genericnames.check(standard_name.name)
-        standardnames.update(standard_name, overwrite)
+        standardnames.update(standard_name, overwrite=overwrite)
 
     except (NameError, KeyError, Exception) as error:
-        click.echo(format_error(error))
+        click.echo(format_error(error, submission_file))
     else:
         click.echo(
-            f"The proposed Standard Name is valid.\n"
-            f"\n{standard_name.as_document().as_yaml()}\n"
-            f"This proposal is ready for submission to "
-            "the Standard Names repository."
+            ":sparkles: This proposal is ready for submission to "
+            "the Standard Names repository.\n"
+            f"\n{standardnames[standard_name.name].as_yaml()}\n"
+            ":label: Label issue with `approve` to commit."
         )
 
 

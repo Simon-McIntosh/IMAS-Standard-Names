@@ -20,12 +20,19 @@ runs:
       shell: bash
       run: gh issue edit $ISSUE_URL --add-label "duplicate"
 
-    - name: Remove dulicalte label
+    - name: Remove duplicate label
       if: |
         inputs.duplicate-name == 'false' && 
         contains(github.event.issue.labels.*.name, 'duplicate')
       shell: bash
       run: gh issue edit $ISSUE_URL --remove-label "duplicate"
+
+    - name: Remove approve label
+      if: |
+        inputs.update-error == 'true' && 
+        contains(github.event.issue.labels.*.name, 'approve')
+      shell: bash
+      run: gh issue edit $ISSUE_URL --remove-label "approve"
 
     - name: Add needswork label
       if: inputs.update-error == 'true'

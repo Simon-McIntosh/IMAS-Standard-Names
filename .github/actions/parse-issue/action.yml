@@ -11,6 +11,9 @@ outputs:
   standard-name:
     description: "Proposed Standard Name."
     value: ${{ steps.issue-data.outputs.standard_name }}
+  overwrite-standard-name:
+    description: "Overwrite an existing Standard Name."
+    value: ${{ steps.issue-data.outputs.overwrite }}
   issue-number:
     description: "The issue number."
     value: ${{ steps.issue-info.outputs.issue_number }}
@@ -33,6 +36,7 @@ runs:
         standard_name=${{ steps.issue-parser.outputs.issueparser_name }}
         echo standard_name=$standard_name | tee -a "$GITHUB_ENV" "$GITHUB_OUTPUT"
         echo '${{ steps.issue-parser.outputs.jsonString }}' > submission.json
+        echo overwrite=${{ contains(steps.issue-parser.outputs.issueparser_options, 'overwrite') }} >> "$GITHUB_OUTPUT"
 
     - name: Edit issue title
       id: issue-info
@@ -56,4 +60,3 @@ runs:
         else
           echo "ready_to_commit=false" >> "$GITHUB_OUTPUT"
         fi
-
