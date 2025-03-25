@@ -1,0 +1,89 @@
+name: Deploy Documentation to GitHub Pages
+description: Deploy documentation to GitHub Pages without removing existing content
+
+inputs:
+  artifacts:
+    description: 'JSON mapping of artifact names to paths, e.g. {"artifact1": "docs/section1"}'
+    required: true
+  artifact-name:
+    description: "Name of the artifact to upload"
+    required: false
+    default: "gh-pages"
+  cache-key:
+    description: "Key for caching the site content"
+    required: false
+    default: "gh-pages-site"
+
+outputs:
+  page_url:
+    description: "URL of the deployed GitHub Pages site"
+    value: ${{ steps.deployment.outputs.page_url }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Restore cache
+      id: cache-restore
+      uses: actions/cache/restore@v4
+      with:
+        path: site
+        key: ${{ inputs.cache-key }}
+        restore-keys: |
+          ${{ inputs.cache-key }}
+        
+    - name: Create site directory
+      shell: bash
+      run: mkdir -p site
+
+    # - name: Create directory structure for artifacts
+    #   if: inputs.artifacts != ''
+    #   shell: bash
+    #   run: |
+    #     if [[ -n "${{ inputs.artifacts }}" ]]; then
+    #       echo '${{ inputs.artifacts }}' | jq -r 'keys[]' | while read name; do
+    #         path=$(echo '${{ inputs.artifacts }}' | jq -r --arg name "$name" '.[$name]')
+    #         mkdir -p _site/$path
+    #       done
+    #     fi
+
+    - name: Download artifacts and copy to site directory
+      if: inputs.artifacts != ''
+      shell: bash
+      run: |
+        echo "Contents of 'site' directory before processing:"
+        ls -ltra site/
+        echo "----------------------------------------"
+        echo '${{ inputs.artifacts }}' | jq -r 'to_entries[] | "\(.key):\(.value)"' | while IFS=: read -r name path; do
+          echo "Downloading artifact '$name' to path '_site/$path'"
+          # Create destination directory
+          mkdir -p _site/$path
+          # Download the artifact
+          gh run download --name "$name" --dir "_site/$path" || echo "Warning: Failed to download artifact '$name', continuing..."
+        done
+        cp -r _site/* site/
+        rm -rf _site
+        
+        echo "Contents of 'site' directory after processing:"
+        ls -ltra site/
+        echo "----------------------------------------"
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+        
+    - name: Save cache
+      id: cache-save
+      uses: actions/cache/save@v4
+      with:
+        path: site
+        key: ${{ inputs.cache-key }}
+
+    - name: Upload Pages artifact
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: site
+        name: ${{ inputs.artifact-name }}
+
+    - name: Deploy documentation to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v4
+      with:
+        artifact_name: ${{ inputs.artifact-name }}
