@@ -1,0 +1,36 @@
+name: build-docs
+description: Build and deploy documentation.
+
+runs:
+  using: "composite"
+  steps:
+    - name: Install docs extra
+      run: pip install .[docs]
+
+    - name: Build documentation
+      env:
+        SITE_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/
+      run: mkdocs build
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v3
+      with:
+        path: ./site/
+
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v4
+
+
+
+  # - name: Comment on PR
+  #   uses: actions/github-script@v6
+  #   with:
+  #     script: |
+  #       const artifactUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+  #       github.rest.issues.createComment({
+  #         issue_number: context.issue.number,
+  #         owner: context.repo.owner,
+  #         repo: context.repo.repo,
+  #         body: `📚 Documentation build completed successfully! You can download the built documentation from the Artifacts section of this workflow run: ${artifactUrl}`
+  #       })
