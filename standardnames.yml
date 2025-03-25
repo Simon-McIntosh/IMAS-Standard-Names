@@ -39,6 +39,6 @@ poloidal_flux:
     surface have the same value for the poloidal flux.
 plasma_current:
   documentation: docs
-  units: A
+  units: amps
   links:
   - https://github.com/Simon-McIntosh/IMAS-Standard-Names/issues/1
