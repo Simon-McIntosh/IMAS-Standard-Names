@@ -1,13 +1,19 @@
 site_name: "Fusion Conventions: Standard Names"
+site_url:
+  !ENV [SITE_URL, "https://iterorganization.github.io/IMAS-Standard-Names/"]
+
 plugins:
-  - macros
+  - macros:
+      verbose: true 
   - data:
       sources:
-        standardnames: standardnames.yml
+        standardnames: !ENV [STANDARD_NAMES_FILE, standardnames.yml]
   - search
   - table-reader
+
 watch:
-  - standardnames.yml
+  - !ENV [STANDARD_NAMES_FILE, standardnames.yml]
+
 theme:
   name: material
 

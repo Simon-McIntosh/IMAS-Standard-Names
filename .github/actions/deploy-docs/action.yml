@@ -1,0 +1,62 @@
+name: Deploy Documentation to GitHub Pages
+description: Deploy documentation to GitHub Pages without removing existing content
+
+inputs:
+  artifacts:
+    description: 'JSON mapping of artifact names to paths, e.g. {"artifact1": "docs/section1"}'
+    required: true
+  artifact-name:
+    description: "Name of the artifact to upload"
+    required: false
+    default: "gh-pages"
+
+outputs:
+  page_url:
+    description: "URL of the deployed GitHub Pages site"
+    value: ${{ steps.deployment.outputs.page_url }}
+
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/checkout@v4
+      with:
+        ref: gh-pages
+        path: site
+        sparse-checkout: .
+        sparse-checkout-cone-mode: false
+      continue-on-error: true
+
+    - name: Create directory structure
+      shell: bash
+      run: |
+        mkdir -p site
+
+        if [[ -n "${{ inputs.artifacts }}" ]]; then
+          echo '${{ inputs.artifacts }}' | jq -r 'keys[]' | while read name; do
+            path=$(echo '${{ inputs.artifacts }}' | jq -r --arg name "$name" '.[$name]')
+            mkdir -p site/$path
+          done
+        fi
+
+    - name: Download artifacts
+      if: inputs.artifacts != ''
+      shell: bash
+      run: |
+        echo '${{ inputs.artifacts }}' | jq -r 'to_entries[] | "\(.key):\(.value)"' | while IFS=: read -r name path; do
+          echo "Downloading artifact '$name' to path 'site/$path'"
+          gh run download --name "$name" --dir "site/$path"
+        done
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+
+    - name: Upload Pages artifact
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: site
+        name: ${{ inputs.artifact-name }}
+
+    - name: Deploy documentation to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v4
+      with:
+        artifact_name: ${{ inputs.artifact-name }}

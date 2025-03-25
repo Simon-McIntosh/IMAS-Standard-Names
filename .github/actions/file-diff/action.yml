@@ -1,0 +1,59 @@
+name: "File Diffrence Analysis"
+description: "Compare files across git references and extract additions to a new file."
+inputs:
+  filename:
+    description: "Name of the file being compared"
+    required: true
+    default: "standardnames.yml"
+  base-ref:
+    description: "Reference to compare against (branch, tag, or commit)"
+    required: false
+    default: "origin/develop"
+  output-filename:
+    description: "Name for the output file"
+    required: false
+    default: "standardname_additions.yml"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Extract file additions
+      id: extract
+      shell: bash
+      run: |
+        # Ensure the base reference is available
+        git fetch origin ${BASE_REF#origin/} || true
+
+        # Create the output directory if it doesn't exist
+        mkdir -p $(dirname "$OUTPUT_NAME")
+
+        # Check if the file exists in both revisions
+        if git show "$BASE_REF:$FILENAME" > /dev/null 2>&1; then
+          # Extract only the added lines (lines starting with +)
+          git diff --no-prefix "$BASE_REF" -- "$FILENAME" | grep '^+' | sed 's/^+//' | grep -v '^+++' > "$OUTPUT_NAME"
+          echo "Generated diff file at $OUTPUT_NAME"
+        else
+          echo "Warning: File $FILENAME does not exist in $BASE_REF"
+          # If the file is completely new, just copy it
+          cp "$FILENAME" "$OUTPUT_NAME"
+          echo "File appears to be new. Copied current version to $OUTPUT_NAME"
+        fi
+
+      env:
+        FILENAME: ${{ inputs.filename }}
+        BASE_REF: ${{ inputs.base-ref }}
+        OUTPUT_NAME: ${{ inputs.output-filename }}
+
+    - name: Summary
+      shell: bash
+      run: |
+        echo "## File Diff Summary" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "- **File analyzed**: $FILENAME" >> $GITHUB_STEP_SUMMARY
+        echo "- **Compared against**: $BASE_REF" >> $GITHUB_STEP_SUMMARY
+        echo "- **Output file**: $OUTPUT_NAME" >> $GITHUB_STEP_SUMMARY
+        echo "- **Additions found**: $(wc -l < $OUTPUT_NAME) lines" >> $GITHUB_STEP_SUMMARY
+      env:
+        FILENAME: ${{ inputs.filename }}
+        BASE_REF: ${{ inputs.base-ref }}
+        OUTPUT_NAME: ${{ inputs.output-filename }}

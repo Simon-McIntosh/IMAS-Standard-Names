@@ -4,6 +4,7 @@ import click
 import json
 from strictyaml.ruamel import YAML
 
+from imas_standard_names.repository import update_static_urls
 from imas_standard_names.standard_name import (
     GenericNames,
     StandardInput,
@@ -28,12 +29,12 @@ def format_error(error, submission_file=None):
         yaml_str = StringIO()
         yaml.dump(submission, yaml_str)
         error_message += (
-            "\n:page_facing_up: Here is the submission for reference:\n"
-            f"{yaml_str.getvalue()}\n"
+            f"\nHere is the submission for reference:\n{yaml_str.getvalue()}\n"
         )
     error_message += (
-        "\n> [!NOTE]\n"
-        "> :pencil: Correct the error by editing the Issue Body at the top of the page.\n"
+        "\n"
+        "> [!NOTE]\n"
+        "> Correct the error by editing the Issue Body at the top of the page.\n"
     )
     return error_message
 
@@ -73,7 +74,7 @@ def update_standardnames(
             "the Standard Names repository.\n"
             f"\n{standardnames[standard_name.name].as_yaml()}\n"
             "> [!NOTE]\n"
-            "> :label: Label this issue with `approve` to commit."
+            "> Label this issue with `approve` to commit."
         )
 
 
@@ -110,3 +111,11 @@ def get_standardname(standardnames_file: str, standard_name: str, unit_format: s
         click.echo(format_error(error))
     else:
         click.echo(submission)
+
+
+@click.command()
+@click.argument("remote")
+@click.option("--filename", default="README.md", help="File to update")
+def update_links(remote: str, filename: str):
+    """Update the README.md file with the remote's URL."""
+    update_static_urls(filename, remote=remote)

@@ -7,6 +7,10 @@ __pycache__/
 # coverage
 .coverage 
 coverage.json
+htmlcov/
+
+# pytest 
+htmltest/
 
 # vscode
 .vscode/

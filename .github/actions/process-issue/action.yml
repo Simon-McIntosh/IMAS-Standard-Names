@@ -25,6 +25,9 @@ outputs:
   valid-commit:
     description: "A boolean flag indicating if the proposal is ready to commit."
     value: ${{ steps.flags.outputs.valid-commit }}
+  approved-valid-commit:
+    description: "A boolean flag indicating that the proposal is valid and approved."
+    value: ${{ steps.flags.outputs.approved-valid-commit }}
 
 runs:
   using: "composite"
@@ -74,4 +77,5 @@ runs:
       run: |
         echo duplicate-name=${{ contains(steps.imas-standard-name.outputs.has_name, 'True') }} >> "$GITHUB_OUTPUT"
         echo update-error=${{ contains(steps.imas-standard-name.outputs.update-message, 'Error') }} >> "$GITHUB_OUTPUT"
-        echo valid-commit=${{ ! contains(steps.imas-standard-name.outputs.update-message, 'Error') && inputs.ready-to-commit == 'true' }} >> "$GITHUB_OUTPUT"
+        echo valid-commit=${{ ! contains(steps.imas-standard-name.outputs.update-message, 'Error') }} >> "$GITHUB_OUTPUT"
+        echo approved-valid-commit=${{ ! contains(steps.imas-standard-name.outputs.update-message, 'Error') && inputs.ready-to-commit == 'true' }} >> "$GITHUB_OUTPUT"

@@ -14,7 +14,7 @@ vertical_distance:
   units: m
   tags:
     - cylindrical-coordinates
-    - cartesian-cooordinates
+    - cartesian-coordinates
   documentation:
     Vertical distance to the horizontal reference plane of the coordinate
     system.
