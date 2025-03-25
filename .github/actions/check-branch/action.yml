@@ -17,8 +17,8 @@ runs:
       run: |
         if ! git ls-remote --exit-code --heads origin ${{ inputs.target-branch }}; then
           current_branch=$(git branch --show-current)
-          git fetch origin ${{ inputs.source-branch }}:${{ inputs.source-branch }}
           git switch ${{ inputs.source-branch }}
+          git pull origin ${{ inputs.source-branch }}
           git branch ${{ inputs.target-branch }}
           git push origin ${{ inputs.target-branch }}
           git switch $current_branch
