@@ -1,0 +1,13 @@
+labels:
+  - name: approve
+    color: "#21AE80"
+    description: "This standard name is ready to commit."
+  - name: duplicate
+    color: "#cfd3d7"
+    description: "This standard name has already been defined. Mark the Overwrite checkbox to replace."
+  - name: needswork
+    color: "#FB6A1E"
+    description: "This standard name proposal needs further work."
+  - name: standard-name
+    color: "#18A5D7"
+    description: "Process IMAS Standard Name proposal from issue template."

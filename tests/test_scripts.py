@@ -99,7 +99,7 @@ def test_add_standard_name(tmp_path):
         args,
     ):
         result = runner.invoke(update_standardnames, args)
-    assert "The proposed Standard Name is valid." in result.output
+    assert "proposal is ready for submission" in result.output
 
 
 def test_overwrite(tmp_path):
@@ -110,7 +110,7 @@ def test_overwrite(tmp_path):
         args,
     ):
         result = runner.invoke(update_standardnames, args + ("--overwrite",))
-    assert "The proposed Standard Name is valid." in result.output
+    assert "proposal is ready for submission" in result.output
 
 
 def test_overwrite_error(tmp_path):
@@ -145,7 +145,7 @@ def test_standard_name_alias(tmp_path):
         args,
     ):
         result = runner.invoke(update_standardnames, args)
-    assert "The proposed Standard Name is valid." in result.output
+    assert "proposal is ready for submission" in result.output
 
 
 def test_standard_name_alias_error(tmp_path):
