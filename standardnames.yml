@@ -1,27 +1,26 @@
 time:
   units: s
   tags:
-    - time
+  - time
   documentation: |
     Number of elapsed seconds. Typically this expresses the number of
     seconds since the start of the pulse.
 radial_distance:
   units: m
   tags:
-    - cylindrical-coordinates
+  - cylindrical-coordinates
   documentation: Distance from the central axis of the cylindrical coordinate system.
 vertical_distance:
   units: m
   tags:
-    - cylindrical-coordinates
-    - cartesian-cooordinates
-  documentation:
-    Vertical distance to the horizontal reference plane of the coordinate
+  - cylindrical-coordinates
+  - cartesian-cooordinates
+  documentation: Vertical distance to the horizontal reference plane of the coordinate
     system.
 poloidal_flux:
   units: Wb
   tags:
-    - flux-coordinates
+  - flux-coordinates
   documentation: |
     Poloidal flux. Integral of magnetic field passing through a contour
     defined by the intersection of a flux surface passing through the point
@@ -38,3 +37,8 @@ poloidal_flux:
     Illustration of an integration surface (blue) to calculate the poloidal
     flux and the flux surface (grey). By definition, all points on the flux
     surface have the same value for the poloidal flux.
+plasma_current:
+  documentation: docs
+  units: A
+  links:
+  - https://github.com/Simon-McIntosh/IMAS-Standard-Names/issues/1
