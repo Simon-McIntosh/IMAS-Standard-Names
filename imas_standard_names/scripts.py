@@ -18,18 +18,23 @@ yaml.width = 80  # Line width
 
 def format_error(error, submission_file=None):
     """Return formatted error message."""
-    error_message = f"**{type(error).__name__}**: {error}"
+    error_message = (
+        ":boom: The proposed Standard Name is not valid.\n"
+        f"\n{type(error).__name__}: {error}\n"
+    )
     if submission_file:
         with open(submission_file, "r") as f:
             submission = json.load(f)
         yaml_str = StringIO()
         yaml.dump(submission, yaml_str)
-        error_message = (
-            ":boom: The proposed Standard Name is not valid.\n"
-            f"\n{error_message}\n"
-            "\n:pencil: Please correct the error by editing the Issue Body at the top of the page.\n"
-            f"\n{yaml_str.getvalue()}\n"
+        error_message += (
+            "\n:page_facing_up: Here is the submission for reference:\n"
+            f"{yaml_str.getvalue()}\n"
         )
+    error_message += (
+        "\n> [!NOTE]\n"
+        "> :pencil: Correct the error by editing the Issue Body at the top of the page.\n"
+    )
     return error_message
 
 
@@ -67,7 +72,8 @@ def update_standardnames(
             ":sparkles: This proposal is ready for submission to "
             "the Standard Names repository.\n"
             f"\n{standardnames[standard_name.name].as_yaml()}\n"
-            ":label: Label issue with `approve` to commit."
+            "> [!NOTE]\n"
+            "> :label: Label this issue with `approve` to commit."
         )
 
 

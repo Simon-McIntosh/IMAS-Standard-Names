@@ -1,0 +1,29 @@
+name: Apply Labels
+
+on:
+  push:
+    paths:
+      - .github/labels.yml
+
+jobs:
+  apply-labels:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "16"
+
+      - name: Install dependencies
+        run: npm install @actions/github @actions/core js-yaml
+
+      - name: Apply labels
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo '{ "type": "module" }' > package.json
+          node .github/workflows/apply-labels.js

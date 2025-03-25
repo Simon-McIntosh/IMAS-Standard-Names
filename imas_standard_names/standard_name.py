@@ -39,7 +39,7 @@ class StandardName(pydantic.BaseModel):
             assert " " not in name  # Standard names do not contain whitespace
         except AssertionError:
             raise NameError(
-                f":see_no_evil: The proposed Standard Name **{name}** is *not* valid."
+                f" :see_no_evil: The proposed Standard Name **{name}** is *not* valid."
                 "\n\nStandard names must:\n"
                 "- be lowercase;\n"
                 "- start with a letter;\n"
@@ -234,8 +234,10 @@ class StandardNameFile(ParseYaml):
                 assert standard_name.name not in self.data
             except AssertionError:
                 raise KeyError(
-                    f":busts_in_silhouette: The proposed standard name **{standard_name.name}** "
-                    f"is already present in the {self.filename} file."
+                    " :busts_in_silhouette: "
+                    f"The proposed standard name {standard_name.name} "
+                    f"is already present in the {self.filename} file "
+                    "with the following content:"
                     f"\n\n{self[standard_name.name].as_yaml()}\n\n"
                     "Mark the :white_check_mark: **overwrite** checkbox to overwrite this standard name."
                 )
@@ -244,7 +246,7 @@ class StandardNameFile(ParseYaml):
                 assert standard_name.alias in self.data
             except AssertionError:
                 raise KeyError(
-                    f":alien: The proposed alias **{standard_name.alias}** "
+                    f" :alien: The proposed alias **{standard_name.alias}** "
                     f"is not present in {self.filename}."
                 )
         self += standard_name.as_document()
