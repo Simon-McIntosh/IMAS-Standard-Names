@@ -16,6 +16,9 @@ jobs:
   imas-standard_name:
     if: contains(github.event.issue.labels.*.name, 'standard-name')
     runs-on: ubuntu-latest
+    outputs:
+      doc-ref: ${{ steps.document-issue.outputs.doc-ref }}
+      valid-commit: ${{ steps.process-issue.outputs.valid-commit }}
 
     steps:
       - name: Comment on issue
@@ -56,8 +59,15 @@ jobs:
           duplicate-name: ${{ steps.process-issue.outputs.duplicate-name }}
           update-error: ${{ steps.process-issue.outputs.update-error }}
 
-      - id: commit-issue
+      - id: document-issue
         if: steps.process-issue.outputs.valid-commit == 'true'
+        uses: ./.github/actions/document-standard-name
+        with:
+          doc-ref: issue-${{ steps.parse-issue.outputs.issue-number }}
+          base-ref: ${{ env.BASE_BRANCH }}
+
+      - id: commit-issue
+        if: steps.process-issue.outputs.approved-valid-commit == 'true'
         uses: ./.github/actions/commit-issue
         with:
           standard-name: ${{ steps.parse-issue.outputs.standard-name }}
@@ -66,8 +76,42 @@ jobs:
           issue-number: ${{ steps.parse-issue.outputs.issue-number}}
 
       - id: raise-pull-request
-        if: steps.process-issue.outputs.valid-commit == 'true'
+        if: steps.process-issue.outputs.approved-valid-commit == 'true'
         uses: ./.github/actions/raise-pull-request
         with:
           base-branch: ${{ env.BASE_BRANCH }}
           topic-branch: ${{ env.TOPIC_BRANCH }}
+
+  deploy-docs:
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+
+    concurrency:
+      group: "${{ github.workflow }}-${{ github.event.issue.number}}"
+      cancel-in-progress: true
+
+    if: ${{ needs.imas-standard_name.outputs.valid-commit == 'true' }}
+    needs:
+      - imas-standard_name
+
+    runs-on: ubuntu-latest
+    outputs:
+      doc-url: ${{ steps.deploy-docs.outputs.page_url }}
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy-docs.outputs.page_url }}${{ needs.imas-standard_name.outputs.doc-ref }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - id: deploy-docs
+        uses: ./.github/actions/deploy-docs
+        with:
+          artifacts: '{"${{ env.doc-ref }}": "${{ env.doc-ref }}"}'
+        env:
+          doc-ref: ${{ needs.imas-standard_name.outputs.doc-ref }}

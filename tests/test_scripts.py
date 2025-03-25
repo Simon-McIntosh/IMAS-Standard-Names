@@ -6,12 +6,14 @@ import json
 from pathlib import Path
 import pytest
 import strictyaml as syaml
+import subprocess
 
 from imas_standard_names.scripts import (
     get_standardname,
     has_standardname,
     is_genericname,
     update_standardnames,
+    update_links,
 )
 
 
@@ -256,6 +258,41 @@ def test_get_standardname_error(tmp_path):
         result = runner.invoke(get_standardname, (standardnames_file, "plasma current"))
     assert result.exit_code == 0
     assert "KeyError" in result.output
+
+
+def test_update_links(tmp_path):
+    with click_runner(tmp_path) as (runner, temp_dir):
+        filename = Path(temp_dir) / "README.md"
+        with open(filename, "w") as f:
+            f.write(
+                """
+[![coverage](https://github.com/iterorganization/IMAS-Standard-Names/badges/coverage.svg)](https://github.com/Simon-McIntosh/IMAS-Standard-Names/actions)
+[![docs](https://img.shields.io/badge/docs-online-brightgreen)](https://github.com/iterorganization/IMAS-Standard-Names/actions)
+"""
+            )
+        # Initialize a git repository in the temporary directory
+        subprocess.run(["git", "init"], cwd=temp_dir, check=True)
+        subprocess.run(
+            [
+                "git",
+                "remote",
+                "add",
+                "origin",
+                "https://github.com/forked-username/IMAS-Standard-Names.git",
+            ],
+            cwd=temp_dir,
+            check=True,
+        )
+        result = runner.invoke(
+            update_links, ("origin", "--filename", filename.as_posix())
+        )
+        assert result.exit_code == 0
+        assert "forked-username" in filename.read_text()
+        assert "iterorganization" not in filename.read_text()
+        result = runner.invoke(
+            update_links, ("origin", "--filename", filename.as_posix())
+        )
+        assert "No changes needed" in result.output
 
 
 if __name__ == "__main__":  # pragma: no cover
