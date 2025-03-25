@@ -42,3 +42,8 @@ plasma_current:
   units: amps
   links:
   - https://github.com/Simon-McIntosh/IMAS-Standard-Names/issues/1
+coil_current:
+  documentation: docs
+  units: amps
+  links:
+  - https://github.com/Simon-McIntosh/IMAS-Standard-Names/issues/3
