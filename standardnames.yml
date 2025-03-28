@@ -48,3 +48,8 @@ coil_current:
   units: amps
   links:
   - https://github.com/Simon-McIntosh/IMAS-Standard-Names/issues/3
+maximum_firstwall_temperature:
+  documentation: docs
+  units: C
+  links:
+  - https://github.com/Simon-McIntosh/IMAS-Standard-Names/issues/5
