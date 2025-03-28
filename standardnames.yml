@@ -53,3 +53,8 @@ maximum_firstwall_temperature:
   units: C
   links:
   - https://github.com/Simon-McIntosh/IMAS-Standard-Names/issues/5
+poloidal_flux_rz:
+  documentation: docs
+  units: Wb
+  links:
+  - https://github.com/Simon-McIntosh/IMAS-Standard-Names/issues/7
