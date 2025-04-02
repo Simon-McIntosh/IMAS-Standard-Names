@@ -79,27 +79,17 @@ jobs:
           topic-branch: ${{ env.TOPIC_BRANCH }}
 
   deploy-docs:
-    permissions:
-      contents: read
-      pages: write
-      id-token: write
-
-    concurrency:
-      group: "${{ github.workflow }}-${{ github.event.issue.number}}"
-      cancel-in-progress: true
-
-    if: ${{ needs.imas-standard_name.outputs.valid-commit == 'true' }}
     needs:
       - imas-standard_name
-
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/submit'
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     outputs:
       doc-url: ${{ steps.deploy-docs.outputs.page_url }}
-
     environment:
       name: github-pages
       url: ${{ steps.deploy-docs.outputs.page_url }}${{ needs.imas-standard_name.outputs.doc-ref }}
-
     steps:
       - uses: actions/checkout@v4
         with:
@@ -108,6 +98,8 @@ jobs:
       - id: deploy-docs
         uses: ./.github/actions/deploy-docs
         with:
-          artifacts: '{"${{ env.doc-ref }}": "${{ env.doc-ref }}"}'
-        env:
-          doc-ref: ${{ needs.imas-standard_name.outputs.doc-ref }}
+          artifacts: >
+            {
+              "docs-imas-standard-name": "${{ needs.imas-standard_name.outputs.doc-ref }}"
+            }
+          token: ${{ secrets.GITHUB_TOKEN }}

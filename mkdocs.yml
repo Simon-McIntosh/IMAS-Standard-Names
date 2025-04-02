@@ -4,18 +4,34 @@ site_url:
 
 plugins:
   - macros:
-      verbose: true 
+      verbose: true
   - data:
       sources:
         standardnames: !ENV [STANDARD_NAMES_FILE, standardnames.yml]
   - search
   - table-reader
+  - mike:
+      canonical_version: latest
+      version_selector: true
+      css_dir: stylesheets
+      javascript_dir: javascripts
 
 watch:
   - !ENV [STANDARD_NAMES_FILE, standardnames.yml]
 
 theme:
   name: material
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.indexes
+    - navigation.top
+
+extra:
+  version:
+    provider: mike
 
 # Enable latex/math notation
 markdown_extensions:
