@@ -14,7 +14,11 @@ Conventions and logic for creating a static website for documentation.
 
 The project documentation is available at our [GitHub Pages site](https://Simon-McIntosh.github.io/IMAS-Standard-Names/).
 
-GitHub Actions automatically build and deploy the documentation whenever you push changes to the main branch. To build the documentation locally, run:
+GitHub Actions automatically build and deploy the documentation whenever you push changes to the main branch. The documentation is versioned using [Mike](https://github.com/jimporter/mike), allowing multiple versions to be accessible simultaneously.
+
+### Local Documentation Development
+
+To build the documentation locally, run:
 
 ```bash
 # create virtual environment
@@ -30,3 +34,34 @@ mkdocs build
 # To preview the documentation locally
 mkdocs serve
 ```
+
+### Working with Versioned Documentation
+
+This project uses Mike to manage versioned documentation. To work with versioned documentation locally:
+
+```bash
+# Install documentation dependencies (includes Mike)
+pip install .[docs]
+
+# Initialize a git repo if not already done
+git init
+
+# Build and serve multiple versions using Mike
+mike deploy 0.1 latest --update-aliases
+mike deploy 0.2 --update-aliases
+mike serve  # Serves the versioned documentation locally
+
+# List all versions of the documentation
+mike list
+
+# Set the default version
+mike set-default latest
+```
+
+When the CI/CD pipeline runs, it automatically deploys documentation for:
+
+- `main` branch as "latest"
+- `develop` branch as "develop"
+- `submit` branch as "submit"
+
+Each branch will be available as a separate version in the version selector dropdown on the documentation site.
