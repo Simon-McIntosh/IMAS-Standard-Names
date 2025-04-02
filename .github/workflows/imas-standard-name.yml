@@ -37,13 +37,9 @@ jobs:
         with:
           template_path: ".github/ISSUE_TEMPLATE/standard-name.yml"
 
-      - uses: actions/setup-python@v3
+      - uses: ./.github/actions/install-project
         with:
           python-version: "3.12"
-      - name: Install imas-standard-names
-        run: |
-          python -m pip install --upgrade pip
-          pip install .
 
       - id: process-issue
         uses: ./.github/actions/process-issue

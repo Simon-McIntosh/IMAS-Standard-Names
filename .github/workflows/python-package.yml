@@ -35,14 +35,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v3
+      - uses: ./.github/actions/install-project
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install .[test]
+          pip-extras: "test"
 
       - name: Ruff format check
         uses: astral-sh/ruff-action@v3
@@ -87,7 +83,7 @@ jobs:
           path: htmltest/
           retention-days: 1
 
-      - name: Build docs
+      - name: Install docs dependencies and build docs
         if: matrix.python-version == env.BASE_PYTHON_VERSION
         run: |
           python -m pip install .[docs]
