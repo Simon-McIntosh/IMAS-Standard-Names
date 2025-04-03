@@ -11,5 +11,5 @@ runs:
   steps:
     - shell: bash
       run: |
-        git fetch origin ${{ inputs.branch-name }}:${{ inputs.branch-name }} 
-        git checkout ${{ inputs.branch-name }} -- standardnames.yml
+        git fetch origin ${{ inputs.branch-name }}
+        git checkout origin/${{ inputs.branch-name }} -- standardnames.yml

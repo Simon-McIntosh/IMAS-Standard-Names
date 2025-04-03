@@ -10,13 +10,18 @@ runs:
   using: "composite"
   steps:
     - uses: actions/checkout@v4
+
     - name: Install poetry
       shell: bash
       run: pipx install poetry
+
     - uses: actions/setup-python@v5
+      id: setup-python
       with:
         python-version: ${{ inputs.python-version }}
         cache: "poetry"
-    - name: Install dependencies
+
+    - name: Re-sync dependencies when cache is not hit
+      if : ${{ steps.setup-python.outputs.cache-hit != 'true' }}
       shell: bash
-      run: poetry sync --all-extras
+      run: poetry sync --all-extras --without dev

@@ -1,3 +1,4 @@
+from copy import copy, deepcopy
 import csv
 import itertools
 
@@ -102,11 +103,22 @@ def test_standard_name_with_units(units):
     assert units == standard_name.as_document()[name]["units"]
 
 
-@pytest.mark.parametrize("units", ["none"])
-def test_standard_name_without_units(units):
+def test_standard_name_without_units():
     name = "plasma_current"
-    standard_name = StandardName(name=name, documentation="docs", units=units)
+    standard_name = StandardName(name=name, documentation="docs", units="none")
     assert "units" not in standard_name.as_document()[name]
+
+
+def test_parse_yaml_without_units():
+    standard_name = ParseYaml(
+        StandardName(**standard_name_data | {"units": "none"}).as_yaml()
+    )[standard_name_data["name"]]
+    assert "units" not in standard_name.as_document()[standard_name_data["name"]]
+
+
+def test_parse_units_error():
+    with pytest.raises(ValueError):
+        StandardName.parse_units("A / m^2:~P:~F")
 
 
 @pytest.mark.parametrize(
@@ -216,7 +228,7 @@ def test_yaml_roundtrip():
         )
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture()
 def standardnames(tmp_path_factory):
     filepath = tmp_path_factory.mktemp("data") / "standardnames.yaml"
     with open(filepath, "w") as f:
@@ -351,6 +363,80 @@ def test_json_roundtrip():
         ParseJson(StandardName(**standard_name_data).as_json()).standard_name
         == ParseJson(json.dumps(standard_name_data)).standard_name
     )
+
+
+def test_standard_name_difference(standardnames):
+    standard_names = StandardNameFile(standardnames)
+
+    submit_standard_names = deepcopy(standard_names)
+    submit_standard_names += StandardName(**standard_name_data).as_document()
+    new_standard_names = (
+        deepcopy(standard_names) + StandardName(**standard_name_data).as_document()
+    )
+    new_standard_names -= standard_names
+    empty_standard_names = deepcopy(standard_names) - submit_standard_names
+    assert len(empty_standard_names.data) == 0
+
+    for key in standard_names.data:
+        assert key not in new_standard_names.data
+
+    assert standard_name_data["name"] in new_standard_names.data
+
+
+def test_standard_name_file_inputs(standardnames):
+    standard_names_from_file_str = StandardNameFile(standardnames.as_posix())
+    standard_names_from_file_path = StandardNameFile(standardnames)
+    standard_names_from_yaml_str = StandardNameFile(
+        standard_names_from_file_path.as_yaml()
+    )
+    standard_names_from_yaml = StandardNameFile(standard_names_from_file_path.data)
+
+    assert standard_names_from_file_str.data == standard_names_from_file_path.data
+    assert standard_names_from_file_str.data == standard_names_from_yaml_str.data
+    assert standard_names_from_file_path.data == standard_names_from_yaml.data
+
+
+def test_deepcopy(standardnames):
+    standard_names = StandardNameFile(standardnames)
+    standard_names_copy = copy(standard_names)
+    standard_names_deepcopy = deepcopy(standard_names)
+
+    assert standard_names_copy == standard_names
+    assert standard_names_deepcopy == standard_names
+    standard_names.data["plasma_current"]["units"] = "s"
+    assert standard_names_copy == standard_names
+    assert standard_names_deepcopy != standard_names
+    assert standard_names_deepcopy.data["plasma_current"]["units"] == "A"
+
+
+def test_filename_setter(standardnames):
+    standard_names = StandardNameFile(standardnames)
+    standard_names_deepcopy = deepcopy(standard_names)
+
+    assert standard_names.filename == standardnames
+    assert standard_names_deepcopy.filename == standardnames
+    standard_names_deepcopy.filename = standardnames.with_suffix(".yml")
+    assert standard_names_deepcopy.filename == standardnames.with_suffix(".yml")
+    assert standard_names_deepcopy.filename != standard_names.filename
+
+
+def test_parse_yaml_input_error(standardnames):
+    standard_names = StandardNameFile(standardnames)
+    with pytest.raises(TypeError):
+        ParseYaml(standard_names.data.as_marked_up())
+
+
+def test_standard_names_file_input_error(standardnames):
+    standard_names = StandardNameFile(standardnames)
+    with pytest.raises(TypeError):
+        StandardNameFile(standard_names.data.as_marked_up())
+
+
+def test_filename_unset_error(standardnames):
+    standard_names = StandardNameFile(standardnames)
+    standard_names_from_yaml = StandardNameFile(standard_names.as_yaml())
+    with pytest.raises(ValueError):
+        standard_names_from_yaml.filename
 
 
 if __name__ == "__main__":  # pragma: no cover

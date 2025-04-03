@@ -1,7 +1,7 @@
-[![Python versions][python-badge]][python-link]
-[![Ruff][ruff-badge]][ruff-link]
 [![pre-commit][pre-commit-badge]][pre-commit-link]
-[![Test status][ci-badge]][ci-link]
+[![Ruff][ruff-badge]][ruff-link]
+[![Python versions][python-badge]][python-link]
+[![CI/CD status][build-deploy-badge]][build-deploy-link]
 [![Coverage status][codecov-badge]][codecov-link]
 [![Documentation][docs-badge]][docs-link]
 
@@ -72,8 +72,8 @@ Each branch will be available as a separate version in the version selector drop
 [ruff-link]: https://github.com/charliermarsh/ruff
 [pre-commit-badge]: https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white
 [pre-commit-link]: https://github.com/pre-commit/pre-commit
-[ci-badge]: https://github.com/Simon-McIntosh/IMAS-Standard-Names/actions/workflows/python-package.yml/badge.svg
-[ci-link]: https://Simon-McIntosh.github.io/IMAS-Standard-Names/main/reports/pytest
+[build-deploy-badge]: https://img.shields.io/github/actions/workflow/status/Simon-McIntosh/IMAS-Standard-Names/python-package.yml?branch=main&color=brightgreen&label=CI%2FCD
+[build-deploy-link]: https://codecov.io/gh/Simon-McIntosh/IMAS-Standard-Names/tests/main
 [codecov-badge]: https://codecov.io/gh/Simon-McIntosh/IMAS-Standard-Names/graph/badge.svg
 [codecov-link]: https://codecov.io/gh/Simon-McIntosh/IMAS-Standard-Names
 [docs-badge]: https://img.shields.io/badge/docs-online-brightgreen
