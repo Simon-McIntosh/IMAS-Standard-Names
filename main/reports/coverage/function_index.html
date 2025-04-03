@@ -11,7 +11,7 @@
 <header>
     <div class="content">
         <h1>Coverage report:
-            <span class="pc_cov">100%</span>
+            <span class="pc_cov">99%</span>
         </h1>
         <aside id="help_panel_wrapper">
             <input id="help_panel_state" type="checkbox">
@@ -27,6 +27,8 @@
                         <kbd>s</kbd>
                         <kbd>m</kbd>
                         <kbd>x</kbd>
+                        <kbd>b</kbd>
+                        <kbd>p</kbd>
                         <kbd>c</kbd>
                         &nbsp; change column sorting
                     </p>
@@ -55,7 +57,7 @@
         </h2>
         <p class="text">
             <a class="nav" href="https://coverage.readthedocs.io/en/7.8.0">coverage.py v7.8.0</a>,
-            created at 2025-04-03 09:42 +0000
+            created at 2025-04-03 10:15 +0000
         </p>
     </div>
 </header>
@@ -68,6 +70,8 @@
                 <th id="statements" aria-sort="none" data-default-sort-order="descending" data-shortcut="s">statements<span class="arrows"></span></th>
                 <th id="missing" aria-sort="none" data-default-sort-order="descending" data-shortcut="m">missing<span class="arrows"></span></th>
                 <th id="excluded" aria-sort="none" data-default-sort-order="descending" data-shortcut="x">excluded<span class="arrows"></span></th>
+                <th id="branches" aria-sort="none" data-default-sort-order="descending" data-shortcut="b">branches<span class="arrows"></span></th>
+                <th id="partial" aria-sort="none" data-default-sort-order="descending" data-shortcut="p">partial<span class="arrows"></span></th>
                 <th id="coverage" class="right" aria-sort="none" data-shortcut="c">coverage<span class="arrows"></span></th>
             </tr>
         </thead>
@@ -78,12 +82,16 @@
                 <td>4</td>
                 <td>0</td>
                 <td>0</td>
-                <td class="right" data-ratio="4 4">100%</td>
+                <td>2</td>
+                <td>0</td>
+                <td class="right" data-ratio="6 6">100%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_c48a54a1561f89ce_repository_py.html#t22">imas_standard_names/repository.py</a></td>
                 <td class="name left"><a href="z_c48a54a1561f89ce_repository_py.html#t22"><data value='remote_regex'>Repository.remote_regex</data></a></td>
                 <td>1</td>
+                <td>0</td>
+                <td>0</td>
                 <td>0</td>
                 <td>0</td>
                 <td class="right" data-ratio="1 1">100%</td>
@@ -94,12 +102,16 @@
                 <td>1</td>
                 <td>0</td>
                 <td>0</td>
+                <td>0</td>
+                <td>0</td>
                 <td class="right" data-ratio="1 1">100%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_c48a54a1561f89ce_repository_py.html#t35">imas_standard_names/repository.py</a></td>
                 <td class="name left"><a href="z_c48a54a1561f89ce_repository_py.html#t35"><data value='pages_url'>Repository.pages_url</data></a></td>
                 <td>1</td>
+                <td>0</td>
+                <td>0</td>
                 <td>0</td>
                 <td>0</td>
                 <td class="right" data-ratio="1 1">100%</td>
@@ -110,6 +122,8 @@
                 <td>4</td>
                 <td>0</td>
                 <td>0</td>
+                <td>0</td>
+                <td>0</td>
                 <td class="right" data-ratio="4 4">100%</td>
             </tr>
             <tr class="region">
@@ -118,7 +132,9 @@
                 <td>6</td>
                 <td>0</td>
                 <td>0</td>
-                <td class="right" data-ratio="6 6">100%</td>
+                <td>4</td>
+                <td>0</td>
+                <td class="right" data-ratio="10 10">100%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_c48a54a1561f89ce_repository_py.html#t65">imas_standard_names/repository.py</a></td>
@@ -126,7 +142,9 @@
                 <td>4</td>
                 <td>0</td>
                 <td>0</td>
-                <td class="right" data-ratio="4 4">100%</td>
+                <td>2</td>
+                <td>0</td>
+                <td class="right" data-ratio="6 6">100%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_c48a54a1561f89ce_repository_py.html#t73">imas_standard_names/repository.py</a></td>
@@ -134,7 +152,9 @@
                 <td>10</td>
                 <td>0</td>
                 <td>0</td>
-                <td class="right" data-ratio="10 10">100%</td>
+                <td>2</td>
+                <td>0</td>
+                <td class="right" data-ratio="12 12">100%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_c48a54a1561f89ce_repository_py.html">imas_standard_names/repository.py</a></td>
@@ -142,6 +162,8 @@
                 <td>20</td>
                 <td>0</td>
                 <td>2</td>
+                <td>0</td>
+                <td>0</td>
                 <td class="right" data-ratio="20 20">100%</td>
             </tr>
             <tr class="region">
@@ -150,12 +172,16 @@
                 <td>9</td>
                 <td>0</td>
                 <td>0</td>
-                <td class="right" data-ratio="9 9">100%</td>
+                <td>2</td>
+                <td>0</td>
+                <td class="right" data-ratio="11 11">100%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_c48a54a1561f89ce_scripts_py.html#t51">imas_standard_names/scripts.py</a></td>
                 <td class="name left"><a href="z_c48a54a1561f89ce_scripts_py.html#t51"><data value='update_standardnames'>update_standardnames</data></a></td>
                 <td>9</td>
+                <td>0</td>
+                <td>0</td>
                 <td>0</td>
                 <td>0</td>
                 <td class="right" data-ratio="9 9">100%</td>
@@ -166,12 +192,16 @@
                 <td>3</td>
                 <td>0</td>
                 <td>0</td>
+                <td>0</td>
+                <td>0</td>
                 <td class="right" data-ratio="3 3">100%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_c48a54a1561f89ce_scripts_py.html#t94">imas_standard_names/scripts.py</a></td>
                 <td class="name left"><a href="z_c48a54a1561f89ce_scripts_py.html#t94"><data value='is_genericname'>is_genericname</data></a></td>
                 <td>2</td>
+                <td>0</td>
+                <td>0</td>
                 <td>0</td>
                 <td>0</td>
                 <td class="right" data-ratio="2 2">100%</td>
@@ -182,12 +212,16 @@
                 <td>7</td>
                 <td>0</td>
                 <td>0</td>
+                <td>0</td>
+                <td>0</td>
                 <td class="right" data-ratio="7 7">100%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_c48a54a1561f89ce_scripts_py.html#t119">imas_standard_names/scripts.py</a></td>
                 <td class="name left"><a href="z_c48a54a1561f89ce_scripts_py.html#t119"><data value='update_links'>update_links</data></a></td>
                 <td>1</td>
+                <td>0</td>
+                <td>0</td>
                 <td>0</td>
                 <td>0</td>
                 <td class="right" data-ratio="1 1">100%</td>
@@ -198,12 +232,16 @@
                 <td>36</td>
                 <td>0</td>
                 <td>0</td>
+                <td>0</td>
+                <td>0</td>
                 <td class="right" data-ratio="36 36">100%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_c48a54a1561f89ce_standard_name_py.html#t34">imas_standard_names/standard_name.py</a></td>
                 <td class="name left"><a href="z_c48a54a1561f89ce_standard_name_py.html#t34"><data value='validate_standard_name'>StandardName.validate_standard_name</data></a></td>
                 <td>7</td>
+                <td>0</td>
+                <td>0</td>
                 <td>0</td>
                 <td>0</td>
                 <td class="right" data-ratio="7 7">100%</td>
@@ -214,7 +252,9 @@
                 <td>10</td>
                 <td>0</td>
                 <td>0</td>
-                <td class="right" data-ratio="10 10">100%</td>
+                <td>8</td>
+                <td>1</td>
+                <td class="right" data-ratio="17 18">94%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_c48a54a1561f89ce_standard_name_py.html#t67">imas_standard_names/standard_name.py</a></td>
@@ -222,12 +262,16 @@
                 <td>3</td>
                 <td>0</td>
                 <td>0</td>
-                <td class="right" data-ratio="3 3">100%</td>
+                <td>2</td>
+                <td>0</td>
+                <td class="right" data-ratio="5 5">100%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_c48a54a1561f89ce_standard_name_py.html#t73">imas_standard_names/standard_name.py</a></td>
                 <td class="name left"><a href="z_c48a54a1561f89ce_standard_name_py.html#t73"><data value='as_document'>StandardName.as_document</data></a></td>
                 <td>2</td>
+                <td>0</td>
+                <td>0</td>
                 <td>0</td>
                 <td>0</td>
                 <td class="right" data-ratio="2 2">100%</td>
@@ -238,12 +282,16 @@
                 <td>1</td>
                 <td>0</td>
                 <td>0</td>
+                <td>0</td>
+                <td>0</td>
                 <td class="right" data-ratio="1 1">100%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_c48a54a1561f89ce_standard_name_py.html#t87">imas_standard_names/standard_name.py</a></td>
                 <td class="name left"><a href="z_c48a54a1561f89ce_standard_name_py.html#t87"><data value='as_json'>StandardName.as_json</data></a></td>
                 <td>1</td>
+                <td>0</td>
+                <td>0</td>
                 <td>0</td>
                 <td>0</td>
                 <td class="right" data-ratio="1 1">100%</td>
@@ -254,12 +302,16 @@
                 <td>1</td>
                 <td>0</td>
                 <td>0</td>
+                <td>0</td>
+                <td>0</td>
                 <td class="right" data-ratio="1 1">100%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_c48a54a1561f89ce_standard_name_py.html#t120">imas_standard_names/standard_name.py</a></td>
                 <td class="name left"><a href="z_c48a54a1561f89ce_standard_name_py.html#t120"><data value='post_init__'>ParseYaml.__post_init__</data></a></td>
                 <td>1</td>
+                <td>0</td>
+                <td>0</td>
                 <td>0</td>
                 <td>0</td>
                 <td class="right" data-ratio="1 1">100%</td>
@@ -270,7 +322,9 @@
                 <td>2</td>
                 <td>0</td>
                 <td>0</td>
-                <td class="right" data-ratio="2 2">100%</td>
+                <td>2</td>
+                <td>0</td>
+                <td class="right" data-ratio="4 4">100%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_c48a54a1561f89ce_standard_name_py.html#t129">imas_standard_names/standard_name.py</a></td>
@@ -278,7 +332,9 @@
                 <td>4</td>
                 <td>0</td>
                 <td>0</td>
-                <td class="right" data-ratio="4 4">100%</td>
+                <td>2</td>
+                <td>1</td>
+                <td class="right" data-ratio="5 6">83%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_c48a54a1561f89ce_standard_name_py.html#t136">imas_standard_names/standard_name.py</a></td>
@@ -286,12 +342,16 @@
                 <td>4</td>
                 <td>0</td>
                 <td>0</td>
-                <td class="right" data-ratio="4 4">100%</td>
+                <td>2</td>
+                <td>0</td>
+                <td class="right" data-ratio="6 6">100%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_c48a54a1561f89ce_standard_name_py.html#t150">imas_standard_names/standard_name.py</a></td>
                 <td class="name left"><a href="z_c48a54a1561f89ce_standard_name_py.html#t150"><data value='post_init__'>ParseJson.__post_init__</data></a></td>
                 <td>5</td>
+                <td>0</td>
+                <td>0</td>
                 <td>0</td>
                 <td>0</td>
                 <td class="right" data-ratio="5 5">100%</td>
@@ -302,12 +362,16 @@
                 <td>1</td>
                 <td>0</td>
                 <td>0</td>
+                <td>0</td>
+                <td>0</td>
                 <td class="right" data-ratio="1 1">100%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_c48a54a1561f89ce_standard_name_py.html#t175">imas_standard_names/standard_name.py</a></td>
                 <td class="name left"><a href="z_c48a54a1561f89ce_standard_name_py.html#t175"><data value='post_init__'>StandardInput.__post_init__</data></a></td>
                 <td>7</td>
+                <td>0</td>
+                <td>0</td>
                 <td>0</td>
                 <td>0</td>
                 <td class="right" data-ratio="7 7">100%</td>
@@ -318,6 +382,8 @@
                 <td>4</td>
                 <td>0</td>
                 <td>0</td>
+                <td>0</td>
+                <td>0</td>
                 <td class="right" data-ratio="4 4">100%</td>
             </tr>
             <tr class="region">
@@ -326,7 +392,9 @@
                 <td>3</td>
                 <td>0</td>
                 <td>0</td>
-                <td class="right" data-ratio="3 3">100%</td>
+                <td>2</td>
+                <td>0</td>
+                <td class="right" data-ratio="5 5">100%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_c48a54a1561f89ce_standard_name_py.html#t211">imas_standard_names/standard_name.py</a></td>
@@ -334,12 +402,16 @@
                 <td>6</td>
                 <td>0</td>
                 <td>0</td>
-                <td class="right" data-ratio="6 6">100%</td>
+                <td>4</td>
+                <td>0</td>
+                <td class="right" data-ratio="10 10">100%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_c48a54a1561f89ce_standard_name_py.html#t221">imas_standard_names/standard_name.py</a></td>
                 <td class="name left"><a href="z_c48a54a1561f89ce_standard_name_py.html#t221"><data value='iadd__'>StandardNameFile.__iadd__</data></a></td>
                 <td>1</td>
+                <td>0</td>
+                <td>0</td>
                 <td>0</td>
                 <td>0</td>
                 <td class="right" data-ratio="1 1">100%</td>
@@ -350,12 +422,16 @@
                 <td>14</td>
                 <td>0</td>
                 <td>0</td>
-                <td class="right" data-ratio="14 14">100%</td>
+                <td>6</td>
+                <td>0</td>
+                <td class="right" data-ratio="20 20">100%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_c48a54a1561f89ce_standard_name_py.html#t264">imas_standard_names/standard_name.py</a></td>
                 <td class="name left"><a href="z_c48a54a1561f89ce_standard_name_py.html#t264"><data value='post_init__'>GenericNames.__post_init__</data></a></td>
                 <td>2</td>
+                <td>0</td>
+                <td>0</td>
                 <td>0</td>
                 <td>0</td>
                 <td class="right" data-ratio="2 2">100%</td>
@@ -366,12 +442,16 @@
                 <td>1</td>
                 <td>0</td>
                 <td>0</td>
+                <td>0</td>
+                <td>0</td>
                 <td class="right" data-ratio="1 1">100%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_c48a54a1561f89ce_standard_name_py.html#t274">imas_standard_names/standard_name.py</a></td>
                 <td class="name left"><a href="z_c48a54a1561f89ce_standard_name_py.html#t274"><data value='contains__'>GenericNames.__contains__</data></a></td>
                 <td>1</td>
+                <td>0</td>
+                <td>0</td>
                 <td>0</td>
                 <td>0</td>
                 <td class="right" data-ratio="1 1">100%</td>
@@ -382,7 +462,9 @@
                 <td>2</td>
                 <td>0</td>
                 <td>0</td>
-                <td class="right" data-ratio="2 2">100%</td>
+                <td>2</td>
+                <td>0</td>
+                <td class="right" data-ratio="4 4">100%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_c48a54a1561f89ce_standard_name_py.html">imas_standard_names/standard_name.py</a></td>
@@ -390,12 +472,16 @@
                 <td>71</td>
                 <td>0</td>
                 <td>2</td>
+                <td>0</td>
+                <td>0</td>
                 <td class="right" data-ratio="71 71">100%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_a44f0ac069e85531_test_repository_py.html#t15">tests/test_repository.py</a></td>
                 <td class="name left"><a href="z_a44f0ac069e85531_test_repository_py.html#t15"><data value='test_repository_owner_name'>test_repository_owner_name</data></a></td>
                 <td>3</td>
+                <td>0</td>
+                <td>0</td>
                 <td>0</td>
                 <td>0</td>
                 <td class="right" data-ratio="3 3">100%</td>
@@ -406,12 +492,16 @@
                 <td>3</td>
                 <td>0</td>
                 <td>0</td>
+                <td>0</td>
+                <td>0</td>
                 <td class="right" data-ratio="3 3">100%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_a44f0ac069e85531_test_repository_py.html#t27">tests/test_repository.py</a></td>
                 <td class="name left"><a href="z_a44f0ac069e85531_test_repository_py.html#t27"><data value='test_repository_name_error'>test_repository_name_error</data></a></td>
                 <td>3</td>
+                <td>0</td>
+                <td>0</td>
                 <td>0</td>
                 <td>0</td>
                 <td class="right" data-ratio="3 3">100%</td>
@@ -422,12 +512,16 @@
                 <td>2</td>
                 <td>0</td>
                 <td>0</td>
+                <td>0</td>
+                <td>0</td>
                 <td class="right" data-ratio="2 2">100%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_a44f0ac069e85531_test_repository_py.html#t38">tests/test_repository.py</a></td>
                 <td class="name left"><a href="z_a44f0ac069e85531_test_repository_py.html#t38"><data value='test_remote_url_error'>test_remote_url_error</data></a></td>
                 <td>4</td>
+                <td>0</td>
+                <td>0</td>
                 <td>0</td>
                 <td>0</td>
                 <td class="right" data-ratio="4 4">100%</td>
@@ -438,6 +532,8 @@
                 <td>4</td>
                 <td>0</td>
                 <td>0</td>
+                <td>0</td>
+                <td>0</td>
                 <td class="right" data-ratio="4 4">100%</td>
             </tr>
             <tr class="region">
@@ -446,12 +542,16 @@
                 <td>3</td>
                 <td>0</td>
                 <td>0</td>
-                <td class="right" data-ratio="3 3">100%</td>
+                <td>2</td>
+                <td>0</td>
+                <td class="right" data-ratio="5 5">100%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_a44f0ac069e85531_test_repository_py.html#t65">tests/test_repository.py</a></td>
                 <td class="name left"><a href="z_a44f0ac069e85531_test_repository_py.html#t65"><data value='test_remote_regex_match'>test_remote_regex_match</data></a></td>
                 <td>3</td>
+                <td>0</td>
+                <td>0</td>
                 <td>0</td>
                 <td>0</td>
                 <td class="right" data-ratio="3 3">100%</td>
@@ -462,12 +562,16 @@
                 <td>3</td>
                 <td>0</td>
                 <td>0</td>
+                <td>0</td>
+                <td>0</td>
                 <td class="right" data-ratio="3 3">100%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_a44f0ac069e85531_test_repository_py.html#t77">tests/test_repository.py</a></td>
                 <td class="name left"><a href="z_a44f0ac069e85531_test_repository_py.html#t77"><data value='test_remote_regex_match_other_repo'>test_remote_regex_match_other_repo</data></a></td>
                 <td>4</td>
+                <td>0</td>
+                <td>0</td>
                 <td>0</td>
                 <td>0</td>
                 <td class="right" data-ratio="4 4">100%</td>
@@ -478,12 +582,16 @@
                 <td>16</td>
                 <td>0</td>
                 <td>2</td>
+                <td>0</td>
+                <td>0</td>
                 <td class="right" data-ratio="16 16">100%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_a44f0ac069e85531_test_scripts_py.html#t46">tests/test_scripts.py</a></td>
                 <td class="name left"><a href="z_a44f0ac069e85531_test_scripts_py.html#t46"><data value='launch_cli'>launch_cli</data></a></td>
                 <td>2</td>
+                <td>0</td>
+                <td>0</td>
                 <td>0</td>
                 <td>0</td>
                 <td class="right" data-ratio="2 2">100%</td>
@@ -494,12 +602,16 @@
                 <td>3</td>
                 <td>0</td>
                 <td>0</td>
+                <td>0</td>
+                <td>0</td>
                 <td class="right" data-ratio="3 3">100%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_a44f0ac069e85531_test_scripts_py.html#t71">tests/test_scripts.py</a></td>
                 <td class="name left"><a href="z_a44f0ac069e85531_test_scripts_py.html#t71"><data value='write_standardnames'>write_standardnames</data></a></td>
                 <td>4</td>
+                <td>0</td>
+                <td>0</td>
                 <td>0</td>
                 <td>0</td>
                 <td class="right" data-ratio="4 4">100%</td>
@@ -510,12 +622,16 @@
                 <td>4</td>
                 <td>0</td>
                 <td>0</td>
+                <td>0</td>
+                <td>0</td>
                 <td class="right" data-ratio="4 4">100%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_a44f0ac069e85531_test_scripts_py.html#t89">tests/test_scripts.py</a></td>
                 <td class="name left"><a href="z_a44f0ac069e85531_test_scripts_py.html#t89"><data value='write_submission'>write_submission</data></a></td>
                 <td>4</td>
+                <td>0</td>
+                <td>0</td>
                 <td>0</td>
                 <td>0</td>
                 <td class="right" data-ratio="4 4">100%</td>
@@ -526,12 +642,16 @@
                 <td>4</td>
                 <td>0</td>
                 <td>0</td>
+                <td>0</td>
+                <td>0</td>
                 <td class="right" data-ratio="4 4">100%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_a44f0ac069e85531_test_scripts_py.html#t107">tests/test_scripts.py</a></td>
                 <td class="name left"><a href="z_a44f0ac069e85531_test_scripts_py.html#t107"><data value='test_overwrite'>test_overwrite</data></a></td>
                 <td>5</td>
+                <td>0</td>
+                <td>0</td>
                 <td>0</td>
                 <td>0</td>
                 <td class="right" data-ratio="5 5">100%</td>
@@ -542,12 +662,16 @@
                 <td>6</td>
                 <td>0</td>
                 <td>0</td>
+                <td>0</td>
+                <td>0</td>
                 <td class="right" data-ratio="6 6">100%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_a44f0ac069e85531_test_scripts_py.html#t130">tests/test_scripts.py</a></td>
                 <td class="name left"><a href="z_a44f0ac069e85531_test_scripts_py.html#t130"><data value='test_standard_name_error'>test_standard_name_error</data></a></td>
                 <td>6</td>
+                <td>0</td>
+                <td>0</td>
                 <td>0</td>
                 <td>0</td>
                 <td class="right" data-ratio="6 6">100%</td>
@@ -558,12 +682,16 @@
                 <td>5</td>
                 <td>0</td>
                 <td>0</td>
+                <td>0</td>
+                <td>0</td>
                 <td class="right" data-ratio="5 5">100%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_a44f0ac069e85531_test_scripts_py.html#t153">tests/test_scripts.py</a></td>
                 <td class="name left"><a href="z_a44f0ac069e85531_test_scripts_py.html#t153"><data value='test_standard_name_alias_error'>test_standard_name_alias_error</data></a></td>
                 <td>6</td>
+                <td>0</td>
+                <td>0</td>
                 <td>0</td>
                 <td>0</td>
                 <td class="right" data-ratio="6 6">100%</td>
@@ -574,12 +702,16 @@
                 <td>6</td>
                 <td>0</td>
                 <td>0</td>
+                <td>0</td>
+                <td>0</td>
                 <td class="right" data-ratio="6 6">100%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_a44f0ac069e85531_test_scripts_py.html#t177">tests/test_scripts.py</a></td>
                 <td class="name left"><a href="z_a44f0ac069e85531_test_scripts_py.html#t177"><data value='test_has_standardname'>test_has_standardname</data></a></td>
                 <td>4</td>
+                <td>0</td>
+                <td>0</td>
                 <td>0</td>
                 <td>0</td>
                 <td class="right" data-ratio="4 4">100%</td>
@@ -590,12 +722,16 @@
                 <td>4</td>
                 <td>0</td>
                 <td>0</td>
+                <td>0</td>
+                <td>0</td>
                 <td class="right" data-ratio="4 4">100%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_a44f0ac069e85531_test_scripts_py.html#t197">tests/test_scripts.py</a></td>
                 <td class="name left"><a href="z_a44f0ac069e85531_test_scripts_py.html#t197"><data value='test_is_genericname'>test_is_genericname</data></a></td>
                 <td>4</td>
+                <td>0</td>
+                <td>0</td>
                 <td>0</td>
                 <td>0</td>
                 <td class="right" data-ratio="4 4">100%</td>
@@ -606,12 +742,16 @@
                 <td>4</td>
                 <td>0</td>
                 <td>0</td>
+                <td>0</td>
+                <td>0</td>
                 <td class="right" data-ratio="4 4">100%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_a44f0ac069e85531_test_scripts_py.html#t217">tests/test_scripts.py</a></td>
                 <td class="name left"><a href="z_a44f0ac069e85531_test_scripts_py.html#t217"><data value='test_standardname_whitespace'>test_standardname_whitespace</data></a></td>
                 <td>4</td>
+                <td>0</td>
+                <td>0</td>
                 <td>0</td>
                 <td>0</td>
                 <td class="right" data-ratio="4 4">100%</td>
@@ -622,12 +762,16 @@
                 <td>4</td>
                 <td>0</td>
                 <td>0</td>
+                <td>0</td>
+                <td>0</td>
                 <td class="right" data-ratio="4 4">100%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_a44f0ac069e85531_test_scripts_py.html#t240">tests/test_scripts.py</a></td>
                 <td class="name left"><a href="z_a44f0ac069e85531_test_scripts_py.html#t240"><data value='test_get_standardname_default_unit_format'>test_get_standardname_default_unit_format</data></a></td>
                 <td>4</td>
+                <td>0</td>
+                <td>0</td>
                 <td>0</td>
                 <td>0</td>
                 <td class="right" data-ratio="4 4">100%</td>
@@ -638,12 +782,16 @@
                 <td>4</td>
                 <td>0</td>
                 <td>0</td>
+                <td>0</td>
+                <td>0</td>
                 <td class="right" data-ratio="4 4">100%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_a44f0ac069e85531_test_scripts_py.html#t263">tests/test_scripts.py</a></td>
                 <td class="name left"><a href="z_a44f0ac069e85531_test_scripts_py.html#t263"><data value='test_update_links'>test_update_links</data></a></td>
                 <td>12</td>
+                <td>0</td>
+                <td>0</td>
                 <td>0</td>
                 <td>0</td>
                 <td class="right" data-ratio="12 12">100%</td>
@@ -654,6 +802,8 @@
                 <td>38</td>
                 <td>0</td>
                 <td>2</td>
+                <td>0</td>
+                <td>0</td>
                 <td class="right" data-ratio="38 38">100%</td>
             </tr>
             <tr class="region">
@@ -662,12 +812,16 @@
                 <td>4</td>
                 <td>0</td>
                 <td>0</td>
-                <td class="right" data-ratio="4 4">100%</td>
+                <td>4</td>
+                <td>0</td>
+                <td class="right" data-ratio="8 8">100%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_a44f0ac069e85531_test_standard_name_py.html#t65">tests/test_standard_name.py</a></td>
                 <td class="name left"><a href="z_a44f0ac069e85531_test_standard_name_py.html#t65"><data value='test_standard_name_empty_string'>test_standard_name_empty_string</data></a></td>
                 <td>3</td>
+                <td>0</td>
+                <td>0</td>
                 <td>0</td>
                 <td>0</td>
                 <td class="right" data-ratio="3 3">100%</td>
@@ -678,12 +832,16 @@
                 <td>3</td>
                 <td>0</td>
                 <td>0</td>
+                <td>0</td>
+                <td>0</td>
                 <td class="right" data-ratio="3 3">100%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_a44f0ac069e85531_test_standard_name_py.html#t88">tests/test_standard_name.py</a></td>
                 <td class="name left"><a href="z_a44f0ac069e85531_test_standard_name_py.html#t88"><data value='test_standard_name_lists'>test_standard_name_lists</data></a></td>
                 <td>4</td>
+                <td>0</td>
+                <td>0</td>
                 <td>0</td>
                 <td>0</td>
                 <td class="right" data-ratio="4 4">100%</td>
@@ -694,12 +852,16 @@
                 <td>4</td>
                 <td>0</td>
                 <td>0</td>
+                <td>0</td>
+                <td>0</td>
                 <td class="right" data-ratio="4 4">100%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_a44f0ac069e85531_test_standard_name_py.html#t106">tests/test_standard_name.py</a></td>
                 <td class="name left"><a href="z_a44f0ac069e85531_test_standard_name_py.html#t106"><data value='test_standard_name_without_units'>test_standard_name_without_units</data></a></td>
                 <td>3</td>
+                <td>0</td>
+                <td>0</td>
                 <td>0</td>
                 <td>0</td>
                 <td class="right" data-ratio="3 3">100%</td>
@@ -710,12 +872,16 @@
                 <td>3</td>
                 <td>0</td>
                 <td>0</td>
+                <td>0</td>
+                <td>0</td>
                 <td class="right" data-ratio="3 3">100%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_a44f0ac069e85531_test_standard_name_py.html#t125">tests/test_standard_name.py</a></td>
                 <td class="name left"><a href="z_a44f0ac069e85531_test_standard_name_py.html#t125"><data value='test_name_validator'>test_name_validator</data></a></td>
                 <td>2</td>
+                <td>0</td>
+                <td>0</td>
                 <td>0</td>
                 <td>0</td>
                 <td class="right" data-ratio="2 2">100%</td>
@@ -726,12 +892,16 @@
                 <td>2</td>
                 <td>0</td>
                 <td>0</td>
+                <td>0</td>
+                <td>0</td>
                 <td class="right" data-ratio="2 2">100%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_a44f0ac069e85531_test_standard_name_py.html#t135">tests/test_standard_name.py</a></td>
                 <td class="name left"><a href="z_a44f0ac069e85531_test_standard_name_py.html#t135"><data value='test_docs_validator'>test_docs_validator</data></a></td>
                 <td>2</td>
+                <td>0</td>
+                <td>0</td>
                 <td>0</td>
                 <td>0</td>
                 <td class="right" data-ratio="2 2">100%</td>
@@ -742,12 +912,16 @@
                 <td>2</td>
                 <td>0</td>
                 <td>0</td>
+                <td>0</td>
+                <td>0</td>
                 <td class="right" data-ratio="2 2">100%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_a44f0ac069e85531_test_standard_name_py.html#t145">tests/test_standard_name.py</a></td>
                 <td class="name left"><a href="z_a44f0ac069e85531_test_standard_name_py.html#t145"><data value='test_units_parser'>test_units_parser</data></a></td>
                 <td>1</td>
+                <td>0</td>
+                <td>0</td>
                 <td>0</td>
                 <td>0</td>
                 <td class="right" data-ratio="1 1">100%</td>
@@ -758,12 +932,16 @@
                 <td>2</td>
                 <td>0</td>
                 <td>0</td>
+                <td>0</td>
+                <td>0</td>
                 <td class="right" data-ratio="2 2">100%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_a44f0ac069e85531_test_standard_name_py.html#t165">tests/test_standard_name.py</a></td>
                 <td class="name left"><a href="z_a44f0ac069e85531_test_standard_name_py.html#t165"><data value='test_units_parser_error'>test_units_parser_error</data></a></td>
                 <td>2</td>
+                <td>0</td>
+                <td>0</td>
                 <td>0</td>
                 <td>0</td>
                 <td class="right" data-ratio="2 2">100%</td>
@@ -774,7 +952,9 @@
                 <td>5</td>
                 <td>0</td>
                 <td>0</td>
-                <td class="right" data-ratio="5 5">100%</td>
+                <td>4</td>
+                <td>0</td>
+                <td class="right" data-ratio="9 9">100%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_a44f0ac069e85531_test_standard_name_py.html#t179">tests/test_standard_name.py</a></td>
@@ -782,7 +962,9 @@
                 <td>4</td>
                 <td>0</td>
                 <td>0</td>
-                <td class="right" data-ratio="4 4">100%</td>
+                <td>2</td>
+                <td>0</td>
+                <td class="right" data-ratio="6 6">100%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_a44f0ac069e85531_test_standard_name_py.html#t190">tests/test_standard_name.py</a></td>
@@ -790,12 +972,16 @@
                 <td>6</td>
                 <td>0</td>
                 <td>0</td>
-                <td class="right" data-ratio="6 6">100%</td>
+                <td>4</td>
+                <td>0</td>
+                <td class="right" data-ratio="10 10">100%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_a44f0ac069e85531_test_standard_name_py.html#t199">tests/test_standard_name.py</a></td>
                 <td class="name left"><a href="z_a44f0ac069e85531_test_standard_name_py.html#t199"><data value='test_json_name'>test_json_name</data></a></td>
                 <td>2</td>
+                <td>0</td>
+                <td>0</td>
                 <td>0</td>
                 <td>0</td>
                 <td class="right" data-ratio="2 2">100%</td>
@@ -806,6 +992,8 @@
                 <td>3</td>
                 <td>0</td>
                 <td>0</td>
+                <td>0</td>
+                <td>0</td>
                 <td class="right" data-ratio="3 3">100%</td>
             </tr>
             <tr class="region">
@@ -814,12 +1002,16 @@
                 <td>3</td>
                 <td>0</td>
                 <td>0</td>
-                <td class="right" data-ratio="3 3">100%</td>
+                <td>2</td>
+                <td>0</td>
+                <td class="right" data-ratio="5 5">100%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_a44f0ac069e85531_test_standard_name_py.html#t220">tests/test_standard_name.py</a></td>
                 <td class="name left"><a href="z_a44f0ac069e85531_test_standard_name_py.html#t220"><data value='standardnames'>standardnames</data></a></td>
                 <td>4</td>
+                <td>0</td>
+                <td>0</td>
                 <td>0</td>
                 <td>0</td>
                 <td class="right" data-ratio="4 4">100%</td>
@@ -830,6 +1022,8 @@
                 <td>1</td>
                 <td>0</td>
                 <td>0</td>
+                <td>0</td>
+                <td>0</td>
                 <td class="right" data-ratio="1 1">100%</td>
             </tr>
             <tr class="region">
@@ -838,12 +1032,16 @@
                 <td>4</td>
                 <td>0</td>
                 <td>0</td>
-                <td class="right" data-ratio="4 4">100%</td>
+                <td>2</td>
+                <td>0</td>
+                <td class="right" data-ratio="6 6">100%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_a44f0ac069e85531_test_standard_name_py.html#t238">tests/test_standard_name.py</a></td>
                 <td class="name left"><a href="z_a44f0ac069e85531_test_standard_name_py.html#t238"><data value='test_file_update'>test_file_update</data></a></td>
                 <td>11</td>
+                <td>0</td>
+                <td>0</td>
                 <td>0</td>
                 <td>0</td>
                 <td class="right" data-ratio="11 11">100%</td>
@@ -854,12 +1052,16 @@
                 <td>5</td>
                 <td>0</td>
                 <td>0</td>
+                <td>0</td>
+                <td>0</td>
                 <td class="right" data-ratio="5 5">100%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_a44f0ac069e85531_test_standard_name_py.html#t269">tests/test_standard_name.py</a></td>
                 <td class="name left"><a href="z_a44f0ac069e85531_test_standard_name_py.html#t269"><data value='test_alias_update_error'>test_alias_update_error</data></a></td>
                 <td>5</td>
+                <td>0</td>
+                <td>0</td>
                 <td>0</td>
                 <td>0</td>
                 <td class="right" data-ratio="5 5">100%</td>
@@ -870,12 +1072,16 @@
                 <td>5</td>
                 <td>0</td>
                 <td>0</td>
+                <td>0</td>
+                <td>0</td>
                 <td class="right" data-ratio="5 5">100%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_a44f0ac069e85531_test_standard_name_py.html#t285">tests/test_standard_name.py</a></td>
                 <td class="name left"><a href="z_a44f0ac069e85531_test_standard_name_py.html#t285"><data value='test_link_update'>test_link_update</data></a></td>
                 <td>7</td>
+                <td>0</td>
+                <td>0</td>
                 <td>0</td>
                 <td>0</td>
                 <td class="right" data-ratio="7 7">100%</td>
@@ -886,12 +1092,16 @@
                 <td>6</td>
                 <td>0</td>
                 <td>0</td>
+                <td>0</td>
+                <td>0</td>
                 <td class="right" data-ratio="6 6">100%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_a44f0ac069e85531_test_standard_name_py.html#t322">tests/test_standard_name.py</a></td>
                 <td class="name left"><a href="z_a44f0ac069e85531_test_standard_name_py.html#t322"><data value='generic_names'>generic_names</data></a></td>
                 <td>7</td>
+                <td>0</td>
+                <td>0</td>
                 <td>0</td>
                 <td>0</td>
                 <td class="right" data-ratio="7 7">100%</td>
@@ -902,12 +1112,16 @@
                 <td>1</td>
                 <td>0</td>
                 <td>0</td>
+                <td>0</td>
+                <td>0</td>
                 <td class="right" data-ratio="1 1">100%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_a44f0ac069e85531_test_standard_name_py.html#t338">tests/test_standard_name.py</a></td>
                 <td class="name left"><a href="z_a44f0ac069e85531_test_standard_name_py.html#t338"><data value='test_is_not_generic_name'>test_is_not_generic_name</data></a></td>
                 <td>1</td>
+                <td>0</td>
+                <td>0</td>
                 <td>0</td>
                 <td>0</td>
                 <td class="right" data-ratio="1 1">100%</td>
@@ -918,12 +1132,16 @@
                 <td>4</td>
                 <td>0</td>
                 <td>0</td>
+                <td>0</td>
+                <td>0</td>
                 <td class="right" data-ratio="4 4">100%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_a44f0ac069e85531_test_standard_name_py.html#t349">tests/test_standard_name.py</a></td>
                 <td class="name left"><a href="z_a44f0ac069e85531_test_standard_name_py.html#t349"><data value='test_json_roundtrip'>test_json_roundtrip</data></a></td>
                 <td>1</td>
+                <td>0</td>
+                <td>0</td>
                 <td>0</td>
                 <td>0</td>
                 <td class="right" data-ratio="1 1">100%</td>
@@ -934,6 +1152,8 @@
                 <td>58</td>
                 <td>0</td>
                 <td>2</td>
+                <td>0</td>
+                <td>0</td>
                 <td class="right" data-ratio="58 58">100%</td>
             </tr>
         </tbody>
@@ -944,7 +1164,9 @@
                 <td>637</td>
                 <td>0</td>
                 <td>10</td>
-                <td class="right" data-ratio="637 637">100%</td>
+                <td>62</td>
+                <td>2</td>
+                <td class="right" data-ratio="697 699">99%</td>
             </tr>
         </tfoot>
     </table>
@@ -956,7 +1178,7 @@
     <div class="content">
         <p>
             <a class="nav" href="https://coverage.readthedocs.io/en/7.8.0">coverage.py v7.8.0</a>,
-            created at 2025-04-03 09:42 +0000
+            created at 2025-04-03 10:15 +0000
         </p>
     </div>
     <aside class="hidden">
