@@ -2,14 +2,14 @@
   {
     "version": "main",
     "title": "main",
-    "aliases": []
+    "aliases": [
+      "latest"
+    ]
   },
   {
     "version": "issue-14",
     "title": "issue-14",
-    "aliases": [
-      "latest"
-    ]
+    "aliases": []
   },
   {
     "version": "issue-13",
