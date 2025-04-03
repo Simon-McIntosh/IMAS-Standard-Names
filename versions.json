@@ -1,9 +1,14 @@
 [
   {
-    "version": "issue-11",
-    "title": "issue-11",
+    "version": "issue-12",
+    "title": "issue-12",
     "aliases": [
       "latest"
     ]
+  },
+  {
+    "version": "issue-11",
+    "title": "issue-11",
+    "aliases": []
   }
 ]
