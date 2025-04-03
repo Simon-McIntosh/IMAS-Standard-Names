@@ -56,6 +56,11 @@ class StandardName(pydantic.BaseModel):
                 pass
             case [str(units)]:
                 unit_format = "~F"
+            case _:
+                raise ValueError(
+                    f"Invalid units format: {units}. "
+                    "Expected 'units' or 'units:format'."
+                )
         if units == "none":
             return units
         if "L" in unit_format:  # LaTeX format
@@ -99,8 +104,8 @@ class StandardName(pydantic.BaseModel):
 class ParseYaml:
     """Ingest IMAS Standard Names with a YAML schema."""
 
-    input_: InitVar[str]
-    data: syaml.representation.YAML = field(init=False, repr=False)
+    input_: InitVar[str | syaml.YAML]
+    data: syaml.YAML = field(init=False, repr=False)
     unit_format: str | None = None
 
     schema: ClassVar = syaml.MapPattern(
@@ -117,9 +122,17 @@ class ParseYaml:
         ),
     )
 
-    def __post_init__(self, input_: str):
+    def __post_init__(self, input_: str | syaml.YAML):
         """Load yaml data."""
-        self.data = syaml.load(input_, self.schema)
+        match input_:
+            case str():
+                self.data = syaml.load(input_, self.schema)
+            case syaml.YAML():
+                self.data = input_
+            case _:
+                raise TypeError(
+                    f"Invalid input type: {type(input_)}. Expected str or YAML."
+                )
 
     def _append_unit_format(self, data: syaml.representation.YAML):
         """Append unit formatter to units string."""
@@ -139,6 +152,31 @@ class ParseYaml:
         for name in self.data:
             yaml_data += self[str(name)].as_yaml()
         return yaml_data
+
+    def __add__(self, other):
+        """Add content of other to self, overiding existing keys."""
+        for key, value in other.data.items():
+            # append issue links to existing list
+            if key in self.data:
+                links = self.data.data[key].get("links", "") + value.get("links", "")
+                value["links"] = np.unique(links).tolist()
+            self.data[key] = value
+        return self
+
+    def __iadd__(self, other):
+        """Add content of other to self, overiding existing keys."""
+        return self.__add__(other)
+
+    def __sub__(self, other):
+        """Remove content of other from self."""
+        for key in other.data:
+            if key in self.data:
+                del self.data[key]
+        return self
+
+    def __isub__(self, other):
+        """Remove content of other from self."""
+        return self.__sub__(other)
 
 
 @dataclass
@@ -192,35 +230,44 @@ class StandardInput(ParseJson):
 class StandardNameFile(ParseYaml):
     """Manage the project's standard name file."""
 
-    input_: InitVar[str | Path]
+    input_: InitVar[str | Path | syaml.YAML]
+    _filename: Path | None = field(init=False, repr=False)
 
-    def __post_init__(self, input_: str | Path):
+    def __post_init__(self, input_: str | Path | syaml.YAML):
         """Load standard name data from yaml file."""
-        self._filename = Path(input_)
-        with open(self.filename, "r") as f:
-            yaml_data = syaml.load(f.read(), self.schema)
-        super().__post_init__(yaml_data.as_yaml())
+        match input_:
+            case str() if self._is_yaml(input_):
+                self._filename = None
+            case str() | Path():
+                self._filename = Path(input_)
+                with open(self.filename, "r") as f:
+                    input_ = f.read()
+            case syaml.YAML():
+                self._filename = None
+            case _:
+                raise TypeError(
+                    f"Invalid input type: {type(input_)}. Expected str, Path, or YAML."
+                )
+        super().__post_init__(input_)
+
+    @staticmethod
+    def _is_yaml(input_: str) -> bool:
+        """Return True if str looks like YAML content."""
+        return any(c in input_ for c in ["\n", ":", "-"]) and not Path(input_).exists()
 
     @property
     def filename(self) -> Path:
         """Return standardnames yaml file path."""
+        if self._filename is None:
+            raise ValueError("Data input from YAML. No filename provided.")
         if self._filename.suffix in [".yml", ".yaml"]:
             return self._filename
         return self._filename.with_suffix(".yaml")
 
-    def __add__(self, other):
-        """Add content of other to self, overiding existing keys."""
-        for key, value in other.data.items():
-            # append issue links to existing list
-            if key in self.data:
-                links = self.data.data[key].get("links", "") + value.get("links", "")
-                value["links"] = np.unique(links).tolist()
-            self.data[key] = value
-        return self
-
-    def __iadd__(self, other):
-        """Add content of other to self, overiding existing keys."""
-        return self.__add__(other)
+    @filename.setter
+    def filename(self, value: str | Path):
+        """Set standard names yaml file path."""
+        self._filename = Path(value)
 
     def update(
         self,

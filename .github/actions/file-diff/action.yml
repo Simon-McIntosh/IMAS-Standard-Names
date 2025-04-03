@@ -1,4 +1,4 @@
-name: "File Diffrence Analysis"
+name: "File difference Analysis"
 description: "Compare files across git references and extract additions to a new file."
 inputs:
   filename:
