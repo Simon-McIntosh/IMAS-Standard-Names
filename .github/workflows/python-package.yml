@@ -18,7 +18,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: "${{ github.workflow }}-${{ github.ref }}"
+  group: "pages"
   cancel-in-progress: true
 
 env:
@@ -28,8 +28,6 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
-    outputs:
-      is_base_python: ${{ matrix.python-version == env.BASE_PYTHON_VERSION }}
     strategy:
       fail-fast: true
       matrix:
@@ -51,11 +49,7 @@ jobs:
         run: |
           if [[ "${{ matrix.python-version }}" == "${{ env.BASE_PYTHON_VERSION }}" ]]; then
             poetry run pytest \
-              --html=docs/reports/pytest/index.html \
-              --self-contained-html \
               --cov \
-              --cov-report=json \
-              --cov-report=html:docs/reports/coverage \
               --cov-branch \
               --cov-report=xml \
               --junitxml=junit.xml -o junit_family=legacy
@@ -79,47 +73,6 @@ jobs:
           git config user.email github-actions[bot]@users.noreply.github.com
           poetry run mike deploy "${{ github.ref_name }}" --push --allow-empty
 
-      # - name: Upload coverage json report for README coverage badge on main branch
-      #   if: matrix.python-version == env.BASE_PYTHON_VERSION  && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: cov-json-${{ github.ref_name }}
-      #     path: coverage.json
-      #     retention-days: 1
-
-      # - name: Upload coverage html report
-      #   if: matrix.python-version == env.BASE_PYTHON_VERSION
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: cov-html-${{ github.ref_name }}
-      #     path: htmlcov/
-      #     retention-days: 1
-
-      # - name: Upload pytest html report
-      #   if: matrix.python-version == env.BASE_PYTHON_VERSION
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: pytest-html-${{ github.ref_name }}
-      #     path: htmltest/
-      #     retention-days: 1
-
-  # coverage-badge:
-  #   needs: test
-  #   if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch) && needs.build.outputs.is_base_python == 'true'
-  #   runs-on: ubuntu-latest
-  #   permissions:
-  #     contents: write
-  #   steps:
-  #     - uses: actions/checkout@v4
-
-  #     - name: Download coverage json report
-  #       uses: actions/download-artifact@v4
-  #       with:
-  #         name: cov-json-${{ github.ref_name }}
-
-  #     - name: Update Coverage Badge
-  #       uses: we-cli/coverage-badge-action@main
-
   deploy:
     environment:
       name: github-pages
@@ -140,43 +93,3 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-
-  # deploy-docs:
-  #   needs:
-  #     - build
-  #   if: needs.build.outputs.is_base_python == 'true'
-  #   runs-on: ubuntu-latest
-  #   permissions:
-  #     pages: write
-  #     id-token: write
-  #   environment:
-  #     name: github-pages
-  #     url: ${{ steps.deploy-docs.outputs.page_url }}
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #       with:
-  #         ref: main
-
-  #     - uses: ./.github/actions/install-project
-  #       with:
-  #         python-version: ${{ env.BASE_PYTHON_VERSION }}
-
-  #     - name: Build docs
-  #       run: poetry run mkdocs build -d ./site
-
-  #     - name: Deploy to GitHub Pages
-  #       id: deployment
-  #       uses: actions/deploy-pages@v4
-
-  #     # - id: deploy-docs
-  #     #   uses: ./.github/actions/deploy-docs
-  #     #   with:
-  #     #     artifacts: >
-  #     #       {
-  #     #         "cov-html-${{ github.ref_name }}": "coverage",
-  #     #         "pytest-html-${{ github.ref_name }}": "pytest"
-  #     #       }
-  #     #     token: ${{ secrets.GITHUB_TOKEN }}
-  #     #     version: ${{ github.ref_name }}
-  #     #     alias: ${{ github.ref_name == 'main' && 'latest' || '' }}
-  #     #     update-aliases: "true"

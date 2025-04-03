@@ -1,10 +1,9 @@
-[![image](https://img.shields.io/badge/python-3.11%20%7C%203.12%20%7C%203.13-blue)](https://github.com/Simon-McIntosh/IMAS-Standard-Names.git)
-[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/charliermarsh/ruff/main/assets/badge/v2.json)](https://github.com/charliermarsh/ruff)
-[![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)
-[![pytest](https://github.com/Simon-McIntosh/IMAS-Standard-Names/actions/workflows/python-package.yml/badge.svg)](https://Simon-McIntosh.github.io/IMAS-Standard-Names/main/reports/pytest)
-[![coverage](https://github.com/Simon-McIntosh/IMAS-Standard-Names/blob/gh-pages/badges/coverage.svg)](https://Simon-McIntosh.github.io/IMAS-Standard-Names/main/reports/coverage)
-[![Coverage status][codecov-image]][codecov-link]
-[![docs](https://img.shields.io/badge/docs-online-brightgreen)](https://Simon-McIntosh.github.io/IMAS-Standard-Names/)
+[![Python versions][python-badge]][python-link]
+[![Ruff][ruff-badge]][ruff-link]
+[![pre-commit][pre-commit-badge]][pre-commit-link]
+[![Test status][ci-badge]][ci-link]
+[![Coverage status][codecov-badge]][codecov-link]
+[![Documentation][docs-badge]][docs-link]
 
 # IMAS Standard Names
 
@@ -67,5 +66,15 @@ When the CI/CD pipeline runs, it automatically deploys documentation for:
 
 Each branch will be available as a separate version in the version selector dropdown on the documentation site.
 
-[codecov-image]: https://codecov.io/gh/Simon-McIntosh/IMAS-Standard-Names/graph/badge.svg
+[python-badge]: https://img.shields.io/badge/python-3.11%20%7C%203.12%20%7C%203.13-blue
+[python-link]: https://github.com/Simon-McIntosh/IMAS-Standard-Names.git
+[ruff-badge]: https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/charliermarsh/ruff/main/assets/badge/v2.json
+[ruff-link]: https://github.com/charliermarsh/ruff
+[pre-commit-badge]: https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white
+[pre-commit-link]: https://github.com/pre-commit/pre-commit
+[ci-badge]: https://github.com/Simon-McIntosh/IMAS-Standard-Names/actions/workflows/python-package.yml/badge.svg
+[ci-link]: https://Simon-McIntosh.github.io/IMAS-Standard-Names/main/reports/pytest
+[codecov-badge]: https://codecov.io/gh/Simon-McIntosh/IMAS-Standard-Names/graph/badge.svg
 [codecov-link]: https://codecov.io/gh/Simon-McIntosh/IMAS-Standard-Names
+[docs-badge]: https://img.shields.io/badge/docs-online-brightgreen
+[docs-link]: https://Simon-McIntosh.github.io/IMAS-Standard-Names/

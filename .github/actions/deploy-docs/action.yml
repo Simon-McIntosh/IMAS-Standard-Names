@@ -1,137 +1,68 @@
 name: Deploy Documentation to GitHub Pages
-description: Deploy documentation to GitHub Pages using Mike for versioned documentation
+description: Deploy documentation to GitHub Pages without removing existing content
 
 inputs:
   artifacts:
-    description: 'JSON mapping of artifact names to paths, e.g. {"artifact1": "docs/section1"}'
+    description: "YAML mapping of artifact names to paths, e.g. artifact1: docs/section1"
     required: true
-  token:
-    description: "GitHub token with repository access"
+  artifact-name:
+    description: "Name of the artifact to upload"
     required: false
-    default: ${{ github.token }}
-  committer-name:
-    description: "Name to use for the commit"
-    required: false
-    default: "github-actions[bot]"
-  committer-email:
-    description: "Email to use for the commit"
-    required: false
-    default: "github-actions[bot]@users.noreply.github.com"
-  commit-message:
-    description: "Commit message for the gh-pages commit"
-    required: false
-    default: "Update documentation"
-  version:
-    description: "Version to deploy (e.g., '1.0', 'latest')"
-    required: true
-  alias:
-    description: "Alias for the version (e.g., 'stable', 'latest')"
-    required: false
-    default: ""
-  update-aliases:
-    description: "Whether to update aliases when deploying a new version"
-    required: false
-    default: "true"
+    default: "gh-pages"
 
 outputs:
   page_url:
     description: "URL of the deployed GitHub Pages site"
-    value: ${{ steps.set-url.outputs.page_url }}
+    value: ${{ steps.deployment.outputs.page_url }}
 
 runs:
   using: "composite"
   steps:
-    - name: Prepare site directory
-      shell: bash
-      run: mkdir -p site
+    - uses: actions/checkout@v4
+      with:
+        ref: gh-pages
+        path: site
+        sparse-checkout: .
+        sparse-checkout-cone-mode: false
+      continue-on-error: true
 
-    - name: Download artifacts and prepare content
+    - name: Create directory structure
+      shell: bash
+      run: |
+        mkdir -p site
+
+        # Handle name-path pairs from YAML mapping
+        if [[ -n "${{ inputs.artifacts }}" ]]; then
+          # Convert YAML to JSON for processing
+          artifacts_json=$(echo '${{ toJSON(inputs.artifacts) }}')
+          echo "$artifacts_json" | jq -r 'keys[]' | while read name; do
+            path=$(echo "$artifacts_json" | jq -r --arg name "$name" '.[$name]')
+            mkdir -p site/$path
+          done
+        fi
+
+    - name: Download artifacts
       if: inputs.artifacts != ''
       shell: bash
       run: |
-        # Process artifacts JSON input
-        echo '${{ inputs.artifacts }}' | jq -r 'to_entries[] | "\(.key):\(.value)"' | while IFS=: read -r name path; do
-          echo "📦 Processing artifact '$name' to path '$path'"
-          mkdir -p "site/$path"
-          gh run download --name "$name" --dir "site/$path" || echo "⚠️ Could not find artifact '$name', skipping"
+        # Convert YAML to JSON for processing
+        artifacts_json=$(echo '${{ toJSON(inputs.artifacts) }}')
+        echo "$artifacts_json" | jq -r 'keys[]' | while read name; do
+          path=$(echo "$artifacts_json" | jq -r --arg name "$name" '.[$name]')
+          echo "Downloading artifact '$name' to path 'site/$path'"
+          gh artifact download "$name" --dir "site/$path"
         done
       env:
-        GITHUB_TOKEN: ${{ inputs.token }}
+        GITHUB_TOKEN: ${{ github.token }}
 
-    - name: Clean gh-pages branch
-      shell: bash
-      run: |
-        echo "🧹 Cleaning gh-pages branch before deployment"
+    - name: Upload Pages artifact
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: site
+        name: ${{ inputs.artifact-name }}
 
-        # Set up git configuration
-        git config --global user.name "${{ inputs.committer-name }}"
-        git config --global user.email "${{ inputs.committer-email }}"
-
-        # Initialize git in the site directory
-        cd site
-        git init
-        git remote add origin https://${{ inputs.token }}@github.com/${GITHUB_REPOSITORY}.git
-
-        # Check if gh-pages branch exists
-        if git ls-remote --heads origin gh-pages | grep gh-pages; then
-          echo "📄 gh-pages branch exists remotely"
-          # Instead of deleting, we'll create a new branch locally and force push it later
-        else
-          echo "📄 gh-pages branch does not exist remotely, will create it"
-        fi
-
-        # Create a new orphan branch for gh-pages
-        git checkout --orphan gh-pages
-        git reset --hard
-        git clean -fdx
-
-        # Create an empty .nojekyll file to disable Jekyll
-        touch .nojekyll
-        git add .nojekyll
-        git commit -m "Initialize gh-pages branch"
-
-        cd ..
-
-    - name: Deploy with Mike
-      shell: bash
-      run: |
-        # Extract repository information
-        REPO_OWNER=$(echo "$GITHUB_REPOSITORY" | cut -d '/' -f1)
-        REPO_NAME=$(echo "$GITHUB_REPOSITORY" | cut -d '/' -f2)
-
-        # Set up git configuration
-        git config --global user.name "${{ inputs.committer-name }}"
-        git config --global user.email "${{ inputs.committer-email }}"
-
-        echo "📚 Setting up Mike for deployment"
-
-        # Configure git to use force pushes by default for this repository
-        # This will effectively force push without needing the --force flag in mike
-        git config --global push.default simple
-
-        cd site
-        git remote set-url origin https://${{ inputs.token }}@github.com/${GITHUB_REPOSITORY}.git
-        cd ..
-
-        # Deploy with mike without force flag
-        if [ -n "${{ inputs.alias }}" ] && [ "${{ inputs.update-aliases }}" = "true" ]; then
-          echo "📚 Deploying version ${{ inputs.version }} with alias ${{ inputs.alias }}"
-          mike deploy ${{ inputs.version }} ${{ inputs.alias }} --update-aliases --push
-        elif [ -n "${{ inputs.alias }}" ]; then
-          echo "📚 Deploying version ${{ inputs.version }} with alias ${{ inputs.alias }} (not updating aliases)"
-          mike deploy ${{ inputs.version }} ${{ inputs.alias }} --push
-        else
-          echo "📚 Deploying version ${{ inputs.version }}"
-          mike deploy ${{ inputs.version }} --push
-        fi
-
-        echo "✅ Documentation deployed successfully with Mike"
-
-    - name: Set page URL output
-      id: set-url
-      shell: bash
-      run: |
-        REPO_OWNER=$(echo "$GITHUB_REPOSITORY" | cut -d '/' -f1)
-        REPO_NAME=$(echo "$GITHUB_REPOSITORY" | cut -d '/' -f2)
-        echo "page_url=https://${REPO_OWNER}.github.io/${REPO_NAME}" >> $GITHUB_OUTPUT
-        echo "📘 Documentation published at: https://${REPO_OWNER}.github.io/${REPO_NAME}"
+    - name: Deploy documentation to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v4
+      with:
+        artifact_name: ${{ inputs.artifact-name }}
