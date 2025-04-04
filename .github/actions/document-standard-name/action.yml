@@ -40,12 +40,7 @@ runs:
         STANDARD_NAMES_FILE: ${{ inputs.standard-names-additions }}
       shell: bash
       run: |
-        pip install .[docs]
-        mkdocs build --site-dir site/${{ inputs.doc-ref }}
-
-    - name: Upload Pages artifact
-      uses: actions/upload-pages-artifact@v3
-      with:
-        name: ${{ inputs.doc-ref }}
-        path: site/${{ inputs.doc-ref }}
-        retention-days: 1
+        git fetch origin gh-pages --depth=1
+        git config user.name github-actions[bot]
+        git config user.email github-actions[bot]@users.noreply.github.com
+        poetry run mike deploy "${{ inputs.doc-ref }}" --deploy-prefix issues --push --allow-empty

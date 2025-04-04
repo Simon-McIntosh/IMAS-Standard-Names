@@ -91,7 +91,7 @@ When the CI/CD pipeline runs, it automatically deploys documentation for:
 Each branch will be available as a separate version in the version selector dropdown on the documentation site.
 
 [python-badge]: https://img.shields.io/badge/python-3.11%20%7C%203.12%20%7C%203.13-blue
-[python-link]: https://github.com/Simon-McIntosh/IMAS-Standard-Names.git
+[python-link]: https://www.python.org/downloads/
 [ruff-badge]: https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/charliermarsh/ruff/main/assets/badge/v2.json
 [ruff-link]: https://docs.astral.sh/ruff/
 [pre-commit-badge]: https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white

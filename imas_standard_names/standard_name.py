@@ -95,6 +95,66 @@ class StandardName(pydantic.BaseModel):
             self.as_document().as_marked_up()[self.name] | {"name": self.name}
         )
 
+    def as_html(self) -> str:
+        """Return standard name as HTML string.
+
+        Creates an HTML representation of the standard name with all its
+        attributes formatted for documentation or display purposes.
+        """
+        html = f"<div class='standard-name' id='{self.name}'>\n"
+        html += f"  <h2>{self.name}</h2>\n"
+
+        # Documentation
+        html += "  <div class='documentation'>\n"
+        html += f"    <p>{self.documentation}</p>\n"
+        html += "  </div>\n"
+
+        # Create details table for other attributes
+        html += "  <table class='details'>\n"
+
+        # Units (if not 'none')
+        if self.units != "none":
+            html += "    <tr>\n"
+            html += "      <th>Units</th>\n"
+            html += f"      <td>{self.units}</td>\n"
+            html += "    </tr>\n"
+
+        # Alias (if present)
+        if self.alias:
+            html += "    <tr>\n"
+            html += "      <th>Alias</th>\n"
+            html += f"      <td><a href='#{self.alias}'>{self.alias}</a></td>\n"
+            html += "    </tr>\n"
+
+        # Tags (if present)
+        if isinstance(self.tags, list) and self.tags:
+            tags_html = ", ".join(
+                [f"<span class='tag'>{tag}</span>" for tag in self.tags]
+            )
+            html += "    <tr>\n"
+            html += "      <th>Tags</th>\n"
+            html += f"      <td>{tags_html}</td>\n"
+            html += "    </tr>\n"
+
+        # Links (if present)
+        if isinstance(self.links, list) and self.links:
+            links_html = "<ul>\n"
+            for link in self.links:
+                if link.startswith(("http://", "https://")):
+                    links_html += f"        <li><a href='{link}'>{link}</a></li>\n"
+                else:
+                    links_html += f"        <li>{link}</li>\n"
+            links_html += "      </ul>"
+            html += "    <tr>\n"
+            html += "      <th>Links</th>\n"
+            html += f"      <td>{links_html}</td>\n"
+            html += "    </tr>\n"
+
+        html += "  </table>\n"
+        html += "</div>\n"
+
+        return html
+
     def items(self):
         """Return key-value pairs with keys defined by self.attrs."""
         return {attr: getattr(self, attr) for attr in self.attrs}.items()

@@ -12,8 +12,19 @@ env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   ISSUE_URL: ${{ github.event.issue.html_url }}
 
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+  issues: write
+  pull-requests: write
+
+concurrency:
+  group: "issue-${{ github.event.issue.number }}"
+  cancel-in-progress: true
+
 jobs:
-  imas-standard_name:
+  check:
     if: contains(github.event.issue.labels.*.name, 'standard-name')
     runs-on: ubuntu-latest
     outputs:
@@ -78,28 +89,24 @@ jobs:
           base-branch: ${{ env.BASE_BRANCH }}
           topic-branch: ${{ env.TOPIC_BRANCH }}
 
-  deploy-docs:
-    needs:
-      - imas-standard_name
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/submit'
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    outputs:
-      doc-url: ${{ steps.deploy-docs.outputs.page_url }}
+  deploy:
     environment:
       name: github-pages
-      url: ${{ steps.deploy-docs.outputs.page_url }}${{ needs.imas-standard_name.outputs.doc-ref }}
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs:
+      - check
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: main
+          ref: gh-pages
 
-      - id: deploy-docs
-        uses: ./.github/actions/deploy-docs
+      - uses: actions/upload-pages-artifact@v3
         with:
-          artifacts: >
-            {
-              "docs-imas-standard-name": "${{ needs.imas-standard_name.outputs.doc-ref }}"
-            }
-          token: ${{ secrets.GITHUB_TOKEN }}
+          path: .
+          retention-days: 1
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+

@@ -72,7 +72,7 @@ def update_standardnames(
         click.echo(
             ":sparkles: This proposal is ready for submission to "
             "the Standard Names repository.\n"
-            f"\n{standardnames[standard_name.name].as_yaml()}\n"
+            f"\n{standardnames[standard_name.name].as_html()}\n"
             "> [!NOTE]\n"
             "> Label this issue with `approve` to commit."
         )

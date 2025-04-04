@@ -37,7 +37,6 @@ runs:
         echo standard_name=$standard_name | tee -a "$GITHUB_ENV" "$GITHUB_OUTPUT"
         echo '${{ steps.issue-parser.outputs.jsonString }}' > submission.json
         echo overwrite=${{ contains(steps.issue-parser.outputs.issueparser_options, 'overwrite') }} >> "$GITHUB_OUTPUT"
-
     - name: Edit issue title
       id: issue-info
       shell: bash
