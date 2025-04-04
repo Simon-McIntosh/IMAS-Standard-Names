@@ -2,7 +2,7 @@
 
 ## Characters
 
-Standard names consist of lower-letters, digits and underscores, and begin with
+Standard names consist of lower-case letters, digits and underscores, and begin with
 a letter. Do not use upper case.
 
 ## Spelling
@@ -16,7 +16,6 @@ forms and order. These qualifications do not change the units of the quantity.
 
 [[component](#component)] standard_name [at [position](#position)] [due to
 [process](#process)]
-
 
 ### Component
 
