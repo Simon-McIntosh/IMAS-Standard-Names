@@ -50,7 +50,7 @@ class StandardName(pydantic.BaseModel):
     @pydantic.field_validator("units", mode="after")
     @classmethod
     def parse_units(cls, units: str) -> str:
-        """Return units validated and formatted with pint"""
+        """Return units validated and formatted with pint."""
         match units.split(":"):
             case [str(units), str(unit_format)]:
                 pass
@@ -154,7 +154,7 @@ class ParseYaml:
         return yaml_data
 
     def __add__(self, other):
-        """Add content of other to self, overiding existing keys."""
+        """Add content of other to self, overriding existing keys."""
         for key, value in other.data.items():
             # append issue links to existing list
             if key in self.data:
@@ -164,7 +164,7 @@ class ParseYaml:
         return self
 
     def __iadd__(self, other):
-        """Add content of other to self, overiding existing keys."""
+        """Add content of other to self, overriding existing keys."""
         return self.__add__(other)
 
     def __sub__(self, other):
@@ -319,7 +319,7 @@ class GenericNames:
         return self.data["Generic Name"].tolist()
 
     def __contains__(self, name: str) -> bool:
-        """Check if name is included the the generic standard name list."""
+        """Check if name is included in the generic standard name list."""
         return name in self.names
 
     def check(self, standard_name: str) -> None:

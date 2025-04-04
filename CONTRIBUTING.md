@@ -12,17 +12,17 @@ IMAS Standard Names is a project that maintains standardized naming conventions 
 
 If you find a problem or have a suggestion:
 
-1. Check if the issue already exists in the [Issues](https://github.com/iterorganization/imas-standard-names/issues) section
-2. If not, create a new issue with a clear title and detailed description
-3. Include relevant examples or error messages
+1. Check if the issue already exists in the [Issues](https://github.com/iterorganization/imas-standard-names/issues) section.
+2. If not, create a new issue with a clear title and detailed description.
+3. Include relevant examples or error messages.
 
 ### Submitting Changes
 
-1. Fork the repository
-2. Create a new branch with a descriptive name
-3. Make your changes
-4. Ensure tests pass with 100% coverage for modified code and update the documentation accordingly
-5. Submit a pull request with a clear description of the changes
+1. Fork the repository.
+2. Create a new branch with a descriptive name.
+3. Make your changes.
+4. Ensure tests pass with 100% coverage for modified code and update the documentation accordingly.
+5. Submit a pull request with a clear description of the changes.
 
 ### Development Setup
 
@@ -56,10 +56,10 @@ If you find a problem or have a suggestion:
    pytest --cov
    ```
 
-5. Create PR
+5. Create a PR:
 
-   - make edits
-   - confirm tests are passing with 100% coverage for updates
+   - Make edits.
+   - Confirm tests are passing with 100% coverage for updates.
 
    ```bash
    # Update static links to match the upstream remote
@@ -68,23 +68,23 @@ If you find a problem or have a suggestion:
 
 ## Coding Standards
 
-- Follow PEP 8 style guide for Python code
-- Include docstrings for all functions, classes, and modules
-- Write tests for new functionality
-- Keep commits focused and related to a single issue when possible
+- Follow PEP 8 style guide for Python code.
+- Include docstrings for all functions, classes, and modules.
+- Write tests for new functionality.
+- Keep commits focused and related to a single issue when possible.
 
 ## Review Process
 
-1. All pull requests require review by at least one maintainer
-2. Automated tests must pass
-3. Update the documentation alongside code changes
-4. Reviewers may request changes before merging
+1. All pull requests require review by at least one maintainer.
+2. Automated tests must pass.
+3. Update the documentation alongside code changes.
+4. Reviewers may request changes before merging.
 
 ## Adding or Modifying Standard Names
 
-1. Propose standard name using the IMAS Standard Name issue template
-2. Ensure the proposed name follows the established naming conventions
-3. Provide a units and clear documentation
+1. Propose a standard name using the IMAS Standard Name issue template.
+2. Ensure the proposed name follows the established naming conventions.
+3. Provide units and clear documentation.
 
 ## License
 
