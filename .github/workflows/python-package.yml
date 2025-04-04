@@ -18,7 +18,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: "pages"
+  group: "python-package-${{ github.ref }}"
   cancel-in-progress: true
 
 env:

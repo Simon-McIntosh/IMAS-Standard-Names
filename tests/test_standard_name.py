@@ -439,5 +439,64 @@ def test_filename_unset_error(standardnames):
         standard_names_from_yaml.filename
 
 
+@pytest.mark.parametrize(
+    "data",
+    [
+        {
+            "name": "ion_temperature",
+            "documentation": "multi-line\ndoc string",
+            "units": "A",
+            "alias": "",
+            "tags": "",
+            "links": "",
+        },
+        {
+            "name": "coordinate_label",
+            "documentation": "docs",
+            "units": "none",
+            "alias": "another_coorninate_label",
+            "tags": "equilibrium, geometry",
+            "links": "link1,https://link2.com",
+        },
+        {
+            "name": "non_dimensional_parameter",
+            "documentation": "docs",
+            "units": ":F",
+            "alias": "same_parameter_with_a_different_name",
+            "tags": ["equilibrium", "non-dimensional"],
+            "links": ["link1", "https://link2.com"],
+        },
+    ],
+)
+def test_standard_name_as_html(data):
+    standard_name = StandardName(**data)
+    html_output = standard_name.as_html()
+
+    assert "<div" in html_output
+    assert "</div>" in html_output
+    assert standard_name.name in html_output
+
+    for key, value in standard_name.items():
+        if value and value != "none":
+            if key == "documentation":
+                assert key in html_output
+            else:
+                assert key.capitalize() in html_output
+            if isinstance(value, str):
+                assert value in html_output
+            else:
+                assert all(item in html_output for item in value)
+            if key == "links":
+                assert isinstance(value, list)
+                assert all(
+                    "href" in html_output
+                    for link in value
+                    if link.startswith(("http://", "https://"))
+                )
+
+        else:
+            assert key.capitalize() not in html_output
+
+
 if __name__ == "__main__":  # pragma: no cover
     pytest.main([__file__])

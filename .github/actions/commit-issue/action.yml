@@ -14,18 +14,35 @@ inputs:
   issue-number:
     description: "GitHub issue number."
     required: true
+  pat-token:
+    description: "GitHub Personal Access Token for authentication"
+    required: true
 
 runs:
   using: "composite"
   steps:
-    - name: commit standardnames.yml to topic branch
+
+    - name: fetch topic branch
       shell: bash
       run: |
-        git fetch origin ${{ inputs.topic-branch }}:${{ inputs.topic-branch }}
+        git fetch origin ${{ inputs.topic-branch }}
         git switch ${{ inputs.topic-branch }}
+
+    - name: download commit files from artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: issue-files-${{ inputs.issue-number }}
+        path: ./
+
+    - name: commit files to topic branch
+      shell: bash
+      run: |
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
         git add standardnames.yml
+        git add docs/img
         git commit -m "${{ inputs.standard-name }} Closes #${{ inputs.issue-number }} :rocket:"
         git push --set-upstream origin ${{ inputs.topic-branch }}
-        git switch main
+        git switch main      
+      env:
+        GITHUB_TOKEN: ${{ inputs.pat-token }}
