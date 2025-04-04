@@ -8,6 +8,9 @@ inputs:
   topic-branch:
     description: "Pull request topic branch."
     value: "gh-develop"
+  pat-token:
+    description: "GitHub Personal Access Token for authentication"
+    required: true
 
 runs:
   using: "composite"
@@ -28,4 +31,6 @@ runs:
             --title 'Review Standard Names proposals pushed to the ${{ inputs.topic-branch }} branch' \
             --body 'Merge Standard Names submissions input with the IMAS Standard Name Issue template and committed into the **${{ inputs.topic-branch }}** branch.' \
             --draft
-        fi
+        fi      
+      env:
+        GITHUB_TOKEN: ${{ inputs.pat-token }}

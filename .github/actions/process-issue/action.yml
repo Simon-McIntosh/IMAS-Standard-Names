@@ -17,7 +17,7 @@ outputs:
     description: "A boolean flag indicating if the proposal is a duplicate."
     value: ${{ steps.flags.outputs.duplicate-name }}
   update-message:
-    description: "Update Standard Names update message."
+    description: "Standard Names update message."
     value: ${{ steps.imas-standard-name.outputs.update-message }}
   update-error:
     description: "A boolean flag indicating if the Standard Name update failed."
@@ -54,18 +54,18 @@ runs:
       run: |
         {
         echo 'has_name<<EOF'
-        has_standardname standardnames.yml ${{ inputs.standard-name }} 
+        poetry run has_standardname standardnames.yml ${{ inputs.standard-name }} 
         echo EOF
         } >> "$GITHUB_OUTPUT"
         {
         echo 'update-message<<EOF'
-        update_standardnames standardnames.yml docs/generic_names.csv submission.json --issue-link ${{ github.event.issue.html_url }} ${{ env.overwrite }}
+        poetry run update_standardnames standardnames.yml docs/generic_names.csv submission.json --issue-link ${{ github.event.issue.html_url }} ${{ env.overwrite }}
         echo EOF
         } >> "$GITHUB_OUTPUT"
         rm submission.json
 
-    - name: Comment on issue
-      if: ${{ ! contains(github.event.issue.labels.*.name, 'approve') || contains(steps.imas-standard-name.outputs.update-message, 'Error') }}
+    - name: Comment on issue errors
+      if: ${{ contains(steps.imas-standard-name.outputs.update-message, 'Error') }}
       shell: bash
       env:
         update_message: ${{ steps.imas-standard-name.outputs.update-message }}

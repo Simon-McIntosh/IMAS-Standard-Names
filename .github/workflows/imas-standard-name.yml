@@ -12,13 +12,27 @@ env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   ISSUE_URL: ${{ github.event.issue.html_url }}
 
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+  issues: write
+  pull-requests: write
+
+concurrency:
+  group: "issue-${{ github.event.issue.number }}"
+  cancel-in-progress: true
+
 jobs:
-  imas-standard_name:
+  check:
     if: contains(github.event.issue.labels.*.name, 'standard-name')
     runs-on: ubuntu-latest
     outputs:
-      doc-ref: ${{ steps.document-issue.outputs.doc-ref }}
       valid-commit: ${{ steps.process-issue.outputs.valid-commit }}
+      approved-valid-commit: ${{ steps.process-issue.outputs.approved-valid-commit }}
+      standard-name: ${{ steps.parse-issue.outputs.standard-name }}
+      issue-number: ${{ steps.parse-issue.outputs.issue-number }}
+      update-message: ${{ steps.process-issue.outputs.update-message }}
 
     steps:
       - name: Comment on issue
@@ -60,46 +74,94 @@ jobs:
         uses: ./.github/actions/document-standard-name
         with:
           doc-ref: issue-${{ steps.parse-issue.outputs.issue-number }}
-          base-ref: ${{ env.BASE_BRANCH }}
+          standard-names-file: submission.yml
+          single-page: true
 
-      - id: commit-issue
+      - id: upload-commit-artifact
         if: steps.process-issue.outputs.approved-valid-commit == 'true'
-        uses: ./.github/actions/commit-issue
+        uses: actions/upload-artifact@v4
         with:
-          standard-name: ${{ steps.parse-issue.outputs.standard-name }}
-          base-branch: ${{ env.BASE_BRANCH }}
-          topic-branch: ${{ env.TOPIC_BRANCH }}
-          issue-number: ${{ steps.parse-issue.outputs.issue-number}}
+          name: issue-files-${{ steps.parse-issue.outputs.issue-number }}
+          path: |
+            standardnames.yml
+            docs/img/${{ steps.parse-issue.outputs.standard-name }}-[0-9]+\..*
+          retention-days: 1
 
-      - id: raise-pull-request
-        if: steps.process-issue.outputs.approved-valid-commit == 'true'
-        uses: ./.github/actions/raise-pull-request
-        with:
-          base-branch: ${{ env.BASE_BRANCH }}
-          topic-branch: ${{ env.TOPIC_BRANCH }}
-
-  deploy-docs:
+  deploy:
     needs:
-      - imas-standard_name
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/submit'
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    outputs:
-      doc-url: ${{ steps.deploy-docs.outputs.page_url }}
+      - check
+    if: needs.check.outputs.valid-commit == 'true'
     environment:
       name: github-pages
-      url: ${{ steps.deploy-docs.outputs.page_url }}${{ needs.imas-standard_name.outputs.doc-ref }}
+      url: ${{ steps.deployment.outputs.page_url }}/issues/issue-${{ needs.check.outputs.issue-number }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+          retention-days: 1
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: Comment on issue deployment
+        if: ${{ ! contains(github.event.issue.labels.*.name, 'approve') }}
+        shell: bash
+        env:
+          update_message: >
+
+            ${{ needs.check.outputs.update-message }}
+
+            Your Standard Name proposal has been published at [this link](
+            ${{ steps.deployment.outputs.page_url }}/issues/issue-${{ needs.check.outputs.issue-number }}).
+            Please verify that the information presented correctly reflects your intention.
+            To make changes, click "Edit" from the three dots menu (⋯) in the top 
+            right corner of this issue. Changes will automatically trigger an 
+            update.
+
+
+            > [!NOTE]\n
+            > Assignees: Apply the "approve" label to approve this request.
+            Application of the "approve" label will automatically commit changes to
+            the submit branch and create or update the associated Pull Request.
+        run: echo -e "$update_message" | gh issue comment $ISSUE_URL --body-file -
+
+  commit:
+    if: needs.check.outputs.approved-valid-commit == 'true'
+    needs:
+      - check
+      - deploy
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           ref: main
 
-      - id: deploy-docs
-        uses: ./.github/actions/deploy-docs
+      - name: Check for PAT_TOKEN
+        shell: bash
+        run: |
+          if [[ -z "${{ secrets.PAT_TOKEN }}" ]]; then
+            echo "::error::PAT_TOKEN secret is not defined. Please add a personal access token with repo and workflow scopes to your repository secrets."
+            exit 1
+          fi
+
+      - id: commit-issue
+        uses: ./.github/actions/commit-issue
         with:
-          artifacts: >
-            {
-              "docs-imas-standard-name": "${{ needs.imas-standard_name.outputs.doc-ref }}"
-            }
-          token: ${{ secrets.GITHUB_TOKEN }}
+          standard-name: ${{ needs.check.outputs.standard-name }}
+          base-branch: ${{ env.BASE_BRANCH }}
+          topic-branch: ${{ env.TOPIC_BRANCH }}
+          issue-number: ${{ needs.check.outputs.issue-number }}
+          pat-token: ${{ secrets.PAT_TOKEN }}
+
+      - id: raise-pull-request
+        uses: ./.github/actions/raise-pull-request
+        with:
+          base-branch: ${{ env.BASE_BRANCH }}
+          topic-branch: ${{ env.TOPIC_BRANCH }}
+          pat-token: ${{ secrets.PAT_TOKEN }}

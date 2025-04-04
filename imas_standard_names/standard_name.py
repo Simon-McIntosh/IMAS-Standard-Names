@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 from typing import ClassVar
 
+import markdown
 import numpy as np
 import pandas
 import pydantic
@@ -75,6 +76,14 @@ class StandardName(pydantic.BaseModel):
             return value
         return [item.strip() for item in value.split(",")]
 
+    def as_dict(self) -> dict:
+        """Return a dictionary representation of the StandardName instance."""
+        return {"name": self.name} | dict(self.items())
+
+    def items(self) -> dict[str, str | list[str]]:
+        """Return a dictionary of attrs and their values."""
+        return {attr: getattr(self, attr) for attr in self.attrs}.items()
+
     def as_document(self) -> syaml.representation.YAML:
         """Return standard name as a YAML document."""
         data = {
@@ -95,9 +104,65 @@ class StandardName(pydantic.BaseModel):
             self.as_document().as_marked_up()[self.name] | {"name": self.name}
         )
 
-    def items(self):
-        """Return key-value pairs with keys defined by self.attrs."""
-        return {attr: getattr(self, attr) for attr in self.attrs}.items()
+    def as_html(self) -> str:
+        """Return standard name as HTML string.
+
+        Creates an HTML representation of the standard name with all its
+        attributes formatted for documentation or display purposes.
+        """
+        html = f"<div class='standard-name' id='{self.name}'>\n"
+        html += f"  <h2>{self.name}</h2>\n"
+
+        # Documentation
+        html += "  <div class='documentation'>\n"
+        html += f"    {markdown.markdown(self.documentation)}\n"
+        html += "  </div>\n"
+
+        # Create details table for other attributes
+        html += "  <table class='details'>\n"
+
+        # Units (if not 'none')
+        if self.units != "none":
+            html += "    <tr>\n"
+            html += "      <th>Units</th>\n"
+            html += f"      <td>{self.units}</td>\n"
+            html += "    </tr>\n"
+
+        # Alias (if present)
+        if self.alias:
+            html += "    <tr>\n"
+            html += "      <th>Alias</th>\n"
+            html += f"      <td><a href='#{self.alias}'>{self.alias}</a></td>\n"
+            html += "    </tr>\n"
+
+        # Tags (if present)
+        if isinstance(self.tags, list) and self.tags:
+            tags_html = ", ".join(
+                [f"<span class='tag'>{tag}</span>" for tag in self.tags]
+            )
+            html += "    <tr>\n"
+            html += "      <th>Tags</th>\n"
+            html += f"      <td>{tags_html}</td>\n"
+            html += "    </tr>\n"
+
+        # Links (if present)
+        if isinstance(self.links, list) and self.links:
+            links_html = "<ul>\n"
+            for link in self.links:
+                if link.startswith(("http://", "https://")):
+                    links_html += f"        <li><a href='{link}'>{link}</a></li>\n"
+                else:
+                    links_html += f"        <li>{link}</li>\n"
+            links_html += "      </ul>"
+            html += "    <tr>\n"
+            html += "      <th>Links</th>\n"
+            html += f"      <td>{links_html}</td>\n"
+            html += "    </tr>\n"
+
+        html += "  </table>\n"
+        html += "</div>\n"
+
+        return html
 
 
 @dataclass
@@ -284,8 +349,9 @@ class StandardNameFile(ParseYaml):
                     f"The proposed standard name **{standard_name.name}** "
                     f"is already present in the {self.filename} file "
                     "with the following content:"
-                    f"\n\n{self[standard_name.name].as_yaml()}\n\n"
-                    "Mark the :white_check_mark: **overwrite** checkbox to overwrite this standard name."
+                    f"\n\n{self[standard_name.name].as_html()}\n\n"
+                    "Mark the :white_check_mark: **overwrite** checkbox "
+                    "to overwrite this standard name."
                 )
         if standard_name.alias:
             try:
@@ -297,6 +363,8 @@ class StandardNameFile(ParseYaml):
                 )
         self += standard_name.as_document()
         if update_file:
+            with open(self.filename.with_name("submission.yml"), "w") as f:
+                f.write(standard_name.as_yaml())
             with open(self.filename, "w") as f:
                 f.write(self.data.as_yaml())
 

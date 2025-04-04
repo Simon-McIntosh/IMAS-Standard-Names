@@ -29,14 +29,16 @@ runs:
       with:
         template-path: ${{ inputs.template_path }}
 
-    - name: Extract submission data
+    - name: Process standard name data and generate submission.json
       id: issue-data
       shell: bash
       run: |
-        standard_name=${{ steps.issue-parser.outputs.issueparser_name }}
-        echo standard_name=$standard_name | tee -a "$GITHUB_ENV" "$GITHUB_OUTPUT"
+        standard_name="${{ steps.issue-parser.outputs.issueparser_name }}"
+        echo "standard_name=$standard_name" | tee -a "$GITHUB_ENV" "$GITHUB_OUTPUT"
+        echo "overwrite=${{ contains(steps.issue-parser.outputs.issueparser_options, 'overwrite') }}" >> "$GITHUB_OUTPUT"
+
+        # Create initial JSON from the issue parser output
         echo '${{ steps.issue-parser.outputs.jsonString }}' > submission.json
-        echo overwrite=${{ contains(steps.issue-parser.outputs.issueparser_options, 'overwrite') }} >> "$GITHUB_OUTPUT"
 
     - name: Edit issue title
       id: issue-info

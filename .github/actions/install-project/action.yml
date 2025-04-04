@@ -9,8 +9,6 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - uses: actions/checkout@v4
-
     - name: Install poetry
       shell: bash
       run: pipx install poetry
@@ -22,6 +20,6 @@ runs:
         cache: "poetry"
 
     - name: Re-sync dependencies when cache is not hit
-      if : ${{ steps.setup-python.outputs.cache-hit != 'true' }}
+      if: ${{ steps.setup-python.outputs.cache-hit != 'true' }}
       shell: bash
       run: poetry sync --all-extras --without dev

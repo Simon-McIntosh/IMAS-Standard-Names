@@ -5,47 +5,36 @@ inputs:
   doc-ref:
     description: "Documentation name."
     required: true
-  base-ref:
-    description: "Reference to compare against (branch, tag, or commit)"
-    required: true
-    default: "origin/develop"
   standard-names-file:
-    description: "Name of comparative file"
+    description: "Name for the Standard Names documentation file."
     required: false
-    default: "standardnames.yml"
-  standard-names-additions:
-    description: "Name for the output file"
+    default: "submission.yml"
+  single-page:
+    description: "Generate a single page documentation."
     required: false
-    default: "standardname_additions.yml"
+    default: "true"
 
 outputs:
   doc-ref:
-    description: "Name of the documentation subdirectory"
+    description: "Documentation name."
     value: ${{ inputs.doc-ref }}
 
 runs:
   using: "composite"
   steps:
-  
-    - id: file-diff
-      uses: ./.github/actions/file-diff
-      with:
-        filename: ${{ inputs.standard-names-file }}
-        base-ref: ${{ inputs.base-ref }}
-        output-filename: ${{ inputs.standard-names-additions }}
 
+    - name: Prune docs directory 
+      if: ${{ inputs.single-page == 'true' }}
+      shell: bash
+      run: find docs -name "*.md" ! -name "index.md" -type f -delete
+  
     - name: Build documentation
       env:
         SITE_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/${{ inputs.doc-ref }}
-        STANDARD_NAMES_FILE: ${{ inputs.standard-names-additions }}
+        STANDARD_NAMES_FILE: ${{ inputs.standard-names-file }}
       shell: bash
       run: |
-        pip install .[docs]
-        mkdocs build --site-dir site/${{ inputs.doc-ref }}
-
-    - name: Upload Pages artifact
-      uses: actions/upload-pages-artifact@v3
-      with:
-        name: ${{ inputs.doc-ref }}
-        path: site/${{ inputs.doc-ref }}
-        retention-days: 1
+        git fetch origin gh-pages --depth=1
+        git config user.name github-actions[bot]
+        git config user.email github-actions[bot]@users.noreply.github.com
+        poetry run mike deploy "${{ inputs.doc-ref }}" --deploy-prefix issues --push --allow-empty

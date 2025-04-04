@@ -4,10 +4,12 @@ import click
 import json
 from strictyaml.ruamel import YAML
 
+from imas_standard_names.image_processor import ImageProcessor
 from imas_standard_names.repository import update_static_urls
 from imas_standard_names.standard_name import (
     GenericNames,
     StandardInput,
+    StandardName,
     StandardNameFile,
 )
 
@@ -28,13 +30,14 @@ def format_error(error, submission_file=None):
             submission = json.load(f)
         yaml_str = StringIO()
         yaml.dump(submission, yaml_str)
-        error_message += (
-            f"\nHere is the submission for reference:\n{yaml_str.getvalue()}\n"
-        )
+        error_message += f"\nHere is a copy of the submission for reference:\n\n{yaml_str.getvalue()}\n"
     error_message += (
         "\n"
         "> [!NOTE]\n"
-        "> Correct the error by editing the Issue Body at the top of the page.\n"
+        "> Click the three dots (⋯) in the upper right corner of the issue and "
+        'select "Edit" to make changes to your proposal. Any changes you make '
+        "will automatically recheck the submission."
+        "\n"
     )
     return error_message
 
@@ -64,7 +67,17 @@ def update_standardnames(
             submission_file, unit_format=unit_format, issue_link=issue_link
         ).standard_name
         genericnames.check(standard_name.name)
-        standardnames.update(standard_name, overwrite=overwrite)
+        # Process GitHub user-attachment image URLs in documentation
+        image_processor = ImageProcessor(
+            standard_name.name, standard_name.documentation
+        )
+        image_processor.download_images()
+        relative_standard_name = StandardName(
+            **standard_name.as_dict()
+            | {"documentation": image_processor.documentation_with_relative_paths()}
+        )
+        # Update standardnames.yml
+        standardnames.update(relative_standard_name, overwrite=overwrite)
 
     except (NameError, KeyError, Exception) as error:
         click.echo(format_error(error, submission_file))
@@ -72,9 +85,7 @@ def update_standardnames(
         click.echo(
             ":sparkles: This proposal is ready for submission to "
             "the Standard Names repository.\n"
-            f"\n{standardnames[standard_name.name].as_yaml()}\n"
-            "> [!NOTE]\n"
-            "> Label this issue with `approve` to commit."
+            f"\n{standard_name.as_html()}\n".replace("img/", "docs/img/")
         )
 
 
