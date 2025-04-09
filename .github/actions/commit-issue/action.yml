@@ -25,6 +25,13 @@ runs:
         git fetch origin ${{ inputs.topic-branch }}
         git switch ${{ inputs.topic-branch }}
 
+    - name: remove standard name image directory 
+      shell: bash
+      run: |
+        if [ -d "docs/img/${{ inputs.standard-name }}" ]; then
+          rm -rf "docs/img/${{ inputs.standard-name }}"
+        fi
+
     - name: download commit files from artifact
       uses: actions/download-artifact@v4
       with:
@@ -36,11 +43,7 @@ runs:
       run: |
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
-        git add standardnames.yml
-        git add docs/img/${{ inputs.standard-name }}/
-        # List all files that are staged for commit
-        echo "Files added to git:"
-        git diff --name-only --cached
+        git add .
         git commit -m "${{ inputs.standard-name }} Closes #${{ inputs.issue-number }} :rocket:"
         git push --set-upstream origin ${{ inputs.topic-branch }}
         git switch main  

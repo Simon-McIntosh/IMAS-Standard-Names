@@ -78,21 +78,6 @@ jobs:
           standard-names-file: submission.yml
           single-page: true
 
-      - name: List image files
-        if: steps.process-issue.outputs.valid-commit == 'true'
-        shell: bash
-        run: |
-          echo "Listing files in docs/img directory:"
-          find docs/img -type f -name "*" | sort
-
-      - name: Debug file paths
-        run: |
-          echo "Standard name: ${{ env.standard_name }}"
-          echo "Expected path: docs/img/${{ env.standard_name }}/${{ env.standard_name }}-image[0-9]+.*"
-          find docs/img -type f -name "${{ env.standard_name }}-image*" | sort
-        env:
-          standard_name: ${{ steps.parse-issue.outputs.standard-name }}
-  
       - id: upload-commit-artifact
         if: steps.process-issue.outputs.approved-valid-commit == 'true'
         uses: actions/upload-artifact@v4
@@ -101,7 +86,6 @@ jobs:
           path: |
             standardnames.yml
             docs/img/${{ env.standard_name }}/
-            docs/img/
           retention-days: 1
         env:
           standard_name: ${{ steps.parse-issue.outputs.standard-name }}
@@ -138,10 +122,10 @@ jobs:
 
             Documentation for this Standard Name is [avaliable online](
             ${{ steps.deployment.outputs.page_url }}/issues/issue-${{ needs.check.outputs.issue-number }}).
-            Please verify that the information presented correctly reflects your intention.
+            Please verify that this documentation correctly reflects your intention.
             To make changes, click "Edit" from the three dots menu (⋯) in the top 
-            right corner of this issue. Changes will automatically re-process this 
-            submission.
+            right corner of this issue. Editing the issue content will automatically 
+            trigger reprocessing of this submission.
 
 
             > [!NOTE]\n
