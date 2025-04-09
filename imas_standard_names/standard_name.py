@@ -80,7 +80,7 @@ class StandardName(pydantic.BaseModel):
         """Return a dictionary representation of the StandardName instance."""
         return {"name": self.name} | dict(self.items())
 
-    def items(self) -> dict[str, str | list[str]]:
+    def items(self):
         """Return a dictionary of attrs and their values."""
         return {attr: getattr(self, attr) for attr in self.attrs}.items()
 
@@ -223,8 +223,10 @@ class ParseYaml:
         for key, value in other.data.items():
             # append issue links to existing list
             if key in self.data:
-                links = self.data.data[key].get("links", "") + value.get("links", "")
+                links = self.data.data[key].get("links", []) + value.get("links", [])
                 value["links"] = np.unique(links).tolist()
+                if not value["links"]:
+                    value["links"] = ""
             self.data[key] = value
         return self
 

@@ -14,9 +14,6 @@ inputs:
   issue-number:
     description: "GitHub issue number."
     required: true
-  pat-token:
-    description: "GitHub Personal Access Token for authentication"
-    required: true
 
 runs:
   using: "composite"
@@ -40,9 +37,23 @@ runs:
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
         git add standardnames.yml
-        git add docs/img
+        git add docs/img/${{ inputs.standard-name }}/
+        # List all files that are staged for commit
+        echo "Files added to git:"
+        git diff --name-only --cached
         git commit -m "${{ inputs.standard-name }} Closes #${{ inputs.issue-number }} :rocket:"
         git push --set-upstream origin ${{ inputs.topic-branch }}
-        git switch main      
-      env:
-        GITHUB_TOKEN: ${{ inputs.pat-token }}
+        git switch main  
+
+    - name: run CI/CD workflow on topic-branch
+      uses: actions/github-script@v7
+      with:
+        github-token: ${{ github.token }}
+        script: |
+          await github.rest.actions.createWorkflowDispatch({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            workflow_id: 'python-package.yml',
+            ref: '${{ inputs.topic-branch }}',
+          })
+

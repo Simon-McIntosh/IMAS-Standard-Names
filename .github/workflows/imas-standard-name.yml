@@ -13,6 +13,7 @@ env:
   ISSUE_URL: ${{ github.event.issue.html_url }}
 
 permissions:
+  actions: write
   contents: write
   pages: write
   id-token: write
@@ -77,6 +78,21 @@ jobs:
           standard-names-file: submission.yml
           single-page: true
 
+      - name: List image files
+        if: steps.process-issue.outputs.valid-commit == 'true'
+        shell: bash
+        run: |
+          echo "Listing files in docs/img directory:"
+          find docs/img -type f -name "*" | sort
+
+      - name: Debug file paths
+        run: |
+          echo "Standard name: ${{ env.standard_name }}"
+          echo "Expected path: docs/img/${{ env.standard_name }}/${{ env.standard_name }}-image[0-9]+.*"
+          find docs/img -type f -name "${{ env.standard_name }}-image*" | sort
+        env:
+          standard_name: ${{ steps.parse-issue.outputs.standard-name }}
+  
       - id: upload-commit-artifact
         if: steps.process-issue.outputs.approved-valid-commit == 'true'
         uses: actions/upload-artifact@v4
@@ -84,8 +100,11 @@ jobs:
           name: issue-files-${{ steps.parse-issue.outputs.issue-number }}
           path: |
             standardnames.yml
-            docs/img/${{ steps.parse-issue.outputs.standard-name }}-[0-9]+\..*
+            docs/img/${{ env.standard_name }}/
+            docs/img/
           retention-days: 1
+        env:
+          standard_name: ${{ steps.parse-issue.outputs.standard-name }}
 
   deploy:
     needs:
@@ -117,12 +136,12 @@ jobs:
 
             ${{ needs.check.outputs.update-message }}
 
-            Your Standard Name proposal has been published at [this link](
+            Documentation for this Standard Name is [avaliable online](
             ${{ steps.deployment.outputs.page_url }}/issues/issue-${{ needs.check.outputs.issue-number }}).
             Please verify that the information presented correctly reflects your intention.
             To make changes, click "Edit" from the three dots menu (⋯) in the top 
-            right corner of this issue. Changes will automatically trigger an 
-            update.
+            right corner of this issue. Changes will automatically re-process this 
+            submission.
 
 
             > [!NOTE]\n
@@ -142,14 +161,6 @@ jobs:
         with:
           ref: main
 
-      - name: Check for PAT_TOKEN
-        shell: bash
-        run: |
-          if [[ -z "${{ secrets.PAT_TOKEN }}" ]]; then
-            echo "::error::PAT_TOKEN secret is not defined. Please add a personal access token with repo and workflow scopes to your repository secrets."
-            exit 1
-          fi
-
       - id: commit-issue
         uses: ./.github/actions/commit-issue
         with:
@@ -157,11 +168,9 @@ jobs:
           base-branch: ${{ env.BASE_BRANCH }}
           topic-branch: ${{ env.TOPIC_BRANCH }}
           issue-number: ${{ needs.check.outputs.issue-number }}
-          pat-token: ${{ secrets.PAT_TOKEN }}
 
       - id: raise-pull-request
         uses: ./.github/actions/raise-pull-request
         with:
           base-branch: ${{ env.BASE_BRANCH }}
           topic-branch: ${{ env.TOPIC_BRANCH }}
-          pat-token: ${{ secrets.PAT_TOKEN }}
