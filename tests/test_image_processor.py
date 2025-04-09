@@ -62,31 +62,38 @@ def test_url_extraction(sample_documentation, mock_urls):
         assert url in urls
 
 
-def test_path_extraction(sample_documentation, mock_urls):
+@pytest.mark.parametrize("standard_name", ["plasma_current", "poloidal_flux"])
+def test_path_extraction(standard_name, sample_documentation, mock_urls):
     """Test that paths are correctly generated from URLs."""
-    files = ImageProcessor("test_name", sample_documentation, "images").files
+    image_dir = Path("images")
+    paths = ImageProcessor(standard_name, sample_documentation, image_dir).paths
 
     # Check that the paths are correctly generated
-    assert len(files) == len(mock_urls)
+    assert len(paths) == len(mock_urls)
     for index, url in enumerate(mock_urls, 1):
         expected_extension = url.split(".")[-1]
-        expected_path = (Path("images") / f"test_name-{index}").with_suffix(
+        expected_path = (image_dir / f"{standard_name}-image{index}").with_suffix(
             f".{expected_extension}"
         )
-        assert expected_path in files
+        assert expected_path in paths
 
 
-def test_documentation_with_relative_paths(sample_documentation, mock_urls):
+@pytest.mark.parametrize("parents", [None, 0, 1])
+def test_documentation_with_relative_paths(parents, sample_documentation, mock_urls):
     """Test that documentation is correctly modified with relative paths."""
-    processor = ImageProcessor("test_name", sample_documentation, "images")
+    image_dir = Path("images/in/a/sub/folder")
+    processor = ImageProcessor(
+        "test_name", sample_documentation, image_dir, parents=parents
+    )
     modified_docs = processor.documentation_with_relative_paths()
-
     # Check that the URLs are replaced with relative paths
     for index, url in enumerate(mock_urls, 1):
-        expected_path = (Path("images") / f"test_name-{index}").with_suffix(
+        filename = (image_dir / f"test_name-image{index}").with_suffix(
             f".{url.split('.')[-1]}"
         )
-        assert str(expected_path) in modified_docs
+        if parents:
+            filename = filename.relative_to(image_dir.parents[parents])
+        assert filename.as_posix() in modified_docs
 
 
 def test_no_images_in_documentation():
@@ -109,7 +116,7 @@ def test_image_content_writing(mock_get, mock_file, mock_response, temp_dir):
     processor = ImageProcessor(
         "test_name",
         "![test](https://github.com/user-attachments/assets/12345/test.png)",
-        str(temp_dir.parent),
+        temp_dir,
     )
 
     # Call the download method
@@ -142,6 +149,42 @@ def test_extension_mapping(content_type, extension, mock_response):
             "https://github.com/user-attachments/assets/12345/test"
         )
         assert result == extension
+
+
+@patch("builtins.open", new_callable=mock_open)
+@patch("requests.get")
+def test_remove_existing(mock_get, mock_file, mock_response, temp_dir):
+    """Test that image content is correctly written to file."""
+    # Set up the mock response
+    mock_get.return_value = mock_response("image/png")
+    image_dir = temp_dir / "test_name"
+
+    processor = ImageProcessor(
+        "test_name",
+        """
+        ![test](https://github.com/user-attachments/assets/12345/test1.png)
+        ![test](https://github.com/user-attachments/assets/12345/test2.png)
+        ![test](https://github.com/user-attachments/assets/12345/test3.png)
+        """,
+        image_dir,
+    )
+
+    processor.download_images()
+    assert len(list(image_dir.glob("*"))) == 3
+
+    processor = ImageProcessor(
+        "test_name",
+        """
+        ![test](https://github.com/user-attachments/assets/12345/test4.png)
+        ![test](https://github.com/user-attachments/assets/12345/test5.png)
+        """,
+        image_dir,
+    )
+
+    processor.download_images()
+    assert len(list(image_dir.glob("*"))) == 3
+    processor.download_images(remove_existing=True)
+    assert len(list(image_dir.glob("*"))) == 2
 
 
 if __name__ == "__main__":  # pragma: no cover

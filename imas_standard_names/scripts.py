@@ -2,6 +2,7 @@ from io import StringIO
 
 import click
 import json
+from pathlib import Path
 from strictyaml.ruamel import YAML
 
 from imas_standard_names.image_processor import ImageProcessor
@@ -67,11 +68,14 @@ def update_standardnames(
             submission_file, unit_format=unit_format, issue_link=issue_link
         ).standard_name
         genericnames.check(standard_name.name)
-        # Process GitHub user-attachment image URLs in documentation
+        # Process image URLs in documentation string
         image_processor = ImageProcessor(
-            standard_name.name, standard_name.documentation
+            standard_name.name,
+            standard_name.documentation,
+            image_dir=Path("docs/img") / standard_name.name,
+            parents=1,
         )
-        image_processor.download_images()
+        image_processor.download_images(remove_existing=True)
         relative_standard_name = StandardName(
             **standard_name.as_dict()
             | {"documentation": image_processor.documentation_with_relative_paths()}
