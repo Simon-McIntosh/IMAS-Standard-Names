@@ -84,7 +84,7 @@ class StandardName(pydantic.BaseModel):
         """Return a dictionary of attrs and their values."""
         return {attr: getattr(self, attr) for attr in self.attrs}.items()
 
-    def as_document(self) -> syaml.representation.YAML:
+    def as_document(self) -> syaml.YAML:
         """Return standard name as a YAML document."""
         data = {
             key: value
@@ -199,7 +199,7 @@ class ParseYaml:
                     f"Invalid input type: {type(input_)}. Expected str or YAML."
                 )
 
-    def _append_unit_format(self, data: syaml.representation.YAML):
+    def _append_unit_format(self, data: syaml.YAML):
         """Append unit formatter to units string."""
         if self.unit_format:
             data["units"] = data["units"].split(":")[0] + f":{self.unit_format}"
@@ -218,8 +218,20 @@ class ParseYaml:
             yaml_data += self[str(name)].as_yaml()
         return yaml_data
 
-    def __add__(self, other):
+    def _as_document(self, other) -> syaml.YAML:
+        """Return other as yaml document."""
+        match other:
+            case StandardName():
+                other = other.as_document()
+            case StandardNameFile():
+                other = other.data
+            case syaml.YAML():
+                pass
+        return other
+
+    def __add__(self, other: syaml.YAML | StandardName) -> "ParseYaml":
         """Add content of other to self, overriding existing keys."""
+        other = self._as_document(other)
         for key, value in other.data.items():
             # append issue links to existing list
             if key in self.data:
@@ -236,6 +248,7 @@ class ParseYaml:
 
     def __sub__(self, other):
         """Remove content of other from self."""
+        other = self._as_document(other)
         for key in other.data:
             if key in self.data:
                 del self.data[key]
@@ -404,4 +417,4 @@ class GenericNames:
 
 
 if __name__ == "__main__":  # pragma: no cover
-    standard_names = StandardNameFile("../standardnames.yml")
+    standard_names = StandardNameFile("standardnames.yml")

@@ -96,7 +96,7 @@ Each branch will be available as a separate version in the version selector drop
 [ruff-link]: https://docs.astral.sh/ruff/
 [pre-commit-badge]: https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white
 [pre-commit-link]: https://github.com/pre-commit/pre-commit
-[build-deploy-badge]: https://img.shields.io/github/actions/workflow/status/Simon-McIntosh/IMAS-Standard-Names/python-package.yml?branch=main&color=brightgreen&label=CI%2FCD
+[build-deploy-badge]: https://img.shields.io/github/actions/workflow/status/Simon-McIntosh/IMAS-Standard-Names/test-project.yml?branch=main&color=brightgreen&label=CI%2FCD
 [build-deploy-link]: https://codecov.io/gh/Simon-McIntosh/IMAS-Standard-Names/tests/main
 [codecov-badge]: https://codecov.io/gh/Simon-McIntosh/IMAS-Standard-Names/graph/badge.svg
 [codecov-link]: https://codecov.io/gh/Simon-McIntosh/IMAS-Standard-Names

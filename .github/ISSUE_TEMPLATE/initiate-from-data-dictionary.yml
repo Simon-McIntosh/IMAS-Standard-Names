@@ -1,0 +1,11 @@
+name: Initiate a Standard Name
+title: Initiate Standard Name proposal from Data Dictionary path
+description: |
+  A submission workflow for initiating Standard Name proposals from 
+  a Data Dictionary attribute.
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Issues with the default title will be automatically labeled with the given Standard Name.
