@@ -1,4 +1,4 @@
-name: Apply Labels
+name: apply-labels
 
 on:
   push:
