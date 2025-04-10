@@ -1,4 +1,4 @@
-name: IMAS Standard Name
+name: process-standard-name
 
 on:
   issues:
@@ -50,7 +50,7 @@ jobs:
       - id: parse-issue
         uses: ./.github/actions/parse-issue
         with:
-          template_path: ".github/ISSUE_TEMPLATE/standard-name.yml"
+          template_path: ".github/ISSUE_TEMPLATE/create-standard-name.yml"
 
       - uses: ./.github/actions/install-project
         with:
@@ -120,13 +120,13 @@ jobs:
 
             ${{ needs.check.outputs.update-message }}
 
-            Documentation for this Standard Name is [avaliable online](
-            ${{ steps.deployment.outputs.page_url }}/issues/issue-${{ needs.check.outputs.issue-number }}).
-            Please verify that this documentation correctly reflects your intention.
+            Please verify that the documentation for this Standard Name given 
+            at [issue-${{ needs.check.outputs.issue-number }}] (
+            ${{ steps.deployment.outputs.page_url }}/issues/issue-${{ needs.check.outputs.issue-number }}
+            ) correctly reflects your intention.
             To make changes, click "Edit" from the three dots menu (⋯) in the top 
-            right corner of this issue. Editing the issue content will automatically 
-            trigger reprocessing of this submission.
-
+            right corner of this issue. Editing this issue's content will trigger an 
+            automatic reprocessing of your submission.
 
             > [!NOTE]\n
             > Assignees: Apply the "approve" label to approve this request.

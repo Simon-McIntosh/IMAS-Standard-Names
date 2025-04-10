@@ -1,4 +1,4 @@
-name: Sync GitHub Workflows and Actions
+name: sync-project-files
 
 on:
   push:
@@ -7,8 +7,11 @@ on:
     paths:
       - ".github/workflows/**"
       - ".github/actions/**"
+      - "imas_standard_names/**"
       - "pyproject.toml"
       - "poetry.lock"
+      - "docs/**"
+      - "mkdocs.yml"
   workflow_dispatch:
 
 env:
@@ -52,7 +55,7 @@ jobs:
             git checkout -b $TEMP_BRANCH
             
             # Copy only workflows and actions directories from main
-            git checkout main -- .github/workflows/ .github/actions/ pyproject.toml poetry.lock
+            git checkout main -- .github/workflows/ .github/actions/ imas_standard_names/ pyproject.toml poetry.lock docs/ mkdocs.yml
             
             # Commit changes if there are any
             if [[ -n "$(git status --porcelain)" ]]; then

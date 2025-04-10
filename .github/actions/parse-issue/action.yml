@@ -5,7 +5,7 @@ inputs:
   template_path:
     description: "Path to the issue template."
     required: true
-    default: ".github/ISSUE_TEMPLATE/standard-name.yml"
+    default: ".github/ISSUE_TEMPLATE/create-standard-name.yml"
 
 outputs:
   standard-name:
