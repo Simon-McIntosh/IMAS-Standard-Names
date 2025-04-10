@@ -95,6 +95,23 @@ def update_standardnames(
 
 @click.command()
 @click.argument("standardnames_file")
+@click.argument("minuend_standardnames_file")
+@click.argument("subtrahend_standardnames_file")
+def subtract_standardnames(
+    standardnames_file,
+    minuend_standardnames_file: str,
+    subtrahend_standardnames_file: str,
+):
+    """Subtract one standard names file from another."""
+    minuend = StandardNameFile(minuend_standardnames_file)
+    subtrahend = StandardNameFile(subtrahend_standardnames_file)
+    result = minuend - subtrahend
+    with open(standardnames_file, "w") as f:
+        f.write(result.data.as_yaml())
+
+
+@click.command()
+@click.argument("standardnames_file")
 @click.argument("standard_name", nargs=-1)  # handle whitespace in standard name
 def has_standardname(standardnames_file: str, standard_name: str):
     """Check if a standard name exists in the project's standard name file."""

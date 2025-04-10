@@ -56,7 +56,7 @@ runs:
           await github.rest.actions.createWorkflowDispatch({
             owner: context.repo.owner,
             repo: context.repo.repo,
-            workflow_id: 'python-package.yml',
+            workflow_id: 'build-docs.yml',
             ref: '${{ inputs.topic-branch }}',
           })
 
