@@ -1,6 +1,8 @@
-name: IMAS Standard Name
-title: Standard Name Proposal
-description: Propose an IMAS Standard Name addition or modification.
+name: Create Standard Name
+title: Propose a new Standard Name
+description: |
+  A GitHub issue form and associated actions that implement a zero-code workflow for 
+  the proposal, review, and approval of Fusion Convention Standard Names.
 labels: standard-name
 
 body:
