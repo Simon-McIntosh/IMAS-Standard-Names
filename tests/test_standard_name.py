@@ -43,8 +43,10 @@ yaml_multi = syaml.as_document(
         name: {
             "units": units,
             "documentation": "docs",
-            "links": "https://github.com/iterorganization/IMAS-Standard-Names/issues/5,"
-            "https://github.com/iterorganization/IMAS-Standard-Names/issues/6",
+            "links": [
+                "https://github.com/iterorganization/IMAS-Standard-Names/issues/5",
+                "https://github.com/iterorganization/IMAS-Standard-Names/issues/6",
+            ],
         }
         for name, units in zip(
             ["plasma_current", "plasma_current_density", "electron_temperature"],
@@ -363,6 +365,22 @@ def test_json_roundtrip():
         ParseJson(StandardName(**standard_name_data).as_json()).standard_name
         == ParseJson(json.dumps(standard_name_data)).standard_name
     )
+
+
+def test_standard_name_addition_subtraction():
+    standard_names = StandardNameFile(deepcopy(yaml_single))
+    other_standard_names = StandardNameFile(deepcopy(yaml_multi))
+    standard_names += other_standard_names
+    standard_names += StandardName(name="plasma_current", documentation="docs")
+    standard_names += StandardName(
+        name="plasma_volume", documentation="docs"
+    ).as_document()
+    names = [name.data for name in standard_names.data.keys()]
+    assert len(standard_names.data.keys()) == len(names)
+    for name in names:
+        assert name in standard_names.data
+        standard_names -= StandardName(name=name, documentation="other docs")
+    assert len(standard_names.data.keys()) == 0
 
 
 def test_standard_name_difference(standardnames):

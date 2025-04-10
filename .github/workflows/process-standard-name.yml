@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 env:
-  ISSUE_TITLE: "Standard Name Proposal"
+  ISSUE_TITLE: "Propose a new Standard Name"
   BASE_BRANCH: "develop"
   TOPIC_BRANCH: "submit"
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -25,7 +25,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  check:
+  build:
     if: contains(github.event.issue.labels.*.name, 'standard-name')
     runs-on: ubuntu-latest
     outputs:
@@ -92,11 +92,11 @@ jobs:
 
   deploy:
     needs:
-      - check
-    if: needs.check.outputs.valid-commit == 'true'
+      - build
+    if: needs.build.outputs.valid-commit == 'true'
     environment:
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}/issues/issue-${{ needs.check.outputs.issue-number }}
+      url: ${{ steps.deployment.outputs.page_url }}/issues/issue-${{ needs.build.outputs.issue-number }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -111,6 +111,7 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+        continue-on-error: true
 
       - name: Comment on issue deployment
         if: ${{ ! contains(github.event.issue.labels.*.name, 'approve') }}
@@ -118,11 +119,11 @@ jobs:
         env:
           update_message: >
 
-            ${{ needs.check.outputs.update-message }}
+            ${{ needs.build.outputs.update-message }}
 
             Please verify that the documentation for this Standard Name given 
-            at [issue-${{ needs.check.outputs.issue-number }}] (
-            ${{ steps.deployment.outputs.page_url }}/issues/issue-${{ needs.check.outputs.issue-number }}
+            at [issue-${{ needs.build.outputs.issue-number }}] (
+            ${{ steps.deployment.outputs.page_url }}/issues/issue-${{ needs.build.outputs.issue-number }}
             ) correctly reflects your intention.
             To make changes, click "Edit" from the three dots menu (⋯) in the top 
             right corner of this issue. Editing this issue's content will trigger an 
@@ -135,9 +136,9 @@ jobs:
         run: echo -e "$update_message" | gh issue comment $ISSUE_URL --body-file -
 
   commit:
-    if: needs.check.outputs.approved-valid-commit == 'true'
+    if: needs.build.outputs.approved-valid-commit == 'true'
     needs:
-      - check
+      - build
       - deploy
     runs-on: ubuntu-latest
     steps:
@@ -148,10 +149,10 @@ jobs:
       - id: commit-issue
         uses: ./.github/actions/commit-issue
         with:
-          standard-name: ${{ needs.check.outputs.standard-name }}
+          standard-name: ${{ needs.build.outputs.standard-name }}
           base-branch: ${{ env.BASE_BRANCH }}
           topic-branch: ${{ env.TOPIC_BRANCH }}
-          issue-number: ${{ needs.check.outputs.issue-number }}
+          issue-number: ${{ needs.build.outputs.issue-number }}
 
       - id: raise-pull-request
         uses: ./.github/actions/raise-pull-request
