@@ -31,7 +31,7 @@ def format_error(error, submission_file=None):
             submission = json.load(f)
         yaml_str = StringIO()
         yaml.dump(submission, yaml_str)
-        error_message += f"\nHere is a copy of the submission for reference:\n\n{yaml_str.getvalue()}\n"
+        # error_message += f"\nHere is a copy of the submission for reference:\n\n{yaml_str.getvalue()}\n"
     error_message += (
         "\n"
         "> [!NOTE]\n"
@@ -115,6 +115,10 @@ def subtract_standardnames(
 @click.argument("standard_name", nargs=-1)  # handle whitespace in standard name
 def has_standardname(standardnames_file: str, standard_name: str):
     """Check if a standard name exists in the project's standard name file."""
+    path = Path(standardnames_file)
+    if not path.exists() or path.stat().st_size == 0:
+        click.echo("False")  # standardnames file does not exist or is empty
+        return
     standardnames = StandardNameFile(standardnames_file)
     standard_name = " ".join(standard_name)
     click.echo(f"{standard_name in standardnames.data}")

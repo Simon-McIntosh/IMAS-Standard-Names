@@ -173,7 +173,7 @@ class ParseYaml:
     data: syaml.YAML = field(init=False, repr=False)
     unit_format: str | None = None
 
-    schema: ClassVar = syaml.MapPattern(
+    schema: ClassVar = syaml.EmptyDict() | syaml.MapPattern(
         syaml.Str(),
         syaml.Map(
             {
@@ -316,6 +316,8 @@ class StandardNameFile(ParseYaml):
     def __post_init__(self, input_: str | Path | syaml.YAML):
         """Load standard name data from yaml file."""
         match input_:
+            case "":
+                pass
             case str() if self._is_yaml(input_):
                 self._filename = None
             case str() | Path():
@@ -328,6 +330,9 @@ class StandardNameFile(ParseYaml):
                 raise TypeError(
                     f"Invalid input type: {type(input_)}. Expected str, Path, or YAML."
                 )
+        if input_ == "":
+            self.data = syaml.as_document({}, schema=self.schema)
+            return
         super().__post_init__(input_)
 
     @staticmethod
@@ -417,4 +422,4 @@ class GenericNames:
 
 
 if __name__ == "__main__":  # pragma: no cover
-    standard_names = StandardNameFile("standardnames.yml")
+    standard_names = StandardNameFile("")
