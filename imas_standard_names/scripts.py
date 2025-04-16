@@ -115,6 +115,10 @@ def subtract_standardnames(
 @click.argument("standard_name", nargs=-1)  # handle whitespace in standard name
 def has_standardname(standardnames_file: str, standard_name: str):
     """Check if a standard name exists in the project's standard name file."""
+    path = Path(standardnames_file)
+    if not path.exists() or path.stat().st_size == 0:
+        click.echo("False")  # standardnames file does not exist or is empty
+        return
     standardnames = StandardNameFile(standardnames_file)
     standard_name = " ".join(standard_name)
     click.echo(f"{standard_name in standardnames.data}")
