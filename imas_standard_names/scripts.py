@@ -31,7 +31,7 @@ def format_error(error, submission_file=None):
             submission = json.load(f)
         yaml_str = StringIO()
         yaml.dump(submission, yaml_str)
-        error_message += f"\nHere is a copy of the submission for reference:\n\n{yaml_str.getvalue()}\n"
+        # error_message += f"\nHere is a copy of the submission for reference:\n\n{yaml_str.getvalue()}\n"
     error_message += (
         "\n"
         "> [!NOTE]\n"
