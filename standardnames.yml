@@ -31,3 +31,36 @@ coil_current:
   - control
   links:
   - https://github.com/Simon-McIntosh/IMAS-Standard-Names/issues/1
+normalized_poloidal_flux:
+  documentation: |-
+    Normalized poloidal flux is a dimensionless spatial coordinate used in tokamak and stellarator fusion devices to indicate radial position within the plasma. It provides a standardized radial coordinate that ranges from 0 at the magnetic axis to 1 at the plasma boundary, regardless of the absolute values of the poloidal flux.
+
+    The mathematical definition of normalized poloidal flux is:
+
+    $$\psi_N = \frac{\psi - \psi_{\text{axis}}}{\psi_{\text{boundary}} - \psi_{\text{axis}}}$$
+
+    where:
+
+    - $\psi_N$ is the normalized poloidal flux
+    - $\psi$ is the poloidal flux at a given point in the plasma
+    - $\psi_{\text{axis}}$ is the poloidal flux at the magnetic axis
+    - $\psi_{\text{boundary}}$ is the poloidal flux at the plasma boundary (typically the last closed flux surface or separatrix)
+
+    In fusion plasmas, the poloidal magnetic flux $\psi$ is the magnetic flux passing through a surface connecting the major axis to a given point in the plasma. It is defined as the integral of the poloidal magnetic field component over this surface. The poloidal flux is an important quantity because magnetic field lines lie on surfaces of constant poloidal flux in axisymmetric equilibria.
+
+    The normalization provides several advantages:
+
+    - It creates a dimensionless coordinate that ranges from 0 to 1, making it easy to compare different plasma configurations
+    - It accounts for differences in absolute flux values across different devices or operating conditions
+    - It provides a natural coordinate system for plasma transport and stability analyses
+
+    The sign convention for normalized poloidal flux is such that it increases monotonically from the magnetic axis outward to the plasma boundary. This definition applies to both tokamaks and stellarators, although in stellarators the lack of axisymmetry can introduce complications in the precise definition of flux surfaces.
+  units:
+  tags:
+  - equilibrium
+  - magnetic_field
+  - coordinate
+  - flux_surface
+  - radial
+  links:
+  - https://github.com/Simon-McIntosh/IMAS-Standard-Names/issues/8
