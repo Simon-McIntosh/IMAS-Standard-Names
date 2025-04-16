@@ -1,0 +1,33 @@
+coil_current:
+  documentation: |-
+    The electric current flowing through coils in a fusion device. Coil current represents the magnitude of charge flow per unit time through a conductor that forms part of a magnetic field-generating electromagnetic coil system.
+
+    Coil current is defined as the rate of flow of electric charge through the coil:
+
+    $$I = \frac{dQ}{dt}$$
+
+    where:
+    - $I$ is the coil current in amperes (A)
+    - $Q$ is the electric charge in coulombs (C)
+    - $t$ is time in seconds (s)
+
+    The conventional direction of current flow is from positive to negative potential, corresponding to the direction opposite to electron flow.
+
+    Coil current in fusion devices is used to generate magnetic fields for plasma confinement, shaping, and position control. Different coil systems serve specific functions:
+
+    - Toroidal field coils generate the main toroidal magnetic field
+    - Poloidal field coils control plasma shape and position
+    - Central solenoid coils induce plasma current through transformer action
+    - Correction coils adjust field errors and provide additional control
+     
+    In stellarators, complex 3D coil geometries produce the confining magnetic field directly without requiring a large plasma current.
+
+    The sign convention for coil currents defines positive current as that which generates magnetic field in the clockwise direction when viewed along the direction of the current.
+  units: A
+  tags:
+  - magnetics
+  - coils
+  - current
+  - control
+  links:
+  - https://github.com/Simon-McIntosh/IMAS-Standard-Names/issues/1
