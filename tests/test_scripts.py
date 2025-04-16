@@ -222,6 +222,18 @@ def test_has_not_standardname(tmp_path):
     assert result.output == "False\n"
 
 
+def test_has_standardname_empty_file(tmp_path):
+    with click_runner(tmp_path) as (runner, temp_dir):
+        empty_file = Path(temp_dir) / "empty_standardnames.yml"
+        # Create an empty file
+        empty_file.touch()
+        result = runner.invoke(
+            has_standardname, (empty_file.as_posix(), "plasma_current")
+        )
+    assert result.exit_code == 0
+    assert result.output == "False\n"  # empty file behaves as if name does not exist
+
+
 def test_is_genericname(tmp_path):
     with (
         click_runner(tmp_path) as (runner, temp_dir),

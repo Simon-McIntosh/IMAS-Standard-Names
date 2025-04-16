@@ -50,17 +50,18 @@ a definition relies on axi-symmetry not present in stellarators.
 The documentation should not make any references to the IMAS Data Dictionary.
 
 Include an enumerated list of Harvard style linked references used by Copilot
-to create the issue in the documentation field.
+to create the issue in the documentation field with a References title.
 
 Do not generate images or diagrams.
 
-Include an enumerated list of IMAS Data Dictionary references used to create 
+Include the overwrite option in the submission with the checkbox unchecked.
+
+Create a new section labelled `IMAS Data Dictionary references`.
+Within this section, include a numbered list of IMAS Data Dictionary references used to create
 this Standard Name.
-Format DD references as {full DD attribute path}:{DD attribute documentation} with the
-attribute path in standard font followed by the IMAS documentation
-string in italics with a colon separating the path and documentation.
-Place the DD references in an additional issue field labelled
-`IMAS Data Dictionary references`.
+Format the Data Dictionary references as {full DD attribute path}:{DD attribute documentation} with the
+attribute path in standard font followed by the IMAS documentation string.
+Separate the path and documentation fields with a colon.
 
 Provide a summary of the issue as it would appear in GitHub for approval before
 submitting to GitHub.
@@ -72,10 +73,19 @@ ask for feedback to help improve the issue.
 Before creating the GitHub issue, identify which LLM you are using
 (e.g., GPT-4o, Claude 3.5 Sonnet, etc.).
 
-After creating the issue, perform the following steps in order:
+After creating the issue, perform the following steps:
 
 - comment on the issue with the following message:
   '🪄 This issue was created by Copilot using the {insert detected LLM name here}
-  Large Language Model. The content is based on the IMAS Data Dictionary and the
-  Fusion Conventions.'
-- After commenting on the issue, add the "standard-name" label to this issue.
+  Large Language Model. The proposed Standard Name follows the Fusion Conventions. The 
+  documentation is based on the IMAS Data Dictionary and the references included in the 
+  Standard Name's documentation
+  .'
+- Add the "standard-name" label to the submitted issue.
+
+Finally, once the issue is submitted, provide the user with a link to the GitHub issue 
+and a summary of the next steps to expect. Ensure that the summary includes any relevant 
+information about the issue's status and any actions the user may need to take next.
+
+Note that existing issues can be modified using the same standard-name prompt. 
+Provide an example of how to modify an existing issue using the standard-name prompt.
