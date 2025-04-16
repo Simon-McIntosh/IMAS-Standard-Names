@@ -362,9 +362,9 @@ class StandardNameFile(ParseYaml):
             except AssertionError:
                 raise KeyError(
                     f"The proposed standard name **{standard_name.name}** "
-                    f"is already present in the {self.filename} file "
-                    "with the following content:"
-                    f"\n\n{self[standard_name.name].as_html()}\n\n"
+                    f"is already present in the {self.filename} file.\n\n"
+                    # "with the following content:"
+                    # f"\n\n{self[standard_name.name].as_html()}\n\n"
                     "Mark the :white_check_mark: **overwrite** checkbox "
                     "to overwrite this standard name."
                 )

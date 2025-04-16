@@ -38,7 +38,15 @@ runs:
         echo "overwrite=${{ contains(steps.issue-parser.outputs.issueparser_options, 'overwrite') }}" >> "$GITHUB_OUTPUT"
 
         # Create initial JSON from the issue parser output
-        echo '${{ steps.issue-parser.outputs.jsonString }}' > submission.json
+        cat > submission.json << 'EOL'
+        ${{ steps.issue-parser.outputs.jsonString }}
+        EOL
+
+    - name: Echo submission.json contents
+      shell: bash
+      run: |
+       echo "Contents of submission.json:"
+       cat submission.json
 
     - name: Edit issue title
       id: issue-info
@@ -57,7 +65,7 @@ runs:
       run: |
         issue_number=${{ github.event.issue.number }}
         labels=$(gh issue view $issue_number --json labels --jq '.labels[].name')
-        if echo "$labels" | grep -q "approve"; then
+        if echo "$labels" | grep -q "commit"; then
           echo "ready_to_commit=true" >> "$GITHUB_OUTPUT"
         else
           echo "ready_to_commit=false" >> "$GITHUB_OUTPUT"

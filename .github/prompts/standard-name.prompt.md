@@ -1,8 +1,81 @@
 Create a new GitHub issue for Simon-McIntosh/IMAS-Standard-Names.
+
 The issue should follow the #file:../ISSUE_TEMPLATE/create-standard-name.yml template.
+The issue should include blank lines above and below each section.
+The issue should be written in markdown format.
+Ensure that the issue is correctly formated and indented.
+Special attention should be paid to the creation of markdown lists by ensuring that:
+
+- the inclusion of a blank line before the first list item
+- each bullet point starts with a hyphen
+- the use of consistent indentation for nested lists
+- the inclusion of a blank line after the last list item
 
 Follow the IMAS Data Dictionary conventions for standard names.
+Include the following files as context:
 
-Include the following information in the documentation field: - mathematical notation for the standard name - images - usage examples
+- file:../docs/guidelines.md
+- file:../docs/generic_names.csv
+- file:../docs/transformations.csv
 
-The issue should be created in the Simon-McIntosh/IMAS-Standard-Names repository.
+<!-- Retrive further information about the source  # TODO make  CF Conventions MCP server
+[Climate and Forcasting conventions](https://cfconventions.org/) upon which the
+Fusion Conventions, defined above, are based. In the case of conflicts between the Fusion
+and Climate and Forcasting conventions, the Fusion conventions take precedence. -->
+
+Use the IMAS MCP server to:
+
+- list schemas
+- get schema
+- get documentation
+
+The issue should be written in markdown format and use heading level 3 to mark each section.
+Ensure that the issue is correctly formatted and indented.
+Ensure that the issue is written in Plain English using US spelling.
+Use markdown for formulars and equations.
+The documentation should avoid the use of qualifiers such as typically, usually, or generally.
+
+Include the following information in the documentation field:
+
+- a clear and concise description of the standard name
+- mathematical definition for the standard name including derivations, if appropriate
+- fundamental definitions along with application specific ones
+- a sign convention, when appropriate
+- usage examples
+
+The documentation shall apply to both stellarators and tokamaks. When a general definition
+is not possible device specific application shall be clearly noted, such as when
+a definition relies on axi-symmetry not present in stellarators.
+
+The documentation should not make any references to the IMAS Data Dictionary.
+
+Include an enumerated list of Harvard style linked references used by Copilot
+to create the issue in the documentation field.
+
+Do not generate images or diagrams.
+
+Include an enumerated list of IMAS Data Dictionary references used to create 
+this Standard Name.
+Format DD references as {full DD attribute path}:{DD attribute documentation} with the
+attribute path in standard font followed by the IMAS documentation
+string in italics with a colon separating the path and documentation.
+Place the DD references in an additional issue field labelled
+`IMAS Data Dictionary references`.
+
+Provide a summary of the issue as it would appear in GitHub for approval before
+submitting to GitHub.
+Ask for a confirmation to submit the issue to GitHub.
+Create the GitHub issue if the user responds in the affirmative.
+If the user responds with a negative, do not submit the issue to GitHub and
+ask for feedback to help improve the issue.
+
+Before creating the GitHub issue, identify which LLM you are using
+(e.g., GPT-4o, Claude 3.5 Sonnet, etc.).
+
+After creating the issue, perform the following steps in order:
+
+- comment on the issue with the following message:
+  '🪄 This issue was created by Copilot using the {insert detected LLM name here}
+  Large Language Model. The content is based on the IMAS Data Dictionary and the
+  Fusion Conventions.'
+- After commenting on the issue, add the "standard-name" label to this issue.

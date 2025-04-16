@@ -1,5 +1,5 @@
 labels:
-  - name: approve
+  - name: commit
     color: "#21AE80"
     description: "This standard name is ready to commit."
   - name: duplicate

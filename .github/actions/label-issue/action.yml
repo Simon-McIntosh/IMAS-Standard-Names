@@ -27,12 +27,12 @@ runs:
       shell: bash
       run: gh issue edit $ISSUE_URL --remove-label "duplicate"
 
-    - name: Remove approve label
+    - name: Remove commit label
       if: |
         inputs.update-error == 'true' && 
-        contains(github.event.issue.labels.*.name, 'approve')
+        contains(github.event.issue.labels.*.name, 'commit')
       shell: bash
-      run: gh issue edit $ISSUE_URL --remove-label "approve"
+      run: gh issue edit $ISSUE_URL --remove-label "commit"
 
     - name: Add needswork label
       if: inputs.update-error == 'true'
