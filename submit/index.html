@@ -286,6 +286,15 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#normalized_poloidal_flux" class="md-nav__link">
+    <span class="md-ellipsis">
+      normalized_poloidal_flux
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -324,6 +333,15 @@
   <a href="#coil_current" class="md-nav__link">
     <span class="md-ellipsis">
       coil_current
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#normalized_poloidal_flux" class="md-nav__link">
+    <span class="md-ellipsis">
+      normalized_poloidal_flux
     </span>
   </a>
   
@@ -372,6 +390,33 @@
 </ul>
 <p>In stellarators, complex 3D coil geometries produce the confining magnetic field directly without requiring a large plasma current.</p>
 <p>The sign convention for coil currents defines positive current as that which generates magnetic field in the clockwise direction when viewed along the direction of the current.</p>
+<h2 id="normalized_poloidal_flux"><code>normalized_poloidal_flux</code></h2>
+<ul>
+<li>
+<p><em>units</em>: None</p>
+</li>
+<li>
+<p><em>tags: equilibrium, magnetic_field, coordinate, flux_surface, radial</em></p>
+</li>
+</ul>
+<p>Normalized poloidal flux is a dimensionless spatial coordinate used in tokamak and stellarator fusion devices to indicate radial position within the plasma. It provides a standardized radial coordinate that ranges from 0 at the magnetic axis to 1 at the plasma boundary, regardless of the absolute values of the poloidal flux.</p>
+<p>The mathematical definition of normalized poloidal flux is:</p>
+<div class="arithmatex">\[\psi_N = \frac{\psi - \psi_{\text{axis}}}{\psi_{\text{boundary}} - \psi_{\text{axis}}}\]</div>
+<p>where:</p>
+<ul>
+<li><span class="arithmatex">\(\psi_N\)</span> is the normalized poloidal flux</li>
+<li><span class="arithmatex">\(\psi\)</span> is the poloidal flux at a given point in the plasma</li>
+<li><span class="arithmatex">\(\psi_{\text{axis}}\)</span> is the poloidal flux at the magnetic axis</li>
+<li><span class="arithmatex">\(\psi_{\text{boundary}}\)</span> is the poloidal flux at the plasma boundary (typically the last closed flux surface or separatrix)</li>
+</ul>
+<p>In fusion plasmas, the poloidal magnetic flux <span class="arithmatex">\(\psi\)</span> is the magnetic flux passing through a surface connecting the major axis to a given point in the plasma. It is defined as the integral of the poloidal magnetic field component over this surface. The poloidal flux is an important quantity because magnetic field lines lie on surfaces of constant poloidal flux in axisymmetric equilibria.</p>
+<p>The normalization provides several advantages:</p>
+<ul>
+<li>It creates a dimensionless coordinate that ranges from 0 to 1, making it easy to compare different plasma configurations</li>
+<li>It accounts for differences in absolute flux values across different devices or operating conditions</li>
+<li>It provides a natural coordinate system for plasma transport and stability analyses</li>
+</ul>
+<p>The sign convention for normalized poloidal flux is such that it increases monotonically from the magnetic axis outward to the plasma boundary. This definition applies to both tokamaks and stellarators, although in stellarators the lack of axisymmetry can introduce complications in the precise definition of flux surfaces.</p>
 
 
 
