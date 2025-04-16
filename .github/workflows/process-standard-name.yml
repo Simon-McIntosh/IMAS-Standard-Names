@@ -121,8 +121,8 @@ jobs:
 
             ${{ needs.build.outputs.update-message }}
 
-            Please verify that the documentation for this Standard Name given 
-            at [issue-${{ needs.build.outputs.issue-number }}] (
+            Please verify that the documentation for this Standard Name 
+            [issue-${{ needs.build.outputs.issue-number }}](
             ${{ steps.deployment.outputs.page_url }}/issues/issue-${{ needs.build.outputs.issue-number }}
             ) correctly reflects your intention.
             To make changes, click "Edit" from the three dots menu (⋯) in the top 
@@ -130,9 +130,9 @@ jobs:
             automatic reprocessing of your submission.
 
             > [!NOTE]\n
-            > Assignees: Apply the "approve" label to approve this request.
-            Application of the "approve" label will automatically commit changes to
-            the submit branch and create or update the associated Pull Request.
+            > Reviewer: Apply the "commit" label to automatically commit changes 
+            to the submit branch and create or update an associated Pull Request for 
+            expert approval.
         run: echo -e "$update_message" | gh issue comment $ISSUE_URL --body-file -
 
   commit:

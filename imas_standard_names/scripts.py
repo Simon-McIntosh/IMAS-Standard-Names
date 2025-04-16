@@ -89,7 +89,7 @@ def update_standardnames(
         click.echo(
             ":sparkles: This proposal is ready for submission to "
             "the Standard Names repository.\n"
-            f"\n{standard_name.as_html()}\n".replace("img/", "docs/img/")
+            # f"\n{standard_name.as_html()}\n".replace("img/", "docs/img/")
         )
 
 

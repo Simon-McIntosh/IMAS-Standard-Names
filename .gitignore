@@ -12,5 +12,3 @@ htmlcov/
 # pytest 
 htmltest/
 
-# vscode
-.vscode/
