@@ -23,7 +23,8 @@ class IdsIssue:
 
     def __str__(self) -> str:
         """Return string representation of the issue."""
-        return textwrap.dedent(f"""
+        return textwrap.dedent(
+            f"""
             ### Standard Name
             
             {self.name}
@@ -34,7 +35,7 @@ class IdsIssue:
             
             ### Documentation
             
-            {self.metadata.documentation}
+            {self["documentation"]}
             
             ### Tags
             
@@ -43,7 +44,8 @@ class IdsIssue:
             ### Options
             
             - [{self.overwrite}] This proposal overwrites a duplicate Standard Name.
-        """).strip()
+            """
+        ).strip()
 
 
 if __name__ == "__main__":

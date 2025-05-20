@@ -423,3 +423,5 @@ class GenericNames:
 
 if __name__ == "__main__":  # pragma: no cover
     standard_names = StandardNameFile("")
+
+    print(standard_names)

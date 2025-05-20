@@ -12,3 +12,6 @@ htmlcov/
 # pytest 
 htmltest/
 
+# environment API keys
+.env/
+uv.lock

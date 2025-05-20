@@ -1,10 +1,10 @@
 {
   "inputs": [
     {
-        "type": "promptString",
-        "id": "github_token",
-        "description": "GitHub Personal Access Token",
-        "password": true
+      "type": "promptString",
+      "id": "github_token",
+      "description": "GitHub Personal Access Token",
+      "password": true
     }
   ],
   "servers": {
@@ -12,6 +12,7 @@
       "command": "docker",
       "args": ["run", "-i", "--rm", "mcp-imas"]
     },
+
     "github": {
       "command": "docker",
       "args": [

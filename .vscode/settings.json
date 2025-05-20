@@ -1,3 +1,26 @@
 {
-  "python.analysis.typeCheckingMode": "standard"
+  "python.analysis.typeCheckingMode": "standard",
+  "cSpell.words": [
+    "dotenv",
+    "fastmcp",
+    "genericname",
+    "IMAS",
+    "ipykernel",
+    "logfire",
+    "Maarten",
+    "mkdocs",
+    "mypy",
+    "pydantic",
+    "pytest",
+    "pyyaml",
+    "Sebregts",
+    "standardname",
+    "standardnames",
+    "stellarators",
+    "strictyaml",
+    "tokamaks"
+  ],
+  "python.testing.pytestArgs": ["tests"],
+  "python.testing.unittestEnabled": false,
+  "python.testing.pytestEnabled": true
 }

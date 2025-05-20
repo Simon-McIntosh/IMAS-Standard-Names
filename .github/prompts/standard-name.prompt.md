@@ -3,7 +3,7 @@ Create a new GitHub issue for Simon-McIntosh/IMAS-Standard-Names.
 The issue should follow the #file:../ISSUE_TEMPLATE/create-standard-name.yml template.
 The issue should include blank lines above and below each section.
 The issue should be written in markdown format.
-Ensure that the issue is correctly formated and indented.
+Ensure that the issue is correctly formatted and indented.
 Special attention should be paid to the creation of markdown lists by ensuring that:
 
 - the inclusion of a blank line before the first list item
@@ -18,10 +18,10 @@ Include the following files as context:
 - file:../docs/generic_names.csv
 - file:../docs/transformations.csv
 
-<!-- Retrive further information about the source  # TODO make  CF Conventions MCP server
-[Climate and Forcasting conventions](https://cfconventions.org/) upon which the
+<!-- retrieve further information about the source  # TODO make  CF Conventions MCP server
+[Climate and forecasting conventions](https://cfconventions.org/) upon which the
 Fusion Conventions, defined above, are based. In the case of conflicts between the Fusion
-and Climate and Forcasting conventions, the Fusion conventions take precedence. -->
+and Climate and forecasting conventions, the Fusion conventions take precedence. -->
 
 Use the IMAS MCP server to:
 
@@ -32,7 +32,8 @@ Use the IMAS MCP server to:
 The issue should be written in markdown format and use heading level 3 to mark each section.
 Ensure that the issue is correctly formatted and indented.
 Ensure that the issue is written in Plain English using US spelling.
-Use markdown for formulars and equations.
+Use LaTeX formatted math within Markdown for formulas and equations.
+Justify all formulas and equations centrally. 
 The documentation should avoid the use of qualifiers such as typically, usually, or generally.
 
 Include the following information in the documentation field:
@@ -77,15 +78,15 @@ After creating the issue, perform the following steps:
 
 - comment on the issue with the following message:
   '🪄 This issue was created by Copilot using the {insert detected LLM name here}
-  Large Language Model. The proposed Standard Name follows the Fusion Conventions. The 
-  documentation is based on the IMAS Data Dictionary and the references included in the 
+  Large Language Model. The proposed Standard Name follows the Fusion Conventions. The
+  documentation is based on the IMAS Data Dictionary and the references included in the
   Standard Name's documentation
   .'
 - Add the "standard-name" label to the submitted issue.
 
-Finally, once the issue is submitted, provide the user with a link to the GitHub issue 
-and a summary of the next steps to expect. Ensure that the summary includes any relevant 
+Finally, once the issue is submitted, provide the user with a link to the GitHub issue
+and a summary of the next steps to expect. Ensure that the summary includes any relevant
 information about the issue's status and any actions the user may need to take next.
 
-Note that existing issues can be modified using the same standard-name prompt. 
+Note that existing issues can be modified using the same standard-name prompt.
 Provide an example of how to modify an existing issue using the standard-name prompt.
