@@ -13,5 +13,5 @@ htmlcov/
 htmltest/
 
 # environment API keys
-.env/
+.env
 uv.lock
