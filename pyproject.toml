@@ -1,6 +1,6 @@
 [project]
 name = "imas-standard-names"
-version = "0.0.0"
+dynamic = ["version"]
 description = "A collection of Standard Names used in the Fusion Conventions and logic for creating a static website for documentation."
 authors = [
   { name = "Maarten Sebregts", email = "msebregts@ignitioncomputing.com" },
@@ -64,8 +64,11 @@ docs = [
   "mkdocs-table-reader-plugin (>=3.1.0,<4.0.0)",
 ]
 [build-system]
-requires = ["hatchling>=1.25.0"]
+requires = ["hatchling>=1.25.0", "hatch-vcs>=0.4.0"]
 build-backend = "hatchling.build"
+
+[tool.hatch.version]
+source = "vcs"
 
 [dependency-groups]
 dev = [
