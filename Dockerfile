@@ -21,7 +21,7 @@ RUN pip install --no-cache-dir uv
 WORKDIR /app
 
 # Copy only necessary files for installation
-COPY pyproject.toml poetry.lock* README.md ./
+COPY pyproject.toml README.md ./
 COPY imas_standard_names/ ./imas_standard_names/
 
 # Copy git files essential  for versioning

@@ -1,31 +1,18 @@
 {
-  "inputs": [
-    {
-      "type": "promptString",
-      "id": "github_token",
-      "description": "GitHub Personal Access Token",
-      "password": true
-    }
-  ],
   "servers": {
+    // "imas": {
+    //   "url": "https://imas-dd.iter.org/mcp/",
+    //   "type": "http"
+    // },
     "imas": {
-      "command": "docker",
-      "args": ["run", "-i", "--rm", "mcp-imas"]
-    },
-
-    "github": {
-      "command": "docker",
+      "type": "stdio",
+      "command": "uv",
       "args": [
         "run",
-        "-i",
-        "--rm",
-        "-e",
-        "GITHUB_PERSONAL_ACCESS_TOKEN",
-        "ghcr.io/github/github-mcp-server"
-      ],
-      "env": {
-        "GITHUB_PERSONAL_ACCESS_TOKEN": "${input:github_token}"
-      }
+        "--active",
+        "imas-mcp",
+        "--no-rich",
+      ]
     },
   }
 }

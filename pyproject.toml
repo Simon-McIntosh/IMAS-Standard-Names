@@ -1,6 +1,6 @@
 [project]
 name = "imas-standard-names"
-dynamic = ["version"]
+version = "0.0.0"
 description = "A collection of Standard Names used in the Fusion Conventions and logic for creating a static website for documentation."
 authors = [
   { name = "Maarten Sebregts", email = "msebregts@ignitioncomputing.com" },
@@ -19,6 +19,7 @@ dependencies = [
   "tabulate (>=0.9.0,<0.10.0)",
   "requests (>=2.32.3,<3.0.0)",
   "markdown (>=3.8,<4.0)",
+  "imas-mcp>=2.2",
 ]
 keywords = [
   "fusion",
@@ -62,37 +63,23 @@ docs = [
   "mkdocs-data-plugin (>=0.2.0,<0.3.0)",
   "mkdocs-table-reader-plugin (>=3.1.0,<4.0.0)",
 ]
-
 [build-system]
-requires = ["poetry-core>=2.1", "poetry-dynamic-versioning>=1.4"]
-build-backend = "poetry_dynamic_versioning.backend"
+requires = ["hatchling>=1.25.0"]
+build-backend = "hatchling.build"
 
-[tool.poetry]
-name = "imas-standard-names"
-version = "0.0.0"
-package-mode = true
-exclude = [".github"]
-
-[tool.poetry.group.dev.dependencies]
-ipykernel = "^6.29.5"
-pre-commit = "^4.1.0"
-pandas-stubs = "^2.2.3.250308"
-types-pyyaml = "^6.0.12.20241230"
-logfire = "^3.14.0"
-mcp-cli = "^0.1.0"
-ruff = "^0.11.10"
-
-[tool.poetry.requires-plugins]
-poetry-dynamic-versioning = { version = ">=1.0.0,<2.0.0", extras = ["plugin"] }
-poetry-plugin-shell = { version = ">=1.0.0,<2.0.0", extras = ["plugin"] }
-poetry-plugin-export = ">=1.8"
-
-[tool.poetry-dynamic-versioning]
-enable = true
-vcs = "git"
-style = "semver"
-pattern = "^(?P<base>\\d+\\.\\d+\\.\\d+)(-?((?P<stage>[a-zA-Z]+)\\.?(?P<revision>\\d+)?))?"
-format = "{base}+{distance}.{commit}"
+[dependency-groups]
+dev = [
+  "pre-commit>=4.1.0,<5.0.0",
+  "ruff>=0.11.10,<1.0.0",
+  "pytest>=8.3.4,<9.0.0",
+  "pytest-cov>=4.1.0,<5.0.0",
+  "pytest-html>=4.1.1,<5.0.0",
+  "ipykernel>=6.29.5,<7.0.0",
+  "pandas-stubs>=2.2.3.250308,<3.0.0",
+  "types-pyyaml>=6.0.12.20241230,<7.0.0",
+  "logfire>=3.14.0,<4.0.0",
+  "mcp-cli>=0.1.0,<1.0.0",
+]
 
 [[tool.mypy.overrides]]
 module = ["strictyaml"]

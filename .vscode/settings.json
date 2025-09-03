@@ -22,5 +22,10 @@
   ],
   "python.testing.pytestArgs": ["tests"],
   "python.testing.unittestEnabled": false,
-  "python.testing.pytestEnabled": true
+  "python.testing.pytestEnabled": true,
+  "chat.mcp.serverSampling": {
+    "imas-standard-names/.vscode/mcp.json: imas-uv": {
+      "allowedDuringChat": true
+    }
+  }
 }
