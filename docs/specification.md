@@ -1,4 +1,4 @@
-# IMAS Standard Names Specification (Vector & Component Uniform Grammar)
+# IMAS Standard Names Specification
 
 Status: draft (initial skeleton)
 
@@ -10,30 +10,94 @@ marked (TBD) can evolve after initial vectors land.
 
 ## 1. Overview
 
-We adopt an _absolute uniform_ component naming pattern and encourage using the
-IMAS MCP server (configured in `.vscode/mcp.json`) to mine existing IMAS Data
-Dictionary content when drafting new equilibrium or diagnostics-related names.
+This specification treats **scalars as the primary, atomic carriers of physical
+meaning**. Almost every quantity (temperature, density, current, flux, axis
+position, shape parameter, diagnostic reading) is a scalar standard name. Vector
+standard names are a lightweight organizational layer that *group existing
+scalar components*; they never replace or diminish scalar semantics.
 
-Component pattern:
+You should first look for (or propose) scalar names. Introduce a vector name
+only when you need to express a coherent multi‑component physical field (e.g.
+`magnetic_field`) whose components already follow a consistent axis frame.
+
+Use the IMAS MCP server (configured in `.vscode/mcp.json`) to mine existing IMAS
+Data Dictionary content before proposing new scalar or vector names so the
+catalog reflects deployed diagnostics and equilibrium reconstructions.
+
+Section 2 establishes scalar naming rules. Section 3 then layers the uniform
+vector/component system on top of those, including transformation (operator)
+chains.
+
+---
+
+## 2. Scalar Standard Names
+
+Scalar names represent a single physical quantity or its derived transformation
+without embedding coordinate system, measurement method, or storage shape. Core
+rules:
+
+| Aspect | Guidance | Example |
+| ------ | -------- | ------- |
+| Form | Lowercase words separated by underscores | `electron_temperature` |
+| Clarity | Prefer explicit words over opaque abbreviations | `ion_density` |
+| No frame tokens | Omit axis names unless intrinsic | `plasma_volume` |
+| Derivatives | Prefix operator chain | `time_derivative_of_electron_temperature` |
+| From vector | Use scalarizing operator or magnitude suffix | `divergence_of_magnetic_field`, `magnetic_field_magnitude` |
+
+Common scalar patterns:
+* Physical state: `electron_temperature`, `ion_density`, `plasma_volume`.
+* Diagnostic reading (generic physical quantity).
+* Geometry / landmark: `magnetic_axis_radial_position`, `magnetic_axis_vertical_position`.
+* Shape parameter: `plasma_elongation`, `plasma_triangularity_upper`.
+* Flux / field map scalar: `poloidal_flux` (grid axes defined separately).
+
+Scalar anti‑patterns:
+
+| Invalid | Issue | Correct |
+| ------- | ----- | ------- |
+| `electron_temperature_time_derivative` | Suffix derivative form | `time_derivative_of_electron_temperature` |
+| `magnitude_of_magnetic_field` | Non‑canonical magnitude prefix | `magnetic_field_magnitude` |
+| `gradient_of_electron_temperature_radial_component` | Gradient raises rank | `radial_component_of_gradient_of_electron_temperature` |
+| `magnetic_probe_23_normal_field` | Embeds instrument index (device-specific) | `magnetic_probe_normal_field` (generic) |
+
+Gradients, curls, divergence, and similar operators may *raise* or *lower* rank.
+When they yield scalars (e.g. divergence) they simply produce another scalar
+name. When they yield vectors (e.g. gradient of a scalar), the resulting vector
+and its components use the vector layer (next section) but the scalar inputs
+remain the foundation.
+
+For extended scalar guidance (templates, validation hooks) see Section 12 and
+the `style-guide.md`.
+
+---
+
+## 3. Vector & Component System (Layer on Scalars)
+
+Vectors provide structured grouping of related scalar components plus optional
+derived vectors and scalars. Every vector is defined strictly by its scalar
+components; vectors do not introduce independent physical values.
+
+Uniform component pattern:
 
 ```text
 <axis>_component_of_<vector_expression>
 ```
 
-where `<vector_expression>` may itself include a left‑to‑right chain of
-operators (e.g. `time_derivative_of_curl_of_magnetic_field`). Every base or
-derived vector has:
+`<vector_expression>` may include a left‑to‑right operator chain, e.g.
+`time_derivative_of_curl_of_magnetic_field`.
 
-- A vector standard name (e.g. `magnetic_field`).
-- A set of component scalar standard names (e.g. `radial_component_of_magnetic_field`).
-- Optional derived scalar names (e.g. `magnetic_field_magnitude`, `divergence_of_magnetic_field`).
-- Optional derived vectors (e.g. `curl_of_magnetic_field`).
+Each (base or derived) vector entry supplies:
+
+* Vector standard name (e.g. `magnetic_field`).
+* Mapping axis → component scalar names (`radial_component_of_magnetic_field`, ...).
+* Optional magnitude scalar (`magnetic_field_magnitude`).
+* Optional derived vectors (`curl_of_magnetic_field`).
 
 Vectors group semantics; components remain atomic scalars.
 
 ---
 
-## 2. Design Principles
+## 4. Design Principles
 
 | Principle                 | Rationale                                                          |
 | ------------------------- | ------------------------------------------------------------------ |
@@ -46,7 +110,7 @@ Vectors group semantics; components remain atomic scalars.
 
 ---
 
-## 3. Terminology & Kinds
+## 5. Terminology & Kinds
 
 | Kind             | Meaning                                                                    |
 | ---------------- | -------------------------------------------------------------------------- |
@@ -59,7 +123,7 @@ Vectors group semantics; components remain atomic scalars.
 
 ---
 
-## 4. Naming Grammar (EBNF)
+## 6. Naming Grammar (EBNF)
 
 Condensed from the detailed discussion; see `docs/naming-cheatsheet.md` (future).
 
@@ -105,11 +169,11 @@ Condensed from the detailed discussion; see `docs/naming-cheatsheet.md` (future)
 <subset> ::= poloidal|toroidal|radial|parallel|perpendicular1|perpendicular2|x|y|z|<word>
 ```
 
-Enforce semantic rank rules (Section 6); grammar alone is insufficient.
+Enforce semantic rank rules (Section 7); grammar alone is insufficient.
 
 ---
 
-## 5. Operator Rank Semantics
+## 7. Operator Rank Semantics
 
 | Operator                           | Input Rank    | Output Rank | Components? | Notes                                |
 | ---------------------------------- | ------------- | ----------- | ----------- | ------------------------------------ |
@@ -126,7 +190,7 @@ Disallowed chains: e.g. `curl_of_divergence_of_...` (scalar → curl invalid).
 
 ---
 
-## 6. Validation Invariants
+## 8. Validation Invariants
 
 | Code name (for tooling) | Rule                                                                 |
 | ----------------------- | -------------------------------------------------------------------- |
@@ -139,10 +203,11 @@ Disallowed chains: e.g. `curl_of_divergence_of_...` (scalar → curl invalid).
 | SUB001                  | `<subset>_magnitude` subset ⊆ frame axes.                            |
 | AXS001                  | Axis tokens must appear in frame file.                               |
 | DRP001                  | No legacy suffix pattern detected.                                   |
+| DIAG001                 | No hard-coded instrument indices inside diagnostic quantity names.    |
 
 ---
 
-## 7. Authoring Workflow (Summary)
+## 9. Authoring Workflow (Summary)
 
 1. Define / reuse frame (see `frames/`).
 2. Create vector file with axes + magnitude field (recommended).
@@ -156,7 +221,7 @@ Extended quick start: see `quickstart.md`.
 
 ---
 
-## 8. Anti‑Patterns
+## 10. Anti‑Patterns
 
 | Invalid                                   | Reason                        | Correct                                      |
 | ----------------------------------------- | ----------------------------- | -------------------------------------------- |
@@ -167,7 +232,7 @@ Extended quick start: see `quickstart.md`.
 
 ---
 
-## 9. Future Extensions (TBD)
+## 11. Future Extensions (TBD)
 
 - Tensor ranks (`kind: tensor` with index list).
 - Frame transformations & alias vectors.
@@ -175,7 +240,7 @@ Extended quick start: see `quickstart.md`.
 
 ---
 
-## 10. Appendix: Quick Regex Hints
+## 12. Appendix: Quick Regex Hints
 
 Below are illustrative (not normative) patterns. Escape and extend as needed.
 
@@ -196,7 +261,11 @@ Always combine regex checks with semantic rank validation.
 
 End of initial specification skeleton.
 
-## 11. Scalar Standard Names (Author Guidance)
+## 13. Extended Scalar Author Guidance
+
+See also the dedicated Style Guide (`style-guide.md`) for a broader set of
+rules, anti-patterns, submission checklist, and equilibrium attribute
+conventions.
 
 While much of this specification emphasizes vectors (to pin down the
 uniform component grammar), the majority of entries will remain plain

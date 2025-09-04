@@ -31,6 +31,7 @@ import sys
 import yaml
 from pathlib import Path
 from typing import Dict, List, Set
+import re
 
 ROOT = Path(__file__).resolve().parent.parent
 STD_DIR = ROOT / "standard_names"
@@ -105,6 +106,15 @@ def main() -> int:
         # record components
         if kind in {"scalar", "derived_scalar"} and is_component_name(name):
             component_files[name] = data
+
+        # DIAG001: forbid hard-coded instrument indices (e.g. magnetic_probe_23_normal_field)
+        # Allowed pattern: trailing numeric IDs ONLY for established equipment sets (future allowlist).
+        if re.search(
+            r"\b(magnetic_probe|flux_loop|diagnostic_probe|pf_coil)_[0-9]+_", name
+        ):
+            errors.append(
+                f"DIAG001 {name}: hard-coded instrument index detected; remove numeric id from standard name."
+            )
 
     # Validate component naming pattern
     for comp_name, data in component_files.items():
