@@ -9,6 +9,12 @@
 
 This repository documents a collection of Standard Names used in the Fusion Conventions. To submit proposals for new Standard Names or changes to existing Standard Names, please use one of the supplied issue templates. The issue templates use the following "zero-code" submission process:
 
+> Data Harvest Note: For bootstrapping new entries (especially Phase 1 equilibrium
+> reconstruction attributes), use the IMAS MCP server configured in
+> `.vscode/mcp.json` (tool id `imas`) to extract existing coil, probe, loop,
+> and equilibrium geometry information from the IMAS Data Dictionary. This
+> ensures proposed names align with available diagnostics and metadata.
+
 1. **Create an Issue**: Use the provided issue templates to create a new issue.
    - For new Standard Names, use the "New Standard Name" template.
    - For changes to existing Standard Names, use the "Change Existing Standard Name" template.
@@ -37,6 +43,9 @@ This project uses a Git branching strategy to manage development and releases. T
 ## Documentation
 
 The project documentation is available at our [GitHub Pages site](https://Simon-McIntosh.github.io/IMAS-Standard-Names/).
+
+### Roadmap
+See the evolving [Roadmap](docs/roadmap.md) for phased milestones (vectors, frames, operator validation, lifecycle governance, and future tensor support).
 
 GitHub Actions automatically build and deploy the documentation whenever you push changes to the main branch. We version the documentation using [Mike](https://github.com/jimporter/mike), allowing versions to be accessible simultaneously.
 
