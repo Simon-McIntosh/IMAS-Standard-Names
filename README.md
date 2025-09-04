@@ -27,7 +27,7 @@ This repository documents a collection of Standard Names used in the Fusion Conv
    - After successful automatic processing, a member of the IMAS Standard Names team will review your issue.
    - The team may request information or clarification if needed.
 5. **Approval**: Once your issue is sufficiently developed, collaborators with privileges will tag it with the 'approve' label.
-6. **Submission**: After approval, a GitHub action will automatically commit the Standard Name proposal to the `submit` branch. The action will raise a *draft* Pull Request pointing from the `submit` branch to the `develop` branch, if one is not already present.
+6. **Submission**: After approval, a GitHub action will automatically commit the Standard Name proposal to the `submit` branch. The action will raise a _draft_ Pull Request pointing from the `submit` branch to the `develop` branch, if one is not already present.
 7. **Final Review**: Once we collect a batch of Standard Name proposals, the Pull Request will undergo final review and approval.
 8. **Release**: We will tag releases that merge approved changes from the `develop` branch back to the `main` branch accordingly.
 9. **Feedback**: We encourage feedback on the Standard Names to ensure they meet community needs. Please submit your feedback through the provided issue templates to support discussion and improvements.
@@ -45,6 +45,7 @@ This project uses a Git branching strategy to manage development and releases. T
 The project documentation is available at our [GitHub Pages site](https://Simon-McIntosh.github.io/IMAS-Standard-Names/).
 
 ### Roadmap
+
 See the evolving [Roadmap](docs/roadmap.md) for phased milestones (vectors, frames, operator validation, lifecycle governance, and future tensor support).
 
 GitHub Actions automatically build and deploy the documentation whenever you push changes to the main branch. We version the documentation using [Mike](https://github.com/jimporter/mike), allowing versions to be accessible simultaneously.
