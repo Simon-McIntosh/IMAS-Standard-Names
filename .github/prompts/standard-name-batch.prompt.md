@@ -1,6 +1,6 @@
 Batch IMAS Standard Name Generation Prompt
 
-Purpose: Generate a curated batch (set) of proposed IMAS Standard Names for a specified analysis type WITHOUT producing documentation, units, or references yet. Output ONLY the list of proposed standard names. This prompt orchestrates a focused workflow using the IMAS MCP server tools and the IMAS naming guidelines.
+Purpose: Generate a curated batch (set) of proposed IMAS Standard Names for a specified analysis type. Canonical magnitude naming now uses the prefix form `magnitude_of_<vector>` (suffix `<vector>_magnitude` is deprecated). Output focuses on name tokens; optionally can be extended to YAML using the templates in `standard-name-batch.prompt.md` (this file emphasizes list mode).
 
 Input Parameters (required unless marked optional):
 - analysis_type: A short description of the analysis domain or task (e.g. "equilibrium reconstruction", "core transport modeling", "heating and current drive", "edge plasma", "runaway electron analysis").
@@ -9,11 +9,31 @@ Input Parameters (required unless marked optional):
 - restrict_components (optional): Comma-separated subset of components to allow (from: radial, vertical, toroidal, poloidal, parallel, diamagnetic). If omitted, all may be considered where physically meaningful.
 - disallow_processes (optional): Comma-separated list of process qualifiers to exclude (e.g. conduction, convection, radiation, diffusion, induction).
 - refinement_instruction (optional): If present, treat this as a follow-up refinement request instead of a fresh generation.
+- input_standard_name_batch (optional): A previously generated `STANDARD_NAME_BATCH` YAML block (from the list prompt v1.3+) whose content can be mined for domain context, previously accepted tokens, and rejected near-duplicates. If present:
+   * Parse YAML safely; ignore extraneous fields.
+   * If `analysis_type` parameter is NOT explicitly provided, derive `analysis_type` from `parameters.domain_group` inside the batch (e.g. domain_group `equilibrium` -> analysis_type `equilibrium reconstruction`). Minimal mapping rules:
+      - equilibrium -> equilibrium reconstruction
+      - diagnostics -> magnetic diagnostics analysis
+      - plasma_state -> core plasma state characterization
+      - transport -> core transport modeling
+      - geometry -> equilibrium geometry characterization
+      - generic|mixed -> generic cross-domain synthesis
+   * Seed a do-not-propose set with all names appearing in any `sections` array of the input batch to avoid duplication.
+   * May reuse harvested context under `source_context.harvested_ids_terms` to bias candidate selection.
+   * Honor prior `rejected` and `similar_rejected` by avoiding generation of exact duplicates; near duplicates (Levenshtein ≤2) should also be suppressed unless refinement explicitly requests reconsideration.
+   * If both `analysis_type` AND `parameters.domain_group` are supplied (explicit + batch) and conflict, prefer explicit `analysis_type` but emit (silently) a suppression note by NOT proposing domain-group-only tokens that contradict the explicit domain.
+   * If provided batch lacks `parameters.domain_group` and `analysis_type` absent, output single bullet item: `invalid_input_missing_analysis_type`.
+
+Batch Ingestion Safeguards:
+1. Never echo the full input batch YAML back to the user; only use its data.
+2. If parsing fails (invalid YAML), fall back to standard behavior ignoring the batch; do NOT emit an error token—continue normally if `analysis_type` is provided, else emit `invalid_input_missing_analysis_type`.
+3. Limit combined total new proposals to `desired_count`; do not re-list previously accepted names unless refinement explicitly requests expansion of those exact tokens (rare; treat as out-of-scope unless `refinement_instruction` contains phrase `include previous`).
 
 Output Requirements:
 - Produce ONLY a markdown bullet list of proposed standard names (one per line) preceded and followed by a blank line.
 - No units, no documentation text, no equations, no explanatory prose.
 - Names must follow formatting rules (see below) and be unique within the list.
+ - If an `input_standard_name_batch` was provided, ensure none of its existing section names are repeated; instead, extend the conceptual space.
 
 Context Files to Load:
 
@@ -26,7 +46,7 @@ Guideline Essentials (embedded summary – authoritative source remains guidelin
 - Allowed components: radial, vertical, toroidal, poloidal, parallel, diamagnetic.
 - at_<position> examples: at_magnetic_axis, at_boundary, at_current_center (positions must start with a letter and use underscores; only include if physically justified by analysis_type evidence from IDS data paths or commonly used global surfaces / landmarks).
 - due_to_<process> examples: due_to_conduction, due_to_convection, due_to_radiation, due_to_diffusion, due_to_induction (only include if analysis_type implies decomposition of a flux / source term; do NOT invent obscure processes).
-- Transformations (from transformations.csv) may stack but avoid redundancy (e.g. square_of_square_of_X is invalid). Do not combine mutually unclear constructs (e.g. ratio_of_derivative_of_X_wrt_Y_to_derivative_of_X_wrt_Z is out of scope for batch stage).
+- Transformations (from transformations.csv) may stack but avoid redundancy (e.g. square_of_square_of_X is invalid). Do not combine mutually unclear constructs (e.g. ratio_of_derivative_of_X_wrt_Y_to_derivative_of_X_wrt_Z is out of scope for batch stage). Use `magnitude_of_<vector_expression>`; do NOT propose legacy `<vector_expression>_magnitude`.
 - Generic base nouns (from generic_names.csv) are NOT themselves valid final names; they must be contextualized (e.g. pressure -> poloidal_pressure is acceptable only if representing a directional component, else just pressure if already specific enough in fusion context). Avoid meaningless qualifiers.
 - Regex compliance: ^[a-z][a-z0-9_]*$ ; no double underscores; no trailing underscore; no embedded uppercase or hyphens.
 - No repetition: e.g. radial_radial_pressure invalid; temperature_temperature invalid; derivative_of_derivative_of_X invalid at this stage.
@@ -65,7 +85,7 @@ Targeted MCP Tool Workflow:
    - Filter out overly compound or speculative constructs.
    - Sort logically: (a) base scalar quantities, (b) directional/vector component forms, (c) ratios / derived / transformed forms.
 9. Output
-   - Emit bullet list (markdown) of final names ONLY. Blank line before first and after last list item.
+   - Emit bullet list (markdown) of final names ONLY. Blank line before first and after last list item. All magnitude forms must use `magnitude_of_` prefix.
    - Count should match desired_count if feasible; if fewer produced (due to strict filtering) still output list (do NOT fabricate low-quality names to pad). Do not explain deficit—user can request refinement.
 10. Refinement Loop (if refinement_instruction provided)
    - Compare newly requested constraints vs previous set. Categorize modifications internally then output ONLY the revised bullet list.
@@ -83,6 +103,7 @@ Quality Heuristics (apply silently):
 Error Handling:
 - If analysis_type is missing: return a single bullet list item: invalid_input_missing_analysis_type (and nothing else).
 - If zero candidate names after filtering: return a single bullet list item: no_viable_names_found_refine_inputs .
+ - If batch ingestion supplied but yields only duplicates so nothing new remains, still return `no_viable_names_found_refine_inputs` (user can refine).
 
 Output Format Example (illustrative only – do NOT hardcode these actual names):
 
@@ -90,12 +111,12 @@ Output Format Example (illustrative only – do NOT hardcode these actual names)
 - ion_temperature
 - electron_density
 - ion_density
-- poloidal_magnetic_field
-- toroidal_magnetic_field
+- radial_component_of_magnetic_field
+- toroidal_component_of_magnetic_field
 - parallel_current_density
 - bootstrap_current_density
 - ratio_of_ion_density_to_electron_density
-- derivative_of_electron_temperature_wrt_radius
+- magnitude_of_magnetic_field
 
 (End example – real output depends on analysis_type and live tool queries.)
 

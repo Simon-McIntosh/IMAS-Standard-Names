@@ -52,8 +52,8 @@ status: draft
 ### 1.3 Gradient of a Scalar (Produces a Vector)
 
 Gradient changes rank (scalar → vector). Skip to the vector section below using
-`gradient_of_<scalar>` as the vector name (kind: derived_vector) and add
-components: `<axis>_component_of_gradient_of_<scalar>`.
+`gradient_of_<scalar>` as the vector name (kind: derived*vector) and add
+components: `<axis>\_component_of_gradient_of*<scalar>`.
 
 ### 1.4 Derived Scalar from a Vector
 
@@ -103,7 +103,7 @@ Base scalar: <noun_phrase>
 Time derivative: time_derivative_of_<scalar>
 Vector gradient (see vectors): gradient_of_<scalar>
 Scalar from vector divergence: divergence_of_<vector>
-Scalar from vector magnitude (vector → scalar): <vector_expression>_magnitude
+Scalar from vector magnitude (vector → scalar): magnitude_of_<vector_expression>  # canonical (suffix form deprecated)
 ```
 
 ---
@@ -148,7 +148,7 @@ components:
   radial: radial_component_of_magnetic_field
   toroidal: toroidal_component_of_magnetic_field
   vertical: vertical_component_of_magnetic_field
-magnitude: magnetic_field_magnitude
+magnitude: magnitude_of_magnetic_field
 status: draft
 description: Magnetic field vector in laboratory cylindrical coordinates.
 ```
@@ -174,7 +174,7 @@ Repeat for toroidal/vertical axes.
 `standard_names/magnetic_field/magnetic_field_magnitude.yml`
 
 ```yaml
-name: magnetic_field_magnitude
+name: magnitude_of_magnetic_field
 kind: derived_scalar
 unit: T
 parent_vector: magnetic_field

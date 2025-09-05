@@ -1,0 +1,8 @@
+name: time_derivative_of_poloidal_flux_boundary
+kind: scalar
+unit: Wb/s
+status: draft
+description: Time derivative of poloidal flux at the last closed flux surface (∂ψ_boundary/∂t).
+parent_scalar: poloidal_flux_boundary
+notes:
+  - Indicates boundary and shape control dynamics.

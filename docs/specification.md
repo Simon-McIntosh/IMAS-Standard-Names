@@ -13,8 +13,8 @@ marked (TBD) can evolve after initial vectors land.
 This specification treats **scalars as the primary, atomic carriers of physical
 meaning**. Almost every quantity (temperature, density, current, flux, axis
 position, shape parameter, diagnostic reading) is a scalar standard name. Vector
-standard names are a lightweight organizational layer that *group existing
-scalar components*; they never replace or diminish scalar semantics.
+standard names are a lightweight organizational layer that _group existing
+scalar components_; they never replace or diminish scalar semantics.
 
 You should first look for (or propose) scalar names. Introduce a vector name
 only when you need to express a coherent multi‑component physical field (e.g.
@@ -36,31 +36,32 @@ Scalar names represent a single physical quantity or its derived transformation
 without embedding coordinate system, measurement method, or storage shape. Core
 rules:
 
-| Aspect | Guidance | Example |
-| ------ | -------- | ------- |
-| Form | Lowercase words separated by underscores | `electron_temperature` |
-| Clarity | Prefer explicit words over opaque abbreviations | `ion_density` |
-| No frame tokens | Omit axis names unless intrinsic | `plasma_volume` |
-| Derivatives | Prefix operator chain | `time_derivative_of_electron_temperature` |
-| From vector | Use scalarizing operator or magnitude suffix | `divergence_of_magnetic_field`, `magnetic_field_magnitude` |
+| Aspect          | Guidance                                                               | Example                                                       |
+| --------------- | ---------------------------------------------------------------------- | ------------------------------------------------------------- |
+| Form            | Lowercase words separated by underscores                               | `electron_temperature`                                        |
+| Clarity         | Prefer explicit words over opaque abbreviations                        | `ion_density`                                                 |
+| No frame tokens | Omit axis names unless intrinsic                                       | `plasma_volume`                                               |
+| Derivatives     | Prefix operator chain                                                  | `time_derivative_of_electron_temperature`                     |
+| From vector     | Use scalarizing operator or canonical magnitude prefix `magnitude_of_` | `divergence_of_magnetic_field`, `magnitude_of_magnetic_field` |
 
 Common scalar patterns:
-* Physical state: `electron_temperature`, `ion_density`, `plasma_volume`.
-* Diagnostic reading (generic physical quantity).
-* Geometry / landmark: `magnetic_axis_radial_position`, `magnetic_axis_vertical_position`.
-* Shape parameter: `plasma_elongation`, `plasma_triangularity_upper`.
-* Flux / field map scalar: `poloidal_flux` (grid axes defined separately).
+
+- Physical state: `electron_temperature`, `ion_density`, `plasma_volume`.
+- Diagnostic reading (generic physical quantity).
+- Geometry / landmark: `magnetic_axis_radial_position`, `magnetic_axis_vertical_position`.
+- Shape parameter: `plasma_elongation`, `plasma_triangularity_upper`.
+- Flux / field map scalar: `poloidal_flux` (grid axes defined separately).
 
 Scalar anti‑patterns:
 
-| Invalid | Issue | Correct |
-| ------- | ----- | ------- |
-| `electron_temperature_time_derivative` | Suffix derivative form | `time_derivative_of_electron_temperature` |
-| `magnitude_of_magnetic_field` | Non‑canonical magnitude prefix | `magnetic_field_magnitude` |
-| `gradient_of_electron_temperature_radial_component` | Gradient raises rank | `radial_component_of_gradient_of_electron_temperature` |
-| `magnetic_probe_23_normal_field` | Embeds instrument index (device-specific) | `magnetic_probe_normal_field` (generic) |
+| Invalid                                             | Issue                                     | Correct                                                |
+| --------------------------------------------------- | ----------------------------------------- | ------------------------------------------------------ |
+| `electron_temperature_time_derivative`              | Suffix derivative form                    | `time_derivative_of_electron_temperature`              |
+| `magnetic_field_magnitude`                          | Deprecated suffix magnitude form          | `magnitude_of_magnetic_field`                          |
+| `gradient_of_electron_temperature_radial_component` | Gradient raises rank                      | `radial_component_of_gradient_of_electron_temperature` |
+| `magnetic_probe_23_normal_field`                    | Embeds instrument index (device-specific) | `magnetic_probe_normal_field` (generic)                |
 
-Gradients, curls, divergence, and similar operators may *raise* or *lower* rank.
+Gradients, curls, divergence, and similar operators may _raise_ or _lower_ rank.
 When they yield scalars (e.g. divergence) they simply produce another scalar
 name. When they yield vectors (e.g. gradient of a scalar), the resulting vector
 and its components use the vector layer (next section) but the scalar inputs
@@ -88,10 +89,10 @@ Uniform component pattern:
 
 Each (base or derived) vector entry supplies:
 
-* Vector standard name (e.g. `magnetic_field`).
-* Mapping axis → component scalar names (`radial_component_of_magnetic_field`, ...).
-* Optional magnitude scalar (`magnetic_field_magnitude`).
-* Optional derived vectors (`curl_of_magnetic_field`).
+- Vector standard name (e.g. `magnetic_field`).
+- Mapping axis → component scalar names (`radial_component_of_magnetic_field`, ...).
+- Optional magnitude scalar (`magnitude_of_magnetic_field`).
+- Optional derived vectors (`curl_of_magnetic_field`).
 
 Vectors group semantics; components remain atomic scalars.
 
@@ -203,7 +204,7 @@ Disallowed chains: e.g. `curl_of_divergence_of_...` (scalar → curl invalid).
 | SUB001                  | `<subset>_magnitude` subset ⊆ frame axes.                            |
 | AXS001                  | Axis tokens must appear in frame file.                               |
 | DRP001                  | No legacy suffix pattern detected.                                   |
-| DIAG001                 | No hard-coded instrument indices inside diagnostic quantity names.    |
+| DIAG001                 | No hard-coded instrument indices inside diagnostic quantity names.   |
 
 ---
 
@@ -228,7 +229,7 @@ Extended quick start: see `quickstart.md`.
 | `magnetic_field_radial_component`         | Legacy suffix style           | `radial_component_of_magnetic_field`         |
 | `curl_of_magnetic_field_radial_component` | Ambiguous (curl of scalar)    | `radial_component_of_curl_of_magnetic_field` |
 | `gradient_of_magnetic_field`              | Gradient needs scalar operand | (none) or `gradient_of_electron_temperature` |
-| `magnitude_of_magnetic_field_magnitude`   | Double magnitude              | `magnetic_field_magnitude`                   |
+| `magnitude_of_magnetic_field_magnitude`   | Double magnitude (invalid)    | `magnitude_of_magnetic_field`                |
 
 ---
 
@@ -311,7 +312,7 @@ Always prefix: `time_derivative_of_<name>`; chainable with other operators:
 | Invalid                                             | Reason                                      | Correct                                                |
 | --------------------------------------------------- | ------------------------------------------- | ------------------------------------------------------ |
 | `electron_temperature_time_derivative`              | Suffix style conflicts with uniform grammar | `time_derivative_of_electron_temperature`              |
-| `magnitude_of_magnetic_field`                       | Non-canonical magnitude form                | `magnetic_field_magnitude`                             |
+| `magnetic_field_magnitude`                          | Deprecated legacy magnitude suffix          | `magnitude_of_magnetic_field`                          |
 | `gradient_of_electron_temperature_radial_component` | Gradient raises rank (vector)               | `radial_component_of_gradient_of_electron_temperature` |
 
 ### 11.7 Minimal YAML Templates

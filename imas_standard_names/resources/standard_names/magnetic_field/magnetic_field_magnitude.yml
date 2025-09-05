@@ -1,0 +1,15 @@
+name: magnetic_field_magnitude
+kind: derived_scalar
+unit: T
+parent_vector: magnetic_field
+derivation:
+  expression: |
+    sqrt(radial_component_of_magnetic_field^2 +
+         toroidal_component_of_magnetic_field^2 +
+         vertical_component_of_magnetic_field^2)
+  dependencies:
+    - radial_component_of_magnetic_field
+    - toroidal_component_of_magnetic_field
+    - vertical_component_of_magnetic_field
+status: deprecated
+description: DEPRECATED suffix form magnitude of magnetic_field; use magnitude_of_magnetic_field instead.

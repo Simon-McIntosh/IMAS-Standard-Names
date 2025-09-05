@@ -1,0 +1,11 @@
+name: magnetic_field
+kind: vector
+frame: cylindrical_r_tor_z
+unit: T
+components:
+  radial: radial_component_of_magnetic_field
+  toroidal: toroidal_component_of_magnetic_field
+  vertical: vertical_component_of_magnetic_field
+magnitude: magnitude_of_magnetic_field
+status: draft
+description: Magnetic field vector in laboratory cylindrical coordinates.

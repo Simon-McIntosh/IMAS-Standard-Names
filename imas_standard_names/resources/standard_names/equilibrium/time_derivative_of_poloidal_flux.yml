@@ -1,0 +1,8 @@
+name: time_derivative_of_poloidal_flux
+kind: scalar
+unit: Wb/s
+status: draft
+description: Time derivative of the poloidal flux field (∂ψ/∂t).
+parent_scalar: poloidal_flux
+notes:
+  - Relevant for dynamic equilibrium and resistive diffusion analyses.

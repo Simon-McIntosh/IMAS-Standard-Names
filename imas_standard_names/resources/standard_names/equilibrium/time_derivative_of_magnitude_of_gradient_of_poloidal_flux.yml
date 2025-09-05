@@ -1,0 +1,8 @@
+name: time_derivative_of_magnitude_of_gradient_of_poloidal_flux
+kind: scalar
+unit: Wb/(m*s)
+status: draft
+description: Time derivative of the magnitude of the poloidal flux gradient ∂/∂t(|∇ψ|).
+parent_scalar: magnitude_of_gradient_of_poloidal_flux
+notes:
+  - Captures rate of change of flux surface spacing.

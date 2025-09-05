@@ -1,0 +1,8 @@
+name: magnitude_of_gradient_of_poloidal_flux
+kind: scalar
+unit: Wb/m
+status: draft
+description: Magnitude (Euclidean norm) of the spatial gradient of poloidal flux |∇ψ|.
+parent_vector: gradient_of_poloidal_flux
+notes:
+  - Used in metric coefficient and flux surface spacing calculations.

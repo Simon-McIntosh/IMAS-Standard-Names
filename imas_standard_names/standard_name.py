@@ -223,7 +223,7 @@ class ParseYaml:
         match other:
             case StandardName():
                 other = other.as_document()
-            case StandardNameFile():
+            case StandardNames():
                 other = other.data
             case syaml.YAML():
                 pass
@@ -307,52 +307,125 @@ class StandardInput(ParseJson):
 
 
 @dataclass
-class StandardNameFile(ParseYaml):
-    """Manage the project's standard name file."""
+class StandardNames(ParseYaml):
+    """Manage the project's standard names stored as individual YAML files.
 
-    input_: InitVar[str | Path | syaml.YAML]
-    _filename: Path | None = field(init=False, repr=False)
+    The project stores each standard name in a separate YAML file under a
+    directory tree. This class scans a directory (recursively) collecting all
+    standard name YAML documents into a single strictyaml document.
+    """
 
-    def __post_init__(self, input_: str | Path | syaml.YAML):
-        """Load standard name data from yaml file."""
+    _dirname: Path | None = field(init=False, repr=False, default=None)
+    _origin_file: Path | None = field(init=False, repr=False, default=None)
+
+    def __post_init__(self, input_: str | syaml.YAML | Path):
+        """Load standard name data from directory, file, or raw YAML content."""
         match input_:
             case "":
-                pass
-            case str() if self._is_yaml(input_):
-                self._filename = None
-            case str() | Path():
-                self._filename = Path(input_)
-                with open(self.filename, "r") as f:
-                    input_ = f.read()
+                self.data = syaml.as_document({}, schema=self.schema)
+                return
             case syaml.YAML():
-                self._filename = None
+                self._dirname = None
+                self._origin_file = None
+                super().__post_init__(input_)
+                return
+            case str() if self._is_yaml_string(input_):
+                self._dirname = None
+                self._origin_file = None
+                super().__post_init__(input_)
+                return
+            case str() | Path():
+                path = Path(input_)
+                if path.exists():
+                    if path.is_dir():
+                        self._dirname = path
+                        self._origin_file = None
+                        yaml_text = self._gather_directory_yaml(path)
+                        # Recursively parse the gathered YAML
+                        self.__post_init__(yaml_text)
+                        return
+                    if path.is_file():
+                        self._dirname = path.parent
+                        self._origin_file = path
+                        with open(path, "r", encoding="utf-8") as f:
+                            yaml_text = f.read()
+                        self.__post_init__(yaml_text)
+                        return
+                # Non-existent path or not a file/dir: treat as YAML string
+                self._dirname = None
+                self._origin_file = None
+                super().__post_init__(str(path))
+                return
             case _:
                 raise TypeError(
                     f"Invalid input type: {type(input_)}. Expected str, Path, or YAML."
                 )
-        if input_ == "":
-            self.data = syaml.as_document({}, schema=self.schema)
-            return
-        super().__post_init__(input_)
 
     @staticmethod
-    def _is_yaml(input_: str) -> bool:
-        """Return True if str looks like YAML content."""
-        return any(c in input_ for c in ["\n", ":", "-"]) and not Path(input_).exists()
+    def _is_yaml_string(candidate: str) -> bool:
+        """Return True if string resembles YAML content (and not an existing path)."""
+        return (
+            any(c in candidate for c in ["\n", ":", "-"])
+            and not Path(candidate).exists()
+        )
+
+    def _gather_directory_yaml(self, dirname: Path) -> str:
+        """Return concatenated YAML from all *.yml|*.yaml files under dirname."""
+        yaml_docs: list[str] = []
+        for file in sorted(dirname.rglob("*.yml")) + sorted(dirname.rglob("*.yaml")):
+            with open(file, "r", encoding="utf-8") as f:
+                content = f.read().strip()
+            if not content:
+                continue
+            # Each individual file may either be a single mapping with a top-level
+            # name key (new per-file schema) or the legacy {name: {...}} structure.
+            try:
+                parsed = yaml.safe_load(content)
+            except Exception as exc:  # pragma: no cover - defensive
+                raise ValueError(f"Failed parsing YAML file {file}: {exc}") from exc
+
+            if not isinstance(parsed, dict) or "name" not in parsed:
+                # Assume legacy structure already in expected format.
+                yaml_docs.append(content if content.endswith("\n") else content + "\n")
+                continue
+
+            # Convert per-file schema to existing aggregated schema {name: attrs}
+            name = parsed.pop("name")
+            # Map new field names to existing schema keys when possible.
+            # 'description' in new files corresponds to 'documentation'.
+            if "description" in parsed and "documentation" not in parsed:
+                parsed["documentation"] = parsed.pop("description")
+            # Normalise unit key -> units
+            if "unit" in parsed and "units" not in parsed:
+                parsed["units"] = parsed.pop("unit")
+            # Remove fields not currently modeled; could be stored later if needed.
+            filtered = {
+                k: v
+                for k, v in parsed.items()
+                if k in StandardName.attrs and k != "name" and v not in (None, "")
+            }
+            yaml_docs.append(
+                syaml.as_document({name: filtered}, schema=ParseYaml.schema).as_yaml()
+            )
+        return "".join(yaml_docs)
 
     @property
-    def filename(self) -> Path:
-        """Return standardnames yaml file path."""
-        if self._filename is None:
-            raise ValueError("Data input from YAML. No filename provided.")
-        if self._filename.suffix in [".yml", ".yaml"]:
-            return self._filename
-        return self._filename.with_suffix(".yaml")
+    def dirname(self) -> Path | None:
+        """Return directory containing standard name yaml files, or None."""
+        return getattr(self, "_dirname", None)
 
-    @filename.setter
-    def filename(self, value: str | Path):
-        """Set standard names yaml file path."""
-        self._filename = Path(value)
+    @dirname.setter
+    def dirname(self, value: str | Path):
+        self._dirname = Path(value)
+
+    @property
+    def origin_file(self) -> Path | None:
+        """Return origin file path, or None."""
+        return getattr(self, "_origin_file", None)
+
+    @origin_file.setter
+    def origin_file(self, value: str | Path):
+        self._origin_file = Path(value)
 
     def update(
         self,
@@ -360,33 +433,54 @@ class StandardNameFile(ParseYaml):
         overwrite: bool = False,
         update_file: bool = True,
     ):
-        """Add json data to self and update standard names file."""
-        if not overwrite:  # check for existing standard name
-            try:
-                assert standard_name.name not in self.data
-            except AssertionError:
-                raise KeyError(
-                    f"The proposed standard name **{standard_name.name}** "
-                    f"is already present in the {self.filename} file.\n\n"
-                    # "with the following content:"
-                    # f"\n\n{self[standard_name.name].as_html()}\n\n"
-                    "Mark the :white_check_mark: **overwrite** checkbox "
-                    "to overwrite this standard name."
-                )
-        if standard_name.alias:
-            try:
-                assert standard_name.alias in self.data
-            except AssertionError:
-                raise KeyError(
-                    f"The proposed alias **{standard_name.alias}** "
-                    f"is not present in {self.filename}."
-                )
+        """Add or update a StandardName and optionally persist to per-file YAML.
+
+        Behaviour mirrors previous single-file version. When persisting, write
+        two files:
+        - submission.yml (single-name document for review pipelines)
+        - <dirname>/<standard_name>.yml (canonical per-name file)
+        """
+        if not overwrite and standard_name.name in self.data:
+            raise KeyError(
+                f"The proposed standard name **{standard_name.name}** is already present.\n\n"
+                "Mark the :white_check_mark: **overwrite** checkbox to overwrite this standard name."
+            )
+        if standard_name.alias and standard_name.alias not in self.data:
+            raise KeyError(
+                f"The proposed alias **{standard_name.alias}** is not present in the collection."
+            )
+
         self += standard_name.as_document()
+
         if update_file:
-            with open(self.filename.with_name("submission.yml"), "w") as f:
-                f.write(standard_name.as_yaml())
-            with open(self.filename, "w") as f:
-                f.write(self.data.as_yaml())
+            # Always write submission.yml if directory known
+            if self._dirname is not None:  # type: ignore[attr-defined]
+                submission_path = self._dirname / "submission.yml"  # type: ignore[attr-defined]
+                with open(submission_path, "w", encoding="utf-8") as f:
+                    f.write(standard_name.as_yaml())
+                # Per-name file (directory mode)
+                name_file = self._dirname / f"{standard_name.name}.yml"  # type: ignore[attr-defined]
+                with open(name_file, "w", encoding="utf-8") as f:
+                    f.write(standard_name.as_yaml())
+            # Backwards compatibility: if originally from a single file, refresh it
+            if self._origin_file is not None:  # type: ignore[attr-defined]
+                with open(self._origin_file, "w", encoding="utf-8") as f:  # type: ignore[attr-defined]
+                    f.write(self.data.as_yaml())
+
+    # Backwards compatibility helpers (some tests expect .filename behaviour)
+    @property
+    def filename(self) -> Path:  # pragma: no cover - backward compatibility
+        if self._origin_file is None:
+            raise ValueError(
+                "Data input from YAML string or directory. No filename provided."
+            )
+        return self._origin_file
+
+    @filename.setter  # pragma: no cover - transitional
+    def filename(self, value):  # noqa: D401
+        path = Path(value)
+        self._origin_file = path
+        self._dirname = path.parent
 
 
 @dataclass
@@ -422,6 +516,6 @@ class GenericNames:
 
 
 if __name__ == "__main__":  # pragma: no cover
-    standard_names = StandardNameFile("")
+    standard_names = StandardNames("")
 
     print(standard_names)
