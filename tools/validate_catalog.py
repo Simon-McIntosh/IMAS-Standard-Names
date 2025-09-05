@@ -34,7 +34,8 @@ from typing import Dict, List, Set
 import re
 
 ROOT = Path(__file__).resolve().parent.parent
-STD_DIR = ROOT / "standard_names"
+# Updated path: standard names now reside inside the package resources directory
+STD_DIR = ROOT / "imas_standard_names" / "resources" / "standard_names"
 
 
 def iter_yaml_files() -> List[Path]:
@@ -61,12 +62,14 @@ def main() -> int:
     errors: List[str] = []
 
     if not STD_DIR.exists():
-        print("[INFO] No standard_names/ directory present yet – nothing to validate.")
+        print(
+            "[INFO] No resources/standard_names/ directory present yet – nothing to validate."
+        )
         return 0
 
     files = iter_yaml_files()
     if not files:
-        print("[WARN] standard_names/ contains no YAML files.")
+        print("[WARN] resources/standard_names/ contains no YAML files.")
         return 0
 
     entries: Dict[str, dict] = {}

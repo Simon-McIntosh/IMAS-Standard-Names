@@ -1,0 +1,8 @@
+name: time_derivative_of_poloidal_flux_axis
+kind: scalar
+unit: Wb/s
+status: draft
+description: Time derivative of poloidal flux at the magnetic axis (∂ψ_axis/∂t).
+parent_scalar: poloidal_flux_axis
+notes:
+  - Tracks central equilibrium evolution.

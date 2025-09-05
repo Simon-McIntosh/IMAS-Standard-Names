@@ -1,0 +1,9 @@
+name: toroidal_component_of_gradient_of_poloidal_flux
+kind: scalar
+unit: Wb/m
+status: draft
+description: Toroidal (φ) component of the poloidal flux gradient.
+parent_vector: gradient_of_poloidal_flux
+axis: toroidal
+notes:
+  - Component of ∇ψ projected along the toroidal direction.

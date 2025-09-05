@@ -1,0 +1,7 @@
+name: radial_component_of_magnetic_field
+kind: scalar
+unit: T
+axis: radial
+parent_vector: magnetic_field
+status: draft
+description: Radial component of magnetic_field.
