@@ -7,6 +7,9 @@ import nest_asyncio
 from pydantic_ai import Agent
 from pydantic_ai.mcp import MCPServerStdio
 
+# MODEL = "anthropic:claude-opus-4-1-20250805"
+MODEL = "claude-3-haiku-20240307"
+
 # This is a workaround for the asyncio event loop issue in Jupyter notebooks
 nest_asyncio.apply()
 
@@ -19,10 +22,18 @@ dotenv.load_dotenv(dotenv_path=dotenv_path)
 logfire.configure(send_to_logfire="if-token-present")
 
 # Create an MCPServer instance with the docker command
-mcp_imas = MCPServerStdio("docker", args=["run", "-i", "--rm", "mcp-imas"])
+mcp_imas = MCPServerStdio(
+    "uv",
+    args=[
+        "run",
+        "--active",
+        "imas-mcp",
+        "--no-rich",
+    ],
+)
 
 agent = Agent(
-    model="anthropic:claude-3-7-sonnet-latest",
+    model=MODEL,
     mcp_servers=[mcp_imas],
     system_prompt="Be concise.",
     instrument=True,

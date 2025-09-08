@@ -20,6 +20,8 @@ dependencies = [
   "requests (>=2.32.3,<3.0.0)",
   "markdown (>=3.8,<4.0)",
   "imas-mcp>=2.2",
+  "textual>=6.1.0",
+  "pydantic-ai>=0.1.9",
 ]
 keywords = [
   "fusion",
@@ -82,6 +84,7 @@ dev = [
   "types-pyyaml>=6.0.12.20241230,<7.0.0",
   "logfire>=3.14.0,<4.0.0",
   "mcp-cli>=0.1.0,<1.0.0",
+  "textual-dev>=1.7.0",
 ]
 
 [[tool.mypy.overrides]]

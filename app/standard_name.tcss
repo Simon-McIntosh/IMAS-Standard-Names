@@ -1,0 +1,75 @@
+Query {
+    dock: right;
+    width: 35%;
+    background: $boost;
+    padding: 0;
+}
+
+#names_tree {
+    dock: left;
+    width: 1fr; /* occupy all remaining horizontal space left of Query */
+    height: 1fr;
+    overflow: auto;
+    border: solid gray 30%;
+}
+
+/* Body container fills space between header and footer */
+#body { height: 1fr; }
+
+LabeledTextArea, SendLabeledTextArea, SendTextArea {
+     height: auto; 
+}
+
+Label {
+    width: 100%;
+    text-align: center;
+}
+
+/* Visual separation for the two stacked areas (gray borders) */
+#response { border: solid gray 30%; padding: 0; height: 1fr; }
+#query { border: solid gray 30%; padding: 0; }
+#query_text { color: $text; background: transparent; }
+
+/* Remove focus box and keep consistent styling */
+#query_text:focus {
+    outline: none;
+    border: none;
+    background: transparent;
+    color: $text;
+}
+#response_text:focus { outline: none; border: none; background: transparent; }
+
+/* Remove extra spacing elsewhere */
+LabeledTextArea, SendLabeledTextArea, SendTextArea { margin: 0; }
+
+/* Footer row that contains the send button */
+.send-row {
+    height: 1;
+    padding: 0;
+}
+
+/* Make the first Static spacer expand to push the button to the right */
+.send-row > Static {
+    width: 1fr;
+}
+
+.send-row > .send-btn {
+    dock: right;
+    width: 5; /* minimal cell width */
+    min-width: 1;
+    padding: 0; /* remove default horizontal padding to visually halve width */
+}
+
+.send-btn {
+    background: gray 30%;
+    /* Match key binding logo text color (uses primary accent color) */
+    color: $accent;
+    text-style: bold;
+    border: none;
+    padding: 0; /* ensure no inherited padding inflates width */
+}
+
+.send-btn:hover {
+    background: gray 50%;
+}
+
