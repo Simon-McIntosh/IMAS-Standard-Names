@@ -48,7 +48,7 @@ agent = [
   "dotenv (>=0.9.9,<0.10.0)",
   "fastmcp (>=2.2.6,<3.0.0)",
   "imas-data-dictionary (>=4.0.0.post1,<5.0.0)",
-  "pydantic-ai (>=1.0.0)",
+  "pydantic-ai (>=1.0.0,<2.0.0)",
   "imas-python (>=2.0.0,<3.0.0); python_version < '3.13'",
 ]
 test = [
