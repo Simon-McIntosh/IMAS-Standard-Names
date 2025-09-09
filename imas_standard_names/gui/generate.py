@@ -7,11 +7,7 @@ from textual import events
 
 from functools import cached_property
 
-# Support both package (python -m app.generate) and script (python app/generate.py) execution.
-try:  # pragma: no cover - import flexibility convenience
-    from .tree import build_standard_names_tree  # type: ignore
-except ImportError:  # direct script run, fall back to absolute import
-    from app.tree import build_standard_names_tree  # type: ignore
+from imas_standard_names.gui.tree import build_standard_names_tree
 
 
 class LabeledTextArea(VerticalGroup):
@@ -56,9 +52,6 @@ class LabeledTextArea(VerticalGroup):
 
 
 class SendTextArea(TextArea):  # internal helper with auto-resize
-    MIN_LINES = 1
-    MAX_LINES = 10
-
     def on_key(self, event: events.Key) -> None:  # type: ignore[override]
         # Enter sends (unless Alt for newline). Other keys handled by base class.
         modifiers = getattr(event, "modifiers", set())

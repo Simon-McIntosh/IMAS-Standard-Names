@@ -14,6 +14,7 @@ from pydantic_ai.mcp import MCPServerStdio, MCPServer, MCPServerSSE
 
 class IMASConnect:
     """Class to manage connection to IMAS MCP server and run queries."""
+
     def __init__(self):
         """
         Initializes the IMAS connection class.
@@ -28,9 +29,8 @@ class IMASConnect:
         self.agent = None
         self.model = None
 
-        self.model_client=AsyncClient(verify=False,timeout=Timeout(10.0))
-        self.server_client=AsyncClient(verify=False,timeout=Timeout(10.0))
-
+        self.model_client = AsyncClient(verify=False, timeout=Timeout(10.0))
+        self.server_client = AsyncClient(verify=False, timeout=Timeout(10.0))
 
         nest_asyncio.apply()
 
@@ -52,16 +52,9 @@ class IMASConnect:
         """
         self.mcp_imas = MCPServerStdio(
             "uv",
-            args=[
-                "run",
-                "--active",
-                "imas-mcp",
-                "--no-rich",
-                "--log-level",
-                "DEBUG"
-            ],
-
+            args=["run", "--active", "imas-mcp", "--no-rich", "--log-level", "DEBUG"],
         )
+
     def connect_remote_mcp_sse(self, host: str, port: int):
         """
         Establishes a remote connection to an MCP server using Server-Sent Events (SSE).
@@ -77,9 +70,11 @@ class IMASConnect:
             connect_remote_mcp_sse('localhost', 8080)
         """
 
-        self.mcp_imas = MCPServerSSE(f'{host}:{port}/sse', http_client=self.server_client)
+        self.mcp_imas = MCPServerSSE(
+            f"{host}:{port}/sse", http_client=self.server_client
+        )
 
-    def connect_mcp(self,server: MCPServer):
+    def connect_mcp(self, server: MCPServer):
         """
         Establishes a connection to the specified MCPServer instance.
         Parameters:
@@ -94,14 +89,16 @@ class IMASConnect:
         """
         Initializes and sets up an Anthropic language model for use within the application.
         Args:
-            model_name (str, optional): The name of the Anthropic model to initialize. 
+            model_name (str, optional): The name of the Anthropic model to initialize.
                 Defaults to "claude-3-haiku-20240307".
         Side Effects:
-            Sets the `self.model` attribute to an instance of `AnthropicModel` configured 
+            Sets the `self.model` attribute to an instance of `AnthropicModel` configured
             with the specified model name and provider.
         """
-        
-        self.model = AnthropicModel(model_name, provider = AnthropicProvider(http_client=self.model_client))
+
+        self.model = AnthropicModel(
+            model_name, provider=AnthropicProvider(http_client=self.model_client)
+        )
 
     def setup_agent(self):
         """
@@ -112,7 +109,7 @@ class IMASConnect:
             self.agent: An Agent instance configured with the specified model and MCP server,
                         using a concise system prompt and instrumentation enabled.
         """
-        
+
         if self.mcp_imas is None:
             raise ValueError("MCP server not set up. Setup the mcp server first.")
         if self.model is None:
@@ -123,7 +120,3 @@ class IMASConnect:
             system_prompt="Be concise.",
             instrument=True,
         )
-    
-
-
-
