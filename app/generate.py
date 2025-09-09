@@ -1,18 +1,11 @@
-import asyncio
-
 from typing import Optional
-from enum import Enum
-from functools import cached_property
 
 from textual.app import App, ComposeResult
 from textual.widgets import Footer, Header, Label, TextArea, Button, Static
 from textual.containers import VerticalGroup, Horizontal, Container
 from textual import events
 
-import pydantic_ai
-from pydantic_ai import Agent
-
-from .imas_connect import IMASConnect
+from functools import cached_property
 
 # Support both package (python -m app.generate) and script (python app/generate.py) execution.
 try:  # pragma: no cover - import flexibility convenience
@@ -20,9 +13,6 @@ try:  # pragma: no cover - import flexibility convenience
 except ImportError:  # direct script run, fall back to absolute import
     from app.tree import build_standard_names_tree  # type: ignore
 
-class ChatMode(Enum):
-    QUERY = ">"
-    RESPONSE = "<"
 
 class LabeledTextArea(VerticalGroup):
     """A label stacked above a plain TextArea.
@@ -135,10 +125,6 @@ class StandardNameApp(App):
     BINDINGS = [("enter", "send_query", "Send")]
     TITLE = "IMAS Standard Name Generator"
 
-    def __init__(self, imas_dd_connect, **kwargs) -> None:
-        super().__init__(**kwargs)
-        self.imas = imas_dd_connect
-
     def compose(self) -> ComposeResult:
         """Create child widgets for the app."""
         yield Header(show_clock=False)
@@ -153,28 +139,18 @@ class StandardNameApp(App):
     def on_mount(self) -> None:
         # Focus query on start; splitter will apply persisted layout automatically on mount
         try:
-            self.query_field = self.query_one("#query", LabeledTextArea)
-            self.response_field = self.query_one("#response", LabeledTextArea)
-
             self.query_one("#query_text", TextArea).focus()
         except Exception:  # pragma: no cover
             pass
 
-    async def add_text(self) -> None:
+    def action_send_query(self) -> None:
         """Collect query text and echo to output (temporary demo implementation)."""
-        query = self.query_field.text.strip()
-        if query:
-            self.response_field.append_text(f"{ChatMode.QUERY.value} {query}")
-            self.query_field.text = ""  # clear after sending
-            answer = None
-            async with self.imas.agent.run_mcp_servers():
-                try:
-                    result = self.imas.agent.run_sync(query)
-                    answer = result.output
-                except Exception as e:
-                    raise e
-                    answer = f"Error:\n {e}"
-            self.response_field.append_text(f"{ChatMode.RESPONSE.value} {answer}")
+        query_field = self.query_one("#query", LabeledTextArea)
+        response_field = self.query_one("#response", LabeledTextArea)
+        text = query_field.text.strip()
+        if text:
+            response_field.append_text(f"> {text}")
+            query_field.text = ""  # clear after sending
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
         btn_id = event.button.id or ""
@@ -182,15 +158,9 @@ class StandardNameApp(App):
             # Derive field id (strip suffix)
             field_id = btn_id[:-5]
             if field_id == "query":
-                asyncio.run(self.add_text())
+                self.action_send_query()
 
-async def main():
-    imas = IMASConnect()
-    imas.connect_remote_mcp_sse('http://127.0.0.1',8080)
-    imas.setup_anthropic_model()
-    imas.setup_agent()
-    app = StandardNameApp(imas)
-    app.run()
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    app = StandardNameApp()
+    app.run()
