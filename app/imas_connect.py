@@ -14,7 +14,7 @@ from pydantic_ai.mcp import MCPServerStdio, MCPServer, MCPServerSSE
 
 class IMASConnect:
     """Class to manage connection to IMAS MCP server and run queries."""
-    def __init__(self):
+    def __init__(self, **kwargs):
         """
         Initializes the IMAS connection class.
         - Sets up placeholders for MCP IMAS, agent, and model.
@@ -28,9 +28,12 @@ class IMASConnect:
         self.agent = None
         self.model = None
 
-        self.model_client=AsyncClient(verify=False,timeout=Timeout(10.0))
-        self.server_client=AsyncClient(verify=False,timeout=Timeout(10.0))
+        # persistent clients (extended timeout)
+        self.model_client = AsyncClient(verify=False, timeout=Timeout(30.0))
+        self.server_client = AsyncClient(verify=False, timeout=Timeout(30.0))
 
+        # store basic init config for rebuilds
+        self._config = kwargs.copy()
 
         nest_asyncio.apply()
 
@@ -42,7 +45,21 @@ class IMASConnect:
         # Set up logging
         logfire.configure(send_to_logfire="if-token-present")
 
-    def setup_mcp_uv(self):
+        server_choice = kwargs.get("mcp_server", "remote_sse")
+        model_provider = kwargs.get("model_provider", "anthropic")
+
+        if server_choice == "uv":
+            self._setup_mcp_uv()
+        elif server_choice == "remote_sse":
+            self._connect_remote_mcp_sse(kwargs.get("host"), kwargs.get("port"))
+        elif server_choice == "custom":
+            self._connect_mcp(kwargs.get("server"))
+
+        if model_provider == "anthropic":
+            self._setup_anthropic_model(kwargs.get("model_name", "claude-3-haiku-20240307"))
+        self._setup_agent(kwargs.get("system_prompt","You are an expert in Fusion and utilizing the IMAS data dictionary."), output_type=kwargs.get("output_type", str))
+
+    def _setup_mcp_uv(self):
         """
         Initializes and configures the MCPServerStdio instance for the 'uv' server.
         This method sets up the MCP server with specific arguments to run the 'imas-mcp'
@@ -62,7 +79,7 @@ class IMASConnect:
             ],
 
         )
-    def connect_remote_mcp_sse(self, host: str, port: int):
+    def _connect_remote_mcp_sse(self, host: str, port: int):
         """
         Establishes a remote connection to an MCP server using Server-Sent Events (SSE).
         Args:
@@ -79,7 +96,7 @@ class IMASConnect:
 
         self.mcp_imas = MCPServerSSE(f'{host}:{port}/sse', http_client=self.server_client)
 
-    def connect_mcp(self,server: MCPServer):
+    def _connect_mcp(self,server: MCPServer):
         """
         Establishes a connection to the specified MCPServer instance.
         Parameters:
@@ -90,7 +107,7 @@ class IMASConnect:
 
         self.mcp_imas = server
 
-    def setup_anthropic_model(self, model_name: str = "claude-3-haiku-20240307"):
+    def _setup_anthropic_model(self, model_name: str = "claude-3-haiku-20240307"):
         """
         Initializes and sets up an Anthropic language model for use within the application.
         Args:
@@ -103,7 +120,7 @@ class IMASConnect:
         
         self.model = AnthropicModel(model_name, provider = AnthropicProvider(http_client=self.model_client))
 
-    def setup_agent(self):
+    def _setup_agent(self,system_prompt,output_type):
         """
         Initializes the agent with the configured model and MCP server.
         Raises:
@@ -113,16 +130,39 @@ class IMASConnect:
                         using a concise system prompt and instrumentation enabled.
         """
         
-        if self.mcp_imas is None:
-            raise ValueError("MCP server not set up. Setup the mcp server first.")
-        if self.model is None:
-            raise ValueError("Model not set up. Setup the model first.")
         self.agent = Agent(
             model=self.model,
             mcp_servers=[self.mcp_imas],
-            system_prompt="Be concise.",
+            system_prompt=system_prompt,
             instrument=True,
+            output_type=output_type
         )
+
+    # --- helper to re-create agent if model/server clients were closed ---
+    def ensure(self):
+        recreate = False
+        if self.server_client is None or getattr(self.server_client, 'is_closed', False):
+            self.server_client = AsyncClient(verify=False, timeout=Timeout(30.0))
+            recreate = True
+        if self.model_client is None or getattr(self.model_client, 'is_closed', False):
+            self.model_client = AsyncClient(verify=False, timeout=Timeout(30.0))
+            recreate = True
+        if recreate:
+            # rebuild server & agent minimally
+            choice = self._config.get("mcp_server", "remote_sse")
+            if choice == "uv":
+                self._setup_mcp_uv()
+            elif choice == "remote_sse":
+                self._connect_remote_mcp_sse(self._config.get("host"), self._config.get("port"))
+            elif choice == "custom":
+                self._connect_mcp(self._config.get("server"))
+            if self._config.get("model_provider", "anthropic") == "anthropic":
+                self._setup_anthropic_model(self._config.get("model_name", "claude-3-haiku-20240307"))
+            self._setup_agent(self._config.get("system_prompt"), self._config.get("output_type", str))
+
+    def run(self, prompt: str):
+        self.ensure()
+        return self.agent.run_sync(prompt)
     
 
 

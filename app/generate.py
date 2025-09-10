@@ -12,7 +12,7 @@ from textual import events
 import pydantic_ai
 from pydantic_ai import Agent
 
-from .imas_connect import IMASConnect
+from app.imas_connect import IMASConnect
 
 # Support both package (python -m app.generate) and script (python app/generate.py) execution.
 try:  # pragma: no cover - import flexibility convenience
