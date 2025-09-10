@@ -69,17 +69,10 @@ class IMASConnect:
         """
         self.mcp_imas = MCPServerStdio(
             "uv",
-            args=[
-                "run",
-                "--active",
-                "imas-mcp",
-                "--no-rich",
-                "--log-level",
-                "DEBUG"
-            ],
-
+            args=["run", "--active", "imas-mcp", "--no-rich", "--log-level", "DEBUG"],
         )
-    def _connect_remote_mcp_sse(self, host: str, port: int):
+
+    def connect_remote_mcp_sse(self, host: str, port: int):
         """
         Establishes a remote connection to an MCP server using Server-Sent Events (SSE).
         Args:
@@ -94,9 +87,11 @@ class IMASConnect:
             connect_remote_mcp_sse('localhost', 8080)
         """
 
-        self.mcp_imas = MCPServerSSE(f'{host}:{port}/sse', http_client=self.server_client)
+        self.mcp_imas = MCPServerSSE(
+            f"{host}:{port}/sse", http_client=self.server_client
+        )
 
-    def _connect_mcp(self,server: MCPServer):
+    def connect_mcp(self, server: MCPServer):
         """
         Establishes a connection to the specified MCPServer instance.
         Parameters:
@@ -111,14 +106,16 @@ class IMASConnect:
         """
         Initializes and sets up an Anthropic language model for use within the application.
         Args:
-            model_name (str, optional): The name of the Anthropic model to initialize. 
+            model_name (str, optional): The name of the Anthropic model to initialize.
                 Defaults to "claude-3-haiku-20240307".
         Side Effects:
-            Sets the `self.model` attribute to an instance of `AnthropicModel` configured 
+            Sets the `self.model` attribute to an instance of `AnthropicModel` configured
             with the specified model name and provider.
         """
-        
-        self.model = AnthropicModel(model_name, provider = AnthropicProvider(http_client=self.model_client))
+
+        self.model = AnthropicModel(
+            model_name, provider=AnthropicProvider(http_client=self.model_client)
+        )
 
     def _setup_agent(self,system_prompt,output_type):
         """
@@ -129,7 +126,6 @@ class IMASConnect:
             self.agent: An Agent instance configured with the specified model and MCP server,
                         using a concise system prompt and instrumentation enabled.
         """
-        
         self.agent = Agent(
             model=self.model,
             mcp_servers=[self.mcp_imas],
@@ -164,6 +160,3 @@ class IMASConnect:
         self.ensure()
         return self.agent.run_sync(prompt)
     
-
-
-
