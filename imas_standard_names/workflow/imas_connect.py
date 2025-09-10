@@ -23,7 +23,7 @@ class IMASConnect:
         - Loads environment variables from a .env file located at the project root.
         - Configures logging with Logfire, sending logs if a token is present.
         """
-
+        # core placeholders
         self.mcp_imas = None
         self.agent = None
         self.model = None
@@ -35,14 +35,13 @@ class IMASConnect:
         # store basic init config for rebuilds
         self._config = kwargs.copy()
 
+        # allow nested loops (e.g. inside notebooks / other async contexts)
         nest_asyncio.apply()
 
-        # Load environment variables from .env file
-        project_root = Path(__file__).parent.parent.absolute()
-        dotenv_path = project_root / ".env"
-        dotenv.load_dotenv(dotenv_path=dotenv_path)
+        # environment vars
+        self._load_env()
 
-        # Set up logging
+        # logging
         logfire.configure(send_to_logfire="if-token-present")
 
         server_choice = kwargs.get("mcp_server", "remote_sse")
@@ -57,7 +56,25 @@ class IMASConnect:
 
         if model_provider == "anthropic":
             self._setup_anthropic_model(kwargs.get("model_name", "claude-3-haiku-20240307"))
-        self._setup_agent(kwargs.get("system_prompt","You are an expert in Fusion and utilizing the IMAS data dictionary."), output_type=kwargs.get("output_type", str))
+        self._setup_agent(
+            kwargs.get(
+                "system_prompt",
+                "You are an expert in Fusion and utilizing the IMAS data dictionary.",
+            ),
+            output_type=kwargs.get("output_type", str),
+        )
+
+    def _load_env(self):
+        """Load environment variables from project root .env if present.
+
+        This is separated so that reconstructions (ensure) could also call it later
+        if desired without duplicating path logic.
+        """
+        project_root = Path(__file__).parent.parent.parent.absolute()
+        dotenv_path = project_root / ".env"
+        print(dotenv_path)
+        if dotenv_path.exists():  # only load if file present
+            dotenv.load_dotenv(dotenv_path=dotenv_path)
 
     def _setup_mcp_uv(self):
         """
@@ -72,7 +89,7 @@ class IMASConnect:
             args=["run", "--active", "imas-mcp", "--no-rich", "--log-level", "DEBUG"],
         )
 
-    def connect_remote_mcp_sse(self, host: str, port: int):
+    def _connect_remote_mcp_sse(self, host: str, port: int):
         """
         Establishes a remote connection to an MCP server using Server-Sent Events (SSE).
         Args:
