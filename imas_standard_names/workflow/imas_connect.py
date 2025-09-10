@@ -160,7 +160,7 @@ class IMASConnect:
                 self._setup_anthropic_model(self._config.get("model_name", "claude-3-haiku-20240307"))
             self._setup_agent(self._config.get("system_prompt"), self._config.get("output_type", str))
 
-    def run(self, prompt: str):
+    async def run(self, prompt: str):
         self.ensure()
         return self.agent.run_sync(prompt)
     

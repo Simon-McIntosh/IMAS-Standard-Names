@@ -8,7 +8,7 @@ from pydantic_ai import Agent
 from pydantic_evals.generation import generate_dataset
 from pydantic_evals.dataset import Dataset
 
-from app.imas_connect import IMASConnect
+from imas_standard_names.workflow.imas_connect import IMASConnect
 
 # =============================
 # Core Data Models (simplified)
@@ -147,7 +147,8 @@ class GenerateNames(BaseNode[State]):
                 f"Previous names which were not acceptable were: {', '.join(r.name for r in ctx.state.rejections if r.name)}"
                 f"Generate a new candidate name while avoiding previous rejections and names already proposed."
             )
-            generated = generate_connect.run(prompt).output
+            result = await generate_connect.run(prompt)
+            generated = result.output
             generated.attempt = c.attempt + 1
             generated.review = None
             ctx.state.candidates[idx] = generated
@@ -159,9 +160,10 @@ class AIReview(BaseNode[State]):
         for c in ctx.state.candidates:
             if c.passed:
                 continue
-            c.review = ai_review_connect.run(
+            result =  await ai_review_connect.run(
                 f"Review the proposed IMAS standard name '{c}' for the request {ctx.state.request}. The current candidate names are {",".join([c.name for c in ctx.state.candidates])}"
-            ).output
+            )
+            c.review = result.output
         if not ctx.state.done:
             print("\n=== AI Review rejects ===")
             for c in ctx.state.candidates:
@@ -179,7 +181,8 @@ class HumanReview(BaseNode[State]):
             print("Enter instruction (e.g. 'Generate 3 names for poloidal flux, avoid existing: poloidal_flux').")
             while not query:
                 query = input("> ").strip()
-            ctx.state.request = request_connect.run(query).output
+            result = await request_connect.run(query)
+            ctx.state.request = result.output
             return GenerateNames()
         print("Provide feedback / approvals (press Enter to continue generation). Current candidates are:")
         for c in ctx.state.candidates:
@@ -188,9 +191,10 @@ class HumanReview(BaseNode[State]):
         query = input("> ").strip()
         if query:
             for i, c in enumerate(ctx.state.candidates):
-                ctx.state.candidates[i].review = human_review_connect.run(
+                result = await human_review_connect.run(
                     f"Capture the human review feedback '{query}' for the standard name '{c}' (index {i})."
-                ).output.model_copy()
+                )
+                ctx.state.candidates[i].review = result.output.model_copy()
                 ctx.state.candidates[i].attempt = 0
 
         if ctx.state.done:
