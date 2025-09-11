@@ -4,6 +4,8 @@ repos:
     rev: v4.5.0
     hooks:
       - id: check-added-large-files
+        # uv.lock is intentionally committed for reproducible environments; exclude it from size check
+        exclude: ^uv\.lock$
 
   - repo: local
     hooks:
