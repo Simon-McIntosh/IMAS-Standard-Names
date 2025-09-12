@@ -1,10 +1,11 @@
 name: time_derivative_of_gradient_of_poloidal_flux
 kind: vector
+frame: flux_surface
 unit: Wb/(m*s)
 status: draft
 description: Time derivative of the spatial gradient of poloidal flux (∂/∂t ∇ψ).
 parent_vector: gradient_of_poloidal_flux
-vector_components: []
+components: {}
 notes:
   - Captures temporal evolution of flux surface spacing.
   - Components can be introduced if needed; left unspecified initially.

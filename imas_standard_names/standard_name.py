@@ -3,6 +3,7 @@ from functools import cached_property
 import json
 from pathlib import Path
 from typing import ClassVar
+from enum import Enum, StrEnum
 
 import markdown
 import numpy as np
@@ -14,21 +15,124 @@ import yaml
 from imas_standard_names import pint
 
 
+class Kind(StrEnum):
+    scalar = "scalar"
+    vector = "vector"
+    derived_scalar = "derived_scalar"
+    derived_vector = "derived_vector"
+
+
+class Status(StrEnum):
+    draft = "draft"
+    accepted = "accepted"
+    deprecated = "deprecated"
+    experimental = "experimental"
+    superseded = "superseded"
+
+
+class Frame(StrEnum):
+    cylindrical_r_tor_z = "cylindrical_r_tor_z"
+    cartesian_x_y_z = "cartesian_x_y_z"
+    spherical_r_theta_phi = "spherical_r_theta_phi"
+    toroidal_R_phi_Z = "toroidal_R_phi_Z"
+    flux_surface = "flux_surface"
+
+
 class StandardName(pydantic.BaseModel):
+    """Strict Standard Name model."""
+
+    model_config = pydantic.ConfigDict(use_enum_values=True)
+
+    # Required core
     name: str
-    documentation: str
-    units: str = "none"
+    kind: Kind
+    status: Status
+    unit: str = "none"
+    description: str
+
+    # Optional extended
+    documentation: str = ""
+    parent_scalar: str = ""
+    parent_vector: str = ""
+    frame: Frame | None = None
+    components: dict[str, str] | None = None
+    tags: list[str] = []
     alias: str = ""
-    tags: str | list[str] = ""
-    links: str | list[str] = ""
+
+    # Structured governance / lifecycle fields
+    constraints: list[
+        str
+    ] = []  # Physical or mathematical constraints (atomic statements)
+    validity_domain: str = ""  # Short phrase or sentence describing domain of validity
+    deprecates: str = ""  # Name this entry deprecates (if any)
+    superseded_by: str = ""  # Forward pointer if deprecated/superseded
 
     attrs: ClassVar[list[str]] = [
+        "kind",
+        "status",
+        "unit",
+        "description",
         "documentation",
-        "units",
-        "alias",
+        "parent_scalar",
+        "parent_vector",
+        "frame",
+        "components",
         "tags",
-        "links",
+        "alias",
+        "constraints",
+        "validity_domain",
+        "deprecates",
+        "superseded_by",
     ]
+
+    @pydantic.model_validator(mode="after")
+    def validate_relationships(self) -> "StandardName":
+        errors: list[str] = []
+        name = self.name
+
+        def pattern(p: str) -> bool:
+            return name.startswith(p)
+
+        is_gradient = pattern("gradient_of_")
+        is_time_derivative = pattern("time_derivative_of_")
+        is_magnitude = pattern("magnitude_of_")
+        # Combined patterns implying derivation chains
+        derived_from_scalar = is_gradient or (is_time_derivative and not is_gradient)
+
+        # Vectors must have frame and components (allow empty dict only for placeholder under strict? -> disallow empty)
+        if self.kind in {Kind.vector, Kind.derived_vector}:
+            if self.frame is None:
+                errors.append("frame is required for vector or derived_vector kinds")
+            if self.components is None or len(self.components) == 0:
+                errors.append("components mapping required for vector/derived_vector")
+
+        # parent_scalar required when vector derived from scalar (gradient/time derivative of scalar field)
+        if self.kind in {Kind.vector, Kind.derived_vector} and derived_from_scalar:
+            if not self.parent_scalar and not self.parent_vector:
+                errors.append(
+                    "parent_scalar (or parent_vector if deriving from vector) required for derived vector"
+                )
+
+        # parent_vector required for scalar magnitude_of_ or component-of vector patterns
+        if self.kind in {Kind.scalar, Kind.derived_scalar} and (
+            is_magnitude or "component_of_" in name
+        ):
+            if not self.parent_vector:
+                errors.append("parent_vector required for magnitude/component scalar")
+
+        # Disallow both parent_scalar and parent_vector simultaneously unless kind is derived_vector
+        if (
+            self.parent_scalar
+            and self.parent_vector
+            and self.kind not in {Kind.derived_vector}
+        ):
+            errors.append(
+                "only one of parent_scalar or parent_vector should be set (except for derived_vector)"
+            )
+
+        if errors:
+            raise ValueError("; ".join(errors))
+        return self
 
     @pydantic.field_validator("name", mode="after")
     @classmethod
@@ -48,7 +152,7 @@ class StandardName(pydantic.BaseModel):
             )
         return name
 
-    @pydantic.field_validator("units", mode="after")
+    @pydantic.field_validator("unit", mode="after")
     @classmethod
     def parse_units(cls, units: str) -> str:
         """Return units validated and formatted with pint."""
@@ -68,13 +172,22 @@ class StandardName(pydantic.BaseModel):
             return f"$`{pint.Unit(units):{unit_format}}`$"
         return f"{pint.Unit(units):{unit_format}}"
 
-    @pydantic.field_validator("tags", "links", mode="after")
+    @pydantic.field_validator("tags", "constraints", mode="after")
     @classmethod
-    def parse_list(cls, value: str | list[str]) -> str | list[str]:
-        """Return list of comma separated strings."""
-        if value == "" or isinstance(value, list):
+    def parse_list(cls, value):  # type: ignore[override]
+        """Normalize list-like fields.
+
+        - If already a list -> return as-is.
+        - If empty / None -> return [] (simplifies downstream handling).
+        - If string -> split on commas.
+        """
+        if isinstance(value, list):
             return value
-        return [item.strip() for item in value.split(",")]
+        if value in ("", None):
+            return []
+        if isinstance(value, str):
+            return [item.strip() for item in value.split(",") if item.strip()]
+        return []
 
     def as_dict(self) -> dict:
         """Return a dictionary representation of the StandardName instance."""
@@ -86,12 +199,17 @@ class StandardName(pydantic.BaseModel):
 
     def as_document(self) -> syaml.YAML:
         """Return standard name as a YAML document."""
-        data = {
-            key: value
-            for key, value in self.items()
-            if (key == "units" and value != "none")
-            or (key != "units" and value != [] and value != "")
-        }
+        data = {}
+        for key, value in self.items():
+            # Skip empty / default values
+            if key == "unit" and value == "none":
+                continue
+            if value in ("", [], None):
+                continue
+            # Normalize list-like serialization
+            if key in {"tags"} and isinstance(value, list) and not value:
+                continue
+            data[key] = value
         return syaml.as_document({self.name: data}, schema=ParseYaml.schema)
 
     def as_yaml(self) -> str:
@@ -113,19 +231,96 @@ class StandardName(pydantic.BaseModel):
         html = f"<div class='standard-name' id='{self.name}'>\n"
         html += f"  <h2>{self.name}</h2>\n"
 
-        # Documentation
-        html += "  <div class='documentation'>\n"
-        html += f"    {markdown.markdown(self.documentation)}\n"
-        html += "  </div>\n"
+        # Description (short)
+        if self.description:
+            html += "  <div class='description'>\n"
+            html += f"    {markdown.markdown(self.description)}\n"
+            html += "  </div>\n"
+
+        # Documentation (extended)
+        if self.documentation:
+            html += "  <div class='documentation'>\n"
+            html += f"    {markdown.markdown(self.documentation)}\n"
+            html += "  </div>\n"
 
         # Create details table for other attributes
         html += "  <table class='details'>\n"
 
-        # Units (if not 'none')
-        if self.units != "none":
+        # Description row (duplicate of block above, provides label in table)
+        if self.description:
             html += "    <tr>\n"
-            html += "      <th>Units</th>\n"
-            html += f"      <td>{self.units}</td>\n"
+            html += "      <th>Description</th>\n"
+            html += f"      <td>{markdown.markdown(self.description)}</td>\n"
+            html += "    </tr>\n"
+
+        # Unit (if not 'none')
+        if self.unit != "none":
+            html += "    <tr>\n"
+            html += "      <th>Unit</th>\n"
+            html += f"      <td>{self.unit}</td>\n"
+            html += "    </tr>\n"
+
+        # Optional metadata rows
+        for meta_key in [
+            ("Kind", self.kind.value if isinstance(self.kind, Enum) else self.kind),
+            (
+                "Status",
+                self.status.value if isinstance(self.status, Enum) else self.status,
+            ),
+            ("Frame", self.frame.value if isinstance(self.frame, Enum) else self.frame),
+            ("Parent Scalar", self.parent_scalar),
+            ("Parent Vector", self.parent_vector),
+        ]:
+            label, value = meta_key
+            if value:
+                html += "    <tr>\n"
+                html += f"      <th>{label.replace('_', ' ').title()}</th>\n"
+                html += f"      <td>{value}</td>\n"
+                html += "    </tr>\n"
+
+        # Components / vector components
+        if self.components:
+            comp_repr = self.components
+            comp_html = (
+                "<ul>"
+                + "".join(
+                    f"<li><strong>{k}</strong>: {v}</li>" for k, v in comp_repr.items()
+                )
+                + "</ul>"
+            )
+            html += "    <tr>\n"
+            html += "      <th>Components</th>\n"
+            html += f"      <td>{comp_html}</td>\n"
+            html += "    </tr>\n"
+        # Constraints list
+        if isinstance(self.constraints, list) and self.constraints:
+            constraints_html = (
+                "<ul>"
+                + "".join(f"<li>{markdown.markdown(c)}</li>" for c in self.constraints)
+                + "</ul>"
+            )
+            html += "    <tr>\n"
+            html += "      <th>Constraints</th>\n"
+            html += f"      <td>{constraints_html}</td>\n"
+            html += "    </tr>\n"
+
+        # Validity domain
+        if self.validity_domain:
+            html += "    <tr>\n"
+            html += "      <th>Validity Domain</th>\n"
+            html += f"      <td>{markdown.markdown(self.validity_domain)}</td>\n"
+            html += "    </tr>\n"
+
+        # Deprecation / supersession metadata
+        if self.deprecates:
+            html += "    <tr>\n"
+            html += "      <th>Deprecates</th>\n"
+            html += f"      <td>{self.deprecates}</td>\n"
+            html += "    </tr>\n"
+        if self.superseded_by:
+            html += "    <tr>\n"
+            html += "      <th>Superseded By</th>\n"
+            html += f"      <td>{self.superseded_by}</td>\n"
             html += "    </tr>\n"
 
         # Alias (if present)
@@ -143,20 +338,6 @@ class StandardName(pydantic.BaseModel):
             html += "    <tr>\n"
             html += "      <th>Tags</th>\n"
             html += f"      <td>{tags_html}</td>\n"
-            html += "    </tr>\n"
-
-        # Links (if present)
-        if isinstance(self.links, list) and self.links:
-            links_html = "<ul>\n"
-            for link in self.links:
-                if link.startswith(("http://", "https://")):
-                    links_html += f"        <li><a href='{link}'>{link}</a></li>\n"
-                else:
-                    links_html += f"        <li>{link}</li>\n"
-            links_html += "      </ul>"
-            html += "    <tr>\n"
-            html += "      <th>Links</th>\n"
-            html += f"      <td>{links_html}</td>\n"
             html += "    </tr>\n"
 
         html += "  </table>\n"
@@ -177,12 +358,23 @@ class ParseYaml:
         syaml.Str(),
         syaml.Map(
             {
-                "documentation": syaml.Str(),
-                syaml.Optional("units"): syaml.Str(),
-                syaml.Optional("alias"): syaml.Str(),
+                "kind": syaml.Str(),
+                "status": syaml.Str(),
+                "unit": syaml.Str(),
+                "description": syaml.Str(),
+                syaml.Optional("documentation"): syaml.Str(),
+                syaml.Optional("parent_scalar"): syaml.Str(),
+                syaml.Optional("parent_vector"): syaml.Str(),
+                syaml.Optional("frame"): syaml.Str(),
+                syaml.Optional("components"): syaml.MapPattern(
+                    syaml.Str(), syaml.Str()
+                ),
                 syaml.Optional("tags"): syaml.Str() | syaml.Seq(syaml.Str()),
-                syaml.Optional("links"): syaml.Str() | syaml.Seq(syaml.Str()),
-                syaml.Optional("options"): syaml.EmptyList() | syaml.Seq(syaml.Str()),
+                syaml.Optional("alias"): syaml.Str(),
+                syaml.Optional("constraints"): syaml.Str() | syaml.Seq(syaml.Str()),
+                syaml.Optional("validity_domain"): syaml.Str(),
+                syaml.Optional("deprecates"): syaml.Str(),
+                syaml.Optional("superseded_by"): syaml.Str(),
             }
         ),
     )
@@ -207,8 +399,6 @@ class ParseYaml:
     def __getitem__(self, standard_name: str) -> StandardName:
         """Return StandardName instance for the requested standard name."""
         data = self.data[standard_name].as_marked_up()
-        if "units" in data:
-            self._append_unit_format(data)
         return StandardName(name=standard_name, **data)
 
     def as_yaml(self) -> str:
@@ -232,13 +422,26 @@ class ParseYaml:
     def __add__(self, other: syaml.YAML | StandardName) -> "ParseYaml":
         """Add content of other to self, overriding existing keys."""
         other = self._as_document(other)
-        for key, value in other.data.items():
-            # append issue links to existing list
+        # Defensive: strictyaml Document exposes .data (an OrderedDict-like mapping)
+        other_map = getattr(other, "data", {})  # type: ignore[arg-type]
+        if not isinstance(other_map, dict):  # pragma: no cover - defensive
+            return self
+        for key, value in other_map.items():
+            # Merge links uniquely if both sides have them
             if key in self.data:
-                links = self.data.data[key].get("links", []) + value.get("links", [])
-                value["links"] = np.unique(links).tolist()
-                if not value["links"]:
-                    value["links"] = ""
+                existing = self.data.data.get(key, {})  # type: ignore[index]
+                if isinstance(existing, dict) and isinstance(value, dict):
+                    existing_links = existing.get("links", [])
+                    new_links = value.get("links", [])
+                    if not isinstance(existing_links, list):
+                        existing_links = []
+                    if not isinstance(new_links, list):
+                        new_links = []
+                    merged = np.unique(existing_links + new_links).tolist()
+                    if merged:
+                        value["links"] = merged
+                    elif "links" in value:
+                        value["links"] = ""
             self.data[key] = value
         return self
 
@@ -265,9 +468,14 @@ class ParseJson(ParseYaml):
 
     name: str = field(init=False)
 
-    def __post_init__(self, input_: str):
-        """Load JSON data, extract standard name and convert to YAML."""
-        response = json.loads(input_)
+    def __post_init__(self, input_: str | syaml.YAML):  # type: ignore[override]
+        """Load JSON data (string), extract standard name and convert to YAML.
+
+        If a YAML object is passed (edge case) we defer to parent implementation.
+        """
+        if isinstance(input_, syaml.YAML):  # pragma: no cover - fallback
+            return super().__post_init__(input_)
+        response = json.loads(str(input_))
         response = {
             key: "" if value == [] else value
             for key, value in response.items()
@@ -287,12 +495,12 @@ class ParseJson(ParseYaml):
 class StandardInput(ParseJson):
     """Process standard name input from a GitHub issue form."""
 
-    input_: InitVar[str | Path]
+    input_: InitVar[str | syaml.YAML]
     issue_link: InitVar[str] = ""
 
-    def __post_init__(self, input_: str | Path, issue_link: str):
-        """Load JSON data and Format Overwrite flag."""
-        self.filename = Path(input_).with_suffix(".json")
+    def __post_init__(self, input_: str | syaml.YAML, issue_link: str):  # type: ignore[override]
+        """Load JSON data from file path (string) and attach issue link."""
+        self.filename = Path(str(input_)).with_suffix(".json")
         with open(self.filename, "r") as f:
             json_data = f.read()
         data = json.loads(json_data)
@@ -340,7 +548,7 @@ class StandardNames(ParseYaml):
                     if path.is_dir():
                         self._dirname = path
                         self._origin_file = None
-                        yaml_text = self._gather_directory_yaml(path)
+                        yaml_text = self._build_directory_yaml(path)
                         # Recursively parse the gathered YAML
                         self.__post_init__(yaml_text)
                         return
@@ -369,8 +577,14 @@ class StandardNames(ParseYaml):
             and not Path(candidate).exists()
         )
 
-    def _gather_directory_yaml(self, dirname: Path) -> str:
-        """Return concatenated YAML from all *.yml|*.yaml files under dirname."""
+    def _build_directory_yaml(self, dirname: Path) -> str:
+        """Build and return a single concatenated YAML string from all *.yml|*.yaml files under dirname.
+
+        Performs:
+        - Discovery of per-file standard name YAML files.
+        - Parsing and schema validation (raising on unexpected fields).
+        - Construction of the aggregated multi-document YAML text.
+        """
         yaml_docs: list[str] = []
         for file in sorted(dirname.rglob("*.yml")) + sorted(dirname.rglob("*.yaml")):
             with open(file, "r", encoding="utf-8") as f:
@@ -391,21 +605,19 @@ class StandardNames(ParseYaml):
 
             # Convert per-file schema to existing aggregated schema {name: attrs}
             name = parsed.pop("name")
-            # Map new field names to existing schema keys when possible.
-            # 'description' in new files corresponds to 'documentation'.
-            if "description" in parsed and "documentation" not in parsed:
-                parsed["documentation"] = parsed.pop("description")
-            # Normalise unit key -> units
-            if "unit" in parsed and "units" not in parsed:
-                parsed["units"] = parsed.pop("unit")
-            # Remove fields not currently modeled; could be stored later if needed.
-            filtered = {
-                k: v
-                for k, v in parsed.items()
-                if k in StandardName.attrs and k != "name" and v not in (None, "")
-            }
+            # Detect any unexpected / unmapped fields and raise
+            # so users get explicit feedback.
+            unexpected = [
+                k for k in parsed.keys() if k not in StandardName.attrs and k != "name"
+            ]
+            if unexpected:
+                raise ValueError(
+                    "Unexpected field(s) "
+                    f"{unexpected} in file {file}. These are not part of the StandardName schema: "
+                    f"{StandardName.attrs}"
+                )
             yaml_docs.append(
-                syaml.as_document({name: filtered}, schema=ParseYaml.schema).as_yaml()
+                syaml.as_document({name: parsed}, schema=ParseYaml.schema).as_yaml()
             )
         return "".join(yaml_docs)
 
@@ -435,8 +647,7 @@ class StandardNames(ParseYaml):
     ):
         """Add or update a StandardName and optionally persist to per-file YAML.
 
-        Behaviour mirrors previous single-file version. When persisting, write
-        two files:
+        When persisting, write two files:
         - submission.yml (single-name document for review pipelines)
         - <dirname>/<standard_name>.yml (canonical per-name file)
         """
@@ -516,6 +727,6 @@ class GenericNames:
 
 
 if __name__ == "__main__":  # pragma: no cover
-    standard_names = StandardNames("")
+    standard_names = StandardNames("resources/standard_names")
 
     print(standard_names)

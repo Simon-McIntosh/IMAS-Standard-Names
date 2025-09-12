@@ -4,5 +4,6 @@ unit: Wb/m
 status: draft
 description: Magnitude (Euclidean norm) of the spatial gradient of poloidal flux |∇ψ|.
 parent_vector: gradient_of_poloidal_flux
-notes:
+documentation: |
+  Caveats:
   - Used in metric coefficient and flux surface spacing calculations.

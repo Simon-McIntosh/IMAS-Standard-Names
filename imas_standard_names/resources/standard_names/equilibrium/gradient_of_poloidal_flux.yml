@@ -1,13 +1,15 @@
 name: gradient_of_poloidal_flux
 kind: vector
+frame: flux_surface
 unit: Wb/m
 status: draft
 description: Spatial gradient of the poloidal flux function (∇ψ).
 parent_scalar: poloidal_flux
-vector_components:
-  - radial_component_of_gradient_of_poloidal_flux
-  - toroidal_component_of_gradient_of_poloidal_flux
-  - vertical_component_of_gradient_of_poloidal_flux
-notes:
+components:
+  radial: radial_component_of_gradient_of_poloidal_flux
+  toroidal: toroidal_component_of_gradient_of_poloidal_flux
+  vertical: vertical_component_of_gradient_of_poloidal_flux
+documentation: |
+  Caveats:
   - Provides directional flux surface spacing information.
   - Used in computing |∇ψ| and related geometric factors.

@@ -1003,7 +1003,7 @@ wheels = [
 
 [[package]]
 name = "imas-mcp"
-version = "2.2.0"
+version = "2.4.14"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "cachetools" },
@@ -1018,9 +1018,9 @@ dependencies = [
     { name = "pyyaml" },
     { name = "sentence-transformers" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/74/c8/4e2de611cc655665f9e124e825c31340bde5d8bf03f8306c18bcf352654e/imas_mcp-2.2.0.tar.gz", hash = "sha256:13c0bd93ace2ad905fb6a9aef85fbe6991f5320f935db4e1f0ec526b9a632cdb", size = 410786, upload-time = "2025-09-03T13:20:44.114Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/1a/33/f000fa4602ab76f4aaa5a5127e2616ab9f772b67f0ce3549da48a5123a4d/imas_mcp-2.4.14.tar.gz", hash = "sha256:0ffef21facd7a26c10546f07690b4b848caa61dbda14a69c8c8121d31101e450", size = 415665, upload-time = "2025-09-12T05:03:57.067Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/2c/06/b91ff4d75ab9b8d20f2f3089f8c565336574cb81ac25d668374a0478fd62/imas_mcp-2.2.0-py3-none-any.whl", hash = "sha256:0da3c7ebe1e9abc908d6455ad6f02bd7a98843e0f6214daf378d13c7365ad2f8", size = 1527620, upload-time = "2025-09-03T13:20:42.565Z" },
+    { url = "https://files.pythonhosted.org/packages/a9/3a/efad6e07536673b3157621a6e97b0b0c8f63abb3c9793ed6545268519145/imas_mcp-2.4.14-py3-none-any.whl", hash = "sha256:f8242cc8a7ea8bb74de706b9f55ae637c4b13150ae3631cd4689f906dce7873d", size = 1530575, upload-time = "2025-09-12T05:03:55.54Z" },
 ]
 
 [[package]]
@@ -1103,7 +1103,7 @@ requires-dist = [
     { name = "dotenv", marker = "extra == 'agent'", specifier = ">=0.9.9,<0.10.0" },
     { name = "fastmcp", marker = "extra == 'agent'", specifier = ">=2.2.6,<3.0.0" },
     { name = "imas-data-dictionary", marker = "extra == 'agent'", specifier = ">=4.0.0.post1,<5.0.0" },
-    { name = "imas-mcp", specifier = ">=2.2" },
+    { name = "imas-mcp", specifier = ">=2.4" },
     { name = "imas-python", marker = "python_full_version < '3.13' and extra == 'agent'", specifier = ">=2.0.0,<3.0.0" },
     { name = "markdown", specifier = ">=3.8,<4.0" },
     { name = "mike", marker = "extra == 'docs'", specifier = ">=2.1.3,<3.0.0" },
