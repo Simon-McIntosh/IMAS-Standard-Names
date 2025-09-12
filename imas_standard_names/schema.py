@@ -26,18 +26,20 @@ Vector (example):
   magnitude: magnitude_of_plasma_velocity
 
 Derived (operator) example:
-  name: gradient_of_electron_temperature
-  kind: derived_vector
-  status: active
-  unit: eV/m
-  frame: cylindrical_r_tor_z
-  components:
-    r: r_component_of_gradient_of_electron_temperature,
-    tor: tor_component_of_gradient_of_electron_temperature,
-    z: z_component_of_gradient_of_electron_temperature}
-  parent_operation:
-    operator: gradient
-    operand_vector: electron_temperature  # scalar operand allowed semantics wise
+    name: gradient_of_electron_temperature
+    kind: derived_vector
+    status: active
+    unit: eV/m
+    frame: cylindrical_r_tor_z
+    components:
+        r: r_component_of_gradient_of_electron_temperature
+        tor: tor_component_of_gradient_of_electron_temperature
+        z: z_component_of_gradient_of_electron_temperature
+    provenance:
+        mode: operator
+        operators: [gradient]
+        base: electron_temperature
+        operator_id: gradient
 
 """
 
@@ -56,6 +58,15 @@ from pydantic import (
 )
 
 from imas_standard_names import pint
+from imas_standard_names.operators import (
+    normalize_operator_chain as _normalize_operator_chain,
+    enforce_operator_naming as _enforce_operator_naming,
+)
+from imas_standard_names.provenance import (
+    OperatorProvenance,
+    ExpressionProvenance,
+    Provenance,
+)
 
 
 Kind = Literal["scalar", "derived_scalar", "vector", "derived_vector"]
@@ -68,40 +79,6 @@ class Frame(str, Enum):  # limited set – extend as needed
     spherical_r_theta_phi = "spherical_r_theta_phi"
     toroidal_R_phi_Z = "toroidal_R_phi_Z"
     flux_surface = "flux_surface"
-
-
-class ParentOperation(BaseModel):
-    operator: str
-    operand_vector: str
-
-    @field_validator("operator")
-    @classmethod
-    def validate_operator(cls, v: str) -> str:
-        if not re.match(r"^[a-z_][a-z0-9_]*$", v):
-            raise ValueError(f"Invalid operator token: {v}")
-        return v
-
-    @field_validator("operand_vector")
-    @classmethod
-    def validate_operand(cls, v: str) -> str:
-        if not re.match(r"^[a-z][a-z0-9_]*$", v):
-            raise ValueError(f"Invalid operand vector token: {v}")
-        return v
-
-
-class Derivation(BaseModel):
-    expression: str
-    dependencies: List[str] = Field(default_factory=list)
-
-    @field_validator("dependencies")
-    @classmethod
-    def validate_dependencies(cls, deps: List[str]) -> List[str]:
-        if not deps:
-            raise ValueError("Derivation.dependencies must be non-empty")
-        for d in deps:
-            if not re.match(r"^[a-z][a-z0-9_]*$", d):
-                raise ValueError(f"Invalid dependency token: {d}")
-        return deps
 
 
 class StandardNameBase(BaseModel):
@@ -202,19 +179,23 @@ class StandardNameScalar(StandardNameBase):
 
 class StandardNameDerivedScalar(StandardNameBase):
     kind: Literal["derived_scalar"] = "derived_scalar"
-    parent_operation: Optional[ParentOperation] = None
-    derivation: Optional[Derivation] = None
+    provenance: Provenance
     axis: Optional[str] = None
     parent_vector: Optional[str] = None
 
     @model_validator(mode="after")
     def _derived_rules(self):  # type: ignore[override]
-        if not (self.parent_operation or self.derivation):
-            raise ValueError(
-                "Derived scalar must define parent_operation or derivation"
+        if isinstance(self.provenance, OperatorProvenance):
+            self.provenance.operators = _normalize_operator_chain(
+                self.provenance.operators
             )
-        if self.derivation and not self.derivation.dependencies:
-            raise ValueError("Derivation must list dependencies")
+            _enforce_operator_naming(
+                name=self.name,
+                operators=self.provenance.operators,
+                base=self.provenance.base,
+                operator_id=self.provenance.operator_id,
+                kind=self.kind,
+            )
         return self
 
 
@@ -250,17 +231,37 @@ class StandardNameDerivedVector(StandardNameBase):
     frame: Frame
     components: Dict[str, str]
     magnitude: Optional[str] = None
-    parent_operation: Optional[ParentOperation] = None
-    derivation: Optional[Derivation] = None
+    provenance: Provenance
 
     @model_validator(mode="after")
     def _derived_vector_rules(self):  # type: ignore[override]
-        if not (self.parent_operation or self.derivation):
-            raise ValueError(
-                "Derived vector must define parent_operation or derivation"
+        if len(self.components) < 2:
+            raise ValueError("Vector requires >=2 components")
+        for axis, comp in self.components.items():
+            if not re.match(r"^[a-z][a-z0-9_]*$", axis):
+                raise ValueError(f"Invalid axis token: {axis}")
+            expected_prefix = f"{axis}_component_of_"
+            if not comp.startswith(expected_prefix):
+                raise ValueError(
+                    f"Component '{comp}' must start with '{expected_prefix}'"
+                )
+        if self.magnitude:
+            expected_mag = f"magnitude_of_{self.name}"
+            if self.magnitude != expected_mag:
+                raise ValueError(
+                    f"Magnitude must be named '{expected_mag}', got '{self.magnitude}'"
+                )
+        if isinstance(self.provenance, OperatorProvenance):
+            self.provenance.operators = _normalize_operator_chain(
+                self.provenance.operators
             )
-        if self.derivation and not self.derivation.dependencies:
-            raise ValueError("Derivation must list dependencies")
+            _enforce_operator_naming(
+                name=self.name,
+                operators=self.provenance.operators,
+                base=self.provenance.base,
+                operator_id=self.provenance.operator_id,
+                kind=self.kind,
+            )
         return self
 
 
@@ -327,8 +328,9 @@ __all__ = [
     "Kind",
     "Status",
     "Frame",
-    "ParentOperation",
-    "Derivation",
+    "OperatorProvenance",
+    "ExpressionProvenance",
+    "Provenance",
     "StandardNameBase",
     "StandardNameScalar",
     "StandardNameDerivedScalar",
