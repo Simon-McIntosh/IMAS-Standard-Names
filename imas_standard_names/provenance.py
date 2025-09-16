@@ -1,8 +1,7 @@
 """Provenance models for IMAS Standard Names.
 
-Separated from `schema.py` to keep the core standard name models focused and
-reduce file size / cognitive load. These models define how derived standard
-names record their origin either via an operator chain or an expression.
+These models define how derived standard names record their origin either via an
+operator chain or an expression.
 """
 
 from __future__ import annotations
@@ -74,12 +73,38 @@ class ExpressionProvenance(BaseModel):
         return deps
 
 
+class ReductionProvenance(BaseModel):
+    """Provenance describing a standardized reduction / aggregation.
+
+    Fields
+    ------
+    mode: Literal["reduction"] discriminator.
+    reduction: canonical reduction id (mean, rms, integral, magnitude, ...)
+    domain: contextual domain for the reduction (time, volume, flux_surface, none)
+    base: underlying standard name being reduced.
+    """
+
+    mode: Literal["reduction"] = "reduction"
+    reduction: str
+    domain: str = "none"
+    base: str
+
+    @field_validator("base")
+    @classmethod
+    def validate_base(cls, v: str) -> str:
+        if not re.match(r"^[a-z][a-z0-9_]*$", v):
+            raise ValueError(f"Invalid base token: {v}")
+        return v
+
+
 Provenance = Annotated[
-    Union[OperatorProvenance, ExpressionProvenance], Field(discriminator="mode")
+    Union[OperatorProvenance, ExpressionProvenance, ReductionProvenance],
+    Field(discriminator="mode"),
 ]
 
 __all__ = [
     "OperatorProvenance",
     "ExpressionProvenance",
+    "ReductionProvenance",
     "Provenance",
 ]

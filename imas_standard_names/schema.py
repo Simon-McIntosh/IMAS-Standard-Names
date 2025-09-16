@@ -66,8 +66,9 @@ from imas_standard_names.provenance import (
     OperatorProvenance,
     ExpressionProvenance,
     Provenance,
+    ReductionProvenance,
 )
-
+from imas_standard_names.reductions import enforce_reduction_naming
 
 Kind = Literal["scalar", "derived_scalar", "vector", "derived_vector"]
 Status = Literal["draft", "active", "deprecated", "superseded"]
@@ -117,6 +118,7 @@ class StandardNameBase(BaseModel):
     @field_validator("unit")
     @classmethod
     def normalize_unit(cls, v: str) -> str:
+        # TODO implement unit validation with f"{pint.Unit(units):~F"
         if v in ("", "1", "none", "dimensionless"):
             return ""
         if " " in v:
@@ -196,6 +198,13 @@ class StandardNameDerivedScalar(StandardNameBase):
                 operator_id=self.provenance.operator_id,
                 kind=self.kind,
             )
+        if isinstance(self.provenance, ReductionProvenance):
+            enforce_reduction_naming(
+                name=self.name,
+                reduction=self.provenance.reduction,
+                domain=self.provenance.domain,
+                base=self.provenance.base,
+            )
         return self
 
 
@@ -203,7 +212,7 @@ class StandardNameVector(StandardNameBase):
     kind: Literal["vector"] = "vector"
     frame: Frame
     components: Dict[str, str]
-    magnitude: Optional[str] = None
+    magnitude: Optional[str] = None  # retained for now but no intrinsic validation
 
     @model_validator(mode="after")
     def _vector_rules(self):  # type: ignore[override]
@@ -217,12 +226,6 @@ class StandardNameVector(StandardNameBase):
                 raise ValueError(
                     f"Component '{comp}' must start with '{expected_prefix}'"
                 )
-        if self.magnitude:
-            expected_mag = f"magnitude_of_{self.name}"
-            if self.magnitude != expected_mag:
-                raise ValueError(
-                    f"Magnitude must be named '{expected_mag}', got '{self.magnitude}'"
-                )
         return self
 
 
@@ -230,7 +233,9 @@ class StandardNameDerivedVector(StandardNameBase):
     kind: Literal["derived_vector"] = "derived_vector"
     frame: Frame
     components: Dict[str, str]
-    magnitude: Optional[str] = None
+    magnitude: Optional[str] = (
+        None  # no intrinsic naming validation; handled by reductions if present
+    )
     provenance: Provenance
 
     @model_validator(mode="after")
@@ -245,12 +250,6 @@ class StandardNameDerivedVector(StandardNameBase):
                 raise ValueError(
                     f"Component '{comp}' must start with '{expected_prefix}'"
                 )
-        if self.magnitude:
-            expected_mag = f"magnitude_of_{self.name}"
-            if self.magnitude != expected_mag:
-                raise ValueError(
-                    f"Magnitude must be named '{expected_mag}', got '{self.magnitude}'"
-                )
         if isinstance(self.provenance, OperatorProvenance):
             self.provenance.operators = _normalize_operator_chain(
                 self.provenance.operators
@@ -261,6 +260,14 @@ class StandardNameDerivedVector(StandardNameBase):
                 base=self.provenance.base,
                 operator_id=self.provenance.operator_id,
                 kind=self.kind,
+            )
+        if isinstance(self.provenance, ReductionProvenance):
+            enforce_reduction_naming(
+                name=self.name,
+                reduction=self.provenance.reduction,
+                domain=self.provenance.domain,
+                base=self.provenance.base,
+                vector_predicate=lambda b: b in self.components.values(),
             )
         return self
 
@@ -299,6 +306,13 @@ def load_standard_name_file(path: Path) -> StandardName:
         raise ValueError(
             f"File {path} must contain a flat mapping with a 'name' field (no aggregated legacy format)."
         )
+    # YAML will parse an unquoted dimensionless unit written as `unit: 1` into an
+    # integer. The schema expects a string for units, so coerce simple numeric
+    # scalars to their string representation. This makes authoring YAML a bit
+    # more forgiving while keeping validation strict for other types.
+    unit_value = data.get("unit")
+    if isinstance(unit_value, (int, float)):
+        data["unit"] = str(unit_value)
     return create_standard_name(data)
 
 
@@ -311,7 +325,29 @@ def load_catalog(root: Path) -> Dict[str, StandardName]:
         if entry.name in entries:
             raise ValueError(f"Duplicate standard name '{entry.name}' in {file}")
         entries[entry.name] = entry
+    _post_load_validation(entries)
     return entries
+
+
+def _post_load_validation(entries: Dict[str, StandardName]) -> None:
+    """Additional structural validation across the loaded catalog.
+
+    Currently validates:
+      - magnitude reductions reference an existing vector / derived_vector.
+    """
+    # Build quick index of vector-like entries
+    vector_like = {
+        name for name, e in entries.items() if e.kind in ("vector", "derived_vector")
+    }
+    for name, e in entries.items():
+        prov = getattr(e, "provenance", None)
+        if prov and getattr(prov, "mode", None) == "reduction":
+            if prov.reduction == "magnitude":
+                if prov.base not in vector_like:
+                    raise ValueError(
+                        "Magnitude reduction base must be a vector entry: "
+                        f"'{name}' reduction base '{prov.base}' not found as vector"
+                    )
 
 
 def save_standard_name(entry: StandardNameBase, directory: Path) -> Path:

@@ -4,5 +4,16 @@ unit: Wb/(m*s)
 status: draft
 description: Magnitude of the time derivative of the poloidal flux gradient |∂/∂t ∇ψ|.
 parent_vector: time_derivative_of_gradient_of_poloidal_flux
-notes:
-  - Higher-order diagnostic of evolving flux geometry.
+name: magnitude_of_time_derivative_of_gradient_of_poloidal_flux
+kind: derived_scalar
+unit: Wb/(m s)
+status: draft
+provenance:
+  mode: reduction
+  reduction: magnitude
+  domain: none
+  base: time_derivative_of_gradient_of_poloidal_flux
+description: Magnitude of the time derivative of the spatial gradient of poloidal flux.
+documentation: |
+  Caveats:
+  - Rarely used; ensure physical relevance before employing in analyses.

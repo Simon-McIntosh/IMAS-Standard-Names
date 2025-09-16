@@ -1,0 +1,256 @@
+"""Click CLI commands for issue submission and standard name maintenance."""
+
+from __future__ import annotations
+
+from io import StringIO
+import json
+import shutil
+from pathlib import Path
+from typing import Iterable
+
+import click
+from strictyaml.ruamel import YAML
+
+from imas_standard_names.issues.image_assets import ImageProcessor
+from imas_standard_names.repository import update_static_urls
+from imas_standard_names.generic_names import GenericNames
+from imas_standard_names import schema
+from imas_standard_names.catalog.catalog import StandardNameCatalog
+
+yaml = YAML()
+yaml.indent(mapping=2, sequence=4, offset=2)
+
+
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
+def _load_catalog(root: Path) -> StandardNameCatalog:
+    return StandardNameCatalog(root).load()
+
+
+def format_error(error: Exception, submission_file: str | None = None) -> str:
+    """Return formatted error message for invalid submissions."""
+    error_message = (
+        ":boom: The proposed Standard Name is not valid.\n"
+        f"\n{type(error).__name__}: {error}\n"
+    )
+    if submission_file:
+        try:
+            with open(submission_file, "r") as f:
+                submission = json.load(f)
+            yaml_str = StringIO()
+            yaml.dump(submission, yaml_str)
+        except Exception:
+            pass
+    error_message += (
+        "\n"
+        "> [!NOTE]\n"
+        "> Edit the issue form and the automation will re-run validation."
+        "\n"
+    )
+    return error_message
+
+
+# ---------------------------------------------------------------------------
+# update_standardnames (directory-based)
+# ---------------------------------------------------------------------------
+@click.command()
+@click.argument("standardnames_dir")
+@click.argument("genericnames_file")
+@click.argument("submission_file")
+@click.option("--issue-link", default="")
+@click.option(
+    "--overwrite", default=False, is_flag=True, help="Allow replacing existing entry"
+)
+def update_standardnames(
+    standardnames_dir: str,
+    genericnames_file: str,
+    submission_file: str,
+    issue_link: str,
+    overwrite: bool,
+):
+    """Validate and add a standard name (per-file schema) to a directory.
+
+    Arguments:
+      standardnames_dir  Directory containing per-file standard name YAML entries.
+      genericnames_file  CSV of reserved generic names.
+      submission_file    JSON issue form export.
+    """
+    root = Path(standardnames_dir)
+    root.mkdir(parents=True, exist_ok=True)
+    catalog = _load_catalog(root) if root.exists() else StandardNameCatalog(root)
+    genericnames = GenericNames(genericnames_file)
+
+    try:
+        # Raw JSON (not yet coerced) so we can normalise fields first
+        raw_json = json.loads(Path(submission_file).read_text())
+        # Normalise legacy key 'units' -> 'unit'
+        if "unit" not in raw_json and "units" in raw_json:
+            raw_json["unit"] = raw_json["units"]
+        name = raw_json.get("name", "").strip()
+        if not name:
+            raise ValueError("Submission must include 'name'")
+        # Generic name guard before schema validation
+        genericnames.check(name)
+        # Drop unsupported keys that may appear in issue form (e.g. options)
+        for extraneous in ["options"]:
+            raw_json.pop(extraneous, None)
+        # Tags may arrive as a comma separated string or empty string
+        raw_tags = raw_json.get("tags", [])
+        if isinstance(raw_tags, str):
+            raw_tags = [t.strip() for t in raw_tags.split(",") if t.strip()]
+
+        # Minimal required fields mapping
+        description = raw_json.get("description") or raw_json.get("documentation") or ""
+        data = {
+            "name": name,
+            "kind": raw_json.get("kind", "scalar") or "scalar",
+            "status": raw_json.get("status", "draft") or "draft",
+            "unit": raw_json.get("unit", "") or "",
+            "description": description,
+            "alias": raw_json.get("alias", "") or "",
+            "tags": raw_tags or [],
+            "links": [],
+        }
+        if data["alias"]:
+            data["links"].append(data["alias"])
+        # Remove keys with empty string that are optional (pydantic will ignore missing)
+        cleaned = {k: v for k, v in data.items() if v not in (None, "") or k == "name"}
+        entry = schema.create_standard_name(cleaned)
+
+        # Overwrite guard
+        if not overwrite and entry.name in catalog.entries:
+            raise KeyError(
+                f"The proposed standard name **{entry.name}** is already present. Use --overwrite to replace."
+            )
+
+        # Image processing (optional documentation rewrite)
+        if description:
+            img_proc = ImageProcessor(
+                entry.name,
+                description,
+                image_dir=Path("docs/img") / entry.name,
+                parents=1,
+            )
+            try:
+                img_proc.download_images(remove_existing=True)
+                # Append note about images to description (non-destructive)
+                new_desc = img_proc.documentation_with_relative_paths()
+                if new_desc and new_desc != description:
+                    data["description"] = new_desc
+                    entry = schema.create_standard_name(
+                        {k: v for k, v in data.items() if v not in (None, "")}
+                    )
+            except Exception:  # Non-fatal: continue without images
+                pass
+
+        # Persist per-file YAML
+        schema.save_standard_name(entry, root)
+        click.echo(
+            ":sparkles: This proposal is ready for submission to the Standard Names repository."
+        )
+    except (ValueError, KeyError, NameError, Exception) as error:  # broad
+        click.echo(format_error(error, submission_file))
+
+
+# ---------------------------------------------------------------------------
+# subtract_standardnames (directory based)
+# ---------------------------------------------------------------------------
+@click.command()
+@click.argument("output_dir")
+@click.argument("minuend_dir")
+@click.argument("subtrahend_dir")
+def subtract_standardnames(output_dir: str, minuend_dir: str, subtrahend_dir: str):
+    """Create a catalog in OUTPUT_DIR with entries in MINUEND_DIR minus those in SUBTRAHEND_DIR.
+
+    An index.json file is written listing remaining standard names.
+    """
+    out = Path(output_dir)
+    out.mkdir(parents=True, exist_ok=True)
+    minuend_catalog = _load_catalog(Path(minuend_dir))
+    sub_catalog = _load_catalog(Path(subtrahend_dir))
+    remove = set(sub_catalog.entries.keys())
+    kept = {k: v for k, v in minuend_catalog.entries.items() if k not in remove}
+
+    # Copy kept files (source path discovery by name search in minuend_dir)
+    for file in Path(minuend_dir).rglob("*.yml"):
+        try:
+            entry = schema.load_standard_name_file(file)
+        except Exception:
+            continue
+        if entry.name in kept:
+            shutil.copy2(file, out / file.name)
+
+    # Write index.json
+    index_path = out / "index.json"
+    with open(index_path, "w", encoding="utf-8") as f:
+        json.dump(sorted(list(kept.keys())), f, indent=2)
+    click.echo(f"Wrote {len(kept)} entries to {out}")
+
+
+# ---------------------------------------------------------------------------
+# Queries (has / get)
+# ---------------------------------------------------------------------------
+@click.command()
+@click.argument("standardnames_dir")
+@click.argument("standard_name", nargs=-1)
+def has_standardname(standardnames_dir: str, standard_name: Iterable[str]):
+    """Return True/False if STANDARD_NAME exists in directory catalog."""
+    name = " ".join(standard_name)
+    if not name:
+        click.echo("False")
+        return
+    root = Path(standardnames_dir)
+    if not root.exists():
+        click.echo("False")
+        return
+    try:
+        catalog = _load_catalog(root)
+    except Exception:
+        click.echo("False")
+        return
+    click.echo(str(name in catalog.entries))
+
+
+@click.command()
+@click.argument("standardnames_dir")
+@click.argument("standard_name", nargs=-1)
+def get_standardname(standardnames_dir: str, standard_name: Iterable[str]):
+    """Print the YAML of a single standard name entry."""
+    name = " ".join(standard_name)
+    root = Path(standardnames_dir)
+    try:
+        catalog = _load_catalog(root)
+        entry = catalog.entries[name]
+    except Exception as error:
+        click.echo(format_error(error))
+        return
+    # Serialize similar to saved file
+    data = {k: v for k, v in entry.model_dump().items() if v not in (None, [], "")}
+    data["name"] = entry.name
+    # Use ruamel yaml instance properly via context manager
+    from io import StringIO as _S
+
+    buf = _S()
+    yaml.dump(data, buf)
+    click.echo(buf.getvalue())
+
+
+@click.command()
+@click.argument("genericnames_file")
+@click.argument("standard_name", nargs=-1)
+def is_genericname(genericnames_file: str, standard_name: Iterable[str]):
+    """Check if a standard name is already present in the generic names file."""
+    name = " ".join(standard_name)
+    click.echo(str(name in GenericNames(genericnames_file)))
+
+
+# ---------------------------------------------------------------------------
+# update_links (unchanged)
+# ---------------------------------------------------------------------------
+@click.command()
+@click.argument("remote")
+@click.option("--filename", default="README.md", help="File to update")
+def update_links(remote: str, filename: str):
+    """Update the README.md file with the remote's URL."""
+    update_static_urls(filename, remote=remote)

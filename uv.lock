@@ -989,19 +989,6 @@ wheels = [
 ]
 
 [[package]]
-name = "imas-data-dictionary"
-version = "4.0.0.post1"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "packaging" },
-    { name = "setuptools-scm" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/99/64/b79d9bc55d2dc6fd107dd64bf0d88cc1429448f37a4a0452797c71ac0ce3/imas_data_dictionary-4.0.0.post1.tar.gz", hash = "sha256:3ad8978e944de0b87bd8d2aa64fbe6c640ce976183196858d17101647f6e4d9f", size = 9943245, upload-time = "2025-04-01T12:49:34.16Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/3f/17/748860fca0514de3bb145fdebc5446c54a408ee35425a80670fd9f055353/imas_data_dictionary-4.0.0.post1-py3-none-any.whl", hash = "sha256:3a90a5fe08a1a650e401538db76c6b78c2fe5dfc0fbc8bcc3a85d403b3ea74f8", size = 4888711, upload-time = "2025-04-01T12:49:31.952Z" },
-]
-
-[[package]]
 name = "imas-mcp"
 version = "2.4.14"
 source = { registry = "https://pypi.org/simple" }
@@ -1063,7 +1050,6 @@ dependencies = [
 agent = [
     { name = "dotenv" },
     { name = "fastmcp" },
-    { name = "imas-data-dictionary" },
     { name = "imas-python", marker = "python_full_version < '3.13'" },
     { name = "pydantic-ai" },
 ]
@@ -1102,7 +1088,6 @@ requires-dist = [
     { name = "click", specifier = ">=8.1.8,<9.0.0" },
     { name = "dotenv", marker = "extra == 'agent'", specifier = ">=0.9.9,<0.10.0" },
     { name = "fastmcp", marker = "extra == 'agent'", specifier = ">=2.2.6,<3.0.0" },
-    { name = "imas-data-dictionary", marker = "extra == 'agent'", specifier = ">=4.0.0.post1,<5.0.0" },
     { name = "imas-mcp", specifier = ">=2.4" },
     { name = "imas-python", marker = "python_full_version < '3.13' and extra == 'agent'", specifier = ">=2.0.0,<3.0.0" },
     { name = "markdown", specifier = ">=3.8,<4.0" },

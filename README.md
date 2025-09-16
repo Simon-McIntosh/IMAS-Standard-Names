@@ -44,6 +44,63 @@ This project uses a Git branching strategy to manage development and releases. T
 
 The project documentation is available at our [GitHub Pages site](https://Simon-McIntosh.github.io/IMAS-Standard-Names/).
 
+### Data Layout (Per-File Schema)
+
+Each Standard Name lives in its own YAML file under `resources/standard_names/` (or a user-defined directory).
+
+Minimal scalar example:
+
+```yaml
+name: electron_temperature
+kind: scalar
+unit: keV
+description: Electron temperature.
+status: draft
+```
+
+### CLI Usage
+
+All issue automation and local maintenance use the new CLI entry points (backed by the per-file schema):
+
+| Command                                                                                        | Purpose                                                                  |
+| ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| `update_standardnames <standardnames_dir> <generic_names.csv> <submission.json> [--overwrite]` | Check and add (or overwrite) a proposal from a GitHub issue JSON export. |
+| `has_standardname <standardnames_dir> <name>`                                                  | Returns `True` / `False` for existence.                                  |
+| `get_standardname <standardnames_dir> <name>`                                                  | Prints the YAML for a single entry.                                      |
+| `subtract_standardnames <output_dir> <minuend_dir> <subtrahend_dir>`                           | Writes a reduced catalog (files + `index.json`).                         |
+| `is_genericname <generic_names.csv> <token>`                                                   | Tests if a token collides with a reserved generic name.                  |
+| `update_links <remote>`                                                                        | Rewrites badge/URL references in README for a fork remote.               |
+
+The issue form submission JSON is normalized in-place (e.g. `units` → `unit`, empty strings removed, `documentation` merged into `description`). The CLI discards unsupported legacy keys such as `options`.
+
+### Deprecations Removed
+
+### Migration Notes
+
+If you depended on loading a single aggregated YAML, build an index by scanning the directory:
+
+```python
+from pathlib import Path
+from imas_standard_names.catalog.catalog import StandardNameCatalog
+
+catalog = StandardNameCatalog(Path("resources/standard_names")).load()
+print(catalog.entries["electron_temperature"].unit)
+```
+
+Programmatic creation:
+
+```python
+from imas_standard_names import schema
+entry = schema.create_standard_name({
+   "name": "ion_density",
+   "kind": "scalar",
+   "unit": "m^-3",
+   "description": "Ion number density.",
+   "status": "draft",
+})
+schema.save_standard_name(entry, Path("resources/standard_names/plasma"))
+```
+
 ### Roadmap
 
 See the evolving [Roadmap](docs/roadmap.md) for phased milestones (vectors, frames, operator validation, lifecycle governance, and future tensor support).

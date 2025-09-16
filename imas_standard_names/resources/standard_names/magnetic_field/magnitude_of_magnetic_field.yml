@@ -1,15 +1,12 @@
 name: magnitude_of_magnetic_field
 kind: derived_scalar
 unit: T
-parent_vector: magnetic_field
-derivation:
-  expression: |
-    sqrt(radial_component_of_magnetic_field^2 +
-         toroidal_component_of_magnetic_field^2 +
-         vertical_component_of_magnetic_field^2)
-  dependencies:
-    - radial_component_of_magnetic_field
-    - toroidal_component_of_magnetic_field
-    - vertical_component_of_magnetic_field
+provenance:
+  mode: reduction
+  reduction: magnitude
+  domain: none
+  base: magnetic_field
 status: draft
 description: L2 norm (magnitude) of magnetic_field.
+notes:
+  - Former explicit derivation replaced by reduction provenance.
