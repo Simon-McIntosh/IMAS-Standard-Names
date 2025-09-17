@@ -6,6 +6,8 @@ Purpose: Provide concise, actionable rules for authors proposing new standard
 names (scalars, vectors, geometry, diagnostics) and writing supporting YAML
 metadata.
 
+Provenance block structure is documented in `provenance.md`.
+
 Use the IMAS MCP server (configured in `.vscode/mcp.json` under id `imas`) to
 harvest existing IMAS Data Dictionary information before drafting new names. Align proposals with real data.
 
@@ -16,7 +18,7 @@ harvest existing IMAS Data Dictionary information before drafting new names. Ali
 1. Uniform component pattern: `<axis>_component_of_<vector_expression>`.
 2. Left-to-right operator chains: `time_derivative_of_curl_of_magnetic_field`.
 3. Scalars are atomic; vectors aggregate semantics only.
-4. One canonical spelling (aliases only for deprecation migration).
+4. One canonical spelling (no alternate alias field).
 5. Deterministic parsing > brevity.
 
 ---
@@ -147,19 +149,16 @@ Avoid repetition of the name itself beyond meaningful grammar.
 
 ## 10. YAML Field Guidelines
 
-| Field              | Requirement                                            | Example                                      |
-| ------------------ | ------------------------------------------------------ | -------------------------------------------- | ---------- | ------------------------------- | ----- |
-| `name`             | Matches grammar exactly                                | `radial_component_of_magnetic_field`         |
-| `kind`             | One of scalar, derived_scalar, vector, derived_vector  | `vector`                                     |
-| `frame`            | Required for vectors / derived vectors                 | `cylindrical_r_tor_z`                        |
-| `components`       | Mapping axis→component for vectors                     | `radial: radial_component_of_magnetic_field` |
-| `magnitude`        | Scalar magnitude name (optional but recommended)       | `magnetic_field_magnitude`                   |
-| `parent_vector`    | Component backlink                                     | `magnetic_field`                             |
-| `parent_operation` | For derived vectors/scalars (operator, operand_vector) | operator: curl                               |
-| `derivation`       | Expression + dependencies for computed scalars         | expression: sqrt(...)                        |
-| `dependencies`     | Complete list of required scalar names                 | list of component names                      |
-| `unit`             | SI-consistent                                          | `T`                                          |
-| `status`           | draft                                                  | active                                       | deprecated | superseded (future enforcement) | draft |
+| Field        | Requirement                                           | Example                                      |
+| ------------ | ----------------------------------------------------- | -------------------------------------------- | ---------- | ------------------------------- | ----- |
+| `name`       | Matches grammar exactly                               | `radial_component_of_magnetic_field`         |
+| `kind`       | One of scalar, derived_scalar, vector, derived_vector | `vector`                                     |
+| `frame`      | Required for vectors / derived vectors                | `cylindrical_r_tor_z`                        |
+| `components` | Mapping axis→component for vectors                    | `radial: radial_component_of_magnetic_field` |
+| `magnitude`  | Scalar magnitude name (optional but recommended)      | `magnetic_field_magnitude`                   |
+| `provenance` | Structured provenance (operator / reduction / expr)   | operators: [curl]; base: magnetic_field      |
+| `unit`       | SI-consistent                                         | `T`                                          |
+| `status`     | draft                                                 | active                                       | deprecated | superseded (future enforcement) | draft |
 
 ---
 
@@ -211,12 +210,12 @@ Before submitting an issue / PR:
 Vector pattern: <vector>
 Component: <axis>_component_of_<vector_expression>
 Derived vector: <operator>_of_<vector_expression>
-Magnitude (canonical): magnitude_of_<vector_expression>
+Magnitude: magnitude_of_<vector_expression>
 Time derivative: time_derivative_of_<target>
 Axis tokens (Phase 1): radial, toroidal, vertical
 Outline coordinates: <object>_outline_<axis>_coordinates
 Coil current: pf_coil_<id>_current
-Probe field: magnetic_probe_<normal|tangential>_field (do not encode instrument index)
+Probe field: magnetic_probe_<normal|tangential>_field
 Flux loop flux: flux_loop_<id>_poloidal_flux
 Magnetic axis: magnetic_axis_<radial|vertical>_position
 ```

@@ -18,14 +18,16 @@
     "standardnames",
     "stellarators",
     "strictyaml",
-    "tokamaks"
+    "syaml",
+    "tokamaks",
+    "UDUNITS"
   ],
   "python.testing.pytestArgs": ["tests"],
   "python.testing.unittestEnabled": false,
   "python.testing.pytestEnabled": true,
   "chat.mcp.serverSampling": {
     "imas-standard-names/.vscode/mcp.json: imas": {
-      "allowedModels": [],
+      "allowedModels": ["copilot/gpt-5"],
       "allowedDuringChat": true
     }
   }

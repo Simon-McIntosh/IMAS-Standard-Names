@@ -3,7 +3,5 @@ kind: scalar
 unit: Wb/m
 status: draft
 description: Radial (R) component of the poloidal flux gradient.
-parent_vector: gradient_of_poloidal_flux
-axis: radial
 notes:
   - Component of ∇ψ projected along the radial coordinate.

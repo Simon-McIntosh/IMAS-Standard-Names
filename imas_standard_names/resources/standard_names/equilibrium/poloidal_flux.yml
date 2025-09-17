@@ -3,5 +3,6 @@ kind: scalar
 unit: Wb
 status: draft
 description: Canonical poloidal magnetic flux function (ψ), used for flux surface labeling.
-notes:
+documentation: |
+  Caveats:
   - Maps conceptually to equilibrium IDS psi (radial coordinate proxy).

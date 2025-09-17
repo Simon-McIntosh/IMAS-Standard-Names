@@ -3,7 +3,7 @@ from pathlib import Path
 import requests
 from unittest.mock import Mock, patch, mock_open
 
-from imas_standard_names.image_processor import ImageProcessor
+from imas_standard_names.issues.image_assets import ImageProcessor
 
 
 @pytest.fixture

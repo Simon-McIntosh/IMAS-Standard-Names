@@ -3,7 +3,5 @@ kind: scalar
 unit: Wb/m
 status: draft
 description: Vertical (Z) component of the poloidal flux gradient.
-parent_vector: gradient_of_poloidal_flux
-axis: vertical
 notes:
   - Component of ∇ψ projected along the vertical (Z) axis.
