@@ -1,73 +1,16 @@
-name: sync-project-files
+name: pending-delete-sync-project-files
+
+# This file is a placeholder. It is safe to delete.
+# If you have permissions, run:
+#   git rm .github/workflows/sync-files.yml
+# and commit the removal. Retained only because automated deletion
+# via apply_patch did not remove it in this environment.
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - ".github/workflows/**"
-      - ".github/actions/**"
-      - "imas_standard_names/**"
-      - "pyproject.toml"
-      - "poetry.lock"
-      - "docs/**"
-      - "mkdocs.yml"
-  workflow_dispatch:
-
-env:
-  target_branches: "develop submit"
+  workflow_dispatch: {}
 
 jobs:
-  sync-github-files:
+  noop:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Set Git identity
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com" 
-
-      - name: Sync workflows and actions to all target branches
-        run: |
-          # Get the list of branches
-          BRANCHES="${{ env.target_branches }}"
-          
-          # For each branch
-          for BRANCH in $BRANCHES; do
-            echo "Syncing workflows and actions to $BRANCH branch"
-            
-            # Check if branch exists
-            if ! git ls-remote --heads origin $BRANCH | grep -q $BRANCH; then
-              echo "Branch $BRANCH does not exist. Skipping."
-              continue
-            fi
-            
-            # Checkout target branch
-            git checkout $BRANCH
-            
-            # Create a temporary branch
-            TEMP_BRANCH="temp-sync-github-$BRANCH"
-            git checkout -b $TEMP_BRANCH
-            
-            # Copy only workflows and actions directories from main
-            git checkout main -- .github/workflows/ .github/actions/ imas_standard_names/ pyproject.toml poetry.lock docs/ mkdocs.yml
-            
-            # Commit changes if there are any
-            if [[ -n "$(git status --porcelain)" ]]; then
-              git add .github/workflows/ .github/actions/
-              git commit -m "Sync GitHub workflows and actions from main to $BRANCH"
-              git push origin $TEMP_BRANCH:$BRANCH
-              echo "Successfully synced workflows and actions to $BRANCH"
-            else
-              echo "No changes to commit for $BRANCH"
-            fi
-            
-            # Clean up
-            git checkout main
-            git branch -D $TEMP_BRANCH
-          done
+      - run: echo "This deprecated workflow will be removed."

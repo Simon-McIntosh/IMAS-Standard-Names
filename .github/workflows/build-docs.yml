@@ -62,13 +62,13 @@ jobs:
           git fetch origin gh-pages --depth=1
           git config user.name github-actions[bot]
           git config user.email github-actions[bot]@users.noreply.github.com
-          poetry run mike deploy "${{ steps.version.outputs.version }}" --push --allow-empty --title ${{ github.ref_name }}
+          uv run mike deploy "${{ steps.version.outputs.version }}" --push --allow-empty --title ${{ github.ref_name }}
         env:
           SITE_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}
 
       - name: Update mike alias 
         if: steps.version.outputs.tagged == 'true'
-        run: poetry run mike alias "${{ steps.version.outputs.version }}" "latest" --update-aliases --push
+        run: uv run mike alias "${{ steps.version.outputs.version }}" "latest" --update-aliases --push
 
   deploy:
     environment:

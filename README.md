@@ -118,7 +118,18 @@ GitHub Actions automatically build and deploy the documentation whenever you pus
 
 ### Local Documentation Development
 
-To build the documentation locally, run:
+You can use the blazing fast [uv](https://github.com/astral-sh/uv) workflow (used in CI) or a plain virtual environment.
+
+Using uv (recommended):
+
+```bash
+uv venv
+. .venv/bin/activate  # or .venv\Scripts\activate on Windows
+uv sync --all-extras --no-dev  # install runtime + extras used for docs (dev tools excluded)
+uv run mkdocs serve
+```
+
+Using a plain virtual environment + pip:
 
 ```bash
 # create virtual environment
@@ -140,8 +151,8 @@ mkdocs serve
 This project uses Mike to manage versioned documentation. To work with versioned documentation locally:
 
 ```bash
-# Install documentation dependencies (includes Mike)
-pip install .[docs]
+# Install documentation dependencies (includes Mike) – via uv or pip
+uv sync --extra docs  # or: pip install .[docs]
 
 # Initialize a git repo if not already done
 git init
