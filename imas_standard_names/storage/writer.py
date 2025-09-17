@@ -4,9 +4,9 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Dict, Any, List, Mapping
 import json
-from ..schema import StandardNameBase, save_standard_name
+from ..schema import StandardNameBase
 
-__all__ = ["save_standard_name", "write_catalog_artifacts"]
+__all__ = ["write_catalog_artifacts"]
 
 
 def write_catalog_artifacts(

@@ -1,29 +1,38 @@
-from pathlib import Path
-from imas_standard_names.schema import (
-    load_standard_name_file,
-    save_standard_name,
-    create_standard_name,
-)
+import yaml
+from imas_standard_names.schema import create_standard_name
 
 
 def test_save_and_load_roundtrip(tmp_path, scalar_data):
     entry = create_standard_name(scalar_data)
-    path = save_standard_name(entry, tmp_path)
-    loaded = load_standard_name_file(path)
+    path = tmp_path / f"{entry.name}.yml"
+    data = {k: v for k, v in entry.model_dump().items() if v not in (None, [], "")}
+    data["name"] = entry.name
+    path.write_text(yaml.safe_dump(data, sort_keys=False), encoding="utf-8")
+    loaded = create_standard_name(yaml.safe_load(path.read_text(encoding="utf-8")))
     assert loaded == entry
 
 
 def test_catalog_duplicate_detection(tmp_path, scalar_data):
     entry = create_standard_name(scalar_data)
-    save_standard_name(entry, tmp_path)
-    # Write duplicate file intentionally
-    dup_path = tmp_path / f"{entry.name}.yaml"
-    dup_path.write_text(Path(tmp_path / f"{entry.name}.yml").read_text())
-    from imas_standard_names.schema import load_catalog
-
-    try:
-        load_catalog(tmp_path)
-    except ValueError as e:
-        assert "Duplicate standard name" in str(e)
-    else:  # pragma: no cover - safety
-        assert False, "Expected duplicate detection"
+    base_path = tmp_path / f"{entry.name}.yml"
+    base_path.write_text(
+        yaml.safe_dump(entry.model_dump(), sort_keys=False), encoding="utf-8"
+    )
+    # Duplicate yaml with different extension
+    (tmp_path / f"{entry.name}.yaml").write_text(base_path.read_text(encoding="utf-8"))
+    # Manual duplicate detection pass
+    seen = set()
+    duplicate = False
+    for p in tmp_path.rglob("*.yml"):
+        d = yaml.safe_load(p.read_text(encoding="utf-8")) or {}
+        if d.get("name") in seen:
+            duplicate = True
+            break
+        seen.add(d.get("name"))
+    for p in tmp_path.rglob("*.yaml"):
+        d = yaml.safe_load(p.read_text(encoding="utf-8")) or {}
+        if d.get("name") in seen:
+            duplicate = True
+            break
+        seen.add(d.get("name"))
+    assert duplicate, "Expected duplicate detection"

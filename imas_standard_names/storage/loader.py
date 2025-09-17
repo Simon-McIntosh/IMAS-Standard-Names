@@ -1,16 +1,14 @@
-"""Load Standard Name YAML resources into schema models."""
+"""Legacy loader module retained temporarily.
+
+The repository / UnitOfWork API supersedes this module. For new code use:
+
+    from imas_standard_names.repositories import YamlStandardNameRepository
+
+This stub remains only so existing imports fail fast with a clear message if used.
+"""
 
 from __future__ import annotations
-from pathlib import Path
-from typing import Dict
-from .. import schema
 
-load_standard_name_file = schema.load_standard_name_file
-
-
-def load_catalog(root: Path) -> Dict[str, schema.StandardName]:
-    """Load all per-file YAML standard names under a root directory.
-
-    Thin wrapper so callers can import from imas_standard_names.storage.
-    """
-    return schema.load_catalog(root)
+raise ImportError(
+    "imas_standard_names.storage.loader is deprecated. Use YamlStandardNameRepository instead."
+)

@@ -67,7 +67,7 @@ All issue automation and local maintenance use the new CLI entry points (backed 
 | `update_standardnames <standardnames_dir> <generic_names.csv> <submission.json> [--overwrite]` | Check and add (or overwrite) a proposal from a GitHub issue JSON export. |
 | `has_standardname <standardnames_dir> <name>`                                                  | Returns `True` / `False` for existence.                                  |
 | `get_standardname <standardnames_dir> <name>`                                                  | Prints the YAML for a single entry.                                      |
-| `subtract_standardnames <output_dir> <minuend_dir> <subtrahend_dir>`                           | Writes a reduced catalog (files + `index.json`).                         |
+| `diff_standardnames <old_dir> <new_dir> <report.json> [--export-dir DIR]`                      | JSON diff (added/removed/changed[/unchanged]) and optional export.       |
 | `is_genericname <generic_names.csv> <token>`                                                   | Tests if a token collides with a reserved generic name.                  |
 | `update_links <remote>`                                                                        | Rewrites badge/URL references in README for a fork remote.               |
 
@@ -87,10 +87,18 @@ catalog = StandardNameCatalog(Path("resources/standard_names")).load()
 print(catalog.entries["electron_temperature"].unit)
 ```
 
-Programmatic creation:
+Programmatic creation (Repository + UnitOfWork):
 
 ```python
+from pathlib import Path
 from imas_standard_names import schema
+from imas_standard_names.repositories import YamlStandardNameRepository
+from imas_standard_names.unit_of_work import UnitOfWork
+
+root = Path("resources/standard_names/plasma")
+root.mkdir(parents=True, exist_ok=True)
+repo = YamlStandardNameRepository(root)
+uow = UnitOfWork(repo)
 entry = schema.create_standard_name({
    "name": "ion_density",
    "kind": "scalar",
@@ -98,7 +106,8 @@ entry = schema.create_standard_name({
    "description": "Ion number density.",
    "status": "draft",
 })
-schema.save_standard_name(entry, Path("resources/standard_names/plasma"))
+uow.add(entry)
+uow.commit()
 ```
 
 ### Roadmap

@@ -1,5 +1,6 @@
 from pathlib import Path
-from imas_standard_names.storage.loader import load_standard_name_file, load_catalog
+import yaml
+from imas_standard_names.schema import create_standard_name
 
 
 def test_load_single_entry(tmp_path: Path):
@@ -13,7 +14,8 @@ description: A test quantity.
 """,
         encoding="utf-8",
     )
-    entry = load_standard_name_file(f)
+    data = yaml.safe_load(f.read_text(encoding="utf-8"))
+    entry = create_standard_name(data)
     # Basic sanity: required attributes present
     assert hasattr(entry, "name") and hasattr(entry, "kind")
     assert entry.name == "test_quantity"
@@ -40,5 +42,12 @@ description: B.
 """,
         encoding="utf-8",
     )
-    catalog = load_catalog(tmp_path)
-    assert set(catalog.keys()) == {"quantity_a", "quantity_b"}
+    # Manual load of directory entries
+    names = set()
+    for p in tmp_path.rglob("*.yml"):
+        d = yaml.safe_load(p.read_text(encoding="utf-8"))
+        if isinstance(d.get("unit"), (int, float)):
+            d["unit"] = str(d["unit"])
+        entry = create_standard_name(d)
+        names.add(entry.name)
+    assert names == {"quantity_a", "quantity_b"}

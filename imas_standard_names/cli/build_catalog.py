@@ -3,7 +3,7 @@
 from __future__ import annotations
 import click
 from pathlib import Path
-from ..storage.loader import load_catalog
+from ..repositories import YamlStandardNameRepository
 from ..storage.writer import write_catalog_artifacts
 
 
@@ -16,7 +16,8 @@ from ..storage.writer import write_catalog_artifacts
 )
 @click.option("--quiet", is_flag=True, help="Suppress non-error output")
 def build_catalog_cli(root: Path, out_dir: Path, quiet: bool):
-    entries = load_catalog(root)
+    repo = YamlStandardNameRepository(root)
+    entries = {e.name: e for e in repo.list()}
     written = write_catalog_artifacts(entries, out_dir)
     if not quiet:
         for w in written:

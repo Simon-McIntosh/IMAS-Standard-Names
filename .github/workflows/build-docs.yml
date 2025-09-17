@@ -51,19 +51,7 @@ jobs:
           echo "version=$version" >> $GITHUB_OUTPUT   
           echo "tagged=$tagged" >> $GITHUB_OUTPUT     
 
-      - name: Subtract standard names
-        if: github.ref_name == 'submit' 
-        run: |
-          cp standardnames.yml minuend.yml
-          if git ls-remote --heads origin develop | grep -q develop; then
-            git fetch origin develop --depth=1
-            git checkout origin/develop -- standardnames.yml
-          else
-            git fetch origin main --depth=1
-            git checkout origin/main -- standardnames.yml
-          fi
-          cp standardnames.yml subtrahend.yml
-          poetry run subtract_standardnames standardnames.yml minuend.yml subtrahend.yml 
+      # (Removed legacy subtract_standardnames step)
 
       - name: Prune submit docs directory 
         if: github.ref_name == 'submit' 

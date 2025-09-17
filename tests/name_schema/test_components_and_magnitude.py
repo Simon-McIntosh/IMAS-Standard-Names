@@ -66,7 +66,7 @@ def test_valid_vector_with_magnitude():
                 "r": "r_component_of_plasma_velocity",
                 "tor": "tor_component_of_plasma_velocity",
             },
-            "magnitude": "magnitude_of_plasma_velocity",
         }
     )
+    # Magnitude is a computed property on vector models
     assert getattr(sn, "magnitude") == "magnitude_of_plasma_velocity"

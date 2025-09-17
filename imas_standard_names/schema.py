@@ -43,11 +43,9 @@ Derived (operator) example:
 
 """
 
-from pathlib import Path
 from typing import Dict, List, Literal, Iterable, Union, Annotated
 from enum import Enum
 import re
-import yaml
 from pydantic import (
     BaseModel,
     Field,
@@ -342,81 +340,8 @@ _STANDARD_NAME_ADAPTER = TypeAdapter(StandardName)
 
 
 def create_standard_name(data: Dict) -> StandardName:
-    """Validate data into the appropriate StandardName subclass via discriminator."""
-    # Backward compatibility: drop legacy 'magnitude' key if present; magnitude now derived.
-    if isinstance(data, dict) and "magnitude" in data:
-        data = {k: v for k, v in data.items() if k != "magnitude"}
+    """Validate data into a StandardName union instance via discriminator."""
     return _STANDARD_NAME_ADAPTER.validate_python(data)
-
-
-# ----------------------------------------------------------------------------
-# Catalog loader / persister
-# ----------------------------------------------------------------------------
-
-
-def load_standard_name_file(path: Path) -> StandardName:
-    """Load a single per-file standard name YAML.
-
-    Expected structure is a flat mapping with required 'name' key.
-    """
-    with open(path, "r", encoding="utf-8") as f:
-        data = yaml.safe_load(f) or {}
-    if not isinstance(data, dict) or "name" not in data:
-        raise ValueError(
-            f"File {path} must contain a flat mapping with a 'name' field."
-        )
-    # YAML will parse an unquoted dimensionless unit written as `unit: 1` into an
-    # integer. The schema expects a string for units, so coerce simple numeric
-    # scalars to their string representation. This makes authoring YAML a bit
-    # more forgiving while keeping validation strict for other types.
-    unit_value = data.get("unit")
-    if isinstance(unit_value, (int, float)):
-        data["unit"] = str(unit_value)
-    return create_standard_name(data)
-
-
-def load_catalog(root: Path) -> Dict[str, StandardName]:
-    entries: Dict[str, StandardName] = {}
-    for file in sorted(root.rglob("*.yml")) + sorted(root.rglob("*.yaml")):
-        if file.is_dir():
-            continue
-        entry = load_standard_name_file(file)
-        if entry.name in entries:
-            raise ValueError(f"Duplicate standard name '{entry.name}' in {file}")
-        entries[entry.name] = entry
-    _post_load_validation(entries)
-    return entries
-
-
-def _post_load_validation(entries: Dict[str, StandardName]) -> None:
-    """Additional structural validation across the loaded catalog.
-
-    Currently validates:
-      - magnitude reductions reference an existing vector / derived_vector.
-    """
-    # Build quick index of vector-like entries
-    vector_like = {
-        name for name, e in entries.items() if e.kind in ("vector", "derived_vector")
-    }
-    for name, e in entries.items():
-        prov = getattr(e, "provenance", None)
-        if prov and getattr(prov, "mode", None) == "reduction":
-            if prov.reduction == "magnitude":
-                if prov.base not in vector_like:
-                    raise ValueError(
-                        "Magnitude reduction base must be a vector entry: "
-                        f"'{name}' reduction base '{prov.base}' not found as vector"
-                    )
-
-
-def save_standard_name(entry: StandardNameBase, directory: Path) -> Path:
-    directory.mkdir(parents=True, exist_ok=True)
-    path = directory / f"{entry.name}.yml"
-    data = {k: v for k, v in entry.model_dump().items() if v not in (None, [], "")}
-    data["name"] = entry.name  # ensure name present
-    with open(path, "w", encoding="utf-8") as f:
-        yaml.safe_dump(data, f, sort_keys=False)
-    return path
 
 
 __all__ = [
@@ -433,7 +358,4 @@ __all__ = [
     "Name",  # token alias
     "StandardName",  # union
     "create_standard_name",
-    "load_standard_name_file",
-    "load_catalog",
-    "save_standard_name",
 ]

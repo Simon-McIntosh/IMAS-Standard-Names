@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from io import StringIO
 import json
-import shutil
 from pathlib import Path
 from typing import Iterable
 
@@ -15,6 +14,8 @@ from imas_standard_names.issues.image_assets import ImageProcessor
 from imas_standard_names.repository import update_static_urls
 from imas_standard_names.generic_names import GenericNames
 from imas_standard_names import schema
+from imas_standard_names.repositories import YamlStandardNameRepository
+from imas_standard_names.unit_of_work import UnitOfWork
 from imas_standard_names.catalog.catalog import StandardNameCatalog
 
 yaml = YAML()
@@ -115,8 +116,8 @@ def update_standardnames(
         cleaned = {k: v for k, v in data.items() if v not in (None, "") or k == "name"}
         entry = schema.create_standard_name(cleaned)
 
-        # Overwrite guard
-        if not overwrite and entry.name in catalog.entries:
+        # Overwrite guard (only error if not overwriting)
+        if entry.name in catalog.entries and not overwrite:
             raise KeyError(
                 f"The proposed standard name **{entry.name}** is already present. Use --overwrite to replace."
             )
@@ -141,48 +142,20 @@ def update_standardnames(
             except Exception:  # Non-fatal: continue without images
                 pass
 
-        # Persist per-file YAML
-        schema.save_standard_name(entry, root)
+        # Persist via repository + unit of work
+        repo = YamlStandardNameRepository(root)
+        uow = UnitOfWork(repo)
+        if entry.name in catalog.entries and overwrite:
+            # Treat as update: replace existing entry
+            uow.update(entry.name, entry)
+        else:
+            uow.add(entry)
+        uow.commit()
         click.echo(
             ":sparkles: This proposal is ready for submission to the Standard Names repository."
         )
     except (ValueError, KeyError, NameError, Exception) as error:  # broad
         click.echo(format_error(error, submission_file))
-
-
-# ---------------------------------------------------------------------------
-# subtract_standardnames (directory based)
-# ---------------------------------------------------------------------------
-@click.command()
-@click.argument("output_dir")
-@click.argument("minuend_dir")
-@click.argument("subtrahend_dir")
-def subtract_standardnames(output_dir: str, minuend_dir: str, subtrahend_dir: str):
-    """Create a catalog in OUTPUT_DIR with entries in MINUEND_DIR minus those in SUBTRAHEND_DIR.
-
-    An index.json file is written listing remaining standard names.
-    """
-    out = Path(output_dir)
-    out.mkdir(parents=True, exist_ok=True)
-    minuend_catalog = _load_catalog(Path(minuend_dir))
-    sub_catalog = _load_catalog(Path(subtrahend_dir))
-    remove = set(sub_catalog.entries.keys())
-    kept = {k: v for k, v in minuend_catalog.entries.items() if k not in remove}
-
-    # Copy kept files (source path discovery by name search in minuend_dir)
-    for file in Path(minuend_dir).rglob("*.yml"):
-        try:
-            entry = schema.load_standard_name_file(file)
-        except Exception:
-            continue
-        if entry.name in kept:
-            shutil.copy2(file, out / file.name)
-
-    # Write index.json
-    index_path = out / "index.json"
-    with open(index_path, "w", encoding="utf-8") as f:
-        json.dump(sorted(list(kept.keys())), f, indent=2)
-    click.echo(f"Wrote {len(kept)} entries to {out}")
 
 
 # ---------------------------------------------------------------------------

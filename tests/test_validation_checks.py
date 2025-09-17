@@ -1,5 +1,6 @@
 from pathlib import Path
-from imas_standard_names.storage.loader import load_catalog
+import yaml
+from imas_standard_names.schema import create_standard_name
 from imas_standard_names.validation.structural import run_structural_checks
 from imas_standard_names.validation.semantic import run_semantic_checks
 
@@ -52,7 +53,11 @@ provenance:
 """,
         encoding="utf-8",
     )
-    entries = load_catalog(tmp_path)
+    entries = {}
+    for p in tmp_path.rglob("*.yml"):
+        d = yaml.safe_load(p.read_text(encoding="utf-8"))
+        m = create_standard_name(d)
+        entries[m.name] = m
     structural_issues = run_structural_checks(entries)
     semantic_issues = run_semantic_checks(entries)
     # Semantic heuristic: gradient expects derivative-like units (contains '/' or .m)

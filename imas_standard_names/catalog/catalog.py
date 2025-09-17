@@ -7,14 +7,15 @@ from pathlib import Path
 from typing import Dict, List, Any
 import json
 
-from .. import schema
+from ..schema import StandardName
+from ..repositories import load_standard_name_file
 
 
 @dataclass
 class StandardNameCatalog:
     root: Path | str
     strict: bool = True
-    entries: Dict[str, schema.StandardName] = field(default_factory=dict, init=False)
+    entries: Dict[str, StandardName] = field(default_factory=dict, init=False)
 
     def __post_init__(self):  # pragma: no cover
         self._resolve_root()
@@ -52,7 +53,7 @@ class StandardNameCatalog:
             if file.is_dir():
                 continue
             try:
-                entry = schema.load_standard_name_file(file)
+                entry = load_standard_name_file(file)
             except Exception:
                 if self.strict:
                     raise

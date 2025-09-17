@@ -1,5 +1,6 @@
 from pathlib import Path
-from imas_standard_names.storage.loader import load_standard_name_file
+import yaml
+from imas_standard_names.schema import create_standard_name
 from imas_standard_names.rendering import render_html
 
 
@@ -15,7 +16,6 @@ frame: cylindrical_r_tor_z
 components:
   r: r_component_of_velocity
   tor: tor_component_of_velocity
-magnitude: magnitude_of_velocity
 """,
         encoding="utf-8",
     )
@@ -38,7 +38,8 @@ description: Toroidal component of velocity.
 """,
         encoding="utf-8",
     )
-    entry = load_standard_name_file(yml)
+    data = yaml.safe_load(yml.read_text(encoding="utf-8"))
+    entry = create_standard_name(data)
     html = render_html(entry)
     assert "velocity" in html
     assert "Flow velocity" in html
