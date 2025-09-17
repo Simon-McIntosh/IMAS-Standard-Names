@@ -50,9 +50,9 @@ class IMASConnect:
         if server_choice == "uv":
             self._setup_mcp_uv()
         elif server_choice == "remote_sse":
-            self._connect_remote_mcp_sse(kwargs.get("host"), kwargs.get("port"))
+            self._connect_remote_mcp_sse(kwargs.get("host",""), kwargs.get("port",8080))
         elif server_choice == "custom":
-            self._connect_mcp(kwargs.get("server"))
+            self._connect_mcp(kwargs.get("server", MCPServer))
 
         if model_provider == "anthropic":
             self._setup_anthropic_model(kwargs.get("model_name", "claude-3-haiku-20240307"))
@@ -108,7 +108,7 @@ class IMASConnect:
             f"{host}:{port}/sse", http_client=self.server_client
         )
 
-    def connect_mcp(self, server: MCPServer):
+    def _connect_mcp(self, server: MCPServer):
         """
         Establishes a connection to the specified MCPServer instance.
         Parameters:
@@ -143,9 +143,17 @@ class IMASConnect:
             self.agent: An Agent instance configured with the specified model and MCP server,
                         using a concise system prompt and instrumentation enabled.
         """
+        if self.mcp_imas is None:
+            self.agent = Agent(
+                model=self.model,
+                system_prompt=system_prompt,
+                instrument=True,
+                output_type=output_type
+            )
+            return
         self.agent = Agent(
             model=self.model,
-            mcp_servers=[self.mcp_imas],
+            toolsets=[self.mcp_imas],
             system_prompt=system_prompt,
             instrument=True,
             output_type=output_type
@@ -166,14 +174,16 @@ class IMASConnect:
             if choice == "uv":
                 self._setup_mcp_uv()
             elif choice == "remote_sse":
-                self._connect_remote_mcp_sse(self._config.get("host"), self._config.get("port"))
+                self._connect_remote_mcp_sse(self._config.get("host",""), self._config.get("port",8080))
             elif choice == "custom":
-                self._connect_mcp(self._config.get("server"))
+                self._connect_mcp(self._config.get("server", MCPServer))
             if self._config.get("model_provider", "anthropic") == "anthropic":
                 self._setup_anthropic_model(self._config.get("model_name", "claude-3-haiku-20240307"))
             self._setup_agent(self._config.get("system_prompt"), self._config.get("output_type", str))
 
     async def run(self, prompt: str):
         self.ensure()
-        return self.agent.run_sync(prompt)
+        if self.agent is None:
+            raise ValueError("Agent not set up. Cannot run prompt.")
+        return await self.agent.run(prompt)
     

@@ -11,7 +11,7 @@ from imas_standard_names.standard_name import (
     GenericNames,
     StandardInput,
     StandardName,
-    StandardNameFile,
+    StandardNames,
 )
 
 yaml = YAML()
@@ -61,7 +61,7 @@ def update_standardnames(
     overwrite: bool,
 ):
     """Add a standard name to the project's standard name file."""
-    standardnames = StandardNameFile(standardnames_file, unit_format=unit_format)
+    standardnames = StandardNames(standardnames_file, unit_format=unit_format)
     genericnames = GenericNames(genericnames_file)
     try:
         standard_name = StandardInput(
@@ -103,8 +103,8 @@ def subtract_standardnames(
     subtrahend_standardnames_file: str,
 ):
     """Subtract one standard names file from another."""
-    minuend = StandardNameFile(minuend_standardnames_file)
-    subtrahend = StandardNameFile(subtrahend_standardnames_file)
+    minuend = StandardNames(minuend_standardnames_file)
+    subtrahend = StandardNames(subtrahend_standardnames_file)
     result = minuend - subtrahend
     with open(standardnames_file, "w") as f:
         f.write(result.data.as_yaml())
@@ -119,7 +119,7 @@ def has_standardname(standardnames_file: str, standard_name: str):
     if not path.exists() or path.stat().st_size == 0:
         click.echo("False")  # standardnames file does not exist or is empty
         return
-    standardnames = StandardNameFile(standardnames_file)
+    standardnames = StandardNames(standardnames_file)
     standard_name = " ".join(standard_name)
     click.echo(f"{standard_name in standardnames.data}")
 
@@ -139,7 +139,7 @@ def is_genericname(genericnames_file: str, standard_name: str):
 @click.option("--unit-format", default="~F", help="Pint unit string formatter")
 def get_standardname(standardnames_file: str, standard_name: str, unit_format: str):
     """Return the standard name entry from the project's standard name file."""
-    standardnames = StandardNameFile(standardnames_file, unit_format=unit_format)
+    standardnames = StandardNames(standardnames_file, unit_format=unit_format)
     standard_name = " ".join(standard_name)
     try:
         submission = standardnames[standard_name].as_document()[standard_name].as_yaml()

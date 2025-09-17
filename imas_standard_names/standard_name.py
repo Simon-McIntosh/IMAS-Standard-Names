@@ -349,7 +349,7 @@ class StandardNames(ParseYaml):
                         self._origin_file = path
                         with open(path, "r", encoding="utf-8") as f:
                             yaml_text = f.read()
-                        self.__post_init__(yaml_text)
+                        super().__post_init__(yaml_text)
                         return
                 # Non-existent path or not a file/dir: treat as YAML string
                 self._dirname = None

@@ -13,7 +13,7 @@ from imas_standard_names.standard_name import (
     ParseJson,
     ParseYaml,
     StandardName,
-    StandardNameFile,
+    StandardNames,
     StandardInput,
 )
 
@@ -239,18 +239,19 @@ def standardnames(tmp_path_factory):
 
 
 def test_standard_name_file_without_suffix(standardnames):
-    StandardNameFile(standardnames.with_suffix(""))
+    with pytest.raises(syaml.YAMLValidationError):
+        StandardNames(standardnames.with_suffix(""))
 
 
 def test_standard_name_file(standardnames):
     standard_input = ParseYaml(yaml_multi.as_yaml())
-    standard_names = StandardNameFile(standardnames)
+    standard_names = StandardNames(standardnames)
     for key in yaml_multi.as_marked_up():
         assert standard_names[key] == standard_input[key]
 
 
 def test_file_update(standardnames):
-    standard_names = StandardNameFile(standardnames)
+    standard_names = StandardNames(standardnames)
     assert standard_name_data["name"] not in standard_names.data
     standard_names_document = standard_names.data.whole_document()
     github_response = json.dumps(standard_name_data)
@@ -261,7 +262,7 @@ def test_file_update(standardnames):
         standard_names[standard_name_data["name"]]
         == ParseJson(github_response).standard_name
     )
-    new_standard_names = StandardNameFile(standardnames)
+    new_standard_names = StandardNames(standardnames)
     assert standard_names.data.whole_document() != standard_names_document
     assert (
         new_standard_names[standard_name_data["name"]]
@@ -270,7 +271,7 @@ def test_file_update(standardnames):
 
 
 def test_alias_update(standardnames):
-    standard_names = StandardNameFile(standardnames)
+    standard_names = StandardNames(standardnames)
     github_response = json.dumps(
         standard_name_data
         | {"name": "another_plasma_current", "alias": "plasma_current"}
@@ -281,7 +282,7 @@ def test_alias_update(standardnames):
 
 
 def test_alias_update_error(standardnames):
-    standard_names = StandardNameFile(standardnames)
+    standard_names = StandardNames(standardnames)
     github_response = json.dumps(standard_name_data | {"alias": "undefined"})
     standard_name = ParseJson(github_response).standard_name
     with pytest.raises(KeyError):
@@ -289,7 +290,7 @@ def test_alias_update_error(standardnames):
 
 
 def test_file_update_overwrite_error(standardnames):
-    standard_names = StandardNameFile(standardnames)
+    standard_names = StandardNames(standardnames)
     github_response = json.dumps(standard_name_data | {"name": "plasma_current"})
     standard_name = ParseJson(github_response).standard_name
     with pytest.raises(KeyError):
@@ -297,7 +298,7 @@ def test_file_update_overwrite_error(standardnames):
 
 
 def test_link_update(standardnames):
-    standard_names = StandardNameFile(standardnames)
+    standard_names = StandardNames(standardnames)
     assert len(standard_names["plasma_current"].links) == 2
     github_response = json.dumps(
         standard_name_data
@@ -315,7 +316,7 @@ def test_link_update(standardnames):
 
 
 def test_unique_links(standardnames):
-    standard_names = StandardNameFile(standardnames)
+    standard_names = StandardNames(standardnames)
     assert len(standard_names["plasma_current"].links) == 2
     github_response = json.dumps(
         standard_name_data
@@ -368,8 +369,8 @@ def test_json_roundtrip():
 
 
 def test_standard_name_addition_subtraction():
-    standard_names = StandardNameFile(deepcopy(yaml_single))
-    other_standard_names = StandardNameFile(deepcopy(yaml_multi))
+    standard_names = StandardNames(deepcopy(yaml_single))
+    other_standard_names = StandardNames(deepcopy(yaml_multi))
     standard_names += other_standard_names
     standard_names += StandardName(name="plasma_current", documentation="docs")
     standard_names += StandardName(
@@ -384,7 +385,7 @@ def test_standard_name_addition_subtraction():
 
 
 def test_standard_name_difference(standardnames):
-    standard_names = StandardNameFile(standardnames)
+    standard_names = StandardNames(standardnames)
 
     submit_standard_names = deepcopy(standard_names)
     submit_standard_names += StandardName(**standard_name_data).as_document()
@@ -402,12 +403,12 @@ def test_standard_name_difference(standardnames):
 
 
 def test_standard_name_file_inputs(standardnames):
-    standard_names_from_file_str = StandardNameFile(standardnames.as_posix())
-    standard_names_from_file_path = StandardNameFile(standardnames)
-    standard_names_from_yaml_str = StandardNameFile(
+    standard_names_from_file_str = StandardNames(standardnames.as_posix())
+    standard_names_from_file_path = StandardNames(standardnames)
+    standard_names_from_yaml_str = StandardNames(
         standard_names_from_file_path.as_yaml()
     )
-    standard_names_from_yaml = StandardNameFile(standard_names_from_file_path.data)
+    standard_names_from_yaml = StandardNames(standard_names_from_file_path.data)
 
     assert standard_names_from_file_str.data == standard_names_from_file_path.data
     assert standard_names_from_file_str.data == standard_names_from_yaml_str.data
@@ -415,7 +416,7 @@ def test_standard_name_file_inputs(standardnames):
 
 
 def test_deepcopy(standardnames):
-    standard_names = StandardNameFile(standardnames)
+    standard_names = StandardNames(standardnames)
     standard_names_copy = copy(standard_names)
     standard_names_deepcopy = deepcopy(standard_names)
 
@@ -428,7 +429,7 @@ def test_deepcopy(standardnames):
 
 
 def test_filename_setter(standardnames):
-    standard_names = StandardNameFile(standardnames)
+    standard_names = StandardNames(standardnames)
     standard_names_deepcopy = deepcopy(standard_names)
 
     assert standard_names.filename == standardnames
@@ -439,20 +440,20 @@ def test_filename_setter(standardnames):
 
 
 def test_parse_yaml_input_error(standardnames):
-    standard_names = StandardNameFile(standardnames)
+    standard_names = StandardNames(standardnames)
     with pytest.raises(TypeError):
         ParseYaml(standard_names.data.as_marked_up())
 
 
 def test_standard_names_file_input_error(standardnames):
-    standard_names = StandardNameFile(standardnames)
+    standard_names = StandardNames(standardnames)
     with pytest.raises(TypeError):
-        StandardNameFile(standard_names.data.as_marked_up())
+        StandardNames(standard_names.data.as_marked_up())
 
 
 def test_filename_unset_error(standardnames):
-    standard_names = StandardNameFile(standardnames)
-    standard_names_from_yaml = StandardNameFile(standard_names.as_yaml())
+    standard_names = StandardNames(standardnames)
+    standard_names_from_yaml = StandardNames(standard_names.as_yaml())
     with pytest.raises(ValueError):
         standard_names_from_yaml.filename
 

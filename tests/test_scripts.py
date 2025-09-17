@@ -9,7 +9,7 @@ import pytest
 import strictyaml as syaml
 import subprocess
 
-from imas_standard_names.standard_name import StandardName, StandardNameFile
+from imas_standard_names.standard_name import StandardName, StandardNames
 from imas_standard_names.scripts import (
     get_standardname,
     has_standardname,
@@ -72,7 +72,7 @@ def click_runner(path: str | Path):
 
 @contextmanager
 def write_standardnames(
-    standardnames: syaml.YAML | StandardNameFile, temp_dir, filename="standardnames.yml"
+    standardnames: syaml.YAML | StandardNames, temp_dir, filename="standardnames.yml"
 ):
     """Write yaml standardnames to a temporary file."""
     standardnames_file = Path(temp_dir) / filename
@@ -111,7 +111,7 @@ def test_add_standard_name(tmp_path):
 
 def test_subtract_stnadardnames(tmp_path):
     new_name = "a_new_standard_name"
-    submit_standardnames = StandardNameFile(deepcopy(standardnames))
+    submit_standardnames = StandardNames(deepcopy(standardnames))
     submit_standardnames += StandardName(name=new_name, documentation="docs")
     with (
         click_runner(tmp_path) as (runner, temp_dir),
@@ -126,7 +126,7 @@ def test_subtract_stnadardnames(tmp_path):
             subtract_standardnames, ("standardnames.yml", minuend_file, subtrahend_file)
         )
         assert result.exit_code == 0
-        output_standardnames = StandardNameFile("standardnames.yml")
+        output_standardnames = StandardNames("standardnames.yml")
         assert (new_name) in output_standardnames.data
         for name in standardnames.data:
             assert name not in output_standardnames.data

@@ -94,29 +94,31 @@ try:
 except FileNotFoundError:
     HUMAN_REVIEWER_SYSTEM_PROMPT = "You parse user instructions to extract the review pertaining to each standard name. You score the feedback on a scale of 0.0 to 1.0, where 1.0 indicates full approval and 0.0 indicates complete rejection, approval of the name begins at 0.7. Closely inspect the human input to not assign passing scores when the user asks for regeneration. Using the user provided feedback write a prompt for an LLM to improve the standard_name to include in the feedback message."
 
+port = 8080
+host = "http://127.0.0.1"
 
 generate_connect = IMASConnect(
-    host="http://127.0.0.1", 
-    port=8080, 
+    host=host, 
+    port=port, 
     system_prompt=GENERATOR_SYSTEM_PROMPT,
     output_type=StandardName
     )
 ai_review_connect = IMASConnect(
-    host="http://127.0.0.1", 
-    port=8080, 
+    host=host, 
+    port=port, 
     system_prompt=AI_REVIEWER_SYSTEM_PROMPT,
     output_type=Review
     )
 human_review_connect = IMASConnect(
-    host="http://127.0.0.1", 
-    port=8080, 
+    host=host, 
+    port=port, 
     system_prompt=HUMAN_REVIEWER_SYSTEM_PROMPT,
     output_type=Review
     )
 
 request_connect = IMASConnect(
-    host="http://127.0.0.1", 
-    port=8080, 
+    host=host, 
+    port=port, 
     system_prompt=HUMAN_REQUEST_SYSTEM_PROMPT,
     output_type=GenerationRequest
     )
@@ -164,7 +166,7 @@ class AIReview(BaseNode[State]):
             print("\n=== AI Review rejects ===")
             for c in ctx.state.candidates:
                 if not c.passed:
-                    print(f" - {c.name}:\t {c.review.score:.2f}")
+                    print(f" - {c.name}:\t {c.review.score if c.review else 0:.2f}")
             return GenerateNames()
         return HumanReview()
 
@@ -199,15 +201,11 @@ class HumanReview(BaseNode[State]):
         return GenerateNames()
 @dataclass
 class Finalize(BaseNode[State]):
-    async def run(self, ctx: GraphRunContext[State]) -> End:
+    async def run(self, ctx: GraphRunContext[State]) -> End[list[StandardName]]:
         print("\n=== Final Approved Standard Names ===")
-        approved = [c for c in ctx.state.candidates if c.passed]
-        if not approved:
-            print("No approved standard names.")
-        else:
-            for c in approved:
-                print(f" - {c.name}: {c.description or 'No description provided.'}")
-        return End(approved)
+        for c in ctx.state.candidates:
+            print(f" - {c.name}: {c.description or 'No description provided.'}")
+        return End(ctx.state.candidates)
 
 
 # =============================

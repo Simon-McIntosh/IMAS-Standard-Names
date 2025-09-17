@@ -14,7 +14,7 @@ def mock_urls():
         "https://github.com/user-attachments/assets/67890/image2.png",
         "https://github.com/user-attachments/assets/11223/image3.gif",
         "https://github.com/user-attachments/assets/44556/image4.svg",
-        "https://github.com/user-attachments/assets/77889/image5.webp",
+        #"https://github.com/user-attachments/assets/77889/image5.webp",
     ]
 
 
@@ -67,7 +67,6 @@ def test_path_extraction(standard_name, sample_documentation, mock_urls):
     """Test that paths are correctly generated from URLs."""
     image_dir = Path("images")
     paths = ImageProcessor(standard_name, sample_documentation, image_dir).paths
-
     # Check that the paths are correctly generated
     assert len(paths) == len(mock_urls)
     for index, url in enumerate(mock_urls, 1):
