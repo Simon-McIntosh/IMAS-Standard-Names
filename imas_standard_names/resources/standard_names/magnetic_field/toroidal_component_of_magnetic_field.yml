@@ -1,7 +1,5 @@
 name: toroidal_component_of_magnetic_field
 kind: scalar
 unit: T
-axis: toroidal
-parent_vector: magnetic_field
 status: draft
 description: Toroidal component of magnetic_field.

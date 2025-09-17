@@ -28,8 +28,16 @@ __all__ = ["__version__", "GenericNames"]
 # ---------------------------------------------------------------------------
 @pint.register_unit_format("F")
 def format_unit_simple(unit, registry, **options):  # pragma: no cover - format
-    """Return pint unit in fused dot-exponent UDUNITS syntax.
-    ND
-        Example: {'m': 1, 's': -2} -> 'm.s^-2'
+    """Return pint unit in fused dot-exponent UDUNITS syntax using short symbols.
+
+    Differences from pint's built-in formatters:
+        * Enforces lexicographic ordering of symbols for determinism.
+        * Uses the stored short symbols (no expansion to long names like 'meter').
+        * Represents denominators with negative exponents only (no division symbol).
     """
-    return ".".join(u if p == 1 else f"{u}^{p}" for u, p in unit.items())
+    items = [(str(sym), int(exp)) for sym, exp in unit.items() if int(exp) != 0]
+    items.sort(key=lambda x: x[0])
+    return ".".join(sym if exp == 1 else f"{sym}^{exp}" for sym, exp in items)
+
+
+__all__.append("format_unit_simple")

@@ -44,7 +44,7 @@ Derived (operator) example:
 """
 
 from pathlib import Path
-from typing import Dict, List, Literal, Optional, Iterable, Union, Annotated
+from typing import Dict, List, Literal, Iterable, Union, Annotated
 from enum import Enum
 import re
 import yaml
@@ -69,6 +69,16 @@ from imas_standard_names.provenance import (
     ReductionProvenance,
 )
 from imas_standard_names.reductions import enforce_reduction_naming
+from imas_standard_names.field_types import (
+    Name,
+    Unit,
+    Tags,
+    Links,
+    Constraints,
+    Description,
+    Documentation,
+    Domain,
+)
 
 Kind = Literal["scalar", "derived_scalar", "vector", "derived_vector"]
 Status = Literal["draft", "active", "deprecated", "superseded"]
@@ -85,44 +95,89 @@ class Frame(str, Enum):  # limited set – extend as needed
 class StandardNameBase(BaseModel):
     """Base standard name definition (fields common to all kinds).
 
-    Pydantic discriminated union configured via 'kind'. Subclasses define literal kind values.
+    Pydantic discriminated union configured via 'kind'. Subclasses define
+    literal kind values. All fields are explicitly annotated with concise
+    descriptions for downstream documentation / tooling generation.
     """
 
     model_config = ConfigDict(extra="forbid")
 
-    # core fields
-    name: str
-    description: str
-    unit: str = ""
-    status: Status = "draft"
+    # Core identification & description
+    name: Name
+    description: Description
+    documentation: Documentation = ""
+    unit: Unit = ""
+    status: Status = Field(
+        "draft",
+        description="Lifecycle state: draft | active | deprecated | superseded.",
+    )
 
     # Governance / metadata
-    validity_domain: str = ""
-    constraints: List[str] = Field(default_factory=list)
-    deprecates: str = ""
-    superseded_by: str = ""
-    alias: str = ""
-    tags: List[str] = Field(default_factory=list)
-    links: List[str] = Field(default_factory=list)
+    validity_domain: Domain = ""
+    constraints: Constraints = Field(default_factory=list)
+    deprecates: Name | str = ""
+    superseded_by: Name | str = ""
+    tags: Tags = Field(default_factory=list)
+    links: Links = Field(default_factory=list)
 
-    # Base validators
-    @field_validator("name")
+    # Supplemental validator for double underscore rule not expressible in pattern.
+    @field_validator("name", "deprecates", "superseded_by")
     @classmethod
-    def validate_name(cls, v: str) -> str:
-        if not re.match(r"^[a-z][a-z0-9_]*$", v):
-            raise ValueError("Invalid name token")
-        if "__" in v:
-            raise ValueError("Name must not contain double underscores")
+    def _no_double_underscore(cls, v: str) -> str:  # type: ignore[override]
+        if v and "__" in v:
+            raise ValueError("Name tokens must not contain double underscores")
         return v
 
+    # Base validators
     @field_validator("unit")
     @classmethod
     def normalize_unit(cls, v: str) -> str:
-        # TODO implement unit validation with f"{pint.Unit(units):~F"
+        # Dimensionless synonyms collapse to empty string.
         if v in ("", "1", "none", "dimensionless"):
             return ""
         if " " in v:
             raise ValueError("Unit must not contain whitespace")
+        if "/" in v or "*" in v:
+            raise ValueError(
+                "Use dot-exponent style (e.g. m.s^-2); '/' and '*' are forbidden"
+            )
+
+        # Syntactic canonicalization performed without expanding symbols to their
+        # long names (pint would expand 'm' -> 'meter', etc.), because we want
+        # authors to write the concise symbols and we want to preserve those as
+        # the canonical storage form. We still optionally validate that each
+        # symbol is a known pint unit if pint is available, but we compare using
+        # the author-supplied symbols.
+        token_re = re.compile(r"^([A-Za-z0-9]+)(\^([+-]?\d+))?$")
+        parts_raw = v.split(".")
+        parsed: list[tuple[str, int]] = []
+        for part in parts_raw:
+            m = token_re.match(part)
+            if not m:
+                raise ValueError(f"Invalid unit token '{part}' in '{v}'")
+            sym = m.group(1)
+            exp = int(m.group(3) or 1)
+            if exp == 0:
+                # Zero exponents are meaningless – reject to avoid silent drops.
+                raise ValueError(f"Zero exponent not allowed in unit token '{part}'")
+            parsed.append((sym, exp))
+
+        # Lexicographic ordering of symbols defines canonical order.
+        canonical = ".".join(
+            sym if exp == 1 else f"{sym}^{exp}"
+            for sym, exp in sorted(parsed, key=lambda x: x[0])
+        )
+        if canonical != v:
+            raise ValueError(f"Unit '{v}' not canonical; expected '{canonical}'")
+
+        # Optional semantic validation via pint (best-effort). We allow tokens that
+        # pint can resolve individually; we do not reconstruct expansion names.
+        if pint:
+            try:
+                # Full parse ensures combined dimensional validity (e.g. catches typos).
+                pint.Unit(v)
+            except Exception as e:  # pragma: no cover - defensive
+                raise ValueError(f"Invalid unit '{v}': {e}") from e
         return v
 
     @field_validator("tags", "links", "constraints")
@@ -152,8 +207,12 @@ class StandardNameBase(BaseModel):
         u = pint.Unit(self.unit)
         match style:
             case "plain":
-                return f"{u:~P}"
-            case "pint":
+                # Plain style now uses pint's pretty (~P) for human readability
+                # (may produce Unicode superscripts or ASCII fallbacks)
+                s = f"{u:~P}"
+                return s.replace("·", "/")  # preserve legacy visual slash style
+            case "dotexp":
+                # Canonical fused dot-exponent short-symbol format
                 return f"{u:~F}"
             case "latex":
                 return f"$`{u:L}`$"
@@ -163,27 +222,11 @@ class StandardNameBase(BaseModel):
 
 class StandardNameScalar(StandardNameBase):
     kind: Literal["scalar"] = "scalar"
-    axis: Optional[str] = None
-    parent_vector: Optional[str] = None
-
-    @model_validator(mode="after")
-    def _component_rules(self):  # type: ignore[override]
-        if self.axis or self.parent_vector:
-            if not (self.axis and self.parent_vector):
-                raise ValueError("Component scalar must define axis and parent_vector")
-            expected_prefix = f"{self.axis}_component_of_"
-            if not self.name.startswith(expected_prefix):
-                raise ValueError(
-                    f"Component scalar name must start with '{expected_prefix}'"
-                )
-        return self
 
 
 class StandardNameDerivedScalar(StandardNameBase):
     kind: Literal["derived_scalar"] = "derived_scalar"
     provenance: Provenance
-    axis: Optional[str] = None
-    parent_vector: Optional[str] = None
 
     @model_validator(mode="after")
     def _derived_rules(self):  # type: ignore[override]
@@ -210,9 +253,10 @@ class StandardNameDerivedScalar(StandardNameBase):
 
 class StandardNameVector(StandardNameBase):
     kind: Literal["vector"] = "vector"
-    frame: Frame
-    components: Dict[str, str]
-    magnitude: Optional[str] = None  # retained for now but no intrinsic validation
+    frame: Frame = Field(..., description="Reference frame / coordinate system.")
+    components: Dict[str, str] = Field(
+        ..., description="Mapping axis -> component standard name."
+    )
 
     @model_validator(mode="after")
     def _vector_rules(self):  # type: ignore[override]
@@ -228,13 +272,21 @@ class StandardNameVector(StandardNameBase):
                 )
         return self
 
+    @property
+    def magnitude(self) -> str:
+        """Derived magnitude standard name (not a stored field).
+
+        Conventionally 'magnitude_of_<vector_name>'. Presence as an entry in
+        the catalog is optional and validated elsewhere if defined.
+        """
+        return f"magnitude_of_{self.name}"
+
 
 class StandardNameDerivedVector(StandardNameBase):
     kind: Literal["derived_vector"] = "derived_vector"
-    frame: Frame
-    components: Dict[str, str]
-    magnitude: Optional[str] = (
-        None  # no intrinsic naming validation; handled by reductions if present
+    frame: Frame = Field(..., description="Reference frame / coordinate system.")
+    components: Dict[str, str] = Field(
+        ..., description="Mapping axis -> component standard name."
     )
     provenance: Provenance
 
@@ -271,6 +323,10 @@ class StandardNameDerivedVector(StandardNameBase):
             )
         return self
 
+    @property
+    def magnitude(self) -> str:
+        return f"magnitude_of_{self.name}"
+
 
 StandardName = Annotated[
     Union[
@@ -287,6 +343,9 @@ _STANDARD_NAME_ADAPTER = TypeAdapter(StandardName)
 
 def create_standard_name(data: Dict) -> StandardName:
     """Validate data into the appropriate StandardName subclass via discriminator."""
+    # Backward compatibility: drop legacy 'magnitude' key if present; magnitude now derived.
+    if isinstance(data, dict) and "magnitude" in data:
+        data = {k: v for k, v in data.items() if k != "magnitude"}
     return _STANDARD_NAME_ADAPTER.validate_python(data)
 
 
@@ -304,7 +363,7 @@ def load_standard_name_file(path: Path) -> StandardName:
         data = yaml.safe_load(f) or {}
     if not isinstance(data, dict) or "name" not in data:
         raise ValueError(
-            f"File {path} must contain a flat mapping with a 'name' field (no aggregated legacy format)."
+            f"File {path} must contain a flat mapping with a 'name' field."
         )
     # YAML will parse an unquoted dimensionless unit written as `unit: 1` into an
     # integer. The schema expects a string for units, so coerce simple numeric
@@ -366,14 +425,13 @@ __all__ = [
     "Frame",
     "OperatorProvenance",
     "ExpressionProvenance",
-    "Provenance",
     "StandardNameBase",
     "StandardNameScalar",
     "StandardNameDerivedScalar",
     "StandardNameVector",
     "StandardNameDerivedVector",
-    "StandardName",
-    "StandardName",
+    "Name",  # token alias
+    "StandardName",  # union
     "create_standard_name",
     "load_standard_name_file",
     "load_catalog",

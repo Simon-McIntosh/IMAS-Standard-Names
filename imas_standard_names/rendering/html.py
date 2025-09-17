@@ -68,8 +68,6 @@ def render_html(
     add_row("Frame", getattr(entry, "frame", None))
     add_row("Components", getattr(entry, "components", None))
     add_row("Magnitude", getattr(entry, "magnitude", None))
-    add_row("Axis", getattr(entry, "axis", None))
-    add_row("Parent Vector", getattr(entry, "parent_vector", None))
     # Provenance (flatten if present)
     prov = getattr(entry, "provenance", None)
     if prov is not None:
@@ -85,7 +83,6 @@ def render_html(
     add_row("Validity Domain", getattr(entry, "validity_domain", None))
     add_row("Deprecates", getattr(entry, "deprecates", None))
     add_row("Superseded By", getattr(entry, "superseded_by", None))
-    add_row("Alias", getattr(entry, "alias", None))
 
     if rows:
         html.append("<table class='details'>")

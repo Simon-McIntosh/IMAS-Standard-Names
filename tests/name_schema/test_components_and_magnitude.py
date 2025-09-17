@@ -2,60 +2,19 @@ import pytest
 from imas_standard_names.schema import create_standard_name
 
 
-def test_component_scalar_requires_axis_and_parent():
-    with pytest.raises(ValueError):
-        create_standard_name(
-            {
-                "kind": "scalar",
-                "name": "r_component_of_plasma_velocity",
-                "description": "A component missing parent",
-                "unit": "m/s",
-                "status": "active",
-                "axis": "r",
-                # parent_vector omitted
-            }
-        )
-    with pytest.raises(ValueError):
-        create_standard_name(
-            {
-                "kind": "scalar",
-                "name": "r_component_of_plasma_velocity",
-                "description": "A component missing axis",
-                "unit": "m/s",
-                "status": "active",
-                "parent_vector": "plasma_velocity",
-            }
-        )
-
-
-def test_component_scalar_prefix_enforced():
-    with pytest.raises(ValueError):
-        create_standard_name(
-            {
-                "kind": "scalar",
-                "name": "wrong_component_of_plasma_velocity",
-                "description": "Bad prefix",
-                "unit": "m/s",
-                "status": "draft",
-                "axis": "r",
-                "parent_vector": "plasma_velocity",
-            }
-        )
-
-
-def test_valid_component_scalar():
+def test_component_scalar_now_minimal():
+    # Scalar components no longer require explicit axis/parent_vector fields.
+    # Validation only enforces vector component naming indirectly via vector definitions.
     sn = create_standard_name(
         {
             "kind": "scalar",
             "name": "r_component_of_plasma_velocity",
             "description": "Radial component",
-            "unit": "m/s",
+            "unit": "m.s^-1",
             "status": "active",
-            "axis": "r",
-            "parent_vector": "plasma_velocity",
         }
     )
-    assert sn.axis == "r" and sn.parent_vector == "plasma_velocity"
+    assert sn.name.startswith("r_component_of_")
 
 
 def test_vector_invalid_component_prefix():
@@ -83,7 +42,7 @@ def test_vector_invalid_axis_token():
                 "kind": "vector",
                 "name": "flow",
                 "description": "Flow",
-                "unit": "m/s",
+                "unit": "m.s^-1",
                 "status": "active",
                 "frame": "cylindrical_r_tor_z",
                 "components": {
@@ -100,7 +59,7 @@ def test_valid_vector_with_magnitude():
             "kind": "vector",
             "name": "plasma_velocity",
             "description": "Velocity",
-            "unit": "m/s",
+            "unit": "m.s^-1",
             "status": "active",
             "frame": "cylindrical_r_tor_z",
             "components": {
@@ -110,4 +69,4 @@ def test_valid_vector_with_magnitude():
             "magnitude": "magnitude_of_plasma_velocity",
         }
     )
-    assert sn.magnitude == "magnitude_of_plasma_velocity"
+    assert getattr(sn, "magnitude") == "magnitude_of_plasma_velocity"

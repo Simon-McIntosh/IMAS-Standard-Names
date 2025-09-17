@@ -50,7 +50,7 @@ def test_volume_integral_scalar():
             "kind": "derived_scalar",
             "name": "volume_integral_of_pressure",
             "description": "Volume integral",
-            "unit": "Pa*m^3",
+            "unit": "Pa.m^3",
             "status": "active",
             "provenance": {
                 "mode": "reduction",
@@ -69,7 +69,7 @@ def test_magnitude_vector():
             "kind": "derived_scalar",
             "name": "magnitude_of_plasma_velocity",
             "description": "Speed",
-            "unit": "m/s",
+            "unit": "m.s^-1",
             "status": "active",
             "provenance": {
                 "mode": "reduction",

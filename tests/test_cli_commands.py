@@ -11,7 +11,7 @@ def _make_minimal_vector(tmp_path: Path):
         """name: velocity
 kind: vector
 status: active
-unit: m/s
+unit: m.s^-1
 description: Velocity.
 frame: cylindrical_r_tor_z
 components:
@@ -24,10 +24,8 @@ components:
         """name: r_component_of_velocity
 kind: scalar
 status: active
-unit: m/s
+unit: m.s^-1
 description: Radial component.
-axis: r
-parent_vector: velocity
 """,
         encoding="utf-8",
     )
@@ -35,10 +33,8 @@ parent_vector: velocity
         """name: tor_component_of_velocity
 kind: scalar
 status: active
-unit: m/s
+unit: m.s^-1
 description: Toroidal component.
-axis: tor
-parent_vector: velocity
 """,
         encoding="utf-8",
     )

@@ -9,7 +9,7 @@ def test_render_html_basic(tmp_path: Path):
         """name: velocity
 kind: vector
 status: active
-unit: m/s
+unit: m.s^-1
 description: Flow velocity.
 frame: cylindrical_r_tor_z
 components:
@@ -24,10 +24,8 @@ magnitude: magnitude_of_velocity
         """name: r_component_of_velocity
 kind: scalar
 status: active
-unit: m/s
+    unit: m.s^-1
 description: Radial component of velocity.
-axis: r
-parent_vector: velocity
 """,
         encoding="utf-8",
     )
@@ -35,10 +33,8 @@ parent_vector: velocity
         """name: tor_component_of_velocity
 kind: scalar
 status: active
-unit: m/s
+    unit: m.s^-1
 description: Toroidal component of velocity.
-axis: tor
-parent_vector: velocity
 """,
         encoding="utf-8",
     )

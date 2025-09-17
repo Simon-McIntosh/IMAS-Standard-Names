@@ -19,7 +19,6 @@ def submission_base(
         "status": "draft",
         "unit": github_input["units"],
         "description": github_input["documentation"],
-        "alias": github_input["alias"],
         "tags": github_input["tags"],
     }
 
@@ -111,38 +110,3 @@ def test_update_standardnames_generic_name_error(work_env, submission_base):
     )
     assert result.exit_code == 0
     assert "generic name" in result.output.lower()
-
-
-def test_update_standardnames_alias_success(work_env, submission_base):
-    runner, standard_dir, generic_file, submission_file = work_env
-    # alias refers to an existing name (plasma_current)
-    alias_submission = deepcopy(submission_base)
-    alias_submission["name"] = "second_plasma_current"
-    alias_submission["alias"] = "plasma_current"
-    _write_submission(submission_file, alias_submission)
-    result = runner.invoke(
-        update_standardnames,
-        (standard_dir.as_posix(), generic_file.as_posix(), submission_file.as_posix()),
-    )
-    assert result.exit_code == 0
-    assert "proposal is ready for submission" in result.output.lower()
-
-
-def test_update_standardnames_alias_missing_error(work_env, submission_base):
-    """Currently alias pointing to undefined name does not raise an error.
-
-    This test documents existing behavior. When validation is implemented
-    (ensuring alias target exists), update this test accordingly.
-    """
-    runner, standard_dir, generic_file, submission_file = work_env
-    alias_submission = deepcopy(submission_base)
-    alias_submission["name"] = "second_plasma_current"
-    alias_submission["alias"] = "undefined_name"
-    _write_submission(submission_file, alias_submission)
-    result = runner.invoke(
-        update_standardnames,
-        (standard_dir.as_posix(), generic_file.as_posix(), submission_file.as_posix()),
-    )
-    assert result.exit_code == 0
-    # Behavior: treated as normal submission
-    assert "proposal is ready" in result.output.lower()

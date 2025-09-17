@@ -92,8 +92,6 @@ class StandardNameCatalog:
                 "components": data.get("components", {}) or {},
                 "magnitude": data.get("magnitude"),
                 "provenance": data.get("provenance"),
-                "parent_vector": data.get("parent_vector"),
-                "axis": data.get("axis"),
             }
         return rel
 

@@ -41,8 +41,6 @@ def write_catalog_artifacts(
             "components": getattr(e, "components", {}) or {},
             "magnitude": getattr(e, "magnitude", None),
             "provenance": getattr(e, "provenance", None),
-            "parent_vector": getattr(e, "parent_vector", None),
-            "axis": getattr(e, "axis", None),
         }
         for name, e in entries.items()
     }

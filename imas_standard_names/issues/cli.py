@@ -108,12 +108,9 @@ def update_standardnames(
             "status": raw_json.get("status", "draft") or "draft",
             "unit": raw_json.get("unit", "") or "",
             "description": description,
-            "alias": raw_json.get("alias", "") or "",
             "tags": raw_tags or [],
             "links": [],
         }
-        if data["alias"]:
-            data["links"].append(data["alias"])
         # Remove keys with empty string that are optional (pydantic will ignore missing)
         cleaned = {k: v for k, v in data.items() if v not in (None, "") or k == "name"}
         entry = schema.create_standard_name(cleaned)

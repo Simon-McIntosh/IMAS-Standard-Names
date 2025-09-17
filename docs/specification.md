@@ -70,6 +70,8 @@ remain the foundation.
 For extended scalar guidance (templates, validation hooks) see Section 12 and
 the `style-guide.md`.
 
+See also `provenance.md` for the unified derivation / operator / reduction schema.
+
 ---
 
 ## 3. Vector & Component System (Layer on Scalars)
@@ -107,7 +109,7 @@ Vectors group semantics; components remain atomic scalars.
 | Deterministic Parsing     | Names are machine decomposed with simple regex + operator table.   |
 | Rank Safety               | Operators have explicit input/output ranks (vector → scalar etc.). |
 | Left‑to‑Right Composition | Outermost operation first: `time_derivative_of_curl_of_B`.         |
-| No Silent Aliases         | One canonical form per concept (aliases permitted for migration).  |
+| One Canonical Form        | Exactly one name per concept (no alternate alias field).           |
 
 ---
 
@@ -193,18 +195,18 @@ Disallowed chains: e.g. `curl_of_divergence_of_...` (scalar → curl invalid).
 
 ## 8. Validation Invariants
 
-| Code name (for tooling) | Rule                                                                 |
-| ----------------------- | -------------------------------------------------------------------- |
-| VEC001                  | A vector file must list >=2 distinct axes.                           |
-| VEC002                  | All component names referenced exist & backlink via `parent_vector`. |
-| VEC003                  | Each component follows uniform pattern `<axis>_component_of_...`.    |
-| OPR001                  | Operator chain obeys rank transitions.                               |
-| OPR002                  | Scalarizing operator cannot precede a vector‑producing operator.     |
-| MAG001                  | `<vector>_magnitude` depends on every base component once.           |
-| SUB001                  | `<subset>_magnitude` subset ⊆ frame axes.                            |
-| AXS001                  | Axis tokens must appear in frame file.                               |
-| DRP001                  | No legacy suffix pattern detected.                                   |
-| DIAG001                 | No hard-coded instrument indices inside diagnostic quantity names.   |
+| Code name (for tooling) | Rule                                                               |
+| ----------------------- | ------------------------------------------------------------------ |
+| VEC001                  | A vector file must list >=2 distinct axes.                         |
+| VEC002                  | All component names referenced exist.                              |
+| VEC003                  | Each component follows uniform pattern `<axis>_component_of_...`.  |
+| OPR001                  | Operator chain obeys rank transitions.                             |
+| OPR002                  | Scalarizing operator cannot precede a vector‑producing operator.   |
+| MAG001                  | `<vector>_magnitude` depends on every base component once.         |
+| SUB001                  | `<subset>_magnitude` subset ⊆ frame axes.                          |
+| AXS001                  | Axis tokens must appear in frame file.                             |
+| DRP001                  | No legacy suffix pattern detected.                                 |
+| DIAG001                 | No hard-coded instrument indices inside diagnostic quantity names. |
 
 ---
 
@@ -236,7 +238,7 @@ Extended quick start: see `quickstart.md`.
 ## 11. Future Extensions (TBD)
 
 - Tensor ranks (`kind: tensor` with index list).
-- Frame transformations & alias vectors.
+- Frame transformations.
 - Normalized variants with explicit dependency tracking.
 
 ---

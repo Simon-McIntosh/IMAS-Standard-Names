@@ -26,7 +26,7 @@ def base_names_data():
             "name": "plasma_current_density",
             "kind": "scalar",
             "status": "draft",
-            "unit": "A/m^2",
+            "unit": "A.m^-2",
             "description": "Plasma current density",
         },
         {
@@ -54,7 +54,6 @@ def github_input():
         "units": "A",
         "documentation": "multi-line\ndoc string",
         "tags": "",
-        "alias": "",
         "options": [],
     }
 

@@ -15,8 +15,8 @@ def run_structural_checks(entries: Dict[str, StandardName]) -> List[str]:
     """Return a list of structural issues discovered.
 
     Current placeholder rules (expand later):
-      * All magnitude names referenced actually exist
-      * Component references exist & backlink parent_vector
+        * All magnitude names referenced actually exist
+        * Component references exist (vector lists only)
     """
     issues: List[str] = []
     for name, entry in entries.items():
@@ -25,15 +25,9 @@ def run_structural_checks(entries: Dict[str, StandardName]) -> List[str]:
         mag = data.get("magnitude")
         if mag and mag not in entries:
             issues.append(f"{name}: magnitude '{mag}' not found")
-        # Components existence + backlink
+        # Components existence (backlink fields removed from schema)
         components = data.get("components", {}) or {}
         for comp in components.values():
             if comp not in entries:
                 issues.append(f"{name}: component '{comp}' file missing")
-            else:
-                comp_parent = getattr(entries[comp], "parent_vector", None)
-                if comp_parent and comp_parent != name:
-                    issues.append(
-                        f"{name}: component '{comp}' parent_vector mismatch (has {comp_parent})"
-                    )
     return issues

@@ -8,15 +8,15 @@ Current checks (incremental roadmap):
   2. Parse all `.yml` / `.yaml` files under domain subdirectories.
   3. Classify entries by `kind`.
   4. Detect component naming pattern violations.
-  5. Ensure vector entries list components that exist.
-  6. Ensure each component file back-links via parent_vector.
-  7. Check magnitude file dependencies (if present) cover all base components.
+    5. Ensure vector entries list components that exist.
+    6. Check magnitude reduction provenance base is the vector and no spurious components missing.
 
 Planned (not implemented):
   * Operator rank validation
   * Nested operator chain parsing
-  * Frame axis conformity
-  * Derived vector component consistency
+    * Frame axis conformity
+    * Derived vector component consistency
+    * Operator rank validation (supersedes simple pattern checks)
 
 Usage:
   python tools/validate_catalog.py
@@ -120,39 +120,23 @@ def main() -> int:
             )
 
     # Validate component naming pattern
-    for comp_name, data in component_files.items():
-        if not comp_name.startswith(
-            tuple(
-                [
-                    "radial_",
-                    "toroidal_",
-                    "vertical_",
-                    "poloidal_",
-                    "parallel_",
-                    "perpendicular1_",
-                    "perpendicular2_",
-                    "x_",
-                    "y_",
-                    "z_",
-                ]
-            )
-        ):
+    axis_prefixes = (
+        "radial_",
+        "toroidal_",
+        "vertical_",
+        "poloidal_",
+        "parallel_",
+        "perpendicular1_",
+        "perpendicular2_",
+        "x_",
+        "y_",
+        "z_",
+    )
+    for comp_name in component_files:
+        if not comp_name.startswith(axis_prefixes):
             errors.append(
                 f"COMPONENT {comp_name}: axis prefix not in approved list (extend validator if intended)."
             )
-        if not comp_name.endswith(
-            "_component_of_" + comp_name.split("_component_of_")[-1]
-        ):
-            # Pattern itself guaranteed by substring, skip heavy regex here.
-            pass
-        parent_vector = data.get("parent_vector")
-        if not parent_vector:
-            errors.append(f"COMPONENT {comp_name}: missing parent_vector")
-        else:
-            if parent_vector not in entries:
-                errors.append(
-                    f"COMPONENT {comp_name}: parent_vector '{parent_vector}' not found"
-                )
 
     # Cross-check vectors reference existing components
     for vec, comps in vector_components.items():
@@ -166,23 +150,20 @@ def main() -> int:
                     errors.append(
                         f"VECTOR {vec}: listed component '{cname}' does not follow component pattern."
                     )
-                # Ensure backlink
-                parent_vec = entries[cname].get("parent_vector")
-                if parent_vec != vec:
-                    errors.append(
-                        f"VECTOR {vec}: component '{cname}' parent_vector='{parent_vec}' mismatch"
-                    )
+                # Backlink field removed from schema: membership inferred solely from listing.
 
-    # Magnitude coverage: for any <vector>_magnitude ensure dependencies cover all base components
+    # Magnitude coverage via provenance (mode: reduction, reduction: magnitude)
     for name, data in entries.items():
-        if name.endswith("_magnitude") and data.get("parent_vector"):
-            parent = data["parent_vector"]
-            # Identify base vector components only (exclude derived vector parents)
-            base_components = vector_components.get(parent, set())
-            deps = set((data.get("derivation") or {}).get("dependencies", []))
-            if base_components and deps and deps != base_components:
+        prov = data.get("provenance") or {}
+        if (
+            isinstance(prov, dict)
+            and prov.get("mode") == "reduction"
+            and prov.get("reduction") == "magnitude"
+        ):
+            base = prov.get("base")
+            if base not in vector_components:
                 errors.append(
-                    f"MAGNITUDE {name}: dependency set {deps} != base components {base_components}"
+                    f"MAGNITUDE {name}: reduction base '{base}' is not a declared vector"
                 )
 
     if errors:

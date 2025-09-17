@@ -25,7 +25,7 @@ def vector_data():
         "kind": "vector",
         "name": "plasma_velocity",
         "description": "Bulk plasma velocity",
-        "unit": "m/s",
+        "unit": "m.s^-1",
         "status": "active",
         "frame": "cylindrical_r_tor_z",
         "components": {
@@ -43,7 +43,7 @@ def operator_scalar_data():
         "kind": "derived_scalar",
         "name": "divergence_of_plasma_velocity",
         "description": "Divergence of velocity",
-        "unit": "1/s",
+        "unit": "s^-1",
         "status": "active",
         "provenance": {
             "mode": "operator",
@@ -60,7 +60,7 @@ def gradient_vector_data():
         "kind": "derived_vector",
         "name": "gradient_of_electron_temperature",
         "description": "Spatial gradient of Te",
-        "unit": "eV/m",
+        "unit": "eV.m^-1",
         "status": "active",
         "frame": "cylindrical_r_tor_z",
         "components": {

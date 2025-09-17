@@ -10,7 +10,7 @@ def test_structural_and_semantic_checks(tmp_path: Path):
         """name: gradient_of_temperature
 kind: derived_vector
 status: draft
-unit: K/m
+unit: K.m^-1
 description: Gradient of temperature.
 frame: cylindrical_r_tor_z
 components:
@@ -28,10 +28,8 @@ provenance:
         """name: r_component_of_gradient_of_temperature
 kind: derived_scalar
 status: draft
-unit: K/m
+unit: K.m^-1
 description: Radial component.
-axis: r
-parent_vector: gradient_of_temperature
 provenance:
   mode: operator
   operators: [gradient]
@@ -44,10 +42,8 @@ provenance:
         """name: tor_component_of_gradient_of_temperature
 kind: derived_scalar
 status: draft
-unit: K/m
+unit: K.m^-1
 description: Toroidal component.
-axis: tor
-parent_vector: gradient_of_temperature
 provenance:
   mode: operator
   operators: [gradient]

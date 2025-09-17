@@ -32,11 +32,11 @@ def test_unit_whitespace_rejected():
 @pytest.mark.parametrize(
     "style,expected_variants",
     [
-        # Pretty (~P) may emit Unicode superscript or ASCII fallback depending on locale/terminal
+        # Plain (~P) may emit Unicode superscript or caret fallback; both accepted
         ("plain", ("m/s²", "m/s^2")),
-        # Custom registered 'pint' (~F) format should produce dotted with negative exponent form
-        ("pint", ("m.s^-2",)),
-        # LaTeX form includes full wrapper added in schema ( $`...`$ )
+        # Canonical fused dot-exponent short-symbol style
+        ("dotexp", ("m.s^-2",)),
+        # LaTeX expanded symbols
         ("latex", ("$`\\frac{\\mathrm{meter}}{\\mathrm{second}^{2}}`$",)),
     ],
 )
@@ -46,7 +46,7 @@ def test_formatted_unit_styles(style, expected_variants):
             "kind": "scalar",
             "name": "acceleration",
             "description": "Acceleration",
-            "unit": "m/s^2",
+            "unit": "m.s^-2",
             "status": "active",
         }
     )
@@ -62,7 +62,7 @@ def test_formatted_unit_unknown_style():
             "kind": "scalar",
             "name": "electron_density",
             "description": "Electron density",
-            "unit": "1/m^3",
+            "unit": "m^-3",
             "status": "draft",
         }
     )

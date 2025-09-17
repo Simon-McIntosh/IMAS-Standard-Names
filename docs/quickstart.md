@@ -161,29 +161,26 @@ Example: `standard_names/magnetic_field/radial_component_of_magnetic_field.yml`
 name: radial_component_of_magnetic_field
 kind: scalar
 unit: T
-axis: radial
-parent_vector: magnetic_field
 status: draft
 description: Radial component of magnetic_field.
 ```
 
-Repeat for toroidal/vertical axes.
+Repeat for toroidal / vertical axes. Component membership is inferred purely from the
+uniform name pattern and the vector's `components` mapping.
 
 ### 2.5 Magnitude File
 
-`standard_names/magnetic_field/magnetic_field_magnitude.yml`
+`standard_names/magnetic_field/magnitude_of_magnetic_field.yml`
 
 ```yaml
 name: magnitude_of_magnetic_field
 kind: derived_scalar
 unit: T
-parent_vector: magnetic_field
-derivation:
-  expression: sqrt(radial_component_of_magnetic_field^2 +\n                   toroidal_component_of_magnetic_field^2 +\n                   vertical_component_of_magnetic_field^2)
-  dependencies:
-    - radial_component_of_magnetic_field
-    - toroidal_component_of_magnetic_field
-    - vertical_component_of_magnetic_field
+provenance:
+  mode: reduction
+  reduction: magnitude
+  domain: none
+  base: magnetic_field
 status: draft
 ```
 
@@ -196,9 +193,11 @@ name: curl_of_magnetic_field
 kind: derived_vector
 frame: cylindrical_r_tor_z
 unit: T.m^-1
-parent_operation:
-  operator: curl
-  operand_vector: magnetic_field
+provenance:
+  mode: operator
+  operators: [curl]
+  base: magnetic_field
+  operator_id: curl
 components:
   radial: radial_component_of_curl_of_magnetic_field
   toroidal: toroidal_component_of_curl_of_magnetic_field
@@ -206,20 +205,19 @@ components:
 status: draft
 ```
 
-Component example:
+Component example (derived scalar component):
 
 ```yaml
 name: radial_component_of_curl_of_magnetic_field
 kind: derived_scalar
 unit: T.m^-1
-axis: radial
-parent_vector: curl_of_magnetic_field
-derivation:
-  expression: d(B_vertical)/d(toroidal) - d(B_toroidal)/d(vertical)
-  dependencies:
-    - vertical_component_of_magnetic_field
-    - toroidal_component_of_magnetic_field
+provenance:
+  mode: operator
+  operators: [curl]
+  base: radial_component_of_magnetic_field
+  operator_id: curl
 status: draft
+description: Radial component of curl_of_magnetic_field.
 ```
 
 ### 2.7 Validate
@@ -248,9 +246,8 @@ Done.
 name: <axis>_component_of_<vector_expression>
 kind: scalar # or derived_scalar
 unit: <unit>
-axis: <axis>
-parent_vector: <vector or derived vector>
 status: draft
+description: <Axis> component of <vector_expression>.
 ```
 
 - Derived vector template:
@@ -260,9 +257,11 @@ name: <op>_of_<vector>
 kind: derived_vector
 frame: <frame>
 unit: <unit>
-parent_operation:
-  operator: <op>
-  operand_vector: <vector>
+provenance:
+  mode: operator
+  operators: [<op>]
+  base: <vector>
+  operator_id: <op>
 components:
   <axis>: <axis>_component_of_<op>_of_<vector>
   ...
