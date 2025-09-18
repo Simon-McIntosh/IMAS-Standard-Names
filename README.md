@@ -182,6 +182,44 @@ repository variants have been replaced by the unified repository and explicit
 build step (`build_catalog`). If you previously relied on a JSON or legacy
 artifact, switch to invoking `build_catalog` and consuming with `CatalogRead`.
 
+### Debugging Foreign Key (FK) Errors & Logging
+
+The in-memory authoring catalog enables SQLite foreign keys. Vector entries
+reference their component scalar names. If components are missing when the
+repository attempts to insert a vector you will now receive a diagnostic:
+
+```text
+sqlite3.IntegrityError: Foreign key constraint failed while inserting vector 'gradient_of_poloidal_flux'.
+Missing component standard_name rows: radial_component_of_gradient_of_poloidal_flux, ...
+Insert the component scalar definitions before the vector or reorder YAML files.
+```
+
+The `StandardNameRepository` performs a two-pass load (non-vectors first,
+then vectors) to avoid ordering issues during initial load from YAML. If you
+manually insert new models at runtime ensure scalar components / dependencies
+exist before derived vectors or expression provenance rows.
+
+Set an environment variable to enable verbose logging (helpful for tracing
+load order and pinpointing the first failing name):
+
+PowerShell (Windows):
+
+```powershell
+setx IMAS_SN_LOG_LEVEL DEBUG
+# start a new shell OR for current session:
+$env:IMAS_SN_LOG_LEVEL = "DEBUG"
+python -m imas_standard_names.cli.build_catalog resources/standard_names
+```
+
+Unix shells:
+
+```bash
+IMAS_SN_LOG_LEVEL=DEBUG python -m imas_standard_names.cli.build_catalog resources/standard_names
+```
+
+Accepted levels: DEBUG, INFO, WARNING, ERROR (default WARNING). The catalog
+logger name is `imas_standard_names.catalog`.
+
 ### Roadmap
 
 See the evolving [Roadmap](docs/roadmap.md) for phased milestones (vectors, frames, operator validation, lifecycle governance, and future tensor support).

@@ -34,6 +34,8 @@ def row_to_model(conn: sqlite3.Connection, row: sqlite3.Row) -> StandardName:
             (row["name"],),
         ).fetchall()
         data["components"] = {c[0]: c[1] for c in comps}
+        # Frame applies to both vector and derived_vector kinds
+        data["frame"] = row["frame"]
     op = conn.execute(
         "SELECT operator_chain, base, operator_id FROM provenance_operator WHERE name=?",
         (row["name"],),

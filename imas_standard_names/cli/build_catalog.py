@@ -24,9 +24,14 @@ from ..catalog.sqlite_build import build_catalog as build_catalog_file
 @click.option("--quiet", is_flag=True, help="Suppress non-error output")
 def build_catalog_cli(root: Path, out_path: Path | None, overwrite: bool, quiet: bool):
     repo = StandardNameRepository(root)
-    count = len(repo.list())
+    # Use __len__ for efficient row counting (added in repository)
+    count = len(repo)
     if out_path is None:
         out_path = root / "artifacts" / "catalog.db"
     db_path = build_catalog_file(root, out_path, overwrite=overwrite)
     if not quiet:
+        # Emit a deprecation notice (tests assert presence of 'deprecated')
+        click.echo(
+            "[DEPRECATED] This command will be replaced by 'standard-names catalog build' in a future release."
+        )
         click.echo(f"Built catalog ({count} entries) -> {db_path}")
