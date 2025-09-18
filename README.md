@@ -81,10 +81,17 @@ If you depended on loading a single aggregated YAML, build an index by scanning 
 
 ```python
 from pathlib import Path
-from imas_standard_names.catalog.catalog import StandardNameCatalog
+from imas_standard_names.catalog.catalog import load_catalog, StandardNameCatalog
 
-catalog = StandardNameCatalog(Path("resources/standard_names")).load()
+# Smart loader (prefers fresh SQLite, falls back to YAML)
+catalog = load_catalog(Path("resources/standard_names"))
 print(catalog.entries["electron_temperature"].unit)
+
+# Explicit source forcing (optional):
+# YAML only
+catalog_yaml = StandardNameCatalog.from_yaml("resources/standard_names")
+# SQLite only (raises if DB missing)
+# catalog_db = StandardNameCatalog.from_sqlite("resources/standard_names", db_path="imas_standard_names/resources/artifacts/catalog.db")
 ```
 
 Programmatic creation (Repository + UnitOfWork):

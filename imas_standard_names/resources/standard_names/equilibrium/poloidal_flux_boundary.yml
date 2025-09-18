@@ -2,7 +2,4 @@ name: poloidal_flux_boundary
 kind: scalar
 unit: Wb
 status: draft
-description: Poloidal flux at the last closed flux surface / plasma boundary (ψ_boundary).
-parent_scalar: poloidal_flux
-notes:
-  - Corresponds to psi_boundary in equilibrium IDS.
+description: Poloidal flux at the last closed flux surface / plasma boundary (ψ_boundary). Corresponds to psi_boundary in equilibrium IDS.

@@ -1,5 +1,5 @@
 from pathlib import Path
-import json
+import sqlite3
 from click.testing import CliRunner
 
 from imas_standard_names.cli.build_catalog import build_catalog_cli
@@ -42,13 +42,18 @@ description: Toroidal component.
 
 def test_build_catalog_cli(tmp_path: Path):
     _make_minimal_vector(tmp_path)
-    out_dir = tmp_path / "artifacts"
+    artifacts = tmp_path / "artifacts"
     runner = CliRunner()
-    result = runner.invoke(build_catalog_cli, [str(tmp_path), str(out_dir)])
+    # build with explicit db path
+    db_path = artifacts / "catalog.db"
+    result = runner.invoke(build_catalog_cli, [str(tmp_path), "--db", str(db_path)])
     assert result.exit_code == 0, result.output
-    assert (out_dir / "catalog.json").exists()
-    data = json.loads((out_dir / "catalog.json").read_text())
-    assert "velocity" in data
+    assert db_path.exists()
+    conn = sqlite3.connect(db_path)
+    cur = conn.cursor()
+    cur.execute("SELECT name FROM standard_name WHERE name='velocity'")
+    assert cur.fetchone() is not None
+    conn.close()
 
 
 def test_validate_catalog_cli(tmp_path: Path):
