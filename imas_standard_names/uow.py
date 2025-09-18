@@ -119,6 +119,33 @@ class UnitOfWork:
                 self.catalog.insert(op.old.model)
         self.close()
 
+    # Granular undo ---------------------------------------------------------
+    def undo_last(self) -> bool:
+        """Undo only the most recent mutation.
+
+        Returns True if an operation was undone, False if there was nothing to undo.
+        Leaves the UnitOfWork open for further staging or eventual commit/rollback.
+        Raises RuntimeError if the UnitOfWork is already closed.
+        """
+        if self._closed:
+            raise RuntimeError("UnitOfWork is closed")
+        if not self._undo:
+            return False
+        op = self._undo.pop()
+        if isinstance(op, UndoOpAdd):
+            self.catalog.delete(op.name)
+        elif isinstance(op, UndoOpDelete):
+            self.catalog.insert(op.snap.model)
+        elif isinstance(op, UndoOpUpdate):
+            self.catalog.delete(op.snap.name)
+            self.catalog.insert(op.snap.model)
+        elif isinstance(op, UndoOpRename):
+            self.catalog.delete(op.new_name)
+            self.catalog.insert(op.old.model)
+        else:  # pragma: no cover - defensive programming
+            raise RuntimeError(f"Unknown undo op: {op!r}")
+        return True
+
     def close(self):
         if not self._closed:
             self._closed = True

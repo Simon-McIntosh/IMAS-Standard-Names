@@ -18,7 +18,7 @@ Example file: `standard_names/electron/electron_temperature.yml`
 ```yaml
 name: electron_temperature
 kind: scalar
-unit: keV # pick canonical unit; validators will standardize format
+unit: keV # pick canonical unit; validators will check format
 description: Electron temperature.
 status: draft
 ```
