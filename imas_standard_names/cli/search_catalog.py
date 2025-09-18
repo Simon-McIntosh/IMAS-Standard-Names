@@ -1,7 +1,8 @@
 from __future__ import annotations
 import click
 from pathlib import Path
-from ..catalog.catalog import load_catalog
+from ..repository import StandardNameRepository
+from ..catalog.sqlite_read import CatalogRead
 
 
 @click.command(name="search_catalog")
@@ -12,41 +13,44 @@ from ..catalog.catalog import load_catalog
 )
 @click.option("--meta", is_flag=True, help="Include score and highlights in output")
 @click.option(
-    "--db",
-    type=click.Path(file_okay=True, dir_okay=False, path_type=Path),
-    default=None,
-    help="Explicit path to catalog.db (optional)",
-)
-@click.option(
-    "--no-prefer-db", is_flag=True, help="Force YAML even if SQLite is available"
-)
-@click.option(
-    "--require-fresh",
-    is_flag=True,
-    help="Reject stale SQLite artifact and fallback to YAML",
+    "--mode",
+    type=click.Choice(["auto", "file", "memory"], case_sensitive=False),
+    default="auto",
+    show_default=True,
+    help="Search source preference: file (built DB), memory (fresh YAML load), or auto (prefer file).",
 )
 def search_catalog_cli(
     root: Path,
     query: str,
     limit: int,
     meta: bool,
-    db: Path | None,
-    no_prefer_db: bool,
-    require_fresh: bool,
+    mode: str,
 ):
     """Search the catalog for QUERY using FTS (ranked) when available.
 
     Prints either a simple list of names (default) or a JSON array with
     metadata when --meta is used.
     """
-    catalog = load_catalog(
-        root=root,
-        db_path=db,
-        prefer_db=not no_prefer_db,
-        strict=True,
-        require_fresh=require_fresh,
-    )
-    results = catalog.search(query, limit=limit, with_meta=meta)
+    results = None
+    source_label = "memory"
+    db_path = root / "artifacts" / "catalog.db"
+    use_file = False
+    if mode.lower() == "file":
+        use_file = True
+    elif mode.lower() == "auto":
+        use_file = db_path.exists()
+    # File-backed read-only
+    if use_file:
+        try:
+            ro = CatalogRead(db_path)
+            results = ro.search(query, limit=limit, with_meta=meta)
+            source_label = "file"
+        except Exception:  # fall back silently
+            results = None
+    if results is None:
+        repo = StandardNameRepository(root)
+        results = repo.search(query, limit=limit, with_meta=meta)
+        source_label = "memory"
     if meta:
         import json
 
@@ -61,7 +65,7 @@ def search_catalog_cli(
                         "score": r.get("score"),
                         "highlight_description": r.get("highlight_description"),
                         "highlight_documentation": r.get("highlight_documentation"),
-                        "source": catalog.source,
+                        "source": source_label,
                     }
                 )
         click.echo(json.dumps(payload, indent=2))

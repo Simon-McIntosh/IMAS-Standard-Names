@@ -4,12 +4,12 @@ from click.testing import CliRunner
 
 from imas_standard_names.cli.diff_catalog import diff_standardnames
 from imas_standard_names import schema
-from imas_standard_names.repositories import YamlStandardNameRepository
+from imas_standard_names.repository import StandardNameRepository
 from imas_standard_names.unit_of_work import UnitOfWork
 
 
 def _write(repo_dir: Path, entries):
-    repo = YamlStandardNameRepository(repo_dir)
+    repo = StandardNameRepository(repo_dir)
     for data in entries:
         uow = UnitOfWork(repo)
         uow.add(schema.create_standard_name(data))

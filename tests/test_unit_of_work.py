@@ -1,12 +1,12 @@
 from imas_standard_names.schema import create_standard_name
-from imas_standard_names.repositories import YamlStandardNameRepository
+from imas_standard_names.repository import StandardNameRepository
 from imas_standard_names.unit_of_work import UnitOfWork
 
 
 def test_unit_of_work_add_update_remove_commit(tmp_path):
     root = tmp_path / "standard_names"
     root.mkdir()
-    repo = YamlStandardNameRepository(root)
+    repo = StandardNameRepository(root)
     uow = UnitOfWork(repo)
 
     # Add new entry
@@ -21,7 +21,7 @@ def test_unit_of_work_add_update_remove_commit(tmp_path):
     )
     uow.add(a)
     uow.commit()
-    assert repo.exists("electron_density")
+    assert repo.get("electron_density") is not None
     file_path = root / "electron_density.yml"
     assert file_path.exists()
 
@@ -44,5 +44,5 @@ def test_unit_of_work_add_update_remove_commit(tmp_path):
     # Remove
     uow.remove("electron_density")
     uow.commit()
-    assert not repo.exists("electron_density")
+    assert repo.get("electron_density") is None
     assert not file_path.exists()

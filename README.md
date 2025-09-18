@@ -75,47 +75,112 @@ The issue form submission JSON is normalized in-place (e.g. `units` → `unit`, 
 
 ### Deprecations Removed
 
-### Migration Notes
+### Programmatic Usage (Repository, Build, Read-Only)
 
-If you depended on loading a single aggregated YAML, build an index by scanning the directory:
+The YAML files are the authoritative source. A `StandardNameRepository` loads them
+into an in-memory SQLite catalog (with FTS) for fast queries and authoring.
+
+Basic queries:
 
 ```python
 from pathlib import Path
-from imas_standard_names.catalog.catalog import load_catalog, StandardNameCatalog
+from imas_standard_names.repository import StandardNameRepository
 
-# Smart loader (prefers fresh SQLite, falls back to YAML)
-catalog = load_catalog(Path("resources/standard_names"))
-print(catalog.entries["electron_temperature"].unit)
-
-# Explicit source forcing (optional):
-# YAML only
-catalog_yaml = StandardNameCatalog.from_yaml("resources/standard_names")
-# SQLite only (raises if DB missing)
-# catalog_db = StandardNameCatalog.from_sqlite("resources/standard_names", db_path="imas_standard_names/resources/artifacts/catalog.db")
+repo = StandardNameRepository(Path("resources/standard_names"))
+print([m.name for m in repo.list()][:5])
+print(repo.get("electron_temperature").unit)
+print(repo.search("electron temperature", limit=3))
 ```
 
-Programmatic creation (Repository + UnitOfWork):
+Mutations use a UnitOfWork boundary (add/update/remove/rename then commit to rewrite YAML):
 
 ```python
-from pathlib import Path
 from imas_standard_names import schema
-from imas_standard_names.repositories import YamlStandardNameRepository
-from imas_standard_names.unit_of_work import UnitOfWork
 
-root = Path("resources/standard_names/plasma")
-root.mkdir(parents=True, exist_ok=True)
-repo = YamlStandardNameRepository(root)
-uow = UnitOfWork(repo)
-entry = schema.create_standard_name({
+uow = repo.start_uow()
+model = schema.create_standard_name({
    "name": "ion_density",
    "kind": "scalar",
    "unit": "m^-3",
    "description": "Ion number density.",
    "status": "draft",
 })
-uow.add(entry)
-uow.commit()
+uow.add(model)
+uow.commit()  # writes ion_density.yml
 ```
+
+### Building a Definitive SQLite Catalog
+
+For distribution or read-only consumers, build a file-backed catalog that mirrors
+YAML exactly:
+
+```python
+from pathlib import Path
+from imas_standard_names.catalog.sqlite_build import build_catalog
+from imas_standard_names.catalog.sqlite_read import CatalogRead
+
+root = Path("resources/standard_names")
+db_path = build_catalog(root, root / "artifacts" / "catalog.db")
+ro = CatalogRead(db_path)
+print(len(ro.list()))
+```
+
+CLI equivalent:
+
+```bash
+python -m imas_standard_names.cli.build_catalog resources/standard_names --out resources/standard_names/artifacts/catalog.db
+```
+
+### Architectural Components
+
+| Component                | Purpose                                                                 |
+| ------------------------ | ----------------------------------------------------------------------- |
+| `YamlStore`              | Discover, load, and write per-file YAML entries (authoritative).        |
+| `CatalogReadWrite`       | Ephemeral in-memory SQLite (authoring session).                         |
+| `CatalogBuild`           | File-backed builder (creates persistent SQLite mirror).                 |
+| `CatalogRead`            | Read-only view over file-backed SQLite snapshot.                        |
+| `StandardNameRepository` | Facade combining `YamlStore` + `CatalogReadWrite` + search.             |
+| `UnitOfWork`             | Batched mutation (add/update/remove/rename + validation + YAML commit). |
+
+### Search
+
+Search uses SQLite FTS5 ranking (bm25) with a substring fallback. Request metadata:
+
+```python
+repo.search("temperature gradient", with_meta=True, limit=5)
+```
+
+Returns objects including name, score, and highlighted description/documentation spans.
+
+### Validation
+
+Load-time validation (structural + semantic) aborts on invalid YAML. During a UoW
+commit, the full staged view is revalidated before writing to disk.
+
+CLI validation supports file-backed or fresh memory modes plus optional integrity verification:
+
+```bash
+python -m imas_standard_names.validation.cli validate_catalog resources/standard_names \
+   --mode auto            # auto | file | memory
+   --verify               # (file mode) compare integrity table to current YAML (size/mtime or full)
+   --full                 # recompute hashes & check aggregate manifest
+```
+
+Exit codes:
+| Code | Meaning |
+|------|---------|
+| 0 | Structural & semantic valid (and no integrity issues, or integrity issues only if code not raised) |
+| 1 | Structural/semantic validation failed (no integrity issues) |
+| 2 | Structural/semantic valid but integrity discrepancies detected |
+
+Integrity issue codes: `mismatch-meta`, `hash-mismatch`, `missing-on-disk`, `missing-in-db`, `manifest-mismatch`.
+
+### Migration (Legacy APIs Removed)
+
+Legacy `StandardNameCatalog`, `load_catalog`, artifact rebuild flags, and
+repository variants have been replaced by the unified repository and explicit
+build step (`build_catalog`). If you previously relied on a JSON or legacy
+artifact, switch to invoking `build_catalog` and consuming with `CatalogRead`.
 
 ### Roadmap
 
