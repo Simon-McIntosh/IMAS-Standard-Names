@@ -128,7 +128,7 @@ print(len(ro.list()))
 CLI equivalent:
 
 ```bash
-python -m imas_standard_names.cli.build_catalog resources/standard_names --out resources/standard_names/artifacts/catalog.db
+python -m imas_standard_names.cli.build_catalog resources/standard_names --db resources/standard_names/artifacts/catalog.db
 ```
 
 ### Architectural Components

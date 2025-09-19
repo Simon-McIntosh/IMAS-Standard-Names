@@ -32,14 +32,17 @@ from .schema import StandardName
 from .catalog.sqlite_rw import CatalogReadWrite
 from .yaml_store import YamlStore
 from .services import row_to_model
-from .uow import UnitOfWork
-from .paths import resolve_root
+from .unit_of_work import UnitOfWork
+from .paths import CatalogPaths
 from .ordering import ordered_models
 
 
 class StandardNameRepository:
     def __init__(self, root: Union[str, Path, None] = None):
-        resolved_root = resolve_root(root)
+        # Map None -> packaged standard_names root for historical semantics.
+        paths = CatalogPaths("standard_names" if root is None else root)
+        self.paths = paths
+        resolved_root = paths.yaml_path
         self.store = YamlStore(resolved_root)
         self.catalog = CatalogReadWrite()
         models = self.store.load()

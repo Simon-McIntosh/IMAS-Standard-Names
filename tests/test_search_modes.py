@@ -2,8 +2,7 @@ from pathlib import Path
 import json
 from click.testing import CliRunner
 
-from imas_standard_names.cli.search_catalog import search_catalog_cli
-from imas_standard_names.cli.build_catalog import build_catalog_cli
+from imas_standard_names.cli import standard_names
 
 
 def _seed(root: Path):
@@ -19,7 +18,8 @@ def test_search_mode_memory(tmp_path: Path):
     _seed(tmp_path)
     runner = CliRunner()
     res = runner.invoke(
-        search_catalog_cli, [str(tmp_path), "electron", "--mode", "memory", "--meta"]
+        standard_names,
+        ["search", "electron", str(tmp_path), "--mode", "memory", "--meta"],
     )
     assert res.exit_code == 0, res.output
     payload = json.loads(res.output)
@@ -31,10 +31,11 @@ def test_search_mode_file(tmp_path: Path):
     _seed(tmp_path)
     runner = CliRunner()
     # Build file-backed catalog
-    build_res = runner.invoke(build_catalog_cli, [str(tmp_path)])
+    build_res = runner.invoke(standard_names, ["build", str(tmp_path)])
     assert build_res.exit_code == 0, build_res.output
     res = runner.invoke(
-        search_catalog_cli, [str(tmp_path), "ion", "--mode", "file", "--meta"]
+        standard_names,
+        ["search", "ion", str(tmp_path), "--mode", "file", "--meta"],
     )
     assert res.exit_code == 0, res.output
     payload = json.loads(res.output)
@@ -46,9 +47,10 @@ def test_search_mode_auto_prefers_file(tmp_path: Path):
     _seed(tmp_path)
     runner = CliRunner()
     # Build file-backed catalog
-    runner.invoke(build_catalog_cli, [str(tmp_path)])
+    runner.invoke(standard_names, ["build", str(tmp_path)])
     res = runner.invoke(
-        search_catalog_cli, [str(tmp_path), "temperature", "--mode", "auto", "--meta"]
+        standard_names,
+        ["search", "temperature", str(tmp_path), "--mode", "auto", "--meta"],
     )
     assert res.exit_code == 0, res.output
     payload = json.loads(res.output)

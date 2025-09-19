@@ -4,6 +4,7 @@ from __future__ import annotations
 import click
 from pathlib import Path
 from ..repository import StandardNameRepository
+from ..paths import CATALOG_DIRNAME
 from ..catalog.sqlite_read import CatalogRead
 from ..catalog.integrity import verify_integrity
 from .structural import run_structural_checks
@@ -26,7 +27,7 @@ from .semantic import run_semantic_checks
     help="When verifying, recompute hashes even if metadata matches",
 )
 def validate_catalog_cli(root: Path, mode: str, verify: bool, full: bool):
-    db_path = root / "artifacts" / "catalog.db"
+    db_path = root / CATALOG_DIRNAME / "catalog.db"
     use_file = False
     if mode == "file":
         use_file = True

@@ -1,89 +1,162 @@
-"""Unit of Work for managing batched StandardName catalog mutations."""
+"""UnitOfWork with undo stack and YAML persistence commit boundary."""
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Dict, Set, Iterable
+from dataclasses import dataclass
+from typing import List, TYPE_CHECKING
 
 from .schema import StandardName
-from .repository import StandardNameRepository
 from .services import validate_models
-from .yaml_store import YamlStore
 
 
 @dataclass
+class Snapshot:
+    name: str
+    model: StandardName
+
+
+@dataclass
+class UndoOpAdd:  # inverse delete
+    name: str
+
+
+@dataclass
+class UndoOpDelete:  # inverse reinsert
+    snap: Snapshot
+
+
+@dataclass
+class UndoOpUpdate:  # inverse restore old
+    snap: Snapshot
+
+
+@dataclass
+class UndoOpRename:  # inverse delete new then reinsert old
+    old: Snapshot
+    new_name: str
+
+
+if TYPE_CHECKING:  # pragma: no cover
+    from .repository import StandardNameRepository
+
+
 class UnitOfWork:
-    repo: StandardNameRepository
-    _new: Dict[str, StandardName] = field(default_factory=dict, init=False)
-    _dirty: Dict[str, StandardName] = field(default_factory=dict, init=False)
-    _deleted: Set[str] = field(default_factory=set, init=False)
+    def __init__(self, repo: "StandardNameRepository"):
+        self.repo = repo
+        self.catalog = repo.catalog
+        self._undo: List[object] = []
+        self._closed = False
 
-    def add(self, model: StandardName) -> None:
-        if self.repo.get(model.name) or model.name in self._new:
-            raise ValueError(f"Entry '{model.name}' already exists (repo or staged)")
-        self._new[model.name] = model
+    # Mutations --------------------------------------------------------------
+    def add(self, model: StandardName):
+        if self.catalog.get_row(model.name):
+            raise ValueError(f"Entry '{model.name}' exists")
+        self.catalog.insert(model)
+        self._undo.append(UndoOpAdd(model.name))
 
-    def update(self, name: str, model: StandardName) -> None:
-        if name not in self._new and not self.repo.get(name):
+    def update(self, name: str, model: StandardName):
+        row = self.catalog.get_row(name)
+        if not row:
             raise KeyError(name)
-        # Handle rename across staged items
-        if name in self._new and name != model.name:
-            self._new.pop(name)
-            if model.name in self._new or self.repo.get(model.name):
-                raise ValueError(f"Cannot rename to existing entry '{model.name}'")
-            self._new[model.name] = model
+        old_model = self.repo._row_to_model(row)
+        self.catalog.delete(name)
+        self.catalog.insert(model)
+        self._undo.append(UndoOpUpdate(Snapshot(name, old_model)))
+
+    def remove(self, name: str):
+        row = self.catalog.get_row(name)
+        if not row:
             return
-        self._dirty[model.name] = model
+        old_model = self.repo._row_to_model(row)
+        self.catalog.delete(name)
+        self._undo.append(UndoOpDelete(Snapshot(name, old_model)))
 
-    def remove(self, name: str) -> None:
-        if name in self._new:
-            self._new.pop(name)
-            return
-        if not self.repo.get(name):
-            raise KeyError(name)
-        self._deleted.add(name)
+    def rename(self, old_name: str, new_model: StandardName):
+        if old_name == new_model.name:
+            return self.update(old_name, new_model)
+        row = self.catalog.get_row(old_name)
+        if not row:
+            raise KeyError(old_name)
+        old_model = self.repo._row_to_model(row)
+        if self.catalog.get_row(new_model.name):
+            raise ValueError(f"Target name '{new_model.name}' exists")
+        self.catalog.delete(old_name)
+        self.catalog.insert(new_model)
+        self._undo.append(UndoOpRename(Snapshot(old_name, old_model), new_model.name))
 
-    def list(self) -> Iterable[StandardName]:
-        existing = {m.name: m for m in self.repo.list()}
-        existing.update(self._dirty)
-        existing.update(self._new)
-        for d in self._deleted:
-            existing.pop(d, None)
-        return list(existing.values())
+    # Validation --------------------------------------------------------------
+    def validate(self):
+        models = {m.name: m for m in self.repo.list()}
+        return validate_models(models)
 
-    def validate(self) -> None:
-        view = {m.name: m for m in self.list()}
-        issues = validate_models(view)
+    # Lifecycle ---------------------------------------------------------------
+    def commit(self):
+        issues = self.validate()
         if issues:
-            raise ValueError("Structural validation failed:\n" + "\n".join(issues))
+            raise ValueError("Validation failed:\n" + "\n".join(issues))
+        existing_files = {f.stem for f in self.repo.store.yaml_files()}
+        current_names = set()
+        for m in self.repo.list():
+            self.repo.store.write(m)
+            current_names.add(m.name)
+        for name in existing_files - current_names:
+            self.repo.store.delete(name)
+        self._undo.clear()
+        self.close()
 
-    def commit(self) -> None:
-        # Validate staged + existing view
-        self.validate()
-        # Access underlying yaml store (authoritative persistence)
-        store: YamlStore = self.repo.store  # type: ignore[attr-defined]
-        # Deletions
-        for name in self._deleted:
-            store.delete(name)
-        # New + dirty -> write YAML (idempotent overwrite for dirty)
-        for model in {**self._new, **self._dirty}.values():
-            store.write(model)
-            # Reflect into in-memory catalog
-            existing = self.repo.get(model.name)
-            if not existing:  # new
-                self.repo.catalog.insert(model)
-            else:  # update: remove + insert simplistic approach
-                self.repo.catalog.delete(model.name)
-                self.repo.catalog.insert(model)
-        # Removed from in-memory catalog
-        for name in self._deleted:
-            if self.repo.get(name):
-                self.repo.catalog.delete(name)
-        # Clear state + notify repo
-        self.repo._end_uow()
-        self._new.clear()
-        self._dirty.clear()
-        self._deleted.clear()
+    def rollback(self):
+        while self._undo:
+            op = self._undo.pop()
+            if isinstance(op, UndoOpAdd):
+                self.catalog.delete(op.name)
+            elif isinstance(op, UndoOpDelete):
+                self.catalog.insert(op.snap.model)
+            elif isinstance(op, UndoOpUpdate):
+                self.catalog.delete(op.snap.name)
+                self.catalog.insert(op.snap.model)
+            elif isinstance(op, UndoOpRename):
+                self.catalog.delete(op.new_name)
+                self.catalog.insert(op.old.model)
+        self.close()
+
+    # Granular undo ---------------------------------------------------------
+    def undo_last(self) -> bool:
+        """Undo only the most recent mutation.
+
+        Returns True if an operation was undone, False if there was nothing to undo.
+        Leaves the UnitOfWork open for further staging or eventual commit/rollback.
+        Raises RuntimeError if the UnitOfWork is already closed.
+        """
+        if self._closed:
+            raise RuntimeError("UnitOfWork is closed")
+        if not self._undo:
+            return False
+        op = self._undo.pop()
+        if isinstance(op, UndoOpAdd):
+            self.catalog.delete(op.name)
+        elif isinstance(op, UndoOpDelete):
+            self.catalog.insert(op.snap.model)
+        elif isinstance(op, UndoOpUpdate):
+            self.catalog.delete(op.snap.name)
+            self.catalog.insert(op.snap.model)
+        elif isinstance(op, UndoOpRename):
+            self.catalog.delete(op.new_name)
+            self.catalog.insert(op.old.model)
+        else:  # pragma: no cover - defensive programming
+            raise RuntimeError(f"Unknown undo op: {op!r}")
+        return True
+
+    def close(self):
+        if not self._closed:
+            self._closed = True
+            self.repo._end_uow()
 
 
-__all__ = ["UnitOfWork"]
+__all__ = [
+    "UnitOfWork",
+    "Snapshot",
+    "UndoOpAdd",
+    "UndoOpDelete",
+    "UndoOpUpdate",
+    "UndoOpRename",
+]

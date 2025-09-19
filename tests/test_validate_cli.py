@@ -3,7 +3,7 @@ import time
 from click.testing import CliRunner
 
 from imas_standard_names.validation.cli import validate_catalog_cli
-from imas_standard_names.cli.build_catalog import build_catalog_cli
+from imas_standard_names.cli import standard_names
 
 
 def _seed(root: Path):
@@ -26,7 +26,7 @@ def test_validate_memory_mode(tmp_path: Path):
 def test_validate_file_mode_without_verify(tmp_path: Path):
     _seed(tmp_path)
     runner = CliRunner()
-    build_res = runner.invoke(build_catalog_cli, [str(tmp_path)])
+    build_res = runner.invoke(standard_names, ["build", str(tmp_path)])
     assert build_res.exit_code == 0
     res = runner.invoke(validate_catalog_cli, [str(tmp_path), "--mode", "file"])
     assert res.exit_code == 0, res.output
@@ -36,7 +36,7 @@ def test_validate_file_mode_without_verify(tmp_path: Path):
 def test_validate_file_mode_with_verify_clean(tmp_path: Path):
     _seed(tmp_path)
     runner = CliRunner()
-    runner.invoke(build_catalog_cli, [str(tmp_path)])
+    runner.invoke(standard_names, ["build", str(tmp_path)])
     res = runner.invoke(
         validate_catalog_cli, [str(tmp_path), "--mode", "file", "--verify"]
     )
@@ -47,7 +47,7 @@ def test_validate_file_mode_with_verify_clean(tmp_path: Path):
 def test_validate_file_mode_with_integrity_mismatch(tmp_path: Path):
     _seed(tmp_path)
     runner = CliRunner()
-    runner.invoke(build_catalog_cli, [str(tmp_path)])
+    runner.invoke(standard_names, ["build", str(tmp_path)])
     # Modify one file after build
     time.sleep(0.02)
     (tmp_path / "b.yml").write_text(
@@ -65,7 +65,7 @@ def test_validate_file_mode_with_integrity_mismatch(tmp_path: Path):
 def test_validate_auto_prefers_file(tmp_path: Path):
     _seed(tmp_path)
     runner = CliRunner()
-    runner.invoke(build_catalog_cli, [str(tmp_path)])
+    runner.invoke(standard_names, ["build", str(tmp_path)])
     res = runner.invoke(validate_catalog_cli, [str(tmp_path), "--mode", "auto"])
     assert res.exit_code == 0
     assert "PASSED" in res.output

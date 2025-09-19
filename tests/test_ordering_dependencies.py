@@ -1,11 +1,11 @@
-from imas_standard_names.paths import resolve_root
+from imas_standard_names.paths import CatalogPaths
 from imas_standard_names.yaml_store import YamlStore
 from imas_standard_names.ordering import ordered_model_names
 from imas_standard_names.repository import StandardNameRepository
 
 
 def test_vector_components_before_vectors():
-    root = resolve_root(None)
+    root = CatalogPaths().yaml_path
     store = YamlStore(root)
     models = store.load()
     order = list(ordered_model_names(models))
@@ -21,7 +21,7 @@ def test_vector_components_before_vectors():
 
 
 def test_provenance_base_before_derived():
-    root = resolve_root(None)
+    root = CatalogPaths().yaml_path
     store = YamlStore(root)
     models = store.load()
     order = list(ordered_model_names(models))

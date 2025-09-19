@@ -1,8 +1,8 @@
 from pathlib import Path
 from click.testing import CliRunner
 
-from imas_standard_names.cli.build_catalog import build_catalog_cli
 from imas_standard_names.validation.cli import validate_catalog_cli
+from imas_standard_names.cli import standard_names
 
 
 def _make_minimal_vector(tmp_path: Path):  # now simplified to scalars
@@ -26,12 +26,12 @@ description: Ion temperature.
     )
 
 
-def test_build_catalog_cli(tmp_path: Path):
+def test_catalog_build_subcommand(tmp_path: Path):
     _make_minimal_vector(tmp_path)
     runner = CliRunner()
-    result = runner.invoke(build_catalog_cli, [str(tmp_path)])
+    result = runner.invoke(standard_names, ["build", str(tmp_path)])
     assert result.exit_code == 0, result.output
-    assert "deprecated" in result.output.lower()
+    assert "Built catalog" in result.output
 
 
 def test_validate_catalog_cli(tmp_path: Path):

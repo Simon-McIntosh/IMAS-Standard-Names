@@ -15,6 +15,7 @@ import os
 from .sqlite_rw import CatalogReadWrite, DDL
 from ..yaml_store import YamlStore
 from ..schema import StandardName
+from ..ordering import ordered_models
 from typing import Iterable
 
 
@@ -43,7 +44,8 @@ def build_catalog(yaml_root: Path, db_path: Path, overwrite: bool = True) -> Pat
     store = YamlStore(yaml_root)
     models: Iterable[StandardName] = store.load()
     builder = CatalogBuild(db_path, overwrite=overwrite)
-    for m in models:
+    # Insert using dependency-safe ordering (vectors after components, derived after bases)
+    for m in ordered_models(models):
         builder.insert(m)
     # Integrity tables -------------------------------------------------
     cur = builder.conn.cursor()

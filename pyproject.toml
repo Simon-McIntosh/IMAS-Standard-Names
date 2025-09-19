@@ -38,12 +38,11 @@ keywords = [
 [project.scripts]
 has_standardname = "imas_standard_names.issues.cli:has_standardname"
 update_standardnames = "imas_standard_names.issues.cli:update_standardnames"
-diff_standardnames = "imas_standard_names.cli.diff_catalog:diff_standardnames"
 get_standardname = "imas_standard_names.issues.cli:get_standardname"
 is_genericname = "imas_standard_names.issues.cli:is_genericname"
 update_links = "imas_standard_names.issues.cli:update_links"
-build_catalog = "imas_standard_names.cli.build_catalog:build_catalog_cli"
 validate_catalog = "imas_standard_names.validation.cli:validate_catalog_cli"
+standard-names = "imas_standard_names.cli:standard_names"
 
 [project.optional-dependencies]
 agent = [

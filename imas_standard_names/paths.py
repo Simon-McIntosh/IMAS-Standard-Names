@@ -1,88 +1,192 @@
-"""Path & resource resolution utilities for standard names.
+"""Path resolution utilities for IMAS standard names data.
 
-This module centralises logic for resolving the *root* directory used by
-``YamlStore`` / ``StandardNameRepository`` so that repository.py stays lean.
+The :class:`CatalogPaths` value object normalizes two user inputs into two
+resolved outputs:
 
-Public API
-----------
-resolve_root(root: str | Path | None) -> Path
-    Resolve a user supplied value into a concrete filesystem directory.
-    * ``None`` -> packaged resources/standard_names
-    * existing path -> returned as absolute path
-    * string pattern -> first directory under packaged tree matching fnmatch
+Inputs
+======
+* ``yaml``: directory or pattern (``None`` -> packaged ``resources/standard_names``)
+* ``catalog``: directory or explicit ``.db`` file (``None`` -> `<yaml_path>/.catalog/catalog.db`)
 
-The packaged base path is treated read-only; pattern matching is performed
-against the POSIX relative path of each nested directory under the packaged
-``standard_names`` tree.
+Outputs
+=======
+* ``yaml_path``: resolved directory containing YAML definition files
+* ``catalog_path``: absolute path to the SQLite catalog file (always includes filename)
+
+Rules
+=====
+* Wildcards (``* ? []``) are supported only for ``yaml`` and are matched
+    against subdirectories of the packaged ``standard_names`` tree.
+* If ``catalog`` is a directory (exists or not) the filename ``catalog.db`` (or
+    the provided ``catalog_filename`` override) is appended.
+* If ``catalog`` ends with ``.db`` it is treated as the final file path. A
+    relative ``.db`` filename is interpreted relative to ``yaml_path``.
+* No filesystem changes are performed automatically; call
+    :meth:`ensure_catalog_dir` to create the parent directory of the catalog file.
+
+This design keeps construction side‑effect free and explicit while allowing a
+concise interface for common defaults and overrides.
 """
 
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Iterable, Union
+from typing import Iterable
+from dataclasses import dataclass, field
 import importlib.resources as ir
 import fnmatch
 
-RESOURCES_PACKAGE = f"{__package__}.resources"
+RESOURCES_DIRNAME = "resources"
 STANDARD_NAMES_DIRNAME = "standard_names"
+CATALOG_DIRNAME = ".catalog"
 
 
-def _package_standard_names_root() -> Path:
-    traversable = ir.files(RESOURCES_PACKAGE).joinpath(STANDARD_NAMES_DIRNAME)
-    with ir.as_file(traversable) as base_fs_path:
-        return Path(base_fs_path)
+@dataclass
+class CatalogPaths:
+    """Resolve source YAML directory and catalog SQLite file path.
 
+    Parameters
+    ----------
+    yaml : Path | str | None
+        Directory, pattern, or ``None`` (use packaged standard names).
+    catalog : Path | str | None
+        Directory or explicit ``.db`` file path. ``None`` -> default under
+        ``yaml_path``: ``.catalog/catalog.db``.
+    catalog_filename : str
+        Filename used when ``catalog`` is a directory (default ``catalog.db``).
 
-def _iter_standard_names_dirs() -> Iterable[Path]:
-    base = _package_standard_names_root()
-    for d in base.rglob("*"):
-        if d.is_dir():
-            yield d
-
-
-def _first_match(pattern: str, base: Path, candidates: Iterable[Path]) -> Path:
-    """Return first lexicographically sorted directory matching pattern.
-
-    Raises ValueError if no match.
+    Attributes
+    ----------
+    yaml_path : Path
+        Resolved YAML directory.
+    catalog_path : Path
+        Absolute path to catalog SQLite file (always includes filename).
+    catalog_filename : str
+        Final filename component (updated if an explicit file path was given).
     """
-    norm_pattern = pattern.replace("\\", "/")
-    matched: list[Path] = []
-    for d in candidates:
-        rel = d.relative_to(base).as_posix()
-        if fnmatch.fnmatch(rel, norm_pattern):
-            matched.append(d)
-    if not matched:
-        raise ValueError(
-            f"Could not resolve pattern '{pattern}' inside packaged '{STANDARD_NAMES_DIRNAME}'"
+
+    yaml: Path | str | None = None
+    catalog: Path | str | None = None
+    catalog_filename: str = "catalog.db"
+
+    yaml_path: Path = field(init=False)
+    catalog_path: Path = field(init=False)
+
+    # ---------------------------------------------------------------------
+    def __post_init__(self) -> None:
+        self.yaml_path = self._resolve_yaml(self.yaml)
+        self.catalog_path = self._resolve_catalog(self.catalog, self.catalog_filename)
+
+    # Public helper -------------------------------------------------------
+    def ensure_catalog_dir(self) -> "CatalogPaths":
+        """Create the parent directory for `catalog_path` if missing."""
+        self.catalog_path.parent.mkdir(parents=True, exist_ok=True)
+        return self
+
+    # Resource roots ------------------------------------------------------
+    # Simple instance attributes instead of cached_property
+    @property
+    def resources_root(self) -> Path:
+        files_obj = ir.files(__package__) / RESOURCES_DIRNAME
+        with ir.as_file(files_obj) as p:
+            path = Path(p)
+            if not path.exists() or not path.is_dir():  # pragma: no cover
+                raise FileNotFoundError(f"Resources directory not found: {path}")
+            return path
+
+    @property
+    def standard_names_root(self) -> Path:
+        std = self.resources_root / STANDARD_NAMES_DIRNAME
+        if not std.exists() or not std.is_dir():  # pragma: no cover
+            raise FileNotFoundError(
+                f"Standard names directory '{STANDARD_NAMES_DIRNAME}' not present under resources root {self.resources_root}"
+            )
+        return std
+
+    # Internal resolution helpers -----------------------------------------
+    @staticmethod
+    def _iter_tree(base: Path, include_files: bool) -> Iterable[Path]:
+        for p in base.rglob("*"):
+            if p.is_dir() or (include_files and p.is_file()):
+                yield p
+
+    @classmethod
+    def _first_match(cls, pattern: str, base: Path, include_files: bool) -> Path:
+        norm = pattern.replace("\\", "/")
+        matches: list[Path] = []
+        for p in cls._iter_tree(base, include_files):
+            rel = p.relative_to(base).as_posix()
+            if fnmatch.fnmatch(rel, norm) or fnmatch.fnmatch(p.name, norm):
+                matches.append(p)
+        if not matches:
+            raise ValueError(f"Could not resolve pattern '{pattern}' inside '{base}'")
+        return sorted(matches)[0]
+
+    @classmethod
+    def _resolve_under(cls, base: Path, spec: str, include_files: bool) -> Path:
+        if not any(ch in spec for ch in "*?[]"):
+            candidate = base / spec if spec not in ("", ".") else base
+            if candidate.exists():
+                return candidate.resolve()
+            # Non-wildcard but non-existing -> return candidate (allow creation)
+            return candidate.resolve()
+        # Wildcard case
+        return cls._first_match(spec, base, include_files).resolve()
+
+    def _resolve_yaml(self, value: Path | str | None) -> Path:
+        if value is None:
+            return self.standard_names_root
+        if isinstance(value, Path):
+            return value.expanduser().resolve()
+        s = value.strip()
+        if s == "":
+            return self.standard_names_root
+        # Allow shorthand "standard_names/..."
+        if s.startswith(f"{STANDARD_NAMES_DIRNAME}/"):
+            rel = s[len(STANDARD_NAMES_DIRNAME) + 1 :]
+        elif s == STANDARD_NAMES_DIRNAME:
+            rel = ""
+        else:
+            rel = s
+        base = self.standard_names_root
+        if rel in ("", "."):
+            return base
+        if any(ch in rel for ch in "*?[]"):
+            return self._first_match(rel, base, include_files=False).resolve()
+        return (
+            (base / rel).resolve() if (base / rel).exists() else (base / rel).resolve()
         )
-    return sorted(matched)[0]
+
+    def _resolve_catalog(self, value: Path | str | None, default_name: str) -> Path:
+        # If user gives None -> default directory inside yaml_root
+        if value is None:
+            target_dir = self.yaml_path / CATALOG_DIRNAME
+            return (target_dir / default_name).resolve()
+        if isinstance(value, Path):
+            p = value.expanduser().resolve()
+            if p.is_dir():
+                return (p / default_name).resolve()
+            if p.suffix == ".db":
+                self.catalog_filename = p.name
+                return p
+            return (p / default_name).resolve()
+        s = value.strip()
+        if s == "":
+            return (self.yaml_path / CATALOG_DIRNAME / default_name).resolve()
+        # If it looks like a filename
+        if s.endswith(".db"):
+            raw_path = Path(s).expanduser()
+            if raw_path.is_absolute():
+                return raw_path.resolve()
+            # Treat relative filename as under yaml_path
+            return (self.yaml_path / raw_path).resolve()
+        # Treat as directory (relative -> under yaml_root)
+        d = Path(s).expanduser()
+        if not d.is_absolute():
+            d = (self.yaml_path / d).resolve()
+        else:
+            d = d.resolve()
+        return (d / default_name).resolve()
 
 
-def resolve_root(root: Union[str, Path, None]) -> Path:
-    """Resolve a repository root.
-
-    Uses structural pattern matching for clarity.
-
-    Cases:
-        * None -> packaged base
-        * Path  -> absolute, expanded
-        * str existing path -> resolved
-        * str pattern -> first matching directory under packaged base
-    """
-
-    match root:
-        case None:
-            return _package_standard_names_root()
-        case Path() as p:
-            return p.expanduser().resolve()
-        case str() as s:
-            p = Path(s).expanduser()
-            if p.exists():
-                return p.resolve()
-            base = _package_standard_names_root()
-            return _first_match(s, base, _iter_standard_names_dirs())
-        case _:
-            raise TypeError("root must be None, str, or Path")
-
-
-__all__ = ["resolve_root", "STANDARD_NAMES_DIRNAME", "RESOURCES_PACKAGE"]
+__all__ = ["CatalogPaths", "STANDARD_NAMES_DIRNAME", "CATALOG_DIRNAME"]
