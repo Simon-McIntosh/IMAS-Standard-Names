@@ -14,5 +14,16 @@
         "--no-rich",
       ]
     },
+    "imas-sn": {
+      "type": "stdio",
+      "command": "uv",
+      "args": [
+        "run",
+        "--active",
+        "standard-names-mcp",
+        "--log-level",
+        "DEBUG",
+      ]
+    },
   }
 }

@@ -75,6 +75,17 @@ The issue form submission JSON is normalized in-place (e.g. `units` → `unit`, 
 
 ### Deprecations Removed
 
+The legacy stub validator script `tools/validate_catalog.py` has been removed.
+Use the consolidated CLI command instead:
+
+```bash
+validate_catalog resources/standard_names
+# or (module form)
+python -m imas_standard_names.validation.cli validate_catalog resources/standard_names
+```
+
+This performs structural + semantic checks (and optional integrity verification with `--verify`).
+
 ### Programmatic Usage (Repository, Build, Read-Only)
 
 The YAML files are the authoritative source. A `StandardNameRepository` loads them

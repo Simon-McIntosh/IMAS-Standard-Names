@@ -15,3 +15,7 @@ htmltest/
 # environment API keys
 .env
 .venv/
+
+# build artifacts 
+**/.catalog/
+*.db

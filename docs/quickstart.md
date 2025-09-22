@@ -222,13 +222,19 @@ description: Radial component of curl_of_magnetic_field.
 
 ### 2.7 Validate
 
-Run the (stub) validator:
+Run the catalog validator (structural + semantic):
 
 ```bash
-python tools/validate_catalog.py
+validate_catalog resources/standard_names
 ```
 
-Resolve any reported issues.
+If you don't have the console script (editable install not active), you can also invoke:
+
+```bash
+python -m imas_standard_names.validation.cli validate_catalog resources/standard_names
+```
+
+Resolve any reported issues shown. Exit code 0 means all checks passed; non-zero indicates problems (see messages for details).
 
 ### 2.8 Commit & Document
 

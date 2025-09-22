@@ -6,13 +6,14 @@ SQLite catalog (file mode) or load YAML definitions into memory.
 
 from __future__ import annotations
 
-from pathlib import Path
 import json
+from pathlib import Path
+
 import click
 
+from ..catalog.sqlite_read import CatalogRead
 from ..paths import CatalogPaths
 from ..repository import StandardNameRepository
-from ..catalog.sqlite_read import CatalogRead
 
 
 @click.command("search")
@@ -58,48 +59,35 @@ def search_cmd(
         results = repo.search(query, limit=limit, with_meta=meta)
         source_label = "memory"
     if meta:
-        payload = []
-        for r in results:  # type: ignore[assignment]
-            if isinstance(r, dict):
-                payload.append(
-                    {
-                        "name": r.get("name"),
-                        "score": r.get("score"),
-                        "highlight_description": r.get("highlight_description"),
-                        "highlight_documentation": r.get("highlight_documentation"),
-                        "source": source_label,
-                    }
-                )
-            else:  # StandardName model
-                payload.append(
-                    {
-                        "name": getattr(r, "name", None),
-                        "score": None,
-                        "highlight_description": None,
-                        "highlight_documentation": None,
-                        "source": source_label,
-                    }
-                )
+        # with_meta=True always yields dictionaries from catalog search.
+        payload = [
+            {
+                "name": r.get("name"),
+                "score": r.get("score"),
+                "highlight_documentation": r.get("highlight_documentation"),
+                "standard_name": r.get("standard_name"),
+                "source": source_label,
+            }
+            for r in results  # type: ignore[assignment]
+        ]
         click.echo(json.dumps(payload, indent=2))
-    else:
-        if not results:
-            # No matches -> distinctive non-zero exit code for scripting
-            raise SystemExit(1)
-        # Print count header only if more than one to stay minimal for single result
-        if len(results) > 1:
-            click.echo(f"{len(results)} results:")
-        for e in results:  # type: ignore[assignment]
-            # Results may be plain strings, dicts (meta), or StandardName models
-            if isinstance(e, str):
-                click.echo(e)
-                continue
-            if isinstance(e, dict):
-                nm = e.get("name")
-                if nm:
-                    click.echo(nm)
-                continue
-            # Fallback: model object
-            click.echo(getattr(e, "name", ""))
+        return
+
+    # Non-meta: list of names (strings or model objects)
+    if not results:
+        raise SystemExit(1)
+    if len(results) > 1:
+        click.echo(f"{len(results)} results:")
+    for e in results:  # type: ignore[assignment]
+        if isinstance(e, str):
+            click.echo(e)
+            continue
+        if isinstance(e, dict):  # unexpected in non-meta mode, but guard
+            nm = e.get("name")
+            if nm:
+                click.echo(nm)
+            continue
+        click.echo(getattr(e, "name", ""))
 
 
 __all__ = ["search_cmd"]
