@@ -1,6 +1,7 @@
 from fastmcp import FastMCP
 
 from imas_standard_names.repository import StandardNameRepository
+from imas_standard_names.tools.overview import OverviewTool
 from imas_standard_names.tools.search import SearchTool
 
 
@@ -12,9 +13,9 @@ class Tools:
 
         # Create shared in-memory standard name repository
         self.repository = StandardNameRepository()
-
         # Initialize individual tools with shared standard names repository
         self.search_tool = SearchTool(self.repository)
+        self.overview_tool = OverviewTool(self.repository)
 
     @property
     def name(self) -> str:
@@ -30,7 +31,7 @@ class Tools:
         This keeps registration declarative and avoids manual duplication.
         """
 
-        tool_instances = [self.search_tool]
+        tool_instances = [self.search_tool, self.overview_tool]
 
         for tool in tool_instances:
             for attr_name in dir(tool):  # introspect public + private

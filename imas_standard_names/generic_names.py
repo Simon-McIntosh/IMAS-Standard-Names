@@ -14,8 +14,9 @@ retained for human readability and potential future validation heuristics.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field, InitVar
+from dataclasses import InitVar, dataclass, field
 from functools import cached_property
+
 import pandas
 
 __all__ = ["GenericNames"]
@@ -29,7 +30,7 @@ class GenericNames:
     data: pandas.DataFrame = field(init=False, repr=False)
 
     def __post_init__(self, input_: str):  # type: ignore[override]
-        with open(input_, "r", newline="") as f:
+        with open(input_, newline="") as f:
             self.data = pandas.read_csv(f)
         if "Generic Name" not in self.data.columns:
             raise ValueError("CSV must contain a 'Generic Name' column")
