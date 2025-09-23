@@ -1425,7 +1425,7 @@ components; vectors do not introduce independent physical values.</p>
 <li>Create one component file per axis (uniform pattern).</li>
 <li>Add derived vectors (curl etc.) + their component sets.</li>
 <li>Add derived scalars (divergence, magnitude if not already).</li>
-<li>Run validator: <code>python tools/validate_catalog.py</code>.</li>
+<li>Run validator: <code>validate_catalog resources/standard_names</code> (or <code>python -m imas_standard_names.validation.cli validate_catalog resources/standard_names</code>).</li>
 <li>Commit on green.</li>
 </ol>
 <p>Extended quick start: see <code>quickstart.md</code>.</p>

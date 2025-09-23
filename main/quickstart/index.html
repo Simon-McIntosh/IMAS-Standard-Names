@@ -1208,10 +1208,13 @@ status: draft
 description: Radial component of curl_of_magnetic_field.
 </code></pre>
 <h3 id="27-validate">2.7 Validate</h3>
-<p>Run the (stub) validator:</p>
-<pre><code class="language-bash">python tools/validate_catalog.py
+<p>Run the catalog validator (structural + semantic):</p>
+<pre><code class="language-bash">validate_catalog resources/standard_names
 </code></pre>
-<p>Resolve any reported issues.</p>
+<p>If you don't have the console script (editable install not active), you can also invoke:</p>
+<pre><code class="language-bash">python -m imas_standard_names.validation.cli validate_catalog resources/standard_names
+</code></pre>
+<p>Resolve any reported issues shown. Exit code 0 means all checks passed; non-zero indicates problems (see messages for details).</p>
 <h3 id="28-commit-document">2.8 Commit &amp; Document</h3>
 <p>Add a short note in CHANGELOG if introducing a new vector domain.</p>
 <p>Done.</p>
