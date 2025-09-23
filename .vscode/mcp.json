@@ -22,7 +22,7 @@
         "--active",
         "standard-names-mcp",
         "--log-level",
-        "DEBUG",
+        "INFO",
       ]
     },
   }

@@ -1,6 +1,8 @@
 from fastmcp import FastMCP
 
+from imas_standard_names.editing.repository import EditRepository
 from imas_standard_names.repository import StandardNameRepository
+from imas_standard_names.tools.edit import EditStandardNamesTool
 from imas_standard_names.tools.overview import OverviewTool
 from imas_standard_names.tools.search import SearchTool
 
@@ -10,12 +12,14 @@ class Tools:
 
     def __init__(self):
         """Initialize the Standard Names tools provider."""
-
         # Create shared in-memory standard name repository
         self.repository = StandardNameRepository()
+        # Editing facade (persistent multi-call edit session support)
+        self.edit_repository = EditRepository(self.repository)
         # Initialize individual tools with shared standard names repository
         self.search_tool = SearchTool(self.repository)
         self.overview_tool = OverviewTool(self.repository)
+        self.edit_tool = EditStandardNamesTool(self.repository, self.edit_repository)
 
     @property
     def name(self) -> str:
@@ -31,15 +35,13 @@ class Tools:
         This keeps registration declarative and avoids manual duplication.
         """
 
-        tool_instances = [self.search_tool, self.overview_tool]
+        tool_instances = [self.search_tool, self.overview_tool, self.edit_tool]
 
         for tool in tool_instances:
             for attr_name in dir(tool):  # introspect public + private
                 if attr_name.startswith("_"):
                     continue  # skip dunder/private helpers
                 attr = getattr(tool, attr_name)
-                # Only register callables explicitly marked as MCP tools
                 if callable(attr) and getattr(attr, "_mcp_tool", False):
                     description = getattr(attr, "_mcp_description", "")
-                    # FastMCP.tool returns a decorator expecting the function
                     mcp.tool(description=description)(attr)

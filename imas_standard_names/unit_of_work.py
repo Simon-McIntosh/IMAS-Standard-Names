@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import List, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
 from .schema import StandardName
 from .services import validate_models
@@ -41,10 +41,10 @@ if TYPE_CHECKING:  # pragma: no cover
 
 
 class UnitOfWork:
-    def __init__(self, repo: "StandardNameRepository"):
+    def __init__(self, repo: StandardNameRepository):
         self.repo = repo
         self.catalog = repo.catalog
-        self._undo: List[object] = []
+        self._undo: list[object] = []
         self._closed = False
 
     # Mutations --------------------------------------------------------------

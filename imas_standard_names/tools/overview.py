@@ -83,3 +83,122 @@ class OverviewTool(BaseTool):
             "standard_names_by_tag": standard_names_by_tag,
             "version": package_version,
         }
+
+    @mcp_tool(
+        description=(
+            "List standard names with commit/staging classification. Optional 'scope' "
+            "argument filters output: all (default) | committed | staged | new | modified | renamed | deleted. "
+            "Returns base structure {universal_set, committed, staged{new,modified,rename_map,deleted}, counts} "
+            "for scope=all or committed only, staged block only, or a single list depending on scope. "
+            "Committed derived from YAML filenames; staged diff via active EditRepository when available, else set diff. "
+            "Renamed entries returned as mapping old_name->new_name."
+        )
+    )
+    async def list_standard_names(self, scope: str = "all", ctx: Context | None = None):  # noqa: D401
+        """Return committed vs staged standard name identifiers.
+
+        Fields:
+            universal_set: all in-memory names.
+            committed: names persisted on disk.
+            staged.new / staged.deleted: set membership differences.
+            staged.modified: structurally changed entries (needs EditRepository).
+            staged.rename_map: old_name -> new_name mapping for renames.
+            counts: *_count metrics plus staged_total_count.
+        """
+        # Committed names from disk (filenames without parsing).
+        committed = [
+            f.stem
+            for f in self.repository.store.yaml_files()  # type: ignore[attr-defined]
+        ]
+        committed.sort()
+
+        # Universal (current) names.
+        universal_set = self.repository.list_names()
+
+        # Initialize staged diff containers.
+        new: list[str] = []
+        modified: list[str] = []
+        deleted: list[str] = []
+        rename_map: dict[str, str] = {}
+
+        edit_repo = getattr(self, "edit_repository", None)
+        if edit_repo is not None and hasattr(edit_repo, "diff"):
+            try:
+                diff = edit_repo.diff()
+                new = [e["name"] for e in diff.get("added", [])]
+                deleted = [e["name"] for e in diff.get("removed", [])]
+                modified = [e["name"] for e in diff.get("updated", [])]
+                rename_map = {
+                    r.get("from"): r.get("to")  # type: ignore[dict-item]
+                    for r in diff.get("renamed", [])
+                    if r.get("from") and r.get("to")
+                }
+            except Exception:  # pragma: no cover
+                edit_repo = None
+
+        if edit_repo is None:
+            committed_set = set(committed)
+            current_set = set(universal_set)
+            new = sorted(current_set - committed_set)
+            deleted = sorted(committed_set - current_set)
+            # modified + rename_map remain empty
+
+        counts = {
+            "universal_count": len(universal_set),
+            "committed_count": len(committed),
+            "new_count": len(new),
+            "modified_count": len(modified),
+            "renamed_count": len(rename_map),
+            "deleted_count": len(deleted),
+        }
+        counts["staged_total_count"] = (
+            counts["new_count"]
+            + counts["modified_count"]
+            + counts["renamed_count"]
+            + counts["deleted_count"]
+        )
+
+        scope_normalized = scope.lower().strip()
+        valid_scopes = {
+            "all",
+            "committed",
+            "staged",
+            "new",
+            "modified",
+            "renamed",
+            "deleted",
+        }
+        if scope_normalized not in valid_scopes:
+            raise ValueError(
+                f"Invalid scope '{scope}'; expected one of: {', '.join(sorted(valid_scopes))}"
+            )
+
+        base_payload = {
+            "universal_set": universal_set,
+            "committed": committed,
+            "staged": {
+                "new": new,
+                "modified": modified,
+                "rename_map": rename_map,
+                "deleted": deleted,
+            },
+            "counts": counts,
+        }
+
+        match scope_normalized:
+            case "all":
+                return base_payload
+            case "committed":
+                return {"committed": committed, "counts": counts}
+            case "staged":
+                return {"staged": base_payload["staged"], "counts": counts}
+            case "new":
+                return {"new": new, "counts": counts}
+            case "modified":
+                return {"modified": modified, "counts": counts}
+            case "renamed":
+                return {"rename_map": rename_map, "counts": counts}
+            case "deleted":
+                return {"deleted": deleted, "counts": counts}
+            case _:
+                return base_payload

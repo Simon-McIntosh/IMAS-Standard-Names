@@ -49,10 +49,6 @@ fastmcp_logger.setLevel(logging.WARNING)
 class Server:
     """Standard Names - Composable integrator using composition pattern."""
 
-    # Configuration parameters
-    ids_set: set[str] | None = None
-    use_rich: bool = True
-
     # Internal fields
     mcp: FastMCP = field(init=False, repr=False)
     tools: Tools = field(init=False, repr=False)
@@ -69,6 +65,7 @@ class Server:
 
         # Register components with MCP server
         self._register_components()
+
         # Capture start times (wall clock + monotonic for stable uptime)
         self.started_at = datetime.now(UTC)
         self._started_monotonic = time.monotonic()
