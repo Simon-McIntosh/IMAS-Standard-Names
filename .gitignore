@@ -14,3 +14,6 @@ htmltest/
 
 # environment API keys
 .env
+
+# dev tests
+**/test.py
