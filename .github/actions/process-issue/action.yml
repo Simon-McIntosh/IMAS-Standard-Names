@@ -54,12 +54,12 @@ runs:
       run: |
         {
         echo 'has_name<<EOF'
-        poetry run has_standardname standardnames.yml ${{ inputs.standard-name }} 
+        uv run has_standardname standardnames.yml ${{ inputs.standard-name }} 
         echo EOF
         } >> "$GITHUB_OUTPUT"
         {
         echo 'update-message<<EOF'
-        poetry run update_standardnames standardnames.yml docs/generic_names.csv submission.json --issue-link ${{ github.event.issue.html_url }} ${{ env.overwrite }}
+        uv run update_standardnames standardnames.yml docs/generic_names.csv submission.json --issue-link ${{ github.event.issue.html_url }} ${{ env.overwrite }}
         echo EOF
         } >> "$GITHUB_OUTPUT"
         rm submission.json

@@ -8,7 +8,7 @@ import pytest
 from click.testing import CliRunner
 
 from imas_standard_names import schema
-from imas_standard_names.repositories import YamlStandardNameRepository
+from imas_standard_names.repository import StandardNameRepository
 from imas_standard_names.unit_of_work import UnitOfWork
 
 
@@ -69,7 +69,7 @@ def click_runner(path: str | Path):
 
 
 def _write_entry(entry: dict, directory: Path):
-    repo = YamlStandardNameRepository(directory)
+    repo = StandardNameRepository(directory)
     uow = UnitOfWork(repo)
     obj = schema.create_standard_name(entry)
     uow.add(obj)

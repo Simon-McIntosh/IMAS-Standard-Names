@@ -1,10 +1,10 @@
 {
   "servers": {
-    "imas": {
+    "imas-dd": {
       "url": "https://imas-dd.iter.org/mcp",
       "type": "http"
     },
-    "imas-debug": {
+    "imas-dd-debug": {
       "type": "stdio",
       "command": "uv",
       "args": [
@@ -12,6 +12,17 @@
         "--active",
         "imas-mcp",
         "--no-rich",
+      ]
+    },
+    "imas-sn": {
+      "type": "stdio",
+      "command": "uv",
+      "args": [
+        "run",
+        "--active",
+        "standard-names-mcp",
+        "--log-level",
+        "INFO",
       ]
     },
   }

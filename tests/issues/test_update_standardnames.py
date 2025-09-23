@@ -6,7 +6,7 @@ from click.testing import CliRunner
 
 from imas_standard_names.issues.cli import update_standardnames
 from imas_standard_names import schema
-from imas_standard_names.repositories import YamlStandardNameRepository
+from imas_standard_names.repository import StandardNameRepository
 from imas_standard_names.unit_of_work import UnitOfWork
 
 
@@ -41,7 +41,7 @@ def work_env(tmp_path, base_names_data, base_genericnames, submission_base):
         temp_dir_path = tmp_path  # because isolated_filesystem copies into tmp_path
         standard_dir = temp_dir_path / "standard_names"
         standard_dir.mkdir(exist_ok=True)
-        repo = YamlStandardNameRepository(standard_dir)
+        repo = StandardNameRepository(standard_dir)
         for e in base_names_data:
             uow = UnitOfWork(repo)
             uow.add(schema.create_standard_name(e))

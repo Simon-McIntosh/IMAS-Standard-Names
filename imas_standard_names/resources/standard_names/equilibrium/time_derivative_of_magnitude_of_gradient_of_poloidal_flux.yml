@@ -1,6 +1,6 @@
 name: time_derivative_of_magnitude_of_gradient_of_poloidal_flux
 kind: derived_scalar
-unit: Wb/(m*s)
+unit: Wb.m^-1.s^-1
 status: draft
 provenance:
   mode: operator

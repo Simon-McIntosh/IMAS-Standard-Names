@@ -7,6 +7,5 @@ provenance:
   domain: none
   base: magnetic_field
 status: deprecated
-description: DEPRECATED suffix form magnitude of magnetic_field; use magnitude_of_magnetic_field instead.
-notes:
-  - Retained for backward compatibility; prefer magnitude_of_magnetic_field.
+description: DEPRECATED suffix form magnitude of magnetic_field; use magnitude_of_magnetic_field instead. Retained for backward compatibility; prefer magnitude_of_magnetic_field.
+superseded_by: magnitude_of_magnetic_field

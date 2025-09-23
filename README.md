@@ -75,40 +75,161 @@ The issue form submission JSON is normalized in-place (e.g. `units` → `unit`, 
 
 ### Deprecations Removed
 
-### Migration Notes
+The legacy stub validator script `tools/validate_catalog.py` has been removed.
+Use the consolidated CLI command instead:
 
-If you depended on loading a single aggregated YAML, build an index by scanning the directory:
-
-```python
-from pathlib import Path
-from imas_standard_names.catalog.catalog import StandardNameCatalog
-
-catalog = StandardNameCatalog(Path("resources/standard_names")).load()
-print(catalog.entries["electron_temperature"].unit)
+```bash
+validate_catalog resources/standard_names
+# or (module form)
+python -m imas_standard_names.validation.cli validate_catalog resources/standard_names
 ```
 
-Programmatic creation (Repository + UnitOfWork):
+This performs structural + semantic checks (and optional integrity verification with `--verify`).
+
+### Programmatic Usage (Repository, Build, Read-Only)
+
+The YAML files are the authoritative source. A `StandardNameRepository` loads them
+into an in-memory SQLite catalog (with FTS) for fast queries and authoring.
+
+Basic queries:
 
 ```python
 from pathlib import Path
-from imas_standard_names import schema
-from imas_standard_names.repositories import YamlStandardNameRepository
-from imas_standard_names.unit_of_work import UnitOfWork
+from imas_standard_names.repository import StandardNameRepository
 
-root = Path("resources/standard_names/plasma")
-root.mkdir(parents=True, exist_ok=True)
-repo = YamlStandardNameRepository(root)
-uow = UnitOfWork(repo)
-entry = schema.create_standard_name({
+repo = StandardNameRepository(Path("resources/standard_names"))
+print([m.name for m in repo.list()][:5])
+print(repo.get("electron_temperature").unit)
+print(repo.search("electron temperature", limit=3))
+```
+
+Mutations use a UnitOfWork boundary (add/update/remove/rename then commit to rewrite YAML):
+
+```python
+from imas_standard_names import schema
+
+uow = repo.start_uow()
+model = schema.create_standard_name({
    "name": "ion_density",
    "kind": "scalar",
    "unit": "m^-3",
    "description": "Ion number density.",
    "status": "draft",
 })
-uow.add(entry)
-uow.commit()
+uow.add(model)
+uow.commit()  # writes ion_density.yml
 ```
+
+### Building a Definitive SQLite Catalog
+
+For distribution or read-only consumers, build a file-backed catalog that mirrors
+YAML exactly:
+
+```python
+from pathlib import Path
+from imas_standard_names.catalog.sqlite_build import build_catalog
+from imas_standard_names.catalog.sqlite_read import CatalogRead
+
+root = Path("resources/standard_names")
+db_path = build_catalog(root, root / "artifacts" / "catalog.db")
+ro = CatalogRead(db_path)
+print(len(ro.list()))
+```
+
+CLI equivalent:
+
+```bash
+python -m imas_standard_names.cli.build_catalog resources/standard_names --db resources/standard_names/artifacts/catalog.db
+```
+
+### Architectural Components
+
+| Component                | Purpose                                                                 |
+| ------------------------ | ----------------------------------------------------------------------- |
+| `YamlStore`              | Discover, load, and write per-file YAML entries (authoritative).        |
+| `CatalogReadWrite`       | Ephemeral in-memory SQLite (authoring session).                         |
+| `CatalogBuild`           | File-backed builder (creates persistent SQLite mirror).                 |
+| `CatalogRead`            | Read-only view over file-backed SQLite snapshot.                        |
+| `StandardNameRepository` | Facade combining `YamlStore` + `CatalogReadWrite` + search.             |
+| `UnitOfWork`             | Batched mutation (add/update/remove/rename + validation + YAML commit). |
+
+### Search
+
+Search uses SQLite FTS5 ranking (bm25) with a substring fallback. Request metadata:
+
+```python
+repo.search("temperature gradient", with_meta=True, limit=5)
+```
+
+Returns objects including name, score, and highlighted description/documentation spans.
+
+### Validation
+
+Load-time validation (structural + semantic) aborts on invalid YAML. During a UoW
+commit, the full staged view is revalidated before writing to disk.
+
+CLI validation supports file-backed or fresh memory modes plus optional integrity verification:
+
+```bash
+python -m imas_standard_names.validation.cli validate_catalog resources/standard_names \
+   --mode auto            # auto | file | memory
+   --verify               # (file mode) compare integrity table to current YAML (size/mtime or full)
+   --full                 # recompute hashes & check aggregate manifest
+```
+
+Exit codes:
+| Code | Meaning |
+|------|---------|
+| 0 | Structural & semantic valid (and no integrity issues, or integrity issues only if code not raised) |
+| 1 | Structural/semantic validation failed (no integrity issues) |
+| 2 | Structural/semantic valid but integrity discrepancies detected |
+
+Integrity issue codes: `mismatch-meta`, `hash-mismatch`, `missing-on-disk`, `missing-in-db`, `manifest-mismatch`.
+
+### Migration (Legacy APIs Removed)
+
+Legacy `StandardNameCatalog`, `load_catalog`, artifact rebuild flags, and
+repository variants have been replaced by the unified repository and explicit
+build step (`build_catalog`). If you previously relied on a JSON or legacy
+artifact, switch to invoking `build_catalog` and consuming with `CatalogRead`.
+
+### Debugging Foreign Key (FK) Errors & Logging
+
+The in-memory authoring catalog enables SQLite foreign keys. Vector entries
+reference their component scalar names. If components are missing when the
+repository attempts to insert a vector you will now receive a diagnostic:
+
+```text
+sqlite3.IntegrityError: Foreign key constraint failed while inserting vector 'gradient_of_poloidal_flux'.
+Missing component standard_name rows: radial_component_of_gradient_of_poloidal_flux, ...
+Insert the component scalar definitions before the vector or reorder YAML files.
+```
+
+The `StandardNameRepository` performs a two-pass load (non-vectors first,
+then vectors) to avoid ordering issues during initial load from YAML. If you
+manually insert new models at runtime ensure scalar components / dependencies
+exist before derived vectors or expression provenance rows.
+
+Set an environment variable to enable verbose logging (helpful for tracing
+load order and pinpointing the first failing name):
+
+PowerShell (Windows):
+
+```powershell
+setx IMAS_SN_LOG_LEVEL DEBUG
+# start a new shell OR for current session:
+$env:IMAS_SN_LOG_LEVEL = "DEBUG"
+python -m imas_standard_names.cli.build_catalog resources/standard_names
+```
+
+Unix shells:
+
+```bash
+IMAS_SN_LOG_LEVEL=DEBUG python -m imas_standard_names.cli.build_catalog resources/standard_names
+```
+
+Accepted levels: DEBUG, INFO, WARNING, ERROR (default WARNING). The catalog
+logger name is `imas_standard_names.catalog`.
 
 ### Roadmap
 
@@ -118,7 +239,18 @@ GitHub Actions automatically build and deploy the documentation whenever you pus
 
 ### Local Documentation Development
 
-To build the documentation locally, run:
+You can use the blazing fast [uv](https://github.com/astral-sh/uv) workflow (used in CI) or a plain virtual environment.
+
+Using uv (recommended):
+
+```bash
+uv venv
+. .venv/bin/activate  # or .venv\Scripts\activate on Windows
+uv sync --all-extras --no-dev  # install runtime + extras used for docs (dev tools excluded)
+uv run mkdocs serve
+```
+
+Using a plain virtual environment + pip:
 
 ```bash
 # create virtual environment
@@ -140,8 +272,8 @@ mkdocs serve
 This project uses Mike to manage versioned documentation. To work with versioned documentation locally:
 
 ```bash
-# Install documentation dependencies (includes Mike)
-pip install .[docs]
+# Install documentation dependencies (includes Mike) – via uv or pip
+uv sync --extra docs  # or: pip install .[docs]
 
 # Initialize a git repo if not already done
 git init

@@ -2,7 +2,4 @@ name: poloidal_flux_axis
 kind: scalar
 unit: Wb
 status: draft
-description: Poloidal flux value at the magnetic axis (ψ_axis), reference for flux differences.
-parent_scalar: poloidal_flux
-notes:
-  - Corresponds to psi_axis in equilibrium IDS.
+description: Poloidal flux value at the magnetic axis (ψ_axis), reference for flux differences. Corresponds to psi_axis in equilibrium IDS.
