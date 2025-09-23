@@ -1,5 +1,5 @@
 name: Install imas-standard-names project
-description: Manage a cached Poetry environments for testing and documentation.
+description: Set up Python with uv and sync project dependencies (all extras, excluding dev) for testing and documentation.
 
 inputs:
   python-version:
@@ -9,17 +9,14 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Install poetry
-      shell: bash
-      run: pipx install poetry
-
     - uses: actions/setup-python@v5
-      id: setup-python
       with:
         python-version: ${{ inputs.python-version }}
-        cache: "poetry"
-
-    - name: Re-sync dependencies when cache is not hit
-      if: ${{ steps.setup-python.outputs.cache-hit != 'true' }}
+    - name: Install uv
+      uses: astral-sh/setup-uv@v3
+      with:
+        enable-cache: true
+    - name: Sync dependencies (no dev)
       shell: bash
-      run: poetry sync --all-extras --without dev
+      run: |
+        uv sync --all-extras --no-dev

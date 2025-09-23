@@ -1,7 +1,7 @@
 name: gradient_of_poloidal_flux
 kind: derived_vector
 frame: flux_surface
-unit: Wb/m
+unit: Wb.m^-1
 status: draft
 description: Spatial gradient of the poloidal flux function (∇ψ).
 # Unified provenance
@@ -14,4 +14,3 @@ components:
   radial: radial_component_of_gradient_of_poloidal_flux
   toroidal: toroidal_component_of_gradient_of_poloidal_flux
   vertical: vertical_component_of_gradient_of_poloidal_flux
-magnitude: magnitude_of_gradient_of_poloidal_flux

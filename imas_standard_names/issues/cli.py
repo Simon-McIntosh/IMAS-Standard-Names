@@ -11,12 +11,11 @@ import click
 from strictyaml.ruamel import YAML
 
 from imas_standard_names.issues.image_assets import ImageProcessor
-from imas_standard_names.repository import update_static_urls
+from imas_standard_names.issues.gh_repo import update_static_urls
 from imas_standard_names.generic_names import GenericNames
 from imas_standard_names import schema
-from imas_standard_names.repositories import YamlStandardNameRepository
 from imas_standard_names.unit_of_work import UnitOfWork
-from imas_standard_names.catalog.catalog import StandardNameCatalog
+from imas_standard_names.repository import StandardNameRepository
 
 yaml = YAML()
 yaml.indent(mapping=2, sequence=4, offset=2)
@@ -25,8 +24,8 @@ yaml.indent(mapping=2, sequence=4, offset=2)
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
-def _load_catalog(root: Path) -> StandardNameCatalog:
-    return StandardNameCatalog(root).load()
+def _legacy_private_load(root: Path):  # backward compat placeholder
+    return StandardNameRepository(root)
 
 
 def format_error(error: Exception, submission_file: str | None = None) -> str:
@@ -79,7 +78,7 @@ def update_standardnames(
     """
     root = Path(standardnames_dir)
     root.mkdir(parents=True, exist_ok=True)
-    catalog = _load_catalog(root) if root.exists() else StandardNameCatalog(root)
+    repo = StandardNameRepository(root)
     genericnames = GenericNames(genericnames_file)
 
     try:
@@ -117,7 +116,7 @@ def update_standardnames(
         entry = schema.create_standard_name(cleaned)
 
         # Overwrite guard (only error if not overwriting)
-        if entry.name in catalog.entries and not overwrite:
+        if repo.get(entry.name) and not overwrite:
             raise KeyError(
                 f"The proposed standard name **{entry.name}** is already present. Use --overwrite to replace."
             )
@@ -142,11 +141,9 @@ def update_standardnames(
             except Exception:  # Non-fatal: continue without images
                 pass
 
-        # Persist via repository + unit of work
-        repo = YamlStandardNameRepository(root)
+        # Persist via unified repository + unit of work
         uow = UnitOfWork(repo)
-        if entry.name in catalog.entries and overwrite:
-            # Treat as update: replace existing entry
+        if repo.get(entry.name) and overwrite:
             uow.update(entry.name, entry)
         else:
             uow.add(entry)
@@ -175,11 +172,11 @@ def has_standardname(standardnames_dir: str, standard_name: Iterable[str]):
         click.echo("False")
         return
     try:
-        catalog = _load_catalog(root)
+        repo = StandardNameRepository(root)
     except Exception:
         click.echo("False")
         return
-    click.echo(str(name in catalog.entries))
+    click.echo(str(repo.get(name) is not None))
 
 
 @click.command()
@@ -190,8 +187,10 @@ def get_standardname(standardnames_dir: str, standard_name: Iterable[str]):
     name = " ".join(standard_name)
     root = Path(standardnames_dir)
     try:
-        catalog = _load_catalog(root)
-        entry = catalog.entries[name]
+        repo = StandardNameRepository(root)
+        entry = repo.get(name)
+        if not entry:
+            raise KeyError(name)
     except Exception as error:
         click.echo(format_error(error))
         return

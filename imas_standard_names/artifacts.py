@@ -8,7 +8,7 @@ commands from storage specifics.
 from __future__ import annotations
 
 from pathlib import Path
-from .repositories import StandardNameRepository
+from .repository import StandardNameRepository
 from .storage.writer import write_catalog_artifacts
 
 __all__ = ["build_artifacts"]

@@ -1,0 +1,5 @@
+name: radial_component_of_time_derivative_of_gradient_of_poloidal_flux
+kind: scalar
+unit: Wb.m^-1.s^-1
+status: draft
+description: Radial (R) component of the time derivative of the poloidal flux gradient.

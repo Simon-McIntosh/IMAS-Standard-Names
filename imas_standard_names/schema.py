@@ -43,40 +43,42 @@ Derived (operator) example:
 
 """
 
-from typing import Dict, List, Literal, Iterable, Union, Annotated
-from enum import Enum
 import re
+from collections.abc import Iterable
+from enum import Enum
+from typing import Annotated, Literal
+
 from pydantic import (
     BaseModel,
+    ConfigDict,
     Field,
+    TypeAdapter,
     field_validator,
     model_validator,
-    ConfigDict,
-    TypeAdapter,
 )
 
 from imas_standard_names import pint
-from imas_standard_names.operators import (
-    normalize_operator_chain as _normalize_operator_chain,
-    enforce_operator_naming as _enforce_operator_naming,
-)
-from imas_standard_names.provenance import (
-    OperatorProvenance,
-    ExpressionProvenance,
-    Provenance,
-    ReductionProvenance,
-)
-from imas_standard_names.reductions import enforce_reduction_naming
 from imas_standard_names.field_types import (
-    Name,
-    Unit,
-    Tags,
-    Links,
     Constraints,
     Description,
     Documentation,
     Domain,
+    Links,
+    Name,
+    Tags,
+    Unit,
 )
+from imas_standard_names.operators import (
+    enforce_operator_naming as _enforce_operator_naming,
+    normalize_operator_chain as _normalize_operator_chain,
+)
+from imas_standard_names.provenance import (
+    ExpressionProvenance,
+    OperatorProvenance,
+    Provenance,
+    ReductionProvenance,
+)
+from imas_standard_names.reductions import enforce_reduction_naming
 
 Kind = Literal["scalar", "derived_scalar", "vector", "derived_vector"]
 Status = Literal["draft", "active", "deprecated", "superseded"]
@@ -180,7 +182,7 @@ class StandardNameBase(BaseModel):
 
     @field_validator("tags", "links", "constraints")
     @classmethod
-    def list_normalizer(cls, v: Iterable[str]) -> List[str]:  # type: ignore[override]
+    def list_normalizer(cls, v: Iterable[str]) -> list[str]:  # type: ignore[override]
         if v is None:
             return []
         return [str(item).strip() for item in v if str(item).strip()]
@@ -252,7 +254,7 @@ class StandardNameDerivedScalar(StandardNameBase):
 class StandardNameVector(StandardNameBase):
     kind: Literal["vector"] = "vector"
     frame: Frame = Field(..., description="Reference frame / coordinate system.")
-    components: Dict[str, str] = Field(
+    components: dict[str, str] = Field(
         ..., description="Mapping axis -> component standard name."
     )
 
@@ -283,7 +285,7 @@ class StandardNameVector(StandardNameBase):
 class StandardNameDerivedVector(StandardNameBase):
     kind: Literal["derived_vector"] = "derived_vector"
     frame: Frame = Field(..., description="Reference frame / coordinate system.")
-    components: Dict[str, str] = Field(
+    components: dict[str, str] = Field(
         ..., description="Mapping axis -> component standard name."
     )
     provenance: Provenance
@@ -327,19 +329,17 @@ class StandardNameDerivedVector(StandardNameBase):
 
 
 StandardName = Annotated[
-    Union[
-        StandardNameScalar,
-        StandardNameDerivedScalar,
-        StandardNameVector,
-        StandardNameDerivedVector,
-    ],
+    StandardNameScalar
+    | StandardNameDerivedScalar
+    | StandardNameVector
+    | StandardNameDerivedVector,
     Field(discriminator="kind"),
 ]
 
 _STANDARD_NAME_ADAPTER = TypeAdapter(StandardName)
 
 
-def create_standard_name(data: Dict) -> StandardName:
+def create_standard_name(data: dict) -> StandardName:
     """Validate data into a StandardName union instance via discriminator."""
     return _STANDARD_NAME_ADAPTER.validate_python(data)
 

@@ -47,13 +47,13 @@ jobs:
       - name: Test and coverage
         run: |
           if [[ "${{ matrix.python-version }}" == "${{ env.BASE_PYTHON_VERSION }}" ]]; then
-            poetry run pytest \
+            uv run pytest \
               --cov \
               --cov-branch \
               --cov-report=xml \
               --junitxml=junit.xml -o junit_family=legacy
           else
-            poetry run pytest
+            uv run pytest
           fi
 
       - name: Upload test results to Codecov

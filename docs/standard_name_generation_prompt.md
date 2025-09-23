@@ -111,7 +111,7 @@ Purpose: Drive an LLM (or MCP-enabled agent) to propose VALID new IMAS Standard 
     Provide an index summary at end (name → kind).
 
 16. Post-Step Guidance (Optional)
-    Suggest running locally: `python tools/validate_catalog.py` and (future) loading with Pydantic models to confirm.
+    Suggest running locally: `validate_catalog resources/standard_names` (or `python -m imas_standard_names.validation.cli validate_catalog resources/standard_names`) and (future) loading with Pydantic models to confirm.
 
 ---
 

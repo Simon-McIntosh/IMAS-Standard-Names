@@ -217,7 +217,7 @@ Disallowed chains: e.g. `curl_of_divergence_of_...` (scalar → curl invalid).
 3. Create one component file per axis (uniform pattern).
 4. Add derived vectors (curl etc.) + their component sets.
 5. Add derived scalars (divergence, magnitude if not already).
-6. Run validator: `python tools/validate_catalog.py`.
+6. Run validator: `validate_catalog resources/standard_names` (or `python -m imas_standard_names.validation.cli validate_catalog resources/standard_names`).
 7. Commit on green.
 
 Extended quick start: see `quickstart.md`.

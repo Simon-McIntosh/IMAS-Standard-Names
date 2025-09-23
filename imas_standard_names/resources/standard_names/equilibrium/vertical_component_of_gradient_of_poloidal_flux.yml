@@ -1,7 +1,5 @@
 name: vertical_component_of_gradient_of_poloidal_flux
 kind: scalar
-unit: Wb/m
+unit: Wb.m^-1
 status: draft
-description: Vertical (Z) component of the poloidal flux gradient.
-notes:
-  - Component of ∇ψ projected along the vertical (Z) axis.
+description: Vertical (Z) component of the poloidal flux gradient. Component of ∇ψ projected along the vertical (Z) axis.
