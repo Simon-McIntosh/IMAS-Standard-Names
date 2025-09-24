@@ -4,24 +4,25 @@
   //  Keep this file lean: only project-specific behavior.
   //  User/editor UX customizations belong in user settings instead.
   // =====================================================================
-
   // --- Python: analysis & interpreter ----------------------------------
   "python.analysis.typeCheckingMode": "standard", // Raise to "strict" later if desired
   "python.defaultInterpreterPath": "${workspaceFolder}\\.venv\\Scripts\\python.exe", // Relative venv
   "python.envFile": "${workspaceFolder}/.env", // Optional environment overrides
-
   // --- Python: terminal activation -------------------------------------
   // Rely on extension auto-activation. executeInFileDir false = run from workspace root.
   "python.terminal.activateEnvInCurrentTerminal": true,
   "python.terminal.activateEnvironment": true,
   "python.terminal.executeInFileDir": false,
-
   // --- Testing ----------------------------------------------------------
   "python.testing.pytestEnabled": true,
   "python.testing.unittestEnabled": false,
-  "python.testing.pytestArgs": ["tests"],
+  "python.testing.pytestArgs": [
+    "tests"
+  ],
   "python.testing.cwd": "${workspaceFolder}",
-
+  // --- Formatting --------------------------------------------------------
+  "editor.formatOnSave": true,
+  "editor.formatOnPaste": true,
   // --- Spelling (project-specific domain words) ------------------------
   "cSpell.words": [
     "dotenv",
@@ -46,11 +47,12 @@
     "tokamaks",
     "UDUNITS"
   ],
-
   // --- Chat MCP sampling (project tool integration) --------------------
   "chat.mcp.serverSampling": {
     "imas-standard-names/.vscode/mcp.json: imas": {
-      "allowedModels": ["copilot/gpt-5"],
+      "allowedModels": [
+        "copilot/gpt-5"
+      ],
       "allowedDuringChat": true
     }
   }

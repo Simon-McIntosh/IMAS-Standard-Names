@@ -1,8 +1,8 @@
 {
   "servers": {
     "imas-dd": {
-      "url": "https://imas-dd.iter.org/mcp",
-      "type": "http"
+      "type": "http",
+      "url": "https://imas-dd.iter.org/mcp"
     },
     "imas-dd-debug": {
       "type": "stdio",
@@ -11,7 +11,7 @@
         "run",
         "--active",
         "imas-mcp",
-        "--no-rich",
+        "--no-rich"
       ]
     },
     "imas-sn": {
@@ -22,8 +22,12 @@
         "--active",
         "standard-names-mcp",
         "--log-level",
-        "INFO",
+        "INFO"
       ]
     },
+    "imas-sse": {
+      "type": "sse",
+      "url": "http://127.0.0.1:8000/sse"
+    }
   }
 }
