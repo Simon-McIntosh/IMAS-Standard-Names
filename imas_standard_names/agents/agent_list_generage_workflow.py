@@ -1,5 +1,6 @@
 import os
 from asyncio import run
+from pathlib import Path
 
 import dotenv
 import logfire as lf
@@ -12,10 +13,10 @@ from pydantic_ai.mcp import (
 from pydantic_ai.models.anthropic import AnthropicModel
 from pydantic_ai.models.openai import OpenAIChatModel
 from pydantic_ai.providers.openrouter import OpenRouterProvider
-from rich.prompt import IntPrompt, Prompt
+from rich.prompt import Prompt
 
 from imas_standard_names.agents.load_mcp import load_mcp_servers
-from imas_standard_names.agents.schema import Review, State
+from imas_standard_names.agents.schema import Review
 from imas_standard_names.schema import StandardName  # type: ignore
 
 # from imas_standard_names.schema import StandardName
@@ -52,40 +53,39 @@ def build_default_model() -> AI_MODELS:
 #     model=build_default_model(), output_type=list[Review], toolsets=SERVERS
 # )  # type: ignore
 
-GENERATE_SYSTEM_PROMPT = """"
-You are an expert in using the IMAS Data Dictionary and tasked to create new standard names
-for the IMAS data dictionary. The names must be descriptive, and follow the IMAS naming conventions,
-and being unique in their description of the data they represent - so as to not to be confused
-with existing names in the data dictionary. For derived quantities make certain you are
-generating the correct standard names for underlying scalar quantities so that the derived validations
-can pass.
-"""
+_generate_md = (
+    Path(__file__).resolve().parent.parent.parent
+    / ".github"
+    / "prompts"
+    / "workflows"
+    / "list_generate_workflow"
+    / "generate.md"
+)
+GENERATE_SYSTEM_PROMPT: str = _generate_md.read_text(encoding="utf-8")
 
-REVIEW_SYSTEM_PROMPT = """
-You are an expert in using the IMAS Data Dictionary tasked to identify how well a standard name
-fits into the IMAS data dictionary. You will be provided with a standard name, including its description,
-and ared tasked to provide a score between 0 and 1, with scores above 0.7 being names which could be included.
 
-Score on metrics such as:
-- How well the name fits into the existing naming conventions
-- How descriptive the name is
-- How unique the name is compared to existing names in the data dictionary
-"""
+_review_md = (
+    Path(__file__).resolve().parent.parent.parent
+    / ".github"
+    / "prompts"
+    / "workflows"
+    / "list_generate_workflow"
+    / "review.md"
+)
+REVIEW_SYSTEM_PROMPT: str = _review_md.read_text(encoding="utf-8")
 
-HUMAN_SYSTEM_PROMPT = """
-You are a helpful assistant that helps users in generating standard names for the IMAS data dictionary.
-You will be provided with user input and are tasked on extracting key information to help generate
-a prompt to pass to an AI agent tasked to generate standard names.
 
-On the first interaction, you are to extract how many names the user wants to generate and
-generate a prompt as well as a review scoring 0 for each name to be generated.
+_human_md = (
+    Path(__file__).resolve().parent.parent.parent
+    / ".github"
+    / "prompts"
+    / "workflows"
+    / "list_generate_workflow"
+    / "human.md"
+)
+HUMAN_SYSTEM_PROMPT: str = _human_md.read_text(encoding="utf-8")
 
-On subsequent interactions, the user has been provided with a list of standard names which have been
-generated, and will either accept the names, in which case you are to provide a Reivew with a score of 1
-for the accepted names. For names which the user has rejected, extract the user's sentiment towards
-the name to generate a score, and generate a prompt to guide the generation agent 
-to generate a better name.
-"""
+
 request_agent = Agent[None, list[Review]](
     model=build_default_model(),
     output_type=list[Review],
@@ -124,55 +124,81 @@ def build_review_query(candidates: list[StandardName]) -> str:
     )
 
 
+def build_human_review_query(query, names: list[StandardName]) -> str:
+    return (
+        f"The user provided the feedback: '{query}' for the following standard names (in order): "
+        + "\n".join(str(c) for c in names)
+        + f"\n Create an engeneered prompt as a review for each of the {len(names)} names, to capture user sentiment of the name. Score above 0.7 if the user approves the name"
+    )
+
+
 async def main():
     print("IMAS Standard Name Generator")
 
-    query = Prompt.ask(">")
+    query = Prompt.ask(
+        ">", default="generate a list of 3 standard scalar names for poloidal flux"
+    )
 
     review_output = await request_agent.run(query)
     reviews: list[Review] = review_output.output
 
     num_names = len(reviews)
 
+    print(f"Initial reviews for {num_names}:")
+    for r in reviews:
+        print(f"- scored at {r.score:.2f}")
+        print(r.message)
+        print()
+
     accepted: list[StandardName] = []
     candidates: list[StandardName] = []
+
+    pairs: list[tuple[StandardName | None, Review]] = list(
+        zip([None] * num_names, reviews, strict=True)
+    )
 
     retries = 0
     MAX_RETRIES = 5
     while len(accepted) < num_names and retries < MAX_RETRIES:
-        while any(r.failed for r in reviews) and retries < MAX_RETRIES:
+        ai_accepted = []
+        while (pairs != []) and retries < MAX_RETRIES:
             candidates_output = await standard_name_agent.run(
-                build_regenerate_query(
-                    list(
-                        zip(
-                            candidates if candidates else [None] * num_names,
-                            reviews,
-                            strict=True,
-                        )
-                    )
-                )
+                build_regenerate_query(pairs)
             )
             candidates = candidates_output.output
             reviews_output = await ai_review_agent.run(build_review_query(candidates))
-            reviews = reviews_output.output
 
-            accepted += [
-                c.model_copy()
-                for c, r in zip(candidates, reviews, strict=True)
-                if r.passed
+            pairs = list(zip(candidates, reviews_output.output, strict=True))
+            ai_accepted += [
+                c.model_copy() for c, r in pairs if r.passed and c is not None
             ]
-            reviews = [r for r in reviews if r.failed]
-            candidates = [
-                c for c, r in zip(candidates, reviews, strict=True) if r.failed
-            ]
-
+            pairs = [p for p in pairs if p[1].failed]
             retries += 1
+
             print(f"Candidates after retry {retries}:")
-            for c, r in zip(candidates, reviews, strict=True):
-                print(f"- {c.name}: scored at {r.score:.2f}")
+            for c, r in pairs:
+                print(f"- {c.name if c else 'NONE'}: scored at {r.score:.2f}")
+        print(f"Candidates after retry {retries}:")
+        for c in ai_accepted:
+            print(f"- {c.name}")
+
         query = Prompt.ask(">")
-        review_output = await request_agent.run(query)
-        reviews: list[Review] = review_output.output
+        review_output = await request_agent.run(
+            build_human_review_query(query, ai_accepted)
+        )
+        pairs = list(zip(ai_accepted, review_output.output, strict=True))
+        accepted += [c.model_copy() for c, r in pairs if r.passed and c is not None]
+        pairs = [p for p in pairs if p[1].failed]
+
+        print("Human reviews")
+        print("--------------")
+        for c, r in pairs:
+            print(f"- {c.name if c is not None else 'None'}: scored at {r.score:.2f}")
+    print(f"Accepted {len(accepted)} names:")
+    for c in accepted:
+        print(f"- {c.name}: {type(c)}")
+        print(c)
+    print("--------------")
 
 
 if __name__ == "__main__":
