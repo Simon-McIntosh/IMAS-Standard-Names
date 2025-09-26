@@ -1,3 +1,4 @@
+import json
 import os
 from asyncio import run
 from pathlib import Path
@@ -31,8 +32,6 @@ AI_MODELS = AnthropicModel | OpenAIChatModel
 SERVERS = [load_mcp_servers(r".vscode/mcp.json")[-1]]
 TOOLS = []
 
-REVIEW_QUERY = "You are an expert in using the IMAS Data Dictionary create a review of the standard name as to how well it fits in to the imas data dictionary. give low scores if similar names exist in the data dictionary, or names are not descriptive. only give scores above 0.7 for names which could be included in the imas data dictionary"
-
 
 def build_default_model() -> AI_MODELS:
     return OpenAIChatModel(model_name="openai/gpt-5", provider=OpenRouterProvider())
@@ -41,17 +40,6 @@ def build_default_model() -> AI_MODELS:
 # ===============
 #  Define Agents
 # ===============
-# standard_name_agent = Agent[
-#     tuple[list[StandardName], StandardName | None, Review | None], StandardName
-# ](
-#     model=build_default_model(),
-#     output_type=StandardName,  # type: ignore
-#     toolsets=SERVERS,
-# )  # type: ignore
-
-# ai_review_agent = Agent[None, list[Review]](
-#     model=build_default_model(), output_type=list[Review], toolsets=SERVERS
-# )  # type: ignore
 
 _generate_md = (
     Path(__file__).resolve().parent.parent.parent
