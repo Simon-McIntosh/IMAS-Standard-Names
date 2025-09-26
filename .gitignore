@@ -19,3 +19,6 @@ htmltest/
 # build artifacts 
 **/.catalog/
 *.db
+
+# dev tests
+**/test.py

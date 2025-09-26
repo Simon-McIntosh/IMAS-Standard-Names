@@ -21,7 +21,9 @@ dependencies = [
   "markdown (>=3.8,<4.0)",
   "imas-mcp>=2.4",
   "textual>=6.1.0",
-  "pydantic-ai>=0.1.9",
+  "pydantic-ai>=1.0.8",
+  "pydantic-evals>=0.0.7",
+  "pydantic-graph>=0.0.2",
 ]
 keywords = [
   "fusion",

@@ -7,6 +7,7 @@ from textual import events
 
 from functools import cached_property
 
+from imas_standard_names.workflow.imas_connect import IMASConnect
 from imas_standard_names.gui.tree import build_standard_names_tree
 
 
