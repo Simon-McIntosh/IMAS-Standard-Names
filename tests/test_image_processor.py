@@ -1,7 +1,8 @@
-import pytest
 from pathlib import Path
+from unittest.mock import Mock, mock_open, patch
+
+import pytest
 import requests
-from unittest.mock import Mock, patch, mock_open
 
 from imas_standard_names.issues.image_assets import ImageProcessor
 
@@ -14,7 +15,7 @@ def mock_urls():
         "https://github.com/user-attachments/assets/67890/image2.png",
         "https://github.com/user-attachments/assets/11223/image3.gif",
         "https://github.com/user-attachments/assets/44556/image4.svg",
-        #"https://github.com/user-attachments/assets/77889/image5.webp",
+        # "https://github.com/user-attachments/assets/77889/image5.webp",
     ]
 
 
@@ -36,7 +37,7 @@ def sample_documentation(mock_urls):
     """Create sample documentation with GitHub user-attachment URLs for all image types."""
     return """
     # Sample Documentation
-    
+
     This is a test documentation with images.
 
     """ + "\n".join(
