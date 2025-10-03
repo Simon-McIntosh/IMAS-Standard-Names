@@ -2,7 +2,7 @@ from pathlib import Path
 
 from imas_standard_names.catalog.sqlite_build import build_catalog
 from imas_standard_names.catalog.sqlite_read import CatalogRead
-from imas_standard_names.repository import StandardNameRepository
+from imas_standard_names.repository import StandardNameCatalog
 
 
 def _write_example(root: Path):
@@ -19,7 +19,7 @@ def test_build_catalog_round_trip(tmp_path: Path):
     yaml_root.mkdir()
     _write_example(yaml_root)
     # Load via repository (in-memory) baseline
-    repo = StandardNameRepository(yaml_root)
+    repo = StandardNameCatalog(yaml_root)
     baseline = {m.name: m.description for m in repo.list()}
     # Build file-backed catalog
     db_path = tmp_path / "artifacts" / "catalog.db"

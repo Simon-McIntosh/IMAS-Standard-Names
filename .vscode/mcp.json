@@ -1,33 +1,18 @@
 {
-  "servers": {
-    "imas-dd": {
-      "type": "http",
-      "url": "https://imas-dd.iter.org/mcp"
-    },
-    "imas-dd-debug": {
-      "type": "stdio",
-      "command": "uv",
-      "args": [
-        "run",
-        "--active",
-        "imas-mcp",
-        "--no-rich"
-      ]
-    },
-    "imas-sn": {
-      "type": "stdio",
-      "command": "uv",
-      "args": [
-        "run",
-        "--active",
-        "standard-names-mcp",
-        "--log-level",
-        "INFO"
-      ]
-    },
-    "imas-sse": {
-      "type": "sse",
-      "url": "http://127.0.0.1:8000/sse"
-    }
-  }
+	"servers": {
+		"imas-dd": {
+			"type": "http",
+			"url": "https://imas-dd.iter.org/mcp"
+		},
+		"imas-dd-debug": {
+			"type": "http",
+			"url": "http://127.0.0.1:8080/mcp"
+		},
+		"imas-sn": {
+			"type": "stdio",
+			"command": "uv",
+			"args": ["run", "--active", "standard-names-mcp"]
+		}
+	},
+	"inputs": []
 }

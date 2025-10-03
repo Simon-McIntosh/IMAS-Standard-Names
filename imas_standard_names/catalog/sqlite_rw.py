@@ -2,14 +2,14 @@
 
 from __future__ import annotations
 
-import sqlite3
 import json
-import os
 import logging
-from typing import Iterable, List, Tuple
+import os
+import sqlite3
+from collections.abc import Iterable
 
-from .base import CatalogBase
 from ..schema import StandardName
+from .base import CatalogBase
 
 DDL = [
     "PRAGMA foreign_keys=ON;",
@@ -52,7 +52,7 @@ class CatalogReadWrite(CatalogBase):
         for m in models:
             self.insert(m)
 
-    def _diagnose_fk(self) -> List[Tuple[str, int, str, int]]:
+    def _diagnose_fk(self) -> list[tuple[str, int, str, int]]:
         cur = self.conn.cursor()
         cur.execute("PRAGMA foreign_key_check;")
         rows = cur.fetchall()

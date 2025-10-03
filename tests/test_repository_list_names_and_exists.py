@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from imas_standard_names.repository import StandardNameRepository
+from imas_standard_names.repository import StandardNameCatalog
 from imas_standard_names.schema import create_standard_name
 
 
@@ -16,7 +16,7 @@ def test_list_names_and_exists(tmp_path: Path):
     write_scalar(tmp_path, "a_density")
     write_scalar(tmp_path, "z_temperature")
     write_scalar(tmp_path, "m_pressure")
-    repo = StandardNameRepository(tmp_path)
+    repo = StandardNameCatalog(tmp_path)
 
     # exists() checks
     assert repo.exists("a_density") is True
@@ -35,7 +35,7 @@ def test_list_names_and_exists(tmp_path: Path):
 
 
 def test_exists_after_uow_add_remove(tmp_path: Path):
-    repo = StandardNameRepository(tmp_path)
+    repo = StandardNameCatalog(tmp_path)
     assert not repo.exists("dynamic_entry")
     uow = repo.start_uow()
     model = create_standard_name(

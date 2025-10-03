@@ -1,12 +1,12 @@
+from imas_standard_names.repository import StandardNameCatalog
 from imas_standard_names.schema import create_standard_name
-from imas_standard_names.repository import StandardNameRepository
 from imas_standard_names.unit_of_work import UnitOfWork
 
 
 def test_unit_of_work_add_update_remove_commit(tmp_path):
     root = tmp_path / "standard_names"
     root.mkdir()
-    repo = StandardNameRepository(root)
+    repo = StandardNameCatalog(root)
     uow = UnitOfWork(repo)
 
     # Add new entry

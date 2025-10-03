@@ -5,9 +5,8 @@ site_url:
 plugins:
   - macros:
       verbose: true
-  - data:
-      sources:
-        standardnames: !ENV [STANDARD_NAMES_FILE, standardnames.yml]
+      modules:
+        - docs.grammar_macros
   - search
   - table-reader
   - mike:
@@ -17,7 +16,20 @@ plugins:
       javascript_dir: javascripts
 
 watch:
-  - !ENV [STANDARD_NAMES_FILE, standardnames.yml]
+  - imas_standard_names/resources/grammar.yml
+  - imas_standard_names/resources/standard_names/
+
+nav:
+  - Home: index.md
+  - Grammar Reference: grammar-reference.md
+  - Guidelines: guidelines.md
+  - Specification: specification.md
+  - Quick Start: quickstart.md
+  - Style Guide: style-guide.md
+  - Provenance: provenance.md
+  - Reductions: reductions.md
+  - Roadmap: roadmap.md
+  - Contributing: ../CONTRIBUTING.md
 
 theme:
   name: material

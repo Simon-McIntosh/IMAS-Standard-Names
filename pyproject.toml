@@ -46,6 +46,7 @@ update_links = "imas_standard_names.issues.cli:update_links"
 validate_catalog = "imas_standard_names.validation.cli:validate_catalog_cli"
 standard-names = "imas_standard_names.cli:standard_names"
 standard-names-mcp = "imas_standard_names.cli.server:main"
+build-grammar = "imas_standard_names.grammar_codegen.generate:main"
 
 [project.optional-dependencies]
 agent = [
@@ -69,11 +70,14 @@ docs = [
   "mkdocs-table-reader-plugin (>=3.1.0,<4.0.0)",
 ]
 [build-system]
-requires = ["hatchling>=1.25.0", "hatch-vcs>=0.4.0"]
+requires = ["hatchling>=1.25.0", "hatch-vcs>=0.4.0", "pyyaml>=6.0.2"]
 build-backend = "hatchling.build"
 
 [tool.hatch.version]
 source = "vcs"
+
+[tool.hatch.build.hooks.custom]
+path = "hatch_build_hooks.py"
 
 [dependency-groups]
 dev = [

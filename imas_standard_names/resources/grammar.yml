@@ -1,0 +1,156 @@
+# Canonical standard name grammar (authoritative source):
+#   [component_] [subject_] base_or_transformed_name [in_<basis>_basis]? [of_<target> | at_<position>]? [due_to_<process>]?
+#
+# This file is the single source of truth for the standard-name grammar used by
+# the runtime parser and composer. Downstream Python types and metadata are
+# auto-generated from this YAML during builds/installs.
+#
+# Generation details:
+# - The generator lives at: imas_standard_names/grammar_codegen/generate.py
+# - It writes: imas_standard_names/grammar/types.py
+# - It runs automatically during package build via Hatch (see hatch_build_hooks.py)
+# - A console entrypoint also exists in pyproject.toml: `build-grammar`
+# - You can regenerate locally without building by running:
+#     python -m imas_standard_names.grammar_codegen.generate
+#
+# Notes:
+# - component and subject are optional single tokens; base_or_transformed_name is required.
+# - geometry (of_<target>) and position (at_<position>) draw from the same feature list but are mutually exclusive and appear side-by-side in the suffix order.
+# - do not include units in the name; use lowercase; start with a letter; use letters, digits, and underscores.
+
+segments:
+  - id: component
+    optional: true
+    vocabulary:
+      source: basis
+      field: components
+    exclusive_with:
+      - basis
+  - id: subject
+    optional: true
+    vocabulary: subjects
+  - id: base
+    optional: false
+  - id: geometry
+    optional: true
+    vocabulary: positions
+    template: "of_{token}"
+    exclusive_with:
+      - position
+  - id: position
+    optional: true
+    vocabulary: positions
+    template: "at_{token}"
+    exclusive_with:
+      - geometry
+  - id: process
+    optional: true
+    vocabulary: processes
+    template: "due_to_{token}"
+  - id: basis
+    optional: true
+    vocabulary: basis
+    template: "in_{token}_basis"
+    exclusive_with:
+      - component
+
+vocabularies:
+  components:
+    - radial
+    - toroidal
+    - vertical
+    - parallel
+    - diamagnetic
+    - normal
+    - tangential
+    - binormal
+    - x
+    - y
+    - z
+    - poloidal
+  subjects:
+    - electron
+    - ion
+    - deuterium
+    - tritium
+    - helium
+    - impurity_species
+    - fast_ion
+    - neutral
+    - runaway_electron
+  basis:
+    - cylindrical
+    - field_aligned
+    - cartesian
+    - poloidal
+  positions:
+    - last_closed_flux_surface
+    - first_wall
+    - limiter
+    - plasma_boundary
+    - divertor_target
+    - inner_divertor_target
+    - outer_divertor_target
+    - magnetic_axis
+    - current_center
+    - inner_midplane
+    - outer_midplane
+    - core_region
+    - edge_region
+    - scrape_off_layer
+    - divertor_region
+    - closest_wall_point
+  processes:
+    - conduction
+    - convection
+    - diffusion
+    - neoclassical
+    - turbulent
+    - anomalous
+    - ohmic
+    - electron_cyclotron_heating
+    - ion_cyclotron_heating
+    - lower_hybrid_current_drive
+    - neutral_beam_injection
+    - electron_cyclotron_current_drive
+    - radiation
+    - recombination
+    - ionization
+    - charge_exchange
+    - induction
+    - bootstrap
+    - resistive
+    - viscous
+    - magnetohydrodynamic
+    - external_coil
+    - eddy_current
+    - passive_structure
+    - disruption
+    - halo
+
+basis:
+  cylindrical:
+    description: Cylindrical machine coordinates
+    components:
+      - radial
+      - toroidal
+      - vertical
+  field_aligned:
+    description: Directions aligned to or derived from the magnetic field
+    components:
+      - parallel
+      - diamagnetic
+      - normal
+      - tangential
+      - binormal
+  cartesian:
+    description: Standard Cartesian axes
+    components:
+      - x
+      - y
+      - z
+  poloidal:
+    description: Poloidal plane directions
+    components:
+      - radial
+      - vertical

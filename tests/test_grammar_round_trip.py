@@ -1,0 +1,56 @@
+from imas_standard_names.grammar import (
+    Basis,
+    Component,
+    Position,
+    Process,
+    StandardName,
+    compose_name,
+    parse_name,
+)
+
+
+def test_compose_and_parse_minimal_base():
+    parts = StandardName(base="temperature")
+    name = compose_name(parts)
+    assert name == "temperature"
+    round_trip = parse_name(name)
+    assert round_trip.model_dump_compact() == {"base": "temperature"}
+
+
+def test_with_component_subject_and_implicit_basis():
+    parts = {"component": "radial", "subject": "electron", "base": "heat_flux"}
+    name = compose_name(parts)
+    assert name == "radial_electron_heat_flux"
+    parsed = parse_name(name)
+    assert parsed.component == Component.RADIAL
+    assert parsed.subject == "electron"
+    assert parsed.base == "heat_flux"
+    assert parsed.basis is None
+
+
+def test_with_basis_frame_position_process():
+    parts = {
+        "base": "magnetic_field",
+        "basis": "cylindrical",
+        "position": "plasma_boundary",
+        "process": "external_coil",
+    }
+    name = compose_name(parts)
+    assert (
+        name
+        == "magnetic_field_at_plasma_boundary_due_to_external_coil_in_cylindrical_basis"
+    )
+    back = parse_name(name)
+    assert back.base == "magnetic_field"
+    assert back.basis == Basis.CYLINDRICAL
+    assert back.position == Position.PLASMA_BOUNDARY
+    assert back.process == Process.EXTERNAL_COIL
+
+
+def test_invalid_order_raises():
+    bad = "electron_radial_heat_flux"  # wrong order; component must be first
+    try:
+        parse_name(bad)
+        assert False, "expected ValueError"
+    except ValueError:
+        pass

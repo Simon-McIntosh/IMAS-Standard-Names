@@ -7,11 +7,12 @@ from YAML standard name definitions.
 from __future__ import annotations
 
 from pathlib import Path
+
 import click
 
-from ..paths import CatalogPaths, CATALOG_DIRNAME
-from ..repository import StandardNameRepository
 from ..catalog.sqlite_build import build_catalog as build_catalog_file
+from ..paths import CATALOG_DIRNAME, CatalogPaths
+from ..repository import StandardNameCatalog
 
 
 @click.command("build")
@@ -39,7 +40,7 @@ def build_cmd(yaml_path: str | Path | None, db_path: Path | None, overwrite: boo
     catalog is placed under <yaml_path>/{CATALOG_DIRNAME}/catalog.db
     """
     paths = CatalogPaths("standard_names" if yaml_path is None else yaml_path, db_path)
-    repo = StandardNameRepository(paths.yaml_path)
+    repo = StandardNameCatalog(paths.yaml_path)
     count = len(repo)
     paths.ensure_catalog_dir()
     final_db = build_catalog_file(

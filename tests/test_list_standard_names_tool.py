@@ -1,8 +1,7 @@
 import asyncio
 
-from imas_standard_names.editing.repository import EditRepository
-from imas_standard_names.repository import StandardNameRepository
-from imas_standard_names.schema import create_standard_name
+from imas_standard_names.catalog.edit import EditCatalog
+from imas_standard_names.repository import StandardNameCatalog
 from imas_standard_names.tools.overview import OverviewTool
 
 
@@ -11,7 +10,7 @@ def invoke(tool, *args, **kwargs):
 
 
 def test_list_standard_names_scopes_basic():
-    repo = StandardNameRepository()
+    repo = StandardNameCatalog()
     tool = OverviewTool(repo)
     # all scope
     all_payload = invoke(tool)
@@ -33,10 +32,10 @@ def test_list_standard_names_scopes_basic():
 
 def test_list_standard_names_with_edits(tmp_path):
     # Use a temp copy of the packaged catalog root by initializing repo with pattern
-    repo = StandardNameRepository()  # baseline packaged data
+    repo = StandardNameCatalog()  # baseline packaged data
     tool = OverviewTool(repo)
-    # Attach an EditRepository to tool to surface diff classification
-    tool.edit_repository = EditRepository(repo)  # type: ignore[attr-defined]
+    # Attach an EditCatalog to tool to surface diff classification
+    tool.edit_catalog = EditCatalog(repo)  # type: ignore[attr-defined]
 
     # Pick an existing name to modify (first committed name)
     committed_names = invoke(tool)["committed"]
@@ -47,7 +46,7 @@ def test_list_standard_names_with_edits(tmp_path):
     modified_model_dict["description"] = (
         modified_model_dict["description"] + " (modified)"
     )
-    tool.edit_repository.modify(target, modified_model_dict)  # type: ignore[attr-defined]
+    tool.edit_catalog.modify(target, modified_model_dict)  # type: ignore[attr-defined]
 
     # add new name (simple scalar)
     new_name_data = {
@@ -57,16 +56,16 @@ def test_list_standard_names_with_edits(tmp_path):
         "status": "draft",
         "unit": "",
     }
-    tool.edit_repository.add(new_name_data)  # type: ignore[attr-defined]
+    tool.edit_catalog.add(new_name_data)  # type: ignore[attr-defined]
 
     # rename the newly added name to another
     renamed_data = new_name_data.copy()
     renamed_data["name"] = "renamed_temporary_test_scalar_name"
-    tool.edit_repository.rename("temporary_test_scalar_name", renamed_data)  # type: ignore[attr-defined]
+    tool.edit_catalog.rename("temporary_test_scalar_name", renamed_data)  # type: ignore[attr-defined]
 
     # delete an existing different name (skip the modified one)
     if len(committed_names) > 1:
-        tool.edit_repository.delete(committed_names[1])  # type: ignore[attr-defined]
+        tool.edit_catalog.delete(committed_names[1])  # type: ignore[attr-defined]
 
     diff_all = invoke(tool)
     staged = diff_all["staged"]

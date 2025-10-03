@@ -1,5 +1,6 @@
 from fastmcp import Context
 
+from imas_standard_names.catalog.edit import EditCatalog
 from imas_standard_names.decorators.mcp import mcp_tool
 from imas_standard_names.editing.edit_models import (
     ApplyInput,
@@ -8,13 +9,11 @@ from imas_standard_names.editing.edit_models import (
     example_inputs,
     parse_apply_input,
 )
-from imas_standard_names.editing.repository import EditRepository
 from imas_standard_names.tools.base import BaseTool
 
 
-class EditStandardNamesTool(BaseTool):
+class CatalogTool(BaseTool):
     """Tool exposing catalog edit operations via the unified apply API.
-
     Successful calls return the structured ApplyResult model (dict-serializable
     via model_dump by the framework). Errors return an envelope containing:
         error: string error type (exception class name)
@@ -23,9 +22,9 @@ class EditStandardNamesTool(BaseTool):
         examples: example input payloads
     """
 
-    def __init__(self, repository, edit_repository: EditRepository | None = None):  # type: ignore[no-untyped-def]
-        super().__init__(repository)
-        self.edit_repository = edit_repository or EditRepository(repository)
+    def __init__(self, catalog, edit_catalog: EditCatalog | None = None):  # type: ignore[no-untyped-def]
+        super().__init__(catalog)
+        self.edit_catalog = edit_catalog or EditCatalog(catalog)
 
     @property
     def tool_name(self) -> str:  # pragma: no cover - trivial
@@ -42,7 +41,7 @@ class EditStandardNamesTool(BaseTool):
         try:
             # Parse first to surface validation errors consistently
             apply_input: ApplyInput = parse_apply_input(payload)
-            result: ApplyResult = self.edit_repository.apply(apply_input)
+            result: ApplyResult = self.edit_catalog.apply(apply_input)
             return result.model_dump()
         except Exception as e:  # broad to ensure schema always returned
             return {

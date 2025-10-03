@@ -1,11 +1,11 @@
 from pathlib import Path
 
-from imas_standard_names.repository import StandardNameRepository
+from imas_standard_names.repository import StandardNameCatalog
 from imas_standard_names.schema import create_standard_name
 
 
 def test_uow_add_update_remove(tmp_path: Path):
-    repo = StandardNameRepository(tmp_path)
+    repo = StandardNameCatalog(tmp_path)
     uow = repo.start_uow()
     a = create_standard_name(
         {
@@ -37,7 +37,7 @@ def test_uow_add_update_remove(tmp_path: Path):
 
 
 def test_uow_rollback(tmp_path: Path):
-    repo = StandardNameRepository(tmp_path)
+    repo = StandardNameCatalog(tmp_path)
     uow = repo.start_uow()
     a = create_standard_name(
         {

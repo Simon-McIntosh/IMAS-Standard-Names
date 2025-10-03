@@ -1,14 +1,14 @@
 import json
+from collections.abc import Iterable
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Iterable
 
 import pandas
 import pytest
 from click.testing import CliRunner
 
 from imas_standard_names import schema
-from imas_standard_names.repository import StandardNameRepository
+from imas_standard_names.repository import StandardNameCatalog
 from imas_standard_names.unit_of_work import UnitOfWork
 
 
@@ -69,7 +69,7 @@ def click_runner(path: str | Path):
 
 
 def _write_entry(entry: dict, directory: Path):
-    repo = StandardNameRepository(directory)
+    repo = StandardNameCatalog(directory)
     uow = UnitOfWork(repo)
     obj = schema.create_standard_name(entry)
     uow.add(obj)

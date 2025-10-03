@@ -1,8 +1,9 @@
 from fastmcp import FastMCP
 
-from imas_standard_names.editing.repository import EditRepository
-from imas_standard_names.repository import StandardNameRepository
-from imas_standard_names.tools.edit import EditStandardNamesTool
+from imas_standard_names.catalog.edit import EditCatalog
+from imas_standard_names.repository import StandardNameCatalog
+from imas_standard_names.tools.edit import CatalogTool
+from imas_standard_names.tools.names import NamesTool
 from imas_standard_names.tools.overview import OverviewTool
 from imas_standard_names.tools.search import SearchTool
 
@@ -13,13 +14,16 @@ class Tools:
     def __init__(self):
         """Initialize the Standard Names tools provider."""
         # Create shared in-memory standard name repository
-        self.repository = StandardNameRepository()
+        self.catalog = StandardNameCatalog()
         # Editing facade (persistent multi-call edit session support)
-        self.edit_repository = EditRepository(self.repository)
-        # Initialize individual tools with shared standard names repository
-        self.search_tool = SearchTool(self.repository)
-        self.overview_tool = OverviewTool(self.repository)
-        self.edit_tool = EditStandardNamesTool(self.repository, self.edit_repository)
+        self.edit_catalog = EditCatalog(self.catalog)
+        # Initialize individual tools with shared standard names catalog
+        self.search_tool = SearchTool(self.catalog)
+        self.overview_tool = OverviewTool(self.catalog)
+        # Give overview tool access to edit catalog for diff classification when tests attach it
+        # (Tests may also set tool.edit_catalog directly.)
+        self.catalog_tool = CatalogTool(self.catalog, self.edit_catalog)
+        self.names_tool = NamesTool(self.catalog)
 
     @property
     def name(self) -> str:
@@ -35,7 +39,12 @@ class Tools:
         This keeps registration declarative and avoids manual duplication.
         """
 
-        tool_instances = [self.search_tool, self.overview_tool, self.edit_tool]
+        tool_instances = [
+            self.search_tool,
+            self.overview_tool,
+            self.catalog_tool,
+            self.names_tool,
+        ]
 
         for tool in tool_instances:
             for attr_name in dir(tool):  # introspect public + private

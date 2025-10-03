@@ -9,7 +9,8 @@ constraints without importing the full discriminated union types.
 
 from __future__ import annotations
 
-from typing import Annotated, List
+from typing import Annotated
+
 from pydantic import Field
 
 # ---------------------------------------------------------------------------
@@ -50,7 +51,7 @@ Unit = Annotated[
 ]
 
 Tags = Annotated[
-    List[str],
+    list[str],
     Field(
         description="Classification keywords (lowercase tokens).",
         examples=[["core", "temperature"], ["equilibrium"]],
@@ -58,7 +59,7 @@ Tags = Annotated[
 ]
 
 Links = Annotated[
-    List[str],
+    list[str],
     Field(
         description="External reference links (URLs, issues, docs).",
         examples=[
@@ -69,7 +70,7 @@ Links = Annotated[
 ]
 
 Constraints = Annotated[
-    List[str],
+    list[str],
     Field(
         description="Symbolic or textual constraints (e.g. 'T_i >= 0').",
         examples=[["T_i >= 0"]],
@@ -99,6 +100,22 @@ Domain = Annotated[
     ),
 ]
 
+# ---------------------------------------------------------------------------
+# Base token (root segment) used by grammar.StandardName.base
+# ---------------------------------------------------------------------------
+BaseToken = Annotated[
+    str,
+    Field(
+        description=(
+            "Base segment token (root of a standard name); snake_case token "
+            "matching ^[a-z][a-z0-9_]*$. Examples: 'temperature', 'density', "
+            "'magnetic_field', 'particle_flux'."
+        ),
+        pattern=STANDARD_NAME_PATTERN,
+        examples=["temperature", "density", "magnetic_field", "particle_flux"],
+    ),
+]
+
 
 __all__ = [
     "STANDARD_NAME_PATTERN",
@@ -111,4 +128,5 @@ __all__ = [
     "Description",
     "Documentation",
     "Domain",
+    "BaseToken",
 ]

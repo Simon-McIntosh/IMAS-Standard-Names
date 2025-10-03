@@ -128,6 +128,34 @@ Vectors group semantics; components remain atomic scalars.
 
 ## 6. Naming Grammar (EBNF)
 
+!!! info "Auto-Generated Vocabularies"
+The vocabularies below are automatically generated from `grammar.yml` at build time.
+For the complete grammar reference, see [Grammar Reference](grammar-reference.md).
+
+**Current Vocabularies:**
+
+### Components
+
+{{ grammar_vocabulary_table('components') }}
+
+### Subjects
+
+{{ grammar_vocabulary_table('subjects') }}
+
+### Basis
+
+{{ grammar_vocabulary_table('basis') }}
+
+### Positions
+
+{{ grammar_vocabulary_table('positions') }}
+
+### Processes
+
+{{ grammar_vocabulary_table('processes') }}
+
+---
+
 Condensed from the detailed discussion; see `docs/naming-cheatsheet.md` (future).
 
 ```ebnf
@@ -171,6 +199,12 @@ Condensed from the detailed discussion; see `docs/naming-cheatsheet.md` (future)
 
 <subset> ::= poloidal|toroidal|radial|parallel|perpendicular1|perpendicular2|x|y|z|<word>
 ```
+
+Authoritative grammar and code generation:
+
+- The canonical grammar, segment order, and vocabularies are defined in `imas_standard_names/resources/grammar.yml`.
+- In the suffix order, `in_<basis>_basis` precedes `of_<target>` and `at_<position>`. `of_<target>` (geometry) and `at_<position>` (position) are mutually exclusive and draw from the same vocabulary; they appear adjacent in the grammar.
+- The Python enums and segment metadata in `imas_standard_names/grammar/types.py` are auto-generated from this YAML during build/install (via Hatch). You can regenerate manually with `python -m imas_standard_names.grammar_codegen.generate` or the `build-grammar` script configured in `pyproject.toml`.
 
 Enforce semantic rank rules (Section 7); grammar alone is insufficient.
 

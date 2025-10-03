@@ -1,14 +1,14 @@
-from imas_standard_names.repository import StandardNameRepository
+from imas_standard_names.repository import StandardNameCatalog
 from imas_standard_names.tools.overview import OverviewTool
 
 
 def test_overview_structure():
-    repo = StandardNameRepository()
+    repo = StandardNameCatalog()
     tool = OverviewTool(repo)
     # call directly (sync wrapper of async not needed if we just run loop)
     import asyncio
 
-    result = asyncio.run(tool.get_overview())
+    result = asyncio.run(tool.get_standard_names_overview())
 
     assert "total_standard_names" in result and result["total_standard_names"] == len(
         repo

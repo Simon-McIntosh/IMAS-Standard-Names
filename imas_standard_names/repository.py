@@ -16,9 +16,9 @@ Pattern Matching Semantics
 The pattern is matched against the POSIX relative path of each directory
 under ``standard_names`` (recursive) using :mod:`fnmatch` rules. Examples::
 
-        StandardNameRepository("equilibrium")          # exact directory name
-        StandardNameRepository("equi*")                # wildcard
-        StandardNameRepository("profiles/density*")    # nested path pattern
+    StandardNameCatalog("equilibrium")          # exact directory name
+    StandardNameCatalog("equi*")                # wildcard
+    StandardNameCatalog("profiles/density*")    # nested path pattern
 
 If no directory matches, a ``ValueError`` is raised to fail fast.
 """
@@ -26,19 +26,18 @@ If no directory matches, a ``ValueError`` is raised to fail fast.
 from __future__ import annotations
 
 from pathlib import Path
-from typing import List, Optional, Union
 
-from .schema import StandardName
 from .catalog.sqlite_rw import CatalogReadWrite
-from .yaml_store import YamlStore
+from .ordering import ordered_models
+from .paths import CatalogPaths
+from .schema import StandardName
 from .services import row_to_model
 from .unit_of_work import UnitOfWork
-from .paths import CatalogPaths
-from .ordering import ordered_models
+from .yaml_store import YamlStore
 
 
-class StandardNameRepository:
-    def __init__(self, root: Union[str, Path, None] = None):
+class StandardNameCatalog:
+    def __init__(self, root: str | Path | None = None):
         # Map None -> packaged standard_names root for historical semantics.
         paths = CatalogPaths("standard_names" if root is None else root)
         self.paths = paths
@@ -51,16 +50,16 @@ class StandardNameRepository:
         # to precede vectors / derived entries (avoids FK violations).
         for m in ordered_models(models):
             self.catalog.insert(m)
-        self._active_uow: Optional[UnitOfWork] = None
+        self._active_uow: UnitOfWork | None = None
 
     # Basic queries -----------------------------------------------------------
-    def get(self, name: str) -> Optional[StandardName]:
+    def get(self, name: str) -> StandardName | None:
         row = self.catalog.conn.execute(
             "SELECT * FROM standard_name WHERE name=?", (name,)
         ).fetchone()
         return row_to_model(self.catalog.conn, row) if row else None
 
-    def list(self) -> List[StandardName]:
+    def list(self) -> list[StandardName]:
         rows = self.catalog.conn.execute("SELECT * FROM standard_name").fetchall()
         return [row_to_model(self.catalog.conn, r) for r in rows]
 
@@ -114,4 +113,4 @@ class StandardNameRepository:
         return row_to_model(self.catalog.conn, row)
 
 
-__all__ = ["StandardNameRepository", "UnitOfWork"]
+__all__ = ["StandardNameCatalog", "UnitOfWork"]

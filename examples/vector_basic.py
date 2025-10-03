@@ -9,10 +9,12 @@ Highlights:
 """
 
 from __future__ import annotations
+
 import tempfile
-from pathlib import Path
 from contextlib import contextmanager
-from imas_standard_names.repository import StandardNameRepository
+from pathlib import Path
+
+from imas_standard_names.repository import StandardNameCatalog
 from imas_standard_names.schema import create_standard_name
 
 
@@ -26,7 +28,7 @@ def tmp_root():
 
 def main():
     with tmp_root() as root:
-        repo = StandardNameRepository(root)
+        repo = StandardNameCatalog(root)
         uow = repo.start_uow()
 
         # Stage component scalars first (required before vector insert)

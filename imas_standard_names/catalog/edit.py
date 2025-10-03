@@ -1,7 +1,7 @@
-"""Stateful editing repository façade.
+"""Stateful editing catalog façade.
 
 Provides persistent multi-call edit session semantics on top of the
-`StandardNameRepository` using a single lazily-created UnitOfWork and
+`StandardNameCatalog` using a single lazily-created UnitOfWork and
 semantic diffs between the last committed baseline and current staged
 state.
 """
@@ -10,9 +10,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from ..repository import StandardNameRepository, UnitOfWork
-from ..schema import StandardName, create_standard_name
-from .edit_models import (
+from imas_standard_names.editing.edit_models import (
     AddInput,
     AddResult,
     ApplyInput,
@@ -25,6 +23,8 @@ from .edit_models import (
     RenameResult,
     parse_apply_input,
 )
+from imas_standard_names.schema import StandardName, create_standard_name
+from imas_standard_names.unit_of_work import UnitOfWork
 
 ModelDict = dict[str, Any]
 
@@ -33,11 +33,11 @@ def serialize_model(model: StandardName) -> ModelDict:
     return model.model_dump()  # type: ignore[attr-defined]
 
 
-class EditRepository:
-    """Facade adding stateful edit semantics on top of a repository."""
+class EditCatalog:
+    """Facade adding stateful edit semantics on top of a catalog."""
 
-    def __init__(self, repository: StandardNameRepository):
-        self.repo = repository
+    def __init__(self, catalog: Any):
+        self.catalog = catalog
         self._uow: UnitOfWork | None = None
         self._baseline_snapshot: dict[str, ModelDict] = self._take_snapshot()
         self._renames: list[tuple[str, str]] = []
@@ -49,11 +49,12 @@ class EditRepository:
     @property
     def uow(self) -> UnitOfWork:
         if self._uow is None or self._uow._closed:  # noqa: SLF001
-            self._uow = self.repo.start_uow()
+            self._uow = self.catalog.start_uow()
+        assert self._uow is not None
         return self._uow
 
     def _take_snapshot(self) -> dict[str, ModelDict]:
-        return {m.name: serialize_model(m) for m in self.repo.list()}
+        return {m.name: serialize_model(m) for m in self.catalog.list()}
 
     def _mark_dirty(self, *names: str):
         self._dirty_names.update(names)
@@ -83,7 +84,7 @@ class EditRepository:
         return model
 
     def delete(self, name: str):
-        before = self.repo.get(name)
+        before = self.catalog.get(name)
         self.uow.remove(name)
         if before:
             self._mark_dirty(name)
@@ -127,7 +128,7 @@ class EditRepository:
     # Diff
     # ------------------------------------------------------------------
     def diff(self) -> dict[str, Any]:
-        current = {m.name: serialize_model(m) for m in self.repo.list()}
+        current = {m.name: serialize_model(m) for m in self.catalog.list()}
         baseline = self._baseline_snapshot
         added: list[ModelDict] = []
         removed: list[ModelDict] = []
@@ -187,7 +188,7 @@ class EditRepository:
                 model = self.add(apply_input.model.model_dump())  # type: ignore[attr-defined]
                 return AddResult(model=model)
             case ModifyInput():
-                existing = self.repo.get(apply_input.name)
+                existing = self.catalog.get(apply_input.name)
                 old_model = (
                     existing.model_copy(deep=True) if existing else None  # type: ignore[attr-defined]
                 )
@@ -200,7 +201,7 @@ class EditRepository:
                     return AddResult(model=model)
                 return ModifyResult(old_model=old_model, new_model=model)
             case RenameInput():
-                existing = self.repo.get(apply_input.old_name)
+                existing = self.catalog.get(apply_input.old_name)
                 if not existing:
                     raise KeyError(apply_input.old_name)
                 cloned = existing.model_copy(deep=True)  # type: ignore[attr-defined]
@@ -211,7 +212,7 @@ class EditRepository:
                 )
                 return RenameResult(old_name=apply_input.old_name, new_name=model.name)
             case DeleteInput():
-                existing = self.repo.get(apply_input.name)
+                existing = self.catalog.get(apply_input.name)
                 existed = self.delete(apply_input.name)
                 return DeleteResult(old_model=existing, existed=existed)
             case _:  # pragma: no cover - defensive
@@ -228,4 +229,4 @@ class EditRepository:
         return self._uow is not None and not self._uow._closed  # noqa: SLF001
 
 
-__all__ = ["EditRepository"]
+__all__ = ["EditCatalog"]

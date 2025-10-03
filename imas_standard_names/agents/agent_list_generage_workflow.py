@@ -1,4 +1,3 @@
-import json
 import os
 from asyncio import run
 from pathlib import Path
@@ -116,7 +115,7 @@ def build_human_review_query(query, names: list[StandardName]) -> str:
     return (
         f"The user provided the feedback: '{query}' for the following standard names (in order): "
         + "\n".join(str(c) for c in names)
-        + f"\n Create an engeneered prompt as a review for each of the {len(names)} names, to capture user sentiment of the name. Score above 0.7 if the user approves the name"
+        + f"\n Create an engineered prompt as a review for each of the {len(names)} names, to capture user sentiment of the name. Score above 0.7 if the user approves the name"
     )
 
 

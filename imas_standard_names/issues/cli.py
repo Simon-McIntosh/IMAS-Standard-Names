@@ -2,20 +2,20 @@
 
 from __future__ import annotations
 
-from io import StringIO
 import json
+from collections.abc import Iterable
+from io import StringIO
 from pathlib import Path
-from typing import Iterable
 
 import click
 from strictyaml.ruamel import YAML
 
-from imas_standard_names.issues.image_assets import ImageProcessor
-from imas_standard_names.issues.gh_repo import update_static_urls
-from imas_standard_names.generic_names import GenericNames
 from imas_standard_names import schema
+from imas_standard_names.generic_names import GenericNames
+from imas_standard_names.issues.gh_repo import update_static_urls
+from imas_standard_names.issues.image_assets import ImageProcessor
+from imas_standard_names.repository import StandardNameCatalog
 from imas_standard_names.unit_of_work import UnitOfWork
-from imas_standard_names.repository import StandardNameRepository
 
 yaml = YAML()
 yaml.indent(mapping=2, sequence=4, offset=2)
@@ -25,7 +25,7 @@ yaml.indent(mapping=2, sequence=4, offset=2)
 # Helpers
 # ---------------------------------------------------------------------------
 def _legacy_private_load(root: Path):  # backward compat placeholder
-    return StandardNameRepository(root)
+    return StandardNameCatalog(root)
 
 
 def format_error(error: Exception, submission_file: str | None = None) -> str:
@@ -36,7 +36,7 @@ def format_error(error: Exception, submission_file: str | None = None) -> str:
     )
     if submission_file:
         try:
-            with open(submission_file, "r") as f:
+            with open(submission_file) as f:
                 submission = json.load(f)
             yaml_str = StringIO()
             yaml.dump(submission, yaml_str)
@@ -45,8 +45,7 @@ def format_error(error: Exception, submission_file: str | None = None) -> str:
     error_message += (
         "\n"
         "> [!NOTE]\n"
-        "> Edit the issue form and the automation will re-run validation."
-        "\n"
+        "> Edit the issue form and the automation will re-run validation.\n"
     )
     return error_message
 
@@ -78,7 +77,7 @@ def update_standardnames(
     """
     root = Path(standardnames_dir)
     root.mkdir(parents=True, exist_ok=True)
-    repo = StandardNameRepository(root)
+    repo = StandardNameCatalog(root)
     genericnames = GenericNames(genericnames_file)
 
     try:
@@ -172,7 +171,7 @@ def has_standardname(standardnames_dir: str, standard_name: Iterable[str]):
         click.echo("False")
         return
     try:
-        repo = StandardNameRepository(root)
+        repo = StandardNameCatalog(root)
     except Exception:
         click.echo("False")
         return
@@ -187,7 +186,7 @@ def get_standardname(standardnames_dir: str, standard_name: Iterable[str]):
     name = " ".join(standard_name)
     root = Path(standardnames_dir)
     try:
-        repo = StandardNameRepository(root)
+        repo = StandardNameCatalog(root)
         entry = repo.get(name)
         if not entry:
             raise KeyError(name)

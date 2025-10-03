@@ -37,11 +37,11 @@ class UndoOpRename:  # inverse delete new then reinsert old
 
 
 if TYPE_CHECKING:  # pragma: no cover
-    from .repository import StandardNameRepository
+    from .repository import StandardNameCatalog
 
 
 class UnitOfWork:
-    def __init__(self, repo: StandardNameRepository):
+    def __init__(self, repo: StandardNameCatalog):
         self.repo = repo
         self.catalog = repo.catalog
         self._undo: list[object] = []

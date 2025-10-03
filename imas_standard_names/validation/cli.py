@@ -1,14 +1,17 @@
 """CLI entrypoint for validation (structural + semantic)."""
 
 from __future__ import annotations
-import click
+
 from pathlib import Path
-from ..repository import StandardNameRepository
-from ..paths import CATALOG_DIRNAME
-from ..catalog.sqlite_read import CatalogRead
+
+import click
+
 from ..catalog.integrity import verify_integrity
-from .structural import run_structural_checks
+from ..catalog.sqlite_read import CatalogRead
+from ..paths import CATALOG_DIRNAME
+from ..repository import StandardNameCatalog
 from .semantic import run_semantic_checks
+from .structural import run_structural_checks
 
 
 @click.command(name="validate_catalog")
@@ -45,11 +48,11 @@ def validate_catalog_cli(root: Path, mode: str, verify: bool, full: bool):
         except Exception as e:  # fallback to memory if auto
             if mode == "file":
                 click.echo(f"Failed to open file-backed catalog: {e}")
-                raise SystemExit(1)
+                raise SystemExit(1) from e
             use_file = False
 
     if not use_file:
-        repo = StandardNameRepository(root)
+        repo = StandardNameCatalog(root)
         entries = {m.name: m for m in repo.list()}
         # No integrity verification in memory mode (fresh load)
 

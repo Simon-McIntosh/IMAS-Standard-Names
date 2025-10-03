@@ -1,8 +1,9 @@
 from __future__ import annotations
+
 from pathlib import Path
 
 from imas_standard_names import schema
-from imas_standard_names.repository import StandardNameRepository
+from imas_standard_names.repository import StandardNameCatalog
 from imas_standard_names.unit_of_work import UnitOfWork
 
 
@@ -17,7 +18,7 @@ def _make_simple(tmp: Path):
 
 def test_repository_uow_writable_ops(tmp_path: Path):
     _make_simple(tmp_path)
-    repo = StandardNameRepository(tmp_path)
+    repo = StandardNameCatalog(tmp_path)
     # Add new entry via UoW
     uow = UnitOfWork(repo)
     new_model = schema.create_standard_name(

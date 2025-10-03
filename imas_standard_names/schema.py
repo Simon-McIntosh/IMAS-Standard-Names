@@ -80,8 +80,16 @@ from imas_standard_names.provenance import (
 )
 from imas_standard_names.reductions import enforce_reduction_naming
 
-Kind = Literal["scalar", "derived_scalar", "vector", "derived_vector"]
 Status = Literal["draft", "active", "deprecated", "superseded"]
+
+
+class Kind(str, Enum):
+    """Runtime enum for standard name kinds."""
+
+    scalar = "scalar"
+    derived_scalar = "derived_scalar"
+    vector = "vector"
+    derived_vector = "derived_vector"
 
 
 class Frame(str, Enum):  # limited set – extend as needed

@@ -18,11 +18,15 @@ class OverviewTool(BaseTool):
     Standard Names catalog for quick inspection and monitoring.
 
     Returned structure is stable JSON for programmatic consumption.
-    Updated to explicit naming: every aggregation key conveys that values are
-    counts (number of entries). Coordinate frames and kinds include zero-count
-    members for full visibility. Units aggregation includes dimensionless as
-    the symbolic key 'dimensionless'.
+    Every aggregation key conveys that values are counts (number of entries).
+    Coordinate frames and kinds include zero-count members for full visibility.
+    Units aggregation includes dimensionless as the symbolic key 'dimensionless'.
     """
+
+    def __init__(self, repository=None):  # type: ignore[no-untyped-def]
+        super().__init__(repository)
+        # Optional: an attached EditCatalog instance for staged diffs
+        self.edit_catalog = None
 
     @property
     def tool_name(self) -> str:  # pragma: no cover - trivial
@@ -37,7 +41,7 @@ class OverviewTool(BaseTool):
             "frames included; dimensionless unit appears as 'dimensionless'."
         )
     )
-    async def get_overview(self, ctx: Context | None = None):
+    async def get_standard_names_overview(self, ctx: Context | None = None):
         models = self.repository.list()
         total = len(models)
 
@@ -84,13 +88,15 @@ class OverviewTool(BaseTool):
             "version": package_version,
         }
 
+    # No legacy alias methods
+
     @mcp_tool(
         description=(
             "List standard names with commit/staging classification. Optional 'scope' "
             "argument filters output: all (default) | committed | staged | new | modified | renamed | deleted. "
             "Returns base structure {universal_set, committed, staged{new,modified,rename_map,deleted}, counts} "
             "for scope=all or committed only, staged block only, or a single list depending on scope. "
-            "Committed derived from YAML filenames; staged diff via active EditRepository when available, else set diff. "
+            "Committed derived from YAML filenames; staged diff via active EditCatalog when available, else set diff. "
             "Renamed entries returned as mapping old_name->new_name."
         )
     )
@@ -101,7 +107,7 @@ class OverviewTool(BaseTool):
             universal_set: all in-memory names.
             committed: names persisted on disk.
             staged.new / staged.deleted: set membership differences.
-            staged.modified: structurally changed entries (needs EditRepository).
+            staged.modified: structurally changed entries (needs EditCatalog).
             staged.rename_map: old_name -> new_name mapping for renames.
             counts: *_count metrics plus staged_total_count.
         """
@@ -121,7 +127,8 @@ class OverviewTool(BaseTool):
         deleted: list[str] = []
         rename_map: dict[str, str] = {}
 
-        edit_repo = getattr(self, "edit_repository", None)
+        # Use an attached EditCatalog instance (if any) for staged diffs
+        edit_repo = getattr(self, "edit_catalog", None)
         if edit_repo is not None and hasattr(edit_repo, "diff"):
             try:
                 diff = edit_repo.diff()
