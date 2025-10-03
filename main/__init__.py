@@ -1,0 +1,1 @@
+"""Documentation macros package."""
