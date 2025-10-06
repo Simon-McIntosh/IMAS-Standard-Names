@@ -3,10 +3,10 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import List
+
 import yaml
 
-from .schema import create_standard_name, StandardName
+from .schema import StandardName, create_standard_name
 from .services import validate_models
 
 
@@ -19,15 +19,15 @@ class YamlStore:
         return sorted(list(self.root.rglob("*.yml")) + list(self.root.rglob("*.yaml")))
 
     # Load --------------------------------------------------------------------
-    def load(self) -> List[StandardName]:
-        models: List[StandardName] = []
+    def load(self) -> list[StandardName]:
+        models: list[StandardName] = []
         for f in self.yaml_files():
-            with open(f, "r", encoding="utf-8") as fh:
+            with open(f, encoding="utf-8") as fh:
                 data = yaml.safe_load(fh) or {}
             if not isinstance(data, dict) or "name" not in data:
                 continue
             unit_val = data.get("unit")
-            if isinstance(unit_val, (int, float)):
+            if isinstance(unit_val, int | float):
                 data["unit"] = str(unit_val)
             m = create_standard_name(data)
             models.append(m)

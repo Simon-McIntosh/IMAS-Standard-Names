@@ -2,16 +2,15 @@
 
 from __future__ import annotations
 
-from typing import Dict, List
 import json
 import sqlite3
 
-from .schema import create_standard_name, StandardName
-from .validation.structural import run_structural_checks
+from .schema import StandardName, create_standard_name
 from .validation.semantic import run_semantic_checks
+from .validation.structural import run_structural_checks
 
 
-def validate_models(models: Dict[str, StandardName]) -> List[str]:
+def validate_models(models: dict[str, StandardName]) -> list[str]:
     """Run structural + semantic validation returning list of issues."""
     return run_structural_checks(models) + run_semantic_checks(models)
 

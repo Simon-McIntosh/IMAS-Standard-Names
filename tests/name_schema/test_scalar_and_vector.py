@@ -1,8 +1,9 @@
 import pytest
+
 from imas_standard_names.schema import (
-    create_standard_name,
     StandardNameScalar,
     StandardNameVector,
+    create_standard_name,
 )
 
 
@@ -23,7 +24,7 @@ def test_vector_creation(vector_data):
 @pytest.mark.parametrize("bad_name", ["ElectronTemp", "1temp", "temp__double"])
 def test_invalid_name_rejected(scalar_data, bad_name):
     data = scalar_data | {"name": bad_name}
-    with pytest.raises(Exception):
+    with pytest.raises((ValueError, KeyError, TypeError)):
         create_standard_name(data)
 
 

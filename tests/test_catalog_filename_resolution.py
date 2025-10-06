@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from imas_standard_names.paths import CatalogPaths, CATALOG_DIRNAME
+from imas_standard_names.paths import CATALOG_DIRNAME, CatalogPaths
 
 
 def test_catalog_filename_default(tmp_path: Path):

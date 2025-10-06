@@ -1,5 +1,7 @@
 from pathlib import Path
+
 import yaml
+
 from imas_standard_names.schema import create_standard_name
 
 
@@ -46,7 +48,7 @@ description: B.
     names = set()
     for p in tmp_path.rglob("*.yml"):
         d = yaml.safe_load(p.read_text(encoding="utf-8"))
-        if isinstance(d.get("unit"), (int, float)):
+        if isinstance(d.get("unit"), int | float):
             d["unit"] = str(d["unit"])
         entry = create_standard_name(d)
         names.add(entry.name)

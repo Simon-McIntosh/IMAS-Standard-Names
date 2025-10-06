@@ -1,5 +1,5 @@
-from imas_standard_names.schema import create_standard_name
 from imas_standard_names.catalog.sqlite_rw import CatalogReadWrite
+from imas_standard_names.schema import create_standard_name
 from imas_standard_names.services import row_to_model
 
 

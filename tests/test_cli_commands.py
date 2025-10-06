@@ -1,8 +1,9 @@
 from pathlib import Path
+
 from click.testing import CliRunner
 
-from imas_standard_names.validation.cli import validate_catalog_cli
 from imas_standard_names.cli import standard_names
+from imas_standard_names.validation.cli import validate_catalog_cli
 
 
 def _make_minimal_vector(tmp_path: Path):  # now simplified to scalars

@@ -1,15 +1,14 @@
 # GitHub repo URL utilities
-from dataclasses import dataclass
-from functools import cached_property
-from typing import Optional
 import re
 import subprocess
+from dataclasses import dataclass
+from functools import cached_property
 
 
 @dataclass
 class Repository:
     remote: str = "origin"
-    remote_url: Optional[str] = None
+    remote_url: str | None = None
 
     def __post_init__(self):
         if not self.remote_url:
@@ -63,9 +62,9 @@ class Repository:
         raise ValueError("Could not parse GitHub URL format")
 
 
-def update_static_urls(filename: str, remote: Optional[str]):
+def update_static_urls(filename: str, remote: str | None):
     repo = Repository(remote=remote)
-    with open(filename, "r", encoding="utf-8") as f:
+    with open(filename, encoding="utf-8") as f:
         content = f.read()
     _content = repo.remote_regex.sub(repo.remote_url, content)
     _content = repo.pages_regex.sub(repo.pages_url, _content)

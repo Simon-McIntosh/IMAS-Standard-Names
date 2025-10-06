@@ -13,8 +13,8 @@ Cycles or unresolved dependencies produce clear exceptions.
 
 from __future__ import annotations
 
-from graphlib import TopologicalSorter, CycleError
-from typing import Iterable, Dict, List, Set
+from collections.abc import Iterable
+from graphlib import CycleError, TopologicalSorter
 
 from .schema import StandardName
 
@@ -23,8 +23,8 @@ class OrderingError(RuntimeError):
     """Raised when models cannot be ordered (cycle or missing prerequisite)."""
 
 
-def _extract_dependencies(model: StandardName, available: Set[str]) -> Set[str]:
-    deps: Set[str] = set()
+def _extract_dependencies(model: StandardName, available: set[str]) -> set[str]:
+    deps: set[str] = set()
     kind = getattr(model, "kind", "")
 
     # Vector components must exist before the vector.
@@ -57,12 +57,12 @@ def ordered_model_names(models: Iterable[StandardName]) -> Iterable[str]:
     Uses a topological sort over the implicit dependency graph. Cycles raise
     OrderingError with diagnostic detail.
     """
-    model_list: List[StandardName] = list(models)
-    name_map: Dict[str, StandardName] = {m.name: m for m in model_list}
+    model_list: list[StandardName] = list(models)
+    name_map: dict[str, StandardName] = {m.name: m for m in model_list}
     names = set(name_map.keys())
 
     ts = TopologicalSorter()
-    missing_refs: Dict[str, Set[str]] = {}
+    missing_refs: dict[str, set[str]] = {}
 
     for m in model_list:
         deps = _extract_dependencies(m, names)
@@ -73,16 +73,15 @@ def ordered_model_names(models: Iterable[StandardName]) -> Iterable[str]:
         ts.add(m.name, *sorted(deps))
 
     try:
-        for n in ts.static_order():
-            yield n
+        yield from ts.static_order()
     except CycleError as e:  # rewrap for consistency
         raise OrderingError(f"Cycle detected in standard name dependencies: {e}") from e
 
 
 def ordered_models(models: Iterable[StandardName]) -> Iterable[StandardName]:
     """Yield full model objects in dependency order (wrapper over ordered_model_names)."""
-    model_list: List[StandardName] = list(models)
-    name_map: Dict[str, StandardName] = {m.name: m for m in model_list}
+    model_list: list[StandardName] = list(models)
+    name_map: dict[str, StandardName] = {m.name: m for m in model_list}
     for name in ordered_model_names(model_list):
         yield name_map[name]
 

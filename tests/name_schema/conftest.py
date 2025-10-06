@@ -1,8 +1,9 @@
+from pathlib import Path
+
 import pytest
+import yaml
 
 from imas_standard_names.schema import create_standard_name
-import yaml
-from pathlib import Path
 
 
 @pytest.fixture

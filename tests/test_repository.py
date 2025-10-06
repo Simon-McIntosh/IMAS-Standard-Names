@@ -1,5 +1,6 @@
 import contextlib
 import itertools
+
 import pytest
 
 from imas_standard_names.issues.gh_repo import Repository

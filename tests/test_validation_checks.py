@@ -1,8 +1,10 @@
 from pathlib import Path
+
 import yaml
+
 from imas_standard_names.schema import create_standard_name
-from imas_standard_names.validation.structural import run_structural_checks
 from imas_standard_names.validation.semantic import run_semantic_checks
+from imas_standard_names.validation.structural import run_structural_checks
 
 
 def test_structural_and_semantic_checks(tmp_path: Path):

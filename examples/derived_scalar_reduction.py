@@ -9,9 +9,11 @@ Highlights:
 """
 
 from __future__ import annotations
+
 import tempfile
-from pathlib import Path
 from contextlib import contextmanager
+from pathlib import Path
+
 from imas_standard_names.repository import StandardNameRepository
 from imas_standard_names.schema import create_standard_name
 

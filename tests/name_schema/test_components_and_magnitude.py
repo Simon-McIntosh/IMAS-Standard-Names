@@ -1,4 +1,5 @@
 import pytest
+
 from imas_standard_names.schema import create_standard_name
 
 
@@ -69,4 +70,4 @@ def test_valid_vector_with_magnitude():
         }
     )
     # Magnitude is a computed property on vector models
-    assert getattr(sn, "magnitude") == "magnitude_of_plasma_velocity"
+    assert sn.magnitude == "magnitude_of_plasma_velocity"

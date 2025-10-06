@@ -5,20 +5,20 @@ relational consistency beyond individual model validation.
 """
 
 from __future__ import annotations
-from typing import Dict, List
+
 from ..schema import StandardName
 
 __all__ = ["run_structural_checks"]
 
 
-def run_structural_checks(entries: Dict[str, StandardName]) -> List[str]:
+def run_structural_checks(entries: dict[str, StandardName]) -> list[str]:
     """Return a list of structural issues discovered.
 
     Current placeholder rules (expand later):
         * All magnitude names referenced actually exist
         * Component references exist (vector lists only)
     """
-    issues: List[str] = []
+    issues: list[str] = []
     for name, entry in entries.items():
         data = entry.model_dump()
         # Magnitude reference existence

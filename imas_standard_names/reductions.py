@@ -13,7 +13,6 @@ model validators for ReductionProvenance entries.
 
 from __future__ import annotations
 
-from typing import List, Tuple
 from pydantic import BaseModel
 
 
@@ -25,7 +24,7 @@ class ReductionPattern(BaseModel):
     description: str = ""
 
 
-REDUCTION_PATTERNS: List[ReductionPattern] = [
+REDUCTION_PATTERNS: list[ReductionPattern] = [
     ReductionPattern(
         prefix="time_average_of_",
         reduction="mean",
@@ -53,7 +52,7 @@ REDUCTION_PATTERNS: List[ReductionPattern] = [
 ]
 
 
-def match_reduction_pattern(name: str) -> Tuple[ReductionPattern, str] | None:
+def match_reduction_pattern(name: str) -> tuple[ReductionPattern, str] | None:
     for pat in sorted(REDUCTION_PATTERNS, key=lambda p: len(p.prefix), reverse=True):
         if name.startswith(pat.prefix):
             return pat, name[len(pat.prefix) :]

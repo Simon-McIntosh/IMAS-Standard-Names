@@ -3,7 +3,6 @@ from asyncio import run
 
 import dotenv
 import logfire as lf
-from httpx import AsyncClient
 from pydantic_ai import Agent
 from pydantic_ai.mcp import (
     MCPServerSSE,
@@ -12,7 +11,6 @@ from pydantic_ai.mcp import (
 )
 from pydantic_ai.models.anthropic import AnthropicModel
 from pydantic_ai.models.openai import OpenAIChatModel
-from pydantic_ai.providers.anthropic import AnthropicProvider
 from pydantic_ai.providers.openrouter import OpenRouterProvider
 from rich.prompt import IntPrompt, Prompt
 

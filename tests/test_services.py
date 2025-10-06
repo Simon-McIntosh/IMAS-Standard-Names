@@ -1,6 +1,6 @@
-from imas_standard_names.schema import create_standard_name
 from imas_standard_names.catalog.sqlite_rw import CatalogReadWrite
-from imas_standard_names.services import validate_models, row_to_model
+from imas_standard_names.schema import create_standard_name
+from imas_standard_names.services import row_to_model, validate_models
 
 
 def test_services_validate_and_row_to_model():

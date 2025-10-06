@@ -1,8 +1,9 @@
 import pytest
+
 from imas_standard_names.schema import (
-    create_standard_name,
     StandardNameDerivedScalar,
     StandardNameDerivedVector,
+    create_standard_name,
 )
 
 
@@ -23,7 +24,7 @@ def test_operator_chain_mismatch(operator_scalar_data):
     bad = operator_scalar_data | {
         "provenance": operator_scalar_data["provenance"] | {"operators": ["gradient"]}
     }
-    with pytest.raises(Exception):
+    with pytest.raises((ValueError, KeyError, TypeError)):
         create_standard_name(bad)
 
 
@@ -32,7 +33,7 @@ def test_operator_base_mismatch(operator_scalar_data):
         "provenance": operator_scalar_data["provenance"]
         | {"base": "electron_temperature"}
     }
-    with pytest.raises(Exception):
+    with pytest.raises((ValueError, KeyError, TypeError)):
         create_standard_name(bad)
 
 
@@ -40,5 +41,5 @@ def test_operator_id_mismatch(operator_scalar_data):
     bad = operator_scalar_data | {
         "provenance": operator_scalar_data["provenance"] | {"operator_id": "curl"}
     }
-    with pytest.raises(Exception):
+    with pytest.raises((ValueError, KeyError, TypeError)):
         create_standard_name(bad)

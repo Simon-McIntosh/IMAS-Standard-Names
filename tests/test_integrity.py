@@ -1,8 +1,8 @@
-from pathlib import Path
 import time
+from pathlib import Path
 
-from imas_standard_names.catalog.sqlite_build import build_catalog
 from imas_standard_names.catalog.integrity import verify_integrity
+from imas_standard_names.catalog.sqlite_build import build_catalog
 
 
 def _seed(root: Path):

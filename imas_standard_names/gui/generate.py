@@ -1,13 +1,10 @@
-from typing import Optional
-
-from textual.app import App, ComposeResult
-from textual.widgets import Footer, Header, Label, TextArea, Button, Static
-from textual.containers import VerticalGroup, Horizontal, Container
-from textual import events
-
 from functools import cached_property
 
-from imas_standard_names.workflow.imas_connect import IMASConnect
+from textual import events
+from textual.app import App, ComposeResult
+from textual.containers import Container, Horizontal, VerticalGroup
+from textual.widgets import Button, Footer, Header, Label, Static, TextArea
+
 from imas_standard_names.gui.tree import build_standard_names_tree
 
 
@@ -19,7 +16,7 @@ class LabeledTextArea(VerticalGroup):
       <id>_text   - the TextArea
     """
 
-    def __init__(self, id: str, label: Optional[str] = None, **kwargs) -> None:
+    def __init__(self, id: str, label: str | None = None, **kwargs) -> None:
         super().__init__(id=id)
         self.label = label
         self._text_area_kwargs = kwargs

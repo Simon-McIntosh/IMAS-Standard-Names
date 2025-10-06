@@ -1,7 +1,9 @@
 from pathlib import Path
+
 import yaml
-from imas_standard_names.schema import create_standard_name
+
 from imas_standard_names.rendering import render_html
+from imas_standard_names.schema import create_standard_name
 
 
 def test_render_html_basic(tmp_path: Path):

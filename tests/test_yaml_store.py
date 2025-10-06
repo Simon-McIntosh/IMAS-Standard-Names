@@ -1,7 +1,7 @@
 from pathlib import Path
 
-from imas_standard_names.yaml_store import YamlStore
 from imas_standard_names.schema import create_standard_name
+from imas_standard_names.yaml_store import YamlStore
 
 
 def test_yaml_store_round_trip(tmp_path: Path):

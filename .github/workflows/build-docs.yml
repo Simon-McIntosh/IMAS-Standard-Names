@@ -43,6 +43,10 @@ jobs:
             # Extract the major and minor version from the tag
             version=$(echo ${{ github.ref_name }} | cut -d. -f1-2)
             tagged=true
+          elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            # For pull requests, use pr-<number>
+            version="pr-${{ github.event.pull_request.number }}"
+            tagged=false
           else
             # Use the branch name as the version
             version=${{ github.ref_name }}
