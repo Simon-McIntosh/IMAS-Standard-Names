@@ -38,8 +38,7 @@ Detailed rules for each segment, including optionality, templates, and exclusivi
 
 ### Components
 
-Component tokens specify the direction of vector components. The available components
-depend on the coordinate basis being used.
+Component tokens specify the direction of vector components.
 
 {{ grammar_vocabulary_table('components') }}
 
@@ -48,12 +47,6 @@ depend on the coordinate basis being used.
 Subject tokens specify the particle species or plasma component:
 
 {{ grammar_vocabulary_table('subjects') }}
-
-### Basis
-
-Basis tokens specify the coordinate system:
-
-{{ grammar_vocabulary_table('basis') }}
 
 ### Positions
 
@@ -66,14 +59,6 @@ Position tokens specify spatial locations or regions within the plasma:
 Process tokens specify physical mechanisms or processes:
 
 {{ grammar_vocabulary_table('processes') }}
-
----
-
-## Basis Component Mappings
-
-Each coordinate basis defines which component tokens are valid:
-
-{{ grammar_basis_components() }}
 
 ---
 
@@ -111,10 +96,6 @@ Using the grammar rules above, here are examples of valid standard names:
 - `heat_flux_due_to_conduction` — scalar + process
 - `particle_flux_due_to_diffusion` — scalar + process
 
-**With basis:**
-
-- `radial_component_of_magnetic_field_in_cylindrical_basis` — component + vector + basis
-
 **Complex:**
 
 - `electron_temperature_at_outer_midplane_due_to_electron_cyclotron_heating` — subject + base + position + process
@@ -125,7 +106,6 @@ Examples that violate the grammar:
 
 ❌ `magnetic_field_radial_component` — component must come first  
 ❌ `at_plasma_boundary_electron_temperature` — segments out of order  
-❌ `radial_component_in_cylindrical_basis` — both component and basis (exclusive)  
 ❌ `electron_temperature_at_plasma_boundary_of_magnetic_axis` — both position and geometry (exclusive)
 
 ---

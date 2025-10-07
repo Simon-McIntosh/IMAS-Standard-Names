@@ -4,7 +4,7 @@ from copy import deepcopy
 import pytest
 from click.testing import CliRunner
 
-from imas_standard_names import schema
+from imas_standard_names import models
 from imas_standard_names.issues.cli import update_standardnames
 from imas_standard_names.repository import StandardNameCatalog
 from imas_standard_names.unit_of_work import UnitOfWork
@@ -44,7 +44,7 @@ def work_env(tmp_path, base_names_data, base_genericnames, submission_base):
         repo = StandardNameCatalog(standard_dir)
         for e in base_names_data:
             uow = UnitOfWork(repo)
-            uow.add(schema.create_standard_name(e))
+            uow.add(models.create_standard_name_entry(e))
             uow.commit()
         generic_file = temp_dir_path / "generic_names.csv"
         base_genericnames.to_csv(generic_file, index=False)

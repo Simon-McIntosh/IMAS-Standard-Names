@@ -43,7 +43,7 @@ If no results at all, explicitly note internally: "No existing related names fou
 ============================================================
 PHASE 3: COLLISION & DIFFERENTIATION ANALYSIS
 ============================================================
-For every collected existing name: - Tokenize by underscores. - Classify tokens: base_quantity, geometry/coordinate qualifier, operation/derivation, statistical, temporal, frame, normalization. - Determine semantic core and how it differs from the target concept.
+For every collected existing name: - Tokenize by underscores. - Classify tokens: base_quantity, geometry/coordinate qualifier, operation/derivation, statistical, temporal, normalization. - Determine semantic core and how it differs from the target concept.
 Build an internal overlap map: existing_name -> minimal distinction statement.
 Identify prohibited constructions: any candidate whose ordered token sequence differs only by trivial additions (e.g. adding \_value, \_data, or reordering without semantic shift).
 Establish required differentiators (at least one dimension: different operator, coordinate specificity, region qualifier, or transformation) if a near-clash exists.
@@ -52,14 +52,14 @@ Establish required differentiators (at least one dimension: different operator, 
 PHASE 4: NEW NAME SYNTHESIS
 ============================================================
 Naming rules: - snake*case; all lowercase. - Structured ordering (general pattern):
-base_quantity[\_spatial/coordinate_qualifier][_region][\_operation_or_derivation][_statistical_or_temporal][\_frame][_normalization]
+base_quantity[\_spatial/coordinate_qualifier][_region][\_operation_or_derivation][_statistical_or_temporal][_normalization]
 Only include segments that add real semantic value. - Avoid redundancy (no repeated words, no duplicate coordinate qualifiers). - Do not encode units or numeric constants into the name. - If the quantity is inherently vectorial AND the user requested components, generate:
 * one vector standard name (use a suffix like \_vector only if consistent with existing catalog patterns; otherwise rely on plural or established vector naming conventions) AND
 \_ component scalar names with standard directional or coordinate suffixes (e.g. \_r, \_theta, \_phi or \_radial, \_poloidal, \_toroidal) matching established IMAS patterns. - For derived quantities (e.g. gradient), ensure underlying scalar forms exist or are also generated if absent and necessary. - Ensure the name does not fully duplicate or ambiguously shadow any existing name discovered in Phase 2.
 
 Description (for each generated StandardName): 1. First sentence: precise physical definition (what is measured/computed). 2. Second sentence: explicit differentiation from closest existing related names (reference their distinguishing operators/regions/coordinates without copying full documentation). 3. Optional third sentence: typical measurement or computational derivation method if it improves clarity.
 
-Provenance metadata (if the schema supports fields): include domain, derivation operator chain, and coordinate frame assumptions.
+Provenance metadata (if the schema supports fields): include domain, derivation operator chain.
 
 ============================================================
 PHASE 5: VALIDATION CHECKLIST BEFORE OUTPUT

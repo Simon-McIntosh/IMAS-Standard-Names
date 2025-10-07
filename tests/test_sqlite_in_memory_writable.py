@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from imas_standard_names import schema
+from imas_standard_names import models
 from imas_standard_names.repository import StandardNameCatalog
 from imas_standard_names.unit_of_work import UnitOfWork
 
@@ -21,7 +21,7 @@ def test_repository_uow_writable_ops(tmp_path: Path):
     repo = StandardNameCatalog(tmp_path)
     # Add new entry via UoW
     uow = UnitOfWork(repo)
-    new_model = schema.create_standard_name(
+    new_model = models.create_standard_name_entry(
         {
             "name": "c",
             "kind": "scalar",
@@ -36,7 +36,7 @@ def test_repository_uow_writable_ops(tmp_path: Path):
     # Update existing
     uow.update(
         "a",
-        schema.create_standard_name(
+        models.create_standard_name_entry(
             {
                 "name": "a",
                 "kind": "scalar",

@@ -1,7 +1,7 @@
 from pathlib import Path
 
+from imas_standard_names.models import create_standard_name_entry
 from imas_standard_names.repository import StandardNameCatalog
-from imas_standard_names.schema import create_standard_name
 
 
 def write_scalar(tmp: Path, name: str):
@@ -23,7 +23,7 @@ def test_repository_load_and_search(tmp_path: Path):
 def test_repository_uow_add_update_remove(tmp_path: Path):
     repo = StandardNameCatalog(tmp_path)
     uow = repo.start_uow()
-    model = create_standard_name(
+    model = create_standard_name_entry(
         {
             "name": "plasma_density",
             "kind": "scalar",
@@ -36,7 +36,7 @@ def test_repository_uow_add_update_remove(tmp_path: Path):
     uow.commit()
     assert repo.get("plasma_density") is not None
     uow2 = repo.start_uow()
-    updated = create_standard_name(
+    updated = create_standard_name_entry(
         {
             "name": "plasma_density",
             "kind": "scalar",

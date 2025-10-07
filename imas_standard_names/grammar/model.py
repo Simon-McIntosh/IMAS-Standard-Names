@@ -20,7 +20,6 @@ from imas_standard_names.grammar.support import (
 )
 from imas_standard_names.grammar.types import (
     EXCLUSIVE_SEGMENT_PAIRS,
-    Basis,
     Component,
     Position,
     Process,
@@ -36,7 +35,6 @@ class StandardName(BaseModel):
     component: Component | None = None
     subject: Subject | None = None
     base: BaseToken
-    basis: Basis | None = None
     geometry: Position | None = None
     position: Position | None = None
     process: Process | None = None

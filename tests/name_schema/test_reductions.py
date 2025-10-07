@@ -1,15 +1,15 @@
 import pytest
 
-from imas_standard_names.schema import (
-    StandardNameDerivedScalar,
-    create_standard_name,
+from imas_standard_names.models import (
+    StandardNameScalarEntry,
+    create_standard_name_entry,
 )
 
 
 def test_time_average_reduction_scalar():
-    sn = create_standard_name(
+    sn = create_standard_name_entry(
         {
-            "kind": "derived_scalar",
+            "kind": "scalar",
             "name": "time_average_of_electron_temperature",
             "description": "Time average",
             "unit": "eV",
@@ -22,14 +22,14 @@ def test_time_average_reduction_scalar():
             },
         }
     )
-    assert isinstance(sn, StandardNameDerivedScalar)
+    assert isinstance(sn, StandardNameScalarEntry)
     assert sn.provenance.reduction == "mean"
 
 
 def test_rms_reduction_scalar():
-    sn = create_standard_name(
+    sn = create_standard_name_entry(
         {
-            "kind": "derived_scalar",
+            "kind": "scalar",
             "name": "root_mean_square_of_electron_temperature",
             "description": "RMS",
             "unit": "eV",
@@ -46,9 +46,9 @@ def test_rms_reduction_scalar():
 
 
 def test_volume_integral_scalar():
-    sn = create_standard_name(
+    sn = create_standard_name_entry(
         {
-            "kind": "derived_scalar",
+            "kind": "scalar",
             "name": "volume_integral_of_pressure",
             "description": "Volume integral",
             "unit": "Pa.m^3",
@@ -65,9 +65,9 @@ def test_volume_integral_scalar():
 
 
 def test_magnitude_vector():
-    sn = create_standard_name(
+    sn = create_standard_name_entry(
         {
-            "kind": "derived_scalar",
+            "kind": "scalar",
             "name": "magnitude_of_plasma_velocity",
             "description": "Speed",
             "unit": "m.s^-1",
@@ -85,9 +85,9 @@ def test_magnitude_vector():
 
 def test_reduction_mismatch_error():
     with pytest.raises(ValueError):
-        create_standard_name(
+        create_standard_name_entry(
             {
-                "kind": "derived_scalar",
+                "kind": "scalar",
                 "name": "time_average_of_electron_temperature",
                 "description": "Mismatch",
                 "unit": "eV",
@@ -104,9 +104,9 @@ def test_reduction_mismatch_error():
 
 def test_domain_mismatch_error():
     with pytest.raises(ValueError):
-        create_standard_name(
+        create_standard_name_entry(
             {
-                "kind": "derived_scalar",
+                "kind": "scalar",
                 "name": "time_average_of_electron_temperature",
                 "description": "Mismatch domain",
                 "unit": "eV",
@@ -123,9 +123,9 @@ def test_domain_mismatch_error():
 
 def test_base_mismatch_error():
     with pytest.raises(ValueError):
-        create_standard_name(
+        create_standard_name_entry(
             {
-                "kind": "derived_scalar",
+                "kind": "scalar",
                 "name": "time_average_of_electron_temperature",
                 "description": "Base mismatch",
                 "unit": "eV",

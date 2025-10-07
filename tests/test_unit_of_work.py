@@ -1,5 +1,5 @@
+from imas_standard_names.models import create_standard_name_entry
 from imas_standard_names.repository import StandardNameCatalog
-from imas_standard_names.schema import create_standard_name
 from imas_standard_names.unit_of_work import UnitOfWork
 
 
@@ -10,7 +10,7 @@ def test_unit_of_work_add_update_remove_commit(tmp_path):
     uow = UnitOfWork(repo)
 
     # Add new entry
-    a = create_standard_name(
+    a = create_standard_name_entry(
         {
             "kind": "scalar",
             "name": "electron_density",
@@ -26,7 +26,7 @@ def test_unit_of_work_add_update_remove_commit(tmp_path):
     assert file_path.exists()
 
     # Update (change description)
-    updated = create_standard_name(
+    updated = create_standard_name_entry(
         {
             "kind": "scalar",
             "name": "electron_density",

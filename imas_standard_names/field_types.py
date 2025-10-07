@@ -1,8 +1,8 @@
-"""Reusable Annotated field type aliases for standard name schema.
+"""Reusable Annotated field type aliases for standard name models.
 
 This module isolates the simple field-level semantics (patterns, short
 explanations, example values) from the structural Pydantic models defined in
-`schema.py`. Keeping these aliases here reduces cognitive load in `schema.py`
+`models.py`. Keeping these aliases here reduces cognitive load in `models.py`
 and allows other tooling (CLI helpers, docs generators) to reuse the same
 constraints without importing the full discriminated union types.
 """

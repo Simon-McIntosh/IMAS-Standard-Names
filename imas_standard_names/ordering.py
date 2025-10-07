@@ -16,14 +16,14 @@ from __future__ import annotations
 from collections.abc import Iterable
 from graphlib import CycleError, TopologicalSorter
 
-from .schema import StandardName
+from .models import StandardNameEntry
 
 
 class OrderingError(RuntimeError):
     """Raised when models cannot be ordered (cycle or missing prerequisite)."""
 
 
-def _extract_dependencies(model: StandardName, available: set[str]) -> set[str]:
+def _extract_dependencies(model: StandardNameEntry, available: set[str]) -> set[str]:
     deps: set[str] = set()
     kind = getattr(model, "kind", "")
 
@@ -51,14 +51,14 @@ def _extract_dependencies(model: StandardName, available: set[str]) -> set[str]:
     return deps
 
 
-def ordered_model_names(models: Iterable[StandardName]) -> Iterable[str]:
+def ordered_model_names(models: Iterable[StandardNameEntry]) -> Iterable[str]:
     """Yield model names in a dependency-safe order.
 
     Uses a topological sort over the implicit dependency graph. Cycles raise
     OrderingError with diagnostic detail.
     """
-    model_list: list[StandardName] = list(models)
-    name_map: dict[str, StandardName] = {m.name: m for m in model_list}
+    model_list: list[StandardNameEntry] = list(models)
+    name_map: dict[str, StandardNameEntry] = {m.name: m for m in model_list}
     names = set(name_map.keys())
 
     ts = TopologicalSorter()
@@ -78,10 +78,10 @@ def ordered_model_names(models: Iterable[StandardName]) -> Iterable[str]:
         raise OrderingError(f"Cycle detected in standard name dependencies: {e}") from e
 
 
-def ordered_models(models: Iterable[StandardName]) -> Iterable[StandardName]:
+def ordered_models(models: Iterable[StandardNameEntry]) -> Iterable[StandardNameEntry]:
     """Yield full model objects in dependency order (wrapper over ordered_model_names)."""
-    model_list: list[StandardName] = list(models)
-    name_map: dict[str, StandardName] = {m.name: m for m in model_list}
+    model_list: list[StandardNameEntry] = list(models)
+    name_map: dict[str, StandardNameEntry] = {m.name: m for m in model_list}
     for name in ordered_model_names(model_list):
         yield name_map[name]
 

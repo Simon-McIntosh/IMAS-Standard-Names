@@ -10,7 +10,7 @@ from pathlib import Path
 
 import click
 
-from ..catalog.sqlite_build import build_catalog as build_catalog_file
+from ..database.build import build_catalog as build_catalog_file
 from ..paths import CATALOG_DIRNAME, CatalogPaths
 from ..repository import StandardNameCatalog
 

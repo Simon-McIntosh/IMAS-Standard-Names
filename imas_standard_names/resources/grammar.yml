@@ -1,5 +1,5 @@
 # Canonical standard name grammar (authoritative source):
-#   [component_] [subject_] base_or_transformed_name [in_<basis>_basis]? [of_<target> | at_<position>]? [due_to_<process>]?
+#   [<component>_component_of_]? [<subject>_]? <base> [of_<geometry> | at_<position>]? [due_to_<process>]?
 #
 # This file is the single source of truth for the standard-name grammar used by
 # the runtime parser and composer. Downstream Python types and metadata are
@@ -21,11 +21,8 @@
 segments:
   - id: component
     optional: true
-    vocabulary:
-      source: basis
-      field: components
-    exclusive_with:
-      - basis
+    vocabulary: components
+    template: "{token}_component_of"
   - id: subject
     optional: true
     vocabulary: subjects
@@ -47,12 +44,6 @@ segments:
     optional: true
     vocabulary: processes
     template: "due_to_{token}"
-  - id: basis
-    optional: true
-    vocabulary: basis
-    template: "in_{token}_basis"
-    exclusive_with:
-      - component
 
 vocabularies:
   components:
@@ -78,11 +69,6 @@ vocabularies:
     - fast_ion
     - neutral
     - runaway_electron
-  basis:
-    - cylindrical
-    - field_aligned
-    - cartesian
-    - poloidal
   positions:
     - last_closed_flux_surface
     - first_wall
@@ -127,30 +113,3 @@ vocabularies:
     - passive_structure
     - disruption
     - halo
-
-basis:
-  cylindrical:
-    description: Cylindrical machine coordinates
-    components:
-      - radial
-      - toroidal
-      - vertical
-  field_aligned:
-    description: Directions aligned to or derived from the magnetic field
-    components:
-      - parallel
-      - diamagnetic
-      - normal
-      - tangential
-      - binormal
-  cartesian:
-    description: Standard Cartesian axes
-    components:
-      - x
-      - y
-      - z
-  poloidal:
-    description: Poloidal plane directions
-    components:
-      - radial
-      - vertical

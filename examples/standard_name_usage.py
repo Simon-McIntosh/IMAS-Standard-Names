@@ -12,7 +12,6 @@ from imas_standard_names.grammar.model import (
     parse_standard_name,
 )
 from imas_standard_names.grammar.types import (
-    Basis,
     Component,
     Position,
     Process,
@@ -26,7 +25,6 @@ def examples() -> None:
         component=Component.POLOIDAL,
         subject=Subject.ELECTRON,
         base="temperature",
-        basis=Basis.CYLINDRICAL,
         position=Position.CORE_REGION,
         process=Process.RADIATION,
     )
@@ -46,7 +44,7 @@ def examples() -> None:
 
     # Parse from string to model
     parsed = parse_standard_name(
-        "poloidal_electron_temperature_in_cylindrical_basis_at_core_region_due_to_radiation"
+        "poloidal_electron_temperature_at_core_region_due_to_radiation"
     )
     print("Parsed model:", parsed)
 

@@ -115,14 +115,15 @@ Vectors group semantics; components remain atomic scalars.
 
 ## 5. Terminology & Kinds
 
-| Kind             | Meaning                                                                    |
-| ---------------- | -------------------------------------------------------------------------- |
-| `scalar`         | Atomic physical scalar or base component.                                  |
-| `derived_scalar` | Scalar produced by an operator chain (e.g. magnitude, divergence).         |
-| `vector`         | Base multi‑component quantity (e.g. `magnetic_field`).                     |
-| `derived_vector` | Vector produced by applying operators (e.g. `curl_of_magnetic_field`).     |
-| `frame`          | Structural definition of axes (external file in `frames/`).                |
-| `operator`       | Transformation with rank signature (defined in `operators/operators.yml`). |
+| Kind       | Meaning                                                                    |
+| ---------- | -------------------------------------------------------------------------- |
+| `scalar`   | Physical scalar quantity, including components and derived scalars.        |
+| `vector`   | Multi‑component quantity (e.g. `magnetic_field`).                          |
+| `operator` | Transformation with rank signature (defined in `operators/operators.yml`). |
+
+Scalars may have optional provenance (operator, reduction, or expression) describing
+their derivation. Vectors are specified using the `vector_axes` metadata attribute at
+runtime to indicate axis labels (e.g., "radial toroidal vertical").
 
 ---
 
@@ -142,10 +143,6 @@ For the complete grammar reference, see [Grammar Reference](grammar-reference.md
 
 {{ grammar_vocabulary_table('subjects') }}
 
-### Basis
-
-{{ grammar_vocabulary_table('basis') }}
-
 ### Positions
 
 {{ grammar_vocabulary_table('positions') }}
@@ -161,8 +158,7 @@ Condensed from the detailed discussion; see `docs/naming-cheatsheet.md` (future)
 ```ebnf
 <standard_name> ::= <vector_name>
                   | <component_name>
-                  | <derived_scalar_name>
-                  | <derived_vector_name>
+                  | <scalar_name>
 
 <vector_name> ::= <base_quantity>
 <base_quantity> ::= <word> ("_" <word> )*
@@ -183,27 +179,15 @@ Condensed from the detailed discussion; see `docs/naming-cheatsheet.md` (future)
                         | derivative_with_respect_to_{coord}
                         | derivative  ; (generic; disfavoured unless qualified)
 
-; Vector results exclude scalarizing terminals at the tail.
-<derived_vector_name> ::= <vector_producing_chain> "_of_" <vector_name>
-                        | <vector_producing_chain> "_of_" <derived_vector_name>
-<vector_producing_chain> ::= (curl|time_derivative|gradient|laplacian|normalized|derivative_with_respect_to_{coord}|derivative)
-                           | (curl|time_derivative|gradient|laplacian|normalized|derivative_with_respect_to_{coord}|derivative) "_of_" <vector_producing_chain>
-
-<derived_scalar_name> ::= <scalarizing_chain> "_of_" <vector_name>
-                        | <scalarizing_chain> "_of_" <derived_vector_name>
-                        | <vector_name> "_magnitude"
-                        | <vector_name> "_" <subset> "_magnitude"
-
-<scalarizing_chain> ::= (divergence|magnitude|curl_magnitude|normalized_magnitude)
-                      | (divergence|magnitude|curl_magnitude|normalized_magnitude) "_of_" <vector_producing_chain>
-
-<subset> ::= poloidal|toroidal|radial|parallel|perpendicular1|perpendicular2|x|y|z|<word>
+<scalar_name> ::= <base_quantity>
+                | <operator_chain> "_of_" <scalar_name>
+                | <operator_chain> "_of_" <vector_expression>
+                | "magnitude_of_" <vector_expression>
 ```
 
 Authoritative grammar and code generation:
 
 - The canonical grammar, segment order, and vocabularies are defined in `imas_standard_names/resources/grammar.yml`.
-- In the suffix order, `in_<basis>_basis` precedes `of_<target>` and `at_<position>`. `of_<target>` (geometry) and `at_<position>` (position) are mutually exclusive and draw from the same vocabulary; they appear adjacent in the grammar.
 - The Python enums and segment metadata in `imas_standard_names/grammar/types.py` are auto-generated from this YAML during build/install (via Hatch). You can regenerate manually with `python -m imas_standard_names.grammar_codegen.generate` or the `build-grammar` script configured in `pyproject.toml`.
 
 Enforce semantic rank rules (Section 7); grammar alone is insufficient.

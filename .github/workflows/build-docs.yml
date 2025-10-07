@@ -75,6 +75,7 @@ jobs:
         run: uv run mike alias "${{ steps.version.outputs.version }}" "latest" --update-aliases
 
   deploy:
+    if: github.event_name != 'pull_request'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

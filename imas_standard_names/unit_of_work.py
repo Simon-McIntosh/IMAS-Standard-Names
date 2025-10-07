@@ -5,14 +5,14 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from .schema import StandardName
+from .models import StandardNameEntry
 from .services import validate_models
 
 
 @dataclass
 class Snapshot:
     name: str
-    model: StandardName
+    model: StandardNameEntry
 
 
 @dataclass
@@ -48,13 +48,13 @@ class UnitOfWork:
         self._closed = False
 
     # Mutations --------------------------------------------------------------
-    def add(self, model: StandardName):
+    def add(self, model: StandardNameEntry) -> None:
         if self.catalog.get_row(model.name):
             raise ValueError(f"Entry '{model.name}' exists")
         self.catalog.insert(model)
         self._undo.append(UndoOpAdd(model.name))
 
-    def update(self, name: str, model: StandardName):
+    def update(self, name: str, model: StandardNameEntry):
         row = self.catalog.get_row(name)
         if not row:
             raise KeyError(name)
@@ -71,7 +71,7 @@ class UnitOfWork:
         self.catalog.delete(name)
         self._undo.append(UndoOpDelete(Snapshot(name, old_model)))
 
-    def rename(self, old_name: str, new_model: StandardName):
+    def rename(self, old_name: str, new_model: StandardNameEntry):
         if old_name == new_model.name:
             return self.update(old_name, new_model)
         row = self.catalog.get_row(old_name)

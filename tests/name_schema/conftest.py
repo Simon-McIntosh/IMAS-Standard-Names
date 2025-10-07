@@ -3,7 +3,7 @@ from pathlib import Path
 import pytest
 import yaml
 
-from imas_standard_names.schema import create_standard_name
+from imas_standard_names.models import create_standard_name_entry
 
 
 @pytest.fixture
@@ -26,19 +26,13 @@ def vector_data():
         "description": "Bulk plasma velocity",
         "unit": "m.s^-1",
         "status": "active",
-        "frame": "cylindrical_r_tor_z",
-        "components": {
-            "r": "r_component_of_plasma_velocity",
-            "tor": "tor_component_of_plasma_velocity",
-            "z": "z_component_of_plasma_velocity",
-        },
     }
 
 
 @pytest.fixture
 def operator_scalar_data():
     return {
-        "kind": "derived_scalar",
+        "kind": "scalar",
         "name": "divergence_of_plasma_velocity",
         "description": "Divergence of velocity",
         "unit": "s^-1",
@@ -55,17 +49,11 @@ def operator_scalar_data():
 @pytest.fixture
 def gradient_vector_data():
     return {
-        "kind": "derived_vector",
+        "kind": "vector",
         "name": "gradient_of_electron_temperature",
         "description": "Spatial gradient of Te",
         "unit": "eV.m^-1",
         "status": "active",
-        "frame": "cylindrical_r_tor_z",
-        "components": {
-            "r": "r_component_of_gradient_of_electron_temperature",
-            "tor": "tor_component_of_gradient_of_electron_temperature",
-            "z": "z_component_of_gradient_of_electron_temperature",
-        },
         "provenance": {
             "mode": "operator",
             "operators": ["gradient"],
@@ -78,7 +66,7 @@ def gradient_vector_data():
 @pytest.fixture
 def expression_scalar_data():
     return {
-        "kind": "derived_scalar",
+        "kind": "scalar",
         "name": "pressure_balance_indicator",
         "description": "Derived scalar from multiple quantities",
         "unit": "",
@@ -98,10 +86,12 @@ def temp_dir(tmp_path):
 
 @pytest.fixture
 def save_and_load_scalar(temp_dir, scalar_data):
-    entry = create_standard_name(scalar_data)
+    entry = create_standard_name_entry(scalar_data)
     path = Path(temp_dir) / f"{entry.name}.yml"
     data = {k: v for k, v in entry.model_dump().items() if v not in (None, [], "")}
     data["name"] = entry.name
     path.write_text(yaml.safe_dump(data, sort_keys=False), encoding="utf-8")
-    loaded = create_standard_name(yaml.safe_load(path.read_text(encoding="utf-8")))
+    loaded = create_standard_name_entry(
+        yaml.safe_load(path.read_text(encoding="utf-8"))
+    )
     return path, loaded

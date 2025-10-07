@@ -3,8 +3,9 @@
 Requirements:
   * Base scalar (electron_temperature) must exist.
   * Derived vector name: gradient_of_<scalar>.
-  * Each component scalar must exist (axis_component_of_gradient_of_<scalar>). Stage them first.
   * Provenance operator chain lists 'gradient'; base points to original scalar.
+  * Component scalars can also exist as separate catalog entries.
+  * Components are specified at runtime via vector_axes metadata attribute.
 """
 
 from __future__ import annotations
@@ -13,7 +14,7 @@ import tempfile
 from contextlib import contextmanager
 from pathlib import Path
 
-from imas_standard_names.repository import StandardNameRepository
+from imas_standard_names.repository import StandardNameCatalog
 from imas_standard_names.schema import create_standard_name
 
 AXES = ["radial", "toroidal", "vertical"]
@@ -29,7 +30,7 @@ def tmp_root():
 
 def main():
     with tmp_root() as root:
-        repo = StandardNameRepository(root)
+        repo = StandardNameCatalog(root)
         uow = repo.start_uow()
 
         # Base scalar
@@ -45,13 +46,13 @@ def main():
             )
         )
 
-        # Component scalars of gradient (must precede derived vector insert)
+        # Component scalars of gradient (separate catalog entries)
         for axis in AXES:
             uow.add(
                 create_standard_name(
                     {
                         "name": f"{axis}_component_of_gradient_of_electron_temperature",
-                        "kind": "derived_scalar",
+                        "kind": "scalar",
                         "unit": "eV.m^-1",
                         "description": f"{axis.capitalize()} component of gradient_of_electron_temperature.",
                         "status": "draft",
@@ -68,14 +69,8 @@ def main():
         derived_vec = create_standard_name(
             {
                 "name": "gradient_of_electron_temperature",
-                "kind": "derived_vector",
+                "kind": "vector",
                 "unit": "eV.m^-1",
-                "frame": "cylindrical_r_tor_z",
-                "components": {
-                    "radial": "radial_component_of_gradient_of_electron_temperature",
-                    "toroidal": "toroidal_component_of_gradient_of_electron_temperature",
-                    "vertical": "vertical_component_of_gradient_of_electron_temperature",
-                },
                 "description": "Gradient of electron_temperature as a vector.",
                 "status": "draft",
                 "provenance": {

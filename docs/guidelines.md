@@ -26,15 +26,14 @@ Standard names are constructed from segments in a fixed order:
 !!! info "Auto-Generated Vocabularies"
 Token lists below are generated from `grammar.yml`. See [Grammar Reference](grammar-reference.md) for complete tables.
 
-| Segment       | Required | Description                                      | Tokens                                                                    |
-| ------------- | -------- | ------------------------------------------------ | ------------------------------------------------------------------------- |
-| **component** | No       | Vector component direction                       | {{ grammar_component_tokens() }}                                          |
-| **subject**   | No       | Particle species or plasma subject               | {{ grammar_subject_tokens() }}                                            |
-| **base**      | **Yes**  | Physical quantity or transformed expression      | User-defined (e.g., `temperature`, `pressure`, `gradient_of_temperature`) |
-| **basis**     | No       | Coordinate system (template: `in_{token}_basis`) | {{ grammar_basis_tokens() }}                                              |
-| **geometry**  | No       | Geometric target (template: `of_{token}`)        | {{ grammar_position_tokens() }}                                           |
-| **position**  | No       | Spatial location (template: `at_{token}`)        | {{ grammar_position_tokens() }}                                           |
-| **process**   | No       | Physical mechanism (template: `due_to_{token}`)  | {{ grammar_process_tokens() }}                                            |
+| Segment       | Required | Description                                     | Tokens                                                                    |
+| ------------- | -------- | ----------------------------------------------- | ------------------------------------------------------------------------- |
+| **component** | No       | Vector component direction                      | {{ grammar_component_tokens() }}                                          |
+| **subject**   | No       | Particle species or plasma subject              | {{ grammar_subject_tokens() }}                                            |
+| **base**      | **Yes**  | Physical quantity or transformed expression     | User-defined (e.g., `temperature`, `pressure`, `gradient_of_temperature`) |
+| **geometry**  | No       | Geometric target (template: `of_{token}`)       | {{ grammar_position_tokens() }}                                           |
+| **position**  | No       | Spatial location (template: `at_{token}`)       | {{ grammar_position_tokens() }}                                           |
+| **process**   | No       | Physical mechanism (template: `due_to_{token}`) | {{ grammar_process_tokens() }}                                            |
 
 ### Exclusivity Rules
 
@@ -44,13 +43,12 @@ Certain segments cannot coexist in the same name:
 
 ### Examples
 
-| Valid Name                                   | Segments Used             | Explanation                   |
-| -------------------------------------------- | ------------------------- | ----------------------------- |
-| `electron_temperature`                       | subject + base            | Simple scalar                 |
-| `radial_component_of_magnetic_field`         | component + base          | Vector component              |
-| `electron_temperature_at_plasma_boundary`    | subject + base + position | Scalar at location            |
-| `heat_flux_due_to_conduction`                | base + process            | Process contribution          |
-| `radial_magnetic_field_in_cylindrical_basis` | component + base + basis  | Component with explicit basis |
+| Valid Name                                | Segments Used             | Explanation          |
+| ----------------------------------------- | ------------------------- | -------------------- |
+| `electron_temperature`                    | subject + base            | Simple scalar        |
+| `radial_component_of_magnetic_field`      | component + base          | Vector component     |
+| `electron_temperature_at_plasma_boundary` | subject + base + position | Scalar at location   |
+| `heat_flux_due_to_conduction`             | base + process            | Process contribution |
 
 ## Grammar Source
 
@@ -68,18 +66,15 @@ Certain segments cannot coexist in the same name:
 
 ### Components
 
-Component tokens specify vector directions. Available components depend on the coordinate basis:
-
-{{ grammar_basis_components() }}
-
-**All component tokens:**
+Component tokens specify vector directions:
 
 {{ grammar_vocabulary_table('components') }}
 
-**Consistency rules:**
+**Usage notes:**
 
-- Component tokens must match the declared or implied basis
-- Do not mix component vocabularies (e.g., no `x` with cylindrical basis)
+- Components follow the pattern: `{axis}_component_of_{vector_name}`
+- Vector axes are specified at runtime via the `vector_axes` metadata attribute
+- Example: `vector_axes="radial toroidal vertical"` for cylindrical coordinates
 
 **Examples:**
 
@@ -123,58 +118,44 @@ Process tokens (template: `due_to_{token}`) identify physical mechanisms. Use wh
 - `particle_flux_due_to_diffusion` — diffusive contribution
 - `heating_due_to_neutral_beam_injection` — NBI heating term
 
-### Basis
-
-Basis tokens (template: `in_{token}_basis`) specify coordinate systems:
-
-{{ grammar_vocabulary_table('basis') }}
-
-**Usage:**
-
-- Primarily for vector forms with component dimension
-- Rare for scalar quantities
-- Must match component token vocabulary
-
----
-
 ## Vector Representation
 
-Vectors can be represented in two ways:
+Vectors are physical quantities with multiple directional components. The IMAS standard names
+system uses a metadata-based approach for specifying vector components.
 
-### 1. Component Form (Recommended)
+### Vector Components
 
-Publish separate scalar variables for each component. The component token implies the basis.
+Vector components are separate scalar standard names that follow the pattern:
 
-**Available basis/component mappings:**
-
-{{ grammar_basis_components() }}
-
-**Examples:**
-
-| Basis         | Component Names                                                               | Unit |
-| ------------- | ----------------------------------------------------------------------------- | ---- |
-| Cartesian     | `x_magnetic_field`, `y_magnetic_field`, `z_magnetic_field`                    | T    |
-| Cylindrical   | `radial_magnetic_field`, `toroidal_magnetic_field`, `vertical_magnetic_field` | T    |
-| Field-aligned | `parallel_heat_flux`, `perpendicular_heat_flux`                               | W/m² |
-
-### 2. Vector Form (Single Array)
-
-Publish single variable with component dimension. Include basis explicitly in name (template: `in_{basis}_basis`).
+```
+{axis}_component_of_{vector_name}
+```
 
 **Examples:**
 
-| Vector Name                                              | Component Labels                     | Notes                   |
-| -------------------------------------------------------- | ------------------------------------ | ----------------------- |
-| `magnetic_field_in_cartesian_basis`                      | `["x", "y", "z"]`                    | Explicit basis          |
-| `magnetic_field_in_cylindrical_basis`                    | `["radial", "toroidal", "vertical"]` | Can append position     |
-| `magnetic_field_in_cylindrical_basis_at_plasma_boundary` | `["radial", "toroidal", "vertical"]` | With position qualifier |
+| Vector         | Component Names                                                                                                      | Unit |
+| -------------- | -------------------------------------------------------------------------------------------------------------------- | ---- |
+| magnetic_field | `radial_component_of_magnetic_field`, `toroidal_component_of_magnetic_field`, `vertical_component_of_magnetic_field` | T    |
+| electric_field | `x_component_of_electric_field`, `y_component_of_electric_field`, `z_component_of_electric_field`                    | V/m  |
+| heat_flux      | `parallel_heat_flux`, `perpendicular_heat_flux`                                                                      | W/m² |
+
+### Vector Metadata
+
+At runtime, use the `vector_axes` metadata attribute to specify which axes apply:
+
+```
+vector_axes = "radial toroidal vertical"  # cylindrical coordinates
+vector_axes = "x y z"                     # Cartesian coordinates
+vector_axes = "parallel perpendicular"    # field-aligned
+```
+
+Use the CF `coordinates` attribute to link to the actual component variable names.
 
 ### Vector Naming Rules
 
-- ✗ Never use the word "vector" in names → ✓ Use component or basis forms
+- ✗ Never use the word "vector" in names → ✓ Use component pattern
 - ✓ For magnitudes: `magnitude_of_magnetic_field` (scalar, not vector)
-- ✓ Component labels in vector form must match declared basis
-- ✗ Never mix component vocabularies in a single set
+- ✓ Component names must follow the `{axis}_component_of_{vector}` pattern
 
 ---
 

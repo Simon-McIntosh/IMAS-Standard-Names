@@ -18,7 +18,7 @@ from pydantic import BaseModel, Field
 class OperatorPattern(BaseModel):
     operator_id: str  # canonical id (may be composite)
     primitive_chain: list[str] = Field(min_length=1)  # outermost-first
-    result_kind: str | None = None  # derived_scalar / derived_vector or None
+    result_kind: str | None = None  # scalar / vector or None
     operand_format: str = Field(default="{suffix}")  # build expected base token
     description: str = ""
 
@@ -44,7 +44,7 @@ OPERATOR_PATTERNS: list[OperatorPattern] = [
     OperatorPattern(
         operator_id="gradient",
         primitive_chain=["gradient"],
-        result_kind="derived_vector",
+        result_kind="vector",
         description="Spatial gradient (vector result).",
     ),
     OperatorPattern(
@@ -56,19 +56,19 @@ OPERATOR_PATTERNS: list[OperatorPattern] = [
     OperatorPattern(
         operator_id="divergence",
         primitive_chain=["divergence"],
-        result_kind="derived_scalar",
+        result_kind="scalar",
         description="Divergence (scalar result).",
     ),
     OperatorPattern(
         operator_id="curl",
         primitive_chain=["curl"],
-        result_kind="derived_vector",
+        result_kind="vector",
         description="Curl (vector result).",
     ),
     OperatorPattern(
         operator_id="laplacian",
         primitive_chain=["laplacian"],
-        result_kind="derived_scalar",
+        result_kind="scalar",
         description="Laplacian (scalar result).",
     ),
 ]
@@ -125,7 +125,7 @@ def enforce_operator_naming(
     - Reconstruct chain + base from name
     - Ensure primitive chain equality
     - Ensure base match
-    - Ensure derived kind consistency (last non-null result_kind wins)
+    - Ensure kind consistency (last non-null result_kind wins)
     - Ensure operator_id (if supplied) matches outermost pattern
     """
     chain, detected_base, patterns = parse_operator_chain(name)
@@ -145,7 +145,7 @@ def enforce_operator_naming(
             expected_kind = pat.result_kind
     if expected_kind and kind != expected_kind:
         raise ValueError(
-            f"Derived kind mismatch: naming implies {expected_kind} but entry is {kind}"
+            f"Kind mismatch: naming implies {expected_kind} but entry is {kind}"
         )
     if operator_id and operator_id != patterns[0].operator_id:
         raise ValueError(

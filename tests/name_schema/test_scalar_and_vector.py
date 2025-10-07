@@ -1,23 +1,24 @@
 import pytest
 
-from imas_standard_names.schema import (
-    StandardNameScalar,
-    StandardNameVector,
-    create_standard_name,
+from imas_standard_names.models import (
+    StandardNameScalarEntry,
+    StandardNameVectorEntry,
+    create_standard_name_entry,
 )
 
 
 def test_scalar_creation(scalar_data):
-    sn = create_standard_name(scalar_data)
-    assert isinstance(sn, StandardNameScalar)
+    sn = create_standard_name_entry(scalar_data)
+    assert isinstance(sn, StandardNameScalarEntry)
     assert sn.name == scalar_data["name"]
     assert sn.formatted_unit() != ""  # eV formatted
 
 
 def test_vector_creation(vector_data):
-    sn = create_standard_name(vector_data)
-    assert isinstance(sn, StandardNameVector)
-    assert sorted(sn.components.keys()) == ["r", "tor", "z"]
+    sn = create_standard_name_entry(vector_data)
+    assert isinstance(sn, StandardNameVectorEntry)
+    # Vector no longer has components field in schema
+    # Components are specified at runtime via vector_axes metadata
     assert sn.magnitude == "magnitude_of_plasma_velocity"
 
 
@@ -25,11 +26,11 @@ def test_vector_creation(vector_data):
 def test_invalid_name_rejected(scalar_data, bad_name):
     data = scalar_data | {"name": bad_name}
     with pytest.raises((ValueError, KeyError, TypeError)):
-        create_standard_name(data)
+        create_standard_name_entry(data)
 
 
 def test_dimensionless_unit_blank():
-    sn = create_standard_name(
+    sn = create_standard_name_entry(
         {
             "kind": "scalar",
             "name": "beta_pol",

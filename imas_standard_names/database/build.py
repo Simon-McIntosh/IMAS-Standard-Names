@@ -13,10 +13,10 @@ import sqlite3
 from collections.abc import Iterable
 from pathlib import Path
 
+from ..models import StandardNameEntry
 from ..ordering import ordered_models
-from ..schema import StandardName
 from ..yaml_store import YamlStore
-from .sqlite_rw import DDL, CatalogReadWrite
+from .readwrite import DDL, CatalogReadWrite
 
 
 class CatalogBuild(CatalogReadWrite):
@@ -42,7 +42,7 @@ def build_catalog(yaml_root: Path, db_path: Path, overwrite: bool = True) -> Pat
     schema + FTS layout. Returns the db_path.
     """
     store = YamlStore(yaml_root)
-    models: Iterable[StandardName] = store.load()
+    models: Iterable[StandardNameEntry] = store.load()
     builder = CatalogBuild(db_path, overwrite=overwrite)
     # Insert using dependency-safe ordering (vectors after components, derived after bases)
     for m in ordered_models(models):

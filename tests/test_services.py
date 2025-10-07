@@ -1,11 +1,11 @@
-from imas_standard_names.catalog.sqlite_rw import CatalogReadWrite
-from imas_standard_names.schema import create_standard_name
+from imas_standard_names.database.readwrite import CatalogReadWrite
+from imas_standard_names.models import create_standard_name_entry
 from imas_standard_names.services import row_to_model, validate_models
 
 
 def test_services_validate_and_row_to_model():
     cat = CatalogReadWrite()
-    model = create_standard_name(
+    model = create_standard_name_entry(
         {
             "name": "electron_density",
             "kind": "scalar",

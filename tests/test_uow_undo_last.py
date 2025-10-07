@@ -1,11 +1,11 @@
 import pytest
 
+from imas_standard_names.models import create_standard_name_entry
 from imas_standard_names.repository import StandardNameCatalog
-from imas_standard_names.schema import create_standard_name
 
 
 def make_scalar(name, unit="eV"):
-    return create_standard_name(
+    return create_standard_name_entry(
         {
             "name": name,
             "kind": "scalar",

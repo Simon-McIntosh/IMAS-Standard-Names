@@ -31,7 +31,6 @@ def _enum_values[
     E: (
         grammar_types.Component,
         grammar_types.Subject,
-        grammar_types.Basis,
         grammar_types.Position,
         grammar_types.Process,
     )
@@ -54,7 +53,6 @@ def _coerce_enum[
     E: (
         grammar_types.Component,
         grammar_types.Subject,
-        grammar_types.Basis,
         grammar_types.Position,
         grammar_types.Process,
     )
@@ -100,7 +98,6 @@ class NamesTool(BaseTool):
         base: str,
         component: grammar_types.Component | str | None = None,
         subject: grammar_types.Subject | str | None = None,
-        basis: grammar_types.Basis | str | None = None,
         geometry: grammar_types.Position | str | None = None,
         position: grammar_types.Position | str | None = None,
         process: grammar_types.Process | str | None = None,
@@ -114,7 +111,6 @@ class NamesTool(BaseTool):
 
         comp = _coerce_enum(grammar_types.Component, component)
         subj = _coerce_enum(grammar_types.Subject, subject)
-        bas = _coerce_enum(grammar_types.Basis, basis)
         geom = _coerce_enum(grammar_types.Position, geometry)
         pos = _coerce_enum(grammar_types.Position, position)
         proc = _coerce_enum(grammar_types.Process, process)
@@ -123,7 +119,6 @@ class NamesTool(BaseTool):
             component=comp,
             subject=subj,
             base=base,
-            basis=bas,
             geometry=geom,
             position=pos,
             process=proc,
@@ -144,7 +139,7 @@ class NamesTool(BaseTool):
     @mcp_tool(
         description=(
             "List allowed tokens for each segment and interface rules. "
-            "Returns {component, subject, basis, position, process, notes}. "
+            "Returns {component, subject, position, process, notes}. "
             "Use to pick valid values before calling name_compose."
         )
     )
@@ -152,16 +147,13 @@ class NamesTool(BaseTool):
         return {
             "component": _enum_values(grammar_types.Component),
             "subject": _enum_values(grammar_types.Subject),
-            "basis": _enum_values(grammar_types.Basis),
-            # geometry and position share the same domain of Position
             "geometry": _enum_values(grammar_types.Position),
             "position": _enum_values(grammar_types.Position),
             "process": _enum_values(grammar_types.Process),
             "notes": [
                 "geometry and position are mutually exclusive",
-                "component and basis are mutually exclusive",
                 "base must match ^[a-z][a-z0-9_]*$",
-                "prefix order: component, subject, base; suffix order: geometry|position, process, basis",
+                "prefix order: component, subject, base; suffix order: geometry|position, process",
             ],
             "examples": [
                 {

@@ -10,7 +10,7 @@ from pathlib import Path
 import click
 from strictyaml.ruamel import YAML
 
-from imas_standard_names import schema
+from imas_standard_names import models
 from imas_standard_names.generic_names import GenericNames
 from imas_standard_names.issues.gh_repo import update_static_urls
 from imas_standard_names.issues.image_assets import ImageProcessor
@@ -112,7 +112,7 @@ def update_standardnames(
         }
         # Remove keys with empty string that are optional (pydantic will ignore missing)
         cleaned = {k: v for k, v in data.items() if v not in (None, "") or k == "name"}
-        entry = schema.create_standard_name(cleaned)
+        entry = models.create_standard_name_entry(cleaned)
 
         # Overwrite guard (only error if not overwriting)
         if repo.get(entry.name) and not overwrite:
@@ -134,7 +134,7 @@ def update_standardnames(
                 new_desc = img_proc.documentation_with_relative_paths()
                 if new_desc and new_desc != description:
                     data["description"] = new_desc
-                    entry = schema.create_standard_name(
+                    entry = models.create_standard_name_entry(
                         {k: v for k, v in data.items() if v not in (None, "")}
                     )
             except Exception:  # Non-fatal: continue without images

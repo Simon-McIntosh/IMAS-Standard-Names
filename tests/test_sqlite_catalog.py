@@ -1,11 +1,11 @@
-from imas_standard_names.catalog.sqlite_rw import CatalogReadWrite
-from imas_standard_names.schema import create_standard_name
+from imas_standard_names.database.readwrite import CatalogReadWrite
+from imas_standard_names.models import create_standard_name_entry
 from imas_standard_names.services import row_to_model
 
 
 def test_sqlite_catalog_insert_search_get():
     cat = CatalogReadWrite()
-    m = create_standard_name(
+    m = create_standard_name_entry(
         {
             "name": "electron_temperature",
             "kind": "scalar",
@@ -28,7 +28,7 @@ def test_sqlite_catalog_insert_search_get():
 
 def test_sqlite_catalog_delete():
     cat = CatalogReadWrite()
-    m = create_standard_name(
+    m = create_standard_name_entry(
         {
             "name": "ion_temperature",
             "kind": "scalar",

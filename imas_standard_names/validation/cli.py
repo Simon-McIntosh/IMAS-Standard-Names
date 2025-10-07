@@ -6,8 +6,8 @@ from pathlib import Path
 
 import click
 
-from ..catalog.integrity import verify_integrity
-from ..catalog.sqlite_read import CatalogRead
+from ..database.integrity import verify_integrity
+from ..database.read import CatalogRead
 from ..paths import CATALOG_DIRNAME
 from ..repository import StandardNameCatalog
 from .semantic import run_semantic_checks

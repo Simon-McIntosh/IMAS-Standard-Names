@@ -17,9 +17,7 @@ from rich.prompt import Prompt
 
 from imas_standard_names.agents.load_mcp import load_mcp_servers
 from imas_standard_names.agents.schema import Review
-from imas_standard_names.schema import StandardName  # type: ignore
-
-# from imas_standard_names.schema import StandardName
+from imas_standard_names.models import StandardNameEntry
 
 dotenv.load_dotenv(".env")
 
@@ -79,9 +77,9 @@ request_agent = Agent[None, list[Review]](
     system_prompt=HUMAN_SYSTEM_PROMPT,
 )
 
-standard_name_agent = Agent[None, list[StandardName]](
+standard_name_agent = Agent[None, list[StandardNameEntry]](
     model=build_default_model(),
-    output_type=list[StandardName],  # type: ignore
+    output_type=list[StandardNameEntry],  # type: ignore
     toolsets=SERVERS,
     system_prompt=GENERATE_SYSTEM_PROMPT,
 )
@@ -94,7 +92,9 @@ ai_review_agent = Agent[None, list[Review]](
 )  # type: ignore
 
 
-def build_regenerate_query(reviews: list[tuple[StandardName | None, Review]]) -> str:
+def build_regenerate_query(
+    reviews: list[tuple[StandardNameEntry | None, Review]],
+) -> str:
     return (
         "The following reviews were generated for failing standard names, consider the following reviews"
         + "\n".join(
@@ -104,14 +104,14 @@ def build_regenerate_query(reviews: list[tuple[StandardName | None, Review]]) ->
     )
 
 
-def build_review_query(candidates: list[StandardName]) -> str:
+def build_review_query(candidates: list[StandardNameEntry]) -> str:
     return (
         "The following standard names were generated, provide a review for each name\n"
         + "\n".join(str(c) for c in candidates)
     )
 
 
-def build_human_review_query(query, names: list[StandardName]) -> str:
+def build_human_review_query(query, names: list[StandardNameEntry]) -> str:
     return (
         f"The user provided the feedback: '{query}' for the following standard names (in order): "
         + "\n".join(str(c) for c in names)
@@ -137,10 +137,10 @@ async def main():
         print(r.message)
         print()
 
-    accepted: list[StandardName] = []
-    candidates: list[StandardName] = []
+    accepted: list[StandardNameEntry] = []
+    candidates: list[StandardNameEntry] = []
 
-    pairs: list[tuple[StandardName | None, Review]] = list(
+    pairs: list[tuple[StandardNameEntry | None, Review]] = list(
         zip([None] * num_names, reviews, strict=True)
     )
 

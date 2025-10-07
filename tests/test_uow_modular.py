@@ -1,13 +1,13 @@
 from pathlib import Path
 
+from imas_standard_names.models import create_standard_name_entry
 from imas_standard_names.repository import StandardNameCatalog
-from imas_standard_names.schema import create_standard_name
 
 
 def test_uow_add_update_remove(tmp_path: Path):
     repo = StandardNameCatalog(tmp_path)
     uow = repo.start_uow()
-    a = create_standard_name(
+    a = create_standard_name_entry(
         {
             "name": "ion_density",
             "kind": "scalar",
@@ -17,7 +17,7 @@ def test_uow_add_update_remove(tmp_path: Path):
     )
     uow.add(a)
     # update description
-    a2 = create_standard_name(
+    a2 = create_standard_name_entry(
         {
             "name": "ion_density",
             "kind": "scalar",
@@ -39,7 +39,7 @@ def test_uow_add_update_remove(tmp_path: Path):
 def test_uow_rollback(tmp_path: Path):
     repo = StandardNameCatalog(tmp_path)
     uow = repo.start_uow()
-    a = create_standard_name(
+    a = create_standard_name_entry(
         {
             "name": "electron_pressure",
             "kind": "scalar",

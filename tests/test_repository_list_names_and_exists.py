@@ -1,7 +1,7 @@
 from pathlib import Path
 
+from imas_standard_names.models import create_standard_name_entry
 from imas_standard_names.repository import StandardNameCatalog
-from imas_standard_names.schema import create_standard_name
 
 
 def write_scalar(tmp: Path, name: str):
@@ -38,7 +38,7 @@ def test_exists_after_uow_add_remove(tmp_path: Path):
     repo = StandardNameCatalog(tmp_path)
     assert not repo.exists("dynamic_entry")
     uow = repo.start_uow()
-    model = create_standard_name(
+    model = create_standard_name_entry(
         {
             "name": "dynamic_entry",
             "kind": "scalar",

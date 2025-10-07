@@ -11,7 +11,7 @@ from pathlib import Path
 
 import click
 
-from ..catalog.sqlite_read import CatalogRead
+from ..database.read import CatalogRead
 from ..paths import CatalogPaths
 from ..repository import StandardNameCatalog
 

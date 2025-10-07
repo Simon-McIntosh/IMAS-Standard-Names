@@ -12,7 +12,7 @@ from .model import (
     parse_standard_name,
 )
 from .support import TOKEN_PATTERN, value_of
-from .types import Basis, Component, Position, Process, Subject
+from .types import Component, Position, Process, Subject
 
 # Friendly aliases to match tests
 compose_name = compose_standard_name
@@ -25,7 +25,6 @@ __all__ = [
     "compose_name",
     "parse_name",
     "value_of",
-    "Basis",
     "Component",
     "Position",
     "Process",

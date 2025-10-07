@@ -27,10 +27,10 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from .catalog.sqlite_rw import CatalogReadWrite
+from .database.readwrite import CatalogReadWrite
+from .models import StandardNameEntry
 from .ordering import ordered_models
 from .paths import CatalogPaths
-from .schema import StandardName
 from .services import row_to_model
 from .unit_of_work import UnitOfWork
 from .yaml_store import YamlStore
@@ -53,13 +53,13 @@ class StandardNameCatalog:
         self._active_uow: UnitOfWork | None = None
 
     # Basic queries -----------------------------------------------------------
-    def get(self, name: str) -> StandardName | None:
+    def get(self, name: str) -> StandardNameEntry | None:
         row = self.catalog.conn.execute(
             "SELECT * FROM standard_name WHERE name=?", (name,)
         ).fetchone()
         return row_to_model(self.catalog.conn, row) if row else None
 
-    def list(self) -> list[StandardName]:
+    def list(self) -> list[StandardNameEntry]:
         rows = self.catalog.conn.execute("SELECT * FROM standard_name").fetchall()
         return [row_to_model(self.catalog.conn, r) for r in rows]
 

@@ -1,12 +1,12 @@
 from pathlib import Path
 
-from imas_standard_names.schema import create_standard_name
+from imas_standard_names.models import create_standard_name_entry
 from imas_standard_names.yaml_store import YamlStore
 
 
 def test_yaml_store_round_trip(tmp_path: Path):
     store = YamlStore(tmp_path)
-    m = create_standard_name(
+    m = create_standard_name_entry(
         {
             "name": "plasma_current",
             "kind": "scalar",

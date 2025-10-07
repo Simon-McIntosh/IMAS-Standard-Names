@@ -2,7 +2,7 @@ from pathlib import Path
 
 import yaml
 
-from imas_standard_names.schema import create_standard_name
+from imas_standard_names.models import create_standard_name_entry
 
 
 def test_load_single_entry(tmp_path: Path):
@@ -17,7 +17,7 @@ description: A test quantity.
         encoding="utf-8",
     )
     data = yaml.safe_load(f.read_text(encoding="utf-8"))
-    entry = create_standard_name(data)
+    entry = create_standard_name_entry(data)
     # Basic sanity: required attributes present
     assert hasattr(entry, "name") and hasattr(entry, "kind")
     assert entry.name == "test_quantity"
@@ -50,6 +50,6 @@ description: B.
         d = yaml.safe_load(p.read_text(encoding="utf-8"))
         if isinstance(d.get("unit"), int | float):
             d["unit"] = str(d["unit"])
-        entry = create_standard_name(d)
+        entry = create_standard_name_entry(d)
         names.add(entry.name)
     assert names == {"quantity_a", "quantity_b"}

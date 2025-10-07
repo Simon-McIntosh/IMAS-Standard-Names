@@ -1,10 +1,10 @@
 import pytest
 
-from imas_standard_names.schema import create_standard_name
+from imas_standard_names.models import create_standard_name_entry
 
 
 def test_unit_dimensionless_normalization():
-    sn = create_standard_name(
+    sn = create_standard_name_entry(
         {
             "kind": "scalar",
             "name": "beta_pol",
@@ -19,7 +19,7 @@ def test_unit_dimensionless_normalization():
 
 def test_unit_whitespace_rejected():
     with pytest.raises(ValueError):
-        create_standard_name(
+        create_standard_name_entry(
             {
                 "kind": "scalar",
                 "name": "some_quantity",
@@ -42,7 +42,7 @@ def test_unit_whitespace_rejected():
     ],
 )
 def test_formatted_unit_styles(style, expected_variants):
-    sn = create_standard_name(
+    sn = create_standard_name_entry(
         {
             "kind": "scalar",
             "name": "acceleration",
@@ -58,7 +58,7 @@ def test_formatted_unit_styles(style, expected_variants):
 
 
 def test_formatted_unit_unknown_style():
-    sn = create_standard_name(
+    sn = create_standard_name_entry(
         {
             "kind": "scalar",
             "name": "electron_density",
@@ -72,7 +72,7 @@ def test_formatted_unit_unknown_style():
 
 
 def test_tags_and_links_normalization():
-    sn = create_standard_name(
+    sn = create_standard_name_entry(
         {
             "kind": "scalar",
             "name": "ion_temperature",
@@ -94,7 +94,7 @@ def test_tags_and_links_normalization():
 
 def test_deprecated_without_superseded_by_error():
     with pytest.raises(ValueError):
-        create_standard_name(
+        create_standard_name_entry(
             {
                 "kind": "scalar",
                 "name": "old_quantity",
@@ -106,7 +106,7 @@ def test_deprecated_without_superseded_by_error():
 
 
 def test_deprecated_with_superseded_by_ok():
-    sn = create_standard_name(
+    sn = create_standard_name_entry(
         {
             "kind": "scalar",
             "name": "old_quantity2",

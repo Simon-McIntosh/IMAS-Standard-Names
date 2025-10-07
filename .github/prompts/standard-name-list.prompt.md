@@ -16,7 +16,7 @@ Version: v1.3 (adds interactive iteration loop with row numbering & deferred bat
 {vector_threshold: 0.15}  # fraction of base scalars to nominate as vectors
 {novelty_check: true}
 {show_rationale: brief}
-{output_sections: base_scalars,vectors,components,derived_vectors,derived_scalars,summary}
+{output_sections: base_scalars,vectors,components,scalars_with_provenance,summary}
 {strict_semantics: true}
 {interactive_review: true}  # NEW: if true, engage iteration loop before final batch block
 {max_iterations: 6}          # Safety cap; after this auto-prompt user to finalize
@@ -91,7 +91,7 @@ When `{interactive_review: true}`:
 7. During iteration phases: NEVER output `BEGIN_STANDARD_NAME_BATCH` or `END_STANDARD_NAME_BATCH`.
 8. Ensure consistency: rows removed or modified must propagate across dependent sections (e.g., if a base scalar is deleted, derived forms including it must also be removed and optionally listed under a transient "auto_removed" note after finalization inside metadata notes section.
 9. Maintain internal sets:
-	- `current.base_scalars`, `current.vectors`, `current.components`, `current.derived_vectors`, `current.derived_scalars`
+	- `current.base_scalars`, `current.vectors`, `current.components`, `current.scalars_with_provenance`
 	- `rejected`, `similar_rejected`, `auto_removed`
 10. Only the final batch block includes `rejected` and `similar_rejected`; iteration steps must not output YAML.
 11. If `{interactive_review: false}` skip the loop and directly output final tables + batch block per legacy v1.2 behavior.
@@ -216,10 +216,8 @@ sections:
 		- <vector_name>
 	components:
 		- <component_name>
-	derived_vectors:
-		- <derived_vector_name>
-	derived_scalars:
-		- <derived_scalar_name>
+	scalars_with_provenance:
+		- <scalar_name_with_provenance>
 rejected:
 	- name: <token>
 		reason: <reason>
@@ -242,7 +240,7 @@ Rules:
 - Do not repeat names across sections; components must not appear in base_scalars.
 - Do not introduce fields outside `parameters`, `source_context`, `sections`, `metadata`.
 - Ensure every vector has >=2 distinct axis components (if vectors present).
-- If `include_vectors: false`, then `vectors`, `components`, `derived_vectors` should be absent or empty.
+- If `include_vectors: false`, then `vectors`, `components` should be absent or empty.
 - Use only the canonical `magnitude_of_` prefix form (never legacy `<vector>_magnitude`).
 - If self-check detects malformed YAML, regenerate the entire block (no manual patching mid-output).
 

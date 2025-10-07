@@ -10,7 +10,7 @@ try:  # optional dependency
 except Exception:  # pragma: no cover
     markdown = None  # type: ignore
 
-from ..schema import StandardNameBase
+from ..models import StandardNameEntryBase
 
 __all__ = ["render_html"]
 
@@ -24,13 +24,13 @@ def _md(text: str) -> str:
 
 
 def render_html(
-    entry: StandardNameBase, extended_doc: str = "", include_empty: bool = False
+    entry: StandardNameEntryBase, extended_doc: str = "", include_empty: bool = False
 ) -> str:
     """Return an HTML fragment representing a standard name.
 
     Parameters
     ----------
-    entry : StandardNameBase
+    entry : StandardNameEntryBase
         The validated schema model instance.
     extended_doc : str
         Optional richer documentation (sidecar markdown, etc.).
@@ -65,10 +65,6 @@ def render_html(
     )
     if unit_display and unit_display != "1":
         add_row("Unit", unit_display)
-    add_row("Frame", getattr(entry, "frame", None))
-    add_row("Components", getattr(entry, "components", None))
-    add_row("Magnitude", getattr(entry, "magnitude", None))
-    # Provenance (flatten if present)
     prov = getattr(entry, "provenance", None)
     if prov is not None:
         try:

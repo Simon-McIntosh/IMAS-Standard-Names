@@ -1,8 +1,16 @@
-"""Unified schema module for IMAS Standard Names.
+"""Pydantic models for IMAS Standard Names catalog entries.
 
-This module introduces a single, explicit data model for standard names.
+This module defines the complete data model for standard name catalog entries,
+including all metadata, provenance, governance, and validation rules.
 
-Per-file YAML schema (example):
+The StandardNameEntry union type represents full catalog entries with:
+- Core identification (name, kind, description)
+- Physical properties (unit, constraints, validity domain)
+- Governance (status, deprecation, supersession)
+- Provenance (operators, reductions, expressions)
+- Metadata (tags, links, documentation)
+
+Example scalar entry:
   name: ion_temperature
   kind: scalar
   status: active
@@ -13,33 +21,24 @@ Per-file YAML schema (example):
     - T_i >= 0
   validity_domain: core plasma
 
-Vector (example):
+Example vector entry:
   name: plasma_velocity
   kind: vector
   status: active
   unit: m/s
-  frame: cylindrical_r_tor_z
-  components:
-    r: r_component_of_plasma_velocity
-    tor: tor_component_of_plasma_velocity
-    z: z_component_of_plasma_velocity
-  magnitude: magnitude_of_plasma_velocity
+  description: Plasma velocity vector.
 
-Derived (operator) example:
-    name: gradient_of_electron_temperature
-    kind: derived_vector
-    status: active
-    unit: eV/m
-    frame: cylindrical_r_tor_z
-    components:
-        r: r_component_of_gradient_of_electron_temperature
-        tor: tor_component_of_gradient_of_electron_temperature
-        z: z_component_of_gradient_of_electron_temperature
-    provenance:
-        mode: operator
-        operators: [gradient]
-        base: electron_temperature
-        operator_id: gradient
+Example with operator provenance:
+  name: gradient_of_electron_temperature
+  kind: vector
+  status: active
+  unit: eV/m
+  description: Spatial gradient of electron temperature.
+  provenance:
+    mode: operator
+    operators: [gradient]
+    base: electron_temperature
+    operator_id: gradient
 
 """
 
@@ -87,25 +86,15 @@ class Kind(str, Enum):
     """Runtime enum for standard name kinds."""
 
     scalar = "scalar"
-    derived_scalar = "derived_scalar"
     vector = "vector"
-    derived_vector = "derived_vector"
 
 
-class Frame(str, Enum):  # limited set – extend as needed
-    cylindrical_r_tor_z = "cylindrical_r_tor_z"
-    cartesian_x_y_z = "cartesian_x_y_z"
-    spherical_r_theta_phi = "spherical_r_theta_phi"
-    toroidal_R_phi_Z = "toroidal_R_phi_Z"
-    flux_surface = "flux_surface"
+class StandardNameEntryBase(BaseModel):
+    """Base catalog entry definition (fields common to scalar and vector kinds).
 
-
-class StandardNameBase(BaseModel):
-    """Base standard name definition (fields common to all kinds).
-
-    Pydantic discriminated union configured via 'kind'. Subclasses define
-    literal kind values. All fields are explicitly annotated with concise
-    descriptions for downstream documentation / tooling generation.
+    Represents a complete standard name catalog entry with all metadata,
+    governance rules, and validation. This is a Pydantic discriminated union
+    configured via 'kind'. Subclasses define literal kind values.
     """
 
     model_config = ConfigDict(extra="forbid")
@@ -127,6 +116,7 @@ class StandardNameBase(BaseModel):
     superseded_by: Name | str = ""
     tags: Tags = Field(default_factory=list)
     links: Links = Field(default_factory=list)
+    provenance: Provenance | None = None
 
     # Supplemental validator for double underscore rule not expressible in pattern.
     @field_validator("name", "deprecates", "superseded_by")
@@ -228,142 +218,94 @@ class StandardNameBase(BaseModel):
                 raise ValueError(f"Unknown unit style: {style}")
 
 
-class StandardNameScalar(StandardNameBase):
+class StandardNameScalarEntry(StandardNameEntryBase):
+    """Scalar standard name catalog entry."""
+
     kind: Literal["scalar"] = "scalar"
 
-
-class StandardNameDerivedScalar(StandardNameBase):
-    kind: Literal["derived_scalar"] = "derived_scalar"
-    provenance: Provenance
-
     @model_validator(mode="after")
-    def _derived_rules(self):  # type: ignore[override]
-        if isinstance(self.provenance, OperatorProvenance):
-            self.provenance.operators = _normalize_operator_chain(
-                self.provenance.operators
-            )
-            _enforce_operator_naming(
-                name=self.name,
-                operators=self.provenance.operators,
-                base=self.provenance.base,
-                operator_id=self.provenance.operator_id,
-                kind=self.kind,
-            )
-        if isinstance(self.provenance, ReductionProvenance):
-            enforce_reduction_naming(
-                name=self.name,
-                reduction=self.provenance.reduction,
-                domain=self.provenance.domain,
-                base=self.provenance.base,
-            )
+    def _provenance_rules(self):  # type: ignore[override]
+        if self.provenance:
+            if isinstance(self.provenance, OperatorProvenance):
+                self.provenance.operators = _normalize_operator_chain(
+                    self.provenance.operators
+                )
+                _enforce_operator_naming(
+                    name=self.name,
+                    operators=self.provenance.operators,
+                    base=self.provenance.base,
+                    operator_id=self.provenance.operator_id,
+                    kind=self.kind,
+                )
+            if isinstance(self.provenance, ReductionProvenance):
+                enforce_reduction_naming(
+                    name=self.name,
+                    reduction=self.provenance.reduction,
+                    domain=self.provenance.domain,
+                    base=self.provenance.base,
+                )
         return self
 
 
-class StandardNameVector(StandardNameBase):
+class StandardNameVectorEntry(StandardNameEntryBase):
+    """Vector standard name catalog entry."""
+
     kind: Literal["vector"] = "vector"
-    frame: Frame = Field(..., description="Reference frame / coordinate system.")
-    components: dict[str, str] = Field(
-        ..., description="Mapping axis -> component standard name."
-    )
 
     @model_validator(mode="after")
-    def _vector_rules(self):  # type: ignore[override]
-        if len(self.components) < 2:
-            raise ValueError("Vector requires >=2 components")
-        for axis, comp in self.components.items():
-            if not re.match(r"^[a-z][a-z0-9_]*$", axis):
-                raise ValueError(f"Invalid axis token: {axis}")
-            expected_prefix = f"{axis}_component_of_"
-            if not comp.startswith(expected_prefix):
-                raise ValueError(
-                    f"Component '{comp}' must start with '{expected_prefix}'"
+    def _provenance_rules(self):  # type: ignore[override]
+        if self.provenance:
+            if isinstance(self.provenance, OperatorProvenance):
+                self.provenance.operators = _normalize_operator_chain(
+                    self.provenance.operators
+                )
+                _enforce_operator_naming(
+                    name=self.name,
+                    operators=self.provenance.operators,
+                    base=self.provenance.base,
+                    operator_id=self.provenance.operator_id,
+                    kind=self.kind,
+                )
+            if isinstance(self.provenance, ReductionProvenance):
+                enforce_reduction_naming(
+                    name=self.name,
+                    reduction=self.provenance.reduction,
+                    domain=self.provenance.domain,
+                    base=self.provenance.base,
                 )
         return self
 
     @property
     def magnitude(self) -> str:
-        """Derived magnitude standard name (not a stored field).
+        """Derived magnitude standard name.
 
-        Conventionally 'magnitude_of_<vector_name>'. Presence as an entry in
-        the catalog is optional and validated elsewhere if defined.
+        Conventionally 'magnitude_of_<vector_name>'.
         """
         return f"magnitude_of_{self.name}"
 
 
-class StandardNameDerivedVector(StandardNameBase):
-    kind: Literal["derived_vector"] = "derived_vector"
-    frame: Frame = Field(..., description="Reference frame / coordinate system.")
-    components: dict[str, str] = Field(
-        ..., description="Mapping axis -> component standard name."
-    )
-    provenance: Provenance
-
-    @model_validator(mode="after")
-    def _derived_vector_rules(self):  # type: ignore[override]
-        if len(self.components) < 2:
-            raise ValueError("Vector requires >=2 components")
-        for axis, comp in self.components.items():
-            if not re.match(r"^[a-z][a-z0-9_]*$", axis):
-                raise ValueError(f"Invalid axis token: {axis}")
-            expected_prefix = f"{axis}_component_of_"
-            if not comp.startswith(expected_prefix):
-                raise ValueError(
-                    f"Component '{comp}' must start with '{expected_prefix}'"
-                )
-        if isinstance(self.provenance, OperatorProvenance):
-            self.provenance.operators = _normalize_operator_chain(
-                self.provenance.operators
-            )
-            _enforce_operator_naming(
-                name=self.name,
-                operators=self.provenance.operators,
-                base=self.provenance.base,
-                operator_id=self.provenance.operator_id,
-                kind=self.kind,
-            )
-        if isinstance(self.provenance, ReductionProvenance):
-            enforce_reduction_naming(
-                name=self.name,
-                reduction=self.provenance.reduction,
-                domain=self.provenance.domain,
-                base=self.provenance.base,
-                vector_predicate=lambda b: b in self.components.values(),
-            )
-        return self
-
-    @property
-    def magnitude(self) -> str:
-        return f"magnitude_of_{self.name}"
-
-
-StandardName = Annotated[
-    StandardNameScalar
-    | StandardNameDerivedScalar
-    | StandardNameVector
-    | StandardNameDerivedVector,
+StandardNameEntry = Annotated[
+    StandardNameScalarEntry | StandardNameVectorEntry,
     Field(discriminator="kind"),
 ]
 
-_STANDARD_NAME_ADAPTER = TypeAdapter(StandardName)
+_STANDARD_NAME_ENTRY_ADAPTER = TypeAdapter(StandardNameEntry)
 
 
-def create_standard_name(data: dict) -> StandardName:
-    """Validate data into a StandardName union instance via discriminator."""
-    return _STANDARD_NAME_ADAPTER.validate_python(data)
+def create_standard_name_entry(data: dict) -> StandardNameEntry:
+    """Validate data into a StandardNameEntry union instance via discriminator."""
+    return _STANDARD_NAME_ENTRY_ADAPTER.validate_python(data)
 
 
 __all__ = [
     "Kind",
     "Status",
-    "Frame",
     "OperatorProvenance",
     "ExpressionProvenance",
-    "StandardNameBase",
-    "StandardNameScalar",
-    "StandardNameDerivedScalar",
-    "StandardNameVector",
-    "StandardNameDerivedVector",
-    "Name",  # token alias
-    "StandardName",  # union
-    "create_standard_name",
+    "StandardNameEntryBase",
+    "StandardNameScalarEntry",
+    "StandardNameVectorEntry",
+    "Name",
+    "StandardNameEntry",
+    "create_standard_name_entry",
 ]

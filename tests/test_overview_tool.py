@@ -15,7 +15,7 @@ def test_overview_structure():
     )
     assert result["total_standard_names"] > 0
 
-    expected_kinds = {"scalar", "derived_scalar", "vector", "derived_vector"}
+    expected_kinds = {"scalar", "vector"}
     assert set(result["standard_names_by_kind"]) == expected_kinds  # all kinds present
     assert (
         sum(result["standard_names_by_kind"].values()) == result["total_standard_names"]
@@ -27,12 +27,6 @@ def test_overview_structure():
         sum(result["standard_names_by_status"].values())
         == result["total_standard_names"]
     )
-
-    # Coordinate frames: must contain every enum value (may be zero counts)
-    from imas_standard_names.schema import Frame
-
-    frame_values = {f.value for f in Frame}
-    assert set(result["vector_standard_names_by_frame"]) == frame_values
 
     # Unit mapping: at least one unit key and dimensionless may appear
     assert "standard_names_by_unit" in result and isinstance(

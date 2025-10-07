@@ -1,11 +1,11 @@
 """Vector standard name example.
 
-Demonstrates creating a base vector with components and its implicit magnitude.
+Demonstrates creating a base vector with components using metadata convention.
 Highlights:
-  * Components must exist (or be staged) as scalar entries.
-  * Component names must follow <axis>_component_of_<vector> pattern.
-  * Frame must be specified.
-  * Magnitude standard name is conventional: magnitude_of_<vector> (optional to define explicitly).
+  * Components are specified at runtime via vector_axes metadata attribute.
+  * Component standard names follow <axis>_component_of_<vector> pattern.
+  * Magnitude standard name is conventional: magnitude_of_<vector>.
+  * Component scalars are separate catalog entries.
 """
 
 from __future__ import annotations
@@ -45,19 +45,13 @@ def main():
                 )
             )
 
-        # Vector references components by axis token mapping
+        # Vector definition - components specified via metadata at runtime
         vector = create_standard_name(
             {
                 "name": "magnetic_field",
                 "kind": "vector",
                 "unit": "T",
-                "frame": "cylindrical_r_tor_z",
-                "components": {
-                    "radial": "radial_component_of_magnetic_field",
-                    "toroidal": "toroidal_component_of_magnetic_field",
-                    "vertical": "vertical_component_of_magnetic_field",
-                },
-                "description": "Magnetic field vector (laboratory cylindrical frame).",
+                "description": "Magnetic field vector.",
                 "status": "draft",
             }
         )

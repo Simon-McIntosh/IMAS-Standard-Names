@@ -23,13 +23,13 @@ from imas_standard_names.editing.edit_models import (
     RenameResult,
     parse_apply_input,
 )
-from imas_standard_names.schema import StandardName, create_standard_name
+from imas_standard_names.models import StandardNameEntry, create_standard_name_entry
 from imas_standard_names.unit_of_work import UnitOfWork
 
 ModelDict = dict[str, Any]
 
 
-def serialize_model(model: StandardName) -> ModelDict:
+def serialize_model(model: StandardNameEntry) -> ModelDict:
     return model.model_dump()  # type: ignore[attr-defined]
 
 
@@ -63,19 +63,19 @@ class EditCatalog:
     # Mutations
     # ------------------------------------------------------------------
     def add(self, model_data: dict):
-        model = create_standard_name(model_data)
+        model = create_standard_name_entry(model_data)
         self.uow.add(model)
         self._mark_dirty(model.name)
         return model
 
     def modify(self, name: str, model_data: dict):
-        model = create_standard_name(model_data)
+        model = create_standard_name_entry(model_data)
         self.uow.update(name, model)
         self._mark_dirty(name, model.name)
         return model
 
     def rename(self, old_name: str, model_data: dict):
-        model = create_standard_name(model_data)
+        model = create_standard_name_entry(model_data)
         if model.name == old_name:
             return self.modify(old_name, model_data)
         self.uow.rename(old_name, model)

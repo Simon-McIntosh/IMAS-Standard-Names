@@ -1,7 +1,7 @@
 from pathlib import Path
 
-from imas_standard_names.catalog.sqlite_build import build_catalog
-from imas_standard_names.catalog.sqlite_read import CatalogRead
+from imas_standard_names.database.build import build_catalog
+from imas_standard_names.database.read import CatalogRead
 from imas_standard_names.repository import StandardNameCatalog
 
 

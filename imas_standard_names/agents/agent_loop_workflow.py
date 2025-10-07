@@ -16,9 +16,7 @@ from rich.prompt import IntPrompt, Prompt
 
 from imas_standard_names.agents.load_mcp import load_mcp_servers
 from imas_standard_names.agents.schema import Review, State
-from imas_standard_names.schema import StandardName  # type: ignore
-
-# from imas_standard_names.schema import StandardName
+from imas_standard_names.models import StandardNameEntry
 
 dotenv.load_dotenv(".env")
 
@@ -51,18 +49,19 @@ request_agent = Agent[None, State](
 #     toolsets=SERVERS,
 # )  # type: ignore
 
-ai_review_agent = Agent[StandardName, Review](
+ai_review_agent = Agent[StandardNameEntry, Review](
     model=build_default_model(), output_type=Review
 )  # type: ignore
 standard_name_agent = Agent[
-    tuple[list[StandardName], StandardName | None, Review | None], StandardName
+    tuple[list[StandardNameEntry], StandardNameEntry | None, Review | None],
+    StandardNameEntry,
 ](
     model=build_default_model(),
-    output_type=StandardName,  # type: ignore
+    output_type=StandardNameEntry,  # type: ignore
     toolsets=SERVERS,
 )  # type: ignore
 
-ai_review_agent = Agent[StandardName, Review](
+ai_review_agent = Agent[StandardNameEntry, Review](
     model=build_default_model(), output_type=Review, toolsets=SERVERS
 )  # type: ignore
 
@@ -75,13 +74,13 @@ async def main():
     )
     num_names: int = IntPrompt.ask("Enter number of names to generate", default=1)
 
-    history: list[StandardName] = []
+    history: list[StandardNameEntry] = []
     # generate initial candidates (sequential async awaits)
     candidate_results = [
         await standard_name_agent.run(query, deps=(history, None, None))
         for _ in range(num_names)
     ]
-    candidates: list[StandardName] = [r.output for r in candidate_results]
+    candidates: list[StandardNameEntry] = [r.output for r in candidate_results]
     print(candidates[0])
 
     review_results = [
