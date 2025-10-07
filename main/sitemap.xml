@@ -2,42 +2,46 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://Simon-McIntosh.github.io/IMAS-Standard-Names/latest/</loc>
-         <lastmod>2025-10-06</lastmod>
+         <lastmod>2025-10-07</lastmod>
+    </url>
+    <url>
+         <loc>https://Simon-McIntosh.github.io/IMAS-Standard-Names/latest/contributing/</loc>
+         <lastmod>2025-10-07</lastmod>
     </url>
     <url>
          <loc>https://Simon-McIntosh.github.io/IMAS-Standard-Names/latest/grammar-reference/</loc>
-         <lastmod>2025-10-06</lastmod>
+         <lastmod>2025-10-07</lastmod>
     </url>
     <url>
          <loc>https://Simon-McIntosh.github.io/IMAS-Standard-Names/latest/guidelines/</loc>
-         <lastmod>2025-10-06</lastmod>
+         <lastmod>2025-10-07</lastmod>
     </url>
     <url>
          <loc>https://Simon-McIntosh.github.io/IMAS-Standard-Names/latest/provenance/</loc>
-         <lastmod>2025-10-06</lastmod>
+         <lastmod>2025-10-07</lastmod>
     </url>
     <url>
          <loc>https://Simon-McIntosh.github.io/IMAS-Standard-Names/latest/quickstart/</loc>
-         <lastmod>2025-10-06</lastmod>
+         <lastmod>2025-10-07</lastmod>
     </url>
     <url>
          <loc>https://Simon-McIntosh.github.io/IMAS-Standard-Names/latest/reductions/</loc>
-         <lastmod>2025-10-06</lastmod>
+         <lastmod>2025-10-07</lastmod>
     </url>
     <url>
          <loc>https://Simon-McIntosh.github.io/IMAS-Standard-Names/latest/roadmap/</loc>
-         <lastmod>2025-10-06</lastmod>
+         <lastmod>2025-10-07</lastmod>
     </url>
     <url>
          <loc>https://Simon-McIntosh.github.io/IMAS-Standard-Names/latest/specification/</loc>
-         <lastmod>2025-10-06</lastmod>
+         <lastmod>2025-10-07</lastmod>
     </url>
     <url>
          <loc>https://Simon-McIntosh.github.io/IMAS-Standard-Names/latest/standard_name_generation_prompt/</loc>
-         <lastmod>2025-10-06</lastmod>
+         <lastmod>2025-10-07</lastmod>
     </url>
     <url>
          <loc>https://Simon-McIntosh.github.io/IMAS-Standard-Names/latest/style-guide/</loc>
-         <lastmod>2025-10-06</lastmod>
+         <lastmod>2025-10-07</lastmod>
     </url>
 </urlset>
