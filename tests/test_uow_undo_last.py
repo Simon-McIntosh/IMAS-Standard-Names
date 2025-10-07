@@ -1,10 +1,11 @@
 import pytest
-from imas_standard_names.repository import StandardNameRepository
-from imas_standard_names.schema import create_standard_name
+
+from imas_standard_names.models import create_standard_name_entry
+from imas_standard_names.repository import StandardNameCatalog
 
 
 def make_scalar(name, unit="eV"):
-    return create_standard_name(
+    return create_standard_name_entry(
         {
             "name": name,
             "kind": "scalar",
@@ -16,7 +17,7 @@ def make_scalar(name, unit="eV"):
 
 
 def test_undo_last_add(tmp_path):
-    repo = StandardNameRepository(tmp_path)
+    repo = StandardNameCatalog(tmp_path)
     uow = repo.start_uow()
     uow.add(make_scalar("a"))
     assert repo.exists("a")
@@ -26,7 +27,7 @@ def test_undo_last_add(tmp_path):
 
 
 def test_undo_last_update(tmp_path):
-    repo = StandardNameRepository(tmp_path)
+    repo = StandardNameCatalog(tmp_path)
     uow = repo.start_uow()
     uow.add(make_scalar("x"))
     # update x with new unit (simulate change)
@@ -39,7 +40,7 @@ def test_undo_last_update(tmp_path):
 
 
 def test_undo_last_rename(tmp_path):
-    repo = StandardNameRepository(tmp_path)
+    repo = StandardNameCatalog(tmp_path)
     uow = repo.start_uow()
     uow.add(make_scalar("orig"))
     renamed = make_scalar("new_name")
@@ -50,7 +51,7 @@ def test_undo_last_rename(tmp_path):
 
 
 def test_undo_last_chain(tmp_path):
-    repo = StandardNameRepository(tmp_path)
+    repo = StandardNameCatalog(tmp_path)
     uow = repo.start_uow()
     uow.add(make_scalar("a"))
     uow.add(make_scalar("b"))
@@ -68,7 +69,7 @@ def test_undo_last_chain(tmp_path):
 
 
 def test_undo_last_closed(tmp_path):
-    repo = StandardNameRepository(tmp_path)
+    repo = StandardNameCatalog(tmp_path)
     uow = repo.start_uow()
     uow.add(make_scalar("a"))
     uow.commit()

@@ -7,16 +7,16 @@ an immutable artifact; subsequent consumers should open it with CatalogRead.
 
 from __future__ import annotations
 
-from pathlib import Path
-import sqlite3
 import hashlib
 import os
+import sqlite3
+from collections.abc import Iterable
+from pathlib import Path
 
-from .sqlite_rw import CatalogReadWrite, DDL
-from ..yaml_store import YamlStore
-from ..schema import StandardName
+from ..models import StandardNameEntry
 from ..ordering import ordered_models
-from typing import Iterable
+from ..yaml_store import YamlStore
+from .readwrite import DDL, CatalogReadWrite
 
 
 class CatalogBuild(CatalogReadWrite):
@@ -42,7 +42,7 @@ def build_catalog(yaml_root: Path, db_path: Path, overwrite: bool = True) -> Pat
     schema + FTS layout. Returns the db_path.
     """
     store = YamlStore(yaml_root)
-    models: Iterable[StandardName] = store.load()
+    models: Iterable[StandardNameEntry] = store.load()
     builder = CatalogBuild(db_path, overwrite=overwrite)
     # Insert using dependency-safe ordering (vectors after components, derived after bases)
     for m in ordered_models(models):
@@ -75,7 +75,7 @@ def build_catalog(yaml_root: Path, db_path: Path, overwrite: bool = True) -> Pat
     # Aggregate hash (sorted by name for determinism)
     agg_hasher = hashlib.blake2b(digest_size=16)
     for name, h in sorted(digest_pairs, key=lambda x: x[0]):
-        agg_hasher.update(f"{name}:{h}".encode("utf-8"))
+        agg_hasher.update(f"{name}:{h}".encode())
     aggregate_hash = agg_hasher.hexdigest()
     cur.execute(
         "INSERT INTO integrity_manifest(id, algo, file_count, aggregate_hash) VALUES (1,?,?,?)",

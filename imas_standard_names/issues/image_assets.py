@@ -6,14 +6,14 @@ Backwards compatibility with the old import path is intentionally not preserved.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-from functools import cached_property
-from pathlib import Path
 import mimetypes
 import os
 import re
 import tempfile
-from typing import ClassVar, Dict, List
+from dataclasses import dataclass
+from functools import cached_property
+from pathlib import Path
+from typing import ClassVar
 
 import requests
 
@@ -35,7 +35,7 @@ class ImageProcessor:
     image_dir: Path = Path("docs/img")
     parents: int | None = 0  # number of parent levels to relativize against
 
-    EXTENSION_MAP: ClassVar[Dict[str, str]] = {
+    EXTENSION_MAP: ClassVar[dict[str, str]] = {
         "image/jpeg": "jpg",
         "image/png": "png",
         "image/gif": "gif",
@@ -44,7 +44,7 @@ class ImageProcessor:
     }
 
     @cached_property
-    def urls(self) -> List[str]:
+    def urls(self) -> list[str]:
         """Return image URLs extracted from documentation markdown/HTML."""
         markdown_pattern = r"!\[[^\]]*\]\((https?://[^)\s]+)\)"
         urls = re.findall(markdown_pattern, self.documentation)
@@ -53,7 +53,7 @@ class ImageProcessor:
         return urls + html_urls
 
     @cached_property
-    def paths(self) -> List[Path]:
+    def paths(self) -> list[Path]:
         """List of Path objects where images will be stored locally."""
         return [self._filepath(url, index) for index, url in enumerate(self.urls, 1)]
 
@@ -99,7 +99,7 @@ class ImageProcessor:
             for file in self.image_dir.glob("*"):
                 if file.is_file():
                     file.unlink()
-        for url, filepath in zip(self.urls, self.paths):
+        for url, filepath in zip(self.urls, self.paths, strict=False):
             self._download_image(url, filepath)
 
     def relative_path(self, filepath: Path) -> Path:
@@ -109,7 +109,7 @@ class ImageProcessor:
 
     def documentation_with_relative_paths(self) -> str:
         documentation = self.documentation
-        for url, filepath in zip(self.urls, self.paths):
+        for url, filepath in zip(self.urls, self.paths, strict=False):
             filepath = self.relative_path(filepath)
             documentation = documentation.replace(url, filepath.as_posix())
         return documentation

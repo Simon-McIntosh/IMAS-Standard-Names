@@ -1,5 +1,5 @@
 name: magnitude_of_gradient_of_poloidal_flux
-kind: derived_scalar
+kind: scalar
 unit: Wb.m^-1
 status: draft
 provenance:

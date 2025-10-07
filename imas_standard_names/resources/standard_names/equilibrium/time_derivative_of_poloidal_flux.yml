@@ -1,5 +1,5 @@
 name: time_derivative_of_poloidal_flux
-kind: derived_scalar
+kind: scalar
 unit: Wb.s^-1
 status: draft
 description: Time derivative of the poloidal flux field (∂ψ/∂t).

@@ -16,9 +16,7 @@
   // --- Testing ----------------------------------------------------------
   "python.testing.pytestEnabled": true,
   "python.testing.unittestEnabled": false,
-  "python.testing.pytestArgs": [
-    "tests"
-  ],
+  "python.testing.pytestArgs": ["tests"],
   "python.testing.cwd": "${workspaceFolder}",
   // --- Formatting --------------------------------------------------------
   "editor.formatOnSave": true,
@@ -34,6 +32,7 @@
     "Maarten",
     "mkdocs",
     "mypy",
+    "openrouter",
     "pydantic",
     "pytest",
     "pyyaml",
@@ -45,15 +44,17 @@
     "strictyaml",
     "syaml",
     "tokamaks",
+    "toolsets",
     "UDUNITS"
   ],
   // --- Chat MCP sampling (project tool integration) --------------------
   "chat.mcp.serverSampling": {
     "imas-standard-names/.vscode/mcp.json: imas": {
-      "allowedModels": [
-        "copilot/gpt-5"
-      ],
+      "allowedModels": ["copilot/gpt-5"],
       "allowedDuringChat": true
     }
+  },
+  "chat.promptFilesLocations": {
+    ".github/prompts/workflows/list_generate_workflow": true
   }
 }

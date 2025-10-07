@@ -1,5 +1,8 @@
 # Contributing to IMAS Standard Names
 
+!!! warning "Documentation Out of Date"
+This contributing guide is currently out of date and needs to be updated to reflect the latest project structure and workflows. Please consult the project maintainers or open an issue if you have questions about contributing.
+
 Thank you for your interest in contributing to the IMAS Standard Names project! This document provides guidelines and instructions to help you contribute effectively.
 
 ## Project Overview

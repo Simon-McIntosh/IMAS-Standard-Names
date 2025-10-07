@@ -13,14 +13,15 @@ compare instances of these dataclasses.
 
 from __future__ import annotations
 
+import importlib.resources as ir
+from collections.abc import Iterable
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Iterable, Any
-import importlib.resources as ir
-import yaml
+from typing import Any
 
-from textual.widgets import Tree
+import yaml
 from rich.text import Text
+from textual.widgets import Tree
 
 RESOURCES_PACKAGE = "imas_standard_names.resources"
 STANDARD_NAMES_DIRNAME = "standard_names"
@@ -49,8 +50,8 @@ class YamlFileNode:
     data: dict[str, Any] = field(repr=False)
 
     @classmethod
-    def from_file(cls, file_path: Path) -> "YamlFileNode":
-        with open(file_path, "r", encoding="utf-8") as f:
+    def from_file(cls, file_path: Path) -> YamlFileNode:
+        with open(file_path, encoding="utf-8") as f:
             raw = yaml.safe_load(f) or {}
         # Normalise legacy format {name: {...}} to inner mapping
         if isinstance(raw, dict) and len(raw) == 1 and next(iter(raw)) != "name":
@@ -88,11 +89,11 @@ class DirectoryNode:
 
     path: Path
     name: str
-    directories: list["DirectoryNode"] = field(default_factory=list)
+    directories: list[DirectoryNode] = field(default_factory=list)
     files: list[YamlFileNode] = field(default_factory=list)
 
     @classmethod
-    def from_path(cls, path: Path) -> "DirectoryNode":
+    def from_path(cls, path: Path) -> DirectoryNode:
         directories: list[DirectoryNode] = []
         files: list[YamlFileNode] = []
         for child in sorted(path.iterdir()):
@@ -114,8 +115,7 @@ class DirectoryNode:
 
     # Iteration utilities (useful for future diffing)
     def iter_files(self) -> Iterable[YamlFileNode]:
-        for f in self.files:
-            yield f
+        yield from self.files
         for d in self.directories:
             yield from d.iter_files()
 
@@ -127,7 +127,7 @@ class ResourcesTree:
     root: DirectoryNode
 
     @classmethod
-    def load(cls) -> "ResourcesTree":
+    def load(cls) -> ResourcesTree:
         traversable = ir.files(RESOURCES_PACKAGE).joinpath(STANDARD_NAMES_DIRNAME)
         # Ensure we have a concrete filesystem path (needed for rglob / iterdir)
         with ir.as_file(traversable) as fs_path:
@@ -220,7 +220,7 @@ class ResourcesTree:
                 parent_node.set_label(label)
 
         # We don't want to wrap in an extra "JSON" node; we attach children directly.
-        if isinstance(json_data, (dict, list)):
+        if isinstance(json_data, dict | list):
             for key, value in (
                 json_data.items()
                 if isinstance(json_data, dict)

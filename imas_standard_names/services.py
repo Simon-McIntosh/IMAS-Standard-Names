@@ -2,21 +2,20 @@
 
 from __future__ import annotations
 
-from typing import Dict, List
 import json
 import sqlite3
 
-from .schema import create_standard_name, StandardName
-from .validation.structural import run_structural_checks
+from .models import StandardNameEntry, create_standard_name_entry
 from .validation.semantic import run_semantic_checks
+from .validation.structural import run_structural_checks
 
 
-def validate_models(models: Dict[str, StandardName]) -> List[str]:
+def validate_models(models: dict[str, StandardNameEntry]) -> list[str]:
     """Run structural + semantic validation returning list of issues."""
     return run_structural_checks(models) + run_semantic_checks(models)
 
 
-def row_to_model(conn: sqlite3.Connection, row: sqlite3.Row) -> StandardName:
+def row_to_model(conn: sqlite3.Connection, row: sqlite3.Row) -> StandardNameEntry:
     data = {
         "name": row["name"],
         "kind": row["kind"],
@@ -28,14 +27,6 @@ def row_to_model(conn: sqlite3.Connection, row: sqlite3.Row) -> StandardName:
         "deprecates": row["deprecates"] or "",
         "superseded_by": row["superseded_by"] or "",
     }
-    if row["kind"].endswith("vector"):
-        comps = conn.execute(
-            "SELECT axis, component_name FROM vector_component WHERE vector_name=?",
-            (row["name"],),
-        ).fetchall()
-        data["components"] = {c[0]: c[1] for c in comps}
-        # Frame applies to both vector and derived_vector kinds
-        data["frame"] = row["frame"]
     op = conn.execute(
         "SELECT operator_chain, base, operator_id FROM provenance_operator WHERE name=?",
         (row["name"],),
@@ -90,7 +81,7 @@ def row_to_model(conn: sqlite3.Connection, row: sqlite3.Row) -> StandardName:
     ]
     if links:
         data["links"] = links
-    return create_standard_name(data)
+    return create_standard_name_entry(data)
 
 
 __all__ = ["validate_models", "row_to_model"]

@@ -1,12 +1,13 @@
 from __future__ import annotations
 
 from pathlib import Path
+
 import pytest
 
 from imas_standard_names.paths import (
-    CatalogPaths,
-    STANDARD_NAMES_DIRNAME,
     CATALOG_DIRNAME,
+    STANDARD_NAMES_DIRNAME,
+    CatalogPaths,
 )
 
 

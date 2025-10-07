@@ -6,18 +6,17 @@ in the SQLite catalog produced by build_catalog.
 
 from __future__ import annotations
 
-from pathlib import Path
-import sqlite3
 import hashlib
-from typing import List, Dict
+import sqlite3
+from pathlib import Path
 
 
 def verify_integrity(
     yaml_root: Path, db_path: Path, full: bool = False
-) -> List[Dict[str, str]]:
+) -> list[dict[str, str]]:
     yaml_root = Path(yaml_root).resolve()
     db_path = Path(db_path)
-    issues: List[Dict[str, str]] = []
+    issues: list[dict[str, str]] = []
     if not db_path.exists():
         return [{"code": "db-missing", "detail": str(db_path)}]
     conn = sqlite3.connect(f"file:{db_path}?mode=ro", uri=True)
@@ -86,7 +85,7 @@ def verify_integrity(
                 agg = hashlib.blake2b(digest_size=16)
                 pairs = [(n, db_index[n]["hash"]) for n in sorted(db_index.keys())]
                 for n, h in pairs:
-                    agg.update(f"{n}:{h}".encode("utf-8"))
+                    agg.update(f"{n}:{h}".encode())
                 if agg.hexdigest() != manifest["aggregate_hash"] or manifest[
                     "file_count"
                 ] != len(db_index):

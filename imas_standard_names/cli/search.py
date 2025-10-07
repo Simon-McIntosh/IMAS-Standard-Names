@@ -11,9 +11,9 @@ from pathlib import Path
 
 import click
 
-from ..catalog.sqlite_read import CatalogRead
+from ..database.read import CatalogRead
 from ..paths import CatalogPaths
-from ..repository import StandardNameRepository
+from ..repository import StandardNameCatalog
 
 
 @click.command("search")
@@ -55,7 +55,7 @@ def search_cmd(
         except Exception:  # pragma: no cover - fallback
             results = None
     if results is None:
-        repo = StandardNameRepository(resolved_root)
+        repo = StandardNameCatalog(resolved_root)
         results = repo.search(query, limit=limit, with_meta=meta)
         source_label = "memory"
     if meta:

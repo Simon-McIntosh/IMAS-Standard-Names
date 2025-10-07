@@ -1,6 +1,9 @@
 import importlib.metadata
 
-import pint
+try:  # pint is optional at import time for build hooks
+    import pint  # type: ignore
+except Exception:  # pragma: no cover - allow package import without pint
+    pint = None  # type: ignore[assignment]
 
 # ---------------------------------------------------------------------------
 # Version metadata
@@ -18,26 +21,37 @@ try:  # pragma: no cover - trivial guard
 except importlib.metadata.PackageNotFoundError:  # distribution not installed
     __version__ = "0.0.0"
 
-from .generic_names import GenericNames  # re-export
-
-__all__ = ["__version__", "GenericNames"]
+__all__ = ["__version__"]
 
 
 # ---------------------------------------------------------------------------
-# Pint custom unit formatting
+# Pint custom unit formatting (register format 'F' when pint is available)
 # ---------------------------------------------------------------------------
-@pint.register_unit_format("F")
-def format_unit_simple(unit, registry, **options):  # pragma: no cover - format
-    """Return pint unit in fused dot-exponent UDUNITS syntax using short symbols.
 
-    Differences from pint's built-in formatters:
-        * Enforces lexicographic ordering of symbols for determinism.
-        * Uses the stored short symbols (no expansion to long names like 'meter').
-        * Represents denominators with negative exponents only (no division symbol).
-    """
-    items = [(str(sym), int(exp)) for sym, exp in unit.items() if int(exp) != 0]
-    items.sort(key=lambda x: x[0])
-    return ".".join(sym if exp == 1 else f"{sym}^{exp}" for sym, exp in items)
+if pint is not None:
 
+    def format_unit_udunits_dot_exponent(
+        unit, registry, **options
+    ):  # pragma: no cover - format
+        """Return UDUNITS-style dot-exponent string using short symbols.
 
-__all__.append("format_unit_simple")
+        This formatter is registered with pint under the short name 'F' and
+        produces strings like "m.s^-2" using unit symbols with dot-separated
+        factors and caret exponents.
+
+        Parameters:
+            unit: The pint UnitsContainer mapping symbols to exponents.
+            registry: The pint UnitRegistry (unused but part of the protocol).
+            **options: Additional formatting options (unused).
+
+        Returns:
+            A string with UDUNITS-style formatting, using short unit symbols.
+        """
+        items = sorted(
+            ((str(sym), int(exp)) for sym, exp in unit.items() if int(exp)),
+            key=lambda x: x[0],
+        )
+        return ".".join(sym if exp == 1 else f"{sym}^{exp}" for sym, exp in items)
+
+    # Register with pint; do not export in package namespace
+    pint.register_unit_format("F")(format_unit_udunits_dot_exponent)

@@ -7,10 +7,12 @@ Creates a time derivative of electron_temperature. Requirements:
 """
 
 from __future__ import annotations
+
 import tempfile
-from pathlib import Path
 from contextlib import contextmanager
-from imas_standard_names.repository import StandardNameRepository
+from pathlib import Path
+
+from imas_standard_names.repository import StandardNameCatalog
 from imas_standard_names.schema import create_standard_name
 
 
@@ -24,7 +26,7 @@ def tmp_root():
 
 def main():
     with tmp_root() as root:
-        repo = StandardNameRepository(root)
+        repo = StandardNameCatalog(root)
         uow = repo.start_uow()
 
         base = create_standard_name(
@@ -41,7 +43,7 @@ def main():
         derived = create_standard_name(
             {
                 "name": "time_derivative_of_electron_temperature",
-                "kind": "derived_scalar",
+                "kind": "scalar",
                 "unit": "eV.s^-1",
                 "description": "Temporal derivative of electron_temperature.",
                 "status": "draft",

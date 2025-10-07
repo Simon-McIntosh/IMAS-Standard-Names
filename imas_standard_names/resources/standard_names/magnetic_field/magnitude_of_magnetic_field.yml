@@ -1,5 +1,5 @@
 name: magnitude_of_magnetic_field
-kind: derived_scalar
+kind: scalar
 unit: T
 provenance:
   mode: reduction

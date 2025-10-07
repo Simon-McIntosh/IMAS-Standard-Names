@@ -1,9 +1,9 @@
-from imas_standard_names.schema import create_standard_name
+from imas_standard_names.models import create_standard_name_entry
 
 
 def test_links_trailing_whitespace_preserved_if_duplicate():
     # Current implementation does not deduplicate; we document that.
-    sn = create_standard_name(
+    sn = create_standard_name_entry(
         {
             "kind": "scalar",
             "name": "core_density",
@@ -17,7 +17,7 @@ def test_links_trailing_whitespace_preserved_if_duplicate():
 
 
 def test_constraints_trimmed():
-    sn = create_standard_name(
+    sn = create_standard_name_entry(
         {
             "kind": "scalar",
             "name": "upper_bound_test",

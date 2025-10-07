@@ -6,8 +6,9 @@ operator chain or an expression.
 
 from __future__ import annotations
 
-from typing import List, Optional, Union, Annotated, Literal
 import re
+from typing import Annotated, Literal
+
 from pydantic import BaseModel, Field, field_validator
 
 
@@ -29,13 +30,13 @@ class OperatorProvenance(BaseModel):
     """
 
     mode: Literal["operator"] = "operator"
-    operators: List[str] = Field(min_length=1)
+    operators: list[str] = Field(min_length=1)
     base: str
-    operator_id: Optional[str] = None
+    operator_id: str | None = None
 
     @field_validator("operators")
     @classmethod
-    def validate_ops(cls, ops: List[str]) -> List[str]:
+    def validate_ops(cls, ops: list[str]) -> list[str]:
         for o in ops:
             if not re.match(r"^[a-z_][a-z0-9_]*$", o):
                 raise ValueError(f"Invalid operator token: {o}")
@@ -62,11 +63,11 @@ class ExpressionProvenance(BaseModel):
 
     mode: Literal["expression"] = "expression"
     expression: str
-    dependencies: List[str] = Field(min_length=1)
+    dependencies: list[str] = Field(min_length=1)
 
     @field_validator("dependencies")
     @classmethod
-    def validate_dependencies(cls, deps: List[str]) -> List[str]:
+    def validate_dependencies(cls, deps: list[str]) -> list[str]:
         for d in deps:
             if not re.match(r"^[a-z][a-z0-9_]*$", d):
                 raise ValueError(f"Invalid dependency token: {d}")
@@ -98,7 +99,7 @@ class ReductionProvenance(BaseModel):
 
 
 Provenance = Annotated[
-    Union[OperatorProvenance, ExpressionProvenance, ReductionProvenance],
+    OperatorProvenance | ExpressionProvenance | ReductionProvenance,
     Field(discriminator="mode"),
 ]
 

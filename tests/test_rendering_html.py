@@ -1,6 +1,8 @@
 from pathlib import Path
+
 import yaml
-from imas_standard_names.schema import create_standard_name
+
+from imas_standard_names.models import create_standard_name_entry
 from imas_standard_names.rendering import render_html
 
 
@@ -12,10 +14,6 @@ kind: vector
 status: active
 unit: m.s^-1
 description: Flow velocity.
-frame: cylindrical_r_tor_z
-components:
-  r: r_component_of_velocity
-  tor: tor_component_of_velocity
 """,
         encoding="utf-8",
     )
@@ -39,8 +37,8 @@ description: Toroidal component of velocity.
         encoding="utf-8",
     )
     data = yaml.safe_load(yml.read_text(encoding="utf-8"))
-    entry = create_standard_name(data)
+    entry = create_standard_name_entry(data)
     html = render_html(entry)
     assert "velocity" in html
     assert "Flow velocity" in html
-    assert "Magnitude" in html or "magnitude_of_velocity" in html
+    assert "vector" in html  # Check kind is rendered

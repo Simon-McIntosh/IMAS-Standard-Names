@@ -8,6 +8,7 @@ commands from storage specifics.
 from __future__ import annotations
 
 from pathlib import Path
+
 from .repository import StandardNameRepository
 from .storage.writer import write_catalog_artifacts
 

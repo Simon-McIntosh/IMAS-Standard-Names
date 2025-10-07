@@ -1,7 +1,7 @@
 from imas_standard_names.issues.cli import (
+    get_standardname,
     has_standardname,
     is_genericname,
-    get_standardname,
 )
 
 

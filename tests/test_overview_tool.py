@@ -1,21 +1,21 @@
-from imas_standard_names.repository import StandardNameRepository
+from imas_standard_names.repository import StandardNameCatalog
 from imas_standard_names.tools.overview import OverviewTool
 
 
 def test_overview_structure():
-    repo = StandardNameRepository()
+    repo = StandardNameCatalog()
     tool = OverviewTool(repo)
     # call directly (sync wrapper of async not needed if we just run loop)
     import asyncio
 
-    result = asyncio.run(tool.get_overview())
+    result = asyncio.run(tool.get_standard_names_overview())
 
     assert "total_standard_names" in result and result["total_standard_names"] == len(
         repo
     )
     assert result["total_standard_names"] > 0
 
-    expected_kinds = {"scalar", "derived_scalar", "vector", "derived_vector"}
+    expected_kinds = {"scalar", "vector"}
     assert set(result["standard_names_by_kind"]) == expected_kinds  # all kinds present
     assert (
         sum(result["standard_names_by_kind"].values()) == result["total_standard_names"]
@@ -27,12 +27,6 @@ def test_overview_structure():
         sum(result["standard_names_by_status"].values())
         == result["total_standard_names"]
     )
-
-    # Coordinate frames: must contain every enum value (may be zero counts)
-    from imas_standard_names.schema import Frame
-
-    frame_values = {f.value for f in Frame}
-    assert set(result["vector_standard_names_by_frame"]) == frame_values
 
     # Unit mapping: at least one unit key and dimensionless may appear
     assert "standard_names_by_unit" in result and isinstance(

@@ -14,6 +14,7 @@ from __future__ import annotations
 import click
 
 from .build import build_cmd
+from .schema import schema_cmd
 from .search import search_cmd
 
 
@@ -25,5 +26,6 @@ def standard_names():  # pragma: no cover - thin group wrapper
 # Register subcommands
 standard_names.add_command(build_cmd)
 standard_names.add_command(search_cmd)
+standard_names.add_command(schema_cmd)
 
 __all__ = ["standard_names"]

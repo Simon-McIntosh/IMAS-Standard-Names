@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import sqlite3
 
-from ..schema import StandardName
+from ..models import StandardNameEntry
 from ..services import row_to_model
 
 
@@ -19,13 +19,13 @@ class CatalogBase:
         self.conn.row_factory = sqlite3.Row
 
     # ---------------------------- Query API ----------------------------
-    def get(self, name: str) -> StandardName | None:
+    def get(self, name: str) -> StandardNameEntry | None:
         row = self.conn.execute(
             "SELECT * FROM standard_name WHERE name=?", (name,)
         ).fetchone()
         return row_to_model(self.conn, row) if row else None
 
-    def list(self) -> list[StandardName]:
+    def list(self) -> list[StandardNameEntry]:
         rows = self.conn.execute("SELECT * FROM standard_name").fetchall()
         return [row_to_model(self.conn, r) for r in rows]
 

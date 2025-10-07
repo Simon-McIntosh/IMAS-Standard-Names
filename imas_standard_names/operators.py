@@ -12,14 +12,13 @@ must always contain only primitive tokens.
 
 from __future__ import annotations
 
-from typing import List, Optional, Tuple
 from pydantic import BaseModel, Field
 
 
 class OperatorPattern(BaseModel):
     operator_id: str  # canonical id (may be composite)
-    primitive_chain: List[str] = Field(min_length=1)  # outermost-first
-    result_kind: Optional[str] = None  # derived_scalar / derived_vector or None
+    primitive_chain: list[str] = Field(min_length=1)  # outermost-first
+    result_kind: str | None = None  # scalar / vector or None
     operand_format: str = Field(default="{suffix}")  # build expected base token
     description: str = ""
 
@@ -35,7 +34,7 @@ class OperatorPattern(BaseModel):
 PRIMITIVE_OPERATORS = {"gradient", "time_derivative", "divergence", "curl", "laplacian"}
 
 # Ordered patterns (specific first)
-OPERATOR_PATTERNS: List[OperatorPattern] = [
+OPERATOR_PATTERNS: list[OperatorPattern] = [
     OperatorPattern(
         operator_id="second_time_derivative",
         primitive_chain=["time_derivative", "time_derivative"],
@@ -45,7 +44,7 @@ OPERATOR_PATTERNS: List[OperatorPattern] = [
     OperatorPattern(
         operator_id="gradient",
         primitive_chain=["gradient"],
-        result_kind="derived_vector",
+        result_kind="vector",
         description="Spatial gradient (vector result).",
     ),
     OperatorPattern(
@@ -57,25 +56,25 @@ OPERATOR_PATTERNS: List[OperatorPattern] = [
     OperatorPattern(
         operator_id="divergence",
         primitive_chain=["divergence"],
-        result_kind="derived_scalar",
+        result_kind="scalar",
         description="Divergence (scalar result).",
     ),
     OperatorPattern(
         operator_id="curl",
         primitive_chain=["curl"],
-        result_kind="derived_vector",
+        result_kind="vector",
         description="Curl (vector result).",
     ),
     OperatorPattern(
         operator_id="laplacian",
         primitive_chain=["laplacian"],
-        result_kind="derived_scalar",
+        result_kind="scalar",
         description="Laplacian (scalar result).",
     ),
 ]
 
 
-def match_operator_pattern(name: str) -> Tuple[OperatorPattern, str] | None:
+def match_operator_pattern(name: str) -> tuple[OperatorPattern, str] | None:
     # Ensure longer prefixes (composite ids) match first
     for pattern in sorted(OPERATOR_PATTERNS, key=lambda p: len(p.prefix), reverse=True):
         pref = pattern.prefix
@@ -84,13 +83,13 @@ def match_operator_pattern(name: str) -> Tuple[OperatorPattern, str] | None:
     return None
 
 
-def parse_operator_chain(name: str) -> Tuple[List[str], str, List[OperatorPattern]]:
+def parse_operator_chain(name: str) -> tuple[list[str], str, list[OperatorPattern]]:
     """Peel operator prefixes recursively.
 
     Returns (primitive_chain, base, patterns_encountered_outermost_first).
     """
-    chain: List[str] = []
-    patterns: List[OperatorPattern] = []
+    chain: list[str] = []
+    patterns: list[OperatorPattern] = []
     remaining = name
     while True:
         m = match_operator_pattern(remaining)
@@ -103,7 +102,7 @@ def parse_operator_chain(name: str) -> Tuple[List[str], str, List[OperatorPatter
     return chain, remaining, patterns
 
 
-def normalize_operator_chain(operators: List[str]) -> List[str]:
+def normalize_operator_chain(operators: list[str]) -> list[str]:
     """Validate operators are primitive tokens and return them (outermost-first)."""
     for op in operators:
         if op not in PRIMITIVE_OPERATORS:
@@ -116,9 +115,9 @@ def normalize_operator_chain(operators: List[str]) -> List[str]:
 def enforce_operator_naming(
     *,
     name: str,
-    operators: List[str],
+    operators: list[str],
     base: str,
-    operator_id: Optional[str],
+    operator_id: str | None,
     kind: str,
 ) -> None:
     """Validate consistency of supplied operator provenance with name.
@@ -126,7 +125,7 @@ def enforce_operator_naming(
     - Reconstruct chain + base from name
     - Ensure primitive chain equality
     - Ensure base match
-    - Ensure derived kind consistency (last non-null result_kind wins)
+    - Ensure kind consistency (last non-null result_kind wins)
     - Ensure operator_id (if supplied) matches outermost pattern
     """
     chain, detected_base, patterns = parse_operator_chain(name)
@@ -146,7 +145,7 @@ def enforce_operator_naming(
             expected_kind = pat.result_kind
     if expected_kind and kind != expected_kind:
         raise ValueError(
-            f"Derived kind mismatch: naming implies {expected_kind} but entry is {kind}"
+            f"Kind mismatch: naming implies {expected_kind} but entry is {kind}"
         )
     if operator_id and operator_id != patterns[0].operator_id:
         raise ValueError(

@@ -43,6 +43,10 @@ jobs:
             # Extract the major and minor version from the tag
             version=$(echo ${{ github.ref_name }} | cut -d. -f1-2)
             tagged=true
+          elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            # For pull requests, use pr-<number>
+            version="pr-${{ github.event.pull_request.number }}"
+            tagged=false
           else
             # Use the branch name as the version
             version=${{ github.ref_name }}
@@ -62,15 +66,16 @@ jobs:
           git fetch origin gh-pages --depth=1
           git config user.name github-actions[bot]
           git config user.email github-actions[bot]@users.noreply.github.com
-          uv run mike deploy "${{ steps.version.outputs.version }}" --push --allow-empty --title ${{ github.ref_name }}
+          uv run mike deploy "${{ steps.version.outputs.version }}" --allow-empty --title ${{ github.ref_name }}
         env:
           SITE_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}
 
       - name: Update mike alias 
         if: steps.version.outputs.tagged == 'true'
-        run: uv run mike alias "${{ steps.version.outputs.version }}" "latest" --update-aliases --push
+        run: uv run mike alias "${{ steps.version.outputs.version }}" "latest" --update-aliases
 
   deploy:
+    if: github.event_name != 'pull_request'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

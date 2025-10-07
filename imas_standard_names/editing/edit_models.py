@@ -15,18 +15,18 @@ from typing import Annotated, Literal
 
 from pydantic import BaseModel, Field, TypeAdapter, model_validator
 
-from ..schema import StandardName, create_standard_name
+from ..models import StandardNameEntry, create_standard_name_entry
 
 
 class AddInput(BaseModel):
     action: Literal["add"]
-    model: StandardName
+    model: StandardNameEntry
 
 
 class ModifyInput(BaseModel):
     action: Literal["modify"]
     name: str
-    model: StandardName
+    model: StandardNameEntry
 
     @model_validator(mode="after")
     def _check_name(self):  # type: ignore[no-untyped-def]
@@ -63,7 +63,7 @@ def parse_apply_input(data: dict) -> ApplyInput:
     """Coerce raw dict payload (with optional model dict) into an ApplyInput."""
     if isinstance(data, dict) and "model" in data and isinstance(data["model"], dict):
         try:
-            data = {**data, "model": create_standard_name(data["model"])}
+            data = {**data, "model": create_standard_name_entry(data["model"])}
         except Exception as e:  # pragma: no cover
             raise ValueError(f"Invalid model payload: {e}") from e
     return _ApplyInputAdapter.validate_python(data)
@@ -98,13 +98,13 @@ class BaseResult(BaseModel):
 
 class AddResult(BaseResult):
     action: Literal["add"] = "add"
-    model: StandardName
+    model: StandardNameEntry
 
 
 class ModifyResult(BaseResult):
     action: Literal["modify"] = "modify"
-    old_model: StandardName
-    new_model: StandardName
+    old_model: StandardNameEntry
+    new_model: StandardNameEntry
 
 
 class RenameResult(BaseResult):
@@ -115,7 +115,7 @@ class RenameResult(BaseResult):
 
 class DeleteResult(BaseResult):
     action: Literal["delete"] = "delete"
-    old_model: StandardName | None
+    old_model: StandardNameEntry | None
     existed: bool
 
 

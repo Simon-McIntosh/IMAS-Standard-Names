@@ -1,7 +1,7 @@
-from imas_standard_names.paths import CatalogPaths
-from imas_standard_names.yaml_store import YamlStore
 from imas_standard_names.ordering import ordered_model_names
-from imas_standard_names.repository import StandardNameRepository
+from imas_standard_names.paths import CatalogPaths
+from imas_standard_names.repository import StandardNameCatalog
+from imas_standard_names.yaml_store import YamlStore
 
 
 def test_vector_components_before_vectors():
@@ -39,6 +39,6 @@ def test_provenance_base_before_derived():
 
 def test_repository_initializes_without_fk_errors():
     # This will raise if FK ordering still broken.
-    repo = StandardNameRepository()
+    repo = StandardNameCatalog()
     # Simple sanity: at least one known name present
     assert any(m.name == "magnetic_field" for m in repo.list())

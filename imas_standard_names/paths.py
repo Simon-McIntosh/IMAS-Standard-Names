@@ -30,11 +30,11 @@ concise interface for common defaults and overrides.
 
 from __future__ import annotations
 
-from pathlib import Path
-from typing import Iterable
-from dataclasses import dataclass, field
-import importlib.resources as ir
 import fnmatch
+import importlib.resources as ir
+from collections.abc import Iterable
+from dataclasses import dataclass, field
+from pathlib import Path
 
 RESOURCES_DIRNAME = "resources"
 STANDARD_NAMES_DIRNAME = "standard_names"
@@ -78,7 +78,7 @@ class CatalogPaths:
         self.catalog_path = self._resolve_catalog(self.catalog, self.catalog_filename)
 
     # Public helper -------------------------------------------------------
-    def ensure_catalog_dir(self) -> "CatalogPaths":
+    def ensure_catalog_dir(self) -> CatalogPaths:
         """Create the parent directory for `catalog_path` if missing."""
         self.catalog_path.parent.mkdir(parents=True, exist_ok=True)
         return self

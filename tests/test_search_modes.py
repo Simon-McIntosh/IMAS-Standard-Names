@@ -1,5 +1,6 @@
-from pathlib import Path
 import json
+from pathlib import Path
+
 from click.testing import CliRunner
 
 from imas_standard_names.cli import standard_names
