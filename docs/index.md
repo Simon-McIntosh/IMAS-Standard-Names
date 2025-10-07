@@ -60,4 +60,4 @@ print(f"{name.unit}: {name.description}")
 
 ## Contributing
 
-See [Contributing Guidelines](../CONTRIBUTING.md) for information on proposing new standard names or modifications to the grammar.
+See [Contributing Guidelines](contributing.md) for information on proposing new standard names or modifications to the grammar.

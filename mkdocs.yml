@@ -3,6 +3,7 @@ site_url:
   !ENV [SITE_URL, "https://iterorganization.github.io/IMAS-Standard-Names/"]
 
 plugins:
+  - include-markdown
   - macros:
       verbose: true
       modules:
@@ -29,7 +30,7 @@ nav:
   - Provenance: provenance.md
   - Reductions: reductions.md
   - Roadmap: roadmap.md
-  - Contributing: ../CONTRIBUTING.md
+  - Contributing: contributing.md
 
 theme:
   name: material
