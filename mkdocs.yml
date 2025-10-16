@@ -27,6 +27,8 @@ nav:
   - Specification: specification.md
   - Quick Start: quickstart.md
   - Style Guide: style-guide.md
+  - Examples:
+    - IMAS Magnetics Diagnostic: magnetics-example.md
   - Provenance: provenance.md
   - Reductions: reductions.md
   - Roadmap: roadmap.md

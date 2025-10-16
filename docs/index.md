@@ -9,6 +9,7 @@ Welcome to the IMAS Standard Names documentation. This project defines a structu
 - **[Specification](specification.md)** - Formal grammar specification and validation rules
 - **[Quick Start](quickstart.md)** - Step-by-step guide to adding new standard names
 - **[Style Guide](style-guide.md)** - Detailed authoring guidelines
+- **[IMAS Magnetics Example](magnetics-example.md)** - Worked example mapping IMAS paths to standard names
 
 ## Overview
 
@@ -24,8 +25,18 @@ The IMAS Standard Names system provides:
 The canonical naming pattern:
 
 ```text
-[component_] [subject_] base [in_<basis>_basis] [of_<target> | at_<position>] [due_to_<process>]
+[<component>_component_of]? [<subject>]? <base>
+[of_<object> | from_<source>]?
+[of_<geometry> | at_<position>]?
+[due_to_<process>]?
 ```
+
+**Key distinctions:**
+
+- **`of_<object>`** — intrinsic property OF hardware/equipment (e.g., `area_of_flux_loop`)
+- **`from_<source>`** — measurement/signal FROM device (e.g., `voltage_from_flux_loop`)
+- **`of_<geometry>`** — geometric property OF a spatial object (e.g., `major_radius_of_plasma_boundary`)
+- **`at_<position>`** — field quantity evaluated AT a location (e.g., `electron_temperature_at_magnetic_axis`)
 
 ### Current Vocabularies
 

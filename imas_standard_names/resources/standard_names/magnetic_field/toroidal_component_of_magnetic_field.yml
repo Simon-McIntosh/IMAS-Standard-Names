@@ -1,5 +1,0 @@
-name: toroidal_component_of_magnetic_field
-kind: scalar
-unit: T
-status: draft
-description: Toroidal component of magnetic_field.

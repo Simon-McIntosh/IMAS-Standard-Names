@@ -24,8 +24,9 @@ class SearchTool(BaseTool):
             "Ranked full-text + fuzzy search over the IMAS Standard Names catalog. "
             "Input: free-text query (case-insensitive tokens / partial tokens). "
             "Output: up to 20 best matches with metadata (name, units, description, "
-            "provenance, dependencies). Empty or no matches -> {}. Use to discover "
-            "canonical variable identifiers for downstream tooling and validation."
+            "provenance, dependencies). Empty or no matches -> {}. "
+            "Use this when you don't know the exact name and need to discover/find names by concept or partial text. "
+            "If you already have exact names, use fetch_standard_names or check_standard_names instead."
         )
     )
     async def search_standard_names(
@@ -34,5 +35,5 @@ class SearchTool(BaseTool):
         ctx: Context | None = None,
     ):
         # Underlying repository returns list[ {name, score, highlight_documentation, standard_name} ]
-        raw = self.repository.search(query, with_meta=True)
+        raw = self.catalog.search(query, with_meta=True)
         return {r["name"]: {k: v for k, v in r.items() if k != "name"} for r in raw}

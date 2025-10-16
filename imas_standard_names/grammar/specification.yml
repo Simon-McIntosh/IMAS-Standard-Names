@@ -1,0 +1,189 @@
+#===============================================================================
+# IMAS Standard Name Grammar Specification
+#===============================================================================
+#
+# This file is the single source of truth for the standard-name grammar used by
+# the runtime parser and composer. Downstream Python types and metadata are
+# auto-generated from this YAML during builds/installs.
+#
+# Generation details:
+# - The generator lives at: imas_standard_names/grammar_codegen/generate.py
+# - It writes: imas_standard_names/grammar/types.py
+# - It runs automatically during package build via Hatch (see hatch_build_hooks.py)
+# - A console entrypoint also exists in pyproject.toml: `build-grammar`
+# - You can regenerate locally without building by running:
+#     python -m imas_standard_names.grammar_codegen.generate
+#
+#===============================================================================
+# Grammar Usage Notes
+#===============================================================================
+#
+# Segment structure:
+# - component/coordinate and subject are optional single tokens; 
+#   base_or_transformed_name is required.
+#
+# component (for physical vectors) vs coordinate (for geometric/spatial vectors):
+#   * Use "component" for physical field vectors 
+#     (magnetic_field, heat_flux, velocity)
+#     Template: {axis}_component_of_{vector} 
+#     (e.g., radial_component_of_magnetic_field)
+#   * Use "coordinate" for geometric/spatial quantities 
+#     (position, vertex, centroid, trajectory)
+#     Template: {axis}_{geometric_base} 
+#     (e.g., radial_position_of_flux_loop_contour)
+#   * component and coordinate are mutually exclusive
+#   * coordinate should only be used with geometric bases 
+#     (position, vertex, outline, centroid, etc.)
+#
+# object (of_<object>) vs source (from_<source>):
+#   * Use "of_" for intrinsic properties/characteristics OF the hardware/equipment
+#     (e.g., major_radius_of_flux_loop, 
+#      area_of_poloidal_magnetic_field_probe)
+#   * Use "from_" for measurements/signals obtained FROM the hardware 
+#     (diagnostic or actuator)
+#     (e.g., voltage_from_flux_loop, current_from_poloidal_field_coil)
+#   * Same token can be used with both "of_" and "from_" 
+#     depending on context
+#   * object and source are mutually exclusive
+#
+# geometry (of_<target>) vs position (at_<location>):
+#   * Use "of_" for intrinsic properties/characteristics 
+#     OF the geometric object itself
+#     (e.g., major_radius_of_plasma_boundary, area_of_first_wall, 
+#      curvature_of_flux_surface)
+#   * Use "at_" for field quantities evaluated/sampled 
+#     AT a spatial location
+#     (e.g., electron_temperature_at_magnetic_axis, 
+#      poloidal_flux_at_plasma_boundary)
+#   * Same token can be used with both "of_" and "at_" 
+#     depending on context
+#   * geometry and position are mutually exclusive and appear side-by-side 
+#     in the suffix order.
+#
+# Naming conventions:
+# - do not include units in the name; use lowercase; start with a letter; 
+#   use letters, digits, and underscores.
+# - Discourage compound base names (e.g., poloidal_flux_boundary); 
+#   prefer explicit position/geometry modifiers
+#
+#===============================================================================
+# Canonical Pattern
+#===============================================================================
+
+canonical_pattern: >
+  [<component>_component_of | <coordinate>]? [<subject>]? <base> 
+  [of_<object> | from_<source>]? 
+  [of_<geometry> | at_<position>]? 
+  [due_to_<process>]?
+
+#===============================================================================
+# Scope: When to Create Standard Names
+#===============================================================================
+
+scope:
+  include:
+    - "Physical measurements and diagnostic signals"
+    - "Derived quantities, calculations, and operators"
+    - "Hardware geometric/physical properties needed for data interpretation"
+    - "Coordinate variables (time, space, flux)"
+  exclude:
+    - >
+      Facility-specific identifiers and labels 
+      (paths like */name, */identifier, */label)
+    - "Type enumeration indices (paths like */type/index)"
+    - "Code provenance metadata (paths like */code/*, */ids_properties/*)"
+  rationale: >
+    Standard names apply to physical quantities with standardizable meaning and units, 
+    not to administrative metadata
+
+#===============================================================================
+# Segment Definitions
+#===============================================================================
+
+segments:
+  - id: component
+    optional: true
+    vocabulary: components
+    template: "{token}_component_of"
+    exclusive_with:
+      - coordinate
+    description: >
+      Directional component of a physical vector quantity 
+      (fields, fluxes, velocities)
+  - id: coordinate
+    optional: true
+    vocabulary: components
+    template: "{token}"
+    exclusive_with:
+      - component
+    description: >
+      Coordinate axis for geometric/spatial vector decomposition 
+      (position, vertex, centroid, trajectory, displacement)
+  - id: subject
+    optional: true
+    vocabulary: subjects
+    description: "Particle species or plasma population"
+  - id: base
+    optional: false
+    description: >
+      Core quantity being described (required). Open-ended - not pre-enumerated. 
+      Can represent physical quantities (magnetic_field, temperature, voltage, flux, current), 
+      geometric properties (position, vertex, centroid, area, length, angle), 
+      measurement signals, or hardware characteristics. 
+      New base terms are defined through catalog entries, not the grammar. 
+      Combine with coordinate prefix for geometric vectors or component prefix for physical vectors.
+  - id: object
+    optional: true
+    vocabulary: objects
+    template: "of_{token}"
+    exclusive_with:
+      - source
+    description: >
+      Physical object, diagnostic hardware, or equipment 
+      whose intrinsic property is described
+  - id: source
+    optional: true
+    vocabulary: sources
+    template: "from_{token}"
+    exclusive_with:
+      - object
+    description: >
+      Physical hardware or device (diagnostic or actuator) 
+      from which measurement or signal is obtained
+  - id: geometry
+    optional: true
+    vocabulary: positions
+    template: "of_{token}"
+    exclusive_with:
+      - position
+    description: >
+      Intrinsic geometric property OF the object 
+      (coordinates, dimensions, shapes that define it)
+  - id: position
+    optional: true
+    vocabulary: positions
+    template: "at_{token}"
+    exclusive_with:
+      - geometry
+    description: >
+      Field quantity evaluated AT the spatial location 
+      (temperatures, densities, fluxes measured there)
+  - id: process
+    optional: true
+    vocabulary: processes
+    template: "due_to_{token}"
+    description: "Physical mechanism or process contributing to the quantity"
+
+#===============================================================================
+# Vocabulary Sources
+#===============================================================================
+# Vocabularies can be defined inline or imported from external files
+# External vocabulary files are in the vocabularies/ subdirectory
+
+vocabularies:
+  components: !include vocabularies/components.yml
+  subjects: !include vocabularies/subjects.yml
+  objects: !include vocabularies/objects.yml
+  sources: !include vocabularies/source.yml
+  positions: !include vocabularies/positions.yml
+  processes: !include vocabularies/processes.yml

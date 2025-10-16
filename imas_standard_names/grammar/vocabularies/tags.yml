@@ -1,0 +1,309 @@
+# IMAS Standard Names - Controlled Tag Vocabulary
+# Primary tags (tags[0]) define catalog subdirectory organization
+# Secondary tags (tags[1:]) provide cross-cutting classification
+
+primary_tags:
+  # UNIVERSAL PHYSICS QUANTITIES
+  fundamental:
+    description: Universal plasma physics quantities appearing across multiple IDS (density, temperature, fields, global parameters)
+    examples: [electron_density, electron_temperature, magnetic_field_strength, plasma_current, safety_factor, beta_poloidal, beta_toroidal]
+    
+  # EQUILIBRIUM & CORE PHYSICS
+  equilibrium:
+    description: MHD equilibrium, flux surfaces, magnetic geometry, coordinate systems
+    ids: [equilibrium]
+    
+  core-physics:
+    description: Core plasma profiles, kinetic quantities, global parameters, integrated quantities
+    ids: [core_profiles, core_transport, core_instant_changes, core_sources, plasma_sources]
+    
+  transport:
+    description: Transport coefficients, fluxes, neoclassical and anomalous transport modeling
+    ids: [transport_solver_numerics, plasma_transport, edge_transport]
+    
+  edge-physics:
+    description: Scrape-off layer, divertor physics, plasma-wall interactions, recycling
+    ids: [edge_profiles, edge_sources, wall, divertors, langmuir_probes, radiation]
+    
+  mhd:
+    description: MHD stability, disruptions, instabilities, sawteeth, tearing modes
+    ids: [mhd, mhd_linear, disruption, ntms, sawteeth]
+    
+  # HEATING & CURRENT DRIVE
+  nbi:
+    description: Neutral beam injection systems, beam-plasma interactions
+    ids: [nbi]
+    
+  ec-heating:
+    description: Electron cyclotron heating and current drive, EC emission diagnostics
+    ids: [ec_launchers, ece]
+    
+  ic-heating:
+    description: Ion cyclotron heating, ICRF systems
+    ids: [ic_antennas]
+    
+  lh-heating:
+    description: Lower hybrid heating and current drive
+    ids: [lh_antennas]
+    
+  waves:
+    description: Wave propagation, RF physics, wave-particle interactions, dispersion
+    ids: [waves]
+    
+  # FAST PARTICLES & DISTRIBUTIONS
+  fast-particles:
+    description: Fast ion/electron distributions, energetic particles, slowing-down
+    ids: [distributions, distribution_sources]
+    
+  runaway-electrons:
+    description: Runaway electron physics, avalanche generation, loss mechanisms
+    ids: [runaway_electrons]
+    
+  # DIAGNOSTICS
+  magnetics:
+    description: Magnetic diagnostics, flux loops, Rogowski coils, diamagnetic measurements
+    ids: [magnetics]
+    
+  thomson-scattering:
+    description: Thomson scattering diagnostics for temperature and density
+    ids: [thomson_scattering]
+    
+  interferometry:
+    description: Interferometry, polarimetry, refractometry for density and magnetic field measurements
+    ids: [interferometer, polarimeter, refractometer]
+    
+  reflectometry:
+    description: Reflectometry for profile and fluctuation measurements
+    ids: [reflectometer_profile, reflectometer_fluctuation]
+    
+  spectroscopy:
+    description: Emission spectroscopy, charge exchange, motional Stark effect, impurity diagnostics
+    ids: [spectrometer_visible, spectrometer_uv, spectrometer_x_ray_crystal, spectrometer_mass, charge_exchange, mse]
+    
+  radiation-diagnostics:
+    description: Bolometry, X-ray diagnostics, bremsstrahlung, synchrotron radiation
+    ids: [bolometer, soft_x_rays, hard_x_rays, bremsstrahlung_visible]
+    
+  imaging:
+    description: Camera-based imaging systems, visible/IR/X-ray cameras
+    ids: [camera_visible, camera_x_rays, camera_ir]
+    
+  neutronics:
+    description: Neutron diagnostics, fusion product measurements, activation
+    ids: [neutron_diagnostic]
+    
+  # MACHINE INFRASTRUCTURE
+  coils-and-control:
+    description: Magnetic coils, control systems, electromagnetic coupling, position control
+    ids: [pf_active, pf_passive, pf_plasma, tf, control, controllers, coils_non_axisymmetric, iron_core, ferritic, b_field_non_axisymmetric, em_coupling]
+    
+  fueling:
+    description: Gas injection, pellet injection, shattered pellet injection, fueling systems
+    ids: [gas_injection, pellets, spi, gas_pumping]
+    
+  wall-and-structures:
+    description: First wall, divertor structures, cryostat, structural components
+    ids: [wall, divertors, cryostat]
+    
+  pulse-management:
+    description: Pulse scheduling, position control references, workflow management, metadata
+    ids: [pulse_schedule, workflow, dataset_description, dataset_fair, real_time_data]
+    
+  data-products:
+    description: Summary data products, integrated analysis results, derived quantities
+    ids: [summary]
+    
+  utilities:
+    description: Auxiliary data, atomic/molecular data, geometry definitions, operational sensors
+    ids: [temporary, amns_data, geometry, operational_instrumentation, calorimetry, barometry, focs]
+    
+  # ADVANCED PHYSICS
+  turbulence:
+    description: Turbulence physics, fluctuations, turbulent transport, correlation analysis
+    ids: [turbulence]
+    
+  plasma-initiation:
+    description: Plasma startup, breakdown, initiation physics, early heating phase
+    ids: [plasma_initiation]
+
+# Secondary tags (tags[1:]) - cross-cutting classification concepts
+# These provide additional metadata dimensions for filtering and discovery
+
+secondary_tags:
+  # TEMPORAL CHARACTERISTICS
+  - id: time-dependent
+    description: Time-varying quantity with explicit time dimension
+    
+  - id: steady-state
+    description: Time-independent or equilibrium quantity
+    
+  - id: transient
+    description: Short timescale transient phenomena (sawteeth, ELMs, disruptions)
+    
+  - id: long-timescale
+    description: Slow evolution (current diffusion, impurity accumulation)
+    
+  # SPATIAL CHARACTERISTICS
+  - id: spatial-profile
+    description: Radial or multi-dimensional spatial profile
+    
+  - id: flux-surface-average
+    description: Flux surface averaged quantity
+    
+  - id: volume-average
+    description: Volume averaged or integrated quantity
+    
+  - id: line-integrated
+    description: Line-integrated measurement along diagnostic chord
+    
+  - id: local-measurement
+    description: Localized point measurement
+    
+  - id: global-quantity
+    description: Machine-level integrated quantity
+    
+  # DATA PROVENANCE
+  - id: measured
+    description: Direct experimental measurement
+    
+  - id: reconstructed
+    description: Reconstructed from experimental data via inversion
+    
+  - id: simulated
+    description: Simulation or modeling output
+    
+  - id: derived
+    description: Derived from other standard names via mathematical operations
+    
+  - id: validated
+    description: Cross-validated against multiple diagnostics or models
+    
+  # PHYSICS DOMAIN CHARACTERISTICS
+  - id: equilibrium-reconstruction
+    description: Related to equilibrium reconstruction process
+    
+  - id: transport-modeling
+    description: Related to transport modeling and prediction
+    
+  - id: mhd-stability-analysis
+    description: Related to MHD stability calculations
+    
+  - id: heating-deposition
+    description: Spatial deposition profiles from heating systems
+    
+  - id: current-drive-efficiency
+    description: Current drive and efficiency metrics
+    
+  - id: impurity-transport
+    description: Impurity species transport and radiation
+    
+  - id: particle-balance
+    description: Particle sources, sinks, and conservation
+    
+  - id: energy-balance
+    description: Energy sources, sinks, losses, and conservation
+    
+  - id: momentum-balance
+    description: Momentum sources, sinks, and rotation physics
+    
+  # ANALYSIS & MODELING
+  - id: integrated-modeling
+    description: Integrated modeling workflow component
+    
+  - id: machine-learning
+    description: Machine learning or AI-derived quantity
+    
+  - id: uncertainty-quantification
+    description: Includes uncertainty or error estimates
+    
+  - id: synthetic-diagnostic
+    description: Synthetic diagnostic forward model output
+    
+  - id: inverse-problem
+    description: Solution to inverse problem or tomographic reconstruction
+    
+  # COORDINATE SYSTEMS
+  - id: cylindrical-coordinates
+    description: Expressed in (R, Z, φ) coordinates
+    
+  - id: flux-coordinates
+    description: Expressed in flux coordinates (ρ, θ, φ)
+    
+  - id: cartesian-coordinates
+    description: Expressed in (x, y, z) coordinates
+    
+  - id: field-aligned
+    description: Field-aligned coordinate system
+    
+  # PHYSICS REGIMES
+  - id: high-confinement-mode
+    description: H-mode specific physics
+    
+  - id: low-confinement-mode
+    description: L-mode specific physics
+    
+  - id: limiter-configuration
+    description: Limiter plasma configuration
+    
+  - id: divertor-configuration
+    description: Divertor plasma configuration
+    
+  - id: ohmic-heating
+    description: Ohmic heating only operation
+    
+  - id: auxiliary-heated
+    description: Auxiliary heating operation
+    
+  # FREQUENCY/SPECTRAL CHARACTERISTICS  
+  - id: dc-component
+    description: Zero frequency or DC component
+    
+  - id: low-frequency
+    description: Low frequency phenomena (<1 kHz)
+    
+  - id: high-frequency
+    description: High frequency phenomena (>1 MHz)
+    
+  - id: fourier-component
+    description: Fourier decomposed component
+    
+  - id: coherent-mode
+    description: Coherent mode structure
+    
+  - id: broadband-fluctuation
+    description: Broadband turbulent fluctuation
+    
+  # DATA QUALITY & STATUS
+  - id: calibrated
+    description: Calibrated measurement data
+    
+  - id: raw-data
+    description: Uncalibrated raw data
+    
+  - id: real-time
+    description: Real-time available quantity
+    
+  - id: post-shot-analysis
+    description: Post-shot analysis result
+    
+  - id: benchmark-quantity
+    description: Standard benchmark or validation quantity
+    
+  - id: performance-metric
+    description: Machine performance or confinement metric
+    
+  # SPECIAL APPLICATIONS
+  - id: disruption-prediction
+    description: Used in disruption prediction workflows
+    
+  - id: scenario-planning
+    description: Used in scenario planning and optimization
+    
+  - id: real-time-control
+    description: Used in real-time control algorithms
+    
+  - id: data-archival
+    description: Archived for long-term storage and analysis
+    
+  - id: published-result
+    description: Used in published scientific results

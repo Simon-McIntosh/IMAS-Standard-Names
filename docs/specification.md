@@ -24,6 +24,13 @@ Use the IMAS MCP server (configured in `.vscode/mcp.json`) to mine existing IMAS
 Data Dictionary content before proposing new scalar or vector names so the
 catalog reflects deployed diagnostics and equilibrium reconstructions.
 
+**Critical Alignment Rule**: All standard names derived from IMAS Data Dictionary
+paths MUST preserve the exact sign conventions, coordinate system definitions,
+physical interpretations, and unit specifications documented in the IMAS DD. Do
+not redefine or invent conventions that contradict the authoritative IMAS DD
+documentation. When documenting quantities, cite and follow IMAS DD conventions
+explicitly.
+
 Section 2 establishes scalar naming rules. Section 3 then layers the uniform
 vector/component system on top of those, including transformation (operator)
 chains.
@@ -117,13 +124,12 @@ Vectors group semantics; components remain atomic scalars.
 
 | Kind       | Meaning                                                                    |
 | ---------- | -------------------------------------------------------------------------- |
-| `scalar`   | Physical scalar quantity, including components and derived scalars.        |
-| `vector`   | Multi‑component quantity (e.g. `magnetic_field`).                          |
+| `scalar`   | Physical scalar quantity (base or derived).                                |
+| `vector`   | Multi‑component quantity (e.g. `magnetic_field`, base or derived).         |
 | `operator` | Transformation with rank signature (defined in `operators/operators.yml`). |
 
-Scalars may have optional provenance (operator, reduction, or expression) describing
-their derivation. Vectors are specified using the `vector_axes` metadata attribute at
-runtime to indicate axis labels (e.g., "radial toroidal vertical").
+Both scalars and vectors may have optional `provenance` (operator, reduction, or expression) describing
+their derivation. Components are inferred from naming patterns at runtime.
 
 ---
 
@@ -319,7 +325,7 @@ We prefer the suffix form `_magnitude` ONLY for the final tail; no `magnitude_of
 
 ### 11.4 Gradients
 
-`gradient_of_<scalar>` is a vector (kind: derived*vector). Do not create a
+`gradient_of_<scalar>` is a vector (kind: vector with provenance). Do not create a
 scalar `gradient_of*\*` entry; instead generate its components.
 
 ### 11.5 Time Derivatives
@@ -351,14 +357,13 @@ Derived scalar (time derivative):
 
 ```yaml
 name: time_derivative_of_electron_temperature
-kind: derived_scalar
+kind: scalar
 unit: keV.s^-1
-derivation:
-    operator_chain:
-        - operator: time_derivative
-            operand: electron_temperature
-dependencies:
-    - electron_temperature
+provenance:
+  mode: operator
+  operators: [time_derivative]
+  base: electron_temperature
+  operator_id: time_derivative
 status: draft
 ```
 
@@ -366,15 +371,13 @@ Derived scalar (divergence of vector):
 
 ```yaml
 name: divergence_of_plasma_velocity
-kind: derived_scalar
+kind: scalar
 unit: s^-1
-parent_operation:
-  operator: divergence
-  operand_vector: plasma_velocity
-dependencies:
-  - radial_component_of_plasma_velocity
-  - toroidal_component_of_plasma_velocity
-  - vertical_component_of_plasma_velocity
+provenance:
+  mode: operator
+  operators: [divergence]
+  base: plasma_velocity
+  operator_id: divergence
 status: draft
 ```
 

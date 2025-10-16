@@ -16,7 +16,8 @@ def run_semantic_checks(entries: dict[str, StandardNameEntry]) -> list[str]:
             # Example rule: if gradient operator present, unit should include division by length
             if "gradient" in list(prov.operators):
                 unit = getattr(entry, "unit", "")
-                if unit and "/" not in unit and ".m" not in unit and unit != "":
+                # Accept units with .m or negative exponent (e.g., m^-4, m^-1)
+                if unit and ".m" not in unit and "^-" not in unit and unit != "":
                     issues.append(
                         f"{name}: gradient operator present but unit '{unit}' does not look like derivative (heuristic)."
                     )

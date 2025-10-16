@@ -32,9 +32,20 @@ class CatalogTool(BaseTool):
 
     @mcp_tool(
         description=(
-            "Apply a single catalog mutation (add, modify, rename, delete) to the "
-            "Standard Names catalog. Input accepts a discriminated union with 'action' key. "
-            "Returns typed result variant or structured error with schema + examples."
+            "Modify, rename, or delete existing catalog entries. "
+            "Use this tool to update existing standard name entries. "
+            "For creating new entries, use create_standard_names instead. "
+            "Supported actions: "
+            "- modify: Update an existing entry's fields (name must match) "
+            "- rename: Change an entry's name (use dry_run to see dependencies) "
+            "- delete: Remove an entry (use dry_run to see dependencies) "
+            "- batch_delete: Remove multiple entries at once "
+            "- batch: Execute multiple operations in sequence "
+            "All changes are kept in-memory (pending) until write_standard_names is called. "
+            "Returns structured result with operation details or error with schema + examples. "
+            "Typical workflow: (1) fetch_standard_names to get current entry, "
+            "(2) edit_standard_name with desired action, "
+            "(3) list_standard_names scope='pending' to review, (4) write_standard_names to persist."
         )
     )
     async def edit_standard_name(self, payload: dict, ctx: Context | None = None):  # type: ignore[no-untyped-def]

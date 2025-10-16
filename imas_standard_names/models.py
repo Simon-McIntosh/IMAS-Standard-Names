@@ -185,6 +185,53 @@ class StandardNameEntryBase(BaseModel):
             return []
         return [str(item).strip() for item in v if str(item).strip()]
 
+    @field_validator("tags")
+    @classmethod
+    def validate_and_reorder_tags(cls, v: list[str]) -> list[str]:  # type: ignore[override]
+        """Validate tags: ensure exactly one primary tag (auto-reorder to position 0) and validate vocabulary."""
+        if not v or len(v) == 0:
+            return v
+
+        from imas_standard_names.grammar.tag_types import (
+            PRIMARY_TAGS,
+            SECONDARY_TAGS,
+        )
+
+        # Find all primary tags in the list
+        primary_tags_found = [tag for tag in v if tag in PRIMARY_TAGS]
+        unknown_tags = [
+            tag for tag in v if tag not in PRIMARY_TAGS and tag not in SECONDARY_TAGS
+        ]
+
+        # Check for unknown tags first
+        if unknown_tags:
+            raise ValueError(
+                f"Unknown tag(s): {', '.join(unknown_tags)}. "
+                f"Valid tags are defined in grammar/vocabularies/tags.yml"
+            )
+
+        # Enforce exactly one primary tag
+        if len(primary_tags_found) == 0:
+            raise ValueError(
+                f"Tags must contain exactly one primary tag. Found none. "
+                f"Valid primary tags include: {', '.join(sorted(PRIMARY_TAGS)[:10])}... "
+                f"(see grammar/vocabularies/tags.yml for complete list)"
+            )
+        elif len(primary_tags_found) > 1:
+            raise ValueError(
+                f"Tags must contain exactly one primary tag. Found {len(primary_tags_found)}: {', '.join(primary_tags_found)}. "
+                f"Choose a single primary tag that best categorizes this entry."
+            )
+
+        # Auto-reorder: ensure the single primary tag is at position 0
+        primary_tag = primary_tags_found[0]
+        if v[0] != primary_tag:
+            # Remove primary tag from its current position and place at start
+            reordered = [primary_tag] + [tag for tag in v if tag != primary_tag]
+            return reordered
+
+        return v
+
     @model_validator(mode="after")
     def _governance_rules(self):  # type: ignore[override]
         if self.status == "deprecated" and not self.superseded_by:

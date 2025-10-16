@@ -4,8 +4,8 @@ from imas_standard_names.models import create_standard_name_entry
 
 
 def test_component_scalar_now_minimal():
-    # Scalar components no longer require explicit axis/parent_vector fields.
-    # Validation only enforces vector component naming indirectly via vector definitions.
+    # Scalar components are minimal entries.
+    # Component relationships are inferred from naming patterns.
     sn = create_standard_name_entry(
         {
             "kind": "scalar",

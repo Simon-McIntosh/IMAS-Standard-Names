@@ -108,8 +108,34 @@ class StandardNameCatalog:
     def _end_uow(self):  # internal callback from UnitOfWork
         self._active_uow = None
 
+    def reload_from_disk(self):
+        """Reload the catalog from YAML files on disk.
+
+        This clears the in-memory SQLite database and repopulates it from
+        the current state of YAML files. Used after commit to sync the
+        in-memory state with persisted changes.
+        """
+        # Clear existing data
+        for table in [
+            "provenance_operator",
+            "provenance_reduction",
+            "provenance_expression_dependency",
+            "provenance_expression",
+            "tag",
+            "link",
+            "fts_standard_name",
+            "standard_name",
+        ]:
+            self.catalog.conn.execute(f"DELETE FROM {table}")
+        self.catalog.conn.commit()
+
+        # Reload from YAML
+        models = self.store.load()
+        for m in ordered_models(models):
+            self.catalog.insert(m)
+
     # Internal helper for UnitOfWork
-    def _row_to_model(self, row):  # compatibility shim
+    def _row_to_model(self, row):
         return row_to_model(self.catalog.conn, row)
 
 

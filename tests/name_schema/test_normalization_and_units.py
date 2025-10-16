@@ -79,12 +79,12 @@ def test_tags_and_links_normalization():
             "description": "Ion T",
             "unit": "eV",
             "status": "active",
-            "tags": [" core ", "temperature", ""],
+            "tags": [" fundamental ", "time-dependent", ""],
             "links": ["  https://example.com/ref  ", "", "https://example.com/ref"],
             "constraints": [" Ti >= 0 ", ""],
         }
     )
-    assert sn.tags == ["core", "temperature"]
+    assert sn.tags == ["fundamental", "time-dependent"]
     assert sn.links == [
         "https://example.com/ref",
         "https://example.com/ref",

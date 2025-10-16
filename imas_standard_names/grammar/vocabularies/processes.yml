@@ -1,0 +1,43 @@
+# Processes vocabulary: physical mechanisms and processes
+#
+# Usage: <base>_due_to_<process>
+# Examples:
+#   - heat_flux_due_to_conduction
+#   - particle_flux_due_to_diffusion
+#   - current_due_to_bootstrap
+
+# === Transport mechanisms ===
+- conduction
+- convection
+- diffusion
+- neoclassical
+- turbulent
+- anomalous
+
+# === Heating and current drive ===
+- ohmic
+- electron_cyclotron_heating
+- ion_cyclotron_heating
+- lower_hybrid_current_drive
+- neutral_beam_injection
+- electron_cyclotron_current_drive
+
+# === Atomic processes ===
+- radiation
+- recombination
+- ionization
+- charge_exchange
+
+# === Current drive mechanisms ===
+- induction
+- bootstrap
+
+# === Other processes ===
+- resistive
+- viscous
+- magnetohydrodynamic
+- external_coil
+- eddy_current
+- passive_structure
+- disruption
+- halo

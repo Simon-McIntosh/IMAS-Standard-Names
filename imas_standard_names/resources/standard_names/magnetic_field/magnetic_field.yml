@@ -1,5 +1,0 @@
-name: magnetic_field
-kind: vector
-unit: T
-status: draft
-description: Magnetic field vector.

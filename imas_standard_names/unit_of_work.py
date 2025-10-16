@@ -48,6 +48,10 @@ class UnitOfWork:
         self._closed = False
 
     # Mutations --------------------------------------------------------------
+    def has(self, name: str) -> bool:
+        """Check if an entry with the given name exists in the catalog."""
+        return self.catalog.get_row(name) is not None
+
     def add(self, model: StandardNameEntry) -> None:
         if self.catalog.get_row(model.name):
             raise ValueError(f"Entry '{model.name}' exists")

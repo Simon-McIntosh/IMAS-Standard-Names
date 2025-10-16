@@ -21,8 +21,10 @@ from imas_standard_names.grammar.support import (
 from imas_standard_names.grammar.types import (
     EXCLUSIVE_SEGMENT_PAIRS,
     Component,
+    Object,
     Position,
     Process,
+    Source,
     Subject,
 )
 
@@ -33,8 +35,11 @@ class StandardName(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     component: Component | None = None
+    coordinate: Component | None = None
     subject: Subject | None = None
     base: BaseToken
+    object: Object | None = None
+    source: Source | None = None
     geometry: Position | None = None
     position: Position | None = None
     process: Process | None = None

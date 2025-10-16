@@ -52,6 +52,9 @@
     "imas-standard-names/.vscode/mcp.json: imas": {
       "allowedModels": ["copilot/gpt-5"],
       "allowedDuringChat": true
+    },
+    "imas-standard-names/.vscode/mcp.json: imas-dd-debug": {
+      "allowedDuringChat": true
     }
   },
   "chat.promptFilesLocations": {

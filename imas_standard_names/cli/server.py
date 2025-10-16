@@ -52,6 +52,13 @@ def _print_version(
     help="Port to bind (env: PORT) for sse and streamable-http transports",
 )
 @click.option(
+    "--catalog-root",
+    envvar="STANDARD_NAMES_CATALOG_ROOT",
+    default=None,
+    type=click.Path(exists=False, file_okay=False, dir_okay=True, path_type=str),
+    help="Custom directory for standard names catalog (env: STANDARD_NAMES_CATALOG_ROOT)",
+)
+@click.option(
     "--log-level",
     default="INFO",
     type=click.Choice(["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]),
@@ -61,6 +68,7 @@ def main(
     transport: str,
     host: str,
     port: int,
+    catalog_root: str | None,
     log_level: str,
 ) -> None:
     """Run the AI-enhanced MCP server with configurable transport options.
@@ -106,7 +114,7 @@ def main(
             logger.info(f"Using {transport} transport on {host}:{port}")
 
     # Create and run the mcp server
-    server = Server()
+    server = Server(catalog_root=catalog_root)
     server.run(
         transport=cast(Literal["stdio", "sse", "streamable-http"], transport),
         host=host,

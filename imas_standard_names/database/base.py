@@ -74,7 +74,8 @@ class CatalogBase:
             f"SELECT * FROM standard_name WHERE name IN ({placeholders})", names
         ).fetchall()
         model_map = {
-            fr["name"]: row_to_model(self.conn, fr).model_dump() for fr in full_rows
+            fr["name"]: row_to_model(self.conn, fr).model_dump(exclude_none=True)
+            for fr in full_rows
         }
 
         results = []

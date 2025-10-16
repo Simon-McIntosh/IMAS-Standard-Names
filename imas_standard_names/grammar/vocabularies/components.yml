@@ -1,0 +1,20 @@
+# Component vocabulary: directional components of vector quantities
+#
+# Usage: <component>_component_of_<base>
+# Examples:
+#   - radial_component_of_magnetic_field
+#   - toroidal_component_of_plasma_velocity
+#   - vertical_component_of_heat_flux
+
+- radial
+- toroidal
+- vertical
+- parallel
+- diamagnetic
+- normal
+- tangential
+- binormal
+- x
+- y
+- z
+- poloidal

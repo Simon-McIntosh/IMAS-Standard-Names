@@ -1,0 +1,17 @@
+# Subject vocabulary: particle species and plasma populations
+#
+# Usage: <subject>_<base>
+# Examples:
+#   - electron_temperature
+#   - ion_density
+#   - deuterium_pressure
+
+- electron
+- ion
+- deuterium
+- tritium
+- helium
+- impurity_species
+- fast_ion
+- neutral
+- runaway_electron

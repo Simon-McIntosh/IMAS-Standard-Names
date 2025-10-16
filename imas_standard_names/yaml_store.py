@@ -40,7 +40,14 @@ class YamlStore:
 
     # Write / Delete ----------------------------------------------------------
     def write(self, model: StandardNameEntry):
-        path = self.root / f"{model.name}.yml"
+        # Organize by primary tag (tags[0]) if present
+        if model.tags and len(model.tags) > 0:
+            primary_tag = model.tags[0]
+            path = self.root / primary_tag / f"{model.name}.yml"
+        else:
+            # Fallback to root if no tags
+            path = self.root / f"{model.name}.yml"
+
         path.parent.mkdir(parents=True, exist_ok=True)
         data = {k: v for k, v in model.model_dump().items() if v not in (None, [], "")}
         data["name"] = model.name
@@ -48,12 +55,15 @@ class YamlStore:
             yaml.safe_dump(data, fh, sort_keys=False)
 
     def delete(self, name: str):
-        path = self.root / f"{name}.yml"
-        if path.exists():
-            try:
-                path.unlink()
-            except OSError:
-                pass
+        # Search in subdirectories first, then root
+        candidates = list(self.root.rglob(f"{name}.yml"))
+        for path in candidates:
+            if path.exists():
+                try:
+                    path.unlink()
+                except OSError:
+                    pass
+                break
 
 
 __all__ = ["YamlStore"]

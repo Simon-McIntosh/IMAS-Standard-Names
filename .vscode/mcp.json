@@ -8,10 +8,13 @@
 			"type": "http",
 			"url": "http://127.0.0.1:8080/mcp"
 		},
-		"imas-sn": {
+		"imas-sn-west": {
 			"type": "stdio",
 			"command": "uv",
-			"args": ["run", "--active", "standard-names-mcp"]
+			"args": ["run", "standard-names-mcp"],
+			"env": {
+				"STANDARD_NAMES_CATALOG_ROOT": "../west-standard-names"
+			}
 		}
 	},
 	"inputs": []

@@ -97,9 +97,12 @@ class CatalogPaths:
     @property
     def standard_names_root(self) -> Path:
         std = self.resources_root / STANDARD_NAMES_DIRNAME
-        if not std.exists() or not std.is_dir():  # pragma: no cover
+        if not std.exists():  # pragma: no cover
+            # Create the directory if it doesn't exist to avoid startup errors
+            std.mkdir(parents=True, exist_ok=True)
+        if not std.is_dir():  # pragma: no cover
             raise FileNotFoundError(
-                f"Standard names directory '{STANDARD_NAMES_DIRNAME}' not present under resources root {self.resources_root}"
+                f"Standard names directory '{STANDARD_NAMES_DIRNAME}' exists but is not a directory: {std}"
             )
         return std
 
@@ -141,12 +144,20 @@ class CatalogPaths:
         s = value.strip()
         if s == "":
             return self.standard_names_root
+
+        # Check if it's an absolute path or relative path (../, ./, or direct path)
+        # These should be resolved relative to CWD, not the packaged resources
+        if s.startswith(("../", "./", "..\\", ".\\")) or Path(s).is_absolute():
+            p = Path(s).expanduser().resolve()
+            return p
+
         # Allow shorthand "standard_names/..."
         if s.startswith(f"{STANDARD_NAMES_DIRNAME}/"):
             rel = s[len(STANDARD_NAMES_DIRNAME) + 1 :]
         elif s == STANDARD_NAMES_DIRNAME:
             rel = ""
         else:
+            # For other cases, treat as pattern or subdir within packaged resources
             rel = s
         base = self.standard_names_root
         if rel in ("", "."):

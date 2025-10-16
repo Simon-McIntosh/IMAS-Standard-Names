@@ -50,11 +50,24 @@ Unit = Annotated[
     ),
 ]
 
+# Tags: list[str] with controlled vocabulary validation
+# First element (tags[0]) must be a primary tag (validated in models.py)
+# Remaining elements (tags[1:]) are secondary tags (validated in models.py)
+# See grammar/vocabularies/tags.yml for complete controlled vocabulary
 Tags = Annotated[
     list[str],
     Field(
-        description="Classification keywords (lowercase tokens).",
-        examples=[["core", "temperature"], ["equilibrium"]],
+        description=(
+            "Classification keywords from controlled vocabulary. "
+            "First element (tags[0]) must be a primary tag defining catalog subdirectory. "
+            "Remaining elements (tags[1:]) are secondary tags for cross-cutting classification. "
+            "Validated against grammar/vocabularies/tags.yml."
+        ),
+        examples=[
+            ["fundamental", "time-dependent", "measured"],
+            ["equilibrium", "steady-state", "reconstructed"],
+            ["core-physics", "spatial-profile"],
+        ],
     ),
 ]
 
@@ -88,7 +101,17 @@ Description = Annotated[
 Documentation = Annotated[
     str,
     Field(
-        description="Extended multi-line rationale / details (may be blank).",
+        description=(
+            "Authoritative documentation providing clear, comprehensive explanation of the physical quantity. "
+            "Should include: physical interpretation and context, governing equations where appropriate, "
+            "measurement or derivation methods, typical values and ranges, "
+            "coordinate systems or conventions, relationships to other quantities, and references to standards or literature. "
+            "Write in precise scientific language suitable for domain experts using Markdown format. "
+            "Use LaTeX for equations: inline $...$ or display $$...$$. "
+            "Examples: Faraday's law $V = -N A \\frac{dB}{dt}$, flux $\\Phi = \\int \\mathbf{B} \\cdot d\\mathbf{A}$, Ampère's law $$\\nabla \\times \\mathbf{B} = \\mu_0 \\mathbf{J}$$. "
+            "Wrap text to ~80 characters per line when used in YAML block scalars (|). "
+            "Do not reference implementation details or source data structure paths."
+        ),
     ),
 ]
 

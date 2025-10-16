@@ -1,4 +1,4 @@
-"""CLI entrypoint for validation (structural + semantic)."""
+"""CLI entrypoint for validation (structural + semantic + quality)."""
 
 from __future__ import annotations
 
@@ -10,6 +10,7 @@ from ..database.integrity import verify_integrity
 from ..database.read import CatalogRead
 from ..paths import CATALOG_DIRNAME
 from ..repository import StandardNameCatalog
+from .quality import format_quality_report, run_quality_checks
 from .semantic import run_semantic_checks
 from .structural import run_structural_checks
 
@@ -29,7 +30,14 @@ from .structural import run_structural_checks
     is_flag=True,
     help="When verifying, recompute hashes even if metadata matches",
 )
-def validate_catalog_cli(root: Path, mode: str, verify: bool, full: bool):
+@click.option(
+    "--quality",
+    type=click.Choice(["off", "info", "warning", "error"], case_sensitive=False),
+    default="warning",
+    show_default=True,
+    help="Quality check level: off (skip), info (all), warning (warn+error), error (error only)",
+)
+def validate_catalog_cli(root: Path, mode: str, verify: bool, full: bool, quality: str):
     db_path = root / CATALOG_DIRNAME / "catalog.db"
     use_file = False
     if mode == "file":
@@ -60,6 +68,19 @@ def validate_catalog_cli(root: Path, mode: str, verify: bool, full: bool):
     semantic = run_semantic_checks(entries)
     issues = structural + semantic
 
+    # Run quality checks if enabled
+    quality_issues = []
+    if quality != "off":
+        quality_issues = run_quality_checks(entries)
+        if quality_issues:
+            click.echo("")
+            click.echo(
+                format_quality_report(
+                    quality_issues, show_level=quality if quality != "info" else None
+                )
+            )
+            click.echo("")
+
     if integrity_issues:
         click.echo("Integrity issues:")
         for iss in integrity_issues:
@@ -71,7 +92,14 @@ def validate_catalog_cli(root: Path, mode: str, verify: bool, full: bool):
         for issue in issues:
             click.echo(f" - {issue}")
         raise SystemExit(1 if not integrity_issues else 2)
+
+    # Check for quality errors that should fail validation
+    quality_errors = [msg for level, msg in quality_issues if level == "error"]
+    if quality_errors and quality in ["error", "warning"]:
+        click.echo(f"Validation FAILED: {len(quality_errors)} quality error(s)")
+        raise SystemExit(1)
+
     if integrity_issues:
         click.echo("Validation PASSED (content) but integrity discrepancies detected.")
         raise SystemExit(2)
-    click.echo("Validation PASSED (structural + semantic checks).")
+    click.echo("Validation PASSED (structural + semantic + quality checks).")
