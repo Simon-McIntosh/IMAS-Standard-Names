@@ -17,14 +17,12 @@ Create standard names following the project grammar for given IMAS IDS paths.
 - Extract IMAS DD documentation, units, and sign conventions
 - Generate scalar standard names aligned with IMAS DD
 - Generate vector components from scalars 
-- Get catalog schema: `get_catalog_entry_schema`
-- Generate tags, units, and descriptions for each entry
 
 ### Output format
 
 Return tabulated markdown table with columns:
 
-`| IDS Path | Standard Name | Units | Tag | Description |`
+`| IDS Path | Standard Name | Units |`
 
 ### Formatting requirements
 
@@ -48,7 +46,8 @@ Do not create entries without user confirmation.
 
 If user confirms creation:
 
-- Generate documentation for each entry
+- Get catalog schema: `get_catalog_entry_schema`
+- Generate tags, units, descriptions and documentation
 - Create entries: `create_standard_names`
 - Write to disk: `write_standard_names`
 
