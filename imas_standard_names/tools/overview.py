@@ -341,6 +341,84 @@ class OverviewTool(BaseTool):
 
         # Critical naming rules for LLM understanding
         naming_rules = {
+            "metadata_exclusion": {
+                "rule": "Exclude administrative metadata from standard names",
+                "excludes": [
+                    "*/type/index",
+                    "*/name",
+                    "*/identifier",
+                    "*/comment",
+                    "*/version",
+                    "*/code/*",
+                    "*/ids_properties/*",
+                    "iteration counts",
+                    "convergence flags",
+                ],
+                "rationale": "Standard names apply to physical quantities with standardizable units, not configuration metadata",
+            },
+            "object_qualification_requirement": {
+                "rule": "All geometric and physical properties must explicitly state the object they describe",
+                "wrong": ["elongation", "enclosed_volume", "minor_radius"],
+                "correct": [
+                    "elongation_of_plasma_boundary",
+                    "volume_enclosed_by_flux_surface",
+                    "minor_radius_of_plasma_boundary",
+                ],
+                "rationale": "Prevents ambiguity about which plasma region/surface the property describes",
+            },
+            "plasma_boundary_terminology": {
+                "rule": "Use 'plasma_boundary' consistently for the last closed flux surface",
+                "use": "plasma_boundary",
+                "avoid_mixing": ["separatrix", "LCFS", "last_closed_flux_surface"],
+                "rationale": "Single term reduces confusion; 'plasma_boundary' is clearest for IMAS context",
+            },
+            "plasma_feature_naming": {
+                "rule": "X-point, strike point, limiter point are independent features, not properties 'of' boundary",
+                "correct": [
+                    "position_of_primary_x_point",
+                    "position_of_primary_strike_point",
+                    "position_of_active_limiter_point",
+                ],
+                "wrong": [
+                    "position_of_x_point_of_plasma_boundary",
+                    "position_of_strike_point_of_plasma_boundary",
+                ],
+                "applies_to": [
+                    "x_point",
+                    "strike_point",
+                    "active_limiter_point",
+                    "magnetic_axis",
+                ],
+                "rationale": "These are topological features defined by field geometry, not geometric properties of a surface",
+            },
+            "mathematical_operation_grammar": {
+                "rule": "Use full mathematical terms, not shorthand",
+                "use": ["multiplied_by", "divided_by", "derivative_of"],
+                "avoid": ["times", "over", "d_dx"],
+                "example": "f_multiplied_by_poloidal_flux_derivative_of_f",
+                "counter_example": "f_times_df_dpsi",
+                "rationale": "Standard names prioritize clarity over brevity; full words are self-documenting",
+            },
+            "position_vs_field_distinction": {
+                "rule": "Distinguish geometric position FROM field values AT that position",
+                "position_geometry": {
+                    "use": "_of_",
+                    "example": "radial_position_of_magnetic_axis",
+                    "description": "Position describes WHERE something is",
+                },
+                "field_at_location": {
+                    "use": "_at_",
+                    "example": "magnetic_field_at_magnetic_axis",
+                    "description": "Field describes WHAT exists at a location",
+                },
+                "rationale": "Clear distinction between geometric location and physical quantities evaluated there",
+            },
+            "reconstruction_metadata_qualification": {
+                "rule": "Qualify weights, flags, and analysis parameters with their context",
+                "use": "equilibrium_reconstruction_weight_of_[diagnostic]_constraint",
+                "avoid": "weight_of_[diagnostic]",
+                "rationale": "Makes purpose explicit; distinguishes from physical weights/masses",
+            },
             "component_vs_coordinate": {
                 "rule": "Choose 'component' for physical vectors, 'coordinate' for geometric vectors",
                 "component_usage": {
@@ -1425,48 +1503,32 @@ class OverviewTool(BaseTool):
             },
             "validation_rules": {
                 "name": {
-                    "pattern": "^[a-z][a-z0-9_]*$",
-                    "description": "Must be snake_case; start with letter; no double underscores (__)",
-                    "examples": [
-                        "electron_temperature",
-                        "radial_position_of_flux_loop",
-                    ],
+                    "note": "Refer to JSON schema 'name' field for pattern and validation rules",
                 },
                 "unit": {
-                    "format": "dot-exponent style with lexicographic token order",
-                    "description": "Use '.' to join tokens; '^' for exponents; no '/' or '*'; empty for dimensionless",
-                    "examples": ["eV", "m", "m.s^-1", "A.m^-2", "T", "Wb", ""],
-                    "invalid": ["m/s", "kg*m", "m s^-2"],
+                    "note": "Refer to JSON schema 'unit' field for pattern and validation rules",
+                    "auto_correction_example": "'s^-2.m' -> 'm.s^-2', 'T.A' -> 'A.T'",
                 },
                 "description": {
                     "max_length": 180,
-                    "guidelines": "One concise sentence summarizing the quantity; avoid repetition of the name. Do not reference IMAS or the Data Dictionary (DD).",
+                    "guidelines": (
+                        "Concise summary sentence. Refer to JSON schema for validation rules. "
+                        "Write this field first to clarify scope before expanding in documentation."
+                    ),
                 },
                 "documentation": {
                     "guidelines": (
-                        "Extended details about the quantity including: "
-                        "physical interpretation, measurement method, typical values, "
-                        "validation requirements, references. "
-                        "Do not reference IMAS, the Data Dictionary (DD), or implementation-specific paths. "
-                        "Use Markdown with LaTeX for all equations ($...$ inline, $$...$$ display). "
-                        "Examples: Faraday $V = -\\frac{d\\Phi}{dt}$, Ampère $$\\nabla \\times \\mathbf{B} = \\mu_0 \\mathbf{J}$$, "
-                        "transport $\\Gamma = -D \\nabla n + v n$. "
-                        "Wrap text to ~80 characters per line. "
-                        "Use YAML block scalar (|) syntax to preserve formatting."
+                        "Extended standalone explanation. Refer to JSON schema for complete requirements. "
+                        "Key workflow: extract physics from IMAS DD if applicable, expand with explicit equations and definitions, "
+                        "ensure complete standalone understanding without external references (no IMAS DD paths, no COCOS references)."
                     ),
                 },
                 "status": {
-                    "values": ["draft", "active", "deprecated", "superseded"],
-                    "rules": {
-                        "draft": "Initial creation; not yet validated",
-                        "active": "Validated and approved for use",
-                        "deprecated": "Must set superseded_by field",
-                        "superseded": "Not currently used",
-                    },
+                    "note": "Refer to JSON schema 'status' field for enum values and descriptions",
+                    "workflow_tip": "Use 'draft' initially; promote to 'active' after validation; set superseded_by when deprecating",
                 },
                 "kind": {
-                    "values": ["scalar", "vector"],
-                    "description": "Discriminator field determining entry type",
+                    "note": "Refer to JSON schema 'kind' field. Discriminator field determining entry type (scalar vs vector)",
                 },
                 "provenance": {
                     "modes": ["operator", "reduction", "expression"],
@@ -1475,32 +1537,9 @@ class OverviewTool(BaseTool):
                     "reduction_example": "mean, rms, integral over time/volume/surface",
                 },
                 "tags": {
-                    "requirement": "Must contain exactly one primary tag; may contain zero or more secondary tags",
-                    "primary_tags": {
-                        "count": len(PRIMARY_TAGS),
-                        "examples": list(PRIMARY_TAGS)[:12],
-                        "note": "See tag_vocabulary for complete list with descriptions",
-                    },
-                    "secondary_tags": {
-                        "count": len(SECONDARY_TAGS),
-                        "examples": list(SECONDARY_TAGS)[:12],
-                        "note": "See tag_vocabulary for complete list with descriptions",
-                    },
-                    "validation": (
-                        "Pre-validation automatically ensures exactly one primary tag is present "
-                        "and places it at position 0. Schema validation then enforces tags[0] is "
-                        "from PRIMARY_TAGS vocabulary and tags[1:] are from SECONDARY_TAGS vocabulary."
-                    ),
-                    "correct_examples": [
-                        ["magnetics", "measured", "cylindrical-coordinates"],
-                        ["equilibrium", "reconstructed", "flux-surface-average"],
-                        ["fundamental", "global-quantity"],
-                    ],
-                    "automatic_reordering": (
-                        "If tags contain exactly one primary tag but it's not at position 0, "
-                        "it will be automatically moved to the first position during validation. "
-                        "Example: ['measured', 'magnetics'] → ['magnetics', 'measured']"
-                    ),
+                    "note": "Refer to JSON schema and tag_vocabulary section for complete controlled vocabulary",
+                    "critical_rule": "tags[0] MUST be a primary tag; tags[1:] are secondary tags",
+                    "auto_reordering": "If exactly one primary tag exists but not at position 0, it's automatically moved there",
                 },
             },
             "common_patterns": {
@@ -1524,38 +1563,25 @@ class OverviewTool(BaseTool):
                 ],
                 "units": [
                     "Prefer SI base units or eV for energy/temperature",
-                    "Use lexicographically sorted tokens: 'A.m^-2' not 'm^-2.A'",
                     "Specify dimensionless as empty string, not '1' or 'dimensionless'",
                 ],
                 "documentation": [
-                    "Do not reference IMAS, the Data Dictionary (DD), or implementation-specific paths",
-                    "Include physical interpretation and context",
-                    "Specify measurement method and typical uncertainty",
-                    "Note validation requirements and cross-diagnostic checks",
-                    "Provide references to relevant papers or documentation",
-                    "Describe coordinate systems and normalization conventions",
-                    "Use Markdown formatting for readability (bold, italics, lists, code blocks)",
-                    "Use LaTeX for all equations and mathematical expressions",
-                    "Inline math: $\\Phi = \\int \\mathbf{B} \\cdot d\\mathbf{A}$, $\\nabla T_e$, $\\frac{\\partial \\psi}{\\partial t}$",
-                    "Display math: $$V = -N A \\frac{dB}{dt}$$, $$\\nabla \\times \\mathbf{B} = \\mu_0 \\mathbf{J}$$, $$Q = P \\cdot \\frac{dV}{dt}$$",
-                    "Physics examples: Faraday induction $V = -\\frac{d\\Phi}{dt}$, transport flux $\\Gamma = -D \\nabla n + v n$, beta $\\beta = \\frac{2\\mu_0 p}{B^2}$",
-                    "Vector operations: gradient $\\nabla \\psi$, divergence $\\nabla \\cdot \\mathbf{\\Gamma}$, curl $\\nabla \\times \\mathbf{E}$, Laplacian $\\nabla^2 \\psi$",
-                    "Wrap text to ~80 characters per line for YAML readability",
-                    "Use YAML block scalar (|) to preserve line breaks and formatting",
+                    "Make fully standalone - no external references to IMAS, DD, COCOS, or implementation paths",
+                    "Define all coordinate systems and sign conventions explicitly within the text",
+                    "When deriving from IMAS DD: extract physics, expand with equations, make self-contained",
+                    "Include physical interpretation, governing equations, measurement methods, typical values",
+                    "Use Markdown formatting for structure (headings, lists, bold, italics)",
+                    "Use LaTeX for all equations: inline $\\nabla T_e$ or display $$V = -N A \\frac{dB}{dt}$$",
+                    "Provide concrete examples: Faraday $V = -\\frac{d\\Phi}{dt}$, transport $\\Gamma = -D \\nabla n + v n$",
+                    "Wrap text to ~80 characters per line; use YAML block scalar (|) for multiline content",
+                    "Specify measurement uncertainty and validation requirements where applicable",
+                    "Cross-reference other standard names by name, with explicit relationship equations",
                 ],
                 "tags": [
-                    "First tag (tags[0]) must be a primary tag from controlled vocabulary",
-                    "Common primary tags: 'magnetics', 'fundamental', 'equilibrium', 'transport', 'core-physics', 'edge-physics'",
-                    "Do not use secondary tags at position 0: 'cylindrical-coordinates', 'local-measurement', 'calibrated', etc.",
-                    "Example correct: ['magnetics', 'measured', 'cylindrical-coordinates']",
-                    "Example wrong: ['cylindrical-coordinates', 'magnetics'] - will fail validation",
-                    "Secondary tags (tags[1:]) provide cross-cutting classification",
-                    "Common secondary tags: measured, reconstructed, simulated, derived, validated, calibrated",
-                    "Temporal: time-dependent, steady-state, transient, long-timescale",
-                    "Spatial: spatial-profile, flux-surface-average, volume-average, line-integrated, local-measurement, global-quantity, cylindrical-coordinates",
-                    "Physics domain: equilibrium-reconstruction, transport-modeling, mhd-stability-analysis, heating-deposition",
-                    "Data quality: calibrated, raw-data, real-time, post-shot-analysis, benchmark-quantity",
-                    "Use get_catalog_entry_schema tool to see complete tag vocabulary with descriptions",
+                    "CRITICAL: tags[0] must be a primary tag (see tag_vocabulary section)",
+                    "Common mistake: putting secondary tags first (e.g., 'cylindrical-coordinates') - this will fail",
+                    "Workflow: choose primary tag for physics domain → add secondary tags for cross-cutting classification",
+                    "Refer to tag_vocabulary section for complete controlled vocabulary with descriptions",
                 ],
                 "metadata": [
                     "Set appropriate validity_domain: core_plasma, edge_plasma, vacuum, whole_plasma, whole_device",

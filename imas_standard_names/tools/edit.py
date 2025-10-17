@@ -48,7 +48,7 @@ class CatalogTool(BaseTool):
             "(3) list_standard_names scope='pending' to review, (4) write_standard_names to persist."
         )
     )
-    async def edit_standard_name(self, payload: dict, ctx: Context | None = None):  # type: ignore[no-untyped-def]
+    async def edit_standard_names(self, payload: dict, ctx: Context | None = None):  # type: ignore[no-untyped-def]
         try:
             # Parse first to surface validation errors consistently
             apply_input: ApplyInput = parse_apply_input(payload)

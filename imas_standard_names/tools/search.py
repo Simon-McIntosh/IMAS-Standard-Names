@@ -22,11 +22,13 @@ class SearchTool(BaseTool):
     @mcp_tool(
         description=(
             "Ranked full-text + fuzzy search over the IMAS Standard Names catalog. "
+            "Searches ONLY persisted (written to disk) entries - pending in-memory entries are NOT included. "
             "Input: free-text query (case-insensitive tokens / partial tokens). "
             "Output: up to 20 best matches with metadata (name, units, description, "
             "provenance, dependencies). Empty or no matches -> {}. "
             "Use this when you don't know the exact name and need to discover/find names by concept or partial text. "
-            "If you already have exact names, use fetch_standard_names or check_standard_names instead."
+            "If you already have exact names, use fetch_standard_names or check_standard_names instead. "
+            "To see pending entries, use list_standard_names(scope='pending')."
         )
     )
     async def search_standard_names(
@@ -36,4 +38,5 @@ class SearchTool(BaseTool):
     ):
         # Underlying repository returns list[ {name, score, highlight_documentation, standard_name} ]
         raw = self.catalog.search(query, with_meta=True)
+
         return {r["name"]: {k: v for k, v in r.items() if k != "name"} for r in raw}

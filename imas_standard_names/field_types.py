@@ -41,9 +41,10 @@ Unit = Annotated[
     str,
     Field(
         description=(
-            "Unit in fused dot-exponent style (lexicographic token order). "
+            "Unit in fused dot-exponent style (auto-corrected to lexicographic token order). "
             "Tokens: alphanumerics only; join with '.'; exponents use ^ (e.g. m.s^-2). "
-            "No '/', '*', or whitespace. Empty string for dimensionless."
+            "No '/', '*', or whitespace. Empty string for dimensionless. "
+            "Units are automatically reordered to canonical form (e.g., 's^-2.m' -> 'm.s^-2')."
         ),
         pattern=UNIT_PATTERN,
         examples=["eV", "m", "m.s^-1", "A.m^-2", "m^-3"],
@@ -93,7 +94,13 @@ Constraints = Annotated[
 Description = Annotated[
     str,
     Field(
-        description="One concise sentence (<=120 chars) summarizing the quantity.",
+        description=(
+            "One concise sentence summarizing the physical quantity. "
+            "Keep under 120 characters for readability. "
+            "Should be self-contained and understandable without external context. "
+            "Avoid: repeating the name verbatim, referencing IMAS Data Dictionary (DD), "
+            "COCOS conventions, or implementation-specific paths."
+        ),
         max_length=180,
     ),
 ]
@@ -102,15 +109,25 @@ Documentation = Annotated[
     str,
     Field(
         description=(
-            "Authoritative documentation providing clear, comprehensive explanation of the physical quantity. "
-            "Should include: physical interpretation and context, governing equations where appropriate, "
-            "measurement or derivation methods, typical values and ranges, "
-            "coordinate systems or conventions, relationships to other quantities, and references to standards or literature. "
-            "Write in precise scientific language suitable for domain experts using Markdown format. "
-            "Use LaTeX for equations: inline $...$ or display $$...$$. "
-            "Examples: Faraday's law $V = -N A \\frac{dB}{dt}$, flux $\\Phi = \\int \\mathbf{B} \\cdot d\\mathbf{A}$, Ampère's law $$\\nabla \\times \\mathbf{B} = \\mu_0 \\mathbf{J}$$. "
+            "Authoritative, self-contained documentation providing clear, comprehensive explanation of the physical quantity. "
+            "This field must be fully standalone - a domain expert should understand the quantity completely without "
+            "consulting external sources. "
+            "\n\n"
+            "MUST include: (1) Physical interpretation and governing physics, (2) Governing equations with full definitions, "
+            "(3) Measurement or derivation methods, (4) Typical values and physical ranges, (5) Coordinate system definitions "
+            "and sign conventions (if applicable), (6) Relationships to other quantities with explicit equations. "
+            "\n\n"
+            "Format requirements: Use Markdown for structure. Use LaTeX for ALL equations - inline $...$ or display $$...$$. "
+            "Examples: Faraday's law $V = -N A \\frac{dB}{dt}$, flux $\\Phi = \\int \\mathbf{B} \\cdot d\\mathbf{A}$, "
+            "Ampère's law $$\\nabla \\times \\mathbf{B} = \\mu_0 \\mathbf{J}$$. "
             "Wrap text to ~80 characters per line when used in YAML block scalars (|). "
-            "Do not reference implementation details or source data structure paths."
+            "\n\n"
+            "AVOID: (1) References to IMAS Data Dictionary (DD) paths or structure, (2) References to COCOS conventions "
+            "(define sign conventions explicitly instead), (3) Statements like 'see IMAS documentation' or 'refer to [external source]', "
+            "(4) Implementation-specific details, (5) Vague terms without explicit definitions. "
+            "\n\n"
+            "When deriving from IMAS DD: extract and expand the physics content, making it standalone. Define all coordinate "
+            "systems and sign conventions explicitly within the documentation text."
         ),
     ),
 ]

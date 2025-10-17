@@ -32,6 +32,10 @@ class CatalogBase:
     def search(self, query: str, limit: int = 20, with_meta: bool = False):
         cur = self.conn.cursor()
         try:
+            # Preprocess query for FTS5: convert multi-word queries to OR syntax
+            # FTS5 treats "word1 word2" as phrase search, but we want OR search
+            fts_query = " OR ".join(query.strip().split())
+
             # Only highlight documentation (long form). We intentionally drop
             # description highlighting to keep that field pristine and reduce
             # noisy HTML tags for downstream LLM/tooling use.
@@ -40,7 +44,7 @@ class CatalogBase:
                 "highlight(fts_standard_name,2,'<b>','</b>') AS h_doc "
                 "FROM fts_standard_name WHERE fts_standard_name MATCH ? "
                 "ORDER BY score LIMIT ?",
-                (query, limit),
+                (fts_query, limit),
             )
             rows = cur.fetchall()
         except Exception:  # fallback substring scan

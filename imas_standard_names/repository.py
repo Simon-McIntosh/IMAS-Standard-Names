@@ -115,6 +115,7 @@ class StandardNameCatalog:
         the current state of YAML files. Used after commit to sync the
         in-memory state with persisted changes.
         """
+
         # Clear existing data
         for table in [
             "provenance_operator",
@@ -133,6 +134,9 @@ class StandardNameCatalog:
         models = self.store.load()
         for m in ordered_models(models):
             self.catalog.insert(m)
+
+        # Ensure all changes are committed
+        self.catalog.conn.commit()
 
     # Internal helper for UnitOfWork
     def _row_to_model(self, row):

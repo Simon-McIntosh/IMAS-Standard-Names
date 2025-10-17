@@ -98,13 +98,40 @@ class UnitOfWork:
         issues = self.validate()
         if issues:
             raise ValueError("Validation failed:\n" + "\n".join(issues))
-        existing_files = {f.stem for f in self.repo.store.yaml_files()}
+
+        # Build map of existing files with their full paths
+        existing_files = {f.stem: f for f in self.repo.store.yaml_files()}
         current_names = set()
+
+        # Write all models and detect primary tag changes
         for m in self.repo.list():
+            name = m.name
+            # Check if this is an update with a primary tag change
+            if name in existing_files:
+                old_path = existing_files[name]
+                # Get expected new path based on current primary tag
+                if m.tags and len(m.tags) > 0:
+                    expected_subdir = m.tags[0]
+                    expected_path = (
+                        self.repo.store.root / expected_subdir / f"{name}.yml"
+                    )
+                else:
+                    expected_path = self.repo.store.root / f"{name}.yml"
+
+                # If primary tag changed, delete old file before writing new one
+                if old_path.resolve() != expected_path.resolve():
+                    try:
+                        old_path.unlink()
+                    except OSError:
+                        pass
+
             self.repo.store.write(m)
-            current_names.add(m.name)
-        for name in existing_files - current_names:
+            current_names.add(name)
+
+        # Delete orphaned files (entries that no longer exist)
+        for name in set(existing_files.keys()) - current_names:
             self.repo.store.delete(name)
+
         self._undo.clear()
         self.close()
 

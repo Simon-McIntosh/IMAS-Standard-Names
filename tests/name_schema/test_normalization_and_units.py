@@ -117,3 +117,54 @@ def test_deprecated_with_superseded_by_ok():
         }
     )
     assert sn.superseded_by == "new_quantity"
+
+
+def test_unit_auto_canonical_ordering():
+    """Test that units are automatically reordered to canonical lexicographic form."""
+    # Test case 1: s^-2.m should be auto-corrected to m.s^-2
+    sn1 = create_standard_name_entry(
+        {
+            "kind": "scalar",
+            "name": "acceleration_test",
+            "description": "Test acceleration",
+            "unit": "s^-2.m",  # Non-canonical order
+            "status": "draft",
+        }
+    )
+    assert sn1.unit == "m.s^-2", f"Expected 'm.s^-2', got '{sn1.unit}'"
+
+    # Test case 2: keV.m^-1 should remain keV.m^-1 (already canonical)
+    sn2 = create_standard_name_entry(
+        {
+            "kind": "scalar",
+            "name": "energy_gradient",
+            "description": "Energy gradient",
+            "unit": "keV.m^-1",
+            "status": "draft",
+        }
+    )
+    assert sn2.unit == "keV.m^-1"
+
+    # Test case 3: Complex non-canonical order
+    sn3 = create_standard_name_entry(
+        {
+            "kind": "scalar",
+            "name": "complex_quantity",
+            "description": "Complex quantity",
+            "unit": "T.m^-2.A",  # Should become A.T.m^-2
+            "status": "draft",
+        }
+    )
+    assert sn3.unit == "A.T.m^-2", f"Expected 'A.T.m^-2', got '{sn3.unit}'"
+
+    # Test case 4: Multiple tokens out of order
+    sn4 = create_standard_name_entry(
+        {
+            "kind": "scalar",
+            "name": "another_quantity",
+            "description": "Another quantity",
+            "unit": "s.kg.m^2",  # Should become kg.m^2.s
+            "status": "draft",
+        }
+    )
+    assert sn4.unit == "kg.m^2.s", f"Expected 'kg.m^2.s', got '{sn4.unit}'"

@@ -17,7 +17,9 @@ class BaseTool(ABC):
 
     def __init__(self, catalog: StandardNameCatalog | None = None):
         self.logger = logger
-        self.catalog = catalog or StandardNameCatalog()
+        if catalog is None:
+            raise ValueError("BaseTool requires a catalog instance - received None")
+        self.catalog = catalog
 
     @property
     @abstractmethod

@@ -145,10 +145,18 @@ class CatalogPaths:
         if s == "":
             return self.standard_names_root
 
-        # Check if it's an absolute path or relative path (../, ./, or direct path)
-        # These should be resolved relative to CWD, not the packaged resources
-        if s.startswith(("../", "./", "..\\", ".\\")) or Path(s).is_absolute():
+        # Check if it's an absolute path
+        if Path(s).is_absolute():
             p = Path(s).expanduser().resolve()
+            return p
+
+        # For relative paths (../, ./), resolve relative to the project root
+        # (parent of the package directory) instead of CWD
+        if s.startswith(("../", "./", "..\\", ".\\")):
+            # Get project root: go up from package directory
+            package_dir = Path(__file__).parent  # imas_standard_names/
+            project_root = package_dir.parent  # imas-standard-names/
+            p = (project_root / s).expanduser().resolve()
             return p
 
         # Allow shorthand "standard_names/..."

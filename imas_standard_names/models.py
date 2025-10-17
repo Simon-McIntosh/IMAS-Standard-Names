@@ -127,9 +127,16 @@ class StandardNameEntryBase(BaseModel):
         return v
 
     # Base validators
-    @field_validator("unit")
+    @field_validator("unit", mode="before")
     @classmethod
-    def normalize_unit(cls, v: str) -> str:
+    def canonicalize_unit_order(cls, v: str) -> str:
+        """Auto-correct unit token order to canonical lexicographic form.
+
+        This helps LLMs and human authors by accepting units in any order
+        and automatically reordering to canonical form. For example:
+        's^-2.m' -> 'm.s^-2'
+        'keV.m^-1' -> 'keV.m^-1' (already canonical)
+        """
         # Dimensionless synonyms collapse to empty string.
         if v in ("", "1", "none", "dimensionless"):
             return ""
@@ -140,12 +147,7 @@ class StandardNameEntryBase(BaseModel):
                 "Use dot-exponent style (e.g. m.s^-2); '/' and '*' are forbidden"
             )
 
-        # Syntactic canonicalization performed without expanding symbols to their
-        # long names (pint would expand 'm' -> 'meter', etc.), because we want
-        # authors to write the concise symbols and we want to preserve those as
-        # the canonical storage form. We still optionally validate that each
-        # symbol is a known pint unit if pint is available, but we compare using
-        # the author-supplied symbols.
+        # Parse tokens and reorder lexicographically
         token_re = re.compile(r"^([A-Za-z0-9]+)(\^([+-]?\d+))?$")
         parts_raw = v.split(".")
         parsed: list[tuple[str, int]] = []
@@ -161,12 +163,26 @@ class StandardNameEntryBase(BaseModel):
             parsed.append((sym, exp))
 
         # Lexicographic ordering of symbols defines canonical order.
+        # Auto-correct by returning the canonical form.
         canonical = ".".join(
             sym if exp == 1 else f"{sym}^{exp}"
             for sym, exp in sorted(parsed, key=lambda x: x[0])
         )
-        if canonical != v:
-            raise ValueError(f"Unit '{v}' not canonical; expected '{canonical}'")
+        return canonical
+
+    @field_validator("unit")
+    @classmethod
+    def validate_unit_with_pint(cls, v: str) -> str:
+        """Validate unit semantics using pint (if available).
+
+        This runs after canonicalization to ensure the unit is dimensionally valid.
+        Syntactic canonicalization is performed without expanding symbols to their
+        long names (pint would expand 'm' -> 'meter', etc.), because we want
+        authors to write the concise symbols and we want to preserve those as
+        the canonical storage form.
+        """
+        if v == "":
+            return v
 
         # Optional semantic validation via pint (best-effort). We allow tokens that
         # pint can resolve individually; we do not reconstruct expansion names.

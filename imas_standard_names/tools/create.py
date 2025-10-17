@@ -79,30 +79,38 @@ class CreateTool(BaseTool):
 
         # Validate entries before processing
         validated_entries: list[StandardNameEntry] = []
-        for entry_data in entries:
+        validation_errors: list[dict] = []
+
+        for i, entry_data in enumerate(entries):
             try:
                 # This will raise if entry is invalid
                 entry = create_standard_name_entry(entry_data)
                 validated_entries.append(entry)
             except Exception as e:
-                # Return early with validation error
-                return {
-                    "action": "batch",
-                    "summary": {
-                        "total": len(entries),
-                        "successful": 0,
-                        "failed": len(entries),
-                        "skipped": 0,
-                        "duration_ms": int((time.time() - start_time) * 1000),
-                        "mode": mode,
-                        "dry_run": dry_run,
-                    },
-                    "error": {
+                validation_errors.append(
+                    {
+                        "index": i,
+                        "entry": entry_data,
                         "type": type(e).__name__,
                         "message": str(e),
-                        "entry": entry_data,
-                    },
-                }
+                    }
+                )
+                # In 'atomic' mode, return early on first error
+                if mode == "atomic":
+                    return {
+                        "action": "batch",
+                        "summary": {
+                            "total": len(entries),
+                            "successful": 0,
+                            "failed": len(entries),
+                            "skipped": 0,
+                            "duration_ms": int((time.time() - start_time) * 1000),
+                            "mode": mode,
+                            "dry_run": dry_run,
+                        },
+                        "error": validation_errors[0],
+                    }
+                # In 'continue' mode, accumulate errors and keep processing
 
         # Dependency ordering - Create simple wrapper objects for topological_sort_operations
         # It expects objects with 'model' attribute that has 'name' and 'provenance'
@@ -212,13 +220,17 @@ class CreateTool(BaseTool):
 
         duration_ms = int((time.time() - start_time) * 1000)
 
-        return {
+        # Build return dict with validation errors if any
+        result = {
             "action": "batch",
             "summary": {
                 "total": len(entries),
                 "successful": successful_count,
-                "failed": failed_count,
-                "skipped": len(entries) - successful_count - failed_count,
+                "failed": failed_count + len(validation_errors),
+                "skipped": len(entries)
+                - successful_count
+                - failed_count
+                - len(validation_errors),
                 "duration_ms": duration_ms,
                 "mode": mode,
                 "dry_run": dry_run,
@@ -226,6 +238,12 @@ class CreateTool(BaseTool):
             "results": results,
             "last_successful_index": last_successful_index,
         }
+
+        # Include validation errors if any occurred
+        if validation_errors:
+            result["validation_errors"] = validation_errors
+
+        return result
 
 
 __all__ = ["CreateTool"]
