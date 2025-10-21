@@ -10,14 +10,14 @@ This specification defines the canonical grammar, validation rules, and semantic
 
 ### Design Principles
 
-| Principle              | Description                                                                 |
-| ---------------------- | --------------------------------------------------------------------------- |
-| Deterministic Parsing  | Names decompose unambiguously via grammar rules                             |
-| Controlled Vocabulary  | Segments use enumerated tokens from specification.yml                       |
-| Canonical Form         | Exactly one valid name per concept                                          |
-| IMAS DD Alignment      | Sign conventions, coordinates, units follow IMAS Data Dictionary            |
-| Segment Order          | Fixed left-to-right sequence enforced                                       |
-| Split Base Structure   | Geometric vs physical bases are mutually exclusive                          |
+| Principle             | Description                                                      |
+| --------------------- | ---------------------------------------------------------------- |
+| Deterministic Parsing | Names decompose unambiguously via grammar rules                  |
+| Controlled Vocabulary | Segments use enumerated tokens from specification.yml            |
+| Canonical Form        | Exactly one valid name per concept                               |
+| IMAS DD Alignment     | Sign conventions, coordinates, units follow IMAS Data Dictionary |
+| Segment Order         | Fixed left-to-right sequence enforced                            |
+| Split Base Structure  | Geometric vs physical bases are mutually exclusive               |
 
 ---
 
@@ -26,11 +26,11 @@ This specification defines the canonical grammar, validation rules, and semantic
 ### Canonical Pattern
 
 ```text
-[<component>_component_of | <coordinate>]? 
-[<subject>]? 
-<geometric_base | physical_base> 
-[of_<object> | from_<source>]? 
-[of_<geometry> | at_<position>]? 
+[<component>_component_of | <coordinate>]?
+[<subject>]?
+<geometric_base | physical_base>
+[of_<object> | from_<source>]?
+[of_<geometry> | at_<position>]?
 [due_to_<process>]?
 ```
 
@@ -38,20 +38,20 @@ This specification defines the canonical grammar, validation rules, and semantic
 
 For detailed segment descriptions and auto-generated vocabulary tables, see [Grammar Reference](../grammar-reference.md).
 
-| Segment          | Required | Description                                      | Exclusive With   |
-| ---------------- | -------- | ------------------------------------------------ | ---------------- |
-| component        | No       | Physical vector component direction              | coordinate       |
-| coordinate       | No       | Geometric vector coordinate axis                 | component        |
-| subject          | No       | Particle species or plasma population            |                 |
-| geometric_base   | No*      | Spatial/geometric quantity                       | physical_base    |
-| physical_base    | No*      | Physical measurement/property                    | geometric_base   |
-| object           | No       | Hardware whose property is described (of_)       | source           |
-| source           | No       | Device from which measurement obtained (from_)   | object           |
-| geometry         | No       | Geometric object property (of_)                  | position         |
-| position         | No       | Location where field evaluated (at_)             | geometry         |
-| process          | No       | Physical mechanism (due_to_)                     |                 |
+| Segment        | Required | Description                                     | Exclusive With |
+| -------------- | -------- | ----------------------------------------------- | -------------- |
+| component      | No       | Physical vector component direction             | coordinate     |
+| coordinate     | No       | Geometric vector coordinate axis                | component      |
+| subject        | No       | Particle species or plasma population           |                |
+| geometric_base | No\*     | Spatial/geometric quantity                      | physical_base  |
+| physical_base  | No\*     | Physical measurement/property                   | geometric_base |
+| object         | No       | Hardware whose property is described (of\_)     | source         |
+| source         | No       | Device from which measurement obtained (from\_) | object         |
+| geometry       | No       | Geometric object property (of\_)                | position       |
+| position       | No       | Location where field evaluated (at\_)           | geometry       |
+| process        | No       | Physical mechanism (due*to*)                    |                |
 
-*One of geometric_base or physical_base is required.
+\*One of geometric_base or physical_base is required.
 
 ### Split Base Semantics
 
@@ -71,15 +71,15 @@ For detailed segment descriptions and auto-generated vocabulary tables, see [Gra
 
 ### Segment Templates
 
-| Segment   | Template                         | Example                                      |
-| --------- | -------------------------------- | -------------------------------------------- |
-| component | `{token}_component_of_`        | `radial_component_of_magnetic_field`       |
-| coordinate| `{token}_`                     | `radial_position_of_flux_loop`             |
-| object    | `of_{token}`                   | `area_of_flux_loop`                        |
-| source    | `from_{token}`                 | `voltage_from_flux_loop`                   |
-| geometry  | `of_{token}`                   | `major_radius_of_plasma_boundary`          |
-| position  | `at_{token}`                   | `electron_temperature_at_magnetic_axis`    |
-| process   | `due_to_{token}`               | `heat_flux_due_to_conduction`              |
+| Segment    | Template                | Example                                 |
+| ---------- | ----------------------- | --------------------------------------- |
+| component  | `{token}_component_of_` | `radial_component_of_magnetic_field`    |
+| coordinate | `{token}_`              | `radial_position_of_flux_loop`          |
+| object     | `of_{token}`            | `area_of_flux_loop`                     |
+| source     | `from_{token}`          | `voltage_from_flux_loop`                |
+| geometry   | `of_{token}`            | `major_radius_of_plasma_boundary`       |
+| position   | `at_{token}`            | `electron_temperature_at_magnetic_axis` |
+| process    | `due_to_{token}`        | `heat_flux_due_to_conduction`           |
 
 ---
 
@@ -87,16 +87,16 @@ For detailed segment descriptions and auto-generated vocabulary tables, see [Gra
 
 ### Structural Invariants
 
-| Rule ID | Description                                                    |
-| ------- | -------------------------------------------------------------- |
+| Rule ID | Description                                                           |
+| ------- | --------------------------------------------------------------------- |
 | GRM001  | Name must contain exactly one base (geometric_base XOR physical_base) |
-| GRM002  | Segment order must follow canonical pattern                    |
-| GRM003  | component and coordinate are mutually exclusive                |
-| GRM004  | object and source are mutually exclusive                       |
-| GRM005  | geometry and position are mutually exclusive                   |
-| GRM006  | coordinate requires geometric_base                             |
-| GRM007  | component requires physical_base                               |
-| GRM008  | All vocabulary tokens must exist in specification.yml          |
+| GRM002  | Segment order must follow canonical pattern                           |
+| GRM003  | component and coordinate are mutually exclusive                       |
+| GRM004  | object and source are mutually exclusive                              |
+| GRM005  | geometry and position are mutually exclusive                          |
+| GRM006  | coordinate requires geometric_base                                    |
+| GRM007  | component requires physical_base                                      |
+| GRM008  | All vocabulary tokens must exist in specification.yml                 |
 
 ### Semantic Constraints
 
@@ -116,11 +116,11 @@ Standard names may include a `provenance` block describing their derivation. See
 
 ### Provenance Modes
 
-| Mode       | Description                               | Example                          |
-| ---------- | ----------------------------------------- | -------------------------------- |
-| operator   | Derived via transformation operators      | `time_derivative_of_temperature` |
-| reduction  | Scalar reduction from vector/array        | `magnitude_of_magnetic_field`    |
-| expression | Explicit algebraic combination            | `ratio_of_pressure_to_field`     |
+| Mode       | Description                          | Example                          |
+| ---------- | ------------------------------------ | -------------------------------- |
+| operator   | Derived via transformation operators | `time_derivative_of_temperature` |
+| reduction  | Scalar reduction from vector/array   | `magnitude_of_magnetic_field`    |
+| expression | Explicit algebraic combination       | `ratio_of_pressure_to_field`     |
 
 ---
 
@@ -149,13 +149,13 @@ major_radius_of_plasma_boundary           (physical_base + geometry)
 
 ### Anti-Patterns
 
-| Invalid                                         | Violation    | Correct                                      |
-| ----------------------------------------------- | ------------ | -------------------------------------------- |
-| `magnetic_field_radial_component`             | Segment order| `radial_component_of_magnetic_field`       |
-| `radial_component_of_position`                | GRM007       | `radial_position_of_flux_loop`             |
-| `radial_position_component_of_flux_loop`      | GRM006       | `radial_position_of_flux_loop`             |
-| `electron_temperature_at_boundary_of_axis`    | GRM005       | Pick one: at_boundary OR of_axis             |
-| `voltage_of_flux_loop`                        | Semantic     | `voltage_from_flux_loop`                   |
+| Invalid                                    | Violation     | Correct                              |
+| ------------------------------------------ | ------------- | ------------------------------------ |
+| `magnetic_field_radial_component`          | Segment order | `radial_component_of_magnetic_field` |
+| `radial_component_of_position`             | GRM007        | `radial_position_of_flux_loop`       |
+| `radial_position_component_of_flux_loop`   | GRM006        | `radial_position_of_flux_loop`       |
+| `electron_temperature_at_boundary_of_axis` | GRM005        | Pick one: at_boundary OR of_axis     |
+| `voltage_of_flux_loop`                     | Semantic      | `voltage_from_flux_loop`             |
 
 ---
 
@@ -201,7 +201,7 @@ The grammar specification drives automatic code generation:
 ## References
 
 - **[Grammar Reference](../grammar-reference.md):** Complete vocabulary tables and rules
-- **[Guidelines](../guidelines.md):** Naming conventions and patterns  
+- **[Guidelines](../guidelines.md):** Naming conventions and patterns
 - **[Quick Start](quickstart.md):** Step-by-step authoring guide
 - **[Style Guide](style-guide.md):** Detailed authoring rules
 - **[Provenance](provenance.md):** Derivation schema reference

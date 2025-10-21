@@ -3,7 +3,7 @@
 This guide shows you how to create new standard names for common scenarios.
 
 !!! tip "Complete Example"
-    For a comprehensive worked example, see the IMAS Magnetics Diagnostic documentation.
+For a comprehensive worked example, see the IMAS Magnetics Diagnostic documentation.
 
 ---
 
@@ -225,14 +225,14 @@ Fix any reported issues and re-run until validation passes (exit code 0).
 
 ## Common Patterns Reference
 
-| Pattern                                   | Use Case                                | Example                                  |
-| ----------------------------------------- | --------------------------------------- | ---------------------------------------- |
-| `<subject>_<physical_base>`             | Basic physical measurement              | `electron_temperature`                 |
-| `<coordinate>_<geometric_base>_of_<object>` | Hardware geometry                   | `radial_position_of_flux_loop`         |
-| `<physical_base>_from_<source>`         | Diagnostic measurement                  | `voltage_from_flux_loop`               |
-| `<component>_component_of_<physical_base>` | Physical vector component            | `radial_component_of_magnetic_field`   |
-| `<physical_base>_at_<position>`         | Field at location                       | `electron_temperature_at_magnetic_axis`|
-| `<physical_base>_of_<geometry>`         | Geometric property of spatial object    | `major_radius_of_plasma_boundary`      |
+| Pattern                                     | Use Case                             | Example                                 |
+| ------------------------------------------- | ------------------------------------ | --------------------------------------- |
+| `<subject>_<physical_base>`                 | Basic physical measurement           | `electron_temperature`                  |
+| `<coordinate>_<geometric_base>_of_<object>` | Hardware geometry                    | `radial_position_of_flux_loop`          |
+| `<physical_base>_from_<source>`             | Diagnostic measurement               | `voltage_from_flux_loop`                |
+| `<component>_component_of_<physical_base>`  | Physical vector component            | `radial_component_of_magnetic_field`    |
+| `<physical_base>_at_<position>`             | Field at location                    | `electron_temperature_at_magnetic_axis` |
+| `<physical_base>_of_<geometry>`             | Geometric property of spatial object | `major_radius_of_plasma_boundary`       |
 
 ---
 

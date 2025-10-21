@@ -1,7 +1,7 @@
 # Guidelines for IMAS Standard Names
 
 !!! info "Auto-Generated Vocabularies"
-    Token lists are automatically generated from `grammar/specification.yml`. See [Grammar Reference](grammar-reference.md) for complete tables.
+Token lists are automatically generated from `grammar/specification.yml`. See [Grammar Reference](grammar-reference.md) for complete tables.
 
 ## Overview
 
@@ -29,11 +29,11 @@ Standard names provide a controlled vocabulary for identifying physical quantiti
 Standard names follow a fixed segment pattern:
 
 ```text
-[<component>_component_of | <coordinate>]? 
-[<subject>]? 
-<geometric_base | physical_base> 
-[of_<object> | from_<source>]? 
-[of_<geometry> | at_<position>]? 
+[<component>_component_of | <coordinate>]?
+[<subject>]?
+<geometric_base | physical_base>
+[of_<object> | from_<source>]?
+[of_<geometry> | at_<position>]?
 [due_to_<process>]?
 ```
 
