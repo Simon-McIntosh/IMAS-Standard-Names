@@ -212,5 +212,3 @@ curvature_of_flux_surface
 **Authoring rules:** [Style Guide](development/style-guide.md)
 
 **Formal specification:** [Specification](development/specification.md)
-
-**Worked example:** [IMAS Magnetics Diagnostic](magnetics-example.md)
