@@ -1,4 +1,4 @@
-Create a new GitHub issue for Simon-McIntosh/IMAS-Standard-Names.
+Create a new GitHub issue for iterorganization/IMAS-Standard-Names.
 
 The issue should follow the #file:../ISSUE_TEMPLATE/create-standard-name.yml template.
 The issue should include blank lines above and below each section.

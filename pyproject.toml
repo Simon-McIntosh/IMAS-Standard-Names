@@ -38,7 +38,7 @@ keywords = [
   "fusion research",
 ]
 [project.urls]
-"Documentation" = "https://simon-mcintosh.github.io/IMAS-Standard-Names/"
+"Documentation" = "https://iterorganization.github.io/IMAS-Standard-Names/"
 
 [project.scripts]
 has_standardname = "imas_standard_names.issues.cli:has_standardname"
