@@ -1,19 +1,7 @@
 [
   {
-    "version": "submit",
-    "title": "submit",
-    "aliases": []
-  },
-  {
     "version": "main",
     "title": "main",
     "aliases": []
-  },
-  {
-    "version": "0.3",
-    "title": "0.3.5",
-    "aliases": [
-      "latest"
-    ]
   }
 ]
