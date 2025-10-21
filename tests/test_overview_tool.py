@@ -21,7 +21,8 @@ def test_overview_structure(sample_catalog):
 
     # Verify canonical pattern matches grammar.yml
     expected_pattern = (
-        "[<component>_component_of | <coordinate>]? [<subject>]? <base> "
+        "[<component>_component_of | <coordinate>]? [<subject>]? "
+        "[<geometric_base> | <physical_base>]? "
         "[of_<object> | from_<source>]? [of_<geometry> | at_<position>]? [due_to_<process>]?"
     )
     assert grammar["canonical_pattern"] == expected_pattern

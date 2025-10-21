@@ -21,6 +21,7 @@ def _enum_values[
     E: (
         grammar_types.Component,
         grammar_types.Subject,
+        grammar_types.GeometricBase,
         grammar_types.Object,
         grammar_types.Source,
         grammar_types.Position,
@@ -84,9 +85,8 @@ def _build_canonical_pattern() -> str:
             if rule.template:
                 template = rule.template.replace("{token}", f"<{seg_id}>")
                 seg_pattern = f"[{template}]?" if rule.optional else template
-            elif seg_id == "base":
-                seg_pattern = "<base>"  # base is never optional
             else:
+                # For segments without templates (geometric_base, physical_base, subject)
                 seg_pattern = f"[<{seg_id}>]?" if rule.optional else f"<{seg_id}>"
 
         pattern_parts.append(seg_pattern)
@@ -277,6 +277,108 @@ class OverviewTool(BaseTool):
                 "description": _get_vocabulary_description("subject"),
             }
 
+        # Add geometric_base vocabulary (CONTROLLED - required for geometric quantities)
+        if hasattr(grammar_types, "GeometricBase"):
+            vocabulary["geometric_base"] = {
+                "segment_id": "geometric_base",
+                "template": SEGMENT_TEMPLATES.get("geometric_base"),
+                "tokens": _enum_values(grammar_types.GeometricBase),
+                "usage": "base",
+                "description": (
+                    "Controlled vocabulary for geometric/spatial base quantities describing "
+                    "locations, shapes, orientations, and geometric properties. "
+                    "REQUIRED: Must be qualified with object OR geometry segment. "
+                    "Mutually exclusive with physical_base."
+                ),
+                "categories": {
+                    "positions": {
+                        "tokens": ["position"],
+                        "description": "Location in space",
+                        "requirement": "Must specify object: position_of_{object}",
+                        "examples": [
+                            "radial_position_of_flux_loop",
+                            "vertical_position_of_magnetic_axis",
+                            "toroidal_position_of_sensor",
+                        ],
+                    },
+                    "vertices_centroids": {
+                        "tokens": ["vertex", "centroid"],
+                        "description": "Key points of geometric objects",
+                        "requirement": "Must specify object: {base}_of_{object}",
+                        "examples": [
+                            "vertex_of_divertor_tile",
+                            "centroid_of_plasma_cross_section",
+                        ],
+                    },
+                    "boundaries_paths": {
+                        "tokens": ["outline", "contour", "trajectory"],
+                        "description": "Paths, boundaries, and motion traces",
+                        "requirement": "Must specify object: {base}_of_{object}",
+                        "examples": [
+                            "outline_of_first_wall",
+                            "contour_of_flux_surface",
+                            "trajectory_of_neutral_beam",
+                        ],
+                    },
+                    "displacements": {
+                        "tokens": ["displacement", "offset"],
+                        "description": "Relative positions and shifts",
+                        "requirement": "Must specify object or reference",
+                        "examples": [
+                            "displacement_of_plasma_boundary",
+                            "radial_offset_of_magnetic_axis",
+                        ],
+                    },
+                    "dimensions": {
+                        "tokens": ["extent"],
+                        "description": "Size/span measurements",
+                        "requirement": "Typically with component for direction",
+                        "examples": [
+                            "radial_extent_of_plasma",
+                            "vertical_extent_of_antenna",
+                        ],
+                    },
+                    "orientations": {
+                        "tokens": ["surface_normal", "sensor_normal", "tangent_vector"],
+                        "description": "Direction vectors for surfaces/sensors/paths",
+                        "requirement": "MUST specify object",
+                        "examples": [
+                            "surface_normal_of_divertor_tile",
+                            "sensor_normal_of_bolometer",
+                            "tangent_vector_of_field_line",
+                        ],
+                    },
+                },
+            }
+
+        # Add physical_base note (open vocabulary)
+        vocabulary["physical_base"] = {
+            "segment_id": "physical_base",
+            "template": SEGMENT_TEMPLATES.get("physical_base"),
+            "tokens": [],  # Open vocabulary - no controlled list
+            "usage": "base",
+            "description": (
+                "Open vocabulary for physical quantity base names (temperature, density, "
+                "pressure, energy, power, current, voltage, etc.). "
+                "Not controlled - use standard physics terminology. "
+                "Typically qualified with subject (electron, ion) rather than object. "
+                "Mutually exclusive with geometric_base."
+            ),
+            "examples": [
+                "electron_temperature",
+                "ion_density",
+                "magnetic_field",
+                "toroidal_current",
+                "plasma_energy",
+                "ohmic_power",
+            ],
+            "guidance": {
+                "subject_qualification": "Prefer subject (electron_temperature) over object qualification",
+                "component_usage": "Use component segment for vector field directions (radial_component_of_magnetic_field)",
+                "units": "Physical bases must have standardizable physical units",
+            },
+        }
+
         # Add object vocabulary if it exists
         if hasattr(grammar_types, "Object"):
             vocabulary["object"] = {
@@ -341,6 +443,138 @@ class OverviewTool(BaseTool):
 
         # Critical naming rules for LLM understanding
         naming_rules = {
+            "geometric_base_requirements": {
+                "rule": "ALL geometric_base names MUST have object OR geometry qualification",
+                "severity": "ERROR",
+                "applies_to": [
+                    "position",
+                    "vertex",
+                    "centroid",
+                    "outline",
+                    "contour",
+                    "displacement",
+                    "offset",
+                    "trajectory",
+                    "extent",
+                    "surface_normal",
+                    "sensor_normal",
+                    "tangent_vector",
+                ],
+                "rationale": "Geometric quantities describe spatial properties *of something*. 'Where?' requires 'of what?'",
+                "wrong": [
+                    "radial_position",
+                    "vertex",
+                    "surface_normal",
+                    "trajectory",
+                ],
+                "correct": [
+                    "radial_position_of_flux_loop",
+                    "vertex_of_divertor_tile",
+                    "surface_normal_of_first_wall",
+                    "trajectory_of_neutral_beam",
+                ],
+                "examples": {
+                    "position": "radial_position_of_magnetic_axis (specifies object)",
+                    "centroid": "centroid_of_plasma_cross_section (what's being centered)",
+                    "outline": "poloidal_outline_of_limiter (boundary of what)",
+                    "normal": "surface_normal_of_divertor_tile (normal to which surface)",
+                },
+            },
+            "base_type_distinction": {
+                "rule": "Use geometric_base for locations/shapes, physical_base for fields/properties",
+                "severity": "CRITICAL",
+                "geometric_base": {
+                    "description": "Spatial/geometric quantities (WHERE things are)",
+                    "controlled_vocabulary": True,
+                    "requires_qualification": "object OR geometry",
+                    "examples": [
+                        "position_of_flux_loop",
+                        "vertex_of_tile",
+                        "contour_of_plasma",
+                    ],
+                },
+                "physical_base": {
+                    "description": "Physical quantities (WHAT exists)",
+                    "controlled_vocabulary": False,
+                    "typical_qualification": "subject (electron, ion)",
+                    "examples": [
+                        "electron_temperature",
+                        "magnetic_field",
+                        "plasma_current",
+                    ],
+                },
+                "key_distinction": "Geometric = WHERE (position, shape, orientation); Physical = WHAT (temperature, field, power)",
+            },
+            "component_vs_coordinate_rule": {
+                "rule": "Use 'component' with physical_base, 'coordinate' with geometric_base",
+                "severity": "WARNING",
+                "component_usage": {
+                    "applies_to": "physical_base (fields, fluxes, gradients)",
+                    "pattern": "{axis}_component_of_{physical_quantity}",
+                    "examples": [
+                        "radial_component_of_magnetic_field",
+                        "toroidal_component_of_heat_flux",
+                        "vertical_component_of_velocity",
+                    ],
+                    "rationale": "Components are directional projections of physical vector fields",
+                },
+                "coordinate_usage": {
+                    "applies_to": "geometric_base (positions, vertices, trajectories)",
+                    "pattern": "{axis}_{geometric_base}_of_{object}",
+                    "examples": [
+                        "radial_position_of_flux_loop",
+                        "toroidal_vertex_of_tile",
+                        "vertical_displacement_of_plasma",
+                    ],
+                    "rationale": "Coordinates specify axes for spatial/geometric decomposition",
+                },
+                "wrong_usage": {
+                    "avoid": [
+                        "radial_component_of_position (use: radial_position_of_...)",
+                        "toroidal_coordinate_temperature (use: toroidal_component_of_...)",
+                    ],
+                },
+            },
+            "orientation_vector_requirement": {
+                "rule": "Normals and tangents MUST specify the object/surface",
+                "severity": "ERROR",
+                "applies_to": ["surface_normal", "sensor_normal", "tangent_vector"],
+                "rationale": "Orientation vectors are properties of surfaces/sensors/curves",
+                "wrong": ["surface_normal", "sensor_normal", "tangent_vector"],
+                "correct": [
+                    "surface_normal_of_divertor_tile",
+                    "sensor_normal_of_bolometer",
+                    "radial_component_of_surface_normal_of_first_wall",
+                    "tangent_vector_of_field_line",
+                ],
+            },
+            "extent_dimensionality_guidance": {
+                "rule": "extent should typically specify dimension via component",
+                "severity": "INFO",
+                "rationale": "'How big?' often needs 'in which direction?'",
+                "preferred": [
+                    "radial_extent_of_plasma",
+                    "vertical_extent_of_antenna",
+                    "toroidal_extent_of_coil",
+                ],
+                "acceptable_without_component": [
+                    "extent_of_tile (if referring to 3D overall size)"
+                ],
+            },
+            "physical_base_with_object_warning": {
+                "rule": "Physical quantities with object qualification may indicate confusion",
+                "severity": "INFO",
+                "rationale": "Physical quantities are properties of subjects, not objects. Object qualification suggests measurement location.",
+                "questionable": [
+                    "temperature_of_langmuir_probe",
+                    "density_of_bolometer",
+                ],
+                "better": [
+                    "electron_temperature_from_langmuir_probe (measurement from device)",
+                    "electron_temperature_at_probe_location (field at location)",
+                    "electron_temperature (intrinsic property of subject)",
+                ],
+            },
             "metadata_exclusion": {
                 "rule": "Exclude administrative metadata from standard names",
                 "excludes": [

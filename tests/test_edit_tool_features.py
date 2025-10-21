@@ -9,7 +9,7 @@ from imas_standard_names.tools.edit import CatalogTool
 
 def invoke(tool, payload):
     """Helper to invoke async tool method."""
-    return asyncio.run(tool.edit_standard_name(payload))
+    return asyncio.run(tool.edit_standard_names(payload))
 
 
 def test_delete_with_dry_run(tmp_path):

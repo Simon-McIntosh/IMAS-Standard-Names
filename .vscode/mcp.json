@@ -13,7 +13,7 @@
 			"command": "uv",
 			"args": ["run", "standard-names-mcp"],
 			"env": {
-				"STANDARD_NAMES_CATALOG_ROOT": "../west-standard-names"
+				"STANDARD_NAMES_CATALOG_ROOT": "../west-standard-names/standard_names"
 			}
 		}
 	},

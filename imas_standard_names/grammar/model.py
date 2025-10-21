@@ -21,6 +21,7 @@ from imas_standard_names.grammar.support import (
 from imas_standard_names.grammar.types import (
     EXCLUSIVE_SEGMENT_PAIRS,
     Component,
+    GeometricBase,
     Object,
     Position,
     Process,
@@ -37,27 +38,35 @@ class StandardName(BaseModel):
     component: Component | None = None
     coordinate: Component | None = None
     subject: Subject | None = None
-    base: BaseToken
+    geometric_base: GeometricBase | None = None
+    physical_base: BaseToken | None = None
     object: Object | None = None
     source: Source | None = None
     geometry: Position | None = None
     position: Position | None = None
     process: Process | None = None
 
-    @field_validator("base")
+    @field_validator("physical_base")
     @classmethod
-    def _validate_base(cls, value: str) -> str:
-        if not TOKEN_PATTERN.fullmatch(value):
-            msg = "base segment must match the canonical token pattern"
+    def _validate_physical_base(cls, value: str | None) -> str | None:
+        if value is not None and not TOKEN_PATTERN.fullmatch(value):
+            msg = "physical_base segment must match the canonical token pattern"
             raise ValueError(msg)
         return value
 
     @model_validator(mode="after")
     def _check_exclusive(self) -> StandardName:
         for left, right in EXCLUSIVE_SEGMENT_PAIRS:
-            if getattr(self, left) and getattr(self, right):
+            if getattr(self, left, None) and getattr(self, right, None):
                 msg = f"Segments '{left}' and '{right}' cannot both be set"
                 raise ValueError(msg)
+        return self
+
+    @model_validator(mode="after")
+    def _check_base_required(self) -> StandardName:
+        if self.geometric_base is None and self.physical_base is None:
+            msg = "Either geometric_base or physical_base must be set"
+            raise ValueError(msg)
         return self
 
     def compose(self) -> str:

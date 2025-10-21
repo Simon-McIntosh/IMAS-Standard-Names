@@ -20,20 +20,19 @@
 #
 # Segment structure:
 # - component/coordinate and subject are optional single tokens; 
-#   base_or_transformed_name is required.
+#   geometric_base or physical_base is required (mutually exclusive).
 #
 # component (for physical vectors) vs coordinate (for geometric/spatial vectors):
 #   * Use "component" for physical field vectors 
-#     (magnetic_field, heat_flux, velocity)
+#     (magnetic_field, heat_flux, velocity) with physical_base
 #     Template: {axis}_component_of_{vector} 
 #     (e.g., radial_component_of_magnetic_field)
 #   * Use "coordinate" for geometric/spatial quantities 
-#     (position, vertex, centroid, trajectory)
+#     (position, vertex, centroid, trajectory) with geometric_base
 #     Template: {axis}_{geometric_base} 
 #     (e.g., radial_position_of_flux_loop_contour)
 #   * component and coordinate are mutually exclusive
-#   * coordinate should only be used with geometric bases 
-#     (position, vertex, outline, centroid, etc.)
+#   * coordinate requires geometric_base; component requires physical_base
 #
 # object (of_<object>) vs source (from_<source>):
 #   * Use "of_" for intrinsic properties/characteristics OF the hardware/equipment
@@ -71,7 +70,7 @@
 #===============================================================================
 
 canonical_pattern: >
-  [<component>_component_of | <coordinate>]? [<subject>]? <base> 
+  [<component>_component_of | <coordinate>]? [<subject>]? <geometric_base | physical_base> 
   [of_<object> | from_<source>]? 
   [of_<geometry> | at_<position>]? 
   [due_to_<process>]?
@@ -123,15 +122,28 @@ segments:
     optional: true
     vocabulary: subjects
     description: "Particle species or plasma population"
-  - id: base
-    optional: false
+  - id: geometric_base
+    optional: true
+    vocabulary: geometric_bases
+    exclusive_with:
+      - physical_base
     description: >
-      Core quantity being described (required). Open-ended - not pre-enumerated. 
-      Can represent physical quantities (magnetic_field, temperature, voltage, flux, current), 
-      geometric properties (position, vertex, centroid, area, length, angle), 
-      measurement signals, or hardware characteristics. 
-      New base terms are defined through catalog entries, not the grammar. 
-      Combine with coordinate prefix for geometric vectors or component prefix for physical vectors.
+      Geometric/spatial quantity describing locations, shapes, orientations, or spatial extents.
+      Controlled vocabulary of geometric bases that represent WHERE something is or 
+      the geometric structure of objects (position, vertex, centroid, displacement, etc.).
+      Must be qualified with object or geometry segment to specify what is being described.
+      Used with coordinate prefix for vector components (e.g., radial_position_of_flux_loop).
+  - id: physical_base
+    optional: true
+    exclusive_with:
+      - geometric_base
+    description: >
+      Physical quantity, measurement, or hardware property (open-ended).
+      Can represent physical fields (magnetic_field, temperature, voltage, flux, current),
+      derived quantities (gradient, divergence), measurement signals, 
+      or hardware characteristics (area, resistance, capacitance).
+      New physical base terms are defined through catalog entries, not the grammar.
+      Used with component prefix for physical vector components (e.g., radial_component_of_magnetic_field).
   - id: object
     optional: true
     vocabulary: objects
@@ -183,6 +195,7 @@ segments:
 vocabularies:
   components: !include vocabularies/components.yml
   subjects: !include vocabularies/subjects.yml
+  geometric_bases: !include vocabularies/geometric_bases.yml
   objects: !include vocabularies/objects.yml
   sources: !include vocabularies/source.yml
   positions: !include vocabularies/positions.yml

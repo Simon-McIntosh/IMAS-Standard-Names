@@ -40,6 +40,7 @@ ENUM_NAME_OVERRIDES = {
     "components": "Component",
     "subjects": "Subject",
     "basis": "Basis",
+    "geometric_bases": "GeometricBase",
     "objects": "Object",
     "sources": "Source",
     "positions": "Position",
@@ -255,11 +256,27 @@ def _render_segment_metadata(meta: Mapping[str, Any]) -> str:
         rule_blocks.append(indent(block, "    "))
 
     rules_section = "\n".join(rule_blocks)
+
+    # Find base segment indices (geometric_base or physical_base)
+    # These are mutually exclusive and mark the boundary between prefix and suffix segments
+    base_indices = [
+        i
+        for i, seg in enumerate(meta["segment_order"])
+        if seg in ("geometric_base", "physical_base", "base")
+    ]
+    if not base_indices:
+        raise ValueError(
+            "Grammar must have at least one base segment (geometric_base, physical_base, or base)"
+        )
+
     prefix_suffix_block = dedent(
-        """
-        _PREFIX_END = SEGMENT_ORDER.index('base')
-        PREFIX_SEGMENTS: tuple[str, ...] = SEGMENT_ORDER[:_PREFIX_END]
-        SUFFIX_SEGMENTS: tuple[str, ...] = SEGMENT_ORDER[_PREFIX_END + 1 :]
+        f"""
+        # Base segments are at indices {base_indices} in SEGMENT_ORDER
+        # They mark the boundary between prefix (component, coordinate, subject) and suffix (object, source, etc.) segments
+        BASE_SEGMENT_INDICES: tuple[int, ...] = {tuple(base_indices)}
+        BASE_SEGMENTS: tuple[str, ...] = {tuple(meta["segment_order"][i] for i in base_indices)}
+        PREFIX_SEGMENTS: tuple[str, ...] = SEGMENT_ORDER[:BASE_SEGMENT_INDICES[0]]
+        SUFFIX_SEGMENTS: tuple[str, ...] = SEGMENT_ORDER[BASE_SEGMENT_INDICES[-1] + 1 :]
         SUFFIX_SEGMENTS_REVERSED: tuple[str, ...] = tuple(reversed(SUFFIX_SEGMENTS))
         """
     ).strip()

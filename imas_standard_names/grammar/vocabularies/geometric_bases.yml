@@ -1,0 +1,16 @@
+# Controlled vocabulary for geometric/spatial base quantities
+# These bases describe locations, shapes, orientations, and geometric properties
+# They require object or geometry qualification to be complete
+
+- position
+- vertex
+- centroid
+- outline
+- contour
+- displacement
+- offset
+- trajectory
+- extent
+- surface_normal
+- sensor_normal
+- tangent_vector

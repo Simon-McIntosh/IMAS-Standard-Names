@@ -107,7 +107,7 @@ def test_model_has_exclusivity_validation():
     # Test component/coordinate exclusivity
     with pytest.raises(ValueError, match="component.*coordinate"):
         StandardName(
-            base="temperature",
+            physical_base="temperature",
             component=Component.RADIAL,
             coordinate=Component.TOROIDAL,
         )
@@ -115,7 +115,7 @@ def test_model_has_exclusivity_validation():
     # Test object/source exclusivity
     with pytest.raises(ValueError, match="object.*source"):
         StandardName(
-            base="temperature",
+            physical_base="temperature",
             object=Object.FLUX_LOOP,
             source=Source.FLUX_LOOP,
         )
@@ -123,7 +123,7 @@ def test_model_has_exclusivity_validation():
     # Test geometry/position exclusivity
     with pytest.raises(ValueError, match="geometry.*position"):
         StandardName(
-            base="temperature",
+            physical_base="temperature",
             geometry=Position.MAGNETIC_AXIS,
             position=Position.PLASMA_BOUNDARY,
         )
@@ -232,26 +232,28 @@ def test_names_tool_compose_creates_valid_model():
     """Verify compose_standard_name tool creates valid StandardName instances."""
     tool = NamesTool(StandardNameCatalog())
 
-    # Test basic composition
+    # Test basic composition - use vector base with component
     result = asyncio.run(
         tool.compose_standard_name(
-            base="temperature", component="radial", subject="electron"
+            physical_base="heat_flux", component="radial", subject="electron"
         )
     )
 
     assert "name" in result
     assert "parts" in result
-    assert result["name"] == "radial_electron_temperature"
+    assert result["name"] == "radial_component_of_electron_heat_flux"
 
     # Test with object parameter
     result = asyncio.run(
-        tool.compose_standard_name(base="major_radius", object="flux_loop")
+        tool.compose_standard_name(physical_base="major_radius", object="flux_loop")
     )
 
     assert result["name"] == "major_radius_of_flux_loop"
 
     # Test with source parameter
-    result = asyncio.run(tool.compose_standard_name(base="voltage", source="flux_loop"))
+    result = asyncio.run(
+        tool.compose_standard_name(physical_base="voltage", source="flux_loop")
+    )
 
     assert result["name"] == "voltage_from_flux_loop"
 
@@ -264,7 +266,7 @@ def test_names_tool_respects_exclusive_pairs():
     with pytest.raises(ValueError, match="component.*coordinate"):
         asyncio.run(
             tool.compose_standard_name(
-                base="temperature", component="radial", coordinate="toroidal"
+                physical_base="temperature", component="radial", coordinate="toroidal"
             )
         )
 
@@ -272,6 +274,6 @@ def test_names_tool_respects_exclusive_pairs():
     with pytest.raises(ValueError, match="object.*source"):
         asyncio.run(
             tool.compose_standard_name(
-                base="temperature", object="flux_loop", source="flux_loop"
+                physical_base="temperature", object="flux_loop", source="flux_loop"
             )
         )

@@ -14,7 +14,7 @@ def test_compose_standard_name():
 
     result = asyncio.run(
         tool.compose_standard_name(
-            base="temperature",
+            physical_base="heat_flux",
             component="radial",
             subject="electron",
         )
@@ -22,8 +22,8 @@ def test_compose_standard_name():
 
     assert "name" in result
     assert "parts" in result
-    assert result["name"] == "radial_electron_temperature"
-    assert result["parts"]["base"] == "temperature"
+    assert result["name"] == "radial_component_of_electron_heat_flux"
+    assert result["parts"]["physical_base"] == "heat_flux"
     assert result["parts"]["component"] == "radial"
     assert result["parts"]["subject"] == "electron"
 
@@ -33,14 +33,14 @@ def test_parse_standard_name():
     repo = StandardNameCatalog()
     tool = NamesTool(repo)
 
-    result = asyncio.run(tool.parse_standard_name("radial_electron_temperature"))
+    result = asyncio.run(tool.parse_standard_name("radial_position_of_flux_loop"))
 
     assert "name" in result
     assert "parts" in result
-    assert result["name"] == "radial_electron_temperature"
-    assert result["parts"]["base"] == "temperature"
-    assert result["parts"]["component"] == "radial"
-    assert result["parts"]["subject"] == "electron"
+    assert result["name"] == "radial_position_of_flux_loop"
+    assert result["parts"]["geometric_base"] == "position"
+    assert result["parts"]["coordinate"] == "radial"
+    assert result["parts"]["object"] == "flux_loop"
 
 
 def test_vocabulary_in_grammar_tool():

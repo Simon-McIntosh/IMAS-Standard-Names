@@ -33,6 +33,7 @@ def _enum_values[
     E: (
         grammar_types.Component,
         grammar_types.Subject,
+        grammar_types.GeometricBase,
         grammar_types.Object,
         grammar_types.Source,
         grammar_types.Position,
@@ -57,6 +58,7 @@ def _coerce_enum[
     E: (
         grammar_types.Component,
         grammar_types.Subject,
+        grammar_types.GeometricBase,
         grammar_types.Object,
         grammar_types.Source,
         grammar_types.Position,
@@ -94,14 +96,16 @@ class NamesTool(BaseTool):
     @mcp_tool(
         description=(
             "Compose a canonical IMAS standard name from named parameters. "
-            "All parameters except 'base' are optional and constrained to "
-            "enumerated values. geometry and position are mutually exclusive. "
+            "Either geometric_base or physical_base must be provided (mutually exclusive). "
+            "All other parameters are optional and constrained to enumerated values. "
+            "geometry and position are mutually exclusive. "
             "Returns {'name', 'parts'} where parts is the validated compact dict."
         )
     )
     async def compose_standard_name(
         self,
-        base: str,
+        geometric_base: grammar_types.GeometricBase | str | None = None,
+        physical_base: str | None = None,
         component: grammar_types.Component | str | None = None,
         coordinate: grammar_types.Component | str | None = None,
         subject: grammar_types.Subject | str | None = None,
@@ -118,6 +122,7 @@ class NamesTool(BaseTool):
         Raises ValueError on invalid tokens or exclusivity violations.
         """
 
+        geo_base = _coerce_enum(grammar_types.GeometricBase, geometric_base)
         comp = _coerce_enum(grammar_types.Component, component)
         coord = _coerce_enum(grammar_types.Component, coordinate)
         subj = _coerce_enum(grammar_types.Subject, subject)
@@ -128,10 +133,11 @@ class NamesTool(BaseTool):
         proc = _coerce_enum(grammar_types.Process, process)
 
         model = grammar_model.StandardName(
+            geometric_base=geo_base,
+            physical_base=physical_base,
             component=comp,
             coordinate=coord,
             subject=subj,
-            base=base,
             object=obj,
             source=src,
             geometry=geom,

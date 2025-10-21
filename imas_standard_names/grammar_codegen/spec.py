@@ -9,13 +9,15 @@ from __future__ import annotations
 
 from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass
-from importlib import resources
+from pathlib import Path
 from typing import Any
 
 import yaml
 
-_GRAMMAR_PACKAGE = "imas_standard_names.grammar"
-_GRAMMAR_FILENAME = "specification.yml"
+# Use file path instead of package import to avoid circular dependency
+# The grammar specification file is in the grammar package directory
+_GRAMMAR_DIR = Path(__file__).resolve().parents[1] / "grammar"
+_GRAMMAR_SPEC_PATH = _GRAMMAR_DIR / "specification.yml"
 
 
 class IncludeLoader(yaml.SafeLoader):
@@ -37,11 +39,10 @@ def include_constructor(loader: IncludeLoader, node):
         filepath = loader._root / filename
         with open(filepath, encoding="utf-8") as f:
             return yaml.safe_load(f)
-    # Fallback to importlib.resources for packaged installations
-    from importlib import resources
-
-    vocab_path = resources.files(_GRAMMAR_PACKAGE) / filename
-    with vocab_path.open("r", encoding="utf-8") as f:
+    # Fallback: use relative path from grammar directory
+    # This avoids importing the grammar package (circular dependency)
+    vocab_path = _GRAMMAR_DIR / filename
+    with open(vocab_path, encoding="utf-8") as f:
         return yaml.safe_load(f)
 
 
@@ -101,8 +102,8 @@ class GrammarSpec:
 
     @classmethod
     def load(cls) -> GrammarSpec:
-        grammar_path = resources.files(_GRAMMAR_PACKAGE) / _GRAMMAR_FILENAME
-        with grammar_path.open("r", encoding="utf-8") as handle:
+        # Use direct file path to avoid importing grammar package (circular dependency)
+        with open(_GRAMMAR_SPEC_PATH, encoding="utf-8") as handle:
             data = yaml.load(handle, Loader=IncludeLoader) or {}
 
         basis_raw = data.get("basis", {})

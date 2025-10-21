@@ -119,12 +119,13 @@ class TestFetchMetadata:
 
         # Grammar should be parsed (or None if parsing failed)
         if grammar is not None:
-            assert "base" in grammar
-            # Base should always be present
-            assert isinstance(grammar["base"], str)
-            assert len(grammar["base"]) > 0
+            # Either geometric_base or physical_base should be present
+            assert ("geometric_base" in grammar) or ("physical_base" in grammar)
+            # Get whichever base is present
+            base_value = grammar.get("geometric_base") or grammar.get("physical_base")
+            assert isinstance(base_value, str)
+            assert len(base_value) > 0
             # Grammar dict only contains keys with non-None values
-            # so we just verify it's a valid dict with base
             assert isinstance(grammar, dict)
 
     def test_fetch_provenance(self, fetch_tool, catalog):
