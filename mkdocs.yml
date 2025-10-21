@@ -17,8 +17,10 @@ plugins:
       javascript_dir: javascripts
 
 watch:
-  - imas_standard_names/resources/grammar.yml
+  - imas_standard_names/grammar/specification.yml
+  - imas_standard_names/grammar/vocabularies/
   - imas_standard_names/resources/standard_names/
+  - docs/grammar_macros.py
 
 nav:
   - Home: index.md
@@ -27,6 +29,7 @@ nav:
   - Specification: specification.md
   - Quick Start: quickstart.md
   - Style Guide: style-guide.md
+  - Catalog: catalog.md
   - Examples:
     - IMAS Magnetics Diagnostic: magnetics-example.md
   - Provenance: provenance.md
