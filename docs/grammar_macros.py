@@ -9,7 +9,13 @@ of truth, ensuring documentation stays synchronized with the implementation.
 
 from __future__ import annotations
 
+import os
+import re
+from collections import defaultdict
+from pathlib import Path
 from typing import Any
+
+import yaml
 
 
 def define_env(env: Any) -> None:
@@ -262,3 +268,184 @@ def define_env(env: Any) -> None:
         """
         tokens = _grammar_spec.vocabulary_tokens("basis")
         return ", ".join(f"`{token}`" for token in tokens)
+
+    # Standard Names Catalog Macros
+    @env.macro
+    def load_standard_names():
+        """Load all YAML standard names from the catalog directory"""
+        project_root = Path(env.project_dir).parent
+        standard_names_dir = (
+            project_root / "imas_standard_names" / "resources" / "standard_names"
+        )
+        standard_names = []
+
+        if standard_names_dir.exists():
+            for root, dirs, files in os.walk(standard_names_dir):
+                dirs[:] = [d for d in dirs if not d.startswith(".")]
+
+                for file in files:
+                    if file.endswith(".yml") or file.endswith(".yaml"):
+                        yaml_path = Path(root) / file
+                        try:
+                            with open(yaml_path, encoding="utf-8") as f:
+                                data = yaml.safe_load(f)
+
+                            if data and isinstance(data, dict):
+                                data["_file_path"] = str(
+                                    yaml_path.relative_to(project_root)
+                                )
+                                data["_category"] = yaml_path.parent.name
+                                standard_names.append(data)
+                        except Exception as e:
+                            print(f"Error loading {yaml_path}: {e}")
+
+        return standard_names
+
+    @env.macro
+    def get_categories():
+        """Get all unique categories (directories) containing standard names"""
+        standard_names = load_standard_names()
+        categories = {}
+
+        for item in standard_names:
+            category = item.get("_category", "unknown")
+            if category not in categories:
+                categories[category] = []
+            categories[category].append(item)
+
+        return categories
+
+    @env.macro
+    def get_tags():
+        """Group standard names by their primary tags"""
+        standard_names = load_standard_names()
+        tags_groups = defaultdict(list)
+
+        for item in standard_names:
+            if "tags" in item and item["tags"]:
+                primary_tag = item["tags"][0]
+                tags_groups[primary_tag].append(item)
+
+        return dict(tags_groups)
+
+    @env.macro
+    def category_stats():
+        """Get statistics about categories and standard names"""
+        categories = get_categories()
+        tags = get_tags()
+        total_names = sum(len(items) for items in categories.values())
+
+        return {
+            "total_names": total_names,
+            "total_categories": len(categories),
+            "total_tags": len(tags),
+            "categories": categories,
+            "tags": tags,
+        }
+
+    def _fix_markdown_formatting(text):
+        """Fix markdown formatting and ensure proper indentation for admonitions"""
+        if not text:
+            return ""
+
+        text = text.strip()
+        text = text.replace("\\n", "\n")
+
+        paragraphs = text.split("\n\n")
+        processed_paragraphs = []
+
+        for paragraph in paragraphs:
+            paragraph = paragraph.strip()
+            if not paragraph:
+                continue
+
+            if "$$" in paragraph:
+                processed_paragraphs.append(paragraph)
+            elif paragraph.startswith("$$") and paragraph.endswith("$$"):
+                processed_paragraphs.append(paragraph)
+            elif "$" in paragraph and paragraph.count("$") >= 2:
+                processed_paragraphs.append(paragraph)
+            elif any(
+                line.strip().startswith(("-", "*", "+"))
+                for line in paragraph.split("\n")
+            ):
+                processed_paragraphs.append(paragraph)
+            elif any(
+                re.match(r"^\d+\.", line.strip()) for line in paragraph.split("\n")
+            ):
+                processed_paragraphs.append(paragraph)
+            else:
+                processed_paragraphs.append(paragraph)
+
+        result = "\n\n".join(processed_paragraphs)
+        result = re.sub(r"\n\s*\$\$", "\n\n$$", result)
+        result = re.sub(r"\$\$\s*\n", "$$\n\n", result)
+
+        return result
+
+    @env.macro
+    def standard_names_catalog():
+        """Generate a complete catalog of all standard names organized by primary tag"""
+        result = ""
+        tags = get_tags()
+
+        if not tags:
+            return "_No standard names found in the catalog._"
+
+        for category, items in sorted(tags.items()):
+            category_name = category.replace("-", " ").title()
+            result += f"## **{category_name}** {{#{category}}}\n\n"
+            result += "---\n\n"
+
+            sorted_items = sorted(items, key=lambda x: x.get("name", ""))
+
+            for item in sorted_items:
+                name = item.get("name", "Unknown")
+                unit = item.get("unit", "")
+                description = item.get("description", "")
+                documentation = item.get("documentation", "")
+                item_tags = item.get("tags", [])
+                status = item.get("status", "")
+
+                tags_display = (
+                    ", ".join(f"`{tag}`" for tag in item_tags) if item_tags else "None"
+                )
+
+                result += f"### {name}\n\n"
+                result += f"{description}\n\n"
+
+                if documentation:
+                    result += f"{_fix_markdown_formatting(documentation)}\n\n"
+
+                if unit:
+                    result += f"**Unit:** `{unit}`\n\n"
+
+                if status:
+                    result += f"**Status:** {status.title()}\n\n"
+
+                if item_tags:
+                    result += f"**Tags:** {tags_display}\n\n"
+
+                result += "---\n\n"
+
+        return result
+
+    @env.macro
+    def catalog_overview():
+        """Generate overview statistics for the catalog"""
+        stats = category_stats()
+
+        if stats["total_names"] == 0:
+            return "_The standard names catalog is currently empty._"
+
+        result = f"**Total Standard Names:** {stats['total_names']}\n\n"
+        result += f"**Categories:** {stats['total_tags']}\n\n"
+
+        result += "### Categories\n\n"
+        for category, items in sorted(stats["tags"].items()):
+            category_name = category.replace("-", " ").title()
+            category_anchor = category_name.lower().replace(" ", "-")
+            count = len(items)
+            result += f"- **[{category_name}](#{category_anchor})** - {count} standard names\n"
+
+        return result

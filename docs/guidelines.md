@@ -7,13 +7,15 @@ For auto-generated vocabulary tables and formal specification, see the [Grammar 
 
 Standard names follow these fundamental requirements:
 
-| Rule           | Description                                 | Example                                              |
-| -------------- | ------------------------------------------- | ---------------------------------------------------- |
-| **Characters** | Lowercase letters, digits, underscores only | `electron_temperature` ✓<br>`Electron_Temperature` ✗ |
-| **Start**      | Must begin with a letter                    | `temperature` ✓<br>`1_temperature` ✗                 |
-| **Spelling**   | Use US spelling                             | `analyze`, `center`                                  |
-| **Units**      | Never include units in the name             | `temperature` ✓<br>`temperature_ev` ✗                |
-| **Order**      | Follow fixed segment order (see below)      | Must respect grammar                                 |
+| Rule                    | Description                                                                                              | Example                                                        |
+| ----------------------- | -------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
+| **Characters**          | Lowercase letters, digits, underscores only                                                              | `electron_temperature` ✓<br>`Electron_Temperature` ✗           |
+| **Start**               | Must begin with a letter                                                                                 | `temperature` ✓<br>`1_temperature` ✗                           |
+| **Spelling**            | Use US spelling                                                                                          | `analyze`, `center`                                            |
+| **Units**               | Never include units in the name                                                                          | `temperature` ✓<br>`temperature_ev` ✗                          |
+| **Order**               | Follow fixed segment order (see below)                                                                   | Must respect grammar                                           |
+| **IMAS DD Conventions** | Sign conventions, coordinate systems, and physical definitions MUST strictly follow IMAS Data Dictionary | Follow IMAS DD documentation exactly                           |
+| **Tags Primary First**  | First tag (tags[0]) must be primary tag; secondary tags like 'cylindrical-coordinates' must follow       | `['magnetics', 'measured']` ✓<br>`['measured', 'magnetics']` ✗ |
 
 ## Grammar Structure
 
@@ -49,6 +51,10 @@ Certain segments cannot coexist in the same name:
 | `radial_component_of_magnetic_field`      | component + base          | Vector component     |
 | `electron_temperature_at_plasma_boundary` | subject + base + position | Scalar at location   |
 | `heat_flux_due_to_conduction`             | base + process            | Process contribution |
+
+!!! example "Worked Example"
+For a comprehensive example of mapping IMAS Data Dictionary paths to standard names,
+see [IMAS Magnetics Diagnostic Example](magnetics-example.md).
 
 ## Grammar Source
 
@@ -209,3 +215,5 @@ Generic names represent physical quantities with consistent units across the cat
 **For detailed authoring rules:** See [Style Guide](style-guide.md)
 
 **For formal grammar and validation:** See [Specification](specification.md)
+
+**For worked examples:** See [IMAS Magnetics Diagnostic Example](magnetics-example.md)

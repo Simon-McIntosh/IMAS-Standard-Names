@@ -1,17 +1,16 @@
 # Provenance Schema Reference
 
 This document describes the unified `provenance` block used across derived
-standard names. It replaces earlier ad hoc `derivation` / `parent_operation`
-fields and provides a single structured container for expressing how a
+standard names, providing a structured container for expressing how a
 quantity was produced.
 
 ## Modes
 
-| mode       | Description                               | Typical Kind          |
-| ---------- | ----------------------------------------- | --------------------- |
-| operator   | One or more chained operators on a base   | derived_scalar/vector |
-| reduction  | Scalar reduction over a vector expression | derived_scalar        |
-| expression | Explicit algebraic combination            | derived_scalar        |
+| Mode       | Description                               | Applies to     |
+| ---------- | ----------------------------------------- | -------------- |
+| operator   | One or more chained operators on a base   | scalar, vector |
+| reduction  | Scalar reduction over a vector expression | scalar         |
+| expression | Explicit algebraic combination            | scalar         |
 
 ## Common Fields
 
@@ -32,18 +31,13 @@ quantity was produced.
 
 ```yaml
 name: curl_of_magnetic_field
-kind: derived_vector
-frame: cylindrical_r_tor_z
+kind: vector
 unit: T.m^-1
 provenance:
   mode: operator
   operators: [curl]
   base: magnetic_field
   operator_id: curl
-components:
-  radial: radial_component_of_curl_of_magnetic_field
-  toroidal: toroidal_component_of_curl_of_magnetic_field
-  vertical: vertical_component_of_curl_of_magnetic_field
 status: draft
 ```
 
@@ -51,7 +45,7 @@ status: draft
 
 ```yaml
 name: magnitude_of_magnetic_field
-kind: derived_scalar
+kind: scalar
 unit: T
 provenance:
   mode: reduction

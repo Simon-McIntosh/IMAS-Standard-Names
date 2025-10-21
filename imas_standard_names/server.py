@@ -49,6 +49,8 @@ fastmcp_logger.setLevel(logging.WARNING)
 class Server:
     """Standard Names - Composable integrator using composition pattern."""
 
+    catalog_root: str | None = None
+
     # Internal fields
     mcp: FastMCP = field(init=False, repr=False)
     tools: Tools = field(init=False, repr=False)
@@ -61,7 +63,7 @@ class Server:
         self.mcp = FastMCP(name="imas")
 
         # Initialize components
-        self.tools = Tools()
+        self.tools = Tools(catalog_root=self.catalog_root)
 
         # Register components with MCP server
         self._register_components()

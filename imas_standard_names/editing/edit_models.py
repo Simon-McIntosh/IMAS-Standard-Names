@@ -11,16 +11,14 @@ result models.
 
 from __future__ import annotations
 
-from typing import Annotated, Literal
+from typing import TYPE_CHECKING, Annotated, Any, Literal
 
 from pydantic import BaseModel, Field, TypeAdapter, model_validator
 
 from ..models import StandardNameEntry, create_standard_name_entry
 
-
-class AddInput(BaseModel):
-    action: Literal["add"]
-    model: StandardNameEntry
+if TYPE_CHECKING:
+    pass
 
 
 class ModifyInput(BaseModel):
@@ -39,6 +37,7 @@ class RenameInput(BaseModel):
     action: Literal["rename"]
     old_name: str
     new_name: str
+    dry_run: bool = False
 
     @model_validator(mode="after")
     def _check_model(self):  # type: ignore[no-untyped-def]
@@ -49,10 +48,25 @@ class RenameInput(BaseModel):
 class DeleteInput(BaseModel):
     action: Literal["delete"]
     name: str
+    dry_run: bool = False
+
+
+class BatchDeleteInput(BaseModel):
+    action: Literal["batch_delete"]
+    names: list[str]
+    dry_run: bool = False
+
+
+class BatchInput(BaseModel):
+    action: Literal["batch"]
+    operations: list[ModifyInput | RenameInput | DeleteInput]
+    mode: Literal["continue", "atomic"] = "continue"
+    dry_run: bool = False
+    resume_from_index: int = 0
 
 
 ApplyInput = Annotated[
-    AddInput | ModifyInput | RenameInput | DeleteInput,
+    ModifyInput | RenameInput | DeleteInput | BatchDeleteInput | BatchInput,
     Field(discriminator="action"),
 ]
 
@@ -76,17 +90,39 @@ def apply_input_schema() -> dict:
 def example_inputs() -> list[dict]:
     return [
         {
-            "action": "add",
-            "model": {"name": "example_name", "kind": "scalar", "description": "desc"},
-        },
-        {
             "action": "modify",
             "name": "example_name",
             "model": {"name": "example_name", "kind": "scalar", "description": "desc"},
         },
         {"action": "rename", "old_name": "old", "new_name": "new"},
-        {"action": "rename", "old_name": "a", "new_name": "b"},
+        {"action": "rename", "old_name": "a", "new_name": "b", "dry_run": True},
         {"action": "delete", "name": "obsolete_name"},
+        {"action": "delete", "name": "test_name", "dry_run": True},
+        {
+            "action": "batch_delete",
+            "names": ["old_entry_1", "old_entry_2", "old_entry_3"],
+        },
+        {"action": "batch_delete", "names": ["test_1", "test_2"], "dry_run": True},
+        {
+            "action": "batch",
+            "mode": "continue",
+            "dry_run": False,
+            "operations": [
+                {
+                    "action": "modify",
+                    "name": "base_quantity",
+                    "model": {
+                        "name": "base_quantity",
+                        "kind": "scalar",
+                        "description": "Updated description",
+                    },
+                },
+                {
+                    "action": "delete",
+                    "name": "obsolete_quantity",
+                },
+            ],
+        },
     ]
 
 
@@ -96,9 +132,32 @@ class BaseResult(BaseModel):
     pass
 
 
-class AddResult(BaseResult):
-    action: Literal["add"] = "add"
-    model: StandardNameEntry
+class ErrorDetail(BaseModel):
+    """Structured error information for failed operations."""
+
+    type: str
+    message: str
+    field: str | None = None
+    suggestion: str | None = None
+
+
+class OperationResult(BaseModel):
+    """Result of a single operation in a batch."""
+
+    index: int
+    operation: ModifyInput | RenameInput | DeleteInput
+    status: Literal["success", "error", "skipped"]
+    result: Any = None  # Will be ApplyResult, use Any to avoid circular reference
+    error: ErrorDetail | None = None
+
+
+class BatchResult(BaseResult):
+    """Result of batch operation with summary and per-operation details."""
+
+    action: Literal["batch"] = "batch"
+    summary: dict
+    results: list[OperationResult]
+    last_successful_index: int | None = None
 
 
 class ModifyResult(BaseResult):
@@ -111,47 +170,66 @@ class RenameResult(BaseResult):
     action: Literal["rename"] = "rename"
     old_name: str
     new_name: str
+    dry_run: bool = False
+    dependencies: list[str] | None = None  # Entries that depend on the old name
 
 
 class DeleteResult(BaseResult):
     action: Literal["delete"] = "delete"
     old_model: StandardNameEntry | None
     existed: bool
+    dry_run: bool = False
+    dependencies: list[str] | None = None  # Entries that depend on this one
 
 
-ApplyResult = AddResult | ModifyResult | RenameResult | DeleteResult
+class BatchDeleteResult(BaseResult):
+    action: Literal["batch_delete"] = "batch_delete"
+    summary: dict
+    results: list[tuple[str, bool, list[str] | None]]  # (name, existed, dependencies)
+    dry_run: bool = False
+
+
+ApplyResult = (
+    ModifyResult | RenameResult | DeleteResult | BatchDeleteResult | BatchResult
+)
 
 
 def result_from_dict(d: dict) -> ApplyResult:
     """Reconstruct a result model from a dictionary (lean schema only)."""
     action = d.get("action")
-    if action == "add":
-        return AddResult(**d)
     if action == "modify":
         return ModifyResult(**d)
     if action == "rename":
         return RenameResult(**d)
     if action == "delete":
         return DeleteResult(**d)
+    if action == "batch_delete":
+        return BatchDeleteResult(**d)
+    if action == "batch":
+        return BatchResult(**d)
     raise ValueError(f"Unknown action in result: {action!r}")
 
 
 __all__ = [
     # inputs
-    "AddInput",
     "ModifyInput",
     "RenameInput",
     "DeleteInput",
+    "BatchDeleteInput",
+    "BatchInput",
     "ApplyInput",
     "parse_apply_input",
     "apply_input_schema",
     "example_inputs",
     # results
     "BaseResult",
-    "AddResult",
     "ModifyResult",
     "RenameResult",
     "DeleteResult",
+    "BatchDeleteResult",
+    "ErrorDetail",
+    "OperationResult",
+    "BatchResult",
     "ApplyResult",
     "result_from_dict",
 ]

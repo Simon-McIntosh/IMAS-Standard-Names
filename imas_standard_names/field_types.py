@@ -41,20 +41,34 @@ Unit = Annotated[
     str,
     Field(
         description=(
-            "Unit in fused dot-exponent style (lexicographic token order). "
+            "Unit in fused dot-exponent style (auto-corrected to lexicographic token order). "
             "Tokens: alphanumerics only; join with '.'; exponents use ^ (e.g. m.s^-2). "
-            "No '/', '*', or whitespace. Empty string for dimensionless."
+            "No '/', '*', or whitespace. Empty string for dimensionless. "
+            "Units are automatically reordered to canonical form (e.g., 's^-2.m' -> 'm.s^-2')."
         ),
         pattern=UNIT_PATTERN,
         examples=["eV", "m", "m.s^-1", "A.m^-2", "m^-3"],
     ),
 ]
 
+# Tags: list[str] with controlled vocabulary validation
+# First element (tags[0]) must be a primary tag (validated in models.py)
+# Remaining elements (tags[1:]) are secondary tags (validated in models.py)
+# See grammar/vocabularies/tags.yml for complete controlled vocabulary
 Tags = Annotated[
     list[str],
     Field(
-        description="Classification keywords (lowercase tokens).",
-        examples=[["core", "temperature"], ["equilibrium"]],
+        description=(
+            "Classification keywords from controlled vocabulary. "
+            "First element (tags[0]) must be a primary tag defining catalog subdirectory. "
+            "Remaining elements (tags[1:]) are secondary tags for cross-cutting classification. "
+            "Validated against grammar/vocabularies/tags.yml."
+        ),
+        examples=[
+            ["fundamental", "time-dependent", "measured"],
+            ["equilibrium", "steady-state", "reconstructed"],
+            ["core-physics", "spatial-profile"],
+        ],
     ),
 ]
 
@@ -80,7 +94,16 @@ Constraints = Annotated[
 Description = Annotated[
     str,
     Field(
-        description="One concise sentence (<=120 chars) summarizing the quantity.",
+        description=(
+            "One concise sentence summarizing the physical quantity. "
+            "Keep under 120 characters for readability. "
+            "Should be self-contained and understandable without external context. "
+            "\n\n"
+            "YAML formatting: Use plain unquoted style for simple text. Use single quotes if special characters needed."
+            "\n\n"
+            "Avoid: repeating the name verbatim, referencing IMAS Data Dictionary (DD), "
+            "COCOS conventions, or implementation-specific paths."
+        ),
         max_length=180,
     ),
 ]
@@ -88,7 +111,40 @@ Description = Annotated[
 Documentation = Annotated[
     str,
     Field(
-        description="Extended multi-line rationale / details (may be blank).",
+        description=(
+            "Authoritative, self-contained documentation providing clear, comprehensive explanation of the physical quantity. "
+            "This field must be fully standalone - a domain expert should understand the quantity completely without "
+            "consulting external sources. "
+            "\n\n"
+            "MUST include: (1) Physical interpretation and governing physics, (2) Governing equations with full definitions, "
+            "(3) Measurement or derivation methods, (4) Typical values and physical ranges, (5) Coordinate system definitions "
+            "and sign conventions (if applicable), (6) Relationships to other quantities with explicit equations. "
+            "\n\n"
+            "YAML formatting: Use literal block scalar style with pipe (|) for multiline content. This preserves formatting "
+            "and requires no escaping. Example:\n"
+            "  documentation: |\n"
+            "    First paragraph with inline LaTeX $T_e$ and display equations:\n"
+            "    \n"
+            "    $$\\nabla \\times \\mathbf{B} = \\mu_0 \\mathbf{J}$$\n"
+            "    \n"
+            "    Second paragraph continues here.\n"
+            "\n\n"
+            "LaTeX requirements: (1) Inline math: $...$, (2) Display equations: $$...$$ on separate lines, "
+            "(3) Use LaTeX commands for symbols ($\\phi$, $\\theta$), not Unicode, (4) Vectors: $\\mathbf{B}$, $\\mathbf{r}$. "
+            "Examples: $V = -N A \\frac{dB}{dt}$, $\\Phi = \\int \\mathbf{B} \\cdot d\\mathbf{A}$, "
+            "$$\\nabla \\times \\mathbf{B} = \\mu_0 \\mathbf{J}$$. "
+            "\n\n"
+            "Formatting: Wrap text at ~75-80 characters. Separate paragraphs with blank lines. Use Markdown lists (-, *) and "
+            "**bold** or *italic* sparingly. No trailing whitespace."
+            "\n\n"
+            "AVOID: (1) References to IMAS Data Dictionary (DD) paths or structure, (2) References to COCOS conventions "
+            "(define sign conventions explicitly instead), (3) Statements like 'see IMAS documentation' or 'refer to [external source]', "
+            "(4) Implementation-specific details, (5) Vague terms without explicit definitions, (6) Unicode characters for Greek letters "
+            "or special symbols (use LaTeX instead). "
+            "\n\n"
+            "When deriving from IMAS DD: extract and expand the physics content, making it standalone. Define all coordinate "
+            "systems and sign conventions explicitly within the documentation text."
+        ),
     ),
 ]
 

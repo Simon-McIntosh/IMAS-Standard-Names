@@ -9,13 +9,44 @@ from __future__ import annotations
 
 from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass
-from importlib import resources
+from pathlib import Path
 from typing import Any
 
 import yaml
 
-_GRAMMAR_PACKAGE = "imas_standard_names.resources"
-_GRAMMAR_FILENAME = "grammar.yml"
+# Use file path instead of package import to avoid circular dependency
+# The grammar specification file is in the grammar package directory
+_GRAMMAR_DIR = Path(__file__).resolve().parents[1] / "grammar"
+_GRAMMAR_SPEC_PATH = _GRAMMAR_DIR / "specification.yml"
+
+
+class IncludeLoader(yaml.SafeLoader):
+    """YAML loader that supports !include directive for external vocabulary files."""
+
+    def __init__(self, stream):
+        self._root = None
+        if hasattr(stream, "name"):
+            from pathlib import Path
+
+            self._root = Path(stream.name).parent
+        super().__init__(stream)
+
+
+def include_constructor(loader: IncludeLoader, node):
+    """Load vocabulary from external file."""
+    filename = loader.construct_scalar(node)
+    if loader._root:
+        filepath = loader._root / filename
+        with open(filepath, encoding="utf-8") as f:
+            return yaml.safe_load(f)
+    # Fallback: use relative path from grammar directory
+    # This avoids importing the grammar package (circular dependency)
+    vocab_path = _GRAMMAR_DIR / filename
+    with open(vocab_path, encoding="utf-8") as f:
+        return yaml.safe_load(f)
+
+
+IncludeLoader.add_constructor("!include", include_constructor)
 
 
 @dataclass(frozen=True)
@@ -35,10 +66,18 @@ class BasisGroup:
 
 
 @dataclass(frozen=True)
+class ScopeSpec:
+    include: tuple[str, ...]
+    exclude: tuple[str, ...]
+    rationale: str
+
+
+@dataclass(frozen=True)
 class GrammarSpec:
     segments: tuple[SegmentSpec, ...]
     vocabularies: dict[str, tuple[str, ...]]
     basis: dict[str, BasisGroup]
+    scope: ScopeSpec | None = None
 
     @property
     def segment_map(self) -> dict[str, SegmentSpec]:
@@ -63,17 +102,27 @@ class GrammarSpec:
 
     @classmethod
     def load(cls) -> GrammarSpec:
-        grammar_path = resources.files(_GRAMMAR_PACKAGE) / _GRAMMAR_FILENAME
-        with grammar_path.open("r", encoding="utf-8") as handle:
-            data = yaml.safe_load(handle) or {}
+        # Use direct file path to avoid importing grammar package (circular dependency)
+        with open(_GRAMMAR_SPEC_PATH, encoding="utf-8") as handle:
+            data = yaml.load(handle, Loader=IncludeLoader) or {}
 
         basis_raw = data.get("basis", {})
         vocab_raw = data.get("vocabularies", {})
         segments_raw = data.get("segments", [])
+        scope_raw = data.get("scope", {})
 
         vocabularies = {
             name: _flatten_unique(tokens) for name, tokens in vocab_raw.items()
         }
+
+        # Parse scope section
+        scope: ScopeSpec | None = None
+        if scope_raw:
+            scope = ScopeSpec(
+                include=_flatten_unique(scope_raw.get("include", ())),
+                exclude=_flatten_unique(scope_raw.get("exclude", ())),
+                rationale=str(scope_raw.get("rationale", "")),
+            )
 
         basis: dict[str, BasisGroup] = {}
         if isinstance(basis_raw, Mapping):
@@ -144,6 +193,7 @@ class GrammarSpec:
             segments=tuple(segments),
             vocabularies=vocabularies,
             basis=basis,
+            scope=scope,
         )
 
 
@@ -167,4 +217,4 @@ def _as_iterable(value: Any) -> Iterable[Any]:
     return (value,)
 
 
-__all__ = ["GrammarSpec", "SegmentSpec", "BasisGroup"]
+__all__ = ["GrammarSpec", "SegmentSpec", "BasisGroup", "ScopeSpec"]

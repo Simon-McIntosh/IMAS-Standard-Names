@@ -37,21 +37,21 @@ provenance:
 
 1. The filesystem/YAML `name` MUST begin with the pattern prefix registered for the reduction.
 2. The substring following the prefix MUST equal the `base` name exactly.
-3. `magnitude` reductions require that `base` resolves to a `derived_vector` or `vector` kind entry (enforced by upcoming validation helper).
-4. Reductions yield a scalar quantity; catalog entries should use `kind: derived_scalar`.
+3. `magnitude` reductions require that `base` resolves to a `vector` kind entry (enforced by validation).
+4. Reductions yield a scalar quantity; catalog entries should use `kind: scalar` with provenance.
 5. Deprecated suffix magnitude forms have been removed from the catalog; always use `magnitude_of_<base>`.
 
 ## Migration Guidance
 
-- Replace legacy fields (`parent_vector`, custom `derivation` expressions computing norms) with a reduction provenance block.
-- Ensure associated vector entries retain a `magnitude: <name>` pointer for discoverability.
-- If a previous magnitude entry included an analytic expression, retain it only if it conveys non-trivial semantics beyond the standard norm; otherwise remove to avoid duplication.
+- Use reduction provenance blocks for all reductions (magnitude, mean, rms, etc.).
+- Magnitude entries should reference the base vector via `provenance.base`.
+- Avoid redundant analytic expressions; standard reductions are well-defined.
 
 ### Example: Canonical Magnitude
 
 ```yaml
 name: magnitude_of_magnetic_field
-kind: derived_scalar
+kind: scalar
 unit: T
 provenance:
   mode: reduction
@@ -91,7 +91,7 @@ Any legacy or alternative pattern MUST:
 ## Authoring Checklist
 
 - [ ] Name matches `<pattern_prefix><base>`.
-- [ ] `kind: derived_scalar` set.
+- [ ] `kind: scalar` set with provenance.
 - [ ] Units consistent with reduction semantics.
 - [ ] `provenance.reduction` registered.
 - [ ] `domain` aligned with pattern (magnitude -> none).

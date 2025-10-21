@@ -2,15 +2,17 @@
 MCP tool for composing and parsing IMAS Standard Names in an LLM-friendly way.
 
 This tool exposes:
-  - name_compose: Named-parameter interface with enum-constrained
+  - compose_standard_name: Named-parameter interface with enum-constrained
     fields (no nested dicts required) that returns the canonical name and
     the validated parts.
-  - name_parse: Parse a canonical name back into structured
+  - parse_standard_name: Parse a canonical name back into structured
     parts using the same enum domain.
-  - name_list_tokens: Enumerate valid tokens per segment so LLMs
-    can reliably select from allowed values.
+
+For vocabulary and grammar rules, use get_grammar_and_vocabulary tool.
 
 Notes:
+  - component and coordinate are mutually exclusive.
+  - object and source are mutually exclusive.
   - geometry and position are mutually exclusive.
   - base must match the canonical token pattern: ^[a-z][a-z0-9_]*$.
 """
@@ -31,6 +33,9 @@ def _enum_values[
     E: (
         grammar_types.Component,
         grammar_types.Subject,
+        grammar_types.GeometricBase,
+        grammar_types.Object,
+        grammar_types.Source,
         grammar_types.Position,
         grammar_types.Process,
     )
@@ -53,6 +58,9 @@ def _coerce_enum[
     E: (
         grammar_types.Component,
         grammar_types.Subject,
+        grammar_types.GeometricBase,
+        grammar_types.Object,
+        grammar_types.Source,
         grammar_types.Position,
         grammar_types.Process,
     )
@@ -88,16 +96,21 @@ class NamesTool(BaseTool):
     @mcp_tool(
         description=(
             "Compose a canonical IMAS standard name from named parameters. "
-            "All parameters except 'base' are optional and constrained to "
-            "enumerated values. geometry and position are mutually exclusive. "
+            "Either geometric_base or physical_base must be provided (mutually exclusive). "
+            "All other parameters are optional and constrained to enumerated values. "
+            "geometry and position are mutually exclusive. "
             "Returns {'name', 'parts'} where parts is the validated compact dict."
         )
     )
-    async def name_compose(
+    async def compose_standard_name(
         self,
-        base: str,
+        geometric_base: grammar_types.GeometricBase | str | None = None,
+        physical_base: str | None = None,
         component: grammar_types.Component | str | None = None,
+        coordinate: grammar_types.Component | str | None = None,
         subject: grammar_types.Subject | str | None = None,
+        object: grammar_types.Object | str | None = None,
+        source: grammar_types.Source | str | None = None,
         geometry: grammar_types.Position | str | None = None,
         position: grammar_types.Position | str | None = None,
         process: grammar_types.Process | str | None = None,
@@ -109,16 +122,24 @@ class NamesTool(BaseTool):
         Raises ValueError on invalid tokens or exclusivity violations.
         """
 
+        geo_base = _coerce_enum(grammar_types.GeometricBase, geometric_base)
         comp = _coerce_enum(grammar_types.Component, component)
+        coord = _coerce_enum(grammar_types.Component, coordinate)
         subj = _coerce_enum(grammar_types.Subject, subject)
+        obj = _coerce_enum(grammar_types.Object, object)
+        src = _coerce_enum(grammar_types.Source, source)
         geom = _coerce_enum(grammar_types.Position, geometry)
         pos = _coerce_enum(grammar_types.Position, position)
         proc = _coerce_enum(grammar_types.Process, process)
 
         model = grammar_model.StandardName(
+            geometric_base=geo_base,
+            physical_base=physical_base,
             component=comp,
+            coordinate=coord,
             subject=subj,
-            base=base,
+            object=obj,
+            source=src,
             geometry=geom,
             position=pos,
             process=proc,
@@ -132,43 +153,8 @@ class NamesTool(BaseTool):
             "Returns {'name', 'parts'} where parts uses the same keys as in build."
         )
     )
-    async def name_parse(self, name: str, ctx: Context | None = None) -> dict[str, Any]:
+    async def parse_standard_name(
+        self, name: str, ctx: Context | None = None
+    ) -> dict[str, Any]:
         model = grammar_model.parse_standard_name(name)
         return {"name": name, "parts": model.model_dump_compact()}
-
-    @mcp_tool(
-        description=(
-            "List allowed tokens for each segment and interface rules. "
-            "Returns {component, subject, position, process, notes}. "
-            "Use to pick valid values before calling name_compose."
-        )
-    )
-    async def name_list_tokens(self, ctx: Context | None = None) -> dict[str, Any]:
-        return {
-            "component": _enum_values(grammar_types.Component),
-            "subject": _enum_values(grammar_types.Subject),
-            "geometry": _enum_values(grammar_types.Position),
-            "position": _enum_values(grammar_types.Position),
-            "process": _enum_values(grammar_types.Process),
-            "notes": [
-                "geometry and position are mutually exclusive",
-                "base must match ^[a-z][a-z0-9_]*$",
-                "prefix order: component, subject, base; suffix order: geometry|position, process",
-            ],
-            "examples": [
-                {
-                    "call": "name_compose",
-                    "args": {
-                        "component": "radial",
-                        "subject": "electron",
-                        "base": "density",
-                        "position": "magnetic_axis",
-                        "process": "conduction",
-                    },
-                },
-                {
-                    "call": "name_compose",
-                    "args": {"base": "temperature"},
-                },
-            ],
-        }

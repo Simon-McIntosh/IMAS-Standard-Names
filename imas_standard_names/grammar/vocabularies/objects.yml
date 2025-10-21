@@ -1,0 +1,57 @@
+# Objects vocabulary: diagnostic hardware, coils, and physical equipment
+#
+# Usage: <base>_of_<object>
+# Examples:
+#   - major_radius_of_toroidal_magnetic_field_probe
+#   - area_of_flux_loop
+#   - turn_count_of_rogowski_coil
+#   - power_of_neutral_beam_injector
+
+# === Magnetic diagnostics ===
+- toroidal_magnetic_field_probe
+- poloidal_magnetic_field_probe
+- radial_magnetic_field_probe
+- flux_loop
+- rogowski_coil
+- diamagnetic_loop
+- saddle_loop
+
+# === Langmuir probes ===
+- langmuir_probe
+- reciprocating_probe
+
+# === Optical diagnostics ===
+- thomson_scattering_laser
+- thomson_scattering_detector
+- interferometer_beam
+- reflectometer_antenna
+- reflectometer_detector
+
+# === Spectroscopy ===
+- spectrometer
+- bolometer
+- soft_xray_detector
+
+# === Heating and current drive ===
+- neutral_beam_injector
+- ion_cyclotron_heating_antenna
+- electron_cyclotron_heating_antenna
+- lower_hybrid_antenna
+
+# === Coils ===
+- poloidal_field_coil
+- toroidal_field_coil
+- correction_coil
+- trim_coil
+
+# === Plasma-facing components ===
+- divertor_tile
+- limiter_tile
+- antenna_strap
+
+# === Imaging and particle diagnostics ===
+- camera
+- infrared_camera
+- visible_camera
+- neutron_detector
+- gamma_ray_detector

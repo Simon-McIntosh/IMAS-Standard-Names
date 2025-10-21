@@ -127,9 +127,16 @@ class StandardNameEntryBase(BaseModel):
         return v
 
     # Base validators
-    @field_validator("unit")
+    @field_validator("unit", mode="before")
     @classmethod
-    def normalize_unit(cls, v: str) -> str:
+    def canonicalize_unit_order(cls, v: str) -> str:
+        """Auto-correct unit token order to canonical lexicographic form.
+
+        This helps LLMs and human authors by accepting units in any order
+        and automatically reordering to canonical form. For example:
+        's^-2.m' -> 'm.s^-2'
+        'keV.m^-1' -> 'keV.m^-1' (already canonical)
+        """
         # Dimensionless synonyms collapse to empty string.
         if v in ("", "1", "none", "dimensionless"):
             return ""
@@ -140,12 +147,7 @@ class StandardNameEntryBase(BaseModel):
                 "Use dot-exponent style (e.g. m.s^-2); '/' and '*' are forbidden"
             )
 
-        # Syntactic canonicalization performed without expanding symbols to their
-        # long names (pint would expand 'm' -> 'meter', etc.), because we want
-        # authors to write the concise symbols and we want to preserve those as
-        # the canonical storage form. We still optionally validate that each
-        # symbol is a known pint unit if pint is available, but we compare using
-        # the author-supplied symbols.
+        # Parse tokens and reorder lexicographically
         token_re = re.compile(r"^([A-Za-z0-9]+)(\^([+-]?\d+))?$")
         parts_raw = v.split(".")
         parsed: list[tuple[str, int]] = []
@@ -161,12 +163,26 @@ class StandardNameEntryBase(BaseModel):
             parsed.append((sym, exp))
 
         # Lexicographic ordering of symbols defines canonical order.
+        # Auto-correct by returning the canonical form.
         canonical = ".".join(
             sym if exp == 1 else f"{sym}^{exp}"
             for sym, exp in sorted(parsed, key=lambda x: x[0])
         )
-        if canonical != v:
-            raise ValueError(f"Unit '{v}' not canonical; expected '{canonical}'")
+        return canonical
+
+    @field_validator("unit")
+    @classmethod
+    def validate_unit_with_pint(cls, v: str) -> str:
+        """Validate unit semantics using pint (if available).
+
+        This runs after canonicalization to ensure the unit is dimensionally valid.
+        Syntactic canonicalization is performed without expanding symbols to their
+        long names (pint would expand 'm' -> 'meter', etc.), because we want
+        authors to write the concise symbols and we want to preserve those as
+        the canonical storage form.
+        """
+        if v == "":
+            return v
 
         # Optional semantic validation via pint (best-effort). We allow tokens that
         # pint can resolve individually; we do not reconstruct expansion names.
@@ -184,6 +200,53 @@ class StandardNameEntryBase(BaseModel):
         if v is None:
             return []
         return [str(item).strip() for item in v if str(item).strip()]
+
+    @field_validator("tags")
+    @classmethod
+    def validate_and_reorder_tags(cls, v: list[str]) -> list[str]:  # type: ignore[override]
+        """Validate tags: ensure exactly one primary tag (auto-reorder to position 0) and validate vocabulary."""
+        if not v or len(v) == 0:
+            return v
+
+        from imas_standard_names.grammar.tag_types import (
+            PRIMARY_TAGS,
+            SECONDARY_TAGS,
+        )
+
+        # Find all primary tags in the list
+        primary_tags_found = [tag for tag in v if tag in PRIMARY_TAGS]
+        unknown_tags = [
+            tag for tag in v if tag not in PRIMARY_TAGS and tag not in SECONDARY_TAGS
+        ]
+
+        # Check for unknown tags first
+        if unknown_tags:
+            raise ValueError(
+                f"Unknown tag(s): {', '.join(unknown_tags)}. "
+                f"Valid tags are defined in grammar/vocabularies/tags.yml"
+            )
+
+        # Enforce exactly one primary tag
+        if len(primary_tags_found) == 0:
+            raise ValueError(
+                f"Tags must contain exactly one primary tag. Found none. "
+                f"Valid primary tags include: {', '.join(sorted(PRIMARY_TAGS)[:10])}... "
+                f"(see grammar/vocabularies/tags.yml for complete list)"
+            )
+        elif len(primary_tags_found) > 1:
+            raise ValueError(
+                f"Tags must contain exactly one primary tag. Found {len(primary_tags_found)}: {', '.join(primary_tags_found)}. "
+                f"Choose a single primary tag that best categorizes this entry."
+            )
+
+        # Auto-reorder: ensure the single primary tag is at position 0
+        primary_tag = primary_tags_found[0]
+        if v[0] != primary_tag:
+            # Remove primary tag from its current position and place at start
+            reordered = [primary_tag] + [tag for tag in v if tag != primary_tag]
+            return reordered
+
+        return v
 
     @model_validator(mode="after")
     def _governance_rules(self):  # type: ignore[override]

@@ -24,6 +24,9 @@ dependencies = [
   "pydantic-ai>=1.0.8",
   "pydantic-evals>=0.0.7",
   "pydantic-graph>=0.0.2",
+  "proselint (>=0.14.0,<0.15.0)",
+  "spacy (>=3.7.0,<4.0.0)",
+  "en-core-web-sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.7.1/en_core_web_sm-3.7.1-py3-none-any.whl",
 ]
 keywords = [
   "fusion",
@@ -71,11 +74,14 @@ docs = [
   "mkdocs-include-markdown-plugin (>=7.0.0,<8.0.0)",
 ]
 [build-system]
-requires = ["hatchling>=1.25.0", "hatch-vcs>=0.4.0", "pyyaml>=6.0.2"]
+requires = ["hatchling>=1.25.0", "hatch-vcs>=0.4.0", "pyyaml>=6.0.2", "pydantic>=2.10.6"]
 build-backend = "hatchling.build"
 
 [tool.hatch.version]
 source = "vcs"
+
+[tool.hatch.metadata]
+allow-direct-references = true
 
 [tool.hatch.build.hooks.custom]
 path = "hatch_build_hooks.py"
@@ -101,6 +107,9 @@ ignore_missing_imports = true
 
 [tool.coverage.run]
 omit = ['__init__.py']
+
+[tool.pytest.ini_options]
+# No special anyio config needed - handled in conftest.py
 
 [tool.ruff]
 target-version = "py312"

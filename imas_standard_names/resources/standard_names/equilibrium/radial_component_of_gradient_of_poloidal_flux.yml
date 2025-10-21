@@ -1,5 +1,0 @@
-name: radial_component_of_gradient_of_poloidal_flux
-kind: scalar
-unit: Wb.m^-1
-status: draft
-description: Radial (R) component of the poloidal flux gradient. Component of ∇ψ projected along the radial coordinate.

@@ -10,6 +10,13 @@ from .models import StandardNameEntry, create_standard_name_entry
 from .services import validate_models
 
 
+def _represent_literal_str(dumper, data):
+    """Represent multiline strings using literal block scalar style (|)."""
+    if "\n" in data:
+        return dumper.represent_scalar("tag:yaml.org,2002:str", data, style="|")
+    return dumper.represent_scalar("tag:yaml.org,2002:str", data)
+
+
 class YamlStore:
     def __init__(self, root: Path):
         self.root = Path(root).expanduser().resolve()
@@ -40,20 +47,34 @@ class YamlStore:
 
     # Write / Delete ----------------------------------------------------------
     def write(self, model: StandardNameEntry):
-        path = self.root / f"{model.name}.yml"
+        # Organize by primary tag (tags[0]) if present
+        if model.tags and len(model.tags) > 0:
+            primary_tag = model.tags[0]
+            path = self.root / primary_tag / f"{model.name}.yml"
+        else:
+            # Fallback to root if no tags
+            path = self.root / f"{model.name}.yml"
+
         path.parent.mkdir(parents=True, exist_ok=True)
         data = {k: v for k, v in model.model_dump().items() if v not in (None, [], "")}
         data["name"] = model.name
+
+        # Configure YAML dumper to use literal block scalar (|) for multiline strings
+        yaml.add_representer(str, _represent_literal_str, Dumper=yaml.SafeDumper)
+
         with open(path, "w", encoding="utf-8") as fh:
-            yaml.safe_dump(data, fh, sort_keys=False)
+            yaml.safe_dump(data, fh, sort_keys=False, allow_unicode=True, width=80)
 
     def delete(self, name: str):
-        path = self.root / f"{name}.yml"
-        if path.exists():
-            try:
-                path.unlink()
-            except OSError:
-                pass
+        # Search in subdirectories first, then root
+        candidates = list(self.root.rglob(f"{name}.yml"))
+        for path in candidates:
+            if path.exists():
+                try:
+                    path.unlink()
+                except OSError:
+                    pass
+                break
 
 
 __all__ = ["YamlStore"]

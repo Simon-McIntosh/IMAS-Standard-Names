@@ -1,0 +1,27 @@
+# Positions vocabulary: spatial locations, surfaces, and regions
+#
+# Can be used with BOTH "of_" and "at_" depending on semantic context:
+#   - "of_<token>" = intrinsic geometric property (major_radius_of_plasma_boundary)
+#   - "at_<token>" = field quantity evaluated there (electron_temperature_at_plasma_boundary)
+#
+# Examples:
+#   - major_radius_of_plasma_boundary (geometric property)
+#   - electron_temperature_at_magnetic_axis (field at location)
+#   - poloidal_flux_at_plasma_boundary (flux evaluated at boundary)
+
+- last_closed_flux_surface
+- first_wall
+- limiter
+- plasma_boundary
+- divertor_target
+- inner_divertor_target
+- outer_divertor_target
+- magnetic_axis
+- current_center
+- inner_midplane
+- outer_midplane
+- core_region
+- edge_region
+- scrape_off_layer
+- divertor_region
+- closest_wall_point

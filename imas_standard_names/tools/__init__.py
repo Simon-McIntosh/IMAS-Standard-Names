@@ -2,19 +2,28 @@ from fastmcp import FastMCP
 
 from imas_standard_names.catalog.edit import EditCatalog
 from imas_standard_names.repository import StandardNameCatalog
+from imas_standard_names.tools.check import CheckTool
+from imas_standard_names.tools.create import CreateTool
 from imas_standard_names.tools.edit import CatalogTool
+from imas_standard_names.tools.fetch import FetchTool
 from imas_standard_names.tools.names import NamesTool
 from imas_standard_names.tools.overview import OverviewTool
 from imas_standard_names.tools.search import SearchTool
+from imas_standard_names.tools.write import WriteTool
 
 
 class Tools:
     """Main Tools class that delegates to individual tool implementations."""
 
-    def __init__(self):
-        """Initialize the Standard Names tools provider."""
+    def __init__(self, catalog_root: str | None = None):
+        """Initialize the Standard Names tools provider.
+
+        Args:
+            catalog_root: Optional custom directory for the standard names catalog.
+                         If None, uses the default packaged resources directory.
+        """
         # Create shared in-memory standard name repository
-        self.catalog = StandardNameCatalog()
+        self.catalog = StandardNameCatalog(root=catalog_root)
         # Editing facade (persistent multi-call edit session support)
         self.edit_catalog = EditCatalog(self.catalog)
         # Initialize individual tools with shared standard names catalog
@@ -24,6 +33,10 @@ class Tools:
         # (Tests may also set tool.edit_catalog directly.)
         self.catalog_tool = CatalogTool(self.catalog, self.edit_catalog)
         self.names_tool = NamesTool(self.catalog)
+        self.check_tool = CheckTool(self.catalog)
+        self.fetch_tool = FetchTool(self.catalog)
+        self.write_tool = WriteTool(self.catalog, self.edit_catalog)
+        self.create_tool = CreateTool(self.catalog, self.edit_catalog)
 
     @property
     def name(self) -> str:
@@ -44,6 +57,10 @@ class Tools:
             self.overview_tool,
             self.catalog_tool,
             self.names_tool,
+            self.check_tool,
+            self.fetch_tool,
+            self.write_tool,
+            self.create_tool,
         ]
 
         for tool in tool_instances:

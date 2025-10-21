@@ -14,7 +14,7 @@ def scalar_data():
         "description": "Core electron temperature",
         "unit": "eV",
         "status": "active",
-        "tags": ["core", "temperature"],
+        "tags": ["fundamental", "measured"],
     }
 
 

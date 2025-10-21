@@ -15,9 +15,11 @@ logger = logging.getLogger(__name__)
 class BaseTool(ABC):
     """Base class for all IMAS MCP tools with service injection."""
 
-    def __init__(self, repository: StandardNameCatalog | None = None):
+    def __init__(self, catalog: StandardNameCatalog | None = None):
         self.logger = logger
-        self.repository = repository or StandardNameCatalog()
+        if catalog is None:
+            raise ValueError("BaseTool requires a catalog instance - received None")
+        self.catalog = catalog
 
     @property
     @abstractmethod

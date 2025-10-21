@@ -1,5 +1,0 @@
-name: ion_temperature
-kind: scalar
-unit: keV
-status: draft
-description: Ion temperature.

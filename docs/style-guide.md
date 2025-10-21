@@ -20,6 +20,8 @@ harvest existing IMAS Data Dictionary information before drafting new names. Ali
 3. Scalars are atomic; vectors aggregate semantics only.
 4. One canonical spelling (no alternate alias field).
 5. Deterministic parsing > brevity.
+6. **IMAS DD Alignment**: Sign conventions, coordinate systems, physical definitions, and units MUST strictly follow IMAS Data Dictionary documentation. Do not invent conventions.
+7. **Tags Ordering**: First tag (tags[0]) MUST be a primary tag from controlled vocabulary (magnetics, fundamental, equilibrium, etc.). Secondary tags (cylindrical-coordinates, measured, local-measurement, etc.) come after.
 
 ---
 
@@ -149,16 +151,15 @@ Avoid repetition of the name itself beyond meaningful grammar.
 
 ## 10. YAML Field Guidelines
 
-| Field        | Requirement                                           | Example                                      |
-| ------------ | ----------------------------------------------------- | -------------------------------------------- | ---------- | ------------------------------- | ----- |
-| `name`       | Matches grammar exactly                               | `radial_component_of_magnetic_field`         |
-| `kind`       | One of scalar, derived_scalar, vector, derived_vector | `vector`                                     |
-| `frame`      | Required for vectors / derived vectors                | `cylindrical_r_tor_z`                        |
-| `components` | Mapping axis→component for vectors                    | `radial: radial_component_of_magnetic_field` |
-| `magnitude`  | Scalar magnitude name (optional but recommended)      | `magnetic_field_magnitude`                   |
-| `provenance` | Structured provenance (operator / reduction / expr)   | operators: [curl]; base: magnetic_field      |
-| `unit`       | SI-consistent                                         | `T`                                          |
-| `status`     | draft                                                 | active                                       | deprecated | superseded (future enforcement) | draft |
+| Field           | Requirement                                                                                             | Example                                                |
+| --------------- | ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------ |
+| `name`          | Matches grammar exactly                                                                                 | `radial_component_of_magnetic_field`                   |
+| `kind`          | One of scalar, vector                                                                                   | `vector`                                               |
+| `provenance`    | Optional: operator / reduction / expression                                                             | operators: [curl]; base: magnetic_field                |
+| `unit`          | SI-consistent, following IMAS DD                                                                        | `T`                                                    |
+| `status`        | draft \| active \| deprecated \| superseded                                                             | `draft`                                                |
+| `tags`          | Array with PRIMARY tag first (tags[0]), secondary tags after (tags[1:])                                 | `['magnetics', 'measured', 'cylindrical-coordinates']` |
+| `documentation` | Must align with IMAS DD sign conventions, coordinate systems, and physical definitions where applicable | See IMAS DD for flux loop sign conventions             |
 
 ---
 
@@ -170,10 +171,12 @@ Before submitting an issue / PR:
 - Vector has ≥2 components and magnitude defined (if sensible).
 - Component files exist for each axis and backlink correctly.
 - Derivation dependencies complete and free of cycles (manual check until Phase 4).
-- Units consistent with physical dimension.
+- Units consistent with physical dimension AND IMAS DD.
 - Description concise and informative.
 - No reserved tokens misused.
 - Phase alignment: If equilibrium attribute, matches Phase 1 patterns.
+- **Tags validation**: First tag is primary tag; secondary tags follow.
+- **IMAS DD alignment**: Sign conventions, coordinate definitions, and physical interpretations match IMAS DD documentation exactly.
 
 ---
 
