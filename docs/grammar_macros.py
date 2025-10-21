@@ -94,20 +94,9 @@ def define_env(env: Any) -> None:
         Returns:
             Markdown table showing which components belong to each basis.
         """
-        if not _grammar_spec.basis:
-            return "_No basis definitions found_"
-
-        lines = [
-            "| Basis | Description | Components |",
-            "|-------|-------------|------------|",
-        ]
-
-        for basis_name, basis_group in _grammar_spec.basis.items():
-            components = ", ".join(f"`{c}`" for c in basis_group.components)
-            description = basis_group.description or "_(no description)_"
-            lines.append(f"| `{basis_name}` | {description} | {components} |")
-
-        return "\n".join(lines)
+        # Note: basis field removed from current grammar spec
+        # This macro is retained for backward compatibility but returns empty
+        return "_Basis definitions have been replaced by the split base structure (geometric_base vs physical_base)._"
 
     @env.macro
     def grammar_segment_rules_table() -> str:
@@ -205,7 +194,9 @@ def define_env(env: Any) -> None:
         vocab_usage = {
             "components": "Vector component directions",
             "subjects": "Particle species or plasma subjects",
-            "basis": "Coordinate system bases",
+            "geometric_bases": "Geometric/spatial quantities (position, vertex, etc.)",
+            "objects": "Hardware or equipment whose intrinsic property is described",
+            "sources": "Devices from which measurements or signals are obtained",
             "positions": "Spatial locations or regions",
             "processes": "Physical processes or mechanisms",
         }
@@ -260,13 +251,33 @@ def define_env(env: Any) -> None:
         return ", ".join(f"`{token}`" for token in tokens)
 
     @env.macro
-    def grammar_basis_tokens() -> str:
-        """Generate inline list of basis tokens.
+    def grammar_geometric_bases_tokens() -> str:
+        """Generate inline list of geometric_bases tokens.
 
         Returns:
             Comma-separated inline list.
         """
-        tokens = _grammar_spec.vocabulary_tokens("basis")
+        tokens = _grammar_spec.vocabulary_tokens("geometric_bases")
+        return ", ".join(f"`{token}`" for token in tokens)
+
+    @env.macro
+    def grammar_objects_tokens() -> str:
+        """Generate inline list of objects tokens.
+
+        Returns:
+            Comma-separated inline list.
+        """
+        tokens = _grammar_spec.vocabulary_tokens("objects")
+        return ", ".join(f"`{token}`" for token in tokens)
+
+    @env.macro
+    def grammar_sources_tokens() -> str:
+        """Generate inline list of sources tokens.
+
+        Returns:
+            Comma-separated inline list.
+        """
+        tokens = _grammar_spec.vocabulary_tokens("sources")
         return ", ".join(f"`{token}`" for token in tokens)
 
     # Standard Names Catalog Macros

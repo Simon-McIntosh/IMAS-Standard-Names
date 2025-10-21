@@ -24,18 +24,16 @@ watch:
 
 nav:
   - Home: index.md
+  - Standard Names: catalog.md
   - Grammar Reference: grammar-reference.md
   - Guidelines: guidelines.md
-  - Specification: specification.md
-  - Quick Start: quickstart.md
-  - Style Guide: style-guide.md
-  - Catalog: catalog.md
-  - Examples:
-    - IMAS Magnetics Diagnostic: magnetics-example.md
-  - Provenance: provenance.md
-  - Reductions: reductions.md
-  - Roadmap: roadmap.md
-  - Contributing: contributing.md
+  - Development:
+    - Quick Start: development/quickstart.md
+    - Style Guide: development/style-guide.md
+    - Specification: development/specification.md
+    - Provenance: development/provenance.md
+    - Reductions: development/reductions.md
+    - Contributing: development/contributing.md
 
 theme:
   name: material

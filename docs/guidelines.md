@@ -1,11 +1,18 @@
-# Guidelines for Construction of IMAS Standard Names
+# Guidelines for IMAS Standard Names
 
-!!! info "Complete Reference"
-For auto-generated vocabulary tables and formal specification, see the [Grammar Reference](grammar-reference.md).
+!!! info "Auto-Generated Vocabularies"
+    Token lists are automatically generated from `grammar/specification.yml`. See [Grammar Reference](grammar-reference.md) for complete tables.
 
-## Basic Rules
+## Overview
 
-Standard names follow these fundamental requirements:
+Standard names provide a controlled vocabulary for identifying physical quantities, diagnostic measurements, and geometric properties in fusion experiments. Each name follows a canonical pattern ensuring:
+
+- **Deterministic parsing** — names decompose unambiguously into structured components
+- **Controlled vocabularies** — segments use enumerated tokens from the grammar specification
+- **Physical clarity** — distinctions between intrinsic properties, measurements, spatial locations
+- **IMAS DD alignment** — conventions follow IMAS Data Dictionary standards
+
+## Basic RulesStandard names follow these fundamental requirements:
 
 | Rule                    | Description                                                                                              | Example                                                        |
 | ----------------------- | -------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
@@ -19,201 +26,191 @@ Standard names follow these fundamental requirements:
 
 ## Grammar Structure
 
-Standard names are constructed from segments in a fixed order:
+Standard names follow a fixed segment pattern:
 
-{{ grammar_segment_order() }}
+```text
+[<component>_component_of | <coordinate>]? 
+[<subject>]? 
+<geometric_base | physical_base> 
+[of_<object> | from_<source>]? 
+[of_<geometry> | at_<position>]? 
+[due_to_<process>]?
+```
 
-### Segment Descriptions
+See [Grammar Reference](grammar-reference.md) for the complete specification and auto-generated segment documentation.
 
-!!! info "Auto-Generated Vocabularies"
-Token lists below are generated from `grammar.yml`. See [Grammar Reference](grammar-reference.md) for complete tables.
+### Key Concepts
 
-| Segment       | Required | Description                                     | Tokens                                                                    |
-| ------------- | -------- | ----------------------------------------------- | ------------------------------------------------------------------------- |
-| **component** | No       | Vector component direction                      | {{ grammar_component_tokens() }}                                          |
-| **subject**   | No       | Particle species or plasma subject              | {{ grammar_subject_tokens() }}                                            |
-| **base**      | **Yes**  | Physical quantity or transformed expression     | User-defined (e.g., `temperature`, `pressure`, `gradient_of_temperature`) |
-| **geometry**  | No       | Geometric target (template: `of_{token}`)       | {{ grammar_position_tokens() }}                                           |
-| **position**  | No       | Spatial location (template: `at_{token}`)       | {{ grammar_position_tokens() }}                                           |
-| **process**   | No       | Physical mechanism (template: `due_to_{token}`) | {{ grammar_process_tokens() }}                                            |
+**Split Base Structure:**
 
-### Exclusivity Rules
+- Every name must have either a `geometric_base` OR a `physical_base` (mutually exclusive)
+- **Geometric base**: Spatial/geometric quantities (position, vertex, centroid, outline, etc.)
+- **Physical base**: Physical measurements, fields, properties (temperature, magnetic_field, voltage, area, etc.)
 
-Certain segments cannot coexist in the same name:
+**Component vs Coordinate:**
 
-{{ grammar_exclusive_pairs() }}
+- Use `component` with `physical_base` for physical vectors: `{axis}_component_of_{physical_vector}`
+- Use `coordinate` with `geometric_base` for geometric vectors: `{axis}_{geometric_base}`
 
-### Examples
+**Object vs Source:**
 
-| Valid Name                                | Segments Used             | Explanation          |
-| ----------------------------------------- | ------------------------- | -------------------- |
-| `electron_temperature`                    | subject + base            | Simple scalar        |
-| `radial_component_of_magnetic_field`      | component + base          | Vector component     |
-| `electron_temperature_at_plasma_boundary` | subject + base + position | Scalar at location   |
-| `heat_flux_due_to_conduction`             | base + process            | Process contribution |
+- `of_<object>` — intrinsic property OF hardware/equipment (e.g., `area_of_flux_loop`)
+- `from_<source>` — measurement/signal FROM device (e.g., `voltage_from_flux_loop`)
 
-!!! example "Worked Example"
-For a comprehensive example of mapping IMAS Data Dictionary paths to standard names,
-see [IMAS Magnetics Diagnostic Example](magnetics-example.md).
+**Geometry vs Position:**
 
-## Grammar Source
+- `of_<geometry>` — geometric property OF spatial object (e.g., `major_radius_of_plasma_boundary`)
+- `at_<position>` — field quantity evaluated AT location (e.g., `electron_temperature_at_magnetic_axis`)
 
-**Single source of truth:** `imas_standard_names/resources/grammar.yml`
+### Segment Reference
 
-**Code generation:**
-
-- Auto-generates: `imas_standard_names/grammar/types.py` (Python enums)
-- Triggers: Automatically during build/install via Hatch
-- Manual: `python -m imas_standard_names.grammar_codegen.generate` or `build-grammar`
+For detailed segment descriptions, templates, and exclusivity rules, see [Grammar Reference](grammar-reference.md#segment-rules).
 
 ---
 
-## Vocabulary Details
+## Vocabulary Overview
+
+Standard names use controlled vocabularies for specific segments. For complete token lists and detailed usage, see [Grammar Reference](grammar-reference.md#vocabularies).
 
 ### Components
 
-Component tokens specify vector directions:
+Specify vector direction (e.g., `radial`, `toroidal`, `vertical`, `x`, `y`, `z`, `parallel`, `perpendicular`).
 
-{{ grammar_vocabulary_table('components') }}
+**Usage:**
 
-**Usage notes:**
-
-- Components follow the pattern: `{axis}_component_of_{vector_name}`
-- Vector axes are specified at runtime via the `vector_axes` metadata attribute
-- Example: `vector_axes="radial toroidal vertical"` for cylindrical coordinates
-
-**Examples:**
-
-- `radial_component_of_magnetic_field` — cylindrical component
-- `x_component_of_electric_field` — Cartesian component
-- `parallel_heat_flux` — field-aligned component
+- Physical vectors: `radial_component_of_magnetic_field`
+- Geometric vectors: `radial_position_of_flux_loop`
 
 ### Subjects
 
-Subject tokens identify particle species or plasma populations:
+Identify particle species or plasma populations (e.g., `electron`, `ion`, `deuterium`, `tritium`).
 
-{{ grammar_vocabulary_table('subjects') }}
+**Example:** `electron_temperature`, `ion_density`
+
+### Geometric Bases
+
+Spatial/geometric quantities that require object or geometry qualification (e.g., `position`, `vertex`, `centroid`, `outline`).
 
 **Examples:**
 
-- `electron_temperature` — electron quantity
-- `ion_density` — ion quantity
-- `deuterium_velocity` — specific isotope
+- `position_of_flux_loop`
+- `radial_position_of_flux_loop`
+- `vertex_of_plasma_boundary`
+
+### Objects
+
+Hardware or equipment whose intrinsic properties you describe (template: `of_{token}`).
+
+**Examples:**
+
+- `area_of_flux_loop` — equipment characteristic
+- `major_radius_of_poloidal_field_coil` — geometric property
+- `turn_count_of_rogowski_coil` — hardware parameter
+
+### Sources
+
+Devices from which measurements or signals originate (template: `from_{token}`).
+
+**Examples:**
+
+- `voltage_from_flux_loop` — diagnostic measurement
+- `current_from_poloidal_field_coil` — actuator signal
+- `magnetic_field_from_toroidal_magnetic_field_probe` — sensor reading
 
 ### Positions
 
-Position tokens (template: `at_{token}`) specify spatial locations:
-
-{{ grammar_vocabulary_table('positions') }}
+Spatial locations or geometric objects (templates: `at_{token}` or `of_{token}`).
 
 **Examples:**
 
-- `temperature_at_plasma_boundary` — at last closed flux surface
-- `pressure_at_magnetic_axis` — on-axis value
-- `density_at_outer_midplane` — at specific location
+- `electron_temperature_at_magnetic_axis` — field at location
+- `pressure_at_plasma_boundary` — measurement at position
+- `major_radius_of_plasma_boundary` — geometric property
 
 ### Processes
 
-Process tokens (template: `due_to_{token}`) identify physical mechanisms. Use when naming a single contribution term in a sum:
-
-{{ grammar_vocabulary_table('processes') }}
+Physical mechanisms (template: `due_to_{token}`).
 
 **Examples:**
 
-- `heat_flux_due_to_conduction` — conductive contribution
-- `particle_flux_due_to_diffusion` — diffusive contribution
-- `heating_due_to_neutral_beam_injection` — NBI heating term
-
-## Vector Representation
-
-Vectors are physical quantities with multiple directional components. The IMAS standard names
-system uses a metadata-based approach for specifying vector components.
-
-### Vector Components
-
-Vector components are separate scalar standard names that follow the pattern:
-
-```
-{axis}_component_of_{vector_name}
-```
-
-**Examples:**
-
-| Vector         | Component Names                                                                                                      | Unit |
-| -------------- | -------------------------------------------------------------------------------------------------------------------- | ---- |
-| magnetic_field | `radial_component_of_magnetic_field`, `toroidal_component_of_magnetic_field`, `vertical_component_of_magnetic_field` | T    |
-| electric_field | `x_component_of_electric_field`, `y_component_of_electric_field`, `z_component_of_electric_field`                    | V/m  |
-| heat_flux      | `parallel_heat_flux`, `perpendicular_heat_flux`                                                                      | W/m² |
-
-### Vector Metadata
-
-At runtime, use the `vector_axes` metadata attribute to specify which axes apply:
-
-```
-vector_axes = "radial toroidal vertical"  # cylindrical coordinates
-vector_axes = "x y z"                     # Cartesian coordinates
-vector_axes = "parallel perpendicular"    # field-aligned
-```
-
-Use the CF `coordinates` attribute to link to the actual component variable names.
-
-### Vector Naming Rules
-
-- ✗ Never use the word "vector" in names → ✓ Use component pattern
-- ✓ For magnitudes: `magnitude_of_magnetic_field` (scalar, not vector)
-- ✓ Component names must follow the `{axis}_component_of_{vector}` pattern
+- `heat_flux_due_to_conduction`
+- `particle_flux_due_to_diffusion`
+- `heating_due_to_neutral_beam_injection`
 
 ---
 
-## Transformations
+## Common Patterns
 
-Derive new standard names from existing ones by applying transformation operators. Transformations may change units. Multiple transformations can be chained.
+### Physical Measurements
 
-### Transformation Rules
+Basic physical quantities use subject + physical_base:
 
-{{ read_csv('transformations.csv') }}
+```text
+electron_temperature
+ion_density
+plasma_pressure
+```
 
-### Transformation Examples
+### Physical Vector Components
 
-| Standard Name                                          | Transformation    | Description               |
-| ------------------------------------------------------ | ----------------- | ------------------------- |
-| `gradient_of_temperature`                              | gradient          | Spatial gradient          |
-| `time_derivative_of_pressure`                          | time derivative   | Rate of change            |
-| `magnitude_of_magnetic_field`                          | magnitude         | Vector magnitude (scalar) |
-| `integral_of_density_over_volume`                      | integral          | Volume integration        |
-| `ratio_of_thermal_pressure_to_magnetic_pressure`       | ratio             | Plasma beta               |
-| `square_of_magnetic_field`                             | square            | Squared quantity          |
-| `normalized_temperature`                               | normalized        | Dimensionless form        |
-| `derivative_of_current_density_with_respect_to_radius` | derivative w.r.t. | Radial derivative         |
+Physical vectors use component + physical_base:
 
----
+```text
+radial_component_of_magnetic_field
+toroidal_component_of_plasma_velocity
+parallel_heat_flux
+```
 
-## Generic Quantity Names
+### Geometric Quantities
 
-Generic names represent physical quantities with consistent units across the catalog. These are building blocks for standard names but **are not themselves valid standard names**.
+Geometric quantities use coordinate + geometric_base + object/geometry:
 
-{{ read_csv('generic_names.csv') }}
+```text
+position_of_flux_loop
+radial_position_of_flux_loop
+vertex_of_plasma_boundary
+centroid_of_divertor_tile
+```
 
-### Unit Conventions
+### Hardware Properties vs Measurements
 
-| Quantity Type         | Unit | Examples                                  |
-| --------------------- | ---- | ----------------------------------------- |
-| Plasma temperatures   | eV   | `electron_temperature`, `ion_temperature` |
-| Material temperatures | K    | `wall_temperature`, `coil_temperature`    |
-| Magnetic field        | T    | `toroidal_magnetic_field`                 |
-| Density               | m⁻³  | `electron_density`, `ion_density`         |
-| Energy                | J    | `plasma_energy`, `kinetic_energy`         |
+Distinguish intrinsic properties (of_object) from measurements (from_source):
+
+```text
+area_of_flux_loop                    (intrinsic property)
+voltage_from_flux_loop               (measurement)
+major_radius_of_poloidal_field_coil  (geometric property)
+current_from_poloidal_field_coil     (actuator signal)
+```
+
+### Spatial Qualification
+
+Use at_position for fields evaluated at locations:
+
+```text
+electron_temperature_at_magnetic_axis
+pressure_at_plasma_boundary
+density_at_outer_midplane
+```
+
+Use of_geometry for geometric properties of spatial objects:
+
+```text
+major_radius_of_plasma_boundary
+area_of_first_wall
+curvature_of_flux_surface
+```
 
 ---
 
 ## Quick Reference
 
-**For complete vocabulary tables and formal specification:** See [Grammar Reference](grammar-reference.md)
+**Complete vocabularies:** [Grammar Reference](grammar-reference.md#vocabularies)
 
-**For step-by-step creation guide:** See [Quick Start](quickstart.md)
+**Step-by-step guide:** [Quick Start](development/quickstart.md)
 
-**For detailed authoring rules:** See [Style Guide](style-guide.md)
+**Authoring rules:** [Style Guide](development/style-guide.md)
 
-**For formal grammar and validation:** See [Specification](specification.md)
+**Formal specification:** [Specification](development/specification.md)
 
-**For worked examples:** See [IMAS Magnetics Diagnostic Example](magnetics-example.md)
+**Worked example:** [IMAS Magnetics Diagnostic](magnetics-example.md)
