@@ -8,6 +8,8 @@ state (in-memory vs on-disk).
 
 from __future__ import annotations
 
+import time
+from copy import deepcopy
 from typing import Any
 
 from imas_standard_names.editing.batch_utils import topological_sort_operations
@@ -217,9 +219,6 @@ class EditCatalog:
         - Dry-run validation without committing
         - Resume from specific index
         """
-        import time
-        from copy import deepcopy
-
         start_time = time.time()
         operations = batch_input.operations
         mode = batch_input.mode
@@ -446,8 +445,6 @@ class EditCatalog:
         Returns summary with list of (name, existed, dependencies) tuples.
         If dry_run is True, validates and shows dependencies without deleting.
         """
-        import time
-
         start_time = time.time()
         names = batch_delete_input.names
         dry_run = batch_delete_input.dry_run

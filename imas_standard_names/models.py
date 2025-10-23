@@ -67,6 +67,11 @@ from imas_standard_names.field_types import (
     Tags,
     Unit,
 )
+from imas_standard_names.grammar.tag_types import (
+    PRIMARY_TAGS,
+    SECONDARY_TAGS,
+)
+from imas_standard_names.grammar.types import Component, Position, Process, Source
 from imas_standard_names.operators import (
     enforce_operator_naming as _enforce_operator_naming,
     normalize_operator_chain as _normalize_operator_chain,
@@ -80,6 +85,71 @@ from imas_standard_names.provenance import (
 from imas_standard_names.reductions import enforce_reduction_naming
 
 Status = Literal["draft", "active", "deprecated", "superseded"]
+
+
+def _check_grammar_vocabulary_consistency(name: str) -> list[str]:
+    """Check if a standard name uses vocabulary tokens that don't exist in grammar.
+
+    Only flags cases where clear template patterns indicate missing vocabulary tokens.
+    Does NOT flag compound base names like 'electron_temperature' or 'plasma_velocity'.
+    """
+    errors = []
+
+    # Only check for explicit template patterns with known vocabulary requirements
+    # These patterns should always map to vocabulary tokens, not compound base names
+
+    # Check 'component_of' pattern - should always map to Component vocabulary
+    component_match = re.search(r"^([a-z_]+)_component_of_", name)
+    if component_match:
+        token = component_match.group(1)
+        if token not in [c.value for c in Component]:
+            errors.append(
+                f"Token '{token}' used with 'component_of' template is missing from Component vocabulary"
+            )
+
+    # Check coordinate pattern - should always map to Component vocabulary (same tokens)
+    coordinate_match = re.search(
+        r"^([a-z_]+)_(?:position|vertex|centroid|outline|contour|displacement|offset|trajectory|extent|surface_normal|sensor_normal|tangent_vector)_",
+        name,
+    )
+    if coordinate_match:
+        token = coordinate_match.group(1)
+        if token not in [c.value for c in Component]:
+            errors.append(
+                f"Token '{token}' used as coordinate prefix is missing from Component vocabulary"
+            )
+
+    # Check 'from_' pattern - should always map to Source vocabulary
+    from_match = re.search(r"_from_([a-z_]+)(?:_|$)", name)
+    if from_match:
+        token = from_match.group(1)
+        if token not in [s.value for s in Source]:
+            errors.append(
+                f"Token '{token}' used with 'from_' template is missing from Source vocabulary"
+            )
+
+    # Check 'at_' pattern - should always map to Position vocabulary
+    at_match = re.search(r"_at_([a-z_]+)(?:_|$)", name)
+    if at_match:
+        token = at_match.group(1)
+        if token not in [p.value for p in Position]:
+            errors.append(
+                f"Token '{token}' used with 'at_' template is missing from Position vocabulary"
+            )
+
+    # Check 'due_to_' pattern - should always map to Process vocabulary
+    due_to_match = re.search(r"_due_to_([a-z_]+)(?:_|$)", name)
+    if due_to_match:
+        token = due_to_match.group(1)
+        if token not in [p.value for p in Process]:
+            errors.append(
+                f"Token '{token}' used with 'due_to_' template is missing from Process vocabulary"
+            )
+
+    # Skip 'of_' pattern validation entirely - it's used for both vocabulary tokens
+    # AND valid compound base names like 'electron_temperature', 'plasma_velocity'
+
+    return errors
 
 
 class Kind(str, Enum):
@@ -124,6 +194,21 @@ class StandardNameEntryBase(BaseModel):
     def _no_double_underscore(cls, v: str) -> str:  # type: ignore[override]
         if v and "__" in v:
             raise ValueError("Name tokens must not contain double underscores")
+        return v
+
+    @field_validator("name")
+    @classmethod
+    def _check_grammar_vocabulary_consistency(cls, v: str) -> str:  # type: ignore[override]
+        """Validate that template tokens in the name exist in the grammar vocabulary."""
+        if not v:
+            return v
+
+        errors = _check_grammar_vocabulary_consistency(v)
+        if errors:
+            error_msg = "Grammar vocabulary consistency errors:\n" + "\n".join(
+                f"  - {error}" for error in errors
+            )
+            raise ValueError(error_msg)
         return v
 
     # Base validators
@@ -207,11 +292,6 @@ class StandardNameEntryBase(BaseModel):
         """Validate tags: ensure exactly one primary tag (auto-reorder to position 0) and validate vocabulary."""
         if not v or len(v) == 0:
             return v
-
-        from imas_standard_names.grammar.tag_types import (
-            PRIMARY_TAGS,
-            SECONDARY_TAGS,
-        )
 
         # Find all primary tags in the list
         primary_tags_found = [tag for tag in v if tag in PRIMARY_TAGS]

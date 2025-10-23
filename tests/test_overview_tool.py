@@ -1,3 +1,5 @@
+import asyncio
+
 from imas_standard_names.repository import StandardNameCatalog
 from imas_standard_names.tools.overview import OverviewTool
 
@@ -6,8 +8,6 @@ def test_overview_structure(sample_catalog):
     repo = sample_catalog
     tool = OverviewTool(repo)
     # call directly (sync wrapper of async not needed if we just run loop)
-    import asyncio
-
     result = asyncio.run(tool.get_grammar_and_vocabulary())
 
     # Check grammar_structure section (new, should be first)

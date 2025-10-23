@@ -12,6 +12,7 @@ from typing import Any
 from pydantic import BaseModel, ConfigDict, field_validator, model_validator
 
 from imas_standard_names.field_types import BaseToken
+from imas_standard_names.grammar.constants import EXCLUSIVE_SEGMENT_PAIRS
 from imas_standard_names.grammar.support import (
     TOKEN_PATTERN,
     compose_standard_name as _compose_from_parts,
@@ -19,7 +20,6 @@ from imas_standard_names.grammar.support import (
     value_of as _value_of,
 )
 from imas_standard_names.grammar.types import (
-    EXCLUSIVE_SEGMENT_PAIRS,
     Component,
     GeometricBase,
     Object,

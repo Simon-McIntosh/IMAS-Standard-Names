@@ -1,11 +1,13 @@
 from collections import Counter
+from importlib import resources
 
+import yaml
 from fastmcp import Context
 
 import imas_standard_names.grammar.types as grammar_types
 from imas_standard_names import __version__ as package_version
 from imas_standard_names.decorators.mcp import mcp_tool
-from imas_standard_names.grammar.types import (
+from imas_standard_names.grammar.constants import (
     EXCLUSIVE_SEGMENT_PAIRS,
     SCOPE_EXCLUDE,
     SCOPE_INCLUDE,
@@ -13,6 +15,23 @@ from imas_standard_names.grammar.types import (
     SEGMENT_ORDER,
     SEGMENT_RULES,
     SEGMENT_TEMPLATES,
+)
+from imas_standard_names.grammar.tag_types import (
+    PRIMARY_TAG_DESCRIPTIONS,
+    PRIMARY_TAGS,
+    SECONDARY_TAG_DESCRIPTIONS,
+    SECONDARY_TAGS,
+)
+from imas_standard_names.grammar_codegen.spec import IncludeLoader
+from imas_standard_names.models import (
+    _STANDARD_NAME_ENTRY_ADAPTER,
+    StandardNameScalarEntry,
+    StandardNameVectorEntry,
+)
+from imas_standard_names.provenance import (
+    ExpressionProvenance,
+    OperatorProvenance,
+    ReductionProvenance,
 )
 from imas_standard_names.tools.base import BaseTool
 
@@ -123,12 +142,6 @@ def _build_segment_order_constraint() -> str:
 
 def _get_segment_descriptions() -> dict[str, str]:
     """Load segment descriptions directly from the grammar specification YAML."""
-    from importlib import resources
-
-    import yaml
-
-    from imas_standard_names.grammar_codegen.spec import IncludeLoader
-
     grammar_path = resources.files("imas_standard_names.grammar") / "specification.yml"
     with grammar_path.open("r", encoding="utf-8") as f:
         data = yaml.load(f, Loader=IncludeLoader) or {}
@@ -1334,23 +1347,6 @@ class OverviewTool(BaseTool):
         - Field descriptions, validation rules, and defaults
         - Best practices for documentation and metadata
         """
-        from imas_standard_names.grammar.tag_types import (
-            PRIMARY_TAG_DESCRIPTIONS,
-            PRIMARY_TAGS,
-            SECONDARY_TAG_DESCRIPTIONS,
-            SECONDARY_TAGS,
-        )
-        from imas_standard_names.models import (
-            _STANDARD_NAME_ENTRY_ADAPTER,
-            StandardNameScalarEntry,
-            StandardNameVectorEntry,
-        )
-        from imas_standard_names.provenance import (
-            ExpressionProvenance,
-            OperatorProvenance,
-            ReductionProvenance,
-        )
-
         return {
             "required_fields": {
                 "scalar": ["name", "description", "kind"],

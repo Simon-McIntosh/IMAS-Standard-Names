@@ -9,10 +9,10 @@ of truth, ensuring documentation stays synchronized with the implementation.
 
 from __future__ import annotations
 
-import os
 import re
 from collections import defaultdict
-from pathlib import Path
+from importlib.metadata import version
+from importlib.resources import files
 from typing import Any
 
 import yaml
@@ -28,7 +28,7 @@ def define_env(env: Any) -> None:
         env: The mkdocs-macros environment object.
     """
     # Import here to avoid issues if grammar types aren't generated yet
-    from imas_standard_names.grammar_codegen.spec import GrammarSpec
+    from imas_standard_names.grammar_codegen.spec import GrammarSpec  # noqa: PLC0415
 
     # Load the grammar specification (cached)
     _grammar_spec = GrammarSpec.load()
@@ -158,8 +158,6 @@ def define_env(env: Any) -> None:
             Version string from the installed package.
         """
         try:
-            from importlib.metadata import version
-
             pkg_version = version("imas-standard-names")
             return f"Grammar version: {pkg_version}"
         except Exception:
@@ -283,32 +281,31 @@ def define_env(env: Any) -> None:
     # Standard Names Catalog Macros
     @env.macro
     def load_standard_names():
-        """Load all YAML standard names from the catalog directory"""
-        project_root = Path(env.project_dir).parent
-        standard_names_dir = (
-            project_root / "imas_standard_names" / "resources" / "standard_names"
-        )
+        """Load all YAML standard names from the catalog directory using importlib.resources"""
         standard_names = []
 
-        if standard_names_dir.exists():
-            for root, dirs, files in os.walk(standard_names_dir):
-                dirs[:] = [d for d in dirs if not d.startswith(".")]
+        try:
+            # Access the standard_names package resource directory
+            resource_path = files("imas_standard_names.resources.standard_names")
 
-                for file in files:
-                    if file.endswith(".yml") or file.endswith(".yaml"):
-                        yaml_path = Path(root) / file
-                        try:
-                            with open(yaml_path, encoding="utf-8") as f:
-                                data = yaml.safe_load(f)
+            # Iterate through all resources in the directory
+            for resource in resource_path.iterdir():
+                if resource.name.endswith((".yml", ".yaml")):
+                    try:
+                        # Read the YAML content
+                        yaml_content = resource.read_text(encoding="utf-8")
+                        data = yaml.safe_load(yaml_content)
 
-                            if data and isinstance(data, dict):
-                                data["_file_path"] = str(
-                                    yaml_path.relative_to(project_root)
-                                )
-                                data["_category"] = yaml_path.parent.name
-                                standard_names.append(data)
-                        except Exception as e:
-                            print(f"Error loading {yaml_path}: {e}")
+                        if data and isinstance(data, dict):
+                            data["_file_path"] = (
+                                f"imas_standard_names/resources/standard_names/{resource.name}"
+                            )
+                            data["_category"] = "standard_names"
+                            standard_names.append(data)
+                    except Exception as e:
+                        print(f"Error loading {resource.name}: {e}")
+        except Exception as e:
+            print(f"Error accessing standard_names resources: {e}")
 
         return standard_names
 
@@ -396,48 +393,119 @@ def define_env(env: Any) -> None:
 
     @env.macro
     def standard_names_catalog():
-        """Generate a complete catalog of all standard names organized by primary tag"""
+        """Generate a complete catalog of all standard names organized by primary tag and base name"""
+        from imas_standard_names.grammar.model import (  # noqa: PLC0415
+            parse_standard_name,
+        )
+
         result = ""
         tags = get_tags()
 
         if not tags:
             return "_No standard names found in the catalog._"
 
+        # Process each primary tag
         for category, items in sorted(tags.items()):
             category_name = category.replace("-", " ").title()
-            result += f"## **{category_name}** {{#{category}}}\n\n"
+            result += f"## {category_name} {{: #{category} }}\n\n"
             result += "---\n\n"
 
-            sorted_items = sorted(items, key=lambda x: x.get("name", ""))
-
-            for item in sorted_items:
+            # Group items by base name
+            base_groups = defaultdict(list)
+            for item in items:
                 name = item.get("name", "Unknown")
-                unit = item.get("unit", "")
-                description = item.get("description", "")
-                documentation = item.get("documentation", "")
-                item_tags = item.get("tags", [])
-                status = item.get("status", "")
+                try:
+                    parsed = parse_standard_name(name)
+                    # Extract base (prefer physical_base, fallback to geometric_base)
+                    base = parsed.physical_base or parsed.geometric_base or "unknown"
+                    base_groups[base].append(item)
+                except Exception:
+                    # If parsing fails, use "unknown" as base
+                    base_groups["unknown"].append(item)
 
-                tags_display = (
-                    ", ".join(f"`{tag}`" for tag in item_tags) if item_tags else "None"
-                )
+            # Sort base groups alphabetically
+            for base_name in sorted(base_groups.keys()):
+                base_items = base_groups[base_name]
 
-                result += f"### {name}\n\n"
-                result += f"{description}\n\n"
+                # Display base name as subheading if there are multiple items or if it helps organization
+                base_display = base_name.replace("_", " ").title()
+                result += f"### {base_display}\n\n"
 
-                if documentation:
-                    result += f"{_fix_markdown_formatting(documentation)}\n\n"
+                # Sort items within base group alphabetically
+                sorted_items = sorted(base_items, key=lambda x: x.get("name", ""))
 
-                if unit:
-                    result += f"**Unit:** `{unit}`\n\n"
+                for item in sorted_items:
+                    name = item.get("name", "Unknown")
+                    unit = item.get("unit", "")
+                    description = item.get("description", "")
+                    documentation = item.get("documentation", "")
+                    item_tags = item.get("tags", [])
+                    status = item.get("status", "")
 
-                if status:
-                    result += f"**Status:** {status.title()}\n\n"
+                    tags_display = (
+                        ", ".join(f"`{tag}`" for tag in item_tags)
+                        if item_tags
+                        else "None"
+                    )
 
-                if item_tags:
-                    result += f"**Tags:** {tags_display}\n\n"
+                    result += f"#### {name} {{: #{name} }}\n\n"
+                    result += f"{description}\n\n"
 
-                result += "---\n\n"
+                    if documentation:
+                        result += f"{_fix_markdown_formatting(documentation)}\n\n"
+
+                    if unit:
+                        result += f"**Unit:** `{unit}`\n\n"
+
+                    if status:
+                        result += f"**Status:** {status.title()}\n\n"
+
+                    if item_tags:
+                        result += f"**Tags:** {tags_display}\n\n"
+
+                    result += "---\n\n"
+
+        return result
+
+    @env.macro
+    def catalog_navigation():
+        """Generate navigation sidebar with all standard names grouped by category and base"""
+        from imas_standard_names.grammar.model import (  # noqa: PLC0415
+            parse_standard_name,
+        )
+
+        tags = get_tags()
+
+        if not tags:
+            return ""
+
+        result = ""
+
+        for category, items in sorted(tags.items()):
+            category_name = category.replace("-", " ").title()
+            result += f"**[{category_name}](#{category})**\n\n"
+
+            # Group items by base name
+            base_groups = defaultdict(list)
+            for item in items:
+                name = item.get("name", "Unknown")
+                try:
+                    parsed = parse_standard_name(name)
+                    base = parsed.physical_base or parsed.geometric_base or "unknown"
+                    base_groups[base].append(item)
+                except Exception:
+                    base_groups["unknown"].append(item)
+
+            # Sort base groups and items within each base
+            for base_name in sorted(base_groups.keys()):
+                base_items = base_groups[base_name]
+                sorted_items = sorted(base_items, key=lambda x: x.get("name", ""))
+
+                for item in sorted_items:
+                    name = item.get("name", "Unknown")
+                    result += f"- [{name}](#{name})\n"
+
+            result += "\n"
 
         return result
 
@@ -455,8 +523,7 @@ def define_env(env: Any) -> None:
         result += "### Categories\n\n"
         for category, items in sorted(stats["tags"].items()):
             category_name = category.replace("-", " ").title()
-            category_anchor = category_name.lower().replace(" ", "-")
             count = len(items)
-            result += f"- **[{category_name}](#{category_anchor})** - {count} standard names\n"
+            result += f"- **[{category_name}](#{category})** - {count} standard names\n"
 
         return result

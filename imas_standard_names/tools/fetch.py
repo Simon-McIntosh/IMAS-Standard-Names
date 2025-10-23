@@ -19,6 +19,11 @@ from fastmcp import Context
 import imas_standard_names.grammar.model as grammar_model
 from imas_standard_names.decorators.mcp import mcp_tool
 from imas_standard_names.models import StandardNameEntry
+from imas_standard_names.provenance import (
+    ExpressionProvenance,
+    OperatorProvenance,
+    ReductionProvenance,
+)
 from imas_standard_names.tools.base import BaseTool
 
 
@@ -122,12 +127,6 @@ class FetchTool(BaseTool):
             return []
 
         # Handle different provenance types
-        from imas_standard_names.provenance import (
-            ExpressionProvenance,
-            OperatorProvenance,
-            ReductionProvenance,
-        )
-
         if isinstance(entry.provenance, OperatorProvenance):
             # Operator provenance has a base
             return [entry.provenance.base]

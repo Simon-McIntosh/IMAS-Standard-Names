@@ -11,6 +11,7 @@ import re
 from typing import TYPE_CHECKING, Literal
 
 from ..grammar.types import Component, Object, Position, Process, Source, Subject
+from ..operators import PRIMITIVE_OPERATORS
 
 if TYPE_CHECKING:
     from ..models import StandardNameEntry
@@ -34,21 +35,23 @@ class QualityChecker:
         """Build set of valid physics/fusion terminology from grammar types and catalog.
 
         Dynamically extracts base names from the catalog to stay in sync with actual usage.
+        Uses late import to avoid circular dependency during module loading.
         """
-        # Imports inside function to avoid circular dependency:
-        # repository -> services -> validation -> repository
-        from ..grammar.model import parse_standard_name
-        from ..operators import PRIMITIVE_OPERATORS
-        from ..repository import StandardNameCatalog
-
         vocab = set()
 
         # Add all grammar vocabulary (segments with constrained tokens)
         for enum_class in [Component, Subject, Object, Source, Position, Process]:
             vocab.update(member.value for member in enum_class)
 
+        # Add primitive operators (already controlled in operators.py)
+        vocab.update(PRIMITIVE_OPERATORS)
+
         # Add all base names from the catalog (dynamic - reflects actual usage)
+        # Late import avoids circular dependency: validation -> repository -> services -> validation
         try:
+            from ..grammar.model import parse_standard_name  # noqa: PLC0415
+            from ..repository import StandardNameCatalog  # noqa: PLC0415
+
             catalog = StandardNameCatalog()
             for entry in catalog.list():
                 # Extract base by parsing the standard name
@@ -58,16 +61,13 @@ class QualityChecker:
             # If catalog loading fails, continue with grammar-only vocab
             pass
 
-        # Add primitive operators (already controlled in operators.py)
-        vocab.update(PRIMITIVE_OPERATORS)
-
         return vocab
 
     @property
     def proselint(self):
         """Lazy-load proselint."""
         if self._proselint is None:
-            from proselint.tools import lint
+            from proselint.tools import lint  # noqa: PLC0415
 
             self._proselint = lint
         return self._proselint
@@ -77,7 +77,7 @@ class QualityChecker:
         """Lazy-load spaCy with small English model."""
         if self._nlp is None:
             try:
-                import spacy
+                import spacy  # noqa: PLC0415
 
                 # Try to load small model, fallback to blank
                 try:

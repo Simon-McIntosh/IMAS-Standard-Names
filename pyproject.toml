@@ -131,6 +131,7 @@ select = [
     "B",
     "C4",
     "UP",
+    "PLC0415",  # import-outside-top-level
 ]
 ignore = [
     "C901",

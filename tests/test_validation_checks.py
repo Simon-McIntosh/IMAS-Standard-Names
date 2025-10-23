@@ -23,8 +23,8 @@ provenance:
 """,
         encoding="utf-8",
     )
-    (tmp_path / "r_component_of_gradient_of_temperature.yml").write_text(
-        """name: r_component_of_gradient_of_temperature
+    (tmp_path / "radial_component_of_gradient_of_temperature.yml").write_text(
+        """name: radial_component_of_gradient_of_temperature
 kind: scalar
 status: draft
 unit: K.m^-1
@@ -37,8 +37,8 @@ provenance:
 """,
         encoding="utf-8",
     )
-    (tmp_path / "tor_component_of_gradient_of_temperature.yml").write_text(
-        """name: tor_component_of_gradient_of_temperature
+    (tmp_path / "toroidal_component_of_gradient_of_temperature.yml").write_text(
+        """name: toroidal_component_of_gradient_of_temperature
 kind: scalar
 status: draft
 unit: K.m^-1

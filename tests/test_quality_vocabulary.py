@@ -4,6 +4,8 @@ Test quality validation vocabulary composition.
 This test documents the vocabulary sources for domain-specific quality checks.
 """
 
+import inspect
+
 from imas_standard_names.grammar.model import parse_standard_name
 from imas_standard_names.grammar.types import (
     Component,
@@ -92,8 +94,6 @@ def test_vocabulary_sources_traceable():
 
 def test_no_hardcoded_vocabulary():
     """Test that vocabulary is dynamically loaded, not hardcoded."""
-    import inspect
-
     source = inspect.getsource(QualityChecker._build_physics_vocabulary)
 
     # Should not contain hardcoded lists of physics terms

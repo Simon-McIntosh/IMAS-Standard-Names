@@ -10,6 +10,18 @@ import re
 from collections.abc import Mapping
 from typing import Any
 
+from imas_standard_names.grammar.constants import (
+    BASE_SEGMENTS,
+    EXCLUSIVE_SEGMENT_PAIRS,
+    PREFIX_SEGMENTS,
+    SEGMENT_PREFIX_TOKEN_MAP,
+    SEGMENT_SUFFIX_TOKEN_MAP,
+    SEGMENT_TEMPLATES,
+    SEGMENT_TOKEN_MAP,
+    SUFFIX_SEGMENTS,
+    SUFFIX_SEGMENTS_REVERSED,
+)
+
 # Token pattern used by base and the overall name validation.
 TOKEN_PATTERN = re.compile(r"^[a-z][a-z0-9_]*$")
 
@@ -30,13 +42,6 @@ def compose_standard_name(parts: Mapping[str, Any]) -> str:
     The generated module will bind a thin wrapper to ensure the same signature
     when using the Pydantic model.
     """
-    from imas_standard_names.grammar.types import (  # local import to avoid cycle
-        BASE_SEGMENTS,
-        PREFIX_SEGMENTS,
-        SEGMENT_TEMPLATES,
-        SUFFIX_SEGMENTS,
-    )
-
     tokens: list[str] = []
     for segment in PREFIX_SEGMENTS:
         value = parts.get(segment)
@@ -85,17 +90,6 @@ def parse_standard_name(name: str) -> dict[str, str]:
 
     Returns a dict with keys matching segment identifiers.
     """
-    from imas_standard_names.grammar.types import (  # local import to avoid cycle
-        BASE_SEGMENTS,
-        EXCLUSIVE_SEGMENT_PAIRS,
-        PREFIX_SEGMENTS,
-        SEGMENT_PREFIX_TOKEN_MAP,
-        SEGMENT_SUFFIX_TOKEN_MAP,
-        SEGMENT_TEMPLATES,
-        SEGMENT_TOKEN_MAP,
-        SUFFIX_SEGMENTS_REVERSED,
-    )
-
     if not TOKEN_PATTERN.fullmatch(name):
         raise ValueError("Invalid token characters in name")
 

@@ -1,12 +1,13 @@
 """Test catalog state management fixes for create/write failures."""
 
+from imas_standard_names.tools.create import CreateTool
+from imas_standard_names.tools.write import WriteTool
+
 
 def test_create_detects_duplicate_in_pending_changes(
     temp_catalog, temp_edit_catalog, invoke_async
 ):
     """Test that create tool detects duplicates in pending changes, not just base catalog."""
-    from imas_standard_names.tools.create import CreateTool
-
     create_tool = CreateTool(temp_catalog, temp_edit_catalog)
 
     # Create first entry with valid data
@@ -33,9 +34,6 @@ def test_create_detects_duplicate_in_pending_changes(
 
 def test_write_persistence(temp_catalog, temp_edit_catalog, invoke_async):
     """Test that successful write persists entries correctly."""
-    from imas_standard_names.tools.create import CreateTool
-    from imas_standard_names.tools.write import WriteTool
-
     create_tool = CreateTool(temp_catalog, temp_edit_catalog)
     write_tool = WriteTool(temp_catalog, temp_edit_catalog)
 
@@ -63,8 +61,6 @@ def test_write_persistence(temp_catalog, temp_edit_catalog, invoke_async):
 
 def test_tag_validation_during_creation(temp_catalog, temp_edit_catalog, invoke_async):
     """Test that invalid tags are rejected during entry creation."""
-    from imas_standard_names.tools.create import CreateTool
-
     create_tool = CreateTool(temp_catalog, temp_edit_catalog)
 
     # Create entry with invalid tag (not in vocabulary)

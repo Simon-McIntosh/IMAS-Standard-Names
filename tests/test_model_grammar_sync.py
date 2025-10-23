@@ -10,16 +10,19 @@ import inspect
 
 import pytest
 
+from imas_standard_names.grammar.constants import EXCLUSIVE_SEGMENT_PAIRS, SEGMENT_ORDER
 from imas_standard_names.grammar.model import StandardName
 from imas_standard_names.grammar.types import (
-    EXCLUSIVE_SEGMENT_PAIRS,
-    SEGMENT_ORDER,
     Component,
     Object,
     Position,
     Process,
     Source,
     Subject,
+)
+from imas_standard_names.grammar_codegen.generate import (
+    ENUM_NAME_OVERRIDES,
+    _enum_class_name,
 )
 from imas_standard_names.grammar_codegen.spec import GrammarSpec
 from imas_standard_names.repository import StandardNameCatalog
@@ -33,11 +36,6 @@ def _load_grammar_spec():
 
 def _build_expected_type_map(spec: GrammarSpec):
     """Build expected type map from grammar specification."""
-    from imas_standard_names.grammar_codegen.generate import (
-        ENUM_NAME_OVERRIDES,
-        _enum_class_name,
-    )
-
     type_map = {}
     for segment in spec.segments:
         if segment.vocabulary_name:

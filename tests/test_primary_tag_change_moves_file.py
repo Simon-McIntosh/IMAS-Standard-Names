@@ -2,12 +2,12 @@
 
 from pathlib import Path
 
+from imas_standard_names.models import create_standard_name_entry
+from imas_standard_names.repository import StandardNameCatalog
+
 
 def test_modify_entry_with_primary_tag_change_deletes_old_file(tmp_path):
     """When primary tag changes via modify, old file should be deleted."""
-    from imas_standard_names.models import create_standard_name_entry
-    from imas_standard_names.repository import StandardNameCatalog
-
     # Setup
     root = tmp_path / "catalog"
     root.mkdir()
@@ -62,9 +62,6 @@ def test_modify_entry_with_primary_tag_change_deletes_old_file(tmp_path):
 
 def test_rename_entry_preserves_primary_tag_directory(tmp_path):
     """Renaming an entry should keep it in the same primary tag directory."""
-    from imas_standard_names.models import create_standard_name_entry
-    from imas_standard_names.repository import StandardNameCatalog
-
     # Setup
     root = tmp_path / "catalog"
     root.mkdir()
@@ -109,9 +106,6 @@ def test_rename_entry_preserves_primary_tag_directory(tmp_path):
 
 def test_rename_with_primary_tag_change_moves_file(tmp_path):
     """Renaming and changing primary tag should move file to new directory."""
-    from imas_standard_names.models import create_standard_name_entry
-    from imas_standard_names.repository import StandardNameCatalog
-
     # Setup
     root = tmp_path / "catalog"
     root.mkdir()

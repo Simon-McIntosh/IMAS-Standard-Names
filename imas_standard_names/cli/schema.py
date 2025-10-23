@@ -9,6 +9,9 @@ from __future__ import annotations
 import json
 
 import click
+import yaml
+
+from imas_standard_names.grammar.model import StandardName
 
 
 @click.command("schema")
@@ -28,17 +31,9 @@ import click
 )
 def schema_cmd(fmt: str, pretty: bool) -> None:
     """Print the `StandardName` model schema in JSON or YAML."""
-    from imas_standard_names.grammar.model import StandardName
-
     schema = StandardName.model_json_schema()
 
     if fmt.lower() == "yaml":
-        try:
-            import yaml
-        except Exception as exc:  # pragma: no cover - import error path
-            raise click.ClickException(
-                f"PyYAML is required for YAML output: {exc}"
-            ) from exc
         click.echo(
             yaml.safe_dump(
                 schema, sort_keys=False, allow_unicode=True, default_flow_style=False

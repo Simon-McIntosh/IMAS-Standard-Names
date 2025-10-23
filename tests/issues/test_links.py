@@ -1,11 +1,11 @@
 import subprocess
 
+from click.testing import CliRunner
+
 from imas_standard_names.issues.cli import update_links
 
 
 def test_update_links(tmp_path):
-    from click.testing import CliRunner
-
     runner = CliRunner()
     with runner.isolated_filesystem(temp_dir=tmp_path):
         filename = tmp_path / "README.md"

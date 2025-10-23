@@ -197,9 +197,7 @@ def get_standardname(standardnames_dir: str, standard_name: Iterable[str]):
     data = {k: v for k, v in entry.model_dump().items() if v not in (None, [], "")}
     data["name"] = entry.name
     # Use ruamel yaml instance properly via context manager
-    from io import StringIO as _S
-
-    buf = _S()
+    buf = StringIO()
     yaml.dump(data, buf)
     click.echo(buf.getvalue())
 

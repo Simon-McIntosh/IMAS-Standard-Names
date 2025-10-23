@@ -34,6 +34,9 @@ TAG_HEADER = (
 
 # The output is next to the runtime grammar modules
 OUTPUT_MODULE = Path(__file__).resolve().parents[1] / "grammar" / "types.py"
+CONSTANTS_OUTPUT_MODULE = (
+    Path(__file__).resolve().parents[1] / "grammar" / "constants.py"
+)
 TAG_OUTPUT_MODULE = Path(__file__).resolve().parents[1] / "grammar" / "tag_types.py"
 
 ENUM_NAME_OVERRIDES = {
@@ -49,20 +52,40 @@ ENUM_NAME_OVERRIDES = {
 
 
 def main() -> None:
-    # Generate grammar types
+    # Generate grammar types and constants
     spec = GrammarSpec.load()
-    content = render_module(spec)
-    existing = (
+
+    # Generate types.py (enums only)
+    types_content = render_types_module(spec)
+    types_existing = (
         OUTPUT_MODULE.read_text(encoding="utf-8") if OUTPUT_MODULE.exists() else ""
     )
-    grammar_updated = False
-    if existing != content:
+    types_updated = False
+    if types_existing != types_content:
         OUTPUT_MODULE.parent.mkdir(parents=True, exist_ok=True)
-        OUTPUT_MODULE.write_text(content, encoding="utf-8")
+        OUTPUT_MODULE.write_text(types_content, encoding="utf-8")
         print("Updated grammar/types.py")
-        grammar_updated = True
+        types_updated = True
     else:
         print("grammar/types.py already up to date")
+
+    # Generate constants.py (all constants)
+    constants_content = render_constants_module(spec)
+    constants_existing = (
+        CONSTANTS_OUTPUT_MODULE.read_text(encoding="utf-8")
+        if CONSTANTS_OUTPUT_MODULE.exists()
+        else ""
+    )
+    constants_updated = False
+    if constants_existing != constants_content:
+        CONSTANTS_OUTPUT_MODULE.parent.mkdir(parents=True, exist_ok=True)
+        CONSTANTS_OUTPUT_MODULE.write_text(constants_content, encoding="utf-8")
+        print("Updated grammar/constants.py")
+        constants_updated = True
+    else:
+        print("grammar/constants.py already up to date")
+
+    grammar_updated = types_updated or constants_updated
 
     # Generate tag types
     tag_spec = TagSpec.load()
@@ -85,40 +108,90 @@ def main() -> None:
         print("All generated files up to date")
 
 
-def render_module(spec: Any) -> str:
-    metadata = _segment_metadata(spec)
+def render_types_module(spec: Any) -> str:
+    """Render types.py with only enum definitions."""
     sections = [
         _module_header(),
-        _import_block(),
+        _types_import_block(),
         _enum_definitions(spec),
-        _segment_rule_dataclass(),
-        _render_segment_metadata(metadata),
-        _render_scope_metadata(spec),
-        _export_block(spec),
+        _types_export_block(spec),
     ]
 
     parts: list[str] = []
-    previous_index: int | None = None
-    for idx, section in enumerate(sections):
+    for section in sections:
         if not section:
             continue
         text = section.strip()
         if not text:
             continue
         if parts:
-            separator = "\n\n"
-            if previous_index == 1:
-                separator = "\n\n\n"
-            parts.append(separator)
+            parts.append("\n\n")
         parts.append(text)
-        previous_index = idx
+
+    body = "".join(parts)
+    return f"{body}\n"
+
+
+def render_constants_module(spec: Any) -> str:
+    """Render constants.py with all metadata constants."""
+    metadata = _segment_metadata(spec)
+    sections = [
+        _constants_header(),
+        _constants_import_block(spec),
+        _segment_rule_dataclass(),
+        _render_segment_metadata(metadata),
+        _render_scope_metadata(spec),
+        _constants_export_block(),
+    ]
+
+    parts: list[str] = []
+    for section in sections:
+        if not section:
+            continue
+        text = section.strip()
+        if not text:
+            continue
+        if parts:
+            parts.append("\n\n")
+        parts.append(text)
 
     body = "".join(parts)
     return f"{body}\n"
 
 
 def _module_header() -> str:
-    return f'"""{HEADER.strip()}"""'
+    return f'"""Auto-generated grammar models.\n\n{HEADER}"""'
+
+
+def _constants_header() -> str:
+    return f'"""Grammar constants and metadata.\n\nThis module contains all constants and metadata used by the grammar system,\nseparated from the types to avoid circular imports between grammar/support.py\nand grammar/types.py.\n\n{HEADER}"""'
+
+
+def _types_import_block() -> str:
+    return dedent(
+        """
+from __future__ import annotations
+
+from enum import StrEnum
+        """
+    ).strip()
+
+
+def _constants_import_block(spec: Any) -> str:
+    enum_names = [_enum_class_name(name) for name in spec.vocabularies]
+    enum_imports = ",\n    ".join(enum_names)
+    return dedent(
+        f"""
+from __future__ import annotations
+
+from collections.abc import Mapping
+from dataclasses import dataclass
+
+from .types import (
+    {enum_imports},
+)
+        """
+    ).strip()
 
 
 def _import_block() -> str:
@@ -328,6 +401,36 @@ def _render_scope_metadata(spec: Any) -> str:
         f"SCOPE_EXCLUDE: tuple[str, ...] = {exclude_repr}\n"
         f"SCOPE_RATIONALE: str = {rationale_repr}"
     )
+
+
+def _types_export_block(spec: Any) -> str:
+    names = [_enum_class_name(name) for name in spec.vocabularies]
+    formatted = ",\n    ".join(f"'{name}'" for name in names)
+    return "__all__ = [\n    " + formatted + "\n]"
+
+
+def _constants_export_block() -> str:
+    constants = [
+        "SegmentRule",
+        "SEGMENT_TOKEN_MAP",
+        "SEGMENT_RULES",
+        "SEGMENT_ORDER",
+        "BASE_SEGMENT_INDICES",
+        "BASE_SEGMENTS",
+        "PREFIX_SEGMENTS",
+        "SUFFIX_SEGMENTS",
+        "SUFFIX_SEGMENTS_REVERSED",
+        "SEGMENT_TEMPLATES",
+        "SEGMENT_SEARCH_TOKEN_MAP",
+        "SEGMENT_PREFIX_TOKEN_MAP",
+        "SEGMENT_SUFFIX_TOKEN_MAP",
+        "EXCLUSIVE_SEGMENT_PAIRS",
+        "SCOPE_INCLUDE",
+        "SCOPE_EXCLUDE",
+        "SCOPE_RATIONALE",
+    ]
+    formatted = ",\n    ".join(f"'{name}'" for name in constants)
+    return "__all__ = [\n    " + formatted + "\n]"
 
 
 def _export_block(spec: Any) -> str:

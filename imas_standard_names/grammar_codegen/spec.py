@@ -26,8 +26,6 @@ class IncludeLoader(yaml.SafeLoader):
     def __init__(self, stream):
         self._root = None
         if hasattr(stream, "name"):
-            from pathlib import Path
-
             self._root = Path(stream.name).parent
         super().__init__(stream)
 
