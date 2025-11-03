@@ -7,7 +7,7 @@ This test documents the vocabulary sources for domain-specific quality checks.
 import inspect
 
 from imas_standard_names.grammar.model import parse_standard_name
-from imas_standard_names.grammar.types import (
+from imas_standard_names.grammar.model_types import (
     Component,
     Object,
     Position,

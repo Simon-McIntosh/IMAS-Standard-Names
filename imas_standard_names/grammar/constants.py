@@ -2,7 +2,7 @@
 
 This module contains all constants and metadata used by the grammar system,
 separated from the types to avoid circular imports between grammar/support.py
-and grammar/types.py.
+and grammar/model_types.py.
 
 Auto-generated grammar models.
 
@@ -14,7 +14,7 @@ from __future__ import annotations
 from collections.abc import Mapping
 from dataclasses import dataclass
 
-from .types import (
+from .model_types import (
     Component,
     GeometricBase,
     Object,

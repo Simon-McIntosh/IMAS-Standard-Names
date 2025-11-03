@@ -15,19 +15,19 @@ from imas_standard_names.grammar.constants import (
     EXCLUSIVE_SEGMENT_PAIRS,
     GENERIC_PHYSICAL_BASES,
 )
-from imas_standard_names.grammar.support import (
-    TOKEN_PATTERN,
-    compose_standard_name as _compose_from_parts,
-    parse_standard_name as _parse_to_dict,
-    value_of as _value_of,
-)
-from imas_standard_names.grammar.types import (
+from imas_standard_names.grammar.model_types import (
     Component,
     GeometricBase,
     Object,
     Position,
     Process,
     Subject,
+)
+from imas_standard_names.grammar.support import (
+    TOKEN_PATTERN,
+    compose_standard_name as _compose_from_parts,
+    parse_standard_name as _parse_to_dict,
+    value_of as _value_of,
 )
 
 # BaseToken: pattern for physical_base segment (open vocabulary)

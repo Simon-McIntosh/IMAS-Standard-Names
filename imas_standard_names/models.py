@@ -78,11 +78,11 @@ from imas_standard_names.field_types import (
     Unit,
 )
 from imas_standard_names.grammar.field_schemas import FIELD_DESCRIPTIONS
+from imas_standard_names.grammar.model_types import Component, Position, Process
 from imas_standard_names.grammar.tag_types import (
     PRIMARY_TAGS,
     SECONDARY_TAGS,
 )
-from imas_standard_names.grammar.types import Component, Position, Process
 from imas_standard_names.operators import (
     enforce_operator_naming as _enforce_operator_naming,
     normalize_operator_chain as _normalize_operator_chain,

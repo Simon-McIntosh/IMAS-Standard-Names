@@ -44,7 +44,7 @@ def enum_values[E](enum_cls: type[E]) -> list[str]:
         List of string values from the enum.
 
     Example:
-        >>> from imas_standard_names.grammar.types import Component
+        >>> from imas_standard_names.grammar.model_types import Component
         >>> enum_values(Component)
         ['radial', 'poloidal', 'toroidal', ...]
     """
@@ -69,7 +69,7 @@ def coerce_enum[E](enum_cls: type[E], value: E | str | None) -> E | None:
         ValueError: If string value doesn't match any enum member.
 
     Example:
-        >>> from imas_standard_names.grammar.types import Component
+        >>> from imas_standard_names.grammar.model_types import Component
         >>> coerce_enum(Component, "radial")
         <Component.RADIAL: 'radial'>
         >>> coerce_enum(Component, Component.RADIAL)

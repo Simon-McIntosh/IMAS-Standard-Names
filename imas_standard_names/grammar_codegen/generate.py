@@ -1,15 +1,20 @@
 """Generate code (types + metadata) from ``grammar.yml`` and ``tags.yml``.
 
 Outputs:
-- ``imas_standard_names/grammar/types.py``
+- ``imas_standard_names/grammar/model_types.py``
 - ``imas_standard_names/grammar/tag_types.py``
 
 Lives outside the ``grammar`` package to avoid importing any module that
 depends on the generated file during generation.
+
+Note: Generated files are automatically formatted by ruff (check --fix and format)
+to ensure consistency with the project's formatting standards. This ensures
+pre-commit hooks won't find formatting issues in generated code.
 """
 
 from __future__ import annotations
 
+import subprocess
 from collections.abc import Mapping
 from pathlib import Path
 from textwrap import dedent, indent
@@ -44,14 +49,12 @@ FIELD_SCHEMAS_HEADER = (
 )
 
 # The output is next to the runtime grammar modules
-OUTPUT_MODULE = Path(__file__).resolve().parents[1] / "grammar" / "types.py"
-CONSTANTS_OUTPUT_MODULE = (
-    Path(__file__).resolve().parents[1] / "grammar" / "constants.py"
-)
-TAG_OUTPUT_MODULE = Path(__file__).resolve().parents[1] / "grammar" / "tag_types.py"
-FIELD_SCHEMAS_OUTPUT_MODULE = (
-    Path(__file__).resolve().parents[1] / "grammar" / "field_schemas.py"
-)
+# Use file path instead of package import to avoid circular dependency
+_GRAMMAR_DIR = Path(__file__).resolve().parents[1] / "grammar"
+OUTPUT_MODULE = _GRAMMAR_DIR / "model_types.py"
+CONSTANTS_OUTPUT_MODULE = _GRAMMAR_DIR / "constants.py"
+TAG_OUTPUT_MODULE = _GRAMMAR_DIR / "tag_types.py"
+FIELD_SCHEMAS_OUTPUT_MODULE = _GRAMMAR_DIR / "field_schemas.py"
 
 ENUM_NAME_OVERRIDES = {
     "components": "Component",
@@ -78,10 +81,10 @@ def main() -> None:
     if types_existing != types_content:
         OUTPUT_MODULE.parent.mkdir(parents=True, exist_ok=True)
         OUTPUT_MODULE.write_text(types_content, encoding="utf-8")
-        print("Updated grammar/types.py")
+        print("Updated grammar/model_types.py")
         types_updated = True
     else:
-        print("grammar/types.py already up to date")
+        print("grammar/model_types.py already up to date")
 
     # Generate constants.py (all constants)
     constants_content = render_constants_module(spec)
@@ -137,6 +140,69 @@ def main() -> None:
 
     if not grammar_updated and not tags_updated and not field_schemas_updated:
         print("All generated files up to date")
+    else:
+        # Run ruff --fix on generated files to ensure they pass formatting checks
+        generated_files = []
+        if types_updated:
+            generated_files.append(str(OUTPUT_MODULE))
+        if constants_updated:
+            generated_files.append(str(CONSTANTS_OUTPUT_MODULE))
+        if tags_updated:
+            generated_files.append(str(TAG_OUTPUT_MODULE))
+        if field_schemas_updated:
+            generated_files.append(str(FIELD_SCHEMAS_OUTPUT_MODULE))
+
+        if generated_files:
+            print("Running ruff formatting on generated files...")
+            project_root = OUTPUT_MODULE.parent.parent.parent
+            files_str = ", ".join(
+                str(Path(f).relative_to(project_root)) for f in generated_files
+            )
+            print(f"  Formatting: {files_str}")
+
+            # Run ruff check --fix first (same as pre-commit)
+            print("  Running ruff check --fix...")
+            result = subprocess.run(
+                ["uv", "run", "ruff", "check", "--fix"] + generated_files,
+                capture_output=True,
+                text=True,
+                cwd=project_root,
+            )
+            if result.returncode != 0:
+                print("✗ Ruff check --fix failed:")
+                if result.stdout:
+                    print(result.stdout)
+                if result.stderr:
+                    print(result.stderr)
+                raise RuntimeError(
+                    f"ruff check --fix failed with return code {result.returncode}. "
+                    "Generated files must pass ruff formatting checks."
+                )
+            if result.stdout.strip():
+                print(f"  {result.stdout.strip()}")
+
+            # Run ruff format to ensure proper formatting (same as pre-commit)
+            print("  Running ruff format...")
+            result = subprocess.run(
+                ["uv", "run", "ruff", "format"] + generated_files,
+                capture_output=True,
+                text=True,
+                cwd=project_root,
+            )
+            if result.returncode != 0:
+                print("✗ Ruff format failed:")
+                if result.stdout:
+                    print(result.stdout)
+                if result.stderr:
+                    print(result.stderr)
+                raise RuntimeError(
+                    f"ruff format failed with return code {result.returncode}. "
+                    "Generated files must pass ruff formatting checks."
+                )
+            if result.stdout.strip():
+                print(f"  {result.stdout.strip()}")
+
+            print("✓ All generated files formatted successfully")
 
 
 def render_types_module(spec: Any) -> str:
@@ -148,14 +214,17 @@ def render_types_module(spec: Any) -> str:
         _types_export_block(spec),
     ]
 
-    parts: list[str] = []
+    # Join sections with proper spacing
+    parts = []
     for section in sections:
         if not section:
             continue
         text = section.strip()
         if not text:
             continue
+
         if parts:
+            # Add exactly one blank line between sections
             parts.append("\n\n")
         parts.append(text)
 
@@ -195,17 +264,21 @@ def _module_header() -> str:
 
 
 def _constants_header() -> str:
-    return f'"""Grammar constants and metadata.\n\nThis module contains all constants and metadata used by the grammar system,\nseparated from the types to avoid circular imports between grammar/support.py\nand grammar/types.py.\n\n{HEADER}"""'
+    return f'"""Grammar constants and metadata.\n\nThis module contains all constants and metadata used by the grammar system,\nseparated from the types to avoid circular imports between grammar/support.py\nand grammar/model_types.py.\n\n{HEADER}"""'
 
 
 def _types_import_block() -> str:
-    return dedent(
-        """
+    return (
+        dedent(
+            """
 from __future__ import annotations
 
 from enum import StrEnum
+
         """
-    ).strip()
+        ).strip()
+        + "\n"
+    )
 
 
 def _constants_import_block(spec: Any) -> str:
@@ -217,7 +290,6 @@ def _constants_import_block(spec: Any) -> str:
             used_enums.add(enum_name)
 
     enum_imports = ",\n    ".join(sorted(used_enums))
-    # Note: No blank line after imports to satisfy ruff I001
     return dedent(
         f"""
 from __future__ import annotations
@@ -225,7 +297,7 @@ from __future__ import annotations
 from collections.abc import Mapping
 from dataclasses import dataclass
 
-from .types import (
+from .model_types import (
     {enum_imports},
 )
 
@@ -255,6 +327,7 @@ def _segment_rule_dataclass() -> str:
             template: str | None
             exclusive_with: tuple[str, ...]
             tokens: tuple[str, ...]
+
         """
     ).strip()
 
@@ -269,9 +342,22 @@ def _enum_definitions(spec: Any) -> str:
         else:
             for token in tokens:
                 member = _enum_member_name(token)
-                lines.append(f'    {member} = "{token}"')
+                # Handle long lines by wrapping if needed
+                assignment = f'    {member} = "{token}"'
+                if len(assignment) > 88:  # ruff's line length limit
+                    lines.append(f"    {member} = (")
+                    lines.append(f'        "{token}"')
+                    lines.append("    )")
+                else:
+                    lines.append(assignment)
+
+        # Add blank line after each enum class
+        lines.append("")
         blocks.append("\n".join(lines))
-    return "\n\n".join(blocks)
+
+    # Join with double newlines to ensure proper spacing
+    result = "\n\n".join(blocks)
+    return result
 
 
 def _segment_metadata(spec: Any) -> dict[str, Any]:
@@ -333,14 +419,14 @@ def _render_segment_metadata(meta: Mapping[str, Any]) -> str:
         enum_name = segment_enum_map.get(identifier)
         if enum_name:
             value_expr = f"tuple(member.value for member in {enum_name})"
-            token_map_lines.append(f"    '{identifier}': {value_expr},")
+            token_map_lines.append(f'    "{identifier}": {value_expr},')
             continue
 
         if tokens:
             tuple_repr = _format_tuple_literal(tokens, indent=8, base_indent=4)
-            token_map_lines.append(f"    '{identifier}': {tuple_repr},")
+            token_map_lines.append(f'    "{identifier}": {tuple_repr},')
         else:
-            token_map_lines.append(f"    '{identifier}': (),")
+            token_map_lines.append(f'    "{identifier}": (),')
     token_map_lines.append("}")
     token_map_repr = "\n".join(token_map_lines)
     order_repr = _format_tuple_literal(meta["segment_order"], indent=4, base_indent=0)
@@ -357,12 +443,13 @@ def _render_segment_metadata(meta: Mapping[str, Any]) -> str:
         block = dedent(
             f"""
             SegmentRule(
-                identifier='{entry["identifier"]}',
+                identifier="{entry["identifier"]}",
                 optional={entry["optional"]},
                 template={template_repr},
                 exclusive_with={entry["exclusive_with"]},
-                tokens=SEGMENT_TOKEN_MAP['{entry["identifier"]}'],
+                tokens=SEGMENT_TOKEN_MAP["{entry["identifier"]}"],
             ),
+
             """
         ).strip()
         rule_blocks.append(indent(block, "    "))
@@ -387,9 +474,10 @@ def _render_segment_metadata(meta: Mapping[str, Any]) -> str:
         # They mark the boundary between prefix (component, coordinate, subject) and suffix (object, geometry, position, process) segments
         BASE_SEGMENT_INDICES: tuple[int, ...] = {tuple(base_indices)}
         BASE_SEGMENTS: tuple[str, ...] = {tuple(meta["segment_order"][i] for i in base_indices)}
-        PREFIX_SEGMENTS: tuple[str, ...] = SEGMENT_ORDER[:BASE_SEGMENT_INDICES[0]]
+        PREFIX_SEGMENTS: tuple[str, ...] = SEGMENT_ORDER[: BASE_SEGMENT_INDICES[0]]
         SUFFIX_SEGMENTS: tuple[str, ...] = SEGMENT_ORDER[BASE_SEGMENT_INDICES[-1] + 1 :]
         SUFFIX_SEGMENTS_REVERSED: tuple[str, ...] = tuple(reversed(SUFFIX_SEGMENTS))
+
         """
     ).strip()
 
@@ -401,6 +489,7 @@ def _render_segment_metadata(meta: Mapping[str, Any]) -> str:
         }
         SEGMENT_PREFIX_TOKEN_MAP: Mapping[str, tuple[str, ...]] = SEGMENT_SEARCH_TOKEN_MAP
         SEGMENT_SUFFIX_TOKEN_MAP: Mapping[str, tuple[str, ...]] = SEGMENT_SEARCH_TOKEN_MAP
+
         """
     ).strip()
 
@@ -466,8 +555,8 @@ def _render_scope_metadata(spec: Any) -> str:
 
 def _types_export_block(spec: Any) -> str:
     names = [_enum_class_name(name) for name in spec.vocabularies]
-    formatted = ",\n    ".join(f"'{name}'" for name in names)
-    return "__all__ = [\n    " + formatted + "\n]"
+    formatted = ",\n    ".join(f'"{name}"' for name in names)
+    return "\n\n__all__ = [\n    " + formatted + ",\n]"
 
 
 def _constants_export_block() -> str:
@@ -491,8 +580,8 @@ def _constants_export_block() -> str:
         "APPLICABILITY_RATIONALE",
         "GENERIC_PHYSICAL_BASES",
     ]
-    formatted = ",\n    ".join(f"'{name}'" for name in constants)
-    return "__all__ = [\n    " + formatted + "\n]"
+    formatted = ",\n    ".join(f'"{name}"' for name in constants)
+    return "__all__ = [\n    " + formatted + ",\n]"
 
 
 def _export_block(spec: Any) -> str:
@@ -518,7 +607,7 @@ def _format_str_dict_literal(mapping: Mapping[str, str]) -> str:
         return "{}"
     lines = ["{"]
     for key, value in mapping.items():
-        lines.append(f"    '{key}': '{value}',")
+        lines.append(f'    "{key}": "{value}",')
     lines.append("}")
     return "\n".join(lines)
 
@@ -708,8 +797,8 @@ def _field_schemas_import_block() -> str:
 
 def _naming_guidance(spec: EntrySchemaSpec) -> str:
     """Generate NAMING_GUIDANCE from specification.yml naming_guidance section."""
-    grammar_package_dir = Path(__file__).parent.parent / "grammar"
-    spec_path = grammar_package_dir / "specification.yml"
+    # Use file path instead of package import to avoid circular dependency
+    spec_path = _GRAMMAR_DIR / "specification.yml"
 
     with open(spec_path, encoding="utf-8") as handle:
         data = yaml.load(handle, Loader=IncludeLoader) or {}

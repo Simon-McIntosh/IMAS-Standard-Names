@@ -637,9 +637,9 @@ PROVENANCE_MODES_INFO: dict[str, Any] | None = {
 try:
     from imas_standard_names.models import (
         Kind,
-        StandardNameMetadataEntry,
         StandardNameScalarEntry,
         StandardNameVectorEntry,
+        StandardNameMetadataEntry,
     )
 
     KIND_MODELS: dict[Kind, type] = {

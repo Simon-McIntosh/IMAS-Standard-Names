@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from ..grammar.model import parse_standard_name
-from ..grammar.types import GeometricBase
+from ..grammar.model_types import GeometricBase
 from ..models import StandardNameEntry
 from ..provenance import OperatorProvenance
 

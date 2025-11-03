@@ -10,7 +10,7 @@ from pydantic import ValidationError
 
 from imas_standard_names.grammar.constants import GENERIC_PHYSICAL_BASES
 from imas_standard_names.grammar.model import StandardName, parse_standard_name
-from imas_standard_names.grammar.types import Component, Object, Position, Subject
+from imas_standard_names.grammar.model_types import Component, Object, Position, Subject
 
 
 class TestGenericPhysicalBaseValidation:

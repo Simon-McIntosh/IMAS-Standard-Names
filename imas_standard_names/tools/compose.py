@@ -24,7 +24,7 @@ from typing import Any
 from fastmcp import Context
 
 import imas_standard_names.grammar.model as grammar_model
-import imas_standard_names.grammar.types as grammar_types
+import imas_standard_names.grammar.model_types as grammar_types
 from imas_standard_names.decorators.mcp import mcp_tool
 from imas_standard_names.grammar.support import coerce_enum
 from imas_standard_names.tools.base import Tool

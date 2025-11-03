@@ -10,7 +10,7 @@ from __future__ import annotations
 import re
 from typing import TYPE_CHECKING, Literal
 
-from ..grammar.types import Component, Object, Position, Process, Subject
+from ..grammar.model_types import Component, Object, Position, Process, Subject
 from ..operators import PRIMITIVE_OPERATORS
 
 if TYPE_CHECKING:

@@ -21,7 +21,7 @@ from pydantic import ValidationError
 
 import imas_standard_names.grammar.model as grammar_model
 from imas_standard_names.decorators.mcp import mcp_tool
-from imas_standard_names.grammar import types as grammar_types
+from imas_standard_names.grammar import model_types as grammar_types
 from imas_standard_names.tools.base import CatalogTool
 
 

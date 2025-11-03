@@ -33,7 +33,7 @@ from collections import defaultdict
 from typing import TYPE_CHECKING, Literal
 
 from imas_standard_names.grammar.model import parse_standard_name
-from imas_standard_names.grammar.types import (
+from imas_standard_names.grammar.model_types import (
     Component,
     GeometricBase,
     Object,

@@ -11,8 +11,8 @@ from .model import (
     compose_standard_name,
     parse_standard_name,
 )
+from .model_types import Component, Position, Process, Subject
 from .support import TOKEN_PATTERN, coerce_enum, enum_values, value_of
-from .types import Component, Position, Process, Subject
 
 # Friendly aliases to match tests
 compose_name = compose_standard_name

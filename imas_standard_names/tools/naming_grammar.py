@@ -3,7 +3,7 @@ from importlib import resources
 import yaml
 from fastmcp import Context
 
-import imas_standard_names.grammar.types as grammar_types
+import imas_standard_names.grammar.model_types as grammar_types
 from imas_standard_names import __version__ as package_version
 from imas_standard_names.decorators.mcp import mcp_tool
 from imas_standard_names.grammar.constants import (

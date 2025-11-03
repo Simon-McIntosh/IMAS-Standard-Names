@@ -12,7 +12,7 @@ import pytest
 
 from imas_standard_names.grammar.constants import EXCLUSIVE_SEGMENT_PAIRS, SEGMENT_ORDER
 from imas_standard_names.grammar.model import StandardName
-from imas_standard_names.grammar.types import (
+from imas_standard_names.grammar.model_types import (
     Component,
     Object,
     Position,

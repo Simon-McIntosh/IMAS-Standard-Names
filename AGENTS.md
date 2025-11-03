@@ -57,6 +57,30 @@ uv run python -m imas_standard_names.grammar_codegen.generate
   - Use **bold**, _italic_, or `code` formatting instead
   - Exception: acronyms (e.g., IMAS, MCP, CF) and constants in code
 
+### Path Resolution Best Practices
+
+**Prefer importlib.resources over Path(__file__)** for resolving package paths:
+
+```python
+# ❌ Avoid: Path(__file__).resolve().parents[1] / "grammar"
+# ✅ Preferred: importlib.resources.files("imas_standard_names.grammar")
+
+import importlib.resources
+from pathlib import Path
+
+grammar_package_path = Path(importlib.resources.files("imas_standard_names.grammar"))
+spec_path = grammar_package_path / "specification.yml"
+```
+
+**Why importlib.resources is preferred:**
+- Works correctly with zip imports and frozen packages
+- More robust in different installation contexts
+- Future-proof against Python packaging changes
+- Better performance in most scenarios
+
+**Note on Code Generation:**
+Generated files (model_types.py, constants.py, tag_types.py, field_schemas.py) are formatted by pre-commit hooks to ensure consistency with project formatting standards. The generate script produces code that follows ruff guidelines, but actual formatting is applied by the project's pre-commit configuration.
+
 ### MCP Tool Pattern
 
 ```python
