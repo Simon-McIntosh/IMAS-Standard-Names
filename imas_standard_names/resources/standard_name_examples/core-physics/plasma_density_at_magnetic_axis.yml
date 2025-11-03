@@ -1,0 +1,28 @@
+name: plasma_density_at_magnetic_axis
+description: Plasma density at magnetic axis.
+documentation: |-
+  Plasma density $n_0$ evaluated at the [magnetic_axis](#magnetic_axis), representing the peak density in the plasma core. Typically refers to [electron_density](#electron_density) at axis, though ion density is nearly equal due to quasi-neutrality. On-axis density is a key parameter for fusion performance and determines the fusion triple product $n T \tau_E$.
+
+  Performance significance:
+
+  On-axis density is critical for fusion performance through the triple product $n T \tau_E$. Higher density improves fusion reaction rates but excessive density can degrade confinement through the Greenwald density limit: $n_{\text{Gw}} \propto I_p / (\pi a^2)$. Density affects [plasma_current](#plasma_current) requirements and [plasma_resistivity](#plasma_resistivity). See [electron_density](#electron_density) for profile context and [electron_temperature_at_magnetic_axis](#electron_temperature_at_magnetic_axis) for temperature relationships.
+
+  Profile considerations:
+
+  Density profiles are typically flatter than temperature profiles due to different transport mechanisms. The density peaking factor $n_0 / \langle n \rangle$ (ratio of peak to volume-averaged density) ranges from 1.1 to 2.0 depending on fueling method and transport characteristics. Density gradients drive [electron_heat_flux](#electron_heat_flux) and affect [plasma_current_density](#plasma_current_density) profiles.
+
+  Measurement methods:
+
+  Plasma density at magnetic axis is measured using Thomson scattering systems with high spatial resolution at the plasma center. Interferometry with vertical chords can provide line-integrated measurements for axis calculation. Reflectometry measures density profiles with high temporal resolution. Core density measurements require precise alignment with [magnetic_axis](#magnetic_axis) and may use multiple diagnostics for validation.
+
+  Typical values:
+
+  H-mode core: $5 \times 10^{19}$ - $2 \times 10^{20}$ m$^{-3}$. On-axis density typically 1.1-2.0 times the volume-averaged density depending on fueling and transport regime.
+
+  Sign convention: Positive density indicates particle concentration, following standard plasma physics conventions with density measured in particles per cubic meter.
+status: draft
+tags:
+- core-physics
+- global-quantity
+kind: scalar
+unit: m^-3

@@ -14,6 +14,9 @@ kind: vector
 status: active
 unit: m.s^-1
 description: Flow velocity.
+documentation: |
+  Flow velocity for HTML rendering testing.
+tags: [fundamental]
 """,
         encoding="utf-8",
     )
@@ -24,6 +27,9 @@ kind: scalar
 status: active
     unit: m.s^-1
 description: Radial component of velocity.
+documentation: |
+  Radial component of velocity for HTML rendering testing.
+tags: [fundamental]
 """,
         encoding="utf-8",
     )
@@ -33,6 +39,9 @@ kind: scalar
 status: active
     unit: m.s^-1
 description: Toroidal component of velocity.
+documentation: |
+  Toroidal component of velocity for HTML rendering testing.
+tags: [fundamental]
 """,
         encoding="utf-8",
     )

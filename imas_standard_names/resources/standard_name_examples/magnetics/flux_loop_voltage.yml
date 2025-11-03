@@ -1,0 +1,37 @@
+name: flux_loop_voltage
+description: Voltage measured by flux loop diagnostic.
+documentation: |-
+  Voltage signal measured by a flux loop diagnostic coil, related to the time derivative of [poloidal_magnetic_flux](#poloidal_magnetic_flux) by Faraday's law. The induced voltage provides fundamental information for equilibrium reconstruction and [plasma_current](#plasma_current) evolution, serving as a primary magnetic diagnostic.
+
+  $$V = -\frac{d\Psi}{dt}$$
+
+  where $V$ is voltage in V, $\Psi$ is the [poloidal_magnetic_flux](#poloidal_magnetic_flux) threading the loop in Wb, and $t$ is time in s.
+
+  Physical significance:
+
+  A conducting loop with effective [area_of_flux_loop](#area_of_flux_loop) $A$ in m$^2$ encircling the plasma measures the time-varying poloidal flux. The induced voltage provides fundamental information for equilibrium reconstruction and [plasma_current](#plasma_current) evolution. Flux loop measurements are essential for [magnetic_field](#magnetic_field) reconstruction and plasma control. See [area_of_flux_loop](#area_of_flux_loop) for calibration and [poloidal_magnetic_flux](#poloidal_magnetic_flux) for flux relationships.
+
+  Measurement principle:
+
+  Flux loop voltage measures the rate of change of magnetic flux threading the loop. Multiple flux loops at different positions provide 2D magnetic field information for equilibrium reconstruction. Voltage integration gives flux changes: $\Delta\Phi = \int V dt / A$ where $A$ is [area_of_flux_loop](#area_of_flux_loop).
+
+  Applications:
+
+  Plasma current monitoring, equilibrium reconstruction, MHD event detection. Spatial positioning given by [radial_position_of_flux_loop](#radial_position_of_flux_loop) and [vertical_position_of_flux_loop](#vertical_position_of_flux_loop). Flux loop arrays provide comprehensive magnetic field measurements for plasma control.
+
+  Measurement methods:
+
+  Flux loop voltage is measured using high-speed data acquisition systems. Voltage signals are integrated to obtain magnetic flux changes. Calibration procedures ensure accurate area and positioning. Multiple loops provide spatial coverage for 2D reconstruction. Real-time processing enables plasma control applications.
+
+  Typical values:
+
+  Millivolts to volts depending on flux change rate and coil area. Voltage levels vary with plasma conditions and measurement location.
+
+  Sign convention: Positive when normal to loop points downward (negative Z direction), following Faraday's law and standard electromagnetic conventions.
+status: active
+tags:
+- magnetics
+- measured
+- time-dependent
+kind: scalar
+unit: V

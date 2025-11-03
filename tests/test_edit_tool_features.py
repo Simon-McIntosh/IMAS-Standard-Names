@@ -13,7 +13,7 @@ def invoke(tool, payload):
 
 
 def test_delete_with_dry_run(tmp_path):
-    """Test that delete with dry_run shows dependencies without deleting."""
+    """Test that delete returns dependencies information."""
     repo = StandardNameCatalog(root=tmp_path)
     edit_catalog = EditCatalog(repo)
     tool = CatalogTool(repo, edit_catalog)
@@ -23,6 +23,7 @@ def test_delete_with_dry_run(tmp_path):
         "name": "test_quantity",
         "kind": "scalar",
         "description": "Test quantity.",
+        "documentation": "Test quantity for delete operation with dry run.",
         "unit": "m",
         "tags": ["fundamental"],
     }
@@ -32,17 +33,13 @@ def test_delete_with_dry_run(tmp_path):
     # Get the name that exists
     target_name = "test_quantity"
 
-    # Delete with dry_run=True
-    result = invoke(tool, {"action": "delete", "name": target_name, "dry_run": True})
+    # Delete the entry
+    result = invoke(tool, {"action": "delete", "name": target_name})
 
-    # Should return success with dry_run flag and dependencies info
+    # Should return success with dependencies info
     assert result["action"] == "delete"
-    assert result["dry_run"] is True
     assert "dependencies" in result
     assert result["existed"] is True
-
-    # Verify entry still exists (wasn't actually deleted)
-    assert repo.get(target_name) is not None
 
 
 def test_delete_without_dry_run(tmp_path):
@@ -56,6 +53,7 @@ def test_delete_without_dry_run(tmp_path):
         "name": "test_quantity",
         "kind": "scalar",
         "description": "Test quantity.",
+        "documentation": "Test quantity for delete operation without dry run.",
         "unit": "m",
         "tags": ["fundamental"],
     }
@@ -65,13 +63,12 @@ def test_delete_without_dry_run(tmp_path):
     # Get the name that exists
     target_name = "test_quantity"
 
-    # Delete without dry_run (default behavior)
+    # Delete the entry
     result = invoke(tool, {"action": "delete", "name": target_name})
 
     # Should return success
     assert result["action"] == "delete"
     assert result["existed"] is True
-    assert result.get("dry_run", False) is False
 
     # Verify entry is removed from catalog view
     # (Note: it's staged for deletion, not committed yet)
@@ -79,7 +76,7 @@ def test_delete_without_dry_run(tmp_path):
 
 
 def test_rename_with_dry_run(tmp_path):
-    """Test that rename with dry_run shows dependencies without renaming."""
+    """Test that rename returns dependencies information."""
     repo = StandardNameCatalog(root=tmp_path)
     edit_catalog = EditCatalog(repo)
     tool = CatalogTool(repo, edit_catalog)
@@ -89,6 +86,7 @@ def test_rename_with_dry_run(tmp_path):
         "name": "test_quantity",
         "kind": "scalar",
         "description": "Test quantity.",
+        "documentation": "Test quantity for rename operation.",
         "unit": "m",
         "tags": ["fundamental"],
     }
@@ -99,27 +97,21 @@ def test_rename_with_dry_run(tmp_path):
     old_name = "test_quantity"
     new_name = "test_quantity_renamed"
 
-    # Rename with dry_run=True
+    # Rename the entry
     result = invoke(
         tool,
         {
             "action": "rename",
             "old_name": old_name,
             "new_name": new_name,
-            "dry_run": True,
         },
     )
 
-    # Should return success with dry_run flag and dependencies
+    # Should return success with dependencies
     assert result["action"] == "rename"
-    assert result["dry_run"] is True
     assert "dependencies" in result
     assert result["old_name"] == old_name
     assert result["new_name"] == new_name
-
-    # Verify original name still exists (wasn't actually renamed)
-    assert repo.get(old_name) is not None
-    assert repo.get(new_name) is None
 
 
 def test_batch_delete(tmp_path):
@@ -134,6 +126,7 @@ def test_batch_delete(tmp_path):
             "name": f"test_quantity_{i}",
             "kind": "scalar",
             "description": f"Test quantity {i}.",
+            "documentation": f"Test quantity {i} for batch delete.",
             "unit": "m",
             "tags": ["fundamental"],
         }
@@ -148,7 +141,6 @@ def test_batch_delete(tmp_path):
 
     # Should return batch_delete result
     assert result["action"] == "batch_delete"
-    assert result["dry_run"] is False
     assert "summary" in result
     assert result["summary"]["total"] == 3
     assert result["summary"]["successful"] == 3
@@ -159,11 +151,12 @@ def test_batch_delete(tmp_path):
     for name, existed, deps in result["results"]:
         assert name in names_to_delete
         assert existed is True
-        assert deps is None  # No dependencies requested without dry_run
+        assert deps is not None  # Dependencies always returned
+        assert isinstance(deps, list)
 
 
 def test_batch_delete_with_dry_run(tmp_path):
-    """Test batch deletion with dry_run shows dependencies for all entries."""
+    """Test batch deletion returns dependencies for all entries."""
     repo = StandardNameCatalog(root=tmp_path)
     edit_catalog = EditCatalog(repo)
     tool = CatalogTool(repo, edit_catalog)
@@ -174,37 +167,31 @@ def test_batch_delete_with_dry_run(tmp_path):
             "name": f"test_quantity_{i}",
             "kind": "scalar",
             "description": f"Test quantity {i}.",
+            "documentation": f"Test quantity {i} for batch delete with dry run.",
             "unit": "m",
             "tags": ["fundamental"],
         }
         edit_catalog.add(test_entry)
     edit_catalog.commit()
 
-    # Get the names to check
-    names_to_check = [f"test_quantity_{i}" for i in range(3)]
+    # Get the names to delete
+    names_to_delete = [f"test_quantity_{i}" for i in range(3)]
 
-    # Batch delete with dry_run
-    result = invoke(
-        tool, {"action": "batch_delete", "names": names_to_check, "dry_run": True}
-    )
+    # Batch delete
+    result = invoke(tool, {"action": "batch_delete", "names": names_to_delete})
 
     # Should return batch_delete result with dependencies
     assert result["action"] == "batch_delete"
-    assert result["dry_run"] is True
     assert "summary" in result
     assert result["summary"]["total"] == 3
 
     # Check results include dependency information
     assert "results" in result
     for name, existed, deps in result["results"]:
-        assert name in names_to_check
+        assert name in names_to_delete
         assert existed is True
-        assert deps is not None  # Dependencies checked with dry_run
+        assert deps is not None  # Dependencies always returned
         assert isinstance(deps, list)
-
-    # Verify entries still exist
-    for name in names_to_check:
-        assert repo.get(name) is not None
 
 
 def test_batch_delete_nonexistent_names():

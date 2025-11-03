@@ -1,0 +1,84 @@
+machine: ITER
+facility: ITER Organization
+location: Cadarache, France
+operational_status: under_construction
+last_updated: "2025-11-03"
+sources:
+  - url: https://fusionwiki.ciemat.es/wiki/ITER
+    accessed: "2025-11-03"
+    description: "FusionWiki comprehensive database"
+  - url: https://www.iter.org
+    description: "Official ITER Organization"
+
+geometry:
+  major_radius:
+    value: 6.2
+    unit: m
+    symbol: R_0
+  minor_radius:
+    value: 2.0
+    unit: m
+    symbol: a
+  plasma_volume:
+    value: 837
+    unit: m^3
+    symbol: V_p
+  elongation:
+    value: 1.85
+    unit: "1"
+    symbol: kappa
+  triangularity:
+    value: 0.33
+    unit: "1"
+    symbol: delta
+  aspect_ratio:
+    value: 3.1
+    unit: "1"
+    symbol: A
+    note: "R_0/a"
+
+physics:
+  toroidal_magnetic_field:
+    value: 5.3
+    unit: T
+    symbol: B_T
+    location: "at major radius R_0"
+  plasma_current:
+    value: 15
+    unit: MA
+    symbol: I_p
+  edge_safety_factor:
+    value: 3.0
+    unit: "1"
+    symbol: q_95
+  electron_density:
+    value: 1.01e20
+    unit: m^-3
+    symbol: n_e
+    note: "volume averaged, baseline scenario"
+  ion_temperature:
+    value: 8.0
+    unit: keV
+    symbol: T_i
+    note: "volume averaged, baseline scenario"
+  electron_temperature:
+    value: 8.8
+    unit: keV
+    symbol: T_e
+    note: "volume averaged, baseline scenario"
+  energy_confinement_time:
+    value: 3.7
+    unit: s
+    symbol: tau_E
+    scenario: "baseline Q=10"
+  fusion_power:
+    value: 500
+    unit: MW
+    symbol: P_fusion
+    scenario: "baseline"
+  fusion_gain:
+    value: 10
+    unit: "1"
+    symbol: Q
+    scenario: "baseline"
+

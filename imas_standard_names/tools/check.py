@@ -22,10 +22,10 @@ from pydantic import ValidationError
 import imas_standard_names.grammar.model as grammar_model
 from imas_standard_names.decorators.mcp import mcp_tool
 from imas_standard_names.grammar import types as grammar_types
-from imas_standard_names.tools.base import BaseTool
+from imas_standard_names.tools.base import CatalogTool
 
 
-class CheckTool(BaseTool):
+class CheckTool(CatalogTool):
     """Tool for fast batch validation of standard names."""
 
     # Vocabulary mapping for error reporting
@@ -34,7 +34,6 @@ class CheckTool(BaseTool):
         "coordinate": grammar_types.Component,  # Uses same vocabulary
         "subject": grammar_types.Subject,
         "object": grammar_types.Object,
-        "source": grammar_types.Source,
         "geometry": grammar_types.Position,
         "position": grammar_types.Position,  # Uses same vocabulary
         "process": grammar_types.Process,

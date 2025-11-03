@@ -13,6 +13,9 @@ kind: scalar
 status: active
 unit: eV
 description: Electron temperature.
+documentation: |
+  Electron temperature for CLI command testing.
+tags: [fundamental]
 """,
         encoding="utf-8",
     )
@@ -22,6 +25,9 @@ kind: scalar
 status: active
 unit: eV
 description: Ion temperature.
+documentation: |
+  Ion temperature for CLI command testing.
+tags: [fundamental]
 """,
         encoding="utf-8",
     )

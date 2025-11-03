@@ -1,0 +1,32 @@
+name: electron_pressure
+description: Electron kinetic pressure.
+documentation: |-
+  Electron kinetic pressure $p_e$ representing the contribution of electron thermal motion to plasma pressure. Includes both thermal and non-thermal electron populations. Electron pressure is a key component of plasma equilibrium and determines confinement quality through pressure gradients.
+
+  Thermodynamic relation:
+
+  Electron pressure relates to [electron_density](#electron_density) and [electron_temperature](#electron_temperature) via the ideal gas law:
+
+  $$p_e = n_e k_B T_e$$
+
+  where $n_e$ is in m$^{-3}$, $k_B = 1.381 \times 10^{-23}$ J/K, $T_e$ is in K, giving $p_e$ in Pa. When using $T_e$ in eV, apply conversion: $p_e = n_e T_e \times 1.602 \times 10^{-19}$ Pa.
+
+  Physical significance:
+
+  Electron pressure contributes to plasma equilibrium force balance through $\nabla p = \mathbf{j} \times \mathbf{B}$ and determines confinement quality. Total plasma pressure is the sum of electron and ion contributions. Pressure gradients drive [plasma_current_density](#plasma_current_density) through bootstrap current generation and affect [safety_factor](#safety_factor) profiles. See [plasma_volume](#plasma_volume) and [energy_confinement_time](#energy_confinement_time) for global confinement metrics.
+
+  Measurement methods:
+
+  Electron pressure is derived from [electron_density](#electron_density) and [electron_temperature](#electron_temperature) measurements. Thomson scattering provides local measurements of both quantities. Interferometry measures line-integrated density for pressure calculations. Electron cyclotron emission provides temperature profiles. Pressure gradients are inferred from equilibrium reconstruction using [magnetic_field](#magnetic_field) measurements.
+
+  Typical values:
+
+  Core region: $10^4$-$10^5$ Pa in high-performance plasmas. Edge region: $10^2$-$10^3$ Pa. Total plasma pressure (electron plus ion) typically ranges from $10^4$-$10^6$ Pa depending on operating regime.
+
+  Sign convention: Positive pressure indicates compressive force outward from plasma center.
+status: draft
+tags:
+- core-physics
+- spatial-profile
+kind: scalar
+unit: Pa

@@ -35,9 +35,11 @@ def test_dimensionless_unit_blank():
             "kind": "scalar",
             "name": "beta_pol",
             "description": "Dimensionless plasma beta",
+            "documentation": "Poloidal beta - dimensionless plasma parameter.",
             "unit": "1",
             "status": "active",
+            "tags": ["fundamental"],
         }
     )
-    assert sn.unit == ""  # normalized
+    assert sn.unit == "1"  # canonical form for dimensionless
     assert sn.is_dimensionless

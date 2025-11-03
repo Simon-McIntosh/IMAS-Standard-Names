@@ -1,0 +1,75 @@
+machine: ASDEX-Upgrade
+facility: Max Planck Institute for Plasma Physics
+location: Garching, Germany
+operational_status: operational
+last_updated: "2025-11-03"
+sources:
+  - url: https://fusionwiki.ciemat.es/wiki/ASDEX_Upgrade
+    accessed: "2025-11-03"
+    description: "FusionWiki comprehensive database"
+  - url: https://www.ipp.mpg.de/asdex-upgrade
+    description: "IPP ASDEX-Upgrade page"
+
+geometry:
+  major_radius:
+    value: 1.65
+    unit: m
+    symbol: R_0
+  minor_radius:
+    value: 0.5
+    unit: m
+    symbol: a
+  plasma_volume:
+    value: 14
+    unit: m^3
+    symbol: V_p
+  elongation:
+    value: 1.6
+    unit: "1"
+    symbol: kappa
+  triangularity:
+    value: 0.25
+    unit: "1"
+    symbol: delta
+  aspect_ratio:
+    value: 3.3
+    unit: "1"
+    symbol: A
+    note: "R_0/a"
+
+physics:
+  toroidal_magnetic_field:
+    value: 3.1
+    unit: T
+    symbol: B_T
+    location: "at major radius R_0"
+  plasma_current:
+    value: 1.4
+    unit: MA
+    symbol: I_p
+    note: "typical maximum"
+  edge_safety_factor:
+    value: 3.0
+    unit: "1"
+    symbol: q_95
+  electron_density:
+    value: 1.0e20
+    unit: m^-3
+    symbol: n_e
+    note: "typical"
+  ion_temperature:
+    value: 3.0
+    unit: keV
+    symbol: T_i
+    note: "typical"
+  electron_temperature:
+    value: 3.0
+    unit: keV
+    symbol: T_e
+    note: "typical"
+  energy_confinement_time:
+    value: 0.2
+    unit: s
+    symbol: tau_E
+    note: "typical H-mode"
+

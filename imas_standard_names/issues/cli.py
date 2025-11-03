@@ -55,7 +55,7 @@ def format_error(error: Exception, submission_file: str | None = None) -> str:
 # ---------------------------------------------------------------------------
 @click.command()
 @click.argument("standardnames_dir")
-@click.argument("genericnames_file")
+@click.argument("genericnames_file", required=False)
 @click.argument("submission_file")
 @click.option("--issue-link", default="")
 @click.option(
@@ -63,7 +63,7 @@ def format_error(error: Exception, submission_file: str | None = None) -> str:
 )
 def update_standardnames(
     standardnames_dir: str,
-    genericnames_file: str,
+    genericnames_file: str | None,
     submission_file: str,
     issue_link: str,
     overwrite: bool,
@@ -72,7 +72,7 @@ def update_standardnames(
 
     Arguments:
       standardnames_dir  Directory containing per-file standard name YAML entries.
-      genericnames_file  CSV of reserved generic names.
+      genericnames_file  (DEPRECATED) CSV of reserved generic names. Optional - uses grammar vocabulary if not provided.
       submission_file    JSON issue form export.
     """
     root = Path(standardnames_dir)
@@ -101,12 +101,14 @@ def update_standardnames(
 
         # Minimal required fields mapping
         description = raw_json.get("description") or raw_json.get("documentation") or ""
+        documentation = raw_json.get("documentation", description)
         data = {
             "name": name,
             "kind": raw_json.get("kind", "scalar") or "scalar",
             "status": raw_json.get("status", "draft") or "draft",
             "unit": raw_json.get("unit", "") or "",
             "description": description,
+            "documentation": documentation,
             "tags": raw_tags or [],
             "links": [],
         }
@@ -203,10 +205,15 @@ def get_standardname(standardnames_dir: str, standard_name: Iterable[str]):
 
 
 @click.command()
-@click.argument("genericnames_file")
+@click.argument("genericnames_file", required=False)
 @click.argument("standard_name", nargs=-1)
-def is_genericname(genericnames_file: str, standard_name: Iterable[str]):
-    """Check if a standard name is already present in the generic names file."""
+def is_genericname(genericnames_file: str | None, standard_name: Iterable[str]):
+    """Check if a standard name is a generic physical base.
+
+    Arguments:
+      genericnames_file  (DEPRECATED) CSV file path. Optional - uses grammar vocabulary if not provided.
+      standard_name      Name to check against generic physical bases.
+    """
     name = " ".join(standard_name)
     click.echo(str(name in GenericNames(genericnames_file)))
 

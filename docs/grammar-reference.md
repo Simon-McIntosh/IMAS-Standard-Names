@@ -17,8 +17,8 @@ The grammar follows this pattern:
 ```text
 [<component>_component_of | <coordinate>]?
 [<subject>]?
+[<device> | of_<object>]?
 <geometric_base | physical_base>
-[of_<object> | from_<source>]?
 [of_<geometry> | at_<position>]?
 [due_to_<process>]?
 ```
@@ -27,7 +27,7 @@ The grammar follows this pattern:
 
 - **Split Base Structure**: Names must have either a `geometric_base` (spatial/geometric quantities) OR a `physical_base` (physical measurements/properties), but not both.
 - **component vs coordinate**: Use `component` for physical vectors (with `physical_base`), use `coordinate` for geometric vectors (with `geometric_base`).
-- **of_object vs from_source**: Use `of_<object>` for intrinsic properties OF hardware/equipment; use `from_<source>` for measurements FROM devices.
+- **device vs object**: Use `<device>_<signal>` for dynamic signals FROM device (e.g., `flux_loop_voltage`); use `<property>_of_<object>` for static properties OF object (e.g., `area_of_flux_loop`).
 - **of_geometry vs at_position**: Use `of_<geometry>` for geometric properties OF spatial objects; use `at_<position>` for fields evaluated AT locations.
 
 ### Vocabularies Summary
@@ -92,19 +92,6 @@ Object tokens specify physical hardware or equipment whose intrinsic properties 
 
 {{ grammar_vocabulary_table('objects') }}
 
-### Sources
-
-Source tokens specify devices from which measurements or signals are obtained.
-
-**Template:** `from_{token}`
-
-**Examples:**
-
-- `voltage_from_flux_loop` — measurement obtained from diagnostic
-- `current_from_poloidal_field_coil` — signal from actuator
-
-{{ grammar_vocabulary_table('sources') }}
-
 ### Positions
 
 Position tokens specify spatial locations or regions within the plasma.
@@ -148,7 +135,7 @@ Certain segments cannot appear together in the same standard name:
 - `electron_temperature` — subject + physical_base
 - `magnetic_field` — physical_base (vector)
 - `radial_component_of_magnetic_field` — component + physical_base
-- `voltage_from_flux_loop` — physical_base + source
+- `flux_loop_voltage` — device + physical_base (device signal)
 - `area_of_poloidal_magnetic_field_probe` — physical_base + object
 
 **With position or geometry:**

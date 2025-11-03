@@ -80,18 +80,19 @@ electron_temperature_at_magnetic_axis
 | component  | physical_base  | `{axis}_component_of_{physical}` | `radial_component_of_magnetic_field` |
 | coordinate | geometric_base | `{axis}_{geometric}`             | `radial_position_of_flux_loop`       |
 
-### of_object vs from_source
+### device vs object
 
-| Segment | Template       | Meaning                        | Example                  |
-| ------- | -------------- | ------------------------------ | ------------------------ |
-| object  | `of_{token}`   | Intrinsic property OF hardware | `area_of_flux_loop`      |
-| source  | `from_{token}` | Measurement FROM device        | `voltage_from_flux_loop` |
+| Segment | Pattern/Template    | Meaning                        | Example             |
+| ------- | ------------------- | ------------------------------ | ------------------- |
+| device  | `{device}_{signal}` | Dynamic signal FROM device     | `flux_loop_voltage` |
+| object  | `of_{token}`        | Intrinsic property OF hardware | `area_of_flux_loop` |
 
-**Same token, different prepositions:**
+**Same device/object, different patterns:**
 
 ```text
-major_radius_of_poloidal_field_coil      (intrinsic geometric property)
-current_from_poloidal_field_coil         (actuator signal)
+flux_loop_voltage                        (dynamic signal from device)
+area_of_flux_loop                        (intrinsic property of object)
+current_of_poloidal_field_coil           (intrinsic property of coil)
 ```
 
 ### of_geometry vs at_position
@@ -155,21 +156,23 @@ tags: [measured, magnetics] # measured is secondary, must come after primary
 
 ---
 
-## IMAS DD Alignment
+## Documentation Guidelines
 
-**Critical Rule:** Sign conventions, coordinate systems, physical definitions, and units MUST follow IMAS Data Dictionary exactly.
+**Standalone Documentation:** Documentation should be self-contained and comprehensive. When documenting sign conventions, coordinate systems, or physical definitions, define them explicitly within the documentation text rather than relying on bare external references.
 
-**Do NOT:**
+**Best Practices:**
 
-- Invent new sign conventions
-- Redefine coordinate systems
-- Contradict IMAS DD physical interpretations
+- Define sign conventions explicitly: "Sign convention: Positive when normal to loop points downward (negative Z direction)."
+- Document coordinate system conventions fully within the documentation text
+- Make documentation understandable without consulting external sources
+- When concepts align with IMAS Data Dictionary or other standards, extract and expand the physics content to make it standalone
+- Use inline links `[standard_name](#standard_name)` for cross-references to other standard names
 
-**DO:**
+**Avoid:**
 
-- Cite IMAS DD in documentation field when relevant
-- Match IMAS DD units precisely
-- Follow IMAS DD naming patterns where established
+- Bare references like "see IMAS DD" or "follows COCOS convention" without explanation
+- Statements like "refer to [external source]" without providing the actual information
+- Assuming readers have access to external documentation
 
 ---
 
@@ -180,7 +183,7 @@ tags: [measured, magnetics] # measured is secondary, must come after primary
 | `magnetic_field_radial_component`        | Wrong segment order       | `radial_component_of_magnetic_field`  |
 | `radial_component_of_position`           | component with geometric  | `radial_position_of_flux_loop`        |
 | `radial_position_component_of_flux_loop` | coordinate with component | `radial_position_of_flux_loop`        |
-| `voltage_of_flux_loop`                   | of* instead of from*      | `voltage_from_flux_loop`              |
+| `voltage_from_flux_loop`                 | Wrong pattern for signal  | `flux_loop_voltage`                   |
 | `electron_temperature_ev`                | Units in name             | `electron_temperature` (unit in YAML) |
 | `pf_coil_current_1`                      | Index after quantity      | `pf_coil_1_current`                   |
 | `Electron_Temperature`                   | Not lowercase             | `electron_temperature`                |
@@ -219,7 +222,7 @@ Before proposing a new standard name:
 ```text
 <subject>_<physical_base>                       electron_temperature
 <component>_component_of_<physical_base>        radial_component_of_magnetic_field
-<physical_base>_from_<source>                   voltage_from_flux_loop
+<device>_<physical_base>                        flux_loop_voltage
 <physical_base>_of_<object>                     area_of_flux_loop
 <physical_base>_at_<position>                   electron_temperature_at_magnetic_axis
 <physical_base>_of_<geometry>                   major_radius_of_plasma_boundary

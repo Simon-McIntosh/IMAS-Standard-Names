@@ -1,0 +1,36 @@
+name: magnetic_flux
+description: Magnetic flux.
+documentation: |-
+  Magnetic flux $\Phi$ through a surface, defined as the surface integral of [magnetic_field](#magnetic_field). Magnetic flux is a fundamental quantity in plasma physics, conserved in ideal MHD and measured through [flux_loop_voltage](#flux_loop_voltage) integration.
+
+  $$\Phi = \int \mathbf{B} \cdot d\mathbf{A}$$
+
+  where $\mathbf{B}$ is magnetic field in T and $d\mathbf{A}$ is the differential area vector in m$^2$.
+
+  Physical significance:
+
+  Magnetic flux is conserved in ideal MHD and threading surfaces define magnetic flux surfaces. Changes in flux threading the plasma indicate non-ideal processes (resistivity, reconnection). Flux conservation relates to [poloidal_magnetic_flux](#poloidal_magnetic_flux) and determines [safety_factor](#safety_factor) through flux surface geometry. See [magnetic_field](#magnetic_field) for field structure and [area_of_flux_loop](#area_of_flux_loop) for measurement calibration.
+
+  Faraday's law:
+
+  The time derivative of magnetic flux through a closed conducting loop induces voltage via Faraday's law:
+
+  $$V = -\frac{d\Phi}{dt}$$
+
+  where $V$ is induced voltage in V. This is the fundamental measurement principle for flux loops: [flux_loop_voltage](#flux_loop_voltage) measures $d\Phi/dt$.
+
+  Measurement methods:
+
+  Magnetic flux is measured through [flux_loop_voltage](#flux_loop_voltage) integration using Faraday's law. Flux loop diagnostics integrate voltage to measure flux changes: $\Delta\Phi = \int V dt / A$ where $A$ is [area_of_flux_loop](#area_of_flux_loop). Equilibrium reconstruction codes use flux measurements to determine magnetic geometry and [plasma_current](#plasma_current) distribution.
+
+  Typical values:
+
+  Flux values depend on machine size and field strength, typically ranging from milliWeber to Weber for tokamak applications. Poloidal flux changes during plasma current ramp typically range from 0.1-1 Wb for medium-sized tokamaks.
+
+  Sign convention: Positive flux follows the right-hand rule for loop orientation, consistent with [flux_loop_voltage](#flux_loop_voltage) measurements.
+status: draft
+tags:
+- magnetics
+- measured
+kind: scalar
+unit: Wb

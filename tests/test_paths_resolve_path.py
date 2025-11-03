@@ -25,19 +25,6 @@ def test_catalog_paths_existing_yaml(tmp_path: Path):
     assert paths.yaml_path == custom.resolve()
 
 
-def test_catalog_paths_pattern_yaml():
-    std_root = CatalogPaths().yaml_path
-    dirs = sorted(
-        [d for d in std_root.rglob("*") if d.is_dir() and not d.name.startswith("__")]
-    )
-    if not dirs:
-        pytest.skip("No content dirs")
-    target = dirs[0]
-    pattern = target.name[: max(1, len(target.name) // 2)] + "*"
-    p = CatalogPaths(yaml=pattern).yaml_path
-    assert p == target or p.name == target.name
-
-
 def test_catalog_paths_nonexistent_relative_dir():
     p = CatalogPaths(yaml="___no_such_directory_pattern___").yaml_path
     assert p.name == "___no_such_directory_pattern___"

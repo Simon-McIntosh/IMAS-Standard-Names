@@ -2,22 +2,23 @@ from pathlib import Path
 
 from imas_standard_names.models import create_standard_name_entry
 from imas_standard_names.repository import StandardNameCatalog
+from imas_standard_names.yaml_store import YamlStore
 
 
-def write_scalar(tmp: Path, name: str):
-    (tmp / f"{name}.yml").write_text(
-        f"""name: {name}\nkind: scalar\nstatus: active\nunit: m\ndescription: {name} description.""",
-        encoding="utf-8",
-    )
+def test_repository_load_and_search(tmp_path: Path, example_scalars):
+    # Use examples from catalog instead of hardcoded data
+    store = YamlStore(tmp_path)
+    for entry in example_scalars[:2]:
+        store.write(entry)
 
-
-def test_repository_load_and_search(tmp_path: Path):
-    write_scalar(tmp_path, "electron_temperature")
-    write_scalar(tmp_path, "ion_temperature")
     repo = StandardNameCatalog(tmp_path)
-    assert repo.get("electron_temperature") is not None
-    results = repo.search("temperature")
-    assert "electron_temperature" in results
+    # Use first example name for assertions
+    first_name = example_scalars[0].name
+    assert repo.get(first_name) is not None
+    # Search using part of the name
+    search_term = first_name.split("_")[0]
+    results = repo.search(search_term)
+    assert first_name in results
 
 
 def test_repository_uow_add_update_remove(tmp_path: Path):
@@ -30,6 +31,8 @@ def test_repository_uow_add_update_remove(tmp_path: Path):
             "status": "active",
             "unit": "m^-3",
             "description": "Density.",
+            "documentation": "Density for repository and search testing.",
+            "tags": ["fundamental"],
         }
     )
     uow.add(model)
@@ -43,6 +46,8 @@ def test_repository_uow_add_update_remove(tmp_path: Path):
             "status": "active",
             "unit": "m^-3",
             "description": "Updated density.",
+            "documentation": "Updated density for repository and search testing.",
+            "tags": ["fundamental"],
         }
     )
     uow2.update("plasma_density", updated)

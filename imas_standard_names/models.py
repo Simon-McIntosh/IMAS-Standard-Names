@@ -28,6 +28,15 @@ Example vector entry:
   unit: m/s
   description: Plasma velocity vector.
 
+Example metadata entry:
+  name: plasma_boundary
+  kind: metadata
+  status: draft
+  description: Definition of plasma boundary.
+  tags: [equilibrium, flux-coordinates]
+  documentation: |
+    Defines what constitutes the plasma boundary for different configurations.
+
 Example with operator provenance:
   name: gradient_of_electron_temperature
   kind: vector
@@ -45,7 +54,7 @@ Example with operator provenance:
 import re
 from collections.abc import Iterable
 from enum import Enum
-from typing import Annotated, Literal
+from typing import Annotated, Literal, get_args
 
 from pydantic import (
     BaseModel,
@@ -58,6 +67,7 @@ from pydantic import (
 
 from imas_standard_names import pint
 from imas_standard_names.field_types import (
+    STANDARD_NAME_PATTERN,
     Constraints,
     Description,
     Documentation,
@@ -67,11 +77,12 @@ from imas_standard_names.field_types import (
     Tags,
     Unit,
 )
+from imas_standard_names.grammar.field_schemas import FIELD_DESCRIPTIONS
 from imas_standard_names.grammar.tag_types import (
     PRIMARY_TAGS,
     SECONDARY_TAGS,
 )
-from imas_standard_names.grammar.types import Component, Position, Process, Source
+from imas_standard_names.grammar.types import Component, Position, Process
 from imas_standard_names.operators import (
     enforce_operator_naming as _enforce_operator_naming,
     normalize_operator_chain as _normalize_operator_chain,
@@ -119,15 +130,6 @@ def _check_grammar_vocabulary_consistency(name: str) -> list[str]:
                 f"Token '{token}' used as coordinate prefix is missing from Component vocabulary"
             )
 
-    # Check 'from_' pattern - should always map to Source vocabulary
-    from_match = re.search(r"_from_([a-z_]+)(?:_|$)", name)
-    if from_match:
-        token = from_match.group(1)
-        if token not in [s.value for s in Source]:
-            errors.append(
-                f"Token '{token}' used with 'from_' template is missing from Source vocabulary"
-            )
-
     # Check 'at_' pattern - should always map to Position vocabulary
     at_match = re.search(r"_at_([a-z_]+)(?:_|$)", name)
     if at_match:
@@ -157,6 +159,7 @@ class Kind(str, Enum):
 
     scalar = "scalar"
     vector = "vector"
+    metadata = "metadata"
 
 
 class StandardNameEntryBase(BaseModel):
@@ -172,11 +175,10 @@ class StandardNameEntryBase(BaseModel):
     # Core identification & description
     name: Name
     description: Description
-    documentation: Documentation = ""
-    unit: Unit = ""
+    documentation: Documentation  # Required: valuable standalone content
     status: Status = Field(
         "draft",
-        description="Lifecycle state: draft | active | deprecated | superseded.",
+        description=FIELD_DESCRIPTIONS["status"],
     )
 
     # Governance / metadata
@@ -184,9 +186,8 @@ class StandardNameEntryBase(BaseModel):
     constraints: Constraints = Field(default_factory=list)
     deprecates: Name | str = ""
     superseded_by: Name | str = ""
-    tags: Tags = Field(default_factory=list)
+    tags: Tags  # Required: tags[0] determines storage directory
     links: Links = Field(default_factory=list)
-    provenance: Provenance | None = None
 
     # Supplemental validator for double underscore rule not expressible in pattern.
     @field_validator("name", "deprecates", "superseded_by")
@@ -211,20 +212,25 @@ class StandardNameEntryBase(BaseModel):
             raise ValueError(error_msg)
         return v
 
-    # Base validators
-    @field_validator("unit", mode="before")
-    @classmethod
-    def canonicalize_unit_order(cls, v: str) -> str:
+    # Base validators (unit validators moved to scalar/vector subclasses)
+    @staticmethod
+    def _canonicalize_unit_order(v: str) -> str:
         """Auto-correct unit token order to canonical lexicographic form.
 
         This helps LLMs and human authors by accepting units in any order
         and automatically reordering to canonical form. For example:
         's^-2.m' -> 'm.s^-2'
         'keV.m^-1' -> 'keV.m^-1' (already canonical)
+
+        Dimensionless quantities must use "1" as the canonical form.
+        Empty strings and other invalid values will fail validation.
         """
-        # Dimensionless synonyms collapse to empty string.
-        if v in ("", "1", "none", "dimensionless"):
-            return ""
+        if v == "1":
+            return "1"
+        if v == "":
+            raise ValueError(
+                "Empty string not allowed for unit; use '1' for dimensionless quantities"
+            )
         if " " in v:
             raise ValueError("Unit must not contain whitespace")
         if "/" in v or "*" in v:
@@ -255,9 +261,8 @@ class StandardNameEntryBase(BaseModel):
         )
         return canonical
 
-    @field_validator("unit")
-    @classmethod
-    def validate_unit_with_pint(cls, v: str) -> str:
+    @staticmethod
+    def _validate_unit_with_pint(v: str) -> str:
         """Validate unit semantics using pint (if available).
 
         This runs after canonicalization to ensure the unit is dimensionally valid.
@@ -266,7 +271,8 @@ class StandardNameEntryBase(BaseModel):
         authors to write the concise symbols and we want to preserve those as
         the canonical storage form.
         """
-        if v == "":
+        # "1" is the canonical form for dimensionless quantities
+        if v == "1":
             return v
 
         # Optional semantic validation via pint (best-effort). We allow tokens that
@@ -279,12 +285,56 @@ class StandardNameEntryBase(BaseModel):
                 raise ValueError(f"Invalid unit '{v}': {e}") from e
         return v
 
-    @field_validator("tags", "links", "constraints")
+    @field_validator("tags", "constraints")
     @classmethod
     def list_normalizer(cls, v: Iterable[str]) -> list[str]:  # type: ignore[override]
         if v is None:
             return []
         return [str(item).strip() for item in v if str(item).strip()]
+
+    @field_validator("links")
+    @classmethod
+    def validate_links(cls, v: Iterable[str]) -> list[str]:  # type: ignore[override]
+        """Validate links: normalize whitespace and validate format.
+
+        Supports two formats:
+        1. External URLs: must start with http:// or https://
+        2. Internal standard name references: must start with 'name:' followed by valid name token
+        """
+        if v is None:
+            return []
+
+        result = []
+        for item in v:
+            link = str(item).strip()
+            if not link:
+                continue
+
+            # Check if it's an internal name reference
+            if link.startswith("name:"):
+                # Extract the name part and validate it
+                name_part = link[5:].strip()  # Remove 'name:' prefix
+                if not name_part:
+                    raise ValueError(
+                        f"Invalid internal link '{link}': name cannot be empty after 'name:' prefix"
+                    )
+                # Validate name format
+                if not re.match(STANDARD_NAME_PATTERN, name_part):
+                    raise ValueError(
+                        f"Invalid internal link '{link}': '{name_part}' is not a valid standard name token. "
+                        f"Must match pattern {STANDARD_NAME_PATTERN}"
+                    )
+                result.append(link)
+            # Check if it's an external URL
+            elif link.startswith(("http://", "https://")):
+                result.append(link)
+            else:
+                raise ValueError(
+                    f"Invalid link '{link}': must be either an external URL (starting with http:// or https://) "
+                    f"or an internal standard name reference (starting with 'name:')"
+                )
+
+        return result
 
     @field_validator("tags")
     @classmethod
@@ -328,6 +378,87 @@ class StandardNameEntryBase(BaseModel):
 
         return v
 
+    @field_validator("documentation")
+    @classmethod
+    def validate_sign_convention_format(cls, v: str) -> str:  # type: ignore[override]
+        """Validate sign convention format if present in documentation.
+
+        Enforces consistent formatting:
+        - Must use 'Sign convention:' (not '**Sign convention:**' or variations)
+        - Must start sentence with 'Positive when' or 'Positive [quantity]'
+        - Must follow the main documentation content (cannot be at start)
+        - Must be a standalone paragraph (blank line before and after)
+        """
+        if not v:
+            return v
+
+        # Check if sign convention is mentioned
+        if re.search(r"\bsign\s+convention\b", v, re.IGNORECASE):
+            # Check for bold markdown formatting (not allowed) - check this FIRST
+            # Match both **Sign convention:** and **Sign convention**
+            if re.search(r"\*\*[Ss]ign\s+[Cc]onvention:?\*\*", v):
+                raise ValueError(
+                    "Sign convention must use plain text 'Sign convention:', not bold '**Sign convention:**'"
+                )
+
+            # Check for lowercase/uppercase issues
+            if re.search(r"sign convention:", v):  # lowercase 'sign'
+                raise ValueError(
+                    "Sign convention format must use title case: 'Sign convention: Positive when [condition].' "
+                    "(found lowercase 'sign convention:', should be 'Sign convention:')"
+                )
+            elif re.search(r"SIGN CONVENTION:", v):  # all caps
+                raise ValueError(
+                    "Sign convention format must use title case: 'Sign convention: Positive when [condition].' "
+                    "(found all caps 'SIGN CONVENTION:', should be 'Sign convention:')"
+                )
+
+            # Check for exact format: "Sign convention:" (title case with colon)
+            # Must be followed by "Positive when" or "Positive [quantity]"
+            correct_format = re.search(r"Sign convention:\s+Positive\s+", v)
+
+            if not correct_format:
+                # Missing "Positive" keyword
+                raise ValueError(
+                    "Sign convention must start with 'Positive when' or 'Positive [quantity]': "
+                    "'Sign convention: Positive when [condition].'"
+                )
+
+            # Check for standalone paragraph (must have \n\n before and after)
+            # Sign convention must NOT be at document start - must follow main content
+            # Find the actual "Sign convention:" text position
+            sign_match = re.search(r"Sign convention:[^\n]+", v)
+            if sign_match:
+                start_pos = sign_match.start()
+                end_pos = sign_match.end()
+
+                # Must have content before sign convention (cannot be at document start)
+                if start_pos < 2:
+                    raise ValueError(
+                        "Sign convention must follow the main documentation content. "
+                        "It cannot be at the start of the documentation field."
+                    )
+
+                # Check if preceded by \n\n
+                preceding_text = v[start_pos - 2 : start_pos]
+                if preceding_text != "\n\n":
+                    raise ValueError(
+                        "Sign convention must be a standalone paragraph with a blank line before it. "
+                        "Add '\\n\\n' before 'Sign convention:' to separate it from preceding text."
+                    )
+
+                # Check if followed by \n\n (or is at end of string)
+                if end_pos < len(v):
+                    # Look at the 2 characters after the sign convention sentence
+                    following_text = v[end_pos : min(len(v), end_pos + 2)]
+                    if not following_text.startswith("\n\n") and following_text.strip():
+                        raise ValueError(
+                            "Sign convention must be a standalone paragraph with a blank line after it. "
+                            "Add '\\n\\n' after the sign convention sentence to separate it from following text."
+                        )
+
+        return v
+
     @model_validator(mode="after")
     def _governance_rules(self):  # type: ignore[override]
         if self.status == "deprecated" and not self.superseded_by:
@@ -338,7 +469,7 @@ class StandardNameEntryBase(BaseModel):
 
     @property
     def is_dimensionless(self) -> bool:
-        return self.unit == ""
+        return self.unit == "1"
 
     def formatted_unit(self, style: str = "plain") -> str:
         if self.is_dimensionless:
@@ -365,6 +496,20 @@ class StandardNameScalarEntry(StandardNameEntryBase):
     """Scalar standard name catalog entry."""
 
     kind: Literal["scalar"] = "scalar"
+    unit: Unit  # Required for scalar (use "1" for dimensionless)
+    provenance: Provenance | None = None
+
+    @field_validator("unit", mode="before")
+    @classmethod
+    def canonicalize_unit_order(cls, v: str) -> str:
+        """Auto-correct unit token order to canonical lexicographic form."""
+        return cls._canonicalize_unit_order(v)
+
+    @field_validator("unit")
+    @classmethod
+    def validate_unit_with_pint(cls, v: str) -> str:
+        """Validate unit semantics using pint (if available)."""
+        return cls._validate_unit_with_pint(v)
 
     @model_validator(mode="after")
     def _provenance_rules(self):  # type: ignore[override]
@@ -394,6 +539,20 @@ class StandardNameVectorEntry(StandardNameEntryBase):
     """Vector standard name catalog entry."""
 
     kind: Literal["vector"] = "vector"
+    unit: Unit  # Required for vector (use "1" for dimensionless)
+    provenance: Provenance | None = None
+
+    @field_validator("unit", mode="before")
+    @classmethod
+    def canonicalize_unit_order(cls, v: str) -> str:
+        """Auto-correct unit token order to canonical lexicographic form."""
+        return cls._canonicalize_unit_order(v)
+
+    @field_validator("unit")
+    @classmethod
+    def validate_unit_with_pint(cls, v: str) -> str:
+        """Validate unit semantics using pint (if available)."""
+        return cls._validate_unit_with_pint(v)
 
     @model_validator(mode="after")
     def _provenance_rules(self):  # type: ignore[override]
@@ -427,17 +586,80 @@ class StandardNameVectorEntry(StandardNameEntryBase):
         return f"magnitude_of_{self.name}"
 
 
+class StandardNameMetadataEntry(StandardNameEntryBase):
+    """Metadata standard name catalog entry.
+
+    Used for definitional entries that document concepts, boundaries,
+    or reference anchors rather than measurable physical quantities.
+    These entries provide documentation and cross-references but do not
+    represent data that can be measured or calculated.
+
+    Examples: plasma_boundary, scrape_off_layer, confined_region
+
+    Metadata entries have relaxed validation:
+    - No unit field required (these are definitional, not measurable)
+    - No provenance required (these are definitional, not derived)
+    - Focus on documentation and links fields
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    kind: Literal["metadata"] = "metadata"
+    # No unit field - metadata entries are definitional, not measurable
+
+    def model_dump(self, **kwargs):
+        """Override to ensure consistent serialization for metadata entries."""
+        return super().model_dump(**kwargs)
+
+
 StandardNameEntry = Annotated[
-    StandardNameScalarEntry | StandardNameVectorEntry,
+    StandardNameScalarEntry | StandardNameVectorEntry | StandardNameMetadataEntry,
     Field(discriminator="kind"),
 ]
 
 _STANDARD_NAME_ENTRY_ADAPTER = TypeAdapter(StandardNameEntry)
 
 
+def _build_standard_name_models() -> dict[str, type[StandardNameEntry]]:
+    """Build mapping of kind string to model class from StandardNameEntry union.
+
+    Extracts model classes from the discriminated union and indexes them by
+    their kind literal value. This provides O(1) lookup for loading entries.
+
+    Returns:
+        Dictionary mapping kind strings ('scalar', 'vector', 'metadata') to
+        their corresponding model classes.
+    """
+    union_type = get_args(StandardNameEntry)[0]
+    model_classes = get_args(union_type)
+    return {
+        model_class.model_fields["kind"].default: model_class
+        for model_class in model_classes
+    }
+
+
+STANDARD_NAME_MODELS = _build_standard_name_models()
+
+
 def create_standard_name_entry(data: dict) -> StandardNameEntry:
     """Validate data into a StandardNameEntry union instance via discriminator."""
     return _STANDARD_NAME_ENTRY_ADAPTER.validate_python(data)
+
+
+def load_standard_name_entry(data: dict) -> StandardNameEntry:
+    """Load a StandardNameEntry instance without validation (bypasses validators)."""
+    kind = data.get("kind")
+    if not kind:
+        raise ValueError("Missing required field 'kind' in data dictionary")
+
+    kind_str = kind.value if isinstance(kind, Kind) else kind
+    model_class = STANDARD_NAME_MODELS.get(kind_str)
+
+    if not model_class:
+        valid_kinds = ", ".join(STANDARD_NAME_MODELS.keys())
+        raise ValueError(f"Unknown kind: {kind_str}. Valid kinds: {valid_kinds}")
+
+    return model_class.model_construct(**data)
 
 
 __all__ = [
@@ -448,7 +670,10 @@ __all__ = [
     "StandardNameEntryBase",
     "StandardNameScalarEntry",
     "StandardNameVectorEntry",
+    "StandardNameMetadataEntry",
     "Name",
     "StandardNameEntry",
+    "STANDARD_NAME_MODELS",
     "create_standard_name_entry",
+    "load_standard_name_entry",
 ]

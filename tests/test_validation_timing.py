@@ -42,6 +42,7 @@ def test_valid_entry_accepted_and_writable(tmp_path):
         "name": "electron_density",
         "kind": "scalar",
         "description": "Electron density.",
+        "documentation": "Electron density for validation timing testing.",
         "unit": "m^-3",
         "tags": ["fundamental", "measured"],
     }
@@ -75,6 +76,7 @@ def test_tag_auto_reordering(tmp_path):
         "name": "test_quantity",
         "kind": "scalar",
         "description": "Test quantity.",
+        "documentation": "Test quantity for tag auto-reordering.",
         "unit": "T",
         "tags": ["measured", "magnetics", "calibrated"],  # magnetics is primary
     }

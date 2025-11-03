@@ -1,0 +1,36 @@
+name: plasma_resistivity
+description: Plasma electrical resistivity.
+documentation: |-
+  Plasma electrical resistivity $\eta$ quantifying resistance to current flow, arising from electron-ion collisions. Relates electric field to current density via Ohm's law and determines [heating_power_due_to_ohmic](#heating_power_due_to_ohmic) efficiency and [plasma_current](#plasma_current) requirements.
+
+  $$\mathbf{E} = \eta \mathbf{j}$$
+
+  where $\mathbf{E}$ is electric field in V/m and $\mathbf{j}$ is [plasma_current_density](#plasma_current_density) in A/m$^2$.
+
+  Temperature dependence:
+
+  Plasma resistivity decreases strongly with [electron_temperature](#electron_temperature):
+
+  $$\eta \propto T_e^{-3/2}$$
+
+  For a hydrogen plasma: $\eta \approx 5.2 \times 10^{-5} Z_{\text{eff}} \ln\Lambda / T_e^{3/2}$ $\Omega$·m, where $T_e$ is in eV, $Z_{\text{eff}}$ is effective charge, and $\ln\Lambda$ is the Coulomb logarithm.
+
+  Physical significance:
+
+  Resistivity determines [heating_power_due_to_ohmic](#heating_power_due_to_ohmic): $P_{\text{ohm}} = \int \eta j^2 dV$. At high temperatures, resistivity becomes negligible, making ohmic heating ineffective and requiring auxiliary heating. Resistivity affects [plasma_current](#plasma_current) penetration and current ramp rates. See [heating_power_due_to_ohmic](#heating_power_due_to_ohmic) for heating relationships and [plasma_current_density](#plasma_current_density) for current distribution.
+
+  Measurement methods:
+
+  Plasma resistivity is determined from [plasma_current](#plasma_current) and voltage measurements using Ohm's law. Loop voltage measurements provide electric field information. Current profile analysis requires equilibrium reconstruction. Resistivity profiles are inferred from temperature and density measurements. Spitzer resistivity calculations use [electron_temperature](#electron_temperature) and impurity content.
+
+  Typical values:
+
+  Core ($T_e$ ~ 1-10 keV): $10^{-8}$-$10^{-7}$ $\Omega$·m, edge ($T_e$ ~ 10-100 eV): $10^{-6}$-$10^{-5}$ $\Omega$·m. Resistivity decreases strongly with temperature and increases with impurity content.
+
+  Sign convention: Positive resistivity indicates resistance to current flow, following standard electrical resistance conventions with current flow direction.
+status: draft
+tags:
+- core-physics
+- spatial-profile
+kind: scalar
+unit: m.ohm

@@ -1,0 +1,25 @@
+name: poloidal_magnetic_flux
+description: Poloidal magnetic flux.
+documentation: |-
+  Poloidal magnetic flux $\Psi$ threading a surface in the poloidal plane, defined as the integral of [poloidal_magnetic_field](#poloidal_magnetic_field) through a surface:
+
+  $$\Psi = \int \mathbf{B}_p \cdot d\mathbf{A}$$
+
+  where $\mathbf{B}_p$ is poloidal magnetic field in T and $d\mathbf{A}$ is the differential area element in m$^2$.
+
+  Physical context:
+
+  Poloidal flux is a fundamental coordinate for describing tokamak equilibria. Flux surfaces are contours of constant $\Psi$, and the normalized poloidal flux $\Psi_N = (\Psi - \Psi_{\text{axis}}) / (\Psi_{\text{LCFS}} - \Psi_{\text{axis}})$ is used to label flux surfaces from magnetic axis ($\Psi_N = 0$) to [plasma_boundary](#plasma_boundary) ($\Psi_N = 1$).
+
+  Measurement:
+
+  Poloidal flux changes are measured by [flux_loop_voltage](#flux_loop_voltage) via Faraday's law: $V = -d\Psi/dt$.
+
+  Sign convention: Positive when surface normal points upward (positive Z direction).
+status: draft
+tags:
+- magnetics
+- flux-coordinates
+- measured
+kind: scalar
+unit: Wb

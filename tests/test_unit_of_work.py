@@ -15,14 +15,17 @@ def test_unit_of_work_add_update_remove_commit(tmp_path):
             "kind": "scalar",
             "name": "electron_density",
             "description": "Electron density",
+            "documentation": "Number density of electrons in the plasma.",
             "unit": "m^-3",
             "status": "draft",
+            "tags": ["fundamental"],
         }
     )
     uow.add(a)
     uow.commit()
     assert repo.get("electron_density") is not None
-    file_path = root / "electron_density.yml"
+    # YamlStore organizes files by primary tag
+    file_path = root / "fundamental" / "electron_density.yml"
     assert file_path.exists()
 
     # Update (change description)
@@ -31,8 +34,10 @@ def test_unit_of_work_add_update_remove_commit(tmp_path):
             "kind": "scalar",
             "name": "electron_density",
             "description": "Electron density (updated)",
+            "documentation": "Number density of electrons in the plasma (updated).",
             "unit": "m^-3",
             "status": "active",
+            "tags": ["fundamental"],
         }
     )
     uow.update("electron_density", updated)
@@ -45,4 +50,5 @@ def test_unit_of_work_add_update_remove_commit(tmp_path):
     uow.remove("electron_density")
     uow.commit()
     assert repo.get("electron_density") is None
+    # File should be deleted after removal
     assert not file_path.exists()

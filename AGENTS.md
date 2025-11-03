@@ -53,6 +53,9 @@ uv run python -m imas_standard_names.grammar_codegen.generate
 - Return structured data via `.model_dump()` or error dictionaries with schema
 - 100% test coverage required for all new/modified code
 - Follow existing patterns in `tools/` directory for MCP tool development
+- **Never use ALL CAPS for emphasis** in documentation, docstrings, or user-facing text
+  - Use **bold**, _italic_, or `code` formatting instead
+  - Exception: acronyms (e.g., IMAS, MCP, CF) and constants in code
 
 ### MCP Tool Pattern
 
@@ -113,6 +116,7 @@ description: Starts with capital, under 120 chars
 4. **Units in names**: Use YAML `unit` field, not in name text
 5. **Synchronous MCP tools**: All tool methods must be `async`
 6. **Missing error schemas**: Always return structured errors with examples
+7. **Direct YAML file editing**: Never edit standard name YAML files directly - always use MCP tools (`create_standard_names`, `edit_standard_names`, `write_standard_names`) to ensure validation and consistency
 
 ## Project Structure
 

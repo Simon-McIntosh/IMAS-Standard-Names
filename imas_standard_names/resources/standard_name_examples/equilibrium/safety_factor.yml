@@ -1,0 +1,28 @@
+name: safety_factor
+description: Magnetic safety factor.
+documentation: |-
+  Magnetic safety factor $q$ (or $q$-profile) quantifying the pitch of magnetic field lines on a flux surface. The safety factor is fundamental for MHD stability analysis and determines the rational surfaces where instabilities can occur.
+
+  $$q = \frac{1}{2\pi} \oint \frac{B_{\phi}}{B_p R} dl_p$$
+
+  where $B_{\phi}$ is [toroidal_component_of_magnetic_field](#toroidal_component_of_magnetic_field), $B_p$ is [poloidal_component_of_magnetic_field](#poloidal_component_of_magnetic_field), $R$ is major radius, and $dl_p$ is the differential poloidal arc length.
+
+  Physical significance:
+
+  The safety factor determines MHD stability limits through the Kruskal-Shafranov criterion. Rational surfaces where $q = m/n$ (integer $m$, $n$) are resonant for MHD modes. Lower $q$ values indicate higher [plasma_current](#plasma_current) and reduced stability margins. The minimum safety factor $q_{\text{min}}$ and edge safety factor $q_{95}$ are key operational parameters. See [plasma_current](#plasma_current) and [magnetic_field](#magnetic_field) for field structure relationships.
+
+  Measurement methods:
+
+  Safety factor profiles are determined from equilibrium reconstruction using external magnetic measurements. The $q$-profile relates to [plasma_current_density](#plasma_current_density) through $\nabla \times \mathbf{B} = \mu_0 \mathbf{J}$ and can be inferred from [flux_loop_voltage](#flux_loop_voltage) measurements. MSE (motional Stark effect) diagnostics provide direct $q$-profile measurements in some devices.
+
+  Typical values:
+
+  On-axis: $q_0 = 0.7$-1.5, edge: $q_{95} = 3$-6 for stable operation. Operation below $q_{\text{min}} < 1$ leads to sawtooth oscillations. H-mode operation typically requires $q_{95} > 2.5$ for stability.
+
+  Sign convention: Positive when toroidal current and toroidal field are in same direction, following右手螺旋定则 for standard tokamak operation.
+status: draft
+tags:
+- equilibrium
+- spatial-profile
+kind: scalar
+unit: '1'

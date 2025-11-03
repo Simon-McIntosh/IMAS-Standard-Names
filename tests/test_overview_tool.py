@@ -1,16 +1,101 @@
 import asyncio
 
 from imas_standard_names.repository import StandardNameCatalog
-from imas_standard_names.tools.overview import OverviewTool
+from imas_standard_names.tools.naming_grammar import NamingGrammarTool
+from imas_standard_names.tools.schema import SchemaTool
 
 
 def test_overview_structure(sample_catalog):
-    repo = sample_catalog
-    tool = OverviewTool(repo)
-    # call directly (sync wrapper of async not needed if we just run loop)
-    result = asyncio.run(tool.get_grammar_and_vocabulary())
+    """Test that default overview returns compact structure with available sections."""
+    examples_catalog = StandardNameCatalog(
+        root="./imas_standard_names/resources/standard_name_examples",
+        permissive=False,
+    )
+    tool = NamingGrammarTool(examples_catalog)
 
-    # Check grammar_structure section (new, should be first)
+    # Without section parameter, should return overview (not full structure)
+    result = asyncio.run(tool.get_naming_grammar())
+
+    # Should have canonical pattern in overview
+    assert "canonical_pattern" in result
+    expected_pattern = (
+        "[<component>_component_of | <coordinate>]? [<subject>]? [<device> | of_<object>]? "
+        "[<geometric_base> | <physical_base>]? "
+        "[of_<geometry> | at_<position>]? [due_to_<process>]?"
+    )
+    assert result["canonical_pattern"] == expected_pattern
+
+    # Should have common patterns as quick reference
+    assert "common_patterns" in result
+    patterns = result["common_patterns"]
+    assert "vector_component" in patterns
+    assert "device_signal" in patterns
+    assert "object_property" in patterns
+
+    # Should have critical distinctions
+    assert "critical_distinctions" in result
+    distinctions = result["critical_distinctions"]
+    assert "component_vs_coordinate" in distinctions
+    assert "device_vs_object" in distinctions
+    assert "geometry_vs_position" in distinctions
+
+    # Quick start workflow
+    assert "quick_start" in result
+    quick_start = result["quick_start"]
+    assert isinstance(quick_start, dict)
+    assert "1_choose_base" in quick_start
+
+    # New enhanced fields
+    assert "templates" in result
+    templates = result["templates"]
+    assert isinstance(templates, dict)
+    assert templates["component"] == "{token}_component_of"
+    assert templates["object"] == "of_{token}"
+    assert templates["position"] == "at_{token}"
+    assert templates["coordinate"] == "{token}"  # No template - token used as-is
+    assert templates["subject"] == "{token}"  # No template - token used as-is
+
+    assert "segment_usage" in result
+    segment_usage = result["segment_usage"]
+    assert isinstance(segment_usage, dict)
+    assert "component" in segment_usage
+    assert "guidance" in segment_usage["component"]
+    assert "template" in segment_usage["component"]
+    assert "vocabulary_size" in segment_usage["component"]
+
+    assert "base_requirements" in result
+    base_reqs = result["base_requirements"]
+    assert "geometric_base" in base_reqs
+    assert "physical_base" in base_reqs
+    assert "choice" in base_reqs
+
+    assert "vocabulary_token_counts" in result
+    token_counts = result["vocabulary_token_counts"]
+    assert isinstance(token_counts, dict)
+    assert token_counts["component"] > 0
+
+
+def test_overview_full_section(sample_catalog):
+    """Test that section='all' returns complete grammar structure."""
+    examples_catalog = StandardNameCatalog(
+        root="./imas_standard_names/resources/standard_name_examples",
+        permissive=False,
+    )
+    tool = NamingGrammarTool(examples_catalog)
+
+    # With section='all', should return full structure
+    result = asyncio.run(tool.get_naming_grammar(section="all"))
+
+    # Check applicability section (critical guidance on what should have standard names)
+    assert "applicability" in result
+    applicability = result["applicability"]
+    assert "include" in applicability
+    assert "exclude" in applicability
+    assert "rationale" in applicability
+    assert isinstance(applicability["include"], list)
+    assert isinstance(applicability["exclude"], list)
+
+    # Check grammar_structure section (should be in full output)
     assert "grammar_structure" in result
     grammar = result["grammar_structure"]
     assert "canonical_pattern" in grammar
@@ -18,14 +103,6 @@ def test_overview_structure(sample_catalog):
     assert "segments" in grammar
     assert isinstance(grammar["segments"], list)
     assert len(grammar["segments"]) > 0
-
-    # Verify canonical pattern matches grammar.yml
-    expected_pattern = (
-        "[<component>_component_of | <coordinate>]? [<subject>]? "
-        "[<geometric_base> | <physical_base>]? "
-        "[of_<object> | from_<source>]? [of_<geometry> | at_<position>]? [due_to_<process>]?"
-    )
-    assert grammar["canonical_pattern"] == expected_pattern
 
     # Check vocabulary section
     assert "vocabulary" in result
@@ -52,7 +129,7 @@ def test_overview_structure(sample_catalog):
     if "mutually_exclusive" in vocab["position"]:
         assert vocab["position"]["mutually_exclusive"] is True
 
-    # Check validation_rules section (new)
+    # Check validation_rules section
     assert "validation_rules" in result
     val_rules = result["validation_rules"]
     assert "base_pattern" in val_rules
@@ -60,45 +137,50 @@ def test_overview_structure(sample_catalog):
     assert "exclusivity_constraints" in val_rules
     assert isinstance(val_rules["exclusivity_constraints"], list)
 
-    # Check composition_examples section (new, improved)
-    assert "composition_examples" in result
-    examples = result["composition_examples"]
-    assert isinstance(examples, list)
-    assert len(examples) > 0
-    # Check that examples have the right structure
-    for example in examples:
-        assert "name" in example
-        assert "parts" in example
-        assert "template_expansion" in example
-
-    # Check catalog stats section
-    assert "catalog_stats" in result
-    stats = result["catalog_stats"]
-    assert "total_standard_names" in stats and stats["total_standard_names"] == len(
-        repo
-    )
-    assert stats["total_standard_names"] > 0
-
-    expected_kinds = {"scalar", "vector"}
-    assert set(stats["standard_names_by_kind"]) == expected_kinds
-    assert (
-        sum(stats["standard_names_by_kind"].values()) == stats["total_standard_names"]
-    )
-
-    expected_status = {"draft", "active", "deprecated", "superseded"}
-    assert set(stats["standard_names_by_status"]) == expected_status
-    assert (
-        sum(stats["standard_names_by_status"].values()) == stats["total_standard_names"]
-    )
-
-    # Unit mapping: at least one unit key and dimensionless may appear
-    assert "standard_names_by_unit" in stats and isinstance(
-        stats["standard_names_by_unit"], dict
-    )
-
-    # Tags aggregation present (may be empty dict)
-    assert "standard_names_by_tag" in stats
-    assert isinstance(stats["standard_names_by_tag"], dict)
+    # Check examples section (from examples catalog)
+    assert "examples" in result
+    examples = result["examples"]
+    assert "composition_examples" in examples
+    assert isinstance(examples["composition_examples"], dict)
+    assert "total_examples" in examples
 
     # Version present
     assert "version" in result and isinstance(result["version"], str)
+
+
+def test_overview_specific_sections(sample_catalog):
+    """Test that specific section parameters return focused content."""
+    examples_catalog = StandardNameCatalog(
+        root="./imas_standard_names/resources/standard_name_examples",
+        permissive=False,
+    )
+    tool = NamingGrammarTool(examples_catalog)
+
+    # Test segments section
+    result = asyncio.run(tool.get_naming_grammar(section="segments"))
+    assert "section" in result
+    assert result["section"] == "segments"
+    assert "vocabulary" in result
+    vocab = result["vocabulary"]
+    assert "component" in vocab
+    assert "physical_base" in vocab
+
+    # Test rules section
+    result = asyncio.run(tool.get_naming_grammar(section="rules"))
+    assert "section" in result
+    assert result["section"] == "rules"
+    assert "validation_rules" in result
+    assert result["validation_rules"]["base_required"] is True
+
+    # Test examples section
+    result = asyncio.run(tool.get_naming_grammar(section="examples"))
+    assert "section" in result
+    assert result["section"] == "examples"
+    assert "composition_examples" in result
+    assert isinstance(result["composition_examples"], dict)
+
+    # Test that statistics section is no longer valid (grammar tool has no catalog)
+    result = asyncio.run(tool.get_naming_grammar(section="statistics"))
+    assert "error" in result
+    assert result["error"] == "Invalid section"
+    assert "available_sections" in result

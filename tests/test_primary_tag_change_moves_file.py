@@ -17,6 +17,7 @@ def test_modify_entry_with_primary_tag_change_deletes_old_file(tmp_path):
         "name": "test_quantity",
         "kind": "scalar",
         "description": "Test quantity for primary tag change.",
+        "documentation": "Test quantity for primary tag change validation.",
         "tags": ["fundamental", "spatial-profile"],
         "unit": "m",
         "status": "draft",
@@ -71,7 +72,9 @@ def test_rename_entry_preserves_primary_tag_directory(tmp_path):
         "name": "old_name",
         "kind": "scalar",
         "description": "Test entry for rename.",
+        "documentation": "Test entry for rename validation.",
         "tags": ["equilibrium", "spatial-profile"],
+        "unit": "m",
         "status": "draft",
     }
 
@@ -115,7 +118,9 @@ def test_rename_with_primary_tag_change_moves_file(tmp_path):
         "name": "old_name",
         "kind": "scalar",
         "description": "Test entry for rename with tag change.",
+        "documentation": "Test entry for rename with tag change validation.",
         "tags": ["fundamental", "spatial-profile"],
+        "unit": "m",
         "status": "draft",
     }
 

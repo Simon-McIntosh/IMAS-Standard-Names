@@ -1,0 +1,36 @@
+name: plasma_volume
+description: Total plasma volume.
+documentation: |-
+  Total plasma volume $V_p$ enclosed by the [plasma_boundary](#plasma_boundary), calculated as the volume integral. Plasma volume determines total stored energy, particle inventory, and fusion power in burning plasmas, affecting [energy_confinement_time](#energy_confinement_time) through scaling laws.
+
+  $$V_p = \int dV = 2\pi \int R \, dA$$
+
+  where $R$ is major radius in m, $dA$ is differential area element in poloidal plane in m$^2$, giving $V_p$ in m$^3$.
+
+  Geometric scaling:
+
+  For shaped plasmas, volume scales approximately as:
+
+  $$V_p \approx 2\pi^2 R_0 a^2 \kappa$$
+
+  where $R_0$ is major radius, $a$ is [minor_radius_of_plasma_boundary](#minor_radius_of_plasma_boundary), and $\kappa$ is [elongation_of_plasma_boundary](#elongation_of_plasma_boundary).
+
+  Physical significance:
+
+  Plasma volume determines total stored energy, particle inventory, and fusion power in burning plasmas. Larger volume generally improves confinement through favorable scaling laws. Volume affects [energy_confinement_time](#energy_confinement_time) and determines [plasma_current](#plasma_current) requirements. See [major_radius_of_plasma_boundary](#major_radius_of_plasma_boundary), [minor_radius_of_plasma_boundary](#minor_radius_of_plasma_boundary), and [elongation_of_plasma_boundary](#elongation_of_plasma_boundary) for geometric relationships.
+
+  Measurement methods:
+
+  Plasma volume is calculated from equilibrium reconstruction using external [magnetic_field](#magnetic_field) measurements. [Flux_loop_voltage](#flux_loop_voltage) integration provides boundary geometry information. Volume calculation requires [magnetic_axis](#magnetic_axis) location and [plasma_boundary](#plasma_boundary) identification. Geometric integration uses flux surface coordinates and shape parameters.
+
+  Typical values:
+
+  Small tokamaks: 1-10 m$^3$, medium tokamaks: 10-50 m$^3$, ITER: ~840 m$^3$. Volume scales with machine size and shape parameters.
+
+  Sign convention: Positive volume indicates enclosed plasma region, following standard geometric conventions with volume measured in cubic meters.
+status: draft
+tags:
+- equilibrium
+- global-quantity
+kind: scalar
+unit: m^3

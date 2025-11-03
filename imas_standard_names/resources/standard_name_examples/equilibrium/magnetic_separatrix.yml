@@ -1,0 +1,26 @@
+name: magnetic_separatrix
+description: Magnetic separatrix in diverted configuration.
+documentation: |-
+  The magnetic separatrix is the flux surface containing the X-point(s) in a diverted tokamak configuration, where the poloidal field vanishes locally ($\nabla \Psi = 0$). The separatrix divides closed flux surfaces (confined plasma) from open field lines that intersect divertor targets, defining the [plasma_boundary](#plasma_boundary) in diverted operation.
+
+  Topological structure:
+
+  At the X-point, poloidal field lines split into two branches forming the divertor legs. Field lines inside the separatrix close poloidally; those outside flow to material surfaces. The separatrix corresponds to the [last_closed_flux_surface](#last_closed_flux_surface) in diverted operation, with normalized poloidal flux $\Psi_N = 1$ at the separatrix.
+
+  Physical significance:
+
+  The separatrix geometry determines power handling and particle exhaust in diverted configurations. Heat and particles flowing along open field lines deposit on divertor targets. Separatrix shape and position relative to strike points are actively controlled to manage heat flux distribution. See [plasma_boundary](#plasma_boundary) for boundary relationships and [scrape_off_layer](#scrape_off_layer) for open field line region.
+
+  Relation to plasma boundary:
+
+  In diverted configurations, the separatrix defines the [plasma_boundary](#plasma_boundary). The [scrape_off_layer](#scrape_off_layer) extends from separatrix to [first_wall](#first_wall), with field lines intersecting divertor targets. Separatrix location affects [heating_power_due_to_ohmic](#heating_power_due_to_ohmic) and plasma performance.
+
+  Measurement methods:
+
+  Separatrix location is determined from equilibrium reconstruction using external [magnetic_field](#magnetic_field) measurements. [Flux_loop_voltage](#flux_loop_voltage) integration provides flux surface geometry. X-point identification requires field line tracing and flux surface analysis. Separatrix position is controlled through external coil currents. Divertor diagnostics measure strike point locations for separatrix mapping.
+status: draft
+tags:
+- equilibrium
+- divertor-configuration
+- flux-coordinates
+kind: metadata

@@ -1,17 +1,56 @@
 """Shared pytest fixtures for IMAS Standard Names tests."""
 
 import asyncio
+import importlib.resources as ir
 import tempfile
 from pathlib import Path
 
 import pytest
 
 from imas_standard_names.catalog.edit import EditCatalog
+from imas_standard_names.models import create_standard_name_entry
 from imas_standard_names.repository import StandardNameCatalog
 from imas_standard_names.tools.create import CreateTool
 from imas_standard_names.tools.fetch import FetchTool
 from imas_standard_names.tools.write import WriteTool
 from imas_standard_names.yaml_store import YamlStore
+
+
+# Helper functions for creating valid test entries
+def make_valid_entry(kind="scalar", **overrides):
+    """Create a valid standard name entry with all required fields.
+
+    Args:
+        kind: Entry kind (scalar, vector, metadata)
+        **overrides: Override default values for any field
+
+    Returns:
+        StandardNameEntry with all required fields populated
+    """
+    defaults = {
+        "kind": kind,
+        "name": "test_quantity",
+        "description": "Test quantity for unit tests.",
+        "documentation": "Detailed documentation for test quantity.",
+        "unit": "m^-3" if kind != "metadata" else "",
+        "status": "draft",
+        "tags": ["fundamental"],
+    }
+
+    # Merge with overrides
+    data = {**defaults, **overrides}
+
+    # Remove unit for metadata if not explicitly set
+    if kind == "metadata" and "unit" not in overrides:
+        data.pop("unit", None)
+
+    return create_standard_name_entry(data)
+
+
+@pytest.fixture
+def make_entry():
+    """Fixture providing the make_valid_entry helper function."""
+    return make_valid_entry
 
 
 # Configure pytest-anyio to only use asyncio backend (trio not installed)
@@ -130,143 +169,70 @@ def sample_entries_with_provenance():
     ]
 
 
+@pytest.fixture(scope="session")
+def examples_catalog():
+    """Load examples catalog using importlib.resources."""
+    files_obj = ir.files("imas_standard_names") / "resources" / "standard_name_examples"
+    with ir.as_file(files_obj) as examples_path:
+        return StandardNameCatalog(root=examples_path, permissive=True)
+
+
 @pytest.fixture
-def sample_catalog(tmp_path):
+def example_scalars(examples_catalog):
+    """Get scalar examples auto-discovered from catalog."""
+    return examples_catalog.list(kind="scalar")[:3]
+
+
+@pytest.fixture
+def example_vectors(examples_catalog):
+    """Get vector examples auto-discovered from catalog."""
+    return examples_catalog.list(kind="vector")[:3]
+
+
+@pytest.fixture
+def example_metadata(examples_catalog):
+    """Get metadata examples auto-discovered from catalog."""
+    return examples_catalog.list(kind="metadata")[:2]
+
+
+@pytest.fixture
+def copy_examples(examples_catalog):
+    """Return function to copy examples to temp directory."""
+
+    def _copy(target_dir: Path, count: int = 5, kind: str | None = None):
+        examples = examples_catalog.list(kind=kind)[:count]
+        for entry in examples:
+            primary_tag = entry.tags[0] if entry.tags else "other"
+            (target_dir / primary_tag).mkdir(exist_ok=True)
+        target_store = YamlStore(target_dir)
+        for entry in examples:
+            target_store.write(entry)
+        return examples
+
+    return _copy
+
+
+@pytest.fixture
+def sample_catalog(tmp_path, examples_catalog):
     """Create a StandardNameCatalog pre-populated with sample entries.
 
     This fixture provides a catalog with several standard entries for tests
     that need existing data (e.g., testing search, list, edit operations).
-    Includes scalars and vectors for comprehensive testing.
+    Uses real examples from the examples catalog for comprehensive testing.
     Isolated from production catalog and cleaned up automatically.
     """
     catalog_dir = tmp_path / "sample_catalog"
     catalog_dir.mkdir()
 
-    # Create subdirectories for primary tags
-    (catalog_dir / "fundamental").mkdir()
-    (catalog_dir / "magnetics").mkdir()
-    (catalog_dir / "equilibrium").mkdir()
-    (catalog_dir / "core-physics").mkdir()
-    (catalog_dir / "transport").mkdir()
+    # Copy examples from the examples catalog
+    examples = examples_catalog.list()[:10]  # Get first 10 examples for variety
+    for entry in examples:
+        primary_tag = entry.tags[0] if entry.tags else "other"
+        (catalog_dir / primary_tag).mkdir(exist_ok=True)
 
-    # Sample entries - mix of scalars and vectors with valid tags
-    sample_entries = {
-        # Scalar entries
-        "fundamental/magnetic_field.yml": """name: magnetic_field
-kind: scalar
-description: Magnitude of the magnetic field vector
-unit: T
-tags:
-  - fundamental
-  - measured
-status: active
-""",
-        "fundamental/electron_density.yml": """name: electron_density
-kind: scalar
-description: Electron number density
-unit: m^-3
-tags:
-  - fundamental
-  - measured
-status: active
-""",
-        "magnetics/poloidal_magnetic_field.yml": """name: poloidal_magnetic_field
-kind: scalar
-description: Poloidal component of magnetic field
-unit: T
-tags:
-  - magnetics
-  - measured
-status: active
-""",
-        "equilibrium/plasma_current.yml": """name: plasma_current
-kind: scalar
-description: Total plasma current
-unit: A
-tags:
-  - equilibrium
-  - measured
-status: active
-""",
-        "fundamental/ion_temperature.yml": """name: ion_temperature
-kind: scalar
-description: Ion temperature
-unit: eV
-tags:
-  - fundamental
-  - measured
-status: active
-""",
-        "fundamental/electron_temperature.yml": """name: electron_temperature
-kind: scalar
-description: Electron temperature
-unit: eV
-tags:
-  - fundamental
-  - measured
-status: active
-""",
-        # Vector entries (use primary tags: core-physics, edge-physics, magnetics)
-        "core-physics/electron_density_profile.yml": """name: electron_density_profile
-kind: vector
-description: Radial profile of electron number density
-unit: m^-3
-tags:
-  - core-physics
-  - spatial-profile
-  - measured
-status: active
-""",
-        "core-physics/electron_temperature_profile.yml": """name: electron_temperature_profile
-kind: vector
-description: Radial profile of electron temperature
-unit: eV
-tags:
-  - core-physics
-  - spatial-profile
-  - measured
-status: active
-""",
-        "magnetics/magnetic_field_components.yml": """name: magnetic_field_components
-kind: vector
-description: Components of the magnetic field vector
-unit: T
-tags:
-  - magnetics
-  - measured
-status: active
-""",
-        "core-physics/ion_temperature_profile.yml": """name: ion_temperature_profile
-kind: vector
-description: Radial profile of ion temperature
-unit: eV
-tags:
-  - core-physics
-  - spatial-profile
-  - measured
-status: active
-""",
-        # Entry with operator provenance (gradient)
-        "transport/electron_density_gradient.yml": """name: electron_density_gradient
-kind: vector
-description: Gradient of electron density
-unit: m^-3.m^-1
-tags:
-  - transport
-  - derived
-  - spatial-profile
-status: active
-provenance:
-  mode: operator
-  operators:
-    - gradient
-  operator_id: gradient
-  base: electron_density
-""",
-    }  # Write sample entries to disk
-    for rel_path, content in sample_entries.items():
-        file_path = catalog_dir / rel_path
-        file_path.write_text(content)
+    target_store = YamlStore(catalog_dir)
+    for entry in examples:
+        target_store.write(entry)
 
     # Return initialized catalog
     return StandardNameCatalog(root=catalog_dir)

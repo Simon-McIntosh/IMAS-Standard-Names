@@ -1,0 +1,75 @@
+machine: MAST-U
+facility: UK Atomic Energy Authority
+location: Culham, United Kingdom
+operational_status: operational
+last_updated: "2025-11-03"
+sources:
+  - url: https://fusionwiki.ciemat.es/wiki/MAST-U
+    accessed: "2025-11-03"
+    description: "FusionWiki comprehensive database"
+  - url: https://ccfe.ukaea.uk/research/mast-upgrade/
+    description: "UKAEA MAST-U page"
+
+geometry:
+  major_radius:
+    value: 0.85
+    unit: m
+    symbol: R_0
+  minor_radius:
+    value: 0.65
+    unit: m
+    symbol: a
+  plasma_volume:
+    value: 11
+    unit: m^3
+    symbol: V_p
+  elongation:
+    value: 2.5
+    unit: "1"
+    symbol: kappa
+  triangularity:
+    value: 0.45
+    unit: "1"
+    symbol: delta
+  aspect_ratio:
+    value: 1.3
+    unit: "1"
+    symbol: A
+    note: "R_0/a, spherical tokamak"
+
+physics:
+  toroidal_magnetic_field:
+    value: 0.95
+    unit: T
+    symbol: B_T
+    location: "at major radius R_0"
+  plasma_current:
+    value: 1.9
+    unit: MA
+    symbol: I_p
+    note: "design value"
+  edge_safety_factor:
+    value: 3.0
+    unit: "1"
+    symbol: q_95
+  electron_density:
+    value: 5.0e19
+    unit: m^-3
+    symbol: n_e
+    note: "typical"
+  ion_temperature:
+    value: 1.5
+    unit: keV
+    symbol: T_i
+    note: "typical"
+  electron_temperature:
+    value: 1.5
+    unit: keV
+    symbol: T_e
+    note: "typical"
+  energy_confinement_time:
+    value: 0.05
+    unit: s
+    symbol: tau_E
+    note: "typical"
+

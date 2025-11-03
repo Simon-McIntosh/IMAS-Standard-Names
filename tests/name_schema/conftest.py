@@ -12,6 +12,7 @@ def scalar_data():
         "kind": "scalar",
         "name": "electron_temperature",
         "description": "Core electron temperature",
+        "documentation": "Temperature of electrons in the plasma core.",
         "unit": "eV",
         "status": "active",
         "tags": ["fundamental", "measured"],
@@ -24,8 +25,10 @@ def vector_data():
         "kind": "vector",
         "name": "plasma_velocity",
         "description": "Bulk plasma velocity",
+        "documentation": "Velocity vector of the bulk plasma flow.",
         "unit": "m.s^-1",
         "status": "active",
+        "tags": ["transport"],
     }
 
 
@@ -35,8 +38,10 @@ def operator_scalar_data():
         "kind": "scalar",
         "name": "divergence_of_plasma_velocity",
         "description": "Divergence of velocity",
+        "documentation": "Divergence operator applied to plasma velocity field.",
         "unit": "s^-1",
         "status": "active",
+        "tags": ["transport"],
         "provenance": {
             "mode": "operator",
             "operators": ["divergence"],
@@ -52,8 +57,10 @@ def gradient_vector_data():
         "kind": "vector",
         "name": "gradient_of_electron_temperature",
         "description": "Spatial gradient of Te",
+        "documentation": "Gradient operator applied to electron temperature field.",
         "unit": "eV.m^-1",
         "status": "active",
+        "tags": ["transport"],
         "provenance": {
             "mode": "operator",
             "operators": ["gradient"],
@@ -69,8 +76,10 @@ def expression_scalar_data():
         "kind": "scalar",
         "name": "pressure_balance_indicator",
         "description": "Derived scalar from multiple quantities",
-        "unit": "",
+        "documentation": "Indicator derived from electron and ion temperatures via expression.",
+        "unit": "1",
         "status": "draft",
+        "tags": ["core-physics"],
         "provenance": {
             "mode": "expression",
             "expression": "electron_temperature * ion_temperature",

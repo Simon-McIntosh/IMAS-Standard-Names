@@ -9,6 +9,7 @@
 - radial
 - toroidal
 - vertical
+- poloidal
 - parallel
 - diamagnetic
 - normal
@@ -17,4 +18,4 @@
 - x
 - y
 - z
-- poloidal
+

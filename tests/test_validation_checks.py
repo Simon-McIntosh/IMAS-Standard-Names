@@ -15,6 +15,9 @@ kind: vector
 status: draft
 unit: K.m^-1
 description: Gradient of temperature.
+documentation: |
+  Gradient of temperature for structural and semantic validation testing.
+tags: [fundamental]
 provenance:
   mode: operator
   operators: [gradient]
@@ -29,6 +32,9 @@ kind: scalar
 status: draft
 unit: K.m^-1
 description: Radial component.
+documentation: |
+  Radial component of gradient of temperature for structural and semantic validation testing.
+tags: [fundamental]
 provenance:
   mode: operator
   operators: [gradient]
@@ -43,6 +49,9 @@ kind: scalar
 status: draft
 unit: K.m^-1
 description: Toroidal component.
+documentation: |
+  Toroidal component of gradient of temperature for structural and semantic validation testing.
+tags: [fundamental]
 provenance:
   mode: operator
   operators: [gradient]

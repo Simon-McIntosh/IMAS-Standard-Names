@@ -24,10 +24,10 @@ from imas_standard_names.provenance import (
     OperatorProvenance,
     ReductionProvenance,
 )
-from imas_standard_names.tools.base import BaseTool
+from imas_standard_names.tools.base import CatalogTool
 
 
-class FetchTool(BaseTool):
+class FetchTool(CatalogTool):
     """Tool for comprehensive standard name retrieval."""
 
     @property
@@ -86,7 +86,6 @@ class FetchTool(BaseTool):
                     "name": name,
                     "description": entry.description,
                     "documentation": entry.documentation,
-                    "unit": str(entry.unit),
                     "status": entry.status,
                     "kind": entry.kind,
                     "validity_domain": entry.validity_domain,
@@ -98,8 +97,13 @@ class FetchTool(BaseTool):
                         "derived_from": derived_from,
                     },
                     "tags": entry.tags,
-                    "links": [{"url": link} for link in entry.links],
+                    "links": self._format_links(entry.links),
                 }
+
+                # Only include unit field for scalar and vector entries
+                if entry.kind != "metadata":
+                    entry_dict["unit"] = str(entry.unit)
+
                 entries.append(entry_dict)
             else:
                 not_found.append(name)
@@ -114,6 +118,26 @@ class FetchTool(BaseTool):
 
         return {"entries": entries, "summary": summary}
 
+    def _format_links(self, links: list[str]) -> list[dict[str, str]]:
+        """Format links with type discrimination.
+
+        Args:
+            links: List of link strings (URLs or internal references)
+
+        Returns:
+            List of link dicts with 'type' and appropriate key ('url' or 'name')
+        """
+        formatted = []
+        for link in links:
+            if link.startswith("name:"):
+                # Internal standard name reference
+                name_part = link[5:].strip()
+                formatted.append({"type": "standard_name", "name": name_part})
+            else:
+                # External URL
+                formatted.append({"type": "url", "url": link})
+        return formatted
+
     def _get_derived_from(self, entry: StandardNameEntry) -> list[str]:
         """Extract derivation dependencies from entry.
 
@@ -123,7 +147,7 @@ class FetchTool(BaseTool):
         Returns:
             List of standard name dependencies from provenance.
         """
-        if not entry.provenance:
+        if not hasattr(entry, "provenance") or not entry.provenance:
             return []
 
         # Handle different provenance types

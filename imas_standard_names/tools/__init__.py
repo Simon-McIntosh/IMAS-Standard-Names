@@ -1,14 +1,22 @@
+import logging
+
 from fastmcp import FastMCP
 
 from imas_standard_names.catalog.edit import EditCatalog
 from imas_standard_names.repository import StandardNameCatalog
 from imas_standard_names.tools.check import CheckTool
+from imas_standard_names.tools.compose import ComposeTool
 from imas_standard_names.tools.create import CreateTool
 from imas_standard_names.tools.edit import CatalogTool
 from imas_standard_names.tools.fetch import FetchTool
-from imas_standard_names.tools.names import NamesTool
-from imas_standard_names.tools.overview import OverviewTool
+from imas_standard_names.tools.list_standard_names import ListTool
+from imas_standard_names.tools.naming_grammar import NamingGrammarTool
+from imas_standard_names.tools.schema import SchemaTool
 from imas_standard_names.tools.search import SearchTool
+from imas_standard_names.tools.tokamak_parameters import TokamakParametersTool
+from imas_standard_names.tools.validate_catalog import ValidateCatalogTool
+from imas_standard_names.tools.vocabulary import VocabularyTool
+from imas_standard_names.tools.vocabulary_tokens import VocabularyTokensTool
 from imas_standard_names.tools.write import WriteTool
 
 
@@ -23,20 +31,37 @@ class Tools:
                          If None, uses the default packaged resources directory.
         """
         # Create shared in-memory standard name repository
-        self.catalog = StandardNameCatalog(root=catalog_root)
-        # Editing facade (persistent multi-call edit session support)
+        # Always use permissive mode for MCP tools to ensure tools are available to fix issues
+        self.catalog = StandardNameCatalog(root=catalog_root, permissive=True)
         self.edit_catalog = EditCatalog(self.catalog)
-        # Initialize individual tools with shared standard names catalog
+        self.examples_catalog = StandardNameCatalog(
+            root="./imas_standard_names/resources/standard_name_examples",
+            permissive=True,
+        )
+
+        # Metadata tools (operate on static grammar/schema, not catalog data)
+        self.grammar_tool = NamingGrammarTool(self.examples_catalog)
+        self.schema_tool = SchemaTool(self.examples_catalog)
+        self.compose_tool = ComposeTool()
+
+        # Read-only catalog tools (query and validate catalog entries)
         self.search_tool = SearchTool(self.catalog)
-        self.overview_tool = OverviewTool(self.catalog)
-        # Give overview tool access to edit catalog for diff classification when tests attach it
-        # (Tests may also set tool.edit_catalog directly.)
-        self.catalog_tool = CatalogTool(self.catalog, self.edit_catalog)
-        self.names_tool = NamesTool(self.catalog)
         self.check_tool = CheckTool(self.catalog)
         self.fetch_tool = FetchTool(self.catalog)
-        self.write_tool = WriteTool(self.catalog, self.edit_catalog)
+        self.vocabulary_tokens_tool = VocabularyTokensTool(self.catalog)
+        self.validate_catalog_tool = ValidateCatalogTool(self.catalog)
+
+        # Edit/write tools (modify catalog state or vocabulary files)
+        self.list_tool = ListTool(self.catalog, self.edit_catalog)
+        self.catalog_tool = CatalogTool(self.catalog, self.edit_catalog)
         self.create_tool = CreateTool(self.catalog, self.edit_catalog)
+        self.write_tool = WriteTool(self.catalog, self.edit_catalog)
+        self.vocabulary_tool = VocabularyTool(
+            self.catalog
+        )  # Edits vocabulary YAML files
+
+        # Reference data tools (external databases)
+        self.tokamak_parameters_tool = TokamakParametersTool()
 
     @property
     def name(self) -> str:
@@ -53,14 +78,20 @@ class Tools:
         """
 
         tool_instances = [
+            self.grammar_tool,
+            self.schema_tool,
+            self.list_tool,
+            self.compose_tool,
             self.search_tool,
-            self.overview_tool,
-            self.catalog_tool,
-            self.names_tool,
             self.check_tool,
             self.fetch_tool,
-            self.write_tool,
+            self.catalog_tool,
             self.create_tool,
+            self.write_tool,
+            self.vocabulary_tokens_tool,
+            self.vocabulary_tool,
+            self.validate_catalog_tool,
+            self.tokamak_parameters_tool,
         ]
 
         for tool in tool_instances:

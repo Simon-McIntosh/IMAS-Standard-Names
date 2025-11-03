@@ -32,6 +32,7 @@ from imas_standard_names.editing.edit_models import (
 )
 from imas_standard_names.models import StandardNameEntry, create_standard_name_entry
 from imas_standard_names.unit_of_work import UnitOfWork
+from imas_standard_names.validation.description import validate_description
 
 ModelDict = dict[str, Any]
 
@@ -75,16 +76,50 @@ class EditCatalog:
         self._mark_dirty(model.name)
         return model
 
-    def modify(self, name: str, model_data: dict):
-        model = create_standard_name_entry(model_data)
+    def modify(
+        self, name: str, model_data: dict | None = None, updates: dict | None = None
+    ):
+        """Modify an existing entry by full replacement or partial update.
+
+        Args:
+            name: Name of entry to modify
+            model_data: Full model dict for complete replacement
+            updates: Partial dict of fields to update
+        """
+        if model_data is None and updates is None:
+            raise ValueError("Must provide either model_data or updates")
+        if model_data is not None and updates is not None:
+            raise ValueError("Cannot provide both model_data and updates")
+
+        if updates is not None:
+            # Partial update: fetch current, merge, validate
+            current = self.catalog.get(name)
+            if current is None:
+                raise ValueError(f"Cannot update non-existent entry: {name}")
+            current_dict = serialize_model(current)
+            merged = {**current_dict, **updates}
+            model = create_standard_name_entry(merged)
+        else:
+            # Full replacement
+            model = create_standard_name_entry(model_data)
+
         self.uow.update(name, model)
         self._mark_dirty(name, model.name)
-        return model
+
+        # Validate description if it changed (warnings only)
+        description_warnings = None
+        if (updates and "description" in updates) or model_data:
+            description_issues = validate_description(serialize_model(model))
+            if description_issues:
+                description_warnings = description_issues
+
+        return model, description_warnings
 
     def rename(self, old_name: str, model_data: dict):
         model = create_standard_name_entry(model_data)
         if model.name == old_name:
-            return self.modify(old_name, model_data)
+            model, _warnings = self.modify(old_name, model_data)
+            return model
         self.uow.rename(old_name, model)
         self._renames.append((old_name, model.name))
         self._mark_dirty(old_name, model.name)
@@ -216,13 +251,11 @@ class EditCatalog:
         Supports:
         - Automatic dependency ordering via provenance
         - Continue-on-error or atomic transaction modes
-        - Dry-run validation without committing
         - Resume from specific index
         """
         start_time = time.time()
         operations = batch_input.operations
         mode = batch_input.mode
-        dry_run = batch_input.dry_run
         resume_from = batch_input.resume_from_index
 
         # Dependency ordering
@@ -251,7 +284,7 @@ class EditCatalog:
         # For atomic mode, create snapshot before starting
         snapshot = None
         snapshot_uow_state = None
-        if mode == "atomic" and not dry_run:
+        if mode == "atomic":
             snapshot = self._take_snapshot()
             snapshot_uow_state = deepcopy(self._uow) if self._uow else None
 
@@ -270,32 +303,18 @@ class EditCatalog:
                 continue
 
             try:
-                if dry_run:
-                    # Validate without committing
-                    result = self._validate_operation(op)
-                    results.append(
-                        OperationResult(
-                            index=idx,
-                            operation=op,
-                            status="success",
-                            result=result,
-                        )
+                # Apply operation
+                result = self.apply(op)
+                results.append(
+                    OperationResult(
+                        index=idx,
+                        operation=op,
+                        status="success",
+                        result=result,
                     )
-                    successful_count += 1
-                    last_successful_index = idx
-                else:
-                    # Apply operation
-                    result = self.apply(op)
-                    results.append(
-                        OperationResult(
-                            index=idx,
-                            operation=op,
-                            status="success",
-                            result=result,
-                        )
-                    )
-                    successful_count += 1
-                    last_successful_index = idx
+                )
+                successful_count += 1
+                last_successful_index = idx
 
             except Exception as e:
                 # Capture error details
@@ -318,7 +337,7 @@ class EditCatalog:
                 # Handle atomic mode failure
                 if mode == "atomic":
                     # Rollback all changes
-                    if not dry_run and snapshot is not None:
+                    if snapshot is not None:
                         self._baseline_snapshot = snapshot
                         self._uow = snapshot_uow_state
                         if self._uow:
@@ -348,7 +367,6 @@ class EditCatalog:
                 "skipped": skipped_count,
                 "duration_ms": duration_ms,
                 "mode": mode,
-                "dry_run": dry_run,
             },
             results=results,
             last_successful_index=last_successful_index,
@@ -372,24 +390,18 @@ class EditCatalog:
                     raise KeyError(f"Entry '{op.old_name}' not found")
                 if self.catalog.get(op.new_name):
                     raise ValueError(f"Target name '{op.new_name}' already exists")
-                # Check dependencies if dry_run
-                dependencies = (
-                    self._find_dependencies(op.old_name) if op.dry_run else None
-                )
+                dependencies = self._find_dependencies(op.old_name)
                 return RenameResult(
                     old_name=op.old_name,
                     new_name=op.new_name,
-                    dry_run=op.dry_run,
                     dependencies=dependencies,
                 )
             case DeleteInput():
                 existing = self.catalog.get(op.name)
-                # Check dependencies if dry_run
-                dependencies = self._find_dependencies(op.name) if op.dry_run else None
+                dependencies = self._find_dependencies(op.name)
                 return DeleteResult(
                     old_model=existing,
                     existed=existing is not None,
-                    dry_run=op.dry_run,
                     dependencies=dependencies,
                 )
             case _:
@@ -443,11 +455,9 @@ class EditCatalog:
         """Delete multiple entries in a batch operation.
 
         Returns summary with list of (name, existed, dependencies) tuples.
-        If dry_run is True, validates and shows dependencies without deleting.
         """
         start_time = time.time()
         names = batch_delete_input.names
-        dry_run = batch_delete_input.dry_run
 
         results: list[tuple[str, bool, list[str] | None]] = []
         successful = 0
@@ -457,9 +467,9 @@ class EditCatalog:
             try:
                 existing = self.catalog.get(name)
                 existed = existing is not None
-                dependencies = self._find_dependencies(name) if dry_run else None
+                dependencies = self._find_dependencies(name)
 
-                if not dry_run and existed:
+                if existed:
                     self.delete(name)
 
                 results.append((name, existed, dependencies))
@@ -477,10 +487,8 @@ class EditCatalog:
                 "successful": successful,
                 "failed": failed,
                 "duration_ms": duration_ms,
-                "dry_run": dry_run,
             },
             results=results,
-            dry_run=dry_run,
         )
 
     def apply(self, apply_input: dict | ApplyInput) -> ApplyResult:
@@ -504,27 +512,29 @@ class EditCatalog:
                 old_model = (
                     existing.model_copy(deep=True) if existing else None  # type: ignore[attr-defined]
                 )
-                model = self.modify(
-                    apply_input.name,
-                    apply_input.model.model_dump(),  # type: ignore[attr-defined]
-                )
+
+                # Handle full model replacement or partial updates
+                warnings = None
+                if apply_input.model is not None:
+                    model, warnings = self.modify(
+                        apply_input.name,
+                        model_data=apply_input.model.model_dump(),  # type: ignore[attr-defined]
+                    )
+                else:
+                    model, warnings = self.modify(
+                        apply_input.name,
+                        updates=apply_input.updates,
+                    )
+
                 if old_model is None:
                     raise KeyError(f"Entry '{apply_input.name}' not found")
-                return ModifyResult(old_model=old_model, new_model=model)
+                return ModifyResult(
+                    old_model=old_model, new_model=model, warnings=warnings
+                )
             case RenameInput():
                 existing = self.catalog.get(apply_input.old_name)
                 if not existing:
                     raise KeyError(apply_input.old_name)
-
-                # Handle dry_run
-                if apply_input.dry_run:
-                    dependencies = self._find_dependencies(apply_input.old_name)
-                    return RenameResult(
-                        old_name=apply_input.old_name,
-                        new_name=apply_input.new_name,
-                        dry_run=True,
-                        dependencies=dependencies,
-                    )
 
                 cloned = existing.model_copy(deep=True)  # type: ignore[attr-defined]
                 cloned.name = apply_input.new_name  # type: ignore[attr-defined]
@@ -532,22 +542,21 @@ class EditCatalog:
                     apply_input.old_name,
                     cloned.model_dump(),  # type: ignore[attr-defined]
                 )
-                return RenameResult(old_name=apply_input.old_name, new_name=model.name)
+                dependencies = self._find_dependencies(apply_input.old_name)
+                return RenameResult(
+                    old_name=apply_input.old_name,
+                    new_name=model.name,
+                    dependencies=dependencies,
+                )
             case DeleteInput():
                 existing = self.catalog.get(apply_input.name)
-
-                # Handle dry_run
-                if apply_input.dry_run:
-                    dependencies = self._find_dependencies(apply_input.name)
-                    return DeleteResult(
-                        old_model=existing,
-                        existed=existing is not None,
-                        dry_run=True,
-                        dependencies=dependencies,
-                    )
-
                 existed = self.delete(apply_input.name)
-                return DeleteResult(old_model=existing, existed=existed)
+                dependencies = self._find_dependencies(apply_input.name)
+                return DeleteResult(
+                    old_model=existing,
+                    existed=existed,
+                    dependencies=dependencies,
+                )
             case _:  # pragma: no cover - defensive
                 raise RuntimeError("Unhandled edit input")
 

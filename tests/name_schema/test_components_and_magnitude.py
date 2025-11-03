@@ -11,8 +11,10 @@ def test_component_scalar_now_minimal():
             "kind": "scalar",
             "name": "radial_component_of_plasma_velocity",
             "description": "Radial component",
+            "documentation": "Radial component of plasma velocity.",
             "unit": "m.s^-1",
             "status": "active",
+            "tags": ["fundamental"],
         }
     )
     assert sn.name.startswith("radial_component_of_")
@@ -29,8 +31,10 @@ def test_invalid_component_token_rejected():
                 "kind": "scalar",
                 "name": "r_component_of_plasma_velocity",
                 "description": "Invalid radial component using 'r' instead of 'radial'",
+                "documentation": "Test entry for grammar validation.",
                 "unit": "m.s^-1",
                 "status": "draft",
+                "tags": ["fundamental"],
             }
         )
 
@@ -44,8 +48,10 @@ def test_invalid_component_token_rejected():
                 "kind": "scalar",
                 "name": "tor_component_of_magnetic_field",
                 "description": "Invalid toroidal component using 'tor' instead of 'toroidal'",
+                "documentation": "Test entry for grammar validation.",
                 "unit": "T",
                 "status": "draft",
+                "tags": ["fundamental"],
             }
         )
 
@@ -58,8 +64,10 @@ def test_valid_component_tokens_accepted():
             "kind": "scalar",
             "name": "radial_component_of_plasma_velocity",
             "description": "Valid radial component",
+            "documentation": "Radial component of plasma velocity.",
             "unit": "m.s^-1",
             "status": "draft",
+            "tags": ["fundamental"],
         }
     )
     assert sn1.name == "radial_component_of_plasma_velocity"
@@ -70,8 +78,10 @@ def test_valid_component_tokens_accepted():
             "kind": "scalar",
             "name": "toroidal_component_of_magnetic_field",
             "description": "Valid toroidal component",
+            "documentation": "Toroidal component of magnetic field.",
             "unit": "T",
             "status": "draft",
+            "tags": ["fundamental"],
         }
     )
     assert sn2.name == "toroidal_component_of_magnetic_field"
@@ -84,8 +94,10 @@ def test_vector_invalid_component_prefix():
                 "kind": "vector",
                 "name": "magnetic_field",
                 "description": "B field",
+                "documentation": "Magnetic field vector.",
                 "unit": "T",
                 "status": "active",
+                "tags": ["fundamental"],
                 "frame": "cylindrical_r_tor_z",
                 "components": {
                     "r": "radial_component_of_magnetic_field",
@@ -102,8 +114,10 @@ def test_vector_invalid_axis_token():
                 "kind": "vector",
                 "name": "flow",
                 "description": "Flow",
+                "documentation": "Flow vector.",
                 "unit": "m.s^-1",
                 "status": "active",
+                "tags": ["fundamental"],
                 "frame": "cylindrical_r_tor_z",
                 "components": {
                     "radial": "radial_component_of_flow",
@@ -119,8 +133,10 @@ def test_valid_vector_with_magnitude():
             "kind": "vector",
             "name": "plasma_velocity",
             "description": "Velocity",
+            "documentation": "Plasma velocity vector.",
             "unit": "m.s^-1",
             "status": "active",
+            "tags": ["fundamental"],
         }
     )
     # Magnitude is a computed property on vector models

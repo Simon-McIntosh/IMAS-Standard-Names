@@ -1,3 +1,4 @@
+import importlib.resources as ir
 import json
 from collections.abc import Iterable
 from contextlib import contextmanager
@@ -15,30 +16,12 @@ from imas_standard_names.unit_of_work import UnitOfWork
 # Shared baseline data ---------------------------------------------------------
 @pytest.fixture(scope="session")
 def base_names_data():
-    """Return iterable of minimal per-file standard name dicts."""
-    return [
-        {
-            "name": "plasma_current",
-            "kind": "scalar",
-            "status": "draft",
-            "unit": "A",
-            "description": "Total plasma current",
-        },
-        {
-            "name": "plasma_current_density",
-            "kind": "scalar",
-            "status": "draft",
-            "unit": "A.m^-2",
-            "description": "Plasma current density",
-        },
-        {
-            "name": "electron_temperature",
-            "kind": "scalar",
-            "status": "draft",
-            "unit": "eV",
-            "description": "Electron temperature",
-        },
-    ]
+    """Load example scalars from catalog."""
+    files_obj = ir.files("imas_standard_names") / "resources" / "standard_name_examples"
+    with ir.as_file(files_obj) as examples_path:
+        catalog = StandardNameCatalog(root=examples_path, permissive=True)
+        scalars = catalog.list(kind="scalar")[:3]
+        return [entry.model_dump() for entry in scalars]
 
 
 @pytest.fixture(scope="session")
@@ -51,11 +34,12 @@ def base_genericnames():
 
 @pytest.fixture
 def github_input():
+    """GitHub issue form submission data with all required fields."""
     return {
-        "name": "ion_temperature",
-        "units": "A",
-        "documentation": "multi-line\ndoc string",
-        "tags": "",
+        "name": "test_new_quantity",
+        "units": "eV",
+        "documentation": "Test quantity for validation.\n\nThis is a multi-line documentation string for testing purposes.",
+        "tags": "core-physics",
         "options": [],
     }
 
@@ -137,7 +121,7 @@ def extended_names_data(base_names_data):
             "name": "a_new_standard_name",
             "kind": "scalar",
             "status": "draft",
-            "unit": "",
+            "unit": "1",
             "description": "desc",
         }
     ]

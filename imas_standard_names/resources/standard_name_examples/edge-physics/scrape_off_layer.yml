@@ -1,0 +1,31 @@
+name: scrape_off_layer
+description: Region outside last closed flux surface.
+documentation: |-
+  The scrape-off layer (SOL) is the region between the [last_closed_flux_surface](#last_closed_flux_surface) and the [first_wall](#first_wall) where magnetic field lines intersect material surfaces. In diverted configurations, the SOL includes the field lines that connect to the [divertor](#divertor) targets. The SOL is critical for plasma-wall interactions and power handling in tokamak operation.
+
+  Physics context:
+
+  The SOL is characterized by open field lines, steep gradients in plasma parameters, and direct plasma-wall interactions. Heat and particles flow along field lines to material surfaces, making the SOL critical for power handling and impurity control. The SOL width determines heat flux spreading and affects [heat_flux_to_divertor](#heat_flux_to_divertor) distribution. See [plasma_boundary](#plasma_boundary) for confined plasma boundary and [magnetic_separatrix](#magnetic_separatrix) for diverted topology.
+
+  Physical significance:
+
+  The SOL controls plasma-wall interactions and determines impurity generation and fuel recycling. Heat and particles flowing along field lines deposit on material surfaces, affecting [first_wall](#first_wall) loading and [divertor](#divertor) performance. SOL parameters affect [plasma_boundary](#plasma_boundary) stability and MHD mode structure. SOL width determines power handling capabilities and affects [plasma_current](#plasma_current) requirements.
+
+  Key processes:
+
+  Parallel transport along field lines dominates energy and particle loss. Cross-field transport through turbulence and drifts determines SOL width. Plasma-neutral interactions include recycling, sputtering, and radiation. Impurity generation and transport affect core contamination. Power balance includes conducted and radiated power to material surfaces.
+
+  Related quantities:
+
+  The SOL relates to [plasma_boundary](#plasma_boundary) through the last closed flux surface, [magnetic_separatrix](#magnetic_separatrix) in diverted operation, and [heat_flux_to_divertor](#heat_flux_to_divertor) through power deposition patterns. SOL width affects [divertor](#divertor) loading and plasma performance. SOL parameters influence [energy_confinement_time](#energy_confinement_time).
+
+  Measurement methods:
+
+  SOL parameters are measured using edge diagnostics including Thomson scattering for temperature and density, Langmuir probes for plasma parameters, and heat flux monitors for power deposition. [Flux_loop_voltage](#flux_loop_voltage) integration provides boundary information. SOL analysis requires multiple diagnostic measurements across the edge region.
+status: active
+tags:
+- edge-physics
+- flux-coordinates
+links:
+- name:plasma_boundary
+kind: metadata

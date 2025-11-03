@@ -1,0 +1,21 @@
+# Schema defines structure for all tokamak parameter files
+version: "1.0"
+required_fields:
+  - machine
+  - facility
+  - location
+  - operational_status
+  - last_updated
+  - sources
+  - geometry
+  - physics
+
+geometry_required:
+  - major_radius
+  - minor_radius
+  - plasma_volume
+
+physics_required:
+  - toroidal_magnetic_field
+  - plasma_current
+

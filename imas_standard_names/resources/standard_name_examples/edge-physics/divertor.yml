@@ -1,0 +1,25 @@
+name: divertor
+description: Divertor plasma-facing component.
+documentation: |-
+  The divertor is a specialized plasma-facing component designed to exhaust heat and particles from the plasma by directing open field lines from the [scrape_off_layer](#scrape_off_layer) to remote target plates. Divertor configuration is the standard approach for power handling in modern tokamaks.
+
+  Physical principle:
+
+  The divertor uses a null point ([magnetic_separatrix](#magnetic_separatrix)) in the poloidal field to separate the confined plasma from a divertor chamber. Open field lines in the SOL intersect target plates in the divertor, where plasma recombines and neutrals are pumped. The divertor geometry controls particle and energy exhaust through magnetic field line topology.
+
+  Power handling:
+
+  The divertor must handle significant heat flux (5-20 MW/m$^2$ steady-state, higher during transients) while maintaining acceptable target temperature and limiting erosion. Detachment (reducing target temperature via radiation and volumetric recombination) is used for power dissipation. Heat flux distribution determines [heat_flux_to_divertor](#heat_flux_to_divertor) patterns and target loading.
+
+  Fueling and exhaust:
+
+  The divertor region provides fueling through gas injection and removes helium ash and impurities via differential pumping. Closed divertor geometries improve neutral compression for effective pumping. The divertor controls particle balance and impurity contamination of the core plasma.
+
+  Related quantities:
+
+  The divertor relates to [plasma_boundary](#plasma_boundary) through the magnetic separatrix, [scrape_off_layer](#scrape_off_layer) through open field lines, and [heat_flux_to_divertor](#heat_flux_to_divertor) through power deposition patterns. Divertor configuration affects [first_wall](#first_wall) loading and plasma performance.
+status: draft
+tags:
+- edge-physics
+- divertor-configuration
+kind: metadata

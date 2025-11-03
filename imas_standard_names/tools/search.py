@@ -1,10 +1,10 @@
 from fastmcp import Context
 
 from imas_standard_names.decorators.mcp import mcp_tool
-from imas_standard_names.tools.base import BaseTool
+from imas_standard_names.tools.base import CatalogTool
 
 
-class SearchTool(BaseTool):
+class SearchTool(CatalogTool):
     """Tool for searching the Standard Names Catalog using service composition.
 
     Behavior:
@@ -21,9 +21,10 @@ class SearchTool(BaseTool):
 
     @mcp_tool(
         description=(
-            "Ranked full-text + fuzzy search over the IMAS Standard Names catalog. "
+            "Ranked full-text + fuzzy search over the IMAS Standard Names catalog with optional field filters. "
             "Searches ONLY persisted (written to disk) entries - pending in-memory entries are NOT included. "
             "Input: free-text query (case-insensitive tokens / partial tokens). "
+            "Optional filters: unit (exact match), tags (contains any), kind (scalar/vector), status (draft/active/deprecated/superseded). "
             "Output: up to 20 best matches with metadata (name, units, description, "
             "provenance, dependencies). Empty or no matches -> {}. "
             "Use this when you don't know the exact name and need to discover/find names by concept or partial text. "
@@ -34,9 +35,19 @@ class SearchTool(BaseTool):
     async def search_standard_names(
         self,
         query: str,
+        unit: str | int | None = None,
+        tags: str | list[str] | None = None,
+        kind: str | None = None,
+        status: str | None = None,
         ctx: Context | None = None,
     ):
+        # Normalize unit filter: convert numeric 1 to string "1"
+        if unit is not None and (unit == 1 or unit == 1.0):
+            unit = "1"
+
         # Underlying repository returns list[ {name, score, highlight_documentation, standard_name} ]
-        raw = self.catalog.search(query, with_meta=True)
+        raw = self.catalog.search(
+            query, with_meta=True, unit=unit, tags=tags, kind=kind, status=status
+        )
 
         return {r["name"]: {k: v for k, v in r.items() if k != "name"} for r in raw}

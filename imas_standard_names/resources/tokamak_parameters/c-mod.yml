@@ -1,0 +1,76 @@
+machine: C-Mod
+facility: Massachusetts Institute of Technology
+location: Cambridge, Massachusetts, USA
+operational_status: decommissioned
+last_updated: "2025-11-03"
+sources:
+  - url: https://fusionwiki.ciemat.es/wiki/Alcator_C-Mod
+    accessed: "2025-11-03"
+    description: "FusionWiki comprehensive database"
+  - url: https://www.psfc.mit.edu/research/alcator
+    description: "MIT PSFC Alcator C-Mod page"
+
+geometry:
+  major_radius:
+    value: 0.67
+    unit: m
+    symbol: R_0
+  minor_radius:
+    value: 0.22
+    unit: m
+    symbol: a
+  plasma_volume:
+    value: 1.0
+    unit: m^3
+    symbol: V_p
+  elongation:
+    value: 1.65
+    unit: "1"
+    symbol: kappa
+  triangularity:
+    value: 0.4
+    unit: "1"
+    symbol: delta
+  aspect_ratio:
+    value: 3.0
+    unit: "1"
+    symbol: A
+    note: "R_0/a"
+
+physics:
+  toroidal_magnetic_field:
+    value: 7.9
+    unit: T
+    symbol: B_T
+    location: "at major radius R_0"
+    note: "record high field compact tokamak"
+  plasma_current:
+    value: 1.7
+    unit: MA
+    symbol: I_p
+    note: "typical maximum"
+  edge_safety_factor:
+    value: 3.0
+    unit: "1"
+    symbol: q_95
+  electron_density:
+    value: 1.0e21
+    unit: m^-3
+    symbol: n_e
+    note: "typical, highest densities achieved"
+  ion_temperature:
+    value: 3.0
+    unit: keV
+    symbol: T_i
+    note: "typical"
+  electron_temperature:
+    value: 4.5
+    unit: keV
+    symbol: T_e
+    note: "typical"
+  energy_confinement_time:
+    value: 0.035
+    unit: s
+    symbol: tau_E
+    note: "typical H-mode"
+

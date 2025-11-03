@@ -1,0 +1,27 @@
+name: major_radius_of_plasma_boundary
+description: Major radius at plasma boundary.
+documentation: |-
+  Major radius $R$ evaluated at the outboard midplane of the [plasma_boundary](#plasma_boundary) (last closed flux surface). The plasma boundary is the last closed flux surface separating confined plasma from the scrape-off layer. Major radius characterizes the outer radial extent of confined plasma.
+
+  Geometric definition:
+
+  For shaped plasmas, this is the major radius at the outboard midplane where the vertical coordinate equals the [magnetic_axis](#magnetic_axis) Z-coordinate: $R_{\text{boundary}}(Z = Z_{\text{axis}})$ in m.
+
+  Physical significance:
+
+  This quantity characterizes the outer radial extent of confined plasma and is used in calculating [plasma_volume](#plasma_volume), surface area, and shape parameters. Major radius affects [energy_confinement_time](#energy_confinement_time) through scaling laws and determines [plasma_current](#plasma_current) requirements. See [minor_radius_of_plasma_boundary](#minor_radius_of_plasma_boundary) for aspect ratio and [elongation_of_plasma_boundary](#elongation_of_plasma_boundary) for shape relationships.
+
+  Measurement methods:
+
+  Major radius is determined from equilibrium reconstruction using external [magnetic_field](#magnetic_field) measurements. [Flux_loop_voltage](#flux_loop_voltage) integration provides boundary position information. Plasma imaging systems measure boundary geometry directly. Major radius analysis requires [magnetic_axis](#magnetic_axis) location and [plasma_boundary](#plasma_boundary) identification. Geometric measurements use standard tokamak coordinate systems.
+
+  Typical values:
+
+  Small tokamaks: 0.5-1.0 m, medium tokamaks: 1.5-3.0 m, ITER: 6.2 m (design). Major radius is primarily determined by machine geometry and external coil configuration.
+
+  Sign convention: Positive major radius measured from machine center, following standard cylindrical coordinate conventions and tokamak geometry.
+status: active
+tags:
+- equilibrium
+kind: scalar
+unit: m

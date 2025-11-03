@@ -12,7 +12,6 @@ from imas_standard_names.grammar.types import (
     Object,
     Position,
     Process,
-    Source,
     Subject,
 )
 from imas_standard_names.operators import PRIMITIVE_OPERATORS
@@ -25,9 +24,9 @@ def test_vocabulary_composition():
     qc = QualityChecker()
     vocab = qc._build_physics_vocabulary()
 
-    # Source 1: Grammar enums (Component, Subject, Object, Source, Position, Process)
+    # Source 1: Grammar enums (Component, Subject, Object, Position, Process)
     grammar_vocab = set()
-    for enum_class in [Component, Subject, Object, Source, Position, Process]:
+    for enum_class in [Component, Subject, Object, Position, Process]:
         grammar_vocab.update(member.value for member in enum_class)
 
     # Source 2: Catalog base names (extracted by parsing standard names)
@@ -78,7 +77,7 @@ def test_vocabulary_sources_traceable():
 
     # Every term should come from one of three sources
     grammar_vocab = set()
-    for enum_class in [Component, Subject, Object, Source, Position, Process]:
+    for enum_class in [Component, Subject, Object, Position, Process]:
         grammar_vocab.update(member.value for member in enum_class)
 
     catalog = StandardNameCatalog()

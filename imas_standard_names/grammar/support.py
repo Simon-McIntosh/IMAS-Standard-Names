@@ -34,6 +34,67 @@ def value_of(value: Any) -> str:
     return value.value if hasattr(value, "value") else str(value)
 
 
+def enum_values[E](enum_cls: type[E]) -> list[str]:
+    """Return the allowed string values for a StrEnum type.
+
+    Args:
+        enum_cls: Enumeration type (StrEnum subclasses from grammar.types).
+
+    Returns:
+        List of string values from the enum.
+
+    Example:
+        >>> from imas_standard_names.grammar.types import Component
+        >>> enum_values(Component)
+        ['radial', 'poloidal', 'toroidal', ...]
+    """
+    return [e.value for e in enum_cls]  # type: ignore[attr-defined]
+
+
+def coerce_enum[E](enum_cls: type[E], value: E | str | None) -> E | None:
+    """Coerce a possibly-string value to an enum member.
+
+    Accepts the enum member already, or its .value string. Returns None when
+    value is None. Raises ValueError if the string doesn't match an allowed
+    member.
+
+    Args:
+        enum_cls: Target enumeration type.
+        value: Enum member, string value, or None.
+
+    Returns:
+        Enum member or None.
+
+    Raises:
+        ValueError: If string value doesn't match any enum member.
+
+    Example:
+        >>> from imas_standard_names.grammar.types import Component
+        >>> coerce_enum(Component, "radial")
+        <Component.RADIAL: 'radial'>
+        >>> coerce_enum(Component, Component.RADIAL)
+        <Component.RADIAL: 'radial'>
+        >>> coerce_enum(Component, None)
+        None
+    """
+    if value is None:
+        return None
+    if isinstance(value, enum_cls):
+        return value
+    if isinstance(value, str):
+        try:
+            return enum_cls(value)  # type: ignore[call-arg]
+        except ValueError as e:
+            allowed = [e.value for e in enum_cls]  # type: ignore[attr-defined]
+            raise ValueError(
+                f"Invalid {enum_cls.__name__} token '{value}'. "
+                f"Allowed values: {allowed}"
+            ) from e
+    raise TypeError(
+        f"Expected {enum_cls.__name__}, str, or None; got {type(value).__name__}"
+    )
+
+
 def compose_standard_name(parts: Mapping[str, Any]) -> str:
     """Compose a standard name from parts.
 
@@ -108,19 +169,53 @@ def parse_standard_name(name: str) -> dict[str, str]:
                 values[segment] = token
                 break
 
-    for segment in PREFIX_SEGMENTS:
-        template = SEGMENT_TEMPLATES.get(segment)
-        for token in SEGMENT_PREFIX_TOKEN_MAP.get(segment, ()):
-            # Apply template if present, otherwise use token directly
-            if template:
-                rendered = template.format(token=token)
+    # Parse prefixes greedily - at each position, find the longest match across
+    # ALL unmatched segments, then consume it. This ensures poloidal_field_coil_
+    # (device) is matched before poloidal_ (coordinate).
+    # But we still respect ordering by only moving forward in the segment list.
+    current_segment_idx = 0
+
+    while current_segment_idx < len(PREFIX_SEGMENTS) and remaining:
+        # Find the best match among segments from current position onward
+        best_token = None
+        best_length = 0
+        best_segment = None
+        best_segment_idx = current_segment_idx
+
+        for idx in range(current_segment_idx, len(PREFIX_SEGMENTS)):
+            segment = PREFIX_SEGMENTS[idx]
+            if segment in values:
+                # Already matched this segment
+                continue
+
+            template = SEGMENT_TEMPLATES.get(segment)
+            for token in SEGMENT_PREFIX_TOKEN_MAP.get(segment, ()):
+                # Apply template if present, otherwise use token directly
+                if template:
+                    rendered = template.format(token=token)
+                else:
+                    rendered = token
+                prefix = rendered + "_"
+                if remaining.startswith(prefix) and len(prefix) > best_length:
+                    best_token = token
+                    best_length = len(prefix)
+                    best_segment = segment
+                    best_segment_idx = idx
+
+        if best_token is not None:
+            # Apply the best match
+            prefix_str = SEGMENT_TEMPLATES.get(best_segment)
+            if prefix_str:
+                prefix = prefix_str.format(token=best_token) + "_"
             else:
-                rendered = token
-            prefix = rendered + "_"
-            if remaining.startswith(prefix):
-                remaining = remaining[len(prefix) :]
-                values[segment] = token
-                break
+                prefix = best_token + "_"
+            remaining = remaining[len(prefix) :]
+            values[best_segment] = best_token
+            # Move to the next segment position after the one we just matched
+            current_segment_idx = best_segment_idx + 1
+        else:
+            # No match found, move to next segment
+            current_segment_idx += 1
 
     if not remaining:
         raise ValueError("Missing base segment in name")

@@ -17,7 +17,6 @@ from imas_standard_names.grammar.types import (
     Object,
     Position,
     Process,
-    Source,
     Subject,
 )
 from imas_standard_names.grammar_codegen.generate import (
@@ -26,7 +25,7 @@ from imas_standard_names.grammar_codegen.generate import (
 )
 from imas_standard_names.grammar_codegen.spec import GrammarSpec
 from imas_standard_names.repository import StandardNameCatalog
-from imas_standard_names.tools.names import NamesTool
+from imas_standard_names.tools.compose import ComposeTool
 
 
 def _load_grammar_spec():
@@ -45,7 +44,6 @@ def _build_expected_type_map(spec: GrammarSpec):
                 "Component": Component,
                 "Subject": Subject,
                 "Object": Object,
-                "Source": Source,
                 "Position": Position,
                 "Process": Process,
             }.get(enum_name)
@@ -110,14 +108,6 @@ def test_model_has_exclusivity_validation():
             coordinate=Component.TOROIDAL,
         )
 
-    # Test object/source exclusivity
-    with pytest.raises(ValueError, match="object.*source"):
-        StandardName(
-            physical_base="temperature",
-            object=Object.FLUX_LOOP,
-            source=Source.FLUX_LOOP,
-        )
-
     # Test geometry/position exclusivity
     with pytest.raises(ValueError, match="geometry.*position"):
         StandardName(
@@ -173,7 +163,7 @@ def test_model_optional_fields_match_specification():
 def test_names_tool_has_all_segment_parameters():
     """Verify compose_standard_name MCP tool has parameters for all segments."""
     spec = _load_grammar_spec()
-    tool = NamesTool(StandardNameCatalog())
+    tool = ComposeTool()
 
     # Get the compose_standard_name method signature
     sig = inspect.signature(tool.compose_standard_name)
@@ -190,7 +180,7 @@ def test_names_tool_has_all_segment_parameters():
         f"compose_standard_name parameters don't match grammar specification!\n"
         f"Missing parameters: {grammar_segments - tool_params}\n"
         f"Extra parameters: {tool_params - grammar_segments}\n"
-        f"\nUpdate NamesTool.compose_standard_name in names.py"
+        f"\nUpdate ComposeTool.compose_standard_name in compose.py"
     )
 
 
@@ -198,7 +188,7 @@ def test_names_tool_parameter_types_match_grammar():
     """Verify compose_standard_name parameter types match grammar vocabularies."""
     spec = _load_grammar_spec()
     expected_type_map = _build_expected_type_map(spec)
-    tool = NamesTool(StandardNameCatalog())
+    tool = ComposeTool()
 
     # Get the compose_standard_name method signature
     sig = inspect.signature(tool.compose_standard_name)
@@ -228,7 +218,7 @@ def test_names_tool_parameter_types_match_grammar():
 
 def test_names_tool_compose_creates_valid_model():
     """Verify compose_standard_name tool creates valid StandardName instances."""
-    tool = NamesTool(StandardNameCatalog())
+    tool = ComposeTool()
 
     # Test basic composition - use vector base with component
     result = asyncio.run(
@@ -248,30 +238,15 @@ def test_names_tool_compose_creates_valid_model():
 
     assert result["name"] == "major_radius_of_flux_loop"
 
-    # Test with source parameter
-    result = asyncio.run(
-        tool.compose_standard_name(physical_base="voltage", source="flux_loop")
-    )
-
-    assert result["name"] == "voltage_from_flux_loop"
-
 
 def test_names_tool_respects_exclusive_pairs():
     """Verify compose_standard_name enforces exclusive segment pairs."""
-    tool = NamesTool(StandardNameCatalog())
+    tool = ComposeTool()
 
     # Test component/coordinate exclusivity
     with pytest.raises(ValueError, match="component.*coordinate"):
         asyncio.run(
             tool.compose_standard_name(
                 physical_base="temperature", component="radial", coordinate="toroidal"
-            )
-        )
-
-    # Test object/source exclusivity
-    with pytest.raises(ValueError, match="object.*source"):
-        asyncio.run(
-            tool.compose_standard_name(
-                physical_base="temperature", object="flux_loop", source="flux_loop"
             )
         )

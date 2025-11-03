@@ -116,6 +116,8 @@ def test_valid_primary_tag_only():
     entry = StandardNameScalarEntry(
         name="test_quantity",
         description="Test quantity",
+        documentation="Test quantity for tag validation.",
+        unit="m",
         tags=["fundamental"],
     )
     assert entry.tags == ["fundamental"]
@@ -126,6 +128,8 @@ def test_valid_primary_and_secondary_tags():
     entry = StandardNameScalarEntry(
         name="test_quantity",
         description="Test quantity",
+        documentation="Test quantity with multiple tags.",
+        unit="m",
         tags=["fundamental", "measured", "time-dependent"],
     )
     assert entry.tags == ["fundamental", "measured", "time-dependent"]
@@ -136,6 +140,8 @@ def test_valid_multiple_secondary_tags():
     entry = StandardNameScalarEntry(
         name="test_quantity",
         description="Test quantity",
+        documentation="Test quantity with many secondary tags.",
+        unit="m",
         tags=["equilibrium", "steady-state", "reconstructed", "validated"],
     )
     assert len(entry.tags) == 4
@@ -176,6 +182,8 @@ def test_empty_tags_allowed():
     entry = StandardNameScalarEntry(
         name="test_quantity",
         description="Test quantity",
+        documentation="Test quantity with empty tags.",
+        unit="m",
         tags=[],
     )
     assert entry.tags == []
@@ -187,6 +195,8 @@ def test_primary_tag_validation_position_specific():
     entry = StandardNameScalarEntry(
         name="test_quantity",
         description="Test quantity",
+        documentation="Test quantity for tag order validation.",
+        unit="m",
         tags=["fundamental", "measured"],
     )
     assert entry.tags[0] == "fundamental"
@@ -195,6 +205,8 @@ def test_primary_tag_validation_position_specific():
     entry2 = StandardNameScalarEntry(
         name="test_quantity",
         description="Test quantity",
+        documentation="Test quantity for tag auto-reordering.",
+        unit="m",
         tags=["measured", "fundamental"],  # Will be auto-reordered
     )
 
@@ -210,6 +222,8 @@ def test_tag_whitespace_normalization():
             "kind": "scalar",
             "name": "test_quantity",
             "description": "Test quantity",
+            "documentation": "Test quantity for tag normalization.",
+            "unit": "m",
             "tags": ["  fundamental  ", " measured ", ""],
         }
     )
@@ -222,6 +236,8 @@ def test_vector_entry_tag_validation():
     entry = StandardNameVectorEntry(
         name="test_vector",
         description="Test vector",
+        documentation="Test vector for tag validation.",
+        unit="m.s^-1",
         tags=["transport", "spatial-profile"],
     )
     assert entry.tags == ["transport", "spatial-profile"]
@@ -354,6 +370,8 @@ def test_common_tag_combinations():
             entry = StandardNameScalarEntry(
                 name="test_quantity",
                 description="Test quantity",
+                documentation="Test quantity for tag combination validation.",
+                unit="m",
                 tags=tags,
             )
             assert entry.tags == tags
@@ -362,6 +380,8 @@ def test_common_tag_combinations():
                 StandardNameScalarEntry(
                     name="test_quantity",
                     description="Test quantity",
+                    documentation="Test quantity for invalid tag validation.",
+                    unit="m",
                     tags=tags,
                 )
 

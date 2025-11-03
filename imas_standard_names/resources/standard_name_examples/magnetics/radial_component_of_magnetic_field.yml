@@ -1,0 +1,28 @@
+name: radial_component_of_magnetic_field
+description: Radial component of magnetic field vector.
+documentation: |-
+  Radial component of the magnetic field vector $B_R$ in cylindrical coordinates. In axisymmetric tokamak equilibria, the radial component is typically small compared to toroidal and poloidal components but is essential for equilibrium force balance and magnetic flux surface reconstruction.
+
+  $$B_R = \mathbf{B} \cdot \hat{e}_R$$
+
+  where $\mathbf{B}$ is the total magnetic field in T and $\hat{e}_R$ is the unit vector in the major radius direction.
+
+  Physical significance:
+
+  In axisymmetric tokamak equilibria, the radial component is typically small compared to toroidal and poloidal components but is essential for equilibrium force balance and magnetic flux surface reconstruction. Radial field affects plasma shaping and stability. Field strength relates to [plasma_current](#plasma_current) distribution and [safety_factor](#safety_factor) profiles. See [magnetic_field](#magnetic_field) for total field structure and [poloidal_magnetic_field](#poloidal_magnetic_field) for vector relationships.
+
+  Measurement methods:
+
+  Radial magnetic field is measured using magnetic probes positioned at different major radii around the plasma. [Flux_loop_voltage](#flux_loop_voltage) integration provides field change information. Equilibrium reconstruction codes invert external magnetic measurements to determine internal field structure. Radial field analysis requires probes at multiple radial locations. Field measurements are essential for flux surface mapping.
+
+  Typical values:
+
+  $|B_R|$ ranges from milliTesla to tens of milliTesla, typically 1-2 orders of magnitude smaller than $B_{\phi}$ and $B_Z$. Radial field strength varies with plasma conditions and external coil currents.
+
+  Sign convention: Positive outward (increasing R direction), following standard cylindrical coordinate conventions and consistent with tokamak geometry.
+status: active
+tags:
+- magnetics
+- measured
+kind: scalar
+unit: T

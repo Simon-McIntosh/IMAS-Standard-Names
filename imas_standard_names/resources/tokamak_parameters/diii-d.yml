@@ -1,0 +1,75 @@
+machine: DIII-D
+facility: General Atomics
+location: San Diego, California, USA
+operational_status: operational
+last_updated: "2025-11-03"
+sources:
+  - url: https://fusionwiki.ciemat.es/wiki/DIII-D
+    accessed: "2025-11-03"
+    description: "FusionWiki comprehensive database"
+  - url: https://www.ga.com/magnetic-fusion/diii-d
+    description: "General Atomics DIII-D page"
+
+geometry:
+  major_radius:
+    value: 1.67
+    unit: m
+    symbol: R_0
+  minor_radius:
+    value: 0.67
+    unit: m
+    symbol: a
+  plasma_volume:
+    value: 32
+    unit: m^3
+    symbol: V_p
+  elongation:
+    value: 1.8
+    unit: "1"
+    symbol: kappa
+  triangularity:
+    value: 0.7
+    unit: "1"
+    symbol: delta
+  aspect_ratio:
+    value: 2.5
+    unit: "1"
+    symbol: A
+    note: "R_0/a"
+
+physics:
+  toroidal_magnetic_field:
+    value: 2.2
+    unit: T
+    symbol: B_T
+    location: "at major radius R_0"
+  plasma_current:
+    value: 2.0
+    unit: MA
+    symbol: I_p
+    note: "typical maximum"
+  edge_safety_factor:
+    value: 3.5
+    unit: "1"
+    symbol: q_95
+  electron_density:
+    value: 6.0e19
+    unit: m^-3
+    symbol: n_e
+    note: "typical"
+  ion_temperature:
+    value: 4.0
+    unit: keV
+    symbol: T_i
+    note: "typical"
+  electron_temperature:
+    value: 4.0
+    unit: keV
+    symbol: T_e
+    note: "typical"
+  energy_confinement_time:
+    value: 0.2
+    unit: s
+    symbol: tau_E
+    note: "typical H-mode"
+

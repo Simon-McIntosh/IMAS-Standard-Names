@@ -1,0 +1,24 @@
+name: ion_temperature_at_magnetic_axis
+description: Ion temperature at magnetic axis.
+documentation: |-
+  Ion temperature $T_{i,0}$ evaluated at the [magnetic_axis](#magnetic_axis), representing the peak [ion_temperature](#ion_temperature) in the plasma core. The magnetic axis is the innermost flux surface where plasma parameters typically reach maximum values. On-axis ion temperature is critical for fusion performance and determines the fusion triple product $n T \tau_E$.
+
+  Performance significance:
+
+  On-axis ion temperature increases fusion reactivity, which peaks near 100 keV but practical operation occurs at 10-20 keV. Together with [electron_temperature_at_magnetic_axis](#electron_temperature_at_magnetic_axis), determines the fusion triple product for ignition conditions. Ion temperature affects [energy_confinement_time](#energy_confinement_time) and determines [plasma_current](#plasma_current) requirements for stable operation. See [ion_temperature](#ion_temperature) for profile context and [plasma_density_at_magnetic_axis](#plasma_density_at_magnetic_axis) for density values.
+
+  Measurement methods:
+
+  Ion temperature at magnetic axis is measured using charge exchange recombination spectroscopy focused on the plasma center. Neutral particle analyzers measure charge-exchanged neutrals escaping from the core. X-ray crystal spectroscopy determines temperature from continuum radiation. Thomson scattering can provide ion temperature in some configurations. Core measurements require precise alignment with [magnetic_axis](#magnetic_axis) and may use impurity injection for enhanced signal.
+
+  Typical values:
+
+  High-performance H-mode: 5-20 keV, ohmic plasmas: 0.5-3 keV. Ion temperature often exceeds electron temperature in heated plasmas due to different heating mechanisms and transport processes.
+
+  Sign convention: Positive temperature indicates thermal energy per ion, following standard thermodynamic conventions with temperature measured in energy units (eV or keV).
+status: draft
+tags:
+- core-physics
+- global-quantity
+kind: scalar
+unit: eV

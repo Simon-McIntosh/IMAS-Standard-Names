@@ -1,0 +1,87 @@
+machine: JET
+facility: Culham Centre for Fusion Energy
+location: Culham, United Kingdom
+operational_status: decommissioned
+last_updated: "2025-11-03"
+note: "Final plasma December 2023, decommissioning ongoing until ~2040"
+sources:
+  - url: https://fusionwiki.ciemat.es/wiki/JET
+    accessed: "2025-11-03"
+    description: "FusionWiki comprehensive database"
+  - url: https://www.euro-fusion.org/devices/jet/
+    description: "EUROfusion JET page"
+
+geometry:
+  major_radius:
+    value: 2.96
+    unit: m
+    symbol: R_0
+  minor_radius:
+    value: 1.25
+    unit: m
+    symbol: a
+    note: "horizontal minor radius"
+  plasma_volume:
+    value: 155
+    unit: m^3
+    symbol: V_p
+  elongation:
+    value: 1.7
+    unit: "1"
+    symbol: kappa
+  triangularity:
+    value: 0.4
+    unit: "1"
+    symbol: delta
+  aspect_ratio:
+    value: 2.4
+    unit: "1"
+    symbol: A
+    note: "R_0/a"
+
+physics:
+  toroidal_magnetic_field:
+    value: 3.45
+    unit: T
+    symbol: B_T
+    location: "at major radius R_0"
+  plasma_current:
+    value: 4.8
+    unit: MA
+    symbol: I_p
+    note: "typical maximum"
+  edge_safety_factor:
+    value: 3.0
+    unit: "1"
+    symbol: q_95
+  electron_density:
+    value: 1.0e20
+    unit: m^-3
+    symbol: n_e
+    note: "typical high performance"
+  ion_temperature:
+    value: 5.0
+    unit: keV
+    symbol: T_i
+    note: "typical high performance"
+  electron_temperature:
+    value: 5.0
+    unit: keV
+    symbol: T_e
+    note: "typical high performance"
+  energy_confinement_time:
+    value: 1.0
+    unit: s
+    symbol: tau_E
+    note: "typical H-mode"
+  fusion_power:
+    value: 16.1
+    unit: MW
+    symbol: P_fusion
+    note: "record DT pulse, 1997"
+  fusion_gain:
+    value: 0.67
+    unit: "1"
+    symbol: Q
+    note: "record DT pulse, 1997"
+

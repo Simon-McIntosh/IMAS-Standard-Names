@@ -10,7 +10,7 @@ from __future__ import annotations
 import re
 from typing import TYPE_CHECKING, Literal
 
-from ..grammar.types import Component, Object, Position, Process, Source, Subject
+from ..grammar.types import Component, Object, Position, Process, Subject
 from ..operators import PRIMITIVE_OPERATORS
 
 if TYPE_CHECKING:
@@ -40,7 +40,7 @@ class QualityChecker:
         vocab = set()
 
         # Add all grammar vocabulary (segments with constrained tokens)
-        for enum_class in [Component, Subject, Object, Source, Position, Process]:
+        for enum_class in [Component, Subject, Object, Position, Process]:
             vocab.update(member.value for member in enum_class)
 
         # Add primitive operators (already controlled in operators.py)
@@ -208,7 +208,33 @@ class QualityChecker:
             if re.search(pattern, desc_lower):
                 issues.append(("error", f"{name}: tautology - {desc_pattern}"))
 
-        # Check 2: Component descriptions should mention axis
+        # Check 2: Deprecated '_from_' pattern for device sources
+        device_terms = [
+            "probe",
+            "detector",
+            "coil",
+            "loop",
+            "antenna",
+            "spectrometer",
+            "interferometer",
+            "beam",
+            "sensor",
+            "diagnostic",
+        ]
+        if "_from_" in name:
+            for term in device_terms:
+                if term in name:
+                    issues.append(
+                        (
+                            "error",
+                            f"{name}: uses deprecated '_from_<device>' pattern. "
+                            f"Use '<device>_<signal>' for device properties, "
+                            f"or remove device from name for physics quantities.",
+                        )
+                    )
+                    break
+
+        # Check 3: Component descriptions should mention axis
         if "_component_of_" in name:
             axis = name.split("_component_of_")[0].split("_")[-1]
             if axis not in desc_lower:
@@ -219,7 +245,7 @@ class QualityChecker:
                     )
                 )
 
-        # Check 3: Operator descriptions should clarify transformation
+        # Check 4: Operator descriptions should clarify transformation
         operators = [
             "gradient",
             "curl",
@@ -231,16 +257,6 @@ class QualityChecker:
         for op in operators:
             if f"{op}_of_" in name and op.replace("_", " ") not in desc_lower:
                 issues.append(("info", f"{name}: could clarify '{op}' operation"))
-
-        # Check 4: Source-tagged descriptions
-        if "_from_" in name:
-            source = name.split("_from_")[1].replace("_", " ")
-            if source not in desc_lower and not any(
-                word in desc_lower for word in source.split()
-            ):
-                issues.append(
-                    ("warning", f"{name}: should mention data source '{source}'")
-                )
 
         # Check 5: Redundant name repetition
         name_parts = name.split("_")

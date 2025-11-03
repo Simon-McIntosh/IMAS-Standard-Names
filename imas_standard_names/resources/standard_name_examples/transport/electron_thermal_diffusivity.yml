@@ -1,0 +1,33 @@
+name: electron_thermal_diffusivity
+description: Electron thermal diffusivity coefficient.
+documentation: |-
+  Electron thermal diffusivity $\chi_e$ quantifying the rate of electron thermal energy transport in the plasma. This effective transport coefficient combines neoclassical and turbulent contributions and determines [energy_confinement_time](#energy_confinement_time) through the relationship between heat flux and temperature gradients.
+
+  Transport relation:
+
+  The [electron_heat_flux](#electron_heat_flux) relates to temperature gradient via:
+
+  $$q_e = -n_e \chi_e \nabla T_e$$
+
+  where $n_e$ is [electron_density](#electron_density) in m$^{-3}$, $\nabla T_e$ is [electron_temperature](#electron_temperature) gradient in eV/m, giving $q_e$ in W/m$^2$.
+
+  Physical significance:
+
+  Electron thermal diffusivity arises from turbulent transport (primarily) and neoclassical transport. In tokamaks, $\chi_e$ is typically anomalous (much larger than neoclassical predictions) due to micro-instabilities such as trapped electron modes and electron temperature gradient modes. Higher diffusivity reduces [energy_confinement_time](#energy_confinement_time) and affects [plasma_current](#plasma_current) requirements. See [electron_heat_flux](#electron_heat_flux) for transport relationships and [radial_component_of_electron_heat_flux](#radial_component_of_electron_heat_flux) for radial transport analysis.
+
+  Measurement methods:
+
+  Electron thermal diffusivity is inferred from transport analysis using [electron_temperature](#electron_temperature) and [electron_density](#electron_density) profile measurements. Power balance analysis determines diffusivity from heat flux divergence. Thomson scattering provides local temperature and density measurements for gradient calculations. Electron cyclotron emission measures temperature profiles. Diffusivity analysis requires equilibrium reconstruction and power deposition calculations.
+
+  Typical values:
+
+  Core region: 0.1-10 m$^2$/s depending on confinement regime. L-mode shows higher values than H-mode due to increased turbulent transport. Diffusivity typically increases with radius and decreases with heating power.
+
+  Sign convention: Positive diffusivity indicates outward heat transport from hot plasma core to cooler edge regions, following standard transport theory conventions.
+status: draft
+tags:
+- transport
+- derived
+- spatial-profile
+kind: scalar
+unit: m^2.s^-1

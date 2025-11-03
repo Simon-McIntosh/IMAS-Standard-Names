@@ -1,0 +1,30 @@
+name: electron_temperature
+description: Electron kinetic temperature.
+documentation: |-
+  Electron kinetic temperature $T_e$ representing the mean thermal energy per electron. In fusion plasmas, electron temperature typically ranges from tens of eV in the edge region to several keV in the plasma core.
+
+  Thermodynamic relation:
+
+  Electron temperature relates to [electron_pressure](#electron_pressure) via the ideal gas law:
+
+  $$p_e = n_e k_B T_e$$
+
+  where $n_e$ is [electron_density](#electron_density) in m$^{-3}$, $k_B = 1.381 \times 10^{-23}$ J/K is Boltzmann's constant, $T_e$ is in K, giving $p_e$ in Pa. When using $T_e$ in eV, apply conversion: $p_e = n_e T_e \times 1.602 \times 10^{-19}$ Pa.
+
+  Physical significance:
+
+  Temperature determines [energy_confinement_time](#energy_confinement_time) and fusion reactivity. Higher electron temperatures improve confinement quality and increase fusion reaction rates. The temperature gradient drives [electron_heat_flux](#electron_heat_flux) and affects [plasma_resistivity](#plasma_resistivity). See also [ion_temperature](#ion_temperature) and [electron_temperature_at_magnetic_axis](#electron_temperature_at_magnetic_axis).
+
+  Measurement methods:
+
+  Thomson scattering provides local [electron_density](#electron_density) and temperature measurements. Electron cyclotron emission measures temperature from radiation spectrum. X-ray spectroscopy determines temperature from continuum and line emissions. Interferometry provides line-integrated density for pressure calculations.
+
+  Typical values:
+
+  Edge region: 10-200 eV, core region: 1-20 keV in high-performance tokamak plasmas. On-axis values in [electron_temperature_at_magnetic_axis](#electron_temperature_at_magnetic_axis) typically reach 5-15 keV during auxiliary heating.
+status: active
+tags:
+- core-physics
+- spatial-profile
+kind: scalar
+unit: eV
