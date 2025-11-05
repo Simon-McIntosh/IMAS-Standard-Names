@@ -23,7 +23,6 @@ from .model_types import (
     Subject,
 )
 
-
 @dataclass(frozen=True)
 class SegmentRule:
     identifier: str
@@ -31,7 +30,6 @@ class SegmentRule:
     template: str | None
     exclusive_with: tuple[str, ...]
     tokens: tuple[str, ...]
-
 
 SEGMENT_TOKEN_MAP: dict[str, tuple[str, ...]] = {
     "component": tuple(member.value for member in Component),
@@ -50,15 +48,15 @@ SEGMENT_RULES: tuple[SegmentRule, ...] = (
     SegmentRule(
         identifier="component",
         optional=True,
-        template="{token}_component_of",
-        exclusive_with=("coordinate",),
+        template='{token}_component_of',
+        exclusive_with=('coordinate',),
         tokens=SEGMENT_TOKEN_MAP["component"],
     ),
     SegmentRule(
         identifier="coordinate",
         optional=True,
         template=None,
-        exclusive_with=("component",),
+        exclusive_with=('component',),
         tokens=SEGMENT_TOKEN_MAP["coordinate"],
     ),
     SegmentRule(
@@ -72,70 +70,70 @@ SEGMENT_RULES: tuple[SegmentRule, ...] = (
         identifier="device",
         optional=True,
         template=None,
-        exclusive_with=("object",),
+        exclusive_with=('object',),
         tokens=SEGMENT_TOKEN_MAP["device"],
     ),
     SegmentRule(
         identifier="geometric_base",
         optional=True,
         template=None,
-        exclusive_with=("physical_base",),
+        exclusive_with=('physical_base',),
         tokens=SEGMENT_TOKEN_MAP["geometric_base"],
     ),
     SegmentRule(
         identifier="physical_base",
         optional=True,
         template=None,
-        exclusive_with=("geometric_base",),
+        exclusive_with=('geometric_base',),
         tokens=SEGMENT_TOKEN_MAP["physical_base"],
     ),
     SegmentRule(
         identifier="object",
         optional=True,
-        template="of_{token}",
-        exclusive_with=("device",),
+        template='of_{token}',
+        exclusive_with=('device',),
         tokens=SEGMENT_TOKEN_MAP["object"],
     ),
     SegmentRule(
         identifier="geometry",
         optional=True,
-        template="of_{token}",
-        exclusive_with=("position",),
+        template='of_{token}',
+        exclusive_with=('position',),
         tokens=SEGMENT_TOKEN_MAP["geometry"],
     ),
     SegmentRule(
         identifier="position",
         optional=True,
-        template="at_{token}",
-        exclusive_with=("geometry",),
+        template='at_{token}',
+        exclusive_with=('geometry',),
         tokens=SEGMENT_TOKEN_MAP["position"],
     ),
     SegmentRule(
         identifier="process",
         optional=True,
-        template="due_to_{token}",
+        template='due_to_{token}',
         exclusive_with=(),
         tokens=SEGMENT_TOKEN_MAP["process"],
     ),
 )
 
 SEGMENT_ORDER: tuple[str, ...] = (
-    "component",
-    "coordinate",
-    "subject",
-    "device",
-    "geometric_base",
-    "physical_base",
-    "object",
-    "geometry",
-    "position",
-    "process",
+    'component',
+    'coordinate',
+    'subject',
+    'device',
+    'geometric_base',
+    'physical_base',
+    'object',
+    'geometry',
+    'position',
+    'process',
 )
 
 # Base segments are at indices [4, 5] in SEGMENT_ORDER
 # They mark the boundary between prefix (component, coordinate, subject) and suffix (object, geometry, position, process) segments
 BASE_SEGMENT_INDICES: tuple[int, ...] = (4, 5)
-BASE_SEGMENTS: tuple[str, ...] = ("geometric_base", "physical_base")
+BASE_SEGMENTS: tuple[str, ...] = ('geometric_base', 'physical_base')
 PREFIX_SEGMENTS: tuple[str, ...] = SEGMENT_ORDER[: BASE_SEGMENT_INDICES[0]]
 SUFFIX_SEGMENTS: tuple[str, ...] = SEGMENT_ORDER[BASE_SEGMENT_INDICES[-1] + 1 :]
 SUFFIX_SEGMENTS_REVERSED: tuple[str, ...] = tuple(reversed(SUFFIX_SEGMENTS))
@@ -156,44 +154,44 @@ SEGMENT_PREFIX_TOKEN_MAP: Mapping[str, tuple[str, ...]] = SEGMENT_SEARCH_TOKEN_M
 SEGMENT_SUFFIX_TOKEN_MAP: Mapping[str, tuple[str, ...]] = SEGMENT_SEARCH_TOKEN_MAP
 
 EXCLUSIVE_SEGMENT_PAIRS: tuple[tuple[str, str], ...] = (
-    ("component", "coordinate"),
-    ("device", "object"),
-    ("geometric_base", "physical_base"),
-    ("geometry", "position"),
+    ('component', 'coordinate'),
+    ('device', 'object'),
+    ('geometric_base', 'physical_base'),
+    ('geometry', 'position'),
 )
 
 # Applicability: when to create standard names
 APPLICABILITY_INCLUDE: tuple[str, ...] = (
-    "Conceptual definitions: plasma regions, boundaries, reference surfaces,  and operational modes",
-    "Physical quantities: measurements, diagnostic signals, and derived calculations",
-    "Geometric quantities: spatial locations, shapes, dimensions, and extents",
-    "Hardware properties: physical characteristics and configuration parameters",
-    "Coordinate systems: time, spatial coordinates, and flux coordinates",
+    'Conceptual definitions: plasma regions, boundaries, reference surfaces,  and operational modes',
+    'Physical quantities: measurements, diagnostic signals, and derived calculations',
+    'Geometric quantities: spatial locations, shapes, dimensions, and extents',
+    'Hardware properties: physical characteristics and configuration parameters',
+    'Coordinate systems: time, spatial coordinates, and flux coordinates',
 )
 APPLICABILITY_EXCLUDE: tuple[str, ...] = (
-    "Facility-specific identifiers and labels  (paths like */name, */identifier, */label)",
-    "Type enumeration indices (paths like */type/index)",
-    "Code provenance metadata (paths like */code/*, */ids_properties/*)",
+    'Facility-specific identifiers and labels  (paths like */name, */identifier, */label)',
+    'Type enumeration indices (paths like */type/index)',
+    'Code provenance metadata (paths like */code/*, */ids_properties/*)',
 )
-APPLICABILITY_RATIONALE: str = "Standard names cover physical quantities with standardizable meaning and units,  as well as conceptual definitions that establish shared understanding of plasma regions,  boundaries, and reference coordinates across codes and diagnostics.\n"
+APPLICABILITY_RATIONALE: str = 'Standard names cover physical quantities with standardizable meaning and units,  as well as conceptual definitions that establish shared understanding of plasma regions,  boundaries, and reference coordinates across codes and diagnostics.\n'
 
 
 # Generic physical bases that require qualification
 # These physical_base tokens cannot stand alone and must have
 # subject, device, object, position, or geometry qualification
 GENERIC_PHYSICAL_BASES: tuple[str, ...] = (
-    "area",
-    "current",
-    "energy",
-    "flux",
-    "frequency",
-    "number_density",
-    "power",
-    "pressure",
-    "temperature",
-    "velocity",
-    "voltage",
-    "volume",
+    'area',
+    'current',
+    'energy',
+    'flux',
+    'frequency',
+    'number_density',
+    'power',
+    'pressure',
+    'temperature',
+    'velocity',
+    'voltage',
+    'volume',
 )
 
 __all__ = [

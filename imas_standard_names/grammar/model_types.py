@@ -9,7 +9,6 @@ from __future__ import annotations
 
 from enum import StrEnum
 
-
 class Component(StrEnum):
     RADIAL = "radial"
     TOROIDAL = "toroidal"
@@ -172,7 +171,6 @@ class GenericPhysicalBase(StrEnum):
     VELOCITY = "velocity"
     VOLTAGE = "voltage"
     VOLUME = "volume"
-
 
 __all__ = [
     "Component",

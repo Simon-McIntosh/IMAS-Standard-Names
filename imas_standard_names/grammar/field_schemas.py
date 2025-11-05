@@ -10,165 +10,114 @@ from typing import Any
 
 NAMING_GUIDANCE: dict[str, Any] = {
     "ambiguous_qualifiers": {
-        "boundary_shape_parameters": {
-            "rule": "Shape parameters need explicit qualifiers",
-            "examples": "Use elongation_of_plasma_boundary or elongation_of_flux_surface, not elongation",
-            "why": "IMAS DD has both boundary values and profile arrays",
+            "boundary_shape_parameters": {
+                    "rule": "Shape parameters need explicit qualifiers",
+                    "examples": "Use elongation_of_plasma_boundary or elongation_of_flux_surface, not elongation",
+                    "why": "IMAS DD has both boundary values and profile arrays",
+                },
+            "geometric_quantities": {
+                    "rule": "Always specify reference object or surface",
+                    "examples": "Use minor_radius_of_plasma_boundary, not minor_radius",
+                    "why": "Prevents confusion between scalar boundary values and profile data",
+                },
         },
-        "geometric_quantities": {
-            "rule": "Always specify reference object or surface",
-            "examples": "Use minor_radius_of_plasma_boundary, not minor_radius",
-            "why": "Prevents confusion between scalar boundary values and profile data",
-        },
-    },
 }
 
 DOCUMENTATION_GUIDANCE: dict[str, Any] = {
     "imas_data_dictionary": {
-        "purpose": "Use IMAS DD tools to discover context and ensure consistency",
-        "tools": {
-            "search_imas": "Find relevant DD paths for structural understanding",
-            "fetch_imas_paths": "Extract authoritative descriptions, units, coordinates, and documentation",
-            "explore_relationships": "Discover related quantities for inline links (omit max_depth for full cross-IDS discovery)",
+            "purpose": "Use IMAS DD tools to discover context and ensure consistency",
+            "tools": {
+                    "search_imas": "Find relevant DD paths for structural understanding",
+                    "fetch_imas_paths": "Extract authoritative descriptions, units, coordinates, and documentation",
+                    "explore_relationships": "Discover related quantities for inline links (omit max_depth for full cross-IDS discovery)",
+                },
+            "inline_links_discovery": {
+                    "tool": "explore_relationships",
+                    "approach": "Query relevant DD leaf paths, omit max_depth parameter for full cross-IDS discovery",
+                    "target": "4-8 inline links per entry distributed throughout documentation",
+                },
         },
-        "inline_links_discovery": {
-            "tool": "explore_relationships",
-            "approach": "Query relevant DD leaf paths, omit max_depth parameter for full cross-IDS discovery",
-            "target": "4-8 inline links per entry distributed throughout documentation",
-        },
-    },
     "tokamak_parameters": {
-        "purpose": "Access authoritative machine parameters for typical values in documentation",
-        "tools": {
-            "get_tokamak_parameters": "Retrieve verified geometry and physics parameters for tokamak machines",
+            "purpose": "Access authoritative machine parameters for typical values in documentation",
+            "tools": {
+                    "get_tokamak_parameters": "Retrieve verified geometry and physics parameters for tokamak machines",
+                },
+            "usage": {
+                    "single_machine": "get_tokamak_parameters(machines='ITER') - Returns full parameter set for one machine",
+                    "multiple_machines": "get_tokamak_parameters(machines='ITER JET DIII-D') - Returns full data plus statistics (min/max/mean/median)",
+                    "all_machines": "get_tokamak_parameters(machines='all') - Returns all machines with statistics",
+                },
+            "examples": ["ITER major radius: get_tokamak_parameters(machines='ITER')", "Compare JET and DIII-D: get_tokamak_parameters(machines='JET DIII-D')", "Parameter ranges across all machines: get_tokamak_parameters(machines='all')"],
+            "note": "Always cite specific machines in 'Typical values' sections. Use statistics for parameter ranges.",
         },
-        "usage": {
-            "single_machine": "get_tokamak_parameters(machines='ITER') - Returns full parameter set for one machine",
-            "multiple_machines": "get_tokamak_parameters(machines='ITER JET DIII-D') - Returns full data plus statistics (min/max/mean/median)",
-            "all_machines": "get_tokamak_parameters(machines='all') - Returns all machines with statistics",
-        },
-        "examples": [
-            "ITER major radius: get_tokamak_parameters(machines='ITER')",
-            "Compare JET and DIII-D: get_tokamak_parameters(machines='JET DIII-D')",
-            "Parameter ranges across all machines: get_tokamak_parameters(machines='all')",
-        ],
-        "note": "Always cite specific machines in 'Typical values' sections. Use statistics for parameter ranges.",
-    },
     "structure_templates": {
-        "opening_paragraph": {
-            "content": "Clear definition of the quantity with physics context",
-            "inline_links": "None - focus on clarity",
-            "length": "2-4 sentences",
+            "opening_paragraph": {
+                    "content": "Clear definition of the quantity with physics context",
+                    "inline_links": "None - focus on clarity",
+                    "length": "2-4 sentences",
+                },
+            "subsequent_sections": {
+                    "preferred_order": ["Governing equations ($$...$$)", "Physical significance (include 2-3 inline links here)", "Measurement/Calculation methods (2-3 inline links)", "Typical values with context", "Sign convention (as final paragraph if applicable)"],
+                    "section_labels": {
+                            "format": "Plain text with colon, no formatting",
+                            "examples": ["Physical significance:", "Measurement methods:", "Typical values:"],
+                            "avoid": ["**Physical significance:**", "PHYSICAL SIGNIFICANCE"],
+                        },
+                },
+            "inline_links": {
+                    "format": "[standard_name](#standard_name)",
+                    "distribution": "Throughout documentation after opening, not in opening",
+                    "target_count": "4-8 for scalar/vector, 3-5 for metadata",
+                },
         },
-        "subsequent_sections": {
-            "preferred_order": [
-                "Governing equations ($$...$$)",
-                "Physical significance (include 2-3 inline links here)",
-                "Measurement/Calculation methods (2-3 inline links)",
-                "Typical values with context",
-                "Sign convention (as final paragraph if applicable)",
-            ],
-            "section_labels": {
-                "format": "Plain text with colon, no formatting",
-                "examples": [
-                    "Physical significance:",
-                    "Measurement methods:",
-                    "Typical values:",
-                ],
-                "avoid": ["**Physical significance:**", "PHYSICAL SIGNIFICANCE"],
-            },
-        },
-        "inline_links": {
-            "format": "[standard_name](#standard_name)",
-            "distribution": "Throughout documentation after opening, not in opening",
-            "target_count": "4-8 for scalar/vector, 3-5 for metadata",
-        },
-    },
     "quality_targets": {
-        "word_count": "150-400 words for scalar/vector, 120-300 for metadata",
-        "equations": "At least one display equation ($$...$$) for physics quantities",
-        "typical_values": "Required with context-specific ranges",
-    },
-    "must_include": [
-        "Physical interpretation and governing physics",
-        "Governing equations with full definitions (use display equations for main formulas)",
-        "Measurement or derivation methods",
-        "Typical values and physical ranges (populate validity_domain and constraints fields when applicable)",
-        "Coordinate system definitions and sign conventions (if applicable)",
-        "Relationships to other quantities with explicit equations",
-    ],
-    "yaml_formatting": {
-        "style": "Use literal block scalar style with pipe (|) for multiline content. This preserves formatting and requires no escaping.",
-        "example": "documentation: |\n  First paragraph with inline LaTeX $T_e$ and display equations:\n  \n  $$\\nabla \\times \\mathbf{B} = \\mu_0 \\mathbf{J}$$\n  \n  Second paragraph continues here.\n",
-    },
-    "inline_links": {
-        "description": "Reference related standard names using markdown link format [standard_name](#standard_name) for machine-readable cross-references within documentation text",
-        "format": "[standard_name_token](#standard_name_token)",
-        "examples": [
-            "The electron temperature [electron_temperature](#electron_temperature) is related to electron pressure [electron_pressure](#electron_pressure) via the ideal gas law.",
-            "This quantity is the radial component of the magnetic field vector [magnetic_field](#magnetic_field).",
-            "See also [ion_temperature](#ion_temperature) and [electron_density](#electron_density) for related plasma parameters.",
-        ],
-        "validation": "Referenced names are validated against catalog when entry is created",
-        "note": "Use inline links for narrative cross-references; use links field for formal dependency declarations",
-    },
-    "equations": {
-        "inline_math": "Use $...$ for inline equations (e.g., $T_e$, $\\nabla p$, $\\mathbf{B}$)",
-        "display_math": "Use $$...$$ on separate lines for display equations",
-        "symbols": "Use LaTeX commands ($\\phi$, $\\theta$, $\\rho$), not Unicode characters",
-        "vectors": "Use $\\mathbf{B}$, $\\mathbf{r}$, $\\mathbf{J}$ notation for vectors",
-        "requirements": [
-            "All variables in equations must be defined either before first use, in a 'where' clause immediately after the equation, or inline when introduced",
-            "Define units for all variables in 'where' clauses or inline definitions",
-            "Ensure dimensional consistency with entry's unit field",
-            "Include only fundamental governing equations - avoid algebraic rearrangements or trivial derivations that don't add physical insight",
-        ],
-        "examples": [
-            "$V = -N A \\frac{dB}{dt}$ where $V$ is voltage in V, $N$ is number of turns, $A$ is area in m$^2$, $B$ is magnetic field in T",
-            "$\\Phi = \\int \\mathbf{B} \\cdot d\\mathbf{A}$",
-            "$$\\nabla \\times \\mathbf{B} = \\mu_0 \\mathbf{J}$$",
-        ],
-        "unit_consistency": {
-            "rule": "All equations must be dimensionally consistent with the specified unit field",
-            "requirements": [
-                "Clearly specify units for all variables in 'where' clauses or inline definitions",
-                "Ensure the equation resolves to the entry's stated unit when using SI base units",
-                "If showing alternative unit conventions (e.g., eV for temperature), present them separately with explicit conversion factors - never chain inequivalent expressions with equals signs",
-            ],
-            "correct_example": "$$p = n k_B T$$ where $n$ is in m$^{-3}$, $k_B$ in J/K, $T$ in K, giving $p$ in Pa",
-            "incorrect_example": "$$p = n k_B T = n T \\text{ [eV]}$$ (dimensionally inconsistent chain)",
-            "alternative_units": "For alternative conventions, use separate statements: 'When using $T$ in eV, apply conversion: $p = n T \\times 1.602 \\times 10^{-19}$ Pa.'",
+            "word_count": "150-400 words for scalar/vector, 120-300 for metadata",
+            "equations": "At least one display equation ($$...$$) for physics quantities",
+            "typical_values": "Required with context-specific ranges",
         },
-    },
+    "must_include": ["Physical interpretation and governing physics", "Governing equations with full definitions (use display equations for main formulas)", "Measurement or derivation methods", "Typical values and physical ranges (populate validity_domain and constraints fields when applicable)", "Coordinate system definitions and sign conventions (if applicable)", "Relationships to other quantities with explicit equations"],
+    "yaml_formatting": {
+            "style": "Use literal block scalar style with pipe (|) for multiline content. This preserves formatting and requires no escaping.",
+            "example": "documentation: |\n  First paragraph with inline LaTeX $T_e$ and display equations:\n  \n  $$\\nabla \\times \\mathbf{B} = \\mu_0 \\mathbf{J}$$\n  \n  Second paragraph continues here.\n",
+        },
+    "inline_links": {
+            "description": "Reference related standard names using markdown link format [standard_name](#standard_name) for machine-readable cross-references within documentation text",
+            "format": "[standard_name_token](#standard_name_token)",
+            "examples": ["The electron temperature [electron_temperature](#electron_temperature) is related to electron pressure [electron_pressure](#electron_pressure) via the ideal gas law.", "This quantity is the radial component of the magnetic field vector [magnetic_field](#magnetic_field).", "See also [ion_temperature](#ion_temperature) and [electron_density](#electron_density) for related plasma parameters."],
+            "validation": "Referenced names are validated against catalog when entry is created",
+            "note": "Use inline links for narrative cross-references; use links field for formal dependency declarations",
+        },
+    "equations": {
+            "inline_math": "Use $...$ for inline equations (e.g., $T_e$, $\\nabla p$, $\\mathbf{B}$)",
+            "display_math": "Use $$...$$ on separate lines for display equations",
+            "symbols": "Use LaTeX commands ($\\phi$, $\\theta$, $\\rho$), not Unicode characters",
+            "vectors": "Use $\\mathbf{B}$, $\\mathbf{r}$, $\\mathbf{J}$ notation for vectors",
+            "requirements": ["All variables in equations must be defined either before first use, in a 'where' clause immediately after the equation, or inline when introduced", "Define units for all variables in 'where' clauses or inline definitions", "Ensure dimensional consistency with entry's unit field", "Include only fundamental governing equations - avoid algebraic rearrangements or trivial derivations that don't add physical insight"],
+            "examples": ["$V = -N A \\frac{dB}{dt}$ where $V$ is voltage in V, $N$ is number of turns, $A$ is area in m$^2$, $B$ is magnetic field in T", "$\\Phi = \\int \\mathbf{B} \\cdot d\\mathbf{A}$", "$$\\nabla \\times \\mathbf{B} = \\mu_0 \\mathbf{J}$$"],
+            "unit_consistency": {
+                    "rule": "All equations must be dimensionally consistent with the specified unit field",
+                    "requirements": ["Clearly specify units for all variables in 'where' clauses or inline definitions", "Ensure the equation resolves to the entry's stated unit when using SI base units", "If showing alternative unit conventions (e.g., eV for temperature), present them separately with explicit conversion factors - never chain inequivalent expressions with equals signs"],
+                    "correct_example": "$$p = n k_B T$$ where $n$ is in m$^{-3}$, $k_B$ in J/K, $T$ in K, giving $p$ in Pa",
+                    "incorrect_example": "$$p = n k_B T = n T \\text{ [eV]}$$ (dimensionally inconsistent chain)",
+                    "alternative_units": "For alternative conventions, use separate statements: 'When using $T$ in eV, apply conversion: $p = n T \\times 1.602 \\times 10^{-19}$ Pa.'",
+                },
+        },
     "sign_conventions": {
-        "when_applicable": "For quantities with directional or signed interpretations (fields, fluxes, currents, geometric normals)",
-        "format": "Sign convention must follow the main content as standalone paragraph",
-        "template": "Sign convention: Positive when [condition].",
-        "example": "Sign convention: Positive when normal to loop points downward (negative Z direction).",
-        "requirements": [
-            "Plain text (not bold or italic)",
-            "Blank lines before and after",
-            "Cannot be at document start",
-            "Always start with 'Sign convention:' (title case, colon) followed by 'Positive when' or 'Positive [quantity]'",
-        ],
-    },
+            "when_applicable": "For quantities with directional or signed interpretations (fields, fluxes, currents, geometric normals)",
+            "format": "Sign convention must follow the main content as standalone paragraph",
+            "template": "Sign convention: Positive when [condition].",
+            "example": "Sign convention: Positive when normal to loop points downward (negative Z direction).",
+            "requirements": ["Plain text (not bold or italic)", "Blank lines before and after", "Cannot be at document start", "Always start with 'Sign convention:' (title case, colon) followed by 'Positive when' or 'Positive [quantity]'"],
+        },
     "formatting": {
-        "wrapping": "Wrap text at ~75-80 characters for readability",
-        "paragraphs": "Separate paragraphs with blank lines",
-        "sections": "Use plain section labels (e.g., 'Measurement methods:', 'Physical context:') without bold formatting",
-        "lists": "Use Markdown lists (-, *) for organization. Do not use bold or italic formatting",
-        "equations": "Main governing equations should be standalone display equations ($$...$$), not inline",
-        "trailing_space": "No trailing whitespace on any line",
-    },
-    "avoid": [
-        "References to IMAS Data Dictionary (DD) paths or structure",
-        "References to COCOS conventions (define sign conventions explicitly instead)",
-        "Statements like 'see IMAS documentation' or 'refer to [external source]'",
-        "Implementation-specific details",
-        "Vague terms without explicit definitions",
-        "Unicode characters for Greek letters or special symbols (use LaTeX instead)",
-        "Undefined mathematical variables or symbols appearing in equations",
-    ],
+            "wrapping": "Wrap text at ~75-80 characters for readability",
+            "paragraphs": "Separate paragraphs with blank lines",
+            "sections": "Use plain section labels (e.g., 'Measurement methods:', 'Physical context:') without bold formatting",
+            "lists": "Use Markdown lists (-, *) for organization. Do not use bold or italic formatting",
+            "equations": "Main governing equations should be standalone display equations ($$...$$), not inline",
+            "trailing_space": "No trailing whitespace on any line",
+        },
+    "avoid": ["References to IMAS Data Dictionary (DD) paths or structure", "References to COCOS conventions (define sign conventions explicitly instead)", "Statements like 'see IMAS documentation' or 'refer to [external source]'", "Implementation-specific details", "Vague terms without explicit definitions", "Unicode characters for Greek letters or special symbols (use LaTeX instead)", "Undefined mathematical variables or symbols appearing in equations"],
     "when_deriving_from_imas_dd": "Extract and expand the physics content, making it standalone. Define all coordinate systems and sign conventions explicitly within the documentation text.",
 }
 
@@ -193,11 +142,7 @@ FIELD_CONSTRAINTS: dict[str, dict[str, Any]] = {
         "required": True,
         "type": "string",
         "pattern": "^[a-z][a-z0-9_]*$",
-        "examples": [
-            "electron_temperature",
-            "gradient_of_electron_temperature",
-            "radial_component_of_magnetic_field",
-        ],
+        "examples": ["electron_temperature", "gradient_of_electron_temperature", "radial_component_of_magnetic_field"],
     },
     "description": {
         "required": True,
@@ -242,7 +187,11 @@ FIELD_CONSTRAINTS: dict[str, dict[str, Any]] = {
     "constraints": {
         "required": False,
         "type": "array",
-        "examples": [["T_e > 0"], ["n_e >= 0", "n_e < 1e22 m^-3"], ["kappa >= 1"]],
+        "examples": [
+            ["T_e > 0"],
+            ["n_e >= 0", "n_e < 1e22 m^-3"],
+            ["kappa >= 1"]
+        ],
     },
     "deprecates": {
         "required": False,
@@ -259,179 +208,116 @@ FIELD_CONSTRAINTS: dict[str, dict[str, Any]] = {
 FIELD_GUIDANCE: dict[str, dict[str, Any]] = {
     "name": {
         "validation": "Must follow grammar canonical pattern. Use get_naming_grammar for composition rules.",
-        "common_mistakes": [
-            "Including units in name (use unit field instead)",
-            "Using camelCase or spaces",
-            "Starting with underscore or digit",
-        ],
+        "common_mistakes": ["Including units in name (use unit field instead)", "Using camelCase or spaces", "Starting with underscore or digit"],
     },
     "description": {
         "yaml_formatting": "Use plain unquoted style for simple text. Use single quotes if special characters needed.",
-        "content_rules": [
-            "Start with capital letter, end with period",
-            "Be specific and precise",
-            "Avoid jargon without definition",
-            "Exception: Flux surface averaged terms representing standard transport quantities (corresponding to IMAS equilibrium gm* geometric moments) are allowed to include 'flux surface averaged' in descriptions even when flux-surface-average tag is present. These are standard quantities (gm1-gm9 parameters) exchanged in transport modeling where the averaging is part of the quantity definition. Reference: IMAS equilibrium IDS equilibrium/time_slice/profiles_1d/gm1 through gm9.",
-        ],
-        "avoid": [
-            "Repeating the name verbatim",
-            "Referencing IMAS Data Dictionary (DD), COCOS conventions, or implementation-specific paths",
-        ],
+        "content_rules": ["Start with capital letter, end with period", "Be specific and precise", "Avoid jargon without definition", "Exception: Flux surface averaged terms representing standard transport quantities (corresponding to IMAS equilibrium gm* geometric moments) are allowed to include 'flux surface averaged' in descriptions even when flux-surface-average tag is present. These are standard quantities (gm1-gm9 parameters) exchanged in transport modeling where the averaging is part of the quantity definition. Reference: IMAS equilibrium IDS equilibrium/time_slice/profiles_1d/gm1 through gm9."],
+        "avoid": ["Repeating the name verbatim", "Referencing IMAS Data Dictionary (DD), COCOS conventions, or implementation-specific paths"],
     },
     "documentation": {
         "imas_data_dictionary": {
-            "purpose": "Use IMAS DD tools to discover context and ensure consistency",
-            "tools": {
-                "search_imas": "Find relevant DD paths for structural understanding",
-                "fetch_imas_paths": "Extract authoritative descriptions, units, coordinates, and documentation",
-                "explore_relationships": "Discover related quantities for inline links (omit max_depth for full cross-IDS discovery)",
+                "purpose": "Use IMAS DD tools to discover context and ensure consistency",
+                "tools": {
+                        "search_imas": "Find relevant DD paths for structural understanding",
+                        "fetch_imas_paths": "Extract authoritative descriptions, units, coordinates, and documentation",
+                        "explore_relationships": "Discover related quantities for inline links (omit max_depth for full cross-IDS discovery)",
+                    },
+                "inline_links_discovery": {
+                        "tool": "explore_relationships",
+                        "approach": "Query relevant DD leaf paths, omit max_depth parameter for full cross-IDS discovery",
+                        "target": "4-8 inline links per entry distributed throughout documentation",
+                    },
             },
-            "inline_links_discovery": {
-                "tool": "explore_relationships",
-                "approach": "Query relevant DD leaf paths, omit max_depth parameter for full cross-IDS discovery",
-                "target": "4-8 inline links per entry distributed throughout documentation",
-            },
-        },
         "tokamak_parameters": {
-            "purpose": "Access authoritative machine parameters for typical values in documentation",
-            "tools": {
-                "get_tokamak_parameters": "Retrieve verified geometry and physics parameters for tokamak machines",
+                "purpose": "Access authoritative machine parameters for typical values in documentation",
+                "tools": {
+                        "get_tokamak_parameters": "Retrieve verified geometry and physics parameters for tokamak machines",
+                    },
+                "usage": {
+                        "single_machine": "get_tokamak_parameters(machines='ITER') - Returns full parameter set for one machine",
+                        "multiple_machines": "get_tokamak_parameters(machines='ITER JET DIII-D') - Returns full data plus statistics (min/max/mean/median)",
+                        "all_machines": "get_tokamak_parameters(machines='all') - Returns all machines with statistics",
+                    },
+                "examples": ["ITER major radius: get_tokamak_parameters(machines='ITER')", "Compare JET and DIII-D: get_tokamak_parameters(machines='JET DIII-D')", "Parameter ranges across all machines: get_tokamak_parameters(machines='all')"],
+                "note": "Always cite specific machines in 'Typical values' sections. Use statistics for parameter ranges.",
             },
-            "usage": {
-                "single_machine": "get_tokamak_parameters(machines='ITER') - Returns full parameter set for one machine",
-                "multiple_machines": "get_tokamak_parameters(machines='ITER JET DIII-D') - Returns full data plus statistics (min/max/mean/median)",
-                "all_machines": "get_tokamak_parameters(machines='all') - Returns all machines with statistics",
-            },
-            "examples": [
-                "ITER major radius: get_tokamak_parameters(machines='ITER')",
-                "Compare JET and DIII-D: get_tokamak_parameters(machines='JET DIII-D')",
-                "Parameter ranges across all machines: get_tokamak_parameters(machines='all')",
-            ],
-            "note": "Always cite specific machines in 'Typical values' sections. Use statistics for parameter ranges.",
-        },
         "structure_templates": {
-            "opening_paragraph": {
-                "content": "Clear definition of the quantity with physics context",
-                "inline_links": "None - focus on clarity",
-                "length": "2-4 sentences",
+                "opening_paragraph": {
+                        "content": "Clear definition of the quantity with physics context",
+                        "inline_links": "None - focus on clarity",
+                        "length": "2-4 sentences",
+                    },
+                "subsequent_sections": {
+                        "preferred_order": ["Governing equations ($$...$$)", "Physical significance (include 2-3 inline links here)", "Measurement/Calculation methods (2-3 inline links)", "Typical values with context", "Sign convention (as final paragraph if applicable)"],
+                        "section_labels": {
+                                "format": "Plain text with colon, no formatting",
+                                "examples": ["Physical significance:", "Measurement methods:", "Typical values:"],
+                                "avoid": ["**Physical significance:**", "PHYSICAL SIGNIFICANCE"],
+                            },
+                    },
+                "inline_links": {
+                        "format": "[standard_name](#standard_name)",
+                        "distribution": "Throughout documentation after opening, not in opening",
+                        "target_count": "4-8 for scalar/vector, 3-5 for metadata",
+                    },
             },
-            "subsequent_sections": {
-                "preferred_order": [
-                    "Governing equations ($$...$$)",
-                    "Physical significance (include 2-3 inline links here)",
-                    "Measurement/Calculation methods (2-3 inline links)",
-                    "Typical values with context",
-                    "Sign convention (as final paragraph if applicable)",
-                ],
-                "section_labels": {
-                    "format": "Plain text with colon, no formatting",
-                    "examples": [
-                        "Physical significance:",
-                        "Measurement methods:",
-                        "Typical values:",
-                    ],
-                    "avoid": ["**Physical significance:**", "PHYSICAL SIGNIFICANCE"],
-                },
-            },
-            "inline_links": {
-                "format": "[standard_name](#standard_name)",
-                "distribution": "Throughout documentation after opening, not in opening",
-                "target_count": "4-8 for scalar/vector, 3-5 for metadata",
-            },
-        },
         "quality_targets": {
-            "word_count": "150-400 words for scalar/vector, 120-300 for metadata",
-            "equations": "At least one display equation ($$...$$) for physics quantities",
-            "typical_values": "Required with context-specific ranges",
-        },
-        "must_include": [
-            "Physical interpretation and governing physics",
-            "Governing equations with full definitions (use display equations for main formulas)",
-            "Measurement or derivation methods",
-            "Typical values and physical ranges (populate validity_domain and constraints fields when applicable)",
-            "Coordinate system definitions and sign conventions (if applicable)",
-            "Relationships to other quantities with explicit equations",
-        ],
-        "yaml_formatting": {
-            "style": "Use literal block scalar style with pipe (|) for multiline content. This preserves formatting and requires no escaping.",
-            "example": "documentation: |\n  First paragraph with inline LaTeX $T_e$ and display equations:\n  \n  $$\\nabla \\times \\mathbf{B} = \\mu_0 \\mathbf{J}$$\n  \n  Second paragraph continues here.\n",
-        },
-        "inline_links": {
-            "description": "Reference related standard names using markdown link format [standard_name](#standard_name) for machine-readable cross-references within documentation text",
-            "format": "[standard_name_token](#standard_name_token)",
-            "examples": [
-                "The electron temperature [electron_temperature](#electron_temperature) is related to electron pressure [electron_pressure](#electron_pressure) via the ideal gas law.",
-                "This quantity is the radial component of the magnetic field vector [magnetic_field](#magnetic_field).",
-                "See also [ion_temperature](#ion_temperature) and [electron_density](#electron_density) for related plasma parameters.",
-            ],
-            "validation": "Referenced names are validated against catalog when entry is created",
-            "note": "Use inline links for narrative cross-references; use links field for formal dependency declarations",
-        },
-        "equations": {
-            "inline_math": "Use $...$ for inline equations (e.g., $T_e$, $\\nabla p$, $\\mathbf{B}$)",
-            "display_math": "Use $$...$$ on separate lines for display equations",
-            "symbols": "Use LaTeX commands ($\\phi$, $\\theta$, $\\rho$), not Unicode characters",
-            "vectors": "Use $\\mathbf{B}$, $\\mathbf{r}$, $\\mathbf{J}$ notation for vectors",
-            "requirements": [
-                "All variables in equations must be defined either before first use, in a 'where' clause immediately after the equation, or inline when introduced",
-                "Define units for all variables in 'where' clauses or inline definitions",
-                "Ensure dimensional consistency with entry's unit field",
-                "Include only fundamental governing equations - avoid algebraic rearrangements or trivial derivations that don't add physical insight",
-            ],
-            "examples": [
-                "$V = -N A \\frac{dB}{dt}$ where $V$ is voltage in V, $N$ is number of turns, $A$ is area in m$^2$, $B$ is magnetic field in T",
-                "$\\Phi = \\int \\mathbf{B} \\cdot d\\mathbf{A}$",
-                "$$\\nabla \\times \\mathbf{B} = \\mu_0 \\mathbf{J}$$",
-            ],
-            "unit_consistency": {
-                "rule": "All equations must be dimensionally consistent with the specified unit field",
-                "requirements": [
-                    "Clearly specify units for all variables in 'where' clauses or inline definitions",
-                    "Ensure the equation resolves to the entry's stated unit when using SI base units",
-                    "If showing alternative unit conventions (e.g., eV for temperature), present them separately with explicit conversion factors - never chain inequivalent expressions with equals signs",
-                ],
-                "correct_example": "$$p = n k_B T$$ where $n$ is in m$^{-3}$, $k_B$ in J/K, $T$ in K, giving $p$ in Pa",
-                "incorrect_example": "$$p = n k_B T = n T \\text{ [eV]}$$ (dimensionally inconsistent chain)",
-                "alternative_units": "For alternative conventions, use separate statements: 'When using $T$ in eV, apply conversion: $p = n T \\times 1.602 \\times 10^{-19}$ Pa.'",
+                "word_count": "150-400 words for scalar/vector, 120-300 for metadata",
+                "equations": "At least one display equation ($$...$$) for physics quantities",
+                "typical_values": "Required with context-specific ranges",
             },
-        },
+        "must_include": ["Physical interpretation and governing physics", "Governing equations with full definitions (use display equations for main formulas)", "Measurement or derivation methods", "Typical values and physical ranges (populate validity_domain and constraints fields when applicable)", "Coordinate system definitions and sign conventions (if applicable)", "Relationships to other quantities with explicit equations"],
+        "yaml_formatting": {
+                "style": "Use literal block scalar style with pipe (|) for multiline content. This preserves formatting and requires no escaping.",
+                "example": "documentation: |\n  First paragraph with inline LaTeX $T_e$ and display equations:\n  \n  $$\\nabla \\times \\mathbf{B} = \\mu_0 \\mathbf{J}$$\n  \n  Second paragraph continues here.\n",
+            },
+        "inline_links": {
+                "description": "Reference related standard names using markdown link format [standard_name](#standard_name) for machine-readable cross-references within documentation text",
+                "format": "[standard_name_token](#standard_name_token)",
+                "examples": ["The electron temperature [electron_temperature](#electron_temperature) is related to electron pressure [electron_pressure](#electron_pressure) via the ideal gas law.", "This quantity is the radial component of the magnetic field vector [magnetic_field](#magnetic_field).", "See also [ion_temperature](#ion_temperature) and [electron_density](#electron_density) for related plasma parameters."],
+                "validation": "Referenced names are validated against catalog when entry is created",
+                "note": "Use inline links for narrative cross-references; use links field for formal dependency declarations",
+            },
+        "equations": {
+                "inline_math": "Use $...$ for inline equations (e.g., $T_e$, $\\nabla p$, $\\mathbf{B}$)",
+                "display_math": "Use $$...$$ on separate lines for display equations",
+                "symbols": "Use LaTeX commands ($\\phi$, $\\theta$, $\\rho$), not Unicode characters",
+                "vectors": "Use $\\mathbf{B}$, $\\mathbf{r}$, $\\mathbf{J}$ notation for vectors",
+                "requirements": ["All variables in equations must be defined either before first use, in a 'where' clause immediately after the equation, or inline when introduced", "Define units for all variables in 'where' clauses or inline definitions", "Ensure dimensional consistency with entry's unit field", "Include only fundamental governing equations - avoid algebraic rearrangements or trivial derivations that don't add physical insight"],
+                "examples": ["$V = -N A \\frac{dB}{dt}$ where $V$ is voltage in V, $N$ is number of turns, $A$ is area in m$^2$, $B$ is magnetic field in T", "$\\Phi = \\int \\mathbf{B} \\cdot d\\mathbf{A}$", "$$\\nabla \\times \\mathbf{B} = \\mu_0 \\mathbf{J}$$"],
+                "unit_consistency": {
+                        "rule": "All equations must be dimensionally consistent with the specified unit field",
+                        "requirements": ["Clearly specify units for all variables in 'where' clauses or inline definitions", "Ensure the equation resolves to the entry's stated unit when using SI base units", "If showing alternative unit conventions (e.g., eV for temperature), present them separately with explicit conversion factors - never chain inequivalent expressions with equals signs"],
+                        "correct_example": "$$p = n k_B T$$ where $n$ is in m$^{-3}$, $k_B$ in J/K, $T$ in K, giving $p$ in Pa",
+                        "incorrect_example": "$$p = n k_B T = n T \\text{ [eV]}$$ (dimensionally inconsistent chain)",
+                        "alternative_units": "For alternative conventions, use separate statements: 'When using $T$ in eV, apply conversion: $p = n T \\times 1.602 \\times 10^{-19}$ Pa.'",
+                    },
+            },
         "sign_conventions": {
-            "when_applicable": "For quantities with directional or signed interpretations (fields, fluxes, currents, geometric normals)",
-            "format": "Sign convention must follow the main content as standalone paragraph",
-            "template": "Sign convention: Positive when [condition].",
-            "example": "Sign convention: Positive when normal to loop points downward (negative Z direction).",
-            "requirements": [
-                "Plain text (not bold or italic)",
-                "Blank lines before and after",
-                "Cannot be at document start",
-                "Always start with 'Sign convention:' (title case, colon) followed by 'Positive when' or 'Positive [quantity]'",
-            ],
-        },
+                "when_applicable": "For quantities with directional or signed interpretations (fields, fluxes, currents, geometric normals)",
+                "format": "Sign convention must follow the main content as standalone paragraph",
+                "template": "Sign convention: Positive when [condition].",
+                "example": "Sign convention: Positive when normal to loop points downward (negative Z direction).",
+                "requirements": ["Plain text (not bold or italic)", "Blank lines before and after", "Cannot be at document start", "Always start with 'Sign convention:' (title case, colon) followed by 'Positive when' or 'Positive [quantity]'"],
+            },
         "formatting": {
-            "wrapping": "Wrap text at ~75-80 characters for readability",
-            "paragraphs": "Separate paragraphs with blank lines",
-            "sections": "Use plain section labels (e.g., 'Measurement methods:', 'Physical context:') without bold formatting",
-            "lists": "Use Markdown lists (-, *) for organization. Do not use bold or italic formatting",
-            "equations": "Main governing equations should be standalone display equations ($$...$$), not inline",
-            "trailing_space": "No trailing whitespace on any line",
-        },
-        "avoid": [
-            "References to IMAS Data Dictionary (DD) paths or structure",
-            "References to COCOS conventions (define sign conventions explicitly instead)",
-            "Statements like 'see IMAS documentation' or 'refer to [external source]'",
-            "Implementation-specific details",
-            "Vague terms without explicit definitions",
-            "Unicode characters for Greek letters or special symbols (use LaTeX instead)",
-            "Undefined mathematical variables or symbols appearing in equations",
-        ],
+                "wrapping": "Wrap text at ~75-80 characters for readability",
+                "paragraphs": "Separate paragraphs with blank lines",
+                "sections": "Use plain section labels (e.g., 'Measurement methods:', 'Physical context:') without bold formatting",
+                "lists": "Use Markdown lists (-, *) for organization. Do not use bold or italic formatting",
+                "equations": "Main governing equations should be standalone display equations ($$...$$), not inline",
+                "trailing_space": "No trailing whitespace on any line",
+            },
+        "avoid": ["References to IMAS Data Dictionary (DD) paths or structure", "References to COCOS conventions (define sign conventions explicitly instead)", "Statements like 'see IMAS documentation' or 'refer to [external source]'", "Implementation-specific details", "Vague terms without explicit definitions", "Unicode characters for Greek letters or special symbols (use LaTeX instead)", "Undefined mathematical variables or symbols appearing in equations"],
         "when_deriving_from_imas_dd": "Extract and expand the physics content, making it standalone. Define all coordinate systems and sign conventions explicitly within the documentation text.",
     },
     "unit": {
         "auto_correction": {
-            "enabled": True,
-            "example": "'s^-2.m' -> 'm.s^-2', 'T.A' -> 'A.T'",
-            "rule": "Tokens sorted lexicographically",
-        },
+                "enabled": True,
+                "example": "'s^-2.m' -> 'm.s^-2', 'T.A' -> 'A.T'",
+                "rule": "Tokens sorted lexicographically",
+            },
         "dimensionless": "Use '1' for dimensionless quantities",
         "scalar_vector_requirement": "Required for scalar and vector entries (use '1' if dimensionless)",
         "metadata_optional": "Optional for metadata entries (default empty string, omitted from serialization)",
@@ -442,48 +328,29 @@ FIELD_GUIDANCE: dict[str, dict[str, Any]] = {
         "validation": "All tags validated against grammar/vocabularies/tags.yml. Validation fails if tags[0] is not a primary tag.",
         "common_mistake": "Do not put secondary tags like 'cylindrical-coordinates' at position 0. Always start with primary tag.",
         "examples": {
-            "correct": [
-                ["magnetics", "measured", "calibrated", "local-measurement"],
-                ["equilibrium", "spatial-profile", "reconstructed"],
-                ["fundamental", "global-quantity", "time-dependent"],
-            ],
-            "wrong": [
-                ["cylindrical-coordinates", "magnetics"],
-                ["measured", "magnetics"],
-            ],
-        },
+                "correct": [
+                    ["magnetics", "measured", "calibrated", "local-measurement"],
+                    ["equilibrium", "spatial-profile", "reconstructed"],
+                    ["fundamental", "global-quantity", "time-dependent"]
+                ],
+                "wrong": [
+                    ["cylindrical-coordinates", "magnetics"],
+                    ["measured", "magnetics"]
+                ],
+            },
     },
     "links": {
-        "use_for": [
-            "Related physical quantities (e.g., components of a vector)",
-            "Base quantities for derived entries (e.g., in provenance)",
-            "Complementary measurements or properties",
-            "Alternative representations",
-        ],
-        "do_not_use_for": [
-            "IMAS Data Dictionary paths or URLs - DD links to standard names, not reverse",
-            "MCP server endpoints (e.g., https://imas-dd.iter.org/mcp)",
-            "External specifications or DOIs - describe in documentation with context instead",
-            "Implementation paths or tool endpoints",
-            "Diagnostic/hardware configuration URLs",
-        ],
+        "use_for": ["Related physical quantities (e.g., components of a vector)", "Base quantities for derived entries (e.g., in provenance)", "Complementary measurements or properties", "Alternative representations"],
+        "do_not_use_for": ["IMAS Data Dictionary paths or URLs - DD links to standard names, not reverse", "MCP server endpoints (e.g., https://imas-dd.iter.org/mcp)", "External specifications or DOIs - describe in documentation with context instead", "Implementation paths or tool endpoints", "Diagnostic/hardware configuration URLs"],
         "critical_rule": "Standard names are authoritative. IMAS DD references standard names. Never link back to DD.",
         "validation": "Internal 'name:' references are validated against catalog. Names must exist or be created in same batch.",
         "rationale": "Links field creates machine-readable dependency graph. External resources need human context.",
         "for_external_resources": "Describe in documentation field with proper context, not as bare links in links field.",
         "inline_vs_links_field": "Use inline name: references in documentation for narrative cross-references. Use links field for formal machine-readable dependency declarations.",
         "examples": {
-            "correct": [
-                "name:plasma_pressure",
-                "name:magnetic_field",
-                "name:electron_temperature",
-            ],
-            "wrong": [
-                "https://imas-dd.iter.org/...",
-                "equilibrium/time_slice/profiles_1d/elongation",
-                "https://doi.org/10.1088/...",
-            ],
-        },
+                "correct": ["name:plasma_pressure", "name:magnetic_field", "name:electron_temperature"],
+                "wrong": ["https://imas-dd.iter.org/...", "equilibrium/time_slice/profiles_1d/elongation", "https://doi.org/10.1088/..."],
+            },
     },
     "status": {
         "workflow": "Use 'draft' initially; promote to 'active' after validation; set superseded_by when deprecating",
@@ -500,20 +367,11 @@ FIELD_GUIDANCE: dict[str, dict[str, Any]] = {
     "validity_domain": {
         "purpose": "Specify the spatial or operational domain where this quantity is physically valid or typically measured",
         "use_when": "The quantity is inherently limited to a specific plasma region or operational regime",
-        "examples": [
-            "core_plasma: for quantities only meaningful in confined plasma region",
-            "edge_plasma: for edge/pedestal region specific quantities",
-            "vacuum: for quantities in vacuum regions only",
-            "whole_plasma: for quantities spanning entire plasma volume",
-        ],
+        "examples": ["core_plasma: for quantities only meaningful in confined plasma region", "edge_plasma: for edge/pedestal region specific quantities", "vacuum: for quantities in vacuum regions only", "whole_plasma: for quantities spanning entire plasma volume"],
     },
     "constraints": {
         "purpose": "Specify hard physical bounds and mathematical constraints on the quantity",
-        "use_for": [
-            "Physical bounds: non-negativity, fundamental limits from physics",
-            "Mathematical constraints: relationships that must hold (e.g., 'elongation >= 1', '0 <= poloidal_beta <= 1')",
-            "Dimensional constraints: valid ranges for dimensionless quantities",
-        ],
+        "use_for": ["Physical bounds: non-negativity, fundamental limits from physics", "Mathematical constraints: relationships that must hold (e.g., 'elongation >= 1', '0 <= poloidal_beta <= 1')", "Dimensional constraints: valid ranges for dimensionless quantities"],
         "format": "Use clear mathematical notation with units where applicable",
         "note": "Constraints represent hard limits, not typical operational ranges. For typical values, document in a dedicated field or structured metadata (future enhancement)",
         "validation": "Constraints are validated for format but not evaluated for physical correctness",
@@ -524,49 +382,26 @@ TYPE_SPECIFIC_REQUIREMENTS: dict[str, dict[str, Any]] = {
     "scalar": {
         "required_fields": ["name", "description", "documentation", "unit", "tags"],
         "field_overrides": {
-            "unit": "Required (use '1' for dimensionless)",
-        },
-        "optional_fields": [
-            "provenance",
-            "status",
-            "validity_domain",
-            "constraints",
-            "deprecates",
-            "superseded_by",
-            "links",
-        ],
+                "unit": "Required (use '1' for dimensionless)",
+            },
+        "optional_fields": ["provenance", "status", "validity_domain", "constraints", "deprecates", "superseded_by", "links"],
         "description": "Physical quantities with single value at each point",
     },
     "vector": {
         "required_fields": ["name", "description", "documentation", "unit", "tags"],
         "field_overrides": {
-            "unit": "Required (use '1' for dimensionless)",
-        },
-        "optional_fields": [
-            "provenance",
-            "status",
-            "validity_domain",
-            "constraints",
-            "deprecates",
-            "superseded_by",
-            "links",
-        ],
+                "unit": "Required (use '1' for dimensionless)",
+            },
+        "optional_fields": ["provenance", "status", "validity_domain", "constraints", "deprecates", "superseded_by", "links"],
         "description": "Vector field quantities with components",
     },
     "metadata": {
         "required_fields": ["name", "description", "documentation", "tags"],
         "field_overrides": {
-            "unit": "Optional (default empty string, omitted from serialization)",
-        },
+                "unit": "Optional (default empty string, omitted from serialization)",
+            },
         "forbidden_fields": ["provenance"],
-        "optional_fields": [
-            "status",
-            "validity_domain",
-            "constraints",
-            "deprecates",
-            "superseded_by",
-            "links",
-        ],
+        "optional_fields": ["status", "validity_domain", "constraints", "deprecates", "superseded_by", "links"],
         "description": "Definitional entries (boundaries, regions, concepts)",
         "note": "Metadata entries are definitional anchors, not measurable/derived quantities",
     },
@@ -577,60 +412,39 @@ PROVENANCE_MODES_INFO: dict[str, Any] | None = {
     "applicable_to": ["scalar", "vector"],
     "note": "Metadata entries are definitional anchors, not derived quantities",
     "modes": {
-        "operator": {
-            "description": "Chain of mathematical operators applied to base quantity",
-            "fields": {
-                "mode": "Literal 'operator' discriminator",
-                "operators": "List of operator tokens (outermost first, auto-normalized to primitive operators)",
-                "base": "Standard name of underlying quantity",
-                "operator_id": "Optional composite operator identifier (e.g., 'laplacian', 'second_time_derivative') if user supplied one",
-            },
-            "examples": [
-                "gradient of temperature",
-                "divergence of velocity",
-                "time derivative of current",
-                "curl of magnetic field",
-            ],
-            "validation": [
-                "Base standard name must exist in catalog or be created in same batch",
-                "Name should match operator pattern (e.g., 'gradient_of_base')",
-            ],
+            "operator": {
+                    "description": "Chain of mathematical operators applied to base quantity",
+                    "fields": {
+                            "mode": "Literal 'operator' discriminator",
+                            "operators": "List of operator tokens (outermost first, auto-normalized to primitive operators)",
+                            "base": "Standard name of underlying quantity",
+                            "operator_id": "Optional composite operator identifier (e.g., 'laplacian', 'second_time_derivative') if user supplied one",
+                        },
+                    "examples": ["gradient of temperature", "divergence of velocity", "time derivative of current", "curl of magnetic field"],
+                    "validation": ["Base standard name must exist in catalog or be created in same batch", "Name should match operator pattern (e.g., 'gradient_of_base')"],
+                },
+            "reduction": {
+                    "description": "Aggregation/reduction over a domain",
+                    "fields": {
+                            "mode": "Literal 'reduction' discriminator",
+                            "reduction": "Reduction operation (mean, rms, integral, magnitude, ...)",
+                            "domain": "Domain of reduction (time, volume, flux_surface, none)",
+                            "base": "Standard name of quantity being reduced",
+                        },
+                    "examples": ["time average of density", "volume integral of power", "rms of fluctuations", "flux surface average of pressure"],
+                    "validation": ["Base standard name must exist in catalog or be created in same batch", "Name should match reduction pattern (e.g., 'time_average_of_base')"],
+                },
+            "expression": {
+                    "description": "Algebraic expression combining multiple standard names",
+                    "fields": {
+                            "mode": "Literal 'expression' discriminator",
+                            "expression": "Free-form expression string (catalog-governed)",
+                            "dependencies": "List of standard names referenced in expression",
+                        },
+                    "examples": ["poloidal_beta = 4 * integral(pressure) / (R0 * mu0 * current^2)", "total_energy = kinetic_energy + potential_energy"],
+                    "validation": ["All dependencies must exist in catalog or be created in same batch"],
+                },
         },
-        "reduction": {
-            "description": "Aggregation/reduction over a domain",
-            "fields": {
-                "mode": "Literal 'reduction' discriminator",
-                "reduction": "Reduction operation (mean, rms, integral, magnitude, ...)",
-                "domain": "Domain of reduction (time, volume, flux_surface, none)",
-                "base": "Standard name of quantity being reduced",
-            },
-            "examples": [
-                "time average of density",
-                "volume integral of power",
-                "rms of fluctuations",
-                "flux surface average of pressure",
-            ],
-            "validation": [
-                "Base standard name must exist in catalog or be created in same batch",
-                "Name should match reduction pattern (e.g., 'time_average_of_base')",
-            ],
-        },
-        "expression": {
-            "description": "Algebraic expression combining multiple standard names",
-            "fields": {
-                "mode": "Literal 'expression' discriminator",
-                "expression": "Free-form expression string (catalog-governed)",
-                "dependencies": "List of standard names referenced in expression",
-            },
-            "examples": [
-                "poloidal_beta = 4 * integral(pressure) / (R0 * mu0 * current^2)",
-                "total_energy = kinetic_energy + potential_energy",
-            ],
-            "validation": [
-                "All dependencies must exist in catalog or be created in same batch"
-            ],
-        },
-    },
 }
 
 # Mapping of Kind enum values to Pydantic model classes
@@ -653,12 +467,12 @@ except ImportError:
     KIND_MODELS = {}  # type: ignore[assignment]
 
 __all__ = [
-    "NAMING_GUIDANCE",
-    "DOCUMENTATION_GUIDANCE",
-    "FIELD_DESCRIPTIONS",
-    "FIELD_CONSTRAINTS",
-    "FIELD_GUIDANCE",
-    "TYPE_SPECIFIC_REQUIREMENTS",
-    "PROVENANCE_MODES_INFO",
-    "KIND_MODELS",
+    'NAMING_GUIDANCE',
+    'DOCUMENTATION_GUIDANCE',
+    'FIELD_DESCRIPTIONS',
+    'FIELD_CONSTRAINTS',
+    'FIELD_GUIDANCE',
+    'TYPE_SPECIFIC_REQUIREMENTS',
+    'PROVENANCE_MODES_INFO',
+    'KIND_MODELS',
 ]
