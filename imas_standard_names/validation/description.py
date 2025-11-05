@@ -75,6 +75,33 @@ def validate_description(entry: dict[str, Any]) -> list[dict[str, Any]]:
         if tag in tags:
             for pattern in patterns:
                 if pattern in description:
+                    # Exception: gm* transport quantities (geometric moments) are allowed
+                    # to include "flux surface averaged" as it's part of their definition
+                    if (
+                        tag == "flux-surface-average"
+                        and pattern == "flux surface averaged"
+                    ):
+                        name = entry.get("name", "")
+                        # Check if this is a standard transport quantity (gm* parameter)
+                        gm_patterns = [
+                            "inverse_major_radius",
+                            "major_radius",
+                            "magnetic_field_strength",
+                            "squared_magnetic_field_strength",
+                            "inverse_squared_magnetic_field_strength",
+                            "toroidal_flux_coordinate_gradient",
+                            "toroidal_current_density",
+                            "parallel_current_density",
+                            "bootstrap",
+                            "ohmic",
+                            "diamagnetic",
+                        ]
+                        is_gm_transport = any(
+                            gm_name in name for gm_name in gm_patterns
+                        )
+                        if is_gm_transport:
+                            continue  # Skip warning for gm* transport quantities
+
                     issues.append(
                         {
                             "severity": "warning",

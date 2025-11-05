@@ -271,6 +271,7 @@ FIELD_GUIDANCE: dict[str, dict[str, Any]] = {
             "Start with capital letter, end with period",
             "Be specific and precise",
             "Avoid jargon without definition",
+            "Exception: Flux surface averaged terms representing standard transport quantities (corresponding to IMAS equilibrium gm* geometric moments) are allowed to include 'flux surface averaged' in descriptions even when flux-surface-average tag is present. These are standard quantities (gm1-gm9 parameters) exchanged in transport modeling where the averaging is part of the quantity definition. Reference: IMAS equilibrium IDS equilibrium/time_slice/profiles_1d/gm1 through gm9.",
         ],
         "avoid": [
             "Repeating the name verbatim",
