@@ -1,13 +1,24 @@
+import importlib.resources as ir
 import json
 from pathlib import Path
 
 from imas_standard_names.issues.cli import update_standardnames
+from imas_standard_names.repository import StandardNameCatalog
 
 
 def _rewrite_submission(file_path: str, **updates):
     data = json.loads(Path(file_path).read_text())
     data.update(updates)
     Path(file_path).write_text(json.dumps(data))
+
+
+def _get_first_example_name():
+    """Get first example name from catalog for testing conflicts."""
+    files_obj = ir.files("imas_standard_names") / "resources" / "standard_name_examples"
+    with ir.as_file(files_obj) as examples_path:
+        catalog = StandardNameCatalog(root=examples_path, permissive=True)
+        scalars = catalog.list(kind="scalar")
+        return scalars[0].name if scalars else "electron_temperature"
 
 
 def test_add_standard_name(cli_env):
@@ -22,7 +33,9 @@ def test_add_standard_name(cli_env):
 
 def test_overwrite(cli_env):
     runner, (standardnames_dir, genericnames_file, submission_file) = cli_env
-    _rewrite_submission(submission_file, name="plasma_current")
+    # Use actual example name that exists
+    existing_name = _get_first_example_name()
+    _rewrite_submission(submission_file, name=existing_name)
     # First attempt without overwrite should error
     result1 = runner.invoke(
         update_standardnames,
@@ -54,8 +67,10 @@ def test_invalid_name(cli_env):
 
 def test_alias_success(cli_env):
     runner, (standardnames_dir, genericnames_file, submission_file) = cli_env
+    # Use actual example name as alias target
+    existing_name = _get_first_example_name()
     _rewrite_submission(
-        submission_file, name="second_plasma_current", alias="plasma_current"
+        submission_file, name="test_alias_quantity", alias=existing_name
     )
     result = runner.invoke(
         update_standardnames,

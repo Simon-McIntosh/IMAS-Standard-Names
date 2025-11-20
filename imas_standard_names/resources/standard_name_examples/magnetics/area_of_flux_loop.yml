@@ -1,0 +1,35 @@
+name: area_of_flux_loop
+description: Effective sensing area of flux loop coil.
+documentation: |-
+  Effective sensing area $A_{\text{eff}}$ of a flux loop diagnostic coil, defined as the product of the number of turns and the area enclosed by each turn. The effective area converts measured voltage to magnetic flux change via integration and is critical for quantitative magnetic measurements and equilibrium reconstruction.
+
+  $$A_{\text{eff}} = N \times A_{\text{turn}}$$
+
+  where $N$ is the number of turns (dimensionless), $A_{\text{turn}}$ is the area per turn in m$^2$, giving $A_{\text{eff}}$ in m$^2$.
+
+  Physical significance:
+
+  The effective area converts measured voltage to magnetic flux change via integration. Accurate calibration of flux loop effective area is critical for quantitative magnetic measurements and equilibrium reconstruction. Area affects [flux_loop_voltage](#flux_loop_voltage) calibration and determines measurement sensitivity. See [flux_loop_voltage](#flux_loop_voltage) for measurement relationships and [magnetic_flux](#magnetic_flux) for flux calculations.
+
+  Measurement relation:
+
+  The effective area converts measured voltage to magnetic flux change via integration:
+
+  $$\Delta \Psi = \frac{1}{A_{\text{eff}}} \int V \, dt$$
+
+  where $V$ is [flux_loop_voltage](#flux_loop_voltage) in V, $t$ is time in s, and $\Delta \Psi$ is flux change in Wb.
+
+  Measurement methods:
+
+  Flux loop area is determined from coil geometry measurements including turn count and loop dimensions. Calibration procedures use known magnetic fields for area verification. Area calibration affects [flux_loop_voltage](#flux_loop_voltage) interpretation and equilibrium reconstruction accuracy. Engineering survey techniques measure coil positioning and geometry. Area stability is monitored over time.
+
+  Typical values:
+
+  0.01-1 m$^2$ depending on coil design and installation location. Area typically ranges from small diagnostic loops to large vessel-encompassing coils.
+
+  Sign convention: Positive area follows the right-hand rule for loop orientation, consistent with [flux_loop_voltage](#flux_loop_voltage) measurements and magnetic flux conventions.
+status: active
+tags:
+- magnetics
+kind: scalar
+unit: m^2

@@ -1,74 +1,47 @@
 # IMAS Standard Names
 
-Welcome to the IMAS Standard Names documentation. This project defines a structured, machine-parseable naming convention for fusion data variables.
+Welcome to the IMAS Standard Names catalog  a comprehensive collection of structured, machine-parseable names for fusion data variables.
 
-## Quick Links
+{% set stats = category_stats() %}
 
-- **[Grammar Reference](grammar-reference.md)** - Complete auto-generated grammar vocabulary and rules
-- **[Guidelines](guidelines.md)** - Naming conventions and best practices
-- **[Specification](specification.md)** - Formal grammar specification and validation rules
-- **[Quick Start](quickstart.md)** - Step-by-step guide to adding new standard names
-- **[Style Guide](style-guide.md)** - Detailed authoring guidelines
-- **[IMAS Magnetics Example](magnetics-example.md)** - Worked example mapping IMAS paths to standard names
+## Standard Name Categories
 
-## Overview
+Browse standard names by category:
 
-The IMAS Standard Names system provides:
+{% for tag, items in stats.tags.items() %}
+- **[{{ tag.replace('-', ' ').title() }}](catalog.md#{{ tag }})**  {{ items|length }} standard names
+{% endfor %}
 
-- **Deterministic parsing** of variable names into structured components
-- **Controlled vocabularies** for segments (components, subjects, positions, processes, basis)
-- **Validation rules** to ensure consistency and correctness
-- **Single source of truth** in `grammar.yml` with auto-generated code and documentation
+## Statistics
 
-## Grammar Summary
+- **Total Standard Names:** {{ stats.total_names }}
+- **Categories:** {{ stats.total_tags }}
 
-The canonical naming pattern:
+---
 
-```text
-[<component>_component_of]? [<subject>]? <base>
-[of_<object> | from_<source>]?
-[of_<geometry> | at_<position>]?
-[due_to_<process>]?
-```
+## About Standard Names
 
-**Key distinctions:**
+Standard names provide a controlled vocabulary for identifying physical quantities, diagnostic measurements, and geometric properties in fusion experiments. Each name includes:
 
-- **`of_<object>`** — intrinsic property OF hardware/equipment (e.g., `area_of_flux_loop`)
-- **`from_<source>`** — measurement/signal FROM device (e.g., `voltage_from_flux_loop`)
-- **`of_<geometry>`** — geometric property OF a spatial object (e.g., `major_radius_of_plasma_boundary`)
-- **`at_<position>`** — field quantity evaluated AT a location (e.g., `electron_temperature_at_magnetic_axis`)
+- **Unique identifier** following grammar rules
+- **Physical units** (SI-consistent)
+- **Description** and detailed documentation
+- **Category tags** for organization
+- **Status** tracking (draft, active, deprecated)
 
-### Current Vocabularies
+## Documentation
 
-{{ grammar_all_vocabularies() }}
+- **[Standard Names Catalog](catalog.md)**  Complete browsable catalog
+- **[Grammar Reference](grammar-reference.md)**  Vocabulary and naming rules
+- **[Guidelines](guidelines.md)**  Naming patterns and conventions
+- **[Development Guides](development/quickstart.md)**  For contributors
 
-See the [Grammar Reference](grammar-reference.md) for complete details on all vocabularies, segment rules, and examples.
-
-## Getting Started
-
-1. Review the [Grammar Reference](grammar-reference.md) to understand available vocabularies
-2. Follow the [Quick Start](quickstart.md) guide to create your first standard name
-3. Consult the [Guidelines](guidelines.md) for naming conventions
-4. Use the [Style Guide](style-guide.md) for detailed authoring rules
-
-## Standard Names Catalog
-
-The current catalog of standard names is maintained in `imas_standard_names/resources/standard_names/` with individual YAML files organized by domain:
-
-- **magnetic_field/** - Magnetic field vectors and components
-- **plasma/** - Plasma parameters (temperature, density, etc.)
-- **equilibrium/** - Equilibrium reconstruction quantities
-
-For programmatic access to the catalog, use the Python API:
+## Programmatic Access
 
 ```python
 from imas_standard_names.repository import StandardNameRepository
 
 repo = StandardNameRepository()
-name = repo.get("electron_temperature")
-print(f"{name.unit}: {name.description}")
+name = repo.get(\"electron_temperature\")
+print(f\"{name.name}: {name.unit}  {name.description}\")
 ```
-
-## Contributing
-
-See [Contributing Guidelines](contributing.md) for information on proposing new standard names or modifications to the grammar.

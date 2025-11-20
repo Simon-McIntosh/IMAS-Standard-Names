@@ -9,11 +9,11 @@ from imas_standard_names.grammar import (
 
 
 def test_compose_and_parse_minimal_base():
-    parts = StandardName(physical_base="temperature")
+    parts = StandardName(physical_base="magnetic_field")
     name = compose_name(parts)
-    assert name == "temperature"
+    assert name == "magnetic_field"
     round_trip = parse_name(name)
-    assert round_trip.model_dump_compact() == {"physical_base": "temperature"}
+    assert round_trip.model_dump_compact() == {"physical_base": "magnetic_field"}
 
 
 def test_with_component_subject_no_basis():

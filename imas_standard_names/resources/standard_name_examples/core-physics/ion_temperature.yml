@@ -1,0 +1,33 @@
+name: ion_temperature
+description: Ion kinetic temperature.
+documentation: |-
+  Ion kinetic temperature $T_i$ representing the mean thermal energy per ion. In fusion plasmas, ion temperature is critical for achieving fusion reactions, as the fusion cross-section strongly depends on ion temperature. Ion temperature determines the thermal velocity of ions and affects fusion reactivity.
+
+  Thermodynamic relation:
+
+  Ion temperature relates to ion pressure via the ideal gas law:
+
+  $$p_i = n_i k_B T_i$$
+
+  where $n_i$ is ion density in m$^{-3}$, $k_B = 1.381 \times 10^{-23}$ J/K, $T_i$ is in K, giving $p_i$ in Pa. When using $T_i$ in eV, apply conversion: $p_i = n_i T_i \times 1.602 \times 10^{-19}$ Pa.
+
+  Physical significance:
+
+  Ion temperature determines fusion reactivity through the Maxwellian-averaged cross-section. For deuterium-tritium fusion, maximum reactivity occurs near $T_i \approx 100$ keV, with practical operating points around 10-20 keV. Ion temperature affects [energy_confinement_time](#energy_confinement_time) and determines the fusion triple product $n T \tau_E$. See [electron_temperature](#electron_temperature) for electron-ion energy exchange and [ion_temperature_at_magnetic_axis](#ion_temperature_at_magnetic_axis) for core values.
+
+  Measurement methods:
+
+  Charge exchange recombination spectroscopy provides local ion temperature measurements through Doppler broadening of impurity lines. Neutral particle analyzers measure charge-exchanged neutrals escaping the plasma. X-ray crystal spectroscopy determines ion temperature from continuum radiation. Thomson scattering can provide ion temperature in some configurations. Ion temperature profiles are essential for [plasma_current_density](#plasma_current_density) calculations.
+
+  Typical values:
+
+  Edge region: 10-200 eV, core region: 1-20 keV in high-performance tokamak plasmas. On-axis values in [ion_temperature_at_magnetic_axis](#ion_temperature_at_magnetic_axis) typically reach 5-15 keV during auxiliary heating. Ion temperature often exceeds electron temperature in heated plasmas.
+
+  Sign convention: Positive temperature indicates thermal energy per particle, following standard thermodynamic conventions.
+status: draft
+tags:
+- core-physics
+- measured
+- spatial-profile
+kind: scalar
+unit: eV

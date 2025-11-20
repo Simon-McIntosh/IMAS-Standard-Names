@@ -14,25 +14,34 @@ kind: vector
 status: active
 unit: m.s^-1
 description: Flow velocity.
+documentation: |
+  Flow velocity for HTML rendering testing.
+tags: [fundamental]
 """,
         encoding="utf-8",
     )
     # component files
-    (tmp_path / "r_component_of_velocity.yml").write_text(
-        """name: r_component_of_velocity
+    (tmp_path / "radial_component_of_velocity.yml").write_text(
+        """name: radial_component_of_velocity
 kind: scalar
 status: active
     unit: m.s^-1
 description: Radial component of velocity.
+documentation: |
+  Radial component of velocity for HTML rendering testing.
+tags: [fundamental]
 """,
         encoding="utf-8",
     )
-    (tmp_path / "tor_component_of_velocity.yml").write_text(
-        """name: tor_component_of_velocity
+    (tmp_path / "toroidal_component_of_velocity.yml").write_text(
+        """name: toroidal_component_of_velocity
 kind: scalar
 status: active
     unit: m.s^-1
 description: Toroidal component of velocity.
+documentation: |
+  Toroidal component of velocity for HTML rendering testing.
+tags: [fundamental]
 """,
         encoding="utf-8",
     )

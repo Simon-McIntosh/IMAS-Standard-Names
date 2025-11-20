@@ -1,0 +1,31 @@
+name: vertical_displacement_event
+description: Vertical displacement event.
+documentation: |-
+  A vertical displacement event (VDE) is a plasma instability in elongated tokamaks where the plasma rapidly moves vertically, potentially leading to disruption. VDEs occur when vertical position control is lost, allowing the plasma to accelerate toward the top or bottom of the vessel. Elongated plasmas are vertically unstable due to the n=0 mode.
+
+  Physical mechanism:
+
+  Elongated plasmas ($\kappa > 1.3$) are vertically unstable due to the n=0 mode. The vertical magnetic field required to balance the hoop force creates an unstable equilibrium. Active feedback control using vertical field coils is required to maintain stability. VDE growth rate depends on plasma parameters and external coil response. See [elongation_of_plasma_boundary](#elongation_of_plasma_boundary) for instability threshold.
+
+  Consequences:
+
+  Uncontrolled VDEs can cause large eddy currents in vessel structures, asymmetric forces on [first_wall](#first_wall) and coils, plasma contact with wall leading to disruption, and potential damage to plasma-facing components. VDEs affect [plasma_current](#plasma_current) distribution and [safety_factor](#safety_factor) profiles. See [magnetic_axis](#magnetic_axis) for position relationships.
+
+  Mitigation:
+
+  Fast vertical position control (response time < $\tau_{\text{wall}}$) is essential for highly elongated plasmas. Shape control and [elongation_of_plasma_boundary](#elongation_of_plasma_boundary) limits are set by VDE avoidance. Passive stability improvements include vessel configuration and error field correction. VDE detection systems provide early warning for control system response.
+
+  Related quantities:
+
+  VDE relates to [elongation_of_plasma_boundary](#elongation_of_plasma_boundary) through instability threshold, [plasma_boundary](#plasma_boundary) through wall contact, and [magnetic_axis](#magnetic_axis) through position control. VDE prevention affects operational limits and plasma performance.
+
+  Measurement methods:
+
+  VDE detection uses magnetic diagnostics including [flux_loop_voltage](#flux_loop_voltage) and magnetic probes. Position control systems monitor plasma location relative to [first_wall](#first_wall). Fast magnetic measurements detect VDE onset. Equilibrium reconstruction tracks plasma position evolution. VDE analysis requires real-time magnetic field measurements.
+
+  Sign convention: Positive displacement indicates upward plasma motion, following standard coordinate conventions with Z measured from midplane.
+status: draft
+tags:
+- mhd
+- transient
+kind: metadata

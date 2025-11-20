@@ -2,7 +2,7 @@ import asyncio
 
 from imas_standard_names.catalog.edit import EditCatalog
 from imas_standard_names.repository import StandardNameCatalog
-from imas_standard_names.tools.overview import OverviewTool
+from imas_standard_names.tools.list_standard_names import ListTool
 
 
 def invoke(tool, *args, **kwargs):
@@ -11,7 +11,7 @@ def invoke(tool, *args, **kwargs):
 
 def test_list_standard_names_scopes_basic():
     repo = StandardNameCatalog()
-    tool = OverviewTool(repo)
+    tool = ListTool(repo)
     # all scope
     all_payload = invoke(tool)
     assert (
@@ -40,7 +40,7 @@ def test_list_standard_names_scopes_basic():
 def test_list_standard_names_with_edits(sample_catalog):
     # Use sample catalog instead of packaged data
     repo = sample_catalog
-    tool = OverviewTool(repo)
+    tool = ListTool(repo)
     # Attach an EditCatalog to tool to surface diff classification
     tool.edit_catalog = EditCatalog(repo)  # type: ignore[attr-defined]
 
@@ -60,8 +60,9 @@ def test_list_standard_names_with_edits(sample_catalog):
         "name": "temporary_test_scalar_name",
         "kind": "scalar",
         "description": "Temporary test scalar",
+        "documentation": "Temporary test scalar for list tool testing.",
         "status": "draft",
-        "unit": "",
+        "unit": "1",
         "tags": ["fundamental"],
     }
     tool.edit_catalog.add(new_name_data)  # type: ignore[attr-defined]

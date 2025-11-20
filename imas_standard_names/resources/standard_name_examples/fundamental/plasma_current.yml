@@ -1,0 +1,30 @@
+name: plasma_current
+description: Total toroidal plasma current.
+documentation: |-
+  Total toroidal plasma current $I_p$ obtained by integrating the toroidal [current_density](#current_density) over the plasma cross-section. Plasma current is fundamental for tokamak confinement, generating the poloidal magnetic field that provides rotational transform of field lines.
+
+  $$I_p = \int j_{\phi} \, dA$$
+
+  where $j_{\phi}$ is toroidal [plasma_current_density](#plasma_current_density) in A/m$^2$ and $dA$ is the differential area element in m$^2$.
+
+  Physical significance:
+
+  Plasma current generates [poloidal_magnetic_field](#poloidal_magnetic_field) through Ampère's law and provides rotational transform for field line closure. Higher plasma current typically improves [energy_confinement_time](#energy_confinement_time) through better magnetic confinement but reduces [safety_factor](#safety_factor), affecting MHD stability limits. Current profile shape determines bootstrap current fraction and affects [plasma_resistivity](#plasma_resistivity) requirements.
+
+  Measurement methods:
+
+  Plasma current is determined from external magnetic measurements using [flux_loop_voltage](#flux_loop_voltage) integration and Rogowski coils. Equilibrium reconstruction codes invert magnetic measurements to determine current profiles. The current relates to [magnetic_field](#magnetic_field) via $\nabla \times \mathbf{B} = \mu_0 \mathbf{J}$ and can be inferred from poloidal field measurements.
+
+  Typical values:
+
+  Small tokamaks: 0.1-0.5 MA, medium tokamaks: 1-2 MA, ITER: up to 15 MA. Current density profiles typically peak on-axis with values $10^5$-$10^6$ A/m$^2$ in the core region.
+
+  Sign convention: Positive indicates counter-clockwise toroidal current when viewed from above, same direction as toroidal magnetic field for stable operation.
+status: active
+tags:
+- fundamental
+- global-quantity
+- measured
+- time-dependent
+kind: scalar
+unit: A

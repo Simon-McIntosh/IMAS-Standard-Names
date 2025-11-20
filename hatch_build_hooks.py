@@ -18,15 +18,15 @@ class CustomBuildHook(BuildHookInterface):
 
     def initialize(self, version: str, build_data: dict) -> None:  # noqa: D401
         # Ensure the project source root is importable while building
-        import sys
+        import sys  # noqa: PLC0415
 
         if self.root not in sys.path:
             sys.path.insert(0, self.root)
 
         # Execute the generator module by path to avoid importing
         # the grammar package (which would expect types.py to exist).
-        import os
-        import runpy
+        import os  # noqa: PLC0415
+        import runpy  # noqa: PLC0415
 
         gen_path = os.path.join(
             self.root,

@@ -8,50 +8,41 @@
 #   - power_of_neutral_beam_injector
 
 # === Magnetic diagnostics ===
-- toroidal_magnetic_field_probe
+- antenna_strap
+- bolometer
+- camera
+- correction_coil
+- diamagnetic_loop
+- divertor_tile
+- electron_cyclotron_heating_antenna
+- flux_loop
+- gamma_ray_detector
+- infrared_camera
+- interferometer_beam
+- ion_cyclotron_heating_antenna
+- isotope
+- langmuir_probe
+- limiter_tile
+- lower_hybrid_antenna
+- neutral_beam_injector
+- neutron_detector
+- poloidal_field_coil
 - poloidal_magnetic_field_probe
 - radial_magnetic_field_probe
-- flux_loop
-- rogowski_coil
-- diamagnetic_loop
-- saddle_loop
-
-# === Langmuir probes ===
-- langmuir_probe
 - reciprocating_probe
-
-# === Optical diagnostics ===
-- thomson_scattering_laser
-- thomson_scattering_detector
-- interferometer_beam
 - reflectometer_antenna
 - reflectometer_detector
-
-# === Spectroscopy ===
-- spectrometer
-- bolometer
+- rogowski_coil
+- saddle_loop
 - soft_xray_detector
-
-# === Heating and current drive ===
-- neutral_beam_injector
-- ion_cyclotron_heating_antenna
-- electron_cyclotron_heating_antenna
-- lower_hybrid_antenna
-
-# === Coils ===
-- poloidal_field_coil
+- soft_xray_detector_line_of_sight_first_point
+- soft_xray_detector_line_of_sight_second_point
+- spectrometer
+- spectrometer_line_of_sight_first_point
+- spectrometer_line_of_sight_second_point
+- thomson_scattering_detector
+- thomson_scattering_laser
 - toroidal_field_coil
-- correction_coil
+- toroidal_magnetic_field_probe
 - trim_coil
-
-# === Plasma-facing components ===
-- divertor_tile
-- limiter_tile
-- antenna_strap
-
-# === Imaging and particle diagnostics ===
-- camera
-- infrared_camera
 - visible_camera
-- neutron_detector
-- gamma_ray_detector

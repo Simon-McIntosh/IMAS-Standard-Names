@@ -1,0 +1,28 @@
+name: toroidal_component_of_magnetic_field
+description: Toroidal component of magnetic field vector.
+documentation: |-
+  Toroidal component of the [magnetic_field](#magnetic_field) vector $B_{\phi}$ in cylindrical coordinates. In tokamaks, the toroidal component is the dominant field component, produced by external toroidal field coils and providing plasma stability and particle confinement.
+
+  $$B_{\phi} = \mathbf{B} \cdot \hat{e}_{\phi}$$
+
+  where $\mathbf{B}$ is the total magnetic field in T and $\hat{e}_{\phi}$ is the unit vector in the toroidal direction.
+
+  Physical significance:
+
+  In tokamaks, the toroidal component is the dominant field component, produced by external toroidal field coils. Typical field strengths are 1-6 T on axis, with $B_{\phi} \gg B_R, B_Z$ for good magnetic confinement. The toroidal field provides plasma stability and determines the Larmor radius of particles. Field strength affects [safety_factor](#safety_factor) and MHD stability limits. See [poloidal_component_of_magnetic_field](#poloidal_component_of_magnetic_field) for field ratio and [magnetic_field](#magnetic_field) for total field structure.
+
+  Measurement methods:
+
+  Toroidal magnetic field is measured using magnetic probes and flux loops positioned around the plasma. [Flux_loop_voltage](#flux_loop_voltage) integration provides field change information. Equilibrium reconstruction codes determine internal field structure from external measurements. Toroidal field coils provide known field contribution for calibration. Field mapping requires multiple measurement locations around the torus.
+
+  Typical values:
+
+  On-axis: 2-6 T for medium to large tokamaks, decreasing as $B_{\phi} \propto 1/R$ for vacuum field. Field strength is primarily determined by external coil current and machine geometry.
+
+  Sign convention: Positive when anti-clockwise viewed from above, following standard tokamak conventions and consistent with [plasma_current](#plasma_current) direction for stable operation.
+status: draft
+tags:
+- magnetics
+- measured
+kind: scalar
+unit: T

@@ -1,12 +1,13 @@
 """Test catalog state management fixes for create/write failures."""
 
+from imas_standard_names.tools.create import CreateTool
+from imas_standard_names.tools.write import WriteTool
+
 
 def test_create_detects_duplicate_in_pending_changes(
     temp_catalog, temp_edit_catalog, invoke_async
 ):
     """Test that create tool detects duplicates in pending changes, not just base catalog."""
-    from imas_standard_names.tools.create import CreateTool
-
     create_tool = CreateTool(temp_catalog, temp_edit_catalog)
 
     # Create first entry with valid data
@@ -14,7 +15,9 @@ def test_create_detects_duplicate_in_pending_changes(
         "name": "plasma_current",
         "kind": "scalar",
         "description": "Total toroidal plasma current.",
+        "documentation": "Total toroidal plasma current flowing in the plasma.",
         "unit": "A",
+        "tags": ["fundamental"],
     }
     result1 = invoke_async(create_tool, "create_standard_names", entries=[entry1])
     assert result1["summary"]["successful"] == 1
@@ -24,7 +27,9 @@ def test_create_detects_duplicate_in_pending_changes(
         "name": "plasma_current",
         "kind": "scalar",
         "description": "Duplicate entry.",
+        "documentation": "This is a duplicate entry that should be rejected.",
         "unit": "A",
+        "tags": ["fundamental"],
     }
     result2 = invoke_async(create_tool, "create_standard_names", entries=[entry2])
     assert result2["summary"]["failed"] == 1
@@ -33,9 +38,6 @@ def test_create_detects_duplicate_in_pending_changes(
 
 def test_write_persistence(temp_catalog, temp_edit_catalog, invoke_async):
     """Test that successful write persists entries correctly."""
-    from imas_standard_names.tools.create import CreateTool
-    from imas_standard_names.tools.write import WriteTool
-
     create_tool = CreateTool(temp_catalog, temp_edit_catalog)
     write_tool = WriteTool(temp_catalog, temp_edit_catalog)
 
@@ -44,7 +46,9 @@ def test_write_persistence(temp_catalog, temp_edit_catalog, invoke_async):
         "name": "test_quantity",
         "kind": "scalar",
         "description": "Test quantity for write test.",
+        "documentation": "Test quantity to verify write persistence behavior.",
         "unit": "m",
+        "tags": ["fundamental"],
     }
     result = invoke_async(create_tool, "create_standard_names", entries=[entry])
     assert result["summary"]["successful"] == 1
@@ -63,8 +67,6 @@ def test_write_persistence(temp_catalog, temp_edit_catalog, invoke_async):
 
 def test_tag_validation_during_creation(temp_catalog, temp_edit_catalog, invoke_async):
     """Test that invalid tags are rejected during entry creation."""
-    from imas_standard_names.tools.create import CreateTool
-
     create_tool = CreateTool(temp_catalog, temp_edit_catalog)
 
     # Create entry with invalid tag (not in vocabulary)
@@ -72,6 +74,7 @@ def test_tag_validation_during_creation(temp_catalog, temp_edit_catalog, invoke_
         "name": "test_bad_tags",
         "kind": "scalar",
         "description": "Test entry with invalid tags.",
+        "documentation": "Test entry to verify tag validation during creation.",
         "unit": "m",
         "tags": ["nonexistent-tag-that-should-fail"],
     }

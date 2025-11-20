@@ -15,18 +15,16 @@ dependencies = [
   "click (>=8.1.8,<9.0.0)",
   "pyyaml (>=6.0.2,<7.0.0)",
   "pint (>=0.24.4,<0.25.0)",
-  "pandas (>=2.2.3,<3.0.0)",
-  "tabulate (>=0.9.0,<0.10.0)",
   "requests (>=2.32.3,<3.0.0)",
   "markdown (>=3.8,<4.0)",
-  "imas-mcp>=2.4",
   "textual>=6.1.0",
   "pydantic-ai>=1.0.8",
-  "pydantic-evals>=0.0.7",
-  "pydantic-graph>=0.0.2",
   "proselint (>=0.14.0,<0.15.0)",
-  "spacy (>=3.7.0,<4.0.0)",
-  "en-core-web-sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.7.1/en_core_web_sm-3.7.1-py3-none-any.whl",
+  "spacy (>=3.8.0,<4.0.0)",
+  "en-core-web-sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl",
+  "imas-python (>=2.0.0,<3.0.0); python_version < '3.13'",
+  "fastmcp (>=2.2.6,<3.0.0)",
+  "dotenv (>=0.9.9,<0.10.0)",
 ]
 keywords = [
   "fusion",
@@ -38,7 +36,7 @@ keywords = [
   "fusion research",
 ]
 [project.urls]
-"Documentation" = "https://simon-mcintosh.github.io/IMAS-Standard-Names/"
+"Documentation" = "https://iterorganization.github.io/IMAS-Standard-Names/"
 
 [project.scripts]
 has_standardname = "imas_standard_names.issues.cli:has_standardname"
@@ -52,12 +50,6 @@ standard-names-mcp = "imas_standard_names.cli.server:main"
 build-grammar = "imas_standard_names.grammar_codegen.generate:main"
 
 [project.optional-dependencies]
-agent = [
-  "dotenv (>=0.9.9,<0.10.0)",
-  "fastmcp (>=2.2.6,<3.0.0)",
-  "pydantic-ai (>=1.0.0,<2.0.0)",
-  "imas-python (>=2.0.0,<3.0.0); python_version < '3.13'",
-]
 test = [
   "pytest (>=8.3.4,<9.0.0)",
   "pytest-cov (>=4.1.0,<5.0.0)",
@@ -74,7 +66,13 @@ docs = [
   "mkdocs-include-markdown-plugin (>=7.0.0,<8.0.0)",
 ]
 [build-system]
-requires = ["hatchling>=1.25.0", "hatch-vcs>=0.4.0", "pyyaml>=6.0.2", "pydantic>=2.10.6"]
+requires = [
+  "hatchling>=1.25.0",
+  "hatch-vcs>=0.4.0",
+  "pyyaml>=6.0.2",
+  "pydantic>=2.10.6",
+  "ruff>=0.9.8",
+]
 build-backend = "hatchling.build"
 
 [tool.hatch.version]
@@ -99,6 +97,7 @@ dev = [
   "logfire>=3.14.0,<4.0.0",
   "mcp-cli>=0.1.0,<1.0.0",
   "textual-dev>=1.7.0",
+  "pandas (>=2.2.3,<3.0.0)",
 ]
 
 [[tool.mypy.overrides]]
@@ -124,22 +123,30 @@ line-ending = "auto"
 
 [tool.ruff.lint]
 select = [
-    "E",
-    "W",
-    "F",
-    "I",
-    "B",
-    "C4",
-    "UP",
+  "E",
+  "W",
+  "F",
+  "I",
+  "B",
+  "C4",
+  "UP",
+  "PLC0415", # import-outside-top-level
 ]
-ignore = [
-    "C901",
-    "E501", 
-]
+ignore = ["C901", "E501"]
 
 [tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["F401"]
-"tests/**/*" = ["B011","F401","F811"]
+"tests/**/*" = ["B011", "F401", "F811"]
+"imas_standard_names/grammar/field_schemas.py" = [
+  "I",
+] # Codegen file - skip formatting
+"imas_standard_names/grammar/types.py" = ["I"] # Codegen file - skip formatting
+"imas_standard_names/grammar/constants.py" = [
+  "I",
+] # Codegen file - skip formatting
+"imas_standard_names/grammar/tag_types.py" = [
+  "I",
+] # Codegen file - skip formatting
 
 [tool.ruff.lint.isort]
 known-first-party = ["imas_standard_names"]

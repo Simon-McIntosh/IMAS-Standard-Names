@@ -189,7 +189,7 @@ class ResourcesTree:
             json_data (object): Parsed mapping / sequence / scalar.
         """
 
-        from rich.highlighter import (
+        from rich.highlighter import (  # noqa: PLC0415
             ReprHighlighter,
         )  # local import to reduce startup cost
 

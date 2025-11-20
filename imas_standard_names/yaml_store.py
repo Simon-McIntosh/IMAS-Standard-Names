@@ -6,7 +6,11 @@ from pathlib import Path
 
 import yaml
 
-from .models import StandardNameEntry, create_standard_name_entry
+from .models import (
+    StandardNameEntry,
+    StandardNameScalarEntry,
+    create_standard_name_entry,
+)
 from .services import validate_models
 
 
@@ -18,8 +22,10 @@ def _represent_literal_str(dumper, data):
 
 
 class YamlStore:
-    def __init__(self, root: Path):
+    def __init__(self, root: str | Path, permissive: bool = False):
         self.root = Path(root).expanduser().resolve()
+        self.permissive = permissive
+        self.validation_warnings: list[str] = []
 
     # Discovery ---------------------------------------------------------------
     def yaml_files(self):
@@ -36,13 +42,59 @@ class YamlStore:
             unit_val = data.get("unit")
             if isinstance(unit_val, int | float):
                 data["unit"] = str(unit_val)
-            m = create_standard_name_entry(data)
-            models.append(m)
+
+            # Handle Pydantic validation errors in permissive mode
+            try:
+                m = create_standard_name_entry(data)
+                models.append(m)
+            except Exception as e:
+                if self.permissive:
+                    # Load invalid entry anyway by creating object without validation
+                    # Use object.__new__ to bypass __init__ and all validators
+                    m = object.__new__(StandardNameScalarEntry)
+                    # Manually set fields from data
+                    for key, value in data.items():
+                        object.__setattr__(m, key, value)
+                    # Set defaults for missing required fields
+                    if not hasattr(m, "kind"):
+                        object.__setattr__(m, "kind", "scalar")
+                    if not hasattr(m, "status"):
+                        object.__setattr__(m, "status", "draft")
+                    if not hasattr(m, "unit"):
+                        object.__setattr__(m, "unit", "")
+                    if not hasattr(m, "tags"):
+                        object.__setattr__(m, "tags", [])
+                    if not hasattr(m, "links"):
+                        object.__setattr__(m, "links", [])
+                    if not hasattr(m, "constraints"):
+                        object.__setattr__(m, "constraints", [])
+                    if not hasattr(m, "documentation"):
+                        object.__setattr__(m, "documentation", "")
+                    if not hasattr(m, "validity_domain"):
+                        object.__setattr__(m, "validity_domain", "")
+                    if not hasattr(m, "deprecates"):
+                        object.__setattr__(m, "deprecates", "")
+                    if not hasattr(m, "superseded_by"):
+                        object.__setattr__(m, "superseded_by", "")
+                    if not hasattr(m, "provenance"):
+                        object.__setattr__(m, "provenance", None)
+                    models.append(m)
+                    warning = f"Validation error in {f.name}: {e}"
+                    self.validation_warnings.append(warning)
+                else:
+                    raise  # Re-raise in strict mode
+
+        # Handle structural validation errors in permissive mode
         issues = validate_models({m.name: m for m in models})
         if issues:
-            raise ValueError(
-                "Structural validation failed on load:\n" + "\n".join(issues)
-            )
+            if self.permissive:
+                self.validation_warnings.extend(
+                    [f"Structural: {issue}" for issue in issues]
+                )
+            else:
+                raise ValueError(
+                    "Structural validation failed on load:\n" + "\n".join(issues)
+                )
         return models
 
     # Write / Delete ----------------------------------------------------------

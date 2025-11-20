@@ -153,7 +153,8 @@ class TestFetchMetadata:
         operator_entries = [
             e
             for e in all_entries
-            if e.provenance
+            if hasattr(e, "provenance")
+            and e.provenance
             and hasattr(e.provenance, "mode")
             and e.provenance.mode == "operator"  # type: ignore[attr-defined]
         ]

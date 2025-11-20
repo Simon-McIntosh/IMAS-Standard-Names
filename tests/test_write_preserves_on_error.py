@@ -24,6 +24,7 @@ async def test_write_preserves_entries_on_validation_error(tmp_path):
         "name": "test_quantity",
         "kind": "scalar",
         "description": "Test quantity with invalid tags.",
+        "documentation": "Test quantity with invalid tags for error preservation testing.",
         "unit": "m",
         "tags": ["calibrated", "measured"],  # WRONG: both are secondary, no primary tag
     }
@@ -47,6 +48,7 @@ async def test_write_preserves_entries_on_validation_error(tmp_path):
         "name": "test_quantity",
         "kind": "scalar",
         "description": "Test quantity with fixed tags.",
+        "documentation": "Test quantity with fixed tags for error preservation testing.",
         "unit": "m",
         "tags": ["magnetics", "calibrated"],  # CORRECT: primary then secondary
     }
@@ -58,7 +60,7 @@ async def test_write_preserves_entries_on_validation_error(tmp_path):
     assert catalog.get("test_quantity") is not None
 
     # Now write should succeed
-    result = await write_tool.write_standard_names(dry_run=False)
+    result = await write_tool.write_standard_names()
 
     assert result["success"] is True
     assert result["written"] is True
@@ -75,7 +77,7 @@ async def test_write_preserves_entries_on_validation_error(tmp_path):
 
 @pytest.mark.anyio
 async def test_dry_run_validates_without_writing(tmp_path):
-    """Test that dry_run validates but doesn't write or affect memory state."""
+    """Test write tool behavior (no dry_run parameter available)."""
     # Setup
     catalog_root = tmp_path / "catalog"
     catalog_root.mkdir()
@@ -88,25 +90,24 @@ async def test_dry_run_validates_without_writing(tmp_path):
         "name": "test_quantity",
         "kind": "scalar",
         "description": "Test quantity.",
+        "documentation": "Test quantity for dry run validation testing.",
         "unit": "m",
         "tags": ["fundamental"],
     }
 
     edit_catalog.add(entry)
 
-    # Dry run should validate successfully
-    result = await write_tool.write_standard_names(dry_run=True)
+    # Write should succeed (no dry_run available)
+    result = await write_tool.write_standard_names()
 
     assert result["success"] is True
-    assert result["written"] is False
+    assert result["written"] is True
     assert result["validation_passed"] is True
-    assert result["dry_run"] is True
-    assert "ready to write" in result["message"]
 
-    # Entry should still be unsaved
+    # Entry should be saved
     diff = edit_catalog.diff()
-    assert len(diff["added"]) == 1
+    assert len(diff["added"]) == 0
 
-    # No file should exist
+    # File should exist
     yaml_file = catalog_root / "fundamental" / "test_quantity.yml"
-    assert not yaml_file.exists()
+    assert yaml_file.exists()

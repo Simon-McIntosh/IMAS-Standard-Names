@@ -1,0 +1,28 @@
+{
+    "mcpServers": {
+        "imas-sn-examples": {
+            "type": "stdio",
+            "command": "C:/Users/mcintos/Code/imas-standard-names/.venv/Scripts/standard-names-mcp.exe",
+            "args": [],
+            "env": {
+                "STANDARD_NAMES_CATALOG_ROOT": "./imas_standard_names/resources/standard_name_examples"
+            }
+        },
+        "imas-sn-uv": {
+            "type": "stdio",
+            "command": "uv",
+            "args": [
+                "run",
+                "standard-names-mcp"
+            ],
+            "env": {
+                "STANDARD_NAMES_CATALOG_ROOT": "../west-standard-names/standard_names"
+            }
+        },
+        "imas-dd": {
+            "type": "http",
+            "url": "https://imas-dd.iter.org/mcp"
+        }
+    },
+    "inputs": []
+}

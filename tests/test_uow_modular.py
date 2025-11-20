@@ -12,7 +12,9 @@ def test_uow_add_update_remove(tmp_path: Path):
             "name": "ion_density",
             "kind": "scalar",
             "description": "Ion density.",
+            "documentation": "Number density of ions in the plasma.",
             "unit": "m^-3".replace("^-", "^-"),
+            "tags": ["fundamental"],
         }
     )
     uow.add(a)
@@ -22,7 +24,9 @@ def test_uow_add_update_remove(tmp_path: Path):
             "name": "ion_density",
             "kind": "scalar",
             "description": "Updated ion density.",
+            "documentation": "Number density of ions in the plasma (updated).",
             "unit": "m^-3".replace("^-", "^-"),
+            "tags": ["fundamental"],
         }
     )
     uow.update("ion_density", a2)
@@ -44,7 +48,9 @@ def test_uow_rollback(tmp_path: Path):
             "name": "electron_pressure",
             "kind": "scalar",
             "description": "Electron pressure.",
+            "documentation": "Pressure of electrons in the plasma.",
             "unit": "Pa",
+            "tags": ["fundamental"],
         }
     )
     uow.add(a)

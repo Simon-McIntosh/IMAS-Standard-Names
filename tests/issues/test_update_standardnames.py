@@ -15,13 +15,17 @@ def submission_base(
     github_input,
 ):  # reuse github_input style but map to new schema keys
     # Map legacy keys to new per-file schema field names
+    tags = github_input["tags"]
+    if isinstance(tags, str):
+        tags = [tags] if tags else []
     return {
         "name": github_input["name"],
         "kind": "scalar",
         "status": "draft",
         "unit": github_input["units"],
-        "description": github_input["documentation"],
-        "tags": github_input["tags"],
+        "description": "Test standard name for validation.",
+        "documentation": github_input["documentation"],
+        "tags": tags,
     }
 
 
@@ -31,7 +35,8 @@ def _write_submission(path, data):
 
 
 def _catalog_entries(directory):
-    return {p.stem for p in directory.glob("*.yml")}
+    """Get all entry names from catalog directory (including subdirectories)."""
+    return {p.stem for p in directory.rglob("*.yml")}
 
 
 @pytest.fixture

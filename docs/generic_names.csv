@@ -1,3 +1,14 @@
+# DEPRECATED: This file is kept for backward compatibility only.
+#
+# Generic physical bases are now maintained in the grammar vocabulary:
+#   imas_standard_names/grammar/vocabularies/generic_physical_bases.yml
+#
+# They are code-generated into GENERIC_PHYSICAL_BASES constant and used
+# for validation in the grammar model. This CSV file is no longer read
+# by the system.
+#
+# This file will be removed in a future version.
+#
 Unit,Generic Name
 `m^2`,area
 `A`,current
@@ -8,4 +19,5 @@ Unit,Generic Name
 `Pa`,pressure
 `K` or `eV`[^1],temperature
 `m.s^-1`,velocity
+`V`,voltage
 `m^3`,volume

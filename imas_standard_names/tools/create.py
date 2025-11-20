@@ -15,10 +15,11 @@ from fastmcp import Context
 from imas_standard_names.decorators.mcp import mcp_tool
 from imas_standard_names.editing.batch_utils import topological_sort_operations
 from imas_standard_names.models import StandardNameEntry, create_standard_name_entry
-from imas_standard_names.tools.base import BaseTool
+from imas_standard_names.tools.base import CatalogTool
+from imas_standard_names.validation.description import validate_description
 
 
-class CreateTool(BaseTool):
+class CreateTool(CatalogTool):
     """Tool for creating new standard name entries."""
 
     def __init__(self, catalog: Any, edit_catalog: Any):
@@ -80,11 +81,18 @@ class CreateTool(BaseTool):
         # Validate entries before processing
         validated_entries: list[StandardNameEntry] = []
         validation_errors: list[dict] = []
+        description_warnings: dict[int, list[dict]] = {}  # index -> warnings
 
         for i, entry_data in enumerate(entries):
             try:
                 # This will raise if entry is invalid
                 entry = create_standard_name_entry(entry_data)
+
+                # Validate description for metadata leakage (warnings only)
+                description_issues = validate_description(entry_data)
+                if description_issues:
+                    description_warnings[i] = description_issues
+
                 validated_entries.append(entry)
             except Exception as e:
                 validation_errors.append(
@@ -153,19 +161,26 @@ class CreateTool(BaseTool):
         # Process each entry
         for idx, entry in enumerate(sorted_entries):
             try:
+                # Get original index for warnings lookup
+                orig_idx = next(
+                    (i for i, e in enumerate(validated_entries) if e == entry), idx
+                )
+                warnings = description_warnings.get(orig_idx, [])
+
                 if dry_run:
                     # Validate without adding - check both catalog and pending changes
                     if self.catalog.get(entry.name) or self.edit_catalog.uow.has(
                         entry.name
                     ):  # type: ignore[attr-defined]
                         raise ValueError(f"Entry '{entry.name}' already exists")  # type: ignore[attr-defined]
-                    results.append(
-                        {
-                            "index": idx,
-                            "status": "success",
-                            "name": entry.name,  # type: ignore[attr-defined]
-                        }
-                    )
+                    result = {
+                        "index": idx,
+                        "status": "success",
+                        "name": entry.name,  # type: ignore[attr-defined]
+                    }
+                    if warnings:
+                        result["warnings"] = warnings
+                    results.append(result)
                 else:
                     # Check if entry already exists in catalog or pending changes
                     if self.catalog.get(entry.name) or self.edit_catalog.uow.has(
@@ -174,13 +189,14 @@ class CreateTool(BaseTool):
                         raise ValueError(f"Entry '{entry.name}' exists")  # type: ignore[attr-defined]
                     # Add to catalog
                     self.edit_catalog.add(entry.model_dump())  # type: ignore[attr-defined]
-                    results.append(
-                        {
-                            "index": idx,
-                            "status": "success",
-                            "name": entry.name,  # type: ignore[attr-defined]
-                        }
-                    )
+                    result = {
+                        "index": idx,
+                        "status": "success",
+                        "name": entry.name,  # type: ignore[attr-defined]
+                    }
+                    if warnings:
+                        result["warnings"] = warnings
+                    results.append(result)
 
                 successful_count += 1
                 last_successful_index = idx

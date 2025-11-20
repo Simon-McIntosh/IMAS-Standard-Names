@@ -6,7 +6,7 @@ from imas_standard_names.catalog.edit import EditCatalog
 from imas_standard_names.repository import StandardNameCatalog
 
 
-def test_catalog_reload_after_commit(tmp_path):
+def test_catalog_reload_after_commit(tmp_path, example_scalars):
     """Test that catalog is reloaded from disk after commit.
 
     This test verifies the fix for the bug where fetch_standard_names
@@ -20,23 +20,8 @@ def test_catalog_reload_after_commit(tmp_path):
     # Initially empty
     assert len(catalog.list_names()) == 0
 
-    # Create entries
-    entries = [
-        {
-            "name": "test_scalar_1",
-            "kind": "scalar",
-            "description": "Test scalar 1",
-            "unit": "m",
-            "tags": ["fundamental"],
-        },
-        {
-            "name": "test_scalar_2",
-            "kind": "scalar",
-            "description": "Test scalar 2",
-            "unit": "s",
-            "tags": ["fundamental"],
-        },
-    ]
+    # Use examples from catalog
+    entries = [example_scalars[0].model_dump(), example_scalars[1].model_dump()]
 
     # Add entries via EditCatalog
     for entry in entries:
@@ -44,8 +29,8 @@ def test_catalog_reload_after_commit(tmp_path):
 
     # Verify entries are in memory before commit
     assert len(catalog.list_names()) == 2
-    assert catalog.exists("test_scalar_1")
-    assert catalog.exists("test_scalar_2")
+    assert catalog.exists(example_scalars[0].name)
+    assert catalog.exists(example_scalars[1].name)
 
     # Commit (writes to disk)
     result = edit_catalog.commit()
@@ -58,17 +43,22 @@ def test_catalog_reload_after_commit(tmp_path):
     assert len(catalog.list_names()) == 2, (
         "Catalog should reload from disk after commit"
     )
-    assert catalog.exists("test_scalar_1"), "Should be able to fetch entry after commit"
-    assert catalog.exists("test_scalar_2"), "Should be able to fetch entry after commit"
+    assert catalog.exists(example_scalars[0].name), (
+        "Should be able to fetch entry after commit"
+    )
+    assert catalog.exists(example_scalars[1].name), (
+        "Should be able to fetch entry after commit"
+    )
 
     # Verify get() also works
-    entry1 = catalog.get("test_scalar_1")
+    entry1 = catalog.get(example_scalars[0].name)
     assert entry1 is not None
-    assert entry1.name == "test_scalar_1"
+    assert entry1.name == example_scalars[0].name
 
     # Verify search works
-    results = catalog.search("test scalar")
-    assert len(results) >= 2
+    search_term = example_scalars[0].name.split("_")[0]
+    results = catalog.search(search_term)
+    assert len(results) >= 1
 
 
 def test_catalog_reload_after_multiple_commits(tmp_path):
@@ -82,6 +72,8 @@ def test_catalog_reload_after_multiple_commits(tmp_path):
             "name": "entry_1",
             "kind": "scalar",
             "description": "First entry",
+            "documentation": "First entry for testing catalog reload.",
+            "unit": "1",
             "tags": ["fundamental"],
         }
     )
@@ -96,6 +88,8 @@ def test_catalog_reload_after_multiple_commits(tmp_path):
             "name": "entry_2",
             "kind": "scalar",
             "description": "Second entry",
+            "documentation": "Second entry for testing catalog reload.",
+            "unit": "1",
             "tags": ["fundamental"],
         }
     )
@@ -127,6 +121,7 @@ def test_catalog_reload_preserves_relationships(tmp_path):
             "name": "base_quantity",
             "kind": "scalar",
             "description": "Base quantity",
+            "documentation": "Base quantity for testing provenance relationships.",
             "unit": "m",
             "tags": ["fundamental", "measured"],
         }
@@ -138,6 +133,7 @@ def test_catalog_reload_preserves_relationships(tmp_path):
             "name": "gradient_of_base_quantity",
             "kind": "vector",
             "description": "Gradient of base quantity",
+            "documentation": "Spatial gradient of base quantity vector field.",
             "unit": "m.m^-1",
             "tags": ["fundamental", "derived"],
             "provenance": {

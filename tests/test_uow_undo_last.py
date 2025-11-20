@@ -11,7 +11,9 @@ def make_scalar(name, unit="eV"):
             "kind": "scalar",
             "unit": unit,
             "description": f"Desc for {name}",
+            "documentation": f"Test documentation for {name}.",
             "status": "draft",
+            "tags": ["fundamental"],
         }
     )
 

@@ -1,48 +1,69 @@
 """Generic (reserved) name management.
 
 This module provides the GenericNames helper used to detect and block proposals
-that collide with reserved generic terms (e.g. 'current', 'area').
+that collide with reserved generic terms (e.g. 'current', 'area', 'voltage').
 
-CSV format requirements:
-    Unit,Generic Name
-    m^2,area
-    A,current
+Generic physical bases are maintained in the grammar vocabulary system at:
+    imas_standard_names/grammar/vocabularies/generic_physical_bases.yml
 
-Only the 'Generic Name' column is required for collision checks; 'Unit' is
-retained for human readability and potential future validation heuristics.
+The list is code-generated into GENERIC_PHYSICAL_BASES constant during build.
+
+Legacy CSV support:
+    For backward compatibility, this class still accepts a CSV file path,
+    but the generic names are now sourced from the grammar vocabulary regardless
+    of CSV content. The CSV parameter is deprecated and will be removed in a
+    future version.
 """
 
 from __future__ import annotations
 
-from dataclasses import InitVar, dataclass, field
-from functools import cached_property
+import warnings
+from dataclasses import dataclass
 
-import pandas
+from imas_standard_names.grammar.constants import GENERIC_PHYSICAL_BASES
 
 __all__ = ["GenericNames"]
 
 
 @dataclass
 class GenericNames:
-    """Load and query reserved generic names from a CSV file."""
+    """Query reserved generic names from grammar vocabulary.
 
-    input_: InitVar[str]
-    data: pandas.DataFrame = field(init=False, repr=False)
+    Args:
+        input_: Legacy CSV file path (deprecated, ignored). For backward compatibility only.
+    """
 
-    def __post_init__(self, input_: str):  # type: ignore[override]
-        with open(input_, newline="") as f:
-            self.data = pandas.read_csv(f)
-        if "Generic Name" not in self.data.columns:
-            raise ValueError("CSV must contain a 'Generic Name' column")
+    input_: str | None = None
 
-    @cached_property
-    def names(self) -> list[str]:
-        return self.data["Generic Name"].tolist()
+    def __post_init__(self):
+        if self.input_ is not None:
+            warnings.warn(
+                "GenericNames CSV file parameter is deprecated. "
+                "Generic names are now maintained in grammar/vocabularies/generic_physical_bases.yml "
+                "and accessed via GENERIC_PHYSICAL_BASES constant. "
+                "The CSV parameter will be removed in a future version.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
 
-    def __contains__(self, name: str) -> bool:  # pragma: no cover - trivial
-        return name in self.names
+    @property
+    def names(self) -> tuple[str, ...]:
+        """Return tuple of generic physical base names from grammar vocabulary."""
+        return GENERIC_PHYSICAL_BASES
+
+    def __contains__(self, name: str) -> bool:
+        """Check if name is a generic physical base."""
+        return name in GENERIC_PHYSICAL_BASES
 
     def check(self, standard_name: str) -> None:
+        """Raise KeyError if standard_name is a generic physical base.
+
+        Args:
+            standard_name: The proposed standard name to check.
+
+        Raises:
+            KeyError: If standard_name matches a generic physical base.
+        """
         if standard_name in self:
             raise KeyError(
                 f"The proposed standard name **{standard_name}** is a generic name."

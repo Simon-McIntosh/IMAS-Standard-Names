@@ -15,6 +15,9 @@ kind: vector
 status: draft
 unit: K.m^-1
 description: Gradient of temperature.
+documentation: |
+  Gradient of temperature for structural and semantic validation testing.
+tags: [fundamental]
 provenance:
   mode: operator
   operators: [gradient]
@@ -23,12 +26,15 @@ provenance:
 """,
         encoding="utf-8",
     )
-    (tmp_path / "r_component_of_gradient_of_temperature.yml").write_text(
-        """name: r_component_of_gradient_of_temperature
+    (tmp_path / "radial_component_of_gradient_of_temperature.yml").write_text(
+        """name: radial_component_of_gradient_of_temperature
 kind: scalar
 status: draft
 unit: K.m^-1
 description: Radial component.
+documentation: |
+  Radial component of gradient of temperature for structural and semantic validation testing.
+tags: [fundamental]
 provenance:
   mode: operator
   operators: [gradient]
@@ -37,12 +43,15 @@ provenance:
 """,
         encoding="utf-8",
     )
-    (tmp_path / "tor_component_of_gradient_of_temperature.yml").write_text(
-        """name: tor_component_of_gradient_of_temperature
+    (tmp_path / "toroidal_component_of_gradient_of_temperature.yml").write_text(
+        """name: toroidal_component_of_gradient_of_temperature
 kind: scalar
 status: draft
 unit: K.m^-1
 description: Toroidal component.
+documentation: |
+  Toroidal component of gradient of temperature for structural and semantic validation testing.
+tags: [fundamental]
 provenance:
   mode: operator
   operators: [gradient]

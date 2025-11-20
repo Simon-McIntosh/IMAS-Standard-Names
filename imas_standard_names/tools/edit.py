@@ -9,10 +9,10 @@ from imas_standard_names.editing.edit_models import (
     example_inputs,
     parse_apply_input,
 )
-from imas_standard_names.tools.base import BaseTool
+from imas_standard_names.tools.base import CatalogTool
 
 
-class CatalogTool(BaseTool):
+class CatalogTool(CatalogTool):
     """Tool exposing catalog edit operations via the unified apply API.
     Successful calls return the structured ApplyResult model (dict-serializable
     via model_dump by the framework). Errors return an envelope containing:
@@ -37,8 +37,8 @@ class CatalogTool(BaseTool):
             "For creating new entries, use create_standard_names instead. "
             "Supported actions: "
             "- modify: Update an existing entry's fields (name must match) "
-            "- rename: Change an entry's name (use dry_run to see dependencies) "
-            "- delete: Remove an entry (use dry_run to see dependencies) "
+            "- rename: Change an entry's name "
+            "- delete: Remove an entry "
             "- batch_delete: Remove multiple entries at once "
             "- batch: Execute multiple operations in sequence "
             "All changes are kept in-memory (pending) until write_standard_names is called. "

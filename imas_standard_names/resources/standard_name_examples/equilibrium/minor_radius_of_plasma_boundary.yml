@@ -1,0 +1,32 @@
+name: minor_radius_of_plasma_boundary
+description: Minor radius at plasma boundary.
+documentation: |-
+  Minor radius evaluated at the [plasma_boundary](#plasma_boundary) (last closed flux surface), calculated as half the difference between outboard and inboard major radii at the midplane. Minor radius defines the characteristic size scale for normalized radial coordinates and plasma cross-sectional area.
+
+  $$a_{\text{boundary}} = \frac{R_{\text{out}} - R_{\text{in}}}{2}$$
+
+  where $R_{\text{out}}$ is [major_radius_of_plasma_boundary](#major_radius_of_plasma_boundary) at outboard midplane and $R_{\text{in}}$ is major radius at inboard midplane, both in m.
+
+  Physical significance:
+
+  This quantity defines the radial extent of confined plasma and is used in calculating plasma cross-sectional area, [plasma_volume](#plasma_volume), and shape parameters. It serves as the characteristic length scale for normalized radial coordinates. Minor radius affects [energy_confinement_time](#energy_confinement_time) through scaling laws and determines [plasma_current](#plasma_current) requirements. See [major_radius_of_plasma_boundary](#major_radius_of_plasma_boundary) for aspect ratio and [elongation_of_plasma_boundary](#elongation_of_plasma_boundary) for shape relationships.
+
+  Relation to shape parameters:
+
+  Together with [elongation_of_plasma_boundary](#elongation_of_plasma_boundary) $\kappa$, determines the plasma cross-sectional area: $A_p \approx \pi a^2 \kappa$. This relationship is fundamental for plasma volume and surface area calculations.
+
+  Measurement methods:
+
+  Minor radius is determined from equilibrium reconstruction using external [magnetic_field](#magnetic_field) measurements. [Flux_loop_voltage](#flux_loop_voltage) integration provides boundary geometry information. Plasma imaging systems measure boundary coordinates directly. Minor radius analysis requires [magnetic_axis](#magnetic_axis) location and [plasma_boundary](#plasma_boundary) identification. Geometric calculations use standard tokamak coordinate systems.
+
+  Typical values:
+
+  Small tokamaks: 0.2-0.5 m, medium tokamaks: 0.5-1.0 m, ITER: ~2 m. Minor radius scales with machine size and determines plasma cross-sectional area.
+
+  Sign convention: Positive minor radius measured from magnetic axis to boundary, following standard tokamak geometry conventions.
+status: draft
+tags:
+- equilibrium
+- global-quantity
+kind: scalar
+unit: m

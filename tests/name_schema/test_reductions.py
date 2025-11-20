@@ -12,8 +12,10 @@ def test_time_average_reduction_scalar():
             "kind": "scalar",
             "name": "time_average_of_electron_temperature",
             "description": "Time average",
+            "documentation": "Time-averaged electron temperature.",
             "unit": "eV",
             "status": "active",
+            "tags": ["fundamental"],
             "provenance": {
                 "mode": "reduction",
                 "reduction": "mean",
@@ -32,8 +34,10 @@ def test_rms_reduction_scalar():
             "kind": "scalar",
             "name": "root_mean_square_of_electron_temperature",
             "description": "RMS",
+            "documentation": "Root mean square of electron temperature.",
             "unit": "eV",
             "status": "active",
+            "tags": ["fundamental"],
             "provenance": {
                 "mode": "reduction",
                 "reduction": "rms",
@@ -51,8 +55,10 @@ def test_volume_integral_scalar():
             "kind": "scalar",
             "name": "volume_integral_of_pressure",
             "description": "Volume integral",
+            "documentation": "Volume integral of pressure over the plasma.",
             "unit": "Pa.m^3",
             "status": "active",
+            "tags": ["fundamental"],
             "provenance": {
                 "mode": "reduction",
                 "reduction": "integral",
@@ -70,8 +76,10 @@ def test_magnitude_vector():
             "kind": "scalar",
             "name": "magnitude_of_plasma_velocity",
             "description": "Speed",
+            "documentation": "Magnitude (speed) of plasma velocity vector.",
             "unit": "m.s^-1",
             "status": "active",
+            "tags": ["transport"],
             "provenance": {
                 "mode": "reduction",
                 "reduction": "magnitude",

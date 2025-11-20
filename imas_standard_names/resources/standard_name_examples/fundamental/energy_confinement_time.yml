@@ -1,0 +1,31 @@
+name: energy_confinement_time
+description: Energy confinement time.
+documentation: |-
+  Energy confinement time $\tau_E$ quantifying how long thermal energy is retained in the plasma before being lost to the surroundings. This is the single most important figure of merit for fusion performance and determines the approach to ignition conditions.
+
+  $$\tau_E = \frac{W_{\text{th}}}{P_{\text{loss}}}$$
+
+  where $W_{\text{th}}$ is total thermal energy content in J and $P_{\text{loss}}$ is total power loss in W.
+
+  Physical significance:
+
+  Energy confinement time determines fusion performance through the triple product $n T \tau_E$. Longer confinement times enable higher plasma temperatures and pressures, approaching fusion ignition conditions. The fusion triple product criterion requires $n T \tau_E > 3 \times 10^{21}$ m$^{-3}$ keV s for D-T fusion. Confinement quality affects [plasma_current](#plasma_current) requirements and [safety_factor](#safety_factor) limits for stable operation.
+
+  Scaling laws:
+
+  Empirical scaling laws predict $\tau_E$ from machine and plasma parameters. H-mode confinement shows $\tau_E \propto I_p^{0.93} B_T^{0.15} P^{-0.69} n^{0.41} R^{1.97} a^{0.58} \kappa^{0.78}$ (IPB98(y,2) scaling), where $I_p$ is [plasma_current](#plasma_current), $B_T$ is toroidal field, $P$ is heating power, and geometric factors follow. Confinement improves with higher current, density, and larger machine size.
+
+  Measurement methods:
+
+  Energy confinement time is derived from total thermal energy content and power loss measurements. Thermal energy is calculated from [electron_temperature](#electron_temperature) and [ion_temperature](#ion_temperature) profiles integrated over [plasma_volume](#plasma_volume). Power loss includes radiated power, conducted power to walls, and convective losses. [Electron_heat_flux](#electron_heat_flux) measurements provide local transport analysis.
+
+  Typical values:
+
+  L-mode: 20-50 ms, H-mode: 100-300 ms for medium tokamaks; ITER target: ~4 s. Confinement time scales with machine size and plasma current, following empirical scaling laws.
+status: draft
+tags:
+- fundamental
+- global-quantity
+- performance-metric
+kind: scalar
+unit: s

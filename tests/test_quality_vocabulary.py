@@ -4,13 +4,14 @@ Test quality validation vocabulary composition.
 This test documents the vocabulary sources for domain-specific quality checks.
 """
 
+import inspect
+
 from imas_standard_names.grammar.model import parse_standard_name
-from imas_standard_names.grammar.types import (
+from imas_standard_names.grammar.model_types import (
     Component,
     Object,
     Position,
     Process,
-    Source,
     Subject,
 )
 from imas_standard_names.operators import PRIMITIVE_OPERATORS
@@ -23,9 +24,9 @@ def test_vocabulary_composition():
     qc = QualityChecker()
     vocab = qc._build_physics_vocabulary()
 
-    # Source 1: Grammar enums (Component, Subject, Object, Source, Position, Process)
+    # Source 1: Grammar enums (Component, Subject, Object, Position, Process)
     grammar_vocab = set()
-    for enum_class in [Component, Subject, Object, Source, Position, Process]:
+    for enum_class in [Component, Subject, Object, Position, Process]:
         grammar_vocab.update(member.value for member in enum_class)
 
     # Source 2: Catalog base names (extracted by parsing standard names)
@@ -76,7 +77,7 @@ def test_vocabulary_sources_traceable():
 
     # Every term should come from one of three sources
     grammar_vocab = set()
-    for enum_class in [Component, Subject, Object, Source, Position, Process]:
+    for enum_class in [Component, Subject, Object, Position, Process]:
         grammar_vocab.update(member.value for member in enum_class)
 
     catalog = StandardNameCatalog()
@@ -92,8 +93,6 @@ def test_vocabulary_sources_traceable():
 
 def test_no_hardcoded_vocabulary():
     """Test that vocabulary is dynamically loaded, not hardcoded."""
-    import inspect
-
     source = inspect.getsource(QualityChecker._build_physics_vocabulary)
 
     # Should not contain hardcoded lists of physics terms

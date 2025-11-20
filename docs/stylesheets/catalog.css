@@ -1,0 +1,63 @@
+/* Catalog page layout with sidebar navigation */
+.catalog-container {
+    display: flex;
+    gap: 2rem;
+    align-items: flex-start;
+}
+
+.catalog-sidebar {
+    flex: 0 0 250px;
+    position: sticky;
+    top: 4rem;
+    max-height: calc(100vh - 5rem);
+    overflow-y: auto;
+    padding: 1rem;
+    background: var(--md-code-bg-color);
+    border-radius: 0.2rem;
+}
+
+.catalog-sidebar h2 {
+    font-size: 1rem;
+    margin-top: 0;
+    margin-bottom: 1rem;
+}
+
+.catalog-sidebar ul {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+.catalog-sidebar li {
+    margin: 0.25rem 0;
+}
+
+.catalog-sidebar a {
+    text-decoration: none;
+    font-size: 0.85rem;
+}
+
+.catalog-sidebar > div > p > strong > a {
+    font-weight: bold;
+    font-size: 0.95rem;
+    margin-top: 1rem;
+    display: block;
+}
+
+.catalog-content {
+    flex: 1;
+    min-width: 0;
+}
+
+/* Responsive: stack on smaller screens */
+@media screen and (max-width: 76.1875em) {
+    .catalog-container {
+        flex-direction: column;
+    }
+    
+    .catalog-sidebar {
+        position: static;
+        max-height: none;
+        width: 100%;
+    }
+}

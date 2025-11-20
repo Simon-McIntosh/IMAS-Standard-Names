@@ -1,0 +1,28 @@
+name: vertical_component_of_magnetic_field
+description: Vertical component of magnetic field vector.
+documentation: |-
+  Vertical component of the [magnetic_field](#magnetic_field) vector $B_Z$ in cylindrical coordinates. The vertical component is part of the poloidal magnetic field, essential for equilibrium force balance and plasma shaping in tokamak configurations.
+
+  $$B_Z = \mathbf{B} \cdot \hat{e}_Z$$
+
+  where $\mathbf{B}$ is the total magnetic field in T and $\hat{e}_Z$ is the unit vector in the vertical direction.
+
+  Physical significance:
+
+  The vertical component is part of the poloidal magnetic field, essential for equilibrium force balance and plasma shaping. Together with [radial_component_of_magnetic_field](#radial_component_of_magnetic_field), it forms the poloidal field that provides rotational transform of field lines. Vertical field strength affects plasma position control and [safety_factor](#safety_factor) profiles. See [poloidal_magnetic_field](#poloidal_magnetic_field) for vector relationships and [poloidal_component_of_magnetic_field](#poloidal_component_of_magnetic_field) for magnitude.
+
+  Measurement methods:
+
+  Vertical magnetic field is measured using magnetic probes and flux loops positioned above and below the plasma. [Flux_loop_voltage](#flux_loop_voltage) integration provides field change information. Equilibrium reconstruction codes invert external magnetic measurements to determine internal field structure. Vertical field analysis requires symmetric probe placement above and below the midplane. Field measurements are essential for plasma position control.
+
+  Typical values:
+
+  $|B_Z|$ ranges from milliTesla to 1 T, typically 1-2 orders of magnitude smaller than [toroidal_component_of_magnetic_field](#toroidal_component_of_magnetic_field). Vertical field strength varies with plasma position and external coil currents.
+
+  Sign convention: Positive upward (positive Z direction), following standard cylindrical coordinate conventions and consistent with tokamak geometry.
+status: draft
+tags:
+- magnetics
+- measured
+kind: scalar
+unit: T

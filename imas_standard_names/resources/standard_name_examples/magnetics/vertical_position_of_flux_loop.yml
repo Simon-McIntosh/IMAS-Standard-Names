@@ -1,0 +1,31 @@
+name: vertical_position_of_flux_loop
+description: Vertical coordinate of flux loop diagnostic.
+documentation: |-
+  Vertical coordinate (height) $Z$ of the flux loop diagnostic sensor in cylindrical coordinates. Flux loops are magnetic diagnostics consisting of conducting loops installed around the plasma, typically on the vessel wall or behind diagnostic ports. Accurate vertical positioning is essential for equilibrium reconstruction and magnetic field mapping.
+
+  Diagnostic context:
+
+  Flux loops measure the time derivative of poloidal magnetic flux threading the loop via [flux_loop_voltage](#flux_loop_voltage). Accurate knowledge of sensor positions $(R, Z)$ in m is essential for equilibrium reconstruction, magnetic field mapping, and plasma shape control. See [radial_position_of_flux_loop](#radial_position_of_flux_loop) for coordinate pairs and [area_of_flux_loop](#area_of_flux_loop) for calibration.
+
+  Physical significance:
+
+  Vertical position affects flux loop measurement sensitivity and spatial resolution. Position accuracy determines equilibrium reconstruction quality and affects [magnetic_field](#magnetic_field) mapping precision. Flux loop positioning influences plasma control system performance and affects measurement calibration procedures.
+
+  Installation:
+
+  Multiple flux loops at different poloidal angles provide 2D information about the poloidal field structure, enabling reconstruction of plasma shape, position, and current distribution. Vertical positioning is optimized for measurement coverage and accessibility. Position stability is maintained through mechanical design and survey procedures.
+
+  Measurement methods:
+
+  Flux loop position is measured using engineering survey techniques including laser ranging and coordinate measurement systems. Position accuracy is verified through calibration procedures and cross-validation with other diagnostics. Real-time position monitoring ensures measurement stability. Position data is incorporated into equilibrium reconstruction algorithms.
+
+  Typical values:
+
+  Positions range from vessel bottom to top, spanning the full poloidal extent: $Z = -1$ to $+1$ m for medium tokamaks. Vertical positioning provides coverage from lower to upper divertor regions.
+
+  Sign convention: Positive vertical position measured upward from midplane, following standard cylindrical coordinate conventions and tokamak geometry.
+status: draft
+tags:
+- magnetics
+kind: scalar
+unit: m

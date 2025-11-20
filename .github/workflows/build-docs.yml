@@ -6,7 +6,7 @@ on:
       - main
       - develop
     tags:
-      - "[0-9]+.[0-9]+.[0-9]+"
+      - "v[0-9]+.[0-9]+.[0-9]+"
   pull_request:
     branches:
       - main
@@ -39,9 +39,13 @@ jobs:
 
       - id: version 
         run: |
-          if [[ ${{ github.ref_name }} =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            # Extract the major and minor version from the tag
-            version=$(echo ${{ github.ref_name }} | cut -d. -f1-2)
+          ref_name="${{ github.ref_name }}"
+          # Remove 'v' prefix if present for version matching
+          clean_name="${ref_name#v}"
+          
+          if [[ $clean_name =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            # Extract the major and minor version from the tag, preserve v prefix
+            version="v$(echo $clean_name | cut -d. -f1-2)"
             tagged=true
           elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
             # For pull requests, use pr-<number>
@@ -70,9 +74,11 @@ jobs:
         env:
           SITE_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}
 
-      - name: Update mike alias 
+      - name: Update mike alias and set default
         if: steps.version.outputs.tagged == 'true'
-        run: uv run mike alias "${{ steps.version.outputs.version }}" "latest" --update-aliases
+        run: |
+          uv run mike alias "${{ steps.version.outputs.version }}" "latest" --update-aliases
+          uv run mike set-default latest
 
   deploy:
     if: github.event_name != 'pull_request'

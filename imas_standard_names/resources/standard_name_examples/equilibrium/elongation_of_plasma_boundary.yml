@@ -1,0 +1,32 @@
+name: elongation_of_plasma_boundary
+description: Elongation evaluated at plasma boundary.
+documentation: |-
+  Plasma cross-section elongation evaluated specifically at the [plasma_boundary](#plasma_boundary) (last closed flux surface). Boundary elongation is a key shape parameter for tokamak design and operation, affecting [plasma_volume](#plasma_volume) and [energy_confinement_time](#energy_confinement_time) through geometric effects.
+
+  $$\kappa_{\text{boundary}} = \frac{b}{a}$$
+
+  where $b$ is half-height of plasma boundary and $a$ is [minor_radius_of_plasma_boundary](#minor_radius_of_plasma_boundary).
+
+  Physical significance:
+
+  Boundary elongation is a key shape parameter for tokamak design and operation. Higher elongation increases [plasma_volume](#plasma_volume) and improves confinement through favorable geometric effects, but also increases susceptibility to [vertical_displacement_event](#vertical_displacement_event) requiring active feedback control. Elongation affects [plasma_current](#plasma_current) limits and [safety_factor](#safety_factor) requirements. See [major_radius_of_plasma_boundary](#major_radius_of_plasma_boundary) and [minor_radius_of_plasma_boundary](#minor_radius_of_plasma_boundary) for geometric relationships.
+
+  Relation to plasma current:
+
+  For fixed aspect ratio and [safety_factor](#safety_factor), higher elongation allows higher [plasma_current](#plasma_current): $I_p \propto \kappa$. This relationship is fundamental for tokamak scaling and operational limits.
+
+  Measurement methods:
+
+  Elongation is determined from equilibrium reconstruction using external [magnetic_field](#magnetic_field) measurements. [Flux_loop_voltage](#flux_loop_voltage) integration provides boundary shape information. Plasma imaging systems measure boundary geometry directly. Shape analysis requires [magnetic_axis](#magnetic_axis) location and [plasma_boundary](#plasma_boundary) identification. Elongation is calculated from boundary coordinates in the poloidal plane.
+
+  Typical values:
+
+  Circular plasmas: $\kappa \approx 1.0$, moderately shaped: $\kappa = 1.5$-1.8, highly elongated: $\kappa = 2.0$-2.5. Elongation is actively controlled through external coil currents.
+
+  Sign convention: Positive when $\kappa \geq 1$ indicating vertically elongated or circular cross-section, following standard tokamak geometry conventions.
+status: draft
+tags:
+- equilibrium
+- global-quantity
+kind: scalar
+unit: '1'

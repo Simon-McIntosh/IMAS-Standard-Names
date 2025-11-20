@@ -1,0 +1,28 @@
+name: first_wall
+description: First wall facing plasma.
+documentation: |-
+  The first wall is the innermost physical boundary of the tokamak vacuum vessel that faces the plasma. It consists of plasma-facing components (PFCs) including divertor tiles, limiter surfaces, and wall armor that define the material boundary of the plasma chamber. The first wall determines the outer boundary of the scrape-off layer.
+
+  Physical context:
+
+  The first wall defines the outer boundary of the [scrape_off_layer](#scrape_off_layer). Plasma-wall interactions at the first wall determine impurity generation, fuel recycling, and wall conditioning. Heat and particle fluxes to the wall must be managed to prevent material damage and plasma contamination. First wall geometry affects [plasma_boundary](#plasma_boundary) stability and MHD mode structure. See [scrape_off_layer](#scrape_off_layer) for adjacent region and [plasma_boundary](#plasma_boundary) for confined plasma boundary.
+
+  Material considerations:
+
+  First wall materials (tungsten, carbon, beryllium) are selected for low sputtering yield, high melting point, and acceptable tritium retention. Surface temperature must stay below damage thresholds (~1500°C for beryllium, ~3000°C for tungsten). Material choice affects plasma performance through impurity contamination and fuel recycling.
+
+  Power handling:
+
+  Typical steady-state heat fluxes: main wall 0.1-0.5 MW/m$^2$, divertor targets 5-20 MW/m$^2$. Transient events (ELMs, disruptions) can deliver much higher transient loads. Heat flux distribution determines material loading and affects [plasma_current](#plasma_current) requirements.
+
+  Measurement methods:
+
+  First wall position and geometry are measured using engineering survey techniques. Heat flux monitoring systems measure power deposition patterns. Temperature monitoring systems track wall surface conditions. First wall position affects equilibrium reconstruction and [magnetic_field](#magnetic_field) measurements. Divertor diagnostics measure heat flux distribution.
+
+  Related quantities:
+
+  The first wall relates to [plasma_boundary](#plasma_boundary) as the material boundary, [scrape_off_layer](#scrape_off_layer) as the adjacent region, and [divertor](#divertor) for power handling. Wall position affects plasma shaping and stability limits.
+status: draft
+tags:
+- wall-and-structures
+kind: metadata

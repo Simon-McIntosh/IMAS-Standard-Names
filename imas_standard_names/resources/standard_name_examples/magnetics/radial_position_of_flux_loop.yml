@@ -1,0 +1,31 @@
+name: radial_position_of_flux_loop
+description: Radial coordinate of flux loop diagnostic.
+documentation: |-
+  Major radius coordinate $R$ of the flux loop diagnostic sensor in cylindrical coordinates. Flux loops are magnetic diagnostics consisting of conducting loops installed around the plasma, typically on the vessel wall or behind diagnostic ports. Accurate sensor positioning is essential for equilibrium reconstruction and magnetic field mapping.
+
+  Diagnostic context:
+
+  Flux loops measure the time derivative of poloidal magnetic flux threading the loop. Accurate knowledge of sensor positions $(R, Z)$ in m is essential for equilibrium reconstruction, magnetic field mapping, and plasma shape control. Multiple flux loops at different poloidal locations provide 2D magnetic field information for equilibrium and stability analysis. See [flux_loop_voltage](#flux_loop_voltage) for measurement relationships and [vertical_position_of_flux_loop](#vertical_position_of_flux_loop) for coordinate pairs.
+
+  Physical significance:
+
+  Radial position affects flux loop measurement sensitivity and spatial resolution. Position accuracy determines equilibrium reconstruction quality and affects [magnetic_field](#magnetic_field) mapping precision. Flux loop positioning influences plasma control system performance and affects measurement calibration procedures.
+
+  Installation:
+
+  Multiple flux loops at different poloidal locations provide 2D magnetic field information for equilibrium and stability analysis. Radial positioning is optimized for measurement coverage and accessibility. Position stability is maintained through mechanical design and survey procedures.
+
+  Measurement methods:
+
+  Flux loop position is measured using engineering survey techniques including laser ranging and coordinate measurement systems. Position accuracy is verified through calibration procedures and cross-validation with other diagnostics. Real-time position monitoring ensures measurement stability. Position data is incorporated into equilibrium reconstruction algorithms.
+
+  Typical values:
+
+  Radial position ranges from inner vessel wall to outer vessel wall, typically 0.5-3 m for medium tokamaks depending on machine size and diagnostic access.
+
+  Sign convention: Positive radial position measured outward from machine center, following standard cylindrical coordinate conventions and tokamak geometry.
+status: active
+tags:
+- magnetics
+kind: scalar
+unit: m

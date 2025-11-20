@@ -9,10 +9,10 @@ from imas_standard_names.unit_of_work import UnitOfWork
 
 def _make_simple(tmp: Path):
     (tmp / "a.yml").write_text(
-        "name: a\nkind: scalar\nstatus: active\nunit: keV\ndescription: A.\n"
+        "name: a\nkind: scalar\nstatus: active\nunit: keV\ndescription: A.\ndocumentation: |\n  A entry for SQLite in-memory writable testing.\ntags: [fundamental]\n"
     )
     (tmp / "b.yml").write_text(
-        "name: b\nkind: scalar\nstatus: active\nunit: keV\ndescription: B.\n"
+        "name: b\nkind: scalar\nstatus: active\nunit: keV\ndescription: B.\ndocumentation: |\n  B entry for SQLite in-memory writable testing.\ntags: [fundamental]\n"
     )
 
 
@@ -28,6 +28,8 @@ def test_repository_uow_writable_ops(tmp_path: Path):
             "status": "draft",
             "unit": "keV",
             "description": "C entry.",
+            "documentation": "C entry for SQLite in-memory writable testing.",
+            "tags": ["fundamental"],
         }
     )
     uow.add(new_model)
@@ -43,6 +45,8 @@ def test_repository_uow_writable_ops(tmp_path: Path):
                 "status": "active",
                 "unit": "keV",
                 "description": "A updated.",
+                "documentation": "A entry updated for SQLite in-memory writable testing.",
+                "tags": ["fundamental"],
             }
         ),
     )

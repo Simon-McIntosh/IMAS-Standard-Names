@@ -26,8 +26,6 @@ class IncludeLoader(yaml.SafeLoader):
     def __init__(self, stream):
         self._root = None
         if hasattr(stream, "name"):
-            from pathlib import Path
-
             self._root = Path(stream.name).parent
         super().__init__(stream)
 
@@ -109,13 +107,14 @@ class GrammarSpec:
         basis_raw = data.get("basis", {})
         vocab_raw = data.get("vocabularies", {})
         segments_raw = data.get("segments", [])
-        scope_raw = data.get("scope", {})
+        # Try 'applicability' first (new name), fall back to 'scope' (legacy)
+        scope_raw = data.get("applicability") or data.get("scope", {})
 
         vocabularies = {
             name: _flatten_unique(tokens) for name, tokens in vocab_raw.items()
         }
 
-        # Parse scope section
+        # Parse applicability/scope section
         scope: ScopeSpec | None = None
         if scope_raw:
             scope = ScopeSpec(

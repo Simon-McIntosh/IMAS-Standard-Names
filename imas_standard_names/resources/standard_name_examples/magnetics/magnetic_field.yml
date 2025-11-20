@@ -1,0 +1,32 @@
+name: magnetic_field
+description: Total magnetic field vector.
+documentation: |-
+  Total magnetic field vector $\mathbf{B}$ in the plasma, comprising toroidal and poloidal components. In cylindrical coordinates $(R, \phi, Z)$, the field is expressed as:
+
+  $$\mathbf{B} = B_R \hat{e}_R + B_{\phi} \hat{e}_{\phi} + B_Z \hat{e}_Z$$
+
+  where $B_R$, $B_{\phi}$, and $B_Z$ are field components in T, and $\hat{e}_R$, $\hat{e}_{\phi}$, $\hat{e}_Z$ are unit vectors in the radial, toroidal, and vertical directions.
+
+  Physical significance:
+
+  The magnetic field is fundamental for plasma confinement in tokamaks. Field strength determines particle Larmor radii and confinement quality. The field relates to [plasma_current_density](#plasma_current_density) via Ampère's law and provides rotational transform for field line closure. See [radial_component_of_magnetic_field](#radial_component_of_magnetic_field), [toroidal_component_of_magnetic_field](#toroidal_component_of_magnetic_field), [vertical_component_of_magnetic_field](#vertical_component_of_magnetic_field), [poloidal_component_of_magnetic_field](#poloidal_component_of_magnetic_field), and [poloidal_magnetic_field](#poloidal_magnetic_field).
+
+  Component decomposition:
+
+  The magnetic field decomposes into [radial_component_of_magnetic_field](#radial_component_of_magnetic_field) $B_R$, [toroidal_component_of_magnetic_field](#toroidal_component_of_magnetic_field) $B_{\phi}$, and [vertical_component_of_magnetic_field](#vertical_component_of_magnetic_field) $B_Z$. The poloidal field combines radial and vertical components, while the toroidal field is the dominant component for confinement.
+
+  Measurement methods:
+
+  Magnetic field components are measured using magnetic probes, flux loops, and Hall sensors. [Flux_loop_voltage](#flux_loop_voltage) measures field changes through Faraday's law. Equilibrium reconstruction codes invert external magnetic measurements to determine internal field structure. Polarimetry measures field strength from Faraday rotation effects.
+
+  Typical values:
+
+  Typical field strengths range from 1-6 T on axis, with the toroidal component dominant ($B_{\phi} \gg B_R, B_Z$). The toroidal field decreases as $B_{\phi} \propto 1/R$ for vacuum field configurations.
+
+  Sign convention: Positive when anti-clockwise viewed from above for toroidal component.
+status: active
+tags:
+- magnetics
+- measured
+kind: vector
+unit: T

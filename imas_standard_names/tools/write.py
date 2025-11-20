@@ -12,10 +12,10 @@ from typing import Any
 from fastmcp import Context
 
 from imas_standard_names.decorators.mcp import mcp_tool
-from imas_standard_names.tools.base import BaseTool
+from imas_standard_names.tools.base import CatalogTool
 
 
-class WriteTool(BaseTool):
+class WriteTool(CatalogTool):
     """Tool for persisting catalog changes to disk."""
 
     def __init__(self, catalog: Any, edit_catalog: Any):
@@ -35,21 +35,17 @@ class WriteTool(BaseTool):
     @mcp_tool(
         description=(
             "Write pending in-memory standard names to disk as YAML files. "
-            "Validates all changes, writes new/modified entries, deletes removed entries. "
-            "Clears pending changes after successful write and reloads catalog from disk. "
-            "Use dry_run=true to validate without writing. "
-            "Use list_standard_names(scope='pending') to review changes before writing."
+            "Always get explicit user permission before calling this tool. "
+            "Use list_standard_names(scope='pending') to review changes before writing. "
+            "Validates all changes before writing. If validation fails, entries are preserved "
+            "in memory for correction. Clears pending changes after successful write and reloads catalog."
         )
     )
     async def write_standard_names(
         self,
-        dry_run: bool = False,
         ctx: Context | None = None,
     ) -> dict[str, Any]:
         """Write pending in-memory changes to disk.
-
-        Args:
-            dry_run: If True, validate but don't write files
 
         Returns:
             Dictionary with write status and summary:
@@ -58,8 +54,7 @@ class WriteTool(BaseTool):
                 "written": bool,
                 "validation_passed": bool,
                 "counts": {"added": n, "modified": n, "renamed": n, "deleted": n},
-                "issues": [...] if validation failed,
-                "dry_run": bool
+                "issues": [...] if validation failed
             }
         """
         # Get current diff to show what will be written
@@ -74,45 +69,23 @@ class WriteTool(BaseTool):
                 "validation_passed": True,
                 "counts": counts,
                 "message": "No pending changes to write",
-                "dry_run": dry_run,
             }
 
-        if dry_run:
-            # Validate without writing
-            issues = self.edit_catalog.uow.validate()
-            if issues:
-                return {
-                    "success": False,
-                    "written": False,
-                    "validation_passed": False,
-                    "counts": counts,
-                    "issues": issues,
-                    "dry_run": True,
-                }
-            return {
-                "success": True,
-                "written": False,
-                "validation_passed": True,
-                "counts": counts,
-                "message": "Validation passed - ready to write",
-                "dry_run": True,
-            }
-
-        # Actually write to disk
+        # Write to disk (includes validation)
         result = self.edit_catalog.write()
 
         if result["ok"]:
+            # Get fresh counts after write (should show 0 pending)
+            post_write_counts = self.edit_catalog.diff()["counts"]
             return {
                 "success": True,
                 "written": True,
                 "validation_passed": True,
-                "counts": counts,
+                "counts": post_write_counts,
                 "message": f"Successfully wrote {counts['total_pending']} changes to disk",
-                "dry_run": False,
             }
         else:
             # Keep entries in memory so user can edit and retry
-            # Do NOT rollback - user wants to preserve changes for editing
             return {
                 "success": False,
                 "written": False,
@@ -121,7 +94,6 @@ class WriteTool(BaseTool):
                 "issues": result.get("issues", []),
                 "error": result.get("error", "unknown_error"),
                 "message": "Write failed - entries preserved in memory. Fix validation issues and retry write_standard_names()",
-                "dry_run": False,
             }
 
 

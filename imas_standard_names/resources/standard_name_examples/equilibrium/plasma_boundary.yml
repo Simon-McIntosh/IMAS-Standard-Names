@@ -1,0 +1,21 @@
+name: plasma_boundary
+description: Last closed flux surface defining plasma boundary.
+documentation: |-
+  The last closed flux surface (LCFS) that defines the boundary between confined plasma and scrape-off layer (SOL). In diverted configurations, this corresponds to the magnetic separatrix where the poloidal flux surfaces split into divertor legs. In limiter configurations, the boundary is the outermost closed flux surface before field lines intersect material surfaces.
+
+  Geometric significance:
+
+  The plasma boundary serves as the reference surface for defining plasma shape parameters including [major_radius_of_plasma_boundary](#major_radius_of_plasma_boundary), [minor_radius_of_plasma_boundary](#minor_radius_of_plasma_boundary), and [elongation_of_plasma_boundary](#elongation_of_plasma_boundary). It separates the confined plasma region from the open field line region and determines the [plasma_volume](#plasma_volume) enclosed by magnetic surfaces.
+
+  Related quantities:
+
+  The plasma boundary relates to [magnetic_separatrix](#magnetic_separatrix) in diverted operation and [scrape_off_layer](#scrape_off_layer) outside the LCFS. Boundary shape affects [plasma_current](#plasma_current) limits and MHD stability. The boundary position determines strike point locations for [heat_flux_to_divertor](#heat_flux_to_divertor) deposition.
+
+  Physical significance:
+
+  Boundary shape and position control plasma-wall interactions and power handling. The boundary determines the last closed flux surface for particle and energy confinement. Changes in boundary shape affect [safety_factor](#safety_factor) profiles and stability limits. The boundary location relative to [first_wall](#first_wall) components determines heat flux distribution and material loading.
+status: active
+tags:
+- equilibrium
+- flux-coordinates
+kind: metadata

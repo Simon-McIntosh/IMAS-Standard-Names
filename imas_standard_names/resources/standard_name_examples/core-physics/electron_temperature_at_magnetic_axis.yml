@@ -1,0 +1,24 @@
+name: electron_temperature_at_magnetic_axis
+description: Electron temperature at magnetic axis.
+documentation: |-
+  Electron temperature $T_{e,0}$ evaluated at the [magnetic_axis](#magnetic_axis), representing the peak electron temperature in the plasma core. The magnetic axis is the innermost flux surface where the poloidal magnetic field vanishes and plasma parameters typically reach maximum values. On-axis electron temperature is a key indicator of core plasma performance and confinement quality.
+
+  Performance significance:
+
+  On-axis electron temperature is used in metrics such as the fusion triple product $n T \tau_E$ where $n$ is density in m$^{-3}$, $T$ is temperature in keV, and $\tau_E$ is [energy_confinement_time](#energy_confinement_time) in s. Higher on-axis temperature improves fusion reactivity and determines [plasma_current](#plasma_current) requirements. Temperature affects [plasma_resistivity](#plasma_resistivity) and [heating_power_due_to_ohmic](#heating_power_due_to_ohmic) efficiency. See [electron_temperature](#electron_temperature) for profile context and [ion_temperature_at_magnetic_axis](#ion_temperature_at_magnetic_axis) for ion temperatures.
+
+  Measurement methods:
+
+  Electron temperature at magnetic axis is measured using Thomson scattering systems focused on the plasma center. Electron cyclotron emission radiometry provides continuous temperature monitoring at the axis. X-ray crystal spectroscopy measures temperature from continuum radiation. MSE (motional Stark effect) diagnostics can provide temperature measurements in some configurations. On-axis measurements require precise alignment with [magnetic_axis](#magnetic_axis) location.
+
+  Typical values:
+
+  High-performance H-mode: 5-20 keV, ohmic plasmas: 1-5 keV. On-axis temperature typically exceeds edge values by factor of 2-5 depending on heating power and confinement regime.
+
+  Sign convention: Positive temperature indicates thermal energy per electron, following standard thermodynamic conventions with temperature measured in energy units (eV or keV).
+status: active
+tags:
+- core-physics
+- global-quantity
+kind: scalar
+unit: eV

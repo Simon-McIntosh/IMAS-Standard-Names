@@ -24,12 +24,23 @@ if TYPE_CHECKING:
 class ModifyInput(BaseModel):
     action: Literal["modify"]
     name: str
-    model: StandardNameEntry
+    model: StandardNameEntry | None = None
+    updates: dict[str, Any] | None = None
 
     @model_validator(mode="after")
     def _check_name(self):  # type: ignore[no-untyped-def]
-        if self.model.name != self.name:  # type: ignore[attr-defined]
+        if self.model is None and self.updates is None:
+            raise ValueError("modify: must provide either 'model' or 'updates'")
+        if self.model is not None and self.updates is not None:
+            raise ValueError("modify: cannot provide both 'model' and 'updates'")
+        if self.model is not None and self.model.name != self.name:  # type: ignore[attr-defined]
             raise ValueError("modify: model.name must match name; use rename")
+        if (
+            self.updates is not None
+            and "name" in self.updates
+            and self.updates["name"] != self.name
+        ):
+            raise ValueError("modify: cannot change name in updates; use rename")
         return self
 
 
@@ -37,7 +48,6 @@ class RenameInput(BaseModel):
     action: Literal["rename"]
     old_name: str
     new_name: str
-    dry_run: bool = False
 
     @model_validator(mode="after")
     def _check_model(self):  # type: ignore[no-untyped-def]
@@ -48,20 +58,17 @@ class RenameInput(BaseModel):
 class DeleteInput(BaseModel):
     action: Literal["delete"]
     name: str
-    dry_run: bool = False
 
 
 class BatchDeleteInput(BaseModel):
     action: Literal["batch_delete"]
     names: list[str]
-    dry_run: bool = False
 
 
 class BatchInput(BaseModel):
     action: Literal["batch"]
     operations: list[ModifyInput | RenameInput | DeleteInput]
     mode: Literal["continue", "atomic"] = "continue"
-    dry_run: bool = False
     resume_from_index: int = 0
 
 
@@ -94,19 +101,20 @@ def example_inputs() -> list[dict]:
             "name": "example_name",
             "model": {"name": "example_name", "kind": "scalar", "description": "desc"},
         },
+        {
+            "action": "modify",
+            "name": "electron_temperature",
+            "updates": {"description": "Updated description", "status": "active"},
+        },
         {"action": "rename", "old_name": "old", "new_name": "new"},
-        {"action": "rename", "old_name": "a", "new_name": "b", "dry_run": True},
         {"action": "delete", "name": "obsolete_name"},
-        {"action": "delete", "name": "test_name", "dry_run": True},
         {
             "action": "batch_delete",
             "names": ["old_entry_1", "old_entry_2", "old_entry_3"],
         },
-        {"action": "batch_delete", "names": ["test_1", "test_2"], "dry_run": True},
         {
             "action": "batch",
             "mode": "continue",
-            "dry_run": False,
             "operations": [
                 {
                     "action": "modify",
@@ -116,6 +124,11 @@ def example_inputs() -> list[dict]:
                         "kind": "scalar",
                         "description": "Updated description",
                     },
+                },
+                {
+                    "action": "modify",
+                    "name": "another_quantity",
+                    "updates": {"description": "Partial update"},
                 },
                 {
                     "action": "delete",
@@ -164,13 +177,13 @@ class ModifyResult(BaseResult):
     action: Literal["modify"] = "modify"
     old_model: StandardNameEntry
     new_model: StandardNameEntry
+    warnings: list[dict] | None = None  # Description validation warnings
 
 
 class RenameResult(BaseResult):
     action: Literal["rename"] = "rename"
     old_name: str
     new_name: str
-    dry_run: bool = False
     dependencies: list[str] | None = None  # Entries that depend on the old name
 
 
@@ -178,7 +191,6 @@ class DeleteResult(BaseResult):
     action: Literal["delete"] = "delete"
     old_model: StandardNameEntry | None
     existed: bool
-    dry_run: bool = False
     dependencies: list[str] | None = None  # Entries that depend on this one
 
 
@@ -186,7 +198,6 @@ class BatchDeleteResult(BaseResult):
     action: Literal["batch_delete"] = "batch_delete"
     summary: dict
     results: list[tuple[str, bool, list[str] | None]]  # (name, existed, dependencies)
-    dry_run: bool = False
 
 
 ApplyResult = (

@@ -1,0 +1,25 @@
+name: last_closed_flux_surface
+description: Last closed flux surface.
+documentation: |-
+  The last closed flux surface (LCFS) is the outermost magnetic flux surface that closes on itself toroidally, defining the boundary between confined plasma and the open field line region. Equivalent to [plasma_boundary](#plasma_boundary), the LCFS separates confined plasma from the scrape-off layer and determines the boundary for particle and energy confinement.
+
+  Physical significance:
+
+  The LCFS separates the confined plasma (inside LCFS) from the [scrape_off_layer](#scrape_off_layer) (outside LCFS). In diverted configurations, the LCFS corresponds to the [magnetic_separatrix](#magnetic_separatrix) where poloidal flux surfaces split. In limiter configurations, the LCFS is determined by the limiter intersection. The LCFS location affects [plasma_current](#plasma_current) distribution and [safety_factor](#safety_factor) profiles. See [magnetic_axis](#magnetic_axis) for flux surface relationships and [plasma_boundary](#plasma_boundary) for equivalent definitions.
+
+  Geometric properties:
+
+  The LCFS is characterized by shape parameters including [major_radius_of_plasma_boundary](#major_radius_of_plasma_boundary), [minor_radius_of_plasma_boundary](#minor_radius_of_plasma_boundary), and [elongation_of_plasma_boundary](#elongation_of_plasma_boundary). These geometric quantities define the plasma cross-section and affect confinement quality.
+
+  Related quantities:
+
+  The LCFS relates to [magnetic_separatrix](#magnetic_separatrix) in diverted operation, [plasma_boundary](#plasma_boundary) as the defining surface, and [first_wall](#first_wall) as the material boundary. LCFS shape affects power handling and determines strike point locations for heat deposition.
+
+  Measurement methods:
+
+  LCFS location is determined from equilibrium reconstruction using external [magnetic_field](#magnetic_field) measurements. [Flux_loop_voltage](#flux_loop_voltage) integration provides flux surface geometry. Plasma imaging systems can directly visualize boundary positions. LCFS identification requires flux surface analysis and field line tracing. Position control systems maintain LCFS position during operations.
+status: draft
+tags:
+- equilibrium
+- flux-coordinates
+kind: metadata

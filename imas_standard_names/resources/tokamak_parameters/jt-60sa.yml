@@ -1,0 +1,75 @@
+machine: JT-60SA
+facility: National Institutes for Quantum Science and Technology
+location: Naka, Japan
+operational_status: operational
+last_updated: "2025-11-03"
+sources:
+  - url: https://fusionwiki.ciemat.es/wiki/JT-60SA
+    accessed: "2025-11-03"
+    description: "FusionWiki comprehensive database"
+  - url: https://www.jt60sa.org/
+    description: "Official JT-60SA page"
+
+geometry:
+  major_radius:
+    value: 2.96
+    unit: m
+    symbol: R_0
+  minor_radius:
+    value: 1.18
+    unit: m
+    symbol: a
+  plasma_volume:
+    value: 135
+    unit: m^3
+    symbol: V_p
+  elongation:
+    value: 1.85
+    unit: "1"
+    symbol: kappa
+  triangularity:
+    value: 0.47
+    unit: "1"
+    symbol: delta
+  aspect_ratio:
+    value: 2.5
+    unit: "1"
+    symbol: A
+    note: "R_0/a"
+
+physics:
+  toroidal_magnetic_field:
+    value: 2.25
+    unit: T
+    symbol: B_T
+    location: "at major radius R_0"
+  plasma_current:
+    value: 5.5
+    unit: MA
+    symbol: I_p
+    note: "design value"
+  edge_safety_factor:
+    value: 3.0
+    unit: "1"
+    symbol: q_95
+  electron_density:
+    value: 7.0e19
+    unit: m^-3
+    symbol: n_e
+    note: "design target"
+  ion_temperature:
+    value: 6.0
+    unit: keV
+    symbol: T_i
+    note: "design target"
+  electron_temperature:
+    value: 6.0
+    unit: keV
+    symbol: T_e
+    note: "design target"
+  energy_confinement_time:
+    value: 0.8
+    unit: s
+    symbol: tau_E
+    note: "design target"
+

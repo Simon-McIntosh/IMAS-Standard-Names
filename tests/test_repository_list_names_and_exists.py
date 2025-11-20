@@ -2,36 +2,32 @@ from pathlib import Path
 
 from imas_standard_names.models import create_standard_name_entry
 from imas_standard_names.repository import StandardNameCatalog
+from imas_standard_names.yaml_store import YamlStore
 
 
-def write_scalar(tmp: Path, name: str):
-    (tmp / f"{name}.yml").write_text(
-        f"""name: {name}\nkind: scalar\nstatus: active\nunit: m\ndescription: {name} description.""",
-        encoding="utf-8",
-    )
+def test_list_names_and_exists(tmp_path: Path, example_scalars):
+    # Use examples from catalog
+    store = YamlStore(tmp_path)
+    for example in example_scalars[:3]:
+        store.write(example)
 
-
-def test_list_names_and_exists(tmp_path: Path):
-    # Create a few scalar standard name YAML entries
-    write_scalar(tmp_path, "a_density")
-    write_scalar(tmp_path, "z_temperature")
-    write_scalar(tmp_path, "m_pressure")
     repo = StandardNameCatalog(tmp_path)
 
     # exists() checks
-    assert repo.exists("a_density") is True
-    assert repo.exists("z_temperature") is True
+    assert repo.exists(example_scalars[0].name) is True
+    assert repo.exists(example_scalars[1].name) is True
     assert repo.exists("does_not_exist") is False
 
     # list_names should return sorted list of names (alphabetical)
     names = repo.list_names()
     assert names == sorted(names)
-    assert set(names) >= {"a_density", "z_temperature", "m_pressure"}
+    expected_names = {ex.name for ex in example_scalars[:3]}
+    assert set(names) >= expected_names
 
     # list() still returns hydrated models matching names
     hydrated = repo.list()
     hydrated_names = {m.name for m in hydrated}
-    assert {"a_density", "z_temperature", "m_pressure"}.issubset(hydrated_names)
+    assert expected_names.issubset(hydrated_names)
 
 
 def test_exists_after_uow_add_remove(tmp_path: Path):
@@ -45,6 +41,8 @@ def test_exists_after_uow_add_remove(tmp_path: Path):
             "status": "active",
             "unit": "m",
             "description": "Dynamic entry.",
+            "documentation": "Dynamic entry for repository list and exists testing.",
+            "tags": ["fundamental"],
         }
     )
     uow.add(model)

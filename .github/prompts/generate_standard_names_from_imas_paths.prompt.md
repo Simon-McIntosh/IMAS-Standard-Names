@@ -46,7 +46,7 @@ Do not create entries without user confirmation.
 
 If user confirms creation:
 
-- Get catalog schema: `get_catalog_entry_schema`
+- Get catalog schema: `get_schema`
 - Generate tags, units, descriptions and documentation
 - Create entries: `create_standard_names`
 - Fix errors: `edit_standard_names`

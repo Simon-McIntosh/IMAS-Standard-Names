@@ -1,0 +1,49 @@
+# Generic physical bases that require qualification
+#
+# These physical quantities are too generic to stand alone as physical_base
+# and MUST be qualified with subject, device, object, or positional context.
+#
+# Rationale:
+# - Generic terms like "current" or "temperature" are ambiguous without context
+# - Following CF metadata conventions: physical quantities need sufficient specificity
+# - Device/object context distinguishes measurement source from physical quantity
+#
+# Validation rules:
+# - If physical_base matches a token in this list AND
+# - No qualifying segment is present (subject, device, object, position, geometry)
+# - Then the name is invalid (too generic)
+#
+# Examples of INVALID names:
+#   - current                    (too generic - current of/through what?)
+#   - power                      (too generic - power from/to what?)
+#   - temperature                (too generic - temperature of what species?)
+#   - voltage                    (too generic - voltage from/across what?)
+#
+# Examples of VALID names:
+#   - plasma_current                                    (generic "current" + implicit plasma object)
+#   - poloidal_field_coil_current                       (generic "current" + device qualifier)
+#   - electron_temperature                              (generic "temperature" + subject qualifier)
+#   - ion_cyclotron_heating_antenna_forward_power       (generic "power" + device qualifier)
+#   - poloidal_magnetic_field_probe_voltage             (generic "voltage" + device qualifier)
+#   - area_of_flux_loop                                 (generic "area" + object qualifier)
+#   - volume_enclosed_by_flux_surface                   (generic "volume" + geometry qualifier)
+#   - pressure_at_magnetic_axis                         (generic "pressure" + position qualifier)
+#
+# Contrast with specific physical bases (NOT in this list):
+#   - magnetic_field             (specific physical quantity, can stand alone)
+#   - poloidal_magnetic_flux     (specific quantity with coordinate qualifier)
+#   - safety_factor              (specific dimensionless parameter)
+#   - diamagnetic_flux           (specific type of flux, not generic "flux")
+
+- area
+- current
+- energy
+- flux
+- frequency
+- number_density
+- power
+- pressure
+- temperature
+- velocity
+- voltage
+- volume

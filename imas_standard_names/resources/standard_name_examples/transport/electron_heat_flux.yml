@@ -1,0 +1,32 @@
+name: electron_heat_flux
+description: Electron heat flux vector.
+documentation: |-
+  Electron heat flux vector $\mathbf{q}_e$ representing the thermal energy transported by electrons. In cylindrical coordinates, components include radial [radial_component_of_electron_heat_flux](#radial_component_of_electron_heat_flux), poloidal, and toroidal directions. Electron heat flux is a primary energy loss channel in tokamak plasmas and determines [energy_confinement_time](#energy_confinement_time) through transport processes.
+
+  Transport relation:
+
+  Heat flux relates to temperature gradient and thermal diffusivity:
+
+  $$\mathbf{q}_e = -n_e \chi_e \nabla T_e$$
+
+  where $n_e$ is [electron_density](#electron_density) in m$^{-3}$, $\chi_e$ is [electron_thermal_diffusivity](#electron_thermal_diffusivity) in m$^2$/s, $\nabla T_e$ is [electron_temperature](#electron_temperature) gradient in eV/m.
+
+  Physical significance:
+
+  Electron heat flux is driven by temperature gradients and turbulent transport, determining energy confinement quality. Understanding and controlling heat flux profiles is essential for achieving good [energy_confinement_time](#energy_confinement_time) and predicting plasma performance. Heat flux affects [plasma_current](#plasma_current) requirements and [safety_factor](#safety_factor) limits. See [electron_thermal_diffusivity](#electron_thermal_diffusivity) for transport coefficients and [radial_component_of_electron_heat_flux](#radial_component_of_electron_heat_flux) for radial transport.
+
+  Measurement methods:
+
+  Electron heat flux is inferred from [electron_temperature](#electron_temperature) and [electron_density](#electron_density) profile measurements using transport analysis. Thomson scattering provides local temperature and density measurements for gradient calculations. Electron cyclotron emission measures temperature profiles. Heat flux analysis requires equilibrium reconstruction using [magnetic_field](#magnetic_field) measurements and [plasma_current](#plasma_current) data.
+
+  Typical values:
+
+  Core region: $10^4$-$10^6$ W/m$^2$, edge region: $10^6$-$10^8$ W/m$^2$ near the pedestal. Heat flux typically increases toward the edge due to steeper temperature gradients and reduced confinement.
+
+  Sign convention: Positive heat flux indicates energy flow in the direction of decreasing temperature, following the direction of $\nabla T_e$.
+status: draft
+tags:
+- transport
+- spatial-profile
+kind: vector
+unit: W.m^-2

@@ -1,0 +1,28 @@
+name: heating_power_due_to_ohmic
+description: Ohmic heating power dissipated in plasma.
+documentation: |-
+  Heating power delivered to the plasma through ohmic (resistive) heating, given by the volume integral. Ohmic heating is the primary heating mechanism during plasma startup and determines initial plasma heating before auxiliary systems become effective.
+
+  $$P_{\text{ohm}} = \int \eta j^2 \, dV$$
+
+  where $\eta$ is [plasma_resistivity](#plasma_resistivity) in $\Omega$·m, $j$ is current density magnitude in A/m$^2$, $dV$ is the volume element in m$^3$, giving $P_{\text{ohm}}$ in W. Alternatively expressed as $P_{\text{ohm}} = R_p I_p^2$ where $R_p$ is plasma resistance in $\Omega$ and $I_p$ is [plasma_current](#plasma_current) in A.
+
+  Physical significance:
+
+  Ohmic heating is the primary heating mechanism during plasma startup. The power scales as $P_{\text{ohm}} \propto T_e^{-3/2}$ due to the temperature dependence of resistivity, making it ineffective at high temperatures where auxiliary heating dominates. Ohmic heating affects [plasma_current](#plasma_current) requirements and determines current ramp efficiency. See [plasma_resistivity](#plasma_resistivity) for resistivity relationships and [plasma_current](#plasma_current) for current distribution.
+
+  Measurement methods:
+
+  Ohmic heating power is calculated from [plasma_current](#plasma_current) and loop voltage measurements: $P_{\text{ohm}} = V_{\text{loop}} I_p$. Plasma resistance is determined from voltage-current relationships. Power balance analysis includes ohmic contribution to total heating. Current density profiles from equilibrium reconstruction provide spatial heating distribution. Ohmic power is primary heating source during current ramp phase.
+
+  Typical values:
+
+  Startup phase: 1-10 MW, high-temperature phase: 0.1-1 MW for medium-sized tokamaks. Ohmic heating decreases with increasing temperature and becomes negligible above ~5 keV.
+
+  Sign convention: Positive heating power indicates energy input to the plasma, following standard power conventions with heating rate measured in watts.
+status: active
+tags:
+- fundamental
+- ohmic-heating
+kind: scalar
+unit: W

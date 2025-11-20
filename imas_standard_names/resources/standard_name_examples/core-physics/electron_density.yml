@@ -1,0 +1,33 @@
+name: electron_density
+description: Electron number density.
+documentation: |-
+  Electron number density $n_e$ representing the volumetric concentration of electrons (thermal plus non-thermal) in the plasma. In fusion plasmas, electron density typically ranges from $10^{18}$ m$^{-3}$ in the edge region to $10^{20}$ m$^{-3}$ in the plasma core. Electron density determines plasma conductivity and affects [plasma_resistivity](#plasma_resistivity).
+
+  Thermodynamic relation:
+
+  Electron density relates to [electron_pressure](#electron_pressure) and [electron_temperature](#electron_temperature) via the ideal gas law:
+
+  $$p_e = n_e k_B T_e$$
+
+  where $p_e$ is electron pressure in Pa, $k_B = 1.381 \times 10^{-23}$ J/K is Boltzmann's constant, and $T_e$ is in K. When using $T_e$ in eV, apply conversion: $p_e = n_e T_e \times 1.602 \times 10^{-19}$ Pa.
+
+  Physical significance:
+
+  Electron density determines plasma conductivity through $\sigma = n_e e^2 \tau / m_e$ and affects [plasma_current](#plasma_current) requirements. Higher density improves confinement through increased collisionality but may reduce [energy_confinement_time](#energy_confinement_time). Density gradients drive [electron_heat_flux](#electron_heat_flux) and affect [plasma_current_density](#plasma_current_density) profiles. See [plasma_density_at_magnetic_axis](#plasma_density_at_magnetic_axis) for core values.
+
+  Measurement methods:
+
+  Interferometry measures line-integrated electron density through phase shift of laser beams. Reflectometry determines density profiles from microwave reflection. Thomson scattering provides local density measurements with high spatial resolution. Interferometry systems use multiple chords for 2D reconstruction. Density measurements are essential for [electron_pressure](#electron_pressure) calculations and equilibrium reconstruction.
+
+  Typical values:
+
+  Edge region: $10^{18}$-$10^{19}$ m$^{-3}$, core region: $10^{19}$-$10^{20}$ m$^{-3}$ in high-performance tokamak plasmas. On-axis values in [plasma_density_at_magnetic_axis](#plasma_density_at_magnetic_axis) typically reach $5 \times 10^{19}$ - $2 \times 10^{20}$ m$^{-3}$ during high-performance operation.
+
+  Sign convention: Positive density indicates particle concentration, following standard plasma physics conventions.
+status: draft
+tags:
+- core-physics
+- measured
+- spatial-profile
+kind: scalar
+unit: m^-3

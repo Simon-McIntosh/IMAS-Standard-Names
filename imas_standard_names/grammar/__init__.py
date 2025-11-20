@@ -11,8 +11,8 @@ from .model import (
     compose_standard_name,
     parse_standard_name,
 )
-from .support import TOKEN_PATTERN, value_of
-from .types import Component, Position, Process, Subject
+from .model_types import Component, Position, Process, Subject
+from .support import TOKEN_PATTERN, coerce_enum, enum_values, value_of
 
 # Friendly aliases to match tests
 compose_name = compose_standard_name
@@ -25,6 +25,8 @@ __all__ = [
     "compose_name",
     "parse_name",
     "value_of",
+    "enum_values",
+    "coerce_enum",
     "Component",
     "Position",
     "Process",

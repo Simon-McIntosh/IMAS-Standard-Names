@@ -3,21 +3,18 @@ from pathlib import Path
 from imas_standard_names.database.build import build_catalog
 from imas_standard_names.database.read import CatalogRead
 from imas_standard_names.repository import StandardNameCatalog
+from imas_standard_names.yaml_store import YamlStore
 
 
-def _write_example(root: Path):
-    (root / "electron_temperature.yml").write_text(
-        "name: electron_temperature\nkind: scalar\nstatus: active\nunit: keV\ndescription: Electron temperature.\n"
-    )
-    (root / "ion_temperature.yml").write_text(
-        "name: ion_temperature\nkind: scalar\nstatus: draft\nunit: keV\ndescription: Ion temperature.\n"
-    )
-
-
-def test_build_catalog_round_trip(tmp_path: Path):
+def test_build_catalog_round_trip(tmp_path: Path, example_scalars):
+    # Use examples from catalog
     yaml_root = tmp_path / "standard_names"
     yaml_root.mkdir()
-    _write_example(yaml_root)
+
+    store = YamlStore(yaml_root)
+    for example in example_scalars[:2]:
+        store.write(example)
+
     # Load via repository (in-memory) baseline
     repo = StandardNameCatalog(yaml_root)
     baseline = {m.name: m.description for m in repo.list()}
@@ -30,5 +27,6 @@ def test_build_catalog_round_trip(tmp_path: Path):
     rebuilt = {m.name: m.description for m in ro.list()}
     assert baseline == rebuilt
     # Ensure FTS search works identically
-    results = ro.search("electron_temperature")
-    assert "electron_temperature" in results
+    first_name = example_scalars[0].name
+    results = ro.search(first_name)
+    assert first_name in results

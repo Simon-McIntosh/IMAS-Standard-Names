@@ -1,0 +1,40 @@
+name: heat_flux_to_divertor
+description: Heat flux to divertor target.
+documentation: |-
+  Heat flux to divertor target surfaces, representing the thermal power per unit area deposited where scrape-off layer field lines intersect divertor plates. This quantity includes contributions from parallel electron and ion heat conduction, convection, and radiation, determining divertor power handling capabilities.
+
+  Power balance:
+
+  The total power to the [divertor](#divertor) $P_{\text{div}}$ equals heating power minus radiated and convected losses:
+
+  $$P_{\text{div}} = P_{\text{heat}} - P_{\text{rad}} - P_{\text{loss}}$$
+
+  This power distributes between inner and outer divertor targets, with peak heat flux at strike points where separatrix field lines intersect targets.
+
+  Physical significance:
+
+  Heat flux to divertor targets determines power handling requirements and affects divertor performance. Steady-state heat flux limits are typically 5-20 MW/m$^2$ for actively cooled targets. Higher fluxes lead to excessive erosion and melting. Transient events (ELMs, disruptions) can briefly deliver much higher fluxes. See [divertor](#divertor) for power handling context and [scrape_off_layer](#scrape_off_layer) for field line relationships.
+
+  Physical constraints:
+
+  Steady-state heat flux limits are typically 5-20 MW/m$^2$ for actively cooled targets. Higher fluxes lead to excessive erosion and melting. Transient events (ELMs, disruptions) can briefly deliver much higher fluxes. Heat flux distribution affects divertor material loading and determines cooling requirements.
+
+  Mitigation strategies:
+
+  Divertor detachment, strike point sweeping, impurity seeding for radiation, and advanced magnetic geometries reduce peak heat flux. Power distribution optimization and real-time control manage heat flux within material limits.
+
+  Measurement methods:
+
+  Heat flux to divertor is measured using thermocouples, infrared cameras, and Langmuir probes. Divertor diagnostics measure surface temperature and power deposition. Heat flux analysis requires power balance calculations and field line mapping. Multiple measurement techniques provide validation and spatial resolution.
+
+  Typical values:
+
+  Attached divertor: 5-20 MW/m$^2$ at outer strike point, partially detached: 1-5 MW/m$^2$, fully detached: < 1 MW/m$^2$. Heat flux varies with plasma conditions and divertor configuration.
+
+  Sign convention: Positive heat flux indicates power flow toward divertor surface, following standard heat transfer conventions with power density measured in W/m$^2$.
+status: draft
+tags:
+- edge-physics
+- measured
+kind: scalar
+unit: W.m^-2

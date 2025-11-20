@@ -1,0 +1,31 @@
+name: magnetic_axis
+description: Magnetic axis location.
+documentation: |-
+  The magnetic axis is the innermost closed flux surface where the poloidal magnetic field vanishes ($B_p = 0$) and plasma parameters typically reach maximum values. It represents the center of nested flux surfaces in tokamak equilibria and serves as the reference point for plasma shape and position.
+
+  Geometric properties:
+
+  The magnetic axis is characterized by major radius $R_0$ and vertical position $Z_0$ in meters. In ideal axisymmetric equilibria, all field lines on the magnetic axis close after one toroidal transit.
+
+  Physical significance:
+
+  Plasma temperature and density typically peak at the magnetic axis. On-axis quantities such as [electron_temperature_at_magnetic_axis](#electron_temperature_at_magnetic_axis) and [plasma_density_at_magnetic_axis](#plasma_density_at_magnetic_axis) are key performance indicators. The magnetic axis location determines the geometric center of the plasma and is used as reference for shape parameters. See [plasma_boundary](#plasma_boundary) for boundary relationships and [major_radius_of_plasma_boundary](#major_radius_of_plasma_boundary) for geometric scaling.
+
+  Related quantities:
+
+  The magnetic axis relates to [major_radius_of_plasma_boundary](#major_radius_of_plasma_boundary), [minor_radius_of_plasma_boundary](#minor_radius_of_plasma_boundary), and [toroidal_component_of_magnetic_field](#toroidal_component_of_magnetic_field) at axis. Axis location affects [plasma_current](#plasma_current) distribution and [safety_factor](#safety_factor) profiles.
+
+  Measurement methods:
+
+  Magnetic axis location is determined from equilibrium reconstruction using external [magnetic_field](#magnetic_field) measurements. [Flux_loop_voltage](#flux_loop_voltage) integration provides poloidal field information. MSE (motional Stark effect) diagnostics can provide direct axis location measurements. Axis identification requires flux surface analysis and field line tracing. Position control systems maintain axis location during plasma operations.
+
+  Typical values:
+
+  Axis location varies with plasma shape and position control settings. Major radius typically ranges from machine center to outer vessel radius, vertical position controlled to maintain plasma centering.
+
+  Sign convention: Positive coordinates follow standard cylindrical coordinate conventions with R measured from machine center and Z measured from midplane.
+status: draft
+tags:
+- equilibrium
+- flux-coordinates
+kind: metadata

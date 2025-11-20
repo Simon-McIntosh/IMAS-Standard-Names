@@ -23,6 +23,7 @@
   "editor.formatOnPaste": true,
   // --- Spelling (project-specific domain words) ------------------------
   "cSpell.words": [
+    "codegen",
     "dotenv",
     "fastmcp",
     "genericname",
@@ -45,7 +46,8 @@
     "syaml",
     "tokamaks",
     "toolsets",
-    "UDUNITS"
+    "UDUNITS",
+    "vocabs"
   ],
   // --- Chat MCP sampling (project tool integration) --------------------
   "chat.mcp.serverSampling": {
@@ -55,9 +57,16 @@
     },
     "imas-standard-names/.vscode/mcp.json: imas-dd-debug": {
       "allowedDuringChat": true
+    },
+    "imas-standard-names/.vscode/mcp.json: imas-dd": {
+      "allowedDuringChat": true
+    },
+    "imas-standard-names/.vscode/mcp.json: imas-dd-local": {
+      "allowedDuringChat": true
     }
   },
   "chat.promptFilesLocations": {
     ".github/prompts/workflows/list_generate_workflow": true
-  }
+  },
+  "cursorpyright.analysis.typeCheckingMode": "standard"
 }

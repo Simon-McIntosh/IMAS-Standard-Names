@@ -10,7 +10,8 @@ from __future__ import annotations
 import re
 from typing import TYPE_CHECKING, Literal
 
-from ..grammar.types import Component, Object, Position, Process, Source, Subject
+from ..grammar.model_types import Component, Object, Position, Process, Subject
+from ..operators import PRIMITIVE_OPERATORS
 
 if TYPE_CHECKING:
     from ..models import StandardNameEntry
@@ -34,21 +35,23 @@ class QualityChecker:
         """Build set of valid physics/fusion terminology from grammar types and catalog.
 
         Dynamically extracts base names from the catalog to stay in sync with actual usage.
+        Uses late import to avoid circular dependency during module loading.
         """
-        # Imports inside function to avoid circular dependency:
-        # repository -> services -> validation -> repository
-        from ..grammar.model import parse_standard_name
-        from ..operators import PRIMITIVE_OPERATORS
-        from ..repository import StandardNameCatalog
-
         vocab = set()
 
         # Add all grammar vocabulary (segments with constrained tokens)
-        for enum_class in [Component, Subject, Object, Source, Position, Process]:
+        for enum_class in [Component, Subject, Object, Position, Process]:
             vocab.update(member.value for member in enum_class)
 
+        # Add primitive operators (already controlled in operators.py)
+        vocab.update(PRIMITIVE_OPERATORS)
+
         # Add all base names from the catalog (dynamic - reflects actual usage)
+        # Late import avoids circular dependency: validation -> repository -> services -> validation
         try:
+            from ..grammar.model import parse_standard_name  # noqa: PLC0415
+            from ..repository import StandardNameCatalog  # noqa: PLC0415
+
             catalog = StandardNameCatalog()
             for entry in catalog.list():
                 # Extract base by parsing the standard name
@@ -58,16 +61,13 @@ class QualityChecker:
             # If catalog loading fails, continue with grammar-only vocab
             pass
 
-        # Add primitive operators (already controlled in operators.py)
-        vocab.update(PRIMITIVE_OPERATORS)
-
         return vocab
 
     @property
     def proselint(self):
         """Lazy-load proselint."""
         if self._proselint is None:
-            from proselint.tools import lint
+            from proselint.tools import lint  # noqa: PLC0415
 
             self._proselint = lint
         return self._proselint
@@ -77,7 +77,7 @@ class QualityChecker:
         """Lazy-load spaCy with small English model."""
         if self._nlp is None:
             try:
-                import spacy
+                import spacy  # noqa: PLC0415
 
                 # Try to load small model, fallback to blank
                 try:
@@ -208,7 +208,33 @@ class QualityChecker:
             if re.search(pattern, desc_lower):
                 issues.append(("error", f"{name}: tautology - {desc_pattern}"))
 
-        # Check 2: Component descriptions should mention axis
+        # Check 2: Deprecated '_from_' pattern for device sources
+        device_terms = [
+            "probe",
+            "detector",
+            "coil",
+            "loop",
+            "antenna",
+            "spectrometer",
+            "interferometer",
+            "beam",
+            "sensor",
+            "diagnostic",
+        ]
+        if "_from_" in name:
+            for term in device_terms:
+                if term in name:
+                    issues.append(
+                        (
+                            "error",
+                            f"{name}: uses deprecated '_from_<device>' pattern. "
+                            f"Use '<device>_<signal>' for device properties, "
+                            f"or remove device from name for physics quantities.",
+                        )
+                    )
+                    break
+
+        # Check 3: Component descriptions should mention axis
         if "_component_of_" in name:
             axis = name.split("_component_of_")[0].split("_")[-1]
             if axis not in desc_lower:
@@ -219,7 +245,7 @@ class QualityChecker:
                     )
                 )
 
-        # Check 3: Operator descriptions should clarify transformation
+        # Check 4: Operator descriptions should clarify transformation
         operators = [
             "gradient",
             "curl",
@@ -231,16 +257,6 @@ class QualityChecker:
         for op in operators:
             if f"{op}_of_" in name and op.replace("_", " ") not in desc_lower:
                 issues.append(("info", f"{name}: could clarify '{op}' operation"))
-
-        # Check 4: Source-tagged descriptions
-        if "_from_" in name:
-            source = name.split("_from_")[1].replace("_", " ")
-            if source not in desc_lower and not any(
-                word in desc_lower for word in source.split()
-            ):
-                issues.append(
-                    ("warning", f"{name}: should mention data source '{source}'")
-                )
 
         # Check 5: Redundant name repetition
         name_parts = name.split("_")
