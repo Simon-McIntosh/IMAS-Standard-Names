@@ -19,4 +19,4 @@ runs:
     - name: Sync dependencies (no dev)
       shell: bash
       run: |
-        uv sync --all-extras --no-dev
+        uv sync --no-dev

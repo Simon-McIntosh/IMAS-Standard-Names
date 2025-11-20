@@ -68,7 +68,7 @@ ENUM_NAME_OVERRIDES = {
 }
 
 
-def main() -> None:
+def main(format_code: bool = True) -> None:
     # Generate grammar types and constants
     spec = GrammarSpec.load()
 
@@ -140,7 +140,7 @@ def main() -> None:
 
     if not grammar_updated and not tags_updated and not field_schemas_updated:
         print("All generated files up to date")
-    else:
+    elif format_code:
         # Run ruff --fix on generated files to ensure they pass formatting checks
         generated_files = []
         if types_updated:
@@ -162,12 +162,23 @@ def main() -> None:
 
             # Run ruff check --fix first (same as pre-commit)
             print("  Running ruff check --fix...")
-            result = subprocess.run(
-                ["uv", "run", "ruff", "check", "--fix"] + generated_files,
-                capture_output=True,
-                text=True,
-                cwd=project_root,
-            )
+            try:
+                # Try running ruff directly first (avoids uv lock issues in build hooks)
+                result = subprocess.run(
+                    ["ruff", "check", "--fix"] + generated_files,
+                    capture_output=True,
+                    text=True,
+                    cwd=project_root,
+                )
+            except FileNotFoundError:
+                # Fallback to uv run ruff if ruff is not in PATH
+                result = subprocess.run(
+                    ["uv", "run", "ruff", "check", "--fix"] + generated_files,
+                    capture_output=True,
+                    text=True,
+                    cwd=project_root,
+                )
+
             if result.returncode != 0:
                 print("✗ Ruff check --fix failed:")
                 if result.stdout:
@@ -183,12 +194,23 @@ def main() -> None:
 
             # Run ruff format to ensure proper formatting (same as pre-commit)
             print("  Running ruff format...")
-            result = subprocess.run(
-                ["uv", "run", "ruff", "format"] + generated_files,
-                capture_output=True,
-                text=True,
-                cwd=project_root,
-            )
+            try:
+                # Try running ruff directly first
+                result = subprocess.run(
+                    ["ruff", "format"] + generated_files,
+                    capture_output=True,
+                    text=True,
+                    cwd=project_root,
+                )
+            except FileNotFoundError:
+                # Fallback to uv run ruff
+                result = subprocess.run(
+                    ["uv", "run", "ruff", "format"] + generated_files,
+                    capture_output=True,
+                    text=True,
+                    cwd=project_root,
+                )
+
             if result.returncode != 0:
                 print("✗ Ruff format failed:")
                 if result.stdout:

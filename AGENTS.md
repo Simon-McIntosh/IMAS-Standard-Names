@@ -19,7 +19,7 @@ uv sync
 .venv\Scripts\Activate.ps1
 
 # Install dependencies
-uv sync --all-extras
+uv sync
 ```
 
 ## Build and Test Commands
@@ -59,7 +59,7 @@ uv run python -m imas_standard_names.grammar_codegen.generate
 
 ### Path Resolution Best Practices
 
-**Prefer importlib.resources over Path(__file__)** for resolving package paths:
+**Prefer importlib.resources over Path(**file**)** for resolving package paths:
 
 ```python
 # ❌ Avoid: Path(__file__).resolve().parents[1] / "grammar"
@@ -73,6 +73,7 @@ spec_path = grammar_package_path / "specification.yml"
 ```
 
 **Why importlib.resources is preferred:**
+
 - Works correctly with zip imports and frozen packages
 - More robust in different installation contexts
 - Future-proof against Python packaging changes
