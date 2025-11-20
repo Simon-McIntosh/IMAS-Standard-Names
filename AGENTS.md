@@ -19,7 +19,7 @@ uv sync
 .venv\Scripts\Activate.ps1
 
 # Install dependencies
-uv sync
+uv sync --all-extras
 ```
 
 ## Build and Test Commands
