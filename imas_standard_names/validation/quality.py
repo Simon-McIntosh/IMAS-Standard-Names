@@ -56,7 +56,10 @@ class QualityChecker:
             for entry in catalog.list():
                 # Extract base by parsing the standard name
                 parsed = parse_standard_name(entry.name)
-                vocab.add(parsed.base)
+                # Base is either physical_base or geometric_base
+                base = parsed.physical_base or parsed.geometric_base
+                if base:
+                    vocab.add(base)
         except Exception:
             # If catalog loading fails, continue with grammar-only vocab
             pass

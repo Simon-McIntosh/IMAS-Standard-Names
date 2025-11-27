@@ -31,7 +31,12 @@ def test_vocabulary_composition():
 
     # Source 2: Catalog base names (extracted by parsing standard names)
     catalog = StandardNameCatalog()
-    catalog_bases = {parse_standard_name(entry.name).base for entry in catalog.list()}
+    catalog_bases = set()
+    for entry in catalog.list():
+        parsed = parse_standard_name(entry.name)
+        base = parsed.physical_base or parsed.geometric_base
+        if base:
+            catalog_bases.add(base)
 
     # Source 3: Primitive operators (from operators.py)
     operators = PRIMITIVE_OPERATORS
@@ -81,7 +86,12 @@ def test_vocabulary_sources_traceable():
         grammar_vocab.update(member.value for member in enum_class)
 
     catalog = StandardNameCatalog()
-    catalog_bases = {parse_standard_name(entry.name).base for entry in catalog.list()}
+    catalog_bases = set()
+    for entry in catalog.list():
+        parsed = parse_standard_name(entry.name)
+        base = parsed.physical_base or parsed.geometric_base
+        if base:
+            catalog_bases.add(base)
 
     operators = PRIMITIVE_OPERATORS
 

@@ -47,9 +47,10 @@ build-grammar = "imas_standard_names.grammar_codegen.generate:main"
 
 [project.optional-dependencies]
 # Catalog package (when available on PyPI)
-catalog = [
-  "imas-standard-names-catalog>=1.0.0",
-]
+# TODO: Uncomment when catalog package is published to PyPI
+# catalog = [
+#   "imas-standard-names-catalog>=1.0.0",
+# ]
 
 # Quality validation and vocabulary management tools
 quality = [

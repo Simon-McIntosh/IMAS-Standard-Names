@@ -367,6 +367,10 @@ class VocabularyAuditor:
             ):
                 token = match.group(1)
                 if self._is_valid_token(token):
+                    # Skip tokens that are actually physical_base or geometric_base
+                    # (e.g., "magnetic_field" in "component_of_magnetic_field")
+                    if self._is_likely_physical_base(token):
+                        continue
                     # Use spaCy to classify if available
                     vocab_type = self._classify_of_token(token)
                     candidates[vocab_type][token] += 1
@@ -417,6 +421,59 @@ class VocabularyAuditor:
             return False
         # Check all chars are lowercase alphanumeric or underscore
         return all(c.isalnum() or c == "_" for c in token) and token.islower()
+
+    def _is_likely_physical_base(self, token: str) -> bool:
+        """Check if token is likely a physical_base rather than an object/position.
+        
+        Physical bases are quantities like 'magnetic_field', 'temperature', 'density'.
+        They often appear after 'component_of_' or stand alone as measurable quantities.
+        
+        Heuristics:
+        - Contains 'field', 'temperature', 'density', 'pressure', 'flux', 'current', 'voltage'
+        - Does NOT contain equipment/diagnostic keywords
+        """
+        # Physical quantity keywords (strong signal for physical_base)
+        physical_quantity_keywords = {
+            "field",
+            "temperature", 
+            "density",
+            "pressure",
+            "flux",
+            "current",
+            "voltage",
+            "energy",
+            "power",
+            "frequency",
+            "velocity",
+            "rotation",
+            "conductivity",
+            "resistivity",
+            "emissivity",
+        }
+        
+        # Equipment keywords (signals NOT a physical_base)
+        equipment_keywords = {
+            "loop",
+            "coil", 
+            "antenna",
+            "probe",
+            "detector",
+            "camera",
+            "sensor",
+            "injector",
+        }
+        
+        # Check for equipment keywords (if present, NOT a physical_base)
+        for keyword in equipment_keywords:
+            if keyword in token:
+                return False
+                
+        # Check for physical quantity keywords
+        for keyword in physical_quantity_keywords:
+            if keyword in token:
+                return True
+                
+        return False
 
     def _classify_of_token(self, token: str) -> Literal["positions", "objects"]:
         """

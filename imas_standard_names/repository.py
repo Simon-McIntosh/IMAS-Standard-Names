@@ -25,6 +25,7 @@ If no directory matches, a ``ValueError`` is raised to fail fast.
 
 from __future__ import annotations
 
+import os
 import sys
 from pathlib import Path
 

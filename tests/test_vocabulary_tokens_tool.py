@@ -175,6 +175,6 @@ class TestVocabularyToolIntegration:
 
         assert result["action"] == "check"
         assert "has_vocabulary_gap" in result
-        # Real name should have no gaps
+        # Real name should have no gaps (auditor now filters physical bases)
         assert result["has_vocabulary_gap"] is False
         assert result["gap_details"] is None
