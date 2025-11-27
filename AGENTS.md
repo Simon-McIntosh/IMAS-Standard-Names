@@ -125,7 +125,7 @@ cd /home/ITER/mcintos/Code/imas-standard-names && uv run pytest
 ### Version Control
 - **Branch naming**: Use `main` as default branch
 - **GitHub CLI**: `gh` is installed in `~/.local/bin` and available in PATH
-- **Authentication**: HTTPS protocol (SSH port 22 blocked on this system)
+- **Authentication**: SSH
 - **Commit messages**: Use conventional commit format with detailed body
 
 **Common gh commands**:

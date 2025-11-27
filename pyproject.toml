@@ -94,6 +94,15 @@ allow-direct-references = true
 [tool.hatch.build.hooks.custom]
 path = "hatch_build_hooks.py"
 
+[tool.hatch.build.targets.wheel]
+# Include codegen files in wheel (they're in .gitignore so need override)
+artifacts = [
+  "imas_standard_names/grammar/model_types.py",
+  "imas_standard_names/grammar/constants.py",
+  "imas_standard_names/grammar/tag_types.py",
+  "imas_standard_names/grammar/field_schemas.py",
+]
+
 [dependency-groups]
 dev = [
   "pre-commit>=4.1.0,<5.0.0",
