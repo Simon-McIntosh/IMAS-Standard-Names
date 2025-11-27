@@ -25,6 +25,7 @@ dependencies = [
   "imas-python (>=2.0.0,<3.0.0); python_version < '3.13'",
   "fastmcp (>=2.2.6,<3.0.0)",
   "dotenv (>=0.9.9,<0.10.0)",
+  "python-dotenv>=1.1.1",
 ]
 keywords = [
   "fusion",
