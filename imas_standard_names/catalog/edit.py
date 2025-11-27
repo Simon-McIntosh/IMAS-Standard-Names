@@ -12,6 +12,7 @@ import time
 from copy import deepcopy
 from typing import Any
 
+from imas_standard_names.decorators.mode import requires_write_mode
 from imas_standard_names.editing.batch_utils import topological_sort_operations
 from imas_standard_names.editing.edit_models import (
     ApplyInput,
@@ -70,12 +71,14 @@ class EditCatalog:
     # ------------------------------------------------------------------
     # Mutations
     # ------------------------------------------------------------------
+    @requires_write_mode
     def add(self, model_data: dict):
         model = create_standard_name_entry(model_data)
         self.uow.add(model)
         self._mark_dirty(model.name)
         return model
 
+    @requires_write_mode
     def modify(
         self, name: str, model_data: dict | None = None, updates: dict | None = None
     ):
@@ -115,6 +118,7 @@ class EditCatalog:
 
         return model, description_warnings
 
+    @requires_write_mode
     def rename(self, old_name: str, model_data: dict):
         model = create_standard_name_entry(model_data)
         if model.name == old_name:
@@ -125,6 +129,7 @@ class EditCatalog:
         self._mark_dirty(old_name, model.name)
         return model
 
+    @requires_write_mode
     def delete(self, name: str):
         before = self.catalog.get(name)
         self.uow.remove(name)
@@ -156,6 +161,7 @@ class EditCatalog:
         """Backward compatibility alias for discard_pending()."""
         return self.discard_pending()
 
+    @requires_write_mode
     def write(self):
         """Write pending in-memory changes to disk as YAML files.
 

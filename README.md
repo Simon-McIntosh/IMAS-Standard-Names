@@ -44,6 +44,77 @@ This project uses a Git branching strategy to manage development and releases. T
 
 The project documentation is available at our [GitHub Pages site](https://iterorganization.github.io/IMAS-Standard-Names/).
 
+## Installation
+
+### Read-Only Access (Querying Catalog)
+
+For users who want to query and browse the standard names catalog:
+
+```bash
+# Option 1: Install without catalog (grammar/schema tools only)
+pip install imas-standard-names
+
+# Option 2: Install with catalog package (when available)
+pip install imas-standard-names[catalog]
+
+# Option 3: Download pre-built catalog from releases
+wget https://github.com/iterorg/imas-standard-names-catalog/releases/latest/download/catalog.db
+export STANDARD_NAMES_CATALOG_DB=./catalog.db
+```
+
+### Read-Write Access (Editing Catalog)
+
+For developers who need to create or edit standard names:
+
+```bash
+# Install with quality validation tools
+pip install imas-standard-names[quality]
+
+# Clone the catalog repository
+git clone https://github.com/iterorg/imas-standard-names-catalog.git
+
+# Point to local catalog
+export STANDARD_NAMES_CATALOG_ROOT=./imas-standard-names-catalog/standard_names
+
+# Verify write access
+python -c "from imas_standard_names import StandardNameCatalog; cat = StandardNameCatalog(); print(f'Writable: {not cat.read_only}')"
+```
+
+### Development Environment
+
+For contributing to the tools repository:
+
+```bash
+# Clone and install in development mode
+git clone https://github.com/iterorganization/imas-standard-names.git
+cd imas-standard-names
+uv sync
+
+# For catalog editing, also clone catalog repo
+cd ..
+git clone https://github.com/iterorg/imas-standard-names-catalog.git
+export STANDARD_NAMES_CATALOG_ROOT=$(pwd)/imas-standard-names-catalog/standard_names
+```
+
+### Environment Variables
+
+- `STANDARD_NAMES_CATALOG_ROOT`: Path to YAML catalog directory (read-write)
+- `STANDARD_NAMES_CATALOG_DB`: Path to pre-built .db file (read-only)
+
+## Catalog Architecture
+
+This project uses a **two-repository architecture**:
+
+1. **imas-standard-names** (this repo): Tools, MCP server, grammar, validation
+2. **imas-standard-names-catalog** (separate repo): YAML catalog source files
+
+**Benefits:**
+- Independent versioning (catalog data evolves separately from tools)
+- Flexible deployment (pin catalog version, float tool version)
+- Read-only safety (pre-built .db files prevent accidental edits)
+
+See [Catalog Development Guide](docs/development/catalog-development-guide.md) for details on developing the catalog.
+
 ### Data Layout (Per-File Schema)
 
 Each Standard Name lives in its own YAML file under `resources/standard_names/` (or a user-defined directory).

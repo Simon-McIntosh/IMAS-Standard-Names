@@ -38,31 +38,88 @@ from .yaml_store import YamlStore
 
 
 class StandardNameCatalog:
-    def __init__(self, root: str | Path | None = None, permissive: bool = False):
-        # Map None -> packaged standard_names root for historical semantics.
-        paths = CatalogPaths("standard_names" if root is None else root)
-        self.paths = paths
-        resolved_root = paths.yaml_path
-        self.store = YamlStore(resolved_root, permissive=permissive)
-        self.catalog = CatalogReadWrite()
-        models = self.store.load()
-        # Use centralized dependency ordering (see ordering.py) so that
-        # component scalars, bases, and provenance dependencies are guaranteed
-        # to precede vectors / derived entries (avoids FK violations).
-        for m in ordered_models(models):
-            self.catalog.insert(m)
-        self._active_uow: UnitOfWork | None = None
+    def __init__(self, root: str | Path | None = None, permissive: bool = False, allow_empty: bool = False):
+        """Initialize catalog.
+        
+        Args:
+            root: Catalog path (directory, .db file, or None for auto-discovery).
+            permissive: Allow loading invalid entries with warnings.
+            allow_empty: If True, don't raise error when no catalog found.
+        """
+        
+        # Resolve catalog path
+        if root is None:
+            from .paths import get_default_catalog_path
+            root = get_default_catalog_path()
+            
+            if root is None:
+                if allow_empty:
+                    # Initialize empty catalog
+                    self._init_empty()
+                    return
+                else:
+                    raise ValueError(
+                        "No catalog found. Options:\n"
+                        "  1. Install catalog: pip install imas-standard-names[catalog]\n"
+                        "  2. Download .db: https://github.com/iterorg/imas-standard-names-catalog/releases\n"
+                        "     Then set: export STANDARD_NAMES_CATALOG_DB=/path/to/catalog.db\n"
+                        "  3. Clone catalog: git clone https://github.com/iterorg/imas-standard-names-catalog.git\n"
+                        "     Then set: export STANDARD_NAMES_CATALOG_ROOT=/path/to/standard_names\n"
+                        "  4. Pass root parameter: StandardNameCatalog(root='/path')\n"
+                        "  5. Use allow_empty=True for tools that don't require catalog data"
+                    )
+        
+        root_path = Path(root)
+        
+        # Handle .db file vs directory
+        if root_path.is_file() and root_path.suffix == ".db":
+            # Pre-built .db file (read-only)
+            from .database.read import CatalogRead
+            self.catalog = CatalogRead(root_path)
+            self.store = None
+            self.paths = None
+            self._read_only = True
+            self._active_uow = None
+        else:
+            # Directory with YAML files
+            paths = CatalogPaths(root_path)
+            self.paths = paths
+            self.store = YamlStore(paths.yaml_path, permissive=permissive)
+            self.catalog = CatalogReadWrite()
+            models = self.store.load()
+            # Use centralized dependency ordering (see ordering.py) so that
+            # component scalars, bases, and provenance dependencies are guaranteed
+            # to precede vectors / derived entries (avoids FK violations).
+            for m in ordered_models(models):
+                self.catalog.insert(m)
+            
+            # Check writability
+            self._read_only = not os.access(root_path, os.W_OK)
+            self._active_uow = None
 
         # Log warnings if in permissive mode
-        if permissive and self.store.validation_warnings:
+        if permissive and hasattr(self, 'store') and self.store and self.store.validation_warnings:
             print(
                 f"⚠️ Loaded catalog in permissive mode with {len(self.store.validation_warnings)} validation warnings:",
                 file=sys.stderr,
             )
             for warning in self.store.validation_warnings:
                 print(f"  - {warning}", file=sys.stderr)
+    
+    def _init_empty(self):
+        """Initialize empty catalog (for tools that don't need catalog data)."""
+        self.catalog = CatalogReadWrite()
+        self.store = None
+        self.paths = None
+        self._read_only = True
+        self._active_uow = None
 
     # Basic queries -----------------------------------------------------------
+    @property
+    def read_only(self) -> bool:
+        """True if catalog is read-only (bundled .db or non-writable path)."""
+        return self._read_only
+    
     def get(self, name: str) -> StandardNameEntry | None:
         row = self.catalog.conn.execute(
             "SELECT * FROM standard_name WHERE name=?", (name,)
@@ -197,6 +254,14 @@ class StandardNameCatalog:
 
     # Unit of Work ------------------------------------------------------------
     def start_uow(self) -> UnitOfWork:
+        # Check if read-only before creating UoW
+        if self._read_only:
+            from .decorators.mode import ReadOnlyModeError
+            catalog_info = None
+            if self.paths:
+                catalog_info = str(self.paths.yaml_path)
+            raise ReadOnlyModeError("start_uow", catalog_info)
+        
         if self._active_uow:
             raise RuntimeError("A UnitOfWork is already active")
         self._active_uow = UnitOfWork(self)
