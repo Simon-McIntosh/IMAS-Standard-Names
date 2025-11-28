@@ -41,7 +41,7 @@ class Tools:
             self._catalog_available = True
         except ValueError as e:
             # No catalog available - some tools still work
-            import logging
+            import logging  # noqa: PLC0415 - only import on error path
 
             logger = logging.getLogger(__name__)
             logger.warning(f"Catalog not available: {e}")
@@ -78,7 +78,9 @@ class Tools:
                 self.write_tool = WriteTool(self.catalog, self.edit_catalog)
 
                 # Quality/vocabulary tools (if available)
-                from imas_standard_names.capabilities import check_write_capabilities
+                from imas_standard_names.capabilities import (  # noqa: PLC0415
+                    check_write_capabilities,
+                )
 
                 capabilities = check_write_capabilities()
                 if capabilities["vocabulary_management"]:

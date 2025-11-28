@@ -24,7 +24,7 @@ def check_write_capabilities() -> dict[str, bool]:
 
     # Check proselint availability
     try:
-        import proselint  # noqa: F401
+        import proselint  # noqa: F401, PLC0415 - optional dependency detection
 
         capabilities["quality_validation"] = True
     except ImportError:
@@ -32,7 +32,7 @@ def check_write_capabilities() -> dict[str, bool]:
 
     # Check spacy availability
     try:
-        import spacy  # noqa: F401
+        import spacy  # noqa: F401, PLC0415 - optional dependency detection
 
         capabilities["vocabulary_management"] = True
     except ImportError:

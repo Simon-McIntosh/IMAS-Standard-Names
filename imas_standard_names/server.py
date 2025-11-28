@@ -79,7 +79,8 @@ class Server:
 
     def _log_startup_info(self):
         """Log server startup information including catalog status and capabilities."""
-        from imas_standard_names.capabilities import (
+        # Lazy import to avoid circular dependency at module load time
+        from imas_standard_names.capabilities import (  # noqa: PLC0415
             check_write_capabilities,
             get_mode_description,
         )

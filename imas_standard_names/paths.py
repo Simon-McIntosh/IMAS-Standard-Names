@@ -226,7 +226,7 @@ def get_default_catalog_path() -> Path | None:
     Returns:
         Path to catalog directory, .db file, or None if no catalog found.
     """
-    import os
+    import os  # noqa: PLC0415 - lazy import for module-level function
 
     # 1. Explicit directory path from environment
     if catalog_root := os.getenv("STANDARD_NAMES_CATALOG_ROOT"):
@@ -242,7 +242,7 @@ def get_default_catalog_path() -> Path | None:
 
     # 3. Try installed catalog package (optional dependency)
     try:
-        import imas_standard_names_catalog
+        import imas_standard_names_catalog  # noqa: PLC0415 - optional dependency
 
         path = imas_standard_names_catalog.get_catalog_path()
         if path.exists():

@@ -55,7 +55,8 @@ class StandardNameCatalog:
 
         # Resolve catalog path
         if root is None:
-            from .paths import get_default_catalog_path
+            # Lazy import to avoid circular dependency with paths module
+            from .paths import get_default_catalog_path  # noqa: PLC0415, I001
 
             root = get_default_catalog_path()
 
@@ -81,7 +82,7 @@ class StandardNameCatalog:
         # Handle .db file vs directory
         if root_path.is_file() and root_path.suffix == ".db":
             # Pre-built .db file (read-only)
-            from .database.read import CatalogRead
+            from .database.read import CatalogRead  # noqa: PLC0415 - conditional import
 
             self.catalog = CatalogRead(root_path)
             self.store = None
@@ -269,7 +270,8 @@ class StandardNameCatalog:
     def start_uow(self) -> UnitOfWork:
         # Check if read-only before creating UoW
         if self._read_only:
-            from .decorators.mode import ReadOnlyModeError
+            # Lazy import to avoid circular dependency
+            from .decorators.mode import ReadOnlyModeError  # noqa: PLC0415, I001
 
             catalog_info = None
             if self.paths:
