@@ -3,15 +3,11 @@
 Provides decorators to enforce write access requirements at runtime.
 """
 
-from __future__ import annotations
-
 import asyncio
 import functools
-from typing import Callable, TypeVar
+from collections.abc import Callable
 
 __all__ = ["requires_write_mode", "ReadOnlyModeError"]
-
-T = TypeVar("T")
 
 
 class ReadOnlyModeError(Exception):
@@ -34,7 +30,7 @@ class ReadOnlyModeError(Exception):
         super().__init__(msg)
 
 
-def requires_write_mode(func: Callable[..., T]) -> Callable[..., T]:
+def requires_write_mode[T](func: Callable[..., T]) -> Callable[..., T]:
     """Decorator to guard write operations based on runtime catalog state.
 
     Checks if the catalog is writable before allowing the operation.

@@ -4,8 +4,6 @@ Detects availability of quality validation and vocabulary management tools
 without importing them (avoiding hard dependencies).
 """
 
-from __future__ import annotations
-
 __all__ = ["check_write_capabilities", "get_mode_description"]
 
 

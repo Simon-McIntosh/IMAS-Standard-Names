@@ -163,6 +163,12 @@ ignore = ["C901", "E501"]
 "imas_standard_names/grammar/field_schemas.py" = [
   "I",
 ] # Codegen file - skip formatting
+# Files with legitimate lazy imports (optional deps, circular import avoidance)
+"imas_standard_names/capabilities.py" = ["PLC0415"]
+"imas_standard_names/paths.py" = ["PLC0415"]
+"imas_standard_names/repository.py" = ["PLC0415"]
+"imas_standard_names/server.py" = ["PLC0415"]
+"imas_standard_names/tools/__init__.py" = ["PLC0415"]
 "imas_standard_names/grammar/types.py" = ["I"] # Codegen file - skip formatting
 "imas_standard_names/grammar/constants.py" = [
   "I",

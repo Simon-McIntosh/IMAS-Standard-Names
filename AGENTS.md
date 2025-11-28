@@ -159,6 +159,9 @@ uv sync
 
 # Install dependencies
 uv sync --all-extras
+
+# Install pre-commit hooks (required for contributors)
+uv run pre-commit install
 ```
 
 ### Build and Test Commands
