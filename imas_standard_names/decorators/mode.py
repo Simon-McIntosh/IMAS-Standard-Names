@@ -16,7 +16,7 @@ T = TypeVar("T")
 
 class ReadOnlyModeError(Exception):
     """Raised when write operation attempted on read-only catalog."""
-    
+
     def __init__(self, operation: str, catalog_info: str | None = None):
         catalog_details = f"\nCurrent catalog: {catalog_info}" if catalog_info else ""
         msg = (
@@ -36,41 +36,41 @@ class ReadOnlyModeError(Exception):
 
 def requires_write_mode(func: Callable[..., T]) -> Callable[..., T]:
     """Decorator to guard write operations based on runtime catalog state.
-    
+
     Checks if the catalog is writable before allowing the operation.
     Works with both sync and async functions.
     """
-    
+
     @functools.wraps(func)
     def sync_wrapper(self, *args, **kwargs):
         # Check if catalog is writable
-        if hasattr(self, 'catalog') and hasattr(self.catalog, 'read_only'):
+        if hasattr(self, "catalog") and hasattr(self.catalog, "read_only"):
             if self.catalog.read_only:
                 catalog_info = None
-                if hasattr(self.catalog, 'paths') and self.catalog.paths:
+                if hasattr(self.catalog, "paths") and self.catalog.paths:
                     catalog_info = str(self.catalog.paths.yaml_path)
-                elif hasattr(self.catalog, 'catalog_path'):
+                elif hasattr(self.catalog, "catalog_path"):
                     catalog_info = str(self.catalog.catalog_path)
                 else:
                     catalog_info = "bundled catalog"
                 raise ReadOnlyModeError(func.__name__, catalog_info)
         return func(self, *args, **kwargs)
-    
+
     @functools.wraps(func)
     async def async_wrapper(self, *args, **kwargs):
         # Check if catalog is writable
-        if hasattr(self, 'catalog') and hasattr(self.catalog, 'read_only'):
+        if hasattr(self, "catalog") and hasattr(self.catalog, "read_only"):
             if self.catalog.read_only:
                 catalog_info = None
-                if hasattr(self.catalog, 'paths') and self.catalog.paths:
+                if hasattr(self.catalog, "paths") and self.catalog.paths:
                     catalog_info = str(self.catalog.paths.yaml_path)
-                elif hasattr(self.catalog, 'catalog_path'):
+                elif hasattr(self.catalog, "catalog_path"):
                     catalog_info = str(self.catalog.catalog_path)
                 else:
                     catalog_info = "bundled catalog"
                 raise ReadOnlyModeError(func.__name__, catalog_info)
         return await func(self, *args, **kwargs)
-    
+
     # Return appropriate wrapper based on function type
     if asyncio.iscoroutinefunction(func):
         return async_wrapper

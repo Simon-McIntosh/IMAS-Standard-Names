@@ -215,40 +215,41 @@ class CatalogPaths:
 
 def get_default_catalog_path() -> Path | None:
     """Get default catalog path with multiple fallback strategies.
-    
+
     Priority order:
     1. STANDARD_NAMES_CATALOG_ROOT env var (directory with YAML files)
     2. STANDARD_NAMES_CATALOG_DB env var (.db file path)
     3. Installed catalog package (if available)
     4. Bundled examples (minimal, for bootstrapping)
     5. None (catalog operations will require explicit path)
-    
+
     Returns:
         Path to catalog directory, .db file, or None if no catalog found.
     """
     import os
-    
+
     # 1. Explicit directory path from environment
     if catalog_root := os.getenv("STANDARD_NAMES_CATALOG_ROOT"):
         path = Path(catalog_root).expanduser().resolve()
         if path.exists():
             return path
-    
+
     # 2. Explicit .db file path from environment
     if catalog_db := os.getenv("STANDARD_NAMES_CATALOG_DB"):
         path = Path(catalog_db).expanduser().resolve()
         if path.exists() and path.suffix == ".db":
             return path
-    
+
     # 3. Try installed catalog package (optional dependency)
     try:
         import imas_standard_names_catalog
+
         path = imas_standard_names_catalog.get_catalog_path()
         if path.exists():
             return path
     except (ImportError, AttributeError):
         pass
-    
+
     # 4. Bundled examples (always available for bootstrapping)
     try:
         files_obj = ir.files(__package__) / RESOURCES_DIRNAME / "standard_name_examples"
@@ -258,9 +259,14 @@ def get_default_catalog_path() -> Path | None:
                 return examples_path
     except Exception:
         pass
-    
+
     # 5. No catalog available
     return None
 
 
-__all__ = ["CatalogPaths", "STANDARD_NAMES_DIRNAME", "CATALOG_DIRNAME", "get_default_catalog_path"]
+__all__ = [
+    "CatalogPaths",
+    "STANDARD_NAMES_DIRNAME",
+    "CATALOG_DIRNAME",
+    "get_default_catalog_path",
+]

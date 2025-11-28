@@ -76,39 +76,52 @@ class Server:
         self._log_startup_info()
 
         logger.debug("IMAS MCP Server initialized with tools and resources")
-    
+
     def _log_startup_info(self):
         """Log server startup information including catalog status and capabilities."""
-        from imas_standard_names.capabilities import check_write_capabilities, get_mode_description
-        
+        from imas_standard_names.capabilities import (
+            check_write_capabilities,
+            get_mode_description,
+        )
+
         # Check catalog availability
         if self.tools._catalog_available:
             catalog = self.tools.catalog
             mode = get_mode_description(catalog.read_only, check_write_capabilities())
-            
+
             # Determine catalog source
-            if hasattr(catalog, 'paths') and catalog.paths:
+            if hasattr(catalog, "paths") and catalog.paths:
                 catalog_info = f"YAML directory: {catalog.paths.yaml_path}"
-            elif hasattr(catalog, 'catalog') and hasattr(catalog.catalog, 'db_path'):
+            elif hasattr(catalog, "catalog") and hasattr(catalog.catalog, "db_path"):
                 catalog_info = f".db file: {catalog.catalog.db_path}"
             else:
                 catalog_info = "bundled resources"
-            
+
             logger.info(f"Catalog: {catalog_info}")
             logger.info(f"Mode: {mode}")
-            
+
             if catalog.read_only:
                 logger.info("Write operations: DISABLED")
-                logger.info("Available tools: search, fetch, list, check, validate, compose, grammar, schema")
+                logger.info(
+                    "Available tools: search, fetch, list, check, validate, compose, grammar, schema"
+                )
             else:
                 capabilities = check_write_capabilities()
                 logger.info("Write operations: ENABLED")
-                logger.info(f"Quality validation: {'available' if capabilities['quality_validation'] else 'unavailable (install with [quality] extra)'}")
-                logger.info(f"Vocabulary management: {'available' if capabilities['vocabulary_management'] else 'unavailable (install with [quality] extra)'}")
-                logger.info("Available tools: All tools including create, edit, write, vocabulary")
+                logger.info(
+                    f"Quality validation: {'available' if capabilities['quality_validation'] else 'unavailable (install with [quality] extra)'}"
+                )
+                logger.info(
+                    f"Vocabulary management: {'available' if capabilities['vocabulary_management'] else 'unavailable (install with [quality] extra)'}"
+                )
+                logger.info(
+                    "Available tools: All tools including create, edit, write, vocabulary"
+                )
         else:
             logger.warning("Catalog: NOT AVAILABLE")
-            logger.warning("Limited tools: grammar, schema, compose, vocabulary_tokens, tokamak_parameters")
+            logger.warning(
+                "Limited tools: grammar, schema, compose, vocabulary_tokens, tokamak_parameters"
+            )
             logger.warning("To enable catalog tools:")
             logger.warning("  1. pip install imas-standard-names[catalog]")
             logger.warning("  2. Or set: STANDARD_NAMES_CATALOG_ROOT=/path/to/catalog")

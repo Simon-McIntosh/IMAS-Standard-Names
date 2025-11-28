@@ -424,10 +424,10 @@ class VocabularyAuditor:
 
     def _is_likely_physical_base(self, token: str) -> bool:
         """Check if token is likely a physical_base rather than an object/position.
-        
+
         Physical bases are quantities like 'magnetic_field', 'temperature', 'density'.
         They often appear after 'component_of_' or stand alone as measurable quantities.
-        
+
         Heuristics:
         - Contains 'field', 'temperature', 'density', 'pressure', 'flux', 'current', 'voltage'
         - Does NOT contain equipment/diagnostic keywords
@@ -435,7 +435,7 @@ class VocabularyAuditor:
         # Physical quantity keywords (strong signal for physical_base)
         physical_quantity_keywords = {
             "field",
-            "temperature", 
+            "temperature",
             "density",
             "pressure",
             "flux",
@@ -450,11 +450,11 @@ class VocabularyAuditor:
             "resistivity",
             "emissivity",
         }
-        
+
         # Equipment keywords (signals NOT a physical_base)
         equipment_keywords = {
             "loop",
-            "coil", 
+            "coil",
             "antenna",
             "probe",
             "detector",
@@ -462,17 +462,17 @@ class VocabularyAuditor:
             "sensor",
             "injector",
         }
-        
+
         # Check for equipment keywords (if present, NOT a physical_base)
         for keyword in equipment_keywords:
             if keyword in token:
                 return False
-                
+
         # Check for physical quantity keywords
         for keyword in physical_quantity_keywords:
             if keyword in token:
                 return True
-                
+
         return False
 
     def _classify_of_token(self, token: str) -> Literal["positions", "objects"]:

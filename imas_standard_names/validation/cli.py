@@ -114,7 +114,9 @@ def validate_catalog_cli(
     if summary:
         if summary == "json":
             result = {
-                "passed": not has_errors and not has_strict_warnings and not has_integrity_issues,
+                "passed": not has_errors
+                and not has_strict_warnings
+                and not has_integrity_issues,
                 "entries": entry_count,
                 "errors": error_count,
                 "warnings": warning_count,
@@ -155,7 +157,9 @@ def validate_catalog_cli(
 
     # Check for warnings in strict mode
     if has_strict_warnings:
-        click.echo(f"Validation FAILED (strict): {len(quality_warnings)} quality warning(s)")
+        click.echo(
+            f"Validation FAILED (strict): {len(quality_warnings)} quality warning(s)"
+        )
         raise SystemExit(1)
 
     if integrity_issues:

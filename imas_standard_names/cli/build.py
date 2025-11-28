@@ -67,7 +67,9 @@ def build_cmd(
 
     if verify:
         file_size = os.path.getsize(final_db)
-        click.echo(f"✓ Built {final_db.name}: {_format_file_size(file_size)}, {count} entries")
+        click.echo(
+            f"✓ Built {final_db.name}: {_format_file_size(file_size)}, {count} entries"
+        )
     else:
         click.echo(f"Built catalog ({count} entries) -> {final_db}")
 

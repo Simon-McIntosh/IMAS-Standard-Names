@@ -35,16 +35,19 @@ class Tools:
         try:
             # Create shared in-memory standard name repository
             # Always use permissive mode for MCP tools to ensure tools are available to fix issues
-            self.catalog = StandardNameCatalog(root=catalog_root, permissive=True, allow_empty=False)
+            self.catalog = StandardNameCatalog(
+                root=catalog_root, permissive=True, allow_empty=False
+            )
             self._catalog_available = True
         except ValueError as e:
             # No catalog available - some tools still work
             import logging
+
             logger = logging.getLogger(__name__)
             logger.warning(f"Catalog not available: {e}")
             logger.warning("Only grammar, schema, and compose tools will be available")
             self.catalog = None
-        
+
         # Always load examples catalog (bundled, always available for grammar tools)
         self.examples_catalog = StandardNameCatalog(
             root="./imas_standard_names/resources/standard_name_examples",
@@ -57,7 +60,7 @@ class Tools:
         self.compose_tool = ComposeTool()
         self.vocabulary_tokens_tool = VocabularyTokensTool(self.examples_catalog)
         self.tokamak_parameters_tool = TokamakParametersTool()
-        
+
         # Catalog-dependent tools (only if catalog available)
         if self._catalog_available:
             # Read-only catalog tools (query and validate catalog entries)
@@ -65,7 +68,7 @@ class Tools:
             self.check_tool = CheckTool(self.catalog)
             self.fetch_tool = FetchTool(self.catalog)
             self.validate_catalog_tool = ValidateCatalogTool(self.catalog)
-            
+
             # Write tools (only if catalog is writable)
             if not self.catalog.read_only:
                 self.edit_catalog = EditCatalog(self.catalog)
@@ -73,9 +76,10 @@ class Tools:
                 self.catalog_tool = CatalogTool(self.catalog, self.edit_catalog)
                 self.create_tool = CreateTool(self.catalog, self.edit_catalog)
                 self.write_tool = WriteTool(self.catalog, self.edit_catalog)
-                
+
                 # Quality/vocabulary tools (if available)
                 from imas_standard_names.capabilities import check_write_capabilities
+
                 capabilities = check_write_capabilities()
                 if capabilities["vocabulary_management"]:
                     self.vocabulary_tool = VocabularyTool(self.catalog)
@@ -95,7 +99,7 @@ class Tools:
         ``_mcp_tool`` attribute (set by the ``mcp_tool`` decorator) and
         registers each with FastMCP, passing through the stored description.
         This keeps registration declarative and avoids manual duplication.
-        
+
         Only registers tools that are available based on catalog availability
         and write capabilities.
         """
@@ -108,7 +112,7 @@ class Tools:
             self.vocabulary_tokens_tool,
             self.tokamak_parameters_tool,
         ]
-        
+
         # Catalog-dependent tools
         catalog_tools = []
         if self._catalog_available:
@@ -119,17 +123,19 @@ class Tools:
                 self.list_tool,
                 self.validate_catalog_tool,
             ]
-            
+
             # Write tools (if catalog is writable)
-            if hasattr(self, 'catalog_tool'):
-                catalog_tools.extend([
-                    self.catalog_tool,
-                    self.create_tool,
-                    self.write_tool,
-                ])
-            
+            if hasattr(self, "catalog_tool"):
+                catalog_tools.extend(
+                    [
+                        self.catalog_tool,
+                        self.create_tool,
+                        self.write_tool,
+                    ]
+                )
+
             # Vocabulary tool (if quality deps available)
-            if hasattr(self, 'vocabulary_tool'):
+            if hasattr(self, "vocabulary_tool"):
                 catalog_tools.append(self.vocabulary_tool)
 
         # Register all available tools
