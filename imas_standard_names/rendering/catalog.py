@@ -33,6 +33,8 @@ class CatalogRenderer:
     def load_names(self) -> list[dict]:
         """Load all YAML standard names from the catalog directory.
 
+        Recursively searches all subdirectories for YAML files.
+
         Returns
         -------
         list[dict]
@@ -46,18 +48,23 @@ class CatalogRenderer:
         if not self.catalog_path.exists():
             return standard_names
 
-        for yaml_file in self.catalog_path.iterdir():
-            if yaml_file.suffix in (".yml", ".yaml"):
-                try:
-                    yaml_content = yaml_file.read_text(encoding="utf-8")
-                    data = yaml.safe_load(yaml_content)
+        # Use rglob for recursive search (matches YamlStore behavior)
+        yaml_files = sorted(
+            list(self.catalog_path.rglob("*.yml"))
+            + list(self.catalog_path.rglob("*.yaml"))
+        )
 
-                    if data and isinstance(data, dict):
-                        data["_file_path"] = str(yaml_file)
-                        data["_category"] = "standard_names"
-                        standard_names.append(data)
-                except Exception as e:
-                    print(f"Error loading {yaml_file.name}: {e}")
+        for yaml_file in yaml_files:
+            try:
+                yaml_content = yaml_file.read_text(encoding="utf-8")
+                data = yaml.safe_load(yaml_content)
+
+                if data and isinstance(data, dict) and "name" in data:
+                    data["_file_path"] = str(yaml_file)
+                    data["_category"] = "standard_names"
+                    standard_names.append(data)
+            except Exception as e:
+                print(f"Error loading {yaml_file.name}: {e}")
 
         self._names = standard_names
         return standard_names
@@ -201,8 +208,14 @@ class CatalogRenderer:
 
         return result
 
-    def render_overview(self) -> str:
+    def render_overview(self, link_prefix: str = "") -> str:
         """Generate overview statistics for the catalog.
+
+        Parameters
+        ----------
+        link_prefix : str
+            Prefix for category links. Use "catalog.md" when rendering
+            overview for a different page (e.g., index.md).
 
         Returns
         -------
@@ -221,7 +234,7 @@ class CatalogRenderer:
         for category, items in sorted(stats["tags"].items()):
             category_name = category.replace("-", " ").title()
             count = len(items)
-            result += f"- **[{category_name}](#{category})** - {count} standard names\n"
+            result += f"- **[{category_name}]({link_prefix}#{category})** - {count} standard names\n"
 
         return result
 

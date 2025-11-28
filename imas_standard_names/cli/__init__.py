@@ -7,7 +7,8 @@ Example usage:
 
         standard-names build path/to/yaml
         standard-names search electron_temperature
-        standard-names docs build ./catalog --version v1.0
+        standard-names catalog-site serve ./catalog
+        standard-names catalog-site deploy ./catalog --version v1.0
 """
 
 from __future__ import annotations
@@ -15,7 +16,7 @@ from __future__ import annotations
 import click
 
 from .build import build_cmd
-from .docs import docs_cmd
+from .catalog_site import catalog_site_cmd
 from .schema import schema_cmd
 from .search import search_cmd
 
@@ -29,6 +30,6 @@ def standard_names():  # pragma: no cover - thin group wrapper
 standard_names.add_command(build_cmd)
 standard_names.add_command(search_cmd)
 standard_names.add_command(schema_cmd)
-standard_names.add_command(docs_cmd)
+standard_names.add_command(catalog_site_cmd)
 
 __all__ = ["standard_names"]

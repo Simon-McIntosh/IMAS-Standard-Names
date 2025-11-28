@@ -107,3 +107,62 @@ def test_catalog_renderer_render_navigation(tmp_path: Path):
     assert "Fundamental" in nav
     assert "electron_temperature" in nav
     assert "ion_temperature" in nav
+
+
+def test_catalog_renderer_loads_from_subdirectories(tmp_path: Path):
+    """Test that catalog renderer recursively loads from subdirectories.
+
+    This reproduces the issue where `docs build` found 0 entries while
+    `build` found 305 entries in a catalog with YAML files organized
+    in subdirectories by primary tag.
+    """
+    # Create subdirectory structure mimicking real catalog organization
+    fundamental_dir = tmp_path / "fundamental"
+    fundamental_dir.mkdir()
+    (fundamental_dir / "electron_temperature.yml").write_text(
+        """name: electron_temperature
+kind: scalar
+status: active
+unit: eV
+description: Electron temperature.
+tags: [fundamental, plasma]
+""",
+        encoding="utf-8",
+    )
+
+    geometry_dir = tmp_path / "geometry"
+    geometry_dir.mkdir()
+    (geometry_dir / "major_radius.yml").write_text(
+        """name: major_radius
+kind: scalar
+status: active
+unit: m
+description: Major radius of the plasma.
+tags: [geometry]
+""",
+        encoding="utf-8",
+    )
+
+    # Create nested subdirectory
+    nested_dir = tmp_path / "diagnostics" / "magnetics"
+    nested_dir.mkdir(parents=True)
+    (nested_dir / "magnetic_field.yml").write_text(
+        """name: magnetic_field
+kind: scalar
+status: active
+unit: T
+description: Magnetic field measurement.
+tags: [diagnostics, magnetics]
+""",
+        encoding="utf-8",
+    )
+
+    renderer = CatalogRenderer(tmp_path)
+    names = renderer.load_names()
+
+    # Should find all 3 entries across subdirectories
+    assert len(names) == 3
+    name_set = {n["name"] for n in names}
+    assert "electron_temperature" in name_set
+    assert "major_radius" in name_set
+    assert "magnetic_field" in name_set
