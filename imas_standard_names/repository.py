@@ -30,9 +30,10 @@ import sys
 from pathlib import Path
 
 from .database.readwrite import CatalogReadWrite
+from .decorators.mode import ReadOnlyModeError
 from .models import StandardNameEntry
 from .ordering import ordered_models
-from .paths import CatalogPaths
+from .paths import CatalogPaths, get_default_catalog_path
 from .services import row_to_model
 from .unit_of_work import UnitOfWork
 from .yaml_store import YamlStore
@@ -55,9 +56,6 @@ class StandardNameCatalog:
 
         # Resolve catalog path
         if root is None:
-            # Lazy import to avoid circular dependency with paths module
-            from .paths import get_default_catalog_path  # noqa: PLC0415, I001
-
             root = get_default_catalog_path()
 
             if root is None:
@@ -270,9 +268,6 @@ class StandardNameCatalog:
     def start_uow(self) -> UnitOfWork:
         # Check if read-only before creating UoW
         if self._read_only:
-            # Lazy import to avoid circular dependency
-            from .decorators.mode import ReadOnlyModeError  # noqa: PLC0415, I001
-
             catalog_info = None
             if self.paths:
                 catalog_info = str(self.paths.yaml_path)

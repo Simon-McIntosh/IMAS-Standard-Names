@@ -32,6 +32,7 @@ from __future__ import annotations
 
 import fnmatch
 import importlib.resources as ir
+import os
 from collections.abc import Iterable
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -226,8 +227,6 @@ def get_default_catalog_path() -> Path | None:
     Returns:
         Path to catalog directory, .db file, or None if no catalog found.
     """
-    import os  # noqa: PLC0415 - lazy import for module-level function
-
     # 1. Explicit directory path from environment
     if catalog_root := os.getenv("STANDARD_NAMES_CATALOG_ROOT"):
         path = Path(catalog_root).expanduser().resolve()
