@@ -141,18 +141,18 @@ tags: [fundamental]
     assert data["passed"] is False
 
 
-def test_docs_command_exists():
-    """Test that docs subcommand is registered."""
+def test_catalog_site_command_exists():
+    """Test that catalog-site subcommand is registered."""
     runner = CliRunner()
-    result = runner.invoke(standard_names, ["docs", "--help"])
+    result = runner.invoke(standard_names, ["catalog-site", "--help"])
     assert result.exit_code == 0, result.output
-    assert "Documentation build commands" in result.output
+    assert "documentation sites for catalog" in result.output.lower()
 
 
-def test_docs_build_command_help():
-    """Test docs build command has expected options."""
+def test_catalog_site_deploy_command_help():
+    """Test catalog-site deploy command has expected options."""
     runner = CliRunner()
-    result = runner.invoke(standard_names, ["docs", "build", "--help"])
+    result = runner.invoke(standard_names, ["catalog-site", "deploy", "--help"])
     assert result.exit_code == 0, result.output
     assert "--version" in result.output
     assert "--push" in result.output
