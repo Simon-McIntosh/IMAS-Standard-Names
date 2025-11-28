@@ -19,12 +19,11 @@ plugins:
 watch:
   - imas_standard_names/grammar/specification.yml
   - imas_standard_names/grammar/vocabularies/
-  - imas_standard_names/resources/standard_names/
   - docs/grammar_macros.py
 
 nav:
   - Home: index.md
-  - Standard Names: catalog.md
+  - Catalog: catalog.md
   - Grammar Reference: grammar-reference.md
   - Guidelines: guidelines.md
   - Development:

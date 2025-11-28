@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import click
@@ -31,13 +32,31 @@ from .structural import run_structural_checks
     help="When verifying, recompute hashes even if metadata matches",
 )
 @click.option(
-    "--quality",
-    type=click.Choice(["off", "info", "warning", "error"], case_sensitive=False),
-    default="warning",
+    "--quality-check/--no-quality-check",
+    default=True,
     show_default=True,
-    help="Quality check level: off (skip), info (all), warning (warn+error), error (error only)",
+    help="Enable or disable quality checks on descriptions",
 )
-def validate_catalog_cli(root: Path, mode: str, verify: bool, full: bool, quality: str):
+@click.option(
+    "--strict",
+    is_flag=True,
+    help="Fail validation on quality warnings (not just errors)",
+)
+@click.option(
+    "--summary",
+    type=click.Choice(["text", "json"], case_sensitive=False),
+    default=None,
+    help="Output machine-readable summary (text or json format)",
+)
+def validate_catalog_cli(
+    root: Path,
+    mode: str,
+    verify: bool,
+    full: bool,
+    quality_check: bool,
+    strict: bool,
+    summary: str | None,
+):
     db_path = root / CATALOG_DIRNAME / "catalog.db"
     use_file = False
     if mode == "file":
@@ -70,17 +89,53 @@ def validate_catalog_cli(root: Path, mode: str, verify: bool, full: bool, qualit
 
     # Run quality checks if enabled
     quality_issues = []
-    if quality != "off":
+    if quality_check:
         quality_issues = run_quality_checks(entries)
-        if quality_issues:
+        if quality_issues and not summary:
             click.echo("")
-            click.echo(
-                format_quality_report(
-                    quality_issues, show_level=quality if quality != "info" else None
-                )
-            )
+            click.echo(format_quality_report(quality_issues, show_level=None))
             click.echo("")
 
+    # Count issues by level
+    quality_errors = [msg for level, msg in quality_issues if level == "error"]
+    quality_warnings = [msg for level, msg in quality_issues if level == "warning"]
+    error_count = len(issues) + len(quality_errors)
+    warning_count = len(quality_warnings)
+    info_count = len([msg for level, msg in quality_issues if level == "info"])
+    entry_count = len(entries)
+
+    # Determine pass/fail status
+    # Fail if: structural/semantic errors, quality errors, or (strict mode + warnings)
+    has_errors = bool(issues) or bool(quality_errors)
+    has_strict_warnings = strict and bool(quality_warnings)
+    has_integrity_issues = bool(integrity_issues)
+
+    # Output summary if requested
+    if summary:
+        if summary == "json":
+            result = {
+                "passed": not has_errors and not has_strict_warnings and not has_integrity_issues,
+                "entries": entry_count,
+                "errors": error_count,
+                "warnings": warning_count,
+                "info": info_count,
+                "integrity_issues": len(integrity_issues),
+            }
+            click.echo(json.dumps(result))
+        else:  # text
+            status = "✓" if not has_errors and not has_strict_warnings else "✗"
+            click.echo(
+                f"{status} Validated {entry_count} entries "
+                f"({error_count} errors, {warning_count} warnings)"
+            )
+        # Still exit with appropriate code
+        if has_errors or has_strict_warnings:
+            raise SystemExit(1)
+        if has_integrity_issues:
+            raise SystemExit(2)
+        return
+
+    # Original verbose output
     if integrity_issues:
         click.echo("Integrity issues:")
         for iss in integrity_issues:
@@ -94,9 +149,13 @@ def validate_catalog_cli(root: Path, mode: str, verify: bool, full: bool, qualit
         raise SystemExit(1 if not integrity_issues else 2)
 
     # Check for quality errors that should fail validation
-    quality_errors = [msg for level, msg in quality_issues if level == "error"]
-    if quality_errors and quality in ["error", "warning"]:
+    if quality_errors:
         click.echo(f"Validation FAILED: {len(quality_errors)} quality error(s)")
+        raise SystemExit(1)
+
+    # Check for warnings in strict mode
+    if has_strict_warnings:
+        click.echo(f"Validation FAILED (strict): {len(quality_warnings)} quality warning(s)")
         raise SystemExit(1)
 
     if integrity_issues:
