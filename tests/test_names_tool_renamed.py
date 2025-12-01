@@ -4,7 +4,7 @@ import asyncio
 
 from imas_standard_names.repository import StandardNameCatalog
 from imas_standard_names.tools.compose import ComposeTool
-from imas_standard_names.tools.naming_grammar import NamingGrammarTool
+from imas_standard_names.tools.grammar import NamingGrammarTool
 
 
 def test_compose_standard_name():

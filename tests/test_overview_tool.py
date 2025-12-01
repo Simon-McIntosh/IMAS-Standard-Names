@@ -1,7 +1,7 @@
 import asyncio
 
 from imas_standard_names.repository import StandardNameCatalog
-from imas_standard_names.tools.naming_grammar import NamingGrammarTool
+from imas_standard_names.tools.grammar import NamingGrammarTool
 from imas_standard_names.tools.schema import SchemaTool
 
 

@@ -332,7 +332,7 @@ imas_standard_names/
 │       └── README.md           # Source documentation
 ├── tokamak_parameters.py       # Pydantic models and loader
 └── tools/
-    └── tokamak_parameters.py   # MCP tool implementation
+    └── tokamak.py              # MCP tool implementation
 ```
 
 ### Pydantic Models

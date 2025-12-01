@@ -1,5 +1,7 @@
 import importlib.resources as ir
 
+from click.testing import CliRunner
+
 from imas_standard_names.issues.cli import (
     get_standardname,
     has_standardname,
@@ -33,18 +35,20 @@ def test_has_not_standardname(standardnames_dir_only):
     assert result.output == "False\n"
 
 
-def test_is_genericname(genericnames_file_only):
-    runner, genericnames_file = genericnames_file_only
-    result = runner.invoke(is_genericname, (genericnames_file, "current"))
+def test_is_genericname():
+    """Test is_genericname uses grammar vocabulary."""
+    runner = CliRunner()
+    result = runner.invoke(is_genericname, ("current",))
     assert result.exit_code == 0
     assert result.output == "True\n"
 
 
-def test_is_not_genericname(genericnames_file_only):
-    runner, genericnames_file = genericnames_file_only
+def test_is_not_genericname():
+    """Test non-generic names return False."""
+    runner = CliRunner()
     # Use actual example name which is not a generic name
     example_names = _get_example_names()
-    result = runner.invoke(is_genericname, (genericnames_file, example_names[0]))
+    result = runner.invoke(is_genericname, (example_names[0],))
     assert result.exit_code == 0
     assert result.output == "False\n"
 

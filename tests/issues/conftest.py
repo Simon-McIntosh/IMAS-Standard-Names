@@ -4,7 +4,6 @@ from collections.abc import Iterable
 from contextlib import contextmanager
 from pathlib import Path
 
-import pandas
 import pytest
 from click.testing import CliRunner
 
@@ -22,14 +21,6 @@ def base_names_data():
         catalog = StandardNameCatalog(root=examples_path, permissive=True)
         scalars = catalog.list(kind="scalar")[:3]
         return [entry.model_dump() for entry in scalars]
-
-
-@pytest.fixture(scope="session")
-def base_genericnames():
-    return pandas.DataFrame(
-        [("m^2", "area"), ("A", "current"), ("J", "energy")],
-        columns=["Unit", "Generic Name"],
-    )
 
 
 @pytest.fixture
@@ -70,14 +61,6 @@ def write_standardnames_dir(entries: Iterable[dict], temp_dir):
 
 
 @contextmanager
-def write_genericnames(genericnames: pandas.DataFrame, temp_dir):
-    genericnames_file = Path(temp_dir) / "generic_names.csv"
-    with open(genericnames_file, "w", newline="") as f:
-        genericnames.to_csv(f, index=False)
-    yield genericnames_file.as_posix()
-
-
-@contextmanager
 def write_submission(github_input: dict[str, str], temp_dir):
     submission_file = Path(temp_dir) / "submission.json"
     with open(submission_file, "w") as f:
@@ -86,14 +69,13 @@ def write_submission(github_input: dict[str, str], temp_dir):
 
 
 @pytest.fixture
-def cli_env(tmp_path, base_names_data, base_genericnames, github_input):
+def cli_env(tmp_path, base_names_data, github_input):
     with (
         click_runner(tmp_path) as (runner, temp_dir),
         write_standardnames_dir(base_names_data, temp_dir) as standardnames_dir,
-        write_genericnames(base_genericnames, temp_dir) as genericnames_file,
         write_submission(github_input, temp_dir) as submission_file,
     ):
-        yield runner, (standardnames_dir, genericnames_file, submission_file)
+        yield runner, (standardnames_dir, submission_file)
 
 
 @pytest.fixture
@@ -103,15 +85,6 @@ def standardnames_dir_only(tmp_path, base_names_data):
         write_standardnames_dir(base_names_data, temp_dir) as standardnames_dir,
     ):
         yield runner, standardnames_dir
-
-
-@pytest.fixture
-def genericnames_file_only(tmp_path, base_genericnames):
-    with (
-        click_runner(tmp_path) as (runner, temp_dir),
-        write_genericnames(base_genericnames, temp_dir) as genericnames_file,
-    ):
-        yield runner, genericnames_file
 
 
 @pytest.fixture

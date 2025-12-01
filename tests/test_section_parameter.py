@@ -2,7 +2,7 @@
 
 import pytest
 
-from imas_standard_names.tools.naming_grammar import NamingGrammarTool
+from imas_standard_names.tools.grammar import NamingGrammarTool
 from imas_standard_names.tools.schema import SchemaTool
 
 pytestmark = pytest.mark.anyio

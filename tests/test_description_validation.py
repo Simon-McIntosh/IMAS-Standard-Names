@@ -6,7 +6,7 @@ from imas_standard_names.catalog.edit import EditCatalog
 from imas_standard_names.models import create_standard_name_entry
 from imas_standard_names.repository import StandardNameCatalog
 from imas_standard_names.tools.create import CreateTool
-from imas_standard_names.tools.validate_catalog import ValidateCatalogTool
+from imas_standard_names.tools.validate import ValidateCatalogTool
 from imas_standard_names.validation.description import validate_description
 
 

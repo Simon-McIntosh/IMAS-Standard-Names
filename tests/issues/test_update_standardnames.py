@@ -40,7 +40,7 @@ def _catalog_entries(directory):
 
 
 @pytest.fixture
-def work_env(tmp_path, base_names_data, base_genericnames, submission_base):
+def work_env(tmp_path, base_names_data, submission_base):
     runner = CliRunner()
     with runner.isolated_filesystem(temp_dir=tmp_path):
         temp_dir_path = tmp_path  # because isolated_filesystem copies into tmp_path
@@ -51,18 +51,16 @@ def work_env(tmp_path, base_names_data, base_genericnames, submission_base):
             uow = UnitOfWork(repo)
             uow.add(models.create_standard_name_entry(e))
             uow.commit()
-        generic_file = temp_dir_path / "generic_names.csv"
-        base_genericnames.to_csv(generic_file, index=False)
         submission_file = temp_dir_path / "submission.json"
         _write_submission(submission_file, submission_base)
-        yield runner, standard_dir, generic_file, submission_file
+        yield runner, standard_dir, submission_file
 
 
 def test_update_standardnames_success(work_env, submission_base):
-    runner, standard_dir, generic_file, submission_file = work_env
+    runner, standard_dir, submission_file = work_env
     result = runner.invoke(
         update_standardnames,
-        (standard_dir.as_posix(), generic_file.as_posix(), submission_file.as_posix()),
+        (standard_dir.as_posix(), submission_file.as_posix()),
     )
     assert result.exit_code == 0, result.output
     assert "proposal is ready for submission" in result.output.lower()
@@ -70,11 +68,11 @@ def test_update_standardnames_success(work_env, submission_base):
 
 
 def test_update_standardnames_overwrite(work_env, submission_base):
-    runner, standard_dir, generic_file, submission_file = work_env
+    runner, standard_dir, submission_file = work_env
     # First insert a new name
     result = runner.invoke(
         update_standardnames,
-        (standard_dir.as_posix(), generic_file.as_posix(), submission_file.as_posix()),
+        (standard_dir.as_posix(), submission_file.as_posix()),
     )
     assert result.exit_code == 0
     # Overwrite by reusing same submission with overwrite flag
@@ -82,7 +80,6 @@ def test_update_standardnames_overwrite(work_env, submission_base):
         update_standardnames,
         (
             standard_dir.as_posix(),
-            generic_file.as_posix(),
             submission_file.as_posix(),
             "--overwrite",
         ),
@@ -92,31 +89,31 @@ def test_update_standardnames_overwrite(work_env, submission_base):
 
 
 def test_update_standardnames_duplicate_error(work_env, submission_base):
-    runner, standard_dir, generic_file, submission_file = work_env
+    runner, standard_dir, submission_file = work_env
     # Insert once
     result = runner.invoke(
         update_standardnames,
-        (standard_dir.as_posix(), generic_file.as_posix(), submission_file.as_posix()),
+        (standard_dir.as_posix(), submission_file.as_posix()),
     )
     assert result.exit_code == 0
     # Attempt second without overwrite
     result2 = runner.invoke(
         update_standardnames,
-        (standard_dir.as_posix(), generic_file.as_posix(), submission_file.as_posix()),
+        (standard_dir.as_posix(), submission_file.as_posix()),
     )
     assert result2.exit_code == 0  # command handles error internally
     assert "already present" in result2.output.lower()
 
 
 def test_update_standardnames_generic_name_error(work_env, submission_base):
-    runner, standard_dir, generic_file, submission_file = work_env
-    # Use a generic name from the generic file
+    runner, standard_dir, submission_file = work_env
+    # Use a generic name from the grammar vocabulary
     generic_submission = deepcopy(submission_base)
     generic_submission["name"] = "area"
     _write_submission(submission_file, generic_submission)
     result = runner.invoke(
         update_standardnames,
-        (standard_dir.as_posix(), generic_file.as_posix(), submission_file.as_posix()),
+        (standard_dir.as_posix(), submission_file.as_posix()),
     )
     assert result.exit_code == 0
     assert "generic name" in result.output.lower()

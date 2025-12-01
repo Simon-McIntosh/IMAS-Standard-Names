@@ -3,7 +3,7 @@
 import pytest
 
 from imas_standard_names.tokamak_parameters import TokamakParametersDB
-from imas_standard_names.tools.tokamak_parameters import TokamakParametersTool
+from imas_standard_names.tools.tokamak import TokamakParametersTool
 
 
 def test_load_iter_parameters():

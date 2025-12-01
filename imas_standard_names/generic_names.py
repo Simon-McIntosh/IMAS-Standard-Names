@@ -7,17 +7,8 @@ Generic physical bases are maintained in the grammar vocabulary system at:
     imas_standard_names/grammar/vocabularies/generic_physical_bases.yml
 
 The list is code-generated into GENERIC_PHYSICAL_BASES constant during build.
-
-Legacy CSV support:
-    For backward compatibility, this class still accepts a CSV file path,
-    but the generic names are now sourced from the grammar vocabulary regardless
-    of CSV content. The CSV parameter is deprecated and will be removed in a
-    future version.
 """
 
-from __future__ import annotations
-
-import warnings
 from dataclasses import dataclass
 
 from imas_standard_names.grammar.constants import GENERIC_PHYSICAL_BASES
@@ -27,24 +18,7 @@ __all__ = ["GenericNames"]
 
 @dataclass
 class GenericNames:
-    """Query reserved generic names from grammar vocabulary.
-
-    Args:
-        input_: Legacy CSV file path (deprecated, ignored). For backward compatibility only.
-    """
-
-    input_: str | None = None
-
-    def __post_init__(self):
-        if self.input_ is not None:
-            warnings.warn(
-                "GenericNames CSV file parameter is deprecated. "
-                "Generic names are now maintained in grammar/vocabularies/generic_physical_bases.yml "
-                "and accessed via GENERIC_PHYSICAL_BASES constant. "
-                "The CSV parameter will be removed in a future version.",
-                DeprecationWarning,
-                stacklevel=2,
-            )
+    """Query reserved generic names from grammar vocabulary."""
 
     @property
     def names(self) -> tuple[str, ...]:

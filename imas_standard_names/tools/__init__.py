@@ -9,14 +9,14 @@ from imas_standard_names.tools.compose import ComposeTool
 from imas_standard_names.tools.create import CreateTool
 from imas_standard_names.tools.edit import CatalogTool
 from imas_standard_names.tools.fetch import FetchTool
-from imas_standard_names.tools.list_standard_names import ListTool
-from imas_standard_names.tools.naming_grammar import NamingGrammarTool
+from imas_standard_names.tools.grammar import NamingGrammarTool
+from imas_standard_names.tools.list import ListTool
 from imas_standard_names.tools.schema import SchemaTool
 from imas_standard_names.tools.search import SearchTool
-from imas_standard_names.tools.tokamak_parameters import TokamakParametersTool
-from imas_standard_names.tools.validate_catalog import ValidateCatalogTool
+from imas_standard_names.tools.tokamak import TokamakParametersTool
+from imas_standard_names.tools.tokens import VocabularyTokensTool
+from imas_standard_names.tools.validate import ValidateCatalogTool
 from imas_standard_names.tools.vocabulary import VocabularyTool
-from imas_standard_names.tools.vocabulary_tokens import VocabularyTokensTool
 from imas_standard_names.tools.write import WriteTool
 
 

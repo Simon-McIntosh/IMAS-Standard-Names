@@ -10,7 +10,7 @@ import yaml
 from imas_standard_names.models import StandardNameScalarEntry
 from imas_standard_names.provenance import ExpressionProvenance
 from imas_standard_names.repository import StandardNameCatalog
-from imas_standard_names.tools.validate_catalog import ValidateCatalogTool
+from imas_standard_names.tools.validate import ValidateCatalogTool
 
 
 @pytest.fixture

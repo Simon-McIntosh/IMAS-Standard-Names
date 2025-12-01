@@ -22,24 +22,24 @@ def _get_first_example_name():
 
 
 def test_add_standard_name(cli_env):
-    runner, (standardnames_dir, genericnames_file, submission_file) = cli_env
+    runner, (standardnames_dir, submission_file) = cli_env
     result = runner.invoke(
         update_standardnames,
-        (standardnames_dir, genericnames_file, submission_file),
+        (standardnames_dir, submission_file),
     )
     assert result.exit_code == 0
     assert "proposal is ready for submission" in result.output
 
 
 def test_overwrite(cli_env):
-    runner, (standardnames_dir, genericnames_file, submission_file) = cli_env
+    runner, (standardnames_dir, submission_file) = cli_env
     # Use actual example name that exists
     existing_name = _get_first_example_name()
     _rewrite_submission(submission_file, name=existing_name)
     # First attempt without overwrite should error
     result1 = runner.invoke(
         update_standardnames,
-        (standardnames_dir, genericnames_file, submission_file),
+        (standardnames_dir, submission_file),
     )
     # Current behaviour: schema validation or duplicate detection message
     assert (
@@ -49,24 +49,24 @@ def test_overwrite(cli_env):
     # Second with overwrite
     result2 = runner.invoke(
         update_standardnames,
-        (standardnames_dir, genericnames_file, submission_file, "--overwrite"),
+        (standardnames_dir, submission_file, "--overwrite"),
     )
     assert result2.exit_code == 0
 
 
 def test_invalid_name(cli_env):
-    runner, (standardnames_dir, genericnames_file, submission_file) = cli_env
+    runner, (standardnames_dir, submission_file) = cli_env
     _rewrite_submission(submission_file, name="1st_plasma_current")
     result = runner.invoke(
         update_standardnames,
-        (standardnames_dir, genericnames_file, submission_file),
+        (standardnames_dir, submission_file),
     )
     assert result.exit_code == 0
     assert "not valid" in result.output.lower()
 
 
 def test_alias_success(cli_env):
-    runner, (standardnames_dir, genericnames_file, submission_file) = cli_env
+    runner, (standardnames_dir, submission_file) = cli_env
     # Use actual example name as alias target
     existing_name = _get_first_example_name()
     _rewrite_submission(
@@ -74,17 +74,17 @@ def test_alias_success(cli_env):
     )
     result = runner.invoke(
         update_standardnames,
-        (standardnames_dir, genericnames_file, submission_file),
+        (standardnames_dir, submission_file),
     )
     assert "proposal is ready for submission" in result.output
 
 
 def test_generic_name_error(cli_env):
-    runner, (standardnames_dir, genericnames_file, submission_file) = cli_env
+    runner, (standardnames_dir, submission_file) = cli_env
     _rewrite_submission(submission_file, name="area")
     result = runner.invoke(
         update_standardnames,
-        (standardnames_dir, genericnames_file, submission_file),
+        (standardnames_dir, submission_file),
     )
     # Current implementation surfaces schema validation error before generic name message
     assert "not valid" in result.output.lower()

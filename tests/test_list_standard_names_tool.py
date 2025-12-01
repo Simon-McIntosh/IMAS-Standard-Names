@@ -2,7 +2,7 @@ import asyncio
 
 from imas_standard_names.catalog.edit import EditCatalog
 from imas_standard_names.repository import StandardNameCatalog
-from imas_standard_names.tools.list_standard_names import ListTool
+from imas_standard_names.tools.list import ListTool
 
 
 def invoke(tool, *args, **kwargs):
