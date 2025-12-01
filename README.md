@@ -46,18 +46,45 @@ The project documentation is available at our [GitHub Pages site](https://iteror
 
 ## Installation
 
-### Read-Only Access (Querying Catalog)
+### MCP Server (Recommended)
+
+The easiest way to use the standard names tools is via the MCP server:
+
+```bash
+# Install as a persistent tool (recommended for regular use)
+uv tool install imas-standard-names
+
+# Run the MCP server
+standard-names-mcp
+
+# With version constraint
+uv tool install 'imas-standard-names>=1.0,<2.0'
+
+# Upgrade to latest
+uv tool upgrade imas-standard-names
+```
+
+For one-off execution without persistent installation:
+
+```bash
+uvx --from imas-standard-names standard-names-mcp
+```
+
+### Library Installation
 
 For users who want to query and browse the standard names catalog:
 
 ```bash
-# Option 1: Install without catalog (grammar/schema tools only)
+# Using uv (recommended)
+uv add imas-standard-names
+
+# Using pip
 pip install imas-standard-names
 
-# Option 2: Install with catalog package (when available)
-pip install imas-standard-names[catalog]
+# With catalog package (when available)
+uv add 'imas-standard-names[catalog]'
 
-# Option 3: Download pre-built catalog from releases
+# Download pre-built catalog from releases
 wget https://github.com/iterorg/imas-standard-names-catalog/releases/latest/download/catalog.db
 export STANDARD_NAMES_CATALOG_DB=./catalog.db
 ```
@@ -68,16 +95,13 @@ For developers who need to create or edit standard names:
 
 ```bash
 # Install with quality validation tools
-pip install imas-standard-names[quality]
+uv add 'imas-standard-names[quality]'
 
 # Clone the catalog repository
 git clone https://github.com/iterorg/imas-standard-names-catalog.git
 
 # Point to local catalog
 export STANDARD_NAMES_CATALOG_ROOT=./imas-standard-names-catalog/standard_names
-
-# Verify write access
-python -c "from imas_standard_names import StandardNameCatalog; cat = StandardNameCatalog(); print(f'Writable: {not cat.read_only}')"
 ```
 
 ### Development Environment
@@ -375,7 +399,7 @@ Each branch will be available as a separate version in the version selector drop
 [ruff-link]: https://docs.astral.sh/ruff/
 [pre-commit-badge]: https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white
 [pre-commit-link]: https://github.com/pre-commit/pre-commit
-[build-deploy-badge]: https://img.shields.io/github/actions/workflow/status/iterorganization/IMAS-Standard-Names/test-project.yml?branch=main&color=brightgreen&label=CI%2FCD
+[build-deploy-badge]: https://img.shields.io/github/actions/workflow/status/iterorganization/IMAS-Standard-Names/test.yml?branch=main&color=brightgreen&label=CI%2FCD
 [build-deploy-link]: https://codecov.io/gh/iterorganization/IMAS-Standard-Names/tests/main
 [codecov-badge]: https://codecov.io/gh/iterorganization/IMAS-Standard-Names/graph/badge.svg
 [codecov-link]: https://codecov.io/gh/iterorganization/IMAS-Standard-Names
