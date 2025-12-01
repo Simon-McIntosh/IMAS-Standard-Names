@@ -59,10 +59,12 @@ imas_standard_names/
 ├── models.py        # Pydantic data models
 └── validation/      # Validation logic
 
-resources/standard_names/  # Authoritative YAML files
-docs/                     # User documentation
-tests/                    # Test suite
+docs/                # User documentation
+tests/               # Test suite
 ```
+
+**Catalog data** is maintained in a separate repository:
+[imas-standard-names-catalog](https://github.com/iterorganization/imas-standard-names-catalog)
 
 **Organization principles**:
 - Mirror test structure to source structure
@@ -174,11 +176,8 @@ uv run pytest --cov
 uv run ruff check --fix
 uv run ruff format
 
-# Validate standard names catalog
-uv run python -m imas_standard_names.validation.cli validate_catalog resources/standard_names
-
-# Build SQLite catalog from YAML files
-uv run python -m imas_standard_names.cli.build_catalog resources/standard_names
+# Validate standard names catalog (requires catalog to be configured)
+uv run validate_catalog $STANDARD_NAMES_CATALOG_ROOT
 
 # Start MCP server
 uv run standard-names-mcp

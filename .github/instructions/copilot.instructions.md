@@ -82,6 +82,6 @@ See `AGENTS.md` for comprehensive development guidelines including:
 ## Quick Reference
 
 - **Project root**: `/home/ITER/mcintos/Code/imas-standard-names`
-- **Standard names**: `resources/standard_names/` (YAML files - use MCP tools, not direct edits)
+- **Standard names catalog**: Separate repository ([imas-standard-names-catalog](https://github.com/iterorganization/imas-standard-names-catalog))
 - **Tests**: `tests/` (mirror source structure)
 - **Grammar spec**: Accessible via `get_naming_grammar()` MCP tool

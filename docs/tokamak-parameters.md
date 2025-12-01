@@ -354,7 +354,7 @@ imas_standard_names/
 
 ## See Also
 
-- Grammar specification: `grammar/specification.yml`
-- Standard names catalog: `resources/standard_names/`
-- MCP tool registration: `tools/__init__.py`
+- Grammar specification: `imas_standard_names/grammar/specification.yml`
+- Standard names catalog: [imas-standard-names-catalog](https://github.com/iterorganization/imas-standard-names-catalog)
+- MCP tool registration: `imas_standard_names/tools/__init__.py`
 

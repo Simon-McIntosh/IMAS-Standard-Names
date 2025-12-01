@@ -1,6 +1,6 @@
 # Standard Names Catalog
 
-The Standard Names catalog is now maintained in a separate repository to allow independent versioning of catalog content.
+The Standard Names catalog is maintained in a separate repository to allow independent versioning of catalog content.
 
 ## Catalog Repository
 
@@ -10,34 +10,31 @@ Visit the **[IMAS Standard Names Catalog](https://github.com/iterorganization/im
 - Versioned documentation matching catalog releases
 - Contribution guidelines for adding new names
 
-## Using Standard Names
-
-To work with standard names programmatically:
-
-```python
-from imas_standard_names.repository import StandardNameRepository
-
-repo = StandardNameRepository()
-
-# List all names
-for name in repo.list():
-    print(f"{name.name}: {name.description}")
-
-# Get a specific name
-entry = repo.get("electron_temperature")
-print(f"{entry.name}: {entry.unit} - {entry.description}")
-```
-
-## CLI Tools
-
-Use the `standard-names` CLI to search and explore:
+## Installation
 
 ```bash
-# Search for names
-standard-names search temperature
+# Install catalog package (recommended)
+pip install imas-standard-names-catalog
 
-# Build catalog database
-standard-names build ./standard_names --verify
+# Or download pre-built database
+wget https://github.com/iterorganization/imas-standard-names-catalog/releases/latest/download/catalog.db
+export STANDARD_NAMES_CATALOG_DB=./catalog.db
+```
+
+## Using Standard Names
+
+```python
+from imas_standard_names import StandardNameCatalog
+
+catalog = StandardNameCatalog()
+
+# List all names
+for entry in catalog.list():
+    print(f"{entry.name}: {entry.description}")
+
+# Get a specific name
+entry = catalog.get("electron_temperature")
+print(f"{entry.name}: {entry.unit} - {entry.description}")
 ```
 
 ## Documentation Resources

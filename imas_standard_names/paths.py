@@ -102,13 +102,23 @@ class CatalogPaths:
 
     @property
     def standard_names_root(self) -> Path:
+        """Return path to standard_names directory within resources.
+
+        Note: This directory is typically empty in this package. The actual
+        catalog data comes from the external imas-standard-names-catalog
+        repository, configured via STANDARD_NAMES_CATALOG_ROOT environment
+        variable or the optional imas_standard_names_catalog package.
+        """
         std = self.resources_root / STANDARD_NAMES_DIRNAME
-        if not std.exists():  # pragma: no cover
-            # Create the directory if it doesn't exist to avoid startup errors
-            std.mkdir(parents=True, exist_ok=True)
-        if not std.is_dir():  # pragma: no cover
+        if not std.exists():
             raise FileNotFoundError(
-                f"Standard names directory '{STANDARD_NAMES_DIRNAME}' exists but is not a directory: {std}"
+                f"Standard names directory not found: {std}. "
+                "Set STANDARD_NAMES_CATALOG_ROOT environment variable to point to "
+                "your catalog directory, or install the imas-standard-names-catalog package."
+            )
+        if not std.is_dir():
+            raise FileNotFoundError(
+                f"Standard names path exists but is not a directory: {std}"
             )
         return std
 

@@ -1,11 +1,21 @@
+import pytest
+
 from imas_standard_names.ordering import ordered_model_names
-from imas_standard_names.paths import CatalogPaths
 from imas_standard_names.repository import StandardNameCatalog
 from imas_standard_names.yaml_store import YamlStore
 
 
-def test_vector_components_before_vectors():
-    root = CatalogPaths().yaml_path
+@pytest.fixture
+def catalog_with_vectors(tmp_path, copy_examples):
+    """Create a catalog with vector examples for testing ordering."""
+    catalog_dir = tmp_path / "ordering_catalog"
+    catalog_dir.mkdir()
+    copy_examples(catalog_dir, count=20, kind=None)
+    return catalog_dir
+
+
+def test_vector_components_before_vectors(catalog_with_vectors):
+    root = catalog_with_vectors
     store = YamlStore(root)
     models = store.load()
     order = list(ordered_model_names(models))
@@ -20,8 +30,8 @@ def test_vector_components_before_vectors():
                 )
 
 
-def test_provenance_base_before_derived():
-    root = CatalogPaths().yaml_path
+def test_provenance_base_before_derived(catalog_with_vectors):
+    root = catalog_with_vectors
     store = YamlStore(root)
     models = store.load()
     order = list(ordered_model_names(models))

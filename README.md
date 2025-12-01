@@ -7,391 +7,147 @@
 
 # IMAS Standard Names
 
-This repository documents a collection of Standard Names used in the Fusion Conventions. To submit proposals for new Standard Names or changes to existing Standard Names, please use one of the supplied issue templates. The issue templates use the following "zero-code" submission process:
+MCP server and Python library for working with IMAS Standard Names — a controlled vocabulary for fusion data variables.
 
-> Data Harvest Note: For bootstrapping new entries (especially Phase 1 equilibrium
-> reconstruction attributes), use the IMAS MCP server configured in
-> `.vscode/mcp.json` (tool id `imas`) to extract existing coil, probe, loop,
-> and equilibrium geometry information from the IMAS Data Dictionary. This
-> ensures proposed names align with available diagnostics and metadata.
+## Quick Start
 
-1. **Create an Issue**: Use the provided issue templates to create a new issue.
-   - For new Standard Names, use the "New Standard Name" template.
-   - For changes to existing Standard Names, use the "Change Existing Standard Name" template.
-2. **Fill in the Template**: Provide all required information in the issue template.
-   - For new Standard Names, include details such as the proposed name, description, and any relevant references.
-   - For changes to existing Standard Names, specify the name of the existing Standard Name and the proposed changes.
-3. **Submit the Issue**: Once you have filled in the template, submit the issue.
-4. **Review Process**: We outline the review process as follows:
-   - Following submission, a GitHub action will automatically check the issue for compliance with the Fusion Conventions and flag any errors or missing information.
-   - After successful automatic processing, a member of the IMAS Standard Names team will review your issue.
-   - The team may request information or clarification if needed.
-5. **Approval**: Once your issue is sufficiently developed, collaborators with privileges will tag it with the 'approve' label.
-6. **Submission**: After approval, a GitHub action will automatically commit the Standard Name proposal to the `submit` branch. The action will raise a _draft_ Pull Request pointing from the `submit` branch to the `develop` branch, if one is not already present.
-7. **Final Review**: Once we collect a batch of Standard Name proposals, the Pull Request will undergo final review and approval.
-8. **Release**: We will tag releases that merge approved changes from the `develop` branch back to the `main` branch accordingly.
-9. **Feedback**: We encourage feedback on the Standard Names to ensure they meet community needs. Please submit your feedback through the provided issue templates to support discussion and improvements.
+### MCP Server
 
-## Branching Strategy
+Configure your AI assistant to use the standard names tools:
 
-This project uses a Git branching strategy to manage development and releases. The principal branches are:
+```bash
+# Install the MCP server
+uv tool install imas-standard-names
 
-- The `submit` branch collects and reviews proposed changes to the Standard Names.
-- We use the `develop` branch for ongoing development and testing of new Standard Names.
-- We create tagged releases of the Standard Names project and associated documentation from the `main` branch.
+# Or with pip
+pip install imas-standard-names
+```
 
-## Documentation
+Add to your MCP configuration (e.g., Claude Desktop, VS Code):
 
-The project documentation is available at our [GitHub Pages site](https://iterorganization.github.io/IMAS-Standard-Names/).
+```json
+{
+  "mcpServers": {
+    "imas-standard-names": {
+      "command": "standard-names-mcp"
+    }
+  }
+}
+```
+
+### Python Library
+
+```python
+from imas_standard_names import StandardNameCatalog
+
+catalog = StandardNameCatalog()
+entry = catalog.get("electron_temperature")
+print(f"{entry.name}: {entry.unit} — {entry.description}")
+```
 
 ## Installation
 
-### MCP Server (Recommended)
+The tools and catalog are distributed separately:
 
-The easiest way to use the standard names tools is via the MCP server:
+| Package | Purpose |
+|---------|---------|
+| `imas-standard-names` | MCP server, grammar, validation tools |
+| `imas-standard-names-catalog` | Standard names catalog (YAML + SQLite) |
 
-```bash
-# Install as a persistent tool (recommended for regular use)
-uv tool install imas-standard-names
-
-# Run the MCP server
-standard-names-mcp
-
-# With version constraint
-uv tool install 'imas-standard-names>=1.0,<2.0'
-
-# Upgrade to latest
-uv tool upgrade imas-standard-names
-```
-
-For one-off execution without persistent installation:
+### Basic Installation
 
 ```bash
-uvx --from imas-standard-names standard-names-mcp
-```
+# Tools + catalog (recommended)
+pip install imas-standard-names[catalog]
 
-### Library Installation
-
-For users who want to query and browse the standard names catalog:
-
-```bash
-# Using uv (recommended)
-uv add imas-standard-names
-
-# Using pip
+# Tools only
 pip install imas-standard-names
-
-# With catalog package (when available)
-uv add 'imas-standard-names[catalog]'
-
-# Download pre-built catalog from releases
-wget https://github.com/iterorg/imas-standard-names-catalog/releases/latest/download/catalog.db
-export STANDARD_NAMES_CATALOG_DB=./catalog.db
 ```
 
-### Read-Write Access (Editing Catalog)
+### Catalog Options
 
-For developers who need to create or edit standard names:
+The catalog can be accessed in several ways:
 
 ```bash
-# Install with quality validation tools
-uv add 'imas-standard-names[quality]'
+# Option 1: Install catalog package (recommended)
+pip install imas-standard-names-catalog
 
-# Clone the catalog repository
-git clone https://github.com/iterorg/imas-standard-names-catalog.git
+# Option 2: Download pre-built database
+wget https://github.com/iterorganization/imas-standard-names-catalog/releases/latest/download/catalog.db
+export STANDARD_NAMES_CATALOG_DB=./catalog.db
 
-# Point to local catalog
+# Option 3: Clone catalog repository (for editing)
+git clone https://github.com/iterorganization/imas-standard-names-catalog.git
 export STANDARD_NAMES_CATALOG_ROOT=./imas-standard-names-catalog/standard_names
 ```
 
-### Development Environment
-
-For contributing to the tools repository:
+### Development Setup
 
 ```bash
-# Clone and install in development mode
 git clone https://github.com/iterorganization/imas-standard-names.git
 cd imas-standard-names
 uv sync
-
-# For catalog editing, also clone catalog repo
-cd ..
-git clone https://github.com/iterorg/imas-standard-names-catalog.git
-export STANDARD_NAMES_CATALOG_ROOT=$(pwd)/imas-standard-names-catalog/standard_names
 ```
 
-### Environment Variables
+## Architecture
 
-- `STANDARD_NAMES_CATALOG_ROOT`: Path to YAML catalog directory (read-write)
-- `STANDARD_NAMES_CATALOG_DB`: Path to pre-built .db file (read-only)
+This project uses a two-repository architecture:
 
-## Catalog Architecture
+- **[imas-standard-names](https://github.com/iterorganization/imas-standard-names)** (this repo): MCP server, grammar, validation, Python API
+- **[imas-standard-names-catalog](https://github.com/iterorganization/imas-standard-names-catalog)**: YAML source files and pre-built SQLite database
 
-This project uses a **two-repository architecture**:
+This separation allows independent versioning — catalog content evolves separately from tooling.
 
-1. **imas-standard-names** (this repo): Tools, MCP server, grammar, validation
-2. **imas-standard-names-catalog** (separate repo): YAML catalog source files
+## Documentation
 
-**Benefits:**
-- Independent versioning (catalog data evolves separately from tools)
-- Flexible deployment (pin catalog version, float tool version)
-- Read-only safety (pre-built .db files prevent accidental edits)
+Full documentation: **[iterorganization.github.io/IMAS-Standard-Names](https://iterorganization.github.io/IMAS-Standard-Names/)**
 
-See [Catalog Development Guide](docs/development/catalog-development-guide.md) for details on developing the catalog.
+- [Grammar Reference](https://iterorganization.github.io/IMAS-Standard-Names/grammar-reference/) — naming rules and vocabulary
+- [Guidelines](https://iterorganization.github.io/IMAS-Standard-Names/guidelines/) — patterns and conventions
+- [Quick Start](https://iterorganization.github.io/IMAS-Standard-Names/development/quickstart/) — creating new standard names
 
-### Data Layout (Per-File Schema)
+## MCP Tools
 
-Each Standard Name lives in its own YAML file under `resources/standard_names/` (or a user-defined directory).
+The MCP server provides tools for AI assistants to work with standard names:
 
-Minimal scalar example:
-
-```yaml
-name: electron_temperature
-kind: scalar
-unit: keV
-description: Electron temperature.
-status: draft
-```
-
-### CLI Usage
-
-All issue automation and local maintenance use the new CLI entry points (backed by the per-file schema):
-
-| Command                                                                                        | Purpose                                                                  |
-| ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
-| `update_standardnames <standardnames_dir> <generic_names.csv> <submission.json> [--overwrite]` | Check and add (or overwrite) a proposal from a GitHub issue JSON export. |
-| `has_standardname <standardnames_dir> <name>`                                                  | Returns `True` / `False` for existence.                                  |
-| `get_standardname <standardnames_dir> <name>`                                                  | Prints the YAML for a single entry.                                      |
-| `diff_standardnames <old_dir> <new_dir> <report.json> [--export-dir DIR]`                      | JSON diff (added/removed/changed[/unchanged]) and optional export.       |
-| `is_genericname <generic_names.csv> <token>`                                                   | Tests if a token collides with a reserved generic name.                  |
-| `update_links <remote>`                                                                        | Rewrites badge/URL references in README for a fork remote.               |
-
-The issue form submission JSON is normalized in-place (e.g. `units` → `unit`, empty strings removed, `documentation` merged into `description`). The CLI discards unsupported legacy keys such as `options`.
-
-### Deprecations Removed
-
-The legacy stub validator script `tools/validate_catalog.py` has been removed.
-Use the consolidated CLI command instead:
-
-```bash
-validate_catalog resources/standard_names
-# or (module form)
-python -m imas_standard_names.validation.cli validate_catalog resources/standard_names
-```
-
-This performs structural + semantic checks (and optional integrity verification with `--verify`).
-
-### Programmatic Usage (Repository, Build, Read-Only)
-
-The YAML files are the authoritative source. A `StandardNameRepository` loads them
-into an in-memory SQLite catalog (with FTS) for fast queries and authoring.
-
-Basic queries:
-
-```python
-from pathlib import Path
-from imas_standard_names.repository import StandardNameRepository
-
-repo = StandardNameRepository(Path("resources/standard_names"))
-print([m.name for m in repo.list()][:5])
-print(repo.get("electron_temperature").unit)
-print(repo.search("electron temperature", limit=3))
-```
-
-Mutations use a UnitOfWork boundary (add/update/remove/rename then commit to rewrite YAML):
-
-```python
-from imas_standard_names import schema
-
-uow = repo.start_uow()
-model = schema.create_standard_name({
-   "name": "ion_density",
-   "kind": "scalar",
-   "unit": "m^-3",
-   "description": "Ion number density.",
-   "status": "draft",
-})
-uow.add(model)
-uow.commit()  # writes ion_density.yml
-```
-
-### Building a Definitive SQLite Catalog
-
-For distribution or read-only consumers, build a file-backed catalog that mirrors
-YAML exactly:
-
-```python
-from pathlib import Path
-from imas_standard_names.catalog.sqlite_build import build_catalog
-from imas_standard_names.catalog.sqlite_read import CatalogRead
-
-root = Path("resources/standard_names")
-db_path = build_catalog(root, root / "artifacts" / "catalog.db")
-ro = CatalogRead(db_path)
-print(len(ro.list()))
-```
-
-CLI equivalent:
-
-```bash
-python -m imas_standard_names.cli.build_catalog resources/standard_names --db resources/standard_names/artifacts/catalog.db
-```
-
-### Architectural Components
-
-| Component                | Purpose                                                                 |
-| ------------------------ | ----------------------------------------------------------------------- |
-| `YamlStore`              | Discover, load, and write per-file YAML entries (authoritative).        |
-| `CatalogReadWrite`       | Ephemeral in-memory SQLite (authoring session).                         |
-| `CatalogBuild`           | File-backed builder (creates persistent SQLite mirror).                 |
-| `CatalogRead`            | Read-only view over file-backed SQLite snapshot.                        |
-| `StandardNameRepository` | Facade combining `YamlStore` + `CatalogReadWrite` + search.             |
-| `UnitOfWork`             | Batched mutation (add/update/remove/rename + validation + YAML commit). |
-
-### Search
-
-Search uses SQLite FTS5 ranking (bm25) with a substring fallback. Request metadata:
-
-```python
-repo.search("temperature gradient", with_meta=True, limit=5)
-```
-
-Returns objects including name, score, and highlighted description/documentation spans.
-
-### Validation
-
-Load-time validation (structural + semantic) aborts on invalid YAML. During a UoW
-commit, the full staged view is revalidated before writing to disk.
-
-CLI validation supports file-backed or fresh memory modes plus optional integrity verification:
-
-```bash
-python -m imas_standard_names.validation.cli validate_catalog resources/standard_names \
-   --mode auto            # auto | file | memory
-   --verify               # (file mode) compare integrity table to current YAML (size/mtime or full)
-   --full                 # recompute hashes & check aggregate manifest
-```
-
-Exit codes:
-| Code | Meaning |
+### Discovery & Search
+| Tool | Purpose |
 |------|---------|
-| 0 | Structural & semantic valid (and no integrity issues, or integrity issues only if code not raised) |
-| 1 | Structural/semantic validation failed (no integrity issues) |
-| 2 | Structural/semantic valid but integrity discrepancies detected |
+| `search_standard_names` | Find names by concept using semantic search |
+| `list_standard_names` | List all names with filtering by status, tags, kind |
+| `fetch_standard_names` | Get complete metadata for specific names |
+| `check_standard_names` | Fast batch validation of name existence |
 
-Integrity issue codes: `mismatch-meta`, `hash-mismatch`, `missing-on-disk`, `missing-in-db`, `manifest-mismatch`.
+### Grammar & Schema
+| Tool | Purpose |
+|------|---------|
+| `get_naming_grammar` | Grammar rules, patterns, and composition guidance |
+| `get_schema` | Entry schema for creating standard names |
+| `get_vocabulary_tokens` | Controlled vocabulary tokens by segment |
 
-### Migration (Legacy APIs Removed)
+### Composition & Parsing
+| Tool | Purpose |
+|------|---------|
+| `compose_standard_name` | Build valid names from structured parts |
+| `parse_standard_name` | Parse names into grammatical components |
 
-Legacy `StandardNameCatalog`, `load_catalog`, artifact rebuild flags, and
-repository variants have been replaced by the unified repository and explicit
-build step (`build_catalog`). If you previously relied on a JSON or legacy
-artifact, switch to invoking `build_catalog` and consuming with `CatalogRead`.
+### Editing & Persistence
+| Tool | Purpose |
+|------|---------|
+| `create_standard_names` | Create new catalog entries (in-memory) |
+| `edit_standard_names` | Modify, rename, or delete entries (in-memory) |
+| `write_standard_names` | Persist pending changes to disk |
 
-### Debugging Foreign Key (FK) Errors & Logging
+### Validation & Reference
+| Tool | Purpose |
+|------|---------|
+| `validate_catalog` | Check catalog integrity and grammar |
+| `manage_vocabulary` | Vocabulary gap detection and management |
+| `get_tokamak_parameters` | Reference tokamak machine parameters |
 
-The in-memory authoring catalog enables SQLite foreign keys. Vector entries
-reference their component scalar names. If components are missing when the
-repository attempts to insert a vector you will now receive a diagnostic:
+## License
 
-```text
-sqlite3.IntegrityError: Foreign key constraint failed while inserting vector 'gradient_of_poloidal_flux'.
-Missing component standard_name rows: radial_component_of_gradient_of_poloidal_flux, ...
-Insert the component scalar definitions before the vector or reorder YAML files.
-```
-
-The `StandardNameRepository` performs a two-pass load (non-vectors first,
-then vectors) to avoid ordering issues during initial load from YAML. If you
-manually insert new models at runtime ensure scalar components / dependencies
-exist before derived vectors or expression provenance rows.
-
-Set an environment variable to enable verbose logging (helpful for tracing
-load order and pinpointing the first failing name):
-
-PowerShell (Windows):
-
-```powershell
-setx IMAS_SN_LOG_LEVEL DEBUG
-# start a new shell OR for current session:
-$env:IMAS_SN_LOG_LEVEL = "DEBUG"
-python -m imas_standard_names.cli.build_catalog resources/standard_names
-```
-
-Unix shells:
-
-```bash
-IMAS_SN_LOG_LEVEL=DEBUG python -m imas_standard_names.cli.build_catalog resources/standard_names
-```
-
-Accepted levels: DEBUG, INFO, WARNING, ERROR (default WARNING). The catalog
-logger name is `imas_standard_names.catalog`.
-
-### Roadmap
-
-See the evolving [Roadmap](docs/roadmap.md) for phased milestones (vectors, frames, operator validation, lifecycle governance, and future tensor support).
-
-GitHub Actions automatically build and deploy the documentation whenever you push changes to the main branch. We version the documentation using [Mike](https://github.com/jimporter/mike), allowing versions to be accessible simultaneously.
-
-### Local Documentation Development
-
-You can use the blazing fast [uv](https://github.com/astral-sh/uv) workflow (used in CI) or a plain virtual environment.
-
-Using uv (recommended):
-
-```bash
-uv venv
-. .venv/bin/activate  # or .venv\Scripts\activate on Windows
-uv sync --all-extras --no-dev  # install runtime + extras used for docs (dev tools excluded)
-uv run mkdocs serve
-```
-
-Using a plain virtual environment + pip:
-
-```bash
-# create virtual environment
-python -m venv
-. venv/bin/activate
-
-# Install documentation dependencies
-pip install .[docs]
-
-# Build the documentation
-mkdocs build
-
-# To preview the documentation locally
-mkdocs serve
-```
-
-### Working with Versioned Documentation
-
-This project uses Mike to manage versioned documentation. To work with versioned documentation locally:
-
-```bash
-# Install documentation dependencies (includes Mike) – via uv or pip
-uv sync --extra docs  # or: pip install .[docs]
-
-# Initialize a git repo if not already done
-git init
-
-# Build and serve versions using Mike
-mike deploy 0.1 latest --update-aliases
-mike deploy 0.2 --update-aliases
-mike serve  # Serves the versioned documentation locally
-
-# List all versions of the documentation
-mike list
-
-# Set the default version
-mike set-default latest
-```
-
-When the CI/CD pipeline runs, it automatically deploys documentation for:
-
-- `main` branch as "latest"
-- `develop` branch as "develop"
-- `submit` branch as "submit"
-
-Each branch will be available as a separate version in the version selector dropdown on the documentation site.
+MIT
 
 [python-badge]: https://img.shields.io/badge/python-3.11%20%7C%203.12%20%7C%203.13-blue
 [python-link]: https://www.python.org/downloads/

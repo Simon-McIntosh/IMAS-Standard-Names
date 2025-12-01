@@ -41,8 +41,6 @@ tags: [plasma]
 status: draft
 ```
 
-**Location:** `imas_standard_names/resources/standard_names/plasma/electron_temperature.yml`
-
 ---
 
 ## Scenario 2: Hardware Geometric Property
@@ -72,8 +70,6 @@ description: Radial position of flux loop.
 tags: [magnetics, geometry]
 status: draft
 ```
-
-**Location:** `imas_standard_names/resources/standard_names/magnetics/radial_position_of_flux_loop.yml`
 
 ---
 
@@ -105,8 +101,6 @@ tags: [magnetics, measured]
 status: draft
 ```
 
-**Location:** `imas_standard_names/resources/standard_names/magnetics/voltage_from_flux_loop.yml`
-
 ---
 
 ## Scenario 4: Physical Vector Component
@@ -136,8 +130,6 @@ description: Radial component of magnetic field.
 tags: [magnetics]
 status: draft
 ```
-
-**Location:** `imas_standard_names/resources/standard_names/magnetics/radial_component_of_magnetic_field.yml`
 
 ---
 
@@ -169,8 +161,6 @@ tags: [plasma]
 status: draft
 ```
 
-**Location:** `imas_standard_names/resources/standard_names/plasma/electron_temperature_at_magnetic_axis.yml`
-
 ---
 
 ## Scenario 6: Geometric Property of Spatial Object
@@ -201,25 +191,27 @@ tags: [equilibrium, geometry]
 status: draft
 ```
 
-**Location:** `imas_standard_names/resources/standard_names/equilibrium/major_radius_of_plasma_boundary.yml`
-
 ---
 
 ## Validation
 
-After creating your YAML file, run the validator:
+Use the MCP tools to validate your new standard name:
 
-```bash
-python -m imas_standard_names.validation.cli validate_catalog imas_standard_names/resources/standard_names
+```python
+# Via MCP tool
+check_standard_names(names=["electron_temperature"])
+
+# Or validate the entire catalog
+validate_catalog()
 ```
 
-Or if you have the console script installed:
+Or use the CLI with the catalog repository:
 
 ```bash
-validate_catalog imas_standard_names/resources/standard_names
+validate_catalog $STANDARD_NAMES_CATALOG_ROOT
 ```
 
-Fix any reported issues and re-run until validation passes (exit code 0).
+Fix any reported issues and re-run until validation passes.
 
 ---
 

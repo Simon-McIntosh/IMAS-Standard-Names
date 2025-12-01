@@ -1,6 +1,6 @@
 # IMAS Standard Names
 
-Welcome to the IMAS Standard Names project — tools and grammar for creating structured, machine-parseable names for fusion data variables.
+MCP server and Python library for working with IMAS Standard Names — a controlled vocabulary for fusion data variables.
 
 ## About Standard Names
 
@@ -30,25 +30,24 @@ This separation allows:
 - **[Guidelines](guidelines.md)** — Naming patterns and conventions
 - **[Development Guides](development/quickstart.md)** — For contributors
 
-## Programmatic Access
+## Quick Start
 
-```python
-from imas_standard_names.repository import StandardNameRepository
-
-repo = StandardNameRepository()
-name = repo.get("electron_temperature")
-print(f"{name.name}: {name.unit} — {name.description}")
-```
-
-## CLI Tools
+### MCP Server
 
 ```bash
-# Search for names
-standard-names search magnetic_field
+# Install
+pip install imas-standard-names[catalog]
 
-# Build catalog database
-standard-names build ./standard_names --verify
+# Run
+standard-names-mcp
+```
 
-# Validate catalog
-validate_catalog ./standard_names --summary text
+### Python Library
+
+```python
+from imas_standard_names import StandardNameCatalog
+
+catalog = StandardNameCatalog()
+entry = catalog.get("electron_temperature")
+print(f"{entry.name}: {entry.unit} — {entry.description}")
 ```

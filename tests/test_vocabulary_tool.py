@@ -3,8 +3,8 @@
 import pytest
 
 from imas_standard_names.repository import StandardNameCatalog
-from imas_standard_names.tools.list_vocabulary import VocabularyTokensTool
 from imas_standard_names.tools.vocabulary import VocabularyTool
+from imas_standard_names.tools.vocabulary_tokens import VocabularyTokensTool
 
 
 @pytest.fixture

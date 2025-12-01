@@ -6,16 +6,14 @@ import pytest
 
 from imas_standard_names.paths import (
     CATALOG_DIRNAME,
-    STANDARD_NAMES_DIRNAME,
     CatalogPaths,
 )
 
 
-def test_catalog_paths_defaults():
-    paths = CatalogPaths()
-    assert paths.yaml_path.exists() and paths.yaml_path.is_dir()
-    assert paths.yaml_path.name == STANDARD_NAMES_DIRNAME
-    assert paths.catalog_path.parent.name == CATALOG_DIRNAME
+def test_catalog_paths_no_default_raises():
+    """Test that CatalogPaths() without args raises when no standard_names dir exists."""
+    with pytest.raises(FileNotFoundError, match="Standard names directory not found"):
+        CatalogPaths()
 
 
 def test_catalog_paths_existing_yaml(tmp_path: Path):
@@ -25,12 +23,9 @@ def test_catalog_paths_existing_yaml(tmp_path: Path):
     assert paths.yaml_path == custom.resolve()
 
 
-def test_catalog_paths_nonexistent_relative_dir():
-    p = CatalogPaths(yaml="___no_such_directory_pattern___").yaml_path
-    assert p.name == "___no_such_directory_pattern___"
+def test_catalog_paths_nonexistent_absolute_dir(tmp_path: Path):
+    """Test that absolute path to nonexistent dir is allowed (for creation)."""
+    nonexistent = tmp_path / "___no_such_directory___"
+    p = CatalogPaths(yaml=nonexistent).yaml_path
+    assert p.name == "___no_such_directory___"
     assert not p.exists()
-
-
-def test_catalog_paths_wildcard_not_found_raises():
-    with pytest.raises(ValueError):
-        CatalogPaths(yaml="___no_such_directory_pattern___*")
