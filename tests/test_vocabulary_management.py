@@ -169,7 +169,7 @@ class TestVocabularyToolIntegration:
 
     @pytest.mark.anyio
     async def test_manage_vocabulary_list(self, vocab_tool):
-        """Test manage_vocabulary with list action (no longer supported - use get_vocabulary_tokens)."""
+        """Test manage_vocabulary with list action (no longer supported - use get_vocabulary)."""
         result = await vocab_tool.manage_vocabulary(
             {"action": "list", "segment": "geometry"}
         )

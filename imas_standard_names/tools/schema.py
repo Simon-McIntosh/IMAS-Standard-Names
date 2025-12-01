@@ -26,7 +26,7 @@ _PURPOSE_CREATE_KIND_ENTRIES = (
     "Create {} entry dicts for create_standard_names(entries=[...])"
 )
 _WORKFLOW_STEPS_BASE = [
-    "1. get_naming_grammar → understand naming rules and compose valid name",
+    "1. get_grammar → understand naming rules and compose valid name",
     "2. get_schema → review field guidance and requirements",
     "3. Construct entry dict with all required fields for chosen kind",
     "4. create_standard_names(entries=[...]) → stage in-memory",
@@ -34,7 +34,7 @@ _WORKFLOW_STEPS_BASE = [
     "6. write_standard_names() → persist to disk",
 ]
 _WORKFLOW_STEPS_KIND = [
-    "1. get_naming_grammar → understand naming rules and compose valid name",
+    "1. get_grammar → understand naming rules and compose valid name",
     "2. get_schema → review field guidance",
     "3. Construct entry dict with all required fields",
     "4. create_standard_names(entries=[...]) → stage in-memory",

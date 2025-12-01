@@ -29,7 +29,7 @@ Read source files ONLY when:
 
 Never read files for:
 - Creating or editing standard names (use MCP tools)
-- Understanding grammar rules (use `get_naming_grammar` tool)
+- Understanding grammar rules (use `get_grammar` tool)
 - Searching the catalog (use `search_standard_names` tool)
 - Validating names (use validation tools)
 
@@ -44,7 +44,7 @@ list_standard_names()        # List all available names
 fetch_standard_names()       # Get complete metadata
 
 # Grammar and composition
-get_naming_grammar()         # Get grammar rules
+get_grammar()                # Get grammar rules
 compose_standard_name()      # Build valid names
 parse_standard_name()        # Parse into components
 
@@ -84,4 +84,4 @@ See `AGENTS.md` for comprehensive development guidelines including:
 - **Project root**: `/home/ITER/mcintos/Code/imas-standard-names`
 - **Standard names catalog**: Separate repository ([imas-standard-names-catalog](https://github.com/iterorganization/imas-standard-names-catalog))
 - **Tests**: `tests/` (mirror source structure)
-- **Grammar spec**: Accessible via `get_naming_grammar()` MCP tool
+- **Grammar spec**: Accessible via `get_grammar()` MCP tool

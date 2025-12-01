@@ -15,7 +15,7 @@ def vocabulary_tool():
 
 
 @pytest.fixture
-def vocabulary_tokens_tool():
+def get_vocabulary_tool():
     """Create a VocabularyTokensTool instance for testing."""
     catalog = StandardNameCatalog()
     return VocabularyTokensTool(catalog)
@@ -25,9 +25,9 @@ class TestVocabularyManageTool:
     """Test suite for manage_vocabulary tool with discriminated union."""
 
     @pytest.mark.anyio
-    async def test_list_all_vocabularies(self, vocabulary_tokens_tool):
+    async def test_list_all_vocabularies(self, get_vocabulary_tool):
         """Test listing all vocabularies."""
-        result = await vocabulary_tokens_tool.get_vocabulary_tokens()
+        result = await get_vocabulary_tool.get_vocabulary()
 
         assert "segments" in result
         assert "summary" in result
@@ -55,9 +55,9 @@ class TestVocabularyManageTool:
         assert "toroidal" in component_data["tokens"]
 
     @pytest.mark.anyio
-    async def test_list_specific_vocabulary(self, vocabulary_tokens_tool):
+    async def test_list_specific_vocabulary(self, get_vocabulary_tool):
         """Test listing a specific segment vocabulary."""
-        result = await vocabulary_tokens_tool.get_vocabulary_tokens(segment="component")
+        result = await get_vocabulary_tool.get_vocabulary(segment="component")
 
         assert "component" in result
 
@@ -123,10 +123,10 @@ class TestVocabularyToolIntegration:
     """Integration tests with real catalog data."""
 
     @pytest.mark.anyio
-    async def test_with_standard_names_catalog(self, vocabulary_tokens_tool):
+    async def test_with_standard_names_catalog(self, get_vocabulary_tool):
         """Test vocabulary tool with actual standard names catalog."""
         # Test that we can list all vocabularies
-        result = await vocabulary_tokens_tool.get_vocabulary_tokens()
+        result = await get_vocabulary_tool.get_vocabulary()
 
         assert "segments" in result
         assert "summary" in result

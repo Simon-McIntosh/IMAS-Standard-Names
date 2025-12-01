@@ -10,7 +10,7 @@ def test_overview_structure(sample_catalog):
     tool = NamingGrammarTool()
 
     # Without section parameter, should return overview (not full structure)
-    result = asyncio.run(tool.get_naming_grammar())
+    result = asyncio.run(tool.get_grammar())
 
     # Should have canonical pattern in overview
     assert "canonical_pattern" in result
@@ -76,7 +76,7 @@ def test_overview_full_section(sample_catalog):
     tool = NamingGrammarTool()
 
     # With section='all', should return full structure
-    result = asyncio.run(tool.get_naming_grammar(section="all"))
+    result = asyncio.run(tool.get_grammar(section="all"))
 
     # Check grammar_structure section (should be in full output)
     assert "grammar_structure" in result
@@ -134,7 +134,7 @@ def test_overview_specific_sections(sample_catalog):
     tool = NamingGrammarTool()
 
     # Test segments section
-    result = asyncio.run(tool.get_naming_grammar(section="segments"))
+    result = asyncio.run(tool.get_grammar(section="segments"))
     assert "section" in result
     assert result["section"] == "segments"
     assert "vocabulary" in result
@@ -143,14 +143,14 @@ def test_overview_specific_sections(sample_catalog):
     assert "physical_base" in vocab
 
     # Test rules section
-    result = asyncio.run(tool.get_naming_grammar(section="rules"))
+    result = asyncio.run(tool.get_grammar(section="rules"))
     assert "section" in result
     assert result["section"] == "rules"
     assert "validation_rules" in result
     assert result["validation_rules"]["base_required"] is True
 
     # Test examples section
-    result = asyncio.run(tool.get_naming_grammar(section="examples"))
+    result = asyncio.run(tool.get_grammar(section="examples"))
     assert "section" in result
     assert result["section"] == "examples"
     assert "composition_examples" in result

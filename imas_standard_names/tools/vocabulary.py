@@ -64,7 +64,7 @@ class VocabularyTool(CatalogTool):
             "Use 'action' field to select operation. "
             "Add/remove operations automatically run codegen and return 'codegen_success_restart_required' status. "
             "After successful changes, restart the MCP server to load new grammar.types enums. "
-            "For browsing available vocabulary tokens, use get_vocabulary_tokens tool."
+            "For browsing available vocabulary tokens, use get_vocabulary tool."
         )
     )
     async def manage_vocabulary(

@@ -55,7 +55,7 @@ field_reference:
   links: "Internal 'name:' refs ONLY, NO DD URLs. Call section='links'"
 
 workflow:
-  1: "get_naming_grammar → compose valid name"
+  1: \"get_grammar → compose valid name\"
   2: "get_schema kind='scalar' → review scalar schema"
   3: "Write minimal entry (name, kind, description)"
   4: "section='documentation' → add standalone docs"

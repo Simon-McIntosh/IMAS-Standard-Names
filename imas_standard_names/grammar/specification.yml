@@ -266,7 +266,7 @@ entry_schema:
         - gradient_of_electron_temperature
         - radial_component_of_magnetic_field
       guidance:
-        validation: "Must follow grammar canonical pattern. Use get_naming_grammar for composition rules."
+        validation: "Must follow grammar canonical pattern. Use get_grammar for composition rules."
         common_mistakes:
           - "Including units in name (use unit field instead)"
           - "Using camelCase or spaces"

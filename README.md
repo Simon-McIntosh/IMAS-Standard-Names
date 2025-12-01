@@ -121,9 +121,9 @@ The MCP server provides tools for AI assistants to work with standard names:
 ### Grammar & Schema
 | Tool | Purpose |
 |------|---------|
-| `get_naming_grammar` | Grammar rules, patterns, and composition guidance |
+| `get_grammar` | Grammar rules, patterns, and composition guidance |
 | `get_schema` | Entry schema for creating standard names |
-| `get_vocabulary_tokens` | Controlled vocabulary tokens by segment |
+| `get_vocabulary` | Controlled vocabulary tokens by segment |
 
 ### Composition & Parsing
 | Tool | Purpose |

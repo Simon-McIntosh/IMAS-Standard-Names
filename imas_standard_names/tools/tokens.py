@@ -32,7 +32,7 @@ class VocabularyTokensTool(CatalogTool):
 
     @property
     def tool_name(self) -> str:  # pragma: no cover - trivial
-        return "vocabulary_tokens"
+        return "vocabulary"
 
     @mcp_tool(
         description=(
@@ -44,11 +44,11 @@ class VocabularyTokensTool(CatalogTool):
             "to get detailed token list for one segment only. "
             "Parameters: include_usage (default true, shows frequency counts), "
             "include_metadata (default false, adds templates and validation rules). "
-            "Complements get_naming_grammar which provides grammar rules and composition patterns. "
-            "Call get_naming_grammar first to understand naming rules, then use this tool to see valid tokens for each segment."
+            "Complements get_grammar which provides grammar rules and composition patterns. "
+            "Call get_grammar first to understand naming rules, then use this tool to see valid tokens for each segment."
         )
     )
-    async def get_vocabulary_tokens(
+    async def get_vocabulary(
         self,
         segment: str | None = None,
         include_usage: bool = True,

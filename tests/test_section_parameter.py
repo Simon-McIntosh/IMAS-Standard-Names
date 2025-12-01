@@ -21,11 +21,11 @@ def schema_tool(sample_catalog):
 
 
 class TestGrammarSection:
-    """Test section parameter on get_naming_grammar tool."""
+    """Test section parameter on get_grammar tool."""
 
     async def test_section_none_returns_overview(self, grammar_tool):
         """When section=None, return concise overview."""
-        result = await grammar_tool.get_naming_grammar(section=None)
+        result = await grammar_tool.get_grammar(section=None)
 
         # Check for key overview components
         assert "canonical_pattern" in result
@@ -42,7 +42,7 @@ class TestGrammarSection:
 
     async def test_section_all_returns_full_output(self, grammar_tool):
         """When section='all', return complete grammar structure including applicability and examples."""
-        result = await grammar_tool.get_naming_grammar(section="all")
+        result = await grammar_tool.get_grammar(section="all")
 
         assert "applicability" in result
         assert "grammar_structure" in result
@@ -53,7 +53,7 @@ class TestGrammarSection:
 
     async def test_section_segments_returns_vocabulary(self, grammar_tool):
         """When section='segments', return vocabulary tokens."""
-        result = await grammar_tool.get_naming_grammar(section="segments")
+        result = await grammar_tool.get_grammar(section="segments")
 
         assert result["section"] == "segments"
         assert "vocabulary" in result
@@ -61,7 +61,7 @@ class TestGrammarSection:
 
     async def test_section_rules_returns_validation_rules(self, grammar_tool):
         """When section='rules', return validation rules."""
-        result = await grammar_tool.get_naming_grammar(section="rules")
+        result = await grammar_tool.get_grammar(section="rules")
 
         assert result["section"] == "rules"
         assert "validation_rules" in result
@@ -69,14 +69,14 @@ class TestGrammarSection:
 
     async def test_section_examples_returns_composition_examples(self, grammar_tool):
         """When section='examples', return composition examples."""
-        result = await grammar_tool.get_naming_grammar(section="examples")
+        result = await grammar_tool.get_grammar(section="examples")
 
         assert result["section"] == "examples"
         assert "composition_examples" in result
 
     async def test_section_statistics_returns_error(self, grammar_tool):
         """When section='statistics', return error since it's not a valid section."""
-        result = await grammar_tool.get_naming_grammar(section="statistics")
+        result = await grammar_tool.get_grammar(section="statistics")
 
         assert "error" in result
         assert result["error"] == "Invalid section"
@@ -88,7 +88,7 @@ class TestGrammarSection:
 
     async def test_invalid_section_returns_error(self, grammar_tool):
         """When section is invalid, return error with available sections."""
-        result = await grammar_tool.get_naming_grammar(section="invalid_section")
+        result = await grammar_tool.get_grammar(section="invalid_section")
 
         assert "error" in result
         assert result["error"] == "Invalid section"
@@ -160,8 +160,8 @@ class TestKindParameterTokenSavings:
 
     async def test_overview_is_smaller_than_specific_kinds(self, grammar_tool):
         """Verify overview response is significantly smaller than full output."""
-        overview = await grammar_tool.get_naming_grammar(section=None)
-        full = await grammar_tool.get_naming_grammar(section="all")
+        overview = await grammar_tool.get_grammar(section=None)
+        full = await grammar_tool.get_grammar(section="all")
 
         overview_str = str(overview)
         full_str = str(full)

@@ -42,7 +42,7 @@ def test_parse_standard_name():
 
 
 def test_vocabulary_in_grammar_tool():
-    """Test that vocabulary is now in get_naming_grammar (with section='all')."""
+    """Test that vocabulary is now in get_grammar (with section='all')."""
     examples_catalog = StandardNameCatalog(
         root="./imas_standard_names/resources/standard_name_examples",
         permissive=False,
@@ -50,7 +50,7 @@ def test_vocabulary_in_grammar_tool():
     tool = NamingGrammarTool(examples_catalog)
 
     # Get full grammar with section='all'
-    result = asyncio.run(tool.get_naming_grammar(section="all"))
+    result = asyncio.run(tool.get_grammar(section="all"))
 
     assert "vocabulary" in result
     vocab = result["vocabulary"]

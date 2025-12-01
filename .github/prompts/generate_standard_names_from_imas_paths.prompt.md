@@ -27,8 +27,8 @@ All output tables must follow these common rules:
 
 ### Initial generation
 
-- Get grammar rules: `get_grammar_and_vocabulary`
-- Check and fetch IMAS paths using IMAS MCP tools
+- Get grammar and vocabulary
+- Check and fetch IMAS paths
 - Extract IMAS DD documentation, units, and sign conventions
 - Generate scalar standard names aligned with IMAS DD
 - Generate vector components from scalars 
@@ -46,11 +46,10 @@ Do not create entries without user confirmation.
 
 If user confirms creation:
 
-- Get catalog schema: `get_schema`
+- Get schema for entry requirements
 - Generate tags, units, descriptions and documentation
-- Create entries: `create_standard_names`
-- Fix errors: `edit_standard_names`
-- Write to disk: `write_standard_names`
+- Create entries, fix any validation errors
+- Write to disk with user permission
 
 **Output:** Markdown table with columns: `| IDS Path | Standard Name | Grammar | Unit | Description | Tags |`
 

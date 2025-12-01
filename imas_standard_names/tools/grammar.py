@@ -223,11 +223,11 @@ class NamingGrammarTool(Tool):
 
     @property
     def tool_name(self) -> str:  # pragma: no cover - trivial
-        return "naming_grammar"
+        return "grammar"
 
     @mcp_tool(
         description=(
-            "Get IMAS Standard Names naming grammar rules for composing valid names. "
+            "Get IMAS Standard Names grammar rules for composing valid names. "
             "Call this first before composing names. "
             "Default (no section): Returns comprehensive overview with templates, patterns, critical distinctions, "
             "and composition rules - sufficient for most single-name tasks. "
@@ -235,12 +235,10 @@ class NamingGrammarTool(Tool):
             "vocabulary (complete token lists), examples (catalog entries by pattern), "
             "segments (detailed descriptions), rules (validation mechanics), "
             "all (complete reference, verbose). "
-            "For vocabulary tokens and usage statistics, use get_vocabulary_tokens tool."
+            "For vocabulary tokens and usage statistics, use get_vocabulary tool."
         )
     )
-    async def get_naming_grammar(
-        self, section: str | None = None, ctx: Context | None = None
-    ):
+    async def get_grammar(self, section: str | None = None, ctx: Context | None = None):
         """Return naming grammar rules and vocabulary overview for IMAS Standard Names.
 
         This is the primary reference for understanding how to compose valid standard names.
