@@ -1,4 +1,4 @@
-name: build
+name: docs
 
 on:
   push:
@@ -19,7 +19,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: "build-docs-${{ github.ref }}"
+  group: "docs-${{ github.ref }}"
   cancel-in-progress: true
 
 env:
@@ -79,6 +79,10 @@ jobs:
         run: |
           uv run mike alias "${{ steps.version.outputs.version }}" "latest" --update-aliases
           uv run mike set-default latest
+
+      - name: Set default version
+        if: steps.version.outputs.tagged != 'true' && github.ref_name == 'main'
+        run: uv run mike set-default main
 
   deploy:
     if: github.event_name != 'pull_request'
