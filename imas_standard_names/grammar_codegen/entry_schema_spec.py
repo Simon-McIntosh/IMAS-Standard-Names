@@ -45,6 +45,7 @@ class EntrySchemaSpec:
     fields: tuple[FieldSpec, ...]
     type_specific: dict[str, dict[str, Any]]
     provenance_modes_info: dict[str, Any] | None = None
+    upsert_guidance: dict[str, Any] | None = None
 
     @property
     def field_map(self) -> dict[str, FieldSpec]:
@@ -61,6 +62,7 @@ class EntrySchemaSpec:
         entry_schema_raw = data.get("entry_schema", {})
         fields_raw = entry_schema_raw.get("fields", {})
         type_specific_raw = entry_schema_raw.get("type_specific", {})
+        upsert_guidance_raw = entry_schema_raw.get("upsert_guidance", {})
 
         # Parse field specifications
         fields: list[FieldSpec] = []
@@ -113,10 +115,16 @@ class EntrySchemaSpec:
                 "modes": provenance_field.get("modes", {}),
             }
 
+        # Extract upsert guidance
+        upsert_guidance: dict[str, Any] | None = None
+        if isinstance(upsert_guidance_raw, dict) and upsert_guidance_raw:
+            upsert_guidance = upsert_guidance_raw
+
         return cls(
             fields=tuple(fields),
             type_specific=type_specific,
             provenance_modes_info=provenance_modes_info,
+            upsert_guidance=upsert_guidance,
         )
 
 

@@ -72,6 +72,7 @@ from imas_standard_names.field_types import (
     Description,
     Documentation,
     Domain,
+    IdsPaths,
     Links,
     Name,
     Tags,
@@ -188,6 +189,7 @@ class StandardNameEntryBase(BaseModel):
     superseded_by: Name | str = ""
     tags: Tags  # Required: tags[0] determines storage directory
     links: Links = Field(default_factory=list)
+    ids_paths: IdsPaths = Field(default_factory=list)
 
     # Supplemental validator for double underscore rule not expressible in pattern.
     @field_validator("name", "deprecates", "superseded_by")

@@ -784,6 +784,7 @@ def render_field_schemas_module(spec: EntrySchemaSpec) -> str:
         _field_guidance(spec),
         _type_specific_requirements(spec),
         _provenance_modes_info(spec),
+        _upsert_guidance(spec),
         _kind_models_mapping(spec),
         _field_schemas_export_block(),
     ]
@@ -919,6 +920,15 @@ def _provenance_modes_info(spec: EntrySchemaSpec) -> str:
     return f"PROVENANCE_MODES_INFO: dict[str, Any] | None = {info_repr}"
 
 
+def _upsert_guidance(spec: EntrySchemaSpec) -> str:
+    """Generate UPSERT_GUIDANCE constant from specification."""
+    if not spec.upsert_guidance:
+        return "UPSERT_GUIDANCE: dict[str, Any] | None = None"
+
+    info_repr = _format_dict_literal(spec.upsert_guidance, indent=4)
+    return f"UPSERT_GUIDANCE: dict[str, Any] | None = {info_repr}"
+
+
 def _kind_models_mapping(spec: EntrySchemaSpec) -> str:
     """Generate KIND_MODELS mapping of Kind enum to model classes.
 
@@ -1002,6 +1012,7 @@ def _field_schemas_export_block() -> str:
             'FIELD_GUIDANCE',
             'TYPE_SPECIFIC_REQUIREMENTS',
             'PROVENANCE_MODES_INFO',
+            'UPSERT_GUIDANCE',
             'KIND_MODELS',
         ]
         """

@@ -619,6 +619,31 @@ entry_schema:
       default: ""
       description: "Standard name token that supersedes this entry (required when status is 'superseded')"
       pattern: "^[a-z][a-z0-9_]*$|^$"
+    
+    ids_paths:
+      required: false
+      type: array
+      items: string
+      default: []
+      description: "IMAS Data Dictionary paths that map to this standard name. Used to track provenance from IMAS DD and enable cross-referencing between standard names and DD structure."
+      format: "ids_name/path/to/leaf"
+      examples:
+        - ["equilibrium/time_slice/profiles_1d/elongation"]
+        - ["equilibrium/time_slice/boundary/elongation", "equilibrium/time_slice/profiles_1d/elongation"]
+        - ["magnetics/flux_loop/flux/data"]
+      guidance:
+        purpose: "Track which IMAS Data Dictionary paths correspond to this standard name. Enables bidirectional linking between standard names and IMAS DD."
+        format_rules:
+          - "Use forward slashes (/) as path separators"
+          - "Start with IDS name (e.g., equilibrium, magnetics, core_profiles)"
+          - "Include full path to leaf node"
+          - "Paths are case-sensitive and must match IMAS DD exactly"
+        validation: "Paths can be validated using the check_imas_paths tool from the IMAS DD MCP server."
+        accumulation: "When enriching an existing entry with data from additional IDS paths, new paths are appended to the list (union semantics with deduplication)."
+        examples:
+          single_path: ["equilibrium/time_slice/profiles_1d/elongation"]
+          multiple_paths: ["equilibrium/time_slice/boundary/elongation", "equilibrium/time_slice/profiles_1d/elongation", "summary/boundary/elongation"]
+        note: "Multiple IDS paths may map to the same physical concept. Document all relevant paths to enable comprehensive data discovery and cross-referencing."
 
   # Type-specific requirements
   type_specific:
@@ -626,14 +651,14 @@ entry_schema:
       required_fields: [name, description, documentation, unit, tags]
       field_overrides:
         unit: "Required (use '1' for dimensionless)"
-      optional_fields: [provenance, status, validity_domain, constraints, deprecates, superseded_by, links]
+      optional_fields: [provenance, status, validity_domain, constraints, deprecates, superseded_by, links, ids_paths]
       description: "Physical quantities with single value at each point"
     
     vector:
       required_fields: [name, description, documentation, unit, tags]
       field_overrides:
         unit: "Required (use '1' for dimensionless)"
-      optional_fields: [provenance, status, validity_domain, constraints, deprecates, superseded_by, links]
+      optional_fields: [provenance, status, validity_domain, constraints, deprecates, superseded_by, links, ids_paths]
       description: "Vector field quantities with components"
     
     metadata:
@@ -641,6 +666,50 @@ entry_schema:
       field_overrides:
         unit: "Optional (default empty string, omitted from serialization)"
       forbidden_fields: [provenance]
-      optional_fields: [status, validity_domain, constraints, deprecates, superseded_by, links]
+      optional_fields: [status, validity_domain, constraints, deprecates, superseded_by, links, ids_paths]
       description: "Definitional entries (boundaries, regions, concepts)"
       note: "Metadata entries are definitional anchors, not measurable/derived quantities"
+
+  # Upsert/Merge Guidance
+  # When a standard name already exists and new IDS path data is available,
+  # use upsert mode to enrich the entry rather than skipping or erroring.
+  upsert_guidance:
+    purpose: "Enable incremental enrichment of standard names from multiple IMAS DD sources over time."
+    when_to_use:
+      - "Creating a standard name that may already exist in the catalog"
+      - "Adding additional IDS paths to an existing entry"
+      - "Enriching documentation with insights from new DD sources"
+    workflow:
+      - "Use create_standard_names with mode='upsert' instead of default mode"
+      - "If entry exists, tool returns existing entry data with merge guidance"
+      - "Read both existing and proposed entries carefully"
+      - "Compose a merged version that incorporates insights from both"
+      - "Use edit_standard_names to apply the merged result"
+    merge_strategy:
+      ids_paths:
+        behavior: "Accumulate (union with deduplication)"
+        guidance: "Append new IDS paths to existing list. Remove duplicates. Preserve order."
+      description:
+        behavior: "Considered merge"
+        guidance: "Read both descriptions. Write a merged version that captures the essence of both. Keep under 180 characters. Be specific and precise."
+      documentation:
+        behavior: "Considered merge"
+        guidance: "Read both documentation sections. Write a comprehensive merged version that incorporates physics context, equations, typical values, and relationships from both sources. Ensure standalone readability."
+      constraints:
+        behavior: "Accumulate (union with deduplication)"
+        guidance: "Combine constraints from both sources. Remove duplicates. Ensure consistency."
+      validity_domain:
+        behavior: "Prefer existing unless empty"
+        guidance: "Keep existing validity_domain if set. Use new value only if existing is empty."
+      links:
+        behavior: "Accumulate (union with deduplication)"
+        guidance: "Combine links from both sources. Remove duplicates."
+      tags:
+        behavior: "Preserve existing"
+        guidance: "Keep existing tags. Primary tag determines file location and should not change."
+    example_workflow: |
+      1. Call create_standard_names(entries=[{name: "elongation", ...}], mode="upsert")
+      2. If entry exists, receive: {action: "upsert_required", existing: {...}, proposed: {...}, merge_guidance: {...}}
+      3. Read existing.documentation and proposed.documentation
+      4. Compose merged documentation incorporating insights from both
+      5. Call edit_standard_names(payload={action: "modify", name: "elongation", updates: {documentation: "...", ids_paths: [...]}})

@@ -8,6 +8,7 @@ from imas_standard_names.grammar.field_schemas import (
     NAMING_GUIDANCE,
     PROVENANCE_MODES_INFO,
     TYPE_SPECIFIC_REQUIREMENTS,
+    UPSERT_GUIDANCE,
 )
 from imas_standard_names.grammar.tag_types import (
     PRIMARY_TAG_DESCRIPTIONS,
@@ -253,6 +254,7 @@ class SchemaTool(Tool):
                     "schemas": scalar_schema.get("$defs", {}),
                     "modes_info": PROVENANCE_MODES_INFO,
                 },
+                "upsert_guidance": UPSERT_GUIDANCE,
                 "use_kind_parameter": "Call with kind='scalar'|'vector'|'metadata' for specific schema without diffs",
             }
         )

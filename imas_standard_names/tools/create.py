@@ -2,7 +2,8 @@
 Create tool for adding new standard name entries to the catalog.
 
 This tool provides batch and single-entry creation with validation,
-dependency ordering, and dry-run support.
+dependency ordering, dry-run support, and upsert mode for incremental
+enrichment of existing entries.
 """
 
 from __future__ import annotations
@@ -14,6 +15,7 @@ from fastmcp import Context
 
 from imas_standard_names.decorators.mcp import mcp_tool
 from imas_standard_names.editing.batch_utils import topological_sort_operations
+from imas_standard_names.grammar.field_schemas import UPSERT_GUIDANCE
 from imas_standard_names.models import StandardNameEntry, create_standard_name_entry
 from imas_standard_names.tools.base import CatalogTool
 from imas_standard_names.validation.description import validate_description
@@ -36,6 +38,54 @@ class CreateTool(CatalogTool):
     def tool_name(self) -> str:  # pragma: no cover - trivial
         return "standard-name-create"
 
+    def _build_merge_guidance(
+        self, existing: dict[str, Any], proposed: dict[str, Any]
+    ) -> dict[str, Any]:
+        """Build merge guidance for LLM to combine existing and proposed entries.
+
+        Args:
+            existing: The existing entry data from the catalog
+            proposed: The proposed new entry data
+
+        Returns:
+            Structured guidance for LLM to merge the entries
+        """
+        merge_strategy = (
+            UPSERT_GUIDANCE.get("merge_strategy", {}) if UPSERT_GUIDANCE else {}
+        )
+
+        guidance = {
+            "action": "upsert_required",
+            "message": (
+                f"Entry '{existing.get('name')}' already exists. "
+                "Read both versions and compose a merged result."
+            ),
+            "existing": existing,
+            "proposed": proposed,
+            "merge_guidance": {
+                "instructions": [
+                    "Read both existing and proposed entries carefully",
+                    "Compose a merged version that incorporates insights from both",
+                    "Use edit_standard_names to apply the merged result",
+                ],
+                "field_strategies": merge_strategy,
+                "workflow": (
+                    UPSERT_GUIDANCE.get("workflow", []) if UPSERT_GUIDANCE else []
+                ),
+                "example_edit_call": {
+                    "action": "modify",
+                    "name": existing.get("name"),
+                    "updates": {
+                        "description": "<merged description>",
+                        "documentation": "<merged documentation>",
+                        "ids_paths": "<existing ids_paths + new ids_paths>",
+                        "constraints": "<merged constraints>",
+                    },
+                },
+            },
+        }
+        return guidance
+
     @mcp_tool(
         description=(
             "Create new standard name entries (single or batch). "
@@ -43,7 +93,8 @@ class CreateTool(CatalogTool):
             "automatic dependency ordering based on provenance. "
             "Changes are kept in-memory (pending) until write_standard_names is called. "
             "Use dry_run=true to validate without adding. "
-            "Mode 'atomic' rolls back all on first error; 'continue' processes all entries."
+            "Mode 'atomic' rolls back all on first error; 'continue' processes all entries; "
+            "'upsert' returns existing entry with merge guidance for LLM-driven enrichment."
         )
     )
     async def create_standard_names(
@@ -58,23 +109,26 @@ class CreateTool(CatalogTool):
         Args:
             entries: List of entry dicts with name, kind, description, etc.
             dry_run: If True, validate but don't add to catalog
-            mode: 'continue' (process all, accumulate errors) or 'atomic' (rollback on error)
+            mode: 'continue' (process all, accumulate errors),
+                  'atomic' (rollback on error),
+                  'upsert' (return merge guidance if entry exists)
 
         Returns:
-            {
-                "action": "batch",
-                "summary": {
-                    "total": n,
-                    "successful": n,
-                    "failed": n,
-                    "skipped": n,
-                    "duration_ms": n,
-                    "mode": str,
-                    "dry_run": bool
-                },
-                "results": [...],  # Per-entry results
-                "last_successful_index": n
-            }
+            For mode='continue'/'atomic':
+                {
+                    "action": "batch",
+                    "summary": {...},
+                    "results": [...],
+                    "last_successful_index": n
+                }
+            For mode='upsert' when entry exists:
+                {
+                    "action": "upsert_required",
+                    "message": "...",
+                    "existing": {...},
+                    "proposed": {...},
+                    "merge_guidance": {...}
+                }
         """
         start_time = time.time()
 
@@ -149,6 +203,7 @@ class CreateTool(CatalogTool):
         sorted_entries = [op.model for op in sorted_ops]
 
         results = []
+        upsert_results = []  # For upsert mode - entries that need merging
         successful_count = 0
         failed_count = 0
         last_successful_index: int | None = None
@@ -167,12 +222,28 @@ class CreateTool(CatalogTool):
                 )
                 warnings = description_warnings.get(orig_idx, [])
 
-                if dry_run:
-                    # Validate without adding - check both catalog and pending changes
-                    if self.catalog.get(entry.name) or self.edit_catalog.uow.has(
-                        entry.name
-                    ):  # type: ignore[attr-defined]
+                # Check if entry already exists
+                existing = self.catalog.get(entry.name)  # type: ignore[attr-defined]
+                pending_exists = self.edit_catalog.uow.has(entry.name)  # type: ignore[attr-defined]
+
+                if existing or pending_exists:
+                    if mode == "upsert":
+                        # Return merge guidance instead of erroring
+                        existing_data = (
+                            existing.model_dump()
+                            if existing
+                            else self.edit_catalog.uow.get(entry.name).model_dump()  # type: ignore[attr-defined]
+                        )
+                        proposed_data = entry.model_dump()  # type: ignore[attr-defined]
+                        upsert_results.append(
+                            self._build_merge_guidance(existing_data, proposed_data)
+                        )
+                        # Don't count as failure or success in upsert mode
+                        continue
+                    else:
                         raise ValueError(f"Entry '{entry.name}' already exists")  # type: ignore[attr-defined]
+
+                if dry_run:
                     result = {
                         "index": idx,
                         "status": "success",
@@ -182,11 +253,6 @@ class CreateTool(CatalogTool):
                         result["warnings"] = warnings
                     results.append(result)
                 else:
-                    # Check if entry already exists in catalog or pending changes
-                    if self.catalog.get(entry.name) or self.edit_catalog.uow.has(
-                        entry.name
-                    ):  # type: ignore[attr-defined]
-                        raise ValueError(f"Entry '{entry.name}' exists")  # type: ignore[attr-defined]
                     # Add to catalog
                     self.edit_catalog.add(entry.model_dump())  # type: ignore[attr-defined]
                     result = {
@@ -237,7 +303,7 @@ class CreateTool(CatalogTool):
         duration_ms = int((time.time() - start_time) * 1000)
 
         # Build return dict with validation errors if any
-        result = {
+        result_dict: dict[str, Any] = {
             "action": "batch",
             "summary": {
                 "total": len(entries),
@@ -246,7 +312,8 @@ class CreateTool(CatalogTool):
                 "skipped": len(entries)
                 - successful_count
                 - failed_count
-                - len(validation_errors),
+                - len(validation_errors)
+                - len(upsert_results),
                 "duration_ms": duration_ms,
                 "mode": mode,
                 "dry_run": dry_run,
@@ -255,11 +322,16 @@ class CreateTool(CatalogTool):
             "last_successful_index": last_successful_index,
         }
 
+        # Include upsert results if any (entries that need merging)
+        if upsert_results:
+            result_dict["upsert_required"] = upsert_results
+            result_dict["summary"]["upsert_required"] = len(upsert_results)
+
         # Include validation errors if any occurred
         if validation_errors:
-            result["validation_errors"] = validation_errors
+            result_dict["validation_errors"] = validation_errors
 
-        return result
+        return result_dict
 
 
 __all__ = ["CreateTool"]

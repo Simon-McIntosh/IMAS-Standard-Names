@@ -118,6 +118,14 @@ def row_to_model(conn: sqlite3.Connection, row: sqlite3.Row) -> StandardNameEntr
     ]
     if links:
         data["links"] = links
+    ids_paths = [
+        r[0]
+        for r in conn.execute(
+            "SELECT ids_path FROM ids_path WHERE name=?", (row["name"],)
+        ).fetchall()
+    ]
+    if ids_paths:
+        data["ids_paths"] = ids_paths
 
     try:
         return create_standard_name_entry(data)

@@ -97,6 +97,18 @@ Domain = Annotated[
     ),
 ]
 
+IdsPaths = Annotated[
+    list[str],
+    Field(
+        description=FIELD_DESCRIPTIONS.get(
+            "ids_paths",
+            "IMAS Data Dictionary paths that map to this standard name. "
+            "Format: 'ids_name/path/to/leaf' (e.g., 'equilibrium/time_slice/profiles_1d/elongation'). "
+            "Paths can be validated via check_imas_paths tool.",
+        ),
+    ),
+]
+
 
 __all__ = [
     "STANDARD_NAME_PATTERN",
@@ -109,4 +121,5 @@ __all__ = [
     "Description",
     "Documentation",
     "Domain",
+    "IdsPaths",
 ]
