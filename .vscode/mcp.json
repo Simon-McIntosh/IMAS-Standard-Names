@@ -10,7 +10,7 @@
       "args": ["run", "standard-names-mcp"],
       "env": {
         // "STANDARD_NAMES_CATALOG_ROOT": "../west-standard-names/standard_names"
-        "STANDARD_NAMES_CATALOG_ROOT": "./imas_standard_names/resources/standard_name_examples"
+        "STANDARD_NAMES_CATALOG_ROOT": "../imas-standard-names-catalog/standard_names"
       }
     }
   },
