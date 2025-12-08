@@ -4,7 +4,7 @@
       "type": "http",
       "url": "https://imas-dd.iter.org/mcp"
     },
-    "imas-sn-west": {
+    "imas-sn": {
       "type": "stdio",
       "command": "uv",
       "args": ["run", "standard-names-mcp"],
