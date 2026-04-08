@@ -19,7 +19,7 @@ dependencies = [
   "markdown>=3.8,<4.0",
   "textual>=6.1.0",
   "pydantic-ai>=1.0.8",
-  "fastmcp>=2.2.6,<3.0.0",
+  "fastmcp~=3.2.0",
   "dotenv>=0.9.9,<0.10.0",
 ]
 keywords = [
