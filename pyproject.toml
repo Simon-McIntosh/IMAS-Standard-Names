@@ -21,6 +21,7 @@ dependencies = [
   "pydantic-ai>=1.56.0",
   "fastmcp~=3.2.0",
   "dotenv>=0.9.9,<0.10.0",
+  "nest-asyncio>=1.6.0,<2.0.0",
 ]
 keywords = [
   "fusion",
