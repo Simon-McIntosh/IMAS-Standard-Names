@@ -53,7 +53,7 @@ Example with operator provenance:
 
 import re
 from collections.abc import Iterable
-from enum import Enum
+from enum import StrEnum
 from typing import Annotated, Literal, get_args
 
 from pydantic import (
@@ -155,7 +155,7 @@ def _check_grammar_vocabulary_consistency(name: str) -> list[str]:
     return errors
 
 
-class Kind(str, Enum):
+class Kind(StrEnum):
     """Runtime enum for standard name kinds."""
 
     scalar = "scalar"
