@@ -15,7 +15,8 @@ unit: eV
 description: Electron temperature.
 documentation: |
   Electron temperature for testing.
-tags: [fundamental, plasma]
+physics_domain: general
+tags: [spatial-profile]
 """,
         encoding="utf-8",
     )
@@ -27,7 +28,7 @@ unit: eV
 description: Ion temperature.
 documentation: |
   Ion temperature for testing.
-tags: [fundamental]
+physics_domain: general
 """,
         encoding="utf-8",
     )
@@ -47,13 +48,14 @@ def test_catalog_renderer_load_names(tmp_path: Path):
 
 
 def test_catalog_renderer_get_tags(tmp_path: Path):
-    """Test grouping names by primary tag."""
+    """Test grouping names by physics domain."""
     catalog_path = _make_test_catalog(tmp_path)
     renderer = CatalogRenderer(catalog_path)
     tags = renderer.get_tags()
 
-    assert "fundamental" in tags
-    assert len(tags["fundamental"]) == 2
+    # "fundamental" maps to "general" via TAG_TO_PHYSICS_DOMAIN
+    assert "general" in tags
+    assert len(tags["general"]) == 2
 
 
 def test_catalog_renderer_get_stats(tmp_path: Path):
@@ -63,8 +65,8 @@ def test_catalog_renderer_get_stats(tmp_path: Path):
     stats = renderer.get_stats()
 
     assert stats["total_names"] == 2
-    assert stats["total_tags"] == 1  # both have "fundamental" as primary
-    assert "fundamental" in stats["tags"]
+    assert stats["total_tags"] == 1  # both map to "general" physics domain
+    assert "general" in stats["tags"]
 
 
 def test_catalog_renderer_render_overview(tmp_path: Path):
@@ -75,7 +77,7 @@ def test_catalog_renderer_render_overview(tmp_path: Path):
 
     assert "Total Standard Names:" in overview
     assert "2" in overview
-    assert "Fundamental" in overview
+    assert "General" in overview
 
 
 def test_catalog_renderer_render_catalog(tmp_path: Path):
@@ -86,7 +88,7 @@ def test_catalog_renderer_render_catalog(tmp_path: Path):
 
     assert "electron_temperature" in catalog
     assert "ion_temperature" in catalog
-    assert "Fundamental" in catalog
+    assert "General" in catalog
     assert "**Unit:** `eV`" in catalog
 
 
@@ -104,7 +106,7 @@ def test_catalog_renderer_render_navigation(tmp_path: Path):
     renderer = CatalogRenderer(catalog_path)
     nav = renderer.render_navigation()
 
-    assert "Fundamental" in nav
+    assert "General" in nav
     assert "electron_temperature" in nav
     assert "ion_temperature" in nav
 
@@ -117,15 +119,15 @@ def test_catalog_renderer_loads_from_subdirectories(tmp_path: Path):
     in subdirectories by primary tag.
     """
     # Create subdirectory structure mimicking real catalog organization
-    fundamental_dir = tmp_path / "fundamental"
-    fundamental_dir.mkdir()
-    (fundamental_dir / "electron_temperature.yml").write_text(
+    general_dir = tmp_path / "general"
+    general_dir.mkdir()
+    (general_dir / "electron_temperature.yml").write_text(
         """name: electron_temperature
 kind: scalar
 status: active
 unit: eV
 description: Electron temperature.
-tags: [fundamental, plasma]
+physics_domain: general
 """,
         encoding="utf-8",
     )
@@ -138,7 +140,7 @@ kind: scalar
 status: active
 unit: m
 description: Major radius of the plasma.
-tags: [geometry]
+physics_domain: geometry
 """,
         encoding="utf-8",
     )
@@ -152,7 +154,8 @@ kind: scalar
 status: active
 unit: T
 description: Magnetic field measurement.
-tags: [diagnostics, magnetics]
+physics_domain: magnetic_field_diagnostics
+tags: [measured]
 """,
         encoding="utf-8",
     )

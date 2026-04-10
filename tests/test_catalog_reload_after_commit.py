@@ -74,7 +74,7 @@ def test_catalog_reload_after_multiple_commits(tmp_path):
             "description": "First entry",
             "documentation": "First entry for testing catalog reload.",
             "unit": "1",
-            "tags": ["fundamental"],
+            "physics_domain": "general",
         }
     )
     edit_catalog.commit()
@@ -90,7 +90,7 @@ def test_catalog_reload_after_multiple_commits(tmp_path):
             "description": "Second entry",
             "documentation": "Second entry for testing catalog reload.",
             "unit": "1",
-            "tags": ["fundamental"],
+            "physics_domain": "general",
         }
     )
     edit_catalog.commit()
@@ -123,7 +123,8 @@ def test_catalog_reload_preserves_relationships(tmp_path):
             "description": "Base quantity",
             "documentation": "Base quantity for testing provenance relationships.",
             "unit": "m",
-            "tags": ["fundamental", "measured"],
+            "physics_domain": "general",
+            "tags": ["measured"],
         }
     )
 
@@ -135,7 +136,8 @@ def test_catalog_reload_preserves_relationships(tmp_path):
             "description": "Gradient of base quantity",
             "documentation": "Spatial gradient of base quantity vector field.",
             "unit": "m.m^-1",
-            "tags": ["fundamental", "derived"],
+            "physics_domain": "general",
+            "tags": ["derived"],
             "provenance": {
                 "mode": "operator",
                 "operators": ["gradient"],
@@ -151,7 +153,7 @@ def test_catalog_reload_preserves_relationships(tmp_path):
 
     base = catalog.get("base_quantity")
     assert base is not None
-    assert base.tags == ["fundamental", "measured"]
+    assert base.tags == ["measured"]
 
     derived = catalog.get("gradient_of_base_quantity")
     assert derived is not None

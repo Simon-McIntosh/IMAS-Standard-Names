@@ -18,7 +18,7 @@ async def test_write_preserves_entries_on_validation_error(tmp_path):
     edit_catalog = EditCatalog(catalog)
     write_tool = WriteTool(catalog, edit_catalog)
 
-    # Create an entry with invalid tags (no primary tag at all)
+    # Create an entry with no physics_domain (only secondary tags)
     # Note: Validation now happens at add() time via pydantic
     invalid_entry = {
         "name": "test_quantity",
@@ -26,15 +26,15 @@ async def test_write_preserves_entries_on_validation_error(tmp_path):
         "description": "Test quantity with invalid tags.",
         "documentation": "Test quantity with invalid tags for error preservation testing.",
         "unit": "m",
-        "tags": ["calibrated", "measured"],  # WRONG: both are secondary, no primary tag
+        "tags": ["calibrated", "measured"],  # No physics_domain provided
     }
 
     # Add to catalog - should raise ValidationError immediately
     with pytest.raises(Exception) as exc_info:
         edit_catalog.add(invalid_entry)
 
-    # Verify it's a validation error about tags
-    assert "primary tag" in str(exc_info.value).lower()
+    # Verify it's a validation error about physics_domain
+    assert "physics_domain" in str(exc_info.value).lower()
 
     # Verify entry was NOT added to catalog
     assert catalog.get("test_quantity") is None
@@ -50,7 +50,8 @@ async def test_write_preserves_entries_on_validation_error(tmp_path):
         "description": "Test quantity with fixed tags.",
         "documentation": "Test quantity with fixed tags for error preservation testing.",
         "unit": "m",
-        "tags": ["magnetics", "calibrated"],  # CORRECT: primary then secondary
+        "physics_domain": "magnetic_field_diagnostics",
+        "tags": ["calibrated"],
     }
 
     # Add the corrected entry
@@ -67,7 +68,7 @@ async def test_write_preserves_entries_on_validation_error(tmp_path):
     assert result["validation_passed"] is True
 
     # Verify file was written
-    yaml_file = catalog_root / "magnetics" / "test_quantity.yml"
+    yaml_file = catalog_root / "magnetic_field_diagnostics" / "test_quantity.yml"
     assert yaml_file.exists()
 
     # Verify no pending changes remain (all persisted)
@@ -92,7 +93,7 @@ async def test_dry_run_validates_without_writing(tmp_path):
         "description": "Test quantity.",
         "documentation": "Test quantity for dry run validation testing.",
         "unit": "m",
-        "tags": ["fundamental"],
+        "physics_domain": "general",
     }
 
     edit_catalog.add(entry)
@@ -109,5 +110,5 @@ async def test_dry_run_validates_without_writing(tmp_path):
     assert len(diff["added"]) == 0
 
     # File should exist
-    yaml_file = catalog_root / "fundamental" / "test_quantity.yml"
+    yaml_file = catalog_root / "general" / "test_quantity.yml"
     assert yaml_file.exists()

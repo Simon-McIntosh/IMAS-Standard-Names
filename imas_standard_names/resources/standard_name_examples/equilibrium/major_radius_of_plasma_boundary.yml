@@ -21,7 +21,6 @@ documentation: |-
 
   Sign convention: Positive major radius measured from machine center, following standard cylindrical coordinate conventions and tokamak geometry.
 status: active
-tags:
-- equilibrium
+physics_domain: equilibrium
 kind: scalar
 unit: m

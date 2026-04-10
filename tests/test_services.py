@@ -12,7 +12,7 @@ def test_services_validate_and_row_to_model():
             "description": "Electron density.",
             "documentation": "Number density of electrons in the plasma.",
             "unit": "m^-3",  # canonical single token style for test purposes
-            "tags": ["fundamental"],
+            "physics_domain": "general",
         }
     )
     issues = validate_models({model.name: model})

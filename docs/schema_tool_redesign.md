@@ -51,7 +51,8 @@ field_reference:
   unit: "SI or eV, lexicographic order (m.s^-2), '' for dimensionless"
   status: "draft (default) | active | deprecated | superseded"
   documentation: "Standalone with LaTeX. Call section='documentation'"
-  tags: "tags[0]=PRIMARY, tags[1:]=secondary. Call section='tags'"
+  physics_domain: "Required PhysicsDomain enum value (e.g., core_plasma_physics)"
+  tags: "Optional secondary cross-cutting classification. Call section='tags'"
   links: "Internal 'name:' refs ONLY, NO DD URLs. Call section='links'"
 
 workflow:
@@ -69,9 +70,9 @@ complete_example: |
   description: Kinetic temperature of electrons in the plasma
   unit: eV
   status: active
+  physics_domain: core_plasma_physics
   tags:
-  - core-physics          # PRIMARY tag (tags[0])
-  - spatial-profile       # secondary tags
+  - spatial-profile       # optional secondary tags
   - measured
   documentation: |
     Electron kinetic temperature $T_e$ characterizing thermal state of
@@ -117,9 +118,9 @@ kind: scalar                         # Required: entry type discriminator
 description: Kinetic temperature of electrons in the plasma  # Required: one sentence
 unit: eV                            # Optional: SI or eV, lexicographic order
 status: active                      # Optional: draft|active|deprecated|superseded (default: draft)
-tags:                              # Optional: controlled vocabulary
-- core-physics                     #   tags[0] MUST be primary tag
-- spatial-profile                  #   tags[1:] are secondary tags
+physics_domain: core_plasma_physics # Required: PhysicsDomain enum value
+tags:                              # Optional: secondary cross-cutting classification
+- spatial-profile
 - measured
 documentation: |                   # Optional: standalone explanation with LaTeX
   Electron kinetic temperature $T_e$ ...

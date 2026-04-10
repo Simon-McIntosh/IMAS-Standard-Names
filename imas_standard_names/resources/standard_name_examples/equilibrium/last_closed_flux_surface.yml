@@ -19,7 +19,7 @@ documentation: |-
 
   LCFS location is determined from equilibrium reconstruction using external [magnetic_field](#magnetic_field) measurements. [Flux_loop_voltage](#flux_loop_voltage) integration provides flux surface geometry. Plasma imaging systems can directly visualize boundary positions. LCFS identification requires flux surface analysis and field line tracing. Position control systems maintain LCFS position during operations.
 status: draft
+physics_domain: equilibrium
 tags:
-- equilibrium
 - flux-coordinates
 kind: metadata

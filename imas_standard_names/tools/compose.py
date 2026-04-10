@@ -62,6 +62,9 @@ class ComposeTool(Tool):
         geometry: grammar_types.Position | str | None = None,
         position: grammar_types.Position | str | None = None,
         process: grammar_types.Process | str | None = None,
+        transformation: grammar_types.Transformation | str | None = None,
+        binary_operator: grammar_types.BinaryOperator | str | None = None,
+        secondary_base: str | None = None,
         ctx: Context | None = None,
     ) -> dict[str, Any]:
         """Build and validate a standard name.
@@ -79,6 +82,8 @@ class ComposeTool(Tool):
         geom = coerce_enum(grammar_types.Position, geometry)
         pos = coerce_enum(grammar_types.Position, position)
         proc = coerce_enum(grammar_types.Process, process)
+        trans = coerce_enum(grammar_types.Transformation, transformation)
+        binop = coerce_enum(grammar_types.BinaryOperator, binary_operator)
 
         model = grammar_model.StandardName(
             geometric_base=geo_base,
@@ -91,6 +96,9 @@ class ComposeTool(Tool):
             geometry=geom,
             position=pos,
             process=proc,
+            transformation=trans,
+            binary_operator=binop,
+            secondary_base=secondary_base,
         )
         name = model.compose()
         return {"name": name, "parts": model.model_dump_compact()}

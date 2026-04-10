@@ -106,6 +106,7 @@ def update_standardnames(
             "unit": raw_json.get("unit", "") or "",
             "description": description,
             "documentation": documentation,
+            "physics_domain": raw_json.get("physics_domain", ""),
             "tags": raw_tags or [],
             "links": [],
         }

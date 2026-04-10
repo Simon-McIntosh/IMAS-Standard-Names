@@ -17,7 +17,7 @@ def test_create_detects_duplicate_in_pending_changes(
         "description": "Total toroidal plasma current.",
         "documentation": "Total toroidal plasma current flowing in the plasma.",
         "unit": "A",
-        "tags": ["fundamental"],
+        "physics_domain": "general",
     }
     result1 = invoke_async(create_tool, "create_standard_names", entries=[entry1])
     assert result1["summary"]["successful"] == 1
@@ -29,7 +29,7 @@ def test_create_detects_duplicate_in_pending_changes(
         "description": "Duplicate entry.",
         "documentation": "This is a duplicate entry that should be rejected.",
         "unit": "A",
-        "tags": ["fundamental"],
+        "physics_domain": "general",
     }
     result2 = invoke_async(create_tool, "create_standard_names", entries=[entry2])
     assert result2["summary"]["failed"] == 1
@@ -48,7 +48,7 @@ def test_write_persistence(temp_catalog, temp_edit_catalog, invoke_async):
         "description": "Test quantity for write test.",
         "documentation": "Test quantity to verify write persistence behavior.",
         "unit": "m",
-        "tags": ["fundamental"],
+        "physics_domain": "general",
     }
     result = invoke_async(create_tool, "create_standard_names", entries=[entry])
     assert result["summary"]["successful"] == 1

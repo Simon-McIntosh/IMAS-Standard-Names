@@ -1,8 +1,10 @@
 {
   "servers": {
     "imas-dd": {
-      "type": "http",
-      "url": "https://imas-dd.iter.org/mcp"
+      "type": "stdio",
+      "command": "uv",
+      "args": ["run", "imas-codex", "serve", "--dd-only"],
+      "cwd": "../imas-codex"
     },
     "imas-sn": {
       "type": "stdio",

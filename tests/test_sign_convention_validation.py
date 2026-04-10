@@ -18,7 +18,7 @@ Sign convention: Positive when current flows counter-clockwise.
 Additional physics explanation here.
 """,
         unit="A",
-        tags=["fundamental"],
+        physics_domain="general",
     )
     assert entry.name == "test_current"
 
@@ -31,7 +31,7 @@ def test_invalid_bold_sign_convention():
             description="Test current quantity.",
             documentation="**Sign convention:** Positive when current flows counter-clockwise.",
             unit="A",
-            tags=["fundamental"],
+            physics_domain="general",
         )
 
 
@@ -43,7 +43,7 @@ def test_invalid_lowercase_sign_convention():
             description="Test current quantity.",
             documentation="sign convention: Positive when current flows counter-clockwise.",
             unit="A",
-            tags=["fundamental"],
+            physics_domain="general",
         )
 
 
@@ -55,7 +55,7 @@ def test_invalid_missing_positive():
             description="Test current quantity.",
             documentation="Sign convention: Current flows counter-clockwise when positive.",
             unit="A",
-            tags=["fundamental"],
+            physics_domain="general",
         )
 
 
@@ -66,7 +66,7 @@ def test_no_sign_convention_is_ok():
         description="Test temperature quantity.",
         documentation="Temperature measured in the plasma core.",
         unit="eV",
-        tags=["fundamental"],
+        physics_domain="general",
     )
     assert entry.name == "test_temperature"
 
@@ -79,7 +79,7 @@ def test_sign_convention_missing_blank_line_before():
             description="Test current quantity.",
             documentation="First paragraph text.\nSign convention: Positive when current flows counter-clockwise.",
             unit="A",
-            tags=["fundamental"],
+            physics_domain="general",
         )
 
 
@@ -91,7 +91,7 @@ def test_sign_convention_missing_blank_line_after():
             description="Test current quantity.",
             documentation="First paragraph.\n\nSign convention: Positive when current flows counter-clockwise.\nNext sentence immediately.",
             unit="A",
-            tags=["fundamental"],
+            physics_domain="general",
         )
 
 
@@ -103,7 +103,7 @@ def test_sign_convention_embedded_in_paragraph():
             description="Test current quantity.",
             documentation="Some text. Sign convention: Positive when current flows counter-clockwise. More text.",
             unit="A",
-            tags=["fundamental"],
+            physics_domain="general",
         )
 
 
@@ -115,7 +115,7 @@ def test_sign_convention_at_start_is_rejected():
             description="Test current quantity.",
             documentation="Sign convention: Positive when current flows counter-clockwise.\n\nAdditional text here.",
             unit="A",
-            tags=["fundamental"],
+            physics_domain="general",
         )
 
 
@@ -126,7 +126,7 @@ def test_sign_convention_at_end_with_blank_before():
         description="Test current quantity.",
         documentation="First paragraph explaining the quantity.\n\nSign convention: Positive when current flows counter-clockwise.",
         unit="A",
-        tags=["fundamental"],
+        physics_domain="general",
     )
     assert entry.name == "test_current"
 

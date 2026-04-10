@@ -1,6 +1,6 @@
 # IMAS Standard Names - Controlled Tag Vocabulary
-# Primary tags (tags[0]) define catalog subdirectory organization
-# Secondary tags (tags[1:]) provide cross-cutting classification
+# Primary tags define a legacy classification vocabulary (see physics_domains.yml)
+# Secondary tags provide cross-cutting classification
 
 primary_tags:
   # UNIVERSAL PHYSICS QUANTITIES

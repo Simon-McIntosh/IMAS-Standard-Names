@@ -59,6 +59,7 @@ class TestFetchSingleName:
         assert "grammar" in entry
         assert "provenance" in entry
         assert "tags" in entry
+        assert "physics_domain" in entry
         assert "links" in entry
 
     def test_fetch_nonexistent_name(self, fetch_tool):
@@ -146,28 +147,59 @@ class TestFetchMetadata:
         assert "derived_from" in provenance
         assert isinstance(provenance["derived_from"], list)
 
-    def test_fetch_with_operator_provenance(self, fetch_tool, catalog):
+    def test_fetch_with_operator_provenance(self, tmp_path):
         """Test fetching entry with operator provenance."""
-        # Look for an entry with operator provenance (likely gradient, time_derivative)
-        all_entries = catalog.list()
-        operator_entries = [
-            e
-            for e in all_entries
-            if hasattr(e, "provenance")
-            and e.provenance
-            and hasattr(e.provenance, "mode")
-            and e.provenance.mode == "operator"  # type: ignore[attr-defined]
-        ]
-        if not operator_entries:
-            pytest.skip("No entries with operator provenance")
+        from imas_standard_names.models import create_standard_name_entry
+        from imas_standard_names.yaml_store import YamlStore
 
-        entry_obj = operator_entries[0]
-        result = invoke(fetch_tool, entry_obj.name)
+        catalog_dir = tmp_path / "prov_catalog"
+        catalog_dir.mkdir()
+
+        # Create a base entry and a derived entry with operator provenance
+        base_entry = create_standard_name_entry(
+            {
+                "name": "electron_temperature",
+                "kind": "scalar",
+                "unit": "eV",
+                "description": "Electron temperature.",
+                "documentation": "Core electron temperature.",
+                "status": "draft",
+                "physics_domain": "core_plasma_physics",
+            }
+        )
+        derived_entry = create_standard_name_entry(
+            {
+                "name": "gradient_of_electron_temperature",
+                "kind": "vector",
+                "unit": "eV.m^-1",
+                "description": "Spatial gradient of electron temperature.",
+                "documentation": "Gradient of core electron temperature.",
+                "status": "draft",
+                "physics_domain": "core_plasma_physics",
+                "tags": ["derived"],
+                "provenance": {
+                    "mode": "operator",
+                    "operators": ["gradient"],
+                    "base": "electron_temperature",
+                    "operator_id": "gradient",
+                },
+            }
+        )
+
+        store = YamlStore(catalog_dir)
+        (catalog_dir / "core").mkdir()
+        store.write(base_entry)
+        store.write(derived_entry)
+
+        catalog = StandardNameCatalog(root=catalog_dir)
+        tool = FetchTool(catalog)
+        result = invoke(tool, "gradient_of_electron_temperature")
 
         entry = result["entries"][0]
         derived_from = entry["provenance"]["derived_from"]
         assert isinstance(derived_from, list)
-        assert len(derived_from) > 0  # Should have a base
+        assert len(derived_from) > 0
+        assert "electron_temperature" in derived_from
 
     def test_fetch_constraints_and_validity(self, fetch_tool, catalog):
         """Test constraints and validity domain."""

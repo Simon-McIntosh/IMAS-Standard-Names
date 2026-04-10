@@ -18,14 +18,14 @@ def test_unit_of_work_add_update_remove_commit(tmp_path):
             "documentation": "Number density of electrons in the plasma.",
             "unit": "m^-3",
             "status": "draft",
-            "tags": ["fundamental"],
+            "physics_domain": "general",
         }
     )
     uow.add(a)
     uow.commit()
     assert repo.get("electron_density") is not None
-    # YamlStore organizes files by primary tag
-    file_path = root / "fundamental" / "electron_density.yml"
+    # YamlStore organizes files by physics_domain
+    file_path = root / "general" / "electron_density.yml"
     assert file_path.exists()
 
     # Update (change description)
@@ -37,7 +37,7 @@ def test_unit_of_work_add_update_remove_commit(tmp_path):
             "documentation": "Number density of electrons in the plasma (updated).",
             "unit": "m^-3",
             "status": "active",
-            "tags": ["fundamental"],
+            "physics_domain": "general",
         }
     )
     uow.update("electron_density", updated)

@@ -25,8 +25,8 @@ documentation: |-
 
   Sign convention: Positive when $\kappa \geq 1$ indicating vertically elongated or circular cross-section, following standard tokamak geometry conventions.
 status: draft
+physics_domain: equilibrium
 tags:
-- equilibrium
 - global-quantity
 kind: scalar
 unit: '1'

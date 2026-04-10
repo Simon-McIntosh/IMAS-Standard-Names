@@ -12,7 +12,7 @@ def test_unit_dimensionless_normalization():
             "documentation": "Poloidal beta - dimensionless plasma parameter.",
             "unit": "1",
             "status": "active",
-            "tags": ["fundamental"],
+            "physics_domain": "general",
         }
     )
     assert sn.unit == "1"
@@ -66,7 +66,7 @@ def test_formatted_unit_styles(style, expected_variants):
             "documentation": "Acceleration in meters per second squared.",
             "unit": "m.s^-2",
             "status": "active",
-            "tags": ["fundamental"],
+            "physics_domain": "general",
         }
     )
     formatted = sn.formatted_unit(style=style)
@@ -84,7 +84,7 @@ def test_formatted_unit_unknown_style():
             "documentation": "Number density of electrons in the plasma.",
             "unit": "m^-3",
             "status": "draft",
-            "tags": ["fundamental"],
+            "physics_domain": "general",
         }
     )
     with pytest.raises(ValueError):
@@ -100,12 +100,13 @@ def test_tags_and_links_normalization():
             "documentation": "Temperature of ions in the plasma.",
             "unit": "eV",
             "status": "active",
-            "tags": [" fundamental ", "time-dependent", ""],
+            "physics_domain": "general",
+            "tags": [" time-dependent ", "global-quantity", ""],
             "links": ["  https://example.com/ref  ", "", "https://example.com/ref"],
             "constraints": [" Ti >= 0 ", ""],
         }
     )
-    assert sn.tags == ["fundamental", "time-dependent"]
+    assert sn.tags == ["time-dependent", "global-quantity"]
     assert sn.links == [
         "https://example.com/ref",
         "https://example.com/ref",
@@ -135,7 +136,7 @@ def test_deprecated_with_superseded_by_ok():
             "documentation": "Old quantity superseded by new_quantity.",
             "unit": "eV",
             "status": "deprecated",
-            "tags": ["fundamental"],
+            "physics_domain": "general",
             "superseded_by": "new_quantity",
         }
     )
@@ -153,7 +154,7 @@ def test_unit_auto_canonical_ordering():
             "documentation": "Test entry for unit ordering validation.",
             "unit": "s^-2.m",  # Non-canonical order
             "status": "draft",
-            "tags": ["fundamental"],
+            "physics_domain": "general",
         }
     )
     assert sn1.unit == "m.s^-2", f"Expected 'm.s^-2', got '{sn1.unit}'"
@@ -167,7 +168,7 @@ def test_unit_auto_canonical_ordering():
             "documentation": "Spatial gradient of energy.",
             "unit": "keV.m^-1",
             "status": "draft",
-            "tags": ["fundamental"],
+            "physics_domain": "general",
         }
     )
     assert sn2.unit == "keV.m^-1"
@@ -181,7 +182,7 @@ def test_unit_auto_canonical_ordering():
             "documentation": "Test quantity with complex unit ordering.",
             "unit": "T.m^-2.A",  # Should become A.T.m^-2
             "status": "draft",
-            "tags": ["fundamental"],
+            "physics_domain": "general",
         }
     )
     assert sn3.unit == "A.T.m^-2", f"Expected 'A.T.m^-2', got '{sn3.unit}'"
@@ -195,7 +196,7 @@ def test_unit_auto_canonical_ordering():
             "documentation": "Test quantity with multiple unit tokens.",
             "unit": "s.kg.m^2",  # Should become kg.m^2.s
             "status": "draft",
-            "tags": ["fundamental"],
+            "physics_domain": "general",
         }
     )
     assert sn4.unit == "kg.m^2.s", f"Expected 'kg.m^2.s', got '{sn4.unit}'"

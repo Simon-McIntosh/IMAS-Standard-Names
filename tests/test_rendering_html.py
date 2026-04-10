@@ -16,7 +16,8 @@ unit: m.s^-1
 description: Flow velocity.
 documentation: |
   Flow velocity for HTML rendering testing.
-tags: [fundamental]
+physics_domain: general
+tags: [measured]
 """,
         encoding="utf-8",
     )
@@ -29,7 +30,7 @@ status: active
 description: Radial component of velocity.
 documentation: |
   Radial component of velocity for HTML rendering testing.
-tags: [fundamental]
+physics_domain: general
 """,
         encoding="utf-8",
     )
@@ -41,7 +42,7 @@ status: active
 description: Toroidal component of velocity.
 documentation: |
   Toroidal component of velocity for HTML rendering testing.
-tags: [fundamental]
+physics_domain: general
 """,
         encoding="utf-8",
     )

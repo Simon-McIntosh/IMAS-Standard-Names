@@ -25,7 +25,7 @@ def test_delete_with_dry_run(tmp_path):
         "description": "Test quantity.",
         "documentation": "Test quantity for delete operation with dry run.",
         "unit": "m",
-        "tags": ["fundamental"],
+        "physics_domain": "general",
     }
     edit_catalog.add(test_entry)
     edit_catalog.commit()
@@ -55,7 +55,7 @@ def test_delete_without_dry_run(tmp_path):
         "description": "Test quantity.",
         "documentation": "Test quantity for delete operation without dry run.",
         "unit": "m",
-        "tags": ["fundamental"],
+        "physics_domain": "general",
     }
     edit_catalog.add(test_entry)
     edit_catalog.commit()
@@ -88,7 +88,7 @@ def test_rename_with_dry_run(tmp_path):
         "description": "Test quantity.",
         "documentation": "Test quantity for rename operation.",
         "unit": "m",
-        "tags": ["fundamental"],
+        "physics_domain": "general",
     }
     edit_catalog.add(test_entry)
     edit_catalog.commit()
@@ -128,7 +128,7 @@ def test_batch_delete(tmp_path):
             "description": f"Test quantity {i}.",
             "documentation": f"Test quantity {i} for batch delete.",
             "unit": "m",
-            "tags": ["fundamental"],
+            "physics_domain": "general",
         }
         edit_catalog.add(test_entry)
     edit_catalog.commit()
@@ -169,7 +169,7 @@ def test_batch_delete_with_dry_run(tmp_path):
             "description": f"Test quantity {i}.",
             "documentation": f"Test quantity {i} for batch delete with dry run.",
             "unit": "m",
-            "tags": ["fundamental"],
+            "physics_domain": "general",
         }
         edit_catalog.add(test_entry)
     edit_catalog.commit()

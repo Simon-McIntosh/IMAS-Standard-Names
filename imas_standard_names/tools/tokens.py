@@ -19,6 +19,8 @@ from imas_standard_names.decorators.mcp import mcp_tool
 from imas_standard_names.grammar.constants import SEGMENT_RULES, SEGMENT_TOKEN_MAP
 from imas_standard_names.grammar.model import parse_standard_name
 from imas_standard_names.grammar.tag_types import (
+    PHYSICS_DOMAIN_DESCRIPTIONS,
+    PHYSICS_DOMAINS,
     PRIMARY_TAG_DESCRIPTIONS,
     PRIMARY_TAGS,
     SECONDARY_TAG_DESCRIPTIONS,
@@ -104,6 +106,9 @@ class VocabularyTokensTool(CatalogTool):
         segments["secondary_tags"] = self._build_tag_vocabulary(
             "secondary", include_usage
         )
+        segments["physics_domains"] = self._build_physics_domain_vocabulary(
+            include_usage
+        )
 
         # Add summary statistics
         summary = self._build_vocabulary_summary(segments)
@@ -154,9 +159,7 @@ class VocabularyTokensTool(CatalogTool):
         if tag_type == "primary":
             tokens = list(PRIMARY_TAGS)
             descriptions = PRIMARY_TAG_DESCRIPTIONS
-            description = (
-                "Primary tags define catalog subdirectory organization (tags[0])"
-            )
+            description = "Physics domain classification (see PhysicsDomain enum)"
         else:
             tokens = list(SECONDARY_TAGS)
             descriptions = SECONDARY_TAG_DESCRIPTIONS
@@ -176,6 +179,46 @@ class VocabularyTokensTool(CatalogTool):
             tag_data["usage"] = usage_stats
 
         return tag_data
+
+    def _build_physics_domain_vocabulary(self, include_usage: bool) -> dict[str, Any]:
+        """Build vocabulary data for physics domain enum."""
+        tokens = list(PHYSICS_DOMAINS)
+        tag_data: dict[str, Any] = {
+            "tag_type": "physics_domain",
+            "token_count": len(tokens),
+            "tokens": tokens,
+            "descriptions": PHYSICS_DOMAIN_DESCRIPTIONS,
+            "description": "Physics domain classification (PhysicsDomain enum)",
+        }
+        if include_usage:
+            usage_stats = self._compute_physics_domain_usage(tokens)
+            tag_data["usage"] = usage_stats
+        return tag_data
+
+    def _compute_physics_domain_usage(self, domains: list[str]) -> dict[str, Any]:
+        """Compute usage statistics for physics domains."""
+        all_names = list(self.catalog.list_names())
+        domain_counts: Counter[str] = Counter()
+        for name in all_names:
+            try:
+                entry = self.catalog.get(name)
+                if entry and hasattr(entry, "physics_domain") and entry.physics_domain:
+                    pd = entry.physics_domain
+                    if pd in domains:
+                        domain_counts[pd] += 1
+            except Exception:
+                continue
+        used = len([d for d in domains if domain_counts[d] > 0])
+        unused = len(domains) - used
+        sorted_counts = sorted(domain_counts.items(), key=lambda x: x[1], reverse=True)
+        return {
+            "total_tags": len(domains),
+            "used_tags": used,
+            "unused_tags": unused,
+            "usage_rate": round(used / len(domains) * 100, 1) if domains else 0,
+            "tag_frequencies": dict(sorted_counts),
+            "most_common": sorted_counts[:10] if sorted_counts else [],
+        }
 
     def _build_vocabulary_summary(self, segments: dict) -> dict[str, Any]:
         """Build summary statistics across all vocabularies."""
@@ -281,15 +324,13 @@ class VocabularyTokensTool(CatalogTool):
         for name in all_names:
             try:
                 entry = self.catalog.get(name)
-                if entry and entry.tags:
+                if entry:
                     if tag_type == "primary":
-                        # Primary tag is tags[0]
-                        primary = entry.tags[0]
-                        if primary in tags:
-                            tag_counts[primary] += 1
-                    elif tag_type == "secondary" and len(entry.tags) > 1:
-                        # Secondary tags are tags[1:]
-                        for tag in entry.tags[1:]:
+                        pd = getattr(entry, "physics_domain", None)
+                        if pd and pd in tags:
+                            tag_counts[pd] += 1
+                    elif tag_type == "secondary" and entry.tags:
+                        for tag in entry.tags:
                             if tag in tags:
                                 tag_counts[tag] += 1
             except Exception:

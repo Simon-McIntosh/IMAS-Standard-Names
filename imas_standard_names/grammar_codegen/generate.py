@@ -23,6 +23,7 @@ from typing import Any
 import yaml
 
 from imas_standard_names.grammar_codegen.entry_schema_spec import EntrySchemaSpec
+from imas_standard_names.grammar_codegen.physics_domain_spec import PhysicsDomainSpec
 from imas_standard_names.grammar_codegen.spec import GrammarSpec, IncludeLoader
 from imas_standard_names.grammar_codegen.tag_spec import TagSpec
 
@@ -65,6 +66,8 @@ ENUM_NAME_OVERRIDES = {
     "objects": "Object",
     "positions": "Position",
     "processes": "Process",
+    "transformations": "Transformation",
+    "binary_operators": "BinaryOperator",
 }
 
 
@@ -104,9 +107,10 @@ def main(format_code: bool = True) -> None:
 
     grammar_updated = types_updated or constants_updated
 
-    # Generate tag types
+    # Generate tag types and physics domain types
     tag_spec = TagSpec.load()
-    tag_content = render_tag_module(tag_spec)
+    physics_domain_spec = PhysicsDomainSpec.load()
+    tag_content = render_tag_module(tag_spec, physics_domain_spec)
     tag_existing = (
         TAG_OUTPUT_MODULE.read_text(encoding="utf-8")
         if TAG_OUTPUT_MODULE.exists()
@@ -572,6 +576,38 @@ def _render_scope_metadata(spec: Any) -> str:
         )
         sections.append(generic_section)
 
+    # Add transformation tokens if the vocabulary exists
+    if "transformations" in spec.vocabularies:
+        tokens = spec.vocabularies["transformations"]
+        tokens_repr = _format_tuple_literal(tokens, indent=4, base_indent=0)
+        transformation_section = (
+            "\n# Unary transformation tokens that modify a physical base\n"
+            "# These are prefixed to the physical_base: e.g. square_of_temperature\n"
+            f"TRANSFORMATION_TOKENS: tuple[str, ...] = {tokens_repr}"
+        )
+        sections.append(transformation_section)
+
+    # Add binary operator tokens and connector mapping if the vocabulary exists
+    if "binary_operators" in spec.vocabularies:
+        tokens = spec.vocabularies["binary_operators"]
+        tokens_repr = _format_tuple_literal(tokens, indent=4, base_indent=0)
+        binary_op_section = (
+            "\n# Binary operator tokens that combine two physical bases\n"
+            f"BINARY_OPERATOR_TOKENS: tuple[str, ...] = {tokens_repr}"
+        )
+        sections.append(binary_op_section)
+
+    # Add binary operator connectors if present in spec
+    connectors = getattr(spec, "binary_operator_connectors", None)
+    if connectors:
+        connector_repr = _format_str_dict_literal(connectors)
+        connector_section = (
+            "\n# Maps each binary operator to its connector word\n"
+            "# Symmetric operators use 'and'; asymmetric (ratio) uses 'to'\n"
+            f"BINARY_OPERATOR_CONNECTORS: dict[str, str] = {connector_repr}"
+        )
+        sections.append(connector_section)
+
     return "\n\n".join(sections) if sections else ""
 
 
@@ -601,6 +637,9 @@ def _constants_export_block() -> str:
         "APPLICABILITY_EXCLUDE",
         "APPLICABILITY_RATIONALE",
         "GENERIC_PHYSICAL_BASES",
+        "TRANSFORMATION_TOKENS",
+        "BINARY_OPERATOR_TOKENS",
+        "BINARY_OPERATOR_CONNECTORS",
     ]
     formatted = ",\n    ".join(f'"{name}"' for name in constants)
     return "__all__ = [\n    " + formatted + ",\n]"
@@ -664,15 +703,25 @@ def _enum_class_name(vocab_name: str) -> str:
 # ============================================================================
 
 
-def render_tag_module(spec: TagSpec) -> str:
-    """Render the tag_types.py module from TagSpec."""
+def render_tag_module(spec: TagSpec, pd_spec: PhysicsDomainSpec | None = None) -> str:
+    """Render the tag_types.py module from TagSpec and PhysicsDomainSpec."""
     sections = [
         _tag_module_header(),
         _tag_import_block(),
-        _tag_literal_types(spec),
-        _tag_metadata(spec),
-        _tag_export_block(),
     ]
+
+    # Add PhysicsDomain enum and metadata if spec provided
+    if pd_spec:
+        sections.append(_physics_domain_enum(pd_spec))
+        sections.append(_physics_domain_metadata(pd_spec))
+
+    sections.extend(
+        [
+            _tag_literal_types(spec),
+            _tag_metadata(spec),
+            _tag_export_block(pd_spec),
+        ]
+    )
 
     parts: list[str] = []
     for section in sections:
@@ -698,9 +747,50 @@ def _tag_import_block() -> str:
         """
         from __future__ import annotations
 
+        from enum import StrEnum
         from typing import Literal
         """
     ).strip()
+
+
+def _physics_domain_enum(spec: PhysicsDomainSpec) -> str:
+    """Generate PhysicsDomain StrEnum class."""
+    lines = [
+        "class PhysicsDomain(StrEnum):",
+        '    """Physics domain classification for IMAS standard names."""',
+        "",
+    ]
+    for domain in spec.domains:
+        lines.append(f'    {domain.upper()} = "{domain}"')
+
+    return "\n".join(lines)
+
+
+def _physics_domain_metadata(spec: PhysicsDomainSpec) -> str:
+    """Generate PhysicsDomain metadata constants."""
+    # Descriptions dict
+    desc_lines = ["PHYSICS_DOMAIN_DESCRIPTIONS: dict[str, str] = {"]
+    for domain in spec.domains:
+        description = spec.descriptions.get(domain, "").replace("'", "\\'")
+        desc_lines.append(f"    '{domain}': '{description}',")
+    desc_lines.append("}")
+    desc_block = "\n".join(desc_lines)
+
+    # Domains tuple
+    domains_tuple = _format_tuple_literal(spec.domains, indent=4, base_indent=0)
+
+    # Tag-to-domain alias mapping
+    alias_lines = ["TAG_TO_PHYSICS_DOMAIN: dict[str, str] = {"]
+    for old_tag, new_domain in spec.tag_aliases.items():
+        alias_lines.append(f'    "{old_tag}": "{new_domain}",')
+    alias_lines.append("}")
+    alias_block = "\n".join(alias_lines)
+
+    return (
+        f"{desc_block}\n\n"
+        f"PHYSICS_DOMAINS: tuple[str, ...] = {domains_tuple}\n\n"
+        f"{alias_block}"
+    )
 
 
 def _tag_literal_types(spec: TagSpec) -> str:
@@ -710,10 +800,10 @@ def _tag_literal_types(spec: TagSpec) -> str:
 
     return dedent(
         f"""
-        # Primary tags define catalog subdirectory organization (tags[0])
+        # Primary tags (legacy classification vocabulary)
         PrimaryTag = Literal[{primary_values}]
 
-        # Secondary tags provide cross-cutting classification (tags[1:])
+        # Secondary tags for cross-cutting classification
         SecondaryTag = Literal[{secondary_values}]
 
         # Union type for any tag
@@ -756,20 +846,27 @@ def _tag_metadata(spec: TagSpec) -> str:
     )
 
 
-def _tag_export_block() -> str:
-    return dedent(
-        """
-        __all__ = [
-            'PrimaryTag',
-            'SecondaryTag',
-            'Tag',
-            'PRIMARY_TAGS',
-            'SECONDARY_TAGS',
-            'PRIMARY_TAG_DESCRIPTIONS',
-            'SECONDARY_TAG_DESCRIPTIONS',
-        ]
-        """
-    ).strip()
+def _tag_export_block(pd_spec: PhysicsDomainSpec | None = None) -> str:
+    exports = [
+        "'PrimaryTag'",
+        "'SecondaryTag'",
+        "'Tag'",
+        "'PRIMARY_TAGS'",
+        "'SECONDARY_TAGS'",
+        "'PRIMARY_TAG_DESCRIPTIONS'",
+        "'SECONDARY_TAG_DESCRIPTIONS'",
+    ]
+    if pd_spec:
+        exports.extend(
+            [
+                "'PhysicsDomain'",
+                "'PHYSICS_DOMAINS'",
+                "'PHYSICS_DOMAIN_DESCRIPTIONS'",
+                "'TAG_TO_PHYSICS_DOMAIN'",
+            ]
+        )
+    items = ",\n    ".join(exports)
+    return f"__all__ = [\n    {items},\n]"
 
 
 def render_field_schemas_module(spec: EntrySchemaSpec) -> str:

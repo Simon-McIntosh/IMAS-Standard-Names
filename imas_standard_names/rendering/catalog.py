@@ -70,20 +70,20 @@ class CatalogRenderer:
         return standard_names
 
     def get_tags(self) -> dict[str, list[dict]]:
-        """Group standard names by their primary tags.
+        """Group standard names by their physics domain.
 
         Returns
         -------
         dict[str, list[dict]]
-            Dictionary mapping primary tag to list of entries.
+            Dictionary mapping physics domain to list of entries.
         """
         names = self.load_names()
         tags_groups: dict[str, list[dict]] = defaultdict(list)
 
         for item in names:
-            if "tags" in item and item["tags"]:
-                primary_tag = item["tags"][0]
-                tags_groups[primary_tag].append(item)
+            pd = item.get("physics_domain", "")
+            if pd:
+                tags_groups[pd].append(item)
 
         return dict(tags_groups)
 

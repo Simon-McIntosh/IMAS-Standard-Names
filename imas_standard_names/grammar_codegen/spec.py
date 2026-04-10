@@ -76,6 +76,7 @@ class GrammarSpec:
     vocabularies: dict[str, tuple[str, ...]]
     basis: dict[str, BasisGroup]
     scope: ScopeSpec | None = None
+    binary_operator_connectors: dict[str, str] | None = None
 
     @property
     def segment_map(self) -> dict[str, SegmentSpec]:
@@ -188,11 +189,20 @@ class GrammarSpec:
                     )
                 )
 
+        # Parse binary operator connectors
+        connectors_raw = data.get("binary_operator_connectors", {})
+        binary_operator_connectors: dict[str, str] | None = None
+        if connectors_raw and isinstance(connectors_raw, Mapping):
+            binary_operator_connectors = {
+                str(k): str(v) for k, v in connectors_raw.items()
+            }
+
         return cls(
             segments=tuple(segments),
             vocabularies=vocabularies,
             basis=basis,
             scope=scope,
+            binary_operator_connectors=binary_operator_connectors,
         )
 
 

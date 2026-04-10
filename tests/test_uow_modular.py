@@ -14,7 +14,7 @@ def test_uow_add_update_remove(tmp_path: Path):
             "description": "Ion density.",
             "documentation": "Number density of ions in the plasma.",
             "unit": "m^-3".replace("^-", "^-"),
-            "tags": ["fundamental"],
+            "physics_domain": "general",
         }
     )
     uow.add(a)
@@ -26,7 +26,7 @@ def test_uow_add_update_remove(tmp_path: Path):
             "description": "Updated ion density.",
             "documentation": "Number density of ions in the plasma (updated).",
             "unit": "m^-3".replace("^-", "^-"),
-            "tags": ["fundamental"],
+            "physics_domain": "general",
         }
     )
     uow.update("ion_density", a2)
@@ -50,7 +50,7 @@ def test_uow_rollback(tmp_path: Path):
             "description": "Electron pressure.",
             "documentation": "Pressure of electrons in the plasma.",
             "unit": "Pa",
-            "tags": ["fundamental"],
+            "physics_domain": "general",
         }
     )
     uow.add(a)

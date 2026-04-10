@@ -12,16 +12,19 @@ from typing import Annotated, Any
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from imas_standard_names.grammar.constants import (
+    BINARY_OPERATOR_CONNECTORS,
     EXCLUSIVE_SEGMENT_PAIRS,
     GENERIC_PHYSICAL_BASES,
 )
 from imas_standard_names.grammar.model_types import (
+    BinaryOperator,
     Component,
     GeometricBase,
     Object,
     Position,
     Process,
     Subject,
+    Transformation,
 )
 from imas_standard_names.grammar.support import (
     TOKEN_PATTERN,
@@ -61,12 +64,23 @@ class StandardName(BaseModel):
     geometry: Position | None = None
     position: Position | None = None
     process: Process | None = None
+    transformation: Transformation | None = None
+    binary_operator: BinaryOperator | None = None
+    secondary_base: BaseToken | None = None
 
     @field_validator("physical_base")
     @classmethod
     def _validate_physical_base(cls, value: str | None) -> str | None:
         if value is not None and not TOKEN_PATTERN.fullmatch(value):
             msg = "physical_base segment must match the canonical token pattern"
+            raise ValueError(msg)
+        return value
+
+    @field_validator("secondary_base")
+    @classmethod
+    def _validate_secondary_base(cls, value: str | None) -> str | None:
+        if value is not None and not TOKEN_PATTERN.fullmatch(value):
+            msg = "secondary_base segment must match the canonical token pattern"
             raise ValueError(msg)
         return value
 
@@ -83,6 +97,77 @@ class StandardName(BaseModel):
         if self.geometric_base is None and self.physical_base is None:
             msg = "Either geometric_base or physical_base must be set"
             raise ValueError(msg)
+        return self
+
+    @model_validator(mode="after")
+    def _check_transformation_exclusivity(self) -> StandardName:
+        """Transformation is exclusive with component, coordinate, and geometric_base."""
+        if self.transformation:
+            if self.component:
+                msg = "Segments 'transformation' and 'component' cannot both be set"
+                raise ValueError(msg)
+            if self.coordinate:
+                msg = "Segments 'transformation' and 'coordinate' cannot both be set"
+                raise ValueError(msg)
+            if self.geometric_base:
+                msg = (
+                    "Segments 'transformation' and 'geometric_base' cannot both be set"
+                )
+                raise ValueError(msg)
+        return self
+
+    @model_validator(mode="after")
+    def _check_binary_operator_exclusivity(self) -> StandardName:
+        """Binary operator is exclusive with component, transformation,
+        coordinate, subject, device, and geometric_base.
+        """
+        if self.binary_operator:
+            exclusive_fields = {
+                "component": self.component,
+                "transformation": self.transformation,
+                "coordinate": self.coordinate,
+                "subject": self.subject,
+                "device": self.device,
+                "geometric_base": self.geometric_base,
+            }
+            for field_name, field_value in exclusive_fields.items():
+                if field_value:
+                    msg = (
+                        f"Segments 'binary_operator' and '{field_name}' "
+                        f"cannot both be set"
+                    )
+                    raise ValueError(msg)
+            if not self.secondary_base:
+                msg = "binary_operator requires secondary_base"
+                raise ValueError(msg)
+        return self
+
+    @model_validator(mode="after")
+    def _check_secondary_base_requires_binary(self) -> StandardName:
+        """secondary_base can only be set with binary_operator."""
+        if self.secondary_base and not self.binary_operator:
+            msg = "secondary_base can only be set when binary_operator is set"
+            raise ValueError(msg)
+        return self
+
+    @model_validator(mode="after")
+    def _check_binary_operator_connector_safety(self) -> StandardName:
+        """Validate that binary operator operands don't contain the connector word."""
+        if self.binary_operator and self.physical_base and self.secondary_base:
+            connector = BINARY_OPERATOR_CONNECTORS.get(self.binary_operator.value, "")
+            connector_sep = f"_{connector}_"
+            if connector_sep in f"_{self.physical_base}_":
+                msg = (
+                    f"physical_base '{self.physical_base}' contains reserved "
+                    f"connector word '{connector}'"
+                )
+                raise ValueError(msg)
+            if connector_sep in f"_{self.secondary_base}_":
+                msg = (
+                    f"secondary_base '{self.secondary_base}' contains reserved "
+                    f"connector word '{connector}'"
+                )
+                raise ValueError(msg)
         return self
 
     @model_validator(mode="after")
@@ -108,6 +193,7 @@ class StandardName(BaseModel):
         """
         if self.physical_base and self.physical_base in GENERIC_PHYSICAL_BASES:
             # Check if ANY qualifying segment is present
+            # Transformations and binary operators also qualify generic bases
             has_qualification = any(
                 [
                     self.subject,
@@ -115,6 +201,8 @@ class StandardName(BaseModel):
                     self.object,
                     self.position,
                     self.geometry,
+                    self.transformation,
+                    self.binary_operator,
                 ]
             )
 

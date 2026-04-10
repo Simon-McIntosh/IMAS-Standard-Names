@@ -15,7 +15,7 @@ def test_modify_should_appear_in_pending(temp_catalog, temp_edit_catalog):
         "documentation": "Test quantity for tracking pending modifications.",
         "unit": "m",
         "status": "draft",
-        "tags": ["equilibrium"],
+        "physics_domain": "equilibrium",
         "kind": "scalar",
     }
 
@@ -72,7 +72,7 @@ def test_batch_modify_should_appear_in_pending(temp_catalog, temp_edit_catalog):
             "documentation": f"Test quantity {i} for batch modify tracking.",
             "unit": "m",
             "status": "draft",
-            "tags": ["equilibrium"],
+            "physics_domain": "equilibrium",
             "kind": "scalar",
         }
         temp_edit_catalog.add(entry_data)

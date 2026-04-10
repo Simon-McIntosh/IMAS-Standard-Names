@@ -18,7 +18,8 @@ def test_entry():
         "kind": "scalar",
         "unit": "m",
         "status": "draft",
-        "tags": ["equilibrium", "spatial-profile"],  # Primary + secondary tags
+        "physics_domain": "equilibrium",
+        "tags": ["spatial-profile"],  # Primary + secondary tags
         "description": "Test description",
         "documentation": "Test description for validation testing.",
     }
@@ -149,7 +150,8 @@ class TestEditToolValidation:
             "kind": "scalar",
             "unit": "m",
             "status": "draft",
-            "tags": ["equilibrium", "spatial-profile"],
+            "physics_domain": "equilibrium",
+            "tags": ["spatial-profile"],
             "description": "Clean description",
             "documentation": "Clean description for edit validation testing.",
         }
@@ -206,7 +208,8 @@ class TestEditToolValidation:
             "kind": "scalar",
             "unit": "m",
             "status": "draft",
-            "tags": ["equilibrium", "spatial-profile"],
+            "physics_domain": "equilibrium",
+            "tags": ["spatial-profile"],
             "description": "Radial profile of electron density",
             "documentation": "Radial profile of electron density for full replacement testing.",
         }
@@ -231,7 +234,8 @@ class TestValidateCatalogToolIntegration:
             "kind": "scalar",
             "unit": "m",
             "status": "draft",
-            "tags": ["equilibrium", "spatial-profile"],
+            "physics_domain": "equilibrium",
+            "tags": ["spatial-profile"],
             "description": "Radial profile of plasma temperature",
             "documentation": "Radial profile of plasma temperature for description validation testing.",
         }
@@ -243,7 +247,7 @@ class TestValidateCatalogToolIntegration:
             "kind": "scalar",
             "unit": "m",
             "status": "draft",
-            "tags": ["equilibrium"],
+            "physics_domain": "equilibrium",
             "description": "Plasma temperature distribution",
             "documentation": "Plasma temperature distribution for description validation testing.",
         }
@@ -279,7 +283,8 @@ class TestValidateCatalogToolIntegration:
             "kind": "scalar",
             "unit": "m",
             "status": "draft",
-            "tags": ["equilibrium", "spatial-profile"],
+            "physics_domain": "equilibrium",
+            "tags": ["spatial-profile"],
             "description": "Radial profile of density",
         }
         await temp_create_tool.create_standard_names(entries=[entry])

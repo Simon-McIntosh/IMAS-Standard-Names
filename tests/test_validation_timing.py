@@ -14,14 +14,14 @@ def test_invalid_entry_rejected_at_creation(tmp_path):
     catalog = StandardNameCatalog(root=catalog_root)
     edit_catalog = EditCatalog(catalog)
 
-    # Try to create entry with no primary tag - should fail immediately
-    with pytest.raises(ValueError, match="exactly one primary tag"):
+    # Try to create entry with no physics_domain - should fail immediately
+    with pytest.raises(ValueError, match="physics_domain"):
         invalid_entry = {
             "name": "test_quantity",
             "kind": "scalar",
             "description": "Test with only secondary tags.",
             "unit": "m",
-            "tags": ["measured", "calibrated"],  # Both secondary, no primary
+            "tags": ["measured", "calibrated"],  # No physics_domain provided
         }
         edit_catalog.add(invalid_entry)
 
@@ -44,7 +44,8 @@ def test_valid_entry_accepted_and_writable(tmp_path):
         "description": "Electron density.",
         "documentation": "Electron density for validation timing testing.",
         "unit": "m^-3",
-        "tags": ["fundamental", "measured"],
+        "physics_domain": "general",
+        "tags": ["measured"],
     }
     edit_catalog.add(valid_entry)
 
@@ -57,45 +58,42 @@ def test_valid_entry_accepted_and_writable(tmp_path):
     assert result["ok"] is True
 
     # File should exist
-    yaml_file = catalog_root / "fundamental" / "electron_density.yml"
+    yaml_file = catalog_root / "general" / "electron_density.yml"
     assert yaml_file.exists()
 
     # No pending changes
     assert edit_catalog.diff()["counts"]["total_pending"] == 0
 
 
-def test_tag_auto_reordering(tmp_path):
-    """Test that tags are automatically reordered to put primary tag first."""
+def test_physics_domain_determines_directory(tmp_path):
+    """Test that physics_domain determines the storage subdirectory."""
     catalog_root = tmp_path / "catalog"
     catalog_root.mkdir()
     catalog = StandardNameCatalog(root=catalog_root)
     edit_catalog = EditCatalog(catalog)
 
-    # Create entry with primary tag NOT in first position
     entry = {
         "name": "test_quantity",
         "kind": "scalar",
         "description": "Test quantity.",
-        "documentation": "Test quantity for tag auto-reordering.",
+        "documentation": "Test quantity for physics domain directory.",
         "unit": "T",
-        "tags": ["measured", "magnetics", "calibrated"],  # magnetics is primary
+        "physics_domain": "magnetic_field_diagnostics",
+        "tags": ["measured", "calibrated"],
     }
 
-    # Entry creation succeeds and auto-reorders tags
     edit_catalog.add(entry)
     created_entry = catalog.get("test_quantity")
 
-    # Verify tags were reordered: primary tag moved to first position
-    # The order of secondary tags is preserved from input after reordering
-    assert created_entry.tags[0] == "magnetics"  # Primary tag first
-    assert set(created_entry.tags[1:]) == {"measured", "calibrated"}  # Secondary tags
+    assert created_entry.physics_domain == "magnetic_field_diagnostics"
+    assert set(created_entry.tags) == {"measured", "calibrated"}
 
     # Commit should succeed
     result = edit_catalog.commit()
     assert result["ok"] is True
 
-    # File should be in magnetics subdirectory
-    yaml_file = catalog_root / "magnetics" / "test_quantity.yml"
+    # File should be in physics_domain subdirectory
+    yaml_file = catalog_root / "magnetic_field_diagnostics" / "test_quantity.yml"
     assert yaml_file.exists()
 
 

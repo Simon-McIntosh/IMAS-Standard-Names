@@ -244,6 +244,19 @@ vocabularies:
   positions: !include vocabularies/positions.yml
   processes: !include vocabularies/processes.yml
   generic_physical_bases: !include vocabularies/generic_physical_bases.yml
+  transformations: !include vocabularies/transformations.yml
+  binary_operators: !include vocabularies/binary_operators.yml
+
+#===============================================================================
+# Binary Operator Connectors
+#===============================================================================
+# Maps each binary operator to its connector word used to separate operands.
+# Symmetric operators (product, difference) use "and"; asymmetric (ratio) uses "to".
+
+binary_operator_connectors:
+  product_of: and
+  ratio_of: to
+  difference_of: and
 
 #===============================================================================
 # Catalog Entry Schema
@@ -440,26 +453,31 @@ entry_schema:
         scalar_vector_requirement: "Required for scalar and vector entries (use '1' if dimensionless)"
         metadata_optional: "Optional for metadata entries (default empty string, omitted from serialization)"
     
-    tags:
+    physics_domain:
       required: true
+      type: string
+      description: "Physics domain classification from PhysicsDomain enum. Determines catalog subdirectory."
+      validation_file: "vocabularies/physics_domains.yml"
+      guidance:
+        critical_rule: "Must be a valid PhysicsDomain enum value."
+        validation: "Validated against grammar/vocabularies/physics_domains.yml."
+    tags:
+      required: false
       type: array
       items: string
-      min_items: 1
-      description: "Classification keywords from controlled vocabulary. First element (tags[0]) must be a primary tag defining catalog subdirectory. Remaining elements (tags[1:]) are secondary tags for cross-cutting classification."
+      description: "Secondary classification tags from controlled vocabulary for cross-cutting classification."
       validation_file: "vocabularies/tags.yml"
       guidance:
-        critical_rule: "tags[0] must be a primary tag. tags[1:] are secondary tags."
-        ordering: "Primary tag first, then secondary tags in order of decreasing specificity"
-        validation: "All tags validated against grammar/vocabularies/tags.yml. Validation fails if tags[0] is not a primary tag."
-        common_mistake: "Do not put secondary tags like 'cylindrical-coordinates' at position 0. Always start with primary tag."
+        validation: "All tags validated against secondary_tags in grammar/vocabularies/tags.yml."
+        common_mistake: "Do not put physics domain values in tags. Use the physics_domain field instead."
         examples:
           correct:
-            - ["magnetics", "measured", "calibrated", "local-measurement"]
-            - ["equilibrium", "spatial-profile", "reconstructed"]
-            - ["fundamental", "global-quantity", "time-dependent"]
+            - ["measured", "calibrated", "local-measurement"]
+            - ["spatial-profile", "reconstructed"]
+            - ["global-quantity", "time-dependent"]
           wrong:
-            - ["cylindrical-coordinates", "magnetics"]
-            - ["measured", "magnetics"]
+            - ["magnetics", "measured"]
+            - ["equilibrium", "spatial-profile"]
     
     links:
       required: false
@@ -648,21 +666,21 @@ entry_schema:
   # Type-specific requirements
   type_specific:
     scalar:
-      required_fields: [name, description, documentation, unit, tags]
+      required_fields: [name, description, documentation, unit, physics_domain]
       field_overrides:
         unit: "Required (use '1' for dimensionless)"
       optional_fields: [provenance, status, validity_domain, constraints, deprecates, superseded_by, links, ids_paths]
       description: "Physical quantities with single value at each point"
     
     vector:
-      required_fields: [name, description, documentation, unit, tags]
+      required_fields: [name, description, documentation, unit, physics_domain]
       field_overrides:
         unit: "Required (use '1' for dimensionless)"
       optional_fields: [provenance, status, validity_domain, constraints, deprecates, superseded_by, links, ids_paths]
       description: "Vector field quantities with components"
     
     metadata:
-      required_fields: [name, description, documentation, tags]
+      required_fields: [name, description, documentation, physics_domain]
       field_overrides:
         unit: "Optional (default empty string, omitted from serialization)"
       forbidden_fields: [provenance]
@@ -704,9 +722,12 @@ entry_schema:
       links:
         behavior: "Accumulate (union with deduplication)"
         guidance: "Combine links from both sources. Remove duplicates."
+      physics_domain:
+        behavior: "Preserve existing"
+        guidance: "Keep existing physics_domain. Determines file location and should not change."
       tags:
         behavior: "Preserve existing"
-        guidance: "Keep existing tags. Primary tag determines file location and should not change."
+        guidance: "Keep existing secondary tags."
     example_workflow: |
       1. Call create_standard_names(entries=[{name: "elongation", ...}], mode="upsert")
       2. If entry exists, receive: {action: "upsert_required", existing: {...}, proposed: {...}, merge_guidance: {...}}

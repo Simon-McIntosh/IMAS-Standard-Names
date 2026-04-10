@@ -18,8 +18,8 @@ def catalog_root(tmp_path):
     """Create a temporary catalog root directory."""
     catalog_dir = tmp_path / "catalog"
     catalog_dir.mkdir()
-    # Create a primary tag subdirectory for entries
-    (catalog_dir / "fundamental").mkdir()
+    # Create a physics_domain subdirectory for entries
+    (catalog_dir / "general").mkdir()
     return str(catalog_dir)
 
 
@@ -37,9 +37,13 @@ def validate_tool(catalog):
 
 def _write_entry_to_yaml(catalog_root: str, entry: StandardNameScalarEntry):
     """Helper to write an entry to YAML and rebuild catalog."""
-    # Determine primary tag subdirectory
-    primary_tag = entry.tags[0] if entry.tags else "fundamental"
-    tag_dir = Path(catalog_root) / primary_tag
+    # Determine physics_domain subdirectory
+    pd = (
+        entry.physics_domain
+        if hasattr(entry, "physics_domain") and entry.physics_domain
+        else "general"
+    )
+    tag_dir = Path(catalog_root) / pd
     tag_dir.mkdir(exist_ok=True)
 
     # Write YAML file
@@ -139,7 +143,7 @@ async def test_grammar_validation_generic_base(catalog_root):
         unit="A",
         kind="scalar",
         status="draft",
-        tags=["fundamental"],
+        physics_domain="general",
     )
 
     # Write entry and validate
@@ -168,7 +172,7 @@ async def test_schema_validation_missing_fields(catalog_root):
         unit="m",
         kind="scalar",
         status="draft",
-        tags=["fundamental"],
+        physics_domain="general",
     )
 
     # Write entry and validate
@@ -230,7 +234,7 @@ tags:
 
 @pytest.mark.anyio
 async def test_tag_validation_missing_tags_warning(catalog_root):
-    """Test tag validation generates warning for missing tags."""
+    """Test tag validation generates warning for missing physics_domain."""
     entry = StandardNameScalarEntry(
         name="test_quantity",
         description="Test quantity",
@@ -238,6 +242,7 @@ async def test_tag_validation_missing_tags_warning(catalog_root):
         unit="m",
         kind="scalar",
         status="draft",
+        physics_domain="general",
         tags=[],  # Empty tags
     )
 
@@ -250,14 +255,15 @@ async def test_tag_validation_missing_tags_warning(catalog_root):
         scope="persisted", checks=["tags"], include_warnings=True
     )
 
+    # With physics_domain set but empty tags, there should be no warnings
+    # since physics_domain is the primary classification now
     warnings = [
         w
         for w in result["warnings"]
         if w["name"] == "test_quantity" and w["category"] == "tags"
     ]
 
-    assert len(warnings) >= 1
-    assert "no tags" in warnings[0]["message"].lower()
+    assert len(warnings) == 0
 
 
 @pytest.mark.anyio
@@ -306,7 +312,7 @@ async def test_validate_all_checks(catalog_root):
         unit="A",
         kind="scalar",
         status="active",
-        tags=["fundamental"],
+        physics_domain="general",
     )
 
     # Write entry and validate
@@ -343,7 +349,7 @@ async def test_validate_mixed_valid_invalid(catalog_root):
         unit="A",
         kind="scalar",
         status="active",
-        tags=["fundamental"],
+        physics_domain="general",
     )
 
     # Invalid entry - generic base without qualification
@@ -354,7 +360,7 @@ async def test_validate_mixed_valid_invalid(catalog_root):
         unit="V",
         kind="scalar",
         status="draft",
-        tags=["fundamental"],
+        physics_domain="general",
     )
 
     # Write both entries
@@ -382,7 +388,7 @@ async def test_provenance_superseded_by_validation(catalog_root):
         unit="m",
         kind="scalar",
         status="superseded",
-        tags=["fundamental"],
+        physics_domain="general",
         superseded_by="non_existent_new_quantity",
     )
 

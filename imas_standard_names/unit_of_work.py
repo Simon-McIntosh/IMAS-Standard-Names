@@ -103,22 +103,16 @@ class UnitOfWork:
         existing_files = {f.stem: f for f in self.repo.store.yaml_files()}
         current_names = set()
 
-        # Write all models and detect primary tag changes
+        # Write all models and detect physics_domain changes
         for m in self.repo.list():
             name = m.name
-            # Check if this is an update with a primary tag change
+            # Check if this is an update with a physics_domain change
             if name in existing_files:
                 old_path = existing_files[name]
-                # Get expected new path based on current primary tag
-                if m.tags and len(m.tags) > 0:
-                    expected_subdir = m.tags[0]
-                    expected_path = (
-                        self.repo.store.root / expected_subdir / f"{name}.yml"
-                    )
-                else:
-                    expected_path = self.repo.store.root / f"{name}.yml"
+                # Get expected new path based on current physics_domain
+                expected_path = self.repo.store.root / m.physics_domain / f"{name}.yml"
 
-                # If primary tag changed, delete old file before writing new one
+                # If physics_domain changed, delete old file before writing new one
                 if old_path.resolve() != expected_path.resolve():
                     try:
                         old_path.unlink()

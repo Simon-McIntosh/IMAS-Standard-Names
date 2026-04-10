@@ -55,15 +55,28 @@ def _build_expected_type_map(spec: GrammarSpec):
 
 
 def test_model_has_all_grammar_segments():
-    """Verify StandardName has fields for all segments in specification.yml."""
+    """Verify StandardName has fields for all segments in specification.yml.
+
+    The model may have additional fields beyond segments (e.g., transformation,
+    binary_operator, secondary_base) that are not regular grammar segments but
+    are valid model extensions.
+    """
     spec = _load_grammar_spec()
     model_fields = set(StandardName.model_fields.keys())
     grammar_segments = {segment.identifier for segment in spec.segments}
 
-    assert model_fields == grammar_segments, (
-        f"StandardName fields don't match grammar specification!\n"
+    # Non-segment model fields that are valid extensions
+    extension_fields = {"transformation", "binary_operator", "secondary_base"}
+
+    assert grammar_segments <= model_fields, (
+        f"StandardName is missing grammar segment fields!\n"
         f"Missing in model: {grammar_segments - model_fields}\n"
-        f"Extra in model: {model_fields - grammar_segments}\n"
+        f"\nUpdate model.py to match specification.yml"
+    )
+
+    extra = model_fields - grammar_segments - extension_fields
+    assert not extra, (
+        f"StandardName has unexpected extra fields: {extra}\n"
         f"\nUpdate model.py to match specification.yml"
     )
 
@@ -161,7 +174,9 @@ def test_model_optional_fields_match_specification():
 
 
 def test_names_tool_has_all_segment_parameters():
-    """Verify compose_standard_name MCP tool has parameters for all segments."""
+    """Verify compose_standard_name MCP tool has parameters for all segments
+    plus grammar extension parameters (transformation, binary_operator, secondary_base).
+    """
     spec = _load_grammar_spec()
     tool = ComposeTool()
 
@@ -173,13 +188,15 @@ def test_names_tool_has_all_segment_parameters():
     tool_params.discard("self")
     tool_params.discard("ctx")
 
-    # Get expected segments from grammar
+    # Get expected segments from grammar plus extension fields
     grammar_segments = {segment.identifier for segment in spec.segments}
+    extension_params = {"transformation", "binary_operator", "secondary_base"}
+    expected_params = grammar_segments | extension_params
 
-    assert tool_params == grammar_segments, (
-        f"compose_standard_name parameters don't match grammar specification!\n"
-        f"Missing parameters: {grammar_segments - tool_params}\n"
-        f"Extra parameters: {tool_params - grammar_segments}\n"
+    assert tool_params == expected_params, (
+        f"compose_standard_name parameters don't match expected set!\n"
+        f"Missing parameters: {expected_params - tool_params}\n"
+        f"Extra parameters: {tool_params - expected_params}\n"
         f"\nUpdate ComposeTool.compose_standard_name in compose.py"
     )
 
@@ -214,6 +231,19 @@ def test_names_tool_parameter_types_match_grammar():
                 f"Expected type: {expected_type.__name__}\n"
                 f"Got annotation: {annotation_str}"
             )
+
+    # Verify extension parameters exist with correct types
+    for ext_param, ext_type in [
+        ("transformation", "Transformation"),
+        ("binary_operator", "BinaryOperator"),
+        ("secondary_base", "str"),
+    ]:
+        param = sig.parameters.get(ext_param)
+        assert param is not None, f"Missing extension parameter: {ext_param}"
+        assert ext_type in str(param.annotation), (
+            f"Extension parameter '{ext_param}' type mismatch. "
+            f"Expected '{ext_type}' in {param.annotation}"
+        )
 
 
 def test_names_tool_compose_creates_valid_model():

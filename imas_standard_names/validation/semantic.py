@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from ..grammar.model import parse_standard_name
 from ..grammar.model_types import GeometricBase
-from ..models import StandardNameEntry
+from ..models import StandardNameEntry, StandardNameMetadataEntry
 from ..provenance import OperatorProvenance
 
 __all__ = ["run_semantic_checks"]
@@ -50,6 +50,7 @@ def run_semantic_checks(entries: dict[str, StandardNameEntry]) -> list[str]:
         issues.extend(_check_trajectory_path_qualification(name, entry))
         issues.extend(_check_extent_dimensionality(name, entry))
         issues.extend(_check_physical_base_with_object(name, entry))
+        issues.extend(_check_dimensionless_physical_quantity(name, entry))
 
     return issues
 
@@ -238,6 +239,86 @@ def _check_physical_base_with_object(name: str, entry: StandardNameEntry) -> lis
                     "may indicate measurement location. Consider using subject (electron, ion) "
                     f"for intrinsic properties, or _at_{obj} for field evaluation location."
                 )
+    except Exception:
+        pass
+
+    return issues
+
+
+# Physical bases that inherently carry SI units — marking them dimensionless
+# is almost certainly a mistake.
+_INHERENTLY_DIMENSIONAL_BASES = frozenset(
+    {
+        "temperature",
+        "density",
+        "pressure",
+        "magnetic_field",
+        "electric_field",
+        "velocity",
+        "current",
+        "voltage",
+        "energy",
+        "power",
+        "force",
+        "mass",
+        "length",
+        "time",
+        "frequency",
+        "resistance",
+        "inductance",
+        "capacitance",
+        "flux",
+        "luminosity",
+        "torque",
+        "momentum",
+        "viscosity",
+        "conductivity",
+        "resistivity",
+        "charge",
+        "area",
+        "volume",
+    }
+)
+
+
+def _check_dimensionless_physical_quantity(
+    name: str, entry: StandardNameEntry
+) -> list[str]:
+    """Flag dimensionless unit on physical bases that inherently carry units.
+
+    Rule: Scalar/vector entries with ``unit="1"`` whose physical base is a
+    quantity that normally carries SI units are likely misconfigured.  Ratios
+    and other binary-operator names are excluded because they can legitimately
+    be dimensionless.
+    Severity: Warning
+    """
+    issues: list[str] = []
+
+    # Only applies to scalar/vector entries that have a unit field
+    if isinstance(entry, StandardNameMetadataEntry):
+        return issues
+
+    unit = getattr(entry, "unit", None)
+    if unit != "1":
+        return issues
+
+    try:
+        parsed = parse_standard_name(entry.name)
+        physical_base = getattr(parsed, "physical_base", None)
+        binary_operator = getattr(parsed, "binary_operator", None)
+
+        # Binary operators (ratio, product, difference) can legitimately yield
+        # dimensionless results, so skip the check for those.
+        if binary_operator:
+            return issues
+
+        if physical_base and physical_base in _INHERENTLY_DIMENSIONAL_BASES:
+            issues.append(
+                f"{name}: WARNING - dimensionless unit '1' on physical quantity "
+                f"'{physical_base}' is unexpected. Quantities like '{physical_base}' "
+                "normally carry SI units. Use '1' only for true dimensionless "
+                "quantities (ratios, coefficients, counts)."
+            )
     except Exception:
         pass
 

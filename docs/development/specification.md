@@ -105,7 +105,7 @@ For detailed segment descriptions and auto-generated vocabulary tables, see [Gra
 | SEM001  | geometric_base must be qualified with object or geometry       |
 | SEM002  | Sign conventions must follow IMAS DD documentation             |
 | SEM003  | Units must be SI-consistent and match IMAS DD where applicable |
-| SEM004  | First tag (tags[0]) must be primary tag from controlled list   |
+| SEM004  | `physics_domain` must be a valid `PhysicsDomain` enum value    |
 | SEM005  | Provenance dependencies must form a DAG (no cycles)            |
 
 ---

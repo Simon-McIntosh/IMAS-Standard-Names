@@ -99,13 +99,8 @@ class YamlStore:
 
     # Write / Delete ----------------------------------------------------------
     def write(self, model: StandardNameEntry):
-        # Organize by primary tag (tags[0]) if present
-        if model.tags and len(model.tags) > 0:
-            primary_tag = model.tags[0]
-            path = self.root / primary_tag / f"{model.name}.yml"
-        else:
-            # Fallback to root if no tags
-            path = self.root / f"{model.name}.yml"
+        # Organize by physics_domain
+        path = self.root / model.physics_domain / f"{model.name}.yml"
 
         path.parent.mkdir(parents=True, exist_ok=True)
         data = {k: v for k, v in model.model_dump().items() if v not in (None, [], "")}

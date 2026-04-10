@@ -14,10 +14,6 @@ from imas_standard_names.unit_of_work import UnitOfWork
 def submission_base(
     github_input,
 ):  # reuse github_input style but map to new schema keys
-    # Map legacy keys to new per-file schema field names
-    tags = github_input["tags"]
-    if isinstance(tags, str):
-        tags = [tags] if tags else []
     return {
         "name": github_input["name"],
         "kind": "scalar",
@@ -25,7 +21,7 @@ def submission_base(
         "unit": github_input["units"],
         "description": "Test standard name for validation.",
         "documentation": github_input["documentation"],
-        "tags": tags,
+        "physics_domain": github_input["physics_domain"],
     }
 
 

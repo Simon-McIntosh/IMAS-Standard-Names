@@ -63,7 +63,7 @@ def test_list_standard_names_with_edits(sample_catalog):
         "documentation": "Temporary test scalar for list tool testing.",
         "status": "draft",
         "unit": "1",
-        "tags": ["fundamental"],
+        "physics_domain": "general",
     }
     tool.edit_catalog.add(new_name_data)  # type: ignore[attr-defined]
 

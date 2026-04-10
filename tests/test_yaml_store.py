@@ -13,7 +13,7 @@ def test_yaml_store_round_trip(tmp_path: Path):
             "description": "Plasma current.",
             "documentation": "Total plasma current in the tokamak.",
             "unit": "A",
-            "tags": ["fundamental"],
+            "physics_domain": "general",
         }
     )
     store.write(m)

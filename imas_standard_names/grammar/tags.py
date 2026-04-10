@@ -1,7 +1,7 @@
 """Tag vocabulary utilities for IMAS Standard Names.
 
 Provides functions to load and query the controlled tag vocabulary,
-including primary tags (for catalog organization) and secondary tags
+including physics domains (for catalog organization) and secondary tags
 (for cross-cutting classification).
 """
 
@@ -25,21 +25,36 @@ def load_tag_vocabulary() -> dict[str, Any]:
         return yaml.safe_load(f) or {"primary_tags": {}, "secondary_tags": []}
 
 
-def get_primary_tags() -> list[str]:
-    """Get list of valid primary tag identifiers.
+def get_physics_domains() -> list[str]:
+    """Get list of valid physics domain identifiers.
 
     Returns:
-        Sorted list of primary tag IDs that can be used as tags[0].
+        Sorted list of physics domain values from the PhysicsDomain enum.
     """
-    vocab = load_tag_vocabulary()
-    return sorted(vocab.get("primary_tags", {}).keys())
+    from .tag_types import PHYSICS_DOMAINS
+
+    return list(PHYSICS_DOMAINS)
+
+
+def get_physics_domain_description(domain: str) -> str:
+    """Get description for a physics domain.
+
+    Args:
+        domain: Physics domain identifier to look up.
+
+    Returns:
+        Description string, or empty string if not found.
+    """
+    from .tag_types import PHYSICS_DOMAIN_DESCRIPTIONS
+
+    return PHYSICS_DOMAIN_DESCRIPTIONS.get(domain, "")
 
 
 def get_secondary_tags() -> list[str]:
     """Get list of valid secondary tag identifiers.
 
     Returns:
-        List of secondary tag IDs that can be used as tags[1:].
+        List of secondary tag IDs for cross-cutting classification.
     """
     vocab = load_tag_vocabulary()
     secondary = vocab.get("secondary_tags", [])
@@ -103,11 +118,32 @@ def get_tag_ids_list(tag_id: str) -> list[str]:
     return []
 
 
-def validate_tags(tags: list[str]) -> tuple[bool, str]:
-    """Validate a list of tags against the controlled vocabulary.
+def validate_physics_domain(domain: str) -> tuple[bool, str]:
+    """Validate a physics domain against the controlled vocabulary.
 
     Args:
-        tags: List of tags to validate (tags[0] must be primary).
+        domain: Physics domain string to validate.
+
+    Returns:
+        Tuple of (is_valid, error_message).
+    """
+    from .tag_types import PHYSICS_DOMAINS
+
+    if not domain:
+        return False, "Physics domain is required"
+    if domain not in PHYSICS_DOMAINS:
+        return False, (
+            f"Invalid physics domain '{domain}'. "
+            f"Valid: {', '.join(sorted(PHYSICS_DOMAINS)[:10])}..."
+        )
+    return True, ""
+
+
+def validate_tags(tags: list[str]) -> tuple[bool, str]:
+    """Validate a list of secondary tags against the controlled vocabulary.
+
+    Args:
+        tags: List of secondary tags to validate.
 
     Returns:
         Tuple of (is_valid, error_message).
@@ -115,19 +151,9 @@ def validate_tags(tags: list[str]) -> tuple[bool, str]:
     if not tags:
         return True, ""
 
-    primary_tags = get_primary_tags()
     secondary_tags = get_secondary_tags()
-
-    # Validate primary tag
-    if tags[0] not in primary_tags:
-        return False, (
-            f"Primary tag (tags[0]) '{tags[0]}' not in controlled vocabulary. "
-            f"Valid primary tags: {', '.join(primary_tags)}"
-        )
-
-    # Validate secondary tags (optional)
-    for tag in tags[1:]:
-        if tag not in secondary_tags and tag not in primary_tags:
+    for tag in tags:
+        if tag not in secondary_tags:
             return False, (
                 f"Secondary tag '{tag}' not in controlled vocabulary. "
                 f"Valid secondary tags: {', '.join(secondary_tags[:10])}... "
@@ -139,10 +165,12 @@ def validate_tags(tags: list[str]) -> tuple[bool, str]:
 
 __all__ = [
     "load_tag_vocabulary",
-    "get_primary_tags",
+    "get_physics_domains",
+    "get_physics_domain_description",
     "get_secondary_tags",
     "get_tag_description",
     "get_tag_examples",
     "get_tag_ids_list",
+    "validate_physics_domain",
     "validate_tags",
 ]

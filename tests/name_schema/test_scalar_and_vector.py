@@ -38,7 +38,7 @@ def test_dimensionless_unit_blank():
             "documentation": "Poloidal beta - dimensionless plasma parameter.",
             "unit": "1",
             "status": "active",
-            "tags": ["fundamental"],
+            "physics_domain": "general",
         }
     )
     assert sn.unit == "1"  # canonical form for dimensionless

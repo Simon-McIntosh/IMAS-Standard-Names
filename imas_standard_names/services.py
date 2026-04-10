@@ -20,7 +20,43 @@ from .validation.structural import run_structural_checks
 
 
 def validate_models(models: dict[str, StandardNameEntry]) -> list[str]:
-    """Run structural + semantic validation returning list of issues."""
+    """Run structural and semantic validation on a collection of entries.
+
+    Performs cross-entry consistency checks that go beyond individual model
+    validation. Structural checks verify relational consistency (e.g. that
+    referenced magnitude names exist). Semantic checks verify grammar and
+    provenance logic (e.g. correct use of geometric bases and operators).
+
+    This function operates on an in-memory dictionary and does not require
+    a catalog database or any file I/O. Build the dictionary from any source
+    (YAML files, API responses, test fixtures) and pass it directly.
+
+    Args:
+        models: Mapping of standard name strings to their validated entry
+            models. Keys are canonical name strings; values are any variant
+            of ``StandardNameEntry`` (scalar, vector, or metadata).
+
+    Returns:
+        A list of human-readable issue descriptions. An empty list means
+        all checks passed.
+
+    Example::
+
+        from imas_standard_names.models import create_standard_name_entry
+        from imas_standard_names.services import validate_models
+
+        entries = {
+            "electron_temperature": create_standard_name_entry({
+                "name": "electron_temperature",
+                "kind": "scalar",
+                "unit": "eV",
+                "description": "Electron temperature.",
+                "tags": ["core"],
+            }),
+        }
+        issues = validate_models(entries)
+        assert issues == []
+    """
     return run_structural_checks(models) + run_semantic_checks(models)
 
 
@@ -54,6 +90,9 @@ def row_to_model(conn: sqlite3.Connection, row: sqlite3.Row) -> StandardNameEntr
         "deprecates": row["deprecates"] or "",
         "superseded_by": row["superseded_by"] or "",
     }
+
+    if row["physics_domain"]:
+        data["physics_domain"] = row["physics_domain"]
 
     # Conditionally include unit if model has this field
     if "unit" in model_fields:

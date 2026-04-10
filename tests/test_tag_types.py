@@ -1,24 +1,30 @@
-"""Tests for tag type generation and validation.
+"""Tests for tag type generation, physics domain, and validation.
 
 Tests cover:
 - Tag type generation from tags.yml
+- PhysicsDomain enum generation from physics_domains.yml
 - Tag validation in models
 - Tag vocabulary structure
-- Primary/secondary tag constraints
+- Physics domain / secondary tag constraints
 """
 
 import pytest
 from pydantic import ValidationError
 
 from imas_standard_names.grammar.tag_types import (
+    PHYSICS_DOMAIN_DESCRIPTIONS,
+    PHYSICS_DOMAINS,
     PRIMARY_TAG_DESCRIPTIONS,
     PRIMARY_TAGS,
     SECONDARY_TAG_DESCRIPTIONS,
     SECONDARY_TAGS,
+    TAG_TO_PHYSICS_DOMAIN,
+    PhysicsDomain,
     PrimaryTag,
     SecondaryTag,
     Tag,
 )
+from imas_standard_names.grammar_codegen.physics_domain_spec import PhysicsDomainSpec
 from imas_standard_names.grammar_codegen.tag_spec import TagSpec
 from imas_standard_names.models import (
     StandardNameScalarEntry,
@@ -107,60 +113,93 @@ def test_no_tag_overlap_between_primary_and_secondary():
 
 
 # ============================================================================
-# Tag Validation Tests
+# PhysicsDomain Tests
 # ============================================================================
 
 
-def test_valid_primary_tag_only():
-    """Test that entries can be created with just a primary tag."""
+def test_physics_domain_enum_exists():
+    """Test that PhysicsDomain enum is generated."""
+    assert issubclass(PhysicsDomain, str)
+    assert len(PhysicsDomain) > 0
+
+
+def test_physics_domain_spec_loads():
+    """Test that PhysicsDomainSpec can load physics_domains.yml."""
+    spec = PhysicsDomainSpec.load()
+    assert len(spec.domains) > 0
+    assert "equilibrium" in spec.domains
+
+
+def test_physics_domains_constant():
+    """Test that PHYSICS_DOMAINS tuple is generated."""
+    assert isinstance(PHYSICS_DOMAINS, tuple)
+    assert len(PHYSICS_DOMAINS) > 0
+    assert "equilibrium" in PHYSICS_DOMAINS
+    assert "general" in PHYSICS_DOMAINS
+    assert "transport" in PHYSICS_DOMAINS
+
+
+def test_physics_domain_descriptions():
+    """Test that physics domain descriptions are generated."""
+    assert isinstance(PHYSICS_DOMAIN_DESCRIPTIONS, dict)
+    assert len(PHYSICS_DOMAIN_DESCRIPTIONS) == len(PHYSICS_DOMAINS)
+    for domain in PHYSICS_DOMAINS:
+        assert domain in PHYSICS_DOMAIN_DESCRIPTIONS
+        assert PHYSICS_DOMAIN_DESCRIPTIONS[domain].strip()
+
+
+def test_tag_to_physics_domain_mapping():
+    """Test that TAG_TO_PHYSICS_DOMAIN maps old primary tags to domains."""
+    assert isinstance(TAG_TO_PHYSICS_DOMAIN, dict)
+    assert len(TAG_TO_PHYSICS_DOMAIN) > 0
+    assert TAG_TO_PHYSICS_DOMAIN["fundamental"] == "general"
+    assert TAG_TO_PHYSICS_DOMAIN["magnetics"] == "magnetic_field_diagnostics"
+    assert TAG_TO_PHYSICS_DOMAIN["equilibrium"] == "equilibrium"
+
+
+# ============================================================================
+# Tag Validation Tests (secondary tags only)
+# ============================================================================
+
+
+def test_valid_physics_domain_only():
+    """Test entries with physics_domain and no secondary tags."""
     entry = StandardNameScalarEntry(
         name="test_quantity",
         description="Test quantity",
-        documentation="Test quantity for tag validation.",
+        documentation="Test quantity for physics domain validation.",
         unit="m",
-        tags=["fundamental"],
+        physics_domain="general",
     )
-    assert entry.tags == ["fundamental"]
+    assert entry.physics_domain == "general"
+    assert entry.tags == []
 
 
-def test_valid_primary_and_secondary_tags():
-    """Test that entries can be created with primary and secondary tags."""
+def test_valid_physics_domain_with_secondary_tags():
+    """Test entries with physics_domain and secondary tags."""
     entry = StandardNameScalarEntry(
         name="test_quantity",
         description="Test quantity",
-        documentation="Test quantity with multiple tags.",
+        documentation="Test quantity with secondary tags.",
         unit="m",
-        tags=["fundamental", "measured", "time-dependent"],
+        physics_domain="equilibrium",
+        tags=["reconstructed", "steady-state"],
     )
-    assert entry.tags == ["fundamental", "measured", "time-dependent"]
+    assert entry.physics_domain == "equilibrium"
+    assert entry.tags == ["reconstructed", "steady-state"]
 
 
-def test_valid_multiple_secondary_tags():
-    """Test that multiple secondary tags are allowed."""
-    entry = StandardNameScalarEntry(
-        name="test_quantity",
-        description="Test quantity",
-        documentation="Test quantity with many secondary tags.",
-        unit="m",
-        tags=["equilibrium", "steady-state", "reconstructed", "validated"],
-    )
-    assert len(entry.tags) == 4
-    assert entry.tags[0] == "equilibrium"  # Primary
-    assert all(tag in SECONDARY_TAGS for tag in entry.tags[1:])
-
-
-def test_invalid_primary_tag_rejected():
-    """Test that invalid primary tags are rejected."""
+def test_invalid_physics_domain_rejected():
+    """Test that invalid physics domains are rejected."""
     with pytest.raises(ValidationError) as exc_info:
         StandardNameScalarEntry(
             name="test_quantity",
             description="Test quantity",
-            tags=["invalid_primary_tag", "measured"],
+            documentation="Test.",
+            unit="m",
+            physics_domain="invalid_domain",
         )
-
-    error = exc_info.value
-    assert "Unknown tag(s): invalid_primary_tag" in str(error)
-    assert "Valid tags are defined in grammar/vocabularies/tags.yml" in str(error)
+    assert "Invalid physics_domain" in str(exc_info.value)
 
 
 def test_invalid_secondary_tag_rejected():
@@ -169,12 +208,25 @@ def test_invalid_secondary_tag_rejected():
         StandardNameScalarEntry(
             name="test_quantity",
             description="Test quantity",
-            tags=["fundamental", "invalid_secondary_tag"],
+            documentation="Test.",
+            unit="m",
+            physics_domain="general",
+            tags=["invalid_secondary_tag"],
         )
+    assert "Unknown secondary tag(s)" in str(exc_info.value)
 
-    error = exc_info.value
-    assert "Unknown tag(s): invalid_secondary_tag" in str(error)
-    assert "Valid tags are defined in grammar/vocabularies/tags.yml" in str(error)
+
+def test_primary_tag_in_secondary_position_rejected():
+    """Test that physics domain values are rejected in the secondary tags list."""
+    with pytest.raises(ValidationError):
+        StandardNameScalarEntry(
+            name="test_quantity",
+            description="Test quantity",
+            documentation="Test.",
+            unit="m",
+            physics_domain="general",
+            tags=["general"],  # physics domain value, not allowed in secondary tags
+        )
 
 
 def test_empty_tags_allowed():
@@ -184,35 +236,10 @@ def test_empty_tags_allowed():
         description="Test quantity",
         documentation="Test quantity with empty tags.",
         unit="m",
+        physics_domain="general",
         tags=[],
     )
     assert entry.tags == []
-
-
-def test_primary_tag_validation_position_specific():
-    """Test that tags are auto-reordered to put primary tag first."""
-    # Valid: primary tag in first position
-    entry = StandardNameScalarEntry(
-        name="test_quantity",
-        description="Test quantity",
-        documentation="Test quantity for tag order validation.",
-        unit="m",
-        tags=["fundamental", "measured"],
-    )
-    assert entry.tags[0] == "fundamental"
-
-    # Auto-reordering: secondary tag in first position gets reordered
-    entry2 = StandardNameScalarEntry(
-        name="test_quantity",
-        description="Test quantity",
-        documentation="Test quantity for tag auto-reordering.",
-        unit="m",
-        tags=["measured", "fundamental"],  # Will be auto-reordered
-    )
-
-    # Verify that fundamental (primary) was moved to position 0
-    assert entry2.tags[0] == "fundamental"
-    assert "measured" in entry2.tags[1:]
 
 
 def test_tag_whitespace_normalization():
@@ -224,29 +251,34 @@ def test_tag_whitespace_normalization():
             "description": "Test quantity",
             "documentation": "Test quantity for tag normalization.",
             "unit": "m",
-            "tags": ["  fundamental  ", " measured ", ""],
+            "physics_domain": "general",
+            "tags": ["  measured  ", " derived ", ""],
         }
     )
-    assert entry.tags == ["fundamental", "measured"]
+    assert entry.tags == ["measured", "derived"]
 
 
-def test_vector_entry_tag_validation():
-    """Test that vector entries also validate tags correctly."""
-    # Valid
+def test_vector_entry_with_physics_domain():
+    """Test that vector entries use physics_domain correctly."""
     entry = StandardNameVectorEntry(
         name="test_vector",
         description="Test vector",
         documentation="Test vector for tag validation.",
         unit="m.s^-1",
-        tags=["transport", "spatial-profile"],
+        physics_domain="transport",
+        tags=["spatial-profile"],
     )
-    assert entry.tags == ["transport", "spatial-profile"]
+    assert entry.physics_domain == "transport"
+    assert entry.tags == ["spatial-profile"]
 
-    # Invalid
+    # Invalid secondary tag
     with pytest.raises(ValidationError):
         StandardNameVectorEntry(
             name="test_vector",
             description="Test vector",
+            documentation="Test.",
+            unit="m",
+            physics_domain="transport",
             tags=["invalid_tag"],
         )
 
@@ -347,33 +379,43 @@ def test_quality_secondary_tags_exist():
 
 
 def test_common_tag_combinations():
-    """Test common real-world tag combinations."""
+    """Test common real-world tag combinations with physics_domain."""
     test_cases = [
         # Diagnostic measurement
-        (["thomson-scattering", "measured", "spatial-profile", "calibrated"], True),
+        (
+            "magnetic_field_diagnostics",
+            ["measured", "spatial-profile", "calibrated"],
+            True,
+        ),
         # Equilibrium reconstruction
-        (["equilibrium", "reconstructed", "steady-state"], True),
+        ("equilibrium", ["reconstructed", "steady-state"], True),
         # Derived transport quantity
-        (["transport", "derived", "spatial-profile"], True),
+        ("transport", ["derived", "spatial-profile"], True),
         # Fundamental quantity
-        (["fundamental", "global-quantity", "measured"], True),
+        ("general", ["global-quantity", "measured"], True),
         # Time-dependent measurement
-        (["magnetics", "measured", "time-dependent", "raw-data"], True),
-        # Invalid: wrong primary tag
-        (["invalid", "measured"], False),
-        # Invalid: wrong secondary tag
-        (["fundamental", "invalid"], False),
+        (
+            "magnetic_field_diagnostics",
+            ["measured", "time-dependent", "raw-data"],
+            True,
+        ),
+        # Invalid physics domain
+        ("invalid_domain", ["measured"], False),
+        # Invalid secondary tag
+        ("general", ["invalid_tag"], False),
     ]
 
-    for tags, should_succeed in test_cases:
+    for physics_domain, tags, should_succeed in test_cases:
         if should_succeed:
             entry = StandardNameScalarEntry(
                 name="test_quantity",
                 description="Test quantity",
                 documentation="Test quantity for tag combination validation.",
                 unit="m",
+                physics_domain=physics_domain,
                 tags=tags,
             )
+            assert entry.physics_domain == physics_domain
             assert entry.tags == tags
         else:
             with pytest.raises(ValidationError):
@@ -382,6 +424,7 @@ def test_common_tag_combinations():
                     description="Test quantity",
                     documentation="Test quantity for invalid tag validation.",
                     unit="m",
+                    physics_domain=physics_domain,
                     tags=tags,
                 )
 
@@ -405,6 +448,18 @@ def test_tag_consistency_with_yaml_source():
     # Check lengths match
     assert len(PRIMARY_TAGS) == len(spec.primary_tags)
     assert len(SECONDARY_TAGS) == len(spec.secondary_tags)
+
+
+def test_physics_domain_consistency_with_yaml_source():
+    """Test that generated PhysicsDomain enum matches YAML source."""
+    spec = PhysicsDomainSpec.load()
+
+    for domain in spec.domains:
+        assert domain in PHYSICS_DOMAINS, (
+            f"Domain '{domain}' from YAML not in generated PHYSICS_DOMAINS"
+        )
+
+    assert len(PHYSICS_DOMAINS) == len(spec.domains)
 
 
 def test_tag_descriptions_are_nonempty():

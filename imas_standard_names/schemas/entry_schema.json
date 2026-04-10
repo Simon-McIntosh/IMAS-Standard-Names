@@ -1,0 +1,673 @@
+{
+  "$defs": {
+    "ExpressionProvenance": {
+      "description": "Provenance describing an algebraic expression of existing names.\n\nFields\n------\nmode: Literal[\"expression\"] discriminator.\nexpression: Free-form (but catalog-governed) expression string.\ndependencies: List of standard name identifiers referenced by the\n    expression (used for dependency graph construction / validation).",
+      "properties": {
+        "mode": {
+          "const": "expression",
+          "default": "expression",
+          "title": "Mode",
+          "type": "string"
+        },
+        "expression": {
+          "title": "Expression",
+          "type": "string"
+        },
+        "dependencies": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Dependencies",
+          "type": "array"
+        }
+      },
+      "required": [
+        "expression",
+        "dependencies"
+      ],
+      "title": "ExpressionProvenance",
+      "type": "object"
+    },
+    "OperatorProvenance": {
+      "description": "Provenance describing a chain of operators applied to a base quantity.\n\nFields\n------\nmode: Literal[\"operator\"] discriminator.\noperators: Outermost-first sequence of primitive operator tokens, already\n    normalized (composite operators expanded) by the schema validator.\nbase: The underlying primitive standard name (scalar or vector) to which\n    the operators are applied.\noperator_id: Optional composite operator identifier (e.g. 'laplacian',\n    'second_time_derivative') if the user supplied one in the catalog. It\n    is not required and may be omitted if only primitive operators were\n    used. Validation does not derive this value; it simply preserves what\n    was provided for round-tripping / governance checks.",
+      "properties": {
+        "mode": {
+          "const": "operator",
+          "default": "operator",
+          "title": "Mode",
+          "type": "string"
+        },
+        "operators": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Operators",
+          "type": "array"
+        },
+        "base": {
+          "title": "Base",
+          "type": "string"
+        },
+        "operator_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Operator Id"
+        }
+      },
+      "required": [
+        "operators",
+        "base"
+      ],
+      "title": "OperatorProvenance",
+      "type": "object"
+    },
+    "ReductionProvenance": {
+      "description": "Provenance describing a standardized reduction / aggregation.\n\nFields\n------\nmode: Literal[\"reduction\"] discriminator.\nreduction: canonical reduction id (mean, rms, integral, magnitude, ...)\ndomain: contextual domain for the reduction (time, volume, flux_surface, none)\nbase: underlying standard name being reduced.",
+      "properties": {
+        "mode": {
+          "const": "reduction",
+          "default": "reduction",
+          "title": "Mode",
+          "type": "string"
+        },
+        "reduction": {
+          "title": "Reduction",
+          "type": "string"
+        },
+        "domain": {
+          "default": "none",
+          "title": "Domain",
+          "type": "string"
+        },
+        "base": {
+          "title": "Base",
+          "type": "string"
+        }
+      },
+      "required": [
+        "reduction",
+        "base"
+      ],
+      "title": "ReductionProvenance",
+      "type": "object"
+    },
+    "StandardNameMetadataEntry": {
+      "additionalProperties": false,
+      "description": "Metadata standard name catalog entry.\n\nUsed for definitional entries that document concepts, boundaries,\nor reference anchors rather than measurable physical quantities.\nThese entries provide documentation and cross-references but do not\nrepresent data that can be measured or calculated.\n\nExamples: plasma_boundary, scrape_off_layer, confined_region\n\nMetadata entries have relaxed validation:\n- No unit field required (these are definitional, not measurable)\n- No provenance required (these are definitional, not derived)\n- Focus on documentation and links fields",
+      "properties": {
+        "name": {
+          "description": "Standard name token: snake_case (^[a-z][a-z0-9_]*$); starts with a letter; no double '__'.",
+          "examples": [
+            "electron_temperature",
+            "gradient_of_electron_temperature",
+            "radial_component_of_magnetic_field"
+          ],
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Name",
+          "type": "string"
+        },
+        "description": {
+          "description": "One concise sentence summarizing the physical quantity. Keep under 120 characters for readability. Should be self-contained and understandable without external context.",
+          "maxLength": 180,
+          "title": "Description",
+          "type": "string"
+        },
+        "documentation": {
+          "description": "Authoritative, self-contained documentation providing clear, comprehensive explanation of the physical quantity. This field must be fully standalone - a domain expert should understand the quantity completely without consulting external sources.",
+          "title": "Documentation",
+          "type": "string"
+        },
+        "status": {
+          "default": "draft",
+          "description": "Lifecycle state: draft | active | deprecated | superseded.",
+          "enum": [
+            "draft",
+            "active",
+            "deprecated",
+            "superseded"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "validity_domain": {
+          "default": "",
+          "description": "Controlled vocabulary region of validity",
+          "examples": [
+            "core_plasma",
+            "edge_plasma",
+            "vacuum",
+            "whole_plasma"
+          ],
+          "title": "Validity Domain",
+          "type": "string"
+        },
+        "constraints": {
+          "description": "Physical or mathematical constraints that must be satisfied (e.g. 'T_e > 0', 'kappa >= 1')",
+          "examples": [
+            [
+              "T_e > 0"
+            ],
+            [
+              "n_e >= 0",
+              "n_e < 1e22 m^-3"
+            ],
+            [
+              "kappa >= 1"
+            ]
+          ],
+          "items": {
+            "type": "string"
+          },
+          "title": "Constraints",
+          "type": "array"
+        },
+        "deprecates": {
+          "anyOf": [
+            {
+              "description": "Standard name token: snake_case (^[a-z][a-z0-9_]*$); starts with a letter; no double '__'.",
+              "examples": [
+                "electron_temperature",
+                "gradient_of_electron_temperature",
+                "radial_component_of_magnetic_field"
+              ],
+              "pattern": "^[a-z][a-z0-9_]*$",
+              "type": "string"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "default": "",
+          "title": "Deprecates"
+        },
+        "superseded_by": {
+          "anyOf": [
+            {
+              "description": "Standard name token: snake_case (^[a-z][a-z0-9_]*$); starts with a letter; no double '__'.",
+              "examples": [
+                "electron_temperature",
+                "gradient_of_electron_temperature",
+                "radial_component_of_magnetic_field"
+              ],
+              "pattern": "^[a-z][a-z0-9_]*$",
+              "type": "string"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "default": "",
+          "title": "Superseded By"
+        },
+        "physics_domain": {
+          "description": "Physics domain classification from PhysicsDomain enum. Determines catalog subdirectory.",
+          "title": "Physics Domain",
+          "type": "string"
+        },
+        "tags": {
+          "description": "Secondary classification tags from controlled vocabulary for cross-cutting classification.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Tags",
+          "type": "array"
+        },
+        "links": {
+          "description": "Internal cross-references to related standard names only. Use format 'name:standard_name_token' (e.g., 'name:plasma_boundary'). Internal references are validated against the catalog.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Links",
+          "type": "array"
+        },
+        "ids_paths": {
+          "description": "IMAS Data Dictionary paths that map to this standard name. Used to track provenance from IMAS DD and enable cross-referencing between standard names and DD structure.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Ids Paths",
+          "type": "array"
+        },
+        "kind": {
+          "const": "metadata",
+          "default": "metadata",
+          "title": "Kind",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "description",
+        "documentation",
+        "physics_domain"
+      ],
+      "title": "StandardNameMetadataEntry",
+      "type": "object"
+    },
+    "StandardNameScalarEntry": {
+      "additionalProperties": false,
+      "description": "Scalar standard name catalog entry.",
+      "properties": {
+        "name": {
+          "description": "Standard name token: snake_case (^[a-z][a-z0-9_]*$); starts with a letter; no double '__'.",
+          "examples": [
+            "electron_temperature",
+            "gradient_of_electron_temperature",
+            "radial_component_of_magnetic_field"
+          ],
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Name",
+          "type": "string"
+        },
+        "description": {
+          "description": "One concise sentence summarizing the physical quantity. Keep under 120 characters for readability. Should be self-contained and understandable without external context.",
+          "maxLength": 180,
+          "title": "Description",
+          "type": "string"
+        },
+        "documentation": {
+          "description": "Authoritative, self-contained documentation providing clear, comprehensive explanation of the physical quantity. This field must be fully standalone - a domain expert should understand the quantity completely without consulting external sources.",
+          "title": "Documentation",
+          "type": "string"
+        },
+        "status": {
+          "default": "draft",
+          "description": "Lifecycle state: draft | active | deprecated | superseded.",
+          "enum": [
+            "draft",
+            "active",
+            "deprecated",
+            "superseded"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "validity_domain": {
+          "default": "",
+          "description": "Controlled vocabulary region of validity",
+          "examples": [
+            "core_plasma",
+            "edge_plasma",
+            "vacuum",
+            "whole_plasma"
+          ],
+          "title": "Validity Domain",
+          "type": "string"
+        },
+        "constraints": {
+          "description": "Physical or mathematical constraints that must be satisfied (e.g. 'T_e > 0', 'kappa >= 1')",
+          "examples": [
+            [
+              "T_e > 0"
+            ],
+            [
+              "n_e >= 0",
+              "n_e < 1e22 m^-3"
+            ],
+            [
+              "kappa >= 1"
+            ]
+          ],
+          "items": {
+            "type": "string"
+          },
+          "title": "Constraints",
+          "type": "array"
+        },
+        "deprecates": {
+          "anyOf": [
+            {
+              "description": "Standard name token: snake_case (^[a-z][a-z0-9_]*$); starts with a letter; no double '__'.",
+              "examples": [
+                "electron_temperature",
+                "gradient_of_electron_temperature",
+                "radial_component_of_magnetic_field"
+              ],
+              "pattern": "^[a-z][a-z0-9_]*$",
+              "type": "string"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "default": "",
+          "title": "Deprecates"
+        },
+        "superseded_by": {
+          "anyOf": [
+            {
+              "description": "Standard name token: snake_case (^[a-z][a-z0-9_]*$); starts with a letter; no double '__'.",
+              "examples": [
+                "electron_temperature",
+                "gradient_of_electron_temperature",
+                "radial_component_of_magnetic_field"
+              ],
+              "pattern": "^[a-z][a-z0-9_]*$",
+              "type": "string"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "default": "",
+          "title": "Superseded By"
+        },
+        "physics_domain": {
+          "description": "Physics domain classification from PhysicsDomain enum. Determines catalog subdirectory.",
+          "title": "Physics Domain",
+          "type": "string"
+        },
+        "tags": {
+          "description": "Secondary classification tags from controlled vocabulary for cross-cutting classification.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Tags",
+          "type": "array"
+        },
+        "links": {
+          "description": "Internal cross-references to related standard names only. Use format 'name:standard_name_token' (e.g., 'name:plasma_boundary'). Internal references are validated against the catalog.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Links",
+          "type": "array"
+        },
+        "ids_paths": {
+          "description": "IMAS Data Dictionary paths that map to this standard name. Used to track provenance from IMAS DD and enable cross-referencing between standard names and DD structure.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Ids Paths",
+          "type": "array"
+        },
+        "kind": {
+          "const": "scalar",
+          "default": "scalar",
+          "title": "Kind",
+          "type": "string"
+        },
+        "unit": {
+          "description": "Unit in fused dot-exponent style (auto-corrected to lexicographic token order). Tokens: alphanumerics only; join with '.'; exponents use ^ (e.g. m.s^-2). No '/', '*', or whitespace. Empty string for dimensionless.",
+          "examples": [
+            "eV",
+            "m",
+            "m.s^-1",
+            "A.m^-2",
+            "m^-3",
+            "1"
+          ],
+          "pattern": "^[A-Za-z0-9]+(\\^[+-]?\\d+)?(\\.[A-Za-z0-9]+(\\^[+-]?\\d+)?)*$|^$",
+          "title": "Unit",
+          "type": "string"
+        },
+        "provenance": {
+          "anyOf": [
+            {
+              "discriminator": {
+                "mapping": {
+                  "expression": "#/$defs/ExpressionProvenance",
+                  "operator": "#/$defs/OperatorProvenance",
+                  "reduction": "#/$defs/ReductionProvenance"
+                },
+                "propertyName": "mode"
+              },
+              "oneOf": [
+                {
+                  "$ref": "#/$defs/OperatorProvenance"
+                },
+                {
+                  "$ref": "#/$defs/ExpressionProvenance"
+                },
+                {
+                  "$ref": "#/$defs/ReductionProvenance"
+                }
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Provenance"
+        }
+      },
+      "required": [
+        "name",
+        "description",
+        "documentation",
+        "physics_domain",
+        "unit"
+      ],
+      "title": "StandardNameScalarEntry",
+      "type": "object"
+    },
+    "StandardNameVectorEntry": {
+      "additionalProperties": false,
+      "description": "Vector standard name catalog entry.",
+      "properties": {
+        "name": {
+          "description": "Standard name token: snake_case (^[a-z][a-z0-9_]*$); starts with a letter; no double '__'.",
+          "examples": [
+            "electron_temperature",
+            "gradient_of_electron_temperature",
+            "radial_component_of_magnetic_field"
+          ],
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Name",
+          "type": "string"
+        },
+        "description": {
+          "description": "One concise sentence summarizing the physical quantity. Keep under 120 characters for readability. Should be self-contained and understandable without external context.",
+          "maxLength": 180,
+          "title": "Description",
+          "type": "string"
+        },
+        "documentation": {
+          "description": "Authoritative, self-contained documentation providing clear, comprehensive explanation of the physical quantity. This field must be fully standalone - a domain expert should understand the quantity completely without consulting external sources.",
+          "title": "Documentation",
+          "type": "string"
+        },
+        "status": {
+          "default": "draft",
+          "description": "Lifecycle state: draft | active | deprecated | superseded.",
+          "enum": [
+            "draft",
+            "active",
+            "deprecated",
+            "superseded"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "validity_domain": {
+          "default": "",
+          "description": "Controlled vocabulary region of validity",
+          "examples": [
+            "core_plasma",
+            "edge_plasma",
+            "vacuum",
+            "whole_plasma"
+          ],
+          "title": "Validity Domain",
+          "type": "string"
+        },
+        "constraints": {
+          "description": "Physical or mathematical constraints that must be satisfied (e.g. 'T_e > 0', 'kappa >= 1')",
+          "examples": [
+            [
+              "T_e > 0"
+            ],
+            [
+              "n_e >= 0",
+              "n_e < 1e22 m^-3"
+            ],
+            [
+              "kappa >= 1"
+            ]
+          ],
+          "items": {
+            "type": "string"
+          },
+          "title": "Constraints",
+          "type": "array"
+        },
+        "deprecates": {
+          "anyOf": [
+            {
+              "description": "Standard name token: snake_case (^[a-z][a-z0-9_]*$); starts with a letter; no double '__'.",
+              "examples": [
+                "electron_temperature",
+                "gradient_of_electron_temperature",
+                "radial_component_of_magnetic_field"
+              ],
+              "pattern": "^[a-z][a-z0-9_]*$",
+              "type": "string"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "default": "",
+          "title": "Deprecates"
+        },
+        "superseded_by": {
+          "anyOf": [
+            {
+              "description": "Standard name token: snake_case (^[a-z][a-z0-9_]*$); starts with a letter; no double '__'.",
+              "examples": [
+                "electron_temperature",
+                "gradient_of_electron_temperature",
+                "radial_component_of_magnetic_field"
+              ],
+              "pattern": "^[a-z][a-z0-9_]*$",
+              "type": "string"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "default": "",
+          "title": "Superseded By"
+        },
+        "physics_domain": {
+          "description": "Physics domain classification from PhysicsDomain enum. Determines catalog subdirectory.",
+          "title": "Physics Domain",
+          "type": "string"
+        },
+        "tags": {
+          "description": "Secondary classification tags from controlled vocabulary for cross-cutting classification.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Tags",
+          "type": "array"
+        },
+        "links": {
+          "description": "Internal cross-references to related standard names only. Use format 'name:standard_name_token' (e.g., 'name:plasma_boundary'). Internal references are validated against the catalog.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Links",
+          "type": "array"
+        },
+        "ids_paths": {
+          "description": "IMAS Data Dictionary paths that map to this standard name. Used to track provenance from IMAS DD and enable cross-referencing between standard names and DD structure.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Ids Paths",
+          "type": "array"
+        },
+        "kind": {
+          "const": "vector",
+          "default": "vector",
+          "title": "Kind",
+          "type": "string"
+        },
+        "unit": {
+          "description": "Unit in fused dot-exponent style (auto-corrected to lexicographic token order). Tokens: alphanumerics only; join with '.'; exponents use ^ (e.g. m.s^-2). No '/', '*', or whitespace. Empty string for dimensionless.",
+          "examples": [
+            "eV",
+            "m",
+            "m.s^-1",
+            "A.m^-2",
+            "m^-3",
+            "1"
+          ],
+          "pattern": "^[A-Za-z0-9]+(\\^[+-]?\\d+)?(\\.[A-Za-z0-9]+(\\^[+-]?\\d+)?)*$|^$",
+          "title": "Unit",
+          "type": "string"
+        },
+        "provenance": {
+          "anyOf": [
+            {
+              "discriminator": {
+                "mapping": {
+                  "expression": "#/$defs/ExpressionProvenance",
+                  "operator": "#/$defs/OperatorProvenance",
+                  "reduction": "#/$defs/ReductionProvenance"
+                },
+                "propertyName": "mode"
+              },
+              "oneOf": [
+                {
+                  "$ref": "#/$defs/OperatorProvenance"
+                },
+                {
+                  "$ref": "#/$defs/ExpressionProvenance"
+                },
+                {
+                  "$ref": "#/$defs/ReductionProvenance"
+                }
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Provenance"
+        }
+      },
+      "required": [
+        "name",
+        "description",
+        "documentation",
+        "physics_domain",
+        "unit"
+      ],
+      "title": "StandardNameVectorEntry",
+      "type": "object"
+    }
+  },
+  "discriminator": {
+    "mapping": {
+      "metadata": "#/$defs/StandardNameMetadataEntry",
+      "scalar": "#/$defs/StandardNameScalarEntry",
+      "vector": "#/$defs/StandardNameVectorEntry"
+    },
+    "propertyName": "kind"
+  },
+  "oneOf": [
+    {
+      "$ref": "#/$defs/StandardNameScalarEntry"
+    },
+    {
+      "$ref": "#/$defs/StandardNameVectorEntry"
+    },
+    {
+      "$ref": "#/$defs/StandardNameMetadataEntry"
+    }
+  ],
+  "$schema_version": "0.7.0rc2.dev1+g5b1ad0fef.d20260410"
+}

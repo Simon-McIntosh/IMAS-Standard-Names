@@ -34,7 +34,7 @@ def make_valid_entry(kind="scalar", **overrides):
         "documentation": "Detailed documentation for test quantity.",
         "unit": "m^-3" if kind != "metadata" else "",
         "status": "draft",
-        "tags": ["fundamental"],
+        "physics_domain": "general",
     }
 
     # Merge with overrides
@@ -125,7 +125,8 @@ def sample_scalar_entry():
         "description": "Test scalar entry.",
         "unit": "m",
         "status": "draft",
-        "tags": ["magnetics", "measured"],
+        "physics_domain": "magnetic_field_diagnostics",
+        "tags": ["measured"],
     }
 
 
@@ -138,7 +139,8 @@ def sample_vector_entry():
         "description": "Test vector entry.",
         "unit": "T",
         "status": "draft",
-        "tags": ["magnetics", "spatial-profile"],
+        "physics_domain": "magnetic_field_diagnostics",
+        "tags": ["spatial-profile"],
     }
 
 
@@ -151,14 +153,15 @@ def sample_entries_with_provenance():
             "kind": "scalar",
             "description": "Base quantity for provenance tests.",
             "unit": "m",
-            "tags": ["magnetics"],
+            "physics_domain": "magnetic_field_diagnostics",
         },
         {
             "name": "derived_quantity",
             "kind": "scalar",
             "description": "Derived quantity using operator.",
             "unit": "m.s^-1",
-            "tags": ["magnetics", "derived"],
+            "physics_domain": "magnetic_field_diagnostics",
+            "tags": ["derived"],
             "provenance": {
                 "mode": "operator",
                 "operators": ["time_derivative"],
@@ -202,8 +205,12 @@ def copy_examples(examples_catalog):
     def _copy(target_dir: Path, count: int = 5, kind: str | None = None):
         examples = examples_catalog.list(kind=kind)[:count]
         for entry in examples:
-            primary_tag = entry.tags[0] if entry.tags else "other"
-            (target_dir / primary_tag).mkdir(exist_ok=True)
+            pd = (
+                entry.physics_domain
+                if hasattr(entry, "physics_domain") and entry.physics_domain
+                else "other"
+            )
+            (target_dir / pd).mkdir(exist_ok=True)
         target_store = YamlStore(target_dir)
         for entry in examples:
             target_store.write(entry)
@@ -227,8 +234,12 @@ def sample_catalog(tmp_path, examples_catalog):
     # Copy examples from the examples catalog
     examples = examples_catalog.list()[:10]  # Get first 10 examples for variety
     for entry in examples:
-        primary_tag = entry.tags[0] if entry.tags else "other"
-        (catalog_dir / primary_tag).mkdir(exist_ok=True)
+        pd = (
+            entry.physics_domain
+            if hasattr(entry, "physics_domain") and entry.physics_domain
+            else "other"
+        )
+        (catalog_dir / pd).mkdir(exist_ok=True)
 
     target_store = YamlStore(catalog_dir)
     for entry in examples:

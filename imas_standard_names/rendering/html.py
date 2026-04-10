@@ -74,6 +74,7 @@ def render_html(
             )  # type: ignore[attr-defined]
         except Exception:
             add_row("Provenance", str(prov))
+    add_row("Physics Domain", getattr(entry, "physics_domain", None))
     add_row("Tags", getattr(entry, "tags", None))
     add_row("Constraints", getattr(entry, "constraints", None))
     add_row("Validity Domain", getattr(entry, "validity_domain", None))

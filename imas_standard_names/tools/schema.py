@@ -11,8 +11,8 @@ from imas_standard_names.grammar.field_schemas import (
     UPSERT_GUIDANCE,
 )
 from imas_standard_names.grammar.tag_types import (
-    PRIMARY_TAG_DESCRIPTIONS,
-    PRIMARY_TAGS,
+    PHYSICS_DOMAIN_DESCRIPTIONS,
+    PHYSICS_DOMAINS,
     SECONDARY_TAG_DESCRIPTIONS,
     SECONDARY_TAGS,
 )
@@ -84,11 +84,12 @@ class SchemaTool(Tool):
             Dictionary with complete tag vocabularies and descriptions.
         """
         return {
-            "primary_tags": PRIMARY_TAG_DESCRIPTIONS,
+            "physics_domains": PHYSICS_DOMAIN_DESCRIPTIONS,
+            "all_physics_domains": list(PHYSICS_DOMAINS),
             "secondary_tags": SECONDARY_TAG_DESCRIPTIONS,
-            "all_primary_tags": list(PRIMARY_TAGS),
             "all_secondary_tags": list(SECONDARY_TAGS),
-            "ordering_rule": "tags[0] must be primary tag, tags[1:] are secondary tags",
+            "physics_domain_rule": "physics_domain field must be a valid PhysicsDomain enum value",
+            "tags_rule": "tags field contains secondary classification tags only",
         }
 
     def _get_examples_from_catalog(self, kind: str | None = None) -> list[dict]:

@@ -1,0 +1,300 @@
+# IMAS Standard Names - Physics Domain Controlled Vocabulary
+# Unified physics classification values for standard name categorization.
+# Each domain has a description, category, and optional list of associated IMAS IDS names.
+# IDS associations are derived from the existing primary tag vocabulary.
+
+physics_domains:
+
+  # --- Core Plasma ---
+
+  equilibrium:
+    description: MHD equilibrium, flux surfaces, magnetic geometry, coordinate systems
+    category: core_plasma
+    ids:
+      - equilibrium
+
+  transport:
+    description: Transport coefficients, fluxes, neoclassical and anomalous transport modeling
+    category: core_plasma
+    ids:
+      - transport_solver_numerics
+      - plasma_transport
+      - edge_transport
+
+  core_plasma_physics:
+    description: Core plasma profiles, kinetic quantities, global parameters, integrated quantities
+    category: core_plasma
+    ids:
+      - core_profiles
+      - core_transport
+      - core_instant_changes
+      - core_sources
+      - plasma_sources
+
+  turbulence:
+    description: Turbulence physics, fluctuations, turbulent transport, correlation analysis
+    category: core_plasma
+    ids:
+      - turbulence
+
+  magnetohydrodynamics:
+    description: MHD stability, disruptions, instabilities, sawteeth, tearing modes
+    category: core_plasma
+    ids:
+      - mhd
+      - mhd_linear
+      - disruption
+      - ntms
+      - sawteeth
+
+  # --- Heating and Current Drive ---
+
+  auxiliary_heating:
+    description: Auxiliary heating systems including neutral beam, electron cyclotron, ion cyclotron, and lower hybrid
+    category: heating_current_drive
+    ids:
+      - nbi
+      - ec_launchers
+      - ece
+      - ic_antennas
+      - lh_antennas
+
+  current_drive:
+    description: Non-inductive current drive physics, efficiency, and profile control
+    category: heating_current_drive
+
+  waves:
+    description: Wave propagation, RF physics, wave-particle interactions, dispersion
+    category: heating_current_drive
+    ids:
+      - waves
+
+  # --- Edge and Divertor ---
+
+  edge_plasma_physics:
+    description: Scrape-off layer, divertor physics, plasma-wall interactions, recycling
+    category: edge_divertor
+    ids:
+      - edge_profiles
+      - edge_sources
+      - wall
+      - divertors
+      - langmuir_probes
+      - radiation
+
+  plasma_wall_interactions:
+    description: First wall, plasma-facing components, erosion, deposition, material migration
+    category: edge_divertor
+    ids:
+      - wall
+      - divertors
+      - cryostat
+
+  divertor_physics:
+    description: Divertor target loads, detachment, particle and heat exhaust
+    category: edge_divertor
+
+  fueling:
+    description: Gas injection, pellet injection, shattered pellet injection, fueling systems
+    category: edge_divertor
+    ids:
+      - gas_injection
+      - pellets
+      - spi
+      - gas_pumping
+
+  # --- Energetic Particles ---
+
+  fast_particles:
+    description: Fast ion and electron distributions, energetic particles, slowing-down
+    category: energetic_particles
+    ids:
+      - distributions
+      - distribution_sources
+
+  runaway_electrons:
+    description: Runaway electron physics, avalanche generation, loss mechanisms
+    category: energetic_particles
+    ids:
+      - runaway_electrons
+
+  # --- Diagnostics ---
+
+  particle_measurement_diagnostics:
+    description: Thomson scattering and particle-based diagnostic measurements
+    category: diagnostics
+    ids:
+      - thomson_scattering
+
+  electromagnetic_wave_diagnostics:
+    description: Interferometry, polarimetry, reflectometry, and wave-based diagnostics
+    category: diagnostics
+    ids:
+      - interferometer
+      - polarimeter
+      - refractometer
+      - reflectometer_profile
+      - reflectometer_fluctuation
+
+  radiation_measurement_diagnostics:
+    description: Bolometry, X-ray diagnostics, bremsstrahlung, imaging systems
+    category: diagnostics
+    ids:
+      - bolometer
+      - soft_x_rays
+      - hard_x_rays
+      - bremsstrahlung_visible
+      - camera_visible
+      - camera_x_rays
+      - camera_ir
+
+  magnetic_field_diagnostics:
+    description: Magnetic diagnostics, flux loops, Rogowski coils, diamagnetic measurements
+    category: diagnostics
+    ids:
+      - magnetics
+
+  mechanical_measurement_diagnostics:
+    description: Mechanical and structural measurement diagnostics, strain, vibration
+    category: diagnostics
+
+  plasma_measurement_diagnostics:
+    description: General plasma parameter measurement diagnostics
+    category: diagnostics
+
+  spectroscopy:
+    description: Emission spectroscopy, charge exchange, motional Stark effect, impurity diagnostics
+    category: diagnostics
+    ids:
+      - spectrometer_visible
+      - spectrometer_uv
+      - spectrometer_x_ray_crystal
+      - spectrometer_mass
+      - charge_exchange
+      - mse
+
+  neutronics:
+    description: Neutron diagnostics, fusion product measurements, activation
+    category: diagnostics
+    ids:
+      - neutron_diagnostic
+
+  # --- Control and Operations ---
+
+  plasma_control:
+    description: Plasma position and shape control, feedback systems, electromagnetic coupling
+    category: control_operations
+    ids:
+      - pf_active
+      - pf_passive
+      - pf_plasma
+      - tf
+      - control
+      - controllers
+      - coils_non_axisymmetric
+      - iron_core
+      - ferritic
+      - b_field_non_axisymmetric
+      - em_coupling
+
+  machine_operations:
+    description: Pulse scheduling, workflow management, operational metadata
+    category: control_operations
+    ids:
+      - pulse_schedule
+      - workflow
+      - dataset_description
+      - dataset_fair
+      - real_time_data
+
+  plasma_initiation:
+    description: Plasma startup, breakdown, initiation physics, early heating phase
+    category: control_operations
+    ids:
+      - plasma_initiation
+
+  # --- Machine Systems ---
+
+  magnetic_field_systems:
+    description: Magnetic coil systems, superconducting magnets, field generation infrastructure
+    category: machine_systems
+
+  structural_components:
+    description: Vacuum vessel, cryostat, structural support systems
+    category: machine_systems
+
+  plant_systems:
+    description: Power supplies, cooling systems, vacuum systems, plant infrastructure
+    category: machine_systems
+
+  # --- Data and Computing ---
+
+  data_management:
+    description: Summary data products, integrated analysis results, data archival
+    category: data_computing
+    ids:
+      - summary
+
+  computational_workflow:
+    description: Auxiliary data, atomic and molecular data, geometry definitions, computational tools
+    category: data_computing
+    ids:
+      - temporary
+      - amns_data
+      - geometry
+      - operational_instrumentation
+      - calorimetry
+      - barometry
+      - focs
+
+  # --- General ---
+
+  general:
+    description: Universal plasma physics quantities appearing across multiple IDS
+    category: general
+
+  # --- Advanced Physics ---
+
+  gyrokinetics:
+    description: Gyrokinetic theory, simulation, and turbulence modeling
+    category: advanced_physics
+
+
+# Mapping from old primary tag names to physics domain values.
+# Supports one-to-one and many-to-one relationships.
+
+tag_aliases:
+  # Exact matches (tag = enum value)
+  equilibrium: equilibrium
+  transport: transport
+  turbulence: turbulence
+  magnetics: magnetic_field_diagnostics
+  waves: waves
+  fueling: fueling
+  spectroscopy: spectroscopy
+  neutronics: neutronics
+  # Renamed
+  mhd: magnetohydrodynamics
+  edge-physics: edge_plasma_physics
+  core-physics: core_plasma_physics
+  fast-particles: fast_particles
+  runaway-electrons: runaway_electrons
+  radiation-diagnostics: radiation_measurement_diagnostics
+  coils-and-control: plasma_control
+  pulse-management: machine_operations
+  wall-and-structures: plasma_wall_interactions
+  plasma-initiation: plasma_initiation
+  fundamental: general
+  # Many-to-one (heating methods -> auxiliary_heating)
+  nbi: auxiliary_heating
+  ec-heating: auxiliary_heating
+  ic-heating: auxiliary_heating
+  lh-heating: auxiliary_heating
+  # Many-to-one (specific diagnostics -> grouped)
+  thomson-scattering: particle_measurement_diagnostics
+  interferometry: electromagnetic_wave_diagnostics
+  reflectometry: electromagnetic_wave_diagnostics
+  imaging: radiation_measurement_diagnostics
+  # Operational
+  data-products: data_management
+  utilities: computational_workflow

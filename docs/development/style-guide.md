@@ -132,26 +132,21 @@ status: draft | active | deprecated
 | `kind`        | `scalar` for all entries (vector metadata is inferred)         | `scalar`                              |
 | `unit`        | SI symbols, use `.` for multiplication, `^` for powers         | `T`, `eV`, `m.s^-1`                   |
 | `status`      | `draft` `active` `deprecated` `superseded`                     | `draft`                               |
-| `tags`        | PRIMARY tag first (tags[0]), secondary tags after              | `[magnetics, measured, geometry]`     |
+| `physics_domain` | Required `PhysicsDomain` enum value                         | `core_plasma_physics`                 |
+| `tags`        | Optional secondary cross-cutting classification               | `[measured, geometry]`                |
 | `description` | 120 chars, begins with capital, no trailing period if fragment | `Radial component of magnetic field.` |
 
-### Tags Ordering
+### Physics Domain and Tags
 
-**Critical:** The first tag (`tags[0]`) MUST be a primary tag:
+**`physics_domain`** is a required field that classifies the entry using the `PhysicsDomain` enum (32 values, e.g., `core_plasma_physics`, `magnetics`, `equilibrium`).
 
-- Primary tags: `magnetics`, `plasma`, `equilibrium`, `fundamental`, `heating`, `diagnostics`
-- Secondary tags: `measured`, `geometry`, `cylindrical-coordinates`, `derived`
+**`tags`** is optional and used only for secondary cross-cutting classification (e.g., `measured`, `geometry`, `cylindrical_coordinates`, `derived`). Tags have no required ordering.
 
-**Valid:**
-
-```yaml
-tags: [magnetics, measured, geometry]
-```
-
-**Invalid:**
+**Example:**
 
 ```yaml
-tags: [measured, magnetics] # measured is secondary, must come after primary
+physics_domain: core_plasma_physics
+tags: [measured, geometry]
 ```
 
 ---

@@ -23,7 +23,7 @@ def test_metadata_entry_basic_creation():
         name="test_metadata",
         description="Test metadata entry.",
         documentation="Extended documentation for test metadata entry.",
-        tags=["equilibrium"],
+        physics_domain="equilibrium",
     )
     assert entry.kind == "metadata"
     assert entry.name == "test_metadata"
@@ -38,7 +38,7 @@ def test_metadata_entry_without_unit():
         "kind": "metadata",
         "description": "Definition of plasma boundary.",
         "documentation": "Metadata defining the plasma boundary surface.",
-        "tags": ["equilibrium"],
+        "physics_domain": "equilibrium",
     }
     entry = create_standard_name_entry(entry_dict)
     assert isinstance(entry, StandardNameMetadataEntry)
@@ -52,7 +52,7 @@ def test_metadata_entry_model_dump_excludes_unit():
         name="test_metadata",
         description="Test metadata entry.",
         documentation="Extended documentation.",
-        tags=["equilibrium"],
+        physics_domain="equilibrium",
     )
     dumped = entry.model_dump()
     # Check that unit is excluded from serialization
@@ -70,7 +70,7 @@ def test_metadata_entry_with_documentation():
             "The confined region refers to the volume enclosed by the last "
             "closed flux surface where particles and energy are magnetically confined."
         ),
-        tags=["equilibrium"],
+        physics_domain="equilibrium",
         status="draft",
     )
     assert entry.kind == "metadata"
@@ -85,7 +85,7 @@ def test_metadata_entry_rejects_provenance():
             name="test_metadata",
             description="Test metadata entry.",
             documentation="Documentation for test metadata.",
-            tags=["equilibrium"],
+            physics_domain="equilibrium",
             provenance={
                 "mode": "operator",
                 "operators": ["gradient"],
@@ -100,7 +100,7 @@ def test_metadata_entry_with_links():
         name="plasma_boundary",
         description="Definition of plasma boundary.",
         documentation="Metadata defining the plasma boundary with references.",
-        tags=["equilibrium"],
+        physics_domain="equilibrium",
         links=[
             "name:minor_radius_of_flux_surface",
             "https://example.org/plasma-boundary-definition",
@@ -119,7 +119,7 @@ def test_metadata_entry_discriminator():
         "kind": "metadata",
         "description": "Test metadata entry.",
         "documentation": "Documentation for discriminator test.",
-        "tags": ["equilibrium"],
+        "physics_domain": "equilibrium",
     }
     entry = create_standard_name_entry(data)
     assert isinstance(entry, StandardNameMetadataEntry)
@@ -133,7 +133,8 @@ def test_metadata_entry_all_optional_fields():
         description="Definition of scrape-off layer region.",
         documentation="Region outside the last closed flux surface.",
         status="active",
-        tags=["equilibrium", "spatial-profile"],
+        physics_domain="equilibrium",
+        tags=["spatial-profile"],
         links=["name:plasma_boundary"],
         validity_domain="edge_plasma",
         constraints=["flux_surface > separatrix"],
@@ -151,7 +152,7 @@ def test_metadata_entry_governance_fields():
         name="old_plasma_boundary_definition",
         description="Deprecated definition of plasma boundary.",
         documentation="Old definition superseded by newer standard.",
-        tags=["equilibrium"],
+        physics_domain="equilibrium",
         status="deprecated",
         superseded_by="plasma_boundary",
     )

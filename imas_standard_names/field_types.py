@@ -49,13 +49,21 @@ Unit = Annotated[
 ]
 
 # Tags: list[str] with controlled vocabulary validation
-# First element (tags[0]) must be a primary tag (validated in models.py)
-# Remaining elements (tags[1:]) are secondary tags (validated in models.py)
+# Secondary classification tags for cross-cutting classification
 # See grammar/vocabularies/tags.yml for complete controlled vocabulary
 Tags = Annotated[
     list[str],
     Field(
         description=FIELD_DESCRIPTIONS["tags"],
+    ),
+]
+
+# Physics domain: controlled vocabulary from PhysicsDomain enum
+# Determines catalog subdirectory organization
+PhysicsDomainField = Annotated[
+    str,
+    Field(
+        description="Physics domain classification from PhysicsDomain enum. Determines catalog subdirectory.",
     ),
 ]
 
@@ -116,6 +124,7 @@ __all__ = [
     "Name",
     "Unit",
     "Tags",
+    "PhysicsDomainField",
     "Links",
     "Constraints",
     "Description",

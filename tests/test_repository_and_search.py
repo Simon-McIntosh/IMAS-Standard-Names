@@ -32,7 +32,7 @@ def test_repository_uow_add_update_remove(tmp_path: Path):
             "unit": "m^-3",
             "description": "Density.",
             "documentation": "Density for repository and search testing.",
-            "tags": ["fundamental"],
+            "physics_domain": "general",
         }
     )
     uow.add(model)
@@ -47,7 +47,7 @@ def test_repository_uow_add_update_remove(tmp_path: Path):
             "unit": "m^-3",
             "description": "Updated density.",
             "documentation": "Updated density for repository and search testing.",
-            "tags": ["fundamental"],
+            "physics_domain": "general",
         }
     )
     uow2.update("plasma_density", updated)

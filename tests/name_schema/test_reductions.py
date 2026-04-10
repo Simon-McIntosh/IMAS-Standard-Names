@@ -15,7 +15,7 @@ def test_time_average_reduction_scalar():
             "documentation": "Time-averaged electron temperature.",
             "unit": "eV",
             "status": "active",
-            "tags": ["fundamental"],
+            "physics_domain": "general",
             "provenance": {
                 "mode": "reduction",
                 "reduction": "mean",
@@ -37,7 +37,7 @@ def test_rms_reduction_scalar():
             "documentation": "Root mean square of electron temperature.",
             "unit": "eV",
             "status": "active",
-            "tags": ["fundamental"],
+            "physics_domain": "general",
             "provenance": {
                 "mode": "reduction",
                 "reduction": "rms",
@@ -58,7 +58,7 @@ def test_volume_integral_scalar():
             "documentation": "Volume integral of pressure over the plasma.",
             "unit": "Pa.m^3",
             "status": "active",
-            "tags": ["fundamental"],
+            "physics_domain": "general",
             "provenance": {
                 "mode": "reduction",
                 "reduction": "integral",
@@ -79,7 +79,7 @@ def test_magnitude_vector():
             "documentation": "Magnitude (speed) of plasma velocity vector.",
             "unit": "m.s^-1",
             "status": "active",
-            "tags": ["transport"],
+            "physics_domain": "transport",
             "provenance": {
                 "mode": "reduction",
                 "reduction": "magnitude",

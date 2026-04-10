@@ -45,6 +45,7 @@ validate_catalog = "imas_standard_names.validation.cli:validate_catalog_cli"
 standard-names = "imas_standard_names.cli:standard_names"
 standard-names-mcp = "imas_standard_names.cli.server:main"
 build-grammar = "imas_standard_names.grammar_codegen.generate:main"
+generate-schema = "imas_standard_names.schemas.generate:main"
 
 [project.optional-dependencies]
 # Pre-built catalog package (install for read-only access without YAML source).
@@ -102,6 +103,7 @@ artifacts = [
   "imas_standard_names/grammar/constants.py",
   "imas_standard_names/grammar/tag_types.py",
   "imas_standard_names/grammar/field_schemas.py",
+  "imas_standard_names/schemas/entry_schema.json",
 ]
 
 [dependency-groups]
@@ -160,7 +162,10 @@ ignore = ["C901", "E501"]
 
 [tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["F401"]
-"tests/**/*" = ["B011", "F401", "F811"]
+"imas_standard_names/grammar/tags.py" = [
+  "PLC0415",
+] # Lazy imports avoid circular dependency with generated tag_types
+"tests/**/*" = ["B011", "F401", "F811", "PLC0415"]
 "imas_standard_names/grammar/field_schemas.py" = [
   "I",
 ] # Codegen file - skip formatting

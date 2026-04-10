@@ -30,7 +30,7 @@ def github_input():
         "name": "test_new_quantity",
         "units": "eV",
         "documentation": "Test quantity for validation.\n\nThis is a multi-line documentation string for testing purposes.",
-        "tags": "core-physics",
+        "physics_domain": "core_plasma_physics",
         "options": [],
     }
 

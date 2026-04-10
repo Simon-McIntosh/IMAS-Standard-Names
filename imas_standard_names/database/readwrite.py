@@ -11,9 +11,15 @@ from collections.abc import Iterable
 from ..models import StandardNameEntry
 from .base import CatalogBase
 
+# Schema version tracks the DDL structure.
+# Bump major for breaking changes (removed/renamed tables/columns).
+# Bump minor for additive changes (new optional tables/columns).
+CATALOG_SCHEMA_VERSION = "2.0"
+
 DDL = [
     "PRAGMA foreign_keys=ON;",
-    "CREATE TABLE standard_name ( name TEXT PRIMARY KEY, kind TEXT NOT NULL, status TEXT NOT NULL, unit TEXT, description TEXT NOT NULL, documentation TEXT, validity_domain TEXT, deprecates TEXT, superseded_by TEXT, is_dimensionless INTEGER NOT NULL DEFAULT 0 );",
+    "CREATE TABLE catalog_metadata (key TEXT PRIMARY KEY, value TEXT NOT NULL);",
+    "CREATE TABLE standard_name ( name TEXT PRIMARY KEY, kind TEXT NOT NULL, status TEXT NOT NULL, unit TEXT, description TEXT NOT NULL, documentation TEXT, validity_domain TEXT, physics_domain TEXT, deprecates TEXT, superseded_by TEXT, is_dimensionless INTEGER NOT NULL DEFAULT 0 );",
     "CREATE TABLE provenance_operator ( name TEXT PRIMARY KEY REFERENCES standard_name(name) ON DELETE CASCADE, operator_chain TEXT NOT NULL, base TEXT NOT NULL, operator_id TEXT );",
     "CREATE TABLE provenance_reduction ( name TEXT PRIMARY KEY REFERENCES standard_name(name) ON DELETE CASCADE, reduction TEXT NOT NULL, domain TEXT NOT NULL, base TEXT NOT NULL );",
     "CREATE TABLE provenance_expression ( name TEXT PRIMARY KEY REFERENCES standard_name(name) ON DELETE CASCADE, expression TEXT NOT NULL );",
@@ -42,11 +48,19 @@ class CatalogReadWrite(CatalogBase):
         _configure_logging()
         conn = sqlite3.connect(":memory:")
         super().__init__(conn)
+        self._apply_schema()
+        logger.debug("Initialized in-memory writable catalog with schema")
+
+    def _apply_schema(self) -> None:
+        """Execute DDL statements and seed schema version metadata."""
         cur = self.conn.cursor()
         for stmt in DDL:
             cur.execute(stmt)
+        cur.execute(
+            "INSERT INTO catalog_metadata(key, value) VALUES (?, ?)",
+            ("schema_version", CATALOG_SCHEMA_VERSION),
+        )
         self.conn.commit()
-        logger.debug("Initialized in-memory writable catalog with schema")
 
     def load_models(self, models: Iterable[StandardNameEntry]):
         for m in models:
@@ -65,7 +79,7 @@ class CatalogReadWrite(CatalogBase):
         c = self.conn.cursor()
         try:
             c.execute(
-                "INSERT INTO standard_name(name,kind,status,unit,description,documentation,validity_domain,deprecates,superseded_by,is_dimensionless) VALUES (?,?,?,?,?,?,?,?,?,?)",
+                "INSERT INTO standard_name(name,kind,status,unit,description,documentation,validity_domain,physics_domain,deprecates,superseded_by,is_dimensionless) VALUES (?,?,?,?,?,?,?,?,?,?,?)",
                 (
                     m.name,
                     getattr(m, "kind", ""),
@@ -74,6 +88,7 @@ class CatalogReadWrite(CatalogBase):
                     m.description,
                     getattr(m, "documentation", "") or None,
                     getattr(m, "validity_domain", "") or None,
+                    getattr(m, "physics_domain", "") or None,
                     getattr(m, "deprecates", "") or None,
                     getattr(m, "superseded_by", "") or None,
                     1 if getattr(m, "is_dimensionless", False) else 0,
@@ -187,4 +202,4 @@ class CatalogReadWrite(CatalogBase):
         self.conn.commit()
 
 
-__all__ = ["CatalogReadWrite", "DDL"]
+__all__ = ["CATALOG_SCHEMA_VERSION", "CatalogReadWrite", "DDL"]

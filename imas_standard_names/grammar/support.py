@@ -12,6 +12,8 @@ from typing import Any
 
 from imas_standard_names.grammar.constants import (
     BASE_SEGMENTS,
+    BINARY_OPERATOR_CONNECTORS,
+    BINARY_OPERATOR_TOKENS,
     EXCLUSIVE_SEGMENT_PAIRS,
     PREFIX_SEGMENTS,
     SEGMENT_PREFIX_TOKEN_MAP,
@@ -20,10 +22,21 @@ from imas_standard_names.grammar.constants import (
     SEGMENT_TOKEN_MAP,
     SUFFIX_SEGMENTS,
     SUFFIX_SEGMENTS_REVERSED,
+    TRANSFORMATION_TOKENS,
 )
 
 # Token pattern used by base and the overall name validation.
 TOKEN_PATTERN = re.compile(r"^[a-z][a-z0-9_]*$")
+
+# Sort transformation tokens longest-first for greedy matching
+_TRANSFORMATION_TOKENS_SORTED = tuple(
+    sorted(TRANSFORMATION_TOKENS, key=len, reverse=True)
+)
+
+# Sort binary operator tokens longest-first for greedy matching
+_BINARY_OPERATOR_TOKENS_SORTED = tuple(
+    sorted(BINARY_OPERATOR_TOKENS, key=len, reverse=True)
+)
 
 
 def value_of(value: Any) -> str:
@@ -103,6 +116,65 @@ def compose_standard_name(parts: Mapping[str, Any]) -> str:
     The generated module will bind a thin wrapper to ensure the same signature
     when using the Pydantic model.
     """
+    binary_operator = parts.get("binary_operator")
+    secondary_base = parts.get("secondary_base")
+    transformation = parts.get("transformation")
+
+    # Binary operator mode: {operator}_{base1}_{connector}_{base2} [+ suffixes]
+    if binary_operator:
+        op_value = value_of(binary_operator)
+        connector = BINARY_OPERATOR_CONNECTORS.get(op_value)
+        if not connector:
+            raise ValueError(
+                f"Unknown binary operator '{op_value}'. "
+                f"Allowed: {list(BINARY_OPERATOR_CONNECTORS)}"
+            )
+
+        base1 = parts.get("physical_base")
+        if not base1:
+            raise ValueError("binary_operator requires physical_base (first operand)")
+        if not secondary_base:
+            raise ValueError("binary_operator requires secondary_base (second operand)")
+
+        base1_value = value_of(base1)
+        base2_value = value_of(secondary_base)
+
+        if not TOKEN_PATTERN.fullmatch(base1_value):
+            raise ValueError(
+                "physical_base segment must match the canonical token pattern"
+            )
+        if not TOKEN_PATTERN.fullmatch(base2_value):
+            raise ValueError(
+                "secondary_base segment must match the canonical token pattern"
+            )
+
+        # Validate operands don't contain the connector as a standalone word
+        connector_sep = f"_{connector}_"
+        if connector_sep in f"_{base1_value}_":
+            raise ValueError(
+                f"physical_base '{base1_value}' contains reserved connector "
+                f"word '{connector}'"
+            )
+        if connector_sep in f"_{base2_value}_":
+            raise ValueError(
+                f"secondary_base '{base2_value}' contains reserved connector "
+                f"word '{connector}'"
+            )
+
+        tokens = [f"{op_value}_{base1_value}_{connector}_{base2_value}"]
+
+        # Append suffix segments
+        for segment in SUFFIX_SEGMENTS:
+            value = parts.get(segment)
+            if not value:
+                continue
+            template = SEGMENT_TEMPLATES.get(segment)
+            token_value = value_of(value)
+            rendered = template.format(token=token_value) if template else token_value
+            tokens.append(rendered)
+
+        return "_".join(tokens)
+
     tokens: list[str] = []
     for segment in PREFIX_SEGMENTS:
         value = parts.get(segment)
@@ -128,7 +200,12 @@ def compose_standard_name(parts: Mapping[str, Any]) -> str:
                 raise ValueError(
                     f"{base_segment} segment must match the canonical token pattern"
                 )
-            tokens.append(token_value)
+            # Prepend transformation if present (only for physical_base)
+            if transformation and base_segment == "physical_base":
+                transform_value = value_of(transformation)
+                tokens.append(f"{transform_value}_{token_value}")
+            else:
+                tokens.append(token_value)
             base_found = True
 
     if not base_found:
@@ -168,6 +245,19 @@ def parse_standard_name(name: str) -> dict[str, str]:
                 remaining = remaining[: -len(suffix)]
                 values[segment] = token
                 break
+
+    # Check for binary operator prefix (before regular prefix parsing)
+    binary_parsed = _try_parse_binary_operator(remaining)
+    if binary_parsed:
+        values["binary_operator"] = binary_parsed["binary_operator"]
+        values["physical_base"] = binary_parsed["physical_base"]
+        values["secondary_base"] = binary_parsed["secondary_base"]
+
+        # Exclusivity checks
+        for left, right in EXCLUSIVE_SEGMENT_PAIRS:
+            if values.get(left) and values.get(right):
+                raise ValueError(f"Segments '{left}' and '{right}' cannot both be set")
+        return values
 
     # Parse prefixes greedily - at each position, find the longest match across
     # ALL unmatched segments, then consume it. This ensures poloidal_field_coil_
@@ -220,6 +310,12 @@ def parse_standard_name(name: str) -> dict[str, str]:
     if not remaining:
         raise ValueError("Missing base segment in name")
 
+    # Check for transformation prefix on the remaining base text
+    transformation_parsed = _try_parse_transformation(remaining)
+    if transformation_parsed:
+        values["transformation"] = transformation_parsed["transformation"]
+        remaining = transformation_parsed["physical_base"]
+
     # Determine which base segment type this is
     # Check if remaining matches any controlled geometric_base tokens
     base_assigned = False
@@ -262,3 +358,57 @@ def parse_standard_name(name: str) -> dict[str, str]:
             raise ValueError(f"Segments '{left}' and '{right}' cannot both be set")
 
     return values
+
+
+def _try_parse_transformation(remaining: str) -> dict[str, str] | None:
+    """Try to extract a transformation prefix from the remaining base text.
+
+    Returns dict with 'transformation' and 'physical_base' keys, or None.
+    """
+    for token in _TRANSFORMATION_TOKENS_SORTED:
+        prefix = token + "_"
+        if remaining.startswith(prefix):
+            base = remaining[len(prefix) :]
+            if base and TOKEN_PATTERN.fullmatch(base):
+                return {"transformation": token, "physical_base": base}
+    return None
+
+
+def _try_parse_binary_operator(remaining: str) -> dict[str, str] | None:
+    """Try to parse a binary operator expression from remaining text.
+
+    Expected form: {operator}_{base1}_{connector}_{base2}
+
+    Returns dict with 'binary_operator', 'physical_base', 'secondary_base',
+    or None if no binary operator is detected.
+    """
+    for op_token in _BINARY_OPERATOR_TOKENS_SORTED:
+        prefix = op_token + "_"
+        if remaining.startswith(prefix):
+            connector = BINARY_OPERATOR_CONNECTORS.get(op_token)
+            if not connector:
+                continue
+            operand_text = remaining[len(prefix) :]
+            connector_sep = f"_{connector}_"
+
+            # Split on the connector; use the last occurrence to maximize
+            # the first operand (physical bases are open vocabulary)
+            idx = operand_text.rfind(connector_sep)
+            if idx < 0:
+                continue
+
+            base1 = operand_text[:idx]
+            base2 = operand_text[idx + len(connector_sep) :]
+
+            if (
+                base1
+                and base2
+                and TOKEN_PATTERN.fullmatch(base1)
+                and TOKEN_PATTERN.fullmatch(base2)
+            ):
+                return {
+                    "binary_operator": op_token,
+                    "physical_base": base1,
+                    "secondary_base": base2,
+                }
+    return None

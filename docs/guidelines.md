@@ -24,7 +24,7 @@ Standard names follow these fundamental requirements:
 | **Units**              | Never include units in the name                                                                                                                                           | `temperature` ✓<br>`temperature_ev` ✗                          |
 | **Order**              | Follow fixed segment order (see below)                                                                                                                                    | Must respect grammar                                           |
 | **Documentation**      | Document sign conventions, coordinate systems, and physical definitions explicitly and standalone (avoid bare references to external sources like IMAS DD or COCOS specs) | Define conventions in documentation text                       |
-| **Tags Primary First** | First tag (tags[0]) must be primary tag; secondary tags like 'cylindrical-coordinates' must follow                                                                        | `['magnetics', 'measured']` ✓<br>`['measured', 'magnetics']` ✗ |
+| **Physics Domain**     | `physics_domain` is a required `PhysicsDomain` enum field; `tags` is optional for secondary cross-cutting classification only (e.g., "measured", "cylindrical_coordinates") | `physics_domain: magnetics` ✓<br>`tags: [measured]` ✓          |
 
 ## Grammar Structure
 

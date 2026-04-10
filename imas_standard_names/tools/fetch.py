@@ -96,6 +96,7 @@ class FetchTool(CatalogTool):
                         "deprecates": entry.deprecates,
                         "derived_from": derived_from,
                     },
+                    "physics_domain": getattr(entry, "physics_domain", ""),
                     "tags": entry.tags,
                     "links": self._format_links(entry.links),
                 }

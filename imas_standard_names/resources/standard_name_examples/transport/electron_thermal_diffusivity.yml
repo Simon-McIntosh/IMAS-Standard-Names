@@ -25,8 +25,8 @@ documentation: |-
 
   Sign convention: Positive diffusivity indicates outward heat transport from hot plasma core to cooler edge regions, following standard transport theory conventions.
 status: draft
+physics_domain: transport
 tags:
-- transport
 - derived
 - spatial-profile
 kind: scalar

@@ -65,10 +65,14 @@ def test_integrity_deleted_file(tmp_path: Path, example_scalars):
         store.write(example)
 
     first_name = example_scalars[0].name
-    first_tag = example_scalars[0].tags[0] if example_scalars[0].tags else ""
+    first_pd = (
+        example_scalars[0].physics_domain
+        if hasattr(example_scalars[0], "physics_domain")
+        else ""
+    )
     db = build_catalog(tmp_path, tmp_path / "artifacts" / "catalog.db")
-    # Delete first example (file is in primary_tag subdirectory)
-    (tmp_path / first_tag / f"{first_name}.yml").unlink()
+    # Delete first example (file is in physics_domain subdirectory)
+    (tmp_path / first_pd / f"{first_name}.yml").unlink()
     issues = verify_integrity(tmp_path, db, full=False)
     assert any(
         i["code"] == "missing-on-disk" and i.get("name") == first_name for i in issues

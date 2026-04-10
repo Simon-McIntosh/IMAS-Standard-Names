@@ -15,7 +15,8 @@ def scalar_data():
         "documentation": "Temperature of electrons in the plasma core.",
         "unit": "eV",
         "status": "active",
-        "tags": ["fundamental", "measured"],
+        "physics_domain": "general",
+        "tags": ["measured"],
     }
 
 
@@ -28,7 +29,7 @@ def vector_data():
         "documentation": "Velocity vector of the bulk plasma flow.",
         "unit": "m.s^-1",
         "status": "active",
-        "tags": ["transport"],
+        "physics_domain": "transport",
     }
 
 
@@ -41,7 +42,7 @@ def operator_scalar_data():
         "documentation": "Divergence operator applied to plasma velocity field.",
         "unit": "s^-1",
         "status": "active",
-        "tags": ["transport"],
+        "physics_domain": "transport",
         "provenance": {
             "mode": "operator",
             "operators": ["divergence"],
@@ -60,7 +61,7 @@ def gradient_vector_data():
         "documentation": "Gradient operator applied to electron temperature field.",
         "unit": "eV.m^-1",
         "status": "active",
-        "tags": ["transport"],
+        "physics_domain": "transport",
         "provenance": {
             "mode": "operator",
             "operators": ["gradient"],
@@ -79,7 +80,7 @@ def expression_scalar_data():
         "documentation": "Indicator derived from electron and ion temperatures via expression.",
         "unit": "1",
         "status": "draft",
-        "tags": ["core-physics"],
+        "physics_domain": "core_plasma_physics",
         "provenance": {
             "mode": "expression",
             "expression": "electron_temperature * ion_temperature",

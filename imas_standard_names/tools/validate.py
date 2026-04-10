@@ -558,24 +558,26 @@ class ValidateCatalogTool(CatalogTool):
     def _validate_tags(
         self, name: str, entry: Any
     ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
-        """Validate tags. Returns (errors, warnings)."""
+        """Validate tags and physics_domain. Returns (errors, warnings)."""
         issues = []
         warnings = []
 
-        if not hasattr(entry, "tags") or not entry.tags:
+        # Validate physics_domain
+        if not hasattr(entry, "physics_domain") or not entry.physics_domain:
             warnings.append(
                 {
                     "name": name,
                     "category": "tags",
                     "severity": "warning",
-                    "message": "No tags specified",
-                    "suggestion": "Add relevant tags to improve discoverability",
+                    "message": "No physics_domain specified",
+                    "suggestion": "Add a physics_domain from the PhysicsDomain enum",
                 }
             )
+
+        # Validate secondary tags
+        if not hasattr(entry, "tags") or not entry.tags:
             return issues, warnings
 
-        # Check for empty tags - be explicit about checking the raw list
-        # since Pydantic may filter some values during validation
         for i, tag in enumerate(entry.tags):
             if tag is None or (isinstance(tag, str) and len(tag.strip()) == 0):
                 issues.append(

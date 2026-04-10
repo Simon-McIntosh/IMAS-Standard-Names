@@ -29,8 +29,8 @@ documentation: |-
 
   Sign convention: Positive volume indicates enclosed plasma region, following standard geometric conventions with volume measured in cubic meters.
 status: draft
+physics_domain: equilibrium
 tags:
-- equilibrium
 - global-quantity
 kind: scalar
 unit: m^3

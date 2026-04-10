@@ -42,7 +42,7 @@ def test_exists_after_uow_add_remove(tmp_path: Path):
             "unit": "m",
             "description": "Dynamic entry.",
             "documentation": "Dynamic entry for repository list and exists testing.",
-            "tags": ["fundamental"],
+            "physics_domain": "general",
         }
     )
     uow.add(model)

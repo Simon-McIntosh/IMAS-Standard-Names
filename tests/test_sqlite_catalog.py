@@ -13,7 +13,7 @@ def test_sqlite_catalog_insert_search_get():
             "documentation": "Temperature of electrons in the plasma.",
             "unit": "eV",
             "status": "active",
-            "tags": ["fundamental"],
+            "physics_domain": "general",
         }
     )
     cat.insert(m)
@@ -37,7 +37,7 @@ def test_sqlite_catalog_delete():
             "description": "Ion temperature.",
             "documentation": "Temperature of ions in the plasma.",
             "unit": "eV",
-            "tags": ["fundamental"],
+            "physics_domain": "general",
         }
     )
     cat.insert(m)

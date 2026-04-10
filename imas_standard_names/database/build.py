@@ -16,7 +16,7 @@ from pathlib import Path
 from ..models import StandardNameEntry
 from ..ordering import ordered_models
 from ..yaml_store import YamlStore
-from .readwrite import DDL, CatalogReadWrite
+from .readwrite import CatalogReadWrite
 
 
 class CatalogBuild(CatalogReadWrite):
@@ -28,10 +28,7 @@ class CatalogBuild(CatalogReadWrite):
         # Replace in-memory connection with file connection + run DDL
         self.conn = sqlite3.connect(db_path)
         self.conn.row_factory = sqlite3.Row
-        cur = self.conn.cursor()
-        for stmt in DDL:
-            cur.execute(stmt)
-        self.conn.commit()
+        self._apply_schema()
 
 
 def build_catalog(yaml_root: Path, db_path: Path, overwrite: bool = True) -> Path:
@@ -47,6 +44,21 @@ def build_catalog(yaml_root: Path, db_path: Path, overwrite: bool = True) -> Pat
     # Insert using dependency-safe ordering (vectors after components, derived after bases)
     for m in ordered_models(models):
         builder.insert(m)
+
+    # Write builder version metadata
+    try:
+        import importlib.metadata  # noqa: PLC0415
+
+        builder_version = importlib.metadata.version("imas-standard-names")
+    except Exception:
+        builder_version = "unknown"
+
+    cur = builder.conn.cursor()
+    cur.execute(
+        "INSERT OR REPLACE INTO catalog_metadata(key, value) VALUES (?, ?)",
+        ("builder_version", builder_version),
+    )
+
     # Integrity tables -------------------------------------------------
     cur = builder.conn.cursor()
     cur.execute(

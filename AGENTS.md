@@ -31,18 +31,19 @@ Critical distinctions for naming:
 name: follows_grammar_precisely
 kind: scalar
 unit: SI_unit # Never include units in name
-tags: [primary_tag, secondary_tags] # Order matters: primary first
+physics_domain: core_plasma_physics # Required: PhysicsDomain enum value
+tags: [measured] # Optional: secondary cross-cutting classification
 status: draft
 description: Starts with capital, under 120 chars
 ```
 
-**Tag ordering is critical**: Primary tag must be `tags[0]`, secondary tags follow.
+**`physics_domain` is required**: Must be a valid `PhysicsDomain` enum value (32 values). `tags` is optional, used only for secondary cross-cutting classification (e.g., "measured", "cylindrical_coordinates").
 
 ## Common Pitfalls to Avoid
 
 1. **Grammar violations**: Names must follow canonical pattern exactly
 2. **Wrong base combinations**: Never use `component` with `geometric_base`
-3. **Incorrect tag order**: Primary tag must be first in list
+3. **Missing physics_domain**: Must be a valid `PhysicsDomain` value, not a tag
 4. **Units in names**: Use YAML `unit` field, not in name text
 5. **Synchronous MCP tools**: All tool methods must be `async`
 6. **Missing error schemas**: Always return structured errors with examples
@@ -128,25 +129,77 @@ cd /home/ITER/mcintos/Code/imas-standard-names && uv run pytest
 - **Branch naming**: Use `main` as default branch
 - **GitHub CLI**: `gh` is installed in `~/.local/bin` and available in PATH
 - **Authentication**: SSH
-- **Commit messages**: Use conventional commit format with detailed body
+- **Remotes**: `origin` is the user's fork, `upstream` is `iterorganization/IMAS-Standard-Names`
+- **Versioning**: Derived from git tags via `hatch-vcs` — no version numbers in source files
 
-**Common gh commands**:
-```bash
-gh repo create <name> --public --description "..."  # Create repository
-gh repo edit --default-branch main                  # Change default branch
-gh pr create --title "..." --body "..."             # Create pull request
-gh issue create --title "..." --body "..."          # Create issue
-gh repo view --web                                  # Open repo in browser
+**Conventional commits** — use `type: description` format. Signal breaking changes with `BREAKING CHANGE:` in the commit body, not with `!` suffix (shell history expansion breaks it).
+
+```
+feat: add physics_domain field to standard name entries
+fix: correct validation of secondary tags
+docs: update grammar reference for geometric bases
+refactor: simplify catalog renderer grouping logic
+test: add parameterized tests for provenance validation
+chore: update ruff configuration
+```
+
+For breaking changes:
+```
+feat: replace tags with physics_domain field
+
+BREAKING CHANGE: tags[0] replaced by dedicated physics_domain field.
 ```
 
 **Git workflow**:
 ```bash
 git status                      # Check current state
 git add -A                      # Stage all changes
-git commit -m "message"         # Commit with message (triggers pre-commit)
-git push origin main            # Push to remote
+git commit -m 'message'         # Use single quotes (avoids bash ! expansion)
+git push origin main            # Push to fork
 git pull origin main            # Pull latest changes
 ```
+
+**Common gh commands**:
+```bash
+gh pr create --title "..." --body "..."             # Create pull request
+gh issue create --title "..." --body "..."          # Create issue
+gh repo view --web                                  # Open repo in browser
+```
+
+### Release Workflow
+
+Releases use a two-state workflow (Stable ↔ RC) managed by the `standard-names release` CLI. Versioning is entirely tag-driven — the project tag is the version. Never put version numbers in source files.
+
+**How it works**: The CLI creates an annotated git tag and pushes it to `upstream`, which triggers the GitHub Actions publish workflow to build and upload to PyPI.
+
+```bash
+# Check current release state and available commands
+uv run standard-names release status
+
+# Start a new RC series (e.g., v0.6.0 → v0.7.0rc1)
+uv run standard-names release --bump minor -m 'Add physics_domain field'
+
+# Increment RC (e.g., v0.7.0rc1 → v0.7.0rc2)
+uv run standard-names release -m 'Fix validation edge case'
+
+# Finalize RC to stable (e.g., v0.7.0rc2 → v0.7.0)
+uv run standard-names release --final -m 'Production release'
+
+# Direct patch release, skip RC (e.g., v0.7.0 → v0.7.1)
+uv run standard-names release --bump patch --final -m 'Hotfix'
+
+# Dry run — validate without tagging
+uv run standard-names release --bump minor --dry-run -m 'Test'
+```
+
+**Pre-flight checks** (automatic): The release CLI verifies you are on `main`, the working tree is clean, local is synced with `upstream/main`, and CI checks have passed for HEAD. It will refuse to tag if any check fails (unless `--dry-run`).
+
+**Release procedure**:
+1. Ensure all changes are committed and pushed to `upstream/main`
+2. Run `uv run standard-names release status` to see current state
+3. Run the appropriate release command with `-m 'description'`
+4. Monitor the publish workflow: https://github.com/iterorganization/IMAS-Standard-Names/actions
+5. Verify the package appears on PyPI after the workflow completes
 
 ## Development Workflow
 
