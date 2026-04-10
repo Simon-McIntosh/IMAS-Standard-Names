@@ -21,7 +21,11 @@ from .model_types import (
     Transformation,
 )
 from .support import TOKEN_PATTERN, coerce_enum, enum_values, value_of
-from .tag_types import TAG_TO_PHYSICS_DOMAIN, PhysicsDomain
+
+try:
+    from .tag_types import TAG_TO_PHYSICS_DOMAIN, PhysicsDomain
+except ImportError:  # pragma: no cover - generated file absent during build
+    pass
 
 # Friendly aliases to match tests
 compose_name = compose_standard_name
