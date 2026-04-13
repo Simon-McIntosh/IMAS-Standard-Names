@@ -322,11 +322,16 @@ If Phase 3 deletes those modules first, importing the tools package crashes.
 - `docs/architecture/boundary.md` (NEW):
   - **What ISN is:** Grammar library + read-only catalog server
   - **What ISN is NOT:** A name generator (that's imas-codex)
-  - **Public API contract:** `get_grammar_context()`, `compose_standard_name()`,
-    `parse_standard_name()`, grammar enums, validation functions, constants
+  - **Public API contract (exhaustive — codex depends on all of these):**
+    - Grammar: `get_grammar_context()`, `parse_standard_name()`, `compose_standard_name()`
+    - Models: `StandardNameEntry`, `create_standard_name_entry()`
+    - Validation: `run_semantic_checks()`, `validate_description()`, `run_structural_checks()`
+    - Constants: grammar enums (vocabulary StrEnums), tag constants, `PhysicsDomain`
   - **MCP tool contract:** 10 read-only tools (grammar, schema, compose, search,
     check, fetch, list, validate, vocabulary tokens, tokamak params)
   - **Data flow diagram:** codex generates → YAML catalog → ISN builds .db → ISN serves
+  - **Stability commitment:** Functions listed above are the cross-project contract.
+    Renaming, removing, or changing signatures requires a coordinated release.
 
 - `docs/architecture/data-flow.md` (NEW):
   - End-to-end lifecycle: DD paths → codex mint → graph → publish → YAML catalog →
@@ -382,6 +387,16 @@ If Phase 3 deletes those modules first, importing the tools package crashes.
 - **Run `uv run pytest` after every phase.** Fix any import errors immediately.
 - **Coordinate with codex plan:** Phase 0 here enables codex Phase 1 there.
   Codex should update its ISN pin after Phase 0 lands.
+- **Public API contract (cross-project — codex depends on all of these):**
+  - Grammar: `get_grammar_context()`, `parse_standard_name()`, `compose_standard_name()`
+  - Models: `StandardNameEntry`, `create_standard_name_entry()`
+  - Validation: `run_semantic_checks()`, `validate_description()`, `run_structural_checks()`
+  - Constants: grammar enums (vocabulary StrEnums), tag constants, `PhysicsDomain`
+  Renaming, removing, or changing signatures of these functions requires a coordinated
+  release with imas-codex.
+- **Phase 0 must also:** Re-export `validate_description` from `validation/__init__.py`
+  (currently missing — only accessible via direct submodule import). This promotes it
+  to package-level public API alongside `run_semantic_checks` and `run_structural_checks`.
 
 ## Documentation Updates
 
