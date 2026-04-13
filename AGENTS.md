@@ -1,10 +1,12 @@
 # Project Overview
 
-IMAS Standard Names maintains a controlled vocabulary for standardizing data in the ITER Modelling and Analysis Suite (IMAS). The project manages grammar-validated names for physics and geometrical quantities, diagnostics, and spatial properties using Python + MCP (Model Context Protocol) tools.
+IMAS Standard Names (ISN) is a **grammar library** and **read-only catalog server** for the ITER Modelling and Analysis Suite (IMAS). It defines the rules for composing valid standard names and serves the approved catalog through read-only MCP tools.
 
 **Domain**: Fusion energy data standardization  
 **Tech Stack**: Python 3.12+, Pydantic, SQLite, YAML, MCP servers  
 **Key Concept**: All standard names follow strict grammar rules for describing physics and geometrical quantities
+
+**Project boundary**: ISN defines what a valid standard name *is*. [imas-codex](https://github.com/iterorganization/imas-codex) decides what standard names to *create*. See [docs/architecture/boundary.md](docs/architecture/boundary.md) for the full contract.
 
 ## Fusion Physics and Geometry Context
 
@@ -39,6 +41,17 @@ description: Starts with capital, under 120 chars
 
 **`physics_domain` is required**: Must be a valid `PhysicsDomain` enum value (32 values). `tags` is optional, used only for secondary cross-cutting classification (e.g., "measured", "cylindrical_coordinates").
 
+## Public API Contract
+
+ISN exposes a stable Python API that [imas-codex](https://github.com/iterorganization/imas-codex) depends on:
+
+- **Grammar**: `get_grammar_context()`, `parse_standard_name()`, `compose_standard_name()`
+- **Models**: `StandardNameEntryBase`, `create_standard_name_entry()`
+- **Validation**: `run_semantic_checks()`, `validate_description()`, `run_structural_checks()`
+- **Constants**: grammar vocabulary `StrEnum`s, tag constants, `PhysicsDomain`
+
+See [docs/architecture/boundary.md](docs/architecture/boundary.md) for the full contract and stability commitment.
+
 ## Common Pitfalls to Avoid
 
 1. **Grammar violations**: Names must follow canonical pattern exactly
@@ -47,16 +60,15 @@ description: Starts with capital, under 120 chars
 4. **Units in names**: Use YAML `unit` field, not in name text
 5. **Synchronous MCP tools**: All tool methods must be `async`
 6. **Missing error schemas**: Always return structured errors with examples
-7. **Direct YAML file editing**: Never edit standard name YAML files directly - always use MCP tools (`create_standard_names`, `edit_standard_names`, `write_standard_names`) to ensure validation and consistency
 
 ## Project Structure
 
 ```
 imas_standard_names/
-├── tools/           # MCP tool implementations
-├── grammar/         # Grammar parsing and validation
+├── tools/           # MCP read-only tool implementations
+├── grammar/         # Grammar parsing, composition, and validation
 ├── catalog/         # SQLite catalog management
-├── repository.py    # Main repository facade
+├── repository.py    # Main repository facade (read-only)
 ├── models.py        # Pydantic data models
 └── validation/      # Validation logic
 
@@ -232,7 +244,7 @@ uv run ruff format
 # Validate standard names catalog (requires catalog to be configured)
 uv run validate_catalog $STANDARD_NAMES_CATALOG_ROOT
 
-# Start MCP server
+# Start MCP server (read-only)
 uv run standard-names-mcp
 
 # Generate grammar types
@@ -427,6 +439,8 @@ Generated files (model_types.py, constants.py, tag_types.py, field_schemas.py) a
 
 ### MCP Tool Pattern
 
+All MCP tools are **read-only** — they query the catalog and grammar but do not modify data.
+
 ```python
 from imas_standard_names.decorators.mcp import mcp_tool
 from imas_standard_names.tools.base import BaseTool
@@ -435,7 +449,7 @@ class MyTool(BaseTool):
     @mcp_tool(description="Clear single sentence description of purpose for llm")
     async def tool_method(self, param: str, ctx: Context | None = None):
         try:
-            # Implementation
+            # Implementation (read-only query)
             return result.model_dump()
         except Exception as e:
             return {

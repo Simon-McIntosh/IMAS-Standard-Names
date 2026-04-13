@@ -7,7 +7,7 @@
 
 # IMAS Standard Names
 
-MCP server and Python library for working with IMAS Standard Names — a controlled vocabulary for fusion data variables.
+Grammar library and read-only MCP server for IMAS Standard Names — a controlled vocabulary for fusion data variables.
 
 ## Quick Start
 
@@ -51,7 +51,7 @@ The tools and catalog are distributed separately:
 
 | Package | Purpose |
 |---------|---------|
-| `imas-standard-names` | MCP server, grammar, validation tools |
+| `imas-standard-names` | Grammar library, validation, read-only MCP server |
 | `imas-standard-names-catalog` | Standard names catalog (YAML + SQLite) |
 
 ### Basic Installation
@@ -76,7 +76,7 @@ pip install imas-standard-names-catalog
 wget https://github.com/iterorganization/imas-standard-names-catalog/releases/latest/download/catalog.db
 export STANDARD_NAMES_CATALOG_DB=./catalog.db
 
-# Option 3: Clone catalog repository (for editing)
+# Option 3: Clone catalog repository (for development)
 git clone https://github.com/iterorganization/imas-standard-names-catalog.git
 export STANDARD_NAMES_CATALOG_ROOT=./imas-standard-names-catalog/standard_names
 ```
@@ -93,10 +93,12 @@ uv sync
 
 This project uses a two-repository architecture:
 
-- **[imas-standard-names](https://github.com/iterorganization/imas-standard-names)** (this repo): MCP server, grammar, validation, Python API
+- **[imas-standard-names](https://github.com/iterorganization/imas-standard-names)** (this repo): Grammar library, validation, read-only MCP server, Python API
 - **[imas-standard-names-catalog](https://github.com/iterorganization/imas-standard-names-catalog)**: YAML source files and pre-built SQLite database
 
-This separation allows independent versioning — catalog content evolves separately from tooling.
+Name *generation* is handled by [imas-codex](https://github.com/iterorganization/imas-codex), which uses ISN's grammar API to mint candidates.
+
+This separation allows independent versioning — catalog content, tooling, and generation logic evolve separately.
 
 ## Documentation
 
@@ -104,45 +106,34 @@ Full documentation: **[iterorganization.github.io/IMAS-Standard-Names](https://i
 
 - [Grammar Reference](https://iterorganization.github.io/IMAS-Standard-Names/grammar-reference/) — naming rules and vocabulary
 - [Guidelines](https://iterorganization.github.io/IMAS-Standard-Names/guidelines/) — patterns and conventions
-- [Quick Start](https://iterorganization.github.io/IMAS-Standard-Names/development/quickstart/) — creating new standard names
+- [Quick Start](https://iterorganization.github.io/IMAS-Standard-Names/development/quickstart/) — getting started
+- [Architecture](docs/architecture/boundary.md) — project boundary and API contract
 
 ## MCP Tools
 
-The MCP server provides tools for AI assistants to work with standard names:
-
-### Discovery & Search
-| Tool | Purpose |
-|------|---------|
-| `search_standard_names` | Find names by concept using semantic search |
-| `list_standard_names` | List all names with filtering by status, tags, kind |
-| `fetch_standard_names` | Get complete metadata for specific names |
-| `check_standard_names` | Fast batch validation of name existence |
+The MCP server provides **read-only** tools for AI assistants to work with standard names:
 
 ### Grammar & Schema
 | Tool | Purpose |
 |------|---------|
 | `get_grammar` | Grammar rules, patterns, and composition guidance |
-| `get_schema` | Entry schema for creating standard names |
-| `get_vocabulary` | Controlled vocabulary tokens by segment |
-
-### Composition & Parsing
-| Tool | Purpose |
-|------|---------|
+| `get_schema` | Entry schema for understanding catalog entry structure |
 | `compose_standard_name` | Build valid names from structured parts |
 | `parse_standard_name` | Parse names into grammatical components |
+| `get_vocabulary` | Controlled vocabulary tokens by grammar segment |
 
-### Editing & Persistence
+### Catalog Query
 | Tool | Purpose |
 |------|---------|
-| `create_standard_names` | Create new catalog entries (in-memory) |
-| `edit_standard_names` | Modify, rename, or delete entries (in-memory) |
-| `write_standard_names` | Persist pending changes to disk |
+| `search_standard_names` | Find names by concept using semantic search |
+| `list_standard_names` | List names with filtering by status, tags, kind |
+| `fetch_standard_names` | Get complete metadata for specific names |
+| `check_standard_names` | Fast batch validation of name existence |
 
-### Validation & Reference
+### Reference & Validation
 | Tool | Purpose |
 |------|---------|
-| `validate_catalog` | Check catalog integrity and grammar |
-| `manage_vocabulary` | Vocabulary gap detection and management |
+| `validate_catalog` | Check catalog integrity and grammar compliance |
 | `get_tokamak_parameters` | Reference tokamak machine parameters |
 
 ## License

@@ -1,42 +1,30 @@
 # Contributing to IMAS Standard Names
 
-!!! warning "Documentation Out of Date"
-This contributing guide is currently out of date and needs to be updated to reflect the latest project structure and workflows. Please consult the project maintainers or open an issue if you have questions about contributing.
-
 Thank you for your interest in contributing to the IMAS Standard Names project! This document provides guidelines and instructions to help you contribute effectively.
 
 ## Project Overview
 
-IMAS Standard Names is a project that maintains standardized naming conventions for data in the fusion energy research community. The repository contains definitions, schemas, and tools for working with these standard names.
+IMAS Standard Names is a grammar library and read-only catalog server for the fusion energy research community. The project defines rules for composing valid standard names and serves the approved catalog through MCP tools.
+
+Name *generation* is handled by [imas-codex](https://github.com/iterorganization/imas-codex). This project focuses on grammar, validation, and catalog serving.
 
 ## How to Contribute
 
-### Creating Standard Names
+### Areas of Contribution
 
-You can contribute to the IMAS Standard Names project by proposing new standard names. This repository provides a guided process for creating well-formatted standard names with proper documentation.
+- **Grammar rules**: Propose changes or additions to the naming grammar
+- **Validation logic**: Improve semantic, structural, or description validation
+- **Documentation**: Improve grammar reference, guidelines, or architecture docs
+- **MCP tools**: Enhance the read-only query and reference tools
+- **Bug fixes**: Fix issues in grammar parsing, catalog building, or validation
 
-#### Using the Standard Name Prompt
-
-The repository includes a special prompt file that helps you create standardized GitHub issues for new standard names:
-
-1. Open VS Code with GitHub Copilot Chat enabled in Agent mode
-2. Attach this prompt to your GitHub Copilot query using one of these methods:
-
-   - Press Ctrl+Alt+/ and select the standard-name prompt file
-   - Open the Command Palette (Ctrl+Shift+P or Cmd+Shift+P), type "GitHub Copilot: Apply Prompt", then select the prompt file
-   - Type "@prompt" followed by the path: `@prompt .github/prompts/standard-name.prompt.md`
-
-3. Instruct Copilot to generate a Standard Name using natural language
-4. Review the generated content and iterate with Copilot if required
-5. Ask Copilot to submit the issue
-
-#### Using the MCP Server
+### Using the IMAS MCP Server for Reference
 
 This repository includes configuration for the Model Context Protocol (MCP) server, which provides schema information and documentation for IMAS data structures.
 
 > **Note:** Using the IMAS MCP server requires a local Docker installation on your system.
 
-##### VS Code Integration
+#### VS Code Integration
 
 The repository includes a `.vscode/mcp.json` configuration file that sets up the necessary MCP servers:
 
@@ -44,117 +32,6 @@ The repository includes a `.vscode/mcp.json` configuration file that sets up the
 2. Open the project in VS Code with the GitHub Copilot extension enabled
 3. When prompted, enter your GitHub Personal Access Token (Note: this PAT token needs read access to metadata and read/write access to actions, issues, and pull requests)
 4. The MCP servers (IMAS and GitHub) will be accessible to Copilot for providing schema information and documentation
-
-##### Manual Setup (Alternative)
-
-If you prefer to run the MCP server manually:
-
-1. Pull the IMAS MCP server Docker image:
-
-   ```bash
-   docker pull ghcr.io/imas-icc/imas-mcp-server:latest
-   ```
-
-2. Run the MCP server locally:
-
-   ```bash
-   docker run -p 5000:5000 ghcr.io/imas-icc/imas-mcp-server:latest
-   ```
-
-3. The server will be accessible at `http://localhost:5000`
-
-#### Usage Examples
-
-Here are some examples of using the standard name prompt with the MCP server:
-
-**Example 1: Create a standard name for plasma current**
-
-1. Attach the standard-name prompt using one of these methods:
-   - Press Ctrl+Alt+/ and select the standard-name prompt file
-   - Open the Command Palette (Ctrl+Shift+P or Cmd+Shift+P), type "GitHub Copilot: Apply Prompt", then select the prompt file
-   - Type `@prompt .github/prompts/standard-name.prompt.md` in the chat
-2. Ask GitHub Copilot one of the following:
-   - "Create a standard name for plasma toroidal current"
-   - Directly specify the variable name: "plasma toroidal current"
-3. The prompt will guide you through creating a properly formatted issue with:
-   - Appropriate naming convention
-   - Mathematical definition
-   - Usage examples
-   - IMAS Data Dictionary references
-
-**Example 2: Create a standard name for electron temperature**
-
-1. Attach the standard-name prompt using one of these methods:
-   - Press Ctrl+Alt+/ and select the standard-name prompt file
-   - Open the Command Palette (Ctrl+Shift+P or Cmd+Shift+P), type "GitHub Copilot: Apply Prompt", then select the prompt file
-   - Type `@prompt .github/prompts/standard-name.prompt.md` in the chat
-2. Ask GitHub Copilot one of the following:
-   - "Create a standard name for electron temperature profile"
-   - Directly specify the variable name: "electron temperature profile"
-3. Review and submit the generated issue
-
-**Example 3: Using the MCP server to explore the IMAS Data Dictionary**
-
-When creating a standard name, you can directly interact with the IMAS MCP server API to explore the IMAS Data Dictionary:
-
-##### Using GitHub Copilot Chat
-
-With the MCP server configured in your workspace (via the `.vscode/mcp.json` file), you can directly interact with the IMAS data structures through Copilot Chat:
-
-1. Get an overview of an IDS:
-
-   ```
-   What is the core_profiles IDS in IMAS?
-   ```
-
-2. Find specific properties in an IDS:
-
-   ```
-   Where is electron temperature stored in the IMAS data model?
-   ```
-
-3. Understand relationships between structures:
-
-   ```
-   What's the relationship between equilibrium and core_profiles in IMAS?
-   ```
-
-4. Get help with standard naming conventions:
-   ```
-   How should I name a variable for electron temperature at the magnetic axis?
-   ```
-
-These direct interactions with the MCP server through Copilot can help you understand IMAS data structures when creating standard names.
-
-##### Using the Web Browser
-
-You can also explore the API using your web browser:
-
-1. Open `http://localhost:5000/v1/list-schemas` to see all available schemas
-2. Navigate to `http://localhost:5000/v1/documentation?name=core_profiles` to view documentation
-3. Visit `http://localhost:5000/v1/schema?name=equilibrium` to examine the equilibrium schema
-
-##### Using the MCP Server REST API
-
-After starting the MCP server, you can access the API at `http://localhost:5000`:
-
-1. List all available schemas:
-
-   ```bash
-   curl http://localhost:5000/v1/list-schemas
-   ```
-
-2. Get documentation for a specific schema (e.g., core_profiles):
-
-   ```bash
-   curl http://localhost:5000/v1/documentation?name=core_profiles
-   ```
-
-3. Get the full schema definition for a specific data structure:
-
-   ```bash
-   curl http://localhost:5000/v1/schema?name=core_profiles
-   ```
 
 ### Reporting Issues
 
@@ -189,30 +66,21 @@ If you find a problem or have a suggestion:
 3. Set up your development environment:
 
    ```bash
-   # Install dependencies
-   pip install -e ".[test]"
-   ```
-
-   ```bash
-   # Update static links to your forked repo
-   update_links origin
+   uv sync
+   uv run pre-commit install
    ```
 
 4. Run tests:
 
    ```bash
-   pytest --cov
+   uv run pytest --cov
    ```
 
 5. Create a PR:
 
    - Make edits.
    - Confirm tests are passing with 100% coverage for updates.
-
-   ```bash
-   # Update static links to match the upstream remote
-   update_links upstream
-   ```
+   - Submit your pull request.
 
 ## Coding Standards
 
@@ -220,6 +88,7 @@ If you find a problem or have a suggestion:
 - Include docstrings for all functions, classes, and modules.
 - Write tests for new functionality.
 - Keep commits focused and related to a single issue when possible.
+- Use conventional commit messages (e.g., `feat:`, `fix:`, `docs:`).
 
 ## Review Process
 
@@ -228,11 +97,9 @@ If you find a problem or have a suggestion:
 3. Update the documentation alongside code changes.
 4. Reviewers may request changes before merging.
 
-## Adding or Modifying Standard Names
+## Proposing Standard Names
 
-1. Propose a standard name using the IMAS Standard Name issue template.
-2. Ensure the proposed name follows the established naming conventions.
-3. Provide units and clear documentation.
+To propose new standard names, use the [imas-standard-names-catalog](https://github.com/iterorganization/imas-standard-names-catalog) repository. Names are generated by [imas-codex](https://github.com/iterorganization/imas-codex) and reviewed by domain experts before being merged into the catalog.
 
 ## License
 
