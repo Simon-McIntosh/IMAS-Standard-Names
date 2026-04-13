@@ -20,6 +20,7 @@ from .model_types import (
     Subject,
     Transformation,
 )
+from .context import get_grammar_context
 from .support import TOKEN_PATTERN, coerce_enum, enum_values, value_of
 
 try:
@@ -37,6 +38,7 @@ __all__ = [
     "parse_standard_name",
     "compose_name",
     "parse_name",
+    "get_grammar_context",
     "value_of",
     "enum_values",
     "coerce_enum",

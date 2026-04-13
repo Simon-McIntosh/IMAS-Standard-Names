@@ -169,6 +169,9 @@ ignore = ["C901", "E501"]
 "imas_standard_names/grammar/tags.py" = [
   "PLC0415",
 ] # Lazy imports avoid circular dependency with generated tag_types
+"imas_standard_names/grammar/context.py" = [
+  "PLC0415",
+] # Lazy imports avoid circular dependency with models
 "tests/**/*" = ["B011", "F401", "F811", "PLC0415"]
 "imas_standard_names/grammar/field_schemas.py" = [
   "I",

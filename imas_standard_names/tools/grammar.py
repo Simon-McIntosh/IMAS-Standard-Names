@@ -1,6 +1,3 @@
-from importlib import resources
-
-import yaml
 from fastmcp import Context
 
 import imas_standard_names.grammar.model_types as grammar_types
@@ -15,149 +12,17 @@ from imas_standard_names.grammar.constants import (
     SEGMENT_RULES,
     SEGMENT_TEMPLATES,
 )
+from imas_standard_names.grammar.context import (
+    _build_canonical_pattern,
+    _build_segment_order_constraint,
+    _build_template_application_rule,
+    _get_segment_descriptions,
+    _get_vocabulary_description,
+)
 from imas_standard_names.grammar.model import parse_standard_name
 from imas_standard_names.grammar.support import enum_values
-from imas_standard_names.grammar_codegen.spec import IncludeLoader
 from imas_standard_names.repository import StandardNameCatalog
 from imas_standard_names.tools.base import Tool
-
-
-def _build_canonical_pattern() -> str:
-    """Build the canonical pattern string dynamically from SEGMENT_RULES.
-
-    This ensures the pattern stays in sync with the grammar specification.
-    """
-    pattern_parts = []
-    processed_exclusive = set()
-
-    for rule in SEGMENT_RULES:
-        seg_id = rule.identifier
-
-        # Skip if already handled as part of an exclusive group
-        if seg_id in processed_exclusive:
-            continue
-
-        # Check if this segment is part of an exclusive group
-        exclusive_with = set(rule.exclusive_with)
-        if exclusive_with:
-            # Build exclusive pattern for this group
-            group_patterns = []
-
-            # Add current segment's pattern
-            if rule.template:
-                template = rule.template.replace("{token}", f"<{seg_id}>")
-                group_patterns.append(template)
-            else:
-                group_patterns.append(f"<{seg_id}>")
-
-            # Add patterns for exclusive segments
-            for excl_id in exclusive_with:
-                excl_rule = next(
-                    (r for r in SEGMENT_RULES if r.identifier == excl_id), None
-                )
-                if excl_rule is None:
-                    continue
-                if excl_rule.template:
-                    excl_template = excl_rule.template.replace(
-                        "{token}", f"<{excl_id}>"
-                    )
-                    group_patterns.append(excl_template)
-                else:
-                    group_patterns.append(f"<{excl_id}>")
-                processed_exclusive.add(excl_id)
-
-            seg_pattern = f"[{' | '.join(group_patterns)}]?"
-            processed_exclusive.add(seg_id)
-        else:
-            # Build pattern for non-exclusive segment
-            if rule.template:
-                template = rule.template.replace("{token}", f"<{seg_id}>")
-                seg_pattern = f"[{template}]?" if rule.optional else template
-            else:
-                # For segments without templates (geometric_base, physical_base, subject)
-                seg_pattern = f"[<{seg_id}>]?" if rule.optional else f"<{seg_id}>"
-
-        pattern_parts.append(seg_pattern)
-
-    return " ".join(pattern_parts)
-
-
-def _build_segment_order_constraint() -> str:
-    """Build the segment order constraint dynamically from SEGMENT_RULES."""
-    parts = []
-    processed_exclusive = set()
-
-    for rule in SEGMENT_RULES:
-        seg_id = rule.identifier
-
-        if seg_id in processed_exclusive:
-            continue
-
-        # Check if this segment is part of an exclusive group
-        exclusive_with = set(rule.exclusive_with)
-        if exclusive_with:
-            group_ids = [seg_id] + list(exclusive_with)
-            group_label = "|".join(group_ids)
-            parts.append(f"[{group_label}]")
-            processed_exclusive.add(seg_id)
-            processed_exclusive.update(exclusive_with)
-        elif rule.optional:
-            parts.append(f"[{seg_id}]")
-        else:
-            parts.append(seg_id)
-
-    return " → ".join(parts)
-
-
-def _get_segment_descriptions() -> dict[str, str]:
-    """Load segment descriptions directly from the grammar specification YAML."""
-    grammar_path = resources.files("imas_standard_names.grammar") / "specification.yml"
-    with grammar_path.open("r", encoding="utf-8") as f:
-        data = yaml.load(f, Loader=IncludeLoader) or {}
-
-    descriptions = {}
-    for segment in data.get("segments", []):
-        seg_id = segment.get("id", "")
-        desc = segment.get("description", "")
-        if seg_id:
-            descriptions[seg_id] = desc
-
-    return descriptions
-
-
-def _get_vocabulary_description(segment_id: str) -> str:
-    """Generate a human-readable vocabulary description."""
-    descriptions = {
-        "component": "Spatial or field-aligned direction (e.g., radial, toroidal, parallel)",
-        "subject": "Particle species or plasma component (e.g., electron, ion, deuterium)",
-        "object": "Physical object, diagnostic hardware, or equipment (e.g., flux_loop, bolometer)",
-        "position": "Spatial location where field is evaluated (use with at_ template)",
-        "geometry": "Intrinsic geometric property of the object (use with of_ template)",
-        "process": "Physical process or mechanism (e.g., conduction, ohmic, radiation)",
-    }
-    return descriptions.get(segment_id, "")
-
-
-def _build_template_application_rule() -> str:
-    """Build the template application rule dynamically from SEGMENT_TEMPLATES."""
-    templated_segments = [seg for seg in SEGMENT_TEMPLATES if seg != "base"]
-    non_templated = [
-        rule.identifier
-        for rule in SEGMENT_RULES
-        if rule.template is None and rule.identifier != "base"
-    ]
-
-    parts = []
-    if templated_segments:
-        parts.append(
-            f"Templates are applied to {', '.join(templated_segments)} segments."
-        )
-    if non_templated:
-        parts.append(
-            f"{' and '.join(non_templated)} and base are inserted as-is without template modification."
-        )
-
-    return " ".join(parts) if parts else "No templates defined."
 
 
 def _build_template_mapping() -> dict[str, str]:
