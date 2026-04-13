@@ -122,6 +122,18 @@ def get_grammar_context() -> dict[str, Any]:
     - applicability: dict — what should/shouldn't get standard names
     - field_guidance: dict — per-field content rules and validation
     - type_specific_requirements: dict — requirements per kind type
+
+    LLM orientation context:
+    - quick_start: str — 5-step guide for generating a standard name
+    - common_patterns: list[dict] — 11 most frequent naming patterns with examples
+    - critical_distinctions: list[dict] — frequently confused concepts (base vs
+      modifier, orientation vs direction, etc.)
+    - base_requirements: dict — required segments for valid names
+
+    Vocabulary usage statistics:
+    - vocabulary_usage_stats: dict — per-segment token frequency data:
+      {segment: {token: count, ...}, most_common: [...], unused: [...]}
+      Derived from the published catalog.
     """
 ```
 
@@ -136,12 +148,21 @@ def get_grammar_context() -> dict[str, Any]:
   - `APPLICABILITY_INCLUDE/EXCLUDE/RATIONALE` from `grammar/constants.py`
   - Kind definitions derived from the `Kind` enum and its usage patterns
   - Anti-patterns derived from common validation failures
+  - `quick_start` from `tools/grammar.py::_build_grammar_help()` → "Key Steps"
+  - `common_patterns` from `tools/grammar.py::_build_grammar_help()` → "Common Patterns"
+  - `critical_distinctions` from `tools/grammar.py::_build_grammar_help()` → "Critical Distinctions"
+  - `base_requirements` from `grammar/constants.py` → BASE_REQUIREMENTS
+  - `vocabulary_usage_stats` from catalog scan: count token usage across all
+    published entries, report per-segment frequencies, most_common top-10, unused tokens
 
 **Tests:**
 - `tests/grammar/test_context.py` — verify all keys present, types correct, values non-empty
 - Verify `get_grammar_context()` output matches what codex's `build_compose_context()` currently
   assembles from private imports (backward compatibility)
 - Verify naming_guidance, kind_definitions, anti_patterns are non-empty and well-formed
+- Verify quick_start, common_patterns, critical_distinctions are present and non-empty
+- Verify vocabulary_usage_stats has per-segment data with most_common and unused lists
+- Verify base_requirements is a dict with segment keys
 
 **Why first:** Unblocks codex plan Phase 1 (replace private imports). No breaking changes.
 
