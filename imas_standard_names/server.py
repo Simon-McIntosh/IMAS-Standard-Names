@@ -19,15 +19,9 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import Literal
 
-import nest_asyncio
 from fastmcp import FastMCP
 
 from .tools import Tools
-
-# apply nest_asyncio to allow nested event loops
-# This is necessary for Jupyter notebooks and some other environments
-# that don't support nested event loops by default.
-nest_asyncio.apply()
 
 # Configure logging with specific control over different components
 # Note: Default to WARNING but allow CLI to override this
