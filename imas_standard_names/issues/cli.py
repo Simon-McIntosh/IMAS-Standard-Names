@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import json
 from collections.abc import Iterable
 from io import StringIO
 from pathlib import Path
@@ -10,12 +9,9 @@ from pathlib import Path
 import click
 from strictyaml.ruamel import YAML
 
-from imas_standard_names import models
 from imas_standard_names.generic_names import GenericNames
 from imas_standard_names.issues.gh_repo import update_static_urls
-from imas_standard_names.issues.image_assets import ImageProcessor
 from imas_standard_names.repository import StandardNameCatalog
-from imas_standard_names.unit_of_work import UnitOfWork
 
 yaml = YAML()
 yaml.indent(mapping=2, sequence=4, offset=2)
@@ -26,132 +22,6 @@ yaml.indent(mapping=2, sequence=4, offset=2)
 # ---------------------------------------------------------------------------
 def _legacy_private_load(root: Path):  # backward compat placeholder
     return StandardNameCatalog(root)
-
-
-def format_error(error: Exception, submission_file: str | None = None) -> str:
-    """Return formatted error message for invalid submissions."""
-    error_message = (
-        ":boom: The proposed Standard Name is not valid.\n"
-        f"\n{type(error).__name__}: {error}\n"
-    )
-    if submission_file:
-        try:
-            with open(submission_file) as f:
-                submission = json.load(f)
-            yaml_str = StringIO()
-            yaml.dump(submission, yaml_str)
-        except Exception:
-            pass
-    error_message += (
-        "\n"
-        "> [!NOTE]\n"
-        "> Edit the issue form and the automation will re-run validation.\n"
-    )
-    return error_message
-
-
-# ---------------------------------------------------------------------------
-# update_standardnames (directory-based)
-# ---------------------------------------------------------------------------
-@click.command()
-@click.argument("standardnames_dir")
-@click.argument("submission_file")
-@click.option("--issue-link", default="")
-@click.option(
-    "--overwrite", default=False, is_flag=True, help="Allow replacing existing entry"
-)
-def update_standardnames(
-    standardnames_dir: str,
-    submission_file: str,
-    issue_link: str,
-    overwrite: bool,
-):
-    """Validate and add a standard name (per-file schema) to a directory.
-
-    Arguments:
-      standardnames_dir  Directory containing per-file standard name YAML entries.
-      submission_file    JSON issue form export.
-    """
-    root = Path(standardnames_dir)
-    root.mkdir(parents=True, exist_ok=True)
-    repo = StandardNameCatalog(root)
-    genericnames = GenericNames()
-
-    try:
-        # Raw JSON (not yet coerced) so we can normalise fields first
-        raw_json = json.loads(Path(submission_file).read_text())
-        # Normalise legacy key 'units' -> 'unit'
-        if "unit" not in raw_json and "units" in raw_json:
-            raw_json["unit"] = raw_json["units"]
-        name = raw_json.get("name", "").strip()
-        if not name:
-            raise ValueError("Submission must include 'name'")
-        # Generic name guard before schema validation
-        genericnames.check(name)
-        # Drop unsupported keys that may appear in issue form (e.g. options)
-        for extraneous in ["options"]:
-            raw_json.pop(extraneous, None)
-        # Tags may arrive as a comma separated string or empty string
-        raw_tags = raw_json.get("tags", [])
-        if isinstance(raw_tags, str):
-            raw_tags = [t.strip() for t in raw_tags.split(",") if t.strip()]
-
-        # Minimal required fields mapping
-        description = raw_json.get("description") or raw_json.get("documentation") or ""
-        documentation = raw_json.get("documentation", description)
-        data = {
-            "name": name,
-            "kind": raw_json.get("kind", "scalar") or "scalar",
-            "status": raw_json.get("status", "draft") or "draft",
-            "unit": raw_json.get("unit", "") or "",
-            "description": description,
-            "documentation": documentation,
-            "physics_domain": raw_json.get("physics_domain", ""),
-            "tags": raw_tags or [],
-            "links": [],
-        }
-        # Remove keys with empty string that are optional (pydantic will ignore missing)
-        cleaned = {k: v for k, v in data.items() if v not in (None, "") or k == "name"}
-        entry = models.create_standard_name_entry(cleaned)
-
-        # Overwrite guard (only error if not overwriting)
-        if repo.get(entry.name) and not overwrite:
-            raise KeyError(
-                f"The proposed standard name **{entry.name}** is already present. Use --overwrite to replace."
-            )
-
-        # Image processing (optional documentation rewrite)
-        if description:
-            img_proc = ImageProcessor(
-                entry.name,
-                description,
-                image_dir=Path("docs/img") / entry.name,
-                parents=1,
-            )
-            try:
-                img_proc.download_images(remove_existing=True)
-                # Append note about images to description (non-destructive)
-                new_desc = img_proc.documentation_with_relative_paths()
-                if new_desc and new_desc != description:
-                    data["description"] = new_desc
-                    entry = models.create_standard_name_entry(
-                        {k: v for k, v in data.items() if v not in (None, "")}
-                    )
-            except Exception:  # Non-fatal: continue without images
-                pass
-
-        # Persist via unified repository + unit of work
-        uow = UnitOfWork(repo)
-        if repo.get(entry.name) and overwrite:
-            uow.update(entry.name, entry)
-        else:
-            uow.add(entry)
-        uow.commit()
-        click.echo(
-            ":sparkles: This proposal is ready for submission to the Standard Names repository."
-        )
-    except (ValueError, KeyError, NameError, Exception) as error:  # broad
-        click.echo(format_error(error, submission_file))
 
 
 # ---------------------------------------------------------------------------
@@ -191,7 +61,10 @@ def get_standardname(standardnames_dir: str, standard_name: Iterable[str]):
         if not entry:
             raise KeyError(name)
     except Exception as error:
-        click.echo(format_error(error))
+        click.echo(
+            f":boom: The proposed Standard Name is not valid.\n"
+            f"\n{type(error).__name__}: {error}\n"
+        )
         return
     # Serialize similar to saved file
     data = {k: v for k, v in entry.model_dump().items() if v not in (None, [], "")}

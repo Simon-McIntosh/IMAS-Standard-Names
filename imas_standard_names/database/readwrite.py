@@ -185,21 +185,5 @@ class CatalogReadWrite(CatalogBase):
     def list_rows(self):
         return self.conn.execute("SELECT * FROM standard_name").fetchall()
 
-    def delete(self, name: str):
-        c = self.conn.cursor()
-        for table, col in [
-            ("provenance_operator", "name"),
-            ("provenance_reduction", "name"),
-            ("provenance_expression_dependency", "name"),
-            ("provenance_expression", "name"),
-            ("tag", "name"),
-            ("link", "name"),
-            ("ids_path", "name"),
-            ("fts_standard_name", "name"),
-            ("standard_name", "name"),
-        ]:
-            c.execute(f"DELETE FROM {table} WHERE {col}=?", (name,))
-        self.conn.commit()
-
 
 __all__ = ["CATALOG_SCHEMA_VERSION", "CatalogReadWrite", "DDL"]

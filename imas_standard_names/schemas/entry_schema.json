@@ -669,5 +669,5 @@
       "$ref": "#/$defs/StandardNameMetadataEntry"
     }
   ],
-  "$schema_version": "0.7.0rc3.dev6+g300ab88b7.d20260413"
+  "$schema_version": "0.7.0rc3.dev8+g843d478df.d20260413"
 }

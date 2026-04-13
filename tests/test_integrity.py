@@ -3,14 +3,12 @@ from pathlib import Path
 
 from imas_standard_names.database.build import build_catalog
 from imas_standard_names.database.integrity import verify_integrity
-from imas_standard_names.yaml_store import YamlStore
 
 
-def test_integrity_clean(tmp_path: Path, example_scalars):
+def test_integrity_clean(tmp_path: Path, example_scalars, write_yaml):
     # Use examples from catalog
-    store = YamlStore(tmp_path)
     for example in example_scalars[:2]:
-        store.write(example)
+        write_yaml(tmp_path, example)
 
     db = build_catalog(tmp_path, tmp_path / "artifacts" / "catalog.db")
     issues = verify_integrity(tmp_path, db, full=False)
@@ -19,18 +17,17 @@ def test_integrity_clean(tmp_path: Path, example_scalars):
     assert full_issues == []
 
 
-def test_integrity_modified_file(tmp_path: Path, example_scalars):
+def test_integrity_modified_file(tmp_path: Path, example_scalars, write_yaml):
     # Use examples from catalog
-    store = YamlStore(tmp_path)
     for example in example_scalars[:2]:
-        store.write(example)
+        write_yaml(tmp_path, example)
 
     db = build_catalog(tmp_path, tmp_path / "artifacts" / "catalog.db")
     time.sleep(0.02)  # ensure mtime changes on fast FS
     modified = example_scalars[1].model_copy(
         update={"description": "Modified description."}
     )
-    store.write(modified)
+    write_yaml(tmp_path, modified)
 
     issues = verify_integrity(tmp_path, db, full=False)
     codes = {i["code"] for i in issues}
@@ -40,15 +37,14 @@ def test_integrity_modified_file(tmp_path: Path, example_scalars):
     assert "hash-mismatch" in full_codes
 
 
-def test_integrity_added_file(tmp_path: Path, example_scalars):
+def test_integrity_added_file(tmp_path: Path, example_scalars, write_yaml):
     # Use examples from catalog
-    store = YamlStore(tmp_path)
     for example in example_scalars[:2]:
-        store.write(example)
+        write_yaml(tmp_path, example)
 
     db = build_catalog(tmp_path, tmp_path / "artifacts" / "catalog.db")
     # Add third example after build
-    store.write(example_scalars[2])
+    write_yaml(tmp_path, example_scalars[2])
     third_name = example_scalars[2].name
 
     issues = verify_integrity(tmp_path, db, full=False)
@@ -58,11 +54,10 @@ def test_integrity_added_file(tmp_path: Path, example_scalars):
     )
 
 
-def test_integrity_deleted_file(tmp_path: Path, example_scalars):
+def test_integrity_deleted_file(tmp_path: Path, example_scalars, write_yaml):
     # Use examples from catalog
-    store = YamlStore(tmp_path)
     for example in example_scalars[:2]:
-        store.write(example)
+        write_yaml(tmp_path, example)
 
     first_name = example_scalars[0].name
     first_pd = (

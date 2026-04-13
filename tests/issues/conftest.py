@@ -5,11 +5,11 @@ from contextlib import contextmanager
 from pathlib import Path
 
 import pytest
+import yaml
 from click.testing import CliRunner
 
 from imas_standard_names import models
 from imas_standard_names.repository import StandardNameCatalog
-from imas_standard_names.unit_of_work import UnitOfWork
 
 
 # Shared baseline data ---------------------------------------------------------
@@ -44,11 +44,16 @@ def click_runner(path: str | Path):
 
 
 def _write_entry(entry: dict, directory: Path):
-    repo = StandardNameCatalog(directory)
-    uow = UnitOfWork(repo)
+    """Write a standard name entry as a YAML file."""
     obj = models.create_standard_name_entry(entry)
-    uow.add(obj)
-    uow.commit()
+    domain = getattr(obj, "physics_domain", "general") or "general"
+    domain_dir = directory / domain
+    domain_dir.mkdir(parents=True, exist_ok=True)
+    path = domain_dir / f"{obj.name}.yml"
+    data = {k: v for k, v in obj.model_dump().items() if v not in (None, [], "")}
+    data["name"] = obj.name
+    with open(path, "w", encoding="utf-8") as fh:
+        yaml.safe_dump(data, fh, sort_keys=False, allow_unicode=True, width=80)
 
 
 @contextmanager

@@ -66,13 +66,12 @@ class Tools:
             self.validate_catalog_tool = ValidateCatalogTool(self.catalog)
 
             # Vocabulary tool (if quality deps available)
-            from imas_standard_names.capabilities import (  # noqa: PLC0415
-                check_write_capabilities,
-            )
+            try:
+                import spacy  # noqa: PLC0415, F401
 
-            capabilities = check_write_capabilities()
-            if capabilities["vocabulary_management"]:
                 self.vocabulary_tool = VocabularyTool(self.catalog)
+            except ImportError:
+                pass
 
     @property
     def name(self) -> str:

@@ -5,11 +5,29 @@ import importlib.resources as ir
 from pathlib import Path
 
 import pytest
+import yaml
 
 from imas_standard_names.models import create_standard_name_entry
 from imas_standard_names.repository import StandardNameCatalog
 from imas_standard_names.tools.fetch import FetchTool
-from imas_standard_names.yaml_store import YamlStore
+
+
+def _write_entry_yaml(root: Path, entry):
+    """Write a standard name entry as a YAML file to disk."""
+    domain = getattr(entry, "physics_domain", "general") or "general"
+    domain_dir = root / domain
+    domain_dir.mkdir(parents=True, exist_ok=True)
+    path = domain_dir / f"{entry.name}.yml"
+    data = {k: v for k, v in entry.model_dump().items() if v not in (None, [], "")}
+    data["name"] = entry.name
+    with open(path, "w", encoding="utf-8") as fh:
+        yaml.safe_dump(data, fh, sort_keys=False, allow_unicode=True, width=80)
+
+
+@pytest.fixture
+def write_yaml():
+    """Fixture providing a helper to write standard name entries as YAML files."""
+    return _write_entry_yaml
 
 
 # Helper functions for creating valid test entries
@@ -183,15 +201,7 @@ def copy_examples(examples_catalog):
     def _copy(target_dir: Path, count: int = 5, kind: str | None = None):
         examples = examples_catalog.list(kind=kind)[:count]
         for entry in examples:
-            pd = (
-                entry.physics_domain
-                if hasattr(entry, "physics_domain") and entry.physics_domain
-                else "other"
-            )
-            (target_dir / pd).mkdir(exist_ok=True)
-        target_store = YamlStore(target_dir)
-        for entry in examples:
-            target_store.write(entry)
+            _write_entry_yaml(target_dir, entry)
         return examples
 
     return _copy
@@ -212,16 +222,7 @@ def sample_catalog(tmp_path, examples_catalog):
     # Copy examples from the examples catalog
     examples = examples_catalog.list()[:10]  # Get first 10 examples for variety
     for entry in examples:
-        pd = (
-            entry.physics_domain
-            if hasattr(entry, "physics_domain") and entry.physics_domain
-            else "other"
-        )
-        (catalog_dir / pd).mkdir(exist_ok=True)
-
-    target_store = YamlStore(catalog_dir)
-    for entry in examples:
-        target_store.write(entry)
+        _write_entry_yaml(catalog_dir, entry)
 
     # Return initialized catalog
     return StandardNameCatalog(root=catalog_dir)

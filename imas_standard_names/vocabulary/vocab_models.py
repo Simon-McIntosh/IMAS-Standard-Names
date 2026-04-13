@@ -117,28 +117,4 @@ class ListResult(BaseModel):
     vocabularies: dict  # Flexible structure from existing list_vocabulary
 
 
-class AddResult(BaseModel):
-    """Result of adding tokens."""
-
-    action: Literal["add"]
-    vocabulary: str
-    added: list[str]
-    already_present: list[str]
-    status: Literal["success", "failed", "unchanged"]
-    requires_restart: bool
-    details: str | None = None
-
-
-class RemoveResult(BaseModel):
-    """Result of removing tokens."""
-
-    action: Literal["remove"]
-    vocabulary: str
-    removed: list[str]
-    not_found: list[str]
-    status: Literal["success", "failed", "unchanged"]
-    requires_restart: bool
-    details: str | None = None
-
-
-VocabularyResult = AuditResult | CheckResult | AddResult | RemoveResult | ListResult
+VocabularyResult = AuditResult | CheckResult | ListResult

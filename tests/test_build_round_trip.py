@@ -1,9 +1,22 @@
 from pathlib import Path
 
+import yaml
+
 from imas_standard_names.database.build import build_catalog
 from imas_standard_names.database.read import CatalogRead
 from imas_standard_names.repository import StandardNameCatalog
-from imas_standard_names.yaml_store import YamlStore
+
+
+def _write_yaml(root: Path, model):
+    """Write a standard name model as a YAML file."""
+    domain = getattr(model, "physics_domain", "general") or "general"
+    domain_dir = root / domain
+    domain_dir.mkdir(parents=True, exist_ok=True)
+    path = domain_dir / f"{model.name}.yml"
+    data = {k: v for k, v in model.model_dump().items() if v not in (None, [], "")}
+    data["name"] = model.name
+    with open(path, "w", encoding="utf-8") as fh:
+        yaml.safe_dump(data, fh, sort_keys=False, allow_unicode=True, width=80)
 
 
 def test_build_catalog_round_trip(tmp_path: Path, example_scalars):
@@ -11,9 +24,8 @@ def test_build_catalog_round_trip(tmp_path: Path, example_scalars):
     yaml_root = tmp_path / "standard_names"
     yaml_root.mkdir()
 
-    store = YamlStore(yaml_root)
     for example in example_scalars[:2]:
-        store.write(example)
+        _write_yaml(yaml_root, example)
 
     # Load via repository (in-memory) baseline
     repo = StandardNameCatalog(yaml_root)

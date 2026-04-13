@@ -26,21 +26,3 @@ def test_sqlite_catalog_insert_search_get():
     ).fetchone()
     model2 = row_to_model(cat.conn, raw_row)
     assert model2.name == m.name
-
-
-def test_sqlite_catalog_delete():
-    cat = CatalogReadWrite()
-    m = create_standard_name_entry(
-        {
-            "name": "ion_temperature",
-            "kind": "scalar",
-            "description": "Ion temperature.",
-            "documentation": "Temperature of ions in the plasma.",
-            "unit": "eV",
-            "physics_domain": "general",
-        }
-    )
-    cat.insert(m)
-    assert cat.get("ion_temperature") is not None
-    cat.delete("ion_temperature")
-    assert cat.get("ion_temperature") is None

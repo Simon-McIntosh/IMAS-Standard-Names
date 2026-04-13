@@ -25,17 +25,14 @@ If no directory matches, a ``ValueError`` is raised to fail fast.
 
 from __future__ import annotations
 
-import os
 import sys
 from pathlib import Path
 
 from .database.readwrite import CatalogReadWrite
-from .decorators.mode import ReadOnlyModeError
 from .models import StandardNameEntry
 from .ordering import ordered_models
 from .paths import CatalogPaths, get_default_catalog_path
 from .services import row_to_model
-from .unit_of_work import UnitOfWork
 from .yaml_store import YamlStore
 
 
@@ -85,8 +82,6 @@ class StandardNameCatalog:
             self.catalog = CatalogRead(root_path)
             self.store = None
             self.paths = None
-            self._read_only = True
-            self._active_uow = None
         else:
             # Directory with YAML files
             paths = CatalogPaths(root_path)
@@ -99,10 +94,6 @@ class StandardNameCatalog:
             # to precede vectors / derived entries (avoids FK violations).
             for m in ordered_models(models):
                 self.catalog.insert(m)
-
-            # Check writability
-            self._read_only = not os.access(root_path, os.W_OK)
-            self._active_uow = None
 
         # Log warnings if in permissive mode
         if (
@@ -123,14 +114,8 @@ class StandardNameCatalog:
         self.catalog = CatalogReadWrite()
         self.store = None
         self.paths = None
-        self._read_only = True
-        self._active_uow = None
 
     # Basic queries -----------------------------------------------------------
-    @property
-    def read_only(self) -> bool:
-        """True if catalog is read-only (bundled .db or non-writable path)."""
-        return self._read_only
 
     def get(self, name: str) -> StandardNameEntry | None:
         row = self.catalog.conn.execute(
@@ -264,56 +249,5 @@ class StandardNameCatalog:
 
         return filtered
 
-    # Unit of Work ------------------------------------------------------------
-    def start_uow(self) -> UnitOfWork:
-        # Check if read-only before creating UoW
-        if self._read_only:
-            catalog_info = None
-            if self.paths:
-                catalog_info = str(self.paths.yaml_path)
-            raise ReadOnlyModeError("start_uow", catalog_info)
 
-        if self._active_uow:
-            raise RuntimeError("A UnitOfWork is already active")
-        self._active_uow = UnitOfWork(self)
-        return self._active_uow
-
-    def _end_uow(self):  # internal callback from UnitOfWork
-        self._active_uow = None
-
-    def reload_from_disk(self):
-        """Reload the catalog from YAML files on disk.
-
-        This clears the in-memory SQLite database and repopulates it from
-        the current state of YAML files. Used after commit to sync the
-        in-memory state with persisted changes.
-        """
-
-        # Clear existing data
-        for table in [
-            "provenance_operator",
-            "provenance_reduction",
-            "provenance_expression_dependency",
-            "provenance_expression",
-            "tag",
-            "link",
-            "fts_standard_name",
-            "standard_name",
-        ]:
-            self.catalog.conn.execute(f"DELETE FROM {table}")
-        self.catalog.conn.commit()
-
-        # Reload from YAML
-        models = self.store.load()
-        for m in ordered_models(models):
-            self.catalog.insert(m)
-
-        # Ensure all changes are committed
-        self.catalog.conn.commit()
-
-    # Internal helper for UnitOfWork
-    def _row_to_model(self, row):
-        return row_to_model(self.catalog.conn, row)
-
-
-__all__ = ["StandardNameCatalog", "UnitOfWork"]
+__all__ = ["StandardNameCatalog"]

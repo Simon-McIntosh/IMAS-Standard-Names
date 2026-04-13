@@ -72,17 +72,10 @@ class Server:
         logger.debug("IMAS MCP Server initialized with tools and resources")
 
     def _log_startup_info(self):
-        """Log server startup information including catalog status and capabilities."""
-        # Lazy import to avoid circular dependency at module load time
-        from imas_standard_names.capabilities import (  # noqa: PLC0415
-            check_write_capabilities,
-            get_mode_description,
-        )
-
+        """Log server startup information including catalog status."""
         # Check catalog availability
         if self.tools._catalog_available:
             catalog = self.tools.catalog
-            mode = get_mode_description(catalog.read_only, check_write_capabilities())
 
             # Determine catalog source
             if hasattr(catalog, "paths") and catalog.paths:
@@ -93,25 +86,9 @@ class Server:
                 catalog_info = "bundled resources"
 
             logger.info(f"Catalog: {catalog_info}")
-            logger.info(f"Mode: {mode}")
-
-            if catalog.read_only:
-                logger.info("Write operations: DISABLED")
-                logger.info(
-                    "Available tools: search, fetch, list, check, validate, compose, grammar, schema"
-                )
-            else:
-                capabilities = check_write_capabilities()
-                logger.info("Write operations: ENABLED")
-                logger.info(
-                    f"Quality validation: {'available' if capabilities['quality_validation'] else 'unavailable (install with [quality] extra)'}"
-                )
-                logger.info(
-                    f"Vocabulary management: {'available' if capabilities['vocabulary_management'] else 'unavailable (install with [quality] extra)'}"
-                )
-                logger.info(
-                    "Available tools: All tools including create, edit, write, vocabulary"
-                )
+            logger.info(
+                "Available tools: search, fetch, list, check, validate, compose, grammar, schema"
+            )
         else:
             logger.warning("Catalog: NOT AVAILABLE")
             logger.warning(

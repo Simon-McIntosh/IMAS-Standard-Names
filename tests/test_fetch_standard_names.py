@@ -147,10 +147,9 @@ class TestFetchMetadata:
         assert "derived_from" in provenance
         assert isinstance(provenance["derived_from"], list)
 
-    def test_fetch_with_operator_provenance(self, tmp_path):
+    def test_fetch_with_operator_provenance(self, tmp_path, write_yaml):
         """Test fetching entry with operator provenance."""
         from imas_standard_names.models import create_standard_name_entry
-        from imas_standard_names.yaml_store import YamlStore
 
         catalog_dir = tmp_path / "prov_catalog"
         catalog_dir.mkdir()
@@ -186,10 +185,8 @@ class TestFetchMetadata:
             }
         )
 
-        store = YamlStore(catalog_dir)
-        (catalog_dir / "core").mkdir()
-        store.write(base_entry)
-        store.write(derived_entry)
+        write_yaml(catalog_dir, base_entry)
+        write_yaml(catalog_dir, derived_entry)
 
         catalog = StandardNameCatalog(root=catalog_dir)
         tool = FetchTool(catalog)

@@ -15,7 +15,6 @@ from imas_standard_names.database.readwrite import (
     CATALOG_SCHEMA_VERSION,
     CatalogReadWrite,
 )
-from imas_standard_names.yaml_store import YamlStore
 
 
 def test_schema_version_constant_format():
@@ -50,14 +49,13 @@ def test_in_memory_catalog_has_schema_version():
     assert row[0] == CATALOG_SCHEMA_VERSION
 
 
-def test_build_catalog_writes_schema_version(tmp_path, example_scalars):
+def test_build_catalog_writes_schema_version(tmp_path, example_scalars, write_yaml):
     """build_catalog writes schema_version and builder_version to catalog_metadata."""
     yaml_root = tmp_path / "standard_names"
     yaml_root.mkdir()
 
-    store = YamlStore(yaml_root)
     for entry in example_scalars[:1]:
-        store.write(entry)
+        write_yaml(yaml_root, entry)
 
     db_path = tmp_path / "catalog.db"
     build_catalog(yaml_root, db_path)
@@ -78,14 +76,13 @@ def test_build_catalog_writes_schema_version(tmp_path, example_scalars):
     conn.close()
 
 
-def test_catalog_read_accepts_compatible_version(tmp_path, example_scalars):
+def test_catalog_read_accepts_compatible_version(tmp_path, example_scalars, write_yaml):
     """CatalogRead opens catalogs with matching schema version."""
     yaml_root = tmp_path / "standard_names"
     yaml_root.mkdir()
 
-    store = YamlStore(yaml_root)
     for entry in example_scalars[:1]:
-        store.write(entry)
+        write_yaml(yaml_root, entry)
 
     db_path = tmp_path / "catalog.db"
     build_catalog(yaml_root, db_path)
@@ -94,14 +91,15 @@ def test_catalog_read_accepts_compatible_version(tmp_path, example_scalars):
     assert catalog.list() is not None
 
 
-def test_catalog_read_rejects_major_version_mismatch(tmp_path, example_scalars):
+def test_catalog_read_rejects_major_version_mismatch(
+    tmp_path, example_scalars, write_yaml
+):
     """CatalogRead raises SchemaVersionError for major version mismatch."""
     yaml_root = tmp_path / "standard_names"
     yaml_root.mkdir()
 
-    store = YamlStore(yaml_root)
     for entry in example_scalars[:1]:
-        store.write(entry)
+        write_yaml(yaml_root, entry)
 
     db_path = tmp_path / "catalog.db"
     build_catalog(yaml_root, db_path)
@@ -118,14 +116,15 @@ def test_catalog_read_rejects_major_version_mismatch(tmp_path, example_scalars):
         CatalogRead(db_path)
 
 
-def test_catalog_read_warns_for_minor_version_ahead(tmp_path, example_scalars, caplog):
+def test_catalog_read_warns_for_minor_version_ahead(
+    tmp_path, example_scalars, write_yaml, caplog
+):
     """CatalogRead warns when catalog minor version exceeds reader."""
     yaml_root = tmp_path / "standard_names"
     yaml_root.mkdir()
 
-    store = YamlStore(yaml_root)
     for entry in example_scalars[:1]:
-        store.write(entry)
+        write_yaml(yaml_root, entry)
 
     db_path = tmp_path / "catalog.db"
     build_catalog(yaml_root, db_path)
@@ -203,15 +202,14 @@ def test_catalog_read_handles_missing_schema_version_key(tmp_path, caplog):
 
 
 def test_catalog_read_handles_malformed_version_in_db(
-    tmp_path, example_scalars, caplog
+    tmp_path, example_scalars, write_yaml, caplog
 ):
     """CatalogRead warns on malformed version strings rather than crashing."""
     yaml_root = tmp_path / "standard_names"
     yaml_root.mkdir()
 
-    store = YamlStore(yaml_root)
     for entry in example_scalars[:1]:
-        store.write(entry)
+        write_yaml(yaml_root, entry)
 
     db_path = tmp_path / "catalog.db"
     build_catalog(yaml_root, db_path)

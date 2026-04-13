@@ -15,7 +15,6 @@ dependencies = [
   "click>=8.1.8,<9.0.0",
   "pyyaml>=6.0.2,<7.0.0",
   "pint>=0.24.4,<0.25.0",
-  "requests>=2.33.0,<3.0.0",
   "markdown>=3.8,<4.0",
   "fastmcp~=3.2.0",
 ]
@@ -33,7 +32,6 @@ keywords = [
 
 [project.scripts]
 has_standardname = "imas_standard_names.issues.cli:has_standardname"
-update_standardnames = "imas_standard_names.issues.cli:update_standardnames"
 get_standardname = "imas_standard_names.issues.cli:get_standardname"
 is_genericname = "imas_standard_names.issues.cli:is_genericname"
 update_links = "imas_standard_names.issues.cli:update_links"
