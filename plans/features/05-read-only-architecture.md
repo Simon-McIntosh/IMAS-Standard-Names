@@ -82,36 +82,66 @@ textual, nest-asyncio).
 
 ### Phase 0: Public Grammar Context API
 
-**Goal:** Expose a single public function that replaces all 5 private imports in codex.
+**Goal:** Expose a comprehensive public function that replaces all private imports in codex
+and serves as the single source of truth for ALL naming knowledge needed by LLM pipelines.
+
+**Design principle:** ISN owns ALL naming knowledge. If a rule would change when ISN
+updates the grammar spec, it belongs in `get_grammar_context()`. Codex should never
+hardcode naming rules — it should always consume them from this API.
 
 **Files to create/modify:**
 
-- `imas_standard_names/grammar/context.py` (NEW ~80 lines)
+- `imas_standard_names/grammar/context.py` (NEW ~120 lines)
 
 ```python
-"""Public grammar context API for external consumers."""
+"""Public grammar context API for external consumers.
+
+This is the single entry point for any system that needs to understand
+standard name grammar, naming conventions, and validation rules.
+"""
 
 def get_grammar_context() -> dict[str, Any]:
-    """Return complete grammar context for prompt rendering.
+    """Return complete grammar context for prompt rendering and validation.
 
     Returns a dict with keys:
+
+    Grammar mechanics:
     - canonical_pattern: str — the composition pattern
     - segment_order: str — ordering constraint text
     - template_rules: str — template application rules
     - exclusive_pairs: list[tuple[str, str]] — mutually exclusive segments
     - vocabulary_sections: list[dict] — per-segment tokens with descriptions
     - segment_descriptions: dict[str, str] — per-segment usage guidance
+
+    Naming conventions (ISN-authoritative):
+    - naming_guidance: dict — composition rules, naming conventions
+    - documentation_guidance: dict — documentation writing rules
+    - kind_definitions: dict — scalar/vector/metadata classification guidance
+    - anti_patterns: list[dict] — common naming mistakes with corrections
+    - tag_descriptions: dict — primary and secondary tag descriptions
+    - applicability: dict — what should/shouldn't get standard names
+    - field_guidance: dict — per-field content rules and validation
+    - type_specific_requirements: dict — requirements per kind type
     """
 ```
 
 - `imas_standard_names/grammar/__init__.py` — add `get_grammar_context` to `__all__`
 - Move the 5 private functions from `tools/grammar.py` to `grammar/context.py` as private
   helpers, expose only `get_grammar_context()` as public
+- Aggregate naming conventions from existing ISN sources:
+  - `NAMING_GUIDANCE` from `grammar/field_schemas.py`
+  - `DOCUMENTATION_GUIDANCE` from `grammar/field_schemas.py`
+  - `FIELD_GUIDANCE`, `TYPE_SPECIFIC_REQUIREMENTS` from `grammar/field_schemas.py`
+  - `PRIMARY_TAG_DESCRIPTIONS`, `SECONDARY_TAG_DESCRIPTIONS` from `grammar/tag_types.py`
+  - `APPLICABILITY_INCLUDE/EXCLUDE/RATIONALE` from `grammar/constants.py`
+  - Kind definitions derived from the `Kind` enum and its usage patterns
+  - Anti-patterns derived from common validation failures
 
 **Tests:**
 - `tests/grammar/test_context.py` — verify all keys present, types correct, values non-empty
 - Verify `get_grammar_context()` output matches what codex's `build_compose_context()` currently
-  assembles from private imports
+  assembles from private imports (backward compatibility)
+- Verify naming_guidance, kind_definitions, anti_patterns are non-empty and well-formed
 
 **Why first:** Unblocks codex plan Phase 1 (replace private imports). No breaking changes.
 
@@ -149,6 +179,9 @@ def get_grammar_context() -> dict[str, Any]:
 
 **Goal:** Remove create/edit/write tools from the MCP server.
 
+**MUST run before Phase 3.** Write tools import from `catalog/edit.py` and `editing/`.
+If Phase 3 deletes those modules first, importing the tools package crashes.
+
 **Files to delete:**
 - `imas_standard_names/tools/create.py`
 - `imas_standard_names/tools/edit.py`
@@ -170,6 +203,9 @@ def get_grammar_context() -> dict[str, Any]:
   - Remove workflow guidance that references create/write tool calls
   - Keep field schema documentation (useful for understanding entries)
   - Remove `UPSERT_GUIDANCE` import and references
+  - Note: `UPSERT_GUIDANCE` constant in `grammar/field_schemas.py` is auto-generated
+    from `specification.yml`. Remove from the `entry_schema` section of `specification.yml`
+    and regenerate: `uv run build-grammar`
 
 - `imas_standard_names/tools/vocabulary.py` — Remove write actions:
   - Remove `add` and `remove` action handlers
@@ -317,8 +353,10 @@ def get_grammar_context() -> dict[str, Any]:
 
 ## Implementation Notes
 
-- **Order matters:** Phase 0 first (unblocks codex). Phases 1-3 can be parallelized
-  since they delete independent module trees. Phase 4-5 depend on 1-3.
+- **Order matters:** Phase 0 first (unblocks codex). Phase 1 (agents) is independent.
+  **Phase 2 MUST precede Phase 3** — write tools import from `catalog/edit.py` which
+  Phase 3 deletes. If Phase 3 runs first, importing the tools package crashes.
+  Phase 1 can parallel with Phase 2.
 - **Each phase is one commit.** Atomic, reviewable, revertible.
 - **Run `uv run pytest` after every phase.** Fix any import errors immediately.
 - **Coordinate with codex plan:** Phase 0 here enables codex Phase 1 there.
