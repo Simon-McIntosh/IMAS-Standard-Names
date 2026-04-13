@@ -20,8 +20,12 @@ from .model_types import (
     Subject,
     Transformation,
 )
-from .context import get_grammar_context
 from .support import TOKEN_PATTERN, coerce_enum, enum_values, value_of
+
+try:
+    from .context import get_grammar_context
+except ImportError:  # pragma: no cover - generated file absent during build
+    pass
 
 try:
     from .tag_types import TAG_TO_PHYSICS_DOMAIN, PhysicsDomain
