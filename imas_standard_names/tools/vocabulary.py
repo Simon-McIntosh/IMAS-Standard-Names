@@ -1,23 +1,11 @@
 """
-Vocabulary gap detection and management tool for IMAS Standard Names.
+Vocabulary gap detection tool for IMAS Standard Names.
 
-This tool provides interface for vocabulary gap detection and modification:
+This tool provides interface for vocabulary gap detection:
 - Audit: Detect missing tokens by analyzing naming patterns
 - Check: Analyze specific names for vocabulary gaps
-- Add: Add new tokens to vocabulary files (auto-runs codegen)
-- Remove: Remove tokens from vocabulary files (auto-runs codegen)
 
 For browsing available vocabulary tokens, use list_vocabulary tool.
-
-Vocabulary Workflow:
-    1. Use 'audit' or 'check' to identify missing tokens
-    2. Use 'add' to update vocabulary YAML files
-       - Codegen runs automatically after successful edits
-    3. Check validation_status in result for 'codegen_success_restart_required'
-    4. Restart MCP server to load updated grammar.types enums
-
-Important: The MCP server must be restarted after vocabulary changes for the
-          parser to recognize new tokens. Hot-reload is not supported.
 """
 
 from __future__ import annotations
@@ -30,22 +18,15 @@ from pydantic import TypeAdapter
 from imas_standard_names.decorators.mcp import mcp_tool
 from imas_standard_names.tools.base import CatalogTool
 from imas_standard_names.vocabulary.audit import VocabularyAuditor
-from imas_standard_names.vocabulary.editor import VocabularyEditor
 from imas_standard_names.vocabulary.vocab_models import VocabularyInput
 
 
 class VocabularyTool(CatalogTool):
-    """Tool for vocabulary gap detection and management.
-
-    Important: After adding/removing tokens, you must:
-    1. Run codegen to regenerate grammar.types enums
-    2. Restart the MCP server to load new enum values
-    """
+    """Tool for vocabulary gap detection."""
 
     def __init__(self, catalog):
         super().__init__(catalog)
         self._auditor = VocabularyAuditor(catalog)
-        self._editor = VocabularyEditor()
         # Eagerly load spaCy at startup to avoid first-call latency
         self._auditor.preload_spacy()
 
@@ -55,29 +36,23 @@ class VocabularyTool(CatalogTool):
 
     @mcp_tool(
         description=(
-            "Vocabulary gap detection and management for IMAS Standard Names. "
-            "Supports four actions via discriminated union: "
+            "Vocabulary gap detection for IMAS Standard Names. "
+            "Supports two actions via discriminated union: "
             "(1) audit: detect missing tokens by analyzing naming patterns (frequency_threshold=3); "
-            "(2) check: analyze a single name for potential missing tokens; "
-            "(3) add: add tokens to vocabulary YAML files (auto-runs codegen); "
-            "(4) remove: remove tokens from vocabulary files (auto-runs codegen). "
+            "(2) check: analyze a single name for potential missing tokens. "
             "Use 'action' field to select operation. "
-            "Add/remove operations automatically run codegen and return 'codegen_success_restart_required' status. "
-            "After successful changes, restart the MCP server to load new grammar.types enums. "
             "For browsing available vocabulary tokens, use get_vocabulary tool."
         )
     )
     async def manage_vocabulary(
         self, payload: dict[str, Any], ctx: Context | None = None
     ) -> dict[str, Any]:
-        """Vocabulary gap detection and management (audit, check, add, remove).
+        """Vocabulary gap detection (audit, check).
 
         Args:
             payload: Discriminated union with 'action' field:
                 - action='audit': {action, vocabulary?, frequency_threshold?}
                 - action='check': {action, name}
-                - action='add': {action, vocabulary, tokens}
-                - action='remove': {action, vocabulary, tokens}
 
         Returns:
             Structured result dict with operation-specific fields or
@@ -97,21 +72,11 @@ class VocabularyTool(CatalogTool):
                 )
             elif parsed_input.action == "check":
                 result = self._auditor.check_name(name=parsed_input.name)
-            elif parsed_input.action == "add":
-                result = self._editor.add_tokens(
-                    vocabulary=parsed_input.vocabulary,
-                    tokens=parsed_input.tokens,
-                )
-            elif parsed_input.action == "remove":
-                result = self._editor.remove_tokens(
-                    vocabulary=parsed_input.vocabulary,
-                    tokens=parsed_input.tokens,
-                )
             else:
                 return {
                     "error": "InvalidAction",
                     "message": f"Unknown action: {parsed_input.action}",
-                    "valid_actions": ["audit", "check", "add", "remove"],
+                    "valid_actions": ["audit", "check"],
                 }
 
             return result.model_dump()
@@ -139,16 +104,6 @@ class VocabularyTool(CatalogTool):
                     "action": "check (required, literal)",
                     "name": "str (required, standard name to analyze)",
                 },
-                "add": {
-                    "action": "add (required, literal)",
-                    "vocabulary": "components | subjects | geometric_bases | objects | positions | processes (required)",
-                    "tokens": "list[str] (required, min 1 token)",
-                },
-                "remove": {
-                    "action": "remove (required, literal)",
-                    "vocabulary": "components | subjects | geometric_bases | objects | positions | processes (required)",
-                    "tokens": "list[str] (required, min 1 token)",
-                },
             },
         }
 
@@ -172,22 +127,6 @@ class VocabularyTool(CatalogTool):
                 "input": {
                     "action": "check",
                     "name": "cross_sectional_area_of_flux_surface",
-                },
-            },
-            {
-                "description": "Add tokens to positions vocabulary",
-                "input": {
-                    "action": "add",
-                    "vocabulary": "positions",
-                    "tokens": ["flux_surface", "separatrix"],
-                },
-            },
-            {
-                "description": "Remove tokens from objects vocabulary",
-                "input": {
-                    "action": "remove",
-                    "vocabulary": "objects",
-                    "tokens": ["deprecated_diagnostic"],
                 },
             },
         ]

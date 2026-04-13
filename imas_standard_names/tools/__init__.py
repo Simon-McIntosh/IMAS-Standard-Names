@@ -2,12 +2,9 @@ import logging
 
 from fastmcp import FastMCP
 
-from imas_standard_names.catalog.edit import EditCatalog
 from imas_standard_names.repository import StandardNameCatalog
 from imas_standard_names.tools.check import CheckTool
 from imas_standard_names.tools.compose import ComposeTool
-from imas_standard_names.tools.create import CreateTool
-from imas_standard_names.tools.edit import CatalogTool
 from imas_standard_names.tools.fetch import FetchTool
 from imas_standard_names.tools.grammar import NamingGrammarTool
 from imas_standard_names.tools.list import ListTool
@@ -17,7 +14,6 @@ from imas_standard_names.tools.tokamak import TokamakParametersTool
 from imas_standard_names.tools.tokens import VocabularyTokensTool
 from imas_standard_names.tools.validate import ValidateCatalogTool
 from imas_standard_names.tools.vocabulary import VocabularyTool
-from imas_standard_names.tools.write import WriteTool
 
 
 class Tools:
@@ -63,31 +59,20 @@ class Tools:
 
         # Catalog-dependent tools (only if catalog available)
         if self._catalog_available:
-            # Read-only catalog tools (query and validate catalog entries)
             self.search_tool = SearchTool(self.catalog)
             self.check_tool = CheckTool(self.catalog)
             self.fetch_tool = FetchTool(self.catalog)
+            self.list_tool = ListTool(self.catalog)
             self.validate_catalog_tool = ValidateCatalogTool(self.catalog)
 
-            # Write tools (only if catalog is writable)
-            if not self.catalog.read_only:
-                self.edit_catalog = EditCatalog(self.catalog)
-                self.list_tool = ListTool(self.catalog, self.edit_catalog)
-                self.catalog_tool = CatalogTool(self.catalog, self.edit_catalog)
-                self.create_tool = CreateTool(self.catalog, self.edit_catalog)
-                self.write_tool = WriteTool(self.catalog, self.edit_catalog)
+            # Vocabulary tool (if quality deps available)
+            from imas_standard_names.capabilities import (  # noqa: PLC0415
+                check_write_capabilities,
+            )
 
-                # Quality/vocabulary tools (if available)
-                from imas_standard_names.capabilities import (  # noqa: PLC0415
-                    check_write_capabilities,
-                )
-
-                capabilities = check_write_capabilities()
-                if capabilities["vocabulary_management"]:
-                    self.vocabulary_tool = VocabularyTool(self.catalog)
-            else:
-                # Read-only mode: list tool without edit capabilities
-                self.list_tool = ListTool(self.catalog, None)
+            capabilities = check_write_capabilities()
+            if capabilities["vocabulary_management"]:
+                self.vocabulary_tool = VocabularyTool(self.catalog)
 
     @property
     def name(self) -> str:
@@ -102,8 +87,7 @@ class Tools:
         registers each with FastMCP, passing through the stored description.
         This keeps registration declarative and avoids manual duplication.
 
-        Only registers tools that are available based on catalog availability
-        and write capabilities.
+        Only registers tools that are available based on catalog availability.
         """
 
         # Always available tools (work without main catalog)
@@ -125,16 +109,6 @@ class Tools:
                 self.list_tool,
                 self.validate_catalog_tool,
             ]
-
-            # Write tools (if catalog is writable)
-            if hasattr(self, "catalog_tool"):
-                catalog_tools.extend(
-                    [
-                        self.catalog_tool,
-                        self.create_tool,
-                        self.write_tool,
-                    ]
-                )
 
             # Vocabulary tool (if quality deps available)
             if hasattr(self, "vocabulary_tool"):

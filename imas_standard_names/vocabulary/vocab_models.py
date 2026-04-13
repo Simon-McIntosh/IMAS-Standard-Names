@@ -1,7 +1,6 @@
-"""Input and result models for vocabulary management operations.
+"""Input and result models for vocabulary operations.
 
-This module defines discriminated union types for vocabulary operations,
-following the same pattern as editing.edit_models.
+This module defines discriminated union types for vocabulary operations.
 """
 
 from __future__ import annotations
@@ -37,28 +36,8 @@ class CheckInput(BaseModel):
     name: str
 
 
-class AddInput(BaseModel):
-    """Add tokens to vocabulary."""
-
-    action: Literal["add"]
-    vocabulary: Literal[
-        "components", "subjects", "geometric_bases", "objects", "positions", "processes"
-    ]
-    tokens: list[str]
-
-
-class RemoveInput(BaseModel):
-    """Remove tokens from vocabulary."""
-
-    action: Literal["remove"]
-    vocabulary: Literal[
-        "components", "subjects", "geometric_bases", "objects", "positions", "processes"
-    ]
-    tokens: list[str]
-
-
 VocabularyInput = Annotated[
-    AuditInput | CheckInput | AddInput | RemoveInput,
+    AuditInput | CheckInput,
     Field(discriminator="action"),
 ]
 
@@ -92,16 +71,6 @@ def example_vocabulary_inputs() -> list[dict]:
             "action": "check",
             "name": "cross_sectional_area_of_flux_surface",
             "min_frequency": 3,
-        },
-        {
-            "action": "add",
-            "vocabulary": "geometry",
-            "tokens": ["flux_surface"],
-        },
-        {
-            "action": "remove",
-            "vocabulary": "object",
-            "tokens": ["deprecated_token"],
         },
     ]
 
@@ -141,6 +110,13 @@ class CheckResult(BaseModel):
     gap_details: MissingToken | None = None
 
 
+class ListResult(BaseModel):
+    """Result of listing vocabulary tokens."""
+
+    action: Literal["list"]
+    vocabularies: dict  # Flexible structure from existing list_vocabulary
+
+
 class AddResult(BaseModel):
     """Result of adding tokens."""
 
@@ -163,13 +139,6 @@ class RemoveResult(BaseModel):
     status: Literal["success", "failed", "unchanged"]
     requires_restart: bool
     details: str | None = None
-
-
-class ListResult(BaseModel):
-    """Result of listing vocabulary tokens."""
-
-    action: Literal["list"]
-    vocabularies: dict  # Flexible structure from existing list_vocabulary
 
 
 VocabularyResult = AuditResult | CheckResult | AddResult | RemoveResult | ListResult

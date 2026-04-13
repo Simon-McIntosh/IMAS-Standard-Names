@@ -1,8 +1,7 @@
 """
-Tests for vocabulary management (audit + edit) functionality.
+Tests for vocabulary auditing functionality.
 
-Tests the VocabularyTool MCP tool and its underlying VocabularyAuditor
-and VocabularyEditor classes.
+Tests the VocabularyTool MCP tool and its underlying VocabularyAuditor.
 """
 
 import pytest
@@ -10,12 +9,9 @@ import pytest
 from imas_standard_names.repository import StandardNameCatalog
 from imas_standard_names.tools.vocabulary import VocabularyTool
 from imas_standard_names.vocabulary.audit import VocabularyAuditor
-from imas_standard_names.vocabulary.editor import VocabularyEditor
 from imas_standard_names.vocabulary.vocab_models import (
-    AddResult,
     AuditResult,
     CheckResult,
-    RemoveResult,
 )
 
 
@@ -29,12 +25,6 @@ def catalog():
 def auditor(catalog):
     """Vocabulary auditor fixture."""
     return VocabularyAuditor(catalog)
-
-
-@pytest.fixture
-def editor():
-    """Vocabulary editor fixture."""
-    return VocabularyEditor()
 
 
 class TestVocabularyAuditor:
@@ -101,64 +91,6 @@ class TestVocabularyAuditor:
         assert result.gap_details is None
 
 
-class TestVocabularyEditor:
-    """Test VocabularyEditor class."""
-
-    def test_editor_initializes(self, editor):
-        """Test that editor initializes with correct paths."""
-        assert editor.grammar_dir.exists()
-        assert editor.grammar_dir.is_dir()
-        assert (editor.grammar_dir / "vocabularies").exists()
-
-    def test_add_tokens_returns_add_result(self, editor):
-        """Test that add_tokens returns AddResult (dry run concept)."""
-        # We won't actually add tokens to avoid modifying source files
-        # Instead we test the return type structure
-        assert hasattr(editor, "add_tokens")
-        # Test with invalid vocabulary to trigger error
-        with pytest.raises(ValueError, match="Unknown vocabulary"):
-            editor.add_tokens("invalid_vocab", ["test"])
-
-    def test_remove_tokens_returns_remove_result(self, editor):
-        """Test that remove_tokens returns RemoveResult (dry run concept)."""
-        assert hasattr(editor, "remove_tokens")
-        # Test with invalid vocabulary to trigger error
-        with pytest.raises(ValueError, match="Unknown vocabulary"):
-            editor.remove_tokens("invalid_vocab", ["test"])
-
-    def test_editor_vocab_file_mapping(self, editor):
-        """Test that editor has correct vocabulary file mappings."""
-        # Editor uses segment IDs that map to vocabulary files
-        # Check that dynamic mapping includes expected segments
-        assert (
-            len(editor.VOCAB_FILES) >= 6
-        )  # Should have at least 6 vocabulary mappings
-        # Verify some key segment->vocabulary mappings exist
-        vocab_files_str = str(editor.VOCAB_FILES)
-        assert "components" in vocab_files_str or "component" in editor.VOCAB_FILES
-        assert "objects" in vocab_files_str or "object" in editor.VOCAB_FILES
-        assert "positions" in vocab_files_str or "geometry" in editor.VOCAB_FILES
-        assert "position" in editor.VOCAB_FILES
-        # geometry and position should map to same file
-        assert editor.VOCAB_FILES["geometry"] == editor.VOCAB_FILES["position"]
-        # object should map to different file
-        assert editor.VOCAB_FILES["object"] != editor.VOCAB_FILES["geometry"]
-
-    def test_editor_load_vocabulary(self, editor):
-        """Test loading vocabulary from YAML file."""
-        positions_file = editor.grammar_dir / editor.VOCAB_FILES["geometry"]
-        tokens = editor._load_vocabulary(positions_file)
-
-        assert isinstance(tokens, list)
-        assert len(tokens) > 0
-        assert all(isinstance(token, str) for token in tokens)
-
-    def test_editor_validate_changes(self, editor):
-        """Test validation method."""
-        # Should pass validation on current state
-        assert editor.validate_changes() is True
-
-
 class TestVocabularyToolIntegration:
     """Integration tests for VocabularyTool (requires catalog)."""
 
@@ -166,17 +98,6 @@ class TestVocabularyToolIntegration:
     def vocab_tool(self, catalog):
         """VocabularyTool fixture."""
         return VocabularyTool(catalog)
-
-    @pytest.mark.anyio
-    async def test_manage_vocabulary_list(self, vocab_tool):
-        """Test manage_vocabulary with list action (no longer supported - use get_vocabulary)."""
-        result = await vocab_tool.manage_vocabulary(
-            {"action": "list", "segment": "geometry"}
-        )
-
-        # List action is no longer supported in manage_vocabulary
-        assert "error" in result
-        assert result["error"] == "ValidationError"
 
     @pytest.mark.anyio
     async def test_manage_vocabulary_audit(self, vocab_tool):
@@ -257,39 +178,3 @@ class TestVocabModels:
 
         assert result.action == "check"
         assert result.name == "test_name"
-
-    def test_add_result_model(self):
-        """Test AddResult model structure."""
-        result = AddResult(
-            action="add",
-            vocabulary="geometry",
-            added=["flux_surface"],
-            already_present=[],
-            status="success",
-            requires_restart=True,
-            details="Codegen completed successfully",
-        )
-
-        assert result.action == "add"
-        assert result.vocabulary == "geometry"
-        assert "flux_surface" in result.added
-        assert result.details is not None
-        assert result.requires_restart is True
-
-    def test_remove_result_model(self):
-        """Test RemoveResult model structure."""
-        result = RemoveResult(
-            action="remove",
-            vocabulary="geometry",
-            removed=["old_token"],
-            not_found=["missing_token"],
-            status="success",
-            requires_restart=True,
-            details="Codegen completed successfully",
-        )
-
-        assert result.action == "remove"
-        assert result.vocabulary == "geometry"
-        assert "old_token" in result.removed
-        assert result.details is not None
-        assert result.requires_restart is True

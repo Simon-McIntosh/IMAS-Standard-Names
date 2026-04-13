@@ -8,7 +8,6 @@ from imas_standard_names.grammar.field_schemas import (
     NAMING_GUIDANCE,
     PROVENANCE_MODES_INFO,
     TYPE_SPECIFIC_REQUIREMENTS,
-    UPSERT_GUIDANCE,
 )
 from imas_standard_names.grammar.tag_types import (
     PHYSICS_DOMAIN_DESCRIPTIONS,
@@ -20,27 +19,17 @@ from imas_standard_names.models import STANDARD_NAME_MODELS, StandardNameEntryBa
 from imas_standard_names.tools.base import Tool
 
 # Constants for common response strings
-_PURPOSE_CREATE_ENTRIES = (
-    "Create valid entry dicts for create_standard_names(entries=[...]) tool"
-)
-_PURPOSE_CREATE_KIND_ENTRIES = (
-    "Create {} entry dicts for create_standard_names(entries=[...])"
-)
+_PURPOSE_CREATE_ENTRIES = "Understand entry structure for standard name catalog entries"
+_PURPOSE_CREATE_KIND_ENTRIES = "Understand {} entry structure for standard name catalog"
 _WORKFLOW_STEPS_BASE = [
     "1. get_grammar → understand naming rules and compose valid name",
     "2. get_schema → review field guidance and requirements",
     "3. Construct entry dict with all required fields for chosen kind",
-    "4. create_standard_names(entries=[...]) → stage in-memory",
-    "5. list_standard_names(scope='pending') → review changes",
-    "6. write_standard_names() → persist to disk",
 ]
 _WORKFLOW_STEPS_KIND = [
     "1. get_grammar → understand naming rules and compose valid name",
     "2. get_schema → review field guidance",
     "3. Construct entry dict with all required fields",
-    "4. create_standard_names(entries=[...]) → stage in-memory",
-    "5. list_standard_names(scope='pending') → review changes",
-    "6. write_standard_names() → persist to disk",
 ]
 
 
@@ -255,7 +244,6 @@ class SchemaTool(Tool):
                     "schemas": scalar_schema.get("$defs", {}),
                     "modes_info": PROVENANCE_MODES_INFO,
                 },
-                "upsert_guidance": UPSERT_GUIDANCE,
                 "use_kind_parameter": "Call with kind='scalar'|'vector'|'metadata' for specific schema without diffs",
             }
         )
