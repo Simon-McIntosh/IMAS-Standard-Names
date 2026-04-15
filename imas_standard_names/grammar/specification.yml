@@ -638,7 +638,7 @@ entry_schema:
       description: "Standard name token that supersedes this entry (required when status is 'superseded')"
       pattern: "^[a-z][a-z0-9_]*$|^$"
     
-    ids_paths:
+    dd_paths:
       required: false
       type: array
       items: string
@@ -669,14 +669,14 @@ entry_schema:
       required_fields: [name, description, documentation, unit, physics_domain]
       field_overrides:
         unit: "Required (use '1' for dimensionless)"
-      optional_fields: [provenance, status, validity_domain, constraints, deprecates, superseded_by, links, ids_paths]
+      optional_fields: [provenance, status, validity_domain, constraints, deprecates, superseded_by, links, dd_paths]
       description: "Physical quantities with single value at each point"
     
     vector:
       required_fields: [name, description, documentation, unit, physics_domain]
       field_overrides:
         unit: "Required (use '1' for dimensionless)"
-      optional_fields: [provenance, status, validity_domain, constraints, deprecates, superseded_by, links, ids_paths]
+      optional_fields: [provenance, status, validity_domain, constraints, deprecates, superseded_by, links, dd_paths]
       description: "Vector field quantities with components"
     
     metadata:
@@ -684,6 +684,6 @@ entry_schema:
       field_overrides:
         unit: "Optional (default empty string, omitted from serialization)"
       forbidden_fields: [provenance]
-      optional_fields: [status, validity_domain, constraints, deprecates, superseded_by, links, ids_paths]
+      optional_fields: [status, validity_domain, constraints, deprecates, superseded_by, links, dd_paths]
       description: "Definitional entries (boundaries, regions, concepts)"
       note: "Metadata entries are definitional anchors, not measurable/derived quantities"

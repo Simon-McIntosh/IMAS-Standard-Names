@@ -14,7 +14,7 @@ from .base import CatalogBase
 # Schema version tracks the DDL structure.
 # Bump major for breaking changes (removed/renamed tables/columns).
 # Bump minor for additive changes (new optional tables/columns).
-CATALOG_SCHEMA_VERSION = "2.0"
+CATALOG_SCHEMA_VERSION = "3.0"
 
 DDL = [
     "PRAGMA foreign_keys=ON;",
@@ -26,7 +26,7 @@ DDL = [
     "CREATE TABLE provenance_expression_dependency ( name TEXT NOT NULL REFERENCES provenance_expression(name) ON DELETE CASCADE, dependency TEXT NOT NULL REFERENCES standard_name(name), PRIMARY KEY(name,dependency) );",
     "CREATE TABLE tag ( name TEXT NOT NULL REFERENCES standard_name(name) ON DELETE CASCADE, tag TEXT NOT NULL, PRIMARY KEY(name,tag));",
     "CREATE TABLE link ( name TEXT NOT NULL REFERENCES standard_name(name) ON DELETE CASCADE, link TEXT NOT NULL, PRIMARY KEY(name,link));",
-    "CREATE TABLE ids_path ( name TEXT NOT NULL REFERENCES standard_name(name) ON DELETE CASCADE, ids_path TEXT NOT NULL, PRIMARY KEY(name,ids_path));",
+    "CREATE TABLE dd_path ( name TEXT NOT NULL REFERENCES standard_name(name) ON DELETE CASCADE, dd_path TEXT NOT NULL, PRIMARY KEY(name,dd_path));",
     "CREATE VIRTUAL TABLE fts_standard_name USING fts5(name UNINDEXED, description, documentation);",
 ]
 
@@ -131,10 +131,10 @@ class CatalogReadWrite(CatalogBase):
                 c.execute("INSERT INTO tag(name, tag) VALUES (?,?)", (m.name, t))
             for link in getattr(m, "links", []) or []:
                 c.execute("INSERT INTO link(name, link) VALUES (?,?)", (m.name, link))
-            for ids_path in getattr(m, "ids_paths", []) or []:
+            for dd_path in getattr(m, "dd_paths", []) or []:
                 c.execute(
-                    "INSERT INTO ids_path(name, ids_path) VALUES (?,?)",
-                    (m.name, ids_path),
+                    "INSERT INTO dd_path(name, dd_path) VALUES (?,?)",
+                    (m.name, dd_path),
                 )
             c.execute(
                 "INSERT INTO fts_standard_name(name, description, documentation) VALUES (?,?,?)",

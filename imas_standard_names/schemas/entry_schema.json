@@ -229,12 +229,12 @@
           "title": "Links",
           "type": "array"
         },
-        "ids_paths": {
+        "dd_paths": {
           "description": "IMAS Data Dictionary paths that map to this standard name. Used to track provenance from IMAS DD and enable cross-referencing between standard names and DD structure.",
           "items": {
             "type": "string"
           },
-          "title": "Ids Paths",
+          "title": "Dd Paths",
           "type": "array"
         },
         "kind": {
@@ -382,12 +382,12 @@
           "title": "Links",
           "type": "array"
         },
-        "ids_paths": {
+        "dd_paths": {
           "description": "IMAS Data Dictionary paths that map to this standard name. Used to track provenance from IMAS DD and enable cross-referencing between standard names and DD structure.",
           "items": {
             "type": "string"
           },
-          "title": "Ids Paths",
+          "title": "Dd Paths",
           "type": "array"
         },
         "kind": {
@@ -580,12 +580,12 @@
           "title": "Links",
           "type": "array"
         },
-        "ids_paths": {
+        "dd_paths": {
           "description": "IMAS Data Dictionary paths that map to this standard name. Used to track provenance from IMAS DD and enable cross-referencing between standard names and DD structure.",
           "items": {
             "type": "string"
           },
-          "title": "Ids Paths",
+          "title": "Dd Paths",
           "type": "array"
         },
         "kind": {

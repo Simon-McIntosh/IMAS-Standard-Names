@@ -69,10 +69,10 @@ from imas_standard_names import pint
 from imas_standard_names.field_types import (
     STANDARD_NAME_PATTERN,
     Constraints,
+    DdPaths,
     Description,
     Documentation,
     Domain,
-    IdsPaths,
     Links,
     Name,
     PhysicsDomainField,
@@ -193,7 +193,7 @@ class StandardNameEntryBase(BaseModel):
     )
     tags: Tags = Field(default_factory=list)  # Secondary classification tags
     links: Links = Field(default_factory=list)
-    ids_paths: IdsPaths = Field(default_factory=list)
+    dd_paths: DdPaths = Field(default_factory=list)
 
     # Supplemental validator for double underscore rule not expressible in pattern.
     @field_validator("name", "deprecates", "superseded_by")
