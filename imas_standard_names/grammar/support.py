@@ -38,6 +38,23 @@ _BINARY_OPERATOR_TOKENS_SORTED = tuple(
     sorted(BINARY_OPERATOR_TOKENS, key=len, reverse=True)
 )
 
+# Prefix-only exclusive pairs (both sides in PREFIX_SEGMENTS)
+_PREFIX_EXCLUSIVE_PAIRS: tuple[tuple[str, str], ...] = tuple(
+    (left, right)
+    for left, right in EXCLUSIVE_SEGMENT_PAIRS
+    if left in PREFIX_SEGMENTS and right in PREFIX_SEGMENTS
+)
+
+
+def _is_prefix_exclusive_with(segment: str, prefix_matched: set[str]) -> bool:
+    """Check if segment is exclusive with any already-matched prefix segment."""
+    for left, right in _PREFIX_EXCLUSIVE_PAIRS:
+        if segment == left and right in prefix_matched:
+            return True
+        if segment == right and left in prefix_matched:
+            return True
+    return False
+
 
 def value_of(value: Any) -> str:
     """Return the string value for an enum or bare string.
@@ -264,6 +281,7 @@ def parse_standard_name(name: str) -> dict[str, str]:
     # (device) is matched before poloidal_ (coordinate).
     # But we still respect ordering by only moving forward in the segment list.
     current_segment_idx = 0
+    prefix_matched: set[str] = set()
 
     while current_segment_idx < len(PREFIX_SEGMENTS) and remaining:
         # Find the best match among segments from current position onward
@@ -276,6 +294,8 @@ def parse_standard_name(name: str) -> dict[str, str]:
             segment = PREFIX_SEGMENTS[idx]
             if segment in values:
                 # Already matched this segment
+                continue
+            if _is_prefix_exclusive_with(segment, prefix_matched):
                 continue
 
             template = SEGMENT_TEMPLATES.get(segment)
@@ -301,6 +321,7 @@ def parse_standard_name(name: str) -> dict[str, str]:
                 prefix = best_token + "_"
             remaining = remaining[len(prefix) :]
             values[best_segment] = best_token
+            prefix_matched.add(best_segment)
             # Move to the next segment position after the one we just matched
             current_segment_idx = best_segment_idx + 1
         else:
