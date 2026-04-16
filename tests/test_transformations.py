@@ -46,6 +46,100 @@ class TestTransformationCompose:
         name = compose_parts(parts)
         assert name == "inverse_of_safety_factor"
 
+    def test_volume_averaged(self):
+        parts = {
+            "transformation": "volume_averaged",
+            "physical_base": "electron_temperature",
+        }
+        name = compose_parts(parts)
+        assert name == "volume_averaged_electron_temperature"
+
+    def test_time_derivative_of(self):
+        parts = {
+            "transformation": "time_derivative_of",
+            "physical_base": "magnetic_flux",
+        }
+        name = compose_parts(parts)
+        assert name == "time_derivative_of_magnetic_flux"
+
+    def test_normalized(self):
+        parts = {"transformation": "normalized", "physical_base": "electron_pressure"}
+        name = compose_parts(parts)
+        assert name == "normalized_electron_pressure"
+
+    def test_flux_surface_averaged(self):
+        parts = {
+            "transformation": "flux_surface_averaged",
+            "physical_base": "electron_temperature",
+        }
+        name = compose_parts(parts)
+        assert name == "flux_surface_averaged_electron_temperature"
+
+    def test_line_averaged(self):
+        parts = {"transformation": "line_averaged", "physical_base": "electron_density"}
+        name = compose_parts(parts)
+        assert name == "line_averaged_electron_density"
+
+    def test_surface_integrated(self):
+        parts = {"transformation": "surface_integrated", "physical_base": "heat_flux"}
+        name = compose_parts(parts)
+        assert name == "surface_integrated_heat_flux"
+
+    def test_volume_integrated(self):
+        parts = {"transformation": "volume_integrated", "physical_base": "power"}
+        name = compose_parts(parts)
+        assert name == "volume_integrated_power"
+
+    def test_time_integrated(self):
+        parts = {
+            "transformation": "time_integrated",
+            "physical_base": "radiation_power",
+        }
+        name = compose_parts(parts)
+        assert name == "time_integrated_radiation_power"
+
+    def test_maximum_of(self):
+        parts = {"transformation": "maximum_of", "physical_base": "electron_pressure"}
+        name = compose_parts(parts)
+        assert name == "maximum_of_electron_pressure"
+
+    def test_minimum_of(self):
+        parts = {"transformation": "minimum_of", "physical_base": "safety_factor"}
+        name = compose_parts(parts)
+        assert name == "minimum_of_safety_factor"
+
+    def test_maximum_over_flux_surface(self):
+        parts = {
+            "transformation": "maximum_over_flux_surface",
+            "physical_base": "electron_temperature",
+        }
+        name = compose_parts(parts)
+        assert name == "maximum_over_flux_surface_electron_temperature"
+
+    def test_minimum_over_flux_surface(self):
+        parts = {
+            "transformation": "minimum_over_flux_surface",
+            "physical_base": "safety_factor",
+        }
+        name = compose_parts(parts)
+        assert name == "minimum_over_flux_surface_safety_factor"
+
+    def test_derivative_of(self):
+        parts = {
+            "transformation": "derivative_of",
+            "physical_base": "electron_temperature",
+        }
+        name = compose_parts(parts)
+        assert name == "derivative_of_electron_temperature"
+
+    def test_radial_derivative_of(self):
+        parts = {
+            "transformation": "radial_derivative_of",
+            "physical_base": "electron_pressure",
+        }
+        name = compose_parts(parts)
+        assert name == "radial_derivative_of_electron_pressure"
+
     def test_transformation_with_subject_prefix(self):
         """Subject prefix should come before transformation+base."""
         name = compose_name(
@@ -107,6 +201,38 @@ class TestTransformationParse:
         assert result["transformation"] == "inverse_of"
         assert result["physical_base"] == "safety_factor"
 
+    def test_parse_volume_averaged(self):
+        result = parse_parts("volume_averaged_electron_temperature")
+        assert result["transformation"] == "volume_averaged"
+        assert result["physical_base"] == "electron_temperature"
+
+    def test_parse_time_derivative_of(self):
+        result = parse_parts("time_derivative_of_magnetic_flux")
+        assert result["transformation"] == "time_derivative_of"
+        assert result["physical_base"] == "magnetic_flux"
+
+    def test_parse_normalized(self):
+        result = parse_parts("normalized_electron_pressure")
+        assert result["transformation"] == "normalized"
+        assert result["physical_base"] == "electron_pressure"
+
+    def test_parse_flux_surface_averaged(self):
+        result = parse_parts("flux_surface_averaged_electron_temperature")
+        assert result["transformation"] == "flux_surface_averaged"
+        assert result["physical_base"] == "electron_temperature"
+
+    def test_parse_maximum_over_flux_surface(self):
+        result = parse_parts("maximum_over_flux_surface_electron_temperature")
+        assert result["transformation"] == "maximum_over_flux_surface"
+        assert result["physical_base"] == "electron_temperature"
+
+    def test_parse_radial_derivative_of(self):
+        """Parser splits radial_derivative_of as coordinate=radial + transformation=derivative_of."""
+        result = parse_parts("radial_derivative_of_electron_pressure")
+        assert result["transformation"] == "derivative_of"
+        assert result["coordinate"] == "radial"
+        assert result["physical_base"] == "electron_pressure"
+
     def test_parse_with_subject_prefix(self):
         result = parse_parts("electron_square_of_temperature")
         assert result["subject"] == "electron"
@@ -154,6 +280,31 @@ class TestTransformationRoundTrip:
                 "physical_base": "safety_factor",
                 "position": "magnetic_axis",
             },
+            {"transformation": "volume_averaged", "physical_base": "electron_density"},
+            {
+                "transformation": "flux_surface_averaged",
+                "physical_base": "electron_temperature",
+            },
+            {"transformation": "line_averaged", "physical_base": "electron_density"},
+            {"transformation": "surface_integrated", "physical_base": "heat_flux"},
+            {"transformation": "volume_integrated", "physical_base": "power"},
+            {"transformation": "time_integrated", "physical_base": "radiation_power"},
+            {"transformation": "time_derivative_of", "physical_base": "magnetic_flux"},
+            {"transformation": "normalized", "physical_base": "electron_pressure"},
+            {"transformation": "maximum_of", "physical_base": "electron_pressure"},
+            {"transformation": "minimum_of", "physical_base": "safety_factor"},
+            {
+                "transformation": "maximum_over_flux_surface",
+                "physical_base": "electron_temperature",
+            },
+            {
+                "transformation": "minimum_over_flux_surface",
+                "physical_base": "safety_factor",
+            },
+            {
+                "transformation": "derivative_of",
+                "physical_base": "electron_temperature",
+            },
         ],
     )
     def test_round_trip(self, parts):
@@ -161,6 +312,20 @@ class TestTransformationRoundTrip:
         name = model.compose()
         parsed = parse_name(name)
         assert parsed.model_dump_compact() == model.model_dump_compact()
+
+    def test_radial_derivative_compose_parse(self):
+        """radial_derivative_of composes correctly but parses as coordinate+derivative_of."""
+        model = StandardName(
+            transformation="radial_derivative_of",
+            physical_base="electron_pressure",
+        )
+        name = model.compose()
+        assert name == "radial_derivative_of_electron_pressure"
+        # Parser interprets 'radial' as a coordinate prefix
+        result = parse_parts(name)
+        assert result["coordinate"] == "radial"
+        assert result["transformation"] == "derivative_of"
+        assert result["physical_base"] == "electron_pressure"
 
 
 class TestTransformationExclusivity:
@@ -229,6 +394,22 @@ class TestTransformationExclusivity:
 
 class TestTransformationEdgeCases:
     """Test edge cases for transformation handling."""
+
+    def test_time_derivative_synonym(self):
+        """Both time_derivative_of and change_over_time_in are valid transformations."""
+        for t in ["time_derivative_of", "change_over_time_in"]:
+            name = f"{t}_electron_temperature"
+            parsed = parse_parts(name)
+            assert parsed["transformation"] == t
+            assert parsed["physical_base"] == "electron_temperature"
+
+    def test_radial_derivative_not_radial_component(self):
+        """radial_derivative_of parses as coordinate=radial + transformation=derivative_of."""
+        name = "radial_derivative_of_electron_pressure"
+        parsed = parse_parts(name)
+        assert parsed["transformation"] == "derivative_of"
+        assert parsed["coordinate"] == "radial"
+        assert "component" not in parsed
 
     def test_name_starting_with_square_but_not_transformation(self):
         """A name like 'square_root_function' should not match transformation."""
