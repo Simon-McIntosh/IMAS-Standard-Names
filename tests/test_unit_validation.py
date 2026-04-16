@@ -9,6 +9,7 @@ from imas_standard_names.models import (
 )
 from imas_standard_names.validation.semantic import (
     _check_dimensionless_physical_quantity,
+    _check_none_unit_with_quantitative_kind,
 )
 
 
@@ -130,3 +131,63 @@ class TestDimensionlessPhysicalQuantity:
         entry = _scalar("electron_temperature", unit="K")
         issues = _check_dimensionless_physical_quantity("electron_temperature", entry)
         assert issues == []
+
+
+class TestNoneUnitWithQuantitativeKind:
+    """Test _check_none_unit_with_quantitative_kind semantic check."""
+
+    def test_none_unit_with_metadata_is_valid(self):
+        """Metadata entries are allowed to have no unit."""
+        entry = _metadata("plasma_boundary")
+        issues = _check_none_unit_with_quantitative_kind("plasma_boundary", entry)
+        assert issues == []
+
+    def test_scalar_with_proper_unit_is_valid(self):
+        """Scalar entries with explicit units are fine."""
+        entry = _scalar("electron_temperature", unit="eV")
+        issues = _check_none_unit_with_quantitative_kind("electron_temperature", entry)
+        assert issues == []
+
+    def test_scalar_with_dimensionless_unit_is_valid(self):
+        """Scalar entries with unit='1' (dimensionless) are fine."""
+        entry = _scalar("safety_factor", unit="1")
+        issues = _check_none_unit_with_quantitative_kind("safety_factor", entry)
+        assert issues == []
+
+    def test_vector_with_proper_unit_is_valid(self):
+        """Vector entries with explicit units are fine."""
+        entry = _vector("magnetic_field", unit="T")
+        issues = _check_none_unit_with_quantitative_kind("magnetic_field", entry)
+        assert issues == []
+
+    def test_scalar_with_none_unit_warns(self):
+        """Scalar entries with unit=None should produce a warning."""
+        entry = StandardNameScalarEntry.model_construct(
+            name="electron_temperature",
+            kind="scalar",
+            unit=None,
+            description="Test entry",
+            documentation="Test docs.",
+            physics_domain="general",
+            status="draft",
+        )
+        issues = _check_none_unit_with_quantitative_kind("electron_temperature", entry)
+        assert len(issues) == 1
+        assert "WARNING" in issues[0]
+        assert "unit" in issues[0].lower()
+
+    def test_vector_with_none_unit_warns(self):
+        """Vector entries with unit=None should produce a warning."""
+        entry = StandardNameVectorEntry.model_construct(
+            name="magnetic_field",
+            kind="vector",
+            unit=None,
+            description="Test entry",
+            documentation="Test docs.",
+            physics_domain="general",
+            status="draft",
+        )
+        issues = _check_none_unit_with_quantitative_kind("magnetic_field", entry)
+        assert len(issues) == 1
+        assert "WARNING" in issues[0]
+        assert "vector" in issues[0].lower()

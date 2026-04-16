@@ -57,6 +57,8 @@ Detailed rules for each segment, including optionality, templates, and exclusivi
 ### Components
 
 Component tokens specify the direction of physical or geometric vector components.
+Available directions include `radial`, `poloidal`, `toroidal`, `parallel`, `perpendicular`,
+and others.
 
 **Usage:**
 
@@ -67,7 +69,11 @@ Component tokens specify the direction of physical or geometric vector component
 
 ### Subjects
 
-Subject tokens specify the particle species or plasma population:
+Subject tokens specify the particle species or plasma population.
+Subjects are organized in tiers: core species (electron, ion, neutral), hydrogenic
+isotopes (hydrogen, deuterium, tritium), impurity elements (helium, beryllium, carbon,
+nitrogen, neon, argon, tungsten, lithium), extended species (alpha particle, fast ion),
+and reaction mixtures (deuterium-tritium).
 
 {{ grammar_vocabulary_table('subjects') }}
 
@@ -105,9 +111,42 @@ Position tokens specify spatial locations or regions within the plasma.
 
 ### Processes
 
-Process tokens specify physical mechanisms or processes:
+Process tokens specify physical mechanisms or processes. Categories include energy
+transport (conduction, convection, radiation), particle transport (diffusion), fueling
+(gas_puff, pellet_injection), and fusion reactions (fusion, deuterium_tritium_fusion).
 
 {{ grammar_vocabulary_table('processes') }}
+
+### Transformations
+
+Transformation tokens modify a physical base by applying a mathematical operation.
+Transformations are prefixed to the physical base.
+
+**Template:** `{transformation}_{physical_base}`
+
+**Examples:**
+
+- `square_of_electron_temperature` — square of temperature
+- `volume_averaged_electron_density` — spatial average
+- `time_derivative_of_magnetic_flux` — temporal derivative
+- `maximum_over_flux_surface_electron_pressure` — extremum over surface
+
+**Categories:**
+
+- **Existing:** `square_of`, `change_over_time_in`, `logarithm_of`, `inverse_of`
+- **Scaling:** `normalized`
+- **Spatial averages:** `volume_averaged`, `flux_surface_averaged`, `line_averaged`
+- **Spatial integrals:** `surface_integrated`, `volume_integrated`
+- **Temporal:** `time_integrated`, `time_derivative_of`
+- **Extrema:** `maximum_of`, `minimum_of`, `maximum_over_flux_surface`, `minimum_over_flux_surface`
+- **Calculus:** `derivative_of`, `radial_derivative_of`
+
+**Note:** `time_derivative_of` and `change_over_time_in` are both valid transformation tokens
+describing the same mathematical operation. The parser accepts either form.
+
+**Exclusivity:** Transformations cannot be combined with `component`, `coordinate`, or `geometric_base`.
+
+{{ grammar_vocabulary_table('transformations') }}
 
 ---
 

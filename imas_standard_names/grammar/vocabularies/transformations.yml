@@ -1,4 +1,31 @@
+# === Existing ===
 - square_of
 - change_over_time_in
 - logarithm_of
 - inverse_of
+
+# === Scaling ===
+- normalized
+
+# === Spatial averages ===
+- volume_averaged
+- flux_surface_averaged
+- line_averaged
+
+# === Spatial integrals ===
+- surface_integrated
+- volume_integrated
+
+# === Temporal ===
+- time_integrated
+- time_derivative_of
+
+# === Extrema ===
+- maximum_of
+- minimum_of
+- maximum_over_flux_surface
+- minimum_over_flux_surface
+
+# === Calculus ===
+- derivative_of
+- radial_derivative_of

@@ -18,6 +18,7 @@
 - ohmic
 - electron_cyclotron_heating
 - ion_cyclotron_heating
+- ion_cyclotron_current_drive
 - lower_hybrid_current_drive
 - neutral_beam_injection
 - electron_cyclotron_current_drive
@@ -31,6 +32,15 @@
 # === Current drive mechanisms ===
 - induction
 - bootstrap
+- non_inductive
+
+# === Fueling ===
+- gas_injection
+- pellet_injection
+
+# === Fusion reactions ===
+- beam_beam_fusion
+- beam_thermal_fusion
 
 # === Other processes ===
 - resistive

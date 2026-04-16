@@ -51,6 +51,7 @@ def run_semantic_checks(entries: dict[str, StandardNameEntry]) -> list[str]:
         issues.extend(_check_extent_dimensionality(name, entry))
         issues.extend(_check_physical_base_with_object(name, entry))
         issues.extend(_check_dimensionless_physical_quantity(name, entry))
+        issues.extend(_check_none_unit_with_quantitative_kind(name, entry))
 
     return issues
 
@@ -321,5 +322,38 @@ def _check_dimensionless_physical_quantity(
             )
     except Exception:
         pass
+
+    return issues
+
+
+def _check_none_unit_with_quantitative_kind(
+    name: str, entry: StandardNameEntry
+) -> list[str]:
+    """Flag None unit on scalar/vector entries that should have units.
+
+    Rule: Scalar and vector entries represent physical quantities that should
+    have explicit units. ``unit=None`` is reserved for metadata entries
+    (identifiers, labels, enumerations). Scalar/vector entries with no unit
+    likely need either a specific SI unit or ``'1'`` for dimensionless quantities.
+    Severity: Warning
+    """
+    issues: list[str] = []
+
+    # Only metadata entries are exempt from unit requirement
+    if isinstance(entry, StandardNameMetadataEntry):
+        return issues
+
+    unit = getattr(entry, "unit", None)
+    if unit is not None:
+        return issues
+
+    kind = getattr(entry, "kind", None)
+    issues.append(
+        f"{name}: WARNING - {kind} entry has no unit (unit=None). "
+        "Scalar and vector entries should have explicit units. "
+        "Use a specific SI unit, or '1' for dimensionless quantities "
+        "(ratios, coefficients, counts). "
+        "Reserve unit=None for metadata entries only."
+    )
 
     return issues

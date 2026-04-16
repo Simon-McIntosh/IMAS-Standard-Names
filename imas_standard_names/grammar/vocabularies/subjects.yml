@@ -6,6 +6,7 @@
 #   - ion_density
 #   - deuterium_pressure
 
+# === Core plasma species ===
 - electron
 - ion
 - deuterium
@@ -15,3 +16,33 @@
 - fast_ion
 - neutral
 - runaway_electron
+
+# === Tier 1: Core fusion species ===
+- hydrogen
+- alpha_particle
+- helium_3
+- helium_4
+
+# === Tier 2: Impurity elements ===
+- carbon
+- nitrogen
+- neon
+- argon
+- boron
+- beryllium
+- tungsten
+- iron
+- lithium
+- oxygen
+
+# === Tier 3: Extended species ===
+- krypton
+- xenon
+- deuterium_tritium
+- deuterium_deuterium
+- tritium_tritium
+- hydrogenic
+- neutral_beam
+- fast_neutral
+- fast_electron
+- impurity_ion
