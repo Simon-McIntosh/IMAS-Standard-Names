@@ -164,35 +164,37 @@ class Kind(StrEnum):
     metadata = "metadata"
 
 
-class StandardNameEntryBase(BaseModel):
-    """Base catalog entry definition (fields common to scalar and vector kinds).
+class StandardNameBase(BaseModel):
+    """Core identity + governance fields valid without documentation.
 
-    Represents a complete standard name catalog entry with all metadata,
-    governance rules, and validation. This is a Pydantic discriminated union
-    configured via 'kind'. Subclasses define literal kind values.
+    This is the shared base for both full catalog entries (with description,
+    documentation, tags, etc.) and lightweight name-only entries used during
+    pipeline stages that generate names before descriptions exist. It defines
+    only the fields and validators that are meaningful in both modes:
+
+    - name, kind (set by subclass), status, physics_domain
+    - deprecation/supersession governance
+    - dd_paths provenance
+
+    Subclasses either add full-entry documentation fields (see
+    :class:`StandardNameEntryBase`) or remain minimal (name-only variants).
     """
 
     model_config = ConfigDict(extra="forbid")
 
-    # Core identification & description
+    # Core identification
     name: Name
-    description: Description
-    documentation: Documentation  # Required: valuable standalone content
     status: Status = Field(
         "draft",
         description=FIELD_DESCRIPTIONS["status"],
     )
 
-    # Governance / metadata
-    validity_domain: Domain = ""
-    constraints: Constraints = Field(default_factory=list)
+    # Governance
     deprecates: Name | str = ""
     superseded_by: Name | str = ""
     physics_domain: (
         PhysicsDomainField  # Physics domain classification (PhysicsDomain enum)
     )
-    tags: Tags = Field(default_factory=list)  # Secondary classification tags
-    links: Links = Field(default_factory=list)
     dd_paths: DdPaths = Field(default_factory=list)
 
     # Supplemental validator for double underscore rule not expressible in pattern.
@@ -218,7 +220,27 @@ class StandardNameEntryBase(BaseModel):
             raise ValueError(error_msg)
         return v
 
-    # Base validators (unit validators moved to scalar/vector subclasses)
+    @field_validator("physics_domain")
+    @classmethod
+    def validate_physics_domain(cls, v: str) -> str:  # type: ignore[override]
+        """Validate physics_domain is a valid PhysicsDomain enum value."""
+        if v not in PHYSICS_DOMAINS:
+            raise ValueError(
+                f"Invalid physics_domain: '{v}'. "
+                f"Valid domains: {', '.join(sorted(PHYSICS_DOMAINS)[:10])}... "
+                f"(see grammar/vocabularies/physics_domains.yml for complete list)"
+            )
+        return v
+
+    @model_validator(mode="after")
+    def _governance_rules(self):  # type: ignore[override]
+        if self.status == "deprecated" and not self.superseded_by:
+            raise ValueError(
+                "Deprecated entries must set superseded_by referencing an active name"
+            )
+        return self
+
+    # Base unit helpers (shared by scalar/vector subclasses, full and name-only).
     @staticmethod
     def _canonicalize_unit_order(v: str) -> str:
         """Auto-correct unit token order to canonical lexicographic form.
@@ -255,12 +277,9 @@ class StandardNameEntryBase(BaseModel):
             sym = m.group(1)
             exp = int(m.group(3) or 1)
             if exp == 0:
-                # Zero exponents are meaningless – reject to avoid silent drops.
                 raise ValueError(f"Zero exponent not allowed in unit token '{part}'")
             parsed.append((sym, exp))
 
-        # Lexicographic ordering of symbols defines canonical order.
-        # Auto-correct by returning the canonical form.
         canonical = ".".join(
             sym if exp == 1 else f"{sym}^{exp}"
             for sym, exp in sorted(parsed, key=lambda x: x[0])
@@ -269,27 +288,37 @@ class StandardNameEntryBase(BaseModel):
 
     @staticmethod
     def _validate_unit_with_pint(v: str) -> str:
-        """Validate unit semantics using pint (if available).
-
-        This runs after canonicalization to ensure the unit is dimensionally valid.
-        Syntactic canonicalization is performed without expanding symbols to their
-        long names (pint would expand 'm' -> 'meter', etc.), because we want
-        authors to write the concise symbols and we want to preserve those as
-        the canonical storage form.
-        """
-        # "1" is the canonical form for dimensionless quantities
+        """Validate unit semantics using pint (if available)."""
         if v == "1":
             return v
-
-        # Optional semantic validation via pint (best-effort). We allow tokens that
-        # pint can resolve individually; we do not reconstruct expansion names.
         if pint:
             try:
-                # Full parse ensures combined dimensional validity (e.g. catches typos).
                 pint.Unit(v)
             except Exception as e:  # pragma: no cover - defensive
                 raise ValueError(f"Invalid unit '{v}': {e}") from e
         return v
+
+
+class StandardNameEntryBase(StandardNameBase):
+    """Full catalog entry definition (fields common to scalar and vector kinds).
+
+    Extends :class:`StandardNameBase` with the documentation and metadata fields
+    required of a published standard name: description, documentation, validity
+    domain, constraints, tags, links. This remains the class used for the full
+    catalog (serialization, JSON schema, rendering).
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    # Documentation & description
+    description: Description
+    documentation: Documentation  # Required: valuable standalone content
+
+    # Governance / metadata (documentation-adjacent)
+    validity_domain: Domain = ""
+    constraints: Constraints = Field(default_factory=list)
+    tags: Tags = Field(default_factory=list)  # Secondary classification tags
+    links: Links = Field(default_factory=list)
 
     @field_validator("tags", "constraints")
     @classmethod
@@ -341,18 +370,6 @@ class StandardNameEntryBase(BaseModel):
                 )
 
         return result
-
-    @field_validator("physics_domain")
-    @classmethod
-    def validate_physics_domain(cls, v: str) -> str:  # type: ignore[override]
-        """Validate physics_domain is a valid PhysicsDomain enum value."""
-        if v not in PHYSICS_DOMAINS:
-            raise ValueError(
-                f"Invalid physics_domain: '{v}'. "
-                f"Valid domains: {', '.join(sorted(PHYSICS_DOMAINS)[:10])}... "
-                f"(see grammar/vocabularies/physics_domains.yml for complete list)"
-            )
-        return v
 
     @field_validator("tags")
     @classmethod
@@ -451,11 +468,8 @@ class StandardNameEntryBase(BaseModel):
         return v
 
     @model_validator(mode="after")
-    def _governance_rules(self):  # type: ignore[override]
-        if self.status == "deprecated" and not self.superseded_by:
-            raise ValueError(
-                "Deprecated entries must set superseded_by referencing an active name"
-            )
+    def _entry_governance_rules(self):  # type: ignore[override]
+        # Base class already runs deprecated/superseded_by check; kept for future doc-level rules.
         return self
 
     @property
@@ -611,6 +625,66 @@ StandardNameEntry = Annotated[
 _STANDARD_NAME_ENTRY_ADAPTER = TypeAdapter(StandardNameEntry)
 
 
+# ---------------------------------------------------------------------------
+# Name-only entry classes
+# ---------------------------------------------------------------------------
+# Support partial validation during LLM-driven generation where only the
+# identity+unit portion of a standard name has been composed and the
+# description/documentation are filled in by a later enrichment pass.
+# These classes inherit governance + grammar + unit validation from
+# ``StandardNameBase`` but deliberately omit the documentation fields.
+
+
+class StandardNameScalarNameOnly(StandardNameBase):
+    """Scalar standard name — name + unit only (no documentation)."""
+
+    kind: Literal["scalar"] = "scalar"
+    unit: Unit  # Required for scalar (use "1" for dimensionless)
+
+    @field_validator("unit", mode="before")
+    @classmethod
+    def canonicalize_unit_order(cls, v: str) -> str:
+        return cls._canonicalize_unit_order(v)
+
+    @field_validator("unit")
+    @classmethod
+    def validate_unit_with_pint(cls, v: str) -> str:
+        return cls._validate_unit_with_pint(v)
+
+
+class StandardNameVectorNameOnly(StandardNameBase):
+    """Vector standard name — name + unit only (no documentation)."""
+
+    kind: Literal["vector"] = "vector"
+    unit: Unit  # Required for vector (use "1" for dimensionless)
+
+    @field_validator("unit", mode="before")
+    @classmethod
+    def canonicalize_unit_order(cls, v: str) -> str:
+        return cls._canonicalize_unit_order(v)
+
+    @field_validator("unit")
+    @classmethod
+    def validate_unit_with_pint(cls, v: str) -> str:
+        return cls._validate_unit_with_pint(v)
+
+
+class StandardNameMetadataNameOnly(StandardNameBase):
+    """Metadata standard name — name only (no unit, no documentation)."""
+
+    kind: Literal["metadata"] = "metadata"
+
+
+StandardNameNameOnly = Annotated[
+    StandardNameScalarNameOnly
+    | StandardNameVectorNameOnly
+    | StandardNameMetadataNameOnly,
+    Field(discriminator="kind"),
+]
+
+_NAME_ONLY_ADAPTER = TypeAdapter(StandardNameNameOnly)
+
+
 def _build_standard_name_models() -> dict[str, type[StandardNameEntry]]:
     """Build mapping of kind string to model class from StandardNameEntry union.
 
@@ -632,8 +706,20 @@ def _build_standard_name_models() -> dict[str, type[StandardNameEntry]]:
 STANDARD_NAME_MODELS = _build_standard_name_models()
 
 
-def create_standard_name_entry(data: dict) -> StandardNameEntry:
-    """Validate data into a StandardNameEntry union instance via discriminator."""
+def create_standard_name_entry(
+    data: dict, *, name_only: bool = False
+) -> StandardNameEntry | StandardNameNameOnly:
+    """Validate data into a StandardName entry instance.
+
+    Args:
+        data: Entry dictionary. Must include ``kind`` for discrimination.
+        name_only: When ``True``, validate against the lightweight name-only
+            union (identity + unit) that omits description/documentation/tags.
+            Use this during early LLM generation passes. Defaults to ``False``
+            for full catalog-entry validation.
+    """
+    if name_only:
+        return _NAME_ONLY_ADAPTER.validate_python(data)
     return _STANDARD_NAME_ENTRY_ADAPTER.validate_python(data)
 
 
@@ -658,10 +744,15 @@ __all__ = [
     "Status",
     "OperatorProvenance",
     "ExpressionProvenance",
+    "StandardNameBase",
     "StandardNameEntryBase",
     "StandardNameScalarEntry",
     "StandardNameVectorEntry",
     "StandardNameMetadataEntry",
+    "StandardNameScalarNameOnly",
+    "StandardNameVectorNameOnly",
+    "StandardNameMetadataNameOnly",
+    "StandardNameNameOnly",
     "Name",
     "StandardNameEntry",
     "STANDARD_NAME_MODELS",

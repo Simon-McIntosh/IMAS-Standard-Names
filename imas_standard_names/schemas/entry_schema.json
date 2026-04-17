@@ -115,17 +115,6 @@
           "title": "Name",
           "type": "string"
         },
-        "description": {
-          "description": "One concise sentence summarizing the physical quantity. Keep under 120 characters for readability. Should be self-contained and understandable without external context.",
-          "maxLength": 180,
-          "title": "Description",
-          "type": "string"
-        },
-        "documentation": {
-          "description": "Authoritative, self-contained documentation providing clear, comprehensive explanation of the physical quantity. This field must be fully standalone - a domain expert should understand the quantity completely without consulting external sources.",
-          "title": "Documentation",
-          "type": "string"
-        },
         "status": {
           "default": "draft",
           "description": "Lifecycle state: draft | active | deprecated | superseded.",
@@ -137,38 +126,6 @@
           ],
           "title": "Status",
           "type": "string"
-        },
-        "validity_domain": {
-          "default": "",
-          "description": "Controlled vocabulary region of validity",
-          "examples": [
-            "core_plasma",
-            "edge_plasma",
-            "vacuum",
-            "whole_plasma"
-          ],
-          "title": "Validity Domain",
-          "type": "string"
-        },
-        "constraints": {
-          "description": "Physical or mathematical constraints that must be satisfied (e.g. 'T_e > 0', 'kappa >= 1')",
-          "examples": [
-            [
-              "T_e > 0"
-            ],
-            [
-              "n_e >= 0",
-              "n_e < 1e22 m^-3"
-            ],
-            [
-              "kappa >= 1"
-            ]
-          ],
-          "items": {
-            "type": "string"
-          },
-          "title": "Constraints",
-          "type": "array"
         },
         "deprecates": {
           "anyOf": [
@@ -213,6 +170,57 @@
           "title": "Physics Domain",
           "type": "string"
         },
+        "dd_paths": {
+          "description": "IMAS Data Dictionary paths that map to this standard name. Used to track provenance from IMAS DD and enable cross-referencing between standard names and DD structure.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Dd Paths",
+          "type": "array"
+        },
+        "description": {
+          "description": "One concise sentence summarizing the physical quantity. Keep under 120 characters for readability. Should be self-contained and understandable without external context.",
+          "maxLength": 180,
+          "title": "Description",
+          "type": "string"
+        },
+        "documentation": {
+          "description": "Authoritative, self-contained documentation providing clear, comprehensive explanation of the physical quantity. This field must be fully standalone - a domain expert should understand the quantity completely without consulting external sources.",
+          "title": "Documentation",
+          "type": "string"
+        },
+        "validity_domain": {
+          "default": "",
+          "description": "Controlled vocabulary region of validity",
+          "examples": [
+            "core_plasma",
+            "edge_plasma",
+            "vacuum",
+            "whole_plasma"
+          ],
+          "title": "Validity Domain",
+          "type": "string"
+        },
+        "constraints": {
+          "description": "Physical or mathematical constraints that must be satisfied (e.g. 'T_e > 0', 'kappa >= 1')",
+          "examples": [
+            [
+              "T_e > 0"
+            ],
+            [
+              "n_e >= 0",
+              "n_e < 1e22 m^-3"
+            ],
+            [
+              "kappa >= 1"
+            ]
+          ],
+          "items": {
+            "type": "string"
+          },
+          "title": "Constraints",
+          "type": "array"
+        },
         "tags": {
           "description": "Secondary classification tags from controlled vocabulary for cross-cutting classification.",
           "items": {
@@ -229,14 +237,6 @@
           "title": "Links",
           "type": "array"
         },
-        "dd_paths": {
-          "description": "IMAS Data Dictionary paths that map to this standard name. Used to track provenance from IMAS DD and enable cross-referencing between standard names and DD structure.",
-          "items": {
-            "type": "string"
-          },
-          "title": "Dd Paths",
-          "type": "array"
-        },
         "kind": {
           "const": "metadata",
           "default": "metadata",
@@ -246,9 +246,9 @@
       },
       "required": [
         "name",
+        "physics_domain",
         "description",
-        "documentation",
-        "physics_domain"
+        "documentation"
       ],
       "title": "StandardNameMetadataEntry",
       "type": "object"
@@ -268,17 +268,6 @@
           "title": "Name",
           "type": "string"
         },
-        "description": {
-          "description": "One concise sentence summarizing the physical quantity. Keep under 120 characters for readability. Should be self-contained and understandable without external context.",
-          "maxLength": 180,
-          "title": "Description",
-          "type": "string"
-        },
-        "documentation": {
-          "description": "Authoritative, self-contained documentation providing clear, comprehensive explanation of the physical quantity. This field must be fully standalone - a domain expert should understand the quantity completely without consulting external sources.",
-          "title": "Documentation",
-          "type": "string"
-        },
         "status": {
           "default": "draft",
           "description": "Lifecycle state: draft | active | deprecated | superseded.",
@@ -290,38 +279,6 @@
           ],
           "title": "Status",
           "type": "string"
-        },
-        "validity_domain": {
-          "default": "",
-          "description": "Controlled vocabulary region of validity",
-          "examples": [
-            "core_plasma",
-            "edge_plasma",
-            "vacuum",
-            "whole_plasma"
-          ],
-          "title": "Validity Domain",
-          "type": "string"
-        },
-        "constraints": {
-          "description": "Physical or mathematical constraints that must be satisfied (e.g. 'T_e > 0', 'kappa >= 1')",
-          "examples": [
-            [
-              "T_e > 0"
-            ],
-            [
-              "n_e >= 0",
-              "n_e < 1e22 m^-3"
-            ],
-            [
-              "kappa >= 1"
-            ]
-          ],
-          "items": {
-            "type": "string"
-          },
-          "title": "Constraints",
-          "type": "array"
         },
         "deprecates": {
           "anyOf": [
@@ -366,6 +323,57 @@
           "title": "Physics Domain",
           "type": "string"
         },
+        "dd_paths": {
+          "description": "IMAS Data Dictionary paths that map to this standard name. Used to track provenance from IMAS DD and enable cross-referencing between standard names and DD structure.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Dd Paths",
+          "type": "array"
+        },
+        "description": {
+          "description": "One concise sentence summarizing the physical quantity. Keep under 120 characters for readability. Should be self-contained and understandable without external context.",
+          "maxLength": 180,
+          "title": "Description",
+          "type": "string"
+        },
+        "documentation": {
+          "description": "Authoritative, self-contained documentation providing clear, comprehensive explanation of the physical quantity. This field must be fully standalone - a domain expert should understand the quantity completely without consulting external sources.",
+          "title": "Documentation",
+          "type": "string"
+        },
+        "validity_domain": {
+          "default": "",
+          "description": "Controlled vocabulary region of validity",
+          "examples": [
+            "core_plasma",
+            "edge_plasma",
+            "vacuum",
+            "whole_plasma"
+          ],
+          "title": "Validity Domain",
+          "type": "string"
+        },
+        "constraints": {
+          "description": "Physical or mathematical constraints that must be satisfied (e.g. 'T_e > 0', 'kappa >= 1')",
+          "examples": [
+            [
+              "T_e > 0"
+            ],
+            [
+              "n_e >= 0",
+              "n_e < 1e22 m^-3"
+            ],
+            [
+              "kappa >= 1"
+            ]
+          ],
+          "items": {
+            "type": "string"
+          },
+          "title": "Constraints",
+          "type": "array"
+        },
         "tags": {
           "description": "Secondary classification tags from controlled vocabulary for cross-cutting classification.",
           "items": {
@@ -380,14 +388,6 @@
             "type": "string"
           },
           "title": "Links",
-          "type": "array"
-        },
-        "dd_paths": {
-          "description": "IMAS Data Dictionary paths that map to this standard name. Used to track provenance from IMAS DD and enable cross-referencing between standard names and DD structure.",
-          "items": {
-            "type": "string"
-          },
-          "title": "Dd Paths",
           "type": "array"
         },
         "kind": {
@@ -443,9 +443,9 @@
       },
       "required": [
         "name",
+        "physics_domain",
         "description",
         "documentation",
-        "physics_domain",
         "unit"
       ],
       "title": "StandardNameScalarEntry",
@@ -466,17 +466,6 @@
           "title": "Name",
           "type": "string"
         },
-        "description": {
-          "description": "One concise sentence summarizing the physical quantity. Keep under 120 characters for readability. Should be self-contained and understandable without external context.",
-          "maxLength": 180,
-          "title": "Description",
-          "type": "string"
-        },
-        "documentation": {
-          "description": "Authoritative, self-contained documentation providing clear, comprehensive explanation of the physical quantity. This field must be fully standalone - a domain expert should understand the quantity completely without consulting external sources.",
-          "title": "Documentation",
-          "type": "string"
-        },
         "status": {
           "default": "draft",
           "description": "Lifecycle state: draft | active | deprecated | superseded.",
@@ -488,38 +477,6 @@
           ],
           "title": "Status",
           "type": "string"
-        },
-        "validity_domain": {
-          "default": "",
-          "description": "Controlled vocabulary region of validity",
-          "examples": [
-            "core_plasma",
-            "edge_plasma",
-            "vacuum",
-            "whole_plasma"
-          ],
-          "title": "Validity Domain",
-          "type": "string"
-        },
-        "constraints": {
-          "description": "Physical or mathematical constraints that must be satisfied (e.g. 'T_e > 0', 'kappa >= 1')",
-          "examples": [
-            [
-              "T_e > 0"
-            ],
-            [
-              "n_e >= 0",
-              "n_e < 1e22 m^-3"
-            ],
-            [
-              "kappa >= 1"
-            ]
-          ],
-          "items": {
-            "type": "string"
-          },
-          "title": "Constraints",
-          "type": "array"
         },
         "deprecates": {
           "anyOf": [
@@ -564,6 +521,57 @@
           "title": "Physics Domain",
           "type": "string"
         },
+        "dd_paths": {
+          "description": "IMAS Data Dictionary paths that map to this standard name. Used to track provenance from IMAS DD and enable cross-referencing between standard names and DD structure.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Dd Paths",
+          "type": "array"
+        },
+        "description": {
+          "description": "One concise sentence summarizing the physical quantity. Keep under 120 characters for readability. Should be self-contained and understandable without external context.",
+          "maxLength": 180,
+          "title": "Description",
+          "type": "string"
+        },
+        "documentation": {
+          "description": "Authoritative, self-contained documentation providing clear, comprehensive explanation of the physical quantity. This field must be fully standalone - a domain expert should understand the quantity completely without consulting external sources.",
+          "title": "Documentation",
+          "type": "string"
+        },
+        "validity_domain": {
+          "default": "",
+          "description": "Controlled vocabulary region of validity",
+          "examples": [
+            "core_plasma",
+            "edge_plasma",
+            "vacuum",
+            "whole_plasma"
+          ],
+          "title": "Validity Domain",
+          "type": "string"
+        },
+        "constraints": {
+          "description": "Physical or mathematical constraints that must be satisfied (e.g. 'T_e > 0', 'kappa >= 1')",
+          "examples": [
+            [
+              "T_e > 0"
+            ],
+            [
+              "n_e >= 0",
+              "n_e < 1e22 m^-3"
+            ],
+            [
+              "kappa >= 1"
+            ]
+          ],
+          "items": {
+            "type": "string"
+          },
+          "title": "Constraints",
+          "type": "array"
+        },
         "tags": {
           "description": "Secondary classification tags from controlled vocabulary for cross-cutting classification.",
           "items": {
@@ -578,14 +586,6 @@
             "type": "string"
           },
           "title": "Links",
-          "type": "array"
-        },
-        "dd_paths": {
-          "description": "IMAS Data Dictionary paths that map to this standard name. Used to track provenance from IMAS DD and enable cross-referencing between standard names and DD structure.",
-          "items": {
-            "type": "string"
-          },
-          "title": "Dd Paths",
           "type": "array"
         },
         "kind": {
@@ -641,9 +641,9 @@
       },
       "required": [
         "name",
+        "physics_domain",
         "description",
         "documentation",
-        "physics_domain",
         "unit"
       ],
       "title": "StandardNameVectorEntry",
