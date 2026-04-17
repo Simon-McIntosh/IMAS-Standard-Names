@@ -19,6 +19,8 @@
 - first_point_of_interferometer_beam
 - first_wall
 - flux_surface
+- halo_region
+- halo_boundary
 - inner_divertor_target
 - inner_midplane
 - last_closed_flux_surface
@@ -36,6 +38,7 @@
 - reference_major_radius
 - reference_position
 - scrape_off_layer
+- secondary_separatrix
 - second_point_of_interferometer_beam
 - spectral_line
 - third_point_of_interferometer_beam

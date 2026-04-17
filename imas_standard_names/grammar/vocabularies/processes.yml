@@ -25,6 +25,7 @@
 
 # === Atomic processes ===
 - radiation
+- impurity_radiation
 - recombination
 - ionization
 - charge_exchange

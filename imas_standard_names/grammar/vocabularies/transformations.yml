@@ -29,3 +29,12 @@
 # === Calculus ===
 - derivative_of
 - radial_derivative_of
+
+# === Complex-valued decomposition ===
+# Use as outermost prefix on complex-valued field quantities, e.g.
+#   real_part_of_parallel_component_of_wave_electric_field
+#   imaginary_part_of_parallel_component_of_wave_electric_field
+- real_part_of
+- imaginary_part_of
+- magnitude_of
+- phase_of
