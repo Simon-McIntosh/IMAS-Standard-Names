@@ -15,6 +15,7 @@ pre-commit hooks won't find formatting issues in generated code.
 from __future__ import annotations
 
 import subprocess
+import sys
 from collections.abc import Mapping
 from pathlib import Path
 from textwrap import dedent, indent
@@ -71,7 +72,22 @@ ENUM_NAME_OVERRIDES = {
 }
 
 
-def main(format_code: bool = True) -> None:
+def main(format_code: bool = True, check: bool | None = None) -> None:
+    """Regenerate grammar code from YAML specs.
+
+    Args:
+        format_code: Run ruff on regenerated files when True.
+        check: When True, verify committed generated files match spec without
+            writing. Exits with code 1 if drift is detected. When None, falls
+            back to the ``--check`` command-line flag.
+    """
+    if check is None:
+        check = "--check" in sys.argv[1:]
+
+    if check:
+        _run_check_mode()
+        return
+
     # Generate grammar types and constants
     spec = GrammarSpec.load()
 
@@ -229,6 +245,72 @@ def main(format_code: bool = True) -> None:
                 print(f"  {result.stdout.strip()}")
 
             print("✓ All generated files formatted successfully")
+
+
+def _run_check_mode() -> None:
+    """Verify committed generated files match freshly-rendered spec output.
+
+    Exits with status 1 on drift. Used by CI to block commits that change
+    YAML vocabularies without regenerating model_types.py / constants.py
+    / tag_types.py / field_schemas.py.
+    """
+    spec = GrammarSpec.load()
+    tag_spec = TagSpec.load()
+    physics_domain_spec = PhysicsDomainSpec.load()
+    entry_schema_spec = EntrySchemaSpec.load()
+
+    expected = {
+        OUTPUT_MODULE: render_types_module(spec),
+        CONSTANTS_OUTPUT_MODULE: render_constants_module(spec),
+        TAG_OUTPUT_MODULE: render_tag_module(tag_spec, physics_domain_spec),
+        FIELD_SCHEMAS_OUTPUT_MODULE: render_field_schemas_module(entry_schema_spec),
+    }
+
+    project_root = OUTPUT_MODULE.parent.parent.parent
+
+    def _ruff_process(content: str, canonical_path: Path) -> str:
+        """Run the same ruff pipeline as main(), preserving the canonical file
+        path so per-file-ignores in pyproject.toml match."""
+        text = content
+        for args in (
+            ["ruff", "check", "--fix", "--stdin-filename", str(canonical_path), "-"],
+            ["ruff", "format", "--stdin-filename", str(canonical_path), "-"],
+        ):
+            try:
+                result = subprocess.run(
+                    args,
+                    input=text,
+                    capture_output=True,
+                    text=True,
+                    cwd=project_root,
+                    check=False,
+                )
+            except FileNotFoundError:
+                result = subprocess.run(
+                    ["uv", "run", *args],
+                    input=text,
+                    capture_output=True,
+                    text=True,
+                    cwd=project_root,
+                    check=False,
+                )
+            if result.stdout:
+                text = result.stdout
+        return text
+
+    drift: list[str] = []
+    for target, content in expected.items():
+        processed = _ruff_process(content, target)
+        actual = target.read_text(encoding="utf-8") if target.exists() else ""
+        if actual != processed:
+            drift.append(str(target))
+
+    if drift:
+        print("✗ Generated files drift from YAML spec. Run `uv run build-grammar`:")
+        for p in drift:
+            print(f"  - {p}")
+        sys.exit(1)
+    print("✓ Generated files in sync with grammar specification.")
 
 
 def render_types_module(spec: Any) -> str:

@@ -44,6 +44,9 @@ jobs:
       - name: Ruff lint check
         run: uv run ruff check .
 
+      - name: Grammar codegen drift check
+        run: uv run build-grammar --check
+
       - name: Test and coverage
         run: |
           if [[ "${{ matrix.python-version }}" == "${{ env.BASE_PYTHON_VERSION }}" ]]; then
