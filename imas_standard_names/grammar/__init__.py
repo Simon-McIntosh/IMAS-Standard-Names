@@ -20,7 +20,14 @@ from .model_types import (
     Subject,
     Transformation,
 )
-from .support import TOKEN_PATTERN, coerce_enum, enum_values, value_of
+from .support import (
+    TOKEN_PATTERN,
+    coerce_enum,
+    enum_values,
+    normalize_standard_name,
+    validate_forbidden_patterns,
+    value_of,
+)
 
 try:
     from .context import get_grammar_context
@@ -43,6 +50,8 @@ __all__ = [
     "compose_name",
     "parse_name",
     "get_grammar_context",
+    "normalize_standard_name",
+    "validate_forbidden_patterns",
     "value_of",
     "enum_values",
     "coerce_enum",

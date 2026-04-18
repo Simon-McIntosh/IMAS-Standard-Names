@@ -213,10 +213,11 @@ class StandardName(BaseModel):
             - poloidal_magnetic_field_probe_voltage (device qualifier)
             - area_of_flux_loop (object qualifier)
             - pressure_at_magnetic_axis (position qualifier)
+            - power_due_to_viscous_heat_flux (process qualifier)
         """
         if self.physical_base and self.physical_base in GENERIC_PHYSICAL_BASES:
             # Check if ANY qualifying segment is present
-            # Transformations and binary operators also qualify generic bases
+            # Transformations, binary operators, and processes also qualify generic bases
             has_qualification = any(
                 [
                     self.subject,
@@ -225,6 +226,7 @@ class StandardName(BaseModel):
                     self.position,
                     self.geometry,
                     self.region,
+                    self.process,
                     self.transformation,
                     self.decomposition,
                     self.binary_operator,

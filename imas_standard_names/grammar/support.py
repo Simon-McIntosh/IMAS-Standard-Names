@@ -52,6 +52,39 @@ _PREFIX_EXCLUSIVE_PAIRS: tuple[tuple[str, str], ...] = tuple(
 )
 
 
+# ---------------------------------------------------------------------------
+# Synonym rewrites: applied to raw name before parsing to canonicalize
+# near-duplicate forms. Keys are literal substrings; values are replacements.
+# Order matters: longer patterns are tried first.
+# ---------------------------------------------------------------------------
+
+SYNONYM_REWRITES: tuple[tuple[str, str], ...] = (
+    # Longest patterns first
+    ("_per_toroidal_mode_number", "_per_toroidal_mode"),
+    ("_field_probe", "_magnetic_field_probe"),
+    # Note: `over_` → `per_` is intentionally NOT a global rewrite because
+    # `over_` appears in valid transformation tokens (maximum_over_flux_surface,
+    # minimum_over_flux_surface) and decomposition tokens (m_over_n_equals_*).
+    # Use validate_forbidden_patterns() to flag misuse case-by-case.
+)
+
+
+# ---------------------------------------------------------------------------
+# Forbidden suffix patterns: names matching these raise ValidationError
+# with a clear message directing the user to the canonical form.
+# Each entry is (pattern, message, exclusion_substrings). The pattern is
+# only flagged if NONE of the exclusion_substrings appear in the name.
+# ---------------------------------------------------------------------------
+
+FORBIDDEN_SUFFIX_PATTERNS: tuple[tuple[str, str, tuple[str, ...]], ...] = (
+    (
+        "_per_toroidal_mode_number",
+        "Use '_per_toroidal_mode' instead of '_per_toroidal_mode_number'.",
+        (),
+    ),
+)
+
+
 def _is_prefix_exclusive_with(segment: str, prefix_matched: set[str]) -> bool:
     """Check if segment is exclusive with any already-matched prefix segment."""
     for left, right in _PREFIX_EXCLUSIVE_PAIRS:
@@ -68,6 +101,47 @@ def value_of(value: Any) -> str:
     Accepts StrEnum members or plain strings; falls back to ``str(value)``.
     """
     return value.value if hasattr(value, "value") else str(value)
+
+
+def normalize_standard_name(name: str) -> str:
+    """Apply synonym rewrites to canonicalize a standard name.
+
+    Rewrites known non-canonical forms to their canonical equivalents
+    before parsing. For example, ``_per_toroidal_mode_number`` becomes
+    ``_per_toroidal_mode``.
+
+    Args:
+        name: Raw standard name string.
+
+    Returns:
+        Canonicalized name with all synonym rewrites applied.
+    """
+    result = name
+    for pattern, replacement in SYNONYM_REWRITES:
+        result = result.replace(pattern, replacement)
+    return result
+
+
+def validate_forbidden_patterns(name: str) -> None:
+    """Check a standard name for forbidden suffix patterns.
+
+    Raises ValueError with a clear message directing the user to the
+    canonical form if a forbidden pattern is detected.
+
+    Args:
+        name: Standard name string to validate.
+
+    Raises:
+        ValueError: If name contains a forbidden pattern.
+    """
+    for pattern, message, exclusions in FORBIDDEN_SUFFIX_PATTERNS:
+        if pattern in name:
+            # Skip if any exclusion substring is present (avoids false positives)
+            if exclusions and any(excl in name for excl in exclusions):
+                continue
+            raise ValueError(
+                f"Forbidden pattern '{pattern}' in name '{name}'. {message}"
+            )
 
 
 def enum_values[E](enum_cls: type[E]) -> list[str]:
@@ -255,12 +329,14 @@ def compose_standard_name(parts: Mapping[str, Any]) -> str:
 def parse_standard_name(name: str) -> dict[str, str]:
     """Parse a standard name into a dict of parts.
 
-    Returns a dict with keys matching segment identifiers.
+    Applies synonym rewrites to canonicalize near-duplicate forms before
+    parsing. Returns a dict with keys matching segment identifiers.
     """
     if not TOKEN_PATTERN.fullmatch(name):
         raise ValueError("Invalid token characters in name")
 
-    remaining = name
+    # Apply synonym rewrites for canonical forms
+    remaining = normalize_standard_name(name)
     values: dict[str, str] = {}
 
     for segment in SUFFIX_SEGMENTS_REVERSED:

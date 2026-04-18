@@ -65,3 +65,7 @@
 - heat_viscosity               # gyroviscous (heat) stress
 - j_cross_b_force              # J×B electromagnetic body force
 - poloidal_current             # poloidal current generation
+
+# === D.5 review §5 additions ===
+- viscous_heat_flux            # viscous contribution to heat flux
+- inertial                     # inertial (momentum) contribution

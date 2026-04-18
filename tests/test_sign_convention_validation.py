@@ -49,7 +49,7 @@ def test_invalid_lowercase_sign_convention():
 
 def test_invalid_missing_positive():
     """Test that missing 'Positive' keyword is rejected."""
-    with pytest.raises(ValueError, match="Positive when"):
+    with pytest.raises(ValueError, match="Positive"):
         StandardNameScalarEntry(
             name="test_current",
             description="Test current quantity.",
@@ -125,6 +125,30 @@ def test_sign_convention_at_end_with_blank_before():
         name="test_current",
         description="Test current quantity.",
         documentation="First paragraph explaining the quantity.\n\nSign convention: Positive when current flows counter-clockwise.",
+        unit="A",
+        physics_domain="general",
+    )
+    assert entry.name == "test_current"
+
+
+def test_sign_convention_positive_for_format():
+    """Test that 'Positive for <subject>' format is accepted."""
+    entry = StandardNameScalarEntry(
+        name="test_current",
+        description="Test current quantity.",
+        documentation="Describes the plasma current.\n\nSign convention: Positive for counter-clockwise toroidal current.",
+        unit="A",
+        physics_domain="general",
+    )
+    assert entry.name == "test_current"
+
+
+def test_sign_convention_positive_quantity_format():
+    """Test that 'Positive <quantity-noun-phrase>' format is accepted."""
+    entry = StandardNameScalarEntry(
+        name="test_current",
+        description="Test current quantity.",
+        documentation="Describes the plasma current.\n\nSign convention: Positive outward radial direction.",
         unit="A",
         physics_domain="general",
     )

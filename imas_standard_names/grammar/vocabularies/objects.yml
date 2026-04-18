@@ -58,3 +58,10 @@
 - passive_structure                      # passive conducting structure (vessel, support)
 - x_point                               # magnetic null point (X-point)
 - secondary_separatrix_x_point          # X-point on the secondary separatrix
+
+# === D.5 review §5 additions ===
+- magnetic_field_probe                   # generic magnetic field probe (no directional prefix)
+- mse                                    # motional Stark effect diagnostic
+- iron_core_segment                      # iron core transformer segment
+- pickup_coil                            # pickup coil sensor
+- plasma_filament                        # plasma filament structure

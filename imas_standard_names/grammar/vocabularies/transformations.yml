@@ -47,3 +47,8 @@
 - cumulative_inside_flux_surface          # cumulative integral evaluated inside a flux surface
 # Variation
 - variation_of                            # variation or perturbation of a quantity
+
+# === D.5 review §5 additions ===
+- per_toroidal_mode                       # canonical per-mode form (preferred over per_toroidal_mode_number)
+- cumulative                              # standalone cumulative integral or sum
+- amplitude_of                            # amplitude (peak value) of a quantity

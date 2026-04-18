@@ -393,7 +393,10 @@ class StandardNameEntryBase(StandardNameBase):
 
         Enforces consistent formatting:
         - Must use 'Sign convention:' (not '**Sign convention:**' or variations)
-        - Must start sentence with 'Positive when' or 'Positive [quantity]'
+        - Must start with 'Positive' followed by a qualifier:
+          - 'Sign convention: Positive when <condition>.'
+          - 'Sign convention: Positive <quantity-noun-phrase>.'
+          - 'Sign convention: Positive for <subject>.'
         - Must follow the main documentation content (cannot be at start)
         - Must be a standalone paragraph (blank line before and after)
         """
@@ -422,14 +425,16 @@ class StandardNameEntryBase(StandardNameBase):
                 )
 
             # Check for exact format: "Sign convention:" (title case with colon)
-            # Must be followed by "Positive when" or "Positive [quantity]"
+            # Must be followed by "Positive" and then a qualifier word
             correct_format = re.search(r"Sign convention:\s+Positive\s+", v)
 
             if not correct_format:
                 # Missing "Positive" keyword
                 raise ValueError(
-                    "Sign convention must start with 'Positive when' or 'Positive [quantity]': "
-                    "'Sign convention: Positive when [condition].'"
+                    "Sign convention must use 'Sign convention: Positive ...' format. "
+                    "Accepted forms: 'Positive when <condition>.', "
+                    "'Positive <quantity-noun-phrase>.', "
+                    "'Positive for <subject>.'."
                 )
 
             # Check for standalone paragraph (must have \n\n before and after)

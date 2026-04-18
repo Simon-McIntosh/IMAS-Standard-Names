@@ -61,3 +61,7 @@
 - plasma_boundary_gap_reference_point    # reference point for plasma-wall gap measurement
 - x_point                               # magnetic null point (X-point) in poloidal plane
 - outline_point                          # point on the boundary outline contour
+
+# === D.5 review §5 additions ===
+- tearing_mode_center                    # center of a tearing mode island (generic, any mode)
+- normalized_poloidal_flux               # normalized poloidal flux coordinate surface

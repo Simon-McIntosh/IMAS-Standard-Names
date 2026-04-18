@@ -16,6 +16,7 @@
 - fast_ion
 - neutral
 - runaway_electron
+- pfirsch_schlueter
 
 # === Tier 1: Core fusion species ===
 - hydrogen
