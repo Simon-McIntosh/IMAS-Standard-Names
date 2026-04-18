@@ -38,3 +38,12 @@
 - imaginary_part_of
 - magnitude_of
 - phase_of
+
+# === D.3 review §5 additions ===
+# Mode-number decomposition markers (interim; pending ADR-3 Fourier decomposition)
+- per_toroidal_mode_number                # per-mode quantity indexed by toroidal mode number n
+- per_toroidal_and_poloidal_mode_number   # per-mode quantity indexed by both n and m
+# Spatial accumulation
+- cumulative_inside_flux_surface          # cumulative integral evaluated inside a flux surface
+# Variation
+- variation_of                            # variation or perturbation of a quantity

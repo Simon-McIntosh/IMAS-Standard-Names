@@ -54,6 +54,13 @@ class TestDiamagneticAmbiguity:
     not a spatial projection axis. Any use of `diamagnetic` must appear in
     the physical_base (e.g. `diamagnetic_drift_velocity`,
     `diamagnetic_flux`), never as a `<axis>_component_of_<base>` component.
+
+    Note: The D.3 senior review (2026-04) ruled that `diamagnetic` should be
+    restored to Component. This is deferred because the `coordinate` segment
+    shares the Component vocabulary (bare prefix match), causing
+    `diamagnetic_` to match as a coordinate on names like
+    `electron_diamagnetic_drift_velocity`. A parser refactoring to separate
+    component/coordinate vocabularies is required first.
     """
 
     def test_radial_component_of_diamagnetic_velocity(self):

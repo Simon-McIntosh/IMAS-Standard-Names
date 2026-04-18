@@ -52,3 +52,16 @@
 - passive_structure
 - disruption
 - halo
+
+# === D.3 review §5 additions ===
+- neoclassical_tearing_mode   # neoclassical tearing mode (NTM) instability; replaces `ntm_`
+- ohmic_dissipation            # ohmic (resistive Joule) dissipation
+- resistive_diffusion          # resistive magnetic field diffusion
+- resistive_flux_consumption   # resistive consumption of magnetic flux
+- non_inductive_drive          # aggregate non-inductive current drive
+- wave_driven                  # wave-driven heating or current drive
+- parallel_viscosity           # parallel viscous stress or dissipation
+- perpendicular_viscosity      # perpendicular viscous stress or dissipation
+- heat_viscosity               # gyroviscous (heat) stress
+- j_cross_b_force              # J×B electromagnetic body force
+- poloidal_current             # poloidal current generation

@@ -47,3 +47,14 @@
 - toroidal_magnetic_field_probe
 - trim_coil
 - visible_camera
+
+# === D.3 review §5 additions ===
+- neoclassical_tearing_mode              # NTM island as a physical object (e.g. width_of_neoclassical_tearing_mode)
+- electron_cyclotron_beam                # EC heating/current drive beam; replaces abbreviated `ec_` forms
+- electron_cyclotron_launcher            # electron cyclotron wave launcher; replaces `ec_launcher`
+- electron_cyclotron_launcher_mirror     # steering mirror of an EC launcher
+- fiber_optic_current_sensor             # fiber-optic current sensor (FOCS) diagnostic
+- passive_loop                           # passive conducting loop in vessel structure
+- passive_structure                      # passive conducting structure (vessel, support)
+- x_point                               # magnetic null point (X-point)
+- secondary_separatrix_x_point          # X-point on the secondary separatrix

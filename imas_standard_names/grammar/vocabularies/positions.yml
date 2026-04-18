@@ -40,3 +40,24 @@
 - second_point_of_interferometer_beam
 - spectral_line
 - third_point_of_interferometer_beam
+
+# === D.3 review §5 position additions ===
+- sawtooth_inversion_radius              # radial location of sawtooth temperature inversion
+- neoclassical_tearing_mode_center       # rational surface center of NTM island
+- inside_flux_surface                    # interior of a magnetic flux surface
+- halo_boundary                          # boundary of the halo current region
+- strike_point                           # generic divertor strike point location
+- secondary_separatrix_strike_point      # strike point on secondary separatrix
+
+# === D.3 review §5 geometry additions ===
+# (geometry segment shares this vocabulary via `of_<token>` template)
+- beam_tracing_point                     # point along a ray/beam-tracing trajectory
+- beamlet_group                          # sub-bundle grouping of neutral beam beamlets
+- delta_position                         # incremental displacement from reference position
+- end_point                              # terminal point of a geometric path or segment
+- start_point                            # initial point of a geometric path or segment
+- halo_current_area_end_point            # end point of halo current cross-section area
+- halo_current_area_start_point          # start point of halo current cross-section area
+- plasma_boundary_gap_reference_point    # reference point for plasma-wall gap measurement
+- x_point                               # magnetic null point (X-point) in poloidal plane
+- outline_point                          # point on the boundary outline contour

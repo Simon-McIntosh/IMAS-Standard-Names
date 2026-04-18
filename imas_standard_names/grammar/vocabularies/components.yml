@@ -5,7 +5,24 @@
 #   - radial_component_of_magnetic_field
 #   - toroidal_component_of_plasma_velocity
 #   - vertical_component_of_heat_flux
+#
+# Rulings (D.3 senior review 2026-04):
+#   - `toroidal_component` is the canonical directional form in cylindrical
+#     (R, Z, φ) coordinates. `velocity_phi` is forbidden; `velocity_tor` is
+#     deprecated.
+#   - `diamagnetic`, `e_cross_b`, and `pfirsch_schlueter` are deferred as
+#     component tokens. The D.3 review ruled them as component qualifiers
+#     (e.g. `diamagnetic_component_of_drift_velocity`), but the current
+#     parser shares this vocabulary with the `coordinate` segment (bare
+#     prefix match), which breaks existing names like
+#     `electron_diamagnetic_drift_velocity`. Pending parser refactoring
+#     to separate component and coordinate vocabularies.
+#   - `diamagnetic` is a qualifier on drifts and fluxes (in physical_base,
+#     e.g. `diamagnetic_drift_velocity`, `diamagnetic_flux`). It is NEVER
+#     a subject. Composers must not emit `diamagnetic_X` as a standalone
+#     base name.
 
+# === Cardinal / cylindrical directions ===
 - radial
 - toroidal
 - vertical
@@ -18,4 +35,8 @@
 - x
 - y
 - z
+
+# === Normalized spatial directions (D.3 review §5) ===
+- normalized_radial          # component along normalized radial (ρ) direction
+- normalized_vertical        # component along normalized vertical direction
 
