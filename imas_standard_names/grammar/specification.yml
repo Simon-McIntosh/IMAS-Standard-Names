@@ -245,6 +245,7 @@ vocabularies:
   processes: !include vocabularies/processes.yml
   generic_physical_bases: !include vocabularies/generic_physical_bases.yml
   transformations: !include vocabularies/transformations.yml
+  decomposition: !include vocabularies/decomposition.yml
   binary_operators: !include vocabularies/binary_operators.yml
 
 #===============================================================================

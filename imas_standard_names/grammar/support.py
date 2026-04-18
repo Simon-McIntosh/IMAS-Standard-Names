@@ -14,6 +14,7 @@ from imas_standard_names.grammar.constants import (
     BASE_SEGMENTS,
     BINARY_OPERATOR_CONNECTORS,
     BINARY_OPERATOR_TOKENS,
+    DECOMPOSITION_TOKENS,
     EXCLUSIVE_SEGMENT_PAIRS,
     PREFIX_SEGMENTS,
     SEGMENT_PREFIX_TOKEN_MAP,
@@ -31,6 +32,11 @@ TOKEN_PATTERN = re.compile(r"^[a-z][a-z0-9_]*$")
 # Sort transformation tokens longest-first for greedy matching
 _TRANSFORMATION_TOKENS_SORTED = tuple(
     sorted(TRANSFORMATION_TOKENS, key=len, reverse=True)
+)
+
+# Sort decomposition tokens longest-first for greedy matching
+_DECOMPOSITION_TOKENS_SORTED = tuple(
+    sorted(DECOMPOSITION_TOKENS, key=len, reverse=True)
 )
 
 # Sort binary operator tokens longest-first for greedy matching
@@ -136,6 +142,7 @@ def compose_standard_name(parts: Mapping[str, Any]) -> str:
     binary_operator = parts.get("binary_operator")
     secondary_base = parts.get("secondary_base")
     transformation = parts.get("transformation")
+    decomposition = parts.get("decomposition")
 
     # Binary operator mode: {operator}_{base1}_{connector}_{base2} [+ suffixes]
     if binary_operator:
@@ -217,10 +224,15 @@ def compose_standard_name(parts: Mapping[str, Any]) -> str:
                 raise ValueError(
                     f"{base_segment} segment must match the canonical token pattern"
                 )
-            # Prepend transformation if present (only for physical_base)
-            if transformation and base_segment == "physical_base":
-                transform_value = value_of(transformation)
-                tokens.append(f"{transform_value}_{token_value}")
+            # Prepend transformation and/or decomposition if present (only for physical_base)
+            if base_segment == "physical_base" and (transformation or decomposition):
+                prefix_parts: list[str] = []
+                if transformation:
+                    prefix_parts.append(value_of(transformation))
+                if decomposition:
+                    prefix_parts.append(value_of(decomposition))
+                prefix_parts.append(token_value)
+                tokens.append("_".join(prefix_parts))
             else:
                 tokens.append(token_value)
             base_found = True
@@ -337,6 +349,13 @@ def parse_standard_name(name: str) -> dict[str, str]:
         values["transformation"] = transformation_parsed["transformation"]
         remaining = transformation_parsed["physical_base"]
 
+    # Check for decomposition prefix (innermost, closest to the base).
+    # Exclusive with transformation — covered by a model validator.
+    decomposition_parsed = _try_parse_decomposition(remaining)
+    if decomposition_parsed:
+        values["decomposition"] = decomposition_parsed["decomposition"]
+        remaining = decomposition_parsed["physical_base"]
+
     # Determine which base segment type this is
     # Check if remaining matches any controlled geometric_base tokens
     base_assigned = False
@@ -392,6 +411,22 @@ def _try_parse_transformation(remaining: str) -> dict[str, str] | None:
             base = remaining[len(prefix) :]
             if base and TOKEN_PATTERN.fullmatch(base):
                 return {"transformation": token, "physical_base": base}
+    return None
+
+
+def _try_parse_decomposition(remaining: str) -> dict[str, str] | None:
+    """Try to extract a decomposition prefix from the remaining base text.
+
+    Sits between transformation and physical_base. Exclusive with transformation
+    (enforced by a model validator). Returns dict with 'decomposition' and
+    'physical_base' keys, or None.
+    """
+    for token in _DECOMPOSITION_TOKENS_SORTED:
+        prefix = token + "_"
+        if remaining.startswith(prefix):
+            base = remaining[len(prefix) :]
+            if base and TOKEN_PATTERN.fullmatch(base):
+                return {"decomposition": token, "physical_base": base}
     return None
 
 

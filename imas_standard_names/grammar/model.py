@@ -19,6 +19,7 @@ from imas_standard_names.grammar.constants import (
 from imas_standard_names.grammar.model_types import (
     BinaryOperator,
     Component,
+    Decomposition,
     GeometricBase,
     Object,
     Position,
@@ -65,6 +66,7 @@ class StandardName(BaseModel):
     position: Position | None = None
     process: Process | None = None
     transformation: Transformation | None = None
+    decomposition: Decomposition | None = None
     binary_operator: BinaryOperator | None = None
     secondary_base: BaseToken | None = None
 
@@ -117,14 +119,33 @@ class StandardName(BaseModel):
         return self
 
     @model_validator(mode="after")
+    def _check_decomposition_exclusivity(self) -> StandardName:
+        """Decomposition is exclusive with transformation and geometric_base.
+
+        Spec reference: plan 29 / ADR-4 grammar findings F3.
+        Decomposition wraps physical_base only; stacking with transformation
+        would produce names like ``square_of_fourier_coefficient_of_...`` that
+        are not useful enough to justify the parsing ambiguity.
+        """
+        if self.decomposition:
+            if self.transformation:
+                msg = "Segments 'decomposition' and 'transformation' cannot both be set"
+                raise ValueError(msg)
+            if self.geometric_base:
+                msg = "Segments 'decomposition' and 'geometric_base' cannot both be set"
+                raise ValueError(msg)
+        return self
+
+    @model_validator(mode="after")
     def _check_binary_operator_exclusivity(self) -> StandardName:
         """Binary operator is exclusive with component, transformation,
-        coordinate, subject, device, and geometric_base.
+        decomposition, coordinate, subject, device, and geometric_base.
         """
         if self.binary_operator:
             exclusive_fields = {
                 "component": self.component,
                 "transformation": self.transformation,
+                "decomposition": self.decomposition,
                 "coordinate": self.coordinate,
                 "subject": self.subject,
                 "device": self.device,
@@ -202,6 +223,7 @@ class StandardName(BaseModel):
                     self.position,
                     self.geometry,
                     self.transformation,
+                    self.decomposition,
                     self.binary_operator,
                 ]
             )

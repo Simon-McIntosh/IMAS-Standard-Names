@@ -1,0 +1,29 @@
+# Decomposition segment vocabulary
+#
+# Tokens that place a physical_base quantity in a mode / Fourier / spectral
+# decomposition basis. Added by plan 29 Phase A.2 (ADR-4) to unlock minting
+# for MHD, waves, and turbulence domains.
+#
+# Segment ordering: between `transformation` and `physical_base`; exclusive
+# with `transformation` (see grammar/model.py).
+#
+# Template: `{token}` (bare — tokens ending in `_of` already include the
+# connector, mode indicators like `n_equals_1` compose as plain prefixes).
+
+# === Fourier coefficients ===
+- fourier_coefficient_of
+- fourier_amplitude_of
+- fourier_phase_of
+- cosine_coefficient_of
+- sine_coefficient_of
+
+# === Toroidal mode number indicators ===
+- n_equals_1
+- n_equals_2
+
+# === Poloidal mode number indicators ===
+- m_equals_1
+- m_equals_2
+
+# === Mode ratio (resonant surfaces) ===
+- m_over_n_equals_2_over_1

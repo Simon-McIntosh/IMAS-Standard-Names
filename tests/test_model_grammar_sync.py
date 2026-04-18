@@ -66,7 +66,12 @@ def test_model_has_all_grammar_segments():
     grammar_segments = {segment.identifier for segment in spec.segments}
 
     # Non-segment model fields that are valid extensions
-    extension_fields = {"transformation", "binary_operator", "secondary_base"}
+    extension_fields = {
+        "transformation",
+        "decomposition",
+        "binary_operator",
+        "secondary_base",
+    }
 
     assert grammar_segments <= model_fields, (
         f"StandardName is missing grammar segment fields!\n"

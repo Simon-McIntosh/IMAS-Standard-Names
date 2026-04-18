@@ -68,6 +68,7 @@ ENUM_NAME_OVERRIDES = {
     "positions": "Position",
     "processes": "Process",
     "transformations": "Transformation",
+    "decomposition": "Decomposition",
     "binary_operators": "BinaryOperator",
 }
 
@@ -669,6 +670,18 @@ def _render_scope_metadata(spec: Any) -> str:
         )
         sections.append(transformation_section)
 
+    # Add decomposition tokens if the vocabulary exists
+    if "decomposition" in spec.vocabularies:
+        tokens = spec.vocabularies["decomposition"]
+        tokens_repr = _format_tuple_literal(tokens, indent=4, base_indent=0)
+        decomposition_section = (
+            "\n# Mode / Fourier / spectral decomposition tokens prefixed to the\n"
+            "# physical_base between transformation and base:\n"
+            "# e.g. fourier_coefficient_of_magnetic_field, n_equals_1_magnetic_field\n"
+            f"DECOMPOSITION_TOKENS: tuple[str, ...] = {tokens_repr}"
+        )
+        sections.append(decomposition_section)
+
     # Add binary operator tokens and connector mapping if the vocabulary exists
     if "binary_operators" in spec.vocabularies:
         tokens = spec.vocabularies["binary_operators"]
@@ -720,6 +733,7 @@ def _constants_export_block() -> str:
         "APPLICABILITY_RATIONALE",
         "GENERIC_PHYSICAL_BASES",
         "TRANSFORMATION_TOKENS",
+        "DECOMPOSITION_TOKENS",
         "BINARY_OPERATOR_TOKENS",
         "BINARY_OPERATOR_CONNECTORS",
     ]
