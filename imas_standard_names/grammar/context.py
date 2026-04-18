@@ -63,11 +63,9 @@ def _build_canonical_pattern() -> str:
             else:
                 group_patterns.append(f"<{seg_id}>")
 
-            for excl_id in exclusive_with:
-                excl_rule = next(
-                    (r for r in SEGMENT_RULES if r.identifier == excl_id), None
-                )
-                if excl_rule is None:
+            for excl_rule in SEGMENT_RULES:
+                excl_id = excl_rule.identifier
+                if excl_id not in exclusive_with:
                     continue
                 if excl_rule.template:
                     excl_template = excl_rule.template.replace(
@@ -105,8 +103,10 @@ def _build_segment_order_constraint() -> str:
 
         exclusive_with = set(rule.exclusive_with)
         if exclusive_with:
-            group_ids = [seg_id, *list(exclusive_with)]
-            group_label = "|".join(group_ids)
+            ordered_ids = [seg_id] + [
+                r.identifier for r in SEGMENT_RULES if r.identifier in exclusive_with
+            ]
+            group_label = "|".join(ordered_ids)
             parts.append(f"[{group_label}]")
             processed_exclusive.add(seg_id)
             processed_exclusive.update(exclusive_with)

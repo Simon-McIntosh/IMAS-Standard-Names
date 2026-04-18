@@ -86,7 +86,7 @@ canonical_pattern: >
   [<device>]?
   <geometric_base | physical_base> 
   [of_<object>]? 
-  [of_<geometry> | at_<position>]? 
+  [of_<geometry> | at_<position> | over_<region>]? 
   [due_to_<process>]?
 
 #===============================================================================
@@ -212,6 +212,7 @@ segments:
     template: "of_{token}"
     exclusive_with:
       - position
+      - region
     description: >
       Intrinsic geometric property OF the object 
       (coordinates, dimensions, shapes that define it)
@@ -221,9 +222,23 @@ segments:
     template: "at_{token}"
     exclusive_with:
       - geometry
+      - region
     description: >
       Field quantity evaluated AT the spatial location 
       (temperatures, densities, fluxes measured there)
+  - id: region
+    optional: true
+    vocabulary: regions
+    template: "over_{token}"
+    exclusive_with:
+      - geometry
+      - position
+    description: >
+      Multi-dimensional plasma zone (volume, layer, or banded region)
+      over which the quantity is integrated, averaged, or otherwise reduced.
+      Regions are loci with extent (halo_region, core_region, divertor_region,
+      scrape_off_layer, edge_region, halo_boundary); use "over_<region>" —
+      not "at_<region>" — because a region is not a point/line/surface sample.
   - id: process
     optional: true
     vocabulary: processes
@@ -242,6 +257,7 @@ vocabularies:
   geometric_bases: !include vocabularies/geometric_bases.yml
   objects: !include vocabularies/objects.yml
   positions: !include vocabularies/positions.yml
+  regions: !include vocabularies/regions.yml
   processes: !include vocabularies/processes.yml
   generic_physical_bases: !include vocabularies/generic_physical_bases.yml
   transformations: !include vocabularies/transformations.yml

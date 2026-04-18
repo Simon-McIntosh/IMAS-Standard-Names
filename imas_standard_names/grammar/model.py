@@ -24,6 +24,7 @@ from imas_standard_names.grammar.model_types import (
     Object,
     Position,
     Process,
+    Region,
     Subject,
     Transformation,
 )
@@ -64,6 +65,7 @@ class StandardName(BaseModel):
     object: Object | None = None
     geometry: Position | None = None
     position: Position | None = None
+    region: Region | None = None
     process: Process | None = None
     transformation: Transformation | None = None
     decomposition: Decomposition | None = None
@@ -222,6 +224,7 @@ class StandardName(BaseModel):
                     self.object,
                     self.position,
                     self.geometry,
+                    self.region,
                     self.transformation,
                     self.decomposition,
                     self.binary_operator,
@@ -234,7 +237,7 @@ class StandardName(BaseModel):
                     f"Generic terms like '{self.physical_base}' are ambiguous without context. "
                     f"Add a qualifying segment: subject (e.g., electron_), device (e.g., flux_loop_), "
                     f"object (e.g., of_flux_loop), position (e.g., at_magnetic_axis), "
-                    f"or geometry (e.g., of_plasma_boundary)."
+                    f"geometry (e.g., of_plasma_boundary), or region (e.g., over_halo_region)."
                 )
                 raise ValueError(msg)
 

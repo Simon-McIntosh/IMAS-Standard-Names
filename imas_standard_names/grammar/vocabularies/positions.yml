@@ -1,4 +1,4 @@
-# Positions vocabulary: spatial locations, surfaces, and regions
+# Positions vocabulary: points, lines, and surfaces
 #
 # Can be used with BOTH "of_" and "at_" depending on semantic context:
 #   - "of_<token>" = intrinsic geometric property (major_radius_of_plasma_boundary)
@@ -8,19 +8,18 @@
 #   - major_radius_of_plasma_boundary (geometric property)
 #   - electron_temperature_at_magnetic_axis (field at location)
 #   - poloidal_flux_at_plasma_boundary (flux evaluated at boundary)
+#
+# Note: multi-dimensional zones (halo_region, core_region, divertor_region,
+# edge_region, halo_boundary, scrape_off_layer) live in regions.yml and
+# compose with the `over_` template. See plan 29 / ADR-4 F4.
 
 - active_limiter_point
 - closest_wall_point
-- core_region
 - current_center
-- divertor_region
 - divertor_target
-- edge_region
 - first_point_of_interferometer_beam
 - first_wall
 - flux_surface
-- halo_region
-- halo_boundary
 - inner_divertor_target
 - inner_midplane
 - last_closed_flux_surface
@@ -37,7 +36,6 @@
 - primary_x_point
 - reference_major_radius
 - reference_position
-- scrape_off_layer
 - secondary_separatrix
 - second_point_of_interferometer_beam
 - spectral_line

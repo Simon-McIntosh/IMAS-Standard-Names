@@ -1,0 +1,25 @@
+# Regions vocabulary: plasma volumes and 2-/3-D zones
+#
+# Usage: over_<token>
+# Examples:
+#   - electron_radiated_energy_over_halo_region
+#   - volume_integrated_pressure_over_core_region
+#
+# Regions are multi-dimensional loci (volumes, surfaces-as-zones,
+# banded layers). For a quantity evaluated over such a locus the
+# canonical locution is "over_<region>", not "at_<region>" — the
+# latter implies a point, line, or surface sampling.
+#
+# Mutually exclusive with the `geometry` and `position` suffix segments
+# (a name cannot be "of_<thing>" and "over_<region>" simultaneously —
+# that would conflate an intrinsic property of a thing with a spatial
+# reduction over a zone).
+#
+# Spec reference: plan 29 / ADR-4 grammar findings F4.
+
+- core_region
+- divertor_region
+- edge_region
+- halo_boundary
+- halo_region
+- scrape_off_layer
