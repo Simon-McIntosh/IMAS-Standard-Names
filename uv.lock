@@ -1573,6 +1573,9 @@ docs = [
     { name = "mkdocs-material" },
     { name = "mkdocs-table-reader-plugin" },
 ]
+graph = [
+    { name = "neo4j" },
+]
 quality = [
     { name = "proselint" },
     { name = "spacy" },
@@ -1614,6 +1617,7 @@ requires-dist = [
     { name = "mkdocs-macros-plugin", marker = "extra == 'docs'", specifier = ">=1.0.4,<2.0.0" },
     { name = "mkdocs-material", marker = "extra == 'docs'", specifier = ">=9.6.5,<10.0.0" },
     { name = "mkdocs-table-reader-plugin", marker = "extra == 'docs'", specifier = ">=3.1.0,<4.0.0" },
+    { name = "neo4j", marker = "extra == 'graph'", specifier = ">=5.0" },
     { name = "pint", specifier = ">=0.24.4,<0.25.0" },
     { name = "proselint", marker = "extra == 'quality'", specifier = ">=0.14.0,<0.15.0" },
     { name = "pydantic", specifier = ">=2.10.6,<3.0.0" },
@@ -1625,7 +1629,7 @@ requires-dist = [
     { name = "spacy", marker = "extra == 'quality'", specifier = ">=3.8.0,<4.0.0" },
     { name = "strictyaml", specifier = ">=1.7.3,<2.0.0" },
 ]
-provides-extras = ["docs", "quality", "test"]
+provides-extras = ["docs", "graph", "quality", "test"]
 
 [package.metadata.requires-dev]
 dev = [
@@ -2586,6 +2590,18 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/2d/f9/8e360bdfc3c44e267e7e046f0e0b9922766da92da26959a6963f597e6bb5/murmurhash-1.0.15-cp314-cp314t-musllinux_1_2_x86_64.whl", hash = "sha256:4fd8189ee293a09f30f4931408f40c28ccd42d9de4f66595f8814879339378bc", size = 161811, upload-time = "2025-11-14T09:51:01.289Z" },
     { url = "https://files.pythonhosted.org/packages/f9/31/97649680595b1096803d877ababb9a67c07f4378f177ec885eea28b9db6d/murmurhash-1.0.15-cp314-cp314t-win_amd64.whl", hash = "sha256:66395b1388f7daa5103db92debe06842ae3be4c0749ef6db68b444518666cdcc", size = 29817, upload-time = "2025-11-14T09:51:02.493Z" },
     { url = "https://files.pythonhosted.org/packages/76/66/4fce8755f25d77324401886c00017c556be7ca3039575b94037aff905385/murmurhash-1.0.15-cp314-cp314t-win_arm64.whl", hash = "sha256:c22e56c6a0b70598a66e456de5272f76088bc623688da84ef403148a6d41851d", size = 26219, upload-time = "2025-11-14T09:51:03.563Z" },
+]
+
+[[package]]
+name = "neo4j"
+version = "6.1.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "pytz" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/1b/01/d6ce65e4647f6cb2b9cca3b813978f7329b54b4e36660aaec1ddf0ccce7a/neo4j-6.1.0.tar.gz", hash = "sha256:b5dde8c0d8481e7b6ae3733569d990dd3e5befdc5d452f531ad1884ed3500b84", size = 239629, upload-time = "2026-01-12T11:27:34.777Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/70/5c/ee71e2dd955045425ef44283f40ba1da67673cf06404916ca2950ac0cd39/neo4j-6.1.0-py3-none-any.whl", hash = "sha256:3bd93941f3a3559af197031157220af9fd71f4f93a311db687bd69ffa417b67d", size = 325326, upload-time = "2026-01-12T11:27:33.196Z" },
 ]
 
 [[package]]

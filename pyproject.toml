@@ -55,6 +55,13 @@ quality = [
   "spacy>=3.8.0,<4.0.0",
 ]
 
+# Neo4j driver for imas_standard_names.graph.sync consumers.
+# The pure-Python spec (imas_standard_names.graph.spec) needs no driver;
+# only sync_grammar() callers do. imas-codex installs this extra.
+graph = [
+  "neo4j>=5.0",
+]
+
 test = [
   "pytest>=8.3.4,<9.0.0",
   "pytest-cov>=4.1.0,<5.0.0",

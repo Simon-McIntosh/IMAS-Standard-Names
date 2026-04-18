@@ -14,13 +14,17 @@ from .spec import (
     get_grammar_graph_spec,
     segment_edge_specs,
 )
+from .sync import CypherClient, SyncReport, sync_grammar
 
 __all__ = [
+    "CypherClient",
     "GrammarGraphSpec",
     "SegmentEdgeSpec",
     "SegmentSpecEntry",
+    "SyncReport",
     "TemplateSpecEntry",
     "TokenSpecEntry",
     "get_grammar_graph_spec",
     "segment_edge_specs",
+    "sync_grammar",
 ]
