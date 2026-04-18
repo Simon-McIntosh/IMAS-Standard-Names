@@ -65,3 +65,11 @@
 # === D.5 review §5 additions ===
 - tearing_mode_center                    # center of a tearing mode island (generic, any mode)
 - normalized_poloidal_flux               # normalized poloidal flux coordinate surface
+
+# === rc13 codex-rotation additions ===
+# From magnetic_field_systems, particle_measurement_diagnostics,
+# electromagnetic_wave_diagnostics, plasma_control rotation (gap export 2026-04-19).
+- ferritic_insert_centroid               # centroid of a ferritic insert (passive magnetic structure)
+- constraint_position                    # position of an equilibrium reconstruction constraint
+- along_beam                             # location along a neutral / diagnostic beam trajectory
+- ion_state                              # ionisation-state index (atomic state of an ion species)

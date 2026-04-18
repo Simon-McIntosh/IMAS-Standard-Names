@@ -69,3 +69,12 @@
 # === D.5 review §5 additions ===
 - viscous_heat_flux            # viscous contribution to heat flux
 - inertial                     # inertial (momentum) contribution
+
+# === rc13 codex-rotation additions ===
+# From plasma_wall_interactions, fast_particles, magnetic_field_systems,
+# diagnostic and control rotation in imas-codex (gap export 2026-04-19).
+- collisions                   # Coulomb / particle collisions process
+- thermalization               # slowing-down of fast particles to thermal energy
+- fast_ion                     # fast-ion drive / source process (e.g. NBI fast-ion current)
+- external_coils               # plural form for due_to_external_coils (singular external_coil retained)
+- non_inductive_current        # current driven by non-inductive means (preferred over non_inductive)
