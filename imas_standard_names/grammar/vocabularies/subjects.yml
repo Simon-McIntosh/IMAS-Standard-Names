@@ -47,3 +47,8 @@
 - fast_neutral
 - fast_electron
 - impurity_ion
+
+# === rc14 vocabulary extensions (codex plan 31) ===
+- suprathermal_electrons       # suprathermal population tier (ECRH, LH-driven)
+- thermal_electron             # explicit thermal electron population
+- thermal_ion                  # explicit thermal ion population

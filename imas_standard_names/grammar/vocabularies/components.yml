@@ -39,4 +39,6 @@
 # === Normalized spatial directions (D.3 review §5) ===
 - normalized_radial          # component along normalized radial (ρ) direction
 - normalized_vertical        # component along normalized vertical direction
+- normalized_parallel        # component along normalized parallel direction
+- normalized_perpendicular   # component along normalized perpendicular direction
 

@@ -82,6 +82,23 @@ FORBIDDEN_SUFFIX_PATTERNS: tuple[tuple[str, str, tuple[str, ...]], ...] = (
         "Use '_per_toroidal_mode' instead of '_per_toroidal_mode_number'.",
         (),
     ),
+    (
+        "diamagnetic_component_of_",
+        (
+            "'diamagnetic' is a drift qualifier, not a spatial axis. "
+            "Did you mean: radial_component_of_<subject>_diamagnetic_drift_velocity?"
+        ),
+        (),
+    ),
+    (
+        "_density_ratio",
+        (
+            "Ad-hoc ratio compound. Use canonical form: "
+            "ratio_of_<A>_density_to_<B>_density"
+        ),
+        # Exclude names that legitimately contain ratio_of (canonical form)
+        ("ratio_of_",),
+    ),
 )
 
 

@@ -52,3 +52,7 @@
 - per_toroidal_mode                       # canonical per-mode form (preferred over per_toroidal_mode_number)
 - cumulative                              # standalone cumulative integral or sum
 - amplitude_of                            # amplitude (peak value) of a quantity
+
+# === rc14 vocabulary extensions (codex plan 31) ===
+- electron_equivalent                     # gas-injection counts measured in ionization electrons
+- ratio_of                                # canonical form: ratio_of_<A>_to_<B>

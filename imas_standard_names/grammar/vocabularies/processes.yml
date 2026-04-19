@@ -78,3 +78,11 @@
 - fast_ion                     # fast-ion drive / source process (e.g. NBI fast-ion current)
 - external_coils               # plural form for due_to_external_coils (singular external_coil retained)
 - non_inductive_current        # current driven by non-inductive means (preferred over non_inductive)
+
+# === rc14 vocabulary extensions (codex plan 31) ===
+- e_cross_b_drift              # E×B drift mechanism (plasma_control, edge)
+- thermal_fusion               # pure-thermal fusion (alongside beam_beam_, beam_thermal_)
+- thermalization_of_fast_particles  # distribution-source thermalisation
+- halo_currents                # noun form for due_to_halo_currents
+- fast_ions                    # plural noun form for due_to_fast_ions
+- non_inductive_current_drive  # explicit synonym alongside non_inductive_drive

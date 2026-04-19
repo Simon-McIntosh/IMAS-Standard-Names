@@ -73,3 +73,8 @@
 - constraint_position                    # position of an equilibrium reconstruction constraint
 - along_beam                             # location along a neutral / diagnostic beam trajectory
 - ion_state                              # ionisation-state index (atomic state of an ion species)
+
+# === rc14 vocabulary extensions (codex plan 31) ===
+- ferritic_element_centroid              # synonym for ferritic_insert_centroid; DD ferritic/element/*
+- neutron_detector                       # position mirror (was Objects-only)
+- measurement_position                   # for distance_between_measurement_position_and_separatrix_*
