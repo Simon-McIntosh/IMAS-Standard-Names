@@ -86,3 +86,11 @@
 - halo_currents                # noun form for due_to_halo_currents
 - fast_ions                    # plural noun form for due_to_fast_ions
 - non_inductive_current_drive  # explicit synonym alongside non_inductive_drive
+
+# === rc15 vocabulary extensions (edge-plasma rotation) ===
+# Diamagnetic drift is a first-class transport mechanism: fluxes "due to
+# diamagnetic drift" arise from the ∇p × B / (nqB²) drift in the
+# fluid momentum equation. Distinct from the diamagnetic component of a
+# vector (which is handled by `diamagnetic_*` physical_bases per
+# components.yml guidance). DD sources: edge_profiles/*, transport/*.
+- diamagnetic_drift

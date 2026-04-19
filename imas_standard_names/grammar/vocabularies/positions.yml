@@ -78,3 +78,10 @@
 - ferritic_element_centroid              # synonym for ferritic_insert_centroid; DD ferritic/element/*
 - neutron_detector                       # position mirror (was Objects-only)
 - measurement_position                   # for distance_between_measurement_position_and_separatrix_*
+
+# === rc15 vocabulary extensions (plasma-wall-interactions rotation) ===
+# Generic plasma-facing wall surface (distinct from the specific `first_wall`
+# tile layer). Used with `at_` for fluxes emitted at the wall boundary —
+# e.g. `electron_emitted_kinetic_energy_flux_at_wall`. DD sources:
+# plasma_wall_interactions/*, wall/*.
+- wall
