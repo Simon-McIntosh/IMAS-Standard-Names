@@ -52,3 +52,19 @@
 - suprathermal_electrons       # suprathermal population tier (ECRH, LH-driven)
 - thermal_electron             # explicit thermal electron population
 - thermal_ion                  # explicit thermal ion population
+
+# === rc16 vocabulary extensions (VocabGap closure) ===
+# From codex VocabGap graph analysis (2026-04-20).
+- thermal_neutral              # thermal neutral particle population
+- total_ion                    # total ion population (summed over species)
+- molecular_ion                # molecular ion species (e.g. D₂⁺, T₂⁺)
+- molecular_neutral            # molecular neutral species (e.g. D₂, T₂)
+- cold_neutral                 # cold neutral population (recycled wall neutrals)
+- hot_neutral                  # hot neutral population (charge-exchange neutrals)
+- trapped                      # trapped-particle population (banana orbits)
+- co_passing                   # co-passing particle population
+- counter_passing              # counter-passing particle population
+- fast_particle                # generic fast (non-thermal) particle
+- ion_species                  # generic ion species (unresolved)
+- neutral_species              # generic neutral species (unresolved)
+- total                        # total / summed-over-all-species population

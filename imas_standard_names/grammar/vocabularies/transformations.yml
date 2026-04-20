@@ -56,3 +56,12 @@
 # === rc14 vocabulary extensions (codex plan 31) ===
 - electron_equivalent                     # gas-injection counts measured in ionization electrons
 - ratio_of                                # canonical form: ratio_of_<A>_to_<B>
+
+# === rc16 vocabulary extensions (VocabGap closure) ===
+# From codex VocabGap graph analysis (2026-04-20).
+- perturbed                               # perturbation of a base quantity (δQ / Q₁)
+- spectral_density                        # spectral density (per unit frequency/wavenumber)
+- second_derivative_of                    # second-order derivative d²/dx²
+- per_poloidal_mode                       # per-mode quantity indexed by poloidal mode number m
+- derivative_with_respect_to_rho_tor      # derivative w.r.t. normalised toroidal flux coordinate
+- line_of_sight_projected                 # projected along a diagnostic line of sight

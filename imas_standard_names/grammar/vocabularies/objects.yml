@@ -65,3 +65,22 @@
 - iron_core_segment                      # iron core transformer segment
 - pickup_coil                            # pickup coil sensor
 - plasma_filament                        # plasma filament structure
+
+# === rc16 vocabulary extensions (VocabGap closure) ===
+# From codex VocabGap graph analysis (2026-04-20). Shared by `object`
+# (of_<token>) and `device` (<token>_<base>) segments.
+- wave_beam                              # generic wave beam object (EC, LH beam tracing)
+- beam_tracing_beam                      # single beam in a ray/beam-tracing computation
+- beam_tracing_ray                       # single ray in a ray-tracing computation
+- coordinate_system                      # coordinate system object (GGD, equilibrium)
+- ferritic_insert                        # ferritic insert (passive magnetic structure)
+- ferritic_element                       # ferritic element (passive magnetic element)
+- pellet                                 # injection pellet object
+- vacuum_vessel                          # tokamak vacuum vessel structure
+- diagnostic_aperture                    # diagnostic viewing aperture / window
+- lower_hybrid_antenna_row               # row of a lower-hybrid multijunction antenna
+- port                                   # vacuum vessel port for diagnostics or heating
+- plasma_facing_component                # plasma-facing component (PFC)
+- wall_material                          # material of the first wall surface
+- breeder_blanket                        # breeder blanket structure (breeding blanket)
+- breeding_blanket_module                # breeding blanket module

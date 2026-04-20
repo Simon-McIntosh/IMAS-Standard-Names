@@ -94,3 +94,12 @@
 # vector (which is handled by `diamagnetic_*` physical_bases per
 # components.yml guidance). DD sources: edge_profiles/*, transport/*.
 - diamagnetic_drift
+
+# === rc16 vocabulary extensions (VocabGap closure) ===
+# From codex VocabGap graph analysis (2026-04-20).
+- resistive_dissipation        # resistive (Joule) dissipation process
+- dreicer                      # Dreicer mechanism for runaway electron generation
+- coulomb_collisions           # Coulomb collisions between charged particles
+- neutral_beam_shinethrough    # neutral beam shine-through (uncaptured beam fraction)
+- surface_emission             # surface (wall/divertor) particle or photon emission
+- halo_current                 # halo current path (current through open field lines)

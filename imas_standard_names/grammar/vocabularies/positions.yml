@@ -85,3 +85,23 @@
 # e.g. `electron_emitted_kinetic_energy_flux_at_wall`. DD sources:
 # plasma_wall_interactions/*, wall/*.
 - wall
+
+# === rc16 vocabulary extensions (VocabGap closure) ===
+# From codex VocabGap graph analysis (2026-04-20). Shared by both `position`
+# (at_<token>) and `geometry` (of_<token>) segments.
+- geometric_axis                         # geometric axis of the tokamak (distinct from magnetic_axis)
+- control_surface                        # plasma control / diagnostic flux surface
+- gap_reference_point                    # reference point for plasma–wall gap measurement
+- active_wall_point                      # point on the active (stabilizing) wall contour
+- dr_dz_zero_point                       # boundary point where dR/dZ = 0 (zero-gradient)
+- separatrix                             # the separatrix surface itself as a spatial location
+- pedestal                               # pedestal location / region boundary
+- pedestal_top                           # top of the pedestal profile
+- along_line_of_sight                    # position along a diagnostic line of sight
+- launching_position                     # generic launcher launch point (EC, LH, IC)
+- charge_state                           # atomic charge-state index of an ion species
+- post_sawtooth_crash                    # temporal state immediately after a sawtooth crash
+- antenna_row                            # row of a multi-row antenna (e.g. lower-hybrid)
+- ion_charge_state                       # specific ionisation charge state of an ion
+- secondary_separatrix_outline_point     # point on the secondary separatrix boundary outline
+- control_surface_outline_point          # point on a control-surface outline contour
