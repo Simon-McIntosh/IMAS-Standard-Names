@@ -105,3 +105,11 @@
 - ion_charge_state                       # specific ionisation charge state of an ion
 - secondary_separatrix_outline_point     # point on the secondary separatrix boundary outline
 - control_surface_outline_point          # point on a control-surface outline contour
+
+# === rc17 vocabulary extensions (regen cycle 34 VocabGap closure) ===
+# From codex quarantined-name analysis (2025-07-28).
+- internal_transport_barrier             # internal transport barrier (ITB) radial location
+- pedestal_top_high_field_side           # high-field-side position at the pedestal top
+- pedestal_top_low_field_side            # low-field-side position at the pedestal top
+- pedestal_maximum                       # position of maximum pedestal pressure gradient
+- constant_toroidal_flux                 # constant-toroidal-flux (ρ_tor = const) surface

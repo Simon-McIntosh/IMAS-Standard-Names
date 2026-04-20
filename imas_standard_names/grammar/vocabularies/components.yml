@@ -41,4 +41,6 @@
 - normalized_vertical        # component along normalized vertical direction
 - normalized_parallel        # component along normalized parallel direction
 - normalized_perpendicular   # component along normalized perpendicular direction
+- normalized_toroidal        # component along normalized toroidal (φ) direction
+- normalized_poloidal        # component along normalized poloidal (θ) direction
 

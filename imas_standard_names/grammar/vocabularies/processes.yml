@@ -103,3 +103,8 @@
 - neutral_beam_shinethrough    # neutral beam shine-through (uncaptured beam fraction)
 - surface_emission             # surface (wall/divertor) particle or photon emission
 - halo_current                 # halo current path (current through open field lines)
+
+# === rc17 vocabulary extensions (regen cycle 34 VocabGap closure) ===
+# From codex quarantined-name analysis (2025-07-28).
+- runaway_electrons            # runaway electron population as source process (plural form)
+- coulomb_collisions_with_electrons  # Coulomb collisions specifically with electrons
