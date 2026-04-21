@@ -25,7 +25,6 @@ documentation: |-
 
   Sign convention: Positive pressure indicates compressive force outward from plasma center.
 status: draft
-physics_domain: core_plasma_physics
 tags:
 - spatial-profile
 kind: scalar

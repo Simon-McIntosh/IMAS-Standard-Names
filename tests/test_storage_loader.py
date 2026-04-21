@@ -11,9 +11,8 @@ def test_load_single_entry(tmp_path: Path, example_scalars, write_yaml):
     example = example_scalars[0]
     write_yaml(tmp_path, example)
 
-    # Load and verify (file is written to physics_domain subdirectory)
-    pd = example.physics_domain if hasattr(example, "physics_domain") else ""
-    f = tmp_path / pd / f"{example.name}.yml"
+    # Load and verify (write_yaml writes to a "general" subdirectory)
+    f = tmp_path / "general" / f"{example.name}.yml"
     data = yaml.safe_load(f.read_text(encoding="utf-8"))
     entry = create_standard_name_entry(data)
     # Basic sanity: required attributes present

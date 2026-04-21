@@ -60,7 +60,6 @@ def test_validate_accepts_valid_scalar_entry():
         "unit": "eV",
         "description": "Electron temperature.",
         "documentation": "",
-        "physics_domain": "general",
     }
     errors = validate_against_schema(data)
     assert errors == []
@@ -74,7 +73,6 @@ def test_validate_accepts_valid_vector_entry():
         "unit": "m.s^-1",
         "description": "Plasma velocity vector.",
         "documentation": "",
-        "physics_domain": "general",
     }
     errors = validate_against_schema(data)
     assert errors == []
@@ -87,7 +85,6 @@ def test_validate_accepts_valid_metadata_entry():
         "kind": "metadata",
         "description": "Definition of the plasma boundary.",
         "documentation": "",
-        "physics_domain": "equilibrium",
     }
     errors = validate_against_schema(data)
     assert errors == []

@@ -17,7 +17,6 @@ documentation: |-
 
   Sign convention: Positive when surface normal points upward (positive Z direction).
 status: draft
-physics_domain: magnetic_field_diagnostics
 tags:
 - flux-coordinates
 - measured

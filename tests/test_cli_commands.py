@@ -16,7 +16,6 @@ unit: eV
 description: Electron temperature.
 documentation: |
   Electron temperature for CLI command testing.
-physics_domain: general
 """,
         encoding="utf-8",
     )
@@ -28,7 +27,6 @@ unit: eV
 description: Ion temperature.
 documentation: |
   Ion temperature for CLI command testing.
-physics_domain: general
 """,
         encoding="utf-8",
     )
@@ -120,7 +118,6 @@ unit: '1'
 description: Short.
 documentation: |
   Entry with intentionally short description to trigger warning.
-physics_domain: general
 """,
         encoding="utf-8",
     )

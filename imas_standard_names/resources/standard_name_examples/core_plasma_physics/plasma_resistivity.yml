@@ -29,7 +29,6 @@ documentation: |-
 
   Sign convention: Positive resistivity indicates resistance to current flow, following standard electrical resistance conventions with current flow direction.
 status: draft
-physics_domain: core_plasma_physics
 tags:
 - spatial-profile
 kind: scalar

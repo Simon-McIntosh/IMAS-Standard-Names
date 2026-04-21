@@ -25,7 +25,6 @@ documentation: |-
 
   Sign convention: Positive heat flux indicates energy flow in the direction of decreasing temperature, following the direction of $\nabla T_e$.
 status: draft
-physics_domain: transport
 tags:
 - spatial-profile
 kind: vector

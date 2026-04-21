@@ -19,7 +19,6 @@ documentation: |-
 
   Separatrix location is determined from equilibrium reconstruction using external [magnetic_field](#magnetic_field) measurements. [Flux_loop_voltage](#flux_loop_voltage) integration provides flux surface geometry. X-point identification requires field line tracing and flux surface analysis. Separatrix position is controlled through external coil currents. Divertor diagnostics measure strike point locations for separatrix mapping.
 status: draft
-physics_domain: equilibrium
 tags:
 - divertor-configuration
 - flux-coordinates

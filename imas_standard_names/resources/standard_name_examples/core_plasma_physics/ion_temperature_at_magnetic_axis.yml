@@ -17,7 +17,6 @@ documentation: |-
 
   Sign convention: Positive temperature indicates thermal energy per ion, following standard thermodynamic conventions with temperature measured in energy units (eV or keV).
 status: draft
-physics_domain: core_plasma_physics
 tags:
 - global-quantity
 kind: scalar

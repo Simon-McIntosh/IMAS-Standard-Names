@@ -25,7 +25,6 @@ documentation: |-
 
   Sign convention: Positive when anti-clockwise viewed from above for toroidal component.
 status: active
-physics_domain: magnetic_field_diagnostics
 tags:
 - measured
 kind: vector

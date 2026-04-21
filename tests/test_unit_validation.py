@@ -20,7 +20,6 @@ def _scalar(name: str, unit: str = "eV") -> StandardNameScalarEntry:
         unit=unit,
         description="Test entry",
         documentation="Test documentation for validation.",
-        physics_domain="general",
         status="draft",
     )
 
@@ -32,7 +31,6 @@ def _vector(name: str, unit: str = "m.s^-1") -> StandardNameVectorEntry:
         unit=unit,
         description="Test entry",
         documentation="Test documentation for validation.",
-        physics_domain="general",
         status="draft",
     )
 
@@ -43,7 +41,6 @@ def _metadata(name: str) -> StandardNameMetadataEntry:
         kind="metadata",
         description="Test entry",
         documentation="Test documentation for validation.",
-        physics_domain="general",
         status="draft",
     )
 
@@ -168,7 +165,6 @@ class TestNoneUnitWithQuantitativeKind:
             unit=None,
             description="Test entry",
             documentation="Test docs.",
-            physics_domain="general",
             status="draft",
         )
         issues = _check_none_unit_with_quantitative_kind("electron_temperature", entry)
@@ -184,7 +180,6 @@ class TestNoneUnitWithQuantitativeKind:
             unit=None,
             description="Test entry",
             documentation="Test docs.",
-            physics_domain="general",
             status="draft",
         )
         issues = _check_none_unit_with_quantitative_kind("magnetic_field", entry)

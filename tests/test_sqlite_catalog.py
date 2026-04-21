@@ -13,7 +13,6 @@ def test_sqlite_catalog_insert_search_get():
             "documentation": "Temperature of electrons in the plasma.",
             "unit": "eV",
             "status": "active",
-            "physics_domain": "general",
         }
     )
     cat.insert(m)

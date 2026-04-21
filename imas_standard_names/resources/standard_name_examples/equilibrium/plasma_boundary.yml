@@ -15,7 +15,6 @@ documentation: |-
 
   Boundary shape and position control plasma-wall interactions and power handling. The boundary determines the last closed flux surface for particle and energy confinement. Changes in boundary shape affect [safety_factor](#safety_factor) profiles and stability limits. The boundary location relative to [first_wall](#first_wall) components determines heat flux distribution and material loading.
 status: active
-physics_domain: equilibrium
 tags:
 - flux-coordinates
 kind: metadata

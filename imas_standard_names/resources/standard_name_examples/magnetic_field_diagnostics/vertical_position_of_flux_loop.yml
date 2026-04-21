@@ -25,6 +25,5 @@ documentation: |-
 
   Sign convention: Positive vertical position measured upward from midplane, following standard cylindrical coordinate conventions and tokamak geometry.
 status: draft
-physics_domain: magnetic_field_diagnostics
 kind: scalar
 unit: m

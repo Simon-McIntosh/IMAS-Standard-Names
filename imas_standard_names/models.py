@@ -53,6 +53,7 @@ Example with operator provenance:
 
 import re
 from collections.abc import Iterable
+from datetime import datetime
 from enum import StrEnum
 from typing import Annotated, Literal, get_args
 
@@ -69,20 +70,17 @@ from imas_standard_names import pint
 from imas_standard_names.field_types import (
     STANDARD_NAME_PATTERN,
     Constraints,
-    DdPaths,
     Description,
     Documentation,
     Domain,
     Links,
     Name,
-    PhysicsDomainField,
     Tags,
     Unit,
 )
 from imas_standard_names.grammar.field_schemas import FIELD_DESCRIPTIONS
 from imas_standard_names.grammar.model_types import Component, Position, Process
 from imas_standard_names.grammar.tag_types import (
-    PHYSICS_DOMAINS,
     SECONDARY_TAGS,
 )
 from imas_standard_names.operators import (
@@ -172,9 +170,9 @@ class StandardNameBase(BaseModel):
     pipeline stages that generate names before descriptions exist. It defines
     only the fields and validators that are meaningful in both modes:
 
-    - name, kind (set by subclass), status, physics_domain
+    - name, kind (set by subclass), status
     - deprecation/supersession governance
-    - dd_paths provenance
+    - COCOS transformation type
 
     Subclasses either add full-entry documentation fields (see
     :class:`StandardNameEntryBase`) or remain minimal (name-only variants).
@@ -190,24 +188,21 @@ class StandardNameBase(BaseModel):
     )
 
     # Governance
-    deprecates: Name | str = ""
-    superseded_by: Name | str = ""
-    physics_domain: (
-        PhysicsDomainField  # Physics domain classification (PhysicsDomain enum)
-    )
-    dd_paths: DdPaths = Field(default_factory=list)
+    deprecates: Name | None = None
+    superseded_by: Name | None = None
+    cocos_transformation_type: str | None = None
 
     # Supplemental validator for double underscore rule not expressible in pattern.
     @field_validator("name", "deprecates", "superseded_by")
     @classmethod
-    def _no_double_underscore(cls, v: str) -> str:  # type: ignore[override]
+    def _no_double_underscore(cls, v: str | None) -> str | None:
         if v and "__" in v:
             raise ValueError("Name tokens must not contain double underscores")
         return v
 
     @field_validator("name")
     @classmethod
-    def _check_grammar_vocabulary_consistency(cls, v: str) -> str:  # type: ignore[override]
+    def _check_grammar_vocabulary_consistency(cls, v: str) -> str:
         """Validate that template tokens in the name exist in the grammar vocabulary."""
         if not v:
             return v
@@ -218,18 +213,6 @@ class StandardNameBase(BaseModel):
                 f"  - {error}" for error in errors
             )
             raise ValueError(error_msg)
-        return v
-
-    @field_validator("physics_domain")
-    @classmethod
-    def validate_physics_domain(cls, v: str) -> str:  # type: ignore[override]
-        """Validate physics_domain is a valid PhysicsDomain enum value."""
-        if v not in PHYSICS_DOMAINS:
-            raise ValueError(
-                f"Invalid physics_domain: '{v}'. "
-                f"Valid domains: {', '.join(sorted(PHYSICS_DOMAINS)[:10])}... "
-                f"(see grammar/vocabularies/physics_domains.yml for complete list)"
-            )
         return v
 
     @model_validator(mode="after")
@@ -744,6 +727,34 @@ def load_standard_name_entry(data: dict) -> StandardNameEntry:
     return model_class.model_construct(**data)
 
 
+class StandardNameCatalogManifest(BaseModel):
+    """Catalog-level manifest describing a published standard names catalog.
+
+    Placed at the repository root (``catalog.yml``) and records run-level
+    metadata about the export that produced the catalog. Individual entries
+    carry only editorial fields; generation provenance lives here.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    catalog_name: str
+    cocos_convention: int
+    grammar_version: str
+    isn_model_version: str
+    dd_version_lineage: list[str]
+    generated_by: str
+    generated_at: datetime
+    min_score_applied: float | None = None
+    min_description_score_applied: float | None = None
+    include_unreviewed: bool = False
+    candidate_count: int
+    published_count: int
+    excluded_below_score_count: int = 0
+    excluded_unreviewed_count: int = 0
+    source_repo: str | None = None
+    source_commit_sha: str | None = None
+
+
 __all__ = [
     "Kind",
     "Status",
@@ -760,6 +771,7 @@ __all__ = [
     "StandardNameNameOnly",
     "Name",
     "StandardNameEntry",
+    "StandardNameCatalogManifest",
     "STANDARD_NAME_MODELS",
     "create_standard_name_entry",
     "load_standard_name_entry",

@@ -87,12 +87,18 @@ def row_to_model(conn: sqlite3.Connection, row: sqlite3.Row) -> StandardNameEntr
         "description": row["description"],
         "documentation": row["documentation"] or "",
         "validity_domain": row["validity_domain"] or "",
-        "deprecates": row["deprecates"] or "",
-        "superseded_by": row["superseded_by"] or "",
+        "deprecates": row["deprecates"] or None,
+        "superseded_by": row["superseded_by"] or None,
     }
 
-    if row["physics_domain"]:
-        data["physics_domain"] = row["physics_domain"]
+    # Include cocos_transformation_type if present in database
+    cocos_tt = (
+        row["cocos_transformation_type"]
+        if "cocos_transformation_type" in row.keys()
+        else None
+    )
+    if cocos_tt:
+        data["cocos_transformation_type"] = cocos_tt
 
     # Conditionally include unit if model has this field
     if "unit" in model_fields:
@@ -157,14 +163,6 @@ def row_to_model(conn: sqlite3.Connection, row: sqlite3.Row) -> StandardNameEntr
     ]
     if links:
         data["links"] = links
-    dd_paths = [
-        r[0]
-        for r in conn.execute(
-            "SELECT dd_path FROM dd_path WHERE name=?", (row["name"],)
-        ).fetchall()
-    ]
-    if dd_paths:
-        data["dd_paths"] = dd_paths
 
     try:
         return create_standard_name_entry(data)

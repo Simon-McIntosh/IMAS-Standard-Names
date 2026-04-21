@@ -21,7 +21,6 @@ documentation: |-
 
   Sign convention: Positive density indicates particle concentration, following standard plasma physics conventions with density measured in particles per cubic meter.
 status: draft
-physics_domain: core_plasma_physics
 tags:
 - global-quantity
 kind: scalar

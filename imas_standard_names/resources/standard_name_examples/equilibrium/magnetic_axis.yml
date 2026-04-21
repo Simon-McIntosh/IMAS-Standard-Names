@@ -25,7 +25,6 @@ documentation: |-
 
   Sign convention: Positive coordinates follow standard cylindrical coordinate conventions with R measured from machine center and Z measured from midplane.
 status: draft
-physics_domain: equilibrium
 tags:
 - flux-coordinates
 kind: metadata

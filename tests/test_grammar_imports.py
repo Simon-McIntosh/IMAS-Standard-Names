@@ -132,7 +132,6 @@ def test_validate_models_with_plain_dict():
             "unit": "eV",
             "description": "Electron temperature.",
             "documentation": "",
-            "physics_domain": "general",
         }
     )
     entries = {"electron_temperature": entry}
@@ -153,7 +152,6 @@ def test_validate_models_returns_issues_for_problematic_entries():
             "unit": "eV",
             "description": "Spatial gradient of electron temperature.",
             "documentation": "",
-            "physics_domain": "general",
             "provenance": {
                 "mode": "operator",
                 "operators": ["gradient"],

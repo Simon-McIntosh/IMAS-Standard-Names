@@ -140,10 +140,10 @@
               "type": "string"
             },
             {
-              "type": "string"
+              "type": "null"
             }
           ],
-          "default": "",
+          "default": null,
           "title": "Deprecates"
         },
         "superseded_by": {
@@ -159,24 +159,23 @@
               "type": "string"
             },
             {
-              "type": "string"
+              "type": "null"
             }
           ],
-          "default": "",
+          "default": null,
           "title": "Superseded By"
         },
-        "physics_domain": {
-          "description": "Physics domain classification from PhysicsDomain enum. Determines catalog subdirectory.",
-          "title": "Physics Domain",
-          "type": "string"
-        },
-        "dd_paths": {
-          "description": "IMAS Data Dictionary paths that map to this standard name. Used to track provenance from IMAS DD and enable cross-referencing between standard names and DD structure.",
-          "items": {
-            "type": "string"
-          },
-          "title": "Dd Paths",
-          "type": "array"
+        "cocos_transformation_type": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Cocos Transformation Type"
         },
         "description": {
           "description": "One concise sentence summarizing the physical quantity. Keep under 120 characters for readability. Should be self-contained and understandable without external context.",
@@ -246,7 +245,6 @@
       },
       "required": [
         "name",
-        "physics_domain",
         "description",
         "documentation"
       ],
@@ -293,10 +291,10 @@
               "type": "string"
             },
             {
-              "type": "string"
+              "type": "null"
             }
           ],
-          "default": "",
+          "default": null,
           "title": "Deprecates"
         },
         "superseded_by": {
@@ -312,24 +310,23 @@
               "type": "string"
             },
             {
-              "type": "string"
+              "type": "null"
             }
           ],
-          "default": "",
+          "default": null,
           "title": "Superseded By"
         },
-        "physics_domain": {
-          "description": "Physics domain classification from PhysicsDomain enum. Determines catalog subdirectory.",
-          "title": "Physics Domain",
-          "type": "string"
-        },
-        "dd_paths": {
-          "description": "IMAS Data Dictionary paths that map to this standard name. Used to track provenance from IMAS DD and enable cross-referencing between standard names and DD structure.",
-          "items": {
-            "type": "string"
-          },
-          "title": "Dd Paths",
-          "type": "array"
+        "cocos_transformation_type": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Cocos Transformation Type"
         },
         "description": {
           "description": "One concise sentence summarizing the physical quantity. Keep under 120 characters for readability. Should be self-contained and understandable without external context.",
@@ -443,7 +440,6 @@
       },
       "required": [
         "name",
-        "physics_domain",
         "description",
         "documentation",
         "unit"
@@ -491,10 +487,10 @@
               "type": "string"
             },
             {
-              "type": "string"
+              "type": "null"
             }
           ],
-          "default": "",
+          "default": null,
           "title": "Deprecates"
         },
         "superseded_by": {
@@ -510,24 +506,23 @@
               "type": "string"
             },
             {
-              "type": "string"
+              "type": "null"
             }
           ],
-          "default": "",
+          "default": null,
           "title": "Superseded By"
         },
-        "physics_domain": {
-          "description": "Physics domain classification from PhysicsDomain enum. Determines catalog subdirectory.",
-          "title": "Physics Domain",
-          "type": "string"
-        },
-        "dd_paths": {
-          "description": "IMAS Data Dictionary paths that map to this standard name. Used to track provenance from IMAS DD and enable cross-referencing between standard names and DD structure.",
-          "items": {
-            "type": "string"
-          },
-          "title": "Dd Paths",
-          "type": "array"
+        "cocos_transformation_type": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Cocos Transformation Type"
         },
         "description": {
           "description": "One concise sentence summarizing the physical quantity. Keep under 120 characters for readability. Should be self-contained and understandable without external context.",
@@ -641,7 +636,6 @@
       },
       "required": [
         "name",
-        "physics_domain",
         "description",
         "documentation",
         "unit"

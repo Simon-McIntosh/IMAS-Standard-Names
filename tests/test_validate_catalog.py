@@ -37,13 +37,7 @@ def validate_tool(catalog):
 
 def _write_entry_to_yaml(catalog_root: str, entry: StandardNameScalarEntry):
     """Helper to write an entry to YAML and rebuild catalog."""
-    # Determine physics_domain subdirectory
-    pd = (
-        entry.physics_domain
-        if hasattr(entry, "physics_domain") and entry.physics_domain
-        else "general"
-    )
-    tag_dir = Path(catalog_root) / pd
+    tag_dir = Path(catalog_root) / "general"
     tag_dir.mkdir(exist_ok=True)
 
     # Write YAML file
@@ -143,7 +137,6 @@ async def test_grammar_validation_generic_base(catalog_root):
         unit="A",
         kind="scalar",
         status="draft",
-        physics_domain="general",
     )
 
     # Write entry and validate
@@ -172,7 +165,6 @@ async def test_schema_validation_missing_fields(catalog_root):
         unit="m",
         kind="scalar",
         status="draft",
-        physics_domain="general",
     )
 
     # Write entry and validate
@@ -233,40 +225,6 @@ tags:
 
 
 @pytest.mark.anyio
-async def test_tag_validation_missing_tags_warning(catalog_root):
-    """Test tag validation generates warning for missing physics_domain."""
-    entry = StandardNameScalarEntry(
-        name="test_quantity",
-        description="Test quantity",
-        documentation="Test quantity for tag validation.",
-        unit="m",
-        kind="scalar",
-        status="draft",
-        physics_domain="general",
-        tags=[],  # Empty tags
-    )
-
-    # Write entry and validate
-    _write_entry_to_yaml(catalog_root, entry)
-    catalog = StandardNameCatalog(root=catalog_root, permissive=True)
-    validate_tool = ValidateCatalogTool(catalog)
-
-    result = await validate_tool.validate_catalog(
-        scope="persisted", checks=["tags"], include_warnings=True
-    )
-
-    # With physics_domain set but empty tags, there should be no warnings
-    # since physics_domain is the primary classification now
-    warnings = [
-        w
-        for w in result["warnings"]
-        if w["name"] == "test_quantity" and w["category"] == "tags"
-    ]
-
-    assert len(warnings) == 0
-
-
-@pytest.mark.anyio
 async def test_unit_validation_invalid_exponent(catalog_root):
     """Test unit validation catches invalid exponents."""
     # Write YAML directly with invalid unit to bypass Pydantic validation during creation
@@ -312,7 +270,6 @@ async def test_validate_all_checks(catalog_root):
         unit="A",
         kind="scalar",
         status="active",
-        physics_domain="general",
     )
 
     # Write entry and validate
@@ -349,7 +306,6 @@ async def test_validate_mixed_valid_invalid(catalog_root):
         unit="A",
         kind="scalar",
         status="active",
-        physics_domain="general",
     )
 
     # Invalid entry - generic base without qualification
@@ -360,7 +316,6 @@ async def test_validate_mixed_valid_invalid(catalog_root):
         unit="V",
         kind="scalar",
         status="draft",
-        physics_domain="general",
     )
 
     # Write both entries
@@ -388,7 +343,6 @@ async def test_provenance_superseded_by_validation(catalog_root):
         unit="m",
         kind="scalar",
         status="superseded",
-        physics_domain="general",
         superseded_by="non_existent_new_quantity",
     )
 

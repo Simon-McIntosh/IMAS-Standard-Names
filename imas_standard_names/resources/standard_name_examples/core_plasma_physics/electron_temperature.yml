@@ -23,7 +23,6 @@ documentation: |-
 
   Edge region: 10-200 eV, core region: 1-20 keV in high-performance tokamak plasmas. On-axis values in [electron_temperature_at_magnetic_axis](#electron_temperature_at_magnetic_axis) typically reach 5-15 keV during auxiliary heating.
 status: active
-physics_domain: core_plasma_physics
 tags:
 - spatial-profile
 kind: scalar

@@ -21,7 +21,6 @@ documentation: |-
 
   Sign convention: Positive when anti-clockwise viewed from above, following standard tokamak conventions and consistent with [plasma_current](#plasma_current) direction for stable operation.
 status: draft
-physics_domain: magnetic_field_diagnostics
 tags:
 - measured
 kind: scalar

@@ -60,14 +60,9 @@ def test_integrity_deleted_file(tmp_path: Path, example_scalars, write_yaml):
         write_yaml(tmp_path, example)
 
     first_name = example_scalars[0].name
-    first_pd = (
-        example_scalars[0].physics_domain
-        if hasattr(example_scalars[0], "physics_domain")
-        else ""
-    )
     db = build_catalog(tmp_path, tmp_path / "artifacts" / "catalog.db")
-    # Delete first example (file is in physics_domain subdirectory)
-    (tmp_path / first_pd / f"{first_name}.yml").unlink()
+    # Delete first example (write_yaml writes to a "general" subdirectory)
+    (tmp_path / "general" / f"{first_name}.yml").unlink()
     issues = verify_integrity(tmp_path, db, full=False)
     assert any(
         i["code"] == "missing-on-disk" and i.get("name") == first_name for i in issues

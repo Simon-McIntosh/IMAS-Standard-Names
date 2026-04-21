@@ -23,5 +23,4 @@ documentation: |-
 
   The first wall relates to [plasma_boundary](#plasma_boundary) as the material boundary, [scrape_off_layer](#scrape_off_layer) as the adjacent region, and [divertor](#divertor) for power handling. Wall position affects plasma shaping and stability limits.
 status: draft
-physics_domain: plasma_wall_interactions
 kind: metadata

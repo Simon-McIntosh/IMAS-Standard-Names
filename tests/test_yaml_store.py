@@ -13,7 +13,7 @@ def test_yaml_store_load(tmp_path: Path):
         "description: Plasma current.\n"
         "documentation: Total plasma current in the tokamak.\n"
         "unit: A\n"
-        "physics_domain: general\n"
+        ""
     )
     loaded = {mm.name: mm for mm in store.load()}
     assert "plasma_current" in loaded

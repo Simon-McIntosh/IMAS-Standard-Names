@@ -655,52 +655,38 @@ entry_schema:
       description: "Standard name token that supersedes this entry (required when status is 'superseded')"
       pattern: "^[a-z][a-z0-9_]*$|^$"
     
-    dd_paths:
+    cocos_transformation_type:
       required: false
-      type: array
-      items: string
-      default: []
-      description: "IMAS Data Dictionary paths that map to this standard name. Used to track provenance from IMAS DD and enable cross-referencing between standard names and DD structure."
-      format: "ids_name/path/to/leaf"
+      type: string
+      default: null
+      description: "COCOS transformation type for this quantity. Determines how signs change under COCOS convention switches."
+      allowed_values: [psi_like, ip_like, b0_like, f_like, q_like]
       examples:
-        - ["equilibrium/time_slice/profiles_1d/elongation"]
-        - ["equilibrium/time_slice/boundary/elongation", "equilibrium/time_slice/profiles_1d/elongation"]
-        - ["magnetics/flux_loop/flux/data"]
-      guidance:
-        purpose: "Track which IMAS Data Dictionary paths correspond to this standard name. Enables bidirectional linking between standard names and IMAS DD."
-        format_rules:
-          - "Use forward slashes (/) as path separators"
-          - "Start with IDS name (e.g., equilibrium, magnetics, core_profiles)"
-          - "Include full path to leaf node"
-          - "Paths are case-sensitive and must match IMAS DD exactly"
-        validation: "Paths can be validated using the check_imas_paths tool from the IMAS DD MCP server."
-        accumulation: "When enriching an existing entry with data from additional IDS paths, new paths are appended to the list (union semantics with deduplication)."
-        examples:
-          single_path: ["equilibrium/time_slice/profiles_1d/elongation"]
-          multiple_paths: ["equilibrium/time_slice/boundary/elongation", "equilibrium/time_slice/profiles_1d/elongation", "summary/boundary/elongation"]
-        note: "Multiple IDS paths may map to the same physical concept. Document all relevant paths to enable comprehensive data discovery and cross-referencing."
+        - psi_like
+        - ip_like
+        - null
 
   # Type-specific requirements
   type_specific:
     scalar:
-      required_fields: [name, description, documentation, unit, physics_domain]
+      required_fields: [name, description, documentation, unit]
       field_overrides:
         unit: "Required (use '1' for dimensionless)"
-      optional_fields: [provenance, status, validity_domain, constraints, deprecates, superseded_by, links, dd_paths]
+      optional_fields: [provenance, status, validity_domain, constraints, deprecates, superseded_by, links, cocos_transformation_type]
       description: "Physical quantities with single value at each point"
     
     vector:
-      required_fields: [name, description, documentation, unit, physics_domain]
+      required_fields: [name, description, documentation, unit]
       field_overrides:
         unit: "Required (use '1' for dimensionless)"
-      optional_fields: [provenance, status, validity_domain, constraints, deprecates, superseded_by, links, dd_paths]
+      optional_fields: [provenance, status, validity_domain, constraints, deprecates, superseded_by, links, cocos_transformation_type]
       description: "Vector field quantities with components"
     
     metadata:
-      required_fields: [name, description, documentation, physics_domain]
+      required_fields: [name, description, documentation]
       field_overrides:
         unit: "Optional (default empty string, omitted from serialization)"
       forbidden_fields: [provenance]
-      optional_fields: [status, validity_domain, constraints, deprecates, superseded_by, links, dd_paths]
+      optional_fields: [status, validity_domain, constraints, deprecates, superseded_by, links, cocos_transformation_type]
       description: "Definitional entries (boundaries, regions, concepts)"
       note: "Metadata entries are definitional anchors, not measurable/derived quantities"

@@ -29,14 +29,12 @@ def test_name_only_scalar_minimal_dict():
             "name": "plasma_current",
             "kind": "scalar",
             "unit": "A",
-            "physics_domain": "equilibrium",
         },
         name_only=True,
     )
     assert isinstance(entry, StandardNameScalarNameOnly)
     assert entry.name == "plasma_current"
     assert entry.unit == "A"
-    assert entry.physics_domain == "equilibrium"
 
 
 def test_name_only_vector_minimal_dict():
@@ -45,7 +43,6 @@ def test_name_only_vector_minimal_dict():
             "name": "magnetic_field",
             "kind": "vector",
             "unit": "T",
-            "physics_domain": "equilibrium",
         },
         name_only=True,
     )
@@ -58,7 +55,6 @@ def test_name_only_metadata_minimal_dict():
         {
             "name": "plasma_boundary",
             "kind": "metadata",
-            "physics_domain": "equilibrium",
         },
         name_only=True,
     )
@@ -73,7 +69,6 @@ def test_name_only_rejects_description_field():
                 "name": "plasma_current",
                 "kind": "scalar",
                 "unit": "A",
-                "physics_domain": "equilibrium",
                 "description": "accidentally included",
             },
             name_only=True,
@@ -87,7 +82,6 @@ def test_name_only_rejects_documentation_field():
                 "name": "plasma_current",
                 "kind": "scalar",
                 "unit": "A",
-                "physics_domain": "equilibrium",
                 "documentation": "accidentally included",
             },
             name_only=True,
@@ -106,7 +100,6 @@ def test_name_only_enforces_grammar_vocabulary():
                 "name": "nonexistent_component_of_magnetic_field",
                 "kind": "scalar",
                 "unit": "T",
-                "physics_domain": "equilibrium",
             },
             name_only=True,
         )
@@ -119,7 +112,6 @@ def test_name_only_enforces_unit_canonicalization():
             "name": "acceleration",
             "kind": "scalar",
             "unit": "s^-2.m",  # non-canonical, should reorder to m.s^-2
-            "physics_domain": "equilibrium",
         },
         name_only=True,
     )
@@ -134,20 +126,6 @@ def test_name_only_enforces_unit_pint_validation():
                 "name": "bogus_quantity",
                 "kind": "scalar",
                 "unit": "notaunit",
-                "physics_domain": "equilibrium",
-            },
-            name_only=True,
-        )
-
-
-def test_name_only_enforces_physics_domain_enum():
-    with pytest.raises(ValidationError, match="Invalid physics_domain"):
-        create_standard_name_entry(
-            {
-                "name": "plasma_current",
-                "kind": "scalar",
-                "unit": "A",
-                "physics_domain": "not_a_real_domain",
             },
             name_only=True,
         )
@@ -161,7 +139,6 @@ def test_name_only_enforces_deprecated_rule():
                 "name": "plasma_current",
                 "kind": "scalar",
                 "unit": "A",
-                "physics_domain": "equilibrium",
                 "status": "deprecated",
             },
             name_only=True,
@@ -176,7 +153,6 @@ def test_full_factory_still_requires_description():
                 "name": "plasma_current",
                 "kind": "scalar",
                 "unit": "A",
-                "physics_domain": "equilibrium",
             },
             name_only=False,
         )
@@ -189,7 +165,6 @@ def test_full_factory_roundtrip_unchanged():
             "name": "plasma_current",
             "kind": "scalar",
             "unit": "A",
-            "physics_domain": "equilibrium",
             "description": "Total toroidal plasma current.",
             "documentation": "Positive when flowing counter-clockwise viewed from above.",
         },
@@ -219,7 +194,6 @@ def test_name_only_union_discrimination():
             "name": "plasma_current",
             "kind": "scalar",
             "unit": "A",
-            "physics_domain": "equilibrium",
         },
         name_only=True,
     )
@@ -228,7 +202,6 @@ def test_name_only_union_discrimination():
             "name": "magnetic_field",
             "kind": "vector",
             "unit": "T",
-            "physics_domain": "equilibrium",
         },
         name_only=True,
     )
@@ -236,7 +209,6 @@ def test_name_only_union_discrimination():
         {
             "name": "plasma_boundary",
             "kind": "metadata",
-            "physics_domain": "equilibrium",
         },
         name_only=True,
     )

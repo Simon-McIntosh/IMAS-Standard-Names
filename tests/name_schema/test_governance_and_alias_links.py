@@ -13,7 +13,6 @@ def test_links_trailing_whitespace_preserved_if_duplicate():
             "documentation": "Density in the plasma core.",
             "unit": "m^-3",
             "status": "draft",
-            "physics_domain": "core_plasma_physics",
             "links": ["https://example.com/a", "https://example.com/a"],
         }
     )
@@ -30,7 +29,6 @@ def test_links_external_urls():
             "documentation": "Test quantity with external links.",
             "unit": "m",
             "status": "draft",
-            "physics_domain": "general",
             "links": ["https://example.org/spec", "http://doi.org/10.1234/example"],
         }
     )
@@ -47,7 +45,6 @@ def test_links_internal_references():
             "documentation": "Test quantity with internal references.",
             "unit": "m",
             "status": "draft",
-            "physics_domain": "general",
             "links": ["name:plasma_boundary", "name:minor_radius_of_flux_surface"],
         }
     )
@@ -64,7 +61,6 @@ def test_links_mixed_types():
             "documentation": "Test quantity with mixed link types.",
             "unit": "m",
             "status": "draft",
-            "physics_domain": "general",
             "links": [
                 "https://example.org/spec",
                 "name:plasma_boundary",
@@ -133,7 +129,6 @@ def test_constraints_trimmed():
             "documentation": "Test entry for constraint trimming validation.",
             "unit": "eV",
             "status": "draft",
-            "physics_domain": "general",
             "constraints": ["  T > 0  ", ""],
         }
     )

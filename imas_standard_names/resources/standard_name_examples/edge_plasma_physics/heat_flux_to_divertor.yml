@@ -33,7 +33,6 @@ documentation: |-
 
   Sign convention: Positive heat flux indicates power flow toward divertor surface, following standard heat transfer conventions with power density measured in W/m$^2$.
 status: draft
-physics_domain: edge_plasma_physics
 tags:
 - measured
 kind: scalar

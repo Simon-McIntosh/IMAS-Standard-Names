@@ -21,7 +21,6 @@ documentation: |-
 
   Sign convention: Positive indicates counter-clockwise toroidal current when viewed from above, same direction as toroidal magnetic field for stable operation.
 status: active
-physics_domain: general
 tags:
 - global-quantity
 - measured

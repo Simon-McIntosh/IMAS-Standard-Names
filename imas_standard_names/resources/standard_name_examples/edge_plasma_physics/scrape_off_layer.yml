@@ -23,7 +23,6 @@ documentation: |-
 
   SOL parameters are measured using edge diagnostics including Thomson scattering for temperature and density, Langmuir probes for plasma parameters, and heat flux monitors for power deposition. [Flux_loop_voltage](#flux_loop_voltage) integration provides boundary information. SOL analysis requires multiple diagnostic measurements across the edge region.
 status: active
-physics_domain: edge_plasma_physics
 tags:
 - flux-coordinates
 kind: metadata

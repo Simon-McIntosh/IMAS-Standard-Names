@@ -59,7 +59,6 @@ class TestFetchSingleName:
         assert "grammar" in entry
         assert "provenance" in entry
         assert "tags" in entry
-        assert "physics_domain" in entry
         assert "links" in entry
 
     def test_fetch_nonexistent_name(self, fetch_tool):
@@ -163,7 +162,6 @@ class TestFetchMetadata:
                 "description": "Electron temperature.",
                 "documentation": "Core electron temperature.",
                 "status": "draft",
-                "physics_domain": "core_plasma_physics",
             }
         )
         derived_entry = create_standard_name_entry(
@@ -174,7 +172,6 @@ class TestFetchMetadata:
                 "description": "Spatial gradient of electron temperature.",
                 "documentation": "Gradient of core electron temperature.",
                 "status": "draft",
-                "physics_domain": "core_plasma_physics",
                 "tags": ["derived"],
                 "provenance": {
                     "mode": "operator",

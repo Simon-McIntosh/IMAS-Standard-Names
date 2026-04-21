@@ -19,7 +19,6 @@ documentation: |-
 
   The divertor relates to [plasma_boundary](#plasma_boundary) through the magnetic separatrix, [scrape_off_layer](#scrape_off_layer) through open field lines, and [heat_flux_to_divertor](#heat_flux_to_divertor) through power deposition patterns. Divertor configuration affects [first_wall](#first_wall) loading and plasma performance.
 status: draft
-physics_domain: edge_plasma_physics
 tags:
 - divertor-configuration
 kind: metadata

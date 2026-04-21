@@ -29,7 +29,6 @@ documentation: |-
 
   Sign convention: Positive when normal to loop points downward (negative Z direction), following Faraday's law and standard electromagnetic conventions.
 status: active
-physics_domain: magnetic_field_diagnostics
 tags:
 - measured
 - time-dependent

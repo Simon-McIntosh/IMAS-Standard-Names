@@ -21,7 +21,6 @@ documentation: |-
 
   Sign convention: Positive heating power indicates energy input to the plasma, following standard power conventions with heating rate measured in watts.
 status: active
-physics_domain: general
 tags:
 - ohmic-heating
 kind: scalar

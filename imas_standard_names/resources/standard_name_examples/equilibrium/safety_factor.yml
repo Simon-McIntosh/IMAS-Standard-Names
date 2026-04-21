@@ -21,7 +21,6 @@ documentation: |-
 
   Sign convention: Positive when toroidal current and toroidal field are in same direction, following右手螺旋定则 for standard tokamak operation.
 status: draft
-physics_domain: equilibrium
 tags:
 - spatial-profile
 kind: scalar

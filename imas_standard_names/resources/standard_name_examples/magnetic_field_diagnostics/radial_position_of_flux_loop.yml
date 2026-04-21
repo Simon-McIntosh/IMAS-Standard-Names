@@ -25,6 +25,5 @@ documentation: |-
 
   Sign convention: Positive radial position measured outward from machine center, following standard cylindrical coordinate conventions and tokamak geometry.
 status: active
-physics_domain: magnetic_field_diagnostics
 kind: scalar
 unit: m

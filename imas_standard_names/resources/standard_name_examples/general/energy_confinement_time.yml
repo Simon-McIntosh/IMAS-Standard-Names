@@ -23,7 +23,6 @@ documentation: |-
 
   L-mode: 20-50 ms, H-mode: 100-300 ms for medium tokamaks; ITER target: ~4 s. Confinement time scales with machine size and plasma current, following empirical scaling laws.
 status: draft
-physics_domain: general
 tags:
 - global-quantity
 - performance-metric

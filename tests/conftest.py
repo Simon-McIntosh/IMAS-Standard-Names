@@ -48,7 +48,6 @@ def make_valid_entry(kind="scalar", **overrides):
         "documentation": "Detailed documentation for test quantity.",
         "unit": "m^-3" if kind != "metadata" else "",
         "status": "draft",
-        "physics_domain": "general",
     }
 
     # Merge with overrides
@@ -121,7 +120,6 @@ def sample_scalar_entry():
         "description": "Test scalar entry.",
         "unit": "m",
         "status": "draft",
-        "physics_domain": "magnetic_field_diagnostics",
         "tags": ["measured"],
     }
 
@@ -135,7 +133,6 @@ def sample_vector_entry():
         "description": "Test vector entry.",
         "unit": "T",
         "status": "draft",
-        "physics_domain": "magnetic_field_diagnostics",
         "tags": ["spatial-profile"],
     }
 
@@ -149,14 +146,12 @@ def sample_entries_with_provenance():
             "kind": "scalar",
             "description": "Base quantity for provenance tests.",
             "unit": "m",
-            "physics_domain": "magnetic_field_diagnostics",
         },
         {
             "name": "derived_quantity",
             "kind": "scalar",
             "description": "Derived quantity using operator.",
             "unit": "m.s^-1",
-            "physics_domain": "magnetic_field_diagnostics",
             "tags": ["derived"],
             "provenance": {
                 "mode": "operator",

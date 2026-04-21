@@ -13,6 +13,10 @@ from .models import (
 )
 from .services import validate_models
 
+# Fields that are no longer part of the catalog entry model.
+# They are stripped from loaded YAML data to support clean schema migration.
+_STRIPPED_FIELDS = {"physics_domain", "dd_paths"}
+
 
 class YamlStore:
     def __init__(self, root: str | Path, permissive: bool = False):
@@ -35,6 +39,10 @@ class YamlStore:
             unit_val = data.get("unit")
             if isinstance(unit_val, int | float):
                 data["unit"] = str(unit_val)
+
+            # Strip fields no longer in the catalog entry model
+            for field in _STRIPPED_FIELDS:
+                data.pop(field, None)
 
             # Handle Pydantic validation errors in permissive mode
             try:

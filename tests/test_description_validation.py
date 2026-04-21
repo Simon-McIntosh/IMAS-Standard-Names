@@ -13,7 +13,6 @@ def test_entry():
         "kind": "scalar",
         "unit": "m",
         "status": "draft",
-        "physics_domain": "equilibrium",
         "tags": ["spatial-profile"],  # Primary + secondary tags
         "description": "Test description",
         "documentation": "Test description for validation testing.",

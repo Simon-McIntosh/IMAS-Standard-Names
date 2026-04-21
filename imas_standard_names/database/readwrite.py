@@ -14,19 +14,18 @@ from .base import CatalogBase
 # Schema version tracks the DDL structure.
 # Bump major for breaking changes (removed/renamed tables/columns).
 # Bump minor for additive changes (new optional tables/columns).
-CATALOG_SCHEMA_VERSION = "3.0"
+CATALOG_SCHEMA_VERSION = "4.0"
 
 DDL = [
     "PRAGMA foreign_keys=ON;",
     "CREATE TABLE catalog_metadata (key TEXT PRIMARY KEY, value TEXT NOT NULL);",
-    "CREATE TABLE standard_name ( name TEXT PRIMARY KEY, kind TEXT NOT NULL, status TEXT NOT NULL, unit TEXT, description TEXT NOT NULL, documentation TEXT, validity_domain TEXT, physics_domain TEXT, deprecates TEXT, superseded_by TEXT, is_dimensionless INTEGER NOT NULL DEFAULT 0 );",
+    "CREATE TABLE standard_name ( name TEXT PRIMARY KEY, kind TEXT NOT NULL, status TEXT NOT NULL, unit TEXT, description TEXT NOT NULL, documentation TEXT, validity_domain TEXT, deprecates TEXT, superseded_by TEXT, cocos_transformation_type TEXT, is_dimensionless INTEGER NOT NULL DEFAULT 0 );",
     "CREATE TABLE provenance_operator ( name TEXT PRIMARY KEY REFERENCES standard_name(name) ON DELETE CASCADE, operator_chain TEXT NOT NULL, base TEXT NOT NULL, operator_id TEXT );",
     "CREATE TABLE provenance_reduction ( name TEXT PRIMARY KEY REFERENCES standard_name(name) ON DELETE CASCADE, reduction TEXT NOT NULL, domain TEXT NOT NULL, base TEXT NOT NULL );",
     "CREATE TABLE provenance_expression ( name TEXT PRIMARY KEY REFERENCES standard_name(name) ON DELETE CASCADE, expression TEXT NOT NULL );",
     "CREATE TABLE provenance_expression_dependency ( name TEXT NOT NULL REFERENCES provenance_expression(name) ON DELETE CASCADE, dependency TEXT NOT NULL REFERENCES standard_name(name), PRIMARY KEY(name,dependency) );",
     "CREATE TABLE tag ( name TEXT NOT NULL REFERENCES standard_name(name) ON DELETE CASCADE, tag TEXT NOT NULL, PRIMARY KEY(name,tag));",
     "CREATE TABLE link ( name TEXT NOT NULL REFERENCES standard_name(name) ON DELETE CASCADE, link TEXT NOT NULL, PRIMARY KEY(name,link));",
-    "CREATE TABLE dd_path ( name TEXT NOT NULL REFERENCES standard_name(name) ON DELETE CASCADE, dd_path TEXT NOT NULL, PRIMARY KEY(name,dd_path));",
     "CREATE VIRTUAL TABLE fts_standard_name USING fts5(name UNINDEXED, description, documentation);",
 ]
 
@@ -79,7 +78,7 @@ class CatalogReadWrite(CatalogBase):
         c = self.conn.cursor()
         try:
             c.execute(
-                "INSERT INTO standard_name(name,kind,status,unit,description,documentation,validity_domain,physics_domain,deprecates,superseded_by,is_dimensionless) VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+                "INSERT INTO standard_name(name,kind,status,unit,description,documentation,validity_domain,deprecates,superseded_by,cocos_transformation_type,is_dimensionless) VALUES (?,?,?,?,?,?,?,?,?,?,?)",
                 (
                     m.name,
                     getattr(m, "kind", ""),
@@ -88,9 +87,9 @@ class CatalogReadWrite(CatalogBase):
                     m.description,
                     getattr(m, "documentation", "") or None,
                     getattr(m, "validity_domain", "") or None,
-                    getattr(m, "physics_domain", "") or None,
-                    getattr(m, "deprecates", "") or None,
-                    getattr(m, "superseded_by", "") or None,
+                    getattr(m, "deprecates", None),
+                    getattr(m, "superseded_by", None),
+                    getattr(m, "cocos_transformation_type", None),
                     1 if getattr(m, "is_dimensionless", False) else 0,
                 ),
             )
@@ -131,11 +130,6 @@ class CatalogReadWrite(CatalogBase):
                 c.execute("INSERT INTO tag(name, tag) VALUES (?,?)", (m.name, t))
             for link in getattr(m, "links", []) or []:
                 c.execute("INSERT INTO link(name, link) VALUES (?,?)", (m.name, link))
-            for dd_path in getattr(m, "dd_paths", []) or []:
-                c.execute(
-                    "INSERT INTO dd_path(name, dd_path) VALUES (?,?)",
-                    (m.name, dd_path),
-                )
             c.execute(
                 "INSERT INTO fts_standard_name(name, description, documentation) VALUES (?,?,?)",
                 (m.name, m.description, getattr(m, "documentation", "") or ""),

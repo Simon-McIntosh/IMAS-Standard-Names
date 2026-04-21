@@ -9,7 +9,7 @@ from imas_standard_names.repository import StandardNameCatalog
 
 def _write_yaml(root: Path, model):
     """Write a standard name model as a YAML file."""
-    domain = getattr(model, "physics_domain", "general") or "general"
+    domain = "general"
     domain_dir = root / domain
     domain_dir.mkdir(parents=True, exist_ok=True)
     path = domain_dir / f"{model.name}.yml"

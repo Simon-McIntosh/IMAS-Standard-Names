@@ -17,7 +17,6 @@ unit: K.m^-1
 description: Gradient of temperature.
 documentation: |
   Gradient of temperature for structural and semantic validation testing.
-physics_domain: general
 provenance:
   mode: operator
   operators: [gradient]
@@ -34,7 +33,6 @@ unit: K.m^-1
 description: Radial component.
 documentation: |
   Radial component of gradient of temperature for structural and semantic validation testing.
-physics_domain: general
 provenance:
   mode: operator
   operators: [gradient]
@@ -51,7 +49,6 @@ unit: K.m^-1
 description: Toroidal component.
 documentation: |
   Toroidal component of gradient of temperature for structural and semantic validation testing.
-physics_domain: general
 provenance:
   mode: operator
   operators: [gradient]

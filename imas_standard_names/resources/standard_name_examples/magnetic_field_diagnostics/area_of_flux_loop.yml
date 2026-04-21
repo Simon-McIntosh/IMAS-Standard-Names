@@ -29,6 +29,5 @@ documentation: |-
 
   Sign convention: Positive area follows the right-hand rule for loop orientation, consistent with [flux_loop_voltage](#flux_loop_voltage) measurements and magnetic flux conventions.
 status: active
-physics_domain: magnetic_field_diagnostics
 kind: scalar
 unit: m^2

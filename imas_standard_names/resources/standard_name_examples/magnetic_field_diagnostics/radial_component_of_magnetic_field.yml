@@ -21,7 +21,6 @@ documentation: |-
 
   Sign convention: Positive outward (increasing R direction), following standard cylindrical coordinate conventions and consistent with tokamak geometry.
 status: active
-physics_domain: magnetic_field_diagnostics
 tags:
 - measured
 kind: scalar

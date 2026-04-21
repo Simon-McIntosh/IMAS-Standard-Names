@@ -25,7 +25,6 @@ documentation: |-
 
   Sign convention: Positive minor radius measured from magnetic axis to boundary, following standard tokamak geometry conventions.
 status: draft
-physics_domain: equilibrium
 tags:
 - global-quantity
 kind: scalar

@@ -15,8 +15,6 @@ unit: eV
 description: Electron temperature.
 documentation: |
   Electron temperature for testing.
-physics_domain: general
-tags: [spatial-profile]
 """,
         encoding="utf-8",
     )
@@ -28,7 +26,6 @@ unit: eV
 description: Ion temperature.
 documentation: |
   Ion temperature for testing.
-physics_domain: general
 """,
         encoding="utf-8",
     )
@@ -127,7 +124,6 @@ kind: scalar
 status: active
 unit: eV
 description: Electron temperature.
-physics_domain: general
 """,
         encoding="utf-8",
     )
@@ -140,7 +136,6 @@ kind: scalar
 status: active
 unit: m
 description: Major radius of the plasma.
-physics_domain: geometry
 """,
         encoding="utf-8",
     )
@@ -154,7 +149,6 @@ kind: scalar
 status: active
 unit: T
 description: Magnetic field measurement.
-physics_domain: magnetic_field_diagnostics
 tags: [measured]
 """,
         encoding="utf-8",

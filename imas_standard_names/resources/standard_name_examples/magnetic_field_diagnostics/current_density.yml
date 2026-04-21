@@ -27,7 +27,6 @@ documentation: |-
 
   Peak values in plasma core: $10^5$-$10^6$ A/m$^2$ depending on [plasma_current](#plasma_current) and profile shape. Edge values typically 1-2 orders of magnitude lower than core values.
 status: draft
-physics_domain: magnetic_field_diagnostics
 tags:
 - spatial-profile
 kind: scalar

@@ -49,4 +49,4 @@ def test_bundled_examples_catalog_loads():
         for entry in entries:
             assert entry.name, f"Entry missing name: {entry}"
             assert entry.description, f"Entry {entry.name} missing description"
-            assert entry.physics_domain, f"Entry {entry.name} missing physics_domain"
+            assert entry.kind, f"Entry {entry.name} missing kind"

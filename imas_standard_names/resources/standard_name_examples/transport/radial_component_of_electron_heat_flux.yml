@@ -21,7 +21,6 @@ documentation: |-
 
   Sign convention: Positive indicates outward (increasing R direction) heat flow from plasma core to edge, following standard cylindrical coordinate conventions.
 status: active
-physics_domain: transport
 tags:
 - spatial-profile
 kind: scalar

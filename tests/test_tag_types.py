@@ -162,46 +162,6 @@ def test_tag_to_physics_domain_mapping():
 # ============================================================================
 
 
-def test_valid_physics_domain_only():
-    """Test entries with physics_domain and no secondary tags."""
-    entry = StandardNameScalarEntry(
-        name="test_quantity",
-        description="Test quantity",
-        documentation="Test quantity for physics domain validation.",
-        unit="m",
-        physics_domain="general",
-    )
-    assert entry.physics_domain == "general"
-    assert entry.tags == []
-
-
-def test_valid_physics_domain_with_secondary_tags():
-    """Test entries with physics_domain and secondary tags."""
-    entry = StandardNameScalarEntry(
-        name="test_quantity",
-        description="Test quantity",
-        documentation="Test quantity with secondary tags.",
-        unit="m",
-        physics_domain="equilibrium",
-        tags=["reconstructed", "steady-state"],
-    )
-    assert entry.physics_domain == "equilibrium"
-    assert entry.tags == ["reconstructed", "steady-state"]
-
-
-def test_invalid_physics_domain_rejected():
-    """Test that invalid physics domains are rejected."""
-    with pytest.raises(ValidationError) as exc_info:
-        StandardNameScalarEntry(
-            name="test_quantity",
-            description="Test quantity",
-            documentation="Test.",
-            unit="m",
-            physics_domain="invalid_domain",
-        )
-    assert "Invalid physics_domain" in str(exc_info.value)
-
-
 def test_invalid_secondary_tag_rejected():
     """Test that invalid secondary tags are rejected."""
     with pytest.raises(ValidationError) as exc_info:
@@ -210,22 +170,20 @@ def test_invalid_secondary_tag_rejected():
             description="Test quantity",
             documentation="Test.",
             unit="m",
-            physics_domain="general",
             tags=["invalid_secondary_tag"],
         )
     assert "Unknown secondary tag(s)" in str(exc_info.value)
 
 
 def test_primary_tag_in_secondary_position_rejected():
-    """Test that physics domain values are rejected in the secondary tags list."""
+    """Test that primary tag values are rejected in the secondary tags list."""
     with pytest.raises(ValidationError):
         StandardNameScalarEntry(
             name="test_quantity",
             description="Test quantity",
             documentation="Test.",
             unit="m",
-            physics_domain="general",
-            tags=["general"],  # physics domain value, not allowed in secondary tags
+            tags=["general"],  # primary tag value, not allowed in secondary tags
         )
 
 
@@ -236,7 +194,6 @@ def test_empty_tags_allowed():
         description="Test quantity",
         documentation="Test quantity with empty tags.",
         unit="m",
-        physics_domain="general",
         tags=[],
     )
     assert entry.tags == []
@@ -251,24 +208,21 @@ def test_tag_whitespace_normalization():
             "description": "Test quantity",
             "documentation": "Test quantity for tag normalization.",
             "unit": "m",
-            "physics_domain": "general",
             "tags": ["  measured  ", " derived ", ""],
         }
     )
     assert entry.tags == ["measured", "derived"]
 
 
-def test_vector_entry_with_physics_domain():
-    """Test that vector entries use physics_domain correctly."""
+def test_vector_entry_secondary_tag_validation():
+    """Test that vector entries validate secondary tags."""
     entry = StandardNameVectorEntry(
         name="test_vector",
         description="Test vector",
         documentation="Test vector for tag validation.",
         unit="m.s^-1",
-        physics_domain="transport",
         tags=["spatial-profile"],
     )
-    assert entry.physics_domain == "transport"
     assert entry.tags == ["spatial-profile"]
 
     # Invalid secondary tag
@@ -278,7 +232,6 @@ def test_vector_entry_with_physics_domain():
             description="Test vector",
             documentation="Test.",
             unit="m",
-            physics_domain="transport",
             tags=["invalid_tag"],
         )
 
@@ -379,7 +332,7 @@ def test_quality_secondary_tags_exist():
 
 
 def test_common_tag_combinations():
-    """Test common real-world tag combinations with physics_domain."""
+    """Test common real-world tag combinations with secondary tags."""
     test_cases = [
         # Diagnostic measurement
         (
@@ -399,23 +352,19 @@ def test_common_tag_combinations():
             ["measured", "time-dependent", "raw-data"],
             True,
         ),
-        # Invalid physics domain
-        ("invalid_domain", ["measured"], False),
         # Invalid secondary tag
         ("general", ["invalid_tag"], False),
     ]
 
-    for physics_domain, tags, should_succeed in test_cases:
+    for _physics_domain, tags, should_succeed in test_cases:
         if should_succeed:
             entry = StandardNameScalarEntry(
                 name="test_quantity",
                 description="Test quantity",
                 documentation="Test quantity for tag combination validation.",
                 unit="m",
-                physics_domain=physics_domain,
                 tags=tags,
             )
-            assert entry.physics_domain == physics_domain
             assert entry.tags == tags
         else:
             with pytest.raises(ValidationError):
@@ -424,7 +373,6 @@ def test_common_tag_combinations():
                     description="Test quantity",
                     documentation="Test quantity for invalid tag validation.",
                     unit="m",
-                    physics_domain=physics_domain,
                     tags=tags,
                 )
 
@@ -448,18 +396,6 @@ def test_tag_consistency_with_yaml_source():
     # Check lengths match
     assert len(PRIMARY_TAGS) == len(spec.primary_tags)
     assert len(SECONDARY_TAGS) == len(spec.secondary_tags)
-
-
-def test_physics_domain_consistency_with_yaml_source():
-    """Test that generated PhysicsDomain enum matches YAML source."""
-    spec = PhysicsDomainSpec.load()
-
-    for domain in spec.domains:
-        assert domain in PHYSICS_DOMAINS, (
-            f"Domain '{domain}' from YAML not in generated PHYSICS_DOMAINS"
-        )
-
-    assert len(PHYSICS_DOMAINS) == len(spec.domains)
 
 
 def test_tag_descriptions_are_nonempty():

@@ -29,7 +29,6 @@ documentation: |-
 
   Sign convention: Positive poloidal field follows the right-hand rule for toroidal current direction, consistent with [plasma_current](#plasma_current) measurements and standard tokamak conventions.
 status: draft
-physics_domain: magnetic_field_diagnostics
 tags:
 - measured
 kind: vector
