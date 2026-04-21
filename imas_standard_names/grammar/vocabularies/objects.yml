@@ -84,3 +84,22 @@
 - wall_material                          # material of the first wall surface
 - breeder_blanket                        # breeder blanket structure (breeding blanket)
 - breeding_blanket_module                # breeding blanket module
+
+# === rc18 vocabulary extensions (VocabGap closure, codex plan 40) ===
+# From codex VocabGap graph analysis (2026-04-21). Shared by `object`
+# (of_<token>) and `device` (<token>_<base>) segments.
+- breeder_blanket_module              # breeder blanket module (DD synonym for breeding_blanket_module)
+- breeder_blanket_layer               # individual layer of a breeder blanket
+- breeder_blanket_shield              # shield component of a breeder blanket
+- beamlet_group                       # grouping of beamlets within an NBI injector
+- working_fluid                       # cooling / heat-transfer working fluid
+- filter                              # optical / diagnostic spectral filter
+- temperature_sensor                  # generic temperature sensor
+- optical_element                     # generic optical element (lens, mirror, prism)
+- mass_spectrometer                   # residual gas / plasma mass spectrometer
+- mass_spectrometer_channel           # single channel of a mass spectrometer
+- spectrometer_channel                # single channel of a generic spectrometer
+- neutron_detector_converter          # converter component of a neutron detector
+- ec_launcher_mirror                  # steering mirror of an EC launcher (short form)
+- diagnostic_antenna                  # diagnostic antenna (reflectometer, microwave)
+- port                                # vacuum-vessel port used as an object of intrinsic properties

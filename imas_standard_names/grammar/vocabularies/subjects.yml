@@ -68,3 +68,37 @@
 - ion_species                  # generic ion species (unresolved)
 - neutral_species              # generic neutral species (unresolved)
 - total                        # total / summed-over-all-species population
+
+# === rc18 vocabulary extensions (VocabGap closure, codex plan 40) ===
+# From codex VocabGap graph analysis (2026-04-21).
+# Atomic-state qualifiers for ion / neutral populations.
+- ion_state                    # ionisation-state index as a subject qualifier
+- fast_ion_state               # ionisation state of a fast-ion population
+- ion_charge_state             # specific atomic charge state of an ion
+- neutral_state                # electronic/vibrational state of a neutral
+# Orbital-class resolved fast populations (distribution_sources / distributions).
+- trapped_fast_ion             # trapped fast-ion population
+- co_passing_fast_ion          # co-passing fast-ion population
+- counter_passing_fast_ion     # counter-passing fast-ion population
+- trapped_fast_particle        # trapped fast-particle population (generic)
+- co_passing_fast_particle     # co-passing fast-particle population
+- counter_passing_fast_particle # counter-passing fast-particle population
+- trapped_particle             # trapped particle population (thermal or fast)
+# Gyrokinetic representation.
+- gyrocenter                   # gyrocentre distribution representation
+# Halo / pellet / SPI populations.
+- halo                         # halo (edge / scrape-off) particle population
+- pellet                       # injected-pellet species population
+- shattered_pellet             # shattered pellet injector (SPI) population
+- shattered_pellet_fragment    # individual SPI fragment
+- shattered_pellet_species     # species composing an SPI pellet
+# Radiation channels (used as subject of emitted_* bases).
+- hard_xray                    # hard X-ray emission population
+# Aggregate plasma populations.
+- bulk_plasma                  # bulk (thermal) plasma population
+- total_plasma                 # total plasma population (all species)
+# Recycling / fuelling gas species.
+- ammonia                      # ammonia (NH₃) recycling / injection species
+- silane                       # silane (SiH₄) recycling / injection species
+# ELM population marker.
+- edge_localized_mode          # edge-localized-mode population marker

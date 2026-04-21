@@ -108,3 +108,16 @@
 # From codex quarantined-name analysis (2025-07-28).
 - runaway_electrons            # runaway electron population as source process (plural form)
 - coulomb_collisions_with_electrons  # Coulomb collisions specifically with electrons
+
+# === rc18 vocabulary extensions (VocabGap closure, codex plan 40) ===
+# From codex VocabGap graph analysis (2026-04-21).
+- disruption_event                    # discrete disruption event (alongside ongoing `disruption`)
+- wave_particle_interaction           # resonant wave–particle interaction process
+- fast_particle_thermalization        # thermalisation of a fast-particle population
+- wave_driven_current_drive           # current drive driven by an RF wave (explicit form)
+- conductive_losses                   # conductive heat / particle losses (first_wall, blanket)
+- fast_particle_source                # distribution-source term from fast particles
+- distribution_function_driven        # driven by an explicit distribution-function source
+- radiation_emission                  # radiation emission process (generic)
+- recombination_emission              # photon emission from recombination events
+- fusion_born_alpha                   # alpha particles born from fusion reactions

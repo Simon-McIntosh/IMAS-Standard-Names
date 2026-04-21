@@ -113,3 +113,33 @@
 - pedestal_top_low_field_side            # low-field-side position at the pedestal top
 - pedestal_maximum                       # position of maximum pedestal pressure gradient
 - constant_toroidal_flux                 # constant-toroidal-flux (ρ_tor = const) surface
+
+# === rc18 vocabulary extensions (VocabGap closure, codex plan 40) ===
+# From codex VocabGap graph analysis (2026-04-21). Shared by both `position`
+# (at_<token>) and `geometry` (of_<token>) segments.
+# Note: halo_region intentionally NOT added here — it's a region-segment token
+# composed via `over_halo_region`, enforced by tests/test_regions_segment.py.
+- divertor_plate                     # divertor plate surface
+- pellet_path                        # trajectory path of an injected pellet
+- pellet_path_point                  # point along the pellet path
+- pellet_path_first_point            # first point of the pellet-path trajectory
+- pellet_path_second_point           # second point of the pellet-path trajectory
+- along_pellet_path                  # position along the pellet path (distance-parameterised)
+- shattering_position                # SPI shattering position
+- ntm_onset                          # onset location of a neoclassical tearing mode
+- neoclassical_tearing_mode_onset    # explicit form of the above
+- beam_path                          # trajectory path of a diagnostic / heating beam
+- along_beam_path                    # position along a beam path
+- ece_channel                        # ECE (electron cyclotron emission) channel position
+- ece_channel_emission_position      # emission position of an ECE channel
+- outboard_midplane_first_wall       # outboard midplane first-wall location
+- outboard_midplane_separatrix       # outboard midplane separatrix crossing
+- first_wall_midplane                # first-wall midplane location
+- ggd_grid_point                     # generic grid point of a GGD grid
+- ggd_grid_node                      # node of a GGD grid
+- ggd_grid_subset                    # subset (sub-region) of a GGD grid
+- ggd_element                        # element (cell) of a GGD grid
+- ggd_node                           # node of a GGD mesh
+- inlet                              # inlet of a cooling / gas circuit
+- outlet                             # outlet of a cooling / gas circuit
+- cooling_circuit_inlet              # cooling-circuit inlet (explicit form)
