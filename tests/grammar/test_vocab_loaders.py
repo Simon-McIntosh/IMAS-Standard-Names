@@ -98,10 +98,11 @@ def test_locus_entry_relations_are_valid():
 
 
 def test_plasma_boundary_entity_of_only():
+    # plasma_boundary reclassified to position in vNext (plan 38 §A5)
     reg = load_locus_registry()
     pb = reg.loci["plasma_boundary"]
-    assert pb.type == "entity"
-    assert pb.allowed_relations == ["of"]
+    assert pb.type == "position"
+    assert set(pb.allowed_relations) == {"at", "of"}
 
 
 def test_magnetic_axis_position_at_and_of():

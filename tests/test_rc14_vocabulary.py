@@ -127,7 +127,15 @@ class TestD3PositionTokens:
         "token,enum_member",
         [
             ("ferritic_element_centroid", Position.FERRITIC_ELEMENT_CENTROID),
-            ("neutron_detector", Position.NEUTRON_DETECTOR),
+            # neutron_detector reclassified as entity in vNext locus_registry (plan 38 §A5)
+            pytest.param(
+                "neutron_detector",
+                getattr(Position, "NEUTRON_DETECTOR", None),
+                marks=pytest.mark.xfail(
+                    reason="rc20 grammar: neutron_detector reclassified as entity (Object) in vNext (plan 38 §A5)",
+                    strict=True,
+                ),
+            ),
             ("measurement_position", Position.MEASUREMENT_POSITION),
         ],
     )
@@ -138,7 +146,13 @@ class TestD3PositionTokens:
         "position",
         [
             "ferritic_element_centroid",
-            "neutron_detector",
+            pytest.param(
+                "neutron_detector",
+                marks=pytest.mark.xfail(
+                    reason="rc20 grammar: neutron_detector reclassified as entity (Object) in vNext (plan 38 §A5)",
+                    strict=True,
+                ),
+            ),
             "measurement_position",
         ],
     )
@@ -154,7 +168,13 @@ class TestD3PositionTokens:
         "position",
         [
             "ferritic_element_centroid",
-            "neutron_detector",
+            pytest.param(
+                "neutron_detector",
+                marks=pytest.mark.xfail(
+                    reason="rc20 grammar: neutron_detector reclassified as entity (Object) in vNext (plan 38 §A5)",
+                    strict=True,
+                ),
+            ),
             "measurement_position",
         ],
     )
@@ -209,13 +229,32 @@ class TestD5TransformationTokens:
     @pytest.mark.parametrize(
         "token,enum_member",
         [
-            ("electron_equivalent", Transformation.ELECTRON_EQUIVALENT),
-            ("ratio_of", Transformation.RATIO_OF),
+            # electron_equivalent and ratio_of are rc20 tokens not in vNext operators.yml (plan 38 §A7)
+            pytest.param(
+                "electron_equivalent",
+                getattr(Transformation, "ELECTRON_EQUIVALENT", None),
+                marks=pytest.mark.xfail(
+                    reason="rc20 grammar: ELECTRON_EQUIVALENT removed in vNext operators.yml (plan 38 §A7)",
+                    strict=True,
+                ),
+            ),
+            pytest.param(
+                "ratio_of",
+                getattr(Transformation, "RATIO_OF", None),
+                marks=pytest.mark.xfail(
+                    reason="rc20 grammar: RATIO_OF is now a BinaryOperator, not Transformation (plan 38 §A7)",
+                    strict=True,
+                ),
+            ),
         ],
     )
     def test_transformation_enum_membership(self, token, enum_member):
         assert Transformation(token) == enum_member
 
+    @pytest.mark.xfail(
+        reason="rc20 grammar: electron_equivalent not in vNext Transformation enum (plan 38 §A7)",
+        strict=True,
+    )
     def test_electron_equivalent_compose_round_trip(self):
         """Compose from explicit parts and verify round-trip.
 
@@ -236,6 +275,10 @@ class TestD5TransformationTokens:
         # This is a known parser limitation; the token is usable via compose API
         assert reparsed.subject is not None or reparsed.transformation is not None
 
+    @pytest.mark.xfail(
+        reason="rc20 grammar: RATIO_OF is now a BinaryOperator, not Transformation (plan 38 §A7)",
+        strict=True,
+    )
     def test_ratio_of_round_trip(self):
         name = "ratio_of_density"
         parsed = parse_standard_name(name)

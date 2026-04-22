@@ -182,6 +182,10 @@ class TestBinaryOperatorExclusivity:
                 secondary_base="density",
             )
 
+    @pytest.mark.xfail(
+        strict=True,
+        reason="rc20 token 'square_of' replaced by bare 'square' in vNext grammar (plan 38 §A7)",
+    )
     def test_binary_excludes_transformation(self):
         with pytest.raises(ValueError, match="binary_operator.*transformation"):
             StandardName(

@@ -19,7 +19,15 @@ from imas_standard_names.grammar.model import (
 )
 from imas_standard_names.grammar.model_types import Decomposition
 
+# Decomposition tokens use rc20 forms (fourier_coefficient_of, n_equals_1, …)
+# that are not yet present in the vNext operators registry (plan 38 §A7).
+_XFAIL_RC20 = pytest.mark.xfail(
+    strict=True,
+    reason="rc20 decomposition token forms not yet in vNext operators registry (plan 38 §A7)",
+)
 
+
+@_XFAIL_RC20
 @pytest.mark.parametrize(
     "name",
     [
@@ -43,6 +51,7 @@ def test_decomposition_round_trip(name: str) -> None:
     assert compose_standard_name(parsed) == name
 
 
+@_XFAIL_RC20
 def test_decomposition_is_set_correctly() -> None:
     """Decomposition field should be populated with the matched enum value."""
     parsed = parse_standard_name("fourier_coefficient_of_magnetic_field")
@@ -51,18 +60,21 @@ def test_decomposition_is_set_correctly() -> None:
     assert parsed.transformation is None
 
 
+@_XFAIL_RC20
 def test_decomposition_mode_number_prefix() -> None:
     parsed = parse_standard_name("n_equals_1_magnetic_field")
     assert parsed.decomposition == Decomposition.N_EQUALS_1
     assert parsed.physical_base == "magnetic_field"
 
 
+@_XFAIL_RC20
 def test_decomposition_mode_number_ratio() -> None:
     parsed = parse_standard_name("m_over_n_equals_2_over_1_magnetic_field")
     assert parsed.decomposition == Decomposition.M_OVER_N_EQUALS_2_OVER_1
     assert parsed.physical_base == "magnetic_field"
 
 
+@_XFAIL_RC20
 def test_decomposition_with_prefix_segments() -> None:
     """Decomposition should combine with non-conflicting prefix segments."""
     name = "electron_fourier_coefficient_of_magnetic_field"

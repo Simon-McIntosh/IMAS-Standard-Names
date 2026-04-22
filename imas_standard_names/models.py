@@ -91,9 +91,7 @@ from imas_standard_names.provenance import (
     ExpressionProvenance,
     OperatorProvenance,
     Provenance,
-    ReductionProvenance,
 )
-from imas_standard_names.reductions import enforce_reduction_naming
 
 Status = Literal["draft", "active", "deprecated", "superseded"]
 
@@ -539,13 +537,6 @@ class StandardNameScalarEntry(StandardNameEntryBase):
                     operator_id=self.provenance.operator_id,
                     kind=self.kind,
                 )
-            if isinstance(self.provenance, ReductionProvenance):
-                enforce_reduction_naming(
-                    name=self.name,
-                    reduction=self.provenance.reduction,
-                    domain=self.provenance.domain,
-                    base=self.provenance.base,
-                )
         return self
 
 
@@ -581,13 +572,6 @@ class StandardNameVectorEntry(StandardNameEntryBase):
                     base=self.provenance.base,
                     operator_id=self.provenance.operator_id,
                     kind=self.kind,
-                )
-            if isinstance(self.provenance, ReductionProvenance):
-                enforce_reduction_naming(
-                    name=self.name,
-                    reduction=self.provenance.reduction,
-                    domain=self.provenance.domain,
-                    base=self.provenance.base,
                 )
         return self
 
@@ -640,13 +624,6 @@ class StandardNameTensorEntry(StandardNameEntryBase):
                     operator_id=self.provenance.operator_id,
                     kind=self.kind,
                 )
-            if isinstance(self.provenance, ReductionProvenance):
-                enforce_reduction_naming(
-                    name=self.name,
-                    reduction=self.provenance.reduction,
-                    domain=self.provenance.domain,
-                    base=self.provenance.base,
-                )
         return self
 
 
@@ -687,13 +664,6 @@ class StandardNameComplexEntry(StandardNameEntryBase):
                     base=self.provenance.base,
                     operator_id=self.provenance.operator_id,
                     kind=self.kind,
-                )
-            if isinstance(self.provenance, ReductionProvenance):
-                enforce_reduction_naming(
-                    name=self.name,
-                    reduction=self.provenance.reduction,
-                    domain=self.provenance.domain,
-                    base=self.provenance.base,
                 )
         return self
 

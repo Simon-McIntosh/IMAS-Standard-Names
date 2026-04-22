@@ -259,10 +259,18 @@ vocabularies:
   generic_physical_bases: !include vocabularies/generic_physical_bases.yml
   binary_operators: !include vocabularies/binary_operators.yml
   # --- vNext vocabularies (plan 38 §A9) ---
-  # objects.yml, positions.yml → locus_registry.yml (typed)
-  # geometric_bases.yml → geometry_carriers.yml + physical_bases.yml
-  # transformations.yml, decomposition.yml → operators.yml (unified)
-  # The vNext registries are loaded by vocab_loaders.py, not this spec.
+  # objects.yml + positions.yml migrated to locus_registry.yml (typed locus entries)
+  # geometric_bases.yml migrated to geometry_carriers.yml (closed shape carriers)
+  # transformations.yml + decomposition.yml → operators.yml (unified operator registry)
+  # Vocabulary names kept as ``objects``, ``positions``, ``geometric_bases`` for
+  # backward compatibility with generated enum class names (Object, Position, GeometricBase).
+  objects: !include vocabularies/locus_registry.yml
+  positions: !include vocabularies/locus_registry.yml
+  geometric_bases: !include vocabularies/geometry_carriers.yml
+  # transformations + decomposition → both generated from operators.yml (bare vNext tokens).
+  # rc20 tests that assert _of_-suffixed token forms are marked xfail (plan 38 §A10).
+  transformations: !include vocabularies/operators.yml
+  decomposition: !include vocabularies/operators.yml
 
 #===============================================================================
 # Binary Operator Connectors

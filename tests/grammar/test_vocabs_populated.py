@@ -181,8 +181,9 @@ class TestLocusRegistryKeyEntries:
         return load_locus_registry()
 
     def test_plasma_boundary_entity(self, loci):
+        # plasma_boundary reclassified to position in vNext (plan 38 §A5)
         assert "plasma_boundary" in loci.loci
-        assert loci.loci["plasma_boundary"].type == "entity"
+        assert loci.loci["plasma_boundary"].type == "position"
 
     def test_magnetic_axis_position(self, loci):
         assert "magnetic_axis" in loci.loci

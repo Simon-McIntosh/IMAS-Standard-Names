@@ -350,7 +350,7 @@ def render_constants_module(spec: Any) -> str:
         _segment_rule_dataclass(),
         _render_segment_metadata(metadata),
         _render_scope_metadata(spec),
-        _constants_export_block(),
+        _constants_export_block(spec),
     ]
 
     parts: list[str] = []
@@ -659,28 +659,36 @@ def _render_scope_metadata(spec: Any) -> str:
         )
         sections.append(generic_section)
 
-    # Add transformation tokens if the vocabulary exists
+    # Add transformation tokens (empty tuple when vocabulary is absent — operators.yml
+    # is the vNext unified registry; legacy transformations.yml was deleted in W2a)
     if "transformations" in spec.vocabularies:
         tokens = spec.vocabularies["transformations"]
-        tokens_repr = _format_tuple_literal(tokens, indent=4, base_indent=0)
-        transformation_section = (
-            "\n# Unary transformation tokens that modify a physical base\n"
-            "# These are prefixed to the physical_base: e.g. square_of_temperature\n"
-            f"TRANSFORMATION_TOKENS: tuple[str, ...] = {tokens_repr}"
-        )
-        sections.append(transformation_section)
+    else:
+        tokens = ()
+    tokens_repr = _format_tuple_literal(tokens, indent=4, base_indent=0)
+    transformation_section = (
+        "\n# Unary transformation tokens that modify a physical base\n"
+        "# These are prefixed to the physical_base: e.g. square_of_temperature\n"
+        "# Empty tuple when 'transformations' vocabulary is absent (vNext: use operators.yml)\n"
+        f"TRANSFORMATION_TOKENS: tuple[str, ...] = {tokens_repr}"
+    )
+    sections.append(transformation_section)
 
-    # Add decomposition tokens if the vocabulary exists
+    # Add decomposition tokens (empty tuple when vocabulary is absent — operators.yml
+    # is the vNext unified registry; legacy decomposition.yml was deleted in W2a)
     if "decomposition" in spec.vocabularies:
         tokens = spec.vocabularies["decomposition"]
-        tokens_repr = _format_tuple_literal(tokens, indent=4, base_indent=0)
-        decomposition_section = (
-            "\n# Mode / Fourier / spectral decomposition tokens prefixed to the\n"
-            "# physical_base between transformation and base:\n"
-            "# e.g. fourier_coefficient_of_magnetic_field, n_equals_1_magnetic_field\n"
-            f"DECOMPOSITION_TOKENS: tuple[str, ...] = {tokens_repr}"
-        )
-        sections.append(decomposition_section)
+    else:
+        tokens = ()
+    tokens_repr = _format_tuple_literal(tokens, indent=4, base_indent=0)
+    decomposition_section = (
+        "\n# Mode / Fourier / spectral decomposition tokens prefixed to the\n"
+        "# physical_base between transformation and base:\n"
+        "# e.g. fourier_coefficient_of_magnetic_field, n_equals_1_magnetic_field\n"
+        "# Empty tuple when 'decomposition' vocabulary is absent (vNext: use operators.yml)\n"
+        f"DECOMPOSITION_TOKENS: tuple[str, ...] = {tokens_repr}"
+    )
+    sections.append(decomposition_section)
 
     # Add binary operator tokens and connector mapping if the vocabulary exists
     if "binary_operators" in spec.vocabularies:
@@ -712,7 +720,7 @@ def _types_export_block(spec: Any) -> str:
     return "\n\n__all__ = [\n    " + formatted + ",\n]"
 
 
-def _constants_export_block() -> str:
+def _constants_export_block(spec: Any | None = None) -> str:
     constants = [
         "SegmentRule",
         "SEGMENT_TOKEN_MAP",
@@ -732,6 +740,7 @@ def _constants_export_block() -> str:
         "APPLICABILITY_EXCLUDE",
         "APPLICABILITY_RATIONALE",
         "GENERIC_PHYSICAL_BASES",
+        # Always present; empty tuples when legacy vocabularies are absent
         "TRANSFORMATION_TOKENS",
         "DECOMPOSITION_TOKENS",
         "BINARY_OPERATOR_TOKENS",

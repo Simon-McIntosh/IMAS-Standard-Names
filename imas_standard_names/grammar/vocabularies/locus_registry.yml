@@ -180,8 +180,8 @@ loci:
     type: entity
     allowed_relations: [of]
   plasma_boundary:
-    type: entity
-    allowed_relations: [of]
+    type: position
+    allowed_relations: [at, of]
   plasma_facing_component:
     type: entity
     allowed_relations: [of]

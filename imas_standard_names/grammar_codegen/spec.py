@@ -112,7 +112,8 @@ class GrammarSpec:
         scope_raw = data.get("applicability") or data.get("scope", {})
 
         vocabularies = {
-            name: _flatten_unique(tokens) for name, tokens in vocab_raw.items()
+            name: _extract_vocab_tokens(tokens, vocab_name=name)
+            for name, tokens in vocab_raw.items()
         }
 
         # Parse applicability/scope section
@@ -216,6 +217,75 @@ def _flatten_unique(values: Iterable[Any]) -> tuple[str, ...]:
         seen.add(text)
         result.append(text)
     return tuple(result)
+
+
+def _extract_vocab_tokens(value: Any, vocab_name: str = "") -> tuple[str, ...]:
+    """Extract token names from a vocabulary value, handling vNext typed formats.
+
+    Supports the following vocabulary file formats:
+    - Flat list of strings (legacy components/subjects/regions/processes)
+    - Dict with ``loci`` key (locus_registry.yml) — extracts locus token names
+    - Dict with ``carriers`` key (geometry_carriers.yml) — extracts carrier names
+    - Dict with ``bases`` key (physical_bases.yml) — extracts base names
+    - Dict with ``operators`` key (operators.yml) — extracts operator names
+    - Dict with ``axes`` key (coordinate_axes.yml) — extracts axis names
+    - Bare dict with string keys (legacy flat dict vocabs)
+
+    When ``vocab_name`` is ``"objects"`` or ``"positions"``, loci tokens are
+    filtered by ``type`` to preserve rc20 semantics:
+    - ``objects``   → only ``entity``-typed loci (used as device/object prefixes)
+    - ``positions`` → only ``position``-typed loci (used as *at* suffixes)
+
+    When ``vocab_name`` is ``"transformations"`` or ``"decomposition"``, operator
+    tokens are filtered by ``kind`` to exclude binary operators (``product``,
+    ``ratio``, ``difference``) which have their own ``binary_operators`` vocab.
+    - ``transformations`` / ``decomposition`` → exclude ``kind: binary`` operators
+    """
+    # Type-filter mappings for backward-compatible locus_registry vocabulary slices
+    _LOCUS_TYPE_FILTERS: dict[str, str] = {
+        "objects": "entity",
+        "positions": "position",
+    }
+    # Vocab names that should exclude binary operators from operators.yml
+    _UNARY_ONLY_OPERATOR_VOCABS: frozenset[str] = frozenset(
+        {"transformations", "decomposition"}
+    )
+
+    if value is None:
+        return ()
+    if isinstance(value, list):
+        return _flatten_unique(value)
+    if isinstance(value, dict):
+        # vNext typed vocabulary formats — extract the canonical root key
+        for root_key in ("loci", "carriers", "bases", "operators", "axes"):
+            if root_key in value:
+                inner = value[root_key]
+                if root_key == "loci" and isinstance(inner, dict):
+                    locus_type = _LOCUS_TYPE_FILTERS.get(vocab_name)
+                    if locus_type:
+                        # Filter by type for objects/positions backward compat
+                        return tuple(
+                            k
+                            for k, v in inner.items()
+                            if isinstance(v, dict) and v.get("type") == locus_type
+                        )
+                    return _flatten_unique(inner.keys())
+                if root_key == "operators" and isinstance(inner, dict):
+                    if vocab_name in _UNARY_ONLY_OPERATOR_VOCABS:
+                        # Exclude binary operators from transformation/decomposition
+                        return tuple(
+                            k
+                            for k, v in inner.items()
+                            if isinstance(v, dict) and v.get("kind") != "binary"
+                        )
+                    return _flatten_unique(inner.keys())
+                if isinstance(inner, dict):
+                    return _flatten_unique(inner.keys())
+                if isinstance(inner, list):
+                    return _flatten_unique(inner)
+        # Legacy/flat dict: keys are token names
+        return _flatten_unique(value.keys())
+    return _flatten_unique((value,))
 
 
 def _as_iterable(value: Any) -> Iterable[Any]:
