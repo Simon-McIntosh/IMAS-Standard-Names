@@ -55,8 +55,10 @@ import re
 from collections.abc import Iterable
 from datetime import datetime
 from enum import StrEnum
+from pathlib import Path
 from typing import Annotated, Literal, get_args
 
+import yaml as _yaml
 from pydantic import (
     BaseModel,
     ConfigDict,
@@ -78,8 +80,16 @@ from imas_standard_names.field_types import (
     Tags,
     Unit,
 )
+from imas_standard_names.grammar import vocab_loaders as _vocab_loaders
 from imas_standard_names.grammar.field_schemas import FIELD_DESCRIPTIONS
-from imas_standard_names.grammar.model_types import Component, Position, Process
+
+# rc22: Component, Position, Process are retained in model_types for the rc23
+# deprecation cycle but are NO LONGER used in the validators below.
+from imas_standard_names.grammar.model_types import (  # noqa: F401
+    Component,
+    Position,
+    Process,
+)
 from imas_standard_names.grammar.tag_types import (
     SECONDARY_TAGS,
 )
@@ -95,59 +105,139 @@ from imas_standard_names.provenance import (
 
 Status = Literal["draft", "active", "deprecated", "superseded"]
 
+# ---------------------------------------------------------------------------
+# rc22: vNext vocabulary caches (lazy-loaded once per process)
+# ---------------------------------------------------------------------------
+
+_COMPONENT_VOCAB_CACHE: frozenset[str] | None = None
+_COORDINATE_AXES_CACHE: frozenset[str] | None = None
+_LOCUS_REGISTRY_CACHE: dict | None = None
+
+_VOCAB_DIR = Path(__file__).parent / "grammar" / "vocabularies"
+
+
+def _get_component_vocab() -> frozenset[str]:
+    """Return the vNext component token set (from components.yml)."""
+    global _COMPONENT_VOCAB_CACHE
+    if _COMPONENT_VOCAB_CACHE is None:
+        with (_VOCAB_DIR / "components.yml").open(encoding="utf-8") as _fh:
+            _data = _yaml.safe_load(_fh) or []
+        _COMPONENT_VOCAB_CACHE = frozenset(
+            item for item in _data if isinstance(item, str)
+        )
+    return _COMPONENT_VOCAB_CACHE
+
+
+def _get_coordinate_axes() -> frozenset[str]:
+    """Return the vNext coordinate axis token set (from coordinate_axes.yml)."""
+    global _COORDINATE_AXES_CACHE
+    if _COORDINATE_AXES_CACHE is None:
+        _reg = _vocab_loaders.load_coordinate_axes()
+        _COORDINATE_AXES_CACHE = frozenset(_reg.axes)
+    return _COORDINATE_AXES_CACHE
+
+
+def _get_locus_registry() -> dict:
+    """Return the vNext locus registry dict token -> LocusEntry."""
+    global _LOCUS_REGISTRY_CACHE
+    if _LOCUS_REGISTRY_CACHE is None:
+        _reg = _vocab_loaders.load_locus_registry()
+        _LOCUS_REGISTRY_CACHE = dict(_reg.loci)
+    return _LOCUS_REGISTRY_CACHE
+
 
 def _check_grammar_vocabulary_consistency(name: str) -> list[str]:
     """Check if a standard name uses vocabulary tokens that don't exist in grammar.
 
     Only flags cases where clear template patterns indicate missing vocabulary tokens.
     Does NOT flag compound base names like 'electron_temperature' or 'plasma_velocity'.
+
+    rc22: validators now check against vNext vocabulary loaders
+    (``grammar/vocab_loaders.py``) rather than the rc20 Component/Position/Process
+    enums in ``grammar/model_types``.  Those enums are retained for rc23 removal.
     """
     errors = []
 
-    # Only check for explicit template patterns with known vocabulary requirements
-    # These patterns should always map to vocabulary tokens, not compound base names
-
-    # Check 'component_of' pattern - should always map to Component vocabulary
+    # ------------------------------------------------------------------
+    # 1. 'component_of' pattern -> check against vNext components.yml tokens
+    #
+    # Example valid:   "radial_component_of_magnetic_field"
+    # Example invalid: "nonexistent_component_of_magnetic_field"
+    # Skip check when the token before '_component_of_' contains '_of_' --
+    # this indicates operator nesting (e.g.
+    # "normalized_of_parallel_component_of_...") that the parser resolves
+    # via operator peeling; the leading segment captured by the regex is
+    # compound, not a bare component token.
+    # ------------------------------------------------------------------
     component_match = re.search(r"^([a-z_]+)_component_of_", name)
     if component_match:
         token = component_match.group(1)
-        if token not in [c.value for c in Component]:
+        if "_of_" not in token and token not in _get_component_vocab():
             errors.append(
-                f"Token '{token}' used with 'component_of' template is missing from Component vocabulary"
+                f"Token '{token}' used with 'component_of' template is missing"
+                " from component vocabulary"
             )
 
-    # Check coordinate pattern - should always map to Component vocabulary (same tokens)
+    # ------------------------------------------------------------------
+    # 2. Coordinate prefix pattern -> check against vNext coordinate_axes.yml
+    #
+    # Example valid:   "radial_outline_of_plasma_boundary"
+    # Skip check when the captured prefix contains '_of_' -- a multi-word
+    # prefix means the regex over-matched a longer compound token (e.g.
+    # "vertical_coordinate_of_plasma_boundary_outline_point" captures
+    # "vertical_coordinate_of_plasma_boundary" before "_outline_").
+    # ------------------------------------------------------------------
     coordinate_match = re.search(
-        r"^([a-z_]+)_(?:position|vertex|centroid|outline|contour|displacement|offset|trajectory|extent|surface_normal|sensor_normal|tangent_vector)_",
+        r"^([a-z_]+)_(?:position|vertex|centroid|outline|contour|displacement"
+        r"|offset|trajectory|extent|surface_normal|sensor_normal|tangent_vector)_",
         name,
     )
     if coordinate_match:
         token = coordinate_match.group(1)
-        if token not in [c.value for c in Component]:
+        if "_of_" not in token and token not in _get_coordinate_axes():
             errors.append(
-                f"Token '{token}' used as coordinate prefix is missing from Component vocabulary"
+                f"Token '{token}' used as coordinate prefix is missing from"
+                " coordinate_axes vocabulary"
             )
 
-    # Check 'at_' pattern - should always map to Position vocabulary
+    # ------------------------------------------------------------------
+    # 3. 'at_' pattern -> check against vNext locus_registry.yml
+    #
+    # Only raise an error when the token IS found in the locus registry but
+    # that locus type does NOT permit the 'at' relation.  Tokens absent from
+    # the registry are silently accepted -- the parser emits a 'vocab_gap'
+    # info diagnostic for those, and this validator must not second-guess it.
+    #
+    # Example valid (in registry, allows at):
+    #   "pressure_at_plasma_boundary"  (plasma_boundary: type=position,
+    #                                    allowed=[at,of])
+    # Example accepted via VocabGap (not in registry):
+    #   "normalized_pressure_gradient_at_gyrokinetic_flux_surface"
+    # ------------------------------------------------------------------
     at_match = re.search(r"_at_([a-z_]+)(?:_|$)", name)
     if at_match:
         token = at_match.group(1)
-        if token not in [p.value for p in Position]:
-            errors.append(
-                f"Token '{token}' used with 'at_' template is missing from Position vocabulary"
-            )
+        locus_reg = _get_locus_registry()
+        if token in locus_reg:
+            entry = locus_reg[token]
+            if "at" not in entry.allowed_relations:
+                allowed_str = sorted(entry.allowed_relations)
+                errors.append(
+                    f"Token '{token}' used with 'at_' template is not permitted"
+                    f" for locus type '{entry.type}' (allowed: {allowed_str})"
+                )
+        # else: token not in locus_registry -> VocabGap (parser info diagnostic),
+        # no ValidationError raised here.
 
-    # Check 'due_to_' pattern - should always map to Process vocabulary
-    due_to_match = re.search(r"_due_to_([a-z_]+)(?:_|$)", name)
-    if due_to_match:
-        token = due_to_match.group(1)
-        if token not in [p.value for p in Process]:
-            errors.append(
-                f"Token '{token}' used with 'due_to_' template is missing from Process vocabulary"
-            )
-
-    # Skip 'of_' pattern validation entirely - it's used for both vocabulary tokens
-    # AND valid compound base names like 'electron_temperature', 'plasma_velocity'
+    # ------------------------------------------------------------------
+    # 4. 'due_to_' pattern check INTENTIONALLY OMITTED in rc22.
+    #
+    # The vNext parser's _strip_mechanism stage (grammar/parser.py) accepts
+    # any token after '_due_to_' without vocabulary enforcement.  Unknown
+    # process tokens produce no error in the parser, so this validator must
+    # not raise a false-positive either.  Process vocabulary coverage is
+    # tracked via the VocabGap mechanism in the parser, not here.
+    # ------------------------------------------------------------------
 
     return errors
 

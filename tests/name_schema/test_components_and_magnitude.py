@@ -23,7 +23,7 @@ def test_invalid_component_token_rejected():
     """Test that names with invalid component tokens are rejected by grammar validator."""
     with pytest.raises(
         ValueError,
-        match="Token 'r' used with 'component_of' template is missing from Component vocabulary",
+        match="Token 'r' used with 'component_of' template is missing from component vocabulary",
     ):
         create_standard_name_entry(
             {
@@ -39,7 +39,7 @@ def test_invalid_component_token_rejected():
     # Test another invalid component token
     with pytest.raises(
         ValueError,
-        match="Token 'tor' used with 'component_of' template is missing from Component vocabulary",
+        match="Token 'tor' used with 'component_of' template is missing from component vocabulary",
     ):
         create_standard_name_entry(
             {
