@@ -1,0 +1,17 @@
+# Physical bases vocabulary (plan 38 §A6)
+#
+# Closed vocabulary of physical quantity nouns used as the base of a
+# standard name.  Replaces the current open-fallback behaviour in the
+# parser: any residue not found here (or in geometry_carriers.yml) will
+# be REJECTED with an actionable diagnostic.
+#
+# Token rule: a physical_base is a noun phrase describing a physical
+# quantity (temperature, pressure, density, magnetic_field, …) but is
+# NEVER a generic one — see generic_physical_bases.yml for those that
+# require a qualifier (current, power, voltage, …).
+#
+# Expected size: ~200–400 tokens after W2a corpus mining (plan 38 §A9).
+# Populated by W2a from the rc20 corpus grammar_physical_base values plus
+# CF convention references.
+
+bases: {}

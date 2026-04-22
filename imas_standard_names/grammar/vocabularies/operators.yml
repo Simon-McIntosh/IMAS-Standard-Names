@@ -1,0 +1,67 @@
+# Operator registry vocabulary (plan 38 §A7)
+#
+# Unified replacement for transformations.yml + decomposition.yml +
+# reductions.py patterns.  All operator tokens are stored as BARE tokens
+# (no trailing _of_); the rendering engine appends _of_ for unary_prefix
+# operators and handles binary separators.
+#
+# Schema per entry:
+#   kind          - unary_prefix | unary_postfix | binary
+#   precedence    - int; higher = applied further out (wraps more of the name)
+#   returns       - optional str describing the return kind
+#   arg_types     - optional list[str] constraining valid input kinds
+#   separator     - str used between arguments for binary operators
+#   indexed       - bool; if true, index parameters are appended to the name
+#   index_params  - list[str] naming the index parameters (requires indexed=true)
+#
+# Rendering templates:
+#   unary_prefix   ->  <token>_of_<inner>
+#   unary_postfix  ->  <inner>_<token>
+#   binary         ->  <token>_of_<A><separator><B>
+#
+# Populated by W1c (seed ~10 entries); W2a will migrate the full
+# transformations.yml / decomposition.yml contents after parser is updated.
+
+operators:
+  magnitude:
+    kind: unary_postfix
+    precedence: 10
+    returns: scalar
+    arg_types: [vector, complex]
+  time_derivative:
+    kind: unary_prefix
+    precedence: 20
+    returns: rate
+  time_average:
+    kind: unary_prefix
+    precedence: 30
+    returns: scalar_or_vector
+  root_mean_square:
+    kind: unary_prefix
+    precedence: 30
+    returns: scalar
+  fourier_coefficient:
+    kind: unary_prefix
+    precedence: 40
+    indexed: true
+    index_params: [m, n]
+  ratio:
+    kind: binary
+    separator: _to_
+    precedence: 5
+  product:
+    kind: binary
+    separator: _and_
+    precedence: 5
+  square:
+    kind: unary_prefix
+    precedence: 20
+    returns: scalar_or_vector
+  logarithm:
+    kind: unary_prefix
+    precedence: 20
+    returns: scalar
+  inverse:
+    kind: unary_prefix
+    precedence: 20
+    returns: scalar_or_vector

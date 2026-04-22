@@ -1,0 +1,47 @@
+# Locus registry vocabulary (plan 38 §A5)
+#
+# Typed registry replacing the rc20 objects.yml + positions.yml + scattered
+# device/geometry entries.  Every locus token carries:
+#   type            - entity | position | geometry
+#   allowed_relations - subset of [of, at, over]
+#
+# Compatibility matrix enforced at validation time:
+#   entity   -> _of_  (intrinsic property of an entity)
+#   position -> _at_  (field quantity evaluated at a location)
+#              _of_  (geometric property of a position)
+#   geometry -> _at_, _over_  (field over a geometric shape)
+#
+# Populated by W1c (seed ~10 entries); W2a will migrate the full
+# objects.yml / positions.yml contents after parser is updated.
+
+loci:
+  plasma_boundary:
+    type: entity
+    allowed_relations: [of]
+  magnetic_axis:
+    type: position
+    allowed_relations: [at, of]
+  separatrix:
+    type: entity
+    allowed_relations: [of]
+  x_point:
+    type: position
+    allowed_relations: [at, of]
+  flux_loop:
+    type: entity
+    allowed_relations: [of]
+  wall:
+    type: entity
+    allowed_relations: [of, over]
+  pedestal:
+    type: geometry
+    allowed_relations: [at, over]
+  active_limiter_point:
+    type: position
+    allowed_relations: [at, of]
+  divertor_target:
+    type: position
+    allowed_relations: [at, of]
+  current_center:
+    type: position
+    allowed_relations: [at, of]

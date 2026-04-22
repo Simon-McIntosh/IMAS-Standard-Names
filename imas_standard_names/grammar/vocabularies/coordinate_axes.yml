@@ -1,0 +1,22 @@
+# Coordinate axes vocabulary (plan 38 §A4)
+#
+# Used with GeometryCarrier (shape=coordinate) to form projections like
+# "radial_coordinate_of_flux_loop".  Distinct from components.yml which
+# is used with QuantityBase (shape=component, e.g.
+# "radial_component_of_magnetic_field").
+#
+# Populated by W1c (seed); W2a will extend from corpus mining.
+
+axes:
+  radial:
+    aliases: [r]
+  vertical:
+    aliases: [z]
+  toroidal:
+    aliases: [phi, tor]
+  poloidal:
+    aliases: [pol]
+  parallel: {}
+  perpendicular: {}
+  x: {}
+  y: {}

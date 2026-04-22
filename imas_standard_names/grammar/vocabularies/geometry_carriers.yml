@@ -1,0 +1,15 @@
+# Geometry carriers vocabulary (plan 38 §A1)
+#
+# Closed vocabulary of geometric shape tokens that can carry a coordinate
+# projection (shape=coordinate).  Distinct from physical_bases.yml which
+# holds physical quantity nouns.
+#
+# Examples of geometry carriers: position, outline, centroid, trajectory,
+# boundary_outline, midplane_outline, …
+#
+# Note: QUANTITIES *about* geometry (e.g. area_of_flux_surface) remain in
+# physical_bases.yml.
+#
+# Populated by W2a from corpus mining (plan 38 §A9).
+
+carriers: {}
