@@ -497,6 +497,8 @@ def get_grammar_context() -> dict[str, Any]:
 
     Aggregates grammar mechanics, naming conventions, and LLM orientation
     context into a single dictionary suitable for external consumers.
+    Includes the vNext 5-group IR context alongside the rc20 surface
+    for the duration of the rc21 transition (plan 38 W2b).
     """
     return {
         # Grammar mechanics
@@ -529,6 +531,98 @@ def get_grammar_context() -> dict[str, Any]:
         "base_requirements": _build_base_requirements(),
         # Vocabulary usage statistics
         "vocabulary_usage_stats": _build_vocabulary_usage_stats(),
+        # vNext 5-group IR context (plan 38 W2b). Single ISN → codex
+        # contract point for the rc21 transition.
+        "vnext": _build_vnext_context(),
+    }
+
+
+# ---------------------------------------------------------------------------
+# vNext 5-group IR context builder (plan 38 W2b)
+# ---------------------------------------------------------------------------
+
+
+def _build_vnext_context() -> dict[str, Any]:
+    """Build a compact view of the vNext grammar for external consumers.
+
+    Returns a dict with keys: ``ir_groups`` (the 5 IR slots + mechanism),
+    ``vocabularies`` (tokens per closed-vocab file), ``locus_relation_matrix``,
+    ``canonical_templates``, and ``parse_api`` (callable names).
+
+    Any loader failure yields an empty field but never raises — consumers
+    must tolerate partial population during the W2a vocabulary roll-out.
+    """
+
+    from imas_standard_names.grammar import vocab_loaders
+    from imas_standard_names.grammar.ir import (
+        BINARY_SEPARATORS,
+        LOCUS_RELATION_MATRIX,
+    )
+
+    def _safe(fn, default):  # type: ignore[no-untyped-def]
+        try:
+            return fn()
+        except Exception:
+            return default
+
+    axes = _safe(vocab_loaders.load_coordinate_axes, None)
+    loci = _safe(vocab_loaders.load_locus_registry, None)
+    ops = _safe(vocab_loaders.load_operators, None)
+    bases = _safe(vocab_loaders.load_physical_bases, None)
+    carriers = _safe(vocab_loaders.load_geometry_carriers, None)
+
+    return {
+        "ir_groups": [
+            "operators",
+            "projection",
+            "qualifiers",
+            "base",
+            "locus",
+            "mechanism",
+        ],
+        "vocabularies": {
+            "coordinate_axes": sorted(axes.axes) if axes else [],
+            "locus_registry": {
+                token: {
+                    "type": entry.type,
+                    "allowed_relations": list(entry.allowed_relations),
+                }
+                for token, entry in (loci.loci.items() if loci else ())
+            },
+            "operators": {
+                token: {
+                    "kind": entry.kind,
+                    "precedence": entry.precedence,
+                    "separator": entry.separator,
+                    "indexed": entry.indexed,
+                }
+                for token, entry in (ops.operators.items() if ops else ())
+            },
+            "physical_bases": sorted(bases.bases) if bases else [],
+            "geometry_carriers": sorted(carriers.carriers) if carriers else [],
+        },
+        "locus_relation_matrix": {
+            locus_type.value: sorted(r.value for r in relations)
+            for locus_type, relations in LOCUS_RELATION_MATRIX.items()
+        },
+        "binary_separators": sorted(BINARY_SEPARATORS),
+        "canonical_templates": {
+            "unary_prefix": "<op>_of_<inner>",
+            "unary_postfix": "<inner>_<op>",
+            "binary": "<op>_of_<A>_<separator>_<B>",
+            "projection_component": "<axis>_component_of_<base>",
+            "projection_coordinate": "<axis>_coordinate_of_<carrier>",
+            "locus": "<core>_<relation>_<locus_token>",
+            "mechanism": "<core>_due_to_<process>",
+        },
+        "parse_api": {
+            "parse": "imas_standard_names.grammar.parser:parse",
+            "compose": "imas_standard_names.grammar.render:compose",
+            "validate_round_trip": (
+                "imas_standard_names.grammar.parser:validate_round_trip"
+            ),
+            "ir_model": "imas_standard_names.grammar.ir:StandardNameIR",
+        },
     }
 
 

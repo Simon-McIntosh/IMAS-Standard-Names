@@ -29,6 +29,22 @@ from .support import (
     value_of,
 )
 
+# ---------------------------------------------------------------------------
+# vNext API (plan 38 W2b). Import after rc20 shims so the deprecation
+# wrapper in parser.py can discover ``parse_standard_name``.
+# ---------------------------------------------------------------------------
+from .ir import StandardNameIR
+from .parser import (
+    Diagnostic,
+    ParseError,
+    ParseResult,
+    Vocabularies,
+    load_default_vocabularies,
+    parse,
+    validate_round_trip,
+)
+from .render import RenderError, compose
+
 try:
     from .context import get_grammar_context
 except ImportError:  # pragma: no cover - generated file absent during build
@@ -67,4 +83,15 @@ __all__ = [
     "StandardName",
     "TAG_TO_PHYSICS_DOMAIN",
     "Transformation",
+    # vNext API (plan 38 W2b)
+    "Diagnostic",
+    "ParseError",
+    "ParseResult",
+    "RenderError",
+    "StandardNameIR",
+    "Vocabularies",
+    "compose",
+    "load_default_vocabularies",
+    "parse",
+    "validate_round_trip",
 ]

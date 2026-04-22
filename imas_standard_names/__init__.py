@@ -25,6 +25,41 @@ __all__ = ["__version__"]
 
 
 # ---------------------------------------------------------------------------
+# Grammar vNext public surface (plan 38 W2b)
+# ---------------------------------------------------------------------------
+
+try:
+    from imas_standard_names.grammar.ir import StandardNameIR
+    from imas_standard_names.grammar.parser import (
+        Diagnostic,
+        ParseError,
+        ParseResult,
+        parse,
+        validate_round_trip,
+    )
+    from imas_standard_names.grammar.render import compose
+
+    try:
+        from imas_standard_names.grammar.context import get_grammar_context
+    except ImportError:  # pragma: no cover - build-time only
+        get_grammar_context = None  # type: ignore[assignment]
+
+    __all__ = [
+        *__all__,
+        "Diagnostic",
+        "ParseError",
+        "ParseResult",
+        "StandardNameIR",
+        "compose",
+        "get_grammar_context",
+        "parse",
+        "validate_round_trip",
+    ]
+except Exception:  # pragma: no cover - defensive for code-generation stages
+    pass
+
+
+# ---------------------------------------------------------------------------
 # Pint custom unit formatting (register format 'F' when pint is available)
 # ---------------------------------------------------------------------------
 
