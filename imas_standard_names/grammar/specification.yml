@@ -681,6 +681,20 @@ entry_schema:
         unit: "Required (use '1' for dimensionless)"
       optional_fields: [provenance, status, validity_domain, constraints, deprecates, superseded_by, links, cocos_transformation_type]
       description: "Vector field quantities with components"
+
+    tensor:
+      required_fields: [name, description, documentation, unit]
+      field_overrides:
+        unit: "Required (use '1' for dimensionless)"
+      optional_fields: [provenance, status, validity_domain, constraints, deprecates, superseded_by, links, cocos_transformation_type]
+      description: "Rank-2+ tensor quantities (metric tensor, stress tensor, conductivity tensor)"
+
+    complex:
+      required_fields: [name, description, documentation, unit]
+      field_overrides:
+        unit: "Required (use '1' for dimensionless)"
+      optional_fields: [provenance, status, validity_domain, constraints, deprecates, superseded_by, links, cocos_transformation_type]
+      description: "Complex-valued quantities (real + imaginary parts, or magnitude + phase)"
     
     metadata:
       required_fields: [name, description, documentation]

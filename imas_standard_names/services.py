@@ -8,9 +8,11 @@ import sqlite3
 from pydantic import ValidationError
 
 from .models import (
+    StandardNameComplexEntry,
     StandardNameEntry,
     StandardNameMetadataEntry,
     StandardNameScalarEntry,
+    StandardNameTensorEntry,
     StandardNameVectorEntry,
     create_standard_name_entry,
     load_standard_name_entry,
@@ -74,6 +76,8 @@ def row_to_model(conn: sqlite3.Connection, row: sqlite3.Row) -> StandardNameEntr
     kind_to_model_class = {
         "scalar": StandardNameScalarEntry,
         "vector": StandardNameVectorEntry,
+        "tensor": StandardNameTensorEntry,
+        "complex": StandardNameComplexEntry,
         "metadata": StandardNameMetadataEntry,
     }
     ModelClass = kind_to_model_class.get(row["kind"], StandardNameScalarEntry)

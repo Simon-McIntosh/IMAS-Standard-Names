@@ -418,6 +418,8 @@ def _build_kind_definitions() -> dict[str, str]:
     return {member.value: member.value for member in Kind} | {
         "scalar": "Physical quantities with single value at each point",
         "vector": "Vector field quantities with directional components",
+        "tensor": "Rank-2+ tensor quantities (metric tensor, stress tensor, conductivity tensor — full or component)",
+        "complex": "Complex-valued quantities (real + imaginary parts, or magnitude + phase)",
         "metadata": "Definitional entries (boundaries, regions, concepts) — no unit or provenance required",
     }
 

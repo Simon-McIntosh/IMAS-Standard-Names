@@ -155,10 +155,31 @@ def _check_grammar_vocabulary_consistency(name: str) -> list[str]:
 
 
 class Kind(StrEnum):
-    """Runtime enum for standard name kinds."""
+    """Runtime enum for standard name kinds.
+
+    Physical rank hierarchy:
+
+    * ``scalar``  – rank-0, real-valued point quantity
+      (e.g. ``electron_temperature``, ``safety_factor``).
+    * ``vector``  – rank-1 quantity, including named single components.
+      A field like ``magnetic_field_r`` carries an implicit radial
+      covariant index and is therefore *vector*-natured even though
+      only one component is stored.
+    * ``tensor``  – rank-2 or higher quantity (stress tensor, metric
+      tensor, conductivity tensor — full or individual component).
+    * ``complex`` – complex-valued quantity (real + imaginary parts,
+      or magnitude + phase).  Orthogonal to tensor rank in principle;
+      kept as its own kind to preserve a flat discriminator.  Revisit
+      if rank-aware complex names accumulate.
+    * ``metadata`` – non-physical bookkeeping / annotation entries
+      (e.g. ``plasma_boundary``, ``scrape_off_layer``).  No unit or
+      provenance required.
+    """
 
     scalar = "scalar"
     vector = "vector"
+    tensor = "tensor"
+    complex = "complex"
     metadata = "metadata"
 
 
@@ -579,6 +600,104 @@ class StandardNameVectorEntry(StandardNameEntryBase):
         return f"magnitude_of_{self.name}"
 
 
+class StandardNameTensorEntry(StandardNameEntryBase):
+    """Tensor (rank-2+) standard name catalog entry.
+
+    Used for quantities that represent tensor fields — metric tensors,
+    stress tensors, conductivity tensors, etc.  Individual named
+    components (e.g. ``g11_covariant_metric_tensor_component``) are
+    also classified as *tensor* because they carry implicit index
+    structure.
+    """
+
+    kind: Literal["tensor"] = "tensor"
+    unit: Unit  # Required (use "1" for dimensionless)
+    provenance: Provenance | None = None
+
+    @field_validator("unit", mode="before")
+    @classmethod
+    def canonicalize_unit_order(cls, v: str) -> str:
+        """Auto-correct unit token order to canonical lexicographic form."""
+        return cls._canonicalize_unit_order(v)
+
+    @field_validator("unit")
+    @classmethod
+    def validate_unit_with_pint(cls, v: str) -> str:
+        """Validate unit semantics using pint (if available)."""
+        return cls._validate_unit_with_pint(v)
+
+    @model_validator(mode="after")
+    def _provenance_rules(self):  # type: ignore[override]
+        if self.provenance:
+            if isinstance(self.provenance, OperatorProvenance):
+                self.provenance.operators = _normalize_operator_chain(
+                    self.provenance.operators
+                )
+                _enforce_operator_naming(
+                    name=self.name,
+                    operators=self.provenance.operators,
+                    base=self.provenance.base,
+                    operator_id=self.provenance.operator_id,
+                    kind=self.kind,
+                )
+            if isinstance(self.provenance, ReductionProvenance):
+                enforce_reduction_naming(
+                    name=self.name,
+                    reduction=self.provenance.reduction,
+                    domain=self.provenance.domain,
+                    base=self.provenance.base,
+                )
+        return self
+
+
+class StandardNameComplexEntry(StandardNameEntryBase):
+    """Complex-valued standard name catalog entry.
+
+    Used for quantities that have real and imaginary parts (or
+    equivalently, magnitude and phase).  Examples include perturbed
+    MHD quantities, wave amplitudes, and impedance components.
+    """
+
+    kind: Literal["complex"] = "complex"
+    unit: Unit  # Required (use "1" for dimensionless)
+    provenance: Provenance | None = None
+
+    @field_validator("unit", mode="before")
+    @classmethod
+    def canonicalize_unit_order(cls, v: str) -> str:
+        """Auto-correct unit token order to canonical lexicographic form."""
+        return cls._canonicalize_unit_order(v)
+
+    @field_validator("unit")
+    @classmethod
+    def validate_unit_with_pint(cls, v: str) -> str:
+        """Validate unit semantics using pint (if available)."""
+        return cls._validate_unit_with_pint(v)
+
+    @model_validator(mode="after")
+    def _provenance_rules(self):  # type: ignore[override]
+        if self.provenance:
+            if isinstance(self.provenance, OperatorProvenance):
+                self.provenance.operators = _normalize_operator_chain(
+                    self.provenance.operators
+                )
+                _enforce_operator_naming(
+                    name=self.name,
+                    operators=self.provenance.operators,
+                    base=self.provenance.base,
+                    operator_id=self.provenance.operator_id,
+                    kind=self.kind,
+                )
+            if isinstance(self.provenance, ReductionProvenance):
+                enforce_reduction_naming(
+                    name=self.name,
+                    reduction=self.provenance.reduction,
+                    domain=self.provenance.domain,
+                    base=self.provenance.base,
+                )
+        return self
+
+
 class StandardNameMetadataEntry(StandardNameEntryBase):
     """Metadata standard name catalog entry.
 
@@ -606,7 +725,11 @@ class StandardNameMetadataEntry(StandardNameEntryBase):
 
 
 StandardNameEntry = Annotated[
-    StandardNameScalarEntry | StandardNameVectorEntry | StandardNameMetadataEntry,
+    StandardNameScalarEntry
+    | StandardNameVectorEntry
+    | StandardNameTensorEntry
+    | StandardNameComplexEntry
+    | StandardNameMetadataEntry,
     Field(discriminator="kind"),
 ]
 
@@ -657,6 +780,40 @@ class StandardNameVectorNameOnly(StandardNameBase):
         return cls._validate_unit_with_pint(v)
 
 
+class StandardNameTensorNameOnly(StandardNameBase):
+    """Tensor standard name — name + unit only (no documentation)."""
+
+    kind: Literal["tensor"] = "tensor"
+    unit: Unit  # Required (use "1" for dimensionless)
+
+    @field_validator("unit", mode="before")
+    @classmethod
+    def canonicalize_unit_order(cls, v: str) -> str:
+        return cls._canonicalize_unit_order(v)
+
+    @field_validator("unit")
+    @classmethod
+    def validate_unit_with_pint(cls, v: str) -> str:
+        return cls._validate_unit_with_pint(v)
+
+
+class StandardNameComplexNameOnly(StandardNameBase):
+    """Complex standard name — name + unit only (no documentation)."""
+
+    kind: Literal["complex"] = "complex"
+    unit: Unit  # Required (use "1" for dimensionless)
+
+    @field_validator("unit", mode="before")
+    @classmethod
+    def canonicalize_unit_order(cls, v: str) -> str:
+        return cls._canonicalize_unit_order(v)
+
+    @field_validator("unit")
+    @classmethod
+    def validate_unit_with_pint(cls, v: str) -> str:
+        return cls._validate_unit_with_pint(v)
+
+
 class StandardNameMetadataNameOnly(StandardNameBase):
     """Metadata standard name — name only (no unit, no documentation)."""
 
@@ -666,6 +823,8 @@ class StandardNameMetadataNameOnly(StandardNameBase):
 StandardNameNameOnly = Annotated[
     StandardNameScalarNameOnly
     | StandardNameVectorNameOnly
+    | StandardNameTensorNameOnly
+    | StandardNameComplexNameOnly
     | StandardNameMetadataNameOnly,
     Field(discriminator="kind"),
 ]
@@ -764,9 +923,13 @@ __all__ = [
     "StandardNameEntryBase",
     "StandardNameScalarEntry",
     "StandardNameVectorEntry",
+    "StandardNameTensorEntry",
+    "StandardNameComplexEntry",
     "StandardNameMetadataEntry",
     "StandardNameScalarNameOnly",
     "StandardNameVectorNameOnly",
+    "StandardNameTensorNameOnly",
+    "StandardNameComplexNameOnly",
     "StandardNameMetadataNameOnly",
     "StandardNameNameOnly",
     "Name",

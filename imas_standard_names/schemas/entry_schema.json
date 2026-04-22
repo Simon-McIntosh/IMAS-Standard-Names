@@ -100,6 +100,202 @@
       "title": "ReductionProvenance",
       "type": "object"
     },
+    "StandardNameComplexEntry": {
+      "additionalProperties": false,
+      "description": "Complex-valued standard name catalog entry.\n\nUsed for quantities that have real and imaginary parts (or\nequivalently, magnitude and phase).  Examples include perturbed\nMHD quantities, wave amplitudes, and impedance components.",
+      "properties": {
+        "name": {
+          "description": "Standard name token: snake_case (^[a-z][a-z0-9_]*$); starts with a letter; no double '__'.",
+          "examples": [
+            "electron_temperature",
+            "gradient_of_electron_temperature",
+            "radial_component_of_magnetic_field"
+          ],
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Name",
+          "type": "string"
+        },
+        "status": {
+          "default": "draft",
+          "description": "Lifecycle state: draft | active | deprecated | superseded.",
+          "enum": [
+            "draft",
+            "active",
+            "deprecated",
+            "superseded"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "deprecates": {
+          "anyOf": [
+            {
+              "description": "Standard name token: snake_case (^[a-z][a-z0-9_]*$); starts with a letter; no double '__'.",
+              "examples": [
+                "electron_temperature",
+                "gradient_of_electron_temperature",
+                "radial_component_of_magnetic_field"
+              ],
+              "pattern": "^[a-z][a-z0-9_]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Deprecates"
+        },
+        "superseded_by": {
+          "anyOf": [
+            {
+              "description": "Standard name token: snake_case (^[a-z][a-z0-9_]*$); starts with a letter; no double '__'.",
+              "examples": [
+                "electron_temperature",
+                "gradient_of_electron_temperature",
+                "radial_component_of_magnetic_field"
+              ],
+              "pattern": "^[a-z][a-z0-9_]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Superseded By"
+        },
+        "cocos_transformation_type": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Cocos Transformation Type"
+        },
+        "description": {
+          "description": "One concise sentence summarizing the physical quantity. Keep under 120 characters for readability. Should be self-contained and understandable without external context.",
+          "maxLength": 180,
+          "title": "Description",
+          "type": "string"
+        },
+        "documentation": {
+          "description": "Authoritative, self-contained documentation providing clear, comprehensive explanation of the physical quantity. This field must be fully standalone - a domain expert should understand the quantity completely without consulting external sources.",
+          "title": "Documentation",
+          "type": "string"
+        },
+        "validity_domain": {
+          "default": "",
+          "description": "Controlled vocabulary region of validity",
+          "examples": [
+            "core_plasma",
+            "edge_plasma",
+            "vacuum",
+            "whole_plasma"
+          ],
+          "title": "Validity Domain",
+          "type": "string"
+        },
+        "constraints": {
+          "description": "Physical or mathematical constraints that must be satisfied (e.g. 'T_e > 0', 'kappa >= 1')",
+          "examples": [
+            [
+              "T_e > 0"
+            ],
+            [
+              "n_e >= 0",
+              "n_e < 1e22 m^-3"
+            ],
+            [
+              "kappa >= 1"
+            ]
+          ],
+          "items": {
+            "type": "string"
+          },
+          "title": "Constraints",
+          "type": "array"
+        },
+        "tags": {
+          "description": "Secondary classification tags from controlled vocabulary for cross-cutting classification.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Tags",
+          "type": "array"
+        },
+        "links": {
+          "description": "Internal cross-references to related standard names only. Use format 'name:standard_name_token' (e.g., 'name:plasma_boundary'). Internal references are validated against the catalog.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Links",
+          "type": "array"
+        },
+        "kind": {
+          "const": "complex",
+          "default": "complex",
+          "title": "Kind",
+          "type": "string"
+        },
+        "unit": {
+          "description": "Unit in fused dot-exponent style (auto-corrected to lexicographic token order). Tokens: alphanumerics only; join with '.'; exponents use ^ (e.g. m.s^-2). No '/', '*', or whitespace. Empty string for dimensionless.",
+          "examples": [
+            "eV",
+            "m",
+            "m.s^-1",
+            "A.m^-2",
+            "m^-3",
+            "1"
+          ],
+          "pattern": "^[A-Za-z0-9]+(\\^[+-]?\\d+)?(\\.[A-Za-z0-9]+(\\^[+-]?\\d+)?)*$|^$",
+          "title": "Unit",
+          "type": "string"
+        },
+        "provenance": {
+          "anyOf": [
+            {
+              "discriminator": {
+                "mapping": {
+                  "expression": "#/$defs/ExpressionProvenance",
+                  "operator": "#/$defs/OperatorProvenance",
+                  "reduction": "#/$defs/ReductionProvenance"
+                },
+                "propertyName": "mode"
+              },
+              "oneOf": [
+                {
+                  "$ref": "#/$defs/OperatorProvenance"
+                },
+                {
+                  "$ref": "#/$defs/ExpressionProvenance"
+                },
+                {
+                  "$ref": "#/$defs/ReductionProvenance"
+                }
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Provenance"
+        }
+      },
+      "required": [
+        "name",
+        "description",
+        "documentation",
+        "unit"
+      ],
+      "title": "StandardNameComplexEntry",
+      "type": "object"
+    },
     "StandardNameMetadataEntry": {
       "additionalProperties": false,
       "description": "Metadata standard name catalog entry.\n\nUsed for definitional entries that document concepts, boundaries,\nor reference anchors rather than measurable physical quantities.\nThese entries provide documentation and cross-references but do not\nrepresent data that can be measured or calculated.\n\nExamples: plasma_boundary, scrape_off_layer, confined_region\n\nMetadata entries have relaxed validation:\n- No unit field required (these are definitional, not measurable)\n- No provenance required (these are definitional, not derived)\n- Focus on documentation and links fields",
@@ -447,6 +643,202 @@
       "title": "StandardNameScalarEntry",
       "type": "object"
     },
+    "StandardNameTensorEntry": {
+      "additionalProperties": false,
+      "description": "Tensor (rank-2+) standard name catalog entry.\n\nUsed for quantities that represent tensor fields \u2014 metric tensors,\nstress tensors, conductivity tensors, etc.  Individual named\ncomponents (e.g. ``g11_covariant_metric_tensor_component``) are\nalso classified as *tensor* because they carry implicit index\nstructure.",
+      "properties": {
+        "name": {
+          "description": "Standard name token: snake_case (^[a-z][a-z0-9_]*$); starts with a letter; no double '__'.",
+          "examples": [
+            "electron_temperature",
+            "gradient_of_electron_temperature",
+            "radial_component_of_magnetic_field"
+          ],
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Name",
+          "type": "string"
+        },
+        "status": {
+          "default": "draft",
+          "description": "Lifecycle state: draft | active | deprecated | superseded.",
+          "enum": [
+            "draft",
+            "active",
+            "deprecated",
+            "superseded"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "deprecates": {
+          "anyOf": [
+            {
+              "description": "Standard name token: snake_case (^[a-z][a-z0-9_]*$); starts with a letter; no double '__'.",
+              "examples": [
+                "electron_temperature",
+                "gradient_of_electron_temperature",
+                "radial_component_of_magnetic_field"
+              ],
+              "pattern": "^[a-z][a-z0-9_]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Deprecates"
+        },
+        "superseded_by": {
+          "anyOf": [
+            {
+              "description": "Standard name token: snake_case (^[a-z][a-z0-9_]*$); starts with a letter; no double '__'.",
+              "examples": [
+                "electron_temperature",
+                "gradient_of_electron_temperature",
+                "radial_component_of_magnetic_field"
+              ],
+              "pattern": "^[a-z][a-z0-9_]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Superseded By"
+        },
+        "cocos_transformation_type": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Cocos Transformation Type"
+        },
+        "description": {
+          "description": "One concise sentence summarizing the physical quantity. Keep under 120 characters for readability. Should be self-contained and understandable without external context.",
+          "maxLength": 180,
+          "title": "Description",
+          "type": "string"
+        },
+        "documentation": {
+          "description": "Authoritative, self-contained documentation providing clear, comprehensive explanation of the physical quantity. This field must be fully standalone - a domain expert should understand the quantity completely without consulting external sources.",
+          "title": "Documentation",
+          "type": "string"
+        },
+        "validity_domain": {
+          "default": "",
+          "description": "Controlled vocabulary region of validity",
+          "examples": [
+            "core_plasma",
+            "edge_plasma",
+            "vacuum",
+            "whole_plasma"
+          ],
+          "title": "Validity Domain",
+          "type": "string"
+        },
+        "constraints": {
+          "description": "Physical or mathematical constraints that must be satisfied (e.g. 'T_e > 0', 'kappa >= 1')",
+          "examples": [
+            [
+              "T_e > 0"
+            ],
+            [
+              "n_e >= 0",
+              "n_e < 1e22 m^-3"
+            ],
+            [
+              "kappa >= 1"
+            ]
+          ],
+          "items": {
+            "type": "string"
+          },
+          "title": "Constraints",
+          "type": "array"
+        },
+        "tags": {
+          "description": "Secondary classification tags from controlled vocabulary for cross-cutting classification.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Tags",
+          "type": "array"
+        },
+        "links": {
+          "description": "Internal cross-references to related standard names only. Use format 'name:standard_name_token' (e.g., 'name:plasma_boundary'). Internal references are validated against the catalog.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Links",
+          "type": "array"
+        },
+        "kind": {
+          "const": "tensor",
+          "default": "tensor",
+          "title": "Kind",
+          "type": "string"
+        },
+        "unit": {
+          "description": "Unit in fused dot-exponent style (auto-corrected to lexicographic token order). Tokens: alphanumerics only; join with '.'; exponents use ^ (e.g. m.s^-2). No '/', '*', or whitespace. Empty string for dimensionless.",
+          "examples": [
+            "eV",
+            "m",
+            "m.s^-1",
+            "A.m^-2",
+            "m^-3",
+            "1"
+          ],
+          "pattern": "^[A-Za-z0-9]+(\\^[+-]?\\d+)?(\\.[A-Za-z0-9]+(\\^[+-]?\\d+)?)*$|^$",
+          "title": "Unit",
+          "type": "string"
+        },
+        "provenance": {
+          "anyOf": [
+            {
+              "discriminator": {
+                "mapping": {
+                  "expression": "#/$defs/ExpressionProvenance",
+                  "operator": "#/$defs/OperatorProvenance",
+                  "reduction": "#/$defs/ReductionProvenance"
+                },
+                "propertyName": "mode"
+              },
+              "oneOf": [
+                {
+                  "$ref": "#/$defs/OperatorProvenance"
+                },
+                {
+                  "$ref": "#/$defs/ExpressionProvenance"
+                },
+                {
+                  "$ref": "#/$defs/ReductionProvenance"
+                }
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Provenance"
+        }
+      },
+      "required": [
+        "name",
+        "description",
+        "documentation",
+        "unit"
+      ],
+      "title": "StandardNameTensorEntry",
+      "type": "object"
+    },
     "StandardNameVectorEntry": {
       "additionalProperties": false,
       "description": "Vector standard name catalog entry.",
@@ -646,8 +1038,10 @@
   },
   "discriminator": {
     "mapping": {
+      "complex": "#/$defs/StandardNameComplexEntry",
       "metadata": "#/$defs/StandardNameMetadataEntry",
       "scalar": "#/$defs/StandardNameScalarEntry",
+      "tensor": "#/$defs/StandardNameTensorEntry",
       "vector": "#/$defs/StandardNameVectorEntry"
     },
     "propertyName": "kind"
@@ -658,6 +1052,12 @@
     },
     {
       "$ref": "#/$defs/StandardNameVectorEntry"
+    },
+    {
+      "$ref": "#/$defs/StandardNameTensorEntry"
+    },
+    {
+      "$ref": "#/$defs/StandardNameComplexEntry"
     },
     {
       "$ref": "#/$defs/StandardNameMetadataEntry"
