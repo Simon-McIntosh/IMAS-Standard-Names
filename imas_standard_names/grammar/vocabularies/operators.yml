@@ -214,6 +214,26 @@ operators:
     precedence: 30
     returns: scalar
 
+  # --- Uncertainty modifier operators (rc23 — B9 error siblings) ---
+  # Three deterministic operators for IMAS _error_upper / _error_lower /
+  # _error_index companion fields.  Applied as outer wrappers of the
+  # parent standard name: upper_uncertainty_of_<P>, etc.
+
+  upper_uncertainty:
+    kind: unary_prefix
+    precedence: 5
+    returns: scalar_or_vector
+
+  lower_uncertainty:
+    kind: unary_prefix
+    precedence: 5
+    returns: scalar_or_vector
+
+  uncertainty_index:
+    kind: unary_prefix
+    precedence: 5
+    returns: scalar
+
   # ====================================================================
   # Unary postfix operators (rendered: <inner>_<token>)
   # ====================================================================
