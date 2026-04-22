@@ -121,3 +121,14 @@
 - radiation_emission                  # radiation emission process (generic)
 - recombination_emission              # photon emission from recombination events
 - fusion_born_alpha                   # alpha particles born from fusion reactions
+
+# === W2a corpus mining additions (plan 38 §A9) ===
+# From 41 process classifications in rc20 corpus mining.
+- collisional                  # collisional transport or dissipation process
+- drift                        # generic drift mechanism
+- driven                       # generic driven process qualifier
+- fusion                       # fusion reaction process
+- heating                      # generic heating mechanism
+- injection                    # generic injection process
+- sputtering                   # sputtering erosion process
+- viscosity                    # viscous transport process

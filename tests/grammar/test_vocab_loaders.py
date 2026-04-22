@@ -187,10 +187,10 @@ def test_load_physical_bases_returns_registry():
     assert isinstance(reg, PhysicalBasesRegistry)
 
 
-def test_physical_bases_stub_is_empty():
-    """W1c stub must be empty; W2a populates it from corpus mining."""
+def test_physical_bases_stub_is_populated():
+    """W2a populated physical_bases.yml from corpus mining."""
     reg = load_physical_bases()
-    assert reg.bases == {}
+    assert len(reg.bases) >= 150
 
 
 # ---------------------------------------------------------------------------
@@ -203,10 +203,10 @@ def test_load_geometry_carriers_returns_registry():
     assert isinstance(reg, GeometryCarriersRegistry)
 
 
-def test_geometry_carriers_stub_is_empty():
-    """W1c stub must be empty; W2a populates it from corpus mining."""
+def test_geometry_carriers_stub_is_populated():
+    """W2a populated geometry_carriers.yml from corpus mining."""
     reg = load_geometry_carriers()
-    assert reg.carriers == {}
+    assert len(reg.carriers) >= 10
 
 
 # ---------------------------------------------------------------------------

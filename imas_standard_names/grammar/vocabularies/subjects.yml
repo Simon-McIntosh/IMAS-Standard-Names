@@ -102,3 +102,17 @@
 - silane                       # silane (SiH₄) recycling / injection species
 # ELM population marker.
 - edge_localized_mode          # edge-localized-mode population marker
+
+# === W2a corpus mining additions (plan 38 §A9) ===
+# From 67 subject classifications in rc20 corpus mining.
+- electrons                    # plural form of electron (corpus variant)
+- fast                         # bare fast-particle qualifier
+- gyrokinetic                  # gyrokinetic representation qualifier
+- ions                         # plural form of ion (corpus variant)
+- neutron                      # neutron species
+- particle                     # bare particle qualifier
+- particles                    # plural form of particle (corpus variant)
+- passing                      # passing particle population
+- runaway                      # runaway particle qualifier
+- state                        # generic state qualifier
+- thermal                      # thermal population qualifier

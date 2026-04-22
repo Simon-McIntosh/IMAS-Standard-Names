@@ -254,15 +254,15 @@ segments:
 vocabularies:
   components: !include vocabularies/components.yml
   subjects: !include vocabularies/subjects.yml
-  geometric_bases: !include vocabularies/geometric_bases.yml
-  objects: !include vocabularies/objects.yml
-  positions: !include vocabularies/positions.yml
   regions: !include vocabularies/regions.yml
   processes: !include vocabularies/processes.yml
   generic_physical_bases: !include vocabularies/generic_physical_bases.yml
-  transformations: !include vocabularies/transformations.yml
-  decomposition: !include vocabularies/decomposition.yml
   binary_operators: !include vocabularies/binary_operators.yml
+  # --- vNext vocabularies (plan 38 §A9) ---
+  # objects.yml, positions.yml → locus_registry.yml (typed)
+  # geometric_bases.yml → geometry_carriers.yml + physical_bases.yml
+  # transformations.yml, decomposition.yml → operators.yml (unified)
+  # The vNext registries are loaded by vocab_loaders.py, not this spec.
 
 #===============================================================================
 # Binary Operator Connectors

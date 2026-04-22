@@ -23,3 +23,8 @@
 - halo_boundary
 - halo_region
 - scrape_off_layer
+
+# === W2a corpus mining additions (plan 38 §A9) ===
+# From 4 region classifications in rc20 corpus mining.
+- pedestal_region              # pedestal region (steep-gradient zone)
+- vessel                       # vacuum vessel volume region

@@ -19,49 +19,282 @@
 #   unary_postfix  ->  <inner>_<token>
 #   binary         ->  <token>_of_<A><separator><B>
 #
-# Populated by W1c (seed ~10 entries); W2a will migrate the full
-# transformations.yml / decomposition.yml contents after parser is updated.
+# Populated by W2a from corpus mining (25 prefix + 15 postfix + 3 binary)
+# and migration from transformations.yml + decomposition.yml (plan 38 §A9).
 
 operators:
+
+  # ====================================================================
+  # Unary prefix operators (rendered: <token>_of_<inner>)
+  # ====================================================================
+
+  accumulated:
+    kind: unary_prefix
+    precedence: 15
+    returns: scalar
+
+  amplitude:
+    kind: unary_prefix
+    precedence: 20
+    returns: scalar
+
+  cumulative:
+    kind: unary_prefix
+    precedence: 15
+    returns: scalar
+
+  cumulative_inside_flux_surface:
+    kind: unary_prefix
+    precedence: 15
+    returns: scalar
+
+  derivative:
+    kind: unary_prefix
+    precedence: 20
+    returns: scalar_or_vector
+
+  derivative_with_respect_to:
+    kind: unary_prefix
+    precedence: 20
+    returns: scalar_or_vector
+    indexed: true
+    index_params: [coord]
+
+  flux_surface_averaged:
+    kind: unary_prefix
+    precedence: 30
+    returns: scalar_or_vector
+
+  gradient:
+    kind: unary_prefix
+    precedence: 20
+    returns: vector
+    arg_types: [scalar]
+
+  imaginary_part:
+    kind: unary_prefix
+    precedence: 10
+    returns: scalar
+    arg_types: [complex]
+
+  inverse:
+    kind: unary_prefix
+    precedence: 20
+    returns: scalar_or_vector
+
+  line_averaged:
+    kind: unary_prefix
+    precedence: 30
+    returns: scalar
+
+  line_integrated:
+    kind: unary_prefix
+    precedence: 30
+    returns: scalar
+
+  logarithm:
+    kind: unary_prefix
+    precedence: 20
+    returns: scalar
+
   magnitude:
     kind: unary_postfix
     precedence: 10
     returns: scalar
     arg_types: [vector, complex]
-  time_derivative:
-    kind: unary_prefix
-    precedence: 20
-    returns: rate
-  time_average:
+
+  maximum:
     kind: unary_prefix
     precedence: 30
     returns: scalar_or_vector
+
+  maximum_over_flux_surface:
+    kind: unary_prefix
+    precedence: 30
+    returns: scalar_or_vector
+
+  minimum:
+    kind: unary_prefix
+    precedence: 30
+    returns: scalar_or_vector
+
+  minimum_over_flux_surface:
+    kind: unary_prefix
+    precedence: 30
+    returns: scalar_or_vector
+
+  normalized:
+    kind: unary_prefix
+    precedence: 15
+    returns: scalar_or_vector
+
+  per_toroidal_mode:
+    kind: unary_prefix
+    precedence: 35
+    returns: scalar_or_vector
+
+  per_poloidal_mode:
+    kind: unary_prefix
+    precedence: 35
+    returns: scalar_or_vector
+
+  per_toroidal_and_poloidal_mode_number:
+    kind: unary_prefix
+    precedence: 35
+    returns: scalar_or_vector
+
+  perturbed:
+    kind: unary_prefix
+    precedence: 15
+    returns: scalar_or_vector
+
+  radial_derivative:
+    kind: unary_prefix
+    precedence: 20
+    returns: scalar_or_vector
+
+  real_part:
+    kind: unary_prefix
+    precedence: 10
+    returns: scalar
+    arg_types: [complex]
+
   root_mean_square:
     kind: unary_prefix
     precedence: 30
     returns: scalar
-  fourier_coefficient:
+
+  second_derivative:
     kind: unary_prefix
-    precedence: 40
-    indexed: true
-    index_params: [m, n]
-  ratio:
-    kind: binary
-    separator: _to_
-    precedence: 5
-  product:
-    kind: binary
-    separator: _and_
-    precedence: 5
+    precedence: 20
+    returns: scalar_or_vector
+
+  second_radial_derivative:
+    kind: unary_prefix
+    precedence: 20
+    returns: scalar_or_vector
+
   square:
     kind: unary_prefix
     precedence: 20
     returns: scalar_or_vector
-  logarithm:
+
+  surface_integrated:
+    kind: unary_prefix
+    precedence: 30
+    returns: scalar
+
+  tendency:
     kind: unary_prefix
     precedence: 20
-    returns: scalar
-  inverse:
+    returns: rate
+
+  time_average:
+    kind: unary_prefix
+    precedence: 30
+    returns: scalar_or_vector
+
+  time_derivative:
+    kind: unary_prefix
+    precedence: 20
+    returns: rate
+
+  variation:
     kind: unary_prefix
     precedence: 20
     returns: scalar_or_vector
+
+  volume_averaged:
+    kind: unary_prefix
+    precedence: 30
+    returns: scalar_or_vector
+
+  volume_integrated:
+    kind: unary_prefix
+    precedence: 30
+    returns: scalar
+
+  # ====================================================================
+  # Unary postfix operators (rendered: <inner>_<token>)
+  # ====================================================================
+
+  bessel_0:
+    kind: unary_postfix
+    precedence: 10
+    returns: scalar
+    indexed: true
+    index_params: [order]
+
+  bessel_1:
+    kind: unary_postfix
+    precedence: 10
+    returns: scalar
+    indexed: true
+    index_params: [order]
+
+  constraint_exact_flag:
+    kind: unary_postfix
+    precedence: 5
+    returns: scalar
+
+  fourier_coefficient:
+    kind: unary_postfix
+    precedence: 40
+    indexed: true
+    index_params: [m, n]
+
+  gyroaveraged:
+    kind: unary_postfix
+    precedence: 10
+    returns: scalar_or_vector
+
+  imaginary_part_postfix:
+    kind: unary_postfix
+    precedence: 10
+    returns: scalar
+    arg_types: [complex]
+
+  moment:
+    kind: unary_postfix
+    precedence: 10
+    returns: scalar
+
+  on_ggd:
+    kind: unary_postfix
+    precedence: 5
+    returns: scalar_or_vector
+
+  real_part_postfix:
+    kind: unary_postfix
+    precedence: 10
+    returns: scalar
+    arg_types: [complex]
+
+  reference_waveform:
+    kind: unary_postfix
+    precedence: 5
+    returns: scalar
+
+  waveform:
+    kind: unary_postfix
+    precedence: 5
+    returns: scalar
+
+  # ====================================================================
+  # Binary operators (rendered: <token>_of_<A><separator><B>)
+  # ====================================================================
+
+  difference:
+    kind: binary
+    separator: _from_
+    precedence: 5
+
+  product:
+    kind: binary
+    separator: _and_
+    precedence: 5
+
+  ratio:
+    kind: binary
+    separator: _to_
+    precedence: 5

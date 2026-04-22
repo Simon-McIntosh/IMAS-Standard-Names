@@ -10,8 +10,813 @@
 # NEVER a generic one — see generic_physical_bases.yml for those that
 # require a qualifier (current, power, voltage, …).
 #
-# Expected size: ~200–400 tokens after W2a corpus mining (plan 38 §A9).
-# Populated by W2a from the rc20 corpus grammar_physical_base values plus
-# CF convention references.
+# Structure per entry:
+#   aliases  - list of alternate tokens (empty default)
+#   kind     - scalar | vector | tensor | complex
+#
+# Populated by W2a from the rc20 corpus mining (plan 38 §A9, 479 names).
+# Maximal closure: every physical_base residue from rc20 parsing that is
+# plausibly a quantity noun after operator/subject/locus decomposition.
 
-bases: {}
+bases:
+  accumulated_gas_injection:
+    aliases: []
+    kind: scalar
+  angle:
+    aliases: []
+    kind: scalar
+  angle_grid_of_flux_tube:
+    aliases: []
+    kind: scalar
+  angle_of_gyrokinetic_eigenmode:
+    aliases: []
+    kind: scalar
+  angular_momentum_source:
+    aliases: []
+    kind: scalar
+  area:
+    aliases: []
+    kind: scalar
+  atomic_mass:
+    aliases: []
+    kind: scalar
+  average_square_charge:
+    aliases: []
+    kind: scalar
+  ballooning_stability_parameter:
+    aliases: []
+    kind: scalar
+  beam_tracing_wavevector:
+    aliases: []
+    kind: vector
+  beta:
+    aliases: []
+    kind: scalar
+  beta_poloidal:
+    aliases:
+    - poloidal_beta
+    kind: scalar
+  blanket_energy_multiplication_factor:
+    aliases: []
+    kind: scalar
+  bootstrap_current:
+    aliases: []
+    kind: scalar
+  breeding_ratio:
+    aliases: []
+    kind: scalar
+  capacitance:
+    aliases: []
+    kind: scalar
+  center_of_mass_velocity:
+    aliases: []
+    kind: vector
+  charge:
+    aliases: []
+    kind: scalar
+  charge_number:
+    aliases: []
+    kind: scalar
+  chemical_sputtering_coefficient:
+    aliases: []
+    kind: scalar
+  coefficient:
+    aliases: []
+    kind: scalar
+  collected_ion_current:
+    aliases: []
+    kind: scalar
+  collisional_toroidal_torque_density:
+    aliases: []
+    kind: scalar
+  collisionality:
+    aliases: []
+    kind: scalar
+  composition_fraction:
+    aliases: []
+    kind: scalar
+  confinement_time:
+    aliases: []
+    kind: scalar
+  contravariant_metric_tensor:
+    aliases: []
+    kind: tensor
+  convective_velocity:
+    aliases: []
+    kind: vector
+  coolant_inlet_pressure:
+    aliases: []
+    kind: scalar
+  coolant_inlet_temperature:
+    aliases: []
+    kind: scalar
+  coolant_outlet_temperature:
+    aliases: []
+    kind: scalar
+  cosine_shape_coefficient:
+    aliases: []
+    kind: scalar
+  coulomb_logarithm:
+    aliases: []
+    kind: scalar
+  count:
+    aliases: []
+    kind: scalar
+  critical_temperature:
+    aliases: []
+    kind: scalar
+  current:
+    aliases: []
+    kind: scalar
+  current_constraint_exact_flag:
+    aliases: []
+    kind: scalar
+  current_density:
+    aliases: []
+    kind: vector
+  current_drive:
+    aliases: []
+    kind: scalar
+  density:
+    aliases: []
+    kind: scalar
+  density_pedestal_maximum_gradient_position:
+    aliases: []
+    kind: scalar
+  density_pedestal_position:
+    aliases: []
+    kind: scalar
+  density_pedestal_width:
+    aliases: []
+    kind: scalar
+  diamagnetic_current_density:
+    aliases: []
+    kind: scalar
+  diamagnetic_drift_velocity:
+    aliases: []
+    kind: vector
+  diffusivity:
+    aliases: []
+    kind: scalar
+  distribution:
+    aliases: []
+    kind: scalar
+  distribution_particle_count:
+    aliases: []
+    kind: scalar
+  dominant_charge_state:
+    aliases: []
+    kind: scalar
+  drift_velocity:
+    aliases: []
+    kind: vector
+  e_cross_b_drift_velocity:
+    aliases: []
+    kind: vector
+  effective_atomic_mass:
+    aliases: []
+    kind: scalar
+  effective_charge:
+    aliases: []
+    kind: scalar
+  electric_field:
+    aliases: []
+    kind: vector
+  electrical_conductivity:
+    aliases: []
+    kind: scalar
+  electrostatic_potential:
+    aliases: []
+    kind: scalar
+  electrostatic_potential_parity:
+    aliases: []
+    kind: scalar
+  elongation:
+    aliases: []
+    kind: scalar
+  emissivity:
+    aliases: []
+    kind: scalar
+  energy:
+    aliases: []
+    kind: scalar
+  energy_confinement_time:
+    aliases: []
+    kind: scalar
+  energy_convective_velocity:
+    aliases: []
+    kind: vector
+  energy_diffusivity:
+    aliases: []
+    kind: scalar
+  energy_flux:
+    aliases: []
+    kind: vector
+  energy_radial_diffusivity:
+    aliases: []
+    kind: scalar
+  energy_radial_diffusivity_on_ggd:
+    aliases: []
+    kind: scalar
+  energy_source:
+    aliases: []
+    kind: scalar
+  equilibrium_reconstruction_constraint_weight:
+    aliases: []
+    kind: scalar
+  exposure_time:
+    aliases: []
+    kind: scalar
+  factor:
+    aliases: []
+    kind: scalar
+  faraday_rotation_angle:
+    aliases: []
+    kind: scalar
+  field_strength:
+    aliases: []
+    kind: scalar
+  flag:
+    aliases: []
+    kind: scalar
+  floating_potential:
+    aliases: []
+    kind: scalar
+  flow:
+    aliases: []
+    kind: scalar
+  flux:
+    aliases: []
+    kind: scalar
+  flux_coordinate:
+    aliases: []
+    kind: scalar
+  flux_surface_area:
+    aliases: []
+    kind: scalar
+  flux_surface_cross_sectional_area:
+    aliases: []
+    kind: scalar
+  flux_tube_parallel_domain_poloidal_turn_count:
+    aliases: []
+    kind: scalar
+  force:
+    aliases: []
+    kind: vector
+  fraction:
+    aliases: []
+    kind: scalar
+  frequency:
+    aliases: []
+    kind: scalar
+  fusion_power:
+    aliases: []
+    kind: scalar
+  fusion_power_density:
+    aliases: []
+    kind: scalar
+  gap:
+    aliases: []
+    kind: scalar
+  gap_distance:
+    aliases: []
+    kind: scalar
+  gas_injection_rate:
+    aliases: []
+    kind: scalar
+  gas_puff_rate:
+    aliases: []
+    kind: scalar
+  gas_valve_flow_rate:
+    aliases: []
+    kind: scalar
+  greenwald_density:
+    aliases: []
+    kind: scalar
+  greenwald_fraction:
+    aliases: []
+    kind: scalar
+  grid_cell_volume:
+    aliases: []
+    kind: scalar
+  gyrokinetic_normalized_collisionality:
+    aliases: []
+    kind: scalar
+  heat_flux:
+    aliases: []
+    kind: scalar
+  heating_power:
+    aliases: []
+    kind: scalar
+  hydrogen_isotope_fraction:
+    aliases: []
+    kind: scalar
+  impedance:
+    aliases: []
+    kind: scalar
+  inductance:
+    aliases: []
+    kind: scalar
+  inertial_current_density:
+    aliases: []
+    kind: scalar
+  injection_occurrence_flag:
+    aliases: []
+    kind: scalar
+  injector_fragmentation_gas_flow_rate:
+    aliases: []
+    kind: scalar
+  injector_propellant_gas_flow_rate:
+    aliases: []
+    kind: scalar
+  injector_trigger_time:
+    aliases: []
+    kind: scalar
+  internal_inductance:
+    aliases: []
+    kind: scalar
+  inverse_major_radius:
+    aliases: []
+    kind: scalar
+  inverse_square_magnetic_field_strength:
+    aliases: []
+    kind: scalar
+  ion_poloidal_velocity:
+    aliases: []
+    kind: scalar
+  ion_toroidal_velocity:
+    aliases: []
+    kind: scalar
+  kinetic_energy_density:
+    aliases: []
+    kind: scalar
+  larmor_radius:
+    aliases: []
+    kind: scalar
+  launched_power:
+    aliases: []
+    kind: scalar
+  length:
+    aliases: []
+    kind: scalar
+  li:
+    aliases:
+    - internal_inductance_normalized
+    kind: scalar
+  line_integrated_emissivity:
+    aliases: []
+    kind: scalar
+  loop_voltage:
+    aliases: []
+    kind: scalar
+  lower_elongation:
+    aliases: []
+    kind: scalar
+  lower_hybrid_electric_field:
+    aliases: []
+    kind: vector
+  lower_outer_squareness:
+    aliases: []
+    kind: scalar
+  magnetic_field:
+    aliases: []
+    kind: vector
+  magnetic_field_strength:
+    aliases: []
+    kind: scalar
+  magnetic_flux:
+    aliases: []
+    kind: scalar
+  magnetic_moment:
+    aliases: []
+    kind: vector
+  magnetic_shear:
+    aliases: []
+    kind: scalar
+  magnetic_vector_potential:
+    aliases: []
+    kind: vector
+  magnetization:
+    aliases: []
+    kind: scalar
+  magnetization_constraint_exact_flag:
+    aliases: []
+    kind: scalar
+  major_radius:
+    aliases: []
+    kind: scalar
+  mass:
+    aliases: []
+    kind: scalar
+  minimum_charge_state:
+    aliases: []
+    kind: scalar
+  minor_radius:
+    aliases: []
+    kind: scalar
+  mode_number:
+    aliases: []
+    kind: scalar
+  momentum:
+    aliases: []
+    kind: scalar
+  momentum_convective_velocity:
+    aliases: []
+    kind: vector
+  momentum_diffusivity:
+    aliases: []
+    kind: scalar
+  momentum_diffusivity_on_ggd:
+    aliases: []
+    kind: scalar
+  momentum_flux:
+    aliases: []
+    kind: vector
+  momentum_flux_limiter:
+    aliases: []
+    kind: scalar
+  momentum_poloidal_diffusivity:
+    aliases: []
+    kind: scalar
+  momentum_radial_diffusivity:
+    aliases: []
+    kind: scalar
+  momentum_radial_diffusivity_on_ggd:
+    aliases: []
+    kind: scalar
+  momentum_source:
+    aliases: []
+    kind: scalar
+  monte_carlo_marker_phase_space_position:
+    aliases: []
+    kind: scalar
+  neutron_emissivity:
+    aliases: []
+    kind: scalar
+  neutron_flux:
+    aliases: []
+    kind: scalar
+  non_axisymmetric_vacuum_magnetic_field:
+    aliases: []
+    kind: vector
+  normalized_larmor_radius:
+    aliases: []
+    kind: scalar
+  nuclear_heating_power:
+    aliases: []
+    kind: scalar
+  number_density:
+    aliases: []
+    kind: scalar
+  onset_time:
+    aliases: []
+    kind: scalar
+  orbit_frequency:
+    aliases: []
+    kind: scalar
+  parameter:
+    aliases: []
+    kind: scalar
+  particle_confinement_time:
+    aliases: []
+    kind: scalar
+  particle_count:
+    aliases: []
+    kind: scalar
+  particle_flux:
+    aliases: []
+    kind: vector
+  particle_flux_from_plasma:
+    aliases: []
+    kind: scalar
+  particle_flux_from_wall:
+    aliases: []
+    kind: scalar
+  particle_marker_orbit_time:
+    aliases: []
+    kind: scalar
+  particle_number_density:
+    aliases: []
+    kind: scalar
+  particle_number_density_source:
+    aliases: []
+    kind: scalar
+  particle_radial_diffusivity:
+    aliases: []
+    kind: scalar
+  particle_radial_diffusivity_on_ggd:
+    aliases: []
+    kind: scalar
+  perturbed_electrostatic_potential_weight:
+    aliases: []
+    kind: scalar
+  perturbed_parallel_magnetic_field_weight:
+    aliases: []
+    kind: scalar
+  perturbed_parallel_vector_potential_weight:
+    aliases: []
+    kind: scalar
+  phase:
+    aliases: []
+    kind: scalar
+  photon_count_rate:
+    aliases: []
+    kind: scalar
+  physical_sputtering_coefficient:
+    aliases: []
+    kind: scalar
+  pitch_angle:
+    aliases: []
+    kind: scalar
+  plasma_boundary_gap_distance:
+    aliases: []
+    kind: scalar
+  plasma_breakdown_time:
+    aliases: []
+    kind: scalar
+  plasma_current:
+    aliases: []
+    kind: scalar
+  plasma_duration:
+    aliases: []
+    kind: scalar
+  plasma_inductance:
+    aliases: []
+    kind: scalar
+  plasma_pressure:
+    aliases: []
+    kind: scalar
+  plasma_resistance:
+    aliases: []
+    kind: scalar
+  plasma_volume:
+    aliases: []
+    kind: scalar
+  plasma_volume_inside_flux_surface:
+    aliases: []
+    kind: scalar
+  plasma_vorticity:
+    aliases: []
+    kind: scalar
+  poloidal_magnetic_field:
+    aliases: []
+    kind: scalar
+  poloidal_magnetic_flux:
+    aliases: []
+    kind: scalar
+  poloidal_mode_number:
+    aliases: []
+    kind: scalar
+  potential:
+    aliases: []
+    kind: scalar
+  power:
+    aliases: []
+    kind: scalar
+  power_flux_density:
+    aliases: []
+    kind: scalar
+  prefill_gas_injection:
+    aliases: []
+    kind: scalar
+  prefill_gas_pressure:
+    aliases: []
+    kind: scalar
+  pressure:
+    aliases: []
+    kind: scalar
+  pressure_gradient_alpha_parameter:
+    aliases: []
+    kind: scalar
+  pressure_pedestal_fit_offset:
+    aliases: []
+    kind: scalar
+  pressure_pedestal_maximum_gradient_position:
+    aliases: []
+    kind: scalar
+  pressure_pedestal_position:
+    aliases: []
+    kind: scalar
+  pressure_pedestal_top:
+    aliases: []
+    kind: scalar
+  pressure_pedestal_width:
+    aliases: []
+    kind: scalar
+  pressure_scrape_off_layer:
+    aliases: []
+    kind: scalar
+  pressure_separatrix:
+    aliases: []
+    kind: scalar
+  pulse_number:
+    aliases: []
+    kind: scalar
+  pumping_speed:
+    aliases: []
+    kind: scalar
+  q_profile:
+    aliases:
+    - safety_factor_profile
+    kind: scalar
+  radial_coordinate_gradient_magnitude:
+    aliases: []
+    kind: scalar
+  radiated_energy:
+    aliases: []
+    kind: scalar
+  radiated_power:
+    aliases: []
+    kind: scalar
+  radiated_power_density:
+    aliases: []
+    kind: scalar
+  radiated_power_inside_flux_surface:
+    aliases: []
+    kind: scalar
+  radiated_power_inside_last_closed_flux_surface:
+    aliases: []
+    kind: scalar
+  radiated_power_inside_vessel:
+    aliases: []
+    kind: scalar
+  radius:
+    aliases: []
+    kind: scalar
+  rate:
+    aliases: []
+    kind: scalar
+  refractive_index:
+    aliases: []
+    kind: scalar
+  resistance:
+    aliases: []
+    kind: scalar
+  resistive_diffusion_time:
+    aliases: []
+    kind: scalar
+  resonant_magnetic_perturbation_occurrence:
+    aliases: []
+    kind: scalar
+  rotational_pressure:
+    aliases: []
+    kind: scalar
+  safety_factor:
+    aliases: []
+    kind: scalar
+  scrape_off_layer_density_decay_length:
+    aliases: []
+    kind: scalar
+  scrape_off_layer_heat_flux_decay_length:
+    aliases: []
+    kind: scalar
+  scrape_off_layer_temperature_decay_length:
+    aliases: []
+    kind: scalar
+  seed_island_width:
+    aliases: []
+    kind: scalar
+  shape_coefficient:
+    aliases: []
+    kind: scalar
+  simulation_component_elapsed_time_interval:
+    aliases: []
+    kind: scalar
+  simulation_current_time:
+    aliases: []
+    kind: scalar
+  simulation_end_time:
+    aliases: []
+    kind: scalar
+  simulation_restart_time:
+    aliases: []
+    kind: scalar
+  size:
+    aliases: []
+    kind: scalar
+  source:
+    aliases: []
+    kind: scalar
+  sputtering_angle_of_incidence:
+    aliases: []
+    kind: scalar
+  squareness:
+    aliases: []
+    kind: scalar
+  steering_angle:
+    aliases: []
+    kind: scalar
+  stored_energy:
+    aliases: []
+    kind: scalar
+  supply_voltage:
+    aliases: []
+    kind: scalar
+  surface_voltage:
+    aliases: []
+    kind: scalar
+  temperature:
+    aliases: []
+    kind: scalar
+  temperature_peaking_factor:
+    aliases: []
+    kind: scalar
+  temperature_pedestal_maximum_gradient_position:
+    aliases: []
+    kind: scalar
+  temperature_pedestal_position:
+    aliases: []
+    kind: scalar
+  temperature_pedestal_width:
+    aliases: []
+    kind: scalar
+  thermal_energy:
+    aliases: []
+    kind: scalar
+  thermal_energy_pedestal:
+    aliases: []
+    kind: scalar
+  time:
+    aliases: []
+    kind: scalar
+  time_averaging_window_width:
+    aliases: []
+    kind: scalar
+  toroidal_beta:
+    aliases: []
+    kind: scalar
+  toroidal_current_density:
+    aliases: []
+    kind: scalar
+  toroidal_magnetic_field:
+    aliases: []
+    kind: scalar
+  toroidal_mode_number:
+    aliases: []
+    kind: scalar
+  toroidal_torque_density:
+    aliases: []
+    kind: scalar
+  torque:
+    aliases: []
+    kind: scalar
+  torque_density:
+    aliases: []
+    kind: scalar
+  total_beta:
+    aliases: []
+    kind: scalar
+  transport_convection_velocity:
+    aliases: []
+    kind: vector
+  triangularity:
+    aliases: []
+    kind: scalar
+  upper_elongation:
+    aliases: []
+    kind: scalar
+  upper_triangularity:
+    aliases: []
+    kind: scalar
+  velocity:
+    aliases: []
+    kind: vector
+  velocity_gradient:
+    aliases: []
+    kind: scalar
+  vertical_stability_margin:
+    aliases: []
+    kind: scalar
+  voltage:
+    aliases: []
+    kind: scalar
+  volume:
+    aliases: []
+    kind: scalar
+  volume_averaged_electron_density:
+    aliases: []
+    kind: scalar
+  volumetric_energy_source:
+    aliases: []
+    kind: scalar
+  vorticity:
+    aliases: []
+    kind: scalar
+  wave_absorbed_power:
+    aliases: []
+    kind: scalar
+  wave_driven_absorbed_power_inside_flux_surface:
+    aliases: []
+    kind: scalar
+  wave_driven_toroidal_current:
+    aliases: []
+    kind: scalar
+  wave_driven_toroidal_current_inside_flux_surface:
+    aliases: []
+    kind: scalar
+  weight:
+    aliases: []
+    kind: scalar
+  width:
+    aliases: []
+    kind: scalar

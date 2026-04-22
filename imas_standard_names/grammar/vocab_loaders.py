@@ -124,8 +124,19 @@ def load_operators() -> OperatorRegistry:
 # ---------------------------------------------------------------------------
 
 
+BaseKind = Literal["scalar", "vector", "tensor", "complex"]
+
+
 class PhysicalBaseDef(BaseModel, extra="forbid"):
-    """A single physical base entry (schema TBD by W2a)."""
+    """A single physical base entry.
+
+    Attributes:
+        aliases: Alternate tokens that map to this base.
+        kind: Physical kind — scalar, vector, tensor, or complex.
+    """
+
+    aliases: list[str] = []
+    kind: BaseKind
 
 
 class PhysicalBasesRegistry(BaseModel, extra="forbid"):
@@ -137,7 +148,10 @@ class PhysicalBasesRegistry(BaseModel, extra="forbid"):
 def load_physical_bases() -> PhysicalBasesRegistry:
     """Load and validate ``physical_bases.yml``."""
     data = _load_yaml("physical_bases.yml")
-    return PhysicalBasesRegistry(**data)
+    # YAML may contain entries as None (bare key) — normalise to empty dict
+    raw_bases = data.get("bases") or {}
+    normalised = {k: (v or {}) for k, v in raw_bases.items()}
+    return PhysicalBasesRegistry(bases=normalised)
 
 
 # ---------------------------------------------------------------------------
@@ -146,7 +160,13 @@ def load_physical_bases() -> PhysicalBasesRegistry:
 
 
 class GeometryCarrierDef(BaseModel, extra="forbid"):
-    """A single geometry carrier entry (schema TBD by W2a)."""
+    """A single geometry carrier entry.
+
+    Attributes:
+        aliases: Alternate tokens that map to this carrier.
+    """
+
+    aliases: list[str] = []
 
 
 class GeometryCarriersRegistry(BaseModel, extra="forbid"):
@@ -158,7 +178,10 @@ class GeometryCarriersRegistry(BaseModel, extra="forbid"):
 def load_geometry_carriers() -> GeometryCarriersRegistry:
     """Load and validate ``geometry_carriers.yml``."""
     data = _load_yaml("geometry_carriers.yml")
-    return GeometryCarriersRegistry(**data)
+    # YAML may contain entries as None (bare key) — normalise to empty dict
+    raw_carriers = data.get("carriers") or {}
+    normalised = {k: (v or {}) for k, v in raw_carriers.items()}
+    return GeometryCarriersRegistry(carriers=normalised)
 
 
 # ---------------------------------------------------------------------------

@@ -10,6 +10,54 @@
 # Note: QUANTITIES *about* geometry (e.g. area_of_flux_surface) remain in
 # physical_bases.yml.
 #
-# Populated by W2a from corpus mining (plan 38 §A9).
+# Structure per entry:
+#   aliases  - list of alternate tokens (empty default)
+#
+# Populated by W2a from corpus mining (plan 38 §A9) and migration from
+# geometric_bases.yml.
 
-carriers: {}
+carriers:
+
+  # === From corpus mining (8 geometry_carrier tokens) ===
+  centroid:
+    aliases: []
+  line_of_sight:
+    aliases: []
+  normalized_minor_radius:
+    aliases: []
+  normalized_toroidal_flux_coordinate:
+    aliases: []
+  offset:
+    aliases: []
+  position:
+    aliases: []
+  radial_coordinate:
+    aliases: []
+  toroidal_flux_coordinate:
+    aliases: []
+
+  # === Migrated from geometric_bases.yml (carrier-type entries) ===
+  contour:
+    aliases: []
+  coordinate:
+    aliases: []
+  displacement:
+    aliases: []
+  extent:
+    aliases: []
+  normalized_poloidal_flux_coordinate:
+    aliases: []
+  outline:
+    aliases: []
+  sensor_normal:
+    aliases: []
+  surface_normal:
+    aliases: []
+  tangent_vector:
+    aliases: []
+  trajectory:
+    aliases: []
+  unit_vector:
+    aliases: []
+  vertex:
+    aliases: []

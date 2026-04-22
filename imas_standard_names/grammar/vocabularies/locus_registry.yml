@@ -6,42 +6,556 @@
 #   allowed_relations - subset of [of, at, over]
 #
 # Compatibility matrix enforced at validation time:
-#   entity   -> _of_  (intrinsic property of an entity)
-#   position -> _at_  (field quantity evaluated at a location)
-#              _of_  (geometric property of a position)
-#   geometry -> _at_, _over_  (field over a geometric shape)
+#   entity   -> of          (intrinsic property of an entity)
+#   position -> at, of      (field at location, geometric property of location)
+#   geometry -> at, of, over (field over a geometric shape)
 #
-# Populated by W1c (seed ~10 entries); W2a will migrate the full
-# objects.yml / positions.yml contents after parser is updated.
+# Populated by W2a from rc20 objects.yml + positions.yml migration and
+# corpus mining (44 entity + 41 position + 8 geometry tokens).
 
 loci:
-  plasma_boundary:
+
+  # ====================================================================
+  # Entity-typed loci (intrinsic property: _of_<entity>)
+  # Migrated from objects.yml + corpus mining locus_entity tokens
+  # ====================================================================
+
+  antenna_strap:
     type: entity
     allowed_relations: [of]
-  magnetic_axis:
-    type: position
-    allowed_relations: [at, of]
-  separatrix:
+  beam_tracing_beam:
     type: entity
     allowed_relations: [of]
-  x_point:
-    type: position
-    allowed_relations: [at, of]
+  beam_tracing_ray:
+    type: entity
+    allowed_relations: [of]
+  beamlet_group:
+    type: entity
+    allowed_relations: [of]
+  bolometer:
+    type: entity
+    allowed_relations: [of]
+  breeder_blanket:
+    type: entity
+    allowed_relations: [of]
+  breeder_blanket_layer:
+    type: entity
+    allowed_relations: [of]
+  breeder_blanket_module:
+    type: entity
+    allowed_relations: [of]
+  breeder_blanket_shield:
+    type: entity
+    allowed_relations: [of]
+  breeding_blanket_module:
+    type: entity
+    allowed_relations: [of]
+  camera:
+    type: entity
+    allowed_relations: [of]
+  coordinate_system:
+    type: entity
+    allowed_relations: [of]
+  correction_coil:
+    type: entity
+    allowed_relations: [of]
+  diagnostic_antenna:
+    type: entity
+    allowed_relations: [of]
+  diagnostic_aperture:
+    type: entity
+    allowed_relations: [of]
+  diamagnetic_loop:
+    type: entity
+    allowed_relations: [of]
+  divertor:
+    type: entity
+    allowed_relations: [of]
+  divertor_tile:
+    type: entity
+    allowed_relations: [of]
+  electron_cyclotron_beam:
+    type: entity
+    allowed_relations: [of]
+  electron_cyclotron_heating_antenna:
+    type: entity
+    allowed_relations: [of]
+  electron_cyclotron_launcher:
+    type: entity
+    allowed_relations: [of]
+  electron_cyclotron_launcher_mirror:
+    type: entity
+    allowed_relations: [of]
+  ferritic_element:
+    type: entity
+    allowed_relations: [of]
+  ferritic_insert:
+    type: entity
+    allowed_relations: [of]
+  fiber_optic_current_sensor:
+    type: entity
+    allowed_relations: [of]
+  filter:
+    type: entity
+    allowed_relations: [of]
   flux_loop:
     type: entity
     allowed_relations: [of]
-  wall:
+  gamma_ray_detector:
     type: entity
-    allowed_relations: [of, over]
-  pedestal:
-    type: geometry
-    allowed_relations: [at, over]
+    allowed_relations: [of]
+  gyrokinetic_eigenmode:
+    type: entity
+    allowed_relations: [of]
+  hard_xray_detector:
+    type: entity
+    allowed_relations: [of]
+  infrared_camera:
+    type: entity
+    allowed_relations: [of]
+  interferometer_beam:
+    type: entity
+    allowed_relations: [of]
+  ion_cyclotron_heating_antenna:
+    type: entity
+    allowed_relations: [of]
+  ion_state:
+    type: entity
+    allowed_relations: [of]
+  iron_core_segment:
+    type: entity
+    allowed_relations: [of]
+  isotope:
+    type: entity
+    allowed_relations: [of]
+  langmuir_probe:
+    type: entity
+    allowed_relations: [of]
+  limiter_tile:
+    type: entity
+    allowed_relations: [of]
+  lower_hybrid_antenna:
+    type: entity
+    allowed_relations: [of]
+  lower_hybrid_antenna_row:
+    type: entity
+    allowed_relations: [of]
+  magnetic_field_probe:
+    type: entity
+    allowed_relations: [of]
+  mass_spectrometer:
+    type: entity
+    allowed_relations: [of]
+  mass_spectrometer_channel:
+    type: entity
+    allowed_relations: [of]
+  mse:
+    type: entity
+    allowed_relations: [of]
+  neoclassical_tearing_mode:
+    type: entity
+    allowed_relations: [of]
+  neutral_beam_injector:
+    type: entity
+    allowed_relations: [of]
+  neutron_detector:
+    type: entity
+    allowed_relations: [of]
+  neutron_detector_converter:
+    type: entity
+    allowed_relations: [of]
+  optical_element:
+    type: entity
+    allowed_relations: [of]
+  passive_loop:
+    type: entity
+    allowed_relations: [of]
+  passive_structure:
+    type: entity
+    allowed_relations: [of]
+  pellet:
+    type: entity
+    allowed_relations: [of]
+  pickup_coil:
+    type: entity
+    allowed_relations: [of]
+  plasma_boundary:
+    type: entity
+    allowed_relations: [of]
+  plasma_facing_component:
+    type: entity
+    allowed_relations: [of]
+  plasma_filament:
+    type: entity
+    allowed_relations: [of]
+  poloidal_field_coil:
+    type: entity
+    allowed_relations: [of]
+  poloidal_magnetic_field_probe:
+    type: entity
+    allowed_relations: [of]
+  port:
+    type: entity
+    allowed_relations: [of]
+  radial_magnetic_field_probe:
+    type: entity
+    allowed_relations: [of]
+  reciprocating_probe:
+    type: entity
+    allowed_relations: [of]
+  reflectometer_antenna:
+    type: entity
+    allowed_relations: [of]
+  reflectometer_detector:
+    type: entity
+    allowed_relations: [of]
+  rogowski_coil:
+    type: entity
+    allowed_relations: [of]
+  saddle_loop:
+    type: entity
+    allowed_relations: [of]
+  secondary_separatrix_x_point:
+    type: entity
+    allowed_relations: [of]
+  separatrix:
+    type: entity
+    allowed_relations: [of]
+  soft_xray_detector:
+    type: entity
+    allowed_relations: [of]
+  spectrometer:
+    type: entity
+    allowed_relations: [of]
+  spectrometer_channel:
+    type: entity
+    allowed_relations: [of]
+  temperature_sensor:
+    type: entity
+    allowed_relations: [of]
+  thomson_scattering_detector:
+    type: entity
+    allowed_relations: [of]
+  thomson_scattering_laser:
+    type: entity
+    allowed_relations: [of]
+  toroidal_field_coil:
+    type: entity
+    allowed_relations: [of]
+  toroidal_magnetic_field_probe:
+    type: entity
+    allowed_relations: [of]
+  trim_coil:
+    type: entity
+    allowed_relations: [of]
+  vacuum_vessel:
+    type: entity
+    allowed_relations: [of]
+  visible_camera:
+    type: entity
+    allowed_relations: [of]
+  wall_material:
+    type: entity
+    allowed_relations: [of]
+  wave_beam:
+    type: entity
+    allowed_relations: [of]
+  working_fluid:
+    type: entity
+    allowed_relations: [of]
+
+  # ====================================================================
+  # Position-typed loci (field at location: _at_<position>, _of_<position>)
+  # Migrated from positions.yml + corpus mining locus_position tokens
+  # ====================================================================
+
   active_limiter_point:
     type: position
     allowed_relations: [at, of]
-  divertor_target:
+  along_beam:
+    type: position
+    allowed_relations: [at, of]
+  along_beam_path:
+    type: position
+    allowed_relations: [at, of]
+  along_line_of_sight:
+    type: position
+    allowed_relations: [at, of]
+  along_pellet_path:
+    type: position
+    allowed_relations: [at, of]
+  antenna_row:
+    type: position
+    allowed_relations: [at, of]
+  beam_tracing_point:
+    type: position
+    allowed_relations: [at, of]
+  charge_state:
+    type: position
+    allowed_relations: [at, of]
+  closest_wall_point:
+    type: position
+    allowed_relations: [at, of]
+  constraint_position:
+    type: position
+    allowed_relations: [at, of]
+  constant_toroidal_flux:
+    type: position
+    allowed_relations: [at, of]
+  control_surface:
+    type: position
+    allowed_relations: [at, of]
+  control_surface_outline_point:
+    type: position
+    allowed_relations: [at, of]
+  cooling_circuit_inlet:
     type: position
     allowed_relations: [at, of]
   current_center:
     type: position
     allowed_relations: [at, of]
+  delta_position:
+    type: position
+    allowed_relations: [at, of]
+  divertor_plate:
+    type: position
+    allowed_relations: [at, of]
+  divertor_target:
+    type: position
+    allowed_relations: [at, of]
+  dr_dz_zero_point:
+    type: position
+    allowed_relations: [at, of]
+  ece_channel:
+    type: position
+    allowed_relations: [at, of]
+  ece_channel_emission_position:
+    type: position
+    allowed_relations: [at, of]
+  end_point:
+    type: position
+    allowed_relations: [at, of]
+  ferritic_element_centroid:
+    type: position
+    allowed_relations: [at, of]
+  ferritic_insert_centroid:
+    type: position
+    allowed_relations: [at, of]
+  first_point_of_interferometer_beam:
+    type: position
+    allowed_relations: [at, of]
+  first_wall:
+    type: position
+    allowed_relations: [at, of]
+  first_wall_midplane:
+    type: position
+    allowed_relations: [at, of]
+  flux_surface:
+    type: position
+    allowed_relations: [at, of]
+  gap_reference_point:
+    type: position
+    allowed_relations: [at, of]
+  geometric_axis:
+    type: position
+    allowed_relations: [at, of]
+  ggd_element:
+    type: position
+    allowed_relations: [at, of]
+  ggd_grid_node:
+    type: position
+    allowed_relations: [at, of]
+  ggd_grid_point:
+    type: position
+    allowed_relations: [at, of]
+  ggd_grid_subset:
+    type: position
+    allowed_relations: [at, of]
+  ggd_node:
+    type: position
+    allowed_relations: [at, of]
+  halo_boundary:
+    type: position
+    allowed_relations: [at, of]
+  halo_current_area_end_point:
+    type: position
+    allowed_relations: [at, of]
+  halo_current_area_start_point:
+    type: position
+    allowed_relations: [at, of]
+  inlet:
+    type: position
+    allowed_relations: [at, of]
+  inner_divertor_target:
+    type: position
+    allowed_relations: [at, of]
+  inner_midplane:
+    type: position
+    allowed_relations: [at, of]
+  inside_flux_surface:
+    type: position
+    allowed_relations: [at, of]
+  internal_transport_barrier:
+    type: position
+    allowed_relations: [at, of]
+  ion_charge_state:
+    type: position
+    allowed_relations: [at, of]
+  last_closed_flux_surface:
+    type: position
+    allowed_relations: [at, of]
+  launching_position:
+    type: position
+    allowed_relations: [at, of]
+  limiter:
+    type: position
+    allowed_relations: [at, of]
+  magnetic_axis:
+    type: position
+    allowed_relations: [at, of]
+  measurement_position:
+    type: position
+    allowed_relations: [at, of]
+  midplane:
+    type: position
+    allowed_relations: [at, of]
+  minimum_safety_factor:
+    type: position
+    allowed_relations: [at, of]
+  neoclassical_tearing_mode_center:
+    type: position
+    allowed_relations: [at, of]
+  neoclassical_tearing_mode_onset:
+    type: position
+    allowed_relations: [at, of]
+  normalized_poloidal_flux:
+    type: position
+    allowed_relations: [at, of]
+  ntm_onset:
+    type: position
+    allowed_relations: [at, of]
+  outboard_midplane:
+    type: position
+    allowed_relations: [at, of]
+  outboard_midplane_first_wall:
+    type: position
+    allowed_relations: [at, of]
+  outboard_midplane_height:
+    type: position
+    allowed_relations: [at, of]
+  outboard_midplane_separatrix:
+    type: position
+    allowed_relations: [at, of]
+  outer:
+    type: position
+    allowed_relations: [at, of]
+  outer_divertor_target:
+    type: position
+    allowed_relations: [at, of]
+  outer_midplane:
+    type: position
+    allowed_relations: [at, of]
+  outlet:
+    type: position
+    allowed_relations: [at, of]
+  outline_point:
+    type: position
+    allowed_relations: [at, of]
+  pedestal:
+    type: position
+    allowed_relations: [at, of]
+  pedestal_maximum:
+    type: position
+    allowed_relations: [at, of]
+  pedestal_top:
+    type: position
+    allowed_relations: [at, of]
+  pedestal_top_high_field_side:
+    type: position
+    allowed_relations: [at, of]
+  pedestal_top_low_field_side:
+    type: position
+    allowed_relations: [at, of]
+  pellet_path:
+    type: position
+    allowed_relations: [at, of]
+  pellet_path_first_point:
+    type: position
+    allowed_relations: [at, of]
+  pellet_path_point:
+    type: position
+    allowed_relations: [at, of]
+  pellet_path_second_point:
+    type: position
+    allowed_relations: [at, of]
+  plasma_boundary_gap_reference_point:
+    type: position
+    allowed_relations: [at, of]
+  post_sawtooth_crash:
+    type: position
+    allowed_relations: [at, of]
+  primary_strike_point:
+    type: position
+    allowed_relations: [at, of]
+  primary_x_point:
+    type: position
+    allowed_relations: [at, of]
+  reference_major_radius:
+    type: position
+    allowed_relations: [at, of]
+  reference_position:
+    type: position
+    allowed_relations: [at, of]
+  sawtooth_inversion_radius:
+    type: position
+    allowed_relations: [at, of]
+  second_point_of_interferometer_beam:
+    type: position
+    allowed_relations: [at, of]
+  secondary_separatrix:
+    type: position
+    allowed_relations: [at, of]
+  secondary_separatrix_outline_point:
+    type: position
+    allowed_relations: [at, of]
+  secondary_separatrix_strike_point:
+    type: position
+    allowed_relations: [at, of]
+  shattering_position:
+    type: position
+    allowed_relations: [at, of]
+  soft_xray_detector_line_of_sight_second_point:
+    type: position
+    allowed_relations: [at, of]
+  spectral_line:
+    type: position
+    allowed_relations: [at, of]
+  start_point:
+    type: position
+    allowed_relations: [at, of]
+  strike_point:
+    type: position
+    allowed_relations: [at, of]
+  tearing_mode_center:
+    type: position
+    allowed_relations: [at, of]
+  third_point_of_interferometer_beam:
+    type: position
+    allowed_relations: [at, of]
+  wall:
+    type: position
+    allowed_relations: [at, of]
+  x_point:
+    type: position
+    allowed_relations: [at, of]
+
+  # ====================================================================
+  # Geometry-typed loci (shape/region boundary: _at_, _of_, _over_)
+  # ====================================================================
+
+  active_wall_point:
+    type: geometry
+    allowed_relations: [at, of, over]
+  beam_path:
+    type: geometry
+    allowed_relations: [at, of, over]
