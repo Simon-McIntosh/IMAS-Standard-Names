@@ -15,6 +15,13 @@ from imas_standard_names.tools.tokens import VocabularyTokensTool
 from imas_standard_names.tools.validate import ValidateCatalogTool
 from imas_standard_names.tools.vocabulary import VocabularyTool
 
+try:  # Optional: local graph tools require networkx (plan 41)
+    import networkx as _networkx  # noqa: F401
+
+    from imas_standard_names.tools.graph import LocalGraphTool as _LocalGraphTool
+except ImportError:  # pragma: no cover - optional dependency
+    _LocalGraphTool = None  # type: ignore[assignment]
+
 
 class Tools:
     """Main Tools class that delegates to individual tool implementations."""
@@ -73,6 +80,10 @@ class Tools:
             except ImportError:
                 pass
 
+        # Local graph tools (plan 41) - gated on networkx extra
+        if _LocalGraphTool is not None:
+            self.local_graph_tool = _LocalGraphTool(catalog_root=catalog_root)
+
     @property
     def name(self) -> str:
         """Provider name for logging and identification."""
@@ -112,6 +123,10 @@ class Tools:
             # Vocabulary tool (if quality deps available)
             if hasattr(self, "vocabulary_tool"):
                 catalog_tools.append(self.vocabulary_tool)
+
+        # Local graph tool (plan 41) - catalog-root-scoped, no catalog object required
+        if hasattr(self, "local_graph_tool"):
+            catalog_tools.append(self.local_graph_tool)
 
         # Register all available tools
         for tool in always_available + catalog_tools:

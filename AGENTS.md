@@ -68,6 +68,8 @@ imas_standard_names/
 ├── tools/           # MCP read-only tool implementations
 ├── grammar/         # Grammar parsing, composition, and validation
 ├── catalog/         # SQLite catalog management
+├── graph/           # NetworkX local graph builder (plan 41, optional)
+├── rendering/       # MkDocs catalog renderer
 ├── repository.py    # Main repository facade (read-only)
 ├── models.py        # Pydantic data models
 └── validation/      # Validation logic
@@ -83,6 +85,34 @@ tests/               # Test suite
 - Mirror test structure to source structure
 - Group related functionality in focused modules
 - Keep modules cohesive and loosely coupled
+
+### Local Graph (plan 41)
+
+The `graph/local_graph.py` module builds a NetworkX `DiGraph` over the
+per-domain catalog YAML (`<domain>.yml`). Five edge types are emitted:
+
+| Edge type | Source attribute | Direction |
+|-----------|------------------|-----------|
+| `HAS_ARGUMENT` | `arguments.*.name` | entry → argument |
+| `HAS_ERROR` | `error_variants[]` | **base → variant** (base-centric) |
+| `HAS_PREDECESSOR` | `deprecates` | entry → deprecated predecessor |
+| `HAS_SUCCESSOR` | `superseded_by` | deprecated entry → successor |
+| `REFERENCES` | `links[]` | entry → referenced name |
+
+Forward references and external names appear as stub nodes
+(`node["stub"] = True`). Install with `uv sync --extra graph-local`.
+
+Four MCP tools in `tools/graph.py` wrap the graph:
+
+- `get_standard_name_neighbours(name, edge_types=None, direction="both")`
+- `get_standard_name_ancestors(name, max_depth=None)` — transitive closure
+  over HAS_ARGUMENT (out) ∪ HAS_ERROR (in), i.e. ordering parents.
+- `get_standard_name_descendants(name, max_depth=None)` — inverse.
+- `shortest_standard_name_path(source, target, edge_types=None)`
+
+All four are registered as optional read-only tools (skipped when the
+`networkx` import is unavailable).
+
 
 ## Project Setup
 
