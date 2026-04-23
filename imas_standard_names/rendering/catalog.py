@@ -33,7 +33,8 @@ class CatalogRenderer:
     def load_names(self) -> list[dict]:
         """Load all YAML standard names from the catalog directory.
 
-        Recursively searches all subdirectories for YAML files.
+        Supports both per-domain list files (plan 40 layout) and legacy
+        per-file single-entry dicts with a ``name`` key.
 
         Returns
         -------
@@ -59,7 +60,13 @@ class CatalogRenderer:
                 yaml_content = yaml_file.read_text(encoding="utf-8")
                 data = yaml.safe_load(yaml_content)
 
-                if data and isinstance(data, dict) and "name" in data:
+                if isinstance(data, list):
+                    for entry in data:
+                        if entry and isinstance(entry, dict) and "name" in entry:
+                            entry["_file_path"] = str(yaml_file)
+                            entry["_category"] = "standard_names"
+                            standard_names.append(entry)
+                elif data and isinstance(data, dict) and "name" in data:
                     data["_file_path"] = str(yaml_file)
                     data["_category"] = "standard_names"
                     standard_names.append(data)

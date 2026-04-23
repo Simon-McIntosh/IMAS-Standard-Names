@@ -8,15 +8,20 @@ from imas_standard_names.repository import StandardNameCatalog
 
 
 def _write_yaml(root: Path, model):
-    """Write a standard name model as a YAML file."""
-    domain = "general"
-    domain_dir = root / domain
-    domain_dir.mkdir(parents=True, exist_ok=True)
-    path = domain_dir / f"{model.name}.yml"
+    """Write a standard name model to a per-domain list YAML file."""
+    domain = getattr(model, "physics_domain", "general") or "general"
+    domain_file = root / f"{domain}.yml"
     data = {k: v for k, v in model.model_dump().items() if v not in (None, [], "")}
     data["name"] = model.name
-    with open(path, "w", encoding="utf-8") as fh:
-        yaml.safe_dump(data, fh, sort_keys=False, allow_unicode=True, width=80)
+    existing: list[dict] = []
+    if domain_file.exists():
+        with open(domain_file, encoding="utf-8") as fh:
+            loaded = yaml.safe_load(fh)
+        if isinstance(loaded, list):
+            existing = loaded
+    existing.append(data)
+    with open(domain_file, "w", encoding="utf-8") as fh:
+        yaml.safe_dump(existing, fh, sort_keys=False, allow_unicode=True, width=80)
 
 
 def test_build_catalog_round_trip(tmp_path: Path, example_scalars):

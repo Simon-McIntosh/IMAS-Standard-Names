@@ -13,15 +13,27 @@ from imas_standard_names.tools.fetch import FetchTool
 
 
 def _write_entry_yaml(root: Path, entry):
-    """Write a standard name entry as a YAML file to disk."""
+    """Write a standard name entry as a YAML file to disk.
+
+    Uses the per-domain list format (plan 40): entries are appended
+    to ``root/<domain>.yml`` as a YAML sequence.
+    """
     domain = getattr(entry, "physics_domain", "general") or "general"
-    domain_dir = root / domain
-    domain_dir.mkdir(parents=True, exist_ok=True)
-    path = domain_dir / f"{entry.name}.yml"
+    domain_file = root / f"{domain}.yml"
     data = {k: v for k, v in entry.model_dump().items() if v not in (None, [], "")}
     data["name"] = entry.name
-    with open(path, "w", encoding="utf-8") as fh:
-        yaml.safe_dump(data, fh, sort_keys=False, allow_unicode=True, width=80)
+
+    # Load existing entries if the domain file already exists
+    existing: list[dict] = []
+    if domain_file.exists():
+        with open(domain_file, encoding="utf-8") as fh:
+            loaded = yaml.safe_load(fh)
+        if isinstance(loaded, list):
+            existing = loaded
+
+    existing.append(data)
+    with open(domain_file, "w", encoding="utf-8") as fh:
+        yaml.safe_dump(existing, fh, sort_keys=False, allow_unicode=True, width=80)
 
 
 @pytest.fixture

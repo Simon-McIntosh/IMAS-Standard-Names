@@ -61,8 +61,19 @@ def test_integrity_deleted_file(tmp_path: Path, example_scalars, write_yaml):
 
     first_name = example_scalars[0].name
     db = build_catalog(tmp_path, tmp_path / "artifacts" / "catalog.db")
-    # Delete first example (write_yaml writes to a "general" subdirectory)
-    (tmp_path / "general" / f"{first_name}.yml").unlink()
+    # Delete first example by removing its entry from the per-domain file
+    domain = getattr(example_scalars[0], "physics_domain", "general") or "general"
+    domain_file = tmp_path / f"{domain}.yml"
+    import yaml as _yaml
+
+    with open(domain_file) as fh:
+        entries = _yaml.safe_load(fh) or []
+    entries = [e for e in entries if e.get("name") != first_name]
+    if entries:
+        with open(domain_file, "w") as fh:
+            _yaml.safe_dump(entries, fh, sort_keys=False)
+    else:
+        domain_file.unlink()
     issues = verify_integrity(tmp_path, db, full=False)
     assert any(
         i["code"] == "missing-on-disk" and i.get("name") == first_name for i in issues

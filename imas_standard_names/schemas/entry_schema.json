@@ -1,5 +1,96 @@
 {
   "$defs": {
+    "ArgumentRef": {
+      "additionalProperties": false,
+      "description": "Reference to another standard name as an argument of a structural operator.\n\nCaptures one layer of the ISN grammar's operator decomposition: the outer\noperator that wraps this entry around a *base* argument.  Entries emitted\nby the codex export pipeline carry ``arguments`` lists whose elements are\n``ArgumentRef`` instances.",
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "operator": {
+          "title": "Operator",
+          "type": "string"
+        },
+        "operator_kind": {
+          "enum": [
+            "unary_prefix",
+            "unary_postfix",
+            "binary",
+            "projection"
+          ],
+          "title": "Operator Kind",
+          "type": "string"
+        },
+        "role": {
+          "anyOf": [
+            {
+              "enum": [
+                "a",
+                "b"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Role"
+        },
+        "separator": {
+          "anyOf": [
+            {
+              "enum": [
+                "and",
+                "to"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Separator"
+        },
+        "axis": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Axis"
+        },
+        "shape": {
+          "anyOf": [
+            {
+              "enum": [
+                "component",
+                "coordinate"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Shape"
+        }
+      },
+      "required": [
+        "name",
+        "operator",
+        "operator_kind"
+      ],
+      "title": "ArgumentRef",
+      "type": "object"
+    },
     "ExpressionProvenance": {
       "description": "Provenance describing an algebraic expression of existing names.\n\nFields\n------\nmode: Literal[\"expression\"] discriminator.\nexpression: Free-form (but catalog-governed) expression string.\ndependencies: List of standard name identifiers referenced by the\n    expression (used for dependency graph construction / validation).",
       "properties": {
@@ -236,6 +327,43 @@
           "title": "Links",
           "type": "array"
         },
+        "arguments": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/ArgumentRef"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Arguments"
+        },
+        "error_variants": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "propertyNames": {
+                "enum": [
+                  "upper",
+                  "lower",
+                  "index"
+                ]
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Error Variants"
+        },
         "kind": {
           "const": "complex",
           "default": "complex",
@@ -432,6 +560,43 @@
           "title": "Links",
           "type": "array"
         },
+        "arguments": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/ArgumentRef"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Arguments"
+        },
+        "error_variants": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "propertyNames": {
+                "enum": [
+                  "upper",
+                  "lower",
+                  "index"
+                ]
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Error Variants"
+        },
         "kind": {
           "const": "metadata",
           "default": "metadata",
@@ -582,6 +747,43 @@
           },
           "title": "Links",
           "type": "array"
+        },
+        "arguments": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/ArgumentRef"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Arguments"
+        },
+        "error_variants": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "propertyNames": {
+                "enum": [
+                  "upper",
+                  "lower",
+                  "index"
+                ]
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Error Variants"
         },
         "kind": {
           "const": "scalar",
@@ -779,6 +981,43 @@
           "title": "Links",
           "type": "array"
         },
+        "arguments": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/ArgumentRef"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Arguments"
+        },
+        "error_variants": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "propertyNames": {
+                "enum": [
+                  "upper",
+                  "lower",
+                  "index"
+                ]
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Error Variants"
+        },
         "kind": {
           "const": "tensor",
           "default": "tensor",
@@ -974,6 +1213,43 @@
           },
           "title": "Links",
           "type": "array"
+        },
+        "arguments": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/ArgumentRef"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Arguments"
+        },
+        "error_variants": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "propertyNames": {
+                "enum": [
+                  "upper",
+                  "lower",
+                  "index"
+                ]
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Error Variants"
         },
         "kind": {
           "const": "vector",
