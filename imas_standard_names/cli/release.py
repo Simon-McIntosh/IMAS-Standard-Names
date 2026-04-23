@@ -376,7 +376,8 @@ def _show_release_status() -> None:
 # Click command
 # ============================================================================
 
-REMOTE = "upstream"
+_RC_REMOTE = "origin"
+_FINAL_REMOTE = "upstream"
 
 
 @click.command("release")
@@ -405,6 +406,14 @@ REMOTE = "upstream"
     help="Finalize: promote current RC to stable, or skip RC with --bump.",
 )
 @click.option(
+    "--remote",
+    default=None,
+    help=(
+        "Git remote to push the tag to. "
+        "Defaults to 'origin' for RC releases and 'upstream' for final releases."
+    ),
+)
+@click.option(
     "--dry-run",
     is_flag=True,
     help="Show what would be done without making changes.",
@@ -414,26 +423,28 @@ def release_cmd(
     bump: str | None,
     message: str | None,
     final: bool,
+    remote: str | None,
     dry_run: bool,
 ) -> None:
     """Semantic version release with pre-flight safety checks.
 
     Detects current state (Stable or RC mode) from the latest git tag and
-    computes the next version automatically. Tags are always pushed to
-    upstream (iterorganization) to trigger the PyPI publish workflow.
+    computes the next version automatically. RC releases are pushed to origin
+    (fork); final releases are pushed to upstream (iterorganization) to
+    trigger the PyPI publish workflow.
 
     \b
     Examples:
         # Show current state and available commands
         standard-names release status
 
-        # Start RC series (v0.6.0 → v0.7.0rc1)
+        # Start RC series (v0.6.0 → v0.7.0rc1) — pushed to origin
         standard-names release --bump minor -m 'Add release CLI'
 
-        # Increment RC (v0.7.0rc1 → v0.7.0rc2)
+        # Increment RC (v0.7.0rc1 → v0.7.0rc2) — pushed to origin
         standard-names release -m 'Fix CI issues'
 
-        # Finalize RC (v0.7.0rc2 → v0.7.0)
+        # Finalize RC (v0.7.0rc2 → v0.7.0) — pushed to upstream → PyPI
         standard-names release --final -m 'Production release'
 
         # Direct release, skip RC (v0.6.0 → v0.6.1)
@@ -452,12 +463,15 @@ def release_cmd(
             "Example: standard-names release --bump minor -m 'description'"
         )
 
+    # Determine target remote: explicit override, else origin for RC / upstream for final
+    effective_remote = remote or (_FINAL_REMOTE if final else _RC_REMOTE)
+
     # --- Pre-flight checks ---
     click.echo("Pre-flight checks:")
     _check_on_main()
     _check_clean_tree(dry_run)
-    _check_synced(REMOTE, dry_run)
-    _check_ci_passed(REMOTE, dry_run)
+    _check_synced(effective_remote, dry_run)
+    _check_ci_passed(effective_remote, dry_run)
 
     # --- Compute version ---
     info = _detect_state()
@@ -497,7 +511,7 @@ def release_cmd(
     click.echo()
     click.echo(f"Version: {version}")
     click.echo(f"Tag:     {git_tag}")
-    click.echo(f"Remote:  {REMOTE}")
+    click.echo(f"Remote:  {effective_remote}")
 
     if dry_run:
         click.echo()
@@ -510,14 +524,23 @@ def release_cmd(
         raise click.ClickException(f"Failed to create tag: {result.stderr}")
     click.echo(f"  ✓ Created tag {git_tag}")
 
-    result = _run_git("push", REMOTE, git_tag)
+    result = _run_git("push", effective_remote, git_tag)
     if result.returncode != 0:
         # Clean up the local tag on push failure
         _run_git("tag", "-d", git_tag)
-        raise click.ClickException(f"Failed to push tag to {REMOTE}: {result.stderr}")
-    click.echo(f"  ✓ Pushed {git_tag} to {REMOTE}")
+        raise click.ClickException(
+            f"Failed to push tag to {effective_remote}: {result.stderr}"
+        )
+    click.echo(f"  ✓ Pushed {git_tag} to {effective_remote}")
     click.echo()
-    click.echo(
-        "Release pipeline triggered. Monitor at: "
-        "https://github.com/iterorganization/IMAS-Standard-Names/actions"
-    )
+    if final:
+        click.echo(
+            "Release pipeline triggered. Monitor at: "
+            "https://github.com/iterorganization/IMAS-Standard-Names/actions"
+        )
+    else:
+        owner = effective_remote if effective_remote != "origin" else "Simon-McIntosh"
+        click.echo(
+            f"RC release pipeline triggered. Monitor at: "
+            f"https://github.com/{owner}/IMAS-Standard-Names/actions"
+        )
