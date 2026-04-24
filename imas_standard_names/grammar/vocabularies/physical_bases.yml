@@ -155,6 +155,9 @@ bases:
   diamagnetic_drift_velocity:
     aliases: []
     kind: vector
+  diagnostic_latency:  # Added rc27: EMW pilot evidence N=4
+    aliases: []
+    kind: scalar
   diffusivity:
     aliases: []
     kind: scalar
@@ -715,6 +718,9 @@ bases:
   surface_voltage:
     aliases: []
     kind: scalar
+  sweep_duration:  # Added rc27: EMW pilot evidence N=3
+    aliases: []
+    kind: scalar
   temperature:
     aliases: []
     kind: scalar
@@ -818,5 +824,8 @@ bases:
     aliases: []
     kind: scalar
   width:
+    aliases: []
+    kind: scalar
+  x1_width:  # Added rc27: EMW pilot evidence N=3
     aliases: []
     kind: scalar
