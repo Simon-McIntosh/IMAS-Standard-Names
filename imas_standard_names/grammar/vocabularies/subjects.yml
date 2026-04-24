@@ -116,3 +116,12 @@
 - runaway                      # runaway particle qualifier
 - state                        # generic state qualifier
 - thermal                      # thermal population qualifier
+- trapped
+- passing
+- counter_passing
+- co_current
+- counter_current
+- inertial
+- sonic
+- left_hand_circularly_polarized
+- right_hand_circularly_polarized

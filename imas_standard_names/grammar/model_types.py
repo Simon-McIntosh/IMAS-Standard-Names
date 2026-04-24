@@ -128,6 +128,12 @@ class Subject(StrEnum):
     RUNAWAY = "runaway"
     STATE = "state"
     THERMAL = "thermal"
+    CO_CURRENT = "co_current"
+    COUNTER_CURRENT = "counter_current"
+    INERTIAL = "inertial"
+    SONIC = "sonic"
+    LEFT_HAND_CIRCULARLY_POLARIZED = "left_hand_circularly_polarized"
+    RIGHT_HAND_CIRCULARLY_POLARIZED = "right_hand_circularly_polarized"
 
 
 class Region(StrEnum):
@@ -226,6 +232,7 @@ class Process(StrEnum):
     INJECTION = "injection"
     SPUTTERING = "sputtering"
     VISCOSITY = "viscosity"
+    OHMIC_INDUCTION = "ohmic_induction"
 
 
 class GenericPhysicalBase(StrEnum):
