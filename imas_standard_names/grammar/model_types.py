@@ -459,6 +459,8 @@ class GeometricBase(StrEnum):
     TRAJECTORY = "trajectory"
     UNIT_VECTOR = "unit_vector"
     VERTEX = "vertex"
+    X1_COORDINATE = "x1_coordinate"
+    X2_COORDINATE = "x2_coordinate"
 
 
 class Transformation(StrEnum):

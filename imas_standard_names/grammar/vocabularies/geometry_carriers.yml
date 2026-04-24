@@ -61,3 +61,9 @@ carriers:
     aliases: []
   vertex:
     aliases: []
+
+  # === EMW pilot rc27 additions (evidence N>=3) ===
+  x1_coordinate:  # Added rc27: EMW pilot evidence N=3
+    aliases: []
+  x2_coordinate:  # Added rc27: EMW pilot evidence N=3
+    aliases: []
