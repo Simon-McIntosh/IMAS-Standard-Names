@@ -134,6 +134,7 @@ class Subject(StrEnum):
     SONIC = "sonic"
     LEFT_HAND_CIRCULARLY_POLARIZED = "left_hand_circularly_polarized"
     RIGHT_HAND_CIRCULARLY_POLARIZED = "right_hand_circularly_polarized"
+    GYROAVERAGED = "gyroaveraged"
 
 
 class Region(StrEnum):
@@ -368,6 +369,7 @@ class Position(StrEnum):
     FIRST_POINT_OF_INTERFEROMETER_BEAM = "first_point_of_interferometer_beam"
     FIRST_WALL = "first_wall"
     FIRST_WALL_MIDPLANE = "first_wall_midplane"
+    FOCS_OUTLINE_POINT = "focs_outline_point"
     FLUX_SURFACE = "flux_surface"
     GAP_REFERENCE_POINT = "gap_reference_point"
     GEOMETRIC_AXIS = "geometric_axis"
@@ -388,6 +390,7 @@ class Position(StrEnum):
     LAST_CLOSED_FLUX_SURFACE = "last_closed_flux_surface"
     LAUNCHING_POSITION = "launching_position"
     LIMITER = "limiter"
+    LIMITER_OUTLINE_POINT = "limiter_outline_point"
     MAGNETIC_AXIS = "magnetic_axis"
     MEASUREMENT_POSITION = "measurement_position"
     MIDPLANE = "midplane"
@@ -433,6 +436,7 @@ class Position(StrEnum):
     START_POINT = "start_point"
     STRIKE_POINT = "strike_point"
     TEARING_MODE_CENTER = "tearing_mode_center"
+    VESSEL_OUTLINE_POINT = "vessel_outline_point"
     THIRD_POINT_OF_INTERFEROMETER_BEAM = "third_point_of_interferometer_beam"
     WALL = "wall"
     X_POINT = "x_point"

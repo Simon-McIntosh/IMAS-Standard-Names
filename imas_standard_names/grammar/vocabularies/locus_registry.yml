@@ -350,6 +350,9 @@ loci:
   first_wall_midplane:
     type: position
     allowed_relations: [at, of]
+  focs_outline_point:  # Added W7/W9: evidence N=3 (focs/outline/r, focs/outline/z, focs/outline/phi)
+    type: position
+    allowed_relations: [at, of]
   flux_surface:
     type: position
     allowed_relations: [at, of]
@@ -408,6 +411,9 @@ loci:
     type: position
     allowed_relations: [at, of]
   limiter:
+    type: position
+    allowed_relations: [at, of]
+  limiter_outline_point:  # Added W7/W9: evidence N=3 (wall/description_2d/limiter/unit/outline, /r, /z)
     type: position
     allowed_relations: [at, of]
   magnetic_axis:
@@ -537,6 +543,9 @@ loci:
     type: position
     allowed_relations: [at, of]
   tearing_mode_center:
+    type: position
+    allowed_relations: [at, of]
+  vessel_outline_point:  # Added W7/W9: evidence N=6 (wall/description_2d/vessel/unit/annular/outline_inner/r, /z, /outline_outer/r, /z; vessel/unit/element/outline/r, /z)
     type: position
     allowed_relations: [at, of]
   third_point_of_interferometer_beam:
