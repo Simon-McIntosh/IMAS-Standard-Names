@@ -19,6 +19,9 @@
 # plausibly a quantity noun after operator/subject/locus decomposition.
 
 bases:
+  absorbed_wave_power:  # Added W17B: wave-heating evidence N=4 (fast_electron_, thermal_ion_, fast_ion_, thermal_electron_absorbed_wave_power_per_toroidal_mode)
+    aliases: []
+    kind: scalar
   accumulated_gas_injection:
     aliases: []
     kind: scalar
@@ -809,6 +812,12 @@ bases:
     aliases: []
     kind: scalar
   wave_absorbed_power:
+    aliases: []
+    kind: scalar
+  wave_absorbed_power_density:  # Added W17B: wave-heating evidence N=5 (wave_absorbed_power_density_per_toroidal_mode + 4 species variants: fast_electron, thermal_electron, fast_ion, thermal_ion)
+    aliases: []
+    kind: scalar
+  wave_absorbed_power_inside_flux_surface:  # Added W17B: wave-heating evidence N=3 (fast_ion_, thermal_electron_, thermal_ion_wave_absorbed_power_inside_flux_surface_per_toroidal_mode); parallel to wave_driven_absorbed_power_inside_flux_surface
     aliases: []
     kind: scalar
   wave_driven_absorbed_power_inside_flux_surface:
