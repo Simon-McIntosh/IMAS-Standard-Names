@@ -829,3 +829,6 @@ bases:
   x1_width:  # Added rc27: EMW pilot evidence N=3
     aliases: []
     kind: scalar
+  x2_width:  # Added W7/W9: rotation-wave evidence N=43 (bolometer, camera_ir, camera_visible, camera_x_rays, spectrometer_visible, etc.)
+    aliases: []
+    kind: scalar

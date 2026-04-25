@@ -72,3 +72,61 @@ Re-evaluate after Tier B pilot adds more electromagnetic-wave diagnostics covera
 - **Q4 (`line_integrated` cumulative prefix, 1 name):** `operators` segment,
   N=1 — deferred (not captured directly in the gap nodes above; the
   `launched` and `correction_to` operator gaps were flagged instead).
+
+---
+
+## Rotation Waves W7 + W9A (rc28 candidates)
+
+Source: imas-codex rotation waves 7 and 9A across domains:
+`gyrokinetics`, `plasma_wall_interactions`, `particle_measurement_diagnostics`.
+Waves accumulated 33 unique VocabGap tokens; 7 pre-existed in ISN; 2 explicitly
+rejected by preposition policy; 5 qualified at N≥3.
+
+Evidence gate: N ≥ 3 distinct IMAS DD paths required to add a token.
+Evidence method: direct DD path count via `imas-codex` graph queries on
+`IMASNode` paths matching each candidate token.
+
+### Added (N≥3 evidence)
+
+| Token | Segment | Vocab file | Evidence N | Example DD paths |
+|-------|---------|------------|-----------|-----------------|
+| `x2_width` | physical_base | `physical_bases.yml` | 43 | `bolometer/camera/channel/aperture/x2_width`, `bolometer/channel/detector/x2_width`, `camera_ir/fibre_bundle/geometry/x2_width`, `camera_visible/channel/aperture/x2_width`, `camera_x_rays/aperture/x2_width` |
+| `gyroaveraged` | subject | `subjects.yml` | 15 | `gyrokinetics/wavevector/eigenmode/fluxes_moments/moments_norm_gyrocenter/density_gyroav`, `/heat_flux_parallel_gyroav`, `/j_parallel_gyroav`, `/pressure_parallel_gyroav`, `/pressure_perpendicular_gyroav` |
+| `vessel_outline_point` | position | `locus_registry.yml` | 6 | `wall/description_2d/vessel/unit/annular/outline_inner/r`, `/outline_inner/z`, `/outline_outer/r`, `/outline_outer/z`, `/element/outline/r`, `/element/outline/z` |
+| `focs_outline_point` | position | `locus_registry.yml` | 3 | `focs/outline/r`, `focs/outline/z`, `focs/outline/phi` |
+| `limiter_outline_point` | position | `locus_registry.yml` | 3 | `wall/description_2d/limiter/unit/outline`, `/outline/r`, `/outline/z` |
+
+### Already in ISN (no action required)
+
+These tokens appeared in VocabGap nodes from old rotations before they were
+added to ISN; they are confirmed present in `locus_registry.yml`:
+
+`outboard_midplane`, `inner_divertor_target`, `outer_divertor_target`,
+`divertor_target`, `constraint_position`, `current_center`,
+`last_closed_flux_surface`
+
+### Explicitly rejected
+
+| Token | Reason |
+|-------|--------|
+| `from_wall` | Preposition-form token banned by compose grammar (`_from_/_to_` ban in `compose_system_lean.md`) |
+| `from_plasma` | Same preposition-form ban |
+
+### Deferred (N<3 evidence at this time)
+
+| Token | Segment | N | Notes |
+|-------|---------|---|-------|
+| `diagnostic_component_center` | position | 0 | No specific DD paths found; re-evaluate after PWI coverage |
+| `detector_aperture` | position | 0 | `diagnostic_aperture` entity already covers; may be redundant |
+| `mobile_unit_outline_point` | position | 0 | Specific to mobile wall units; insufficient DD coverage |
+| `shearing_rate` | base | 2 | `gyrokinetics/species_all/shearing_rate_norm` + `gyrokinetics_local` — only 2 paths |
+| `spun_fiber` | position | 0 | FOCS spun-fiber properties are physical quantities, not position tokens |
+| `annular` | coordinate_axes | 0 | 123 DD paths exist but segment assignment unclear; not a coordinate axis |
+| `vertical_coordinate_of` | coordinate_axes | 0 | Not found in VocabGap graph; needs re-evaluation |
+| `cartesian_x` | component | 0 | Not found in VocabGap graph; insufficient evidence |
+
+### Note on `x1_width`
+
+`x1_width` was already added at rc27 (EMW pilot). `x2_width` is the symmetric
+counterpart (43 DD paths vs 3 for `x1_width`) and logically belongs alongside it.
+

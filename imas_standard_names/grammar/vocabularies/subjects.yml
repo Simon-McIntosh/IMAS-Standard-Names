@@ -125,3 +125,6 @@
 - sonic
 - left_hand_circularly_polarized
 - right_hand_circularly_polarized
+
+# === Rotation-wave W7/W9 additions (evidence N>=3) ===
+- gyroaveraged                 # gyroaveraged quantity (gyrokinetics IDS, N=15 distinct DD paths)
