@@ -62,6 +62,9 @@ bases:
   bootstrap_current:
     aliases: []
     kind: scalar
+  bootstrap_current_density:  # W23A: j_bootstrap (core_profiles/profiles_1d/j_bootstrap) — evidence N=5 (core_profiles, core_sources, edge_profiles, plasma_profiles, plasma_sources)
+    aliases: []
+    kind: scalar
   breeding_ratio:
     aliases: []
     kind: scalar
@@ -308,6 +311,9 @@ bases:
   heat_flux:
     aliases: []
     kind: scalar
+  heat_viscosity_current_density:  # W23A: j_heat_viscosity (edge_profiles/ggd/j_heat_viscosity, plasma_profiles/ggd/j_heat_viscosity) — evidence N=4
+    aliases: []
+    kind: vector
   heating_power:
     aliases: []
     kind: scalar
@@ -379,6 +385,9 @@ bases:
     aliases: []
     kind: vector
   lower_outer_squareness:
+    aliases: []
+    kind: scalar
+  mach_number:  # W23A: mach_number_parallel (langmuir_probes/reciprocating/plunge/mach_number_parallel) — evidence N=3
     aliases: []
     kind: scalar
   magnetic_field:
@@ -477,6 +486,9 @@ bases:
   orbit_frequency:
     aliases: []
     kind: scalar
+  parallel_viscosity_current_density:  # W23A: j_parallel_viscosity (edge_profiles/ggd/j_parallel_viscosity, plasma_profiles/ggd/j_parallel_viscosity) — evidence N=4
+    aliases: []
+    kind: vector
   parameter:
     aliases: []
     kind: scalar
@@ -510,6 +522,9 @@ bases:
   particle_radial_diffusivity_on_ggd:
     aliases: []
     kind: scalar
+  perpendicular_viscosity_current_density:  # W23A: j_perpendicular_viscosity (edge_profiles/ggd/j_perpendicular_viscosity, plasma_profiles/ggd/j_perpendicular_viscosity) — evidence N=4
+    aliases: []
+    kind: vector
   perturbed_electrostatic_potential_weight:
     aliases: []
     kind: scalar
@@ -658,7 +673,13 @@ bases:
   resistive_diffusion_time:
     aliases: []
     kind: scalar
+  resistivity:  # W23A: wall/*/resistivity, cryostat/*/resistivity — evidence N=6 (wall, cryostat, pf_active, tf)
+    aliases: []
+    kind: scalar
   resonant_magnetic_perturbation_occurrence:
+    aliases: []
+    kind: scalar
+  rotation_frequency:  # W23A: rotation_frequency_tor (core_profiles, plasma_profiles, edge_profiles) — evidence N=8+
     aliases: []
     kind: scalar
   rotational_pressure:
