@@ -34,6 +34,9 @@ bases:
   angular_momentum_source:
     aliases: []
     kind: scalar
+  anomalous_current_density:  # W31: anomalous/turbulent transport current density — evidence N=3 (edge_plasma_physics)
+    aliases: []
+    kind: vector
   area:
     aliases: []
     kind: scalar
@@ -125,6 +128,9 @@ bases:
   count:
     aliases: []
     kind: scalar
+  covariant_metric_tensor:  # W31: lower-index metric g_ij — counterpart to contravariant — evidence N=1 (magnetohydrodynamics)
+    aliases: []
+    kind: tensor
   critical_temperature:
     aliases: []
     kind: scalar
@@ -158,6 +164,9 @@ bases:
   diamagnetic_drift_velocity:
     aliases: []
     kind: vector
+  diamagnetic_energy:  # W31: plasma stored energy from diamagnetic measurement — evidence N=1 (transport)
+    aliases: []
+    kind: scalar
   diagnostic_latency:  # Added rc27: EMW pilot evidence N=4
     aliases: []
     kind: scalar
@@ -165,6 +174,9 @@ bases:
     aliases: []
     kind: scalar
   distribution:
+    aliases: []
+    kind: scalar
+  distribution_function:  # W31: kinetic distribution function f(x,v) in phase space — evidence N=1 (edge_plasma_physics)
     aliases: []
     kind: scalar
   distribution_particle_count:
@@ -183,6 +195,12 @@ bases:
     aliases: []
     kind: scalar
   effective_charge:
+    aliases: []
+    kind: scalar
+  eigenmode_frequency:  # W31: oscillation frequency of a plasma eigenmode — evidence N=1 (gyrokinetics)
+    aliases: []
+    kind: scalar
+  eigenmode_growth_rate:  # W31: linear growth rate of an unstable eigenmode — evidence N=1 (gyrokinetics)
     aliases: []
     kind: scalar
   electric_field:
@@ -353,6 +371,9 @@ bases:
   ion_toroidal_velocity:
     aliases: []
     kind: scalar
+  ionization_potential:  # W31: ionization energy of atomic species — evidence N=1 (edge_plasma_physics)
+    aliases: []
+    kind: scalar
   kinetic_energy_density:
     aliases: []
     kind: scalar
@@ -370,6 +391,12 @@ bases:
     - internal_inductance_normalized
     kind: scalar
   line_integrated_emissivity:
+    aliases: []
+    kind: scalar
+  logarithmic_density_gradient:  # W31: d ln(n)/dx, standard gyrokinetic drive parameter — evidence N=1 (gyrokinetics)
+    aliases: []
+    kind: scalar
+  logarithmic_temperature_gradient:  # W31: d ln(T)/dx, standard gyrokinetic drive parameter — evidence N=1 (gyrokinetics)
     aliases: []
     kind: scalar
   loop_voltage:
@@ -589,6 +616,9 @@ bases:
     aliases: []
     kind: scalar
   pressure:
+    aliases: []
+    kind: scalar
+  pressure_gradient:  # W31: spatial derivative of pressure ∇p — evidence N=1 (gyrokinetics, MHD)
     aliases: []
     kind: scalar
   pressure_gradient_alpha_parameter:
