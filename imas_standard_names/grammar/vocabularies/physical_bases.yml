@@ -242,6 +242,9 @@ bases:
   energy_source:
     aliases: []
     kind: scalar
+  energy_source_density:  # W32: volumetric energy source term (W/m³) — evidence N=4 (transport, edge_plasma_physics)
+    aliases: []
+    kind: scalar
   equilibrium_reconstruction_constraint_weight:
     aliases: []
     kind: scalar
@@ -477,6 +480,9 @@ bases:
   momentum_source:
     aliases: []
     kind: scalar
+  momentum_source_density:  # W32: volumetric momentum source term (N/m³) — evidence N=5 (edge_plasma_physics, transport)
+    aliases: []
+    kind: vector
   monte_carlo_marker_phase_space_position:
     aliases: []
     kind: scalar
@@ -697,6 +703,9 @@ bases:
   resonant_magnetic_perturbation_occurrence:
     aliases: []
     kind: scalar
+  rotation_angle:  # W32: angle of rotation (e.g. EC launcher mirror) — evidence N=3 (auxiliary_heating)
+    aliases: []
+    kind: scalar
   rotation_frequency:  # W23A: rotation_frequency_tor (core_profiles, plasma_profiles, edge_profiles) — evidence N=8+
     aliases: []
     kind: scalar
@@ -752,6 +761,9 @@ bases:
     aliases: []
     kind: scalar
   supply_voltage:
+    aliases: []
+    kind: scalar
+  surface_area:  # W32: area of a physical surface (e.g. aperture, mirror, detector) — evidence N=3 (auxiliary_heating, particle_measurement_diagnostics)
     aliases: []
     kind: scalar
   surface_voltage:
@@ -847,6 +859,9 @@ bases:
   vorticity:
     aliases: []
     kind: scalar
+  wave_vector:  # W32: spatial wavevector k of a wave — evidence N=5 (auxiliary_heating, waves)
+    aliases: [wavevector]
+    kind: vector
   wave_absorbed_power:
     aliases: []
     kind: scalar
