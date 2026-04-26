@@ -279,11 +279,6 @@ operators:
     precedence: 10
     returns: scalar
 
-  on_ggd:
-    kind: unary_postfix
-    precedence: 5
-    returns: scalar_or_vector
-
   real_part_postfix:
     kind: unary_postfix
     precedence: 10
