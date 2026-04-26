@@ -221,9 +221,6 @@ bases:
   energy_radial_diffusivity:
     aliases: []
     kind: scalar
-  energy_radial_diffusivity_on_ggd:
-    aliases: []
-    kind: scalar
   energy_source:
     aliases: []
     kind: scalar
@@ -438,9 +435,6 @@ bases:
   momentum_diffusivity:
     aliases: []
     kind: scalar
-  momentum_diffusivity_on_ggd:
-    aliases: []
-    kind: scalar
   momentum_flux:
     aliases: []
     kind: vector
@@ -451,9 +445,6 @@ bases:
     aliases: []
     kind: scalar
   momentum_radial_diffusivity:
-    aliases: []
-    kind: scalar
-  momentum_radial_diffusivity_on_ggd:
     aliases: []
     kind: scalar
   momentum_source:
@@ -517,9 +508,6 @@ bases:
     aliases: []
     kind: scalar
   particle_radial_diffusivity:
-    aliases: []
-    kind: scalar
-  particle_radial_diffusivity_on_ggd:
     aliases: []
     kind: scalar
   perpendicular_viscosity_current_density:  # W23A: j_perpendicular_viscosity (edge_profiles/ggd/j_perpendicular_viscosity, plasma_profiles/ggd/j_perpendicular_viscosity) — evidence N=4
