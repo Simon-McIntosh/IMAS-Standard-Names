@@ -13,6 +13,14 @@ from pathlib import Path
 
 import yaml
 
+# Rewrite [label](name:foo_bar) → [label](#foo_bar) for in-page anchors.
+_NAME_LINK_RE = re.compile(r"\[([^\]]+)\]\(name:([a-z0-9_]+)\)")
+
+
+def _rewrite_name_links(text: str) -> str:
+    """Replace ``name:foo`` protocol links with in-page anchors ``#foo``."""
+    return _NAME_LINK_RE.sub(r"[\1](#\2)", text)
+
 
 class CatalogRenderer:
     """Renders standard names catalog as Markdown documentation.
@@ -287,6 +295,22 @@ class CatalogRenderer:
             return ""
         return "\n\n".join(lines) + "\n\n"
 
+    @staticmethod
+    def _render_sources(sources: list[dict]) -> str:
+        """Render a collapsed ``<details>`` block listing debug source provenance."""
+        if not sources:
+            return ""
+        lines: list[str] = ["<details>", "<summary>Sources (debug)</summary>", ""]
+        for src in sources:
+            dd_path = src.get("dd_path")
+            signal_id = src.get("signal_id")
+            status = src.get("status") or ""
+            label = f"dd:{dd_path}" if dd_path else (signal_id or src.get("id", "?"))
+            status_str = f" ({status})" if status else ""
+            lines.append(f"- `{label}`{status_str}")
+        lines += ["", "</details>", ""]
+        return "\n".join(lines) + "\n"
+
     def render_catalog(self) -> str:
         """Generate complete catalog organized by physics_domain and base name.
 
@@ -324,8 +348,10 @@ class CatalogRenderer:
                 for item in sorted_items:
                     name = item.get("name", "Unknown")
                     unit = item.get("unit", "")
-                    description = item.get("description", "")
-                    documentation = item.get("documentation", "")
+                    description = _rewrite_name_links(item.get("description", ""))
+                    documentation = _rewrite_name_links(
+                        self._fix_markdown_formatting(item.get("documentation", ""))
+                    )
                     status = item.get("status", "")
                     kind = item.get("kind", "")
 
@@ -333,7 +359,7 @@ class CatalogRenderer:
                     result += f"{description}\n\n"
 
                     if documentation:
-                        result += f"{self._fix_markdown_formatting(documentation)}\n\n"
+                        result += f"{documentation}\n\n"
 
                     if unit:
                         result += f"**Unit:** `{unit}`\n\n"
@@ -349,6 +375,8 @@ class CatalogRenderer:
                     result += self._render_mermaid(item)
 
                     result += self._render_sibling_nav(item, wrapped_by)
+
+                    result += self._render_sources(item.get("sources") or [])
 
                     result += "---\n\n"
 

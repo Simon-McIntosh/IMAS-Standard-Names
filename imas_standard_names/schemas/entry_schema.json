@@ -364,6 +364,22 @@
           "default": null,
           "title": "Error Variants"
         },
+        "sources": {
+          "anyOf": [
+            {
+              "items": {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sources"
+        },
         "kind": {
           "const": "complex",
           "default": "complex",
@@ -597,6 +613,22 @@
           "default": null,
           "title": "Error Variants"
         },
+        "sources": {
+          "anyOf": [
+            {
+              "items": {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sources"
+        },
         "kind": {
           "const": "metadata",
           "default": "metadata",
@@ -784,6 +816,22 @@
           ],
           "default": null,
           "title": "Error Variants"
+        },
+        "sources": {
+          "anyOf": [
+            {
+              "items": {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sources"
         },
         "kind": {
           "const": "scalar",
@@ -1018,6 +1066,22 @@
           "default": null,
           "title": "Error Variants"
         },
+        "sources": {
+          "anyOf": [
+            {
+              "items": {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sources"
+        },
         "kind": {
           "const": "tensor",
           "default": "tensor",
@@ -1250,6 +1314,22 @@
           ],
           "default": null,
           "title": "Error Variants"
+        },
+        "sources": {
+          "anyOf": [
+            {
+              "items": {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sources"
         },
         "kind": {
           "const": "vector",

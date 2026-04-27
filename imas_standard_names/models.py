@@ -56,7 +56,7 @@ from collections.abc import Iterable
 from datetime import datetime
 from enum import StrEnum
 from pathlib import Path
-from typing import Annotated, Literal, get_args
+from typing import Annotated, Any, Literal, get_args
 
 import yaml as _yaml
 from pydantic import (
@@ -468,6 +468,10 @@ class StandardNameEntryBase(StandardNameBase):
     # Structural graph edges (computed fields, re-derived on export)
     arguments: list[ArgumentRef] | None = None
     error_variants: dict[Literal["upper", "lower", "index"], str] | None = None
+
+    # Debug / provenance: sources that generated or mapped to this name
+    # Populated by codex sn export --include-sources; None in catalog-only installs.
+    sources: list[dict[str, Any]] | None = None
 
     @field_validator("tags", "constraints")
     @classmethod
