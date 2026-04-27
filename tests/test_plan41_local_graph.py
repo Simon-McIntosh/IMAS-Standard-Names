@@ -407,10 +407,14 @@ class TestRenderer:
         out = renderer.render_catalog()
         assert "[magnetic_field](#magnetic_field)" in out
 
-    def test_cocos_transformation_type_rendered(self, fixture_catalog: Path) -> None:
+    def test_cocos_transformation_type_not_rendered(
+        self, fixture_catalog: Path
+    ) -> None:
+        """COCOS transformation is metadata clutter and must not appear in rendered output."""
         renderer = CatalogRenderer(fixture_catalog / "standard_names")
         out = renderer.render_catalog()
-        assert "**COCOS transformation:** `psi_like`" in out
+        assert "**COCOS transformation:**" not in out
+        assert "psi_like" not in out
 
     def test_mermaid_block_for_unary_argument(self, fixture_catalog: Path) -> None:
         renderer = CatalogRenderer(fixture_catalog / "standard_names")
