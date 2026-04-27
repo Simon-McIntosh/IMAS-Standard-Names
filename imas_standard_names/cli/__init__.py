@@ -7,8 +7,8 @@ Example usage:
 
         standard-names build path/to/yaml
         standard-names search electron_temperature
-        standard-names catalog-site serve ./catalog
-        standard-names catalog-site deploy ./catalog --version v1.0
+        standard-names serve ./catalog
+        standard-names site-deploy ./catalog --version v1.0
 """
 
 from __future__ import annotations
@@ -16,7 +16,7 @@ from __future__ import annotations
 import click
 
 from .build import build_cmd
-from .catalog_site import catalog_site_cmd
+from .catalog_site import deploy_cmd, serve_cmd
 from .release import release_cmd
 from .schema import schema_cmd
 from .search import search_cmd
@@ -32,6 +32,7 @@ standard_names.add_command(build_cmd)
 standard_names.add_command(release_cmd)
 standard_names.add_command(search_cmd)
 standard_names.add_command(schema_cmd)
-standard_names.add_command(catalog_site_cmd)
+standard_names.add_command(serve_cmd)
+standard_names.add_command(deploy_cmd)
 
 __all__ = ["standard_names"]

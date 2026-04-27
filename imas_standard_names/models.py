@@ -1029,6 +1029,12 @@ class StandardNameCatalogManifest(BaseModel):
     excluded_unreviewed_count: int = 0
     source_repo: str | None = None
     source_commit_sha: str | None = None
+    # Export scope and timing provenance (added in v0.7.0rc31).
+    export_scope: Literal["full", "domain", "scoped"] | None = None
+    domains_included: list[str] = Field(default_factory=list)
+    catalog_commit_sha: str | None = None
+    exported_at: datetime | None = None
+    edge_model_version: str | None = None
 
 
 __all__ = [

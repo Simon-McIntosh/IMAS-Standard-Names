@@ -1,8 +1,15 @@
-"""Catalog site commands for Standard Names.
+"""Top-level catalog site commands for Standard Names.
 
-Provides the `catalog-site` Click command group for generating standalone
+Provides ``serve`` and ``site-deploy`` Click commands for generating standalone
 documentation sites from external catalog repositories containing YAML
 standard name definitions.
+
+Renamed in v0.7.0rc31: the previous ``catalog-site serve`` / ``catalog-site
+deploy`` group was flattened to the top level as the ``catalog-site`` wrapper
+added a level of nesting that no longer served a purpose (only one site type
+exists). The mkdocs subprocess now uses ``sys.executable -m mkdocs`` so it
+inherits the active Python environment regardless of which venv invokes the
+``standard-names`` CLI.
 
 This is intended for use in external catalog repositories, not for building
 documentation for the imas-standard-names project itself.
@@ -13,6 +20,7 @@ from __future__ import annotations
 import os
 import shutil
 import subprocess
+import sys
 import tempfile
 from pathlib import Path
 
@@ -188,19 +196,7 @@ def _generate_site_content(
     return stats["total_names"]
 
 
-@click.group("catalog-site")
-def catalog_site_cmd():
-    """Generate standalone documentation sites for catalog repositories.
-
-    These commands are for external catalog repositories containing YAML
-    standard name definitions. They generate a browsable mkdocs site
-    for the catalog content.
-
-    For the imas-standard-names project documentation, use mkdocs directly.
-    """
-
-
-@catalog_site_cmd.command("serve")
+@click.command("serve")
 @click.argument(
     "catalog_path",
     type=click.Path(exists=True, file_okay=False, path_type=Path),
@@ -218,7 +214,7 @@ def catalog_site_cmd():
 @click.option(
     "--host",
     default="127.0.0.1",
-    help="Host to bind to (default: 127.0.0.1)",
+    help="Host to bind to (default: 127.0.0.1; pass 0.0.0.0 to expose over an SSH tunnel)",
 )
 def serve_cmd(
     catalog_path: Path,
@@ -254,9 +250,9 @@ def serve_cmd(
         click.echo(f"Serving at http://{host}:{port}/")
         click.echo("Press Ctrl+C to stop...")
 
-        # Serve with mkdocs
+        # Serve via the active Python's mkdocs (handles venvs without mkdocs on PATH).
         result = subprocess.run(
-            ["mkdocs", "serve", "--dev-addr", f"{host}:{port}"],
+            [sys.executable, "-m", "mkdocs", "serve", "--dev-addr", f"{host}:{port}"],
             cwd=docs_dir,
         )
 
@@ -267,7 +263,7 @@ def serve_cmd(
         shutil.rmtree(docs_dir, ignore_errors=True)
 
 
-@catalog_site_cmd.command("deploy")
+@click.command("site-deploy")
 @click.argument(
     "catalog_path",
     type=click.Path(exists=True, file_okay=False, path_type=Path),
@@ -315,7 +311,7 @@ def deploy_cmd(
 
     Typical CI workflow:
 
-        standard-names catalog-site deploy ./standard_names --version v1.0 --push
+        standard-names site-deploy ./standard_names --version v1.0 --push
     """
     if not _check_mike_available():
         click.echo(f"Error: {_mike_error_message()}", err=True)
@@ -339,8 +335,8 @@ def deploy_cmd(
 
         click.echo(f"Generated site for {total_names} standard names")
 
-        # Deploy with mike
-        mike_args = ["mike", "deploy", doc_version]
+        # Deploy with mike (use sys.executable -m to inherit active venv).
+        mike_args = [sys.executable, "-m", "mike", "deploy", doc_version]
         if set_default:
             mike_args.extend(["--update-aliases", "latest"])
         if push:
@@ -369,4 +365,4 @@ def deploy_cmd(
         shutil.rmtree(docs_dir, ignore_errors=True)
 
 
-__all__ = ["catalog_site_cmd"]
+__all__ = ["serve_cmd", "deploy_cmd"]
