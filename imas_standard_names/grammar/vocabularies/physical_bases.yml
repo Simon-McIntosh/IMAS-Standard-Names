@@ -143,9 +143,6 @@ bases:
   current_density:
     aliases: []
     kind: vector
-  current_drive:
-    aliases: []
-    kind: scalar
   density:
     aliases: []
     kind: scalar
