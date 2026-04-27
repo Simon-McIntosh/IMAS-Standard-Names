@@ -461,6 +461,8 @@ class GeometricBase(StrEnum):
     VERTEX = "vertex"
     X1_COORDINATE = "x1_coordinate"
     X2_COORDINATE = "x2_coordinate"
+    X1_UNIT_VECTOR = "x1_unit_vector"
+    X2_UNIT_VECTOR = "x2_unit_vector"
 
 
 class Transformation(StrEnum):
