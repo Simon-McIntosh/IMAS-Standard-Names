@@ -132,7 +132,6 @@ def sample_scalar_entry():
         "description": "Test scalar entry.",
         "unit": "m",
         "status": "draft",
-        "tags": ["measured"],
     }
 
 
@@ -145,7 +144,6 @@ def sample_vector_entry():
         "description": "Test vector entry.",
         "unit": "T",
         "status": "draft",
-        "tags": ["spatial-profile"],
     }
 
 
@@ -164,7 +162,6 @@ def sample_entries_with_provenance():
             "kind": "scalar",
             "description": "Derived quantity using operator.",
             "unit": "m.s^-1",
-            "tags": ["derived"],
             "provenance": {
                 "mode": "operator",
                 "operators": ["time_derivative"],

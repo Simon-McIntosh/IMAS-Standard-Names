@@ -58,7 +58,6 @@ class TestFetchSingleName:
         assert "kind" in entry
         assert "grammar" in entry
         assert "provenance" in entry
-        assert "tags" in entry
         assert "links" in entry
 
     def test_fetch_nonexistent_name(self, fetch_tool):
@@ -172,7 +171,6 @@ class TestFetchMetadata:
                 "description": "Spatial gradient of electron temperature.",
                 "documentation": "Gradient of core electron temperature.",
                 "status": "draft",
-                "tags": ["derived"],
                 "provenance": {
                     "mode": "operator",
                     "operators": ["gradient"],
@@ -220,8 +218,6 @@ class TestFetchMetadata:
         result = invoke(fetch_tool, test_name)
 
         entry = result["entries"][0]
-        assert "tags" in entry
-        assert isinstance(entry["tags"], list)
         assert "links" in entry
         assert isinstance(entry["links"], list)
         # Links should be list of dicts with url key

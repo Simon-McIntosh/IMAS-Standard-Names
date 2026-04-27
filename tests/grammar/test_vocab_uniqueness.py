@@ -78,57 +78,27 @@ def compute_collisions(vocab_tokens: dict[str, set[str]]) -> dict[str, set[str]]
 
 
 def test_vocab_cross_segment_uniqueness():
-    """Tokens must be unique across vocabulary files, except whitelisted pairs.
+    """Tokens must be unique across vocabulary files.
 
-    WHITELIST: physics_domains.yml ↔ tags.yml (all physics domains are tags).
-
-    This test will FAIL on the known 'current_drive' collision until resolved.
+    No whitelisting needed since tags.yml has been removed.
     """
     vocab_tokens = load_vocab_tokens()
     collisions = compute_collisions(vocab_tokens)
 
-    # Whitelist: physics_domains ↔ tags collisions are allowed
-    whitelist_pair = {"physics_domains.yml", "tags.yml"}
-    non_whitelisted = {
-        tok: sources for tok, sources in collisions.items() if sources != whitelist_pair
-    }
-
     # Format error message
-    if non_whitelisted:
+    if collisions:
         lines = [
-            "Cross-segment token collisions detected (not whitelisted):",
+            "Cross-segment token collisions detected:",
             "",
         ]
-        for token in sorted(non_whitelisted.keys()):
-            sources = non_whitelisted[token]
+        for token in sorted(collisions.keys()):
+            sources = collisions[token]
             lines.append(f"  '{token}' in: {', '.join(sorted(sources))}")
 
         lines.append("")
-        lines.append("Whitelist: physics_domains.yml ↔ tags.yml (intentional)")
-        lines.append("All other collisions are errors and must be resolved.")
+        lines.append("All collisions are errors and must be resolved.")
 
         pytest.fail("\n".join(lines))
-
-
-def test_physics_domains_tags_whitelist_is_complete():
-    """Verify the whitelist accounts for ALL physics_domains ↔ tags collisions.
-
-    If this test fails, the whitelist in test_vocab_cross_segment_uniqueness
-    may need adjustment.
-    """
-    vocab_tokens = load_vocab_tokens()
-    collisions = compute_collisions(vocab_tokens)
-
-    whitelist_pair = {"physics_domains.yml", "tags.yml"}
-    whitelist_collisions = [
-        tok for tok, src in collisions.items() if src == whitelist_pair
-    ]
-
-    # This test documents how many tokens are in the whitelist
-    assert len(whitelist_collisions) >= 25, (
-        f"Expected at least 25 physics_domains ↔ tags collisions, "
-        f"found {len(whitelist_collisions)}"
-    )
 
 
 def test_no_empty_vocabularies():

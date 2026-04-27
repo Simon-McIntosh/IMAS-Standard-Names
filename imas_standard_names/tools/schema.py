@@ -12,8 +12,6 @@ from imas_standard_names.grammar.field_schemas import (
 from imas_standard_names.grammar.tag_types import (
     PHYSICS_DOMAIN_DESCRIPTIONS,
     PHYSICS_DOMAINS,
-    SECONDARY_TAG_DESCRIPTIONS,
-    SECONDARY_TAGS,
 )
 from imas_standard_names.models import STANDARD_NAME_MODELS, StandardNameEntryBase
 from imas_standard_names.tools.base import Tool
@@ -67,18 +65,15 @@ class SchemaTool(Tool):
         return self._get_kind_schema(kind)
 
     def _get_tags_vocabulary(self) -> dict:
-        """Get tags vocabulary reference data (separate from field guidance).
+        """Get physics domain vocabulary reference data.
 
         Returns:
-            Dictionary with complete tag vocabularies and descriptions.
+            Dictionary with physics domain vocabularies and descriptions.
         """
         return {
             "physics_domains": PHYSICS_DOMAIN_DESCRIPTIONS,
             "all_physics_domains": list(PHYSICS_DOMAINS),
-            "secondary_tags": SECONDARY_TAG_DESCRIPTIONS,
-            "all_secondary_tags": list(SECONDARY_TAGS),
             "physics_domain_rule": "physics_domain field must be a valid PhysicsDomain enum value",
-            "tags_rule": "tags field contains secondary classification tags only",
         }
 
     def _get_examples_from_catalog(self, kind: str | None = None) -> list[dict]:

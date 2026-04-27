@@ -1,26 +1,27 @@
 - name: area_of_flux_loop
   description: Effective sensing area of flux loop coil.
-  documentation: 'Effective sensing area $A_{\text{eff}}$ of a flux loop diagnostic coil, defined as the
-    product of the number of turns and the area enclosed by each turn. The effective area converts measured
-    voltage to magnetic flux change via integration and is critical for quantitative magnetic measurements
-    and equilibrium reconstruction.
+  documentation: 'Effective sensing area $A_{\text{eff}}$ of a flux loop diagnostic
+    coil, defined as the product of the number of turns and the area enclosed by each
+    turn. The effective area converts measured voltage to magnetic flux change via
+    integration and is critical for quantitative magnetic measurements and equilibrium
+    reconstruction.
 
 
     $$A_{\text{eff}} = N \times A_{\text{turn}}$$
 
 
-    where $N$ is the number of turns (dimensionless), $A_{\text{turn}}$ is the area per turn in m$^2$,
-    giving $A_{\text{eff}}$ in m$^2$.
+    where $N$ is the number of turns (dimensionless), $A_{\text{turn}}$ is the area
+    per turn in m$^2$, giving $A_{\text{eff}}$ in m$^2$.
 
 
     Physical significance:
 
 
-    The effective area converts measured voltage to magnetic flux change via integration. Accurate calibration
-    of flux loop effective area is critical for quantitative magnetic measurements and equilibrium reconstruction.
-    Area affects [flux_loop_voltage](#flux_loop_voltage) calibration and determines measurement sensitivity.
-    See [flux_loop_voltage](#flux_loop_voltage) for measurement relationships and [magnetic_flux](#magnetic_flux)
-    for flux calculations.
+    The effective area converts measured voltage to magnetic flux change via integration.
+    Accurate calibration of flux loop effective area is critical for quantitative
+    magnetic measurements and equilibrium reconstruction. Area affects [flux_loop_voltage](#flux_loop_voltage)
+    calibration and determines measurement sensitivity. See [flux_loop_voltage](#flux_loop_voltage)
+    for measurement relationships and [magnetic_flux](#magnetic_flux) for flux calculations.
 
 
     Measurement relation:
@@ -32,35 +33,37 @@
     $$\Delta \Psi = \frac{1}{A_{\text{eff}}} \int V \, dt$$
 
 
-    where $V$ is [flux_loop_voltage](#flux_loop_voltage) in V, $t$ is time in s, and $\Delta \Psi$ is
-    flux change in Wb.
+    where $V$ is [flux_loop_voltage](#flux_loop_voltage) in V, $t$ is time in s, and
+    $\Delta \Psi$ is flux change in Wb.
 
 
     Measurement methods:
 
 
-    Flux loop area is determined from coil geometry measurements including turn count and loop dimensions.
-    Calibration procedures use known magnetic fields for area verification. Area calibration affects [flux_loop_voltage](#flux_loop_voltage)
-    interpretation and equilibrium reconstruction accuracy. Engineering survey techniques measure coil
-    positioning and geometry. Area stability is monitored over time.
+    Flux loop area is determined from coil geometry measurements including turn count
+    and loop dimensions. Calibration procedures use known magnetic fields for area
+    verification. Area calibration affects [flux_loop_voltage](#flux_loop_voltage)
+    interpretation and equilibrium reconstruction accuracy. Engineering survey techniques
+    measure coil positioning and geometry. Area stability is monitored over time.
 
 
     Typical values:
 
 
-    0.01-1 m$^2$ depending on coil design and installation location. Area typically ranges from small
-    diagnostic loops to large vessel-encompassing coils.
+    0.01-1 m$^2$ depending on coil design and installation location. Area typically
+    ranges from small diagnostic loops to large vessel-encompassing coils.
 
 
-    Sign convention: Positive area follows the right-hand rule for loop orientation, consistent with [flux_loop_voltage](#flux_loop_voltage)
-    measurements and magnetic flux conventions.'
+    Sign convention: Positive area follows the right-hand rule for loop orientation,
+    consistent with [flux_loop_voltage](#flux_loop_voltage) measurements and magnetic
+    flux conventions.'
   status: active
   kind: scalar
   unit: m^2
 - name: current_density
   description: Electric current density magnitude.
-  documentation: 'Electric current density magnitude $|\mathbf{j}|$ representing the spatial distribution
-    of current flow. For the full vector field, see [plasma_current_density](#plasma_current_density).
+  documentation: 'Electric current density magnitude $|\mathbf{j}|$ representing the
+    spatial distribution of current flow. For the full vector field, see [plasma_current_density](#plasma_current_density).
 
 
     $$|\mathbf{j}| = \sqrt{j_R^2 + j_{\phi}^2 + j_Z^2}$$
@@ -72,10 +75,11 @@
     Physical significance:
 
 
-    Current density profile shape affects MHD stability and confinement. Peaked profiles with high on-axis
-    current reduce [safety_factor](#safety_factor) and can trigger instabilities. Bootstrap current and
-    external current drive modify the profile. The current density relates to [magnetic_field](#magnetic_field)
-    via Ampère''s law and determines [poloidal_magnetic_field](#poloidal_magnetic_field) strength.
+    Current density profile shape affects MHD stability and confinement. Peaked profiles
+    with high on-axis current reduce [safety_factor](#safety_factor) and can trigger
+    instabilities. Bootstrap current and external current drive modify the profile.
+    The current density relates to [magnetic_field](#magnetic_field) via Ampère''s
+    law and determines [poloidal_magnetic_field](#poloidal_magnetic_field) strength.
 
 
     Relation to plasma current:
@@ -87,260 +91,269 @@
     $$I_p = \int j_{\phi} \, dA$$
 
 
-    where $j_{\phi}$ is toroidal [plasma_current_density](#plasma_current_density) in A/m$^2$ and $dA$
-    is differential area element in m$^2$.
+    where $j_{\phi}$ is toroidal [plasma_current_density](#plasma_current_density)
+    in A/m$^2$ and $dA$ is differential area element in m$^2$.
 
 
     Measurement methods:
 
 
-    Magnetic diagnostics measure current density through [flux_loop_voltage](#flux_loop_voltage) integration
-    and external magnetic field measurements. Equilibrium reconstruction codes invert magnetic measurements
-    to determine current profiles. Polarimetry measures current density from Faraday rotation effects.
+    Magnetic diagnostics measure current density through [flux_loop_voltage](#flux_loop_voltage)
+    integration and external magnetic field measurements. Equilibrium reconstruction
+    codes invert magnetic measurements to determine current profiles. Polarimetry
+    measures current density from Faraday rotation effects.
 
 
     Typical values:
 
 
-    Peak values in plasma core: $10^5$-$10^6$ A/m$^2$ depending on [plasma_current](#plasma_current) and
-    profile shape. Edge values typically 1-2 orders of magnitude lower than core values.'
+    Peak values in plasma core: $10^5$-$10^6$ A/m$^2$ depending on [plasma_current](#plasma_current)
+    and profile shape. Edge values typically 1-2 orders of magnitude lower than core
+    values.'
   status: draft
-  tags:
-  - spatial-profile
   kind: scalar
   unit: A.m^-2
 - name: flux_loop_voltage
   description: Voltage measured by flux loop diagnostic.
-  documentation: 'Voltage signal measured by a flux loop diagnostic coil, related to the time derivative
-    of [poloidal_magnetic_flux](#poloidal_magnetic_flux) by Faraday''s law. The induced voltage provides
-    fundamental information for equilibrium reconstruction and [plasma_current](#plasma_current) evolution,
-    serving as a primary magnetic diagnostic.
+  documentation: 'Voltage signal measured by a flux loop diagnostic coil, related
+    to the time derivative of [poloidal_magnetic_flux](#poloidal_magnetic_flux) by
+    Faraday''s law. The induced voltage provides fundamental information for equilibrium
+    reconstruction and [plasma_current](#plasma_current) evolution, serving as a primary
+    magnetic diagnostic.
 
 
     $$V = -\frac{d\Psi}{dt}$$
 
 
-    where $V$ is voltage in V, $\Psi$ is the [poloidal_magnetic_flux](#poloidal_magnetic_flux) threading
-    the loop in Wb, and $t$ is time in s.
+    where $V$ is voltage in V, $\Psi$ is the [poloidal_magnetic_flux](#poloidal_magnetic_flux)
+    threading the loop in Wb, and $t$ is time in s.
 
 
     Physical significance:
 
 
-    A conducting loop with effective [area_of_flux_loop](#area_of_flux_loop) $A$ in m$^2$ encircling the
-    plasma measures the time-varying poloidal flux. The induced voltage provides fundamental information
-    for equilibrium reconstruction and [plasma_current](#plasma_current) evolution. Flux loop measurements
-    are essential for [magnetic_field](#magnetic_field) reconstruction and plasma control. See [area_of_flux_loop](#area_of_flux_loop)
-    for calibration and [poloidal_magnetic_flux](#poloidal_magnetic_flux) for flux relationships.
+    A conducting loop with effective [area_of_flux_loop](#area_of_flux_loop) $A$ in
+    m$^2$ encircling the plasma measures the time-varying poloidal flux. The induced
+    voltage provides fundamental information for equilibrium reconstruction and [plasma_current](#plasma_current)
+    evolution. Flux loop measurements are essential for [magnetic_field](#magnetic_field)
+    reconstruction and plasma control. See [area_of_flux_loop](#area_of_flux_loop)
+    for calibration and [poloidal_magnetic_flux](#poloidal_magnetic_flux) for flux
+    relationships.
 
 
     Measurement principle:
 
 
-    Flux loop voltage measures the rate of change of magnetic flux threading the loop. Multiple flux loops
-    at different positions provide 2D magnetic field information for equilibrium reconstruction. Voltage
-    integration gives flux changes: $\Delta\Phi = \int V dt / A$ where $A$ is [area_of_flux_loop](#area_of_flux_loop).
+    Flux loop voltage measures the rate of change of magnetic flux threading the loop.
+    Multiple flux loops at different positions provide 2D magnetic field information
+    for equilibrium reconstruction. Voltage integration gives flux changes: $\Delta\Phi
+    = \int V dt / A$ where $A$ is [area_of_flux_loop](#area_of_flux_loop).
 
 
     Applications:
 
 
-    Plasma current monitoring, equilibrium reconstruction, MHD event detection. Spatial positioning given
-    by [radial_position_of_flux_loop](#radial_position_of_flux_loop) and [vertical_position_of_flux_loop](#vertical_position_of_flux_loop).
-    Flux loop arrays provide comprehensive magnetic field measurements for plasma control.
+    Plasma current monitoring, equilibrium reconstruction, MHD event detection. Spatial
+    positioning given by [radial_position_of_flux_loop](#radial_position_of_flux_loop)
+    and [vertical_position_of_flux_loop](#vertical_position_of_flux_loop). Flux loop
+    arrays provide comprehensive magnetic field measurements for plasma control.
 
 
     Measurement methods:
 
 
-    Flux loop voltage is measured using high-speed data acquisition systems. Voltage signals are integrated
-    to obtain magnetic flux changes. Calibration procedures ensure accurate area and positioning. Multiple
-    loops provide spatial coverage for 2D reconstruction. Real-time processing enables plasma control
-    applications.
+    Flux loop voltage is measured using high-speed data acquisition systems. Voltage
+    signals are integrated to obtain magnetic flux changes. Calibration procedures
+    ensure accurate area and positioning. Multiple loops provide spatial coverage
+    for 2D reconstruction. Real-time processing enables plasma control applications.
 
 
     Typical values:
 
 
-    Millivolts to volts depending on flux change rate and coil area. Voltage levels vary with plasma conditions
-    and measurement location.
+    Millivolts to volts depending on flux change rate and coil area. Voltage levels
+    vary with plasma conditions and measurement location.
 
 
-    Sign convention: Positive when normal to loop points downward (negative Z direction), following Faraday''s
-    law and standard electromagnetic conventions.'
+    Sign convention: Positive when normal to loop points downward (negative Z direction),
+    following Faraday''s law and standard electromagnetic conventions.'
   status: active
-  tags:
-  - measured
-  - time-dependent
   kind: scalar
   unit: V
 - name: magnetic_field
   description: Total magnetic field vector.
-  documentation: 'Total magnetic field vector $\mathbf{B}$ in the plasma, comprising toroidal and poloidal
-    components. In cylindrical coordinates $(R, \phi, Z)$, the field is expressed as:
+  documentation: 'Total magnetic field vector $\mathbf{B}$ in the plasma, comprising
+    toroidal and poloidal components. In cylindrical coordinates $(R, \phi, Z)$, the
+    field is expressed as:
 
 
     $$\mathbf{B} = B_R \hat{e}_R + B_{\phi} \hat{e}_{\phi} + B_Z \hat{e}_Z$$
 
 
-    where $B_R$, $B_{\phi}$, and $B_Z$ are field components in T, and $\hat{e}_R$, $\hat{e}_{\phi}$, $\hat{e}_Z$
-    are unit vectors in the radial, toroidal, and vertical directions.
+    where $B_R$, $B_{\phi}$, and $B_Z$ are field components in T, and $\hat{e}_R$,
+    $\hat{e}_{\phi}$, $\hat{e}_Z$ are unit vectors in the radial, toroidal, and vertical
+    directions.
 
 
     Physical significance:
 
 
-    The magnetic field is fundamental for plasma confinement in tokamaks. Field strength determines particle
-    Larmor radii and confinement quality. The field relates to [plasma_current_density](#plasma_current_density)
-    via Ampère''s law and provides rotational transform for field line closure. See [radial_component_of_magnetic_field](#radial_component_of_magnetic_field),
-    [toroidal_component_of_magnetic_field](#toroidal_component_of_magnetic_field), [vertical_component_of_magnetic_field](#vertical_component_of_magnetic_field),
-    [poloidal_component_of_magnetic_field](#poloidal_component_of_magnetic_field), and [poloidal_magnetic_field](#poloidal_magnetic_field).
+    The magnetic field is fundamental for plasma confinement in tokamaks. Field strength
+    determines particle Larmor radii and confinement quality. The field relates to
+    [plasma_current_density](#plasma_current_density) via Ampère''s law and provides
+    rotational transform for field line closure. See [radial_component_of_magnetic_field](#radial_component_of_magnetic_field),
+    [toroidal_component_of_magnetic_field](#toroidal_component_of_magnetic_field),
+    [vertical_component_of_magnetic_field](#vertical_component_of_magnetic_field),
+    [poloidal_component_of_magnetic_field](#poloidal_component_of_magnetic_field),
+    and [poloidal_magnetic_field](#poloidal_magnetic_field).
 
 
     Component decomposition:
 
 
     The magnetic field decomposes into [radial_component_of_magnetic_field](#radial_component_of_magnetic_field)
-    $B_R$, [toroidal_component_of_magnetic_field](#toroidal_component_of_magnetic_field) $B_{\phi}$, and
-    [vertical_component_of_magnetic_field](#vertical_component_of_magnetic_field) $B_Z$. The poloidal
-    field combines radial and vertical components, while the toroidal field is the dominant component
-    for confinement.
+    $B_R$, [toroidal_component_of_magnetic_field](#toroidal_component_of_magnetic_field)
+    $B_{\phi}$, and [vertical_component_of_magnetic_field](#vertical_component_of_magnetic_field)
+    $B_Z$. The poloidal field combines radial and vertical components, while the toroidal
+    field is the dominant component for confinement.
 
 
     Measurement methods:
 
 
-    Magnetic field components are measured using magnetic probes, flux loops, and Hall sensors. [Flux_loop_voltage](#flux_loop_voltage)
-    measures field changes through Faraday''s law. Equilibrium reconstruction codes invert external magnetic
-    measurements to determine internal field structure. Polarimetry measures field strength from Faraday
-    rotation effects.
+    Magnetic field components are measured using magnetic probes, flux loops, and
+    Hall sensors. [Flux_loop_voltage](#flux_loop_voltage) measures field changes through
+    Faraday''s law. Equilibrium reconstruction codes invert external magnetic measurements
+    to determine internal field structure. Polarimetry measures field strength from
+    Faraday rotation effects.
 
 
     Typical values:
 
 
-    Typical field strengths range from 1-6 T on axis, with the toroidal component dominant ($B_{\phi}
-    \gg B_R, B_Z$). The toroidal field decreases as $B_{\phi} \propto 1/R$ for vacuum field configurations.
+    Typical field strengths range from 1-6 T on axis, with the toroidal component
+    dominant ($B_{\phi} \gg B_R, B_Z$). The toroidal field decreases as $B_{\phi}
+    \propto 1/R$ for vacuum field configurations.
 
 
     Sign convention: Positive when anti-clockwise viewed from above for toroidal component.'
   status: active
-  tags:
-  - measured
   kind: vector
   unit: T
 - name: magnetic_flux
   description: Magnetic flux.
-  documentation: 'Magnetic flux $\Phi$ through a surface, defined as the surface integral of [magnetic_field](#magnetic_field).
-    Magnetic flux is a fundamental quantity in plasma physics, conserved in ideal MHD and measured through
-    [flux_loop_voltage](#flux_loop_voltage) integration.
+  documentation: 'Magnetic flux $\Phi$ through a surface, defined as the surface integral
+    of [magnetic_field](#magnetic_field). Magnetic flux is a fundamental quantity
+    in plasma physics, conserved in ideal MHD and measured through [flux_loop_voltage](#flux_loop_voltage)
+    integration.
 
 
     $$\Phi = \int \mathbf{B} \cdot d\mathbf{A}$$
 
 
-    where $\mathbf{B}$ is magnetic field in T and $d\mathbf{A}$ is the differential area vector in m$^2$.
+    where $\mathbf{B}$ is magnetic field in T and $d\mathbf{A}$ is the differential
+    area vector in m$^2$.
 
 
     Physical significance:
 
 
-    Magnetic flux is conserved in ideal MHD and threading surfaces define magnetic flux surfaces. Changes
-    in flux threading the plasma indicate non-ideal processes (resistivity, reconnection). Flux conservation
-    relates to [poloidal_magnetic_flux](#poloidal_magnetic_flux) and determines [safety_factor](#safety_factor)
-    through flux surface geometry. See [magnetic_field](#magnetic_field) for field structure and [area_of_flux_loop](#area_of_flux_loop)
+    Magnetic flux is conserved in ideal MHD and threading surfaces define magnetic
+    flux surfaces. Changes in flux threading the plasma indicate non-ideal processes
+    (resistivity, reconnection). Flux conservation relates to [poloidal_magnetic_flux](#poloidal_magnetic_flux)
+    and determines [safety_factor](#safety_factor) through flux surface geometry.
+    See [magnetic_field](#magnetic_field) for field structure and [area_of_flux_loop](#area_of_flux_loop)
     for measurement calibration.
 
 
     Faraday''s law:
 
 
-    The time derivative of magnetic flux through a closed conducting loop induces voltage via Faraday''s
-    law:
+    The time derivative of magnetic flux through a closed conducting loop induces
+    voltage via Faraday''s law:
 
 
     $$V = -\frac{d\Phi}{dt}$$
 
 
-    where $V$ is induced voltage in V. This is the fundamental measurement principle for flux loops: [flux_loop_voltage](#flux_loop_voltage)
-    measures $d\Phi/dt$.
+    where $V$ is induced voltage in V. This is the fundamental measurement principle
+    for flux loops: [flux_loop_voltage](#flux_loop_voltage) measures $d\Phi/dt$.
 
 
     Measurement methods:
 
 
-    Magnetic flux is measured through [flux_loop_voltage](#flux_loop_voltage) integration using Faraday''s
-    law. Flux loop diagnostics integrate voltage to measure flux changes: $\Delta\Phi = \int V dt / A$
-    where $A$ is [area_of_flux_loop](#area_of_flux_loop). Equilibrium reconstruction codes use flux measurements
-    to determine magnetic geometry and [plasma_current](#plasma_current) distribution.
+    Magnetic flux is measured through [flux_loop_voltage](#flux_loop_voltage) integration
+    using Faraday''s law. Flux loop diagnostics integrate voltage to measure flux
+    changes: $\Delta\Phi = \int V dt / A$ where $A$ is [area_of_flux_loop](#area_of_flux_loop).
+    Equilibrium reconstruction codes use flux measurements to determine magnetic geometry
+    and [plasma_current](#plasma_current) distribution.
 
 
     Typical values:
 
 
-    Flux values depend on machine size and field strength, typically ranging from milliWeber to Weber
-    for tokamak applications. Poloidal flux changes during plasma current ramp typically range from 0.1-1
-    Wb for medium-sized tokamaks.
+    Flux values depend on machine size and field strength, typically ranging from
+    milliWeber to Weber for tokamak applications. Poloidal flux changes during plasma
+    current ramp typically range from 0.1-1 Wb for medium-sized tokamaks.
 
 
-    Sign convention: Positive flux follows the right-hand rule for loop orientation, consistent with [flux_loop_voltage](#flux_loop_voltage)
-    measurements.'
+    Sign convention: Positive flux follows the right-hand rule for loop orientation,
+    consistent with [flux_loop_voltage](#flux_loop_voltage) measurements.'
   status: draft
-  tags:
-  - measured
   kind: scalar
   unit: Wb
 - name: plasma_current_density
   description: Plasma current density vector.
-  documentation: 'Current density vector $\mathbf{J}$ in the plasma, representing the spatial distribution
-    of electric current. Related to [magnetic_field](#magnetic_field) via Ampère''s law and determines
-    the self-generated poloidal magnetic field essential for plasma equilibrium and MHD stability. The
-    total current includes contributions from ohmic current, bootstrap current, and externally driven
-    current.
+  documentation: 'Current density vector $\mathbf{J}$ in the plasma, representing
+    the spatial distribution of electric current. Related to [magnetic_field](#magnetic_field)
+    via Ampère''s law and determines the self-generated poloidal magnetic field essential
+    for plasma equilibrium and MHD stability. The total current includes contributions
+    from ohmic current, bootstrap current, and externally driven current.
 
 
     $$\nabla \times \mathbf{B} = \mu_0 \mathbf{J}$$
 
 
-    where $\mathbf{B}$ is magnetic field in T, $\mu_0 = 4\pi \times 10^{-7}$ H/m is the vacuum permeability,
-    and $\mathbf{J}$ is in A/m$^2$.
+    where $\mathbf{B}$ is magnetic field in T, $\mu_0 = 4\pi \times 10^{-7}$ H/m is
+    the vacuum permeability, and $\mathbf{J}$ is in A/m$^2$.
 
 
     Physical significance:
 
 
     The current density profile determines the self-generated [poloidal_magnetic_field](#poloidal_magnetic_field),
-    which is essential for plasma equilibrium and MHD stability. Current density affects [safety_factor](#safety_factor)
-    profiles and determines [plasma_current](#plasma_current) distribution. Bootstrap current (self-generated
-    by pressure gradients) and external current drive modify the profile. See [current_density](#current_density)
-    for magnitude relationships and [magnetic_field](#magnetic_field) for field structure.
+    which is essential for plasma equilibrium and MHD stability. Current density affects
+    [safety_factor](#safety_factor) profiles and determines [plasma_current](#plasma_current)
+    distribution. Bootstrap current (self-generated by pressure gradients) and external
+    current drive modify the profile. See [current_density](#current_density) for
+    magnitude relationships and [magnetic_field](#magnetic_field) for field structure.
 
 
     Measurement methods:
 
 
-    Plasma current density is determined from equilibrium reconstruction using external [magnetic_field](#magnetic_field)
-    measurements. [Flux_loop_voltage](#flux_loop_voltage) integration provides poloidal field information
-    for current calculation. MSE (motional Stark effect) diagnostics provide direct current density measurements
-    in some devices. Polarimetry measures current density from Faraday rotation effects. Current profile
-    analysis requires [magnetic_axis](#magnetic_axis) location and [plasma_boundary](#plasma_boundary)
+    Plasma current density is determined from equilibrium reconstruction using external
+    [magnetic_field](#magnetic_field) measurements. [Flux_loop_voltage](#flux_loop_voltage)
+    integration provides poloidal field information for current calculation. MSE (motional
+    Stark effect) diagnostics provide direct current density measurements in some
+    devices. Polarimetry measures current density from Faraday rotation effects. Current
+    profile analysis requires [magnetic_axis](#magnetic_axis) location and [plasma_boundary](#plasma_boundary)
     geometry.
 
 
     Typical values:
 
 
-    Peak values in plasma core typically range from $10^5$ to $10^6$ A/m$^2$ depending on [plasma_current](#plasma_current)
-    and current profile shape. Current density profiles typically peak on-axis and decrease toward the
-    edge.
+    Peak values in plasma core typically range from $10^5$ to $10^6$ A/m$^2$ depending
+    on [plasma_current](#plasma_current) and current profile shape. Current density
+    profiles typically peak on-axis and decrease toward the edge.
 
 
-    Sign convention: Positive current density follows the right-hand rule for toroidal current direction,
-    consistent with [plasma_current](#plasma_current) measurements and tokamak operation conventions.'
+    Sign convention: Positive current density follows the right-hand rule for toroidal
+    current direction, consistent with [plasma_current](#plasma_current) measurements
+    and tokamak operation conventions.'
   status: active
-  tags:
-  - reconstructed
-  - spatial-profile
   kind: vector
   unit: A.m^-2
   links:
@@ -348,213 +361,227 @@
   - name:plasma_current
 - name: poloidal_component_of_magnetic_field
   description: Poloidal component of magnetic field.
-  documentation: 'Magnitude of the poloidal component of the [magnetic_field](#magnetic_field) vector
-    $B_p$ in the poloidal plane. The poloidal field component is generated by [plasma_current](#plasma_current)
-    and external poloidal field coils, determining [safety_factor](#safety_factor) and MHD stability limits.
+  documentation: 'Magnitude of the poloidal component of the [magnetic_field](#magnetic_field)
+    vector $B_p$ in the poloidal plane. The poloidal field component is generated
+    by [plasma_current](#plasma_current) and external poloidal field coils, determining
+    [safety_factor](#safety_factor) and MHD stability limits.
 
 
     $$B_p = \sqrt{B_R^2 + B_Z^2}$$
 
 
-    where $B_R$ is [radial_component_of_magnetic_field](#radial_component_of_magnetic_field) and $B_Z$
-    is [vertical_component_of_magnetic_field](#vertical_component_of_magnetic_field), both in T.
+    where $B_R$ is [radial_component_of_magnetic_field](#radial_component_of_magnetic_field)
+    and $B_Z$ is [vertical_component_of_magnetic_field](#vertical_component_of_magnetic_field),
+    both in T.
 
 
     Physical significance:
 
 
-    The poloidal field component is generated by [plasma_current](#plasma_current) and external poloidal
-    field coils. The ratio of toroidal to poloidal field determines the [safety_factor](#safety_factor):
-    $q \propto B_{\phi} / B_p$, a key parameter for MHD stability. Poloidal field strength affects plasma
-    shaping and equilibrium control. See [poloidal_magnetic_field](#poloidal_magnetic_field) for vector
-    relationships and [toroidal_component_of_magnetic_field](#toroidal_component_of_magnetic_field) for
-    field comparison.
+    The poloidal field component is generated by [plasma_current](#plasma_current)
+    and external poloidal field coils. The ratio of toroidal to poloidal field determines
+    the [safety_factor](#safety_factor): $q \propto B_{\phi} / B_p$, a key parameter
+    for MHD stability. Poloidal field strength affects plasma shaping and equilibrium
+    control. See [poloidal_magnetic_field](#poloidal_magnetic_field) for vector relationships
+    and [toroidal_component_of_magnetic_field](#toroidal_component_of_magnetic_field)
+    for field comparison.
 
 
     Measurement methods:
 
 
-    Poloidal magnetic field is measured using magnetic probes and flux loops positioned around the plasma.
-    [Flux_loop_voltage](#flux_loop_voltage) integration provides poloidal field information. Equilibrium
-    reconstruction codes invert external magnetic measurements to determine internal field structure.
-    MSE (motional Stark effect) diagnostics provide direct poloidal field measurements. Poloidal field
-    analysis requires [magnetic_axis](#magnetic_axis) location and [plasma_boundary](#plasma_boundary)
+    Poloidal magnetic field is measured using magnetic probes and flux loops positioned
+    around the plasma. [Flux_loop_voltage](#flux_loop_voltage) integration provides
+    poloidal field information. Equilibrium reconstruction codes invert external magnetic
+    measurements to determine internal field structure. MSE (motional Stark effect)
+    diagnostics provide direct poloidal field measurements. Poloidal field analysis
+    requires [magnetic_axis](#magnetic_axis) location and [plasma_boundary](#plasma_boundary)
     geometry.
 
 
     Typical values:
 
 
-    0.1-1 T, depending on [plasma_current](#plasma_current) and radial position. Much smaller than [toroidal_component_of_magnetic_field](#toroidal_component_of_magnetic_field)
+    0.1-1 T, depending on [plasma_current](#plasma_current) and radial position. Much
+    smaller than [toroidal_component_of_magnetic_field](#toroidal_component_of_magnetic_field)
     but essential for plasma confinement and stability.
 
 
-    Sign convention: Positive poloidal field follows the right-hand rule for current direction, consistent
-    with [plasma_current](#plasma_current) measurements and tokamak operation conventions.'
+    Sign convention: Positive poloidal field follows the right-hand rule for current
+    direction, consistent with [plasma_current](#plasma_current) measurements and
+    tokamak operation conventions.'
   status: draft
-  tags:
-  - measured
   kind: scalar
   unit: T
 - name: poloidal_magnetic_field
   description: Poloidal magnetic field vector.
-  documentation: 'Poloidal magnetic field vector $\mathbf{B}_p$ lying in the poloidal plane (R-Z plane),
-    comprising radial and vertical components. The poloidal field is generated by toroidal [plasma_current](#plasma_current)
-    and external poloidal field coils, providing the rotational transform necessary for tokamak confinement.
+  documentation: 'Poloidal magnetic field vector $\mathbf{B}_p$ lying in the poloidal
+    plane (R-Z plane), comprising radial and vertical components. The poloidal field
+    is generated by toroidal [plasma_current](#plasma_current) and external poloidal
+    field coils, providing the rotational transform necessary for tokamak confinement.
 
 
     $$\mathbf{B}_p = B_R \hat{e}_R + B_Z \hat{e}_Z$$
 
 
-    where $B_R$ is [radial_component_of_magnetic_field](#radial_component_of_magnetic_field), $B_Z$ is
-    [vertical_component_of_magnetic_field](#vertical_component_of_magnetic_field), both in T.
+    where $B_R$ is [radial_component_of_magnetic_field](#radial_component_of_magnetic_field),
+    $B_Z$ is [vertical_component_of_magnetic_field](#vertical_component_of_magnetic_field),
+    both in T.
 
 
     Physical significance:
 
 
-    The poloidal field is generated by toroidal [plasma_current](#plasma_current) and external poloidal
-    field coils. It provides the rotational transform of field lines necessary for tokamak confinement
-    and determines plasma shape through equilibrium force balance. Poloidal field strength affects [safety_factor](#safety_factor)
+    The poloidal field is generated by toroidal [plasma_current](#plasma_current)
+    and external poloidal field coils. It provides the rotational transform of field
+    lines necessary for tokamak confinement and determines plasma shape through equilibrium
+    force balance. Poloidal field strength affects [safety_factor](#safety_factor)
     profiles and MHD stability limits. See [poloidal_component_of_magnetic_field](#poloidal_component_of_magnetic_field)
-    for magnitude relationships and [magnetic_field](#magnetic_field) for total field structure.
+    for magnitude relationships and [magnetic_field](#magnetic_field) for total field
+    structure.
 
 
     Relation to plasma current:
 
 
-    The poloidal field relates to [plasma_current_density](#plasma_current_density) via Ampère''s law:
+    The poloidal field relates to [plasma_current_density](#plasma_current_density)
+    via Ampère''s law:
 
 
     $$\nabla \times \mathbf{B}_p = \mu_0 j_{\phi} \hat{e}_{\phi}$$
 
 
-    where $j_{\phi}$ is toroidal current density in A/m$^2$ and $\mu_0 = 4\pi \times 10^{-7}$ H/m.
+    where $j_{\phi}$ is toroidal current density in A/m$^2$ and $\mu_0 = 4\pi \times
+    10^{-7}$ H/m.
 
 
     Measurement methods:
 
 
-    Poloidal magnetic field is measured using magnetic probes and flux loops positioned around the plasma.
-    [Flux_loop_voltage](#flux_loop_voltage) integration provides field change information. Equilibrium
-    reconstruction codes invert external magnetic measurements to determine internal field structure.
-    MSE diagnostics provide direct poloidal field measurements in some devices. Vector field analysis
-    requires multiple measurement locations.
+    Poloidal magnetic field is measured using magnetic probes and flux loops positioned
+    around the plasma. [Flux_loop_voltage](#flux_loop_voltage) integration provides
+    field change information. Equilibrium reconstruction codes invert external magnetic
+    measurements to determine internal field structure. MSE diagnostics provide direct
+    poloidal field measurements in some devices. Vector field analysis requires multiple
+    measurement locations.
 
 
     Typical values:
 
 
-    Poloidal field strength typically ranges from 0.1-1 T, much smaller than toroidal field but essential
-    for confinement. Field strength varies with radius and [plasma_current](#plasma_current).
+    Poloidal field strength typically ranges from 0.1-1 T, much smaller than toroidal
+    field but essential for confinement. Field strength varies with radius and [plasma_current](#plasma_current).
 
 
-    Sign convention: Positive poloidal field follows the right-hand rule for toroidal current direction,
-    consistent with [plasma_current](#plasma_current) measurements and standard tokamak conventions.'
+    Sign convention: Positive poloidal field follows the right-hand rule for toroidal
+    current direction, consistent with [plasma_current](#plasma_current) measurements
+    and standard tokamak conventions.'
   status: draft
-  tags:
-  - measured
   kind: vector
   unit: T
 - name: poloidal_magnetic_flux
   description: Poloidal magnetic flux.
-  documentation: 'Poloidal magnetic flux $\Psi$ threading a surface in the poloidal plane, defined as
-    the integral of [poloidal_magnetic_field](#poloidal_magnetic_field) through a surface:
+  documentation: 'Poloidal magnetic flux $\Psi$ threading a surface in the poloidal
+    plane, defined as the integral of [poloidal_magnetic_field](#poloidal_magnetic_field)
+    through a surface:
 
 
     $$\Psi = \int \mathbf{B}_p \cdot d\mathbf{A}$$
 
 
-    where $\mathbf{B}_p$ is poloidal magnetic field in T and $d\mathbf{A}$ is the differential area element
-    in m$^2$.
+    where $\mathbf{B}_p$ is poloidal magnetic field in T and $d\mathbf{A}$ is the
+    differential area element in m$^2$.
 
 
     Physical context:
 
 
-    Poloidal flux is a fundamental coordinate for describing tokamak equilibria. Flux surfaces are contours
-    of constant $\Psi$, and the normalized poloidal flux $\Psi_N = (\Psi - \Psi_{\text{axis}}) / (\Psi_{\text{LCFS}}
-    - \Psi_{\text{axis}})$ is used to label flux surfaces from magnetic axis ($\Psi_N = 0$) to [plasma_boundary](#plasma_boundary)
+    Poloidal flux is a fundamental coordinate for describing tokamak equilibria. Flux
+    surfaces are contours of constant $\Psi$, and the normalized poloidal flux $\Psi_N
+    = (\Psi - \Psi_{\text{axis}}) / (\Psi_{\text{LCFS}} - \Psi_{\text{axis}})$ is
+    used to label flux surfaces from magnetic axis ($\Psi_N = 0$) to [plasma_boundary](#plasma_boundary)
     ($\Psi_N = 1$).
 
 
     Measurement:
 
 
-    Poloidal flux changes are measured by [flux_loop_voltage](#flux_loop_voltage) via Faraday''s law:
-    $V = -d\Psi/dt$.
+    Poloidal flux changes are measured by [flux_loop_voltage](#flux_loop_voltage)
+    via Faraday''s law: $V = -d\Psi/dt$.
 
 
     Sign convention: Positive when surface normal points upward (positive Z direction).'
   status: draft
-  tags:
-  - flux-coordinates
-  - measured
   kind: scalar
   unit: Wb
 - name: radial_component_of_magnetic_field
   description: Radial component of magnetic field vector.
-  documentation: 'Radial component of the magnetic field vector $B_R$ in cylindrical coordinates. In axisymmetric
-    tokamak equilibria, the radial component is typically small compared to toroidal and poloidal components
-    but is essential for equilibrium force balance and magnetic flux surface reconstruction.
+  documentation: 'Radial component of the magnetic field vector $B_R$ in cylindrical
+    coordinates. In axisymmetric tokamak equilibria, the radial component is typically
+    small compared to toroidal and poloidal components but is essential for equilibrium
+    force balance and magnetic flux surface reconstruction.
 
 
     $$B_R = \mathbf{B} \cdot \hat{e}_R$$
 
 
-    where $\mathbf{B}$ is the total magnetic field in T and $\hat{e}_R$ is the unit vector in the major
-    radius direction.
+    where $\mathbf{B}$ is the total magnetic field in T and $\hat{e}_R$ is the unit
+    vector in the major radius direction.
 
 
     Physical significance:
 
 
-    In axisymmetric tokamak equilibria, the radial component is typically small compared to toroidal and
-    poloidal components but is essential for equilibrium force balance and magnetic flux surface reconstruction.
-    Radial field affects plasma shaping and stability. Field strength relates to [plasma_current](#plasma_current)
-    distribution and [safety_factor](#safety_factor) profiles. See [magnetic_field](#magnetic_field) for
-    total field structure and [poloidal_magnetic_field](#poloidal_magnetic_field) for vector relationships.
+    In axisymmetric tokamak equilibria, the radial component is typically small compared
+    to toroidal and poloidal components but is essential for equilibrium force balance
+    and magnetic flux surface reconstruction. Radial field affects plasma shaping
+    and stability. Field strength relates to [plasma_current](#plasma_current) distribution
+    and [safety_factor](#safety_factor) profiles. See [magnetic_field](#magnetic_field)
+    for total field structure and [poloidal_magnetic_field](#poloidal_magnetic_field)
+    for vector relationships.
 
 
     Measurement methods:
 
 
-    Radial magnetic field is measured using magnetic probes positioned at different major radii around
-    the plasma. [Flux_loop_voltage](#flux_loop_voltage) integration provides field change information.
-    Equilibrium reconstruction codes invert external magnetic measurements to determine internal field
-    structure. Radial field analysis requires probes at multiple radial locations. Field measurements
-    are essential for flux surface mapping.
+    Radial magnetic field is measured using magnetic probes positioned at different
+    major radii around the plasma. [Flux_loop_voltage](#flux_loop_voltage) integration
+    provides field change information. Equilibrium reconstruction codes invert external
+    magnetic measurements to determine internal field structure. Radial field analysis
+    requires probes at multiple radial locations. Field measurements are essential
+    for flux surface mapping.
 
 
     Typical values:
 
 
-    $|B_R|$ ranges from milliTesla to tens of milliTesla, typically 1-2 orders of magnitude smaller than
-    $B_{\phi}$ and $B_Z$. Radial field strength varies with plasma conditions and external coil currents.
+    $|B_R|$ ranges from milliTesla to tens of milliTesla, typically 1-2 orders of
+    magnitude smaller than $B_{\phi}$ and $B_Z$. Radial field strength varies with
+    plasma conditions and external coil currents.
 
 
-    Sign convention: Positive outward (increasing R direction), following standard cylindrical coordinate
-    conventions and consistent with tokamak geometry.'
+    Sign convention: Positive outward (increasing R direction), following standard
+    cylindrical coordinate conventions and consistent with tokamak geometry.'
   status: active
-  tags:
-  - measured
   kind: scalar
   unit: T
 - name: radial_position_of_flux_loop
   description: Radial coordinate of flux loop diagnostic.
-  documentation: 'Major radius coordinate $R$ of the flux loop diagnostic sensor in cylindrical coordinates.
-    Flux loops are magnetic diagnostics consisting of conducting loops installed around the plasma, typically
-    on the vessel wall or behind diagnostic ports. Accurate sensor positioning is essential for equilibrium
-    reconstruction and magnetic field mapping.
+  documentation: 'Major radius coordinate $R$ of the flux loop diagnostic sensor in
+    cylindrical coordinates. Flux loops are magnetic diagnostics consisting of conducting
+    loops installed around the plasma, typically on the vessel wall or behind diagnostic
+    ports. Accurate sensor positioning is essential for equilibrium reconstruction
+    and magnetic field mapping.
 
 
     Diagnostic context:
 
 
-    Flux loops measure the time derivative of poloidal magnetic flux threading the loop. Accurate knowledge
-    of sensor positions $(R, Z)$ in m is essential for equilibrium reconstruction, magnetic field mapping,
-    and plasma shape control. Multiple flux loops at different poloidal locations provide 2D magnetic
-    field information for equilibrium and stability analysis. See [flux_loop_voltage](#flux_loop_voltage)
+    Flux loops measure the time derivative of poloidal magnetic flux threading the
+    loop. Accurate knowledge of sensor positions $(R, Z)$ in m is essential for equilibrium
+    reconstruction, magnetic field mapping, and plasma shape control. Multiple flux
+    loops at different poloidal locations provide 2D magnetic field information for
+    equilibrium and stability analysis. See [flux_loop_voltage](#flux_loop_voltage)
     for measurement relationships and [vertical_position_of_flux_loop](#vertical_position_of_flux_loop)
     for coordinate pairs.
 
@@ -562,191 +589,203 @@
     Physical significance:
 
 
-    Radial position affects flux loop measurement sensitivity and spatial resolution. Position accuracy
-    determines equilibrium reconstruction quality and affects [magnetic_field](#magnetic_field) mapping
-    precision. Flux loop positioning influences plasma control system performance and affects measurement
-    calibration procedures.
+    Radial position affects flux loop measurement sensitivity and spatial resolution.
+    Position accuracy determines equilibrium reconstruction quality and affects [magnetic_field](#magnetic_field)
+    mapping precision. Flux loop positioning influences plasma control system performance
+    and affects measurement calibration procedures.
 
 
     Installation:
 
 
-    Multiple flux loops at different poloidal locations provide 2D magnetic field information for equilibrium
-    and stability analysis. Radial positioning is optimized for measurement coverage and accessibility.
-    Position stability is maintained through mechanical design and survey procedures.
-
-
-    Measurement methods:
-
-
-    Flux loop position is measured using engineering survey techniques including laser ranging and coordinate
-    measurement systems. Position accuracy is verified through calibration procedures and cross-validation
-    with other diagnostics. Real-time position monitoring ensures measurement stability. Position data
-    is incorporated into equilibrium reconstruction algorithms.
-
-
-    Typical values:
-
-
-    Radial position ranges from inner vessel wall to outer vessel wall, typically 0.5-3 m for medium tokamaks
-    depending on machine size and diagnostic access.
-
-
-    Sign convention: Positive radial position measured outward from machine center, following standard
-    cylindrical coordinate conventions and tokamak geometry.'
-  status: active
-  kind: scalar
-  unit: m
-- name: toroidal_component_of_magnetic_field
-  description: Toroidal component of magnetic field vector.
-  documentation: 'Toroidal component of the [magnetic_field](#magnetic_field) vector $B_{\phi}$ in cylindrical
-    coordinates. In tokamaks, the toroidal component is the dominant field component, produced by external
-    toroidal field coils and providing plasma stability and particle confinement.
-
-
-    $$B_{\phi} = \mathbf{B} \cdot \hat{e}_{\phi}$$
-
-
-    where $\mathbf{B}$ is the total magnetic field in T and $\hat{e}_{\phi}$ is the unit vector in the
-    toroidal direction.
-
-
-    Physical significance:
-
-
-    In tokamaks, the toroidal component is the dominant field component, produced by external toroidal
-    field coils. Typical field strengths are 1-6 T on axis, with $B_{\phi} \gg B_R, B_Z$ for good magnetic
-    confinement. The toroidal field provides plasma stability and determines the Larmor radius of particles.
-    Field strength affects [safety_factor](#safety_factor) and MHD stability limits. See [poloidal_component_of_magnetic_field](#poloidal_component_of_magnetic_field)
-    for field ratio and [magnetic_field](#magnetic_field) for total field structure.
-
-
-    Measurement methods:
-
-
-    Toroidal magnetic field is measured using magnetic probes and flux loops positioned around the plasma.
-    [Flux_loop_voltage](#flux_loop_voltage) integration provides field change information. Equilibrium
-    reconstruction codes determine internal field structure from external measurements. Toroidal field
-    coils provide known field contribution for calibration. Field mapping requires multiple measurement
-    locations around the torus.
-
-
-    Typical values:
-
-
-    On-axis: 2-6 T for medium to large tokamaks, decreasing as $B_{\phi} \propto 1/R$ for vacuum field.
-    Field strength is primarily determined by external coil current and machine geometry.
-
-
-    Sign convention: Positive when anti-clockwise viewed from above, following standard tokamak conventions
-    and consistent with [plasma_current](#plasma_current) direction for stable operation.'
-  status: draft
-  tags:
-  - measured
-  kind: scalar
-  unit: T
-- name: vertical_component_of_magnetic_field
-  description: Vertical component of magnetic field vector.
-  documentation: 'Vertical component of the [magnetic_field](#magnetic_field) vector $B_Z$ in cylindrical
-    coordinates. The vertical component is part of the poloidal magnetic field, essential for equilibrium
-    force balance and plasma shaping in tokamak configurations.
-
-
-    $$B_Z = \mathbf{B} \cdot \hat{e}_Z$$
-
-
-    where $\mathbf{B}$ is the total magnetic field in T and $\hat{e}_Z$ is the unit vector in the vertical
-    direction.
-
-
-    Physical significance:
-
-
-    The vertical component is part of the poloidal magnetic field, essential for equilibrium force balance
-    and plasma shaping. Together with [radial_component_of_magnetic_field](#radial_component_of_magnetic_field),
-    it forms the poloidal field that provides rotational transform of field lines. Vertical field strength
-    affects plasma position control and [safety_factor](#safety_factor) profiles. See [poloidal_magnetic_field](#poloidal_magnetic_field)
-    for vector relationships and [poloidal_component_of_magnetic_field](#poloidal_component_of_magnetic_field)
-    for magnitude.
-
-
-    Measurement methods:
-
-
-    Vertical magnetic field is measured using magnetic probes and flux loops positioned above and below
-    the plasma. [Flux_loop_voltage](#flux_loop_voltage) integration provides field change information.
-    Equilibrium reconstruction codes invert external magnetic measurements to determine internal field
-    structure. Vertical field analysis requires symmetric probe placement above and below the midplane.
-    Field measurements are essential for plasma position control.
-
-
-    Typical values:
-
-
-    $|B_Z|$ ranges from milliTesla to 1 T, typically 1-2 orders of magnitude smaller than [toroidal_component_of_magnetic_field](#toroidal_component_of_magnetic_field).
-    Vertical field strength varies with plasma position and external coil currents.
-
-
-    Sign convention: Positive upward (positive Z direction), following standard cylindrical coordinate
-    conventions and consistent with tokamak geometry.'
-  status: draft
-  tags:
-  - measured
-  kind: scalar
-  unit: T
-- name: vertical_position_of_flux_loop
-  description: Vertical coordinate of flux loop diagnostic.
-  documentation: 'Vertical coordinate (height) $Z$ of the flux loop diagnostic sensor in cylindrical coordinates.
-    Flux loops are magnetic diagnostics consisting of conducting loops installed around the plasma, typically
-    on the vessel wall or behind diagnostic ports. Accurate vertical positioning is essential for equilibrium
-    reconstruction and magnetic field mapping.
-
-
-    Diagnostic context:
-
-
-    Flux loops measure the time derivative of poloidal magnetic flux threading the loop via [flux_loop_voltage](#flux_loop_voltage).
-    Accurate knowledge of sensor positions $(R, Z)$ in m is essential for equilibrium reconstruction,
-    magnetic field mapping, and plasma shape control. See [radial_position_of_flux_loop](#radial_position_of_flux_loop)
-    for coordinate pairs and [area_of_flux_loop](#area_of_flux_loop) for calibration.
-
-
-    Physical significance:
-
-
-    Vertical position affects flux loop measurement sensitivity and spatial resolution. Position accuracy
-    determines equilibrium reconstruction quality and affects [magnetic_field](#magnetic_field) mapping
-    precision. Flux loop positioning influences plasma control system performance and affects measurement
-    calibration procedures.
-
-
-    Installation:
-
-
-    Multiple flux loops at different poloidal angles provide 2D information about the poloidal field structure,
-    enabling reconstruction of plasma shape, position, and current distribution. Vertical positioning
-    is optimized for measurement coverage and accessibility. Position stability is maintained through
+    Multiple flux loops at different poloidal locations provide 2D magnetic field
+    information for equilibrium and stability analysis. Radial positioning is optimized
+    for measurement coverage and accessibility. Position stability is maintained through
     mechanical design and survey procedures.
 
 
     Measurement methods:
 
 
-    Flux loop position is measured using engineering survey techniques including laser ranging and coordinate
-    measurement systems. Position accuracy is verified through calibration procedures and cross-validation
-    with other diagnostics. Real-time position monitoring ensures measurement stability. Position data
-    is incorporated into equilibrium reconstruction algorithms.
+    Flux loop position is measured using engineering survey techniques including laser
+    ranging and coordinate measurement systems. Position accuracy is verified through
+    calibration procedures and cross-validation with other diagnostics. Real-time
+    position monitoring ensures measurement stability. Position data is incorporated
+    into equilibrium reconstruction algorithms.
 
 
     Typical values:
 
 
-    Positions range from vessel bottom to top, spanning the full poloidal extent: $Z = -1$ to $+1$ m for
-    medium tokamaks. Vertical positioning provides coverage from lower to upper divertor regions.
+    Radial position ranges from inner vessel wall to outer vessel wall, typically
+    0.5-3 m for medium tokamaks depending on machine size and diagnostic access.
 
 
-    Sign convention: Positive vertical position measured upward from midplane, following standard cylindrical
-    coordinate conventions and tokamak geometry.'
+    Sign convention: Positive radial position measured outward from machine center,
+    following standard cylindrical coordinate conventions and tokamak geometry.'
+  status: active
+  kind: scalar
+  unit: m
+- name: toroidal_component_of_magnetic_field
+  description: Toroidal component of magnetic field vector.
+  documentation: 'Toroidal component of the [magnetic_field](#magnetic_field) vector
+    $B_{\phi}$ in cylindrical coordinates. In tokamaks, the toroidal component is
+    the dominant field component, produced by external toroidal field coils and providing
+    plasma stability and particle confinement.
+
+
+    $$B_{\phi} = \mathbf{B} \cdot \hat{e}_{\phi}$$
+
+
+    where $\mathbf{B}$ is the total magnetic field in T and $\hat{e}_{\phi}$ is the
+    unit vector in the toroidal direction.
+
+
+    Physical significance:
+
+
+    In tokamaks, the toroidal component is the dominant field component, produced
+    by external toroidal field coils. Typical field strengths are 1-6 T on axis, with
+    $B_{\phi} \gg B_R, B_Z$ for good magnetic confinement. The toroidal field provides
+    plasma stability and determines the Larmor radius of particles. Field strength
+    affects [safety_factor](#safety_factor) and MHD stability limits. See [poloidal_component_of_magnetic_field](#poloidal_component_of_magnetic_field)
+    for field ratio and [magnetic_field](#magnetic_field) for total field structure.
+
+
+    Measurement methods:
+
+
+    Toroidal magnetic field is measured using magnetic probes and flux loops positioned
+    around the plasma. [Flux_loop_voltage](#flux_loop_voltage) integration provides
+    field change information. Equilibrium reconstruction codes determine internal
+    field structure from external measurements. Toroidal field coils provide known
+    field contribution for calibration. Field mapping requires multiple measurement
+    locations around the torus.
+
+
+    Typical values:
+
+
+    On-axis: 2-6 T for medium to large tokamaks, decreasing as $B_{\phi} \propto 1/R$
+    for vacuum field. Field strength is primarily determined by external coil current
+    and machine geometry.
+
+
+    Sign convention: Positive when anti-clockwise viewed from above, following standard
+    tokamak conventions and consistent with [plasma_current](#plasma_current) direction
+    for stable operation.'
+  status: draft
+  kind: scalar
+  unit: T
+- name: vertical_component_of_magnetic_field
+  description: Vertical component of magnetic field vector.
+  documentation: 'Vertical component of the [magnetic_field](#magnetic_field) vector
+    $B_Z$ in cylindrical coordinates. The vertical component is part of the poloidal
+    magnetic field, essential for equilibrium force balance and plasma shaping in
+    tokamak configurations.
+
+
+    $$B_Z = \mathbf{B} \cdot \hat{e}_Z$$
+
+
+    where $\mathbf{B}$ is the total magnetic field in T and $\hat{e}_Z$ is the unit
+    vector in the vertical direction.
+
+
+    Physical significance:
+
+
+    The vertical component is part of the poloidal magnetic field, essential for equilibrium
+    force balance and plasma shaping. Together with [radial_component_of_magnetic_field](#radial_component_of_magnetic_field),
+    it forms the poloidal field that provides rotational transform of field lines.
+    Vertical field strength affects plasma position control and [safety_factor](#safety_factor)
+    profiles. See [poloidal_magnetic_field](#poloidal_magnetic_field) for vector relationships
+    and [poloidal_component_of_magnetic_field](#poloidal_component_of_magnetic_field)
+    for magnitude.
+
+
+    Measurement methods:
+
+
+    Vertical magnetic field is measured using magnetic probes and flux loops positioned
+    above and below the plasma. [Flux_loop_voltage](#flux_loop_voltage) integration
+    provides field change information. Equilibrium reconstruction codes invert external
+    magnetic measurements to determine internal field structure. Vertical field analysis
+    requires symmetric probe placement above and below the midplane. Field measurements
+    are essential for plasma position control.
+
+
+    Typical values:
+
+
+    $|B_Z|$ ranges from milliTesla to 1 T, typically 1-2 orders of magnitude smaller
+    than [toroidal_component_of_magnetic_field](#toroidal_component_of_magnetic_field).
+    Vertical field strength varies with plasma position and external coil currents.
+
+
+    Sign convention: Positive upward (positive Z direction), following standard cylindrical
+    coordinate conventions and consistent with tokamak geometry.'
+  status: draft
+  kind: scalar
+  unit: T
+- name: vertical_position_of_flux_loop
+  description: Vertical coordinate of flux loop diagnostic.
+  documentation: 'Vertical coordinate (height) $Z$ of the flux loop diagnostic sensor
+    in cylindrical coordinates. Flux loops are magnetic diagnostics consisting of
+    conducting loops installed around the plasma, typically on the vessel wall or
+    behind diagnostic ports. Accurate vertical positioning is essential for equilibrium
+    reconstruction and magnetic field mapping.
+
+
+    Diagnostic context:
+
+
+    Flux loops measure the time derivative of poloidal magnetic flux threading the
+    loop via [flux_loop_voltage](#flux_loop_voltage). Accurate knowledge of sensor
+    positions $(R, Z)$ in m is essential for equilibrium reconstruction, magnetic
+    field mapping, and plasma shape control. See [radial_position_of_flux_loop](#radial_position_of_flux_loop)
+    for coordinate pairs and [area_of_flux_loop](#area_of_flux_loop) for calibration.
+
+
+    Physical significance:
+
+
+    Vertical position affects flux loop measurement sensitivity and spatial resolution.
+    Position accuracy determines equilibrium reconstruction quality and affects [magnetic_field](#magnetic_field)
+    mapping precision. Flux loop positioning influences plasma control system performance
+    and affects measurement calibration procedures.
+
+
+    Installation:
+
+
+    Multiple flux loops at different poloidal angles provide 2D information about
+    the poloidal field structure, enabling reconstruction of plasma shape, position,
+    and current distribution. Vertical positioning is optimized for measurement coverage
+    and accessibility. Position stability is maintained through mechanical design
+    and survey procedures.
+
+
+    Measurement methods:
+
+
+    Flux loop position is measured using engineering survey techniques including laser
+    ranging and coordinate measurement systems. Position accuracy is verified through
+    calibration procedures and cross-validation with other diagnostics. Real-time
+    position monitoring ensures measurement stability. Position data is incorporated
+    into equilibrium reconstruction algorithms.
+
+
+    Typical values:
+
+
+    Positions range from vessel bottom to top, spanning the full poloidal extent:
+    $Z = -1$ to $+1$ m for medium tokamaks. Vertical positioning provides coverage
+    from lower to upper divertor regions.
+
+
+    Sign convention: Positive vertical position measured upward from midplane, following
+    standard cylindrical coordinate conventions and tokamak geometry.'
   status: draft
   kind: scalar
   unit: m

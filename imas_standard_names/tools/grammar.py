@@ -586,7 +586,6 @@ class NamingGrammarTool(Tool):
                         "name": example.name,
                         "description": example.description,
                         "unit": example.unit if example.unit else "dimensionless",
-                        "tags": example.tags,
                         "pattern": pattern,
                     }
                 )

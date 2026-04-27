@@ -311,14 +311,6 @@
           "title": "Constraints",
           "type": "array"
         },
-        "tags": {
-          "description": "Secondary classification tags from controlled vocabulary for cross-cutting classification.",
-          "items": {
-            "type": "string"
-          },
-          "title": "Tags",
-          "type": "array"
-        },
         "links": {
           "description": "Internal cross-references to related standard names only. Use format 'name:standard_name_token' (e.g., 'name:plasma_boundary'). Internal references are validated against the catalog.",
           "items": {
@@ -560,14 +552,6 @@
           "title": "Constraints",
           "type": "array"
         },
-        "tags": {
-          "description": "Secondary classification tags from controlled vocabulary for cross-cutting classification.",
-          "items": {
-            "type": "string"
-          },
-          "title": "Tags",
-          "type": "array"
-        },
         "links": {
           "description": "Internal cross-references to related standard names only. Use format 'name:standard_name_token' (e.g., 'name:plasma_boundary'). Internal references are validated against the catalog.",
           "items": {
@@ -762,14 +746,6 @@
             "type": "string"
           },
           "title": "Constraints",
-          "type": "array"
-        },
-        "tags": {
-          "description": "Secondary classification tags from controlled vocabulary for cross-cutting classification.",
-          "items": {
-            "type": "string"
-          },
-          "title": "Tags",
           "type": "array"
         },
         "links": {
@@ -1013,14 +989,6 @@
           "title": "Constraints",
           "type": "array"
         },
-        "tags": {
-          "description": "Secondary classification tags from controlled vocabulary for cross-cutting classification.",
-          "items": {
-            "type": "string"
-          },
-          "title": "Tags",
-          "type": "array"
-        },
         "links": {
           "description": "Internal cross-references to related standard names only. Use format 'name:standard_name_token' (e.g., 'name:plasma_boundary'). Internal references are validated against the catalog.",
           "items": {
@@ -1260,14 +1228,6 @@
             "type": "string"
           },
           "title": "Constraints",
-          "type": "array"
-        },
-        "tags": {
-          "description": "Secondary classification tags from controlled vocabulary for cross-cutting classification.",
-          "items": {
-            "type": "string"
-          },
-          "title": "Tags",
           "type": "array"
         },
         "links": {

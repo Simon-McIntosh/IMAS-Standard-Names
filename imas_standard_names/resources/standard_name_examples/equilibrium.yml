@@ -1,8 +1,8 @@
 - name: elongation_of_plasma_boundary
   description: Elongation evaluated at plasma boundary.
   documentation: 'Plasma cross-section elongation evaluated specifically at the [plasma_boundary](#plasma_boundary)
-    (last closed flux surface). Boundary elongation is a key shape parameter for tokamak design and operation,
-    affecting [plasma_volume](#plasma_volume) and [energy_confinement_time](#energy_confinement_time)
+    (last closed flux surface). Boundary elongation is a key shape parameter for tokamak
+    design and operation, affecting [plasma_volume](#plasma_volume) and [energy_confinement_time](#energy_confinement_time)
     through geometric effects.
 
 
@@ -15,51 +15,54 @@
     Physical significance:
 
 
-    Boundary elongation is a key shape parameter for tokamak design and operation. Higher elongation increases
-    [plasma_volume](#plasma_volume) and improves confinement through favorable geometric effects, but
-    also increases susceptibility to [vertical_displacement_event](#vertical_displacement_event) requiring
-    active feedback control. Elongation affects [plasma_current](#plasma_current) limits and [safety_factor](#safety_factor)
-    requirements. See [major_radius_of_plasma_boundary](#major_radius_of_plasma_boundary) and [minor_radius_of_plasma_boundary](#minor_radius_of_plasma_boundary)
-    for geometric relationships.
+    Boundary elongation is a key shape parameter for tokamak design and operation.
+    Higher elongation increases [plasma_volume](#plasma_volume) and improves confinement
+    through favorable geometric effects, but also increases susceptibility to [vertical_displacement_event](#vertical_displacement_event)
+    requiring active feedback control. Elongation affects [plasma_current](#plasma_current)
+    limits and [safety_factor](#safety_factor) requirements. See [major_radius_of_plasma_boundary](#major_radius_of_plasma_boundary)
+    and [minor_radius_of_plasma_boundary](#minor_radius_of_plasma_boundary) for geometric
+    relationships.
 
 
     Relation to plasma current:
 
 
-    For fixed aspect ratio and [safety_factor](#safety_factor), higher elongation allows higher [plasma_current](#plasma_current):
-    $I_p \propto \kappa$. This relationship is fundamental for tokamak scaling and operational limits.
+    For fixed aspect ratio and [safety_factor](#safety_factor), higher elongation
+    allows higher [plasma_current](#plasma_current): $I_p \propto \kappa$. This relationship
+    is fundamental for tokamak scaling and operational limits.
 
 
     Measurement methods:
 
 
     Elongation is determined from equilibrium reconstruction using external [magnetic_field](#magnetic_field)
-    measurements. [Flux_loop_voltage](#flux_loop_voltage) integration provides boundary shape information.
-    Plasma imaging systems measure boundary geometry directly. Shape analysis requires [magnetic_axis](#magnetic_axis)
-    location and [plasma_boundary](#plasma_boundary) identification. Elongation is calculated from boundary
-    coordinates in the poloidal plane.
+    measurements. [Flux_loop_voltage](#flux_loop_voltage) integration provides boundary
+    shape information. Plasma imaging systems measure boundary geometry directly.
+    Shape analysis requires [magnetic_axis](#magnetic_axis) location and [plasma_boundary](#plasma_boundary)
+    identification. Elongation is calculated from boundary coordinates in the poloidal
+    plane.
 
 
     Typical values:
 
 
-    Circular plasmas: $\kappa \approx 1.0$, moderately shaped: $\kappa = 1.5$-1.8, highly elongated: $\kappa
-    = 2.0$-2.5. Elongation is actively controlled through external coil currents.
+    Circular plasmas: $\kappa \approx 1.0$, moderately shaped: $\kappa = 1.5$-1.8,
+    highly elongated: $\kappa = 2.0$-2.5. Elongation is actively controlled through
+    external coil currents.
 
 
-    Sign convention: Positive when $\kappa \geq 1$ indicating vertically elongated or circular cross-section,
-    following standard tokamak geometry conventions.'
+    Sign convention: Positive when $\kappa \geq 1$ indicating vertically elongated
+    or circular cross-section, following standard tokamak geometry conventions.'
   status: draft
-  tags:
-  - global-quantity
   kind: scalar
   unit: '1'
 - name: last_closed_flux_surface
   description: Last closed flux surface.
-  documentation: 'The last closed flux surface (LCFS) is the outermost magnetic flux surface that closes
-    on itself toroidally, defining the boundary between confined plasma and the open field line region.
-    Equivalent to [plasma_boundary](#plasma_boundary), the LCFS separates confined plasma from the scrape-off
-    layer and determines the boundary for particle and energy confinement.
+  documentation: 'The last closed flux surface (LCFS) is the outermost magnetic flux
+    surface that closes on itself toroidally, defining the boundary between confined
+    plasma and the open field line region. Equivalent to [plasma_boundary](#plasma_boundary),
+    the LCFS separates confined plasma from the scrape-off layer and determines the
+    boundary for particle and energy confinement.
 
 
     Physical significance:
@@ -67,10 +70,11 @@
 
     The LCFS separates the confined plasma (inside LCFS) from the [scrape_off_layer](#scrape_off_layer)
     (outside LCFS). In diverted configurations, the LCFS corresponds to the [magnetic_separatrix](#magnetic_separatrix)
-    where poloidal flux surfaces split. In limiter configurations, the LCFS is determined by the limiter
-    intersection. The LCFS location affects [plasma_current](#plasma_current) distribution and [safety_factor](#safety_factor)
-    profiles. See [magnetic_axis](#magnetic_axis) for flux surface relationships and [plasma_boundary](#plasma_boundary)
-    for equivalent definitions.
+    where poloidal flux surfaces split. In limiter configurations, the LCFS is determined
+    by the limiter intersection. The LCFS location affects [plasma_current](#plasma_current)
+    distribution and [safety_factor](#safety_factor) profiles. See [magnetic_axis](#magnetic_axis)
+    for flux surface relationships and [plasma_boundary](#plasma_boundary) for equivalent
+    definitions.
 
 
     Geometric properties:
@@ -78,50 +82,54 @@
 
     The LCFS is characterized by shape parameters including [major_radius_of_plasma_boundary](#major_radius_of_plasma_boundary),
     [minor_radius_of_plasma_boundary](#minor_radius_of_plasma_boundary), and [elongation_of_plasma_boundary](#elongation_of_plasma_boundary).
-    These geometric quantities define the plasma cross-section and affect confinement quality.
+    These geometric quantities define the plasma cross-section and affect confinement
+    quality.
 
 
     Related quantities:
 
 
-    The LCFS relates to [magnetic_separatrix](#magnetic_separatrix) in diverted operation, [plasma_boundary](#plasma_boundary)
-    as the defining surface, and [first_wall](#first_wall) as the material boundary. LCFS shape affects
-    power handling and determines strike point locations for heat deposition.
+    The LCFS relates to [magnetic_separatrix](#magnetic_separatrix) in diverted operation,
+    [plasma_boundary](#plasma_boundary) as the defining surface, and [first_wall](#first_wall)
+    as the material boundary. LCFS shape affects power handling and determines strike
+    point locations for heat deposition.
 
 
     Measurement methods:
 
 
     LCFS location is determined from equilibrium reconstruction using external [magnetic_field](#magnetic_field)
-    measurements. [Flux_loop_voltage](#flux_loop_voltage) integration provides flux surface geometry.
-    Plasma imaging systems can directly visualize boundary positions. LCFS identification requires flux
-    surface analysis and field line tracing. Position control systems maintain LCFS position during operations.'
+    measurements. [Flux_loop_voltage](#flux_loop_voltage) integration provides flux
+    surface geometry. Plasma imaging systems can directly visualize boundary positions.
+    LCFS identification requires flux surface analysis and field line tracing. Position
+    control systems maintain LCFS position during operations.'
   status: draft
-  tags:
-  - flux-coordinates
   kind: metadata
 - name: magnetic_axis
   description: Magnetic axis location.
-  documentation: 'The magnetic axis is the innermost closed flux surface where the poloidal magnetic field
-    vanishes ($B_p = 0$) and plasma parameters typically reach maximum values. It represents the center
-    of nested flux surfaces in tokamak equilibria and serves as the reference point for plasma shape and
-    position.
+  documentation: 'The magnetic axis is the innermost closed flux surface where the
+    poloidal magnetic field vanishes ($B_p = 0$) and plasma parameters typically reach
+    maximum values. It represents the center of nested flux surfaces in tokamak equilibria
+    and serves as the reference point for plasma shape and position.
 
 
     Geometric properties:
 
 
-    The magnetic axis is characterized by major radius $R_0$ and vertical position $Z_0$ in meters. In
-    ideal axisymmetric equilibria, all field lines on the magnetic axis close after one toroidal transit.
+    The magnetic axis is characterized by major radius $R_0$ and vertical position
+    $Z_0$ in meters. In ideal axisymmetric equilibria, all field lines on the magnetic
+    axis close after one toroidal transit.
 
 
     Physical significance:
 
 
-    Plasma temperature and density typically peak at the magnetic axis. On-axis quantities such as [electron_temperature_at_magnetic_axis](#electron_temperature_at_magnetic_axis)
-    and [plasma_density_at_magnetic_axis](#plasma_density_at_magnetic_axis) are key performance indicators.
-    The magnetic axis location determines the geometric center of the plasma and is used as reference
-    for shape parameters. See [plasma_boundary](#plasma_boundary) for boundary relationships and [major_radius_of_plasma_boundary](#major_radius_of_plasma_boundary)
+    Plasma temperature and density typically peak at the magnetic axis. On-axis quantities
+    such as [electron_temperature_at_magnetic_axis](#electron_temperature_at_magnetic_axis)
+    and [plasma_density_at_magnetic_axis](#plasma_density_at_magnetic_axis) are key
+    performance indicators. The magnetic axis location determines the geometric center
+    of the plasma and is used as reference for shape parameters. See [plasma_boundary](#plasma_boundary)
+    for boundary relationships and [major_radius_of_plasma_boundary](#major_radius_of_plasma_boundary)
     for geometric scaling.
 
 
@@ -130,234 +138,243 @@
 
     The magnetic axis relates to [major_radius_of_plasma_boundary](#major_radius_of_plasma_boundary),
     [minor_radius_of_plasma_boundary](#minor_radius_of_plasma_boundary), and [toroidal_component_of_magnetic_field](#toroidal_component_of_magnetic_field)
-    at axis. Axis location affects [plasma_current](#plasma_current) distribution and [safety_factor](#safety_factor)
-    profiles.
+    at axis. Axis location affects [plasma_current](#plasma_current) distribution
+    and [safety_factor](#safety_factor) profiles.
 
 
     Measurement methods:
 
 
-    Magnetic axis location is determined from equilibrium reconstruction using external [magnetic_field](#magnetic_field)
-    measurements. [Flux_loop_voltage](#flux_loop_voltage) integration provides poloidal field information.
-    MSE (motional Stark effect) diagnostics can provide direct axis location measurements. Axis identification
-    requires flux surface analysis and field line tracing. Position control systems maintain axis location
-    during plasma operations.
+    Magnetic axis location is determined from equilibrium reconstruction using external
+    [magnetic_field](#magnetic_field) measurements. [Flux_loop_voltage](#flux_loop_voltage)
+    integration provides poloidal field information. MSE (motional Stark effect) diagnostics
+    can provide direct axis location measurements. Axis identification requires flux
+    surface analysis and field line tracing. Position control systems maintain axis
+    location during plasma operations.
 
 
     Typical values:
 
 
-    Axis location varies with plasma shape and position control settings. Major radius typically ranges
-    from machine center to outer vessel radius, vertical position controlled to maintain plasma centering.
+    Axis location varies with plasma shape and position control settings. Major radius
+    typically ranges from machine center to outer vessel radius, vertical position
+    controlled to maintain plasma centering.
 
 
-    Sign convention: Positive coordinates follow standard cylindrical coordinate conventions with R measured
-    from machine center and Z measured from midplane.'
+    Sign convention: Positive coordinates follow standard cylindrical coordinate conventions
+    with R measured from machine center and Z measured from midplane.'
   status: draft
-  tags:
-  - flux-coordinates
   kind: metadata
 - name: magnetic_separatrix
   description: Magnetic separatrix in diverted configuration.
-  documentation: 'The magnetic separatrix is the flux surface containing the X-point(s) in a diverted
-    tokamak configuration, where the poloidal field vanishes locally ($\nabla \Psi = 0$). The separatrix
-    divides closed flux surfaces (confined plasma) from open field lines that intersect divertor targets,
-    defining the [plasma_boundary](#plasma_boundary) in diverted operation.
+  documentation: 'The magnetic separatrix is the flux surface containing the X-point(s)
+    in a diverted tokamak configuration, where the poloidal field vanishes locally
+    ($\nabla \Psi = 0$). The separatrix divides closed flux surfaces (confined plasma)
+    from open field lines that intersect divertor targets, defining the [plasma_boundary](#plasma_boundary)
+    in diverted operation.
 
 
     Topological structure:
 
 
-    At the X-point, poloidal field lines split into two branches forming the divertor legs. Field lines
-    inside the separatrix close poloidally; those outside flow to material surfaces. The separatrix corresponds
-    to the [last_closed_flux_surface](#last_closed_flux_surface) in diverted operation, with normalized
-    poloidal flux $\Psi_N = 1$ at the separatrix.
+    At the X-point, poloidal field lines split into two branches forming the divertor
+    legs. Field lines inside the separatrix close poloidally; those outside flow to
+    material surfaces. The separatrix corresponds to the [last_closed_flux_surface](#last_closed_flux_surface)
+    in diverted operation, with normalized poloidal flux $\Psi_N = 1$ at the separatrix.
 
 
     Physical significance:
 
 
-    The separatrix geometry determines power handling and particle exhaust in diverted configurations.
-    Heat and particles flowing along open field lines deposit on divertor targets. Separatrix shape and
-    position relative to strike points are actively controlled to manage heat flux distribution. See [plasma_boundary](#plasma_boundary)
-    for boundary relationships and [scrape_off_layer](#scrape_off_layer) for open field line region.
+    The separatrix geometry determines power handling and particle exhaust in diverted
+    configurations. Heat and particles flowing along open field lines deposit on divertor
+    targets. Separatrix shape and position relative to strike points are actively
+    controlled to manage heat flux distribution. See [plasma_boundary](#plasma_boundary)
+    for boundary relationships and [scrape_off_layer](#scrape_off_layer) for open
+    field line region.
 
 
     Relation to plasma boundary:
 
 
-    In diverted configurations, the separatrix defines the [plasma_boundary](#plasma_boundary). The [scrape_off_layer](#scrape_off_layer)
-    extends from separatrix to [first_wall](#first_wall), with field lines intersecting divertor targets.
-    Separatrix location affects [heating_power_due_to_ohmic](#heating_power_due_to_ohmic) and plasma performance.
+    In diverted configurations, the separatrix defines the [plasma_boundary](#plasma_boundary).
+    The [scrape_off_layer](#scrape_off_layer) extends from separatrix to [first_wall](#first_wall),
+    with field lines intersecting divertor targets. Separatrix location affects [heating_power_due_to_ohmic](#heating_power_due_to_ohmic)
+    and plasma performance.
 
 
     Measurement methods:
 
 
-    Separatrix location is determined from equilibrium reconstruction using external [magnetic_field](#magnetic_field)
-    measurements. [Flux_loop_voltage](#flux_loop_voltage) integration provides flux surface geometry.
-    X-point identification requires field line tracing and flux surface analysis. Separatrix position
-    is controlled through external coil currents. Divertor diagnostics measure strike point locations
-    for separatrix mapping.'
+    Separatrix location is determined from equilibrium reconstruction using external
+    [magnetic_field](#magnetic_field) measurements. [Flux_loop_voltage](#flux_loop_voltage)
+    integration provides flux surface geometry. X-point identification requires field
+    line tracing and flux surface analysis. Separatrix position is controlled through
+    external coil currents. Divertor diagnostics measure strike point locations for
+    separatrix mapping.'
   status: draft
-  tags:
-  - divertor-configuration
-  - flux-coordinates
   kind: metadata
 - name: major_radius_of_plasma_boundary
   description: Major radius at plasma boundary.
   documentation: 'Major radius $R$ evaluated at the outboard midplane of the [plasma_boundary](#plasma_boundary)
-    (last closed flux surface). The plasma boundary is the last closed flux surface separating confined
-    plasma from the scrape-off layer. Major radius characterizes the outer radial extent of confined plasma.
+    (last closed flux surface). The plasma boundary is the last closed flux surface
+    separating confined plasma from the scrape-off layer. Major radius characterizes
+    the outer radial extent of confined plasma.
 
 
     Geometric definition:
 
 
-    For shaped plasmas, this is the major radius at the outboard midplane where the vertical coordinate
-    equals the [magnetic_axis](#magnetic_axis) Z-coordinate: $R_{\text{boundary}}(Z = Z_{\text{axis}})$
-    in m.
+    For shaped plasmas, this is the major radius at the outboard midplane where the
+    vertical coordinate equals the [magnetic_axis](#magnetic_axis) Z-coordinate: $R_{\text{boundary}}(Z
+    = Z_{\text{axis}})$ in m.
 
 
     Physical significance:
 
 
-    This quantity characterizes the outer radial extent of confined plasma and is used in calculating
-    [plasma_volume](#plasma_volume), surface area, and shape parameters. Major radius affects [energy_confinement_time](#energy_confinement_time)
-    through scaling laws and determines [plasma_current](#plasma_current) requirements. See [minor_radius_of_plasma_boundary](#minor_radius_of_plasma_boundary)
-    for aspect ratio and [elongation_of_plasma_boundary](#elongation_of_plasma_boundary) for shape relationships.
+    This quantity characterizes the outer radial extent of confined plasma and is
+    used in calculating [plasma_volume](#plasma_volume), surface area, and shape parameters.
+    Major radius affects [energy_confinement_time](#energy_confinement_time) through
+    scaling laws and determines [plasma_current](#plasma_current) requirements. See
+    [minor_radius_of_plasma_boundary](#minor_radius_of_plasma_boundary) for aspect
+    ratio and [elongation_of_plasma_boundary](#elongation_of_plasma_boundary) for
+    shape relationships.
 
 
     Measurement methods:
 
 
     Major radius is determined from equilibrium reconstruction using external [magnetic_field](#magnetic_field)
-    measurements. [Flux_loop_voltage](#flux_loop_voltage) integration provides boundary position information.
-    Plasma imaging systems measure boundary geometry directly. Major radius analysis requires [magnetic_axis](#magnetic_axis)
-    location and [plasma_boundary](#plasma_boundary) identification. Geometric measurements use standard
-    tokamak coordinate systems.
+    measurements. [Flux_loop_voltage](#flux_loop_voltage) integration provides boundary
+    position information. Plasma imaging systems measure boundary geometry directly.
+    Major radius analysis requires [magnetic_axis](#magnetic_axis) location and [plasma_boundary](#plasma_boundary)
+    identification. Geometric measurements use standard tokamak coordinate systems.
 
 
     Typical values:
 
 
-    Small tokamaks: 0.5-1.0 m, medium tokamaks: 1.5-3.0 m, ITER: 6.2 m (design). Major radius is primarily
-    determined by machine geometry and external coil configuration.
+    Small tokamaks: 0.5-1.0 m, medium tokamaks: 1.5-3.0 m, ITER: 6.2 m (design). Major
+    radius is primarily determined by machine geometry and external coil configuration.
 
 
-    Sign convention: Positive major radius measured from machine center, following standard cylindrical
-    coordinate conventions and tokamak geometry.'
+    Sign convention: Positive major radius measured from machine center, following
+    standard cylindrical coordinate conventions and tokamak geometry.'
   status: active
   kind: scalar
   unit: m
 - name: minor_radius_of_plasma_boundary
   description: Minor radius at plasma boundary.
-  documentation: 'Minor radius evaluated at the [plasma_boundary](#plasma_boundary) (last closed flux
-    surface), calculated as half the difference between outboard and inboard major radii at the midplane.
-    Minor radius defines the characteristic size scale for normalized radial coordinates and plasma cross-sectional
-    area.
+  documentation: 'Minor radius evaluated at the [plasma_boundary](#plasma_boundary)
+    (last closed flux surface), calculated as half the difference between outboard
+    and inboard major radii at the midplane. Minor radius defines the characteristic
+    size scale for normalized radial coordinates and plasma cross-sectional area.
 
 
     $$a_{\text{boundary}} = \frac{R_{\text{out}} - R_{\text{in}}}{2}$$
 
 
-    where $R_{\text{out}}$ is [major_radius_of_plasma_boundary](#major_radius_of_plasma_boundary) at outboard
-    midplane and $R_{\text{in}}$ is major radius at inboard midplane, both in m.
+    where $R_{\text{out}}$ is [major_radius_of_plasma_boundary](#major_radius_of_plasma_boundary)
+    at outboard midplane and $R_{\text{in}}$ is major radius at inboard midplane,
+    both in m.
 
 
     Physical significance:
 
 
-    This quantity defines the radial extent of confined plasma and is used in calculating plasma cross-sectional
-    area, [plasma_volume](#plasma_volume), and shape parameters. It serves as the characteristic length
-    scale for normalized radial coordinates. Minor radius affects [energy_confinement_time](#energy_confinement_time)
-    through scaling laws and determines [plasma_current](#plasma_current) requirements. See [major_radius_of_plasma_boundary](#major_radius_of_plasma_boundary)
-    for aspect ratio and [elongation_of_plasma_boundary](#elongation_of_plasma_boundary) for shape relationships.
+    This quantity defines the radial extent of confined plasma and is used in calculating
+    plasma cross-sectional area, [plasma_volume](#plasma_volume), and shape parameters.
+    It serves as the characteristic length scale for normalized radial coordinates.
+    Minor radius affects [energy_confinement_time](#energy_confinement_time) through
+    scaling laws and determines [plasma_current](#plasma_current) requirements. See
+    [major_radius_of_plasma_boundary](#major_radius_of_plasma_boundary) for aspect
+    ratio and [elongation_of_plasma_boundary](#elongation_of_plasma_boundary) for
+    shape relationships.
 
 
     Relation to shape parameters:
 
 
-    Together with [elongation_of_plasma_boundary](#elongation_of_plasma_boundary) $\kappa$, determines
-    the plasma cross-sectional area: $A_p \approx \pi a^2 \kappa$. This relationship is fundamental for
-    plasma volume and surface area calculations.
+    Together with [elongation_of_plasma_boundary](#elongation_of_plasma_boundary)
+    $\kappa$, determines the plasma cross-sectional area: $A_p \approx \pi a^2 \kappa$.
+    This relationship is fundamental for plasma volume and surface area calculations.
 
 
     Measurement methods:
 
 
     Minor radius is determined from equilibrium reconstruction using external [magnetic_field](#magnetic_field)
-    measurements. [Flux_loop_voltage](#flux_loop_voltage) integration provides boundary geometry information.
-    Plasma imaging systems measure boundary coordinates directly. Minor radius analysis requires [magnetic_axis](#magnetic_axis)
-    location and [plasma_boundary](#plasma_boundary) identification. Geometric calculations use standard
-    tokamak coordinate systems.
+    measurements. [Flux_loop_voltage](#flux_loop_voltage) integration provides boundary
+    geometry information. Plasma imaging systems measure boundary coordinates directly.
+    Minor radius analysis requires [magnetic_axis](#magnetic_axis) location and [plasma_boundary](#plasma_boundary)
+    identification. Geometric calculations use standard tokamak coordinate systems.
 
 
     Typical values:
 
 
-    Small tokamaks: 0.2-0.5 m, medium tokamaks: 0.5-1.0 m, ITER: ~2 m. Minor radius scales with machine
-    size and determines plasma cross-sectional area.
+    Small tokamaks: 0.2-0.5 m, medium tokamaks: 0.5-1.0 m, ITER: ~2 m. Minor radius
+    scales with machine size and determines plasma cross-sectional area.
 
 
-    Sign convention: Positive minor radius measured from magnetic axis to boundary, following standard
-    tokamak geometry conventions.'
+    Sign convention: Positive minor radius measured from magnetic axis to boundary,
+    following standard tokamak geometry conventions.'
   status: draft
-  tags:
-  - global-quantity
   kind: scalar
   unit: m
 - name: plasma_boundary
   description: Last closed flux surface defining plasma boundary.
-  documentation: 'The last closed flux surface (LCFS) that defines the boundary between confined plasma
-    and scrape-off layer (SOL). In diverted configurations, this corresponds to the magnetic separatrix
-    where the poloidal flux surfaces split into divertor legs. In limiter configurations, the boundary
-    is the outermost closed flux surface before field lines intersect material surfaces.
+  documentation: 'The last closed flux surface (LCFS) that defines the boundary between
+    confined plasma and scrape-off layer (SOL). In diverted configurations, this corresponds
+    to the magnetic separatrix where the poloidal flux surfaces split into divertor
+    legs. In limiter configurations, the boundary is the outermost closed flux surface
+    before field lines intersect material surfaces.
 
 
     Geometric significance:
 
 
-    The plasma boundary serves as the reference surface for defining plasma shape parameters including
-    [major_radius_of_plasma_boundary](#major_radius_of_plasma_boundary), [minor_radius_of_plasma_boundary](#minor_radius_of_plasma_boundary),
-    and [elongation_of_plasma_boundary](#elongation_of_plasma_boundary). It separates the confined plasma
-    region from the open field line region and determines the [plasma_volume](#plasma_volume) enclosed
-    by magnetic surfaces.
+    The plasma boundary serves as the reference surface for defining plasma shape
+    parameters including [major_radius_of_plasma_boundary](#major_radius_of_plasma_boundary),
+    [minor_radius_of_plasma_boundary](#minor_radius_of_plasma_boundary), and [elongation_of_plasma_boundary](#elongation_of_plasma_boundary).
+    It separates the confined plasma region from the open field line region and determines
+    the [plasma_volume](#plasma_volume) enclosed by magnetic surfaces.
 
 
     Related quantities:
 
 
-    The plasma boundary relates to [magnetic_separatrix](#magnetic_separatrix) in diverted operation and
-    [scrape_off_layer](#scrape_off_layer) outside the LCFS. Boundary shape affects [plasma_current](#plasma_current)
-    limits and MHD stability. The boundary position determines strike point locations for [heat_flux_to_divertor](#heat_flux_to_divertor)
+    The plasma boundary relates to [magnetic_separatrix](#magnetic_separatrix) in
+    diverted operation and [scrape_off_layer](#scrape_off_layer) outside the LCFS.
+    Boundary shape affects [plasma_current](#plasma_current) limits and MHD stability.
+    The boundary position determines strike point locations for [heat_flux_to_divertor](#heat_flux_to_divertor)
     deposition.
 
 
     Physical significance:
 
 
-    Boundary shape and position control plasma-wall interactions and power handling. The boundary determines
-    the last closed flux surface for particle and energy confinement. Changes in boundary shape affect
-    [safety_factor](#safety_factor) profiles and stability limits. The boundary location relative to [first_wall](#first_wall)
+    Boundary shape and position control plasma-wall interactions and power handling.
+    The boundary determines the last closed flux surface for particle and energy confinement.
+    Changes in boundary shape affect [safety_factor](#safety_factor) profiles and
+    stability limits. The boundary location relative to [first_wall](#first_wall)
     components determines heat flux distribution and material loading.'
   status: active
-  tags:
-  - flux-coordinates
   kind: metadata
 - name: plasma_volume
   description: Total plasma volume.
-  documentation: 'Total plasma volume $V_p$ enclosed by the [plasma_boundary](#plasma_boundary), calculated
-    as the volume integral. Plasma volume determines total stored energy, particle inventory, and fusion
-    power in burning plasmas, affecting [energy_confinement_time](#energy_confinement_time) through scaling
-    laws.
+  documentation: 'Total plasma volume $V_p$ enclosed by the [plasma_boundary](#plasma_boundary),
+    calculated as the volume integral. Plasma volume determines total stored energy,
+    particle inventory, and fusion power in burning plasmas, affecting [energy_confinement_time](#energy_confinement_time)
+    through scaling laws.
 
 
     $$V_p = \int dV = 2\pi \int R \, dA$$
 
 
-    where $R$ is major radius in m, $dA$ is differential area element in poloidal plane in m$^2$, giving
-    $V_p$ in m$^3$.
+    where $R$ is major radius in m, $dA$ is differential area element in poloidal
+    plane in m$^2$, giving $V_p$ in m$^3$.
 
 
     Geometric scaling:
@@ -376,8 +393,9 @@
     Physical significance:
 
 
-    Plasma volume determines total stored energy, particle inventory, and fusion power in burning plasmas.
-    Larger volume generally improves confinement through favorable scaling laws. Volume affects [energy_confinement_time](#energy_confinement_time)
+    Plasma volume determines total stored energy, particle inventory, and fusion power
+    in burning plasmas. Larger volume generally improves confinement through favorable
+    scaling laws. Volume affects [energy_confinement_time](#energy_confinement_time)
     and determines [plasma_current](#plasma_current) requirements. See [major_radius_of_plasma_boundary](#major_radius_of_plasma_boundary),
     [minor_radius_of_plasma_boundary](#minor_radius_of_plasma_boundary), and [elongation_of_plasma_boundary](#elongation_of_plasma_boundary)
     for geometric relationships.
@@ -387,70 +405,71 @@
 
 
     Plasma volume is calculated from equilibrium reconstruction using external [magnetic_field](#magnetic_field)
-    measurements. [Flux_loop_voltage](#flux_loop_voltage) integration provides boundary geometry information.
-    Volume calculation requires [magnetic_axis](#magnetic_axis) location and [plasma_boundary](#plasma_boundary)
-    identification. Geometric integration uses flux surface coordinates and shape parameters.
+    measurements. [Flux_loop_voltage](#flux_loop_voltage) integration provides boundary
+    geometry information. Volume calculation requires [magnetic_axis](#magnetic_axis)
+    location and [plasma_boundary](#plasma_boundary) identification. Geometric integration
+    uses flux surface coordinates and shape parameters.
 
 
     Typical values:
 
 
-    Small tokamaks: 1-10 m$^3$, medium tokamaks: 10-50 m$^3$, ITER: ~840 m$^3$. Volume scales with machine
-    size and shape parameters.
+    Small tokamaks: 1-10 m$^3$, medium tokamaks: 10-50 m$^3$, ITER: ~840 m$^3$. Volume
+    scales with machine size and shape parameters.
 
 
-    Sign convention: Positive volume indicates enclosed plasma region, following standard geometric conventions
-    with volume measured in cubic meters.'
+    Sign convention: Positive volume indicates enclosed plasma region, following standard
+    geometric conventions with volume measured in cubic meters.'
   status: draft
-  tags:
-  - global-quantity
   kind: scalar
   unit: m^3
 - name: safety_factor
   description: Magnetic safety factor.
-  documentation: 'Magnetic safety factor $q$ (or $q$-profile) quantifying the pitch of magnetic field
-    lines on a flux surface. The safety factor is fundamental for MHD stability analysis and determines
-    the rational surfaces where instabilities can occur.
+  documentation: 'Magnetic safety factor $q$ (or $q$-profile) quantifying the pitch
+    of magnetic field lines on a flux surface. The safety factor is fundamental for
+    MHD stability analysis and determines the rational surfaces where instabilities
+    can occur.
 
 
     $$q = \frac{1}{2\pi} \oint \frac{B_{\phi}}{B_p R} dl_p$$
 
 
     where $B_{\phi}$ is [toroidal_component_of_magnetic_field](#toroidal_component_of_magnetic_field),
-    $B_p$ is [poloidal_component_of_magnetic_field](#poloidal_component_of_magnetic_field), $R$ is major
-    radius, and $dl_p$ is the differential poloidal arc length.
+    $B_p$ is [poloidal_component_of_magnetic_field](#poloidal_component_of_magnetic_field),
+    $R$ is major radius, and $dl_p$ is the differential poloidal arc length.
 
 
     Physical significance:
 
 
-    The safety factor determines MHD stability limits through the Kruskal-Shafranov criterion. Rational
-    surfaces where $q = m/n$ (integer $m$, $n$) are resonant for MHD modes. Lower $q$ values indicate
-    higher [plasma_current](#plasma_current) and reduced stability margins. The minimum safety factor
-    $q_{\text{min}}$ and edge safety factor $q_{95}$ are key operational parameters. See [plasma_current](#plasma_current)
+    The safety factor determines MHD stability limits through the Kruskal-Shafranov
+    criterion. Rational surfaces where $q = m/n$ (integer $m$, $n$) are resonant for
+    MHD modes. Lower $q$ values indicate higher [plasma_current](#plasma_current)
+    and reduced stability margins. The minimum safety factor $q_{\text{min}}$ and
+    edge safety factor $q_{95}$ are key operational parameters. See [plasma_current](#plasma_current)
     and [magnetic_field](#magnetic_field) for field structure relationships.
 
 
     Measurement methods:
 
 
-    Safety factor profiles are determined from equilibrium reconstruction using external magnetic measurements.
-    The $q$-profile relates to [plasma_current_density](#plasma_current_density) through $\nabla \times
-    \mathbf{B} = \mu_0 \mathbf{J}$ and can be inferred from [flux_loop_voltage](#flux_loop_voltage) measurements.
-    MSE (motional Stark effect) diagnostics provide direct $q$-profile measurements in some devices.
+    Safety factor profiles are determined from equilibrium reconstruction using external
+    magnetic measurements. The $q$-profile relates to [plasma_current_density](#plasma_current_density)
+    through $\nabla \times \mathbf{B} = \mu_0 \mathbf{J}$ and can be inferred from
+    [flux_loop_voltage](#flux_loop_voltage) measurements. MSE (motional Stark effect)
+    diagnostics provide direct $q$-profile measurements in some devices.
 
 
     Typical values:
 
 
-    On-axis: $q_0 = 0.7$-1.5, edge: $q_{95} = 3$-6 for stable operation. Operation below $q_{\text{min}}
-    < 1$ leads to sawtooth oscillations. H-mode operation typically requires $q_{95} > 2.5$ for stability.
+    On-axis: $q_0 = 0.7$-1.5, edge: $q_{95} = 3$-6 for stable operation. Operation
+    below $q_{\text{min}} < 1$ leads to sawtooth oscillations. H-mode operation typically
+    requires $q_{95} > 2.5$ for stability.
 
 
-    Sign convention: Positive when toroidal current and toroidal field are in same direction, following右手螺旋定则
-    for standard tokamak operation.'
+    Sign convention: Positive when toroidal current and toroidal field are in same
+    direction, following右手螺旋定则 for standard tokamak operation.'
   status: draft
-  tags:
-  - spatial-profile
   kind: scalar
   unit: '1'

@@ -68,7 +68,6 @@ async def test_validate_empty_catalog(validate_tool):
         "grammar_errors": 0,
         "schema_errors": 0,
         "provenance_errors": 0,
-        "tag_errors": 0,
         "unit_errors": 0,
         "reference_errors": 0,
         "description_warnings": 0,
@@ -184,47 +183,6 @@ async def test_schema_validation_missing_fields(catalog_root):
 
 
 @pytest.mark.anyio
-async def test_tag_validation_empty_tags(catalog_root):
-    """Test tag validation with empty tags.
-
-    Note: Pydantic filters empty strings from tag lists during model validation,
-    so entries with empty tags in YAML will have them removed during load.
-    This test verifies that behavior.
-    """
-    primary_tag = "fundamental"
-    tag_dir = Path(catalog_root) / primary_tag
-    tag_dir.mkdir(exist_ok=True)
-
-    yaml_file = tag_dir / "test_quantity.yml"
-    yaml_content = """name: test_quantity
-kind: scalar
-description: Test quantity
-unit: m
-status: draft
-tags:
-  - fundamental
-"""
-    yaml_file.write_text(yaml_content)
-
-    catalog = StandardNameCatalog(root=catalog_root, permissive=True)
-    validate_tool = ValidateCatalogTool(catalog)
-
-    result = await validate_tool.validate_catalog(scope="persisted", checks=["tags"])
-
-    # Verify the entry loaded (Pydantic filters empty tags automatically)
-    assert catalog.exists("test_quantity")
-
-    # Since Pydantic filters empty tags during load, there should be no tag errors
-    # This is the correct behavior - invalid tags are filtered, not stored with errors
-    tag_errors = [
-        issue
-        for issue in result["invalid_entries"]
-        if issue["category"] == "tags" and issue["name"] == "test_quantity"
-    ]
-    assert len(tag_errors) == 0
-
-
-@pytest.mark.anyio
 async def test_unit_validation_invalid_exponent(catalog_root):
     """Test unit validation catches invalid exponents."""
     # Write YAML directly with invalid unit to bypass Pydantic validation during creation
@@ -280,11 +238,10 @@ async def test_validate_all_checks(catalog_root):
     result = await validate_tool.validate_catalog(scope="persisted")
 
     # Should have all checks enabled (including descriptions)
-    assert len(result["summary"]["checks_enabled"]) == 8
+    assert len(result["summary"]["checks_enabled"]) == 7
     assert "grammar" in result["summary"]["checks_enabled"]
     assert "schema" in result["summary"]["checks_enabled"]
     assert "provenance" in result["summary"]["checks_enabled"]
-    assert "tags" in result["summary"]["checks_enabled"]
     assert "units" in result["summary"]["checks_enabled"]
     assert "references" in result["summary"]["checks_enabled"]
     assert "descriptions" in result["summary"]["checks_enabled"]

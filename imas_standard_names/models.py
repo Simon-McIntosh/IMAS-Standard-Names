@@ -8,7 +8,7 @@ The StandardNameEntry union type represents full catalog entries with:
 - Physical properties (unit, constraints, validity domain)
 - Governance (status, deprecation, supersession)
 - Provenance (operators, reductions, expressions)
-- Metadata (tags, links, documentation)
+- Metadata (links, documentation)
 
 Example scalar entry:
   name: ion_temperature
@@ -16,7 +16,6 @@ Example scalar entry:
   status: active
   unit: eV
   description: Core ion temperature.
-  tags: [core, temperature]
   constraints:
     - T_i >= 0
   validity_domain: core plasma
@@ -33,7 +32,6 @@ Example metadata entry:
   kind: metadata
   status: draft
   description: Definition of plasma boundary.
-  tags: [equilibrium, flux-coordinates]
   documentation: |
     Defines what constitutes the plasma boundary for different configurations.
 
@@ -77,7 +75,6 @@ from imas_standard_names.field_types import (
     Domain,
     Links,
     Name,
-    Tags,
     Unit,
 )
 from imas_standard_names.grammar import vocab_loaders as _vocab_loaders
@@ -89,9 +86,6 @@ from imas_standard_names.grammar.model_types import (  # noqa: F401
     Component,
     Position,
     Process,
-)
-from imas_standard_names.grammar.tag_types import (
-    SECONDARY_TAGS,
 )
 from imas_standard_names.operators import (
     enforce_operator_naming as _enforce_operator_naming,
@@ -275,7 +269,7 @@ class StandardNameBase(BaseModel):
     """Core identity + governance fields valid without documentation.
 
     This is the shared base for both full catalog entries (with description,
-    documentation, tags, etc.) and lightweight name-only entries used during
+    documentation, etc.) and lightweight name-only entries used during
     pipeline stages that generate names before descriptions exist. It defines
     only the fields and validators that are meaningful in both modes:
 
@@ -449,7 +443,7 @@ class StandardNameEntryBase(StandardNameBase):
 
     Extends :class:`StandardNameBase` with the documentation and metadata fields
     required of a published standard name: description, documentation, validity
-    domain, constraints, tags, links. This remains the class used for the full
+    domain, constraints, links. This remains the class used for the full
     catalog (serialization, JSON schema, rendering).
     """
 
@@ -462,7 +456,6 @@ class StandardNameEntryBase(StandardNameBase):
     # Governance / metadata (documentation-adjacent)
     validity_domain: Domain = ""
     constraints: Constraints = Field(default_factory=list)
-    tags: Tags = Field(default_factory=list)  # Secondary classification tags
     links: Links = Field(default_factory=list)
 
     # Structural graph edges (computed fields, re-derived on export)
@@ -473,7 +466,7 @@ class StandardNameEntryBase(StandardNameBase):
     # Populated by codex sn export --include-sources; None in catalog-only installs.
     sources: list[dict[str, Any]] | None = None
 
-    @field_validator("tags", "constraints")
+    @field_validator("constraints")
     @classmethod
     def list_normalizer(cls, v: Iterable[str]) -> list[str]:  # type: ignore[override]
         if v is None:
@@ -523,21 +516,6 @@ class StandardNameEntryBase(StandardNameBase):
                 )
 
         return result
-
-    @field_validator("tags")
-    @classmethod
-    def validate_secondary_tags(cls, v: list[str]) -> list[str]:  # type: ignore[override]
-        """Validate tags are all secondary tags from controlled vocabulary."""
-        if not v:
-            return v
-
-        unknown_tags = [tag for tag in v if tag not in SECONDARY_TAGS]
-        if unknown_tags:
-            raise ValueError(
-                f"Unknown secondary tag(s): {', '.join(unknown_tags)}. "
-                f"Valid secondary tags are defined in grammar/vocabularies/tags.yml"
-            )
-        return v
 
     @field_validator("documentation")
     @classmethod

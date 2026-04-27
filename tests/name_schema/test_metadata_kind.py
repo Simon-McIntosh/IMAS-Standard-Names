@@ -126,14 +126,12 @@ def test_metadata_entry_all_optional_fields():
         description="Definition of scrape-off layer region.",
         documentation="Region outside the last closed flux surface.",
         status="active",
-        tags=["spatial-profile"],
         links=["name:plasma_boundary"],
         validity_domain="edge_plasma",
         constraints=["flux_surface > separatrix"],
     )
     assert entry.kind == "metadata"
     assert entry.status == "active"
-    assert "spatial-profile" in entry.tags
     assert len(entry.constraints) == 1
     assert entry.validity_domain == "edge_plasma"
 

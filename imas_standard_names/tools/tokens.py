@@ -21,10 +21,6 @@ from imas_standard_names.grammar.model import parse_standard_name
 from imas_standard_names.grammar.tag_types import (
     PHYSICS_DOMAIN_DESCRIPTIONS,
     PHYSICS_DOMAINS,
-    PRIMARY_TAG_DESCRIPTIONS,
-    PRIMARY_TAGS,
-    SECONDARY_TAG_DESCRIPTIONS,
-    SECONDARY_TAGS,
 )
 from imas_standard_names.tools.base import CatalogTool
 
@@ -101,11 +97,7 @@ class VocabularyTokensTool(CatalogTool):
             segment_id = rule.identifier
             segments[segment_id] = self._build_segment_data(segment_id, include_usage)
 
-        # Add tag vocabularies as special segments
-        segments["primary_tags"] = self._build_tag_vocabulary("primary", include_usage)
-        segments["secondary_tags"] = self._build_tag_vocabulary(
-            "secondary", include_usage
-        )
+        # Add physics domain vocabulary
         segments["physics_domains"] = self._build_physics_domain_vocabulary(
             include_usage
         )
@@ -152,34 +144,6 @@ class VocabularyTokensTool(CatalogTool):
 
         return segment_data
 
-    def _build_tag_vocabulary(
-        self, tag_type: str, include_usage: bool
-    ) -> dict[str, Any]:
-        """Build vocabulary data for tag types (primary/secondary)."""
-        if tag_type == "primary":
-            tokens = list(PRIMARY_TAGS)
-            descriptions = PRIMARY_TAG_DESCRIPTIONS
-            description = "Physics domain classification (see PhysicsDomain enum)"
-        else:
-            tokens = list(SECONDARY_TAGS)
-            descriptions = SECONDARY_TAG_DESCRIPTIONS
-            description = "Secondary tags provide additional classification (tags[1:])"
-
-        tag_data = {
-            "tag_type": tag_type,
-            "token_count": len(tokens),
-            "tokens": tokens,
-            "descriptions": descriptions,
-            "description": description,
-        }
-
-        # Add usage statistics if requested
-        if include_usage:
-            usage_stats = self._compute_tag_usage(tag_type, tokens)
-            tag_data["usage"] = usage_stats
-
-        return tag_data
-
     def _build_physics_domain_vocabulary(self, include_usage: bool) -> dict[str, Any]:
         """Build vocabulary data for physics domain enum."""
         tokens = list(PHYSICS_DOMAINS)
@@ -212,11 +176,11 @@ class VocabularyTokensTool(CatalogTool):
         unused = len(domains) - used
         sorted_counts = sorted(domain_counts.items(), key=lambda x: x[1], reverse=True)
         return {
-            "total_tags": len(domains),
-            "used_tags": used,
-            "unused_tags": unused,
+            "total_domains": len(domains),
+            "used_domains": used,
+            "unused_domains": unused,
             "usage_rate": round(used / len(domains) * 100, 1) if domains else 0,
-            "tag_frequencies": dict(sorted_counts),
+            "domain_frequencies": dict(sorted_counts),
             "most_common": sorted_counts[:10] if sorted_counts else [],
         }
 
@@ -234,9 +198,7 @@ class VocabularyTokensTool(CatalogTool):
         return {
             "total_tokens": total_tokens,
             "segment_counts": segment_counts,
-            "enumerated_segments": len(
-                [s for s in segments if s not in ["primary_tags", "secondary_tags"]]
-            ),
+            "enumerated_segments": len(segments),
         }
 
     def _get_vocabulary_type(self, segment_id: str) -> str:
@@ -313,40 +275,5 @@ class VocabularyTokensTool(CatalogTool):
             "unused_tokens": unused_tokens,
             "usage_rate": round(used_tokens / len(tokens) * 100, 1) if tokens else 0,
             "token_frequencies": dict(sorted_counts),
-            "most_common": sorted_counts[:10] if sorted_counts else [],
-        }
-
-    def _compute_tag_usage(self, tag_type: str, tags: list[str]) -> dict[str, Any]:
-        """Compute usage statistics for tags."""
-        all_names = list(self.catalog.list_names())
-
-        tag_counts = Counter()
-        for name in all_names:
-            try:
-                entry = self.catalog.get(name)
-                if entry:
-                    if tag_type == "primary":
-                        pd = getattr(entry, "physics_domain", None)
-                        if pd and pd in tags:
-                            tag_counts[pd] += 1
-                    elif tag_type == "secondary" and entry.tags:
-                        for tag in entry.tags:
-                            if tag in tags:
-                                tag_counts[tag] += 1
-            except Exception:
-                continue
-
-        used_tags = len([t for t in tags if tag_counts[t] > 0])
-        unused_tags = len(tags) - used_tags
-
-        # Sort by frequency descending
-        sorted_counts = sorted(tag_counts.items(), key=lambda x: x[1], reverse=True)
-
-        return {
-            "total_tags": len(tags),
-            "used_tags": used_tags,
-            "unused_tags": unused_tags,
-            "usage_rate": round(used_tags / len(tags) * 100, 1) if tags else 0,
-            "tag_frequencies": dict(sorted_counts),
             "most_common": sorted_counts[:10] if sorted_counts else [],
         }

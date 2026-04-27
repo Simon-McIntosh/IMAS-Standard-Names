@@ -25,7 +25,6 @@ EXPECTED_KEYS = [
     "documentation_guidance",
     "kind_definitions",
     "anti_patterns",
-    "tag_descriptions",
     "applicability",
     "field_guidance",
     "type_specific_requirements",
@@ -115,17 +114,6 @@ def test_anti_patterns_is_nonempty_list_of_dicts(context: dict):
         assert isinstance(item, dict)
         assert "mistake" in item
         assert "correction" in item
-
-
-def test_tag_descriptions_has_primary_and_secondary(context: dict):
-    td = context["tag_descriptions"]
-    assert isinstance(td, dict)
-    assert "primary" in td
-    assert "secondary" in td
-    assert isinstance(td["primary"], dict)
-    assert isinstance(td["secondary"], dict)
-    assert len(td["primary"]) > 0
-    assert len(td["secondary"]) > 0
 
 
 def test_applicability_has_required_keys(context: dict):

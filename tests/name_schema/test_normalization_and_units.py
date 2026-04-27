@@ -88,7 +88,7 @@ def test_formatted_unit_unknown_style():
         sn.formatted_unit(style="bogus")
 
 
-def test_tags_and_links_normalization():
+def test_links_and_constraints_normalization():
     sn = create_standard_name_entry(
         {
             "kind": "scalar",
@@ -97,12 +97,10 @@ def test_tags_and_links_normalization():
             "documentation": "Temperature of ions in the plasma.",
             "unit": "eV",
             "status": "active",
-            "tags": [" time-dependent ", "global-quantity", ""],
             "links": ["  https://example.com/ref  ", "", "https://example.com/ref"],
             "constraints": [" Ti >= 0 ", ""],
         }
     )
-    assert sn.tags == ["time-dependent", "global-quantity"]
     assert sn.links == [
         "https://example.com/ref",
         "https://example.com/ref",

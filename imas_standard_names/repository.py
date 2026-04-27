@@ -207,7 +207,6 @@ class StandardNameCatalog:
         limit: int = 20,
         with_meta: bool = False,
         unit: str | None = None,
-        tags: str | list[str] | None = None,
         kind: str | None = None,
         status: str | None = None,
     ):
@@ -218,7 +217,7 @@ class StandardNameCatalog:
         results = self.catalog.search(query, limit=limit, with_meta=with_meta)
 
         # Apply filters if any specified
-        if unit is None and tags is None and kind is None and status is None:
+        if unit is None and kind is None and status is None:
             return results
 
         # Get full entries for filtering
@@ -240,10 +239,6 @@ class StandardNameCatalog:
                 continue
             if status is not None and entry.status != status:
                 continue
-            if tags is not None:
-                tag_list = tags if isinstance(tags, list) else [tags]
-                if not any(tag in entry.tags for tag in tag_list):
-                    continue
 
             filtered.append(result)
 

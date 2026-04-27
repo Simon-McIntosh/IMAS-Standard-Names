@@ -16,7 +16,6 @@ unit: m.s^-1
 description: Flow velocity.
 documentation: |
   Flow velocity for HTML rendering testing.
-tags: [measured]
 """,
         encoding="utf-8",
     )

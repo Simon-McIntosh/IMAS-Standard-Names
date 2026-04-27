@@ -40,7 +40,7 @@ class ValidateCatalogTool(CatalogTool):
     @mcp_tool(
         description=(
             "Validate all standard names in the catalog. "
-            "Checks grammar, schema, provenance, tags, units, and cross-references. "
+            "Checks grammar, schema, provenance, units, and cross-references. "
             "Returns structured report of issues found. "
             "Use scope='persisted' (default) for saved entries, 'pending' for in-memory, or 'all'. "
             "Use include_warnings=True to include non-critical issues. "
@@ -99,7 +99,6 @@ class ValidateCatalogTool(CatalogTool):
             "grammar",
             "schema",
             "provenance",
-            "tags",
             "units",
             "references",
             "descriptions",
@@ -145,13 +144,6 @@ class ValidateCatalogTool(CatalogTool):
                 prov_issues = self._validate_provenance(name, entry)
                 issues.extend(prov_issues)
 
-            # Tag validation
-            if "tags" in enabled_checks:
-                tag_issues, tag_warnings = self._validate_tags(name, entry)
-                issues.extend(tag_issues)
-                if include_warnings:
-                    warnings.extend(tag_warnings)
-
             # Unit validation
             if "units" in enabled_checks:
                 unit_issues = self._validate_units(name, entry)
@@ -185,7 +177,6 @@ class ValidateCatalogTool(CatalogTool):
             "provenance_errors": len(
                 [i for i in issues if i["category"] == "provenance"]
             ),
-            "tag_errors": len([i for i in issues if i["category"] == "tags"]),
             "unit_errors": len([i for i in issues if i["category"] == "units"]),
             "reference_errors": len(
                 [i for i in issues if i["category"] == "references"]
@@ -290,7 +281,7 @@ class ValidateCatalogTool(CatalogTool):
         # }
 
         # Common required fields for all kinds
-        common_required = ["name", "description", "documentation", "tags"]
+        common_required = ["name", "description", "documentation"]
 
         # Kind-specific required fields
         kind_specific_required = {
@@ -555,43 +546,6 @@ class ValidateCatalogTool(CatalogTool):
 
         return issues
 
-    def _validate_tags(
-        self, name: str, entry: Any
-    ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
-        """Validate tags and physics_domain. Returns (errors, warnings)."""
-        issues = []
-        warnings = []
-
-        # Validate physics_domain
-        if not hasattr(entry, "physics_domain") or not entry.physics_domain:
-            warnings.append(
-                {
-                    "name": name,
-                    "category": "tags",
-                    "severity": "warning",
-                    "message": "No physics_domain specified",
-                    "suggestion": "Add a physics_domain from the PhysicsDomain enum",
-                }
-            )
-
-        # Validate secondary tags
-        if not hasattr(entry, "tags") or not entry.tags:
-            return issues, warnings
-
-        for i, tag in enumerate(entry.tags):
-            if tag is None or (isinstance(tag, str) and len(tag.strip()) == 0):
-                issues.append(
-                    {
-                        "name": name,
-                        "category": "tags",
-                        "severity": "error",
-                        "message": f"Contains empty or whitespace-only tag at position {i}",
-                        "suggestion": "Remove empty tags",
-                    }
-                )
-
-        return issues, warnings
-
     def _validate_units(self, name: str, entry: Any) -> list[dict[str, Any]]:
         """Validate unit formatting."""
         issues = []
@@ -633,7 +587,7 @@ class ValidateCatalogTool(CatalogTool):
         return issues
 
     def _validate_description(self, name: str, entry: Any) -> list[dict[str, Any]]:
-        """Validate description against tags for metadata leakage."""
+        """Validate description for structural metadata leakage."""
         warnings = []
 
         if not hasattr(entry, "description") or not entry.description:
@@ -654,7 +608,7 @@ class ValidateCatalogTool(CatalogTool):
                     "severity": issue.get("severity", "warning"),
                     "message": issue["message"],
                     "suggestion": issue.get(
-                        "suggestion", "Review description and tags for redundancy"
+                        "suggestion", "Review description for structural metadata"
                     ),
                 }
             )

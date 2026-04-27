@@ -486,24 +486,6 @@ entry_schema:
       guidance:
         critical_rule: "Must be a valid PhysicsDomain enum value."
         validation: "Validated against grammar/vocabularies/physics_domains.yml."
-    tags:
-      required: false
-      type: array
-      items: string
-      description: "Secondary classification tags from controlled vocabulary for cross-cutting classification."
-      validation_file: "vocabularies/tags.yml"
-      guidance:
-        validation: "All tags validated against secondary_tags in grammar/vocabularies/tags.yml."
-        common_mistake: "Do not put physics domain values in tags. Use the physics_domain field instead."
-        examples:
-          correct:
-            - ["measured", "calibrated", "local-measurement"]
-            - ["spatial-profile", "reconstructed"]
-            - ["global-quantity", "time-dependent"]
-          wrong:
-            - ["magnetics", "measured"]
-            - ["equilibrium", "spatial-profile"]
-    
     links:
       required: false
       type: array

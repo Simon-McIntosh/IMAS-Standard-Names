@@ -26,7 +26,6 @@ import yaml
 from imas_standard_names.grammar_codegen.entry_schema_spec import EntrySchemaSpec
 from imas_standard_names.grammar_codegen.physics_domain_spec import PhysicsDomainSpec
 from imas_standard_names.grammar_codegen.spec import GrammarSpec, IncludeLoader
-from imas_standard_names.grammar_codegen.tag_spec import TagSpec
 
 HEADER = (
     "Auto-generated grammar models.\n\n"
@@ -135,9 +134,8 @@ def main(format_code: bool = True, check: bool | None = None) -> None:
     grammar_updated = types_updated or constants_updated
 
     # Generate tag types and physics domain types
-    tag_spec = TagSpec.load()
     physics_domain_spec = PhysicsDomainSpec.load()
-    tag_content = render_tag_module(tag_spec, physics_domain_spec)
+    tag_content = render_tag_module(physics_domain_spec)
     tag_existing = (
         TAG_OUTPUT_MODULE.read_text(encoding="utf-8")
         if TAG_OUTPUT_MODULE.exists()
@@ -266,14 +264,13 @@ def _run_check_mode() -> None:
     / tag_types.py / field_schemas.py.
     """
     spec = GrammarSpec.load()
-    tag_spec = TagSpec.load()
     physics_domain_spec = PhysicsDomainSpec.load()
     entry_schema_spec = EntrySchemaSpec.load()
 
     expected = {
         OUTPUT_MODULE: render_types_module(spec),
         CONSTANTS_OUTPUT_MODULE: render_constants_module(spec),
-        TAG_OUTPUT_MODULE: render_tag_module(tag_spec, physics_domain_spec),
+        TAG_OUTPUT_MODULE: render_tag_module(physics_domain_spec),
         FIELD_SCHEMAS_OUTPUT_MODULE: render_field_schemas_module(entry_schema_spec),
     }
 
@@ -818,8 +815,8 @@ def _enum_class_name(vocab_name: str) -> str:
 # ============================================================================
 
 
-def render_tag_module(spec: TagSpec, pd_spec: PhysicsDomainSpec | None = None) -> str:
-    """Render the tag_types.py module from TagSpec and PhysicsDomainSpec."""
+def render_tag_module(pd_spec: PhysicsDomainSpec | None = None) -> str:
+    """Render the tag_types.py module from PhysicsDomainSpec."""
     sections = [
         _tag_module_header(),
         _tag_import_block(),
@@ -830,13 +827,7 @@ def render_tag_module(spec: TagSpec, pd_spec: PhysicsDomainSpec | None = None) -
         sections.append(_physics_domain_enum(pd_spec))
         sections.append(_physics_domain_metadata(pd_spec))
 
-    sections.extend(
-        [
-            _tag_literal_types(spec),
-            _tag_metadata(spec),
-            _tag_export_block(pd_spec),
-        ]
-    )
+    sections.append(_tag_export_block(pd_spec))
 
     parts: list[str] = []
     for section in sections:
@@ -863,7 +854,6 @@ def _tag_import_block() -> str:
         from __future__ import annotations
 
         from enum import StrEnum
-        from typing import Literal
         """
     ).strip()
 
@@ -908,69 +898,8 @@ def _physics_domain_metadata(spec: PhysicsDomainSpec) -> str:
     )
 
 
-def _tag_literal_types(spec: TagSpec) -> str:
-    """Generate Literal type aliases for primary and secondary tags."""
-    primary_values = ", ".join(f'"{tag}"' for tag in spec.primary_tags)
-    secondary_values = ", ".join(f'"{tag}"' for tag in spec.secondary_tags)
-
-    return dedent(
-        f"""
-        # Primary tags (legacy classification vocabulary)
-        PrimaryTag = Literal[{primary_values}]
-
-        # Secondary tags for cross-cutting classification
-        SecondaryTag = Literal[{secondary_values}]
-
-        # Union type for any tag
-        Tag = PrimaryTag | SecondaryTag
-        """
-    ).strip()
-
-
-def _tag_metadata(spec: TagSpec) -> str:
-    """Generate metadata constants for tag descriptions and examples."""
-    # Primary tag descriptions
-    primary_desc_lines = ["PRIMARY_TAG_DESCRIPTIONS: dict[str, str] = {"]
-    for tag_id in spec.primary_tags:
-        meta = spec.primary_metadata.get(tag_id, {})
-        description = meta.get("description", "")
-        primary_desc_lines.append(f"    '{tag_id}': '{description}',")
-    primary_desc_lines.append("}")
-    primary_desc_block = "\n".join(primary_desc_lines)
-
-    # Secondary tag descriptions
-    secondary_desc_lines = ["SECONDARY_TAG_DESCRIPTIONS: dict[str, str] = {"]
-    for tag_id in spec.secondary_tags:
-        meta = spec.secondary_metadata.get(tag_id, {})
-        description = meta.get("description", "")
-        secondary_desc_lines.append(f"    '{tag_id}': '{description}',")
-    secondary_desc_lines.append("}")
-    secondary_desc_block = "\n".join(secondary_desc_lines)
-
-    # All tags tuple for validation
-    primary_tuple = _format_tuple_literal(spec.primary_tags, indent=4, base_indent=0)
-    secondary_tuple = _format_tuple_literal(
-        spec.secondary_tags, indent=4, base_indent=0
-    )
-
-    return (
-        f"{primary_desc_block}\n\n"
-        f"{secondary_desc_block}\n\n"
-        f"PRIMARY_TAGS: tuple[str, ...] = {primary_tuple}\n\n"
-        f"SECONDARY_TAGS: tuple[str, ...] = {secondary_tuple}"
-    )
-
-
 def _tag_export_block(pd_spec: PhysicsDomainSpec | None = None) -> str:
-    exports = [
-        "'PrimaryTag'",
-        "'SecondaryTag'",
-        "'Tag'",
-        "'PRIMARY_TAGS'",
-        "'SECONDARY_TAGS'",
-        "'PRIMARY_TAG_DESCRIPTIONS'",
-        "'SECONDARY_TAG_DESCRIPTIONS'",
-    ]
+    exports = []
     if pd_spec:
         exports.extend(
             [

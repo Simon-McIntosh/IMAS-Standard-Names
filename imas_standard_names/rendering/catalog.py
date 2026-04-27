@@ -84,7 +84,7 @@ class CatalogRenderer:
         self._names = standard_names
         return standard_names
 
-    def get_tags(self) -> dict[str, list[dict]]:
+    def get_domains(self) -> dict[str, list[dict]]:
         """Group standard names by physics_domain.
 
         Falls back to "uncategorized" for entries without a physics_domain.
@@ -109,15 +109,15 @@ class CatalogRenderer:
         Returns
         -------
         dict
-            Dictionary with total_names, total_tags, and tags breakdown.
+            Dictionary with total_names, total_domains, and domains breakdown.
         """
-        tags = self.get_tags()
-        total_names = sum(len(items) for items in tags.values())
+        domains = self.get_domains()
+        total_names = sum(len(items) for items in domains.values())
 
         return {
             "total_names": total_names,
-            "total_tags": len(tags),
-            "tags": tags,
+            "total_domains": len(domains),
+            "domains": domains,
         }
 
     @staticmethod
@@ -320,7 +320,7 @@ class CatalogRenderer:
             Markdown formatted catalog content.
         """
         result = ""
-        domains = self.get_tags()
+        domains = self.get_domains()
 
         if not domains:
             return "_No standard names found in the catalog._"
@@ -402,10 +402,10 @@ class CatalogRenderer:
             return "_The standard names catalog is currently empty._"
 
         result = f"**Total Standard Names:** {stats['total_names']}\n\n"
-        result += f"**Categories:** {stats['total_tags']}\n\n"
+        result += f"**Categories:** {stats['total_domains']}\n\n"
 
         result += "### Categories\n\n"
-        for domain, items in sorted(stats["tags"].items()):
+        for domain, items in sorted(stats["domains"].items()):
             domain_display = domain.replace("_", " ").title()
             count = len(items)
             result += f"- **[{domain_display}]({link_prefix}#{domain})** - {count} standard names\n"
@@ -420,7 +420,7 @@ class CatalogRenderer:
         str
             Markdown formatted navigation content.
         """
-        domains = self.get_tags()
+        domains = self.get_domains()
 
         if not domains:
             return ""

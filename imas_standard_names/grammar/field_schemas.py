@@ -178,7 +178,6 @@ FIELD_DESCRIPTIONS: dict[str, str] = {
     "documentation": "Authoritative, self-contained documentation providing clear, comprehensive explanation of the physical quantity. This field must be fully standalone - a domain expert should understand the quantity completely without consulting external sources.",
     "unit": "Unit in fused dot-exponent style (auto-corrected to lexicographic token order). Tokens: alphanumerics only; join with '.'; exponents use ^ (e.g. m.s^-2). No '/', '*', or whitespace. Empty string for dimensionless.",
     "physics_domain": "Physics domain classification from PhysicsDomain enum. Determines catalog subdirectory.",
-    "tags": "Secondary classification tags from controlled vocabulary for cross-cutting classification.",
     "links": "Internal cross-references to related standard names only. Use format 'name:standard_name_token' (e.g., 'name:plasma_boundary'). Internal references are validated against the catalog.",
     "status": "Lifecycle state: draft | active | deprecated | superseded.",
     "kind": "Discriminator field determining entry type (scalar vs vector vs metadata)",
@@ -219,10 +218,6 @@ FIELD_CONSTRAINTS: dict[str, dict[str, Any]] = {
     "physics_domain": {
         "required": True,
         "type": "string",
-    },
-    "tags": {
-        "required": False,
-        "type": "array",
     },
     "links": {
         "required": False,
@@ -450,18 +445,6 @@ FIELD_GUIDANCE: dict[str, dict[str, Any]] = {
     "physics_domain": {
         "critical_rule": "Must be a valid PhysicsDomain enum value.",
         "validation": "Validated against grammar/vocabularies/physics_domains.yml.",
-    },
-    "tags": {
-        "validation": "All tags validated against secondary_tags in grammar/vocabularies/tags.yml.",
-        "common_mistake": "Do not put physics domain values in tags. Use the physics_domain field instead.",
-        "examples": {
-            "correct": [
-                ["measured", "calibrated", "local-measurement"],
-                ["spatial-profile", "reconstructed"],
-                ["global-quantity", "time-dependent"],
-            ],
-            "wrong": [["magnetics", "measured"], ["equilibrium", "spatial-profile"]],
-        },
     },
     "links": {
         "use_for": [

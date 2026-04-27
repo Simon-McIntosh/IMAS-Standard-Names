@@ -28,10 +28,6 @@ from imas_standard_names.grammar.field_schemas import (
     TYPE_SPECIFIC_REQUIREMENTS,
 )
 from imas_standard_names.grammar.support import enum_values
-from imas_standard_names.grammar.tag_types import (
-    PRIMARY_TAG_DESCRIPTIONS,
-    SECONDARY_TAG_DESCRIPTIONS,
-)
 from imas_standard_names.grammar_codegen.spec import IncludeLoader
 
 # ---------------------------------------------------------------------------
@@ -513,10 +509,6 @@ def get_grammar_context() -> dict[str, Any]:
         "documentation_guidance": DOCUMENTATION_GUIDANCE,
         "kind_definitions": _build_kind_definitions(),
         "anti_patterns": _build_anti_patterns(),
-        "tag_descriptions": {
-            "primary": PRIMARY_TAG_DESCRIPTIONS,
-            "secondary": SECONDARY_TAG_DESCRIPTIONS,
-        },
         "applicability": {
             "include": list(APPLICABILITY_INCLUDE),
             "exclude": list(APPLICABILITY_EXCLUDE),

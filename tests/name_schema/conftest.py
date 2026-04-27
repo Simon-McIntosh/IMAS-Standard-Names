@@ -15,7 +15,6 @@ def scalar_data():
         "documentation": "Temperature of electrons in the plasma core.",
         "unit": "eV",
         "status": "active",
-        "tags": ["measured"],
     }
 
 

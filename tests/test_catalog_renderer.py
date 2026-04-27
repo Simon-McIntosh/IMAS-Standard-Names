@@ -46,20 +46,19 @@ def test_catalog_renderer_load_names(tmp_path: Path):
     assert "ion_temperature" in name_set
 
 
-def test_catalog_renderer_get_tags_groups_by_physics_domain(tmp_path: Path):
-    """Test that grouping uses physics_domain, not tags."""
+def test_catalog_renderer_get_domains_groups_by_physics_domain(tmp_path: Path):
+    """Test that grouping uses physics_domain."""
     catalog_path = _make_test_catalog(tmp_path)
     renderer = CatalogRenderer(catalog_path)
-    domains = renderer.get_tags()
+    domains = renderer.get_domains()
 
     assert "transport" in domains
     assert len(domains["transport"]) == 2
-    # No fallback-to-tags grouping
     assert "general" not in domains
     assert "uncategorized" not in domains
 
 
-def test_catalog_renderer_get_tags_fallback_to_uncategorized(tmp_path: Path):
+def test_catalog_renderer_get_domains_fallback_to_uncategorized(tmp_path: Path):
     """Entries without physics_domain fall back to 'uncategorized'."""
     (tmp_path / "no_domain.yml").write_text(
         """name: some_quantity
@@ -71,7 +70,7 @@ description: Has no physics_domain field.
         encoding="utf-8",
     )
     renderer = CatalogRenderer(tmp_path)
-    domains = renderer.get_tags()
+    domains = renderer.get_domains()
 
     assert "uncategorized" in domains
     assert any(e["name"] == "some_quantity" for e in domains["uncategorized"])
@@ -84,8 +83,8 @@ def test_catalog_renderer_get_stats(tmp_path: Path):
     stats = renderer.get_stats()
 
     assert stats["total_names"] == 2
-    assert stats["total_tags"] == 1  # both have physics_domain: transport
-    assert "transport" in stats["tags"]
+    assert stats["total_domains"] == 1  # both have physics_domain: transport
+    assert "transport" in stats["domains"]
 
 
 def test_catalog_renderer_render_overview(tmp_path: Path):
