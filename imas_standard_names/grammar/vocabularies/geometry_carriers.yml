@@ -67,3 +67,9 @@ carriers:
     aliases: []
   x2_coordinate:  # Added rc27: EMW pilot evidence N=3
     aliases: []
+
+  # === W38 vocab gap closure (evidence N>=3) ===
+  x1_unit_vector:  # W38: local coordinate axis unit vector, neutron_diagnostic detector/aperture geometry — evidence N=4
+    aliases: []
+  x2_unit_vector:  # W38: companion to x1_unit_vector, local coordinate triad symmetry — evidence N=0 (symmetric addition)
+    aliases: []

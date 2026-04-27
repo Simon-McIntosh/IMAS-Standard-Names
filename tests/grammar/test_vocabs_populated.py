@@ -220,6 +220,32 @@ class TestLocusRegistryKeyEntries:
 # ---------------------------------------------------------------------------
 
 
+class TestGeometryCarriersKeyEntries:
+    """Key geometry carriers from corpus mining and W38 gap closure."""
+
+    @pytest.fixture()
+    def carriers(self):
+        return load_geometry_carriers()
+
+    @pytest.mark.parametrize(
+        "token",
+        [
+            "unit_vector",
+            "x1_coordinate",
+            "x2_coordinate",
+            "x1_unit_vector",
+            "x2_unit_vector",
+            "outline",
+            "position",
+            "contour",
+        ],
+    )
+    def test_key_carrier_present(self, carriers, token):
+        assert token in carriers.carriers, (
+            f"Key geometry carrier '{token}' missing from geometry_carriers.yml"
+        )
+
+
 class TestCrossRegistryDuplicates:
     """No token may appear in more than one vNext registry."""
 
