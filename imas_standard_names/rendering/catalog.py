@@ -77,28 +77,23 @@ class CatalogRenderer:
         return standard_names
 
     def get_tags(self) -> dict[str, list[dict]]:
-        """Group standard names by their physics domain or primary tag.
+        """Group standard names by physics_domain.
 
-        Falls back to "general" for entries without a physics_domain or tags.
+        Falls back to "uncategorized" for entries without a physics_domain.
 
         Returns
         -------
         dict[str, list[dict]]
-            Dictionary mapping category to list of entries.
+            Dictionary mapping physics domain to list of entries.
         """
         names = self.load_names()
-        tags_groups: dict[str, list[dict]] = defaultdict(list)
+        domain_groups: dict[str, list[dict]] = defaultdict(list)
 
         for item in names:
-            # physics_domain removed from schema; use tags or fall back to "general"
-            pd = (
-                item.get("physics_domain", "")
-                or (item.get("tags", [None])[0] if item.get("tags") else "")
-                or "general"
-            )
-            tags_groups[pd].append(item)
+            domain = item.get("physics_domain") or "uncategorized"
+            domain_groups[domain].append(item)
 
-        return dict(tags_groups)
+        return dict(domain_groups)
 
     def get_stats(self) -> dict:
         """Get statistics about the catalog.
@@ -293,7 +288,7 @@ class CatalogRenderer:
         return "\n\n".join(lines) + "\n\n"
 
     def render_catalog(self) -> str:
-        """Generate complete catalog organized by primary tag and base name.
+        """Generate complete catalog organized by physics_domain and base name.
 
         Returns
         -------
@@ -301,16 +296,16 @@ class CatalogRenderer:
             Markdown formatted catalog content.
         """
         result = ""
-        tags = self.get_tags()
+        domains = self.get_tags()
 
-        if not tags:
+        if not domains:
             return "_No standard names found in the catalog._"
 
         wrapped_by = self._build_wrapped_by_index(self.load_names())
 
-        for category, items in sorted(tags.items()):
-            category_name = category.replace("-", " ").title()
-            result += f"## {category_name} {{: #{category} }}\n\n"
+        for domain, items in sorted(domains.items()):
+            domain_display = domain.replace("_", " ").title()
+            result += f"## {domain_display} {{: #{domain} }}\n\n"
             result += "---\n\n"
 
             # Group items by base name
@@ -322,8 +317,7 @@ class CatalogRenderer:
 
             for base_name in sorted(base_groups.keys()):
                 base_items = base_groups[base_name]
-                base_display = base_name.replace("_", " ").title()
-                result += f"### {base_display}\n\n"
+                result += f"### `{base_name}`\n\n"
 
                 sorted_items = sorted(base_items, key=lambda x: x.get("name", ""))
 
@@ -332,14 +326,8 @@ class CatalogRenderer:
                     unit = item.get("unit", "")
                     description = item.get("description", "")
                     documentation = item.get("documentation", "")
-                    item_tags = item.get("tags", [])
                     status = item.get("status", "")
-
-                    tags_display = (
-                        ", ".join(f"`{tag}`" for tag in item_tags)
-                        if item_tags
-                        else "None"
-                    )
+                    kind = item.get("kind", "")
 
                     result += f"#### {name} {{: #{name} }}\n\n"
                     result += f"{description}\n\n"
@@ -350,15 +338,11 @@ class CatalogRenderer:
                     if unit:
                         result += f"**Unit:** `{unit}`\n\n"
 
+                    if kind:
+                        result += f"**Kind:** {kind}\n\n"
+
                     if status:
                         result += f"**Status:** {status.title()}\n\n"
-
-                    cocos = item.get("cocos_transformation_type")
-                    if cocos:
-                        result += f"**COCOS transformation:** `{cocos}`\n\n"
-
-                    if item_tags:
-                        result += f"**Tags:** {tags_display}\n\n"
 
                     result += self._render_links(item.get("links", []))
 
@@ -393,10 +377,10 @@ class CatalogRenderer:
         result += f"**Categories:** {stats['total_tags']}\n\n"
 
         result += "### Categories\n\n"
-        for category, items in sorted(stats["tags"].items()):
-            category_name = category.replace("-", " ").title()
+        for domain, items in sorted(stats["tags"].items()):
+            domain_display = domain.replace("_", " ").title()
             count = len(items)
-            result += f"- **[{category_name}]({link_prefix}#{category})** - {count} standard names\n"
+            result += f"- **[{domain_display}]({link_prefix}#{domain})** - {count} standard names\n"
 
         return result
 
@@ -408,16 +392,16 @@ class CatalogRenderer:
         str
             Markdown formatted navigation content.
         """
-        tags = self.get_tags()
+        domains = self.get_tags()
 
-        if not tags:
+        if not domains:
             return ""
 
         result = ""
 
-        for category, items in sorted(tags.items()):
-            category_name = category.replace("-", " ").title()
-            result += f"**[{category_name}](#{category})**\n\n"
+        for domain, items in sorted(domains.items()):
+            domain_display = domain.replace("_", " ").title()
+            result += f"**[{domain_display}](#{domain})**\n\n"
 
             base_groups: dict[str, list[dict]] = defaultdict(list)
             for item in items:

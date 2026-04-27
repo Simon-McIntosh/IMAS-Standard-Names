@@ -6,12 +6,13 @@ from imas_standard_names.rendering.catalog import CatalogRenderer
 
 
 def _make_test_catalog(tmp_path: Path) -> Path:
-    """Create a minimal test catalog."""
+    """Create a minimal test catalog with physics_domain set."""
     (tmp_path / "electron_temperature.yml").write_text(
         """name: electron_temperature
 kind: scalar
 status: active
 unit: eV
+physics_domain: transport
 description: Electron temperature.
 documentation: |
   Electron temperature for testing.
@@ -23,6 +24,7 @@ documentation: |
 kind: scalar
 status: active
 unit: eV
+physics_domain: transport
 description: Ion temperature.
 documentation: |
   Ion temperature for testing.
@@ -44,15 +46,35 @@ def test_catalog_renderer_load_names(tmp_path: Path):
     assert "ion_temperature" in name_set
 
 
-def test_catalog_renderer_get_tags(tmp_path: Path):
-    """Test grouping names by physics domain."""
+def test_catalog_renderer_get_tags_groups_by_physics_domain(tmp_path: Path):
+    """Test that grouping uses physics_domain, not tags."""
     catalog_path = _make_test_catalog(tmp_path)
     renderer = CatalogRenderer(catalog_path)
-    tags = renderer.get_tags()
+    domains = renderer.get_tags()
 
-    # "fundamental" maps to "general" via TAG_TO_PHYSICS_DOMAIN
-    assert "general" in tags
-    assert len(tags["general"]) == 2
+    assert "transport" in domains
+    assert len(domains["transport"]) == 2
+    # No fallback-to-tags grouping
+    assert "general" not in domains
+    assert "uncategorized" not in domains
+
+
+def test_catalog_renderer_get_tags_fallback_to_uncategorized(tmp_path: Path):
+    """Entries without physics_domain fall back to 'uncategorized'."""
+    (tmp_path / "no_domain.yml").write_text(
+        """name: some_quantity
+kind: scalar
+status: active
+unit: m
+description: Has no physics_domain field.
+""",
+        encoding="utf-8",
+    )
+    renderer = CatalogRenderer(tmp_path)
+    domains = renderer.get_tags()
+
+    assert "uncategorized" in domains
+    assert any(e["name"] == "some_quantity" for e in domains["uncategorized"])
 
 
 def test_catalog_renderer_get_stats(tmp_path: Path):
@@ -62,8 +84,8 @@ def test_catalog_renderer_get_stats(tmp_path: Path):
     stats = renderer.get_stats()
 
     assert stats["total_names"] == 2
-    assert stats["total_tags"] == 1  # both map to "general" physics domain
-    assert "general" in stats["tags"]
+    assert stats["total_tags"] == 1  # both have physics_domain: transport
+    assert "transport" in stats["tags"]
 
 
 def test_catalog_renderer_render_overview(tmp_path: Path):
@@ -74,19 +96,60 @@ def test_catalog_renderer_render_overview(tmp_path: Path):
 
     assert "Total Standard Names:" in overview
     assert "2" in overview
-    assert "General" in overview
+    # Domain heading uses title-cased domain name
+    assert "Transport" in overview
 
 
-def test_catalog_renderer_render_catalog(tmp_path: Path):
-    """Test rendering full catalog."""
+def test_catalog_renderer_render_catalog_groups_by_physics_domain(tmp_path: Path):
+    """Catalog H2 sections are physics domains, not tags."""
     catalog_path = _make_test_catalog(tmp_path)
     renderer = CatalogRenderer(catalog_path)
     catalog = renderer.render_catalog()
 
+    # H2 section header is title-cased domain
+    assert "## Transport" in catalog
+    # Anchor is the raw domain key
+    assert "{: #transport }" in catalog
+    # Names appear verbatim
     assert "electron_temperature" in catalog
     assert "ion_temperature" in catalog
-    assert "General" in catalog
+    # Unit still rendered
     assert "**Unit:** `eV`" in catalog
+
+
+def test_catalog_renderer_render_catalog_raw_base_name(tmp_path: Path):
+    """Base name heading is raw snake_case in backticks, not title-cased."""
+    catalog_path = _make_test_catalog(tmp_path)
+    renderer = CatalogRenderer(catalog_path)
+    catalog = renderer.render_catalog()
+
+    # Should see backtick-wrapped snake_case base name in an H3
+    assert "### `" in catalog
+    # Should NOT see title-cased transformation
+    assert "Electron Temperature" not in catalog
+    assert "Ion Temperature" not in catalog
+
+
+def test_catalog_renderer_render_catalog_no_cocos_no_tags(tmp_path: Path):
+    """COCOS transformation and tags rows are absent from rendered output."""
+    (tmp_path / "psi.yml").write_text(
+        """name: poloidal_flux
+kind: scalar
+status: active
+unit: Wb
+physics_domain: equilibrium
+description: Poloidal flux.
+cocos_transformation_type: psi_like
+tags: [equilibrium, magnetics]
+""",
+        encoding="utf-8",
+    )
+    renderer = CatalogRenderer(tmp_path)
+    catalog = renderer.render_catalog()
+
+    assert "**COCOS" not in catalog
+    assert "**Transformation" not in catalog
+    assert "**Tags:**" not in catalog
 
 
 def test_catalog_renderer_empty_catalog(tmp_path: Path):
@@ -103,7 +166,9 @@ def test_catalog_renderer_render_navigation(tmp_path: Path):
     renderer = CatalogRenderer(catalog_path)
     nav = renderer.render_navigation()
 
-    assert "General" in nav
+    # Navigation section uses title-cased domain
+    assert "Transport" in nav
+    # Raw names are linked
     assert "electron_temperature" in nav
     assert "ion_temperature" in nav
 
@@ -116,13 +181,14 @@ def test_catalog_renderer_loads_from_subdirectories(tmp_path: Path):
     in subdirectories by primary tag.
     """
     # Create subdirectory structure mimicking real catalog organization
-    general_dir = tmp_path / "general"
-    general_dir.mkdir()
-    (general_dir / "electron_temperature.yml").write_text(
+    transport_dir = tmp_path / "transport"
+    transport_dir.mkdir()
+    (transport_dir / "electron_temperature.yml").write_text(
         """name: electron_temperature
 kind: scalar
 status: active
 unit: eV
+physics_domain: transport
 description: Electron temperature.
 """,
         encoding="utf-8",
@@ -135,6 +201,7 @@ description: Electron temperature.
 kind: scalar
 status: active
 unit: m
+physics_domain: geometry
 description: Major radius of the plasma.
 """,
         encoding="utf-8",
@@ -148,6 +215,7 @@ description: Major radius of the plasma.
 kind: scalar
 status: active
 unit: T
+physics_domain: magnetics
 description: Magnetic field measurement.
 tags: [measured]
 """,
