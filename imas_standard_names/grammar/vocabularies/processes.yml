@@ -132,3 +132,6 @@
 - injection                    # generic injection process
 - sputtering                   # sputtering erosion process
 - viscosity                    # viscous transport process
+- e_cross_b_drift
+- heat_viscosity
+- ohmic_induction

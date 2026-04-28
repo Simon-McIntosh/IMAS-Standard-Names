@@ -33,7 +33,8 @@ class CatalogRenderer:
     def load_names(self) -> list[dict]:
         """Load all YAML standard names from the catalog directory.
 
-        Recursively searches all subdirectories for YAML files.
+        Supports both per-domain list files (plan 40 layout) and legacy
+        per-file single-entry dicts with a ``name`` key.
 
         Returns
         -------
@@ -59,7 +60,13 @@ class CatalogRenderer:
                 yaml_content = yaml_file.read_text(encoding="utf-8")
                 data = yaml.safe_load(yaml_content)
 
-                if data and isinstance(data, dict) and "name" in data:
+                if isinstance(data, list):
+                    for entry in data:
+                        if entry and isinstance(entry, dict) and "name" in entry:
+                            entry["_file_path"] = str(yaml_file)
+                            entry["_category"] = "standard_names"
+                            standard_names.append(entry)
+                elif data and isinstance(data, dict) and "name" in data:
                     data["_file_path"] = str(yaml_file)
                     data["_category"] = "standard_names"
                     standard_names.append(data)
@@ -148,6 +155,143 @@ class CatalogRenderer:
         except Exception:
             return "unknown"
 
+    # ------------------------------------------------------------------
+    # Plan 41 helpers: links, cocos, mermaid, sibling nav
+    # ------------------------------------------------------------------
+    @staticmethod
+    def _render_links(links: list[str]) -> str:
+        """Render ``links:`` as markdown; ``name:X`` → in-page anchor."""
+        if not links:
+            return ""
+        parts: list[str] = []
+        for link in links:
+            if not isinstance(link, str):
+                continue
+            link = link.strip()
+            if link.startswith("name:"):
+                target = link[len("name:") :].strip()
+                if target:
+                    parts.append(f"[{target}](#{target})")
+            elif link:
+                parts.append(f"[{link}]({link})")
+        if not parts:
+            return ""
+        return "**Links:** " + ", ".join(parts) + "\n\n"
+
+    @staticmethod
+    def _argument_label(arg: dict) -> str:
+        """Build a mermaid edge label for a HAS_ARGUMENT edge."""
+        operator = arg.get("operator") or "arg"
+        parts = [str(operator)]
+        role = arg.get("role")
+        if role:
+            parts.append(f"role={role}")
+        axis = arg.get("axis")
+        if axis:
+            parts.append(f"axis={axis}")
+        shape = arg.get("shape")
+        if shape:
+            parts.append(f"shape={shape}")
+        return " ".join(parts)
+
+    @classmethod
+    def _render_mermaid(cls, item: dict) -> str:
+        """Emit a Mermaid hierarchy block when structural fields exist."""
+        arguments = item.get("arguments") or []
+        error_variants = item.get("error_variants") or {}
+        deprecates = item.get("deprecates")
+        superseded_by = item.get("superseded_by")
+
+        has_any = (
+            bool(arguments)
+            or bool(error_variants)
+            or bool(deprecates)
+            or bool(superseded_by)
+        )
+        if not has_any:
+            return ""
+
+        name = item.get("name", "")
+        lines: list[str] = ["```mermaid", "graph LR"]
+        for arg in arguments:
+            if isinstance(arg, dict) and arg.get("name"):
+                label = cls._argument_label(arg)
+                lines.append(f'  {name} -- "{label}" --> {arg["name"]}')
+            elif isinstance(arg, str):
+                lines.append(f'  {name} -- "arg" --> {arg}')
+        if isinstance(error_variants, dict):
+            for error_type, target in error_variants.items():
+                if target:
+                    lines.append(f'  {name} -- "error {error_type}" --> {target}')
+        if deprecates:
+            lines.append(f'  {name} -- "deprecates" --> {deprecates}')
+        if superseded_by:
+            lines.append(f'  {name} -- "superseded by" --> {superseded_by}')
+        lines.append("```")
+        return "\n".join(lines) + "\n\n"
+
+    @staticmethod
+    def _build_wrapped_by_index(
+        names: list[dict],
+    ) -> dict[str, list[str]]:
+        """Inverse index for ``HAS_ARGUMENT`` edges: target → [sources]."""
+        wrapped_by: dict[str, list[str]] = {}
+        for item in names:
+            src = item.get("name")
+            args = item.get("arguments") or []
+            for arg in args:
+                target = arg.get("name") if isinstance(arg, dict) else arg
+                if target and src:
+                    wrapped_by.setdefault(target, []).append(src)
+        return wrapped_by
+
+    @staticmethod
+    def _render_sibling_nav(
+        item: dict,
+        wrapped_by: dict[str, list[str]],
+    ) -> str:
+        """Emit neighbour lists below the entry body."""
+        lines: list[str] = []
+
+        def _link(target: str) -> str:
+            return f"[{target}](#{target})"
+
+        arguments = item.get("arguments") or []
+        arg_links = []
+        for arg in arguments:
+            target = arg.get("name") if isinstance(arg, dict) else arg
+            if target:
+                arg_links.append(_link(target))
+        if arg_links:
+            lines.append(f"**Arguments:** {', '.join(arg_links)}")
+
+        name = item.get("name", "")
+        wrappers = wrapped_by.get(name) or []
+        if wrappers:
+            lines.append("**Wrapped by:** " + ", ".join(_link(w) for w in wrappers))
+
+        error_variants = item.get("error_variants") or {}
+        if isinstance(error_variants, dict) and error_variants:
+            variant_links = [
+                f"{etype}: {_link(target)}"
+                for etype, target in error_variants.items()
+                if target
+            ]
+            if variant_links:
+                lines.append("**Error variants:** " + ", ".join(variant_links))
+
+        deprecates = item.get("deprecates")
+        if deprecates:
+            lines.append(f"**Deprecates:** {_link(deprecates)}")
+
+        superseded_by = item.get("superseded_by")
+        if superseded_by:
+            lines.append(f"**Superseded by:** {_link(superseded_by)}")
+
+        if not lines:
+            return ""
+        return "\n\n".join(lines) + "\n\n"
+
     def render_catalog(self) -> str:
         """Generate complete catalog organized by primary tag and base name.
 
@@ -161,6 +305,8 @@ class CatalogRenderer:
 
         if not tags:
             return "_No standard names found in the catalog._"
+
+        wrapped_by = self._build_wrapped_by_index(self.load_names())
 
         for category, items in sorted(tags.items()):
             category_name = category.replace("-", " ").title()
@@ -207,8 +353,18 @@ class CatalogRenderer:
                     if status:
                         result += f"**Status:** {status.title()}\n\n"
 
+                    cocos = item.get("cocos_transformation_type")
+                    if cocos:
+                        result += f"**COCOS transformation:** `{cocos}`\n\n"
+
                     if item_tags:
                         result += f"**Tags:** {tags_display}\n\n"
+
+                    result += self._render_links(item.get("links", []))
+
+                    result += self._render_mermaid(item)
+
+                    result += self._render_sibling_nav(item, wrapped_by)
 
                     result += "---\n\n"
 

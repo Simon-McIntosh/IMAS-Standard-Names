@@ -32,8 +32,13 @@ READONLY_TOOLS = {
 }
 
 # Vocabulary audit tool is optional (requires spacy)
+# Local-graph tools are optional (require networkx, via [graph-local] extra)
 OPTIONAL_TOOLS = {
     "manage_vocabulary",
+    "get_standard_name_neighbours",
+    "get_standard_name_ancestors",
+    "get_standard_name_descendants",
+    "shortest_standard_name_path",
 }
 
 WRITE_TOOLS = {

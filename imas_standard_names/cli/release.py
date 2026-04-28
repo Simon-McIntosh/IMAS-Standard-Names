@@ -186,14 +186,27 @@ def _check_on_main() -> None:
     click.echo("  ✓ On main branch")
 
 
-def _check_clean_tree(dry_run: bool) -> None:
+def _check_clean_tree(dry_run: bool, *, strict: bool = True) -> None:
     result = _run_git("status", "--porcelain")
     if result.stdout.strip():
-        msg = "Working tree has uncommitted changes. Commit or stash first."
-        if dry_run:
-            click.echo(f"  ⚠ {msg}", err=True)
+        dirty_files = result.stdout.strip().splitlines()
+        if dry_run or not strict:
+            label = "dry-run" if dry_run else "RC"
+            click.echo(
+                f"  ⚠ Working tree has {len(dirty_files)} uncommitted change(s) "
+                f"(allowed for {label})",
+                err=True,
+            )
+            for f in dirty_files[:5]:
+                click.echo(f"    {f}", err=True)
+            if len(dirty_files) > 5:
+                click.echo(f"    ... and {len(dirty_files) - 5} more", err=True)
         else:
-            raise click.ClickException(msg)
+            raise click.ClickException(
+                f"Working tree has {len(dirty_files)} uncommitted change(s). "
+                "Commit or stash first.\n"
+                "  Hint: RC releases (without --final) allow dirty worktrees."
+            )
     else:
         click.echo("  ✓ Working tree is clean")
 
@@ -376,7 +389,8 @@ def _show_release_status() -> None:
 # Click command
 # ============================================================================
 
-REMOTE = "upstream"
+_RC_REMOTE = "origin"
+_FINAL_REMOTE = "upstream"
 
 
 @click.command("release")
@@ -405,6 +419,25 @@ REMOTE = "upstream"
     help="Finalize: promote current RC to stable, or skip RC with --bump.",
 )
 @click.option(
+    "--remote",
+    default=None,
+    help=(
+        "Git remote to push the tag to. "
+        "Defaults to 'origin' for RC releases and 'upstream' for final releases."
+    ),
+)
+@click.option(
+    "--version",
+    "explicit_version",
+    default=None,
+    help="Explicit version override (e.g. v0.8.0). Bypasses bump computation.",
+)
+@click.option(
+    "--skip-git",
+    is_flag=True,
+    help="Skip git tag creation and push (useful for testing).",
+)
+@click.option(
     "--dry-run",
     is_flag=True,
     help="Show what would be done without making changes.",
@@ -414,26 +447,30 @@ def release_cmd(
     bump: str | None,
     message: str | None,
     final: bool,
+    remote: str | None,
+    explicit_version: str | None,
+    skip_git: bool,
     dry_run: bool,
 ) -> None:
     """Semantic version release with pre-flight safety checks.
 
     Detects current state (Stable or RC mode) from the latest git tag and
-    computes the next version automatically. Tags are always pushed to
-    upstream (iterorganization) to trigger the PyPI publish workflow.
+    computes the next version automatically. RC releases are pushed to origin
+    (fork); final releases are pushed to upstream (iterorganization) to
+    trigger the PyPI publish workflow.
 
     \b
     Examples:
         # Show current state and available commands
         standard-names release status
 
-        # Start RC series (v0.6.0 → v0.7.0rc1)
+        # Start RC series (v0.6.0 → v0.7.0rc1) — pushed to origin
         standard-names release --bump minor -m 'Add release CLI'
 
-        # Increment RC (v0.7.0rc1 → v0.7.0rc2)
+        # Increment RC (v0.7.0rc1 → v0.7.0rc2) — pushed to origin
         standard-names release -m 'Fix CI issues'
 
-        # Finalize RC (v0.7.0rc2 → v0.7.0)
+        # Finalize RC (v0.7.0rc2 → v0.7.0) — pushed to upstream → PyPI
         standard-names release --final -m 'Production release'
 
         # Direct release, skip RC (v0.6.0 → v0.6.1)
@@ -441,6 +478,12 @@ def release_cmd(
 
         # Dry run (validate without tagging)
         standard-names release --bump minor --dry-run -m 'Test'
+
+        # Explicit version override
+        standard-names release --version v0.8.0 -m 'Direct version'
+
+        # Skip git operations (tag/push)
+        standard-names release --bump patch --skip-git -m 'Local only'
     """
     if action == "status":
         _show_release_status()
@@ -452,26 +495,42 @@ def release_cmd(
             "Example: standard-names release --bump minor -m 'description'"
         )
 
+    # --- Resolve version ---
+    if explicit_version:
+        if not re.match(r"^v\d+\.\d+\.\d+(?:rc\d+)?$", explicit_version):
+            raise click.ClickException(
+                f"Invalid version format: {explicit_version}. "
+                "Expected: v1.0.0 or v1.0.0rc1"
+            )
+        git_tag = explicit_version
+        version = explicit_version.lstrip("v")
+        info = _detect_state()
+    else:
+        # Detect state for error messages and abandonment warning
+        info = _detect_state()
+
+        if not bump and not final:
+            if info["state"] == "rc":
+                git_tag, version = compute_next_version(None)
+            else:
+                raise click.ClickException(
+                    f"On stable release {info['tag'] or '(none)'}. "
+                    "Specify --bump (major|minor|patch) to start a new release."
+                )
+        else:
+            git_tag, version = compute_next_version(bump, final=final)
+
+    is_rc = "rc" in git_tag
+
+    # Determine target remote: explicit override, else origin for RC / upstream for final
+    effective_remote = remote or (_FINAL_REMOTE if final else _RC_REMOTE)
+
     # --- Pre-flight checks ---
     click.echo("Pre-flight checks:")
     _check_on_main()
-    _check_clean_tree(dry_run)
-    _check_synced(REMOTE, dry_run)
-    _check_ci_passed(REMOTE, dry_run)
-
-    # --- Compute version ---
-    info = _detect_state()
-
-    if not bump and not final:
-        if info["state"] == "rc":
-            git_tag, version = compute_next_version(None)
-        else:
-            raise click.ClickException(
-                f"On stable release {info['tag'] or '(none)'}. "
-                "Specify --bump (major|minor|patch) to start a new release."
-            )
-    else:
-        git_tag, version = compute_next_version(bump, final=final)
+    _check_clean_tree(dry_run, strict=not is_rc)
+    _check_synced(effective_remote, dry_run)
+    _check_ci_passed(effective_remote, dry_run)
 
     if _tag_exists(git_tag):
         raise click.ClickException(f"Tag {git_tag} already exists.")
@@ -497,11 +556,16 @@ def release_cmd(
     click.echo()
     click.echo(f"Version: {version}")
     click.echo(f"Tag:     {git_tag}")
-    click.echo(f"Remote:  {REMOTE}")
+    click.echo(f"Remote:  {effective_remote}")
 
     if dry_run:
         click.echo()
         click.echo("Dry run — no changes made.")
+        return
+
+    if skip_git:
+        click.echo()
+        click.echo("Git operations skipped (--skip-git).")
         return
 
     click.echo()
@@ -510,14 +574,23 @@ def release_cmd(
         raise click.ClickException(f"Failed to create tag: {result.stderr}")
     click.echo(f"  ✓ Created tag {git_tag}")
 
-    result = _run_git("push", REMOTE, git_tag)
+    result = _run_git("push", effective_remote, git_tag)
     if result.returncode != 0:
         # Clean up the local tag on push failure
         _run_git("tag", "-d", git_tag)
-        raise click.ClickException(f"Failed to push tag to {REMOTE}: {result.stderr}")
-    click.echo(f"  ✓ Pushed {git_tag} to {REMOTE}")
+        raise click.ClickException(
+            f"Failed to push tag to {effective_remote}: {result.stderr}"
+        )
+    click.echo(f"  ✓ Pushed {git_tag} to {effective_remote}")
     click.echo()
-    click.echo(
-        "Release pipeline triggered. Monitor at: "
-        "https://github.com/iterorganization/IMAS-Standard-Names/actions"
-    )
+    if final:
+        click.echo(
+            "Release pipeline triggered. Monitor at: "
+            "https://github.com/iterorganization/IMAS-Standard-Names/actions"
+        )
+    else:
+        owner = effective_remote if effective_remote != "origin" else "Simon-McIntosh"
+        click.echo(
+            f"RC release pipeline triggered. Monitor at: "
+            f"https://github.com/{owner}/IMAS-Standard-Names/actions"
+        )

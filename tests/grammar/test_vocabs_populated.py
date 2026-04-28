@@ -111,7 +111,6 @@ class TestPhysicalBasesCorpusCoverage:
             "power_flux_density",
             "lower_hybrid_electric_field",
             "temperature_peaking_factor",
-            "energy_radial_diffusivity_on_ggd",
         ],
     )
     def test_top50_base_present(self, bases, token):
@@ -156,7 +155,6 @@ class TestOperatorKeyEntries:
             "fourier_coefficient",
             "ratio",
             "product",
-            "on_ggd",
             "waveform",
             "bessel_0",
             "bessel_1",

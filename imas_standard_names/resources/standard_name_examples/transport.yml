@@ -1,0 +1,164 @@
+- name: electron_heat_flux
+  description: Electron heat flux vector.
+  documentation: 'Electron heat flux vector $\mathbf{q}_e$ representing the thermal energy transported
+    by electrons. In cylindrical coordinates, components include radial [radial_component_of_electron_heat_flux](#radial_component_of_electron_heat_flux),
+    poloidal, and toroidal directions. Electron heat flux is a primary energy loss channel in tokamak
+    plasmas and determines [energy_confinement_time](#energy_confinement_time) through transport processes.
+
+
+    Transport relation:
+
+
+    Heat flux relates to temperature gradient and thermal diffusivity:
+
+
+    $$\mathbf{q}_e = -n_e \chi_e \nabla T_e$$
+
+
+    where $n_e$ is [electron_density](#electron_density) in m$^{-3}$, $\chi_e$ is [electron_thermal_diffusivity](#electron_thermal_diffusivity)
+    in m$^2$/s, $\nabla T_e$ is [electron_temperature](#electron_temperature) gradient in eV/m.
+
+
+    Physical significance:
+
+
+    Electron heat flux is driven by temperature gradients and turbulent transport, determining energy
+    confinement quality. Understanding and controlling heat flux profiles is essential for achieving good
+    [energy_confinement_time](#energy_confinement_time) and predicting plasma performance. Heat flux affects
+    [plasma_current](#plasma_current) requirements and [safety_factor](#safety_factor) limits. See [electron_thermal_diffusivity](#electron_thermal_diffusivity)
+    for transport coefficients and [radial_component_of_electron_heat_flux](#radial_component_of_electron_heat_flux)
+    for radial transport.
+
+
+    Measurement methods:
+
+
+    Electron heat flux is inferred from [electron_temperature](#electron_temperature) and [electron_density](#electron_density)
+    profile measurements using transport analysis. Thomson scattering provides local temperature and density
+    measurements for gradient calculations. Electron cyclotron emission measures temperature profiles.
+    Heat flux analysis requires equilibrium reconstruction using [magnetic_field](#magnetic_field) measurements
+    and [plasma_current](#plasma_current) data.
+
+
+    Typical values:
+
+
+    Core region: $10^4$-$10^6$ W/m$^2$, edge region: $10^6$-$10^8$ W/m$^2$ near the pedestal. Heat flux
+    typically increases toward the edge due to steeper temperature gradients and reduced confinement.
+
+
+    Sign convention: Positive heat flux indicates energy flow in the direction of decreasing temperature,
+    following the direction of $\nabla T_e$.'
+  status: draft
+  tags:
+  - spatial-profile
+  kind: vector
+  unit: W.m^-2
+- name: electron_thermal_diffusivity
+  description: Electron thermal diffusivity coefficient.
+  documentation: 'Electron thermal diffusivity $\chi_e$ quantifying the rate of electron thermal energy
+    transport in the plasma. This effective transport coefficient combines neoclassical and turbulent
+    contributions and determines [energy_confinement_time](#energy_confinement_time) through the relationship
+    between heat flux and temperature gradients.
+
+
+    Transport relation:
+
+
+    The [electron_heat_flux](#electron_heat_flux) relates to temperature gradient via:
+
+
+    $$q_e = -n_e \chi_e \nabla T_e$$
+
+
+    where $n_e$ is [electron_density](#electron_density) in m$^{-3}$, $\nabla T_e$ is [electron_temperature](#electron_temperature)
+    gradient in eV/m, giving $q_e$ in W/m$^2$.
+
+
+    Physical significance:
+
+
+    Electron thermal diffusivity arises from turbulent transport (primarily) and neoclassical transport.
+    In tokamaks, $\chi_e$ is typically anomalous (much larger than neoclassical predictions) due to micro-instabilities
+    such as trapped electron modes and electron temperature gradient modes. Higher diffusivity reduces
+    [energy_confinement_time](#energy_confinement_time) and affects [plasma_current](#plasma_current)
+    requirements. See [electron_heat_flux](#electron_heat_flux) for transport relationships and [radial_component_of_electron_heat_flux](#radial_component_of_electron_heat_flux)
+    for radial transport analysis.
+
+
+    Measurement methods:
+
+
+    Electron thermal diffusivity is inferred from transport analysis using [electron_temperature](#electron_temperature)
+    and [electron_density](#electron_density) profile measurements. Power balance analysis determines
+    diffusivity from heat flux divergence. Thomson scattering provides local temperature and density measurements
+    for gradient calculations. Electron cyclotron emission measures temperature profiles. Diffusivity
+    analysis requires equilibrium reconstruction and power deposition calculations.
+
+
+    Typical values:
+
+
+    Core region: 0.1-10 m$^2$/s depending on confinement regime. L-mode shows higher values than H-mode
+    due to increased turbulent transport. Diffusivity typically increases with radius and decreases with
+    heating power.
+
+
+    Sign convention: Positive diffusivity indicates outward heat transport from hot plasma core to cooler
+    edge regions, following standard transport theory conventions.'
+  status: draft
+  tags:
+  - derived
+  - spatial-profile
+  kind: scalar
+  unit: m^2.s^-1
+- name: radial_component_of_electron_heat_flux
+  description: Radial component of electron heat flux vector.
+  documentation: 'Radial component of the electron heat flux vector $q_{e,R}$ in cylindrical coordinates,
+    representing thermal energy transport by electrons in the major radius direction. This component determines
+    radial energy transport and affects [energy_confinement_time](#energy_confinement_time) through outward
+    heat loss from the plasma core.
+
+
+    $$q_{e,R} = -n_e \chi_e \frac{\partial T_e}{\partial R}$$
+
+
+    where $n_e$ is electron density in m$^{-3}$, $\chi_e$ is [electron_thermal_diffusivity](#electron_thermal_diffusivity)
+    in m$^2$/s, $\partial T_e / \partial R$ is the radial temperature gradient in eV/m, giving $q_{e,R}$
+    in W/m$^2$.
+
+
+    Physical significance:
+
+
+    Electron heat flux is driven by temperature gradients and turbulent transport. Analysis of radial
+    heat flux profiles is essential for validating transport models and understanding energy confinement.
+    Radial heat flux determines the energy loss rate from the core and affects [plasma_current](#plasma_current)
+    requirements. See [electron_heat_flux](#electron_heat_flux) for vector relationships and [electron_thermal_diffusivity](#electron_thermal_diffusivity)
+    for transport coefficients.
+
+
+    Measurement methods:
+
+
+    Radial electron heat flux is inferred from [electron_temperature](#electron_temperature) profile measurements
+    using transport analysis. Thomson scattering provides local temperature measurements for gradient
+    calculations. Electron cyclotron emission measures temperature profiles. Heat flux analysis requires
+    equilibrium reconstruction using [magnetic_field](#magnetic_field) measurements and power balance
+    calculations. Radial profiles require multiple measurement locations.
+
+
+    Typical values:
+
+
+    Core region: $10^4$-$10^6$ W/m$^2$, edge region: $10^6$-$10^8$ W/m$^2$ near the pedestal. Radial heat
+    flux typically increases toward the edge due to steeper temperature gradients and reduced confinement.
+
+
+    Sign convention: Positive indicates outward (increasing R direction) heat flow from plasma core to
+    edge, following standard cylindrical coordinate conventions.'
+  status: active
+  tags:
+  - spatial-profile
+  kind: scalar
+  unit: W.m^-2

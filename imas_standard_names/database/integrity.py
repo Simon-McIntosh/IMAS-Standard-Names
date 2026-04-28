@@ -10,6 +10,8 @@ import hashlib
 import sqlite3
 from pathlib import Path
 
+import yaml as _yaml
+
 
 def verify_integrity(
     yaml_root: Path, db_path: Path, full: bool = False
@@ -35,42 +37,54 @@ def verify_integrity(
         db_index = {r["name"]: r for r in rows}
         # Track which names we see
         seen = set()
-        # Enumerate YAML files
-        file_map = {}
+        # Enumerate YAML files and load per-entry
+        name_to_file: dict[str, Path] = {}
+        name_to_entry_hash: dict[str, str] = {}
+        file_stat_cache: dict[Path, tuple[int, float]] = {}
         for yf in sorted(
             list(yaml_root.rglob("*.yml")) + list(yaml_root.rglob("*.yaml"))
         ):
-            name = yf.stem
-            file_map[name] = yf
+            try:
+                raw = yf.read_bytes()
+            except OSError:
+                continue
+            try:
+                loaded = _yaml.safe_load(raw)
+            except _yaml.YAMLError:
+                continue
+            if isinstance(loaded, dict) and "name" in loaded:
+                loaded = [loaded]
+            if not isinstance(loaded, list):
+                continue
+            st = yf.stat()
+            file_stat_cache[yf] = (st.st_size, st.st_mtime)
+            for entry in loaded:
+                if not isinstance(entry, dict):
+                    continue
+                name = entry.get("name")
+                if not name:
+                    continue
+                entry_bytes = _yaml.safe_dump(
+                    entry, sort_keys=True, allow_unicode=True
+                ).encode()
+                name_to_file[name] = yf
+                name_to_entry_hash[name] = hashlib.blake2b(
+                    entry_bytes, digest_size=16
+                ).hexdigest()
         # Detect additions & modifications
-        for name, path in file_map.items():
+        for name, path in name_to_file.items():
             if name not in db_index:
                 issues.append({"code": "missing-in-db", "name": name})
                 continue
             record = db_index[name]
-            try:
-                st = path.stat()
-            except OSError:
-                issues.append({"code": "missing-on-disk", "name": name})
-                continue
-            meta_changed = (st.st_size != record["size"]) or (
-                st.st_mtime != record["mtime"]
-            )
-            if meta_changed:
-                if full:
-                    # Re-hash and compare
-                    h = hashlib.blake2b(path.read_bytes(), digest_size=16).hexdigest()
-                    if h != record["hash"]:
-                        issues.append({"code": "hash-mismatch", "name": name})
-                    else:
-                        issues.append({"code": "mismatch-meta", "name": name})
-                else:
-                    issues.append({"code": "mismatch-meta", "name": name})
-            elif full:
-                # Optionally hash even if metadata unchanged (belt & suspenders)
-                h = hashlib.blake2b(path.read_bytes(), digest_size=16).hexdigest()
-                if h != record["hash"]:
-                    issues.append({"code": "hash-mismatch", "name": name})
+            size, mtime = file_stat_cache.get(path, (0, 0.0))
+            meta_changed = (size != record["size"]) or (mtime != record["mtime"])
+            entry_hash = name_to_entry_hash[name]
+            hash_changed = entry_hash != record["hash"]
+            if hash_changed:
+                issues.append({"code": "hash-mismatch", "name": name})
+            elif meta_changed:
+                issues.append({"code": "mismatch-meta", "name": name})
             seen.add(name)
         # Detect deletions (present in DB but not on disk)
         for name in db_index.keys() - seen:

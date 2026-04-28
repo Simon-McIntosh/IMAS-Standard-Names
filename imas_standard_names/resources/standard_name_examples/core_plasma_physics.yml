@@ -1,0 +1,422 @@
+- name: electron_density
+  description: Electron number density.
+  documentation: 'Electron number density $n_e$ representing the volumetric concentration of electrons
+    (thermal plus non-thermal) in the plasma. In fusion plasmas, electron density typically ranges from
+    $10^{18}$ m$^{-3}$ in the edge region to $10^{20}$ m$^{-3}$ in the plasma core. Electron density determines
+    plasma conductivity and affects [plasma_resistivity](#plasma_resistivity).
+
+
+    Thermodynamic relation:
+
+
+    Electron density relates to [electron_pressure](#electron_pressure) and [electron_temperature](#electron_temperature)
+    via the ideal gas law:
+
+
+    $$p_e = n_e k_B T_e$$
+
+
+    where $p_e$ is electron pressure in Pa, $k_B = 1.381 \times 10^{-23}$ J/K is Boltzmann''s constant,
+    and $T_e$ is in K. When using $T_e$ in eV, apply conversion: $p_e = n_e T_e \times 1.602 \times 10^{-19}$
+    Pa.
+
+
+    Physical significance:
+
+
+    Electron density determines plasma conductivity through $\sigma = n_e e^2 \tau / m_e$ and affects
+    [plasma_current](#plasma_current) requirements. Higher density improves confinement through increased
+    collisionality but may reduce [energy_confinement_time](#energy_confinement_time). Density gradients
+    drive [electron_heat_flux](#electron_heat_flux) and affect [plasma_current_density](#plasma_current_density)
+    profiles. See [plasma_density_at_magnetic_axis](#plasma_density_at_magnetic_axis) for core values.
+
+
+    Measurement methods:
+
+
+    Interferometry measures line-integrated electron density through phase shift of laser beams. Reflectometry
+    determines density profiles from microwave reflection. Thomson scattering provides local density measurements
+    with high spatial resolution. Interferometry systems use multiple chords for 2D reconstruction. Density
+    measurements are essential for [electron_pressure](#electron_pressure) calculations and equilibrium
+    reconstruction.
+
+
+    Typical values:
+
+
+    Edge region: $10^{18}$-$10^{19}$ m$^{-3}$, core region: $10^{19}$-$10^{20}$ m$^{-3}$ in high-performance
+    tokamak plasmas. On-axis values in [plasma_density_at_magnetic_axis](#plasma_density_at_magnetic_axis)
+    typically reach $5 \times 10^{19}$ - $2 \times 10^{20}$ m$^{-3}$ during high-performance operation.
+
+
+    Sign convention: Positive density indicates particle concentration, following standard plasma physics
+    conventions.'
+  status: draft
+  tags:
+  - measured
+  - spatial-profile
+  kind: scalar
+  unit: m^-3
+- name: electron_pressure
+  description: Electron kinetic pressure.
+  documentation: 'Electron kinetic pressure $p_e$ representing the contribution of electron thermal motion
+    to plasma pressure. Includes both thermal and non-thermal electron populations. Electron pressure
+    is a key component of plasma equilibrium and determines confinement quality through pressure gradients.
+
+
+    Thermodynamic relation:
+
+
+    Electron pressure relates to [electron_density](#electron_density) and [electron_temperature](#electron_temperature)
+    via the ideal gas law:
+
+
+    $$p_e = n_e k_B T_e$$
+
+
+    where $n_e$ is in m$^{-3}$, $k_B = 1.381 \times 10^{-23}$ J/K, $T_e$ is in K, giving $p_e$ in Pa.
+    When using $T_e$ in eV, apply conversion: $p_e = n_e T_e \times 1.602 \times 10^{-19}$ Pa.
+
+
+    Physical significance:
+
+
+    Electron pressure contributes to plasma equilibrium force balance through $\nabla p = \mathbf{j} \times
+    \mathbf{B}$ and determines confinement quality. Total plasma pressure is the sum of electron and ion
+    contributions. Pressure gradients drive [plasma_current_density](#plasma_current_density) through
+    bootstrap current generation and affect [safety_factor](#safety_factor) profiles. See [plasma_volume](#plasma_volume)
+    and [energy_confinement_time](#energy_confinement_time) for global confinement metrics.
+
+
+    Measurement methods:
+
+
+    Electron pressure is derived from [electron_density](#electron_density) and [electron_temperature](#electron_temperature)
+    measurements. Thomson scattering provides local measurements of both quantities. Interferometry measures
+    line-integrated density for pressure calculations. Electron cyclotron emission provides temperature
+    profiles. Pressure gradients are inferred from equilibrium reconstruction using [magnetic_field](#magnetic_field)
+    measurements.
+
+
+    Typical values:
+
+
+    Core region: $10^4$-$10^5$ Pa in high-performance plasmas. Edge region: $10^2$-$10^3$ Pa. Total plasma
+    pressure (electron plus ion) typically ranges from $10^4$-$10^6$ Pa depending on operating regime.
+
+
+    Sign convention: Positive pressure indicates compressive force outward from plasma center.'
+  status: draft
+  tags:
+  - spatial-profile
+  kind: scalar
+  unit: Pa
+- name: electron_temperature
+  description: Electron kinetic temperature.
+  documentation: 'Electron kinetic temperature $T_e$ representing the mean thermal energy per electron.
+    In fusion plasmas, electron temperature typically ranges from tens of eV in the edge region to several
+    keV in the plasma core.
+
+
+    Thermodynamic relation:
+
+
+    Electron temperature relates to [electron_pressure](#electron_pressure) via the ideal gas law:
+
+
+    $$p_e = n_e k_B T_e$$
+
+
+    where $n_e$ is [electron_density](#electron_density) in m$^{-3}$, $k_B = 1.381 \times 10^{-23}$ J/K
+    is Boltzmann''s constant, $T_e$ is in K, giving $p_e$ in Pa. When using $T_e$ in eV, apply conversion:
+    $p_e = n_e T_e \times 1.602 \times 10^{-19}$ Pa.
+
+
+    Physical significance:
+
+
+    Temperature determines [energy_confinement_time](#energy_confinement_time) and fusion reactivity.
+    Higher electron temperatures improve confinement quality and increase fusion reaction rates. The temperature
+    gradient drives [electron_heat_flux](#electron_heat_flux) and affects [plasma_resistivity](#plasma_resistivity).
+    See also [ion_temperature](#ion_temperature) and [electron_temperature_at_magnetic_axis](#electron_temperature_at_magnetic_axis).
+
+
+    Measurement methods:
+
+
+    Thomson scattering provides local [electron_density](#electron_density) and temperature measurements.
+    Electron cyclotron emission measures temperature from radiation spectrum. X-ray spectroscopy determines
+    temperature from continuum and line emissions. Interferometry provides line-integrated density for
+    pressure calculations.
+
+
+    Typical values:
+
+
+    Edge region: 10-200 eV, core region: 1-20 keV in high-performance tokamak plasmas. On-axis values
+    in [electron_temperature_at_magnetic_axis](#electron_temperature_at_magnetic_axis) typically reach
+    5-15 keV during auxiliary heating.'
+  status: active
+  tags:
+  - spatial-profile
+  kind: scalar
+  unit: eV
+- name: electron_temperature_at_magnetic_axis
+  description: Electron temperature at magnetic axis.
+  documentation: 'Electron temperature $T_{e,0}$ evaluated at the [magnetic_axis](#magnetic_axis), representing
+    the peak electron temperature in the plasma core. The magnetic axis is the innermost flux surface
+    where the poloidal magnetic field vanishes and plasma parameters typically reach maximum values. On-axis
+    electron temperature is a key indicator of core plasma performance and confinement quality.
+
+
+    Performance significance:
+
+
+    On-axis electron temperature is used in metrics such as the fusion triple product $n T \tau_E$ where
+    $n$ is density in m$^{-3}$, $T$ is temperature in keV, and $\tau_E$ is [energy_confinement_time](#energy_confinement_time)
+    in s. Higher on-axis temperature improves fusion reactivity and determines [plasma_current](#plasma_current)
+    requirements. Temperature affects [plasma_resistivity](#plasma_resistivity) and [heating_power_due_to_ohmic](#heating_power_due_to_ohmic)
+    efficiency. See [electron_temperature](#electron_temperature) for profile context and [ion_temperature_at_magnetic_axis](#ion_temperature_at_magnetic_axis)
+    for ion temperatures.
+
+
+    Measurement methods:
+
+
+    Electron temperature at magnetic axis is measured using Thomson scattering systems focused on the
+    plasma center. Electron cyclotron emission radiometry provides continuous temperature monitoring at
+    the axis. X-ray crystal spectroscopy measures temperature from continuum radiation. MSE (motional
+    Stark effect) diagnostics can provide temperature measurements in some configurations. On-axis measurements
+    require precise alignment with [magnetic_axis](#magnetic_axis) location.
+
+
+    Typical values:
+
+
+    High-performance H-mode: 5-20 keV, ohmic plasmas: 1-5 keV. On-axis temperature typically exceeds edge
+    values by factor of 2-5 depending on heating power and confinement regime.
+
+
+    Sign convention: Positive temperature indicates thermal energy per electron, following standard thermodynamic
+    conventions with temperature measured in energy units (eV or keV).'
+  status: active
+  tags:
+  - global-quantity
+  kind: scalar
+  unit: eV
+- name: ion_temperature
+  description: Ion kinetic temperature.
+  documentation: 'Ion kinetic temperature $T_i$ representing the mean thermal energy per ion. In fusion
+    plasmas, ion temperature is critical for achieving fusion reactions, as the fusion cross-section strongly
+    depends on ion temperature. Ion temperature determines the thermal velocity of ions and affects fusion
+    reactivity.
+
+
+    Thermodynamic relation:
+
+
+    Ion temperature relates to ion pressure via the ideal gas law:
+
+
+    $$p_i = n_i k_B T_i$$
+
+
+    where $n_i$ is ion density in m$^{-3}$, $k_B = 1.381 \times 10^{-23}$ J/K, $T_i$ is in K, giving $p_i$
+    in Pa. When using $T_i$ in eV, apply conversion: $p_i = n_i T_i \times 1.602 \times 10^{-19}$ Pa.
+
+
+    Physical significance:
+
+
+    Ion temperature determines fusion reactivity through the Maxwellian-averaged cross-section. For deuterium-tritium
+    fusion, maximum reactivity occurs near $T_i \approx 100$ keV, with practical operating points around
+    10-20 keV. Ion temperature affects [energy_confinement_time](#energy_confinement_time) and determines
+    the fusion triple product $n T \tau_E$. See [electron_temperature](#electron_temperature) for electron-ion
+    energy exchange and [ion_temperature_at_magnetic_axis](#ion_temperature_at_magnetic_axis) for core
+    values.
+
+
+    Measurement methods:
+
+
+    Charge exchange recombination spectroscopy provides local ion temperature measurements through Doppler
+    broadening of impurity lines. Neutral particle analyzers measure charge-exchanged neutrals escaping
+    the plasma. X-ray crystal spectroscopy determines ion temperature from continuum radiation. Thomson
+    scattering can provide ion temperature in some configurations. Ion temperature profiles are essential
+    for [plasma_current_density](#plasma_current_density) calculations.
+
+
+    Typical values:
+
+
+    Edge region: 10-200 eV, core region: 1-20 keV in high-performance tokamak plasmas. On-axis values
+    in [ion_temperature_at_magnetic_axis](#ion_temperature_at_magnetic_axis) typically reach 5-15 keV
+    during auxiliary heating. Ion temperature often exceeds electron temperature in heated plasmas.
+
+
+    Sign convention: Positive temperature indicates thermal energy per particle, following standard thermodynamic
+    conventions.'
+  status: draft
+  tags:
+  - measured
+  - spatial-profile
+  kind: scalar
+  unit: eV
+- name: ion_temperature_at_magnetic_axis
+  description: Ion temperature at magnetic axis.
+  documentation: 'Ion temperature $T_{i,0}$ evaluated at the [magnetic_axis](#magnetic_axis), representing
+    the peak [ion_temperature](#ion_temperature) in the plasma core. The magnetic axis is the innermost
+    flux surface where plasma parameters typically reach maximum values. On-axis ion temperature is critical
+    for fusion performance and determines the fusion triple product $n T \tau_E$.
+
+
+    Performance significance:
+
+
+    On-axis ion temperature increases fusion reactivity, which peaks near 100 keV but practical operation
+    occurs at 10-20 keV. Together with [electron_temperature_at_magnetic_axis](#electron_temperature_at_magnetic_axis),
+    determines the fusion triple product for ignition conditions. Ion temperature affects [energy_confinement_time](#energy_confinement_time)
+    and determines [plasma_current](#plasma_current) requirements for stable operation. See [ion_temperature](#ion_temperature)
+    for profile context and [plasma_density_at_magnetic_axis](#plasma_density_at_magnetic_axis) for density
+    values.
+
+
+    Measurement methods:
+
+
+    Ion temperature at magnetic axis is measured using charge exchange recombination spectroscopy focused
+    on the plasma center. Neutral particle analyzers measure charge-exchanged neutrals escaping from the
+    core. X-ray crystal spectroscopy determines temperature from continuum radiation. Thomson scattering
+    can provide ion temperature in some configurations. Core measurements require precise alignment with
+    [magnetic_axis](#magnetic_axis) and may use impurity injection for enhanced signal.
+
+
+    Typical values:
+
+
+    High-performance H-mode: 5-20 keV, ohmic plasmas: 0.5-3 keV. Ion temperature often exceeds electron
+    temperature in heated plasmas due to different heating mechanisms and transport processes.
+
+
+    Sign convention: Positive temperature indicates thermal energy per ion, following standard thermodynamic
+    conventions with temperature measured in energy units (eV or keV).'
+  status: draft
+  tags:
+  - global-quantity
+  kind: scalar
+  unit: eV
+- name: plasma_density_at_magnetic_axis
+  description: Plasma density at magnetic axis.
+  documentation: 'Plasma density $n_0$ evaluated at the [magnetic_axis](#magnetic_axis), representing
+    the peak density in the plasma core. Typically refers to [electron_density](#electron_density) at
+    axis, though ion density is nearly equal due to quasi-neutrality. On-axis density is a key parameter
+    for fusion performance and determines the fusion triple product $n T \tau_E$.
+
+
+    Performance significance:
+
+
+    On-axis density is critical for fusion performance through the triple product $n T \tau_E$. Higher
+    density improves fusion reaction rates but excessive density can degrade confinement through the Greenwald
+    density limit: $n_{\text{Gw}} \propto I_p / (\pi a^2)$. Density affects [plasma_current](#plasma_current)
+    requirements and [plasma_resistivity](#plasma_resistivity). See [electron_density](#electron_density)
+    for profile context and [electron_temperature_at_magnetic_axis](#electron_temperature_at_magnetic_axis)
+    for temperature relationships.
+
+
+    Profile considerations:
+
+
+    Density profiles are typically flatter than temperature profiles due to different transport mechanisms.
+    The density peaking factor $n_0 / \langle n \rangle$ (ratio of peak to volume-averaged density) ranges
+    from 1.1 to 2.0 depending on fueling method and transport characteristics. Density gradients drive
+    [electron_heat_flux](#electron_heat_flux) and affect [plasma_current_density](#plasma_current_density)
+    profiles.
+
+
+    Measurement methods:
+
+
+    Plasma density at magnetic axis is measured using Thomson scattering systems with high spatial resolution
+    at the plasma center. Interferometry with vertical chords can provide line-integrated measurements
+    for axis calculation. Reflectometry measures density profiles with high temporal resolution. Core
+    density measurements require precise alignment with [magnetic_axis](#magnetic_axis) and may use multiple
+    diagnostics for validation.
+
+
+    Typical values:
+
+
+    H-mode core: $5 \times 10^{19}$ - $2 \times 10^{20}$ m$^{-3}$. On-axis density typically 1.1-2.0 times
+    the volume-averaged density depending on fueling and transport regime.
+
+
+    Sign convention: Positive density indicates particle concentration, following standard plasma physics
+    conventions with density measured in particles per cubic meter.'
+  status: draft
+  tags:
+  - global-quantity
+  kind: scalar
+  unit: m^-3
+- name: plasma_resistivity
+  description: Plasma electrical resistivity.
+  documentation: 'Plasma electrical resistivity $\eta$ quantifying resistance to current flow, arising
+    from electron-ion collisions. Relates electric field to current density via Ohm''s law and determines
+    [heating_power_due_to_ohmic](#heating_power_due_to_ohmic) efficiency and [plasma_current](#plasma_current)
+    requirements.
+
+
+    $$\mathbf{E} = \eta \mathbf{j}$$
+
+
+    where $\mathbf{E}$ is electric field in V/m and $\mathbf{j}$ is [plasma_current_density](#plasma_current_density)
+    in A/m$^2$.
+
+
+    Temperature dependence:
+
+
+    Plasma resistivity decreases strongly with [electron_temperature](#electron_temperature):
+
+
+    $$\eta \propto T_e^{-3/2}$$
+
+
+    For a hydrogen plasma: $\eta \approx 5.2 \times 10^{-5} Z_{\text{eff}} \ln\Lambda / T_e^{3/2}$ $\Omega$·m,
+    where $T_e$ is in eV, $Z_{\text{eff}}$ is effective charge, and $\ln\Lambda$ is the Coulomb logarithm.
+
+
+    Physical significance:
+
+
+    Resistivity determines [heating_power_due_to_ohmic](#heating_power_due_to_ohmic): $P_{\text{ohm}}
+    = \int \eta j^2 dV$. At high temperatures, resistivity becomes negligible, making ohmic heating ineffective
+    and requiring auxiliary heating. Resistivity affects [plasma_current](#plasma_current) penetration
+    and current ramp rates. See [heating_power_due_to_ohmic](#heating_power_due_to_ohmic) for heating
+    relationships and [plasma_current_density](#plasma_current_density) for current distribution.
+
+
+    Measurement methods:
+
+
+    Plasma resistivity is determined from [plasma_current](#plasma_current) and voltage measurements using
+    Ohm''s law. Loop voltage measurements provide electric field information. Current profile analysis
+    requires equilibrium reconstruction. Resistivity profiles are inferred from temperature and density
+    measurements. Spitzer resistivity calculations use [electron_temperature](#electron_temperature) and
+    impurity content.
+
+
+    Typical values:
+
+
+    Core ($T_e$ ~ 1-10 keV): $10^{-8}$-$10^{-7}$ $\Omega$·m, edge ($T_e$ ~ 10-100 eV): $10^{-6}$-$10^{-5}$
+    $\Omega$·m. Resistivity decreases strongly with temperature and increases with impurity content.
+
+
+    Sign convention: Positive resistivity indicates resistance to current flow, following standard electrical
+    resistance conventions with current flow direction.'
+  status: draft
+  tags:
+  - spatial-profile
+  kind: scalar
+  unit: m.ohm

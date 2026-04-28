@@ -7,11 +7,10 @@ models in a safe insertion sequence that respects:
 - Vector component dependencies (vector -> its scalar components)
 - Operator / reduction provenance base dependencies (derived* -> base)
 - Expression provenance dependencies (expression -> each dependency + base)
+- Structural argument dependencies (entry -> each arguments[].name target)
 
 Cycles or unresolved dependencies produce clear exceptions.
 """
-
-from __future__ import annotations
 
 from collections.abc import Iterable
 from graphlib import CycleError, TopologicalSorter
@@ -48,6 +47,15 @@ def _extract_dependencies(model: StandardNameEntry, available: set[str]) -> set[
                 if dep in available:
                     deps.add(dep)
         # Reduction provenance already covered by base; other modes implicitly only depend on base.
+
+    # Structural argument dependencies (plan 40).
+    arguments = getattr(model, "arguments", None)
+    if arguments:
+        for arg in arguments:
+            arg_name = getattr(arg, "name", None) if not isinstance(arg, str) else arg
+            if arg_name and arg_name in available:
+                deps.add(arg_name)
+
     return deps
 
 

@@ -128,6 +128,12 @@ class Subject(StrEnum):
     RUNAWAY = "runaway"
     STATE = "state"
     THERMAL = "thermal"
+    CO_CURRENT = "co_current"
+    COUNTER_CURRENT = "counter_current"
+    INERTIAL = "inertial"
+    SONIC = "sonic"
+    LEFT_HAND_CIRCULARLY_POLARIZED = "left_hand_circularly_polarized"
+    RIGHT_HAND_CIRCULARLY_POLARIZED = "right_hand_circularly_polarized"
 
 
 class Region(StrEnum):
@@ -226,6 +232,7 @@ class Process(StrEnum):
     INJECTION = "injection"
     SPUTTERING = "sputtering"
     VISCOSITY = "viscosity"
+    OHMIC_INDUCTION = "ohmic_induction"
 
 
 class GenericPhysicalBase(StrEnum):
@@ -452,6 +459,8 @@ class GeometricBase(StrEnum):
     TRAJECTORY = "trajectory"
     UNIT_VECTOR = "unit_vector"
     VERTEX = "vertex"
+    X1_COORDINATE = "x1_coordinate"
+    X2_COORDINATE = "x2_coordinate"
 
 
 class Transformation(StrEnum):
@@ -501,7 +510,6 @@ class Transformation(StrEnum):
     GYROAVERAGED = "gyroaveraged"
     IMAGINARY_PART_POSTFIX = "imaginary_part_postfix"
     MOMENT = "moment"
-    ON_GGD = "on_ggd"
     REAL_PART_POSTFIX = "real_part_postfix"
     REFERENCE_WAVEFORM = "reference_waveform"
     WAVEFORM = "waveform"
@@ -554,7 +562,6 @@ class Decomposition(StrEnum):
     GYROAVERAGED = "gyroaveraged"
     IMAGINARY_PART_POSTFIX = "imaginary_part_postfix"
     MOMENT = "moment"
-    ON_GGD = "on_ggd"
     REAL_PART_POSTFIX = "real_part_postfix"
     REFERENCE_WAVEFORM = "reference_waveform"
     WAVEFORM = "waveform"

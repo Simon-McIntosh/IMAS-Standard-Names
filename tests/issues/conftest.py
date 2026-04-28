@@ -43,16 +43,21 @@ def click_runner(path: str | Path):
 
 
 def _write_entry(entry: dict, directory: Path):
-    """Write a standard name entry as a YAML file."""
+    """Write a standard name entry by appending to a per-domain YAML file."""
     obj = models.create_standard_name_entry(entry)
     domain = getattr(obj, "physics_domain", "general") or "general"
-    domain_dir = directory / domain
-    domain_dir.mkdir(parents=True, exist_ok=True)
-    path = domain_dir / f"{obj.name}.yml"
+    domain_file = directory / f"{domain}.yml"
+    # Load existing entries if the file exists
+    if domain_file.exists():
+        with open(domain_file, encoding="utf-8") as fh:
+            existing = yaml.safe_load(fh) or []
+    else:
+        existing = []
     data = {k: v for k, v in obj.model_dump().items() if v not in (None, [], "")}
     data["name"] = obj.name
-    with open(path, "w", encoding="utf-8") as fh:
-        yaml.safe_dump(data, fh, sort_keys=False, allow_unicode=True, width=80)
+    existing.append(data)
+    with open(domain_file, "w", encoding="utf-8") as fh:
+        yaml.safe_dump(existing, fh, sort_keys=False, allow_unicode=True, width=80)
 
 
 @contextmanager

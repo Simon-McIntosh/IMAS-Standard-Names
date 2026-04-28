@@ -13,6 +13,8 @@ import sqlite3
 from collections.abc import Iterable
 from pathlib import Path
 
+import yaml as _yaml
+
 from ..models import StandardNameEntry
 from ..ordering import ordered_models
 from ..yaml_store import YamlStore
@@ -69,21 +71,40 @@ def build_catalog(yaml_root: Path, db_path: Path, overwrite: bool = True) -> Pat
     )
     root = Path(yaml_root).resolve()
     digest_pairs = []  # (name, hash)
+    # Per-domain layout (plan 40): each file contains a list of entries.
+    # Track integrity per entry (hash of canonical entry YAML) rather than
+    # per file, so we can still detect per-entry additions/deletions/modifications.
     for yf in sorted(store.yaml_files()):
         try:
             data = yf.read_bytes()
         except OSError:
             continue
-        h = hashlib.blake2b(data, digest_size=16).hexdigest()
-        st = yf.stat()
+        try:
+            loaded = _yaml.safe_load(data)
+        except _yaml.YAMLError:
+            continue
+        if isinstance(loaded, dict) and "name" in loaded:
+            loaded = [loaded]
+        if not isinstance(loaded, list):
+            # Legacy per-file layout would have been rejected by loader; skip defensively.
+            continue
         rel_path = os.path.relpath(yf, root)
-        # Attempt to derive name from filename (stem)
-        name = yf.stem
-        cur.execute(
-            "INSERT INTO integrity(name, rel_path, size, mtime, hash) VALUES (?,?,?,?,?)",
-            (name, rel_path, st.st_size, st.st_mtime, h),
-        )
-        digest_pairs.append((name, h))
+        st = yf.stat()
+        for entry in loaded:
+            if not isinstance(entry, dict):
+                continue
+            name = entry.get("name")
+            if not name:
+                continue
+            entry_bytes = _yaml.safe_dump(
+                entry, sort_keys=True, allow_unicode=True
+            ).encode()
+            h = hashlib.blake2b(entry_bytes, digest_size=16).hexdigest()
+            cur.execute(
+                "INSERT INTO integrity(name, rel_path, size, mtime, hash) VALUES (?,?,?,?,?)",
+                (name, rel_path, st.st_size, st.st_mtime, h),
+            )
+            digest_pairs.append((name, h))
     # Aggregate hash (sorted by name for determinism)
     agg_hasher = hashlib.blake2b(digest_size=16)
     for name, h in sorted(digest_pairs, key=lambda x: x[0]):

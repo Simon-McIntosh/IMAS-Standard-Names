@@ -391,6 +391,59 @@ class StandardNameBase(BaseModel):
         return v
 
 
+class ArgumentRef(BaseModel):
+    """Reference to another standard name as an argument of a structural operator.
+
+    Captures one layer of the ISN grammar's operator decomposition: the outer
+    operator that wraps this entry around a *base* argument.  Entries emitted
+    by the codex export pipeline carry ``arguments`` lists whose elements are
+    ``ArgumentRef`` instances.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    name: str
+    operator: str
+    operator_kind: Literal["unary_prefix", "unary_postfix", "binary", "projection"]
+    role: Literal["a", "b"] | None = None
+    separator: Literal["and", "to"] | None = None
+    axis: str | None = None
+    shape: Literal["component", "coordinate"] | None = None
+
+    @model_validator(mode="after")
+    def _check_operator_kind_fields(self):
+        """Enforce field requirements based on operator_kind."""
+        if self.operator_kind == "binary":
+            if self.role is None or self.separator is None:
+                raise ValueError(
+                    "role and separator are required when operator_kind is 'binary'"
+                )
+            if self.axis is not None or self.shape is not None:
+                raise ValueError(
+                    "axis and shape are forbidden when operator_kind is 'binary'"
+                )
+        elif self.operator_kind == "projection":
+            if self.axis is None or self.shape is None:
+                raise ValueError(
+                    "axis and shape are required when operator_kind is 'projection'"
+                )
+            if self.role is not None or self.separator is not None:
+                raise ValueError(
+                    "role and separator are forbidden when operator_kind is 'projection'"
+                )
+        else:
+            # unary_prefix / unary_postfix
+            if self.role is not None or self.separator is not None:
+                raise ValueError(
+                    f"role and separator are forbidden when operator_kind is '{self.operator_kind}'"
+                )
+            if self.axis is not None or self.shape is not None:
+                raise ValueError(
+                    f"axis and shape are forbidden when operator_kind is '{self.operator_kind}'"
+                )
+        return self
+
+
 class StandardNameEntryBase(StandardNameBase):
     """Full catalog entry definition (fields common to scalar and vector kinds).
 
@@ -411,6 +464,10 @@ class StandardNameEntryBase(StandardNameBase):
     constraints: Constraints = Field(default_factory=list)
     tags: Tags = Field(default_factory=list)  # Secondary classification tags
     links: Links = Field(default_factory=list)
+
+    # Structural graph edges (computed fields, re-derived on export)
+    arguments: list[ArgumentRef] | None = None
+    error_variants: dict[Literal["upper", "lower", "index"], str] | None = None
 
     @field_validator("tags", "constraints")
     @classmethod
@@ -975,6 +1032,7 @@ class StandardNameCatalogManifest(BaseModel):
 
 
 __all__ = [
+    "ArgumentRef",
     "Kind",
     "Status",
     "OperatorProvenance",

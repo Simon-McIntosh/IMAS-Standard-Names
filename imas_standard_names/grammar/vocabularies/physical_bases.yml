@@ -34,6 +34,9 @@ bases:
   angular_momentum_source:
     aliases: []
     kind: scalar
+  anomalous_current_density:  # W31: anomalous/turbulent transport current density — evidence N=3 (edge_plasma_physics)
+    aliases: []
+    kind: vector
   area:
     aliases: []
     kind: scalar
@@ -60,6 +63,9 @@ bases:
     aliases: []
     kind: scalar
   bootstrap_current:
+    aliases: []
+    kind: scalar
+  bootstrap_current_density:  # W23A: j_bootstrap (core_profiles/profiles_1d/j_bootstrap) — evidence N=5 (core_profiles, core_sources, edge_profiles, plasma_profiles, plasma_sources)
     aliases: []
     kind: scalar
   breeding_ratio:
@@ -122,6 +128,9 @@ bases:
   count:
     aliases: []
     kind: scalar
+  covariant_metric_tensor:  # W31: lower-index metric g_ij — counterpart to contravariant — evidence N=1 (magnetohydrodynamics)
+    aliases: []
+    kind: tensor
   critical_temperature:
     aliases: []
     kind: scalar
@@ -155,10 +164,19 @@ bases:
   diamagnetic_drift_velocity:
     aliases: []
     kind: vector
+  diamagnetic_energy:  # W31: plasma stored energy from diamagnetic measurement — evidence N=1 (transport)
+    aliases: []
+    kind: scalar
+  diagnostic_latency:  # Added rc27: EMW pilot evidence N=4
+    aliases: []
+    kind: scalar
   diffusivity:
     aliases: []
     kind: scalar
   distribution:
+    aliases: []
+    kind: scalar
+  distribution_function:  # W31: kinetic distribution function f(x,v) in phase space — evidence N=1 (edge_plasma_physics)
     aliases: []
     kind: scalar
   distribution_particle_count:
@@ -177,6 +195,12 @@ bases:
     aliases: []
     kind: scalar
   effective_charge:
+    aliases: []
+    kind: scalar
+  eigenmode_frequency:  # W31: oscillation frequency of a plasma eigenmode — evidence N=1 (gyrokinetics)
+    aliases: []
+    kind: scalar
+  eigenmode_growth_rate:  # W31: linear growth rate of an unstable eigenmode — evidence N=1 (gyrokinetics)
     aliases: []
     kind: scalar
   electric_field:
@@ -213,9 +237,6 @@ bases:
     aliases: []
     kind: vector
   energy_radial_diffusivity:
-    aliases: []
-    kind: scalar
-  energy_radial_diffusivity_on_ggd:
     aliases: []
     kind: scalar
   energy_source:
@@ -305,6 +326,9 @@ bases:
   heat_flux:
     aliases: []
     kind: scalar
+  heat_viscosity_current_density:  # W23A: j_heat_viscosity (edge_profiles/ggd/j_heat_viscosity, plasma_profiles/ggd/j_heat_viscosity) — evidence N=4
+    aliases: []
+    kind: vector
   heating_power:
     aliases: []
     kind: scalar
@@ -347,6 +371,9 @@ bases:
   ion_toroidal_velocity:
     aliases: []
     kind: scalar
+  ionization_potential:  # W31: ionization energy of atomic species — evidence N=1 (edge_plasma_physics)
+    aliases: []
+    kind: scalar
   kinetic_energy_density:
     aliases: []
     kind: scalar
@@ -366,6 +393,12 @@ bases:
   line_integrated_emissivity:
     aliases: []
     kind: scalar
+  logarithmic_density_gradient:  # W31: d ln(n)/dx, standard gyrokinetic drive parameter — evidence N=1 (gyrokinetics)
+    aliases: []
+    kind: scalar
+  logarithmic_temperature_gradient:  # W31: d ln(T)/dx, standard gyrokinetic drive parameter — evidence N=1 (gyrokinetics)
+    aliases: []
+    kind: scalar
   loop_voltage:
     aliases: []
     kind: scalar
@@ -376,6 +409,9 @@ bases:
     aliases: []
     kind: vector
   lower_outer_squareness:
+    aliases: []
+    kind: scalar
+  mach_number:  # W23A: mach_number_parallel (langmuir_probes/reciprocating/plunge/mach_number_parallel) — evidence N=3
     aliases: []
     kind: scalar
   magnetic_field:
@@ -426,9 +462,6 @@ bases:
   momentum_diffusivity:
     aliases: []
     kind: scalar
-  momentum_diffusivity_on_ggd:
-    aliases: []
-    kind: scalar
   momentum_flux:
     aliases: []
     kind: vector
@@ -439,9 +472,6 @@ bases:
     aliases: []
     kind: scalar
   momentum_radial_diffusivity:
-    aliases: []
-    kind: scalar
-  momentum_radial_diffusivity_on_ggd:
     aliases: []
     kind: scalar
   momentum_source:
@@ -474,6 +504,9 @@ bases:
   orbit_frequency:
     aliases: []
     kind: scalar
+  parallel_viscosity_current_density:  # W23A: j_parallel_viscosity (edge_profiles/ggd/j_parallel_viscosity, plasma_profiles/ggd/j_parallel_viscosity) — evidence N=4
+    aliases: []
+    kind: vector
   parameter:
     aliases: []
     kind: scalar
@@ -504,9 +537,9 @@ bases:
   particle_radial_diffusivity:
     aliases: []
     kind: scalar
-  particle_radial_diffusivity_on_ggd:
+  perpendicular_viscosity_current_density:  # W23A: j_perpendicular_viscosity (edge_profiles/ggd/j_perpendicular_viscosity, plasma_profiles/ggd/j_perpendicular_viscosity) — evidence N=4
     aliases: []
-    kind: scalar
+    kind: vector
   perturbed_electrostatic_potential_weight:
     aliases: []
     kind: scalar
@@ -585,6 +618,9 @@ bases:
   pressure:
     aliases: []
     kind: scalar
+  pressure_gradient:  # W31: spatial derivative of pressure ∇p — evidence N=1 (gyrokinetics, MHD)
+    aliases: []
+    kind: scalar
   pressure_gradient_alpha_parameter:
     aliases: []
     kind: scalar
@@ -655,7 +691,13 @@ bases:
   resistive_diffusion_time:
     aliases: []
     kind: scalar
+  resistivity:  # W23A: wall/*/resistivity, cryostat/*/resistivity — evidence N=6 (wall, cryostat, pf_active, tf)
+    aliases: []
+    kind: scalar
   resonant_magnetic_perturbation_occurrence:
+    aliases: []
+    kind: scalar
+  rotation_frequency:  # W23A: rotation_frequency_tor (core_profiles, plasma_profiles, edge_profiles) — evidence N=8+
     aliases: []
     kind: scalar
   rotational_pressure:
@@ -713,6 +755,9 @@ bases:
     aliases: []
     kind: scalar
   surface_voltage:
+    aliases: []
+    kind: scalar
+  sweep_duration:  # Added rc27: EMW pilot evidence N=3
     aliases: []
     kind: scalar
   temperature:
@@ -818,5 +863,8 @@ bases:
     aliases: []
     kind: scalar
   width:
+    aliases: []
+    kind: scalar
+  x1_width:  # Added rc27: EMW pilot evidence N=3
     aliases: []
     kind: scalar
