@@ -73,3 +73,13 @@ carriers:
     aliases: []
   x2_unit_vector:  # W38: companion to x1_unit_vector, local coordinate triad symmetry — evidence N=0 (symmetric addition)
     aliases: []
+
+  # === rc36 vocab gap closure (W38 wave-3 rotation) ===
+  poloidal_angle:  # rc36: poloidal angle coordinate (sensor orientation, equilibrium grids) — N=2
+    aliases: []
+  toroidal_angle:  # rc36: toroidal angle coordinate (sensor orientation, probe geometry) — N=1
+    aliases: []
+  normal_coordinate:  # rc36: Frenet-Serret normal-axis coordinate (conductor cross-section outlines) — N=1
+    aliases: []
+  binormal_coordinate:  # rc36: Frenet-Serret binormal-axis coordinate (conductor cross-section outlines) — N=1
+    aliases: []

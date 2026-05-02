@@ -317,6 +317,9 @@ loci:
   delta_position:
     type: position
     allowed_relations: [at, of]
+  diagnostic_component_centre:  # rc36: generic centre of diagnostic optical component (detector, aperture, grating) — N=7 across spectrometer/camera/neutron IDS
+    type: position
+    allowed_relations: [at, of]
   divertor_plate:
     type: position
     allowed_relations: [at, of]
@@ -332,6 +335,9 @@ loci:
   ece_channel_emission_position:
     type: position
     allowed_relations: [at, of]
+  emission_grid_point:  # rc36: generic emission-grid sampling point for geometry-matrix diagnostics — N=3 (camera_visible, neutron_diagnostic)
+    type: position
+    allowed_relations: [at, of]
   end_point:
     type: position
     allowed_relations: [at, of]
@@ -342,6 +348,9 @@ loci:
     type: position
     allowed_relations: [at, of]
   first_point_of_interferometer_beam:
+    type: position
+    allowed_relations: [at, of]
+  first_point_of_line_of_sight:  # rc36: generic first endpoint of a diagnostic line-of-sight chord — N=3 (bolometer, reflectometer_fluctuation)
     type: position
     allowed_relations: [at, of]
   first_wall:
@@ -510,6 +519,9 @@ loci:
     type: position
     allowed_relations: [at, of]
   second_point_of_interferometer_beam:
+    type: position
+    allowed_relations: [at, of]
+  second_point_of_line_of_sight:  # rc36: generic second endpoint of a diagnostic line-of-sight chord — N=2 (bolometer, reflectometer_fluctuation)
     type: position
     allowed_relations: [at, of]
   secondary_separatrix:
