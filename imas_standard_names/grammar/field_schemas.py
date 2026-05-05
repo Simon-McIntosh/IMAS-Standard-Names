@@ -174,7 +174,7 @@ DOCUMENTATION_GUIDANCE: dict[str, Any] = {
 
 FIELD_DESCRIPTIONS: dict[str, str] = {
     "name": "Standard name token: snake_case (^[a-z][a-z0-9_]*$); starts with a letter; no double '__'.",
-    "description": "One concise sentence summarizing the physical quantity. Keep under 120 characters for readability. Should be self-contained and understandable without external context.",
+    "description": "Concise summary of the physical quantity (1-3 sentences). Should be self-contained and understandable without external context.",
     "documentation": "Authoritative, self-contained documentation providing clear, comprehensive explanation of the physical quantity. This field must be fully standalone - a domain expert should understand the quantity completely without consulting external sources.",
     "unit": "Unit in fused dot-exponent style (auto-corrected to lexicographic token order). Tokens: alphanumerics only; join with '.'; exponents use ^ (e.g. m.s^-2). No '/', '*', or whitespace. Empty string for dimensionless.",
     "physics_domain": "Physics domain classification from PhysicsDomain enum. Determines catalog subdirectory.",
@@ -203,7 +203,7 @@ FIELD_CONSTRAINTS: dict[str, dict[str, Any]] = {
     "description": {
         "required": True,
         "type": "string",
-        "max_length": 180,
+        "max_length": 500,
     },
     "documentation": {
         "required": True,

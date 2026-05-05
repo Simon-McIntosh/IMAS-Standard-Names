@@ -313,8 +313,8 @@ entry_schema:
     description:
       required: true
       type: string
-      description: "One concise sentence summarizing the physical quantity. Keep under 120 characters for readability. Should be self-contained and understandable without external context."
-      max_length: 180
+      description: "Concise summary of the physical quantity (1-3 sentences). Should be self-contained and understandable without external context."
+      max_length: 500
       guidance:
         yaml_formatting: "Use plain unquoted style for simple text. Use single quotes if special characters needed."
         content_rules:
