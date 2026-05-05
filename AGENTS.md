@@ -8,6 +8,10 @@ IMAS Standard Names (ISN) is a **grammar library** and **read-only catalog serve
 
 **Project boundary**: ISN defines what a valid standard name *is*. [imas-codex](https://github.com/iterorganization/imas-codex) decides what standard names to *create*. See [docs/architecture/boundary.md](docs/architecture/boundary.md) for the full contract.
 
+> **Shared guardrails:** See `~/.agents/AGENTS.md` for git safety (banned
+> commands, stash rules), parallel agent rules, model selection, and commit
+> conventions. This file contains only repo-specific instructions.
+
 ## Fusion Physics and Geometry Context
 
 **Essential concepts for agents working with standard names:**
@@ -157,7 +161,7 @@ cd /home/ITER/mcintos/Code/imas-standard-names && uv run pytest
 - **Entry points**: Configure in `[project.scripts]` section of `pyproject.toml`
 
 ### Code Quality
-- **Pre-commit hooks**: Enabled for all commits
+- **Pre-commit hooks**: Enabled for all commits (ISN-specific: hooks run `ruff --fix` in modifying mode; this is safe here as ISN is a single-developer repo with no concurrent agent sessions writing the same files)
 - **Linting & formatting**: `ruff` (configuration in `pyproject.toml`)
 
 ### Security
@@ -194,11 +198,11 @@ BREAKING CHANGE: tags[0] replaced by dedicated physics_domain field.
 
 **Git workflow**:
 ```bash
-git status                      # Check current state
-git add -A                      # Stage all changes
-git commit -m 'message'         # Use single quotes (avoids bash ! expansion)
-git push origin main            # Push to fork
-git pull origin main            # Pull latest changes
+git status                          # Check current state
+git add <file1> <file2> ...         # Stage specific files (never git add -A)
+git commit -m 'message'             # Use single quotes (avoids bash ! expansion)
+git push origin main                # Push to fork
+git pull origin main                # Pull latest changes
 ```
 
 **Common gh commands**:
