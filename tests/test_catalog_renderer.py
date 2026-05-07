@@ -112,22 +112,24 @@ def test_catalog_renderer_render_catalog_groups_by_physics_domain(tmp_path: Path
     # Names appear verbatim
     assert "electron_temperature" in catalog
     assert "ion_temperature" in catalog
-    # Unit still rendered (now inline with title)
-    assert "`eV`" in catalog
+    # Unit still rendered (now as styled badge)
+    assert "sn-unit" in catalog and "eV" in catalog
 
 
 def test_catalog_renderer_render_catalog_raw_base_name(tmp_path: Path):
-    """Base name heading uses humanized text with count."""
+    """Base name heading uses humanized text (subject + physical_base)."""
     catalog_path = _make_test_catalog(tmp_path)
     renderer = CatalogRenderer(catalog_path)
     catalog = renderer.render_catalog()
 
-    # Should see humanized base name with count in an H3
-    assert "### temperature" in catalog
+    # Should see humanized base name (subject + physical_base) in an H3
+    assert "### electron temperature" in catalog or "### ion temperature" in catalog
     # Entries use card-style divs, not H4 headings
     assert '<div class="sn-card"' in catalog
     # Should NOT see old backtick style
     assert "### `" not in catalog
+    # Should NOT see count in parentheses
+    assert "###" in catalog and "(" not in catalog.split("###")[1].split("\n")[0]
 
 
 def test_catalog_renderer_render_catalog_no_cocos_no_tags(tmp_path: Path):
@@ -168,9 +170,9 @@ def test_catalog_renderer_render_navigation(tmp_path: Path):
 
     # Navigation section uses title-cased domain
     assert "Transport" in nav
-    # Navigation now shows base groups with counts, not individual names
+    # Navigation shows base groups without counts
     assert "temperature" in nav
-    assert "(2)" in nav
+    assert "(2)" not in nav  # Counts removed for cleaner nav
 
 
 def test_catalog_renderer_loads_from_subdirectories(tmp_path: Path):
@@ -359,23 +361,23 @@ def test_catalog_render_no_sources_block_when_absent(tmp_path: Path):
 def test_parse_base_strips_transformation_residue():
     """Transformed names (derivative, tendency) group under the inner base quantity."""
     base = CatalogRenderer._parse_base
-    # Derivatives should resolve to the inner quantity's physical_base
+    # Derivatives should resolve to subject + physical_base of inner quantity
     assert (
         base(
             "derivative_of_electron_density_with_respect_to_normalized_toroidal_flux_coordinate"
         )
-        == "density"
+        == "electron_density"
     )
-    assert base("tendency_of_fast_electron_density") == "density"
+    assert base("tendency_of_fast_electron_density") == "fast_electron_density"
     assert (
         base(
             "second_derivative_of_fast_electron_density_with_respect_to_normalized_toroidal_flux_coordinate"
         )
-        == "density"
+        == "fast_electron_density"
     )
-    # Non-transformed names work as before
-    assert base("electron_temperature") == "temperature"
-    assert base("electron_density") == "density"
+    # Non-transformed names include subject
+    assert base("electron_temperature") == "electron_temperature"
+    assert base("electron_density") == "electron_density"
     assert base("toroidal_component_of_current_density") == "current_density"
     # Parse failures fall back to 'unknown'
     assert base("!!!invalid!!!") == "unknown"

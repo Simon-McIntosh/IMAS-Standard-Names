@@ -156,8 +156,8 @@ class CatalogRenderer:
         """Extract base name from a standard name for catalog grouping.
 
         Uses the ISN grammar parser to extract the core physical quantity.
-        For transformed names (derivative_of_X, tendency_of_X), recursively
-        parses the inner expression to find the true base quantity.
+        For transformed names (derivative_of_X, tendency_of_X), extracts the
+        inner quantity so all derivatives of the same base group together.
         """
         try:
             from ..grammar.model import parse_standard_name  # noqa: PLC0415
@@ -165,24 +165,22 @@ class CatalogRenderer:
             parsed = parse_standard_name(name)
             base = parsed.physical_base or parsed.geometric_base or "unknown"
 
-            # Transformed names leave "of_X_with_respect_to_Y" in physical_base.
-            # Strip the transformation residue to get the inner quantity.
+            # Transformed names leave residue in physical_base.
+            # Strip transformation prefixes to find the true base quantity.
+            # e.g. "of_electron_density_with_respect_to_..." → "electron_density"
             if base.startswith("of_"):
                 inner = base[3:]
                 # Strip "with_respect_to_..." suffix (derivative denominator)
                 wrt_idx = inner.find("_with_respect_to_")
                 if wrt_idx >= 0:
                     inner = inner[:wrt_idx]
-                # Re-parse the inner name to extract its true base
-                try:
-                    inner_parsed = parse_standard_name(inner)
-                    base = (
-                        inner_parsed.physical_base
-                        or inner_parsed.geometric_base
-                        or inner
-                    )
-                except Exception:
-                    base = inner
+                base = inner
+
+            # If subject is present, include it for better grouping
+            # e.g. "electron" + "density" → "electron_density"
+            subject = getattr(parsed, "subject", None)
+            if subject and not base.startswith(subject):
+                base = f"{subject}_{base}"
 
             return base
         except Exception:
@@ -232,7 +230,8 @@ class CatalogRenderer:
         """Emit a Mermaid hierarchy block when structural fields exist.
 
         Uses short node IDs with humanized display labels to prevent
-        text overflow in diagrams.
+        text overflow in diagrams. Nodes are clickable — linking to
+        the corresponding entry's anchor on the same page.
         """
         arguments = item.get("arguments") or []
         error_variants = item.get("error_variants") or {}
@@ -287,6 +286,12 @@ class CatalogRenderer:
         if superseded_by:
             tgt = _decl(superseded_by)
             lines.append(f'  {src} -- "superseded by" --> {tgt}')
+
+        # Make nodes clickable — link to in-page anchors
+        for full_name, nid in nodes.items():
+            if full_name != name:  # Don't link to self
+                lines.append(f'  click {nid} "#{full_name}"')
+
         lines.append("```")
         return "\n".join(lines) + "\n\n"
 
@@ -369,54 +374,63 @@ class CatalogRenderer:
         return "\n".join(lines) + "\n"
 
     def _render_entry(self, item: dict, wrapped_by: dict[str, list[str]]) -> str:
-        """Render a single standard name entry as a card block."""
-        result = ""
+        """Render a single standard name entry as a compact browsable card."""
         name = item.get("name", "Unknown")
         unit = item.get("unit", "")
         description = _rewrite_name_links(item.get("description", ""))
         documentation = _rewrite_name_links(
             self._fix_markdown_formatting(item.get("documentation", ""))
         )
-        status = item.get("status", "")
         kind = item.get("kind", "")
 
-        # Anchored card title (not a heading — keeps TOC clean)
-        human_name = _humanize(name)
-        result += f'<div class="sn-card" id="{name}" markdown>\n\n'
-        result += f"**{human_name}**"
+        # Compact card with anchor
+        result = f'<div class="sn-card" id="{name}" markdown>\n\n'
 
-        # Compact inline metadata
-        meta_parts: list[str] = []
+        # Title line: name with inline metadata badge
+        result += f'<span class="sn-name">{name}</span>'
+        badges: list[str] = []
         if unit:
-            meta_parts.append(f"`{unit}`")
+            badges.append(f'<code class="sn-unit">{unit}</code>')
         if kind:
-            meta_parts.append(kind)
-        if status:
-            meta_parts.append(status.lower())
-        if meta_parts:
-            result += " — " + " · ".join(meta_parts)
+            badges.append(f'<span class="sn-kind">{kind}</span>')
+        if badges:
+            result += " " + " ".join(badges)
         result += "\n{: .sn-title }\n\n"
 
-        # Description (always visible)
+        # Description (always visible — the primary browsing content)
         if description:
             result += f"{description}\n\n"
 
-        # Documentation (collapsible when long)
+        # Documentation + links + relationships in single collapsible block
+        details_parts: list[str] = []
         if documentation:
-            if len(documentation) > 400:
-                result += (
-                    "<details markdown>\n"
-                    "<summary>Documentation</summary>\n\n"
-                    f"{documentation}\n\n"
-                    "</details>\n\n"
-                )
-            else:
-                result += f"{documentation}\n\n"
+            details_parts.append(documentation)
 
-        result += self._render_links(item.get("links", []))
-        result += self._render_mermaid(item)
-        result += self._render_sibling_nav(item, wrapped_by)
-        result += self._render_sources(item.get("sources") or [])
+        # Mermaid relationship diagram (clickable nodes link to entries)
+        mermaid_md = self._render_mermaid(item)
+        if mermaid_md:
+            details_parts.append(mermaid_md)
+
+        links_md = self._render_links(item.get("links", []))
+        if links_md:
+            details_parts.append(links_md)
+
+        sibling_md = self._render_sibling_nav(item, wrapped_by)
+        if sibling_md:
+            details_parts.append(sibling_md)
+
+        sources_md = self._render_sources(item.get("sources") or [])
+        if sources_md:
+            details_parts.append(sources_md)
+
+        if details_parts:
+            result += (
+                "<details markdown>\n"
+                "<summary>Details</summary>\n\n"
+                + "\n\n".join(details_parts)
+                + "\n</details>\n\n"
+            )
+
         result += "</div>\n\n"
         return result
 
@@ -453,8 +467,7 @@ class CatalogRenderer:
 
         for base_name in sorted(base_groups.keys()):
             base_items = base_groups[base_name]
-            count = len(base_items)
-            result += f"## {_humanize(base_name)} ({count}) {{: #{base_name} }}\n\n"
+            result += f"## {_humanize(base_name)} {{: #{base_name} }}\n\n"
 
             sorted_items = sorted(base_items, key=lambda x: x.get("name", ""))
             for item in sorted_items:
@@ -496,10 +509,7 @@ class CatalogRenderer:
 
             for base_name in sorted(base_groups.keys()):
                 base_items = base_groups[base_name]
-                count = len(base_items)
-                result += (
-                    f"### {_humanize(base_name)} ({count}) {{: #{base_name} }}\n\n"
-                )
+                result += f"### {_humanize(base_name)} {{: #{base_name} }}\n\n"
 
                 sorted_items = sorted(base_items, key=lambda x: x.get("name", ""))
                 for item in sorted_items:
@@ -618,8 +628,7 @@ class CatalogRenderer:
                 base_groups[base] += 1
 
             for base_name in sorted(base_groups.keys()):
-                count = base_groups[base_name]
-                result += f"- [{_humanize(base_name)} ({count})](#{base_name})\n"
+                result += f"- [{_humanize(base_name)}](#{base_name})\n"
 
             result += "\n"
 
