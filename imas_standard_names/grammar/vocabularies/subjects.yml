@@ -77,13 +77,9 @@
 - ion_charge_state             # specific atomic charge state of an ion
 - neutral_state                # electronic/vibrational state of a neutral
 # Orbital-class resolved fast populations (distribution_sources / distributions).
-- trapped_fast_ion             # trapped fast-ion population
-- co_passing_fast_ion          # co-passing fast-ion population
-- counter_passing_fast_ion     # counter-passing fast-ion population
-- trapped_fast_particle        # trapped fast-particle population (generic)
-- co_passing_fast_particle     # co-passing fast-particle population
-- counter_passing_fast_particle # counter-passing fast-particle population
-- trapped_particle             # trapped particle population (thermal or fast)
+# NOTE: orbit class alone (trapped, co_passing, counter_passing) is the subject.
+# The species qualifier (fast_ion, fast_particle, particle) is part of physical_base
+# to ensure consistent grouping (all orbit variants of the same quantity together).
 # Gyrokinetic representation.
 - gyrocenter                   # gyrocentre distribution representation
 # Halo / pellet / SPI populations.

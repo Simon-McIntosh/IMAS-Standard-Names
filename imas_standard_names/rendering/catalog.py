@@ -153,11 +153,16 @@ class CatalogRenderer:
 
     @staticmethod
     def _parse_base(name: str) -> str:
-        """Extract base name from a standard name for catalog grouping.
+        """Extract base physical quantity for catalog grouping.
 
-        Uses the ISN grammar parser to extract the core physical quantity.
-        For transformed names (derivative_of_X, tendency_of_X), extracts the
-        inner quantity so all derivatives of the same base group together.
+        Uses the ISN grammar parser directly — no heuristic stripping.
+        Groups by physical_base (or geometric_base), which the parser
+        extracts after consuming all prefix segments (subject, component,
+        coordinate, transformation, etc.).
+
+        When a transformation is present, the parser leaves residue
+        (of_*, _with_respect_to_*) in physical_base — strip it so
+        derivatives group with their base quantity.
         """
         try:
             from ..grammar.model import parse_standard_name  # noqa: PLC0415
@@ -165,24 +170,19 @@ class CatalogRenderer:
             parsed = parse_standard_name(name)
             base = parsed.physical_base or parsed.geometric_base or "unknown"
 
-            # Transformed names leave residue in physical_base.
-            # Strip transformation prefixes to find the true base quantity.
-            # e.g. "of_electron_density_with_respect_to_..." → "electron_density"
-            if base.startswith("of_"):
-                inner = base[3:]
-                # Strip "with_respect_to_..." suffix (derivative denominator)
-                wrt_idx = inner.find("_with_respect_to_")
-                if wrt_idx >= 0:
-                    inner = inner[:wrt_idx]
-                base = inner
+            # Strip transformation residue for grouping
+            if parsed.transformation and base.startswith("of_"):
+                base = base[3:]  # Remove "of_" prefix
+                # Remove "_with_respect_to_*" suffix
+                wrt_idx = base.find("_with_respect_to_")
+                if wrt_idx > 0:
+                    base = base[:wrt_idx]
 
-            # If subject is present, include it for better grouping
-            # e.g. "electron" + "density" → "electron_density"
-            subject = getattr(parsed, "subject", None)
-            if subject and not base.startswith(subject):
-                base = f"{subject}_{base}"
+            # Prepend subject for readable grouping (electron_density, not just density)
+            if parsed.subject and base != "unknown":
+                base = f"{parsed.subject}_{base}"
 
-            return base
+            return base or "unknown"
         except Exception:
             return "unknown"
 
@@ -374,7 +374,7 @@ class CatalogRenderer:
         return "\n".join(lines) + "\n"
 
     def _render_entry(self, item: dict, wrapped_by: dict[str, list[str]]) -> str:
-        """Render a single standard name entry as a compact browsable card."""
+        """Render a single standard name entry — minimal clean layout."""
         name = item.get("name", "Unknown")
         unit = item.get("unit", "")
         description = _rewrite_name_links(item.get("description", ""))
@@ -383,30 +383,26 @@ class CatalogRenderer:
         )
         kind = item.get("kind", "")
 
-        # Compact card with anchor
-        result = f'<div class="sn-card" id="{name}" markdown>\n\n'
+        # Clean entry with anchor — just text, indentation, divider
+        result = f'<div class="sn-entry" id="{name}" markdown>\n\n'
 
-        # Title line: name with inline metadata badge
-        result += f'<span class="sn-name">{name}</span>'
-        badges: list[str] = []
+        # Name line: monospace, with unit/kind inline
+        meta = ""
         if unit:
-            badges.append(f'<code class="sn-unit">{unit}</code>')
+            meta += f" `{unit}`"
         if kind:
-            badges.append(f'<span class="sn-kind">{kind}</span>')
-        if badges:
-            result += " " + " ".join(badges)
-        result += "\n{: .sn-title }\n\n"
+            meta += f" _{kind}_"
+        result += f"`{name}`{meta}\n\n"
 
-        # Description (always visible — the primary browsing content)
+        # Description indented
         if description:
-            result += f"{description}\n\n"
+            result += f":   {description}\n\n"
 
-        # Documentation + links + relationships in single collapsible block
+        # All detail in collapsible — ultra-minimal
         details_parts: list[str] = []
         if documentation:
             details_parts.append(documentation)
 
-        # Mermaid relationship diagram (clickable nodes link to entries)
         mermaid_md = self._render_mermaid(item)
         if mermaid_md:
             details_parts.append(mermaid_md)
@@ -426,7 +422,7 @@ class CatalogRenderer:
         if details_parts:
             result += (
                 "<details markdown>\n"
-                "<summary>Details</summary>\n\n"
+                "<summary>more</summary>\n\n"
                 + "\n\n".join(details_parts)
                 + "\n</details>\n\n"
             )

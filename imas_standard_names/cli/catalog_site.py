@@ -123,107 +123,70 @@ extra_javascript:
 """
 
 CATALOG_CSS = """\
-/* Standard Names Catalog — Compact Browsable Design */
+/* Standard Names Catalog — Minimal Reference Design */
 
-/* Entry cards — minimal chrome, focus on content */
-.sn-card {
-    margin: 0.5rem 0 1rem;
-    padding: 0.75rem 1rem;
-    border-left: 3px solid var(--md-primary-fg-color--light);
-    border-radius: 0 4px 4px 0;
-    background: var(--md-code-bg-color);
-    transition: border-color 0.2s, background 0.2s;
+/* Entry — clean text with subtle separator */
+.sn-entry {
+    padding: 0.6rem 0 0.6rem 1.2rem;
+    border-bottom: 1px solid #e8e8e8;
 }
 
-.sn-card:target {
-    border-left-color: var(--md-accent-fg-color);
-    background: color-mix(in srgb, var(--md-accent-fg-color) 4%, var(--md-code-bg-color));
+.sn-entry:target {
+    background: #f8f9fa;
 }
 
-.sn-card:hover {
-    border-left-color: var(--md-primary-fg-color);
-}
-
-/* Title line: monospace name + badges */
-.sn-card .sn-title {
-    margin: 0 0 0.3rem;
-    font-size: 0.92rem;
-    line-height: 1.4;
-}
-
-.sn-card .sn-name {
-    font-family: var(--md-code-font-family);
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--md-code-fg-color);
-    overflow-wrap: anywhere;
-}
-
-.sn-card .sn-unit {
-    font-size: 0.78rem;
-    padding: 0.1em 0.35em;
-    border-radius: 3px;
-    background: color-mix(in srgb, var(--md-primary-fg-color) 10%, var(--md-default-bg-color));
-    color: var(--md-primary-fg-color);
-    margin-left: 0.4rem;
-}
-
-.sn-card .sn-kind {
-    font-size: 0.75rem;
-    padding: 0.1em 0.35em;
-    border-radius: 3px;
-    background: color-mix(in srgb, var(--md-accent-fg-color) 10%, var(--md-default-bg-color));
-    color: var(--md-accent-fg-color);
-    margin-left: 0.3rem;
-}
-
-/* Description text — compact */
-.sn-card > p {
-    margin: 0.25rem 0;
+/* Inline code for name — slightly larger, distinct */
+.sn-entry > p:first-child code {
     font-size: 0.88rem;
-    line-height: 1.45;
-    color: var(--md-default-fg-color--light);
+    font-weight: 500;
+    background: none;
+    padding: 0;
+    color: #1a1a2e;
 }
 
-/* Collapsed details — minimal styling */
-.sn-card details {
-    margin: 0.4rem 0 0;
-    font-size: 0.85rem;
+/* Description as definition list indent */
+.sn-entry > dl {
+    margin: 0.2rem 0 0.3rem;
 }
 
-.sn-card details summary {
+.sn-entry > dl > dd {
+    margin-left: 0;
+    font-size: 0.87rem;
+    line-height: 1.5;
+    color: #444;
+}
+
+/* Collapsed details — barely visible until needed */
+.sn-entry details {
+    margin: 0.2rem 0 0;
+    font-size: 0.84rem;
+}
+
+.sn-entry details summary {
     cursor: pointer;
-    font-size: 0.8rem;
-    color: var(--md-default-fg-color--lighter);
+    font-size: 0.78rem;
+    color: #999;
     user-select: none;
+    font-style: italic;
 }
 
-.sn-card details summary:hover {
-    color: var(--md-primary-fg-color);
+.sn-entry details summary:hover {
+    color: #555;
 }
 
-.sn-card details[open] summary {
-    margin-bottom: 0.4rem;
-    color: var(--md-primary-fg-color);
+.sn-entry details[open] {
+    padding: 0.3rem 0 0;
+    color: #555;
 }
 
-.sn-card details[open] {
-    padding: 0.4rem 0.6rem;
-    border-top: 1px solid var(--md-default-fg-color--lightest);
-}
-
-/* Links within cards */
-.sn-card a[href^=\\"#\\"] {
-    overflow-wrap: anywhere;
-    font-size: 0.85rem;
-}
-
-/* Base group headings — clean section dividers */
+/* Base group headings — thin grey line */
 h2 {
-    border-bottom: 2px solid var(--md-primary-fg-color--light);
-    padding-bottom: 0.3rem;
-    margin-top: 2rem;
-    font-size: 1.3rem;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 0.2rem;
+    margin-top: 1.8rem;
+    font-size: 1.15rem;
+    font-weight: 500;
+    color: #333;
 }
 
 /* Domain overview table */
@@ -233,7 +196,7 @@ h2 {
 
 .md-typeset table:not([class]) td,
 .md-typeset table:not([class]) th {
-    padding: 0.5rem 0.75rem;
+    padding: 0.4rem 0.6rem;
 }
 """
 

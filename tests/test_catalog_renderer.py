@@ -112,20 +112,21 @@ def test_catalog_renderer_render_catalog_groups_by_physics_domain(tmp_path: Path
     # Names appear verbatim
     assert "electron_temperature" in catalog
     assert "ion_temperature" in catalog
-    # Unit still rendered (now as styled badge)
-    assert "sn-unit" in catalog and "eV" in catalog
+    # Unit still rendered (now as inline code)
+    assert "`eV`" in catalog
 
 
 def test_catalog_renderer_render_catalog_raw_base_name(tmp_path: Path):
-    """Base name heading uses humanized text (subject + physical_base)."""
+    """Base name heading uses humanized physical_base text."""
     catalog_path = _make_test_catalog(tmp_path)
     renderer = CatalogRenderer(catalog_path)
     catalog = renderer.render_catalog()
 
-    # Should see humanized base name (subject + physical_base) in an H3
-    assert "### electron temperature" in catalog or "### ion temperature" in catalog
-    # Entries use card-style divs, not H4 headings
-    assert '<div class="sn-card"' in catalog
+    # Should see subject+physical_base in H3 headings (parser returns subject_base)
+    assert "### electron temperature" in catalog
+    assert "### ion temperature" in catalog
+    # Entries use minimal div styling
+    assert '<div class="sn-entry"' in catalog
     # Should NOT see old backtick style
     assert "### `" not in catalog
     # Should NOT see count in parentheses
