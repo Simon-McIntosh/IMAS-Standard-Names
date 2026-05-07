@@ -92,7 +92,13 @@ bases:
   collected_ion_current:
     aliases: []
     kind: scalar
+  collisional_power_density:  # rc38: W/m³ volumetric collision heating
+    aliases: []
+    kind: scalar
   collisional_toroidal_torque_density:
+    aliases: []
+    kind: scalar
+  collisional_torque_density:  # rc38: N/m² collision torque (generic direction)
     aliases: []
     kind: scalar
   collisionality:
@@ -134,6 +140,9 @@ bases:
   critical_temperature:
     aliases: []
     kind: scalar
+  cross_sectional_area:  # rc38: m² — probe/antenna/element geometry
+    aliases: []
+    kind: scalar
   current:
     aliases: []
     kind: scalar
@@ -165,6 +174,9 @@ bases:
     aliases: []
     kind: scalar
   diagnostic_latency:  # Added rc27: EMW pilot evidence N=4
+    aliases: []
+    kind: scalar
+  diffusion_coefficient:  # rc38: m²/s transport quantity (energy/particle/momentum diffusion)
     aliases: []
     kind: scalar
   diffusivity:
@@ -264,6 +276,9 @@ bases:
     aliases: []
     kind: scalar
   flow:
+    aliases: []
+    kind: scalar
+  flow_damping_rate:  # rc38: s⁻¹ — momentum flow damping
     aliases: []
     kind: scalar
   flux:
@@ -540,6 +555,9 @@ bases:
   particle_radial_diffusivity:
     aliases: []
     kind: scalar
+  particle_source_rate:  # rc38: s⁻¹·m⁻³ — volumetric particle source
+    aliases: []
+    kind: scalar
   perpendicular_viscosity_current_density:  # W23A: j_perpendicular_viscosity (edge_profiles/ggd/j_perpendicular_viscosity, plasma_profiles/ggd/j_perpendicular_viscosity) — evidence N=4
     aliases: []
     kind: vector
@@ -607,6 +625,9 @@ bases:
     aliases: []
     kind: scalar
   power:
+    aliases: []
+    kind: scalar
+  power_density:  # rc38: W/m³ — volumetric power
     aliases: []
     kind: scalar
   power_flux_density:
@@ -743,6 +764,9 @@ bases:
     aliases: []
     kind: scalar
   source:
+    aliases: []
+    kind: scalar
+  speed:  # rc38: m/s — scalar speed (magnitude of velocity)
     aliases: []
     kind: scalar
   sputtering_angle_of_incidence:

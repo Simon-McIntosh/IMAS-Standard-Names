@@ -57,6 +57,7 @@ from imas_standard_names.grammar.ir import (
     QuantityOrCarrier,
     StandardNameIR,
 )
+from imas_standard_names.grammar.model_types import Subject
 from imas_standard_names.grammar.render import compose
 
 __all__ = [
@@ -118,8 +119,12 @@ def load_default_vocabularies() -> Vocabularies:
 
     Falls back to an empty set for any registry whose YAML stub is empty
     (physical_bases.yml, geometry_carriers.yml are populated by W2a).
-    """
 
+    Qualifiers are populated from:
+    - ``Subject`` enum tokens (electron, ion, deuterium, …)
+    - Physics modifier tokens (energy, particle, momentum, …) that act as
+      recursive prefixes before a physical_base.
+    """
     axes_reg = vocab_loaders.load_coordinate_axes()
     loci_reg = vocab_loaders.load_locus_registry()
     ops_reg = vocab_loaders.load_operators()
@@ -144,13 +149,43 @@ def load_default_vocabularies() -> Vocabularies:
             "arg_types": entry.arg_types,
         }
 
+    # Build qualifier set: Subject tokens + physics modifier prefixes.
+    # Tokens that are also in bases/carriers are safe — the parser tries
+    # full base match first; qualifiers only strip recursively when the
+    # full string is NOT itself a registered base or carrier.
+    subject_quals = frozenset(s.value for s in Subject)
+    modifier_quals = frozenset(
+        {
+            "energy",
+            "particle",
+            "momentum",
+            "heat",
+            "total",
+            "collisional",
+            "thermal",
+            "nuclear",
+            "net",
+            "ohmic",
+            "inductive",
+            "non_inductive",
+            "trapped",
+            "co_passing",
+            "counter_passing",
+            "fast",
+            "ferritic",
+            "waste",
+            "direction",
+        }
+    )
+    qualifiers = subject_quals | modifier_quals
+
     return Vocabularies(
         axes=frozenset(axes_reg.axes),
         loci=loci,
         operators=operators,
         bases=frozenset(bases_reg.bases),
         carriers=frozenset(carriers_reg.carriers),
-        qualifiers=frozenset(),  # W2a populates via species/source_entity closure
+        qualifiers=qualifiers,
     )
 
 
