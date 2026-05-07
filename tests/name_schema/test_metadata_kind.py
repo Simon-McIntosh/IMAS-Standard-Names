@@ -127,13 +127,9 @@ def test_metadata_entry_all_optional_fields():
         documentation="Region outside the last closed flux surface.",
         status="active",
         links=["name:plasma_boundary"],
-        validity_domain="edge_plasma",
-        constraints=["flux_surface > separatrix"],
     )
     assert entry.kind == "metadata"
     assert entry.status == "active"
-    assert len(entry.constraints) == 1
-    assert entry.validity_domain == "edge_plasma"
 
 
 def test_metadata_entry_governance_fields():

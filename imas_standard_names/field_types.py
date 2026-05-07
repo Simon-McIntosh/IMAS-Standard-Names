@@ -64,14 +64,6 @@ Links = Annotated[
     ),
 ]
 
-Constraints = Annotated[
-    list[str],
-    Field(
-        description=FIELD_DESCRIPTIONS["constraints"],
-        examples=FIELD_CONSTRAINTS["constraints"]["examples"],
-    ),
-]
-
 Description = Annotated[
     str,
     Field(
@@ -87,14 +79,6 @@ Documentation = Annotated[
     ),
 ]
 
-Domain = Annotated[
-    str,
-    Field(
-        description=FIELD_DESCRIPTIONS["validity_domain"],
-        examples=FIELD_CONSTRAINTS["validity_domain"]["examples"],
-    ),
-]
-
 __all__ = [
     "STANDARD_NAME_PATTERN",
     "UNIT_PATTERN",
@@ -102,8 +86,6 @@ __all__ = [
     "Unit",
     "PhysicsDomainField",
     "Links",
-    "Constraints",
     "Description",
     "Documentation",
-    "Domain",
 ]

@@ -88,8 +88,6 @@ class FetchTool(CatalogTool):
                     "documentation": entry.documentation,
                     "status": entry.status,
                     "kind": entry.kind,
-                    "validity_domain": entry.validity_domain,
-                    "constraints": entry.constraints,
                     "grammar": grammar_parts,
                     "provenance": {
                         "superseded_by": entry.superseded_by,

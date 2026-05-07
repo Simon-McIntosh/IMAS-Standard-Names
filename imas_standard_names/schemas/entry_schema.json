@@ -279,38 +279,6 @@
           "title": "Documentation",
           "type": "string"
         },
-        "validity_domain": {
-          "default": "",
-          "description": "Controlled vocabulary region of validity",
-          "examples": [
-            "core_plasma",
-            "edge_plasma",
-            "vacuum",
-            "whole_plasma"
-          ],
-          "title": "Validity Domain",
-          "type": "string"
-        },
-        "constraints": {
-          "description": "Physical or mathematical constraints that must be satisfied (e.g. 'T_e > 0', 'kappa >= 1')",
-          "examples": [
-            [
-              "T_e > 0"
-            ],
-            [
-              "n_e >= 0",
-              "n_e < 1e22 m^-3"
-            ],
-            [
-              "kappa >= 1"
-            ]
-          ],
-          "items": {
-            "type": "string"
-          },
-          "title": "Constraints",
-          "type": "array"
-        },
         "links": {
           "description": "Internal cross-references to related standard names only. Use format 'name:standard_name_token' (e.g., 'name:plasma_boundary'). Internal references are validated against the catalog.",
           "items": {
@@ -520,38 +488,6 @@
           "title": "Documentation",
           "type": "string"
         },
-        "validity_domain": {
-          "default": "",
-          "description": "Controlled vocabulary region of validity",
-          "examples": [
-            "core_plasma",
-            "edge_plasma",
-            "vacuum",
-            "whole_plasma"
-          ],
-          "title": "Validity Domain",
-          "type": "string"
-        },
-        "constraints": {
-          "description": "Physical or mathematical constraints that must be satisfied (e.g. 'T_e > 0', 'kappa >= 1')",
-          "examples": [
-            [
-              "T_e > 0"
-            ],
-            [
-              "n_e >= 0",
-              "n_e < 1e22 m^-3"
-            ],
-            [
-              "kappa >= 1"
-            ]
-          ],
-          "items": {
-            "type": "string"
-          },
-          "title": "Constraints",
-          "type": "array"
-        },
         "links": {
           "description": "Internal cross-references to related standard names only. Use format 'name:standard_name_token' (e.g., 'name:plasma_boundary'). Internal references are validated against the catalog.",
           "items": {
@@ -715,38 +651,6 @@
           "description": "Authoritative, self-contained documentation providing clear, comprehensive explanation of the physical quantity. This field must be fully standalone - a domain expert should understand the quantity completely without consulting external sources.",
           "title": "Documentation",
           "type": "string"
-        },
-        "validity_domain": {
-          "default": "",
-          "description": "Controlled vocabulary region of validity",
-          "examples": [
-            "core_plasma",
-            "edge_plasma",
-            "vacuum",
-            "whole_plasma"
-          ],
-          "title": "Validity Domain",
-          "type": "string"
-        },
-        "constraints": {
-          "description": "Physical or mathematical constraints that must be satisfied (e.g. 'T_e > 0', 'kappa >= 1')",
-          "examples": [
-            [
-              "T_e > 0"
-            ],
-            [
-              "n_e >= 0",
-              "n_e < 1e22 m^-3"
-            ],
-            [
-              "kappa >= 1"
-            ]
-          ],
-          "items": {
-            "type": "string"
-          },
-          "title": "Constraints",
-          "type": "array"
         },
         "links": {
           "description": "Internal cross-references to related standard names only. Use format 'name:standard_name_token' (e.g., 'name:plasma_boundary'). Internal references are validated against the catalog.",
@@ -957,38 +861,6 @@
           "title": "Documentation",
           "type": "string"
         },
-        "validity_domain": {
-          "default": "",
-          "description": "Controlled vocabulary region of validity",
-          "examples": [
-            "core_plasma",
-            "edge_plasma",
-            "vacuum",
-            "whole_plasma"
-          ],
-          "title": "Validity Domain",
-          "type": "string"
-        },
-        "constraints": {
-          "description": "Physical or mathematical constraints that must be satisfied (e.g. 'T_e > 0', 'kappa >= 1')",
-          "examples": [
-            [
-              "T_e > 0"
-            ],
-            [
-              "n_e >= 0",
-              "n_e < 1e22 m^-3"
-            ],
-            [
-              "kappa >= 1"
-            ]
-          ],
-          "items": {
-            "type": "string"
-          },
-          "title": "Constraints",
-          "type": "array"
-        },
         "links": {
           "description": "Internal cross-references to related standard names only. Use format 'name:standard_name_token' (e.g., 'name:plasma_boundary'). Internal references are validated against the catalog.",
           "items": {
@@ -1197,38 +1069,6 @@
           "description": "Authoritative, self-contained documentation providing clear, comprehensive explanation of the physical quantity. This field must be fully standalone - a domain expert should understand the quantity completely without consulting external sources.",
           "title": "Documentation",
           "type": "string"
-        },
-        "validity_domain": {
-          "default": "",
-          "description": "Controlled vocabulary region of validity",
-          "examples": [
-            "core_plasma",
-            "edge_plasma",
-            "vacuum",
-            "whole_plasma"
-          ],
-          "title": "Validity Domain",
-          "type": "string"
-        },
-        "constraints": {
-          "description": "Physical or mathematical constraints that must be satisfied (e.g. 'T_e > 0', 'kappa >= 1')",
-          "examples": [
-            [
-              "T_e > 0"
-            ],
-            [
-              "n_e >= 0",
-              "n_e < 1e22 m^-3"
-            ],
-            [
-              "kappa >= 1"
-            ]
-          ],
-          "items": {
-            "type": "string"
-          },
-          "title": "Constraints",
-          "type": "array"
         },
         "links": {
           "description": "Internal cross-references to related standard names only. Use format 'name:standard_name_token' (e.g., 'name:plasma_boundary'). Internal references are validated against the catalog.",

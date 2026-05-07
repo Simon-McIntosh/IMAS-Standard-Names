@@ -153,15 +153,38 @@ class CatalogRenderer:
 
     @staticmethod
     def _parse_base(name: str) -> str:
-        """Extract base name from a standard name.
+        """Extract base name from a standard name for catalog grouping.
 
-        Attempts to parse using grammar, falls back to 'unknown'.
+        Uses the ISN grammar parser to extract the core physical quantity.
+        For transformed names (derivative_of_X, tendency_of_X), recursively
+        parses the inner expression to find the true base quantity.
         """
         try:
             from ..grammar.model import parse_standard_name  # noqa: PLC0415
 
             parsed = parse_standard_name(name)
-            return parsed.physical_base or parsed.geometric_base or "unknown"
+            base = parsed.physical_base or parsed.geometric_base or "unknown"
+
+            # Transformed names leave "of_X_with_respect_to_Y" in physical_base.
+            # Strip the transformation residue to get the inner quantity.
+            if base.startswith("of_"):
+                inner = base[3:]
+                # Strip "with_respect_to_..." suffix (derivative denominator)
+                wrt_idx = inner.find("_with_respect_to_")
+                if wrt_idx >= 0:
+                    inner = inner[:wrt_idx]
+                # Re-parse the inner name to extract its true base
+                try:
+                    inner_parsed = parse_standard_name(inner)
+                    base = (
+                        inner_parsed.physical_base
+                        or inner_parsed.geometric_base
+                        or inner
+                    )
+                except Exception:
+                    base = inner
+
+            return base
         except Exception:
             return "unknown"
 

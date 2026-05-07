@@ -193,21 +193,6 @@ class TestFetchMetadata:
         assert len(derived_from) > 0
         assert "electron_temperature" in derived_from
 
-    def test_fetch_constraints_and_validity(self, fetch_tool, catalog):
-        """Test constraints and validity domain."""
-        all_names = catalog.list_names()
-        if not all_names:
-            pytest.skip("No names in catalog")
-
-        test_name = all_names[0]
-        result = invoke(fetch_tool, test_name)
-
-        entry = result["entries"][0]
-        assert "constraints" in entry
-        assert isinstance(entry["constraints"], list)
-        assert "validity_domain" in entry
-        assert isinstance(entry["validity_domain"], str)
-
     def test_fetch_tags_and_links(self, fetch_tool, catalog):
         """Test tags and links."""
         all_names = catalog.list_names()

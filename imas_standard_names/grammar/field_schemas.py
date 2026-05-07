@@ -93,7 +93,7 @@ DOCUMENTATION_GUIDANCE: dict[str, Any] = {
         "Physical interpretation and governing physics",
         "Governing equations with full definitions (use display equations for main formulas)",
         "Measurement or derivation methods",
-        "Typical values and physical ranges (populate validity_domain and constraints fields when applicable)",
+        "Typical values and physical ranges",
         "Coordinate system definitions and sign conventions (if applicable)",
         "Relationships to other quantities with explicit equations",
     ],
@@ -182,8 +182,6 @@ FIELD_DESCRIPTIONS: dict[str, str] = {
     "status": "Lifecycle state: draft | active | deprecated | superseded.",
     "kind": "Discriminator field determining entry type (scalar vs vector vs metadata)",
     "provenance": "Describes how derived quantities are computed from base quantities",
-    "validity_domain": "Controlled vocabulary region of validity",
-    "constraints": "Physical or mathematical constraints that must be satisfied (e.g. 'T_e > 0', 'kappa >= 1')",
     "deprecates": "Standard name token that this entry deprecates (if promoting replacement)",
     "superseded_by": "Standard name token that supersedes this entry (required when status is 'superseded')",
     "cocos_transformation_type": "COCOS transformation type for this quantity. Determines how signs change under COCOS convention switches.",
@@ -234,16 +232,6 @@ FIELD_CONSTRAINTS: dict[str, dict[str, Any]] = {
     "provenance": {
         "required": False,
         "type": "string",
-    },
-    "validity_domain": {
-        "required": False,
-        "type": "string",
-        "examples": ["core_plasma", "edge_plasma", "vacuum", "whole_plasma"],
-    },
-    "constraints": {
-        "required": False,
-        "type": "array",
-        "examples": [["T_e > 0"], ["n_e >= 0", "n_e < 1e22 m^-3"], ["kappa >= 1"]],
     },
     "deprecates": {
         "required": False,
@@ -354,7 +342,7 @@ FIELD_GUIDANCE: dict[str, dict[str, Any]] = {
             "Physical interpretation and governing physics",
             "Governing equations with full definitions (use display equations for main formulas)",
             "Measurement or derivation methods",
-            "Typical values and physical ranges (populate validity_domain and constraints fields when applicable)",
+            "Typical values and physical ranges",
             "Coordinate system definitions and sign conventions (if applicable)",
             "Relationships to other quantities with explicit equations",
         ],
@@ -490,27 +478,6 @@ FIELD_GUIDANCE: dict[str, dict[str, Any]] = {
         "vector": "Vector field quantities with directional components",
         "metadata": "Definitional entries (boundaries, regions, concepts) - no unit or provenance required",
     },
-    "validity_domain": {
-        "purpose": "Specify the spatial or operational domain where this quantity is physically valid or typically measured",
-        "use_when": "The quantity is inherently limited to a specific plasma region or operational regime",
-        "examples": [
-            "core_plasma: for quantities only meaningful in confined plasma region",
-            "edge_plasma: for edge/pedestal region specific quantities",
-            "vacuum: for quantities in vacuum regions only",
-            "whole_plasma: for quantities spanning entire plasma volume",
-        ],
-    },
-    "constraints": {
-        "purpose": "Specify hard physical bounds and mathematical constraints on the quantity",
-        "use_for": [
-            "Physical bounds: non-negativity, fundamental limits from physics",
-            "Mathematical constraints: relationships that must hold (e.g., 'elongation >= 1', '0 <= poloidal_beta <= 1')",
-            "Dimensional constraints: valid ranges for dimensionless quantities",
-        ],
-        "format": "Use clear mathematical notation with units where applicable",
-        "note": "Constraints represent hard limits, not typical operational ranges. For typical values, document in a dedicated field or structured metadata (future enhancement)",
-        "validation": "Constraints are validated for format but not evaluated for physical correctness",
-    },
 }
 
 TYPE_SPECIFIC_REQUIREMENTS: dict[str, dict[str, Any]] = {
@@ -522,8 +489,6 @@ TYPE_SPECIFIC_REQUIREMENTS: dict[str, dict[str, Any]] = {
         "optional_fields": [
             "provenance",
             "status",
-            "validity_domain",
-            "constraints",
             "deprecates",
             "superseded_by",
             "links",
@@ -539,8 +504,6 @@ TYPE_SPECIFIC_REQUIREMENTS: dict[str, dict[str, Any]] = {
         "optional_fields": [
             "provenance",
             "status",
-            "validity_domain",
-            "constraints",
             "deprecates",
             "superseded_by",
             "links",
@@ -556,8 +519,6 @@ TYPE_SPECIFIC_REQUIREMENTS: dict[str, dict[str, Any]] = {
         "optional_fields": [
             "provenance",
             "status",
-            "validity_domain",
-            "constraints",
             "deprecates",
             "superseded_by",
             "links",
@@ -573,8 +534,6 @@ TYPE_SPECIFIC_REQUIREMENTS: dict[str, dict[str, Any]] = {
         "optional_fields": [
             "provenance",
             "status",
-            "validity_domain",
-            "constraints",
             "deprecates",
             "superseded_by",
             "links",
@@ -590,8 +549,6 @@ TYPE_SPECIFIC_REQUIREMENTS: dict[str, dict[str, Any]] = {
         "forbidden_fields": ["provenance"],
         "optional_fields": [
             "status",
-            "validity_domain",
-            "constraints",
             "deprecates",
             "superseded_by",
             "links",

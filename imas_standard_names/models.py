@@ -5,7 +5,7 @@ including all metadata, provenance, governance, and validation rules.
 
 The StandardNameEntry union type represents full catalog entries with:
 - Core identification (name, kind, description)
-- Physical properties (unit, constraints, validity domain)
+- Physical properties (unit)
 - Governance (status, deprecation, supersession)
 - Provenance (operators, reductions, expressions)
 - Metadata (links, documentation)
@@ -16,9 +16,6 @@ Example scalar entry:
   status: active
   unit: eV
   description: Core ion temperature.
-  constraints:
-    - T_i >= 0
-  validity_domain: core plasma
 
 Example vector entry:
   name: plasma_velocity
@@ -69,10 +66,8 @@ from pydantic import (
 from imas_standard_names import pint
 from imas_standard_names.field_types import (
     STANDARD_NAME_PATTERN,
-    Constraints,
     Description,
     Documentation,
-    Domain,
     Links,
     Name,
     Unit,
@@ -442,8 +437,8 @@ class StandardNameEntryBase(StandardNameBase):
     """Full catalog entry definition (fields common to scalar and vector kinds).
 
     Extends :class:`StandardNameBase` with the documentation and metadata fields
-    required of a published standard name: description, documentation, validity
-    domain, constraints, links. This remains the class used for the full
+    required of a published standard name: description, documentation,
+    links. This remains the class used for the full
     catalog (serialization, JSON schema, rendering).
     """
 
@@ -454,8 +449,6 @@ class StandardNameEntryBase(StandardNameBase):
     documentation: Documentation  # Required: valuable standalone content
 
     # Governance / metadata (documentation-adjacent)
-    validity_domain: Domain = ""
-    constraints: Constraints = Field(default_factory=list)
     links: Links = Field(default_factory=list)
 
     # Structural graph edges (computed fields, re-derived on export)
@@ -465,13 +458,6 @@ class StandardNameEntryBase(StandardNameBase):
     # Debug / provenance: sources that generated or mapped to this name
     # Populated by codex sn export --include-sources; None in catalog-only installs.
     sources: list[dict[str, Any]] | None = None
-
-    @field_validator("constraints")
-    @classmethod
-    def list_normalizer(cls, v: Iterable[str]) -> list[str]:  # type: ignore[override]
-        if v is None:
-            return []
-        return [str(item).strip() for item in v if str(item).strip()]
 
     @field_validator("links")
     @classmethod

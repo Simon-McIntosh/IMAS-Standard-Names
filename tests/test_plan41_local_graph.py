@@ -405,7 +405,7 @@ class TestRenderer:
     def test_links_field_resolved_as_anchors(self, fixture_catalog: Path) -> None:
         renderer = CatalogRenderer(fixture_catalog / "standard_names")
         out = renderer.render_catalog()
-        assert "[magnetic_field](#magnetic_field)" in out
+        assert "[magnetic field](#magnetic_field)" in out
 
     def test_cocos_transformation_type_not_rendered(
         self, fixture_catalog: Path
@@ -420,38 +420,38 @@ class TestRenderer:
         renderer = CatalogRenderer(fixture_catalog / "standard_names")
         out = renderer.render_catalog()
         assert "```mermaid" in out
-        assert (
-            'x_component_of_magnetic_field -- "component axis=x" --> magnetic_field'
-            in out
-        )
+        # New format uses short node IDs (n0, n1) with humanized labels
+        assert '"x component of magnetic field"' in out
+        assert '"component axis=x"' in out
+        assert '"magnetic field"' in out
 
     def test_mermaid_block_for_binary_argument(self, fixture_catalog: Path) -> None:
         renderer = CatalogRenderer(fixture_catalog / "standard_names")
         out = renderer.render_catalog()
-        assert 'ratio_of_pressure_to_density -- "ratio role=a" --> pressure' in out
-        assert 'ratio_of_pressure_to_density -- "ratio role=b" --> density' in out
+        assert '"ratio of pressure to density"' in out
+        assert '"ratio role=a"' in out
+        assert '"ratio role=b"' in out
 
     def test_mermaid_block_for_error_variants(self, fixture_catalog: Path) -> None:
         renderer = CatalogRenderer(fixture_catalog / "standard_names")
         out = renderer.render_catalog()
-        assert (
-            'temperature -- "error upper" --> upper_uncertainty_of_temperature' in out
-        )
-        assert (
-            'temperature -- "error lower" --> lower_uncertainty_of_temperature' in out
-        )
+        # New format uses short node IDs with humanized labels
+        assert '"error upper"' in out
+        assert '"error lower"' in out
+        assert '"upper uncertainty of temperature"' in out
+        assert '"lower uncertainty of temperature"' in out
 
     def test_sibling_nav_wrapped_by(self, fixture_catalog: Path) -> None:
         renderer = CatalogRenderer(fixture_catalog / "standard_names")
         out = renderer.render_catalog()
         # magnetic_field is wrapped by x_component and the projection entry.
         assert "**Wrapped by:**" in out
-        assert "[x_component_of_magnetic_field](#x_component_of_magnetic_field)" in out
+        assert "[x component of magnetic field](#x_component_of_magnetic_field)" in out
 
     def test_sibling_nav_deprecates_and_superseded_by(
         self, fixture_catalog: Path
     ) -> None:
         renderer = CatalogRenderer(fixture_catalog / "standard_names")
         out = renderer.render_catalog()
-        assert "**Deprecates:** [old_name](#old_name)" in out
-        assert "**Superseded by:** [new_name](#new_name)" in out
+        assert "**Deprecates:** [old name](#old_name)" in out
+        assert "**Superseded by:** [new name](#new_name)" in out

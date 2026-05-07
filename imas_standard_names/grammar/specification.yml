@@ -383,7 +383,7 @@ entry_schema:
           - "Physical interpretation and governing physics"
           - "Governing equations with full definitions (use display equations for main formulas)"
           - "Measurement or derivation methods"
-          - "Typical values and physical ranges (populate validity_domain and constraints fields when applicable)"
+          - "Typical values and physical ranges"
           - "Coordinate system definitions and sign conventions (if applicable)"
           - "Relationships to other quantities with explicit equations"
         yaml_formatting:
@@ -592,45 +592,6 @@ entry_schema:
           validation:
             - "All dependencies must exist in catalog or be created in same batch"
     
-    validity_domain:
-      required: false
-      type: string
-      default: ""
-      description: "Controlled vocabulary region of validity"
-      examples:
-        - "core_plasma"
-        - "edge_plasma"
-        - "vacuum"
-        - "whole_plasma"
-      guidance:
-        purpose: "Specify the spatial or operational domain where this quantity is physically valid or typically measured"
-        use_when: "The quantity is inherently limited to a specific plasma region or operational regime"
-        examples:
-          - "core_plasma: for quantities only meaningful in confined plasma region"
-          - "edge_plasma: for edge/pedestal region specific quantities"
-          - "vacuum: for quantities in vacuum regions only"
-          - "whole_plasma: for quantities spanning entire plasma volume"
-    
-    constraints:
-      required: false
-      type: array
-      items: string
-      default: []
-      description: "Physical or mathematical constraints that must be satisfied (e.g. 'T_e > 0', 'kappa >= 1')"
-      examples:
-        - ["T_e > 0"]
-        - ["n_e >= 0", "n_e < 1e22 m^-3"]
-        - ["kappa >= 1"]
-      guidance:
-        purpose: "Specify hard physical bounds and mathematical constraints on the quantity"
-        use_for:
-          - "Physical bounds: non-negativity, fundamental limits from physics"
-          - "Mathematical constraints: relationships that must hold (e.g., 'elongation >= 1', '0 <= poloidal_beta <= 1')"
-          - "Dimensional constraints: valid ranges for dimensionless quantities"
-        format: "Use clear mathematical notation with units where applicable"
-        note: "Constraints represent hard limits, not typical operational ranges. For typical values, document in a dedicated field or structured metadata (future enhancement)"
-        validation: "Constraints are validated for format but not evaluated for physical correctness"
-    
     deprecates:
       required: false
       type: string
@@ -662,28 +623,28 @@ entry_schema:
       required_fields: [name, description, documentation, unit]
       field_overrides:
         unit: "Required (use '1' for dimensionless)"
-      optional_fields: [provenance, status, validity_domain, constraints, deprecates, superseded_by, links, cocos_transformation_type]
+      optional_fields: [provenance, status, deprecates, superseded_by, links, cocos_transformation_type]
       description: "Physical quantities with single value at each point"
     
     vector:
       required_fields: [name, description, documentation, unit]
       field_overrides:
         unit: "Required (use '1' for dimensionless)"
-      optional_fields: [provenance, status, validity_domain, constraints, deprecates, superseded_by, links, cocos_transformation_type]
+      optional_fields: [provenance, status, deprecates, superseded_by, links, cocos_transformation_type]
       description: "Vector field quantities with components"
 
     tensor:
       required_fields: [name, description, documentation, unit]
       field_overrides:
         unit: "Required (use '1' for dimensionless)"
-      optional_fields: [provenance, status, validity_domain, constraints, deprecates, superseded_by, links, cocos_transformation_type]
+      optional_fields: [provenance, status, deprecates, superseded_by, links, cocos_transformation_type]
       description: "Rank-2+ tensor quantities (metric tensor, stress tensor, conductivity tensor)"
 
     complex:
       required_fields: [name, description, documentation, unit]
       field_overrides:
         unit: "Required (use '1' for dimensionless)"
-      optional_fields: [provenance, status, validity_domain, constraints, deprecates, superseded_by, links, cocos_transformation_type]
+      optional_fields: [provenance, status, deprecates, superseded_by, links, cocos_transformation_type]
       description: "Complex-valued quantities (real + imaginary parts, or magnitude + phase)"
     
     metadata:
@@ -691,6 +652,6 @@ entry_schema:
       field_overrides:
         unit: "Optional (default empty string, omitted from serialization)"
       forbidden_fields: [provenance]
-      optional_fields: [status, validity_domain, constraints, deprecates, superseded_by, links, cocos_transformation_type]
+      optional_fields: [status, deprecates, superseded_by, links, cocos_transformation_type]
       description: "Definitional entries (boundaries, regions, concepts)"
       note: "Metadata entries are definitional anchors, not measurable/derived quantities"

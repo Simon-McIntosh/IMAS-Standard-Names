@@ -354,3 +354,28 @@ def test_catalog_render_no_sources_block_when_absent(tmp_path: Path):
 
     assert "<details>" not in catalog
     assert "Sources (debug)" not in catalog
+
+
+def test_parse_base_strips_transformation_residue():
+    """Transformed names (derivative, tendency) group under the inner base quantity."""
+    base = CatalogRenderer._parse_base
+    # Derivatives should resolve to the inner quantity's physical_base
+    assert (
+        base(
+            "derivative_of_electron_density_with_respect_to_normalized_toroidal_flux_coordinate"
+        )
+        == "density"
+    )
+    assert base("tendency_of_fast_electron_density") == "density"
+    assert (
+        base(
+            "second_derivative_of_fast_electron_density_with_respect_to_normalized_toroidal_flux_coordinate"
+        )
+        == "density"
+    )
+    # Non-transformed names work as before
+    assert base("electron_temperature") == "temperature"
+    assert base("electron_density") == "density"
+    assert base("toroidal_component_of_current_density") == "current_density"
+    # Parse failures fall back to 'unknown'
+    assert base("!!!invalid!!!") == "unknown"

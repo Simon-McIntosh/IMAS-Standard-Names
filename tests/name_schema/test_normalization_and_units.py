@@ -98,14 +98,12 @@ def test_links_and_constraints_normalization():
             "unit": "eV",
             "status": "active",
             "links": ["  https://example.com/ref  ", "", "https://example.com/ref"],
-            "constraints": [" Ti >= 0 ", ""],
         }
     )
     assert sn.links == [
         "https://example.com/ref",
         "https://example.com/ref",
     ]  # duplication not removed (documented)
-    assert sn.constraints == ["Ti >= 0"]
 
 
 def test_deprecated_without_superseded_by_error():
