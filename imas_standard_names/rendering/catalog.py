@@ -129,12 +129,20 @@ class CatalogRenderer:
 
     @staticmethod
     def _fix_markdown_formatting(text: str) -> str:
-        """Fix markdown formatting and ensure proper indentation."""
+        """Fix markdown formatting and demote headers to bold text.
+
+        Documentation content is rendered inside <details> blocks.
+        Any markdown headers (# ... ####) would leak into the MkDocs
+        page TOC, so we convert them to bold paragraphs instead.
+        """
         if not text:
             return ""
 
         text = text.strip()
         text = text.replace("\\n", "\n")
+
+        # Demote markdown headers to bold text to prevent TOC pollution
+        text = re.sub(r"^#{1,6}\s+(.+)$", r"**\1**", text, flags=re.MULTILINE)
 
         paragraphs = text.split("\n\n")
         processed_paragraphs = []
