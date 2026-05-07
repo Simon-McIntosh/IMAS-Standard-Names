@@ -1,0 +1,168 @@
+# Qualifier vocabulary: prefix modifiers on physical bases
+#
+# Usage: <qualifier>_<base>  (recursive: <qual1>_<qual2>_<base>)
+# Examples:
+#   - collisional_power_density
+#   - bootstrap_current_density
+#   - energy_confinement_time
+#   - non_inductive_current
+#   - center_of_mass_velocity
+#
+# Qualifiers are stripped recursively by _match_base_with_qualifiers()
+# before the residue is matched against registered physical bases.
+# The parser unions qualifiers with subject tokens; tokens that appear
+# in subjects.yml are marked [also-subject] below for documentation.
+#
+# NOTE: Components (toroidal, poloidal, radial, parallel, perpendicular)
+# are handled by components.yml via the coordinate/component segment —
+# they are NOT qualifiers.
+
+# === Original modifier_quals (parser.py hardcoded set) ===
+# These 19 tokens MUST remain for backward compatibility.
+
+# --- Energy/transport type qualifiers ---
+- energy                        # energy transport channel (energy_flux, energy_diffusivity)
+- particle                      # particle transport channel [also-subject]
+- momentum                      # momentum transport channel (momentum_flux, momentum_source)
+- heat                          # heat transport channel (heat_flux, heat_viscosity)
+
+# --- Aggregate/net qualifiers ---
+- total                         # total / summed quantity [also-subject]
+- net                           # net (signed sum) quantity
+
+# --- Collision/transport regime ---
+- collisional                   # collisional regime (collisional_power_density)
+- thermal                       # thermal population/component [also-subject]
+
+# --- Source/mechanism ---
+- ohmic                         # ohmic heating/current
+- inductive                     # inductively driven
+- non_inductive                 # non-inductively driven
+
+# --- Orbit class ---
+- trapped                       # trapped particle orbit class [also-subject]
+- co_passing                    # co-passing orbit class [also-subject]
+- counter_passing               # counter-passing orbit class [also-subject]
+- fast                          # fast (suprathermal) population [also-subject]
+
+# --- Nuclear/material ---
+- nuclear                       # nuclear heating/energy
+- ferritic                      # ferritic material property
+- waste                         # waste (rejected) heat/energy
+
+# --- Direction ---
+- direction                     # directional qualifier
+
+# === Expanded qualifier vocabulary ===
+# Tokens extracted from compound physical_bases.yml entries and
+# standard name corpus analysis.
+
+# --- Transport regime / mechanism ---
+- neoclassical                  # neoclassical transport regime
+- classical                     # classical (Braginskii) transport
+- turbulent                     # turbulent transport regime
+- anomalous                     # anomalous (non-classical) transport
+
+# --- Source / drive mechanism ---
+- bootstrap                     # bootstrap current mechanism
+- beam                          # neutral beam source/drive
+- rf                            # radio-frequency source/drive
+- nbi                           # neutral beam injection
+- alpha                         # alpha particle source
+- fusion                        # fusion reaction source
+- radiative                     # radiative process
+- bremsstrahlung                # bremsstrahlung radiation
+- wave_driven                   # wave-driven mechanism
+- gas                           # gas injection/puff source
+
+# --- Geometry / spatial ---
+- center_of_mass                # center-of-mass reference frame
+- cross_field                   # cross-field (perpendicular to B) direction
+- diamagnetic                   # diamagnetic drift/flux qualifier
+- e_cross_b                     # E×B drift qualifier
+- field_aligned                 # aligned with magnetic field
+- surface                       # surface (2D boundary) qualifier
+- volumetric                    # volumetric (per unit volume) qualifier
+- line_integrated               # line-integrated measurement
+- flux_surface                  # flux-surface averaged/related
+- volume_averaged               # volume-averaged quantity
+- field_line                    # along a field line
+- major                         # major (outer) geometric qualifier
+- minor                         # minor (inner) geometric qualifier
+- contravariant                 # contravariant tensor component
+- covariant                     # covariant tensor component
+
+# --- State / condition ---
+- equilibrium                   # equilibrium state
+- fluctuating                   # fluctuating component
+- mean                          # mean / time-averaged
+- effective                     # effective (weighted) value
+- normalized                    # normalized (dimensionless) form
+- critical                      # critical (threshold) value
+- average                       # averaged quantity
+- peak                          # peak / maximum value
+- minimum                       # minimum value
+- maximum                       # maximum value
+- saturated                     # saturated state
+- steady_state                  # steady-state condition
+- transient                     # transient / time-varying
+- perturbed                     # perturbed / perturbation
+
+# --- Energy type ---
+- kinetic                       # kinetic energy component
+- stored                        # stored energy
+- radiated                      # radiated (emitted) energy/power
+- absorbed                      # absorbed energy/power
+- launched                      # launched (injected) power
+- deposited                     # deposited energy/power
+- conducted                     # conducted (conductive) transport
+- convected                     # convected (convective) transport
+- lost                          # lost (escaping) quantity
+
+# --- Measurement / diagnostic ---
+- measured                      # directly measured quantity
+- reconstructed                 # reconstructed (inferred) quantity
+- fitted                        # fitted / parametric quantity
+- simulated                     # simulation-derived quantity
+- target                        # target / reference value
+- reference                     # reference quantity
+
+# --- Species-related (non-subject) ---
+- slow                          # slow (sub-thermal) population
+- suprathermal                  # suprathermal population
+- plasma                        # plasma (ionized) qualifier
+
+# --- Sign / polarity ---
+- positive                      # positive sign/direction
+- negative                      # negative sign/direction
+
+# --- Plasma region ---
+- scrape_off_layer              # scrape-off layer region
+- pedestal                      # pedestal region
+- core                          # core plasma region
+- edge                          # edge plasma region
+- separatrix                    # at the separatrix
+- divertor                      # divertor region
+
+# --- Temporal ---
+- initial                       # initial condition/value
+- final                         # final state/value
+- instantaneous                 # instantaneous (snapshot) value
+- time_averaged                 # time-averaged quantity
+
+# --- Engineering / subsystem ---
+- coolant                       # coolant fluid qualifier
+- outlet                        # outlet (exit) point qualifier
+- inlet                         # inlet (entry) point qualifier
+- prefill                       # pre-fill injection qualifier
+- accumulated                   # accumulated (integrated) quantity
+- heating                       # heating system qualifier
+
+# --- Mode / instability ---
+- resistive                     # resistive regime/mode
+- ideal                         # ideal (non-resistive) regime
+
+# --- Dimensionless / normalized forms ---
+- gyro_bohm                     # gyro-Bohm normalized
+- bohm                          # Bohm normalized
+- greenwald                     # Greenwald-normalized (density)

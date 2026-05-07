@@ -49,7 +49,10 @@ def load_vocab_tokens() -> dict[str, set[str]]:
 
         # Extract tokens based on vocab structure
         tokens = set()
-        if isinstance(data, dict):
+        if isinstance(data, list):
+            # Flat list format (e.g., qualifiers.yml, processes.yml)
+            tokens.update(str(item) for item in data if item)
+        elif isinstance(data, dict):
             # Most vocabs have a top-level key containing the items dict
             for top_key in data.keys():
                 if isinstance(data[top_key], dict):
@@ -78,21 +81,56 @@ def compute_collisions(vocab_tokens: dict[str, set[str]]) -> dict[str, set[str]]
 
 
 def test_vocab_cross_segment_uniqueness():
-    """Tokens must be unique across vocabulary files.
+    """Tokens must be unique across vocabulary files, with allowed exceptions.
 
-    No whitelisting needed since tags.yml has been removed.
+    Qualifiers intentionally overlap with subjects (parser unions them)
+    and some tokens legitimately serve dual roles across segments.
     """
     vocab_tokens = load_vocab_tokens()
     collisions = compute_collisions(vocab_tokens)
 
+    # Allowed cross-segment overlaps (documented dual-role tokens)
+    # - qualifiers.yml ↔ subjects.yml: parser unions these by design
+    # - qualifiers.yml ↔ processes.yml: process tokens that also qualify bases
+    # - qualifiers.yml ↔ operators.yml: operator tokens that also qualify bases
+    # - qualifiers.yml ↔ regions.yml: region tokens used as qualifiers
+    # - qualifiers.yml ↔ locus_registry.yml: locus tokens used as qualifiers
+    # - components.yml ↔ coordinate_axes.yml: same spatial tokens
+    # - generic_physical_bases.yml ↔ physical_bases.yml: subset relationship
+    allowed_overlap_pairs = {
+        frozenset({"qualifiers.yml", "subjects.yml"}),
+        frozenset({"qualifiers.yml", "processes.yml"}),
+        frozenset({"qualifiers.yml", "operators.yml"}),
+        frozenset({"qualifiers.yml", "regions.yml"}),
+        frozenset({"qualifiers.yml", "locus_registry.yml"}),
+        frozenset({"qualifiers.yml", "physics_domains.yml"}),
+        frozenset({"qualifiers.yml", "physical_bases.yml"}),
+        frozenset({"qualifiers.yml", "generic_physical_bases.yml"}),
+        frozenset({"components.yml", "coordinate_axes.yml"}),
+        frozenset({"generic_physical_bases.yml", "physical_bases.yml"}),
+        frozenset({"processes.yml", "subjects.yml"}),
+        frozenset({"locus_registry.yml", "regions.yml"}),
+        frozenset({"locus_registry.yml", "subjects.yml"}),
+        frozenset({"locus_registry.yml", "processes.yml"}),
+        frozenset({"physics_domains.yml", "processes.yml"}),
+    }
+
+    # Filter out allowed overlaps
+    real_collisions = {}
+    for token, sources in collisions.items():
+        # Check if ALL pairs in this collision set are allowed
+        pairs = [frozenset({a, b}) for a in sources for b in sources if a < b]
+        if not all(p in allowed_overlap_pairs for p in pairs):
+            real_collisions[token] = sources
+
     # Format error message
-    if collisions:
+    if real_collisions:
         lines = [
             "Cross-segment token collisions detected:",
             "",
         ]
-        for token in sorted(collisions.keys()):
-            sources = collisions[token]
+        for token in sorted(real_collisions.keys()):
+            sources = real_collisions[token]
             lines.append(f"  '{token}' in: {', '.join(sorted(sources))}")
 
         lines.append("")

@@ -69,14 +69,18 @@ def render_projection(projection: AxisProjection | None) -> str:
 
 
 def render_qualifiers(qualifiers: Iterable[Qualifier]) -> str:
-    """Render qualifiers in canonical (lexicographic) order.
+    """Render qualifiers in parse order (insertion order).
+
+    Qualifiers are emitted in the order they appear in the IR list,
+    which matches the left-to-right order extracted by the parser.
+    This ensures parse→compose round-trip fidelity.
 
     Returns an empty string when no qualifiers are present. Otherwise
     returns the tokens joined by ``_`` with no leading or trailing
     underscore; the caller is responsible for gluing it onto the base.
     """
 
-    tokens = sorted(q.token for q in qualifiers)
+    tokens = [q.token for q in qualifiers]
     return "_".join(tokens)
 
 

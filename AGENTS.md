@@ -576,6 +576,53 @@ def parse_standard_name(name: str) -> dict[str, str]:
 
 Write code as if it's always been this way.
 
+## Grammar Vocabulary Rules
+
+### Physical Base Vocabulary (Closed, Irreducible)
+
+`physical_bases.yml` contains ~78 irreducible dimensional base quantities. A base is valid ONLY if:
+
+1. It represents a fundamental dimensional quantity (velocity, density, pressure, temperature, flux, etc.)
+2. It CANNOT be decomposed into `qualifier + existing_base`
+3. Dimensionless quantities are valid if genuinely atomic (beta, elongation, safety_factor)
+
+**CI gate:** `test_bases_are_irreducible()` validates that no base entry can decompose.
+
+**NEVER add compound bases** like `collisional_power_density`, `bootstrap_current_density`, or `thermal_velocity`. Instead, add the prefix token to `qualifiers.yml`.
+
+### Qualifier Vocabulary (Closed, Prefix Modifiers)
+
+`qualifiers.yml` contains ~92 prefix modifier tokens. These strip recursively:
+- `collisional_power_density` → qualifier=`collisional`, base=`power_density`
+- `fast_collisional_power_density` → qualifiers=`[fast, collisional]`, base=`power_density`
+
+Multi-word tokens are supported: `center_of_mass`, `non_inductive`, `cross_field`.
+
+**Adding a new qualifier:** Add the token to `qualifiers.yml`, run tests. The parser automatically uses it.
+
+### Disambiguation Rules
+
+1. **D2: Subjects win** — Compound subject tokens (`trapped_fast_particle`) remain atomic subjects. The parser strips subjects FIRST (Stage 3). Qualifiers operate only on the residue after subject removal.
+
+2. **D3: Process via template only** — Process tokens (`bootstrap`, `sawtooth`) appear ONLY via `_due_to_{token}` suffix. If a process token appears as a prefix (`bootstrap_current_density`), it is a qualifier, not a process.
+
+3. **D4: Multi-word qualifier atoms** — `center_of_mass` is an atomic qualifier token. The `_of_` in it is NOT an operator match because operator matching (Stage 4) runs before qualifier extraction (Stage 5).
+
+### Qualifier Ordering
+
+Qualifiers are stored as an **ordered list** (insertion order from parse). Compose emits them in list order. Do NOT sort alphabetically — this breaks round-trip.
+
+### Adding New Vocabulary
+
+| Need | Action | File |
+|------|--------|------|
+| New dimensional base | Add to `physical_bases.yml` (must be irreducible) | `vocabularies/physical_bases.yml` |
+| New prefix modifier | Add to `qualifiers.yml` | `vocabularies/qualifiers.yml` |
+| New process/mechanism | Add to `processes.yml` (used via `_due_to_`) | `vocabularies/processes.yml` |
+| New subject/species | Add to `subjects.yml` | `vocabularies/subjects.yml` |
+
+**Never:** Add a compound to physical_bases when it can be expressed as qualifier + base.
+
 ## Links to Documentation
 
 - Grammar rules: `/docs/grammar-reference.md`

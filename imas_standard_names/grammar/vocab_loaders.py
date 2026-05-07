@@ -185,6 +185,31 @@ def load_geometry_carriers() -> GeometryCarriersRegistry:
 
 
 # ---------------------------------------------------------------------------
+# qualifiers.yml
+# ---------------------------------------------------------------------------
+
+
+def load_qualifiers() -> frozenset[str]:
+    """Load qualifier tokens from ``qualifiers.yml``.
+
+    The file is a flat YAML list of string tokens (with optional inline
+    comments). Returns the set of modifier qualifiers; the parser unions
+    these with Subject enum tokens to form the full qualifier vocabulary.
+    """
+    path = _VOCAB_DIR / "qualifiers.yml"
+    with path.open(encoding="utf-8") as fh:
+        data = yaml.safe_load(fh)
+    if not data:
+        return frozenset()
+    if isinstance(data, list):
+        return frozenset(str(token) for token in data)
+    # Support dict format with top-level "qualifiers:" key
+    if isinstance(data, dict) and "qualifiers" in data:
+        return frozenset(str(token) for token in (data["qualifiers"] or []))
+    return frozenset()
+
+
+# ---------------------------------------------------------------------------
 # Cross-registry validation
 # ---------------------------------------------------------------------------
 

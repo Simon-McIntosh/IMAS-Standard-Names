@@ -26,10 +26,10 @@ from imas_standard_names.grammar.vocab_loaders import (
 class TestRegistryCardinality:
     """Minimum entry counts for each populated registry."""
 
-    def test_physical_bases_minimum_150(self):
+    def test_physical_bases_minimum_70(self):
         reg = load_physical_bases()
-        assert len(reg.bases) >= 150, (
-            f"Expected >= 150 physical bases, got {len(reg.bases)}"
+        assert len(reg.bases) >= 70, (
+            f"Expected >= 70 physical bases, got {len(reg.bases)}"
         )
 
     def test_locus_registry_minimum_60(self):
@@ -68,8 +68,8 @@ class TestPhysicalBasesCorpusCoverage:
     @pytest.mark.parametrize(
         "token",
         [
+            # Irreducible dimensional bases (Plan 41 reduced vocabulary)
             "current_density",
-            "major_radius",
             "number_density",
             "magnetic_field",
             "momentum_flux",
@@ -77,45 +77,30 @@ class TestPhysicalBasesCorpusCoverage:
             "pressure",
             "particle_flux",
             "velocity",
-            "energy_source",
-            "effective_charge",
             "magnetic_flux",
-            "flux_coordinate",
-            "radiated_power_density",
-            "radiated_power_inside_flux_surface",
             "angle",
-            "momentum_convective_velocity",
-            "momentum_flux_limiter",
-            "center_of_mass_velocity",
             "current",
-            "accumulated_gas_injection",
-            "gas_injection_rate",
             "energy_flux",
-            "momentum_diffusivity",
-            "momentum_source",
-            "prefill_gas_injection",
-            "heating_power",
-            "plasma_current",
             "density",
-            "particle_radial_diffusivity",
-            "convective_velocity",
-            "larmor_radius",
-            "scrape_off_layer_density_decay_length",
-            "scrape_off_layer_heat_flux_decay_length",
-            "scrape_off_layer_temperature_decay_length",
-            "thermal_energy_pedestal",
-            "stored_energy",
-            "fusion_power_density",
-            "neutron_emissivity",
-            "particle_flux_from_wall",
-            "power_flux_density",
-            "lower_hybrid_electric_field",
-            "temperature_peaking_factor",
+            "energy",
+            "power",
+            "power_density",
+            "heat_flux",
+            "electric_field",
+            "emissivity",
+            "diffusivity",
+            "radius",
+            "frequency",
+            "resistivity",
+            "force",
+            "torque",
+            "mass",
+            "metric_tensor",
         ],
     )
-    def test_top50_base_present(self, bases, token):
+    def test_irreducible_base_present(self, bases, token):
         assert token in bases.bases, (
-            f"Corpus top-50 base '{token}' missing from physical_bases.yml"
+            f"Irreducible base '{token}' missing from physical_bases.yml"
         )
 
 
@@ -276,6 +261,6 @@ class TestPhysicalBaseKinds:
         reg = load_physical_bases()
         assert reg.bases["temperature"].kind == "scalar"
 
-    def test_contravariant_metric_tensor_is_tensor(self):
+    def test_metric_tensor_is_tensor(self):
         reg = load_physical_bases()
-        assert reg.bases["contravariant_metric_tensor"].kind == "tensor"
+        assert reg.bases["metric_tensor"].kind == "tensor"

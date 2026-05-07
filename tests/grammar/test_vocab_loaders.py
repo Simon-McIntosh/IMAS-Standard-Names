@@ -191,7 +191,7 @@ def test_load_physical_bases_returns_registry():
 def test_physical_bases_stub_is_populated():
     """W2a populated physical_bases.yml from corpus mining."""
     reg = load_physical_bases()
-    assert len(reg.bases) >= 150
+    assert len(reg.bases) >= 70
 
 
 # ---------------------------------------------------------------------------

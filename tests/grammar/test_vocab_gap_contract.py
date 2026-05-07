@@ -64,8 +64,8 @@ def test_physical_bases_vocab_is_closed_and_populated(vocabs: Vocabularies) -> N
     assert isinstance(vocabs.bases, frozenset), (
         "v.bases must be a frozenset (immutable closed set)"
     )
-    assert len(vocabs.bases) >= 200, (
-        f"Expected ≥200 physical_bases; got {len(vocabs.bases)}"
+    assert len(vocabs.bases) >= 70, (
+        f"Expected ≥70 irreducible physical_bases; got {len(vocabs.bases)}"
     )
 
 

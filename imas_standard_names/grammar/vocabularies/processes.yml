@@ -135,3 +135,9 @@
 - e_cross_b_drift
 - heat_viscosity
 - ohmic_induction
+
+# === rc19 vocabulary extensions (plan 41 §A3 corpus gap closure) ===
+# Tokens confirmed missing from corpus analysis against imas-standard-names-catalog.
+- coulomb_collisions_with_ion        # Coulomb collisions specifically with bulk ions (ion-channel analog of coulomb_collisions_with_electrons)
+- coulomb_collisions_with_ion_state  # Coulomb collisions with a specific ion charge state (charge-state-resolved variant)
+- ion_neutral_friction               # ion–neutral friction process (momentum exchange between ions and neutrals)

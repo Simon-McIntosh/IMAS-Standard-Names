@@ -149,34 +149,12 @@ def load_default_vocabularies() -> Vocabularies:
             "arg_types": entry.arg_types,
         }
 
-    # Build qualifier set: Subject tokens + physics modifier prefixes.
+    # Build qualifier set: Subject tokens + YAML-loaded modifier prefixes.
     # Tokens that are also in bases/carriers are safe — the parser tries
     # full base match first; qualifiers only strip recursively when the
     # full string is NOT itself a registered base or carrier.
     subject_quals = frozenset(s.value for s in Subject)
-    modifier_quals = frozenset(
-        {
-            "energy",
-            "particle",
-            "momentum",
-            "heat",
-            "total",
-            "collisional",
-            "thermal",
-            "nuclear",
-            "net",
-            "ohmic",
-            "inductive",
-            "non_inductive",
-            "trapped",
-            "co_passing",
-            "counter_passing",
-            "fast",
-            "ferritic",
-            "waste",
-            "direction",
-        }
-    )
+    modifier_quals = vocab_loaders.load_qualifiers()
     qualifiers = subject_quals | modifier_quals
 
     return Vocabularies(

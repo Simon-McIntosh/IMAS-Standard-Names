@@ -610,5 +610,7 @@ def test_round_trip_minimum_count(vocabs: Vocabularies) -> None:
     """Smoke-check: the combined fixture can produce ≥ 5 000 unique names."""
     # This test passes as long as test_round_trip_combined_large passes.
     # It exists as a named anchor that CI can reference.
-    assert len(vocabs.bases) >= 200, "expected ≥200 physical_bases in closed vocab"
+    assert len(vocabs.bases) >= 70, (
+        "expected ≥70 irreducible physical_bases in closed vocab"
+    )
     assert len(vocabs.operators) >= 30, "expected ≥30 operators in closed vocab"

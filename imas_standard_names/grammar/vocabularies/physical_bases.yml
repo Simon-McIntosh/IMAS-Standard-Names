@@ -1,152 +1,49 @@
-# Physical bases vocabulary (plan 38 §A6)
+# Physical bases vocabulary (plan 38 §A6, reduced plan 41 §A2)
 #
-# Closed vocabulary of physical quantity nouns used as the base of a
-# standard name.  Replaces the current open-fallback behaviour in the
-# parser: any residue not found here (or in geometry_carriers.yml) will
-# be REJECTED with an actionable diagnostic.
+# Closed vocabulary of irreducible dimensional base quantities.
+# Compound tokens (qualifier + base) have been factored out —
+# qualifiers live in qualifiers.yml.
 #
-# Token rule: a physical_base is a noun phrase describing a physical
-# quantity (temperature, pressure, density, magnetic_field, …) but is
-# NEVER a generic one — see generic_physical_bases.yml for those that
-# require a qualifier (current, power, voltage, …).
+# Reduction criteria (plan 41):
+#   KEEP if the token represents a fundamental dimensional quantity
+#   that cannot be further decomposed into qualifier + base.
+#   KEEP dimensionless atomic quantities (beta, elongation, …).
+#   REMOVE if prefix tokens are valid qualifiers/subjects and
+#   the remainder is itself a valid base.
 #
 # Structure per entry:
 #   aliases  - list of alternate tokens (empty default)
 #   kind     - scalar | vector | tensor | complex
-#
-# Populated by W2a from the rc20 corpus mining (plan 38 §A9, 479 names).
-# Maximal closure: every physical_base residue from rc20 parsing that is
-# plausibly a quantity noun after operator/subject/locus decomposition.
 
 bases:
-  accumulated_gas_injection:
-    aliases: []
-    kind: scalar
   angle:
     aliases: []
     kind: scalar
-  angle_grid_of_flux_tube:
-    aliases: []
-    kind: scalar
-  angle_of_gyrokinetic_eigenmode:
-    aliases: []
-    kind: scalar
-  angular_momentum_source:
-    aliases: []
-    kind: scalar
-  anomalous_current_density:  # W31: anomalous/turbulent transport current density — evidence N=3 (edge_plasma_physics)
-    aliases: []
-    kind: vector
   area:
     aliases: []
     kind: scalar
-  atomic_mass:
-    aliases: []
-    kind: scalar
-  average_square_charge:
-    aliases: []
-    kind: scalar
-  ballooning_stability_parameter:
-    aliases: []
-    kind: scalar
-  beam_tracing_wavevector:
-    aliases: []
-    kind: vector
   beta:
-    aliases: []
-    kind: scalar
-  beta_poloidal:
-    aliases:
-    - poloidal_beta
-    kind: scalar
-  blanket_energy_multiplication_factor:
-    aliases: []
-    kind: scalar
-  bootstrap_current:
-    aliases: []
-    kind: scalar
-  bootstrap_current_density:  # W23A: j_bootstrap (core_profiles/profiles_1d/j_bootstrap) — evidence N=5 (core_profiles, core_sources, edge_profiles, plasma_profiles, plasma_sources)
-    aliases: []
-    kind: scalar
-  breeding_ratio:
     aliases: []
     kind: scalar
   capacitance:
     aliases: []
     kind: scalar
-  center_of_mass_velocity:
-    aliases: []
-    kind: vector
   charge:
-    aliases: []
-    kind: scalar
-  charge_number:
-    aliases: []
-    kind: scalar
-  chemical_sputtering_coefficient:
     aliases: []
     kind: scalar
   coefficient:
     aliases: []
     kind: scalar
-  collected_ion_current:
-    aliases: []
-    kind: scalar
-  collisional_power_density:  # rc38: W/m³ volumetric collision heating
-    aliases: []
-    kind: scalar
-  collisional_toroidal_torque_density:
-    aliases: []
-    kind: scalar
-  collisional_torque_density:  # rc38: N/m² collision torque (generic direction)
-    aliases: []
-    kind: scalar
   collisionality:
-    aliases: []
-    kind: scalar
-  composition_fraction:
     aliases: []
     kind: scalar
   confinement_time:
     aliases: []
     kind: scalar
-  contravariant_metric_tensor:
-    aliases: []
-    kind: tensor
-  convective_velocity:
-    aliases: []
-    kind: vector
-  coolant_inlet_pressure:
-    aliases: []
-    kind: scalar
-  coolant_inlet_temperature:
-    aliases: []
-    kind: scalar
-  coolant_outlet_temperature:
-    aliases: []
-    kind: scalar
-  cosine_shape_coefficient:
-    aliases: []
-    kind: scalar
-  coulomb_logarithm:
-    aliases: []
-    kind: scalar
   count:
     aliases: []
     kind: scalar
-  covariant_metric_tensor:  # W31: lower-index metric g_ij — counterpart to contravariant — evidence N=1 (magnetohydrodynamics)
-    aliases: []
-    kind: tensor
-  critical_temperature:
-    aliases: []
-    kind: scalar
-  cross_sectional_area:  # rc38: m² — probe/antenna/element geometry
-    aliases: []
-    kind: scalar
   current:
-    aliases: []
-    kind: scalar
-  current_constraint_exact_flag:
     aliases: []
     kind: scalar
   current_density:
@@ -155,61 +52,13 @@ bases:
   density:
     aliases: []
     kind: scalar
-  density_pedestal_maximum_gradient_position:
-    aliases: []
-    kind: scalar
-  density_pedestal_position:
-    aliases: []
-    kind: scalar
-  density_pedestal_width:
-    aliases: []
-    kind: scalar
-  diamagnetic_current_density:
-    aliases: []
-    kind: scalar
-  diamagnetic_drift_velocity:
-    aliases: []
-    kind: vector
-  diamagnetic_energy:  # W31: plasma stored energy from diamagnetic measurement — evidence N=1 (transport)
-    aliases: []
-    kind: scalar
-  diagnostic_latency:  # Added rc27: EMW pilot evidence N=4
-    aliases: []
-    kind: scalar
-  diffusion_coefficient:  # rc38: m²/s transport quantity (energy/particle/momentum diffusion)
+  diffusion_coefficient:
     aliases: []
     kind: scalar
   diffusivity:
     aliases: []
     kind: scalar
   distribution:
-    aliases: []
-    kind: scalar
-  distribution_function:  # W31: kinetic distribution function f(x,v) in phase space — evidence N=1 (edge_plasma_physics)
-    aliases: []
-    kind: scalar
-  distribution_particle_count:
-    aliases: []
-    kind: scalar
-  dominant_charge_state:
-    aliases: []
-    kind: scalar
-  drift_velocity:
-    aliases: []
-    kind: vector
-  e_cross_b_drift_velocity:
-    aliases: []
-    kind: vector
-  effective_atomic_mass:
-    aliases: []
-    kind: scalar
-  effective_charge:
-    aliases: []
-    kind: scalar
-  eigenmode_frequency:  # W31: oscillation frequency of a plasma eigenmode — evidence N=1 (gyrokinetics)
-    aliases: []
-    kind: scalar
-  eigenmode_growth_rate:  # W31: linear growth rate of an unstable eigenmode — evidence N=1 (gyrokinetics)
     aliases: []
     kind: scalar
   electric_field:
@@ -221,9 +70,6 @@ bases:
   electrostatic_potential:
     aliases: []
     kind: scalar
-  electrostatic_potential_parity:
-    aliases: []
-    kind: scalar
   elongation:
     aliases: []
     kind: scalar
@@ -233,37 +79,10 @@ bases:
   energy:
     aliases: []
     kind: scalar
-  energy_confinement_time:
-    aliases: []
-    kind: scalar
-  energy_convective_velocity:
-    aliases: []
-    kind: vector
-  energy_diffusivity:
-    aliases: []
-    kind: scalar
   energy_flux:
     aliases: []
     kind: vector
-  energy_radial_diffusivity:
-    aliases: []
-    kind: scalar
-  energy_source:
-    aliases: []
-    kind: scalar
-  energy_source_density:  # W32: volumetric energy source term (W/m³) — evidence N=4 (transport, edge_plasma_physics)
-    aliases: []
-    kind: scalar
-  equilibrium_reconstruction_constraint_weight:
-    aliases: []
-    kind: scalar
-  exposure_time:
-    aliases: []
-    kind: scalar
   factor:
-    aliases: []
-    kind: scalar
-  faraday_rotation_angle:
     aliases: []
     kind: scalar
   field_strength:
@@ -272,28 +91,10 @@ bases:
   flag:
     aliases: []
     kind: scalar
-  floating_potential:
-    aliases: []
-    kind: scalar
   flow:
     aliases: []
     kind: scalar
-  flow_damping_rate:  # rc38: s⁻¹ — momentum flow damping
-    aliases: []
-    kind: scalar
   flux:
-    aliases: []
-    kind: scalar
-  flux_coordinate:
-    aliases: []
-    kind: scalar
-  flux_surface_area:
-    aliases: []
-    kind: scalar
-  flux_surface_cross_sectional_area:
-    aliases: []
-    kind: scalar
-  flux_tube_parallel_domain_poloidal_turn_count:
     aliases: []
     kind: scalar
   force:
@@ -305,97 +106,16 @@ bases:
   frequency:
     aliases: []
     kind: scalar
-  fusion_power:
-    aliases: []
-    kind: scalar
-  fusion_power_density:
-    aliases: []
-    kind: scalar
   gap:
     aliases: []
     kind: scalar
-  gap_distance:
-    aliases: []
-    kind: scalar
-  gas_injection_rate:
-    aliases: []
-    kind: scalar
-  gas_puff_rate:
-    aliases: []
-    kind: scalar
-  gas_valve_flow_rate:
-    aliases: []
-    kind: scalar
-  greenwald_density:
-    aliases: []
-    kind: scalar
-  greenwald_fraction:
-    aliases: []
-    kind: scalar
-  grid_cell_volume:
-    aliases: []
-    kind: scalar
-  gyrokinetic_normalized_collisionality:
-    aliases: []
-    kind: scalar
   heat_flux:
-    aliases: []
-    kind: scalar
-  heat_viscosity_current_density:  # W23A: j_heat_viscosity (edge_profiles/ggd/j_heat_viscosity, plasma_profiles/ggd/j_heat_viscosity) — evidence N=4
-    aliases: []
-    kind: vector
-  heating_power:
-    aliases: []
-    kind: scalar
-  hydrogen_isotope_fraction:
     aliases: []
     kind: scalar
   impedance:
     aliases: []
     kind: scalar
   inductance:
-    aliases: []
-    kind: scalar
-  inertial_current_density:
-    aliases: []
-    kind: scalar
-  injection_occurrence_flag:
-    aliases: []
-    kind: scalar
-  injector_fragmentation_gas_flow_rate:
-    aliases: []
-    kind: scalar
-  injector_propellant_gas_flow_rate:
-    aliases: []
-    kind: scalar
-  injector_trigger_time:
-    aliases: []
-    kind: scalar
-  internal_inductance:
-    aliases: []
-    kind: scalar
-  inverse_major_radius:
-    aliases: []
-    kind: scalar
-  inverse_square_magnetic_field_strength:
-    aliases: []
-    kind: scalar
-  ion_poloidal_velocity:
-    aliases: []
-    kind: scalar
-  ion_toroidal_velocity:
-    aliases: []
-    kind: scalar
-  ionization_potential:  # W31: ionization energy of atomic species — evidence N=1 (edge_plasma_physics)
-    aliases: []
-    kind: scalar
-  kinetic_energy_density:
-    aliases: []
-    kind: scalar
-  larmor_radius:
-    aliases: []
-    kind: scalar
-  launched_power:
     aliases: []
     kind: scalar
   length:
@@ -405,36 +125,12 @@ bases:
     aliases:
     - internal_inductance_normalized
     kind: scalar
-  line_integrated_emissivity:
-    aliases: []
-    kind: scalar
-  logarithmic_density_gradient:  # W31: d ln(n)/dx, standard gyrokinetic drive parameter — evidence N=1 (gyrokinetics)
-    aliases: []
-    kind: scalar
-  logarithmic_temperature_gradient:  # W31: d ln(T)/dx, standard gyrokinetic drive parameter — evidence N=1 (gyrokinetics)
-    aliases: []
-    kind: scalar
-  loop_voltage:
-    aliases: []
-    kind: scalar
-  lower_elongation:
-    aliases: []
-    kind: scalar
-  lower_hybrid_electric_field:
-    aliases: []
-    kind: vector
-  lower_outer_squareness:
-    aliases: []
-    kind: scalar
-  mach_number:  # W23A: mach_number_parallel (langmuir_probes/reciprocating/plunge/mach_number_parallel) — evidence N=3
+  mach_number:
     aliases: []
     kind: scalar
   magnetic_field:
     aliases: []
     kind: vector
-  magnetic_field_strength:
-    aliases: []
-    kind: scalar
   magnetic_flux:
     aliases: []
     kind: scalar
@@ -444,181 +140,37 @@ bases:
   magnetic_shear:
     aliases: []
     kind: scalar
-  magnetic_vector_potential:
-    aliases: []
-    kind: vector
   magnetization:
-    aliases: []
-    kind: scalar
-  magnetization_constraint_exact_flag:
-    aliases: []
-    kind: scalar
-  major_radius:
     aliases: []
     kind: scalar
   mass:
     aliases: []
     kind: scalar
-  minimum_charge_state:
+  metric_tensor:
     aliases: []
-    kind: scalar
-  minor_radius:
-    aliases: []
-    kind: scalar
+    kind: tensor
   mode_number:
     aliases: []
     kind: scalar
   momentum:
     aliases: []
     kind: scalar
-  momentum_convective_velocity:
-    aliases: []
-    kind: vector
-  momentum_diffusivity:
-    aliases: []
-    kind: scalar
   momentum_flux:
     aliases: []
     kind: vector
-  momentum_flux_limiter:
-    aliases: []
-    kind: scalar
-  momentum_poloidal_diffusivity:
-    aliases: []
-    kind: scalar
-  momentum_radial_diffusivity:
-    aliases: []
-    kind: scalar
-  momentum_source:
-    aliases: []
-    kind: scalar
-  momentum_source_density:  # W32: volumetric momentum source term (N/m³) — evidence N=5 (edge_plasma_physics, transport)
-    aliases: []
-    kind: vector
-  monte_carlo_marker_phase_space_position:
-    aliases: []
-    kind: scalar
-  neutron_emissivity:
-    aliases: []
-    kind: scalar
-  neutron_flux:
-    aliases: []
-    kind: scalar
-  non_axisymmetric_vacuum_magnetic_field:
-    aliases: []
-    kind: vector
-  normalized_larmor_radius:
-    aliases: []
-    kind: scalar
-  nuclear_heating_power:
-    aliases: []
-    kind: scalar
   number_density:
     aliases: []
     kind: scalar
-  onset_time:
-    aliases: []
-    kind: scalar
-  orbit_frequency:
-    aliases: []
-    kind: scalar
-  parallel_viscosity_current_density:  # W23A: j_parallel_viscosity (edge_profiles/ggd/j_parallel_viscosity, plasma_profiles/ggd/j_parallel_viscosity) — evidence N=4
-    aliases: []
-    kind: vector
   parameter:
-    aliases: []
-    kind: scalar
-  particle_confinement_time:
-    aliases: []
-    kind: scalar
-  particle_count:
     aliases: []
     kind: scalar
   particle_flux:
     aliases: []
     kind: vector
-  particle_flux_from_plasma:
-    aliases: []
-    kind: scalar
-  particle_flux_from_wall:
-    aliases: []
-    kind: scalar
-  particle_marker_orbit_time:
-    aliases: []
-    kind: scalar
-  particle_number_density:
-    aliases: []
-    kind: scalar
-  particle_number_density_source:
-    aliases: []
-    kind: scalar
-  particle_radial_diffusivity:
-    aliases: []
-    kind: scalar
-  particle_source_rate:  # rc38: s⁻¹·m⁻³ — volumetric particle source
-    aliases: []
-    kind: scalar
-  perpendicular_viscosity_current_density:  # W23A: j_perpendicular_viscosity (edge_profiles/ggd/j_perpendicular_viscosity, plasma_profiles/ggd/j_perpendicular_viscosity) — evidence N=4
-    aliases: []
-    kind: vector
-  perturbed_electrostatic_potential_weight:
-    aliases: []
-    kind: scalar
-  perturbed_parallel_magnetic_field_weight:
-    aliases: []
-    kind: scalar
-  perturbed_parallel_vector_potential_weight:
-    aliases: []
-    kind: scalar
   phase:
     aliases: []
     kind: scalar
-  photon_count_rate:
-    aliases: []
-    kind: scalar
-  physical_sputtering_coefficient:
-    aliases: []
-    kind: scalar
   pitch_angle:
-    aliases: []
-    kind: scalar
-  plasma_boundary_gap_distance:
-    aliases: []
-    kind: scalar
-  plasma_breakdown_time:
-    aliases: []
-    kind: scalar
-  plasma_current:
-    aliases: []
-    kind: scalar
-  plasma_duration:
-    aliases: []
-    kind: scalar
-  plasma_inductance:
-    aliases: []
-    kind: scalar
-  plasma_pressure:
-    aliases: []
-    kind: scalar
-  plasma_resistance:
-    aliases: []
-    kind: scalar
-  plasma_volume:
-    aliases: []
-    kind: scalar
-  plasma_volume_inside_flux_surface:
-    aliases: []
-    kind: scalar
-  plasma_vorticity:
-    aliases: []
-    kind: scalar
-  poloidal_magnetic_field:
-    aliases: []
-    kind: scalar
-  poloidal_magnetic_flux:
-    aliases: []
-    kind: scalar
-  poloidal_mode_number:
     aliases: []
     kind: scalar
   potential:
@@ -627,78 +179,15 @@ bases:
   power:
     aliases: []
     kind: scalar
-  power_density:  # rc38: W/m³ — volumetric power
-    aliases: []
-    kind: scalar
-  power_flux_density:
-    aliases: []
-    kind: scalar
-  prefill_gas_injection:
-    aliases: []
-    kind: scalar
-  prefill_gas_pressure:
+  power_density:
     aliases: []
     kind: scalar
   pressure:
     aliases: []
     kind: scalar
-  pressure_gradient:  # W31: spatial derivative of pressure ∇p — evidence N=1 (gyrokinetics, MHD)
-    aliases: []
-    kind: scalar
-  pressure_gradient_alpha_parameter:
-    aliases: []
-    kind: scalar
-  pressure_pedestal_fit_offset:
-    aliases: []
-    kind: scalar
-  pressure_pedestal_maximum_gradient_position:
-    aliases: []
-    kind: scalar
-  pressure_pedestal_position:
-    aliases: []
-    kind: scalar
-  pressure_pedestal_top:
-    aliases: []
-    kind: scalar
-  pressure_pedestal_width:
-    aliases: []
-    kind: scalar
-  pressure_scrape_off_layer:
-    aliases: []
-    kind: scalar
-  pressure_separatrix:
-    aliases: []
-    kind: scalar
-  pulse_number:
-    aliases: []
-    kind: scalar
-  pumping_speed:
-    aliases: []
-    kind: scalar
   q_profile:
     aliases:
     - safety_factor_profile
-    kind: scalar
-  radial_coordinate_gradient_magnitude:
-    aliases: []
-    kind: scalar
-  radiated_energy:
-    aliases: []
-    kind: scalar
-  radiated_power:
-    aliases: []
-    kind: scalar
-  radiated_power_density:
-    aliases: []
-    kind: scalar
-  radiated_power_inside_flux_surface:
-    aliases: []
-    kind: scalar
-  radiated_power_inside_last_closed_flux_surface:
-    aliases: []
-    kind: scalar
-  radiated_power_inside_vessel:
-    aliases: []
     kind: scalar
   radius:
     aliases: []
@@ -712,52 +201,10 @@ bases:
   resistance:
     aliases: []
     kind: scalar
-  resistive_diffusion_time:
-    aliases: []
-    kind: scalar
-  resistivity:  # W23A: wall/*/resistivity, cryostat/*/resistivity — evidence N=6 (wall, cryostat, pf_active, tf)
-    aliases: []
-    kind: scalar
-  resonant_magnetic_perturbation_occurrence:
-    aliases: []
-    kind: scalar
-  rotation_angle:  # W32: angle of rotation (e.g. EC launcher mirror) — evidence N=3 (auxiliary_heating)
-    aliases: []
-    kind: scalar
-  rotation_frequency:  # W23A: rotation_frequency_tor (core_profiles, plasma_profiles, edge_profiles) — evidence N=8+
-    aliases: []
-    kind: scalar
-  rotational_pressure:
+  resistivity:
     aliases: []
     kind: scalar
   safety_factor:
-    aliases: []
-    kind: scalar
-  scrape_off_layer_density_decay_length:
-    aliases: []
-    kind: scalar
-  scrape_off_layer_heat_flux_decay_length:
-    aliases: []
-    kind: scalar
-  scrape_off_layer_temperature_decay_length:
-    aliases: []
-    kind: scalar
-  seed_island_width:
-    aliases: []
-    kind: scalar
-  shape_coefficient:
-    aliases: []
-    kind: scalar
-  simulation_component_elapsed_time_interval:
-    aliases: []
-    kind: scalar
-  simulation_current_time:
-    aliases: []
-    kind: scalar
-  simulation_end_time:
-    aliases: []
-    kind: scalar
-  simulation_restart_time:
     aliases: []
     kind: scalar
   size:
@@ -766,73 +213,16 @@ bases:
   source:
     aliases: []
     kind: scalar
-  speed:  # rc38: m/s — scalar speed (magnitude of velocity)
-    aliases: []
-    kind: scalar
-  sputtering_angle_of_incidence:
+  speed:
     aliases: []
     kind: scalar
   squareness:
     aliases: []
     kind: scalar
-  steering_angle:
-    aliases: []
-    kind: scalar
-  stored_energy:
-    aliases: []
-    kind: scalar
-  supply_voltage:
-    aliases: []
-    kind: scalar
-  surface_area:  # W32: area of a physical surface (e.g. aperture, mirror, detector) — evidence N=3 (auxiliary_heating, particle_measurement_diagnostics)
-    aliases: []
-    kind: scalar
-  surface_voltage:
-    aliases: []
-    kind: scalar
-  sweep_duration:  # Added rc27: EMW pilot evidence N=3
-    aliases: []
-    kind: scalar
   temperature:
     aliases: []
     kind: scalar
-  temperature_peaking_factor:
-    aliases: []
-    kind: scalar
-  temperature_pedestal_maximum_gradient_position:
-    aliases: []
-    kind: scalar
-  temperature_pedestal_position:
-    aliases: []
-    kind: scalar
-  temperature_pedestal_width:
-    aliases: []
-    kind: scalar
-  thermal_energy:
-    aliases: []
-    kind: scalar
-  thermal_energy_pedestal:
-    aliases: []
-    kind: scalar
   time:
-    aliases: []
-    kind: scalar
-  time_averaging_window_width:
-    aliases: []
-    kind: scalar
-  toroidal_beta:
-    aliases: []
-    kind: scalar
-  toroidal_current_density:
-    aliases: []
-    kind: scalar
-  toroidal_magnetic_field:
-    aliases: []
-    kind: scalar
-  toroidal_mode_number:
-    aliases: []
-    kind: scalar
-  toroidal_torque_density:
     aliases: []
     kind: scalar
   torque:
@@ -841,72 +231,27 @@ bases:
   torque_density:
     aliases: []
     kind: scalar
-  total_beta:
-    aliases: []
-    kind: scalar
-  transport_convection_velocity:
-    aliases: []
-    kind: vector
   triangularity:
-    aliases: []
-    kind: scalar
-  upper_elongation:
-    aliases: []
-    kind: scalar
-  upper_triangularity:
     aliases: []
     kind: scalar
   velocity:
     aliases: []
     kind: vector
-  velocity_gradient:
-    aliases: []
-    kind: scalar
-  vertical_stability_margin:
-    aliases: []
-    kind: scalar
   voltage:
     aliases: []
     kind: scalar
   volume:
     aliases: []
     kind: scalar
-  volume_averaged_electron_density:
-    aliases: []
-    kind: scalar
-  volumetric_energy_source:
-    aliases: []
-    kind: scalar
   vorticity:
     aliases: []
     kind: scalar
-  wave_vector:  # W32: spatial wavevector k of a wave — evidence N=5 (auxiliary_heating, waves)
+  wave_vector:
     aliases: [wavevector]
     kind: vector
-  wave_absorbed_power:
-    aliases: []
-    kind: scalar
-  wave_absorbed_power_density:  # W35A: volumetric wave power absorption (W/m³) — evidence N=1 (waves)
-    aliases: []
-    kind: scalar
-  wave_absorbed_power_inside_flux_surface:  # W35A: wave absorbed power integrated inside flux surface (W) — evidence N=1 (waves)
-    aliases: []
-    kind: scalar
-  wave_driven_absorbed_power_inside_flux_surface:
-    aliases: []
-    kind: scalar
-  wave_driven_toroidal_current:
-    aliases: []
-    kind: scalar
-  wave_driven_toroidal_current_inside_flux_surface:
-    aliases: []
-    kind: scalar
   weight:
     aliases: []
     kind: scalar
   width:
-    aliases: []
-    kind: scalar
-  x1_width:  # Added rc27: EMW pilot evidence N=3
     aliases: []
     kind: scalar

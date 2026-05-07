@@ -226,6 +226,9 @@ class Process(StrEnum):
     SPUTTERING = "sputtering"
     VISCOSITY = "viscosity"
     OHMIC_INDUCTION = "ohmic_induction"
+    COULOMB_COLLISIONS_WITH_ION = "coulomb_collisions_with_ion"
+    COULOMB_COLLISIONS_WITH_ION_STATE = "coulomb_collisions_with_ion_state"
+    ION_NEUTRAL_FRICTION = "ion_neutral_friction"
 
 
 class GenericPhysicalBase(StrEnum):
