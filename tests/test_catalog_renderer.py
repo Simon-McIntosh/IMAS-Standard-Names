@@ -122,9 +122,8 @@ def test_catalog_renderer_render_catalog_raw_base_name(tmp_path: Path):
     renderer = CatalogRenderer(catalog_path)
     catalog = renderer.render_catalog()
 
-    # Should see subject+physical_base in H3 headings (parser returns subject_base)
-    assert "### electron temperature" in catalog
-    assert "### ion temperature" in catalog
+    # Should see physical_base in H2 headings (parser returns 'temperature')
+    assert "## temperature" in catalog.lower() or "## Temperature" in catalog
     # Entries use minimal div styling
     assert '<div class="sn-entry"' in catalog
     # Should NOT see old backtick style
@@ -362,7 +361,7 @@ def test_catalog_render_no_sources_block_when_absent(tmp_path: Path):
 def test_parse_base_strips_transformation_residue():
     """Transformed names (derivative, tendency) group under the inner base quantity."""
     base = CatalogRenderer._parse_base
-    # Derivatives should resolve to subject + physical_base of inner quantity
+    # Derivatives should resolve to inner quantity (stripped of transformation residue)
     assert (
         base(
             "derivative_of_electron_density_with_respect_to_normalized_toroidal_flux_coordinate"
@@ -376,9 +375,9 @@ def test_parse_base_strips_transformation_residue():
         )
         == "fast_electron_density"
     )
-    # Non-transformed names include subject
-    assert base("electron_temperature") == "electron_temperature"
-    assert base("electron_density") == "electron_density"
+    # Non-transformed names return physical_base only (no subject prepend)
+    assert base("electron_temperature") == "temperature"
+    assert base("electron_density") == "density"
     assert base("toroidal_component_of_current_density") == "current_density"
     # Parse failures fall back to 'unknown'
     assert base("!!!invalid!!!") == "unknown"

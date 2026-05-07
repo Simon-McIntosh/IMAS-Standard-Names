@@ -156,9 +156,8 @@ class CatalogRenderer:
         """Extract base physical quantity for catalog grouping.
 
         Uses the ISN grammar parser directly — no heuristic stripping.
-        Groups by physical_base (or geometric_base), which the parser
-        extracts after consuming all prefix segments (subject, component,
-        coordinate, transformation, etc.).
+        Groups by physical_base (or geometric_base) alone, so names
+        differing only by subject/orbit-class/species group together.
 
         When a transformation is present, the parser leaves residue
         (of_*, _with_respect_to_*) in physical_base — strip it so
@@ -177,10 +176,6 @@ class CatalogRenderer:
                 wrt_idx = base.find("_with_respect_to_")
                 if wrt_idx > 0:
                     base = base[:wrt_idx]
-
-            # Prepend subject for readable grouping (electron_density, not just density)
-            if parsed.subject and base != "unknown":
-                base = f"{parsed.subject}_{base}"
 
             return base or "unknown"
         except Exception:
