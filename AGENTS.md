@@ -31,6 +31,54 @@ Critical distinctions for naming:
 - `of_object` vs `from_source`: intrinsic properties vs measurements
 - `at_position` vs `of_geometry`: evaluated at location vs property of object
 
+### Vocabulary Design Rules
+
+Grammar segments are defined in `imas_standard_names/grammar/vocabularies/*.yml` and
+mirrored as `StrEnum` members in `grammar/model_types.py`. The parser uses greedy
+longest-prefix matching for closed-vocabulary segments. These rules prevent ambiguity:
+
+**1. No compound tokens that subsume tokens from other segments.**
+A closed-vocabulary segment (e.g., `subject`) must NOT contain tokens that include
+words belonging to `physical_base` (open vocabulary). Example violation:
+`trapped_particle` as a subject token — the parser greedily consumes "particle",
+leaving an inconsistent `physical_base`. Correct: `trapped` alone is the subject;
+`particle_density` stays intact in `physical_base`.
+
+**2. Prefer atomic qualifiers over compound subjects.**
+Orbit-class qualifiers (`trapped`, `co_passing`, `counter_passing`) and species
+identifiers (`fast_particle`, `electron`, `ion`) are independent grammar axes.
+Never combine them into a single subject token (e.g., `trapped_fast_particle`)
+because this prevents consistent grouping of orbit variants.
+
+**3. Test round-trip consistency before adding tokens.**
+Before adding any vocabulary token, verify that ALL existing names containing
+the candidate string still parse and round-trip identically:
+```python
+from imas_standard_names.grammar.model import parse_standard_name, compose_standard_name
+p = parse_standard_name(name)
+assert compose_standard_name(p) == name  # Round-trip
+```
+
+**4. Grouping invariant: same physical quantity → same `physical_base`.**
+All names measuring the same physical quantity (differing only by population,
+orbit class, or species) MUST parse to the same `physical_base`. If a vocabulary
+change breaks this invariant, the token is wrong. Test with:
+```python
+# All orbit variants must share physical_base
+bases = {parse_standard_name(n).physical_base for n in orbit_variants}
+assert len(bases) == 1, f"Inconsistent grouping: {bases}"
+```
+
+**5. `physical_base` is open vocabulary — never add to closed segments what belongs there.**
+If a concept is a physical quantity (density, temperature, power_density, flux, etc.),
+it belongs in `physical_base` regardless of how compound it is. Only qualifier/modifier
+roles (species, orbit class, component, coordinate) belong in closed segments.
+
+**6. Validate with the catalog renderer.**
+After any vocabulary change, run the catalog renderer's `_parse_base()` on all
+existing names and verify that related names group together. The catalog site is
+the primary consumer of grammar decomposition for grouping.
+
 ### YAML Structure Requirements
 
 ```yaml
