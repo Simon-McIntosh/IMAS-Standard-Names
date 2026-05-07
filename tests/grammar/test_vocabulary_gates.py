@@ -440,3 +440,24 @@ class TestSubjectQualifierBoundary:
         assert "alpha" not in quals, (
             f"'alpha' appeared separately — compound subject was split: {quals}"
         )
+
+
+class TestSegmentTokenMapClosed:
+    """SEGMENT_TOKEN_MAP physical_base and qualifier are now closed vocabularies."""
+
+    def test_physical_base_closed(self):
+        from imas_standard_names.grammar.constants import SEGMENT_TOKEN_MAP
+
+        bases = SEGMENT_TOKEN_MAP["physical_base"]
+        assert len(bases) >= 70, f"Expected >= 70 bases, got {len(bases)}"
+        assert "temperature" in bases
+        assert "pressure" in bases
+        assert "density" in bases
+
+    def test_qualifier_in_segment_map(self):
+        from imas_standard_names.grammar.constants import SEGMENT_TOKEN_MAP
+
+        quals = SEGMENT_TOKEN_MAP["qualifier"]
+        assert len(quals) >= 90, f"Expected >= 90 qualifiers, got {len(quals)}"
+        assert "trapped" in quals
+        assert "collisional" in quals

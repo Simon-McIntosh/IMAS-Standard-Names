@@ -35,6 +35,7 @@ from .model_types import (
     Region,
     Subject,
 )
+from .vocab_loaders import load_physical_bases, load_qualifiers
 
 
 @dataclass(frozen=True)
@@ -52,12 +53,13 @@ SEGMENT_TOKEN_MAP: dict[str, tuple[str, ...]] = {
     "subject": tuple(member.value for member in Subject),
     "device": tuple(member.value for member in Object),
     "geometric_base": tuple(member.value for member in GeometricBase),
-    "physical_base": (),
+    "physical_base": tuple(sorted(load_physical_bases().bases.keys())),
     "object": tuple(member.value for member in Object),
     "geometry": tuple(member.value for member in Position),
     "position": tuple(member.value for member in Position),
     "region": tuple(member.value for member in Region),
     "process": tuple(member.value for member in Process),
+    "qualifier": tuple(sorted(load_qualifiers())),
 }
 
 SEGMENT_RULES: tuple[SegmentRule, ...] = (
@@ -137,6 +139,13 @@ SEGMENT_RULES: tuple[SegmentRule, ...] = (
         template="due_to_{token}",
         exclusive_with=(),
         tokens=SEGMENT_TOKEN_MAP["process"],
+    ),
+    SegmentRule(
+        identifier="qualifier",
+        optional=True,
+        template=None,
+        exclusive_with=(),
+        tokens=SEGMENT_TOKEN_MAP["qualifier"],
     ),
 )
 
