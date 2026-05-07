@@ -368,6 +368,100 @@ class CatalogRenderer:
         lines += ["", "</details>", ""]
         return "\n".join(lines) + "\n"
 
+    def _render_entry(self, item: dict, wrapped_by: dict[str, list[str]]) -> str:
+        """Render a single standard name entry as a card block."""
+        result = ""
+        name = item.get("name", "Unknown")
+        unit = item.get("unit", "")
+        description = _rewrite_name_links(item.get("description", ""))
+        documentation = _rewrite_name_links(
+            self._fix_markdown_formatting(item.get("documentation", ""))
+        )
+        status = item.get("status", "")
+        kind = item.get("kind", "")
+
+        # Anchored card title (not a heading — keeps TOC clean)
+        human_name = _humanize(name)
+        result += f'<div class="sn-card" id="{name}" markdown>\n\n'
+        result += f"**{human_name}**"
+
+        # Compact inline metadata
+        meta_parts: list[str] = []
+        if unit:
+            meta_parts.append(f"`{unit}`")
+        if kind:
+            meta_parts.append(kind)
+        if status:
+            meta_parts.append(status.lower())
+        if meta_parts:
+            result += " — " + " · ".join(meta_parts)
+        result += "\n{: .sn-title }\n\n"
+
+        # Description (always visible)
+        if description:
+            result += f"{description}\n\n"
+
+        # Documentation (collapsible when long)
+        if documentation:
+            if len(documentation) > 400:
+                result += (
+                    "<details markdown>\n"
+                    "<summary>Documentation</summary>\n\n"
+                    f"{documentation}\n\n"
+                    "</details>\n\n"
+                )
+            else:
+                result += f"{documentation}\n\n"
+
+        result += self._render_links(item.get("links", []))
+        result += self._render_mermaid(item)
+        result += self._render_sibling_nav(item, wrapped_by)
+        result += self._render_sources(item.get("sources") or [])
+        result += "</div>\n\n"
+        return result
+
+    def render_domain_page(self, domain: str) -> str:
+        """Generate a single domain page with base-name grouping.
+
+        Parameters
+        ----------
+        domain : str
+            Physics domain key (e.g. "equilibrium", "transport").
+
+        Returns
+        -------
+        str
+            Markdown content for the domain page.
+        """
+        domains = self.get_domains()
+        items = domains.get(domain, [])
+        if not items:
+            return f"_No standard names found for domain: {domain}_\n"
+
+        domain_display = domain.replace("_", " ").title()
+        wrapped_by = self._build_wrapped_by_index(self.load_names())
+
+        result = f"# {domain_display}\n\n"
+        result += f"**{len(items)} standard names** in this domain.\n\n"
+
+        # Group items by base name
+        base_groups: dict[str, list[dict]] = defaultdict(list)
+        for item in items:
+            name = item.get("name", "Unknown")
+            base = self._parse_base(name)
+            base_groups[base].append(item)
+
+        for base_name in sorted(base_groups.keys()):
+            base_items = base_groups[base_name]
+            count = len(base_items)
+            result += f"## {_humanize(base_name)} ({count}) {{: #{base_name} }}\n\n"
+
+            sorted_items = sorted(base_items, key=lambda x: x.get("name", ""))
+            for item in sorted_items:
+                result += self._render_entry(item, wrapped_by)
+
+        return result
+
     def render_catalog(self) -> str:
         """Generate complete catalog organized by physics_domain and base name.
 
@@ -408,63 +502,62 @@ class CatalogRenderer:
                 )
 
                 sorted_items = sorted(base_items, key=lambda x: x.get("name", ""))
-
                 for item in sorted_items:
-                    name = item.get("name", "Unknown")
-                    unit = item.get("unit", "")
-                    description = _rewrite_name_links(item.get("description", ""))
-                    documentation = _rewrite_name_links(
-                        self._fix_markdown_formatting(item.get("documentation", ""))
-                    )
-                    status = item.get("status", "")
-                    kind = item.get("kind", "")
-
-                    # Anchored card title (not a heading — keeps TOC clean)
-                    human_name = _humanize(name)
-                    result += (
-                        f'<div class="sn-card" id="{name}" markdown>\n\n'
-                        f"**{human_name}**"
-                    )
-
-                    # Compact inline metadata
-                    meta_parts: list[str] = []
-                    if unit:
-                        meta_parts.append(f"`{unit}`")
-                    if kind:
-                        meta_parts.append(kind)
-                    if status:
-                        meta_parts.append(status.lower())
-                    if meta_parts:
-                        result += " — " + " · ".join(meta_parts)
-                    result += "\n{: .sn-title }\n\n"
-
-                    # Description (always visible)
-                    if description:
-                        result += f"{description}\n\n"
-
-                    # Documentation (collapsible when long)
-                    if documentation:
-                        if len(documentation) > 400:
-                            result += (
-                                "<details markdown>\n"
-                                "<summary>Documentation</summary>\n\n"
-                                f"{documentation}\n\n"
-                                "</details>\n\n"
-                            )
-                        else:
-                            result += f"{documentation}\n\n"
-
-                    result += self._render_links(item.get("links", []))
-
-                    result += self._render_mermaid(item)
-
-                    result += self._render_sibling_nav(item, wrapped_by)
-
-                    result += self._render_sources(item.get("sources") or [])
-
-                    result += "</div>\n\n"
+                    result += self._render_entry(item, wrapped_by)
 
         return result
+
+    def generate_site(self, output_dir: Path) -> dict:
+        """Generate a multi-page site structure with per-domain pages.
+
+        Creates:
+        - index.md: overview with stats and domain links
+        - catalog/index.md: catalog overview with domain navigation
+        - catalog/<domain>.md: per-domain page
+
+        Parameters
+        ----------
+        output_dir : Path
+            Directory to write generated markdown files into.
+
+        Returns
+        -------
+        dict
+            Navigation structure suitable for mkdocs.yml ``nav:`` key.
+        """
+        domains = self.get_domains()
+        stats = self.get_stats()
+
+        catalog_dir = output_dir / "catalog"
+        catalog_dir.mkdir(parents=True, exist_ok=True)
+
+        # --- Catalog index page ---
+        index_content = "# Standard Names Catalog\n\n"
+        index_content += f"**{stats['total_names']} standard names** "
+        index_content += f"across **{stats['total_domains']} physics domains**.\n\n"
+        index_content += (
+            "Browse by domain using the navigation on the left, "
+            "or use the search bar to find specific quantities.\n\n"
+        )
+        index_content += "| Domain | Names |\n|--------|-------|\n"
+        for domain in sorted(domains.keys()):
+            domain_display = domain.replace("_", " ").title()
+            count = len(domains[domain])
+            index_content += f"| [{domain_display}]({domain}.md) | {count} |\n"
+
+        (catalog_dir / "index.md").write_text(index_content)
+
+        # --- Per-domain pages ---
+        nav_items: list[dict[str, str]] = [
+            {"Overview": "catalog/index.md"},
+        ]
+        for domain in sorted(domains.keys()):
+            domain_display = domain.replace("_", " ").title()
+            page_content = self.render_domain_page(domain)
+            (catalog_dir / f"{domain}.md").write_text(page_content)
+            nav_items.append({domain_display: f"catalog/{domain}.md"})
+
+        return {"Catalog": nav_items}
 
     def render_overview(self, link_prefix: str = "") -> str:
         """Generate overview statistics for the catalog.

@@ -29,6 +29,7 @@ import click
 from ..rendering.catalog import CatalogRenderer
 
 # Minimal mkdocs.yml template for versioned deployment (with mike plugin)
+# The nav: section is injected dynamically from the catalog structure.
 MKDOCS_DEPLOY_TEMPLATE = """\
 site_name: "{site_name}"
 site_url: "{site_url}"
@@ -41,9 +42,7 @@ plugins:
       css_dir: stylesheets
       javascript_dir: javascripts
 
-nav:
-  - Home: index.md
-  - Standard Names: catalog.md
+{nav_section}
 
 theme:
   name: material
@@ -51,8 +50,12 @@ theme:
     - navigation.tracking
     - navigation.tabs
     - navigation.tabs.sticky
+    - navigation.sections
+    - navigation.expand
     - navigation.top
     - search.highlight
+    - search.suggest
+    - toc.integrate
 
 extra:
   version:
@@ -67,6 +70,7 @@ markdown_extensions:
   - md_in_html
   - toc:
       permalink: true
+      toc_depth: 3
 
 extra_css:
   - stylesheets/catalog.css
@@ -84,9 +88,7 @@ site_url: "{site_url}"
 plugins:
   - search
 
-nav:
-  - Home: index.md
-  - Standard Names: catalog.md
+{nav_section}
 
 theme:
   name: material
@@ -94,8 +96,12 @@ theme:
     - navigation.tracking
     - navigation.tabs
     - navigation.tabs.sticky
+    - navigation.sections
+    - navigation.expand
     - navigation.top
     - search.highlight
+    - search.suggest
+    - toc.integrate
 
 markdown_extensions:
   - pymdownx.arithmatex:
@@ -106,6 +112,7 @@ markdown_extensions:
   - md_in_html
   - toc:
       permalink: true
+      toc_depth: 3
 
 extra_css:
   - stylesheets/catalog.css
@@ -116,38 +123,47 @@ extra_javascript:
 """
 
 CATALOG_CSS = """\
-/* Standard Names Catalog — Card Styles */
+/* Standard Names Catalog — Multi-page Design */
 
 /* Entry cards */
 .sn-card {
-    margin: 1rem 0 1.5rem;
+    margin: 0.75rem 0 1.25rem;
     padding: 1rem 1.25rem;
     border-left: 3px solid var(--md-primary-fg-color);
-    border-radius: 0 4px 4px 0;
+    border-radius: 0 6px 6px 0;
     background: var(--md-code-bg-color);
+    transition: border-color 0.2s;
+}
+
+.sn-card:target {
+    border-left-color: var(--md-accent-fg-color);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .sn-card .sn-title {
     margin: 0 0 0.5rem;
-    font-size: 1.05rem;
+    font-size: 1rem;
     overflow-wrap: anywhere;
+    line-height: 1.4;
 }
 
 .sn-card p {
     margin: 0.4rem 0;
+    font-size: 0.92rem;
+    line-height: 1.5;
 }
 
 /* Compact metadata inline after title */
 .sn-card .sn-title code {
-    font-size: 0.85em;
-    padding: 0.15em 0.35em;
+    font-size: 0.82em;
+    padding: 0.12em 0.3em;
     border-radius: 3px;
     background: var(--md-default-bg-color);
 }
 
 /* Collapsible documentation sections */
 .sn-card details {
-    margin: 0.75rem 0;
+    margin: 0.6rem 0;
     border: 1px solid var(--md-default-fg-color--lightest);
     border-radius: 4px;
     padding: 0.5rem 0.75rem;
@@ -156,7 +172,7 @@ CATALOG_CSS = """\
 .sn-card details summary {
     cursor: pointer;
     font-weight: 600;
-    font-size: 0.9rem;
+    font-size: 0.88rem;
     color: var(--md-primary-fg-color);
 }
 
@@ -167,19 +183,32 @@ CATALOG_CSS = """\
 }
 
 /* See-also and sibling nav links */
-.sn-card a[href^="#"] {
+.sn-card a[href^=\\"#\\"] {
     overflow-wrap: anywhere;
+    font-size: 0.9rem;
 }
 
 /* Base group headings */
-h3 {
-    border-bottom: 1px solid var(--md-default-fg-color--lightest);
-    padding-bottom: 0.3rem;
+h2 {
+    border-bottom: 2px solid var(--md-primary-fg-color--light);
+    padding-bottom: 0.4rem;
+    margin-top: 2rem;
 }
 
 /* Mermaid overflow */
 .sn-card .mermaid {
     overflow-x: auto;
+    max-width: 100%;
+}
+
+/* Domain overview table */
+.md-typeset table:not([class]) {
+    font-size: 0.88rem;
+}
+
+.md-typeset table:not([class]) td,
+.md-typeset table:not([class]) th {
+    padding: 0.5rem 0.75rem;
 }
 """
 
@@ -207,6 +236,18 @@ def _mike_error_message() -> str:
     )
 
 
+def _generate_nav_yaml(nav_structure: dict) -> str:
+    """Convert nav structure dict to YAML nav: section for mkdocs.yml."""
+    import yaml as _yaml  # noqa: PLC0415
+
+    nav_list = [{"Home": "index.md"}]
+    # Add catalog section from the renderer
+    catalog_section = nav_structure.get("Catalog", [])
+    if catalog_section:
+        nav_list.append({"Catalog": list(catalog_section)})
+    return "nav:\n" + _yaml.dump(nav_list, default_flow_style=False, indent=2)
+
+
 def _generate_site_content(
     catalog_path: Path,
     docs_dir: Path,
@@ -215,6 +256,9 @@ def _generate_site_content(
     site_url: str = "",
 ) -> int:
     """Generate mkdocs site content from catalog YAML files.
+
+    Uses multi-page layout: one page per physics domain for proper
+    left-sidebar navigation in the Material theme.
 
     Returns the number of standard names found.
     """
@@ -227,10 +271,17 @@ def _generate_site_content(
     stylesheets_dir = docs_content_dir / "stylesheets"
     stylesheets_dir.mkdir(exist_ok=True)
 
+    # Generate multi-page catalog structure
+    nav_structure = renderer.generate_site(docs_content_dir)
+
+    # Generate nav YAML for mkdocs config
+    nav_yaml = _generate_nav_yaml(nav_structure)
+
     # Generate mkdocs.yml
     mkdocs_config = mkdocs_template.format(
         site_name=site_name,
         site_url=site_url,
+        nav_section=nav_yaml,
     )
     (docs_dir / "mkdocs.yml").write_text(mkdocs_config)
 
@@ -253,19 +304,10 @@ def _generate_site_content(
     if readme_path.exists():
         index_content = readme_path.read_text(encoding="utf-8")
     else:
-        # Generate default index from catalog stats
-        # Use link_prefix to point to catalog.md for category links
         index_content = f"# {site_name}\n\n"
-        index_content += renderer.render_overview(link_prefix="catalog.md")
+        index_content += renderer.render_overview(link_prefix="catalog/")
 
     (docs_content_dir / "index.md").write_text(index_content)
-
-    # Generate catalog.md (no link prefix needed, anchors are on same page)
-    catalog_content = "# Standard Names Catalog\n\n"
-    catalog_content += renderer.render_overview()
-    catalog_content += "\n---\n\n"
-    catalog_content += renderer.render_catalog()
-    (docs_content_dir / "catalog.md").write_text(catalog_content)
 
     return stats["total_names"]
 

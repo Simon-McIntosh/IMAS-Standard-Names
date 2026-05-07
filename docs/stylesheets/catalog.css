@@ -1,63 +1,87 @@
-/* Catalog page layout with sidebar navigation */
-.catalog-container {
-    display: flex;
-    gap: 2rem;
-    align-items: flex-start;
-}
+/* Standard Names Catalog — Multi-page Design */
 
-.catalog-sidebar {
-    flex: 0 0 250px;
-    position: sticky;
-    top: 4rem;
-    max-height: calc(100vh - 5rem);
-    overflow-y: auto;
-    padding: 1rem;
+/* Entry cards */
+.sn-card {
+    margin: 0.75rem 0 1.25rem;
+    padding: 1rem 1.25rem;
+    border-left: 3px solid var(--md-primary-fg-color);
+    border-radius: 0 6px 6px 0;
     background: var(--md-code-bg-color);
-    border-radius: 0.2rem;
+    transition: border-color 0.2s;
 }
 
-.catalog-sidebar h2 {
+.sn-card:target {
+    border-left-color: var(--md-accent-fg-color);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.sn-card .sn-title {
+    margin: 0 0 0.5rem;
     font-size: 1rem;
-    margin-top: 0;
-    margin-bottom: 1rem;
+    overflow-wrap: anywhere;
+    line-height: 1.4;
 }
 
-.catalog-sidebar ul {
-    list-style: none;
-    padding-left: 0;
-    margin: 0;
+.sn-card p {
+    margin: 0.4rem 0;
+    font-size: 0.92rem;
+    line-height: 1.5;
 }
 
-.catalog-sidebar li {
-    margin: 0.25rem 0;
+/* Compact metadata inline after title */
+.sn-card .sn-title code {
+    font-size: 0.82em;
+    padding: 0.12em 0.3em;
+    border-radius: 3px;
+    background: var(--md-default-bg-color);
 }
 
-.catalog-sidebar a {
-    text-decoration: none;
-    font-size: 0.85rem;
+/* Collapsible documentation sections */
+.sn-card details {
+    margin: 0.6rem 0;
+    border: 1px solid var(--md-default-fg-color--lightest);
+    border-radius: 4px;
+    padding: 0.5rem 0.75rem;
 }
 
-.catalog-sidebar > div > p > strong > a {
-    font-weight: bold;
-    font-size: 0.95rem;
-    margin-top: 1rem;
-    display: block;
+.sn-card details summary {
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.88rem;
+    color: var(--md-primary-fg-color);
 }
 
-.catalog-content {
-    flex: 1;
-    min-width: 0;
+.sn-card details[open] summary {
+    margin-bottom: 0.5rem;
+    border-bottom: 1px solid var(--md-default-fg-color--lightest);
+    padding-bottom: 0.4rem;
 }
 
-/* Responsive: stack on smaller screens */
-@media screen and (max-width: 76.1875em) {
-    .catalog-container {
-        flex-direction: column;
-    }
-    
-    .catalog-sidebar {
-        position: static;
-        max-height: none;
-        width: 100%;
-    }
+/* See-also and sibling nav links */
+.sn-card a[href^="#"] {
+    overflow-wrap: anywhere;
+    font-size: 0.9rem;
+}
+
+/* Base group headings */
+h2 {
+    border-bottom: 2px solid var(--md-primary-fg-color--light);
+    padding-bottom: 0.4rem;
+    margin-top: 2rem;
+}
+
+/* Mermaid overflow */
+.sn-card .mermaid {
+    overflow-x: auto;
+    max-width: 100%;
+}
+
+/* Domain overview table */
+.md-typeset table:not([class]) {
+    font-size: 0.88rem;
+}
+
+.md-typeset table:not([class]) td,
+.md-typeset table:not([class]) th {
+    padding: 0.5rem 0.75rem;
 }
