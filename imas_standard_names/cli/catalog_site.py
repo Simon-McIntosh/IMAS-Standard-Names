@@ -335,8 +335,12 @@ def deploy_cmd(
 
         click.echo(f"Generated site for {total_names} standard names")
 
-        # Deploy with mike (use sys.executable -m to inherit active venv).
-        mike_args = [sys.executable, "-m", "mike", "deploy", doc_version]
+        # Deploy with mike (use entry point script, not -m which requires __main__.py).
+        mike_cmd = shutil.which("mike")
+        if mike_cmd is None:
+            click.echo(f"Error: {_mike_error_message()}", err=True)
+            raise SystemExit(1)
+        mike_args = [mike_cmd, "deploy", doc_version]
         if set_default:
             mike_args.extend(["--update-aliases", "latest"])
         if push:
