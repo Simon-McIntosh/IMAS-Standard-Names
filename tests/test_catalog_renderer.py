@@ -112,21 +112,22 @@ def test_catalog_renderer_render_catalog_groups_by_physics_domain(tmp_path: Path
     # Names appear verbatim
     assert "electron_temperature" in catalog
     assert "ion_temperature" in catalog
-    # Unit still rendered
-    assert "**Unit:** `eV`" in catalog
+    # Unit still rendered (now inline with title)
+    assert "`eV`" in catalog
 
 
 def test_catalog_renderer_render_catalog_raw_base_name(tmp_path: Path):
-    """Base name heading is raw snake_case in backticks, not title-cased."""
+    """Base name heading uses humanized text with count."""
     catalog_path = _make_test_catalog(tmp_path)
     renderer = CatalogRenderer(catalog_path)
     catalog = renderer.render_catalog()
 
-    # Should see backtick-wrapped snake_case base name in an H3
-    assert "### `" in catalog
-    # Should NOT see title-cased transformation
-    assert "Electron Temperature" not in catalog
-    assert "Ion Temperature" not in catalog
+    # Should see humanized base name with count in an H3
+    assert "### temperature" in catalog
+    # Entries use card-style divs, not H4 headings
+    assert '<div class="sn-card"' in catalog
+    # Should NOT see old backtick style
+    assert "### `" not in catalog
 
 
 def test_catalog_renderer_render_catalog_no_cocos_no_tags(tmp_path: Path):
@@ -167,9 +168,9 @@ def test_catalog_renderer_render_navigation(tmp_path: Path):
 
     # Navigation section uses title-cased domain
     assert "Transport" in nav
-    # Raw names are linked
-    assert "electron_temperature" in nav
-    assert "ion_temperature" in nav
+    # Navigation now shows base groups with counts, not individual names
+    assert "temperature" in nav
+    assert "(2)" in nav
 
 
 def test_catalog_renderer_loads_from_subdirectories(tmp_path: Path):
@@ -260,7 +261,8 @@ def test_rewrite_name_links_multiple_in_paragraph(tmp_path: Path):
     text = "See [foo](name:foo) and also [bar_baz](name:bar_baz) for details."
     result = _rewrite_name_links(text)
     assert "[foo](#foo)" in result
-    assert "[bar_baz](#bar_baz)" in result
+    # Link text is humanized (underscores → spaces), anchor stays canonical
+    assert "[bar baz](#bar_baz)" in result
     assert "name:" not in result
 
 
@@ -281,7 +283,7 @@ documentation: |
     renderer = CatalogRenderer(tmp_path)
     catalog = renderer.render_catalog()
 
-    assert "[beta_quantity](#beta_quantity)" in catalog
+    assert "[beta quantity](#beta_quantity)" in catalog
     assert "name:beta_quantity" not in catalog
 
 

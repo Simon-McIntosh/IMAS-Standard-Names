@@ -61,8 +61,10 @@ extra:
 markdown_extensions:
   - pymdownx.arithmatex:
       generic: true
+  - pymdownx.details
   - footnotes
   - attr_list
+  - md_in_html
   - toc:
       permalink: true
 
@@ -70,6 +72,7 @@ extra_css:
   - stylesheets/catalog.css
 
 extra_javascript:
+  - javascripts/mathjax.js
   - https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js
 """
 
@@ -97,8 +100,10 @@ theme:
 markdown_extensions:
   - pymdownx.arithmatex:
       generic: true
+  - pymdownx.details
   - footnotes
   - attr_list
+  - md_in_html
   - toc:
       permalink: true
 
@@ -106,26 +111,75 @@ extra_css:
   - stylesheets/catalog.css
 
 extra_javascript:
+  - javascripts/mathjax.js
   - https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js
 """
 
 CATALOG_CSS = """\
-/* Standard Names Catalog Styles */
-.standard-name {
-    margin-bottom: 2rem;
-    padding: 1rem;
+/* Standard Names Catalog — Card Styles */
+
+/* Entry cards */
+.sn-card {
+    margin: 1rem 0 1.5rem;
+    padding: 1rem 1.25rem;
     border-left: 3px solid var(--md-primary-fg-color);
+    border-radius: 0 4px 4px 0;
+    background: var(--md-code-bg-color);
 }
 
-.standard-name h4 {
-    margin-top: 0;
+.sn-card .sn-title {
+    margin: 0 0 0.5rem;
+    font-size: 1.05rem;
+    overflow-wrap: anywhere;
+}
+
+.sn-card p {
+    margin: 0.4rem 0;
+}
+
+/* Compact metadata inline after title */
+.sn-card .sn-title code {
+    font-size: 0.85em;
+    padding: 0.15em 0.35em;
+    border-radius: 3px;
+    background: var(--md-default-bg-color);
+}
+
+/* Collapsible documentation sections */
+.sn-card details {
+    margin: 0.75rem 0;
+    border: 1px solid var(--md-default-fg-color--lightest);
+    border-radius: 4px;
+    padding: 0.5rem 0.75rem;
+}
+
+.sn-card details summary {
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9rem;
     color: var(--md-primary-fg-color);
 }
 
-.standard-name code {
-    background-color: var(--md-code-bg-color);
-    padding: 0.2em 0.4em;
-    border-radius: 3px;
+.sn-card details[open] summary {
+    margin-bottom: 0.5rem;
+    border-bottom: 1px solid var(--md-default-fg-color--lightest);
+    padding-bottom: 0.4rem;
+}
+
+/* See-also and sibling nav links */
+.sn-card a[href^="#"] {
+    overflow-wrap: anywhere;
+}
+
+/* Base group headings */
+h3 {
+    border-bottom: 1px solid var(--md-default-fg-color--lightest);
+    padding-bottom: 0.3rem;
+}
+
+/* Mermaid overflow */
+.sn-card .mermaid {
+    overflow-x: auto;
 }
 """
 
@@ -182,6 +236,17 @@ def _generate_site_content(
 
     # Generate CSS
     (stylesheets_dir / "catalog.css").write_text(CATALOG_CSS)
+
+    # Generate deferred MathJax config
+    js_dir = docs_content_dir / "javascripts"
+    js_dir.mkdir(exist_ok=True)
+    (js_dir / "mathjax.js").write_text(
+        "window.MathJax = {\n"
+        "  tex: { inlineMath: [['$', '$'], ['\\\\(', '\\\\)']] },\n"
+        "  options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'] },\n"
+        "  startup: { typeset: true }\n"
+        "};\n"
+    )
 
     # Generate index.md from README or create default
     readme_path = catalog_path / "README.md"

@@ -17,9 +17,16 @@ import yaml
 _NAME_LINK_RE = re.compile(r"\[([^\]]+)\]\(name:([a-z0-9_]+)\)")
 
 
+def _humanize(name: str) -> str:
+    """Convert ``snake_case`` standard name to readable text."""
+    return name.replace("_", " ")
+
+
 def _rewrite_name_links(text: str) -> str:
-    """Replace ``name:foo`` protocol links with in-page anchors ``#foo``."""
-    return _NAME_LINK_RE.sub(r"[\1](#\2)", text)
+    """Replace ``name:foo`` protocol links with humanized in-page anchors."""
+    return _NAME_LINK_RE.sub(
+        lambda m: f"[{_humanize(m.group(2))}](#{m.group(2)})", text
+    )
 
 
 class CatalogRenderer:
@@ -163,7 +170,7 @@ class CatalogRenderer:
     # ------------------------------------------------------------------
     @staticmethod
     def _render_links(links: list[str]) -> str:
-        """Render ``links:`` as markdown; ``name:X`` → in-page anchor."""
+        """Render ``links:`` as markdown; ``name:X`` → humanized in-page anchor."""
         if not links:
             return ""
         parts: list[str] = []
@@ -174,12 +181,12 @@ class CatalogRenderer:
             if link.startswith("name:"):
                 target = link[len("name:") :].strip()
                 if target:
-                    parts.append(f"[{target}](#{target})")
+                    parts.append(f"[{_humanize(target)}](#{target})")
             elif link:
                 parts.append(f"[{link}]({link})")
         if not parts:
             return ""
-        return "**Links:** " + ", ".join(parts) + "\n\n"
+        return "**See also:** " + " · ".join(parts) + "\n\n"
 
     @staticmethod
     def _argument_label(arg: dict) -> str:
@@ -199,7 +206,11 @@ class CatalogRenderer:
 
     @classmethod
     def _render_mermaid(cls, item: dict) -> str:
-        """Emit a Mermaid hierarchy block when structural fields exist."""
+        """Emit a Mermaid hierarchy block when structural fields exist.
+
+        Uses short node IDs with humanized display labels to prevent
+        text overflow in diagrams.
+        """
         arguments = item.get("arguments") or []
         error_variants = item.get("error_variants") or {}
         deprecates = item.get("deprecates")
@@ -215,21 +226,44 @@ class CatalogRenderer:
             return ""
 
         name = item.get("name", "")
+        # Build node registry for short IDs
+        nodes: dict[str, str] = {}  # full_name → short_id
+        node_counter = 0
+
+        def _node(full_name: str) -> str:
+            nonlocal node_counter
+            if full_name not in nodes:
+                nodes[full_name] = f"n{node_counter}"
+                node_counter += 1
+            return nodes[full_name]
+
+        def _decl(full_name: str) -> str:
+            """Node declaration with humanized label."""
+            nid = _node(full_name)
+            label = _humanize(full_name)
+            return f'{nid}["{label}"]'
+
         lines: list[str] = ["```mermaid", "graph LR"]
+        src = _decl(name)
         for arg in arguments:
             if isinstance(arg, dict) and arg.get("name"):
                 label = cls._argument_label(arg)
-                lines.append(f'  {name} -- "{label}" --> {arg["name"]}')
+                tgt = _decl(arg["name"])
+                lines.append(f'  {src} -- "{label}" --> {tgt}')
             elif isinstance(arg, str):
-                lines.append(f'  {name} -- "arg" --> {arg}')
+                tgt = _decl(arg)
+                lines.append(f'  {src} -- "arg" --> {tgt}')
         if isinstance(error_variants, dict):
             for error_type, target in error_variants.items():
                 if target:
-                    lines.append(f'  {name} -- "error {error_type}" --> {target}')
+                    tgt = _decl(target)
+                    lines.append(f'  {src} -- "error {error_type}" --> {tgt}')
         if deprecates:
-            lines.append(f'  {name} -- "deprecates" --> {deprecates}')
+            tgt = _decl(deprecates)
+            lines.append(f'  {src} -- "deprecates" --> {tgt}')
         if superseded_by:
-            lines.append(f'  {name} -- "superseded by" --> {superseded_by}')
+            tgt = _decl(superseded_by)
+            lines.append(f'  {src} -- "superseded by" --> {tgt}')
         lines.append("```")
         return "\n".join(lines) + "\n\n"
 
@@ -257,7 +291,7 @@ class CatalogRenderer:
         lines: list[str] = []
 
         def _link(target: str) -> str:
-            return f"[{target}](#{target})"
+            return f"[{_humanize(target)}](#{target})"
 
         arguments = item.get("arguments") or []
         arg_links = []
@@ -266,12 +300,12 @@ class CatalogRenderer:
             if target:
                 arg_links.append(_link(target))
         if arg_links:
-            lines.append(f"**Arguments:** {', '.join(arg_links)}")
+            lines.append(f"**Arguments:** {' · '.join(arg_links)}")
 
         name = item.get("name", "")
         wrappers = wrapped_by.get(name) or []
         if wrappers:
-            lines.append("**Wrapped by:** " + ", ".join(_link(w) for w in wrappers))
+            lines.append("**Wrapped by:** " + " · ".join(_link(w) for w in wrappers))
 
         error_variants = item.get("error_variants") or {}
         if isinstance(error_variants, dict) and error_variants:
@@ -281,7 +315,7 @@ class CatalogRenderer:
                 if target
             ]
             if variant_links:
-                lines.append("**Error variants:** " + ", ".join(variant_links))
+                lines.append("**Error variants:** " + " · ".join(variant_links))
 
         deprecates = item.get("deprecates")
         if deprecates:
@@ -314,6 +348,11 @@ class CatalogRenderer:
     def render_catalog(self) -> str:
         """Generate complete catalog organized by physics_domain and base name.
 
+        Entries are rendered as anchored card-style blocks (not headings) to
+        keep the sidebar/TOC clean. Only domain (H2) and base group (H3)
+        levels appear in the page TOC. Long documentation is wrapped in a
+        collapsible ``<details>`` block.
+
         Returns
         -------
         str
@@ -330,7 +369,6 @@ class CatalogRenderer:
         for domain, items in sorted(domains.items()):
             domain_display = domain.replace("_", " ").title()
             result += f"## {domain_display} {{: #{domain} }}\n\n"
-            result += "---\n\n"
 
             # Group items by base name
             base_groups: dict[str, list[dict]] = defaultdict(list)
@@ -341,7 +379,10 @@ class CatalogRenderer:
 
             for base_name in sorted(base_groups.keys()):
                 base_items = base_groups[base_name]
-                result += f"### `{base_name}`\n\n"
+                count = len(base_items)
+                result += (
+                    f"### {_humanize(base_name)} ({count}) {{: #{base_name} }}\n\n"
+                )
 
                 sorted_items = sorted(base_items, key=lambda x: x.get("name", ""))
 
@@ -355,20 +396,40 @@ class CatalogRenderer:
                     status = item.get("status", "")
                     kind = item.get("kind", "")
 
-                    result += f"#### {name} {{: #{name} }}\n\n"
-                    result += f"{description}\n\n"
+                    # Anchored card title (not a heading — keeps TOC clean)
+                    human_name = _humanize(name)
+                    result += (
+                        f'<div class="sn-card" id="{name}" markdown>\n\n'
+                        f"**{human_name}**"
+                    )
 
-                    if documentation:
-                        result += f"{documentation}\n\n"
-
+                    # Compact inline metadata
+                    meta_parts: list[str] = []
                     if unit:
-                        result += f"**Unit:** `{unit}`\n\n"
-
+                        meta_parts.append(f"`{unit}`")
                     if kind:
-                        result += f"**Kind:** {kind}\n\n"
-
+                        meta_parts.append(kind)
                     if status:
-                        result += f"**Status:** {status.title()}\n\n"
+                        meta_parts.append(status.lower())
+                    if meta_parts:
+                        result += " — " + " · ".join(meta_parts)
+                    result += "\n{: .sn-title }\n\n"
+
+                    # Description (always visible)
+                    if description:
+                        result += f"{description}\n\n"
+
+                    # Documentation (collapsible when long)
+                    if documentation:
+                        if len(documentation) > 400:
+                            result += (
+                                "<details markdown>\n"
+                                "<summary>Documentation</summary>\n\n"
+                                f"{documentation}\n\n"
+                                "</details>\n\n"
+                            )
+                        else:
+                            result += f"{documentation}\n\n"
 
                     result += self._render_links(item.get("links", []))
 
@@ -378,7 +439,7 @@ class CatalogRenderer:
 
                     result += self._render_sources(item.get("sources") or [])
 
-                    result += "---\n\n"
+                    result += "</div>\n\n"
 
         return result
 
@@ -413,7 +474,10 @@ class CatalogRenderer:
         return result
 
     def render_navigation(self) -> str:
-        """Generate navigation sidebar with all standard names.
+        """Generate navigation sidebar grouped by domain and base name.
+
+        Individual standard names are omitted — they are anchored cards
+        within the page, reachable via search or in-page links.
 
         Returns
         -------
@@ -431,19 +495,15 @@ class CatalogRenderer:
             domain_display = domain.replace("_", " ").title()
             result += f"**[{domain_display}](#{domain})**\n\n"
 
-            base_groups: dict[str, list[dict]] = defaultdict(list)
+            base_groups: dict[str, int] = defaultdict(int)
             for item in items:
                 name = item.get("name", "Unknown")
                 base = self._parse_base(name)
-                base_groups[base].append(item)
+                base_groups[base] += 1
 
             for base_name in sorted(base_groups.keys()):
-                base_items = base_groups[base_name]
-                sorted_items = sorted(base_items, key=lambda x: x.get("name", ""))
-
-                for item in sorted_items:
-                    name = item.get("name", "Unknown")
-                    result += f"- [{name}](#{name})\n"
+                count = base_groups[base_name]
+                result += f"- [{_humanize(base_name)} ({count})](#{base_name})\n"
 
             result += "\n"
 
