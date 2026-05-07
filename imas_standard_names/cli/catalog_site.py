@@ -135,6 +135,15 @@ def _check_mike_available() -> bool:
     return shutil.which("mike") is not None
 
 
+def _find_git_root(catalog_path: Path) -> Path:
+    """Walk up from *catalog_path* to find the nearest ``.git`` directory."""
+    current = catalog_path.resolve()
+    for parent in [current, *current.parents]:
+        if (parent / ".git").exists():
+            return parent
+    return Path.cwd()
+
+
 def _mike_error_message() -> str:
     """Return error message with installation instructions."""
     return (
@@ -340,7 +349,13 @@ def deploy_cmd(
         if mike_cmd is None:
             click.echo(f"Error: {_mike_error_message()}", err=True)
             raise SystemExit(1)
-        mike_args = [mike_cmd, "deploy", doc_version]
+
+        # mike needs to run inside the git repository (not the temp docs dir)
+        # so it can commit to gh-pages. Point it to the mkdocs.yml via -F.
+        git_root = _find_git_root(catalog_path)
+        mkdocs_config = docs_dir / "mkdocs.yml"
+
+        mike_args = [mike_cmd, "deploy", "-F", str(mkdocs_config), doc_version]
         if set_default:
             mike_args.extend(["--update-aliases", "latest"])
         if push:
@@ -349,7 +364,7 @@ def deploy_cmd(
         env = os.environ.copy()
         result = subprocess.run(
             mike_args,
-            cwd=docs_dir,
+            cwd=git_root,
             env=env,
             capture_output=True,
             text=True,
