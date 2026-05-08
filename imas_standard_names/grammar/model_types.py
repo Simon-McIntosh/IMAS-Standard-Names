@@ -319,8 +319,6 @@ class Object(StrEnum):
     REFLECTOMETER_DETECTOR = "reflectometer_detector"
     ROGOWSKI_COIL = "rogowski_coil"
     SADDLE_LOOP = "saddle_loop"
-    SECONDARY_SEPARATRIX_X_POINT = "secondary_separatrix_x_point"
-    SEPARATRIX = "separatrix"
     SOFT_XRAY_DETECTOR = "soft_xray_detector"
     SPECTROMETER = "spectrometer"
     SPECTROMETER_CHANNEL = "spectrometer_channel"
@@ -339,6 +337,8 @@ class Object(StrEnum):
 
 class Position(StrEnum):
     PLASMA_BOUNDARY = "plasma_boundary"
+    SECONDARY_SEPARATRIX_X_POINT = "secondary_separatrix_x_point"
+    SEPARATRIX = "separatrix"
     ACTIVE_LIMITER_POINT = "active_limiter_point"
     ALONG_BEAM = "along_beam"
     ALONG_BEAM_PATH = "along_beam_path"

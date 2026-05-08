@@ -176,9 +176,9 @@ class TestLocusRegistryKeyEntries:
         assert "x_point" in loci.loci
         assert loci.loci["x_point"].type == "position"
 
-    def test_separatrix_entity(self, loci):
+    def test_separatrix_position(self, loci):
         assert "separatrix" in loci.loci
-        assert loci.loci["separatrix"].type == "entity"
+        assert loci.loci["separatrix"].type == "position"
 
     def test_flux_loop_entity(self, loci):
         assert "flux_loop" in loci.loci

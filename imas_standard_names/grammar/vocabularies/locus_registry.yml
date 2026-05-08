@@ -216,11 +216,11 @@ loci:
     type: entity
     allowed_relations: [of]
   secondary_separatrix_x_point:
-    type: entity
-    allowed_relations: [of]
+    type: position
+    allowed_relations: [at, of]
   separatrix:
-    type: entity
-    allowed_relations: [of]
+    type: position
+    allowed_relations: [at, of]
   soft_xray_detector:
     type: entity
     allowed_relations: [of]
