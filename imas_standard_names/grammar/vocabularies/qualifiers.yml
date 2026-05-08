@@ -81,6 +81,7 @@
 - cross_field                   # cross-field (perpendicular to B) direction
 - diamagnetic                   # diamagnetic drift/flux qualifier
 - e_cross_b                     # E×B drift qualifier
+- e_cross_b_drift               # E×B drift velocity qualifier (plasma drift due to crossed E and B fields)
 - field_aligned                 # aligned with magnetic field
 - surface                       # surface (2D boundary) qualifier
 - volumetric                    # volumetric (per unit volume) qualifier
@@ -104,6 +105,7 @@
 - peak                          # peak / maximum value
 - minimum                       # minimum value
 - maximum                       # maximum value
+- upper_bound                   # upper bound: maximum value of a bounded quantity
 - saturated                     # saturated state
 - steady_state                  # steady-state condition
 - transient                     # transient / time-varying
