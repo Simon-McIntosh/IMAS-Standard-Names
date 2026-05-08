@@ -229,6 +229,8 @@ class Process(StrEnum):
     COULOMB_COLLISIONS_WITH_ION = "coulomb_collisions_with_ion"
     COULOMB_COLLISIONS_WITH_ION_STATE = "coulomb_collisions_with_ion_state"
     ION_NEUTRAL_FRICTION = "ion_neutral_friction"
+    HOT_TAIL = "hot_tail"
+    COMPTON_SCATTERING = "compton_scattering"
 
 
 class GenericPhysicalBase(StrEnum):

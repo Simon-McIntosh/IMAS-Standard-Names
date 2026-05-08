@@ -71,6 +71,7 @@ _DOCUMENTED_ALSO_SUBJECT = frozenset(
     {
         "co_passing",
         "counter_passing",
+        "state",  # charge state or quantum state — dual-role as qualifier and subject
     }
 )
 

@@ -58,6 +58,7 @@
 # standard name corpus analysis.
 
 # --- Transport regime / mechanism ---
+- convection                    # convective transport qualifier (convection_velocity)
 - neoclassical                  # neoclassical transport regime
 - classical                     # classical (Braginskii) transport
 - turbulent                     # turbulent transport regime
@@ -107,6 +108,9 @@
 - steady_state                  # steady-state condition
 - transient                     # transient / time-varying
 - perturbed                     # perturbed / perturbation
+- gyroaveraged                  # gyro-averaged quantity
+- state                         # charge state or quantum state qualifier
+- atomic                        # atomic (single-particle) qualifier
 
 # --- Energy type ---
 - kinetic                       # kinetic energy component
