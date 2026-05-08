@@ -246,6 +246,9 @@ bases:
   vorticity:
     aliases: []
     kind: scalar
+  wavelength:
+    aliases: []
+    kind: scalar
   wave_vector:
     aliases: [wavevector]
     kind: vector

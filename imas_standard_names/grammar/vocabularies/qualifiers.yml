@@ -121,6 +121,7 @@
 - deposited                     # deposited energy/power
 - conducted                     # conducted (conductive) transport
 - convected                     # convected (convective) transport
+- current_weighted              # current-density-weighted averaging qualifier
 - lost                          # lost (escaping) quantity
 
 # --- Measurement / diagnostic ---
