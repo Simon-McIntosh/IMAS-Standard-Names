@@ -145,3 +145,5 @@
 # === rc20 vocabulary extensions (plan 41 §A4 corpus gap closure) ===
 - hot_tail                     # hot-tail runaway generation mechanism
 - compton_scattering           # Compton scattering interaction
+- perturbed_parallel_magnetic_field     # perturbed parallel magnetic field process
+- perturbed_parallel_vector_potential   # perturbed parallel vector potential process

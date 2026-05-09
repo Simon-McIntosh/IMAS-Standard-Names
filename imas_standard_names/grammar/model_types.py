@@ -231,6 +231,8 @@ class Process(StrEnum):
     ION_NEUTRAL_FRICTION = "ion_neutral_friction"
     HOT_TAIL = "hot_tail"
     COMPTON_SCATTERING = "compton_scattering"
+    PERTURBED_PARALLEL_MAGNETIC_FIELD = "perturbed_parallel_magnetic_field"
+    PERTURBED_PARALLEL_VECTOR_POTENTIAL = "perturbed_parallel_vector_potential"
 
 
 class GenericPhysicalBase(StrEnum):
@@ -260,6 +262,7 @@ class Object(StrEnum):
     BEAM_TRACING_RAY = "beam_tracing_ray"
     BEAMLET_GROUP = "beamlet_group"
     BOLOMETER = "bolometer"
+    BRAGG_CRYSTAL = "bragg_crystal"
     BREEDER_BLANKET = "breeder_blanket"
     BREEDER_BLANKET_LAYER = "breeder_blanket_layer"
     BREEDER_BLANKET_MODULE = "breeder_blanket_module"
@@ -308,6 +311,9 @@ class Object(StrEnum):
     PASSIVE_STRUCTURE = "passive_structure"
     PELLET = "pellet"
     PICKUP_COIL = "pickup_coil"
+    PLANT_COMPONENT_PORT = "plant_component_port"
+    PLANT_SUBSYSTEM = "plant_subsystem"
+    PLANT_SYSTEM = "plant_system"
     PLASMA_FACING_COMPONENT = "plasma_facing_component"
     PLASMA_FILAMENT = "plasma_filament"
     POLOIDAL_FIELD_COIL = "poloidal_field_coil"
@@ -355,9 +361,11 @@ class Position(StrEnum):
     COOLING_CIRCUIT_INLET = "cooling_circuit_inlet"
     CURRENT_CENTER = "current_center"
     DELTA_POSITION = "delta_position"
+    DETECTOR_PIXEL = "detector_pixel"
     DIAGNOSTIC_COMPONENT_CENTRE = "diagnostic_component_centre"
     DIVERTOR_PLATE = "divertor_plate"
     DIVERTOR_TARGET = "divertor_target"
+    DIVERTOR_TILE_SURFACE_OUTLINE_POINT = "divertor_tile_surface_outline_point"
     DR_DZ_ZERO_POINT = "dr_dz_zero_point"
     ECE_CHANNEL = "ece_channel"
     ECE_CHANNEL_EMISSION_POSITION = "ece_channel_emission_position"
@@ -415,6 +423,7 @@ class Position(StrEnum):
     PELLET_PATH_FIRST_POINT = "pellet_path_first_point"
     PELLET_PATH_POINT = "pellet_path_point"
     PELLET_PATH_SECOND_POINT = "pellet_path_second_point"
+    PLASMA_BOUNDARY_GAP = "plasma_boundary_gap"
     PLASMA_BOUNDARY_GAP_REFERENCE_POINT = "plasma_boundary_gap_reference_point"
     POST_SAWTOOTH_CRASH = "post_sawtooth_crash"
     PRIMARY_STRIKE_POINT = "primary_strike_point"
@@ -427,6 +436,7 @@ class Position(StrEnum):
     SECONDARY_SEPARATRIX = "secondary_separatrix"
     SECONDARY_SEPARATRIX_OUTLINE_POINT = "secondary_separatrix_outline_point"
     SECONDARY_SEPARATRIX_STRIKE_POINT = "secondary_separatrix_strike_point"
+    SENSOR_ATTACHMENT_POINT = "sensor_attachment_point"
     SHATTERING_POSITION = "shattering_position"
     SOFT_XRAY_DETECTOR_LINE_OF_SIGHT_SECOND_POINT = (
         "soft_xray_detector_line_of_sight_second_point"
@@ -436,6 +446,8 @@ class Position(StrEnum):
     STRIKE_POINT = "strike_point"
     TEARING_MODE_CENTER = "tearing_mode_center"
     THIRD_POINT_OF_INTERFEROMETER_BEAM = "third_point_of_interferometer_beam"
+    TOWNSEND_GRID_POSITION = "townsend_grid_position"
+    TOWNSEND_POSITION = "townsend_position"
     WALL = "wall"
     X_POINT = "x_point"
 
@@ -469,6 +481,8 @@ class GeometricBase(StrEnum):
     TOROIDAL_ANGLE = "toroidal_angle"
     NORMAL_COORDINATE = "normal_coordinate"
     BINORMAL_COORDINATE = "binormal_coordinate"
+    DIRECTION_UNIT_VECTOR = "direction_unit_vector"
+    TOROIDAL_FLUX_RADIUS = "toroidal_flux_radius"
 
 
 class Transformation(StrEnum):

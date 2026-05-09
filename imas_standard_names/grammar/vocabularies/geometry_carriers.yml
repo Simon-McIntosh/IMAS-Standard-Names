@@ -83,3 +83,7 @@ carriers:
     aliases: []
   binormal_coordinate:  # rc36: Frenet-Serret binormal-axis coordinate (conductor cross-section outlines) — N=1
     aliases: []
+  direction_unit_vector:  # unit vector along a specified direction
+    aliases: []
+  toroidal_flux_radius:  # toroidal flux radius coordinate (rho_tor)
+    aliases: []

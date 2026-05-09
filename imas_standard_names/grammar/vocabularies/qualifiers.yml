@@ -127,6 +127,7 @@
 - lost                          # lost (escaping) quantity
 
 # --- Measurement / diagnostic ---
+- bragg                         # Bragg diffraction (X-ray crystal spectroscopy)
 - measured                      # directly measured quantity
 - reconstructed                 # reconstructed (inferred) quantity
 - fitted                        # fitted / parametric quantity

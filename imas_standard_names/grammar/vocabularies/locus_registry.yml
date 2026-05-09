@@ -35,6 +35,9 @@ loci:
   bolometer:
     type: entity
     allowed_relations: [of]
+  bragg_crystal:
+    type: entity
+    allowed_relations: [of]
   breeder_blanket:
     type: entity
     allowed_relations: [of]
@@ -179,6 +182,15 @@ loci:
   pickup_coil:
     type: entity
     allowed_relations: [of]
+  plant_component_port:
+    type: entity
+    allowed_relations: [of]
+  plant_subsystem:
+    type: entity
+    allowed_relations: [of]
+  plant_system:
+    type: entity
+    allowed_relations: [of]
   plasma_boundary:
     type: position
     allowed_relations: [at, of]
@@ -317,6 +329,9 @@ loci:
   delta_position:
     type: position
     allowed_relations: [at, of]
+  detector_pixel:
+    type: position
+    allowed_relations: [at, of]
   diagnostic_component_centre:  # rc36: generic centre of diagnostic optical component (detector, aperture, grating) — N=7 across spectrometer/camera/neutron IDS
     type: position
     allowed_relations: [at, of]
@@ -324,6 +339,9 @@ loci:
     type: position
     allowed_relations: [at, of]
   divertor_target:
+    type: position
+    allowed_relations: [at, of]
+  divertor_tile_surface_outline_point:
     type: position
     allowed_relations: [at, of]
   dr_dz_zero_point:
@@ -497,6 +515,9 @@ loci:
   pellet_path_second_point:
     type: position
     allowed_relations: [at, of]
+  plasma_boundary_gap:
+    type: position
+    allowed_relations: [at, of]
   plasma_boundary_gap_reference_point:
     type: position
     allowed_relations: [at, of]
@@ -533,6 +554,9 @@ loci:
   secondary_separatrix_strike_point:
     type: position
     allowed_relations: [at, of]
+  sensor_attachment_point:
+    type: position
+    allowed_relations: [at, of]
   shattering_position:
     type: position
     allowed_relations: [at, of]
@@ -552,6 +576,12 @@ loci:
     type: position
     allowed_relations: [at, of]
   third_point_of_interferometer_beam:
+    type: position
+    allowed_relations: [at, of]
+  townsend_grid_position:
+    type: position
+    allowed_relations: [at, of]
+  townsend_position:
     type: position
     allowed_relations: [at, of]
   wall:
