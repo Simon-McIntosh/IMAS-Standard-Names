@@ -78,6 +78,29 @@ def test_vocabulary_sections_is_nonempty_list(context: dict):
         assert "tokens" in section
 
 
+def test_vocabulary_sections_covers_all_segments(context: dict):
+    """Every segment in SEGMENT_TOKEN_MAP must appear with its correct tokens."""
+    from imas_standard_names.grammar.constants import SEGMENT_TOKEN_MAP
+
+    sections = context["vocabulary_sections"]
+    by_segment = {s["segment"]: s["tokens"] for s in sections}
+
+    for seg_id, expected_tokens in SEGMENT_TOKEN_MAP.items():
+        assert seg_id in by_segment, (
+            f"Segment {seg_id!r} has {len(expected_tokens)} tokens in "
+            f"SEGMENT_TOKEN_MAP but is missing from vocabulary_sections"
+        )
+        actual_tokens = by_segment[seg_id]
+        assert len(actual_tokens) == len(expected_tokens), (
+            f"Segment {seg_id!r}: vocabulary_sections has {len(actual_tokens)} "
+            f"tokens but SEGMENT_TOKEN_MAP has {len(expected_tokens)}"
+        )
+        assert set(actual_tokens) == set(expected_tokens), (
+            f"Segment {seg_id!r}: token sets differ between "
+            f"vocabulary_sections and SEGMENT_TOKEN_MAP"
+        )
+
+
 def test_segment_descriptions_is_nonempty_dict(context: dict):
     descs = context["segment_descriptions"]
     assert isinstance(descs, dict)

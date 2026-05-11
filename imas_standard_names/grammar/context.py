@@ -11,7 +11,6 @@ from typing import Any
 
 import yaml
 
-import imas_standard_names.grammar.model_types as grammar_types
 from imas_standard_names.grammar.constants import (
     APPLICABILITY_EXCLUDE,
     APPLICABILITY_INCLUDE,
@@ -20,6 +19,7 @@ from imas_standard_names.grammar.constants import (
     SEGMENT_ORDER,
     SEGMENT_RULES,
     SEGMENT_TEMPLATES,
+    SEGMENT_TOKEN_MAP,
 )
 from imas_standard_names.grammar.field_schemas import (
     DOCUMENTATION_GUIDANCE,
@@ -27,7 +27,6 @@ from imas_standard_names.grammar.field_schemas import (
     NAMING_GUIDANCE,
     TYPE_SPECIFIC_REQUIREMENTS,
 )
-from imas_standard_names.grammar.support import enum_values
 from imas_standard_names.grammar_codegen.spec import IncludeLoader
 
 # ---------------------------------------------------------------------------
@@ -171,26 +170,26 @@ def _build_template_application_rule() -> str:
 
 
 def _build_vocabulary_sections() -> list[dict[str, Any]]:
-    """Build per-segment vocabulary sections with token lists and descriptions."""
+    """Build per-segment vocabulary sections with token lists and descriptions.
+
+    Uses ``SEGMENT_TOKEN_MAP`` as the single source of truth for all segment
+    tokens — this includes segments loaded from YAML vocabularies
+    (physical_base, device, region, qualifier) as well as enum-backed segments.
+    """
     sections: list[dict[str, Any]] = []
 
-    segment_enum_map: dict[str, str] = {
-        "component": "Component",
-        "coordinate": "Component",
-        "subject": "Subject",
-        "object": "Object",
-        "position": "Position",
-        "geometry": "Position",
-        "process": "Process",
-        "geometric_base": "GeometricBase",
-    }
+    # Iterate SEGMENT_ORDER first (preserves canonical display order),
+    # then append any segments in TOKEN_MAP but not in ORDER (e.g. qualifier).
+    seen: set[str] = set()
+    ordered_segments = list(SEGMENT_ORDER)
+    for seg_id in SEGMENT_TOKEN_MAP:
+        if seg_id not in seen and seg_id not in SEGMENT_ORDER:
+            ordered_segments.append(seg_id)
+    for seg_id in ordered_segments:
+        seen.add(seg_id)
 
-    for seg_id in SEGMENT_ORDER:
-        enum_name = segment_enum_map.get(seg_id)
-        if enum_name and hasattr(grammar_types, enum_name):
-            tokens = enum_values(getattr(grammar_types, enum_name))
-        else:
-            tokens = []
+    for seg_id in ordered_segments:
+        tokens = sorted(SEGMENT_TOKEN_MAP.get(seg_id, ()))
 
         section: dict[str, Any] = {
             "segment": seg_id,
