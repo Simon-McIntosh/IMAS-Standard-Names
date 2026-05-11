@@ -1,7 +1,7 @@
-# Locus registry vocabulary (plan 38 §A5)
+# Locus registry vocabulary
 #
-# Typed registry replacing the rc20 objects.yml + positions.yml + scattered
-# device/geometry entries.  Every locus token carries:
+# Typed registry of physical objects, locations, and shapes.  Every locus
+# token carries:
 #   type            - entity | position | geometry
 #   allowed_relations - subset of [of, at, over]
 #
@@ -10,14 +10,17 @@
 #   position -> at, of      (field at location, geometric property of location)
 #   geometry -> at, of, over (field over a geometric shape)
 #
-# Populated by W2a from rc20 objects.yml + positions.yml migration and
-# corpus mining (44 entity + 41 position + 8 geometry tokens).
+# Curation policy:
+#   - Tokens must describe physics-meaningful loci, not DD structural artifacts
+#   - Ordinal point labels (first_point, second_point) belong in DD metadata
+#   - Discretization framework tokens (ggd_*) are not physics positions
+#   - Prefer atomic tokens composable via qualifiers over long compounds
 
 loci:
 
   # ====================================================================
   # Entity-typed loci (intrinsic property: _of_<entity>)
-  # Migrated from objects.yml + corpus mining locus_entity tokens
+  # Hardware, diagnostic systems, and physical objects
   # ====================================================================
 
   antenna_strap:
@@ -48,9 +51,6 @@ loci:
     type: entity
     allowed_relations: [of]
   breeder_blanket_shield:
-    type: entity
-    allowed_relations: [of]
-  breeding_blanket_module:
     type: entity
     allowed_relations: [of]
   camera:
@@ -191,9 +191,6 @@ loci:
   plant_system:
     type: entity
     allowed_relations: [of]
-  plasma_boundary:
-    type: position
-    allowed_relations: [at, of]
   plasma_facing_component:
     type: entity
     allowed_relations: [of]
@@ -227,12 +224,6 @@ loci:
   saddle_loop:
     type: entity
     allowed_relations: [of]
-  secondary_separatrix_x_point:
-    type: position
-    allowed_relations: [at, of]
-  separatrix:
-    type: position
-    allowed_relations: [at, of]
   soft_xray_detector:
     type: entity
     allowed_relations: [of]
@@ -278,12 +269,9 @@ loci:
 
   # ====================================================================
   # Position-typed loci (field at location: _at_<position>, _of_<position>)
-  # Migrated from positions.yml + corpus mining locus_position tokens
+  # Physics-meaningful spatial locations in tokamak geometry
   # ====================================================================
 
-  active_limiter_point:
-    type: position
-    allowed_relations: [at, of]
   along_beam:
     type: position
     allowed_relations: [at, of]
@@ -308,16 +296,13 @@ loci:
   closest_wall_point:
     type: position
     allowed_relations: [at, of]
-  constraint_position:
-    type: position
-    allowed_relations: [at, of]
   constant_toroidal_flux:
     type: position
     allowed_relations: [at, of]
-  control_surface:
+  constraint_position:
     type: position
     allowed_relations: [at, of]
-  control_surface_outline_point:
+  control_surface:
     type: position
     allowed_relations: [at, of]
   cooling_circuit_inlet:
@@ -326,13 +311,10 @@ loci:
   current_center:
     type: position
     allowed_relations: [at, of]
-  delta_position:
-    type: position
-    allowed_relations: [at, of]
   detector_pixel:
     type: position
     allowed_relations: [at, of]
-  diagnostic_component_centre:  # rc36: generic centre of diagnostic optical component (detector, aperture, grating) — N=7 across spectrometer/camera/neutron IDS
+  diagnostic_component_centre:
     type: position
     allowed_relations: [at, of]
   divertor_plate:
@@ -341,34 +323,16 @@ loci:
   divertor_target:
     type: position
     allowed_relations: [at, of]
-  divertor_tile_surface_outline_point:
-    type: position
-    allowed_relations: [at, of]
-  dr_dz_zero_point:
-    type: position
-    allowed_relations: [at, of]
   ece_channel:
     type: position
     allowed_relations: [at, of]
   ece_channel_emission_position:
     type: position
     allowed_relations: [at, of]
-  emission_grid_point:  # rc36: generic emission-grid sampling point for geometry-matrix diagnostics — N=3 (camera_visible, neutron_diagnostic)
-    type: position
-    allowed_relations: [at, of]
-  end_point:
-    type: position
-    allowed_relations: [at, of]
   ferritic_element_centroid:
     type: position
     allowed_relations: [at, of]
   ferritic_insert_centroid:
-    type: position
-    allowed_relations: [at, of]
-  first_point_of_interferometer_beam:
-    type: position
-    allowed_relations: [at, of]
-  first_point_of_line_of_sight:  # rc36: generic first endpoint of a diagnostic line-of-sight chord — N=3 (bolometer, reflectometer_fluctuation)
     type: position
     allowed_relations: [at, of]
   first_wall:
@@ -380,34 +344,10 @@ loci:
   flux_surface:
     type: position
     allowed_relations: [at, of]
-  gap_reference_point:
-    type: position
-    allowed_relations: [at, of]
   geometric_axis:
     type: position
     allowed_relations: [at, of]
-  ggd_element:
-    type: position
-    allowed_relations: [at, of]
-  ggd_grid_node:
-    type: position
-    allowed_relations: [at, of]
-  ggd_grid_point:
-    type: position
-    allowed_relations: [at, of]
-  ggd_grid_subset:
-    type: position
-    allowed_relations: [at, of]
-  ggd_node:
-    type: position
-    allowed_relations: [at, of]
   halo_boundary:
-    type: position
-    allowed_relations: [at, of]
-  halo_current_area_end_point:
-    type: position
-    allowed_relations: [at, of]
-  halo_current_area_start_point:
     type: position
     allowed_relations: [at, of]
   inlet:
@@ -423,9 +363,6 @@ loci:
     type: position
     allowed_relations: [at, of]
   internal_transport_barrier:
-    type: position
-    allowed_relations: [at, of]
-  ion_charge_state:
     type: position
     allowed_relations: [at, of]
   last_closed_flux_surface:
@@ -458,16 +395,7 @@ loci:
   normalized_poloidal_flux:
     type: position
     allowed_relations: [at, of]
-  ntm_onset:
-    type: position
-    allowed_relations: [at, of]
   outboard_midplane:
-    type: position
-    allowed_relations: [at, of]
-  outboard_midplane_first_wall:
-    type: position
-    allowed_relations: [at, of]
-  outboard_midplane_height:
     type: position
     allowed_relations: [at, of]
   outboard_midplane_separatrix:
@@ -483,9 +411,6 @@ loci:
     type: position
     allowed_relations: [at, of]
   outlet:
-    type: position
-    allowed_relations: [at, of]
-  outline_point:
     type: position
     allowed_relations: [at, of]
   pedestal:
@@ -506,13 +431,10 @@ loci:
   pellet_path:
     type: position
     allowed_relations: [at, of]
-  pellet_path_first_point:
-    type: position
-    allowed_relations: [at, of]
   pellet_path_point:
     type: position
     allowed_relations: [at, of]
-  pellet_path_second_point:
+  plasma_boundary:
     type: position
     allowed_relations: [at, of]
   plasma_boundary_gap:
@@ -530,58 +452,34 @@ loci:
   primary_x_point:
     type: position
     allowed_relations: [at, of]
-  reference_major_radius:
-    type: position
-    allowed_relations: [at, of]
-  reference_position:
-    type: position
-    allowed_relations: [at, of]
   sawtooth_inversion_radius:
-    type: position
-    allowed_relations: [at, of]
-  second_point_of_interferometer_beam:
-    type: position
-    allowed_relations: [at, of]
-  second_point_of_line_of_sight:  # rc36: generic second endpoint of a diagnostic line-of-sight chord — N=2 (bolometer, reflectometer_fluctuation)
     type: position
     allowed_relations: [at, of]
   secondary_separatrix:
     type: position
     allowed_relations: [at, of]
-  secondary_separatrix_outline_point:
+  secondary_strike_point:
     type: position
     allowed_relations: [at, of]
-  secondary_separatrix_strike_point:
+  secondary_x_point:
     type: position
     allowed_relations: [at, of]
   sensor_attachment_point:
     type: position
     allowed_relations: [at, of]
+  separatrix:
+    type: position
+    allowed_relations: [at, of]
   shattering_position:
     type: position
     allowed_relations: [at, of]
-  soft_xray_detector_line_of_sight_second_point:
-    type: position
-    allowed_relations: [at, of]
   spectral_line:
-    type: position
-    allowed_relations: [at, of]
-  start_point:
     type: position
     allowed_relations: [at, of]
   strike_point:
     type: position
     allowed_relations: [at, of]
   tearing_mode_center:
-    type: position
-    allowed_relations: [at, of]
-  third_point_of_interferometer_beam:
-    type: position
-    allowed_relations: [at, of]
-  townsend_grid_position:
-    type: position
-    allowed_relations: [at, of]
-  townsend_position:
     type: position
     allowed_relations: [at, of]
   wall:

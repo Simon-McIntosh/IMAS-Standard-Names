@@ -233,7 +233,7 @@ def _try_parse(name: str, vocabs: Vocabularies) -> bool:
         "minor_radius_of_plasma_boundary",
         "major_radius_of_x_point",
         "contravariant_metric_tensor",
-        "coolant_outlet_temperature_of_breeding_blanket_module",
+        "coolant_outlet_temperature_of_breeder_blanket_module",
         "major_radius_of_plasma_boundary",
         "normalized_toroidal_flux_coordinate_at_sawtooth_inversion_radius",
         # Note: 'vertical_coordinate' and 'toroidal_angle' are not yet in

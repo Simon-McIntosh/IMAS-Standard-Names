@@ -7,7 +7,7 @@ enums) now pass without error after the rc22 rewrite of
 
 The four names below were quarantined during the rc21 bootstrap cycle due to
 false-positive ValidationErrors:
-- vertical_coordinate_of_plasma_boundary_outline_point
+- vertical_coordinate_of_plasma_boundary
   → rc20 bug: coordinate prefix check captured compound token
     "vertical_coordinate_of_plasma_boundary" and flagged it as missing from
     Component vocabulary.
@@ -66,15 +66,15 @@ def _vector(name: str) -> StandardNameVectorEntry:
 # ---------------------------------------------------------------------------
 
 
-def test_vertical_coordinate_of_plasma_boundary_outline_point():
+def test_vertical_coordinate_of_plasma_boundary():
     """rc20 false-positive: coordinate prefix check over-matched compound token.
 
-    'vertical_coordinate_of_plasma_boundary' was captured before '_outline_'
-    and flagged as missing from Component vocabulary.  The rc22 fix skips the
-    check when the captured prefix contains '_of_'.
+    'vertical_coordinate_of_plasma_boundary' was captured and flagged as missing
+    from Component vocabulary.  The rc22 fix skips the check when the captured
+    prefix contains '_of_'.
     """
-    entry = _scalar("vertical_coordinate_of_plasma_boundary_outline_point")
-    assert entry.name == "vertical_coordinate_of_plasma_boundary_outline_point"
+    entry = _scalar("vertical_coordinate_of_plasma_boundary")
+    assert entry.name == "vertical_coordinate_of_plasma_boundary"
 
 
 def test_normalized_of_parallel_component_of_gyrocenter_current_density_eigenmode():

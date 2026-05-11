@@ -184,11 +184,11 @@ segments:
     exclusive_with:
       - geometric_base
     description: >
-      Physical quantity, measurement, or hardware property (open-ended).
+      Physical quantity, measurement, or hardware property.
+      Closed vocabulary — all valid tokens are listed in physical_bases.yml.
       Can represent physical fields (magnetic_field, temperature, voltage, flux, current),
-      derived quantities (gradient, divergence), measurement signals, 
+      derived quantities (gradient, divergence), measurement signals,
       or hardware characteristics (area, resistance, capacitance).
-      New physical base terms are defined through catalog entries, not the grammar.
       Used with component prefix for physical vector components (e.g., radial_component_of_magnetic_field).
   - id: object
     optional: true
@@ -243,7 +243,13 @@ segments:
     optional: true
     vocabulary: processes
     template: "due_to_{token}"
-    description: "Physical mechanism or process contributing to the quantity"
+    description: >
+      Physical mechanism or process contributing to the quantity.
+      Sum semantics: X_due_to_P represents a single additive term in a
+      decomposition of X by process.  The sum over all processes P
+      reconstructs the total: X = sum_P(X_due_to_P).
+      Example: electron_energy_source_density_due_to_ohmic_heating is the
+      ohmic contribution to the total electron energy source density.
 
 #===============================================================================
 # Vocabulary Sources

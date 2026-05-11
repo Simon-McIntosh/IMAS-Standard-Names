@@ -89,21 +89,19 @@ def test_ambiguity_at_vs_of_pedestal(vocabs: Vocabularies) -> None:
 
 
 def test_ambiguity_at_vs_of_separatrix(vocabs: Vocabularies) -> None:
-    """Same for a position locus with both at+of: active_limiter_point."""
-    # separatrix is entity-typed (only allows 'of'), so use active_limiter_point
-    # which allows both 'at' and 'of'
+    """Same for a position locus with both at+of: measurement_position."""
     _assert_distinct_ir(
-        "safety_factor_at_active_limiter_point",
-        "safety_factor_of_active_limiter_point",
+        "safety_factor_at_measurement_position",
+        "safety_factor_of_measurement_position",
         vocabs,
     )
 
 
 def test_ambiguity_at_vs_of_active_limiter_point(vocabs: Vocabularies) -> None:
-    """Same for active_limiter_point locus."""
+    """Same for measurement_position locus."""
     _assert_distinct_ir(
-        "temperature_at_active_limiter_point",
-        "temperature_of_active_limiter_point",
+        "temperature_at_measurement_position",
+        "temperature_of_measurement_position",
         vocabs,
     )
 
