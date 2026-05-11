@@ -112,8 +112,8 @@ def test_catalog_renderer_render_catalog_groups_by_physics_domain(tmp_path: Path
     # Names appear verbatim
     assert "electron_temperature" in catalog
     assert "ion_temperature" in catalog
-    # Unit still rendered (now as inline code)
-    assert "`eV`" in catalog
+    # Unit rendered as bracket annotation
+    assert "[eV]" in catalog
 
 
 def test_catalog_renderer_render_catalog_raw_base_name(tmp_path: Path):

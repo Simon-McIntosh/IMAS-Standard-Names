@@ -144,6 +144,14 @@ CATALOG_CSS = """\
     color: #1a1a2e;
 }
 
+/* Unit annotation */
+.sn-unit {
+    font-size: 0.82rem;
+    color: #888;
+    font-weight: 400;
+    margin-left: 0.3rem;
+}
+
 /* Description as definition list indent */
 .sn-entry > dl {
     margin: 0.2rem 0 0.3rem;
@@ -229,10 +237,10 @@ def _generate_nav_yaml(nav_structure: dict) -> str:
     import yaml as _yaml  # noqa: PLC0415
 
     nav_list = [{"Home": "index.md"}]
-    # Add catalog section from the renderer
+    # Flatten catalog domains directly into the top-level nav
     catalog_section = nav_structure.get("Catalog", [])
-    if catalog_section:
-        nav_list.append({"Catalog": list(catalog_section)})
+    for entry in catalog_section:
+        nav_list.append(entry)
     return "nav:\n" + _yaml.dump(nav_list, default_flow_style=False, indent=2)
 
 

@@ -1,69 +1,74 @@
 /* Standard Names Catalog — Multi-page Design */
 
-/* Entry cards */
-.sn-card {
-    margin: 0.75rem 0 1.25rem;
-    padding: 1rem 1.25rem;
-    border-left: 3px solid var(--md-primary-fg-color);
-    border-radius: 0 6px 6px 0;
-    background: var(--md-code-bg-color);
-    transition: border-color 0.2s;
-}
-
-.sn-card:target {
-    border-left-color: var(--md-accent-fg-color);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-}
-
-.sn-card .sn-title {
-    margin: 0 0 0.5rem;
-    font-size: 1rem;
-    overflow-wrap: anywhere;
-    line-height: 1.4;
-}
-
-.sn-card p {
-    margin: 0.4rem 0;
-    font-size: 0.92rem;
-    line-height: 1.5;
-}
-
-/* Compact metadata inline after title */
-.sn-card .sn-title code {
-    font-size: 0.82em;
-    padding: 0.12em 0.3em;
-    border-radius: 3px;
-    background: var(--md-default-bg-color);
-}
-
-/* Collapsible documentation sections */
-.sn-card details {
-    margin: 0.6rem 0;
-    border: 1px solid var(--md-default-fg-color--lightest);
-    border-radius: 4px;
-    padding: 0.5rem 0.75rem;
-}
-
-.sn-card details summary {
-    cursor: pointer;
-    font-weight: 600;
-    font-size: 0.88rem;
-    color: var(--md-primary-fg-color);
-}
-
-.sn-card details[open] summary {
-    margin-bottom: 0.5rem;
+/* Entry — clean text with subtle separator */
+.sn-entry {
+    padding: 0.6rem 0 0.6rem 1.2rem;
     border-bottom: 1px solid var(--md-default-fg-color--lightest);
-    padding-bottom: 0.4rem;
+}
+
+.sn-entry:target {
+    background: var(--md-code-bg-color);
+}
+
+/* Inline code for name — slightly larger, distinct */
+.sn-entry > p:first-child code {
+    font-size: 0.92rem;
+    font-weight: 500;
+    background: none;
+    padding: 0;
+    color: var(--md-default-fg-color);
+}
+
+/* Unit annotation */
+.sn-unit {
+    font-size: 0.82rem;
+    color: var(--md-default-fg-color--light);
+    font-weight: 400;
+    margin-left: 0.3rem;
+}
+
+/* Description as definition list indent */
+.sn-entry > dl {
+    margin: 0.2rem 0 0.3rem;
+}
+
+.sn-entry > dl > dd {
+    margin-left: 0;
+    font-size: 0.87rem;
+    line-height: 1.5;
+    color: var(--md-default-fg-color--light);
+}
+
+/* Collapsed details — barely visible until needed */
+.sn-entry details {
+    margin: 0.2rem 0 0;
+    font-size: 0.84rem;
+}
+
+.sn-entry details summary {
+    cursor: pointer;
+    font-size: 0.78rem;
+    color: var(--md-default-fg-color--lighter);
+    user-select: none;
+    font-style: italic;
+}
+
+.sn-entry details summary:hover {
+    color: var(--md-default-fg-color--light);
+}
+
+.sn-entry details[open] {
+    padding: 0.3rem 0 0;
+    color: var(--md-default-fg-color--light);
 }
 
 /* See-also and sibling nav links */
-.sn-card a[href^="#"] {
+.sn-entry a[href^="#"] {
     overflow-wrap: anywhere;
     font-size: 0.9rem;
 }
 
-/* Base group headings */
+/* Base group headings — thin grey line */
 h2 {
     border-bottom: 2px solid var(--md-primary-fg-color--light);
     padding-bottom: 0.4rem;
@@ -71,7 +76,7 @@ h2 {
 }
 
 /* Mermaid overflow */
-.sn-card .mermaid {
+.sn-entry .mermaid {
     overflow-x: auto;
     max-width: 100%;
 }

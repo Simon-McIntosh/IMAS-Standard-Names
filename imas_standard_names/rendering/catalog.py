@@ -384,18 +384,13 @@ class CatalogRenderer:
         documentation = _rewrite_name_links(
             self._fix_markdown_formatting(item.get("documentation", ""))
         )
-        kind = item.get("kind", "")
 
         # Clean entry with anchor — just text, indentation, divider
         result = f'<div class="sn-entry" id="{name}" markdown>\n\n'
 
-        # Name line: monospace, with unit/kind inline
-        meta = ""
-        if unit:
-            meta += f" `{unit}`"
-        if kind:
-            meta += f" _{kind}_"
-        result += f"`{name}`{meta}\n\n"
+        # Name on its own line, unit as subtle bracket annotation
+        unit_annotation = f' <span class="sn-unit">[{unit}]</span>' if unit else ""
+        result += f"`{name}`{unit_annotation}\n\n"
 
         # Description indented
         if description:
@@ -436,6 +431,10 @@ class CatalogRenderer:
     def render_domain_page(self, domain: str) -> str:
         """Generate a single domain page with base-name grouping.
 
+        Groups are ordered semantically: core physics quantities first,
+        then geometry/structure, then diagnostics/metadata, with
+        "unknown" always last.
+
         Parameters
         ----------
         domain : str
@@ -464,7 +463,14 @@ class CatalogRenderer:
             base = self._parse_base(name)
             base_groups[base].append(item)
 
-        for base_name in sorted(base_groups.keys()):
+        # Sort groups: larger groups first (more important concepts),
+        # then alphabetically within same size. "unknown" always last.
+        def _group_sort_key(base_name: str) -> tuple[int, int, str]:
+            if base_name == "unknown":
+                return (1, 0, base_name)
+            return (0, -len(base_groups[base_name]), base_name)
+
+        for base_name in sorted(base_groups.keys(), key=_group_sort_key):
             base_items = base_groups[base_name]
             result += f"## {_humanize(base_name)} {{: #{base_name} }}\n\n"
 
@@ -594,7 +600,7 @@ class CatalogRenderer:
         for domain, items in sorted(stats["domains"].items()):
             domain_display = domain.replace("_", " ").title()
             count = len(items)
-            result += f"- **[{domain_display}]({link_prefix}#{domain})** - {count} standard names\n"
+            result += f"- **[{domain_display}]({link_prefix}{domain}/)** - {count} standard names\n"
 
         return result
 
