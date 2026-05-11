@@ -17,6 +17,11 @@ dependencies = [
   "pint>=0.24.4,<0.25.0",
   "markdown>=3.8,<4.0",
   "fastmcp~=3.2.0",
+  # Security floor constraints for transitive dependencies
+  "urllib3>=2.7.0",            # CVE-2026-44432, CVE-2026-44431
+  "python-multipart>=0.0.27", # CVE-2026-42561, CVE-2026-40347
+  "lxml>=6.1.0",              # CVE-2026-41066
+  "authlib>=1.6.11",          # CVE-2026-41425
 ]
 keywords = [
   "fusion",
@@ -69,7 +74,7 @@ graph-local = [
 ]
 
 test = [
-  "pytest>=8.3.4,<9.0.0",
+  "pytest>=9.0.3,<10.0.0",    # CVE-2025-71176
   "pytest-cov>=4.1.0,<5.0.0",
   "pytest-html>=4.1.1,<5.0.0",
   "ruff>=0.9.8,<1.0.0",
@@ -118,7 +123,7 @@ artifacts = [
 dev = [
   "pre-commit>=4.1.0,<5.0.0",
   "ruff>=0.11.10,<1.0.0",
-  "pytest>=8.3.4,<9.0.0",
+  "pytest>=9.0.3,<10.0.0",    # CVE-2025-71176
   "pytest-cov>=4.1.0,<5.0.0",
   "pytest-html>=4.1.1,<5.0.0",
   "ipykernel>=6.29.5,<7.0.0",
