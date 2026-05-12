@@ -211,7 +211,7 @@ class TestD4ComponentTokens:
         ],
     )
     def test_component_round_trip(self, component):
-        name = f"{component}_component_of_refractive_index"
+        name = f"{component}_refractive_index"
         parsed = parse_standard_name(name)
         assert parsed.component == Component(component)
         assert parsed.physical_base == "refractive_index"
@@ -341,7 +341,7 @@ class TestD7ForbiddenPatterns:
     def test_normal_names_pass(self):
         """Regular names should not trigger any forbidden pattern."""
         validate_forbidden_patterns("electron_temperature")
-        validate_forbidden_patterns("radial_component_of_magnetic_field")
+        validate_forbidden_patterns("radial_magnetic_field")
         validate_forbidden_patterns("power_due_to_e_cross_b_drift")
 
 
@@ -357,7 +357,7 @@ class TestExistingRoundTripRegression:
         "name",
         [
             "electron_temperature",
-            "radial_component_of_magnetic_field",
+            "radial_magnetic_field",
             "flux_loop_voltage",
             "area_of_flux_loop",
             "electron_temperature_at_magnetic_axis",

@@ -21,7 +21,7 @@ def test_compose_standard_name():
 
     assert "name" in result
     assert "parts" in result
-    assert result["name"] == "radial_component_of_electron_heat_flux"
+    assert result["name"] == "radial_electron_heat_flux"
     assert result["parts"]["physical_base"] == "heat_flux"
     assert result["parts"]["component"] == "radial"
     assert result["parts"]["subject"] == "electron"

@@ -137,7 +137,7 @@
 
 
     The magnetic axis relates to [major_radius_of_plasma_boundary](#major_radius_of_plasma_boundary),
-    [minor_radius_of_plasma_boundary](#minor_radius_of_plasma_boundary), and [toroidal_component_of_magnetic_field](#toroidal_component_of_magnetic_field)
+    [minor_radius_of_plasma_boundary](#minor_radius_of_plasma_boundary), and [toroidal_magnetic_field](#toroidal_magnetic_field)
     at axis. Axis location affects [plasma_current](#plasma_current) distribution
     and [safety_factor](#safety_factor) profiles.
 
@@ -434,8 +434,8 @@
     $$q = \frac{1}{2\pi} \oint \frac{B_{\phi}}{B_p R} dl_p$$
 
 
-    where $B_{\phi}$ is [toroidal_component_of_magnetic_field](#toroidal_component_of_magnetic_field),
-    $B_p$ is [poloidal_component_of_magnetic_field](#poloidal_component_of_magnetic_field),
+    where $B_{\phi}$ is [toroidal_magnetic_field](#toroidal_magnetic_field),
+    $B_p$ is [poloidal_magnetic_field](#poloidal_magnetic_field),
     $R$ is major radius, and $dl_p$ is the differential poloidal arc length.
 
 

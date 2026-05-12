@@ -40,7 +40,7 @@ class TestDiamagneticAmbiguity:
 
     def test_radial_component_of_diamagnetic_velocity(self):
         """When a real projection axis is used, diamagnetic stays in physical_base."""
-        parsed = parse_standard_name("radial_component_of_diamagnetic_velocity")
+        parsed = parse_standard_name("radial_diamagnetic_velocity")
         assert parsed.component.value == "radial"
         assert parsed.physical_base == "diamagnetic_velocity"
         assert parsed.coordinate is None
@@ -61,7 +61,7 @@ class TestDiamagneticAmbiguity:
         """Compose -> parse round-trip for diamagnetic in physical_base."""
         parts = {"component": "radial", "physical_base": "diamagnetic_velocity"}
         name = compose_standard_name(parts)
-        assert name == "radial_component_of_diamagnetic_velocity"
+        assert name == "radial_diamagnetic_velocity"
         parsed = parse_standard_name(name)
         assert parsed.component.value == "radial"
         assert parsed.physical_base == "diamagnetic_velocity"
@@ -125,7 +125,7 @@ class TestVerticalAmbiguity:
     """vertical: Component ∩ position qualifier — template disambiguates."""
 
     def test_vertical_component_of_magnetic_field(self):
-        parsed = parse_standard_name("vertical_component_of_magnetic_field")
+        parsed = parse_standard_name("vertical_magnetic_field")
         assert parsed.component.value == "vertical"
         assert parsed.physical_base == "magnetic_field"
 

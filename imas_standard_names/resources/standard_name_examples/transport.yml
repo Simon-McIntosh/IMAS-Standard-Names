@@ -2,7 +2,7 @@
   description: Electron heat flux vector.
   documentation: 'Electron heat flux vector $\mathbf{q}_e$ representing the thermal
     energy transported by electrons. In cylindrical coordinates, components include
-    radial [radial_component_of_electron_heat_flux](#radial_component_of_electron_heat_flux),
+    radial [radial_electron_heat_flux](#radial_electron_heat_flux),
     poloidal, and toroidal directions. Electron heat flux is a primary energy loss
     channel in tokamak plasmas and determines [energy_confinement_time](#energy_confinement_time)
     through transport processes.
@@ -30,7 +30,7 @@
     profiles is essential for achieving good [energy_confinement_time](#energy_confinement_time)
     and predicting plasma performance. Heat flux affects [plasma_current](#plasma_current)
     requirements and [safety_factor](#safety_factor) limits. See [electron_thermal_diffusivity](#electron_thermal_diffusivity)
-    for transport coefficients and [radial_component_of_electron_heat_flux](#radial_component_of_electron_heat_flux)
+    for transport coefficients and [radial_electron_heat_flux](#radial_electron_heat_flux)
     for radial transport.
 
 
@@ -89,7 +89,7 @@
     predictions) due to micro-instabilities such as trapped electron modes and electron
     temperature gradient modes. Higher diffusivity reduces [energy_confinement_time](#energy_confinement_time)
     and affects [plasma_current](#plasma_current) requirements. See [electron_heat_flux](#electron_heat_flux)
-    for transport relationships and [radial_component_of_electron_heat_flux](#radial_component_of_electron_heat_flux)
+    for transport relationships and [radial_electron_heat_flux](#radial_electron_heat_flux)
     for radial transport analysis.
 
 
@@ -117,7 +117,7 @@
   status: draft
   kind: scalar
   unit: m^2.s^-1
-- name: radial_component_of_electron_heat_flux
+- name: radial_electron_heat_flux
   description: Radial component of electron heat flux vector.
   documentation: 'Radial component of the electron heat flux vector $q_{e,R}$ in cylindrical
     coordinates, representing thermal energy transport by electrons in the major radius

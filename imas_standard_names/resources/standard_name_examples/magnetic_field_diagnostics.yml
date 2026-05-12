@@ -201,19 +201,19 @@
     The magnetic field is fundamental for plasma confinement in tokamaks. Field strength
     determines particle Larmor radii and confinement quality. The field relates to
     [plasma_current_density](#plasma_current_density) via Ampère''s law and provides
-    rotational transform for field line closure. See [radial_component_of_magnetic_field](#radial_component_of_magnetic_field),
-    [toroidal_component_of_magnetic_field](#toroidal_component_of_magnetic_field),
-    [vertical_component_of_magnetic_field](#vertical_component_of_magnetic_field),
-    [poloidal_component_of_magnetic_field](#poloidal_component_of_magnetic_field),
+    rotational transform for field line closure. See [radial_magnetic_field](#radial_magnetic_field),
+    [toroidal_magnetic_field](#toroidal_magnetic_field),
+    [vertical_magnetic_field](#vertical_magnetic_field),
+    [poloidal_magnetic_field](#poloidal_magnetic_field),
     and [poloidal_magnetic_field](#poloidal_magnetic_field).
 
 
     Component decomposition:
 
 
-    The magnetic field decomposes into [radial_component_of_magnetic_field](#radial_component_of_magnetic_field)
-    $B_R$, [toroidal_component_of_magnetic_field](#toroidal_component_of_magnetic_field)
-    $B_{\phi}$, and [vertical_component_of_magnetic_field](#vertical_component_of_magnetic_field)
+    The magnetic field decomposes into [radial_magnetic_field](#radial_magnetic_field)
+    $B_R$, [toroidal_magnetic_field](#toroidal_magnetic_field)
+    $B_{\phi}$, and [vertical_magnetic_field](#vertical_magnetic_field)
     $B_Z$. The poloidal field combines radial and vertical components, while the toroidal
     field is the dominant component for confinement.
 
@@ -359,7 +359,7 @@
   links:
   - name:magnetic_field
   - name:plasma_current
-- name: poloidal_component_of_magnetic_field
+- name: poloidal_magnetic_field
   description: Poloidal component of magnetic field.
   documentation: 'Magnitude of the poloidal component of the [magnetic_field](#magnetic_field)
     vector $B_p$ in the poloidal plane. The poloidal field component is generated
@@ -370,8 +370,8 @@
     $$B_p = \sqrt{B_R^2 + B_Z^2}$$
 
 
-    where $B_R$ is [radial_component_of_magnetic_field](#radial_component_of_magnetic_field)
-    and $B_Z$ is [vertical_component_of_magnetic_field](#vertical_component_of_magnetic_field),
+    where $B_R$ is [radial_magnetic_field](#radial_magnetic_field)
+    and $B_Z$ is [vertical_magnetic_field](#vertical_magnetic_field),
     both in T.
 
 
@@ -383,7 +383,7 @@
     the [safety_factor](#safety_factor): $q \propto B_{\phi} / B_p$, a key parameter
     for MHD stability. Poloidal field strength affects plasma shaping and equilibrium
     control. See [poloidal_magnetic_field](#poloidal_magnetic_field) for vector relationships
-    and [toroidal_component_of_magnetic_field](#toroidal_component_of_magnetic_field)
+    and [toroidal_magnetic_field](#toroidal_magnetic_field)
     for field comparison.
 
 
@@ -403,7 +403,7 @@
 
 
     0.1-1 T, depending on [plasma_current](#plasma_current) and radial position. Much
-    smaller than [toroidal_component_of_magnetic_field](#toroidal_component_of_magnetic_field)
+    smaller than [toroidal_magnetic_field](#toroidal_magnetic_field)
     but essential for plasma confinement and stability.
 
 
@@ -424,8 +424,8 @@
     $$\mathbf{B}_p = B_R \hat{e}_R + B_Z \hat{e}_Z$$
 
 
-    where $B_R$ is [radial_component_of_magnetic_field](#radial_component_of_magnetic_field),
-    $B_Z$ is [vertical_component_of_magnetic_field](#vertical_component_of_magnetic_field),
+    where $B_R$ is [radial_magnetic_field](#radial_magnetic_field),
+    $B_Z$ is [vertical_magnetic_field](#vertical_magnetic_field),
     both in T.
 
 
@@ -436,7 +436,7 @@
     and external poloidal field coils. It provides the rotational transform of field
     lines necessary for tokamak confinement and determines plasma shape through equilibrium
     force balance. Poloidal field strength affects [safety_factor](#safety_factor)
-    profiles and MHD stability limits. See [poloidal_component_of_magnetic_field](#poloidal_component_of_magnetic_field)
+    profiles and MHD stability limits. See [poloidal_magnetic_field](#poloidal_magnetic_field)
     for magnitude relationships and [magnetic_field](#magnetic_field) for total field
     structure.
 
@@ -514,7 +514,7 @@
   status: draft
   kind: scalar
   unit: Wb
-- name: radial_component_of_magnetic_field
+- name: radial_magnetic_field
   description: Radial component of magnetic field vector.
   documentation: 'Radial component of the magnetic field vector $B_R$ in cylindrical
     coordinates. In axisymmetric tokamak equilibria, the radial component is typically
@@ -626,7 +626,7 @@
   status: active
   kind: scalar
   unit: m
-- name: toroidal_component_of_magnetic_field
+- name: toroidal_magnetic_field
   description: Toroidal component of magnetic field vector.
   documentation: 'Toroidal component of the [magnetic_field](#magnetic_field) vector
     $B_{\phi}$ in cylindrical coordinates. In tokamaks, the toroidal component is
@@ -648,7 +648,7 @@
     by external toroidal field coils. Typical field strengths are 1-6 T on axis, with
     $B_{\phi} \gg B_R, B_Z$ for good magnetic confinement. The toroidal field provides
     plasma stability and determines the Larmor radius of particles. Field strength
-    affects [safety_factor](#safety_factor) and MHD stability limits. See [poloidal_component_of_magnetic_field](#poloidal_component_of_magnetic_field)
+    affects [safety_factor](#safety_factor) and MHD stability limits. See [poloidal_magnetic_field](#poloidal_magnetic_field)
     for field ratio and [magnetic_field](#magnetic_field) for total field structure.
 
 
@@ -677,7 +677,7 @@
   status: draft
   kind: scalar
   unit: T
-- name: vertical_component_of_magnetic_field
+- name: vertical_magnetic_field
   description: Vertical component of magnetic field vector.
   documentation: 'Vertical component of the [magnetic_field](#magnetic_field) vector
     $B_Z$ in cylindrical coordinates. The vertical component is part of the poloidal
@@ -696,11 +696,11 @@
 
 
     The vertical component is part of the poloidal magnetic field, essential for equilibrium
-    force balance and plasma shaping. Together with [radial_component_of_magnetic_field](#radial_component_of_magnetic_field),
+    force balance and plasma shaping. Together with [radial_magnetic_field](#radial_magnetic_field),
     it forms the poloidal field that provides rotational transform of field lines.
     Vertical field strength affects plasma position control and [safety_factor](#safety_factor)
     profiles. See [poloidal_magnetic_field](#poloidal_magnetic_field) for vector relationships
-    and [poloidal_component_of_magnetic_field](#poloidal_component_of_magnetic_field)
+    and [poloidal_magnetic_field](#poloidal_magnetic_field)
     for magnitude.
 
 
@@ -719,7 +719,7 @@
 
 
     $|B_Z|$ ranges from milliTesla to 1 T, typically 1-2 orders of magnitude smaller
-    than [toroidal_component_of_magnetic_field](#toroidal_component_of_magnetic_field).
+    than [toroidal_magnetic_field](#toroidal_magnetic_field).
     Vertical field strength varies with plasma position and external coil currents.
 
 

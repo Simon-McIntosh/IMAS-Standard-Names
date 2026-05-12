@@ -247,7 +247,7 @@ class TestExistingRoundTrips:
         "name",
         [
             "electron_temperature",
-            "radial_component_of_magnetic_field",
+            "radial_magnetic_field",
             "flux_loop_voltage",
             "area_of_flux_loop",
             "electron_temperature_at_magnetic_axis",

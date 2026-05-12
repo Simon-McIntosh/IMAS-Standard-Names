@@ -23,7 +23,7 @@ def test_compose_and_parse_minimal_base():
 def test_with_component_subject_no_basis():
     parts = {"component": "radial", "subject": "electron", "physical_base": "heat_flux"}
     name = compose_name(parts)
-    assert name == "radial_component_of_electron_heat_flux"
+    assert name == "radial_electron_heat_flux"
     parsed = parse_name(name)
     assert parsed.component == Component.RADIAL
     assert parsed.subject == "electron"
@@ -44,13 +44,17 @@ def test_with_position_process():
     assert back.process == Process.EXTERNAL_COIL
 
 
-def test_invalid_order_raises():
-    bad = "electron_radial_heat_flux"  # wrong order; component must be first
-    try:
-        parse_name(bad)
-        assert False, "expected ValueError"
-    except ValueError:
-        pass
+def test_order_flexible_in_short_form():
+    """In the short-form grammar the component prefix is position-independent.
+
+    The parser can identify 'radial' as a component token regardless of whether
+    it appears before or after a subject token like 'electron'.
+    Both orderings produce the same canonical composition.
+    """
+    parsed = parse_name("electron_radial_heat_flux")
+    assert parsed.component == Component.RADIAL
+    assert parsed.subject == "electron"
+    assert parsed.physical_base == "heat_flux"
 
 
 # --- D.3 senior review (2026-04) vocabulary additions ---
@@ -65,7 +69,7 @@ class TestD3ComponentAdditions:
             "physical_base": "magnetic_field",
         }
         name = compose_name(parts)
-        assert name == "normalized_radial_component_of_magnetic_field"
+        assert name == "normalized_radial_magnetic_field"
         parsed = parse_name(name)
         assert parsed.component == Component.NORMALIZED_RADIAL
         assert parsed.physical_base == "magnetic_field"
@@ -76,7 +80,7 @@ class TestD3ComponentAdditions:
             "physical_base": "magnetic_field",
         }
         name = compose_name(parts)
-        assert name == "normalized_vertical_component_of_magnetic_field"
+        assert name == "normalized_vertical_magnetic_field"
         parsed = parse_name(name)
         assert parsed.component == Component.NORMALIZED_VERTICAL
         assert parsed.physical_base == "magnetic_field"
