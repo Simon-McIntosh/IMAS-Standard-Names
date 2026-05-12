@@ -195,6 +195,24 @@ class CatalogRenderer:
         except Exception:
             return "unknown"
 
+    @staticmethod
+    def _parse_locus(name: str) -> tuple[str, str] | None:
+        """Extract locus token and relation from a standard name.
+
+        Uses the structured IR parser to detect ``_of_``, ``_at_``, and
+        ``_over_`` locus references. Returns ``(token, relation)`` or
+        ``None`` if the name has no locus.
+        """
+        try:
+            from ..grammar.parser import parse as ir_parse  # noqa: PLC0415
+
+            result = ir_parse(name)
+            if result.ir and result.ir.locus:
+                return (result.ir.locus.token, result.ir.locus.relation.value)
+        except Exception:
+            pass
+        return None
+
     # ------------------------------------------------------------------
     # Plan 41 helpers: links, cocos, mermaid, sibling nav
     # ------------------------------------------------------------------
@@ -391,18 +409,21 @@ class CatalogRenderer:
             self._fix_markdown_formatting(item.get("documentation", ""))
         )
 
-        # Clean entry with anchor — just text, indentation, divider
         result = f'<div class="sn-entry" id="{name}" markdown>\n\n'
 
-        # Name on its own line, unit as subtle bracket annotation
+        # Name with unit annotation
         unit_annotation = f' <span class="sn-unit">[{unit}]</span>' if unit else ""
         result += f"`{name}`{unit_annotation}\n\n"
 
-        # Description indented
+        # Description as definition
         if description:
             result += f":   {description}\n\n"
 
-        # All detail in collapsible — ultra-minimal
+        # Docs-pending badge when no documentation exists
+        if not documentation:
+            result += '<span class="sn-badge sn-badge-pending">docs pending</span>\n\n'
+
+        # Collapsible detail section
         details_parts: list[str] = []
         if documentation:
             details_parts.append(documentation)
@@ -419,9 +440,18 @@ class CatalogRenderer:
         if sibling_md:
             details_parts.append(sibling_md)
 
-        sources_md = self._render_sources(item.get("sources") or [])
-        if sources_md:
-            details_parts.append(sources_md)
+        # Source provenance as a compact footer
+        sources = item.get("sources") or []
+        if sources:
+            count = len(sources)
+            paths = ", ".join(
+                f"`{s.get('dd_path') or s.get('signal_id') or s.get('id', '?')}`"
+                for s in sources[:3]
+            )
+            suffix = f" + {count - 3} more" if count > 3 else ""
+            details_parts.append(
+                f'<span class="sn-sources">Sources ({count}): {paths}{suffix}</span>\n'
+            )
 
         if details_parts:
             result += (
@@ -435,11 +465,12 @@ class CatalogRenderer:
         return result
 
     def render_domain_page(self, domain: str) -> str:
-        """Generate a single domain page with base-name grouping.
+        """Generate a single domain page with base-name and locus grouping.
 
         Groups are ordered semantically: core physics quantities first,
         then geometry/structure, then diagnostics/metadata, with
-        "unknown" always last.
+        "unknown" always last. Within each base group, entries sharing
+        a locus (e.g. "at magnetic axis") are sub-grouped together.
 
         Parameters
         ----------
@@ -480,9 +511,35 @@ class CatalogRenderer:
             base_items = base_groups[base_name]
             result += f"## {_humanize(base_name)} {{: #{base_name} }}\n\n"
 
-            sorted_items = sorted(base_items, key=lambda x: x.get("name", ""))
-            for item in sorted_items:
+            # Sub-group by locus within base group
+            locus_groups: dict[str, list[dict]] = defaultdict(list)
+            no_locus: list[dict] = []
+            for item in base_items:
+                name = item.get("name", "Unknown")
+                locus_info = self._parse_locus(name)
+                if locus_info:
+                    token, relation = locus_info
+                    key = f"{relation}:{token}"
+                    locus_groups[key].append(item)
+                else:
+                    no_locus.append(item)
+
+            # Render items without locus first
+            for item in sorted(no_locus, key=lambda x: x.get("name", "")):
                 result += self._render_entry(item, wrapped_by)
+
+            # Render locus sub-groups with a subtle heading
+            for locus_key in sorted(locus_groups.keys()):
+                relation, token = locus_key.split(":", 1)
+                locus_items = locus_groups[locus_key]
+                heading = f"{relation} {_humanize(token)}"
+                result += (
+                    f'<div class="sn-locus-group" markdown>\n\n'
+                    f"### {heading} {{: #{token} }}\n\n"
+                )
+                for item in sorted(locus_items, key=lambda x: x.get("name", "")):
+                    result += self._render_entry(item, wrapped_by)
+                result += "</div>\n\n"
 
         return result
 
@@ -522,9 +579,32 @@ class CatalogRenderer:
                 base_items = base_groups[base_name]
                 result += f"### {_humanize(base_name)} {{: #{base_name} }}\n\n"
 
-                sorted_items = sorted(base_items, key=lambda x: x.get("name", ""))
-                for item in sorted_items:
+                # Sub-group by locus
+                locus_groups: dict[str, list[dict]] = defaultdict(list)
+                no_locus: list[dict] = []
+                for item in base_items:
+                    name = item.get("name", "Unknown")
+                    locus_info = self._parse_locus(name)
+                    if locus_info:
+                        token, relation = locus_info
+                        key = f"{relation}:{token}"
+                        locus_groups[key].append(item)
+                    else:
+                        no_locus.append(item)
+
+                for item in sorted(no_locus, key=lambda x: x.get("name", "")):
                     result += self._render_entry(item, wrapped_by)
+
+                for locus_key in sorted(locus_groups.keys()):
+                    relation, token = locus_key.split(":", 1)
+                    locus_items = locus_groups[locus_key]
+                    heading = f"{relation} {_humanize(token)}"
+                    result += (
+                        f'<div class="sn-locus-group" markdown>\n\n#### {heading}\n\n'
+                    )
+                    for item in sorted(locus_items, key=lambda x: x.get("name", "")):
+                        result += self._render_entry(item, wrapped_by)
+                    result += "</div>\n\n"
 
         return result
 

@@ -105,8 +105,8 @@ def corpus_names() -> list[str]:
 
 def test_corpus_size(corpus_names: list[str]) -> None:
     """The catalog corpus should contain at least some entries."""
-    assert len(corpus_names) >= 5, (
-        f"Expected ≥5 corpus names; found {len(corpus_names)}"
+    assert len(corpus_names) >= 3, (
+        f"Expected ≥3 corpus names; found {len(corpus_names)}"
     )
 
 

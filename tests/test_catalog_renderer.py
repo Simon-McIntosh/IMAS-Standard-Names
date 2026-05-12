@@ -345,19 +345,18 @@ sources:
     renderer = CatalogRenderer(tmp_path)
     catalog = renderer.render_catalog()
 
-    assert "<details>" in catalog
-    assert "Sources (debug)" in catalog
+    assert "<details" in catalog
+    assert "sn-sources" in catalog
     assert "equilibrium/time_slice/profiles_1d/psi" in catalog
 
 
 def test_catalog_render_no_sources_block_when_absent(tmp_path: Path):
-    """No <details> block when sources field is absent from YAML."""
+    """No sources span when sources field is absent from YAML."""
     catalog_path = _make_test_catalog(tmp_path)
     renderer = CatalogRenderer(catalog_path)
     catalog = renderer.render_catalog()
 
-    assert "<details>" not in catalog
-    assert "Sources (debug)" not in catalog
+    assert "sn-sources" not in catalog
 
 
 @pytest.mark.xfail(
@@ -387,3 +386,71 @@ def test_parse_base_strips_transformation_residue():
     assert base("toroidal_component_of_current_density") == "current_density"
     # Parse failures fall back to 'unknown'
     assert base("!!!invalid!!!") == "unknown"
+
+
+def test_parse_locus_of():
+    """_of_ names produce locus with relation 'of'."""
+    result = CatalogRenderer._parse_locus("major_radius_of_magnetic_axis")
+    assert result == ("magnetic_axis", "of")
+
+
+def test_parse_locus_at():
+    """_at_ names produce locus with relation 'at'."""
+    result = CatalogRenderer._parse_locus("safety_factor_at_normalized_poloidal_flux")
+    assert result == ("normalized_poloidal_flux", "at")
+
+
+def test_parse_locus_none():
+    """Names without locus return None."""
+    assert CatalogRenderer._parse_locus("electron_temperature") is None
+
+
+def test_locus_subgrouping_in_domain_page(tmp_path: Path):
+    """Domain page renders locus sub-groups within base groups."""
+    (tmp_path / "eq.yml").write_text(
+        """- name: major_radius_of_magnetic_axis
+  kind: scalar
+  unit: m
+  physics_domain: equilibrium
+  description: Major radius of the magnetic axis.
+
+- name: vertical_coordinate_of_magnetic_axis
+  kind: scalar
+  unit: m
+  physics_domain: equilibrium
+  description: Vertical coordinate of the magnetic axis.
+
+- name: electron_temperature
+  kind: scalar
+  unit: eV
+  physics_domain: equilibrium
+  description: Electron temperature.
+""",
+        encoding="utf-8",
+    )
+    renderer = CatalogRenderer(tmp_path)
+    page = renderer.render_domain_page("equilibrium")
+
+    # Locus sub-group heading should appear
+    assert "of magnetic axis" in page
+    assert "sn-locus-group" in page
+
+    # Non-locus entry should appear outside the locus group
+    assert "electron_temperature" in page
+
+
+def test_docs_pending_badge(tmp_path: Path):
+    """Entries without documentation show a 'docs pending' badge."""
+    (tmp_path / "te.yml").write_text(
+        """name: electron_temperature
+kind: scalar
+unit: eV
+physics_domain: equilibrium
+description: Electron temperature.
+""",
+        encoding="utf-8",
+    )
+    renderer = CatalogRenderer(tmp_path)
+    catalog = renderer.render_catalog()
+    assert "docs pending" in catalog
+    assert "sn-badge-pending" in catalog
