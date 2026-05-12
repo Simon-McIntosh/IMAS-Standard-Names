@@ -65,12 +65,12 @@ def load_coordinate_axes() -> CoordinateAxesRegistry:
 # locus_registry.yml
 # ---------------------------------------------------------------------------
 
-LocusType = Literal["entity", "position", "geometry"]
+LocusType = Literal["entity", "position", "geometry", "region"]
 LocusRelation = Literal["of", "at", "over"]
 
 
 class LocusEntry(BaseModel, extra="forbid"):
-    """A single locus entry (entity, position, or geometry)."""
+    """A single locus entry (entity, position, geometry, or region)."""
 
     type: LocusType
     allowed_relations: list[LocusRelation]

@@ -14,10 +14,6 @@ from imas_standard_names.grammar import (
     compose_name,
     parse_name,
 )
-from imas_standard_names.grammar.support import (
-    compose_standard_name as compose_parts,
-    parse_standard_name as parse_parts,
-)
 
 # rc20 token forms (e.g. square_of, inverse_of) were replaced by bare tokens
 # (square, inverse) in vNext grammar (plan 38 §A7).  Tests that rely on the
@@ -35,27 +31,31 @@ _XFAIL_RC20 = pytest.mark.xfail(
 class TestTransformationCompose:
     """Test composition of names with unary transformations."""
 
+    @_XFAIL_RC20
     def test_square_of_temperature(self):
         parts = {"transformation": "square_of", "physical_base": "electron_temperature"}
-        name = compose_parts(parts)
+        name = compose_name(parts)
         assert name == "square_of_electron_temperature"
 
+    @_XFAIL_RC20
     def test_change_over_time_in_magnetic_flux(self):
         parts = {
             "transformation": "change_over_time_in",
             "physical_base": "magnetic_flux",
         }
-        name = compose_parts(parts)
+        name = compose_name(parts)
         assert name == "change_over_time_in_magnetic_flux"
 
+    @_XFAIL_RC20
     def test_logarithm_of_density(self):
         parts = {"transformation": "logarithm_of", "physical_base": "density"}
-        name = compose_parts(parts)
+        name = compose_name(parts)
         assert name == "logarithm_of_density"
 
+    @_XFAIL_RC20
     def test_inverse_of_safety_factor(self):
         parts = {"transformation": "inverse_of", "physical_base": "safety_factor"}
-        name = compose_parts(parts)
+        name = compose_name(parts)
         assert name == "inverse_of_safety_factor"
 
     def test_volume_averaged(self):
@@ -63,20 +63,21 @@ class TestTransformationCompose:
             "transformation": "volume_averaged",
             "physical_base": "electron_temperature",
         }
-        name = compose_parts(parts)
+        name = compose_name(parts)
         assert name == "volume_averaged_electron_temperature"
 
+    @_XFAIL_RC20
     def test_time_derivative_of(self):
         parts = {
             "transformation": "time_derivative_of",
             "physical_base": "magnetic_flux",
         }
-        name = compose_parts(parts)
+        name = compose_name(parts)
         assert name == "time_derivative_of_magnetic_flux"
 
     def test_normalized(self):
         parts = {"transformation": "normalized", "physical_base": "electron_pressure"}
-        name = compose_parts(parts)
+        name = compose_name(parts)
         assert name == "normalized_electron_pressure"
 
     def test_flux_surface_averaged(self):
@@ -84,40 +85,43 @@ class TestTransformationCompose:
             "transformation": "flux_surface_averaged",
             "physical_base": "electron_temperature",
         }
-        name = compose_parts(parts)
+        name = compose_name(parts)
         assert name == "flux_surface_averaged_electron_temperature"
 
     def test_line_averaged(self):
         parts = {"transformation": "line_averaged", "physical_base": "electron_density"}
-        name = compose_parts(parts)
+        name = compose_name(parts)
         assert name == "line_averaged_electron_density"
 
     def test_surface_integrated(self):
         parts = {"transformation": "surface_integrated", "physical_base": "heat_flux"}
-        name = compose_parts(parts)
+        name = compose_name(parts)
         assert name == "surface_integrated_heat_flux"
 
     def test_volume_integrated(self):
         parts = {"transformation": "volume_integrated", "physical_base": "power"}
-        name = compose_parts(parts)
+        name = compose_name(parts)
         assert name == "volume_integrated_power"
 
+    @_XFAIL_RC20
     def test_time_integrated(self):
         parts = {
             "transformation": "time_integrated",
             "physical_base": "radiation_power",
         }
-        name = compose_parts(parts)
+        name = compose_name(parts)
         assert name == "time_integrated_radiation_power"
 
+    @_XFAIL_RC20
     def test_maximum_of(self):
         parts = {"transformation": "maximum_of", "physical_base": "electron_pressure"}
-        name = compose_parts(parts)
+        name = compose_name(parts)
         assert name == "maximum_of_electron_pressure"
 
+    @_XFAIL_RC20
     def test_minimum_of(self):
         parts = {"transformation": "minimum_of", "physical_base": "safety_factor"}
-        name = compose_parts(parts)
+        name = compose_name(parts)
         assert name == "minimum_of_safety_factor"
 
     def test_maximum_over_flux_surface(self):
@@ -125,7 +129,7 @@ class TestTransformationCompose:
             "transformation": "maximum_over_flux_surface",
             "physical_base": "electron_temperature",
         }
-        name = compose_parts(parts)
+        name = compose_name(parts)
         assert name == "maximum_over_flux_surface_electron_temperature"
 
     def test_minimum_over_flux_surface(self):
@@ -133,23 +137,25 @@ class TestTransformationCompose:
             "transformation": "minimum_over_flux_surface",
             "physical_base": "safety_factor",
         }
-        name = compose_parts(parts)
+        name = compose_name(parts)
         assert name == "minimum_over_flux_surface_safety_factor"
 
+    @_XFAIL_RC20
     def test_derivative_of(self):
         parts = {
             "transformation": "derivative_of",
             "physical_base": "electron_temperature",
         }
-        name = compose_parts(parts)
+        name = compose_name(parts)
         assert name == "derivative_of_electron_temperature"
 
+    @_XFAIL_RC20
     def test_radial_derivative_of(self):
         parts = {
             "transformation": "radial_derivative_of",
             "physical_base": "electron_pressure",
         }
-        name = compose_parts(parts)
+        name = compose_name(parts)
         assert name == "radial_derivative_of_electron_pressure"
 
     @_XFAIL_RC20
@@ -199,75 +205,79 @@ class TestTransformationParse:
 
     @_XFAIL_RC20
     def test_parse_square_of(self):
-        result = parse_parts("square_of_electron_temperature")
-        assert result["transformation"] == "square_of"
-        assert result["physical_base"] == "electron_temperature"
+        result = parse_name("square_of_electron_temperature")
+        assert result.transformation.value == "square_of"
+        assert result.physical_base == "electron_temperature"
 
     @_XFAIL_RC20
     def test_parse_change_over_time_in(self):
-        result = parse_parts("change_over_time_in_magnetic_flux")
-        assert result["transformation"] == "change_over_time_in"
-        assert result["physical_base"] == "magnetic_flux"
+        result = parse_name("change_over_time_in_magnetic_flux")
+        assert result.transformation.value == "change_over_time_in"
+        assert result.physical_base == "magnetic_flux"
 
     @_XFAIL_RC20
     def test_parse_logarithm_of(self):
-        result = parse_parts("logarithm_of_density")
-        assert result["transformation"] == "logarithm_of"
-        assert result["physical_base"] == "density"
+        result = parse_name("logarithm_of_density")
+        assert result.transformation.value == "logarithm_of"
+        assert result.physical_base == "density"
 
     @_XFAIL_RC20
     def test_parse_inverse_of(self):
-        result = parse_parts("inverse_of_safety_factor")
-        assert result["transformation"] == "inverse_of"
-        assert result["physical_base"] == "safety_factor"
+        result = parse_name("inverse_of_safety_factor")
+        assert result.transformation.value == "inverse_of"
+        assert result.physical_base == "safety_factor"
 
     def test_parse_volume_averaged(self):
-        result = parse_parts("volume_averaged_electron_temperature")
-        assert result["transformation"] == "volume_averaged"
-        assert result["physical_base"] == "electron_temperature"
+        result = parse_name("volume_averaged_electron_temperature")
+        assert result.transformation.value == "volume_averaged"
+        assert result.subject.value == "electron"
+        assert result.physical_base == "temperature"
 
     @_XFAIL_RC20
     def test_parse_time_derivative_of(self):
-        result = parse_parts("time_derivative_of_magnetic_flux")
-        assert result["transformation"] == "time_derivative_of"
-        assert result["physical_base"] == "magnetic_flux"
+        result = parse_name("time_derivative_of_magnetic_flux")
+        assert result.transformation.value == "time_derivative_of"
+        assert result.physical_base == "magnetic_flux"
 
     def test_parse_normalized(self):
-        result = parse_parts("normalized_electron_pressure")
-        assert result["transformation"] == "normalized"
-        assert result["physical_base"] == "electron_pressure"
+        result = parse_name("normalized_electron_pressure")
+        assert result.transformation.value == "normalized"
+        assert result.subject.value == "electron"
+        assert result.physical_base == "pressure"
 
     def test_parse_flux_surface_averaged(self):
-        result = parse_parts("flux_surface_averaged_electron_temperature")
-        assert result["transformation"] == "flux_surface_averaged"
-        assert result["physical_base"] == "electron_temperature"
+        result = parse_name("flux_surface_averaged_electron_temperature")
+        assert result.transformation.value == "flux_surface_averaged"
+        assert result.subject.value == "electron"
+        assert result.physical_base == "temperature"
 
     def test_parse_maximum_over_flux_surface(self):
-        result = parse_parts("maximum_over_flux_surface_electron_temperature")
-        assert result["transformation"] == "maximum_over_flux_surface"
-        assert result["physical_base"] == "electron_temperature"
+        result = parse_name("maximum_over_flux_surface_electron_temperature")
+        assert result.transformation.value == "maximum_over_flux_surface"
+        assert result.subject.value == "electron"
+        assert result.physical_base == "temperature"
 
     @_XFAIL_RC20
     def test_parse_radial_derivative_of(self):
         """Parser splits radial_derivative_of as coordinate=radial + transformation=derivative_of."""
-        result = parse_parts("radial_derivative_of_electron_pressure")
-        assert result["transformation"] == "derivative_of"
-        assert result["coordinate"] == "radial"
-        assert result["physical_base"] == "electron_pressure"
+        result = parse_name("radial_derivative_of_electron_pressure")
+        assert result.transformation.value == "derivative_of"
+        assert result.coordinate.value == "radial"
+        assert result.physical_base == "electron_pressure"
 
     @_XFAIL_RC20
     def test_parse_with_subject_prefix(self):
-        result = parse_parts("electron_square_of_temperature")
-        assert result["subject"] == "electron"
-        assert result["transformation"] == "square_of"
-        assert result["physical_base"] == "temperature"
+        result = parse_name("electron_square_of_temperature")
+        assert result.subject.value == "electron"
+        assert result.transformation.value == "square_of"
+        assert result.physical_base == "temperature"
 
     @_XFAIL_RC20
     def test_parse_with_suffix(self):
-        result = parse_parts("inverse_of_safety_factor_at_magnetic_axis")
-        assert result["transformation"] == "inverse_of"
-        assert result["physical_base"] == "safety_factor"
-        assert result["position"] == "magnetic_axis"
+        result = parse_name("inverse_of_safety_factor_at_magnetic_axis")
+        assert result.transformation.value == "inverse_of"
+        assert result.physical_base == "safety_factor"
+        assert result.position.value == "magnetic_axis"
 
     @_XFAIL_RC20
     def test_parse_via_model(self):
@@ -277,9 +287,9 @@ class TestTransformationParse:
 
     def test_parse_name_without_transformation(self):
         """Names without transformation should parse normally."""
-        result = parse_parts("magnetic_field")
-        assert "transformation" not in result
-        assert result["physical_base"] == "magnetic_field"
+        result = parse_name("magnetic_field")
+        assert result.transformation is None
+        assert result.physical_base == "magnetic_field"
 
 
 class TestTransformationRoundTrip:
@@ -326,12 +336,21 @@ class TestTransformationRoundTrip:
                 },
                 marks=_XFAIL_RC20,
             ),
-            {"transformation": "volume_averaged", "physical_base": "electron_density"},
+            {
+                "transformation": "volume_averaged",
+                "subject": "electron",
+                "physical_base": "density",
+            },
             {
                 "transformation": "flux_surface_averaged",
-                "physical_base": "electron_temperature",
+                "subject": "electron",
+                "physical_base": "temperature",
             },
-            {"transformation": "line_averaged", "physical_base": "electron_density"},
+            {
+                "transformation": "line_averaged",
+                "subject": "electron",
+                "physical_base": "density",
+            },
             {"transformation": "surface_integrated", "physical_base": "heat_flux"},
             {"transformation": "volume_integrated", "physical_base": "power"},
             pytest.param(
@@ -348,7 +367,11 @@ class TestTransformationRoundTrip:
                 },
                 marks=_XFAIL_RC20,
             ),
-            {"transformation": "normalized", "physical_base": "electron_pressure"},
+            {
+                "transformation": "normalized",
+                "subject": "electron",
+                "physical_base": "pressure",
+            },
             pytest.param(
                 {"transformation": "maximum_of", "physical_base": "electron_pressure"},
                 marks=_XFAIL_RC20,
@@ -359,7 +382,8 @@ class TestTransformationRoundTrip:
             ),
             {
                 "transformation": "maximum_over_flux_surface",
-                "physical_base": "electron_temperature",
+                "subject": "electron",
+                "physical_base": "temperature",
             },
             {
                 "transformation": "minimum_over_flux_surface",
@@ -390,10 +414,10 @@ class TestTransformationRoundTrip:
         name = model.compose()
         assert name == "radial_derivative_of_electron_pressure"
         # Parser interprets 'radial' as a coordinate prefix
-        result = parse_parts(name)
-        assert result["coordinate"] == "radial"
-        assert result["transformation"] == "derivative_of"
-        assert result["physical_base"] == "electron_pressure"
+        result = parse_name(name)
+        assert result.coordinate.value == "radial"
+        assert result.transformation.value == "derivative_of"
+        assert result.physical_base == "electron_pressure"
 
 
 class TestTransformationExclusivity:
@@ -475,25 +499,25 @@ class TestTransformationEdgeCases:
         """Both time_derivative_of and change_over_time_in are valid transformations."""
         for t in ["time_derivative_of", "change_over_time_in"]:
             name = f"{t}_electron_temperature"
-            parsed = parse_parts(name)
-            assert parsed["transformation"] == t
-            assert parsed["physical_base"] == "electron_temperature"
+            parsed = parse_name(name)
+            assert parsed.transformation.value == t
+            assert parsed.physical_base == "electron_temperature"
 
     @_XFAIL_RC20
     def test_radial_derivative_not_radial_component(self):
         """radial_derivative_of parses as coordinate=radial + transformation=derivative_of."""
         name = "radial_derivative_of_electron_pressure"
-        parsed = parse_parts(name)
-        assert parsed["transformation"] == "derivative_of"
-        assert parsed["coordinate"] == "radial"
-        assert "component" not in parsed
+        parsed = parse_name(name)
+        assert parsed.transformation.value == "derivative_of"
+        assert parsed.coordinate.value == "radial"
+        assert parsed.component is None
 
     @_XFAIL_RC20
     def test_name_starting_with_square_but_not_transformation(self):
         """A name like 'square_root_function' should not match transformation."""
-        result = parse_parts("square_root_function")
-        assert "transformation" not in result
-        assert result["physical_base"] == "square_root_function"
+        result = parse_name("square_root_function")
+        assert result.transformation is None
+        assert result.physical_base == "square_root_function"
 
     def test_invalid_transformation_token(self):
         with pytest.raises(ValueError):

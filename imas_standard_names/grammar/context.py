@@ -383,10 +383,10 @@ def _build_base_requirements() -> dict[str, Any]:
             "example": "radial_position_of_flux_loop",
         },
         "physical_base": {
-            "type": "Open vocabulary",
+            "type": "Closed vocabulary",
             "guidance": (
-                "Use standard physics terminology "
-                "(temperature, density, pressure, magnetic_field, etc.)"
+                "Use ONLY tokens from the physical_bases registry. "
+                "Unknown tokens are rejected in strict mode."
             ),
             "qualification": (
                 "Typically qualified with subject (electron_temperature) "

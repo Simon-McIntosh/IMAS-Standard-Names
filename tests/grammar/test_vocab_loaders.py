@@ -84,7 +84,7 @@ def test_locus_registry_has_seed_entries():
 
 def test_locus_entry_types_are_valid():
     reg = load_locus_registry()
-    valid_types = {"entity", "position", "geometry"}
+    valid_types = {"entity", "position", "geometry", "region"}
     for name, entry in reg.loci.items():
         assert entry.type in valid_types, f"Invalid type for '{name}': {entry.type}"
 

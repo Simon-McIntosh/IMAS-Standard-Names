@@ -16,11 +16,20 @@
 #   kind     - scalar | vector | tensor | complex
 
 bases:
+  absorptivity:
+    aliases: []
+    kind: scalar
   angle:
     aliases: []
     kind: scalar
   area:
     aliases: []
+    kind: scalar
+  aspect_ratio:
+    aliases: []
+    kind: scalar
+  atomic_number:
+    aliases: [nuclear_charge_number]
     kind: scalar
   beta:
     aliases: []
@@ -43,12 +52,24 @@ bases:
   count:
     aliases: []
     kind: scalar
+  cross_section:
+    aliases: []
+    kind: scalar
+  curvature:
+    aliases: []
+    kind: scalar
   current:
     aliases: []
     kind: scalar
   current_density:
     aliases: []
     kind: vector
+  debye_length:
+    aliases: []
+    kind: scalar
+  delay:
+    aliases: []
+    kind: scalar
   density:
     aliases: []
     kind: scalar
@@ -58,7 +79,13 @@ bases:
   diffusivity:
     aliases: []
     kind: scalar
+  distance:
+    aliases: []
+    kind: scalar
   distribution:
+    aliases: []
+    kind: scalar
+  duration:
     aliases: []
     kind: scalar
   electric_field:
@@ -109,10 +136,16 @@ bases:
   gap:
     aliases: []
     kind: scalar
+  growth_rate:
+    aliases: []
+    kind: scalar
   heat_flux:
     aliases: []
     kind: scalar
   impedance:
+    aliases: []
+    kind: scalar
+  index:
     aliases: []
     kind: scalar
   inductance:
@@ -158,7 +191,13 @@ bases:
   momentum_flux:
     aliases: []
     kind: vector
+  multiplicity:
+    aliases: []
+    kind: scalar
   number_density:
+    aliases: []
+    kind: scalar
+  opacity:
     aliases: []
     kind: scalar
   parameter:
@@ -167,6 +206,9 @@ bases:
   particle_flux:
     aliases: []
     kind: vector
+  period:
+    aliases: []
+    kind: scalar
   phase:
     aliases: []
     kind: scalar
@@ -195,7 +237,13 @@ bases:
   rate:
     aliases: []
     kind: scalar
+  reflectivity:
+    aliases: []
+    kind: scalar
   refractive_index:
+    aliases: []
+    kind: scalar
+  residual:
     aliases: []
     kind: scalar
   resistance:
@@ -207,7 +255,13 @@ bases:
   safety_factor:
     aliases: []
     kind: scalar
+  shearing_rate:
+    aliases: []
+    kind: scalar
   size:
+    aliases: []
+    kind: scalar
+  solid_angle:
     aliases: []
     kind: scalar
   source:
@@ -222,6 +276,9 @@ bases:
   temperature:
     aliases: []
     kind: scalar
+  tilt_angle:
+    aliases: []
+    kind: scalar
   time:
     aliases: []
     kind: scalar
@@ -229,6 +286,9 @@ bases:
     aliases: []
     kind: scalar
   torque_density:
+    aliases: []
+    kind: scalar
+  transmissivity:
     aliases: []
     kind: scalar
   triangularity:

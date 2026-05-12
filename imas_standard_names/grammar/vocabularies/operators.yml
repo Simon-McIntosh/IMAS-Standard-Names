@@ -301,7 +301,7 @@ operators:
 
   difference:
     kind: binary
-    separator: _from_
+    separator: _and_
     precedence: 5
 
   product:

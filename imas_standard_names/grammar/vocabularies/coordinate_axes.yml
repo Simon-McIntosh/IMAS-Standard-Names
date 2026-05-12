@@ -12,9 +12,15 @@
 axes:
   normalized_parallel:
     aliases: []
+  normalized_perpendicular:
+    aliases: []
   normalized_poloidal:
     aliases: []
+  normalized_radial:
+    aliases: []
   normalized_toroidal:
+    aliases: []
+  normalized_vertical:
     aliases: []
   parallel:
     aliases: []

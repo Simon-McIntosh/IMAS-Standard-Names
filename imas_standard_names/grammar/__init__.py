@@ -22,6 +22,7 @@ from .model_types import (
 )
 from .support import (
     TOKEN_PATTERN,
+    UnknownBaseTokenError,
     coerce_enum,
     enum_values,
     normalize_standard_name,
@@ -29,10 +30,6 @@ from .support import (
     value_of,
 )
 
-# ---------------------------------------------------------------------------
-# vNext API (plan 38 W2b). Import after rc20 shims so the deprecation
-# wrapper in parser.py can discover ``parse_standard_name``.
-# ---------------------------------------------------------------------------
 from .ir import StandardNameIR
 from .parser import (
     Diagnostic,
@@ -61,6 +58,7 @@ parse_name = parse_standard_name
 
 __all__ = [
     "TOKEN_PATTERN",
+    "UnknownBaseTokenError",
     "compose_standard_name",
     "parse_standard_name",
     "compose_name",

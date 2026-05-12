@@ -175,7 +175,13 @@ class CatalogRenderer:
             from ..grammar.model import parse_standard_name  # noqa: PLC0415
 
             parsed = parse_standard_name(name)
-            base = parsed.physical_base or parsed.geometric_base or "unknown"
+            base = parsed.physical_base or ""
+            if not base and parsed.geometric_base:
+                base = (
+                    parsed.geometric_base.value
+                    if hasattr(parsed.geometric_base, "value")
+                    else str(parsed.geometric_base)
+                )
 
             # Strip transformation residue for grouping
             if parsed.transformation and base.startswith("of_"):

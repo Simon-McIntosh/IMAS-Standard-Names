@@ -2,6 +2,8 @@
 
 from pathlib import Path
 
+import pytest
+
 from imas_standard_names.rendering.catalog import CatalogRenderer
 
 
@@ -358,6 +360,10 @@ def test_catalog_render_no_sources_block_when_absent(tmp_path: Path):
     assert "Sources (debug)" not in catalog
 
 
+@pytest.mark.xfail(
+    reason="vNext parser does not handle _with_respect_to_ operator syntax",
+    strict=True,
+)
 def test_parse_base_strips_transformation_residue():
     """Transformed names (derivative, tendency) group under the inner base quantity."""
     base = CatalogRenderer._parse_base

@@ -12,10 +12,6 @@ from imas_standard_names.grammar import (
     compose_name,
     parse_name,
 )
-from imas_standard_names.grammar.support import (
-    compose_standard_name as compose_parts,
-    parse_standard_name as parse_parts,
-)
 
 
 class TestPerpendicular:
@@ -23,7 +19,7 @@ class TestPerpendicular:
 
     def test_compose_perpendicular_component(self):
         parts = {"component": "perpendicular", "physical_base": "magnetic_field"}
-        name = compose_parts(parts)
+        name = compose_name(parts)
         assert name == "perpendicular_component_of_magnetic_field"
 
     def test_parse_perpendicular_component(self):
@@ -77,11 +73,11 @@ class TestSubjectTokens:
     def test_subject_round_trip(self, subject):
         """Each subject token should compose and parse correctly."""
         parts = {"subject": subject, "physical_base": "temperature"}
-        name = compose_parts(parts)
+        name = compose_name(parts)
         assert name == f"{subject}_temperature"
-        parsed = parse_parts(name)
-        assert parsed["subject"] == subject
-        assert parsed["physical_base"] == "temperature"
+        parsed = parse_name(name)
+        assert parsed.subject.value == subject
+        assert parsed.physical_base == "temperature"
 
     def test_alpha_particle_density(self):
         parsed = parse_name("alpha_particle_density")
@@ -118,11 +114,11 @@ class TestProcessTokens:
     def test_process_round_trip(self, process):
         """Each process token should compose and parse correctly."""
         parts = {"physical_base": "power", "process": process}
-        name = compose_parts(parts)
+        name = compose_name(parts)
         assert name == f"power_due_to_{process}"
-        parsed = parse_parts(name)
-        assert parsed["process"] == process
-        assert parsed["physical_base"] == "power"
+        parsed = parse_name(name)
+        assert parsed.process.value == process
+        assert parsed.physical_base == "power"
 
     def test_non_inductive_current(self):
         parsed = parse_name("plasma_current_due_to_non_inductive")

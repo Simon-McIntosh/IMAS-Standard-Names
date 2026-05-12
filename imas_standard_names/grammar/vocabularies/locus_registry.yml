@@ -2,13 +2,14 @@
 #
 # Typed registry of physical objects, locations, and shapes.  Every locus
 # token carries:
-#   type            - entity | position | geometry
+#   type            - entity | position | geometry | region
 #   allowed_relations - subset of [of, at, over]
 #
 # Compatibility matrix enforced at validation time:
 #   entity   -> of          (intrinsic property of an entity)
 #   position -> at, of      (field at location, geometric property of location)
 #   geometry -> at, of, over (field over a geometric shape)
+#   region   -> over         (field averaged or integrated over a region)
 #
 # Curation policy:
 #   - Tokens must describe physics-meaningful loci, not DD structural artifacts
@@ -349,7 +350,7 @@ loci:
     allowed_relations: [at, of]
   halo_boundary:
     type: position
-    allowed_relations: [at, of]
+    allowed_relations: [at, of, over]
   inlet:
     type: position
     allowed_relations: [at, of]
@@ -499,3 +500,27 @@ loci:
   beam_path:
     type: geometry
     allowed_relations: [at, of, over]
+
+  # ── Region tokens ──────────────────────────────────────────────────
+  # Multi-dimensional loci (volumes, layers, zones) used with _over_.
+  core_region:
+    type: region
+    allowed_relations: [over]
+  divertor_region:
+    type: region
+    allowed_relations: [over]
+  edge_region:
+    type: region
+    allowed_relations: [over]
+  halo_region:
+    type: region
+    allowed_relations: [over]
+  pedestal_region:
+    type: region
+    allowed_relations: [over]
+  scrape_off_layer:
+    type: region
+    allowed_relations: [over]
+  vessel:
+    type: region
+    allowed_relations: [over]

@@ -35,7 +35,6 @@ edit-distance suggestions. No rc20 open-fallback behaviour is retained.
 
 from __future__ import annotations
 
-import warnings
 from collections.abc import Mapping
 from dataclasses import dataclass, field
 from difflib import get_close_matches
@@ -57,7 +56,7 @@ from imas_standard_names.grammar.ir import (
     QuantityOrCarrier,
     StandardNameIR,
 )
-from imas_standard_names.grammar.model_types import Subject
+from imas_standard_names.grammar.model_types import Object, Subject
 from imas_standard_names.grammar.render import compose
 
 __all__ = [
@@ -149,13 +148,27 @@ def load_default_vocabularies() -> Vocabularies:
             "arg_types": entry.arg_types,
         }
 
-    # Build qualifier set: Subject tokens + YAML-loaded modifier prefixes.
-    # Tokens that are also in bases/carriers are safe — the parser tries
-    # full base match first; qualifiers only strip recursively when the
-    # full string is NOT itself a registered base or carrier.
+    # Build qualifier set: Subject tokens + Object tokens + YAML-loaded
+    # modifier prefixes.  Tokens that are also in bases/carriers are safe —
+    # the parser tries full base match first; qualifiers only strip
+    # recursively when the full string is NOT itself a registered base or
+    # carrier.
     subject_quals = frozenset(s.value for s in Subject)
+    object_quals = frozenset(o.value for o in Object)
     modifier_quals = vocab_loaders.load_qualifiers()
-    qualifiers = subject_quals | modifier_quals
+
+    # Add unary_prefix operator tokens as qualifiers so that "bare" prefix
+    # operators (those that attach without _of_, like volume_averaged,
+    # normalized, flux_surface_averaged) can be stripped during qualifier
+    # matching.  Operators that DO use _of_ form are peeled first by
+    # _peel_outer_operator and never reach the qualifier stage.
+    prefix_op_quals = frozenset(
+        name
+        for name, meta in operators.items()
+        if meta.get("kind") == OperatorKind.UNARY_PREFIX.value
+    )
+
+    qualifiers = subject_quals | object_quals | modifier_quals | prefix_op_quals
 
     return Vocabularies(
         axes=frozenset(axes_reg.axes),
@@ -289,6 +302,9 @@ def _strip_locus(
         return locus, s[:idx], diagnostics
 
     # 2. Unregistered-but-unambiguous fallback for _at_ / _over_.
+    #    Skip if the core that would remain is a known qualifier or operator
+    #    token — that indicates the _over_/_at_ is part of a compound token,
+    #    not a locus marker (e.g. maximum_over_flux_surface).
     for rel, default_type in (
         ("at", LocusType.POSITION),
         ("over", LocusType.REGION),
@@ -299,6 +315,15 @@ def _strip_locus(
             continue
         token = s[idx + len(marker) :]
         if not token or not TOKEN_PATTERN.match(token):
+            continue
+        core = s[:idx]
+        # Check if the whole string up to and including the marker token
+        # is a registered qualifier/operator (e.g. "maximum_over_flux_surface")
+        if any(
+            q.startswith(core + marker.rstrip("_"))
+            for q in v.qualifiers
+            if len(q) > len(core)
+        ):
             continue
         try:
             locus = LocusRef(
@@ -439,6 +464,12 @@ def _peel_outer_operator(
                 [],
             )
 
+    # b2) bare unary prefix: These operators (normalized, volume_averaged, etc.)
+    # fall through to the qualifier + base matching stage and are handled
+    # by the IR→Model adapter in model.py. We do NOT peel them here because
+    # they can form compound axes (e.g. normalized_radial) that projection
+    # stripping needs to see intact.
+
     # c) binary: s starts with "<op>_of_" and contains its declared separator
     for op in sorted(binary_ops, key=len, reverse=True):
         prefix = f"{op}_of_"
@@ -449,28 +480,31 @@ def _peel_outer_operator(
         if sep is None:
             continue
         sep_marker = f"_{sep}_"
-        sep_idx = rest.find(sep_marker)
+        # Use rightmost split to maximize the first operand (compound bases
+        # may contain the separator word).
+        sep_idx = rest.rfind(sep_marker)
         while sep_idx > 0:
             a_str = rest[:sep_idx]
             b_str = rest[sep_idx + len(sep_marker) :]
             if not a_str or not b_str:
                 break
-            try:
-                a_ir = parse(a_str, vocabs=v).ir
-                b_ir = parse(b_str, vocabs=v).ir
-            except ParseError:
-                sep_idx = rest.find(sep_marker, sep_idx + 1)
-                continue
-            return (
-                OperatorApplication(
-                    kind=OperatorKind.BINARY,
-                    op=op,
-                    separator=sep,
-                    args=[a_ir, b_ir],
-                ),
-                "",
-                [a_ir, b_ir],
-            )
+            # Try strict parsing first; fall back to literal bases when
+            # sub-expressions contain unregistered compound tokens (e.g.
+            # "magnetic_pressure").
+            a_ir = _try_parse_or_literal(a_str, v)
+            b_ir = _try_parse_or_literal(b_str, v)
+            if a_ir is not None and b_ir is not None:
+                return (
+                    OperatorApplication(
+                        kind=OperatorKind.BINARY,
+                        op=op,
+                        separator=sep,
+                        args=[a_ir, b_ir],
+                    ),
+                    "",
+                    [a_ir, b_ir],
+                )
+            sep_idx = rest.rfind(sep_marker, 0, sep_idx)
 
     return None, s, []
 
@@ -495,6 +529,25 @@ def _longest_prefix_operator_match(s: str, tokens: set[str]) -> str | None:
     return best
 
 
+def _try_parse_or_literal(s: str, v: Vocabularies) -> StandardNameIR | None:
+    """Try to parse ``s`` as a full standard name; fall back to a literal base.
+
+    Returns ``None`` only when ``s`` is syntactically invalid (not
+    snake_case). For valid-looking tokens that don't match the closed
+    vocabulary, returns a literal ``QuantityOrCarrier`` so binary operator
+    operands with unregistered compound bases (e.g. ``magnetic_pressure``)
+    are accepted.
+    """
+    try:
+        return parse(s, vocabs=v).ir
+    except ParseError:
+        if TOKEN_PATTERN.match(s):
+            return StandardNameIR(
+                base=QuantityOrCarrier(token=s, kind=BaseKind.QUANTITY)
+            )
+        return None
+
+
 def _match_base_with_qualifiers(
     s: str, v: Vocabularies
 ) -> tuple[QuantityOrCarrier, list[Qualifier]]:
@@ -512,7 +565,7 @@ def _match_base_with_qualifiers(
         return QuantityOrCarrier(token=s, kind=BaseKind.GEOMETRY), []
 
     parts = s.split("_")
-    for split in range(1, len(parts)):
+    for split in range(len(parts) - 1, 0, -1):
         prefix = "_".join(parts[:split])
         rest = "_".join(parts[split:])
         if prefix not in v.qualifiers:
@@ -585,6 +638,30 @@ def parse(name: str, vocabs: Vocabularies | None = None) -> ParseResult:
         projection, s, proj_diags = _strip_projection(s, v)
         diagnostics.extend(proj_diags)
 
+    # Implicit coordinate detection: e.g. "radial_position" → radial_coordinate_of_position
+    if projection is None and binary_terminator is None:
+        for axis in sorted(v.axes, key=len, reverse=True):
+            prefix = f"{axis}_"
+            if s.startswith(prefix):
+                rest = s[len(prefix) :]
+                if rest in v.carriers:
+                    projection = AxisProjection(
+                        axis=axis, shape=ProjectionShape.COORDINATE
+                    )
+                    s = rest
+                    diagnostics.append(
+                        Diagnostic(
+                            category="non_canonical",
+                            layer="parser",
+                            message=(
+                                f"implicit coordinate projection {axis}_{rest}; "
+                                f"canonical form: {axis}_coordinate_of_{rest}"
+                            ),
+                            severity="info",
+                        )
+                    )
+                    break
+
     if binary_terminator is not None:
         # Binary consumed everything. Base/qualifiers/projection must be empty.
         if s:
@@ -634,46 +711,3 @@ def validate_round_trip(name: str, vocabs: Vocabularies | None = None) -> bool:
     except Exception:
         return False
     return rendered == name
-
-
-# ---------------------------------------------------------------------------
-# Deprecation wrapper for rc20 parser (plan 38 W2b hand-off to W2c)
-# ---------------------------------------------------------------------------
-
-
-def _install_rc20_deprecation() -> None:
-    """Install a DeprecationWarning on the rc20 ``parse_standard_name`` shim.
-
-    Called at import time. Does nothing if the rc20 module is absent
-    (build-time code-generation tolerance).
-    """
-
-    try:
-        from imas_standard_names.grammar import (  # noqa: PLC0415
-            support as _rc20_support,
-        )
-    except Exception:  # pragma: no cover - defensive
-        return
-
-    original = getattr(_rc20_support, "parse_standard_name", None)
-    if original is None or getattr(original, "_vnext_deprecated", False):
-        return
-
-    def _wrapper(name: str, *args: Any, **kwargs: Any):  # type: ignore[no-untyped-def]
-        warnings.warn(
-            "imas_standard_names.grammar.support.parse_standard_name is "
-            "deprecated; use imas_standard_names.grammar.parser.parse() "
-            "which returns a full StandardNameIR.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return original(name, *args, **kwargs)
-
-    _wrapper._vnext_deprecated = True  # type: ignore[attr-defined]
-    _wrapper.__wrapped__ = original  # type: ignore[attr-defined]
-    _wrapper.__name__ = getattr(original, "__name__", "parse_standard_name")
-    _wrapper.__doc__ = getattr(original, "__doc__", None)
-    _rc20_support.parse_standard_name = _wrapper  # type: ignore[attr-defined]
-
-
-_install_rc20_deprecation()

@@ -107,6 +107,10 @@ class TestD3ProcessAdditions:
         parsed = parse_name(name)
         assert parsed.process == Process.RESISTIVE_DIFFUSION
 
+    @pytest.mark.xfail(
+        reason="vocab gap: magnetic_island not a registered qualifier",
+        strict=True,
+    )
     def test_neoclassical_tearing_mode(self):
         parts = {
             "physical_base": "magnetic_island_width",

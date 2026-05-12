@@ -335,7 +335,7 @@ class TestQualifierOrderingPreserved:
     @pytest.mark.parametrize(
         "name,expected_qualifiers",
         [
-            ("trapped_fast_particle_density", ["trapped", "fast", "particle"]),
+            ("trapped_fast_particle_density", ["trapped", "fast_particle"]),
             ("co_passing_particle_density", ["co_passing", "particle"]),
             ("collisional_power_density", ["collisional"]),
             ("ohmic_current_density", ["ohmic"]),
@@ -387,17 +387,15 @@ class TestSubjectQualifierBoundary:
         "name,expected_subject_qualifier,expected_base",
         [
             # "fast_ion" is not a registered subject; "fast" is a qualifier
-            # and "ion" is a subject-as-qualifier
-            ("fast_ion_pressure", ["fast", "ion"], "pressure"),
+            # "fast_ion" is a registered compound Subject token
+            ("fast_ion_pressure", ["fast_ion"], "pressure"),
             # "trapped" is qualifier, rest peels normally
             ("trapped_particle_density", ["trapped", "particle"], "density"),
             # Single subject
             ("electron_temperature", ["electron"], "temperature"),
-            # NOTE: alpha_particle is a registered Subject, but the recursive
-            # qualifier-stripping parser splits it as ['alpha', 'particle']
-            # because both 'alpha' and 'particle' are individual qualifiers.
-            # This is a known limitation documented here for tracking.
-            ("alpha_particle_density", ["alpha", "particle"], "density"),
+            # alpha_particle is a registered Subject: with longest-match-first,
+            # it's matched as a single compound qualifier token.
+            ("alpha_particle_density", ["alpha_particle"], "density"),
         ],
     )
     def test_subject_boundary(
@@ -419,18 +417,11 @@ class TestSubjectQualifierBoundary:
             f"Base wrong for {name!r}: got {actual_base!r}, expected {expected_base!r}"
         )
 
-    @pytest.mark.xfail(
-        reason="Recursive qualifier-stripping splits compound subjects; "
-        "parser does not try multi-token subject matching (known limitation)"
-    )
     def test_compound_subject_not_split(self, vocabs):
-        """alpha_particle is a registered Subject — should not be split.
+        """alpha_particle is a registered Subject — now matched as single token.
 
-        KNOWN LIMITATION: The current parser strips qualifiers recursively
-        one token at a time. Since 'alpha' and 'particle' are both valid
-        qualifiers, it splits them rather than recognizing the compound
-        subject 'alpha_particle'. This test documents the desired behavior
-        for a future parser enhancement.
+        The longest-match-first qualifier stripping recognizes compound
+        subject tokens like 'alpha_particle' as single tokens.
         """
         result = parse("alpha_particle_density", vocabs)
         quals = [q.token for q in result.ir.qualifiers]

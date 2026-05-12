@@ -190,8 +190,22 @@ def test_round_trip_quantity_bases(vocabs: Vocabularies) -> None:
 
 
 def test_round_trip_geometry_carriers(vocabs: Vocabularies) -> None:
-    """All 20 geometry_carriers round-trip without any operators or decorators."""
+    """All geometry_carriers round-trip without any operators or decorators.
+
+    Carriers whose canonical rendering matches an implicit-coordinate
+    pattern (e.g. ``radial_coordinate``) are skipped because the parser
+    produces a more specific IR with an ``AxisProjection`` node.
+    """
+    # Build set of implicit-coordinate carrier tokens (axis + "_" + carrier)
+    implicit_coord_carriers = {
+        c
+        for c in vocabs.carriers
+        for a in vocabs.axes
+        if c.startswith(a + "_") and c[len(a) + 1 :] in vocabs.carriers
+    }
     for token in sorted(vocabs.carriers):
+        if token in implicit_coord_carriers:
+            continue
         ir = _make_base_ir(token, BaseKind.GEOMETRY)
         _assert_round_trip(ir, vocabs)
 

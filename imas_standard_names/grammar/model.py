@@ -1,7 +1,8 @@
 """Static StandardName model and friendly wrappers.
 
 This module holds the hand-written Pydantic model and thin compose/parse
-wrappers.
+wrappers that bridge the vNext parser/renderer (IR-based) to the flat
+StandardName model used by the rest of the codebase.
 """
 
 from __future__ import annotations
@@ -16,6 +17,20 @@ from imas_standard_names.grammar.constants import (
     EXCLUSIVE_SEGMENT_PAIRS,
     GENERIC_PHYSICAL_BASES,
 )
+from imas_standard_names.grammar.ir import (
+    AxisProjection,
+    BaseKind,
+    LocusRef,
+    LocusRelation,
+    LocusType,
+    OperatorApplication,
+    OperatorKind,
+    Process as IRProcess,
+    ProjectionShape,
+    Qualifier,
+    QuantityOrCarrier,
+    StandardNameIR,
+)
 from imas_standard_names.grammar.model_types import (
     BinaryOperator,
     Component,
@@ -28,14 +43,14 @@ from imas_standard_names.grammar.model_types import (
     Subject,
     Transformation,
 )
+from imas_standard_names.grammar.parser import ParseError, parse as _parse_ir
+from imas_standard_names.grammar.render import compose as _compose_ir
 from imas_standard_names.grammar.support import (
     TOKEN_PATTERN,
-    compose_standard_name as _compose_from_parts,
-    parse_standard_name as _parse_to_dict,
     value_of as _value_of,
 )
 
-# BaseToken: pattern for physical_base segment (open vocabulary)
+# BaseToken: pattern for physical_base segment (closed vocabulary since rc56)
 TOKEN_PATTERN_STR = r"^[a-z][a-z0-9_]*$"
 BaseToken = Annotated[
     str,
@@ -49,6 +64,342 @@ BaseToken = Annotated[
         examples=["temperature", "density", "magnetic_field", "particle_flux"],
     ),
 ]
+
+# ---------------------------------------------------------------------------
+# Subject / Object value sets for qualifier classification
+# ---------------------------------------------------------------------------
+_SUBJECT_VALUES: frozenset[str] = frozenset(s.value for s in Subject)
+_OBJECT_VALUES: frozenset[str] = frozenset(o.value for o in Object)
+_POSITION_VALUES: frozenset[str] = frozenset(p.value for p in Position)
+_REGION_VALUES: frozenset[str] = frozenset(r.value for r in Region)
+_GEOMETRY_VALUES: frozenset[str] = frozenset(g.value for g in GeometricBase)
+
+# Map from LocusType to model field name
+_LOCUS_TYPE_TO_FIELD: dict[LocusType, str] = {
+    LocusType.ENTITY: "object",
+    LocusType.GEOMETRY: "geometry",
+    LocusType.POSITION: "position",
+    LocusType.REGION: "region",
+}
+
+# Map from model field name to (LocusRelation, LocusType)
+_FIELD_TO_LOCUS: dict[str, tuple[LocusRelation, LocusType]] = {
+    "object": (LocusRelation.OF, LocusType.ENTITY),
+    "geometry": (LocusRelation.OF, LocusType.POSITION),
+    "position": (LocusRelation.AT, LocusType.POSITION),
+    "region": (LocusRelation.OVER, LocusType.REGION),
+}
+
+# Map between model BinaryOperator tokens (e.g. "ratio_of") and IR bare tokens
+_BINARY_MODEL_TO_IR: dict[str, str] = {
+    "product_of": "product",
+    "ratio_of": "ratio",
+    "difference_of": "difference",
+}
+_BINARY_IR_TO_MODEL: dict[str, str] = {v: k for k, v in _BINARY_MODEL_TO_IR.items()}
+
+# Map from IR binary operator separator to connector (for lookups)
+_BINARY_SEPARATOR_MAP: dict[str, str] = {}
+for _model_tok, _connector in BINARY_OPERATOR_CONNECTORS.items():
+    _ir_tok = _BINARY_MODEL_TO_IR.get(_model_tok)
+    if _ir_tok:
+        _BINARY_SEPARATOR_MAP[_ir_tok] = _connector
+
+# ---------------------------------------------------------------------------
+# Transformation form classification
+# ---------------------------------------------------------------------------
+# Transformation tokens that render as bare prefixes (<token>_<base>) rather
+# than _of_ form (<token>_of_<base>).  The vNext parser treats these as
+# qualifiers (not operators) since they lack the _of_ joining marker.
+# Determined by corpus analysis of canonical standard names.
+_TRANSFORMATION_VALUES: frozenset[str] = frozenset(t.value for t in Transformation)
+_BARE_PREFIX_TRANSFORMATIONS: frozenset[str] = frozenset(
+    {
+        "accumulated",
+        "cumulative",
+        "cumulative_inside_flux_surface",
+        "flux_surface_averaged",
+        "gyroaveraged",
+        "line_averaged",
+        "line_integrated",
+        "maximum_over_flux_surface",
+        "minimum_over_flux_surface",
+        "normalized",
+        "per_poloidal_mode",
+        "per_toroidal_and_poloidal_mode_number",
+        "per_toroidal_mode",
+        "perturbed",
+        "surface_integrated",
+        "time_average",
+        "volume_averaged",
+        "volume_integrated",
+    }
+)
+
+
+# ---------------------------------------------------------------------------
+# IR ↔ Model adapters
+# ---------------------------------------------------------------------------
+
+
+def _ir_to_model_dict(ir: StandardNameIR) -> dict[str, str]:
+    """Convert a parsed IR to the flat dict consumed by StandardName.model_validate."""
+    d: dict[str, str] = {}
+
+    # Check for binary operator (outermost operator with kind=BINARY)
+    binary_op: OperatorApplication | None = None
+    unary_ops: list[OperatorApplication] = []
+    for op in ir.operators:
+        if op.kind is OperatorKind.BINARY:
+            binary_op = op
+        else:
+            unary_ops.append(op)
+
+    if binary_op is not None:
+        # Binary operator: extract operands from args
+        model_op = _BINARY_IR_TO_MODEL.get(binary_op.op, f"{binary_op.op}_of")
+        d["binary_operator"] = model_op
+
+        # Render each operand back to its string form (physical_base, secondary_base)
+        if len(binary_op.args) == 2:
+            d["physical_base"] = _compose_ir(binary_op.args[0])
+            d["secondary_base"] = _compose_ir(binary_op.args[1])
+    else:
+        # Unary operators
+        for op in unary_ops:
+            if op.kind is OperatorKind.UNARY_PREFIX:
+                d["transformation"] = op.op
+            elif op.kind is OperatorKind.UNARY_POSTFIX:
+                d["decomposition"] = op.op
+
+        # Projection → component or coordinate
+        if ir.projection is not None:
+            if ir.projection.shape is ProjectionShape.COMPONENT:
+                d["component"] = ir.projection.axis
+            elif ir.projection.shape is ProjectionShape.COORDINATE:
+                d["coordinate"] = ir.projection.axis
+
+        # Base + qualifiers → physical_base or geometric_base
+        if ir.base.kind is BaseKind.GEOMETRY:
+            d["geometric_base"] = ir.base.token
+        else:
+            # physical_base: fold uncategorized qualifiers back as prefix
+            subject = None
+            device = None
+            transformation_token = None
+            base_qualifiers: list[str] = []
+            for q in ir.qualifiers:
+                if q.token in _SUBJECT_VALUES:
+                    subject = q.token
+                elif q.token in _OBJECT_VALUES:
+                    device = q.token
+                elif (
+                    q.token in _BARE_PREFIX_TRANSFORMATIONS
+                    and transformation_token is None
+                ):
+                    transformation_token = q.token
+                else:
+                    base_qualifiers.append(q.token)
+            if subject:
+                d["subject"] = subject
+            if device:
+                d["device"] = device
+            if transformation_token:
+                d["transformation"] = transformation_token
+            # Fold remaining qualifiers into physical_base as compound
+            if base_qualifiers:
+                d["physical_base"] = "_".join([*base_qualifiers, ir.base.token])
+            else:
+                d["physical_base"] = ir.base.token
+
+    # Locus → object/geometry/position/region
+    if ir.locus is not None:
+        token = ir.locus.token
+        if ir.locus.type == LocusType.POSITION:
+            if ir.locus.relation == LocusRelation.OVER and token in _REGION_VALUES:
+                d["region"] = token
+            elif ir.locus.relation == LocusRelation.AT:
+                if token in _POSITION_VALUES:
+                    d["position"] = token
+            else:
+                if token in _POSITION_VALUES or token in _GEOMETRY_VALUES:
+                    d["geometry"] = token
+                # else: unregistered geometry token, skip
+        elif ir.locus.type == LocusType.REGION:
+            if token in _REGION_VALUES:
+                d["region"] = token
+        else:
+            field_name = _LOCUS_TYPE_TO_FIELD.get(ir.locus.type)
+            if field_name:
+                d[field_name] = token
+
+    # Mechanism → process
+    if ir.mechanism is not None:
+        d["process"] = ir.mechanism.token
+
+    return d
+
+
+def _model_to_ir(model: StandardName) -> StandardNameIR:
+    """Convert a StandardName model to IR for rendering."""
+    operators: list[OperatorApplication] = []
+    projection: AxisProjection | None = None
+    qualifiers: list[Qualifier] = []
+    locus: LocusRef | None = None
+    mechanism: IRProcess | None = None
+
+    # Binary operator
+    if model.binary_operator:
+        op_model_value = _value_of(model.binary_operator)
+        ir_op = _BINARY_MODEL_TO_IR.get(op_model_value, op_model_value)
+
+        # Look up separator from BINARY_OPERATOR_CONNECTORS
+        connector = BINARY_OPERATOR_CONNECTORS.get(op_model_value)
+        if connector is None:
+            raise ValueError(
+                f"Unknown binary operator '{op_model_value}': "
+                f"no connector defined in BINARY_OPERATOR_CONNECTORS"
+            )
+
+        # Build sub-IRs for each operand by re-parsing them
+        a_str = model.physical_base or ""
+        b_str = _value_of(model.secondary_base) if model.secondary_base else ""
+        a_ir = _parse_simple_base(a_str)
+        b_ir = _parse_simple_base(b_str)
+
+        operators.append(
+            OperatorApplication(
+                kind=OperatorKind.BINARY,
+                op=ir_op,
+                separator=connector,
+                args=[a_ir, b_ir],
+            )
+        )
+        # Binary uses a placeholder base
+        base = QuantityOrCarrier(token="placeholder", kind=BaseKind.QUANTITY)
+    else:
+        # Transformation (unary prefix)
+        transformation_qualifier: Qualifier | None = None
+        if model.transformation:
+            tf_token = _value_of(model.transformation)
+            if tf_token in _BARE_PREFIX_TRANSFORMATIONS:
+                # Bare-prefix transformations render as qualifiers
+                # (will be prepended to base by the renderer)
+                transformation_qualifier = Qualifier(token=tf_token)
+            else:
+                operators.append(
+                    OperatorApplication(
+                        kind=OperatorKind.UNARY_PREFIX,
+                        op=tf_token,
+                    )
+                )
+
+        # Decomposition (unary postfix)
+        if model.decomposition:
+            operators.append(
+                OperatorApplication(
+                    kind=OperatorKind.UNARY_POSTFIX,
+                    op=_value_of(model.decomposition),
+                )
+            )
+
+        # Projection
+        if model.component:
+            projection = AxisProjection(
+                axis=_value_of(model.component), shape=ProjectionShape.COMPONENT
+            )
+        elif model.coordinate:
+            projection = AxisProjection(
+                axis=_value_of(model.coordinate), shape=ProjectionShape.COORDINATE
+            )
+
+        # Base
+        if model.geometric_base:
+            base = QuantityOrCarrier(
+                token=_value_of(model.geometric_base), kind=BaseKind.GEOMETRY
+            )
+        elif model.physical_base:
+            # Re-parse the physical_base to decompose qualifiers + base
+            base, qualifiers = _decompose_physical_base(
+                model.physical_base, model.subject, model.device
+            )
+            # Insert bare-prefix transformation qualifier at the front
+            # (transformation is outermost: <transform>_<subject>_<base>)
+            if transformation_qualifier is not None:
+                qualifiers.insert(0, transformation_qualifier)
+        else:
+            raise ValueError("Either geometric_base or physical_base must be set")
+
+    # Locus — position field uses _at_, geometry field uses _of_ for
+    # POSITION-type loci. Other fields use their fixed defaults.
+    for field_name, (default_relation, locus_type) in _FIELD_TO_LOCUS.items():
+        value = getattr(model, field_name, None)
+        if value is not None:
+            locus = LocusRef(
+                relation=default_relation, token=_value_of(value), type=locus_type
+            )
+            break
+
+    # Mechanism
+    if model.process:
+        mechanism = IRProcess(token=_value_of(model.process))
+
+    return StandardNameIR(
+        operators=operators,
+        projection=projection,
+        qualifiers=qualifiers,
+        base=base,
+        locus=locus,
+        mechanism=mechanism,
+    )
+
+
+def _parse_simple_base(base_str: str) -> StandardNameIR:
+    """Parse a simple base string (e.g. 'electron_temperature') into an IR.
+
+    Used for binary operator operands. Falls back to treating the whole
+    string as a literal physical_base if re-parsing fails.
+    """
+    try:
+        result = _parse_ir(base_str)
+        return result.ir
+    except (ParseError, ValueError):
+        # Fallback: treat as a literal physical_base
+        return StandardNameIR(
+            base=QuantityOrCarrier(token=base_str, kind=BaseKind.QUANTITY)
+        )
+
+
+def _decompose_physical_base(
+    physical_base: str,
+    subject: Subject | None,
+    device: Object | None,
+) -> tuple[QuantityOrCarrier, list[Qualifier]]:
+    """Decompose a physical_base string into IR base + qualifiers.
+
+    The physical_base may be a compound like 'magnetic_field' or
+    'diamagnetic_drift_velocity'. We use the vNext parser to decompose
+    it correctly, then prepend subject/device as qualifiers.
+    """
+    qualifiers: list[Qualifier] = []
+
+    # Add subject and device as qualifiers (in model order: subject before device)
+    if subject:
+        qualifiers.append(Qualifier(token=_value_of(subject)))
+    if device:
+        qualifiers.append(Qualifier(token=_value_of(device)))
+
+    # Try to parse the physical_base to extract any embedded qualifiers
+    try:
+        result = _parse_ir(physical_base)
+        # Successfully parsed: merge the parsed qualifiers
+        qualifiers.extend(result.ir.qualifiers)
+        return result.ir.base, qualifiers
+    except (ParseError, ValueError):
+        # Can't decompose: use the whole string as base
+        return QuantityOrCarrier(
+            token=physical_base, kind=BaseKind.QUANTITY
+        ), qualifiers
 
 
 class StandardName(BaseModel):
@@ -246,7 +597,8 @@ class StandardName(BaseModel):
         return self
 
     def compose(self) -> str:
-        return _compose_from_parts(self.model_dump_compact())
+        ir = _model_to_ir(self)
+        return _compose_ir(ir)
 
     def model_dump_compact(self) -> dict[str, str]:
         return {
@@ -258,15 +610,30 @@ class StandardName(BaseModel):
 
 def compose_standard_name(parts: Mapping[str, Any] | StandardName) -> str:
     if isinstance(parts, StandardName):
-        payload = parts.model_dump_compact()
+        model = parts
     else:
-        payload = StandardName.model_validate(parts).model_dump_compact()
-    return _compose_from_parts(payload)
+        model = StandardName.model_validate(parts)
+    ir = _model_to_ir(model)
+    return _compose_ir(ir)
 
 
 def parse_standard_name(name: str) -> StandardName:
-    values = _parse_to_dict(name)
-    return StandardName.model_validate(values)
+    try:
+        result = _parse_ir(name)
+    except ParseError as exc:
+        if exc.residue:
+            from imas_standard_names.grammar.parser import (  # noqa: PLC0415
+                load_default_vocabularies as _load_vocabs,
+            )
+            from imas_standard_names.grammar.support import (  # noqa: PLC0415
+                UnknownBaseTokenError,
+            )
+
+            vocabs = _load_vocabs()
+            known = tuple(sorted(vocabs.bases | vocabs.carriers))
+            raise UnknownBaseTokenError(exc.residue, known) from exc
+        raise
+    return StandardName.model_validate(_ir_to_model_dict(result.ir))
 
 
 __all__ = [

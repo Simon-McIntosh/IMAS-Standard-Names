@@ -248,6 +248,13 @@ def compose(ir: StandardNameIR) -> str:
     except ValueError as exc:
         raise RenderError(str(exc)) from exc
 
+    # Binary operators replace `inner` entirely, losing any locus/mechanism
+    # that was rendered into `inner` by _render_base_with_decorators.
+    # Re-append them from the top-level IR.
+    if any(op.kind is OperatorKind.BINARY for op in ir.operators):
+        rendered += render_locus(ir.locus)
+        rendered += render_mechanism(ir.mechanism)
+
     # Safety net: enforce the §A3 trailing-locus rule on the final string.
     # When the outermost operator pushes text after the locus suffix, the
     # resulting name violates the trailing-position invariant and must be
