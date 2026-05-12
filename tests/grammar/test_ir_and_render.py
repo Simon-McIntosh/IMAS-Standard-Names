@@ -58,7 +58,7 @@ def test_compose_projection_plus_qualifier_plus_locus():
             type=LocusType.POSITION,
         ),
     )
-    assert compose(ir) == "radial_component_of_electron_pressure_at_plasma_boundary"
+    assert compose(ir) == "radial_electron_pressure_at_plasma_boundary"
 
 
 def test_compose_nested_prefix_operators():
@@ -133,7 +133,7 @@ def test_compose_mechanism_trails_locus():
 
 
 def test_compose_coordinate_shape_on_geometry_carrier():
-    """``vertical_coordinate_of_<geometry_carrier>`` — §A12 row 23."""
+    """``vertical_<geometry_carrier>`` — §A12 row 23."""
     ir = StandardNameIR(
         projection=AxisProjection(axis="vertical", shape=ProjectionShape.COORDINATE),
         base=QuantityOrCarrier(token="position", kind=BaseKind.GEOMETRY),

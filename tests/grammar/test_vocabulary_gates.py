@@ -120,22 +120,22 @@ _CATALOG_NAMES = [
     "counter_passing_particle_density",
     "fast_ion_pressure",
     "fast_particle_density",
-    "poloidal_component_of_electric_field",
-    "radial_component_of_electric_field",
+    "poloidal_electric_field",
+    "radial_electric_field",
     "tendency_of_fast_electron_density",
     "tendency_of_ion_state_density",
-    "toroidal_component_of_electric_field",
+    "toroidal_electric_field",
     "trapped_fast_particle_density",
     "trapped_particle_density",
-    "vertical_component_of_center_of_mass_velocity",
-    "vertical_component_of_electron_velocity",
-    "vertical_component_of_ion_velocity",
+    "vertical_center_of_mass_velocity",
+    "vertical_electron_velocity",
+    "vertical_ion_velocity",
     "area_of_flux_loop",
-    "poloidal_component_of_anomalous_current_density",
-    "radial_component_of_anomalous_current_density",
-    "toroidal_component_of_anomalous_current_density",
-    "parallel_component_of_neutral_momentum_flux",
-    "parallel_component_of_total_momentum_flux",
+    "poloidal_anomalous_current_density",
+    "radial_anomalous_current_density",
+    "toroidal_anomalous_current_density",
+    "parallel_neutral_momentum_flux",
+    "parallel_total_momentum_flux",
 ]
 
 _SYNTHETIC_NAMES = [
@@ -155,9 +155,9 @@ _SYNTHETIC_NAMES = [
     "electron_density_due_to_ionization",
     "energy_flux_due_to_convection",
     # Component projection
-    "toroidal_component_of_magnetic_field",
-    "radial_component_of_velocity",
-    "parallel_component_of_current_density",
+    "toroidal_magnetic_field",
+    "radial_velocity",
+    "parallel_current_density",
     # Operator + base
     "tendency_of_electron_density",
     "time_average_of_temperature",
@@ -167,8 +167,8 @@ _SYNTHETIC_NAMES = [
     "pressure_at_plasma_boundary",
     "density_on_flux_surface",
     # Complex: component + qualifier + base
-    "toroidal_component_of_ion_velocity",
-    "radial_component_of_electron_particle_flux",
+    "toroidal_ion_velocity",
+    "radial_electron_particle_flux",
     # Complex: operator + locus
     "time_average_of_electron_temperature_at_magnetic_axis",
     # Simple bases

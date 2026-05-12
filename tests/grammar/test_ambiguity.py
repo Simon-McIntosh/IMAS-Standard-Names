@@ -414,43 +414,43 @@ def test_ambiguity_operator_mechanism_vs_just_operator(vocabs: Vocabularies) -> 
 
 
 def test_ambiguity_radial_vs_toroidal_component(vocabs: Vocabularies) -> None:
-    """``radial_component_of_X`` vs ``toroidal_component_of_X``."""
+    """``radial_X`` vs ``toroidal_X``."""
     _assert_distinct_ir(
-        "radial_component_of_pressure",
-        "toroidal_component_of_pressure",
+        "radial_pressure",
+        "toroidal_pressure",
         vocabs,
     )
 
 
 def test_ambiguity_radial_vs_poloidal_component(vocabs: Vocabularies) -> None:
-    """``radial_component_of_X`` vs ``poloidal_component_of_X``."""
+    """``radial_X`` vs ``poloidal_X``."""
     _assert_distinct_ir(
-        "radial_component_of_temperature",
-        "poloidal_component_of_temperature",
+        "radial_temperature",
+        "poloidal_temperature",
         vocabs,
     )
 
 
 def test_ambiguity_component_vs_coordinate_projection(vocabs: Vocabularies) -> None:
-    """``radial_component_of_<base>`` vs ``radial_coordinate_of_<carrier>``
+    """``radial_<base>`` vs ``radial_<carrier>``
     differ in projection shape and base kind."""
     _assert_distinct_ir(
-        "radial_component_of_pressure",
-        "radial_coordinate_of_normalized_minor_radius",
+        "radial_pressure",
+        "radial_normalized_minor_radius",
         vocabs,
     )
 
 
 def test_ambiguity_projection_vs_no_projection(vocabs: Vocabularies) -> None:
-    """``radial_component_of_pressure`` vs bare ``pressure``."""
-    _assert_distinct_ir("radial_component_of_pressure", "pressure", vocabs)
+    """``radial_pressure`` vs bare ``pressure``."""
+    _assert_distinct_ir("radial_pressure", "pressure", vocabs)
 
 
 def test_ambiguity_parallel_vs_perpendicular_component(vocabs: Vocabularies) -> None:
-    """``parallel_component_of_X`` vs ``perpendicular_component_of_X``."""
+    """``parallel_X`` vs ``perpendicular_X``."""
     _assert_distinct_ir(
-        "parallel_component_of_pressure",
-        "perpendicular_component_of_pressure",
+        "parallel_pressure",
+        "perpendicular_pressure",
         vocabs,
     )
 
@@ -458,18 +458,18 @@ def test_ambiguity_parallel_vs_perpendicular_component(vocabs: Vocabularies) -> 
 def test_ambiguity_projection_plus_locus_vs_just_projection(
     vocabs: Vocabularies,
 ) -> None:
-    """``radial_component_of_X_at_L`` vs ``radial_component_of_X``."""
+    """``radial_X_at_L`` vs ``radial_X``."""
     _assert_distinct_ir(
-        "radial_component_of_pressure_at_plasma_boundary",
-        "radial_component_of_pressure",
+        "radial_pressure_at_plasma_boundary",
+        "radial_pressure",
         vocabs,
     )
 
 
 def test_ambiguity_projection_plus_locus_vs_just_locus(vocabs: Vocabularies) -> None:
-    """``radial_component_of_X_at_L`` vs ``X_at_L``."""
+    """``radial_X_at_L`` vs ``X_at_L``."""
     _assert_distinct_ir(
-        "radial_component_of_pressure_at_plasma_boundary",
+        "radial_pressure_at_plasma_boundary",
         "pressure_at_plasma_boundary",
         vocabs,
     )

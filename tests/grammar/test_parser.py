@@ -177,7 +177,7 @@ def test_parse_simple_locus(vocabs: Vocabularies):
 
 def test_parse_projection_plus_qualifier_plus_locus(vocabs: Vocabularies):
     """§A2 row: radial component, electron qualifier, at plasma_boundary."""
-    name = "radial_component_of_electron_pressure_at_plasma_boundary"
+    name = "radial_electron_pressure_at_plasma_boundary"
     result = parse(name, vocabs=vocabs)
     assert result.ir.projection is not None
     assert result.ir.projection.axis == "radial"
@@ -284,8 +284,7 @@ def test_parse_row25_two_of_disambiguation(vocabs: Vocabularies):
     """§A12 row 25: two ``_of_`` in one name (component vs locus).
 
     The postfix-component form ``<base>_<axis>_component_of_<locus>`` is
-    the vNext canonical per the plan; the parser resolves it without
-    ambiguity:
+    non-canonical; the parser resolves it without ambiguity:
 
       - trailing ``_of_ferritic_element_centroid`` -> locus (registry hit)
       - remaining ``_toroidal_component`` is a postfix projection... but
@@ -383,16 +382,12 @@ def test_parse_qualifier_plus_base(vocabs: Vocabularies):
 
 
 def test_parse_coordinate_projection_on_carrier(vocabs: Vocabularies):
-    """``vertical_coordinate_of_position_of_flux_loop`` (§A12 row 23 form).
-
-    The long form parses correctly but composes to the short canonical form.
-    """
-    name = "vertical_coordinate_of_position_of_flux_loop"
+    """``vertical_position_of_flux_loop`` (§A12 row 23 short form)."""
+    name = "vertical_position_of_flux_loop"
     result = parse(name, vocabs=vocabs)
     assert result.ir.projection is not None
     assert result.ir.projection.shape is ProjectionShape.COORDINATE
     assert result.ir.base.token == "position"
     assert result.ir.base.kind is BaseKind.GEOMETRY
     assert result.ir.locus is not None and result.ir.locus.token == "flux_loop"
-    # Canonical short form
-    assert compose(result.ir) == "vertical_position_of_flux_loop"
+    assert compose(result.ir) == name

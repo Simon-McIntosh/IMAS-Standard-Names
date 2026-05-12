@@ -6,8 +6,8 @@ produces the exact canonical string described in plan §A2.
 Canonical form rules (§A2):
 - Operator wrapping: ``unary_prefix`` → ``<op>_of_<inner>``;
   ``unary_postfix`` → ``<inner>_<op>``; ``binary`` → ``<op>_of_<A>_<sep>_<B>``
-- Projection prefix (canonical): ``<axis>_component_of_`` before qualifiers+base
-  (component shape) or ``<axis>_coordinate_of_`` before carrier (coordinate shape)
+- Projection prefix (canonical): ``<axis>_`` before qualifiers+base
+  (component shape) or ``<axis>_`` before carrier (coordinate shape)
 - Locus suffix: ``_of_<tok>`` / ``_at_<tok>`` / ``_over_<tok>``
 - Mechanism suffix: ``_due_to_<process>``
 - Order: operators(outer→inner) → projection → qualifiers → base → locus → mechanism
@@ -191,12 +191,12 @@ def test_render_binary_product() -> None:
 
 
 def test_render_projection_component_prefix() -> None:
-    """§A2: component projection → ``<axis>_component_of_<base>``."""
+    """§A2: component projection → ``<axis>_<base>``."""
     ir = StandardNameIR(
         projection=AxisProjection(axis="radial", shape=ProjectionShape.COMPONENT),
         base=QuantityOrCarrier(token="pressure", kind=BaseKind.QUANTITY),
     )
-    assert compose(ir) == "radial_component_of_pressure"
+    assert compose(ir) == "radial_pressure"
 
 
 def test_render_projection_toroidal_component() -> None:
@@ -205,7 +205,7 @@ def test_render_projection_toroidal_component() -> None:
         projection=AxisProjection(axis="toroidal", shape=ProjectionShape.COMPONENT),
         base=QuantityOrCarrier(token="magnetic_field", kind=BaseKind.QUANTITY),
     )
-    assert compose(ir) == "toroidal_component_of_magnetic_field"
+    assert compose(ir) == "toroidal_magnetic_field"
 
 
 def test_render_projection_coordinate_prefix() -> None:
@@ -323,7 +323,7 @@ def test_render_mechanism_with_locus() -> None:
 
 
 def test_render_full_a2_example() -> None:
-    """§A2 canonical template: ``<op>_of_<axis>_component_of_<qual>_<base>_<locus>``."""
+    """§A2 canonical template: ``<op>_of_<axis>_<qual>_<base>_<locus>``."""
     ir = StandardNameIR(
         operators=[
             OperatorApplication(kind=OperatorKind.UNARY_PREFIX, op="root_mean_square")
@@ -338,7 +338,7 @@ def test_render_full_a2_example() -> None:
         ),
     )
     assert compose(ir) == (
-        "root_mean_square_of_radial_component_of_electron_pressure_at_plasma_boundary"
+        "root_mean_square_of_radial_electron_pressure_at_plasma_boundary"
     )
 
 
