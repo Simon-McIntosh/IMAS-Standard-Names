@@ -415,7 +415,7 @@ class TestRenderer:
         out = renderer.render_catalog()
         assert "```mermaid" in out
         # New format uses short node IDs (n0, n1) with humanized labels
-        assert '"x component of magnetic field"' in out
+        assert '"x magnetic field"' in out
         assert '"component axis=x"' in out
         assert '"magnetic field"' in out
 
