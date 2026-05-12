@@ -38,8 +38,7 @@ class TestD1ProcessTokens:
                 "thermalization_of_fast_particles",
                 Process.THERMALIZATION_OF_FAST_PARTICLES,
             ),
-            ("halo_currents", Process.HALO_CURRENTS),
-            ("fast_ions", Process.FAST_IONS),
+            ("halo_current", Process.HALO_CURRENT),
             ("non_inductive_current_drive", Process.NON_INDUCTIVE_CURRENT_DRIVE),
         ],
     )
@@ -52,8 +51,7 @@ class TestD1ProcessTokens:
             "e_cross_b_drift",
             "thermal_fusion",
             "thermalization_of_fast_particles",
-            "halo_currents",
-            "fast_ions",
+            "halo_current",
             "non_inductive_current_drive",
         ],
     )
