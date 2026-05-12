@@ -209,12 +209,12 @@ def test_render_projection_toroidal_component() -> None:
 
 
 def test_render_projection_coordinate_prefix() -> None:
-    """§A2: coordinate projection → ``<axis>_coordinate_of_<carrier>``."""
+    """§A2: coordinate projection → short form ``<axis>_<carrier>``."""
     ir = StandardNameIR(
         projection=AxisProjection(axis="vertical", shape=ProjectionShape.COORDINATE),
         base=QuantityOrCarrier(token="normalized_minor_radius", kind=BaseKind.GEOMETRY),
     )
-    assert compose(ir) == "vertical_coordinate_of_normalized_minor_radius"
+    assert compose(ir) == "vertical_normalized_minor_radius"
 
 
 def test_render_projection_normalized_toroidal_coordinate() -> None:
@@ -228,10 +228,8 @@ def test_render_projection_normalized_toroidal_coordinate() -> None:
             kind=BaseKind.GEOMETRY,
         ),
     )
-    # Axis 'normalized_toroidal' + coordinate shape
-    assert compose(ir) == (
-        "normalized_toroidal_coordinate_of_normalized_toroidal_flux_coordinate"
-    )
+    # Axis 'normalized_toroidal' + coordinate shape → short form
+    assert compose(ir) == ("normalized_toroidal_normalized_toroidal_flux_coordinate")
 
 
 # ---------------------------------------------------------------------------

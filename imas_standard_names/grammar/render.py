@@ -123,8 +123,15 @@ def _render_base_with_decorators(ir: StandardNameIR) -> str:
 
     projection_str = render_projection(ir.projection)
     if projection_str:
-        # ``<axis>_component_of_…`` / ``<axis>_coordinate_of_…``
-        parts.append(f"{projection_str}_of")
+        if (
+            ir.projection is not None
+            and ir.projection.shape is ProjectionShape.COORDINATE
+        ):
+            # Short canonical form: ``<axis>_<carrier>``
+            parts.append(ir.projection.axis)
+        else:
+            # Long form: ``<axis>_component_of_<base>``
+            parts.append(f"{projection_str}_of")
 
     qualifiers_str = render_qualifiers(ir.qualifiers)
     if qualifiers_str:

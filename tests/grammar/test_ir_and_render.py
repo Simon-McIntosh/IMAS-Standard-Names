@@ -143,9 +143,7 @@ def test_compose_coordinate_shape_on_geometry_carrier():
             type=LocusType.ENTITY,
         ),
     )
-    assert compose(ir) == (
-        "vertical_coordinate_of_position_of_ion_cyclotron_heating_antenna"
-    )
+    assert compose(ir) == ("vertical_position_of_ion_cyclotron_heating_antenna")
 
 
 # ---------------------------------------------------------------------------

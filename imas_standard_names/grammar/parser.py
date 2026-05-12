@@ -651,11 +651,11 @@ def parse(name: str, vocabs: Vocabularies | None = None) -> ParseResult:
                     s = rest
                     diagnostics.append(
                         Diagnostic(
-                            category="non_canonical",
+                            category="implicit_coordinate",
                             layer="parser",
                             message=(
-                                f"implicit coordinate projection {axis}_{rest}; "
-                                f"canonical form: {axis}_coordinate_of_{rest}"
+                                f"implicit coordinate projection {axis}_{rest} "
+                                f"(short canonical form)"
                             ),
                             severity="info",
                         )

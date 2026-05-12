@@ -383,7 +383,10 @@ def test_parse_qualifier_plus_base(vocabs: Vocabularies):
 
 
 def test_parse_coordinate_projection_on_carrier(vocabs: Vocabularies):
-    """``vertical_coordinate_of_position_of_flux_loop`` (§A12 row 23 form)."""
+    """``vertical_coordinate_of_position_of_flux_loop`` (§A12 row 23 form).
+
+    The long form parses correctly but composes to the short canonical form.
+    """
     name = "vertical_coordinate_of_position_of_flux_loop"
     result = parse(name, vocabs=vocabs)
     assert result.ir.projection is not None
@@ -391,4 +394,5 @@ def test_parse_coordinate_projection_on_carrier(vocabs: Vocabularies):
     assert result.ir.base.token == "position"
     assert result.ir.base.kind is BaseKind.GEOMETRY
     assert result.ir.locus is not None and result.ir.locus.token == "flux_loop"
-    assert compose(result.ir) == name
+    # Canonical short form
+    assert compose(result.ir) == "vertical_position_of_flux_loop"
