@@ -81,7 +81,7 @@ __all__ = [
     "StandardName",
     "TAG_TO_PHYSICS_DOMAIN",
     "Transformation",
-    # vNext API (plan 38 W2b)
+    # Grammar API (plan 38 W2b)
     "Diagnostic",
     "ParseError",
     "ParseResult",

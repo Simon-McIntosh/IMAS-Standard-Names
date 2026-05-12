@@ -1,4 +1,4 @@
-"""Grammar vNext intermediate representation (IR).
+"""Grammar intermediate representation (IR).
 
 Plan 38 / W1a deliverable. Pydantic v2 models for the 5-group IR:
 
@@ -50,7 +50,7 @@ __all__ = [
 ]
 
 
-# A vNext token is lowercase ASCII snake_case. No leading/trailing underscore,
+# A grammar token is lowercase ASCII snake_case. No leading/trailing underscore,
 # no digits-only segments (``m_2`` is allowed; ``2`` alone is not).
 TOKEN_PATTERN = re.compile(r"^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$")
 
@@ -118,7 +118,7 @@ class LocusType(StrEnum):
     GEOMETRY = "geometry"
 
 
-# Locus relation compatibility matrix (see grammar-vnext.md §5).
+# Locus relation compatibility matrix (see grammar specification §5).
 LOCUS_RELATION_MATRIX: dict[LocusType, frozenset[LocusRelation]] = {
     LocusType.ENTITY: frozenset({LocusRelation.OF}),
     LocusType.POSITION: frozenset({LocusRelation.OF, LocusRelation.AT}),
@@ -127,7 +127,7 @@ LOCUS_RELATION_MATRIX: dict[LocusType, frozenset[LocusRelation]] = {
 }
 
 
-# Allowed separators for binary operators (see §A3 / grammar-vnext.md §6).
+# Allowed separators for binary operators (see grammar specification §A3 / §6).
 BINARY_SEPARATORS: frozenset[str] = frozenset({"and", "to"})
 
 
@@ -309,7 +309,7 @@ class OperatorApplication(BaseModel):
 class StandardNameIR(BaseModel):
     """Top-level 5-group IR for a standard name.
 
-    See :doc:`docs/architecture/grammar-vnext.md` §3 for the full spec.
+    See the grammar specification §3 for the full spec.
     """
 
     model_config = ConfigDict(frozen=True, extra="forbid")

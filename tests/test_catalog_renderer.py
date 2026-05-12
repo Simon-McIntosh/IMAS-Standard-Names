@@ -361,7 +361,7 @@ def test_catalog_render_no_sources_block_when_absent(tmp_path: Path):
 
 
 @pytest.mark.xfail(
-    reason="vNext parser does not handle _with_respect_to_ operator syntax",
+    reason="parser does not handle _with_respect_to_ operator syntax",
     strict=True,
 )
 def test_parse_base_strips_transformation_residue():

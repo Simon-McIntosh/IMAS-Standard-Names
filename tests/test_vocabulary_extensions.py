@@ -20,10 +20,10 @@ class TestPerpendicular:
     def test_compose_perpendicular_component(self):
         parts = {"component": "perpendicular", "physical_base": "magnetic_field"}
         name = compose_name(parts)
-        assert name == "perpendicular_component_of_magnetic_field"
+        assert name == "perpendicular_magnetic_field"
 
     def test_parse_perpendicular_component(self):
-        parsed = parse_name("perpendicular_component_of_magnetic_field")
+        parsed = parse_name("perpendicular_magnetic_field")
         assert parsed.component.value == "perpendicular"
         assert parsed.physical_base == "magnetic_field"
 

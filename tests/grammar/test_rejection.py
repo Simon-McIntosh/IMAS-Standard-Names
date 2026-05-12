@@ -1,4 +1,4 @@
-"""Rejection test battery for grammar vNext (plan 38 §A10, item 3).
+"""Rejection test battery for grammar (plan 38 §A10, item 3).
 
 Forms that MUST raise :class:`~imas_standard_names.grammar.parser.ParseError`
 with helpful suggestions. Covers:

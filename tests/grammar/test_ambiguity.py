@@ -1,7 +1,7 @@
-"""Ambiguity harness for grammar vNext (plan 38 §A10, item 2).
+"""Ambiguity harness for grammar (plan 38 §A10, item 2).
 
 Provides 50 curated pairs of standard names that MUST parse to distinct IR
-objects under the vNext parser. Each pair is documented with the specific
+objects under the parser. Each pair is documented with the specific
 IR attribute that distinguishes it.
 
 The pairs cover:

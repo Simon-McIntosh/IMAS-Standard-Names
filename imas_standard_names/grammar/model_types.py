@@ -10,11 +10,11 @@ rc22 backward-compatibility note
 The ``Component``, ``Position``, and ``Process`` enums defined here are
 **retained for rc22 but no longer used in validation logic**.  The rc20
 validators in ``models.py`` that referenced these enums have been rewritten
-in rc22 to use the vNext vocabulary loaders
+in rc22 to use the vocabulary loaders
 (``imas_standard_names/grammar/vocab_loaders.py``).
 
 These enums are scheduled for **removal in rc23**.  Downstream code that
-imports them from this module should migrate to the vNext vocabularies before
+imports them from this module should migrate to the vocabularies before
 the rc23 release cycle."""
 
 from __future__ import annotations

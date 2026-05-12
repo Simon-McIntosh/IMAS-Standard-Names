@@ -492,7 +492,7 @@ def get_grammar_context() -> dict[str, Any]:
 
     Aggregates grammar mechanics, naming conventions, and LLM orientation
     context into a single dictionary suitable for external consumers.
-    Includes the vNext 5-group IR context alongside the rc20 surface
+    Includes the 5-group IR context alongside the rc20 surface
     for the duration of the rc21 transition (plan 38 W2b).
     """
     return {
@@ -522,19 +522,19 @@ def get_grammar_context() -> dict[str, Any]:
         "base_requirements": _build_base_requirements(),
         # Vocabulary usage statistics
         "vocabulary_usage_stats": _build_vocabulary_usage_stats(),
-        # vNext 5-group IR context (plan 38 W2b). Single ISN → codex
+        # Grammar 5-group IR context (plan 38 W2b). Single ISN → codex
         # contract point for the rc21 transition.
-        "vnext": _build_vnext_context(),
+        "grammar": _build_grammar_context(),
     }
 
 
 # ---------------------------------------------------------------------------
-# vNext 5-group IR context builder (plan 38 W2b)
+# Grammar 5-group IR context builder (plan 38 W2b)
 # ---------------------------------------------------------------------------
 
 
-def _build_vnext_context() -> dict[str, Any]:
-    """Build a compact view of the vNext grammar for external consumers.
+def _build_grammar_context() -> dict[str, Any]:
+    """Build a compact view of the grammar for external consumers.
 
     Returns a dict with keys: ``ir_groups`` (the 5 IR slots + mechanism),
     ``vocabularies`` (tokens per closed-vocab file), ``locus_relation_matrix``,

@@ -14,11 +14,11 @@ rc22 backward-compatibility note
 The ``Component``, ``Position``, and ``Process`` enums defined here are
 **retained for rc22 but no longer used in validation logic**.  The rc20
 validators in ``models.py`` that referenced these enums have been rewritten
-in rc22 to use the vNext vocabulary loaders
+in rc22 to use the vocabulary loaders
 (``imas_standard_names/grammar/vocab_loaders.py``).
 
 These enums are scheduled for **removal in rc23**.  Downstream code that
-imports them from this module should migrate to the vNext vocabularies before
+imports them from this module should migrate to the vocabularies before
 the rc23 release cycle."""
 
 from __future__ import annotations
@@ -233,7 +233,7 @@ GENERIC_PHYSICAL_BASES: tuple[str, ...] = (
 
 # Unary transformation tokens that modify a physical base
 # These are prefixed to the physical_base: e.g. square_of_temperature
-# Empty tuple when 'transformations' vocabulary is absent (vNext: use operators.yml)
+# Empty tuple when 'transformations' vocabulary is absent (use operators.yml)
 TRANSFORMATION_TOKENS: tuple[str, ...] = (
     "accumulated",
     "amplitude",
@@ -290,7 +290,7 @@ TRANSFORMATION_TOKENS: tuple[str, ...] = (
 # Mode / Fourier / spectral decomposition tokens prefixed to the
 # physical_base between transformation and base:
 # e.g. fourier_coefficient_of_magnetic_field, n_equals_1_magnetic_field
-# Empty tuple when 'decomposition' vocabulary is absent (vNext: use operators.yml)
+# Empty tuple when 'decomposition' vocabulary is absent (use operators.yml)
 DECOMPOSITION_TOKENS: tuple[str, ...] = (
     "accumulated",
     "amplitude",

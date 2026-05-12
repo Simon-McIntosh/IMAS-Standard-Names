@@ -1,8 +1,8 @@
-"""Corpus parse test for grammar vNext (plan 38 §A10, item 4).
+"""Corpus parse test for grammar (plan 38 §A10, item 4).
 
 Loads the 479-name ISNC rc20 corpus from the sibling
 ``imas-standard-names-catalog`` checkout and asserts that ≥ 95 % of names
-parse successfully under the vNext vocabulary.
+parse successfully under the current vocabulary.
 
 Current status (post-W2c):
   - 266 physical_bases, 176 loci, 50 operators, 20 carriers populated.
@@ -17,8 +17,8 @@ because the 95 % threshold cannot be met until qualifiers are closed. The
 remaining tests are unconditional assertions that validate the current
 partial-parse behaviour and diagnostics.
 
-W1b identified 13 names that are structurally non-canonical under vNext even
-after qualifiers are closed; these are listed in ``KNOWN_VNEXT_FAILURES`` and
+W1b identified 13 names that are structurally non-canonical under the grammar even
+after qualifiers are closed; these are listed in ``KNOWN_GRAMMAR_FAILURES`` and
 are excluded from the pass-rate denominator in the main assertion.
 """
 
@@ -51,11 +51,11 @@ _CATALOG_ROOT = (
 )
 
 # ---------------------------------------------------------------------------
-# W1b-identified names that are structurally non-canonical under vNext even
+# W1b-identified names that are structurally non-canonical under the grammar even
 # after qualifiers are added. Excluded from the ≥ 95 % pass-rate denominator.
 # ---------------------------------------------------------------------------
 
-KNOWN_VNEXT_FAILURES: frozenset[str] = frozenset(
+KNOWN_GRAMMAR_FAILURES: frozenset[str] = frozenset(
     {
         # Operator patterns that require further parser extension in W2c+
         "flux_surface_averaged_inverse_major_radius",
@@ -198,9 +198,9 @@ def test_corpus_parse_rate_95_pct(
 ) -> None:
     """Assert ≥ 95 % of corpus names parse successfully (xfail: W2a gap).
 
-    Excludes the 13 known-vNext-failures from the denominator.
+    Excludes the 13 known-grammar-failures from the denominator.
     """
-    eligible = [n for n in corpus_names if n not in KNOWN_VNEXT_FAILURES]
+    eligible = [n for n in corpus_names if n not in KNOWN_GRAMMAR_FAILURES]
     passed = sum(1 for n in eligible if _try_parse(n, vocabs))
     total = len(eligible)
     rate = passed / total if total else 0.0
@@ -209,7 +209,7 @@ def test_corpus_parse_rate_95_pct(
     assert rate >= threshold, (
         f"Corpus parse rate {100 * rate:.1f}% < {100 * threshold:.0f}% "
         f"({passed}/{total} eligible names; "
-        f"{len(KNOWN_VNEXT_FAILURES)} known-vNext-failures excluded)"
+        f"{len(KNOWN_GRAMMAR_FAILURES)} known-grammar-failures excluded)"
     )
 
 

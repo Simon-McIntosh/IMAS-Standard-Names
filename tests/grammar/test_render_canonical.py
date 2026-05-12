@@ -1,4 +1,4 @@
-"""Canonical rendering test for grammar vNext (plan 38 §A10, item 6).
+"""Canonical rendering test for grammar (plan 38 §A10, item 6).
 
 Builds IR instances manually and asserts :func:`imas_standard_names.grammar.render.compose`
 produces the exact canonical string described in plan §A2.

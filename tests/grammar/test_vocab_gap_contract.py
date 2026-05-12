@@ -1,4 +1,4 @@
-"""Vocabulary-gap contract test for grammar vNext (plan 38 §A10, item 5).
+"""Vocabulary-gap contract test for grammar (plan 38 §A10, item 5).
 
 Validates the contract that downstream codex tooling (``write_vocab_gaps()``)
 relies on:

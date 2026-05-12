@@ -220,7 +220,7 @@ def _flatten_unique(values: Iterable[Any]) -> tuple[str, ...]:
 
 
 def _extract_vocab_tokens(value: Any, vocab_name: str = "") -> tuple[str, ...]:
-    """Extract token names from a vocabulary value, handling vNext typed formats.
+    """Extract token names from a vocabulary value, handling typed formats.
 
     Supports the following vocabulary file formats:
     - Flat list of strings (legacy components/subjects/regions/processes)
@@ -256,7 +256,7 @@ def _extract_vocab_tokens(value: Any, vocab_name: str = "") -> tuple[str, ...]:
     if isinstance(value, list):
         return _flatten_unique(value)
     if isinstance(value, dict):
-        # vNext typed vocabulary formats — extract the canonical root key
+        # Typed vocabulary formats — extract the canonical root key
         for root_key in ("loci", "carriers", "bases", "operators", "axes"):
             if root_key in value:
                 inner = value[root_key]

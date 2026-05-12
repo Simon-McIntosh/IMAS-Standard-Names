@@ -1,4 +1,4 @@
-"""Tests for populated vNext vocabularies (plan 38 W2a).
+"""Tests for populated grammar vocabularies (plan 38 W2a).
 
 Asserts that the vocabulary files populated from rc20 corpus mining
 have sufficient coverage, contain key entries, and have no cross-registry
@@ -164,7 +164,7 @@ class TestLocusRegistryKeyEntries:
         return load_locus_registry()
 
     def test_plasma_boundary_entity(self, loci):
-        # plasma_boundary reclassified to position in vNext (plan 38 §A5)
+        # plasma_boundary reclassified to position in the grammar (plan 38 §A5)
         assert "plasma_boundary" in loci.loci
         assert loci.loci["plasma_boundary"].type == "position"
 
@@ -232,7 +232,7 @@ class TestGeometryCarriersKeyEntries:
 
 
 class TestCrossRegistryDuplicates:
-    """No token may appear in more than one vNext registry."""
+    """No token may appear in more than one vocabulary registry."""
 
     def test_no_cross_registry_duplicates(self):
         validate_no_cross_registry_duplicates()

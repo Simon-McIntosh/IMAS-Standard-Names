@@ -178,7 +178,7 @@ class TestBinaryOperatorExclusivity:
 
     @pytest.mark.xfail(
         strict=True,
-        reason="rc20 token 'square_of' replaced by bare 'square' in vNext grammar (plan 38 §A7)",
+        reason="rc20 token 'square_of' replaced by bare 'square' in current grammar (plan 38 §A7)",
     )
     def test_binary_excludes_transformation(self):
         with pytest.raises(ValueError, match="binary_operator.*transformation"):
@@ -319,7 +319,7 @@ class TestBinaryOperatorEdgeCases:
     def test_compound_base_with_and_in_name(self):
         """Test that rightmost split handles compound bases correctly.
 
-        The vNext parser splits on the rightmost connector, yielding
+        The parser splits on the rightmost connector, yielding
         physical_base='supply_and_demand'. The model validator rejects
         this because it contains the reserved connector word 'and',
         which is correct — such names are genuinely ambiguous.

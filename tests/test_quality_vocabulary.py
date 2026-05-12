@@ -22,7 +22,7 @@ from imas_standard_names.validation.quality import QualityChecker
 
 
 @pytest.mark.xfail(
-    reason="vNext parser produces compound physical_base tokens that are not "
+    reason="parser produces compound physical_base tokens that are not "
     "individually registered in the quality checker vocabulary",
     strict=True,
 )

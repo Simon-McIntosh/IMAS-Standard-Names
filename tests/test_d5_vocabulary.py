@@ -133,12 +133,12 @@ class TestD5TransformationTokens:
         [
             ("per_toroidal_mode", Transformation.PER_TOROIDAL_MODE),
             ("cumulative", Transformation.CUMULATIVE),
-            # amplitude_of renamed to amplitude (bare token) in vNext operators.yml (plan 38 §A7)
+            # amplitude_of renamed to amplitude (bare token) in operators.yml (plan 38 §A7)
             pytest.param(
                 "amplitude_of",
                 getattr(Transformation, "AMPLITUDE_OF", None),
                 marks=pytest.mark.xfail(
-                    reason="rc20 grammar: AMPLITUDE_OF renamed to AMPLITUDE in vNext (plan 38 §A7)",
+                    reason="rc20 grammar: AMPLITUDE_OF renamed to AMPLITUDE in current grammar (plan 38 §A7)",
                     strict=True,
                 ),
             ),
@@ -162,7 +162,7 @@ class TestD5TransformationTokens:
         assert compose_standard_name(parsed) == name
 
     @pytest.mark.xfail(
-        reason="rc20 grammar: AMPLITUDE_OF renamed to AMPLITUDE in vNext (plan 38 §A7)",
+        reason="rc20 grammar: AMPLITUDE_OF renamed to AMPLITUDE in current grammar (plan 38 §A7)",
         strict=True,
     )
     def test_amplitude_of_magnetic_field_round_trip(self):

@@ -20,8 +20,8 @@ documentation: |
         encoding="utf-8",
     )
     # component files
-    (tmp_path / "radial_component_of_velocity.yml").write_text(
-        """name: radial_component_of_velocity
+    (tmp_path / "radial_velocity.yml").write_text(
+        """name: radial_velocity
 kind: scalar
 status: active
     unit: m.s^-1
@@ -31,8 +31,8 @@ documentation: |
 """,
         encoding="utf-8",
     )
-    (tmp_path / "toroidal_component_of_velocity.yml").write_text(
-        """name: toroidal_component_of_velocity
+    (tmp_path / "toroidal_velocity.yml").write_text(
+        """name: toroidal_velocity
 kind: scalar
 status: active
     unit: m.s^-1

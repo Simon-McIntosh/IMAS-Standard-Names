@@ -169,7 +169,7 @@ class TestVocabularyToolIntegration:
         result = await vocab_tool.manage_vocabulary(
             payload={
                 "action": "check",
-                "name": "radial_component_of_magnetic_field",
+                "name": "radial_magnetic_field",
             }
         )
 

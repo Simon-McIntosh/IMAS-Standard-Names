@@ -1,6 +1,6 @@
 """Regression tests for rc22 validator fixes (plan 39 §A3).
 
-These tests verify that vNext-valid standard names that produced false-positive
+These tests verify that grammar-valid standard names that produced false-positive
 ValidationErrors under the rc20 vocabulary checks (Component/Position/Process
 enums) now pass without error after the rc22 rewrite of
 ``_check_grammar_vocabulary_consistency`` in ``models.py``.
@@ -17,7 +17,7 @@ false-positive ValidationErrors:
     Component vocabulary.
 - normalized_pressure_gradient_at_gyrokinetic_flux_surface
   → rc20 bug: at_ check required token to be in rc20 Position enum;
-    "gyrokinetic_flux_surface" is absent from that enum but valid in vNext
+    "gyrokinetic_flux_surface" is absent from that enum but valid in the grammar
     (VocabGap token accepted by parser).
 - parallel_current_density_due_to_wave_per_toroidal_mode
   → rc20 bug: due_to_ check required token in rc20 Process enum;
@@ -97,7 +97,7 @@ def test_normalized_pressure_gradient_at_gyrokinetic_flux_surface():
     """rc20 false-positive: at_ check required token in rc20 Position enum.
 
     'gyrokinetic_flux_surface' is absent from the rc20 Position enum but is
-    a valid vNext locus token (VocabGap path in parser).  The rc22 fix only
+    a valid grammar locus token (VocabGap path in parser).  The rc22 fix only
     flags tokens that ARE in the locus_registry with an incompatible relation.
     """
     entry = _scalar("normalized_pressure_gradient_at_gyrokinetic_flux_surface")
@@ -117,12 +117,12 @@ def test_parallel_current_density_due_to_wave_per_toroidal_mode():
 
 
 # ---------------------------------------------------------------------------
-# Forward-looking test: vNext coordinate_axis + operator combination
+# Forward-looking test: coordinate_axis + operator combination
 # ---------------------------------------------------------------------------
 
 
-def test_vnext_radial_gradient_of_electron_temperature():
-    """Novel vNext-valid name: coordinate_axis (radial) + operator (gradient_of).
+def test_grammar_radial_gradient_of_electron_temperature():
+    """Novel grammar-valid name: coordinate_axis (radial) + operator (gradient_of).
 
     'radial' is in coordinate_axes.yml.  'gradient_of_electron_temperature'
     uses the unary_prefix operator 'gradient'.  This name exercises both the

@@ -1,4 +1,4 @@
-"""Tests for grammar vNext IR model and canonical renderer (plan 38 W1a).
+"""Tests for grammar IR model and canonical renderer (plan 38 W1a).
 
 These tests validate the IR shape constraints and the canonical strings
 produced by :func:`imas_standard_names.grammar.render.compose`.

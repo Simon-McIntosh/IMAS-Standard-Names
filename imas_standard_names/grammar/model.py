@@ -1,7 +1,7 @@
 """Static StandardName model and friendly wrappers.
 
 This module holds the hand-written Pydantic model and thin compose/parse
-wrappers that bridge the vNext parser/renderer (IR-based) to the flat
+wrappers that bridge the parser/renderer (IR-based) to the flat
 StandardName model used by the rest of the codebase.
 """
 
@@ -109,7 +109,7 @@ for _model_tok, _connector in BINARY_OPERATOR_CONNECTORS.items():
 # Transformation form classification
 # ---------------------------------------------------------------------------
 # Transformation tokens that render as bare prefixes (<token>_<base>) rather
-# than _of_ form (<token>_of_<base>).  The vNext parser treats these as
+# than _of_ form (<token>_of_<base>).  The parser treats these as
 # qualifiers (not operators) since they lack the _of_ joining marker.
 # Determined by corpus analysis of canonical standard names.
 _TRANSFORMATION_VALUES: frozenset[str] = frozenset(t.value for t in Transformation)
@@ -378,7 +378,7 @@ def _decompose_physical_base(
     """Decompose a physical_base string into IR base + qualifiers.
 
     The physical_base may be a compound like 'magnetic_field' or
-    'diamagnetic_drift_velocity'. We use the vNext parser to decompose
+    'diamagnetic_drift_velocity'. We use the parser to decompose
     it correctly, then prepend subject/device as qualifiers.
     """
     qualifiers: list[Qualifier] = []

@@ -37,10 +37,10 @@ HEADER = (
     "The ``Component``, ``Position``, and ``Process`` enums defined here are\n"
     "**retained for rc22 but no longer used in validation logic**.  The rc20\n"
     "validators in ``models.py`` that referenced these enums have been rewritten\n"
-    "in rc22 to use the vNext vocabulary loaders\n"
+    "in rc22 to use the vocabulary loaders\n"
     "(``imas_standard_names/grammar/vocab_loaders.py``).\n\n"
     "These enums are scheduled for **removal in rc23**.  Downstream code that\n"
-    "imports them from this module should migrate to the vNext vocabularies before\n"
+    "imports them from this module should migrate to the vocabularies before\n"
     "the rc23 release cycle."
 )
 
@@ -689,7 +689,7 @@ def _render_scope_metadata(spec: Any) -> str:
         sections.append(generic_section)
 
     # Add transformation tokens (empty tuple when vocabulary is absent — operators.yml
-    # is the vNext unified registry; legacy transformations.yml was deleted in W2a)
+    # is the unified registry; legacy transformations.yml was deleted in W2a)
     if "transformations" in spec.vocabularies:
         tokens = spec.vocabularies["transformations"]
     else:
@@ -698,13 +698,13 @@ def _render_scope_metadata(spec: Any) -> str:
     transformation_section = (
         "\n# Unary transformation tokens that modify a physical base\n"
         "# These are prefixed to the physical_base: e.g. square_of_temperature\n"
-        "# Empty tuple when 'transformations' vocabulary is absent (vNext: use operators.yml)\n"
+        "# Empty tuple when 'transformations' vocabulary is absent (use operators.yml)\n"
         f"TRANSFORMATION_TOKENS: tuple[str, ...] = {tokens_repr}"
     )
     sections.append(transformation_section)
 
     # Add decomposition tokens (empty tuple when vocabulary is absent — operators.yml
-    # is the vNext unified registry; legacy decomposition.yml was deleted in W2a)
+    # is the unified registry; legacy decomposition.yml was deleted in W2a)
     if "decomposition" in spec.vocabularies:
         tokens = spec.vocabularies["decomposition"]
     else:
@@ -714,7 +714,7 @@ def _render_scope_metadata(spec: Any) -> str:
         "\n# Mode / Fourier / spectral decomposition tokens prefixed to the\n"
         "# physical_base between transformation and base:\n"
         "# e.g. fourier_coefficient_of_magnetic_field, n_equals_1_magnetic_field\n"
-        "# Empty tuple when 'decomposition' vocabulary is absent (vNext: use operators.yml)\n"
+        "# Empty tuple when 'decomposition' vocabulary is absent (use operators.yml)\n"
         f"DECOMPOSITION_TOKENS: tuple[str, ...] = {tokens_repr}"
     )
     sections.append(decomposition_section)

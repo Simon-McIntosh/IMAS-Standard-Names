@@ -1,4 +1,4 @@
-"""Grammar vNext canonical renderer (strict generator).
+"""Grammar canonical renderer (strict generator).
 
 Plan 38 / W1a deliverable. Implements :func:`compose` — a pure function
 that maps a :class:`StandardNameIR` to its single canonical string form.
@@ -8,7 +8,7 @@ The renderer is deliberately isolated from vocabulary resolution. It
 consumes validated IR structures (see :mod:`imas_standard_names.grammar.ir`)
 and emits token strings; vocabulary lookups happen at parse time in W2b.
 
-See :doc:`docs/architecture/grammar-vnext.md` §4 for the template spec.
+See the grammar specification §4 for the template spec.
 """
 
 from __future__ import annotations
@@ -21,7 +21,6 @@ from imas_standard_names.grammar.ir import (
     OperatorApplication,
     OperatorKind,
     Process,
-    ProjectionShape,
     Qualifier,
     StandardNameIR,
     assert_binary_has_separator,
@@ -50,22 +49,18 @@ class RenderError(ValueError):
 
 
 def render_projection(projection: AxisProjection | None) -> str:
-    """Render a projection as ``<axis>_component`` or ``<axis>_coordinate``.
+    """Render a projection as the axis prefix token.
 
-    Returns an empty string when ``projection`` is ``None``. The trailing
-    ``_of_`` that attaches the projection to the base is emitted by the
-    caller (see :func:`_render_base_with_decorators`).
+    Both COMPONENT and COORDINATE shapes render identically as just
+    ``<axis>`` — the ``_component_of_`` / ``_coordinate_of_`` long forms
+    are removed. The caller joins this with the base via ``_``.
+
+    Returns an empty string when ``projection`` is ``None``.
     """
 
     if projection is None:
         return ""
-    if projection.shape is ProjectionShape.COMPONENT:
-        return f"{projection.axis}_component"
-    if projection.shape is ProjectionShape.COORDINATE:
-        return f"{projection.axis}_coordinate"
-    raise RenderError(
-        f"unknown projection shape {projection.shape!r}"
-    )  # pragma: no cover - StrEnum is exhaustive
+    return projection.axis
 
 
 def render_qualifiers(qualifiers: Iterable[Qualifier]) -> str:
@@ -121,17 +116,10 @@ def _render_base_with_decorators(ir: StandardNameIR) -> str:
 
     parts: list[str] = []
 
+    # Short form: both COMPONENT and COORDINATE render as ``<axis>_<rest>``
     projection_str = render_projection(ir.projection)
     if projection_str:
-        if (
-            ir.projection is not None
-            and ir.projection.shape is ProjectionShape.COORDINATE
-        ):
-            # Short canonical form: ``<axis>_<carrier>``
-            parts.append(ir.projection.axis)
-        else:
-            # Long form: ``<axis>_component_of_<base>``
-            parts.append(f"{projection_str}_of")
+        parts.append(projection_str)
 
     qualifiers_str = render_qualifiers(ir.qualifiers)
     if qualifiers_str:

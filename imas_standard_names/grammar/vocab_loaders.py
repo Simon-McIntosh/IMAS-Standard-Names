@@ -1,4 +1,4 @@
-"""Pydantic v2 loaders for the vNext vocabulary files (plan 38 W1c).
+"""Pydantic v2 loaders for vocabulary files (plan 38 W1c).
 
 Each loader reads the corresponding YAML under
 ``imas_standard_names/grammar/vocabularies/`` and validates it with
@@ -225,7 +225,7 @@ class _AllRegistries(BaseModel):
 
     @model_validator(mode="after")
     def _no_duplicate_names_across_registries(self) -> _AllRegistries:
-        """Assert no token appears in more than one vNext registry."""
+        """Assert no token appears in more than one vocabulary registry."""
         pools: list[tuple[str, set[str]]] = [
             ("coordinate_axes", set(self.axes.axes)),
             ("locus_registry", set(self.loci.loci)),
@@ -245,7 +245,7 @@ class _AllRegistries(BaseModel):
                     seen[token] = registry_name
         if duplicates:
             raise ValueError(
-                "Duplicate tokens found across vNext registries:\n  "
+                "Duplicate tokens found across vocabulary registries:\n  "
                 + "\n  ".join(duplicates)
             )
         return self

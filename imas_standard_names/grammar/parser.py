@@ -1,4 +1,4 @@
-"""Grammar vNext parser (plan 38 / W2b deliverable).
+"""Standard name grammar parser (plan 38 / W2b deliverable).
 
 Implements a *staged, liberal* parser that turns a standard-name string
 into a :class:`~imas_standard_names.grammar.ir.StandardNameIR` plus a
@@ -16,19 +16,18 @@ Algorithm (plan §A8)::
     2. Strip trailing _of_/_at_/_over_<locus>          -> locus
        (longest registry-backed match; _at_ and _over_
        may fall back with a vocab_gap diagnostic)
-    3. Strip projection  (prefix <axis>_component_of_  -> projection
-       or <axis>_coordinate_of_; canonical emitted by
-       compose() is the PREFIX form)
-    4. Peel outer operators right-to-outermost         -> operators
+    3. Peel outer operators right-to-outermost         -> operators
        a) unary_postfix (longest match at end)
        b) unary_prefix  (longest match `<op>_of_...`)
        c) binary        (`<binary_op>_of_<A>_<sep>_<B>`)
        repeat until no operator peels
-    5. Strip closed qualifier prefixes                  -> qualifiers
-    6. Match residue against physical_bases U
-       geometry_carriers                                -> base
+    4. Match residue: carrier > base > axis+resolve > qualifier+recurse
+       Projection is detected inline when an axis prefix precedes
+       a resolvable base (COMPONENT) or carrier (COORDINATE).
+       Short form only — ``_component_of_`` and ``_coordinate_of_``
+       markers are parse errors.
 
-Liberal acceptance: the parser accepts grammatically valid vNext forms
+Liberal acceptance: the parser accepts grammatically valid forms
 only. Unknown base residues raise :class:`ParseError` with top-3
 edit-distance suggestions. No rc20 open-fallback behaviour is retained.
 """
@@ -114,7 +113,7 @@ def _normalise_separator(sep: str | None) -> str | None:
 
 
 def load_default_vocabularies() -> Vocabularies:
-    """Load all five vNext vocabularies from YAML into a :class:`Vocabularies`.
+    """Load all five grammar vocabularies from YAML into a :class:`Vocabularies`.
 
     Falls back to an empty set for any registry whose YAML stub is empty
     (physical_bases.yml, geometry_carriers.yml are populated by W2a).
@@ -349,54 +348,6 @@ def _strip_locus(
     return None, s, diagnostics
 
 
-def _strip_projection(
-    s: str, v: Vocabularies
-) -> tuple[AxisProjection | None, str, list[Diagnostic]]:
-    """Strip a ``<axis>_component_of_…`` or ``<axis>_coordinate_of_…`` prefix.
-
-    This is the canonical (prefix) projection form emitted by
-    :func:`compose`. Postfix projection is intentionally NOT accepted here
-    — it yields an IR that does not round-trip.
-    """
-
-    diagnostics: list[Diagnostic] = []
-    for shape_str, shape in (
-        ("component", ProjectionShape.COMPONENT),
-        ("coordinate", ProjectionShape.COORDINATE),
-    ):
-        for axis in v.axes:
-            prefix = f"{axis}_{shape_str}_of_"
-            if s.startswith(prefix):
-                remainder = s[len(prefix) :]
-                if not remainder:
-                    continue
-                return (
-                    AxisProjection(axis=axis, shape=shape),
-                    remainder,
-                    diagnostics,
-                )
-    # Vocab-gap check: if the string contains `_component_of_` or
-    # `_coordinate_of_` but the axis prefix is not in v.axes, flag it.
-    for shape_str in ("component", "coordinate"):
-        marker = f"_{shape_str}_of_"
-        if marker in s:
-            head, _, _ = s.partition(marker)
-            if head and "_" not in head and head not in v.axes and v.axes:
-                diagnostics.append(
-                    Diagnostic(
-                        category="vocab_gap",
-                        layer="parser",
-                        message=(
-                            f"axis {head!r} not in coordinate_axes registry "
-                            f"(expected one of {sorted(v.axes)})"
-                        ),
-                        severity="info",
-                    )
-                )
-                break
-    return None, s, diagnostics
-
-
 def _longest_match(s: str, candidates: frozenset[str] | set[str]) -> str | None:
     """Return the longest candidate in ``candidates`` that matches.
 
@@ -549,22 +500,51 @@ def _try_parse_or_literal(s: str, v: Vocabularies) -> StandardNameIR | None:
 
 
 def _match_base_with_qualifiers(
-    s: str, v: Vocabularies
-) -> tuple[QuantityOrCarrier, list[Qualifier]]:
-    """Match ``s`` as ``[qualifier_]*(base|carrier)``.
+    s: str, v: Vocabularies, *, _allow_projection: bool = True
+) -> tuple[QuantityOrCarrier, list[Qualifier], AxisProjection | None]:
+    """Match ``s`` as ``[axis_][qualifier_]*(base|carrier)``.
 
-    Tries the longest-match base first; only strips qualifier prefixes
-    when the full string is not itself a registered base/carrier. This
-    preserves compound bases like ``electron_pressure`` when they are
-    explicitly registered.
+    Resolution priority: carrier > base > axis > qualifier.
+
+    When ``_allow_projection`` is True (the default), an axis prefix
+    followed by a resolvable base/carrier is interpreted as a projection:
+    axis + quantity base → COMPONENT, axis + carrier → COORDINATE.
+    Nested projections (projection inside a projection) are blocked by
+    recursing with ``_allow_projection=False``.
+
+    Returns ``(base_or_carrier, qualifiers, projection_or_none)``.
     """
 
-    if s in v.bases:
-        return QuantityOrCarrier(token=s, kind=BaseKind.QUANTITY), []
     if s in v.carriers:
-        return QuantityOrCarrier(token=s, kind=BaseKind.GEOMETRY), []
+        return QuantityOrCarrier(token=s, kind=BaseKind.GEOMETRY), [], None
+    if s in v.bases:
+        return QuantityOrCarrier(token=s, kind=BaseKind.QUANTITY), [], None
 
     parts = s.split("_")
+
+    # --- Priority 3: axis prefix → projection ---
+    if _allow_projection:
+        for split in range(len(parts) - 1, 0, -1):
+            prefix = "_".join(parts[:split])
+            rest = "_".join(parts[split:])
+            if prefix not in v.axes or not rest:
+                continue
+            try:
+                base, quals, inner_proj = _match_base_with_qualifiers(
+                    rest, v, _allow_projection=False
+                )
+            except ParseError:
+                continue
+            if inner_proj is not None:
+                continue  # nested projections not allowed
+            shape = (
+                ProjectionShape.COORDINATE
+                if base.kind is BaseKind.GEOMETRY
+                else ProjectionShape.COMPONENT
+            )
+            return base, quals, AxisProjection(axis=prefix, shape=shape)
+
+    # --- Priority 4: qualifier prefix ---
     for split in range(len(parts) - 1, 0, -1):
         prefix = "_".join(parts[:split])
         rest = "_".join(parts[split:])
@@ -573,10 +553,12 @@ def _match_base_with_qualifiers(
         if not rest:
             continue
         try:
-            base, deeper = _match_base_with_qualifiers(rest, v)
+            base, deeper, proj = _match_base_with_qualifiers(
+                rest, v, _allow_projection=_allow_projection
+            )
         except ParseError:
             continue
-        return base, [Qualifier(token=prefix), *deeper]
+        return base, [Qualifier(token=prefix), *deeper], proj
 
     suggestions = get_close_matches(s, list(v.base_universe()), n=3)
     raise ParseError(
@@ -603,7 +585,7 @@ def parse(name: str, vocabs: Vocabularies | None = None) -> ParseResult:
         raise ParseError("name must be a non-empty string")
     if not TOKEN_PATTERN.match(name):
         raise ParseError(
-            f"name {name!r} is not a valid vNext token (must be lowercase snake_case)"
+            f"name {name!r} is not a valid grammar token (must be lowercase snake_case)"
         )
 
     v = vocabs if vocabs is not None else _default_vocabs()
@@ -630,38 +612,6 @@ def parse(name: str, vocabs: Vocabularies | None = None) -> ParseResult:
         operator_stack.append(op_app)
         s = new_s
 
-    # Stage 4: projection (prefix form only — matches compose() output).
-    # Inside the operator shell, the core has: projection + qualifiers + base.
-    projection: AxisProjection | None = None
-    proj_diags: list[Diagnostic] = []
-    if binary_terminator is None:
-        projection, s, proj_diags = _strip_projection(s, v)
-        diagnostics.extend(proj_diags)
-
-    # Implicit coordinate detection: e.g. "radial_position" → radial_coordinate_of_position
-    if projection is None and binary_terminator is None:
-        for axis in sorted(v.axes, key=len, reverse=True):
-            prefix = f"{axis}_"
-            if s.startswith(prefix):
-                rest = s[len(prefix) :]
-                if rest in v.carriers:
-                    projection = AxisProjection(
-                        axis=axis, shape=ProjectionShape.COORDINATE
-                    )
-                    s = rest
-                    diagnostics.append(
-                        Diagnostic(
-                            category="implicit_coordinate",
-                            layer="parser",
-                            message=(
-                                f"implicit coordinate projection {axis}_{rest} "
-                                f"(short canonical form)"
-                            ),
-                            severity="info",
-                        )
-                    )
-                    break
-
     if binary_terminator is not None:
         # Binary consumed everything. Base/qualifiers/projection must be empty.
         if s:
@@ -680,12 +630,12 @@ def parse(name: str, vocabs: Vocabularies | None = None) -> ParseResult:
         )
         return ParseResult(ir=ir, diagnostics=diagnostics)
 
-    # Stage 5 + 6: qualifiers then base
+    # Stage 4: carrier > base > axis (projection) > qualifier
     if not s:
         raise ParseError(
             "empty residue after peeling operators and decorators",
         )
-    base, qualifiers = _match_base_with_qualifiers(s, v)
+    base, qualifiers, projection = _match_base_with_qualifiers(s, v)
 
     ir = StandardNameIR(
         operators=operator_stack,

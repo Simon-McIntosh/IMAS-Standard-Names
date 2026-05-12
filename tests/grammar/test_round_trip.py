@@ -1,4 +1,4 @@
-"""Round-trip test battery for grammar vNext (plan 38 §A10, item 1).
+"""Round-trip test battery for grammar (plan 38 §A10, item 1).
 
 Synthesises ≥ 5 000 valid IR instances via seeded random, composes each to
 a canonical string, parses the string back, and asserts the re-parsed IR is

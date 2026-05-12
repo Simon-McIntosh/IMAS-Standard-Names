@@ -98,7 +98,7 @@ def test_locus_entry_relations_are_valid():
 
 
 def test_plasma_boundary_entity_of_only():
-    # plasma_boundary reclassified to position in vNext (plan 38 §A5)
+    # plasma_boundary reclassified to position in the grammar (plan 38 §A5)
     reg = load_locus_registry()
     pb = reg.loci["plasma_boundary"]
     assert pb.type == "position"
@@ -216,7 +216,7 @@ def test_geometry_carriers_stub_is_populated():
 
 
 def test_no_cross_registry_duplicates():
-    """Token names must be unique across all five vNext registries."""
+    """Token names must be unique across all five vocabulary registries."""
     # Should not raise
     validate_no_cross_registry_duplicates()
 

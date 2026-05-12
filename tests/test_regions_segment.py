@@ -99,7 +99,7 @@ def test_region_tokens_not_in_positions_vocabulary() -> None:
     StandardName with a Position value of ``halo_region`` must also fail
     since the enum no longer contains it.
     """
-    # vNext parser does not recognise halo_region as a locus → parse fails
+    # parser does not recognise halo_region as a locus → parse fails
     with pytest.raises((ValueError, Exception)):  # noqa: B017
         parse_standard_name("electron_temperature_at_halo_region")
 

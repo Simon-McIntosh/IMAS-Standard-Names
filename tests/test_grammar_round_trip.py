@@ -161,7 +161,7 @@ class TestD3TransformationAdditions:
 
     @pytest.mark.xfail(
         strict=True,
-        reason="rc20 token 'variation_of' replaced by bare 'variation' in vNext grammar (plan 38 §A7)",
+        reason="rc20 token 'variation_of' replaced by bare 'variation' in current grammar (plan 38 §A7)",
     )
     def test_variation_of(self):
         from imas_standard_names.grammar import Transformation
@@ -191,7 +191,7 @@ class TestD3TransformationAdditions:
 
     @pytest.mark.xfail(
         strict=True,
-        reason="rc20 token 'per_toroidal_mode_number' replaced by 'per_toroidal_mode' in vNext grammar (plan 38 §A7)",
+        reason="rc20 token 'per_toroidal_mode_number' replaced by 'per_toroidal_mode' in current grammar (plan 38 §A7)",
     )
     def test_per_toroidal_mode_number(self):
         from imas_standard_names.grammar import Transformation

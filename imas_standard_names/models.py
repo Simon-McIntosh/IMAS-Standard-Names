@@ -95,7 +95,7 @@ from imas_standard_names.provenance import (
 Status = Literal["draft", "active", "deprecated", "superseded"]
 
 # ---------------------------------------------------------------------------
-# rc22: vNext vocabulary caches (lazy-loaded once per process)
+# rc22: vocabulary caches (lazy-loaded once per process)
 # ---------------------------------------------------------------------------
 
 _COMPONENT_VOCAB_CACHE: frozenset[str] | None = None
@@ -106,7 +106,7 @@ _VOCAB_DIR = Path(__file__).parent / "grammar" / "vocabularies"
 
 
 def _get_component_vocab() -> frozenset[str]:
-    """Return the vNext component token set (from components.yml)."""
+    """Return the component token set (from components.yml)."""
     global _COMPONENT_VOCAB_CACHE
     if _COMPONENT_VOCAB_CACHE is None:
         with (_VOCAB_DIR / "components.yml").open(encoding="utf-8") as _fh:
@@ -118,7 +118,7 @@ def _get_component_vocab() -> frozenset[str]:
 
 
 def _get_coordinate_axes() -> frozenset[str]:
-    """Return the vNext coordinate axis token set (from coordinate_axes.yml)."""
+    """Return the coordinate axis token set (from coordinate_axes.yml)."""
     global _COORDINATE_AXES_CACHE
     if _COORDINATE_AXES_CACHE is None:
         _reg = _vocab_loaders.load_coordinate_axes()
@@ -127,7 +127,7 @@ def _get_coordinate_axes() -> frozenset[str]:
 
 
 def _get_locus_registry() -> dict:
-    """Return the vNext locus registry dict token -> LocusEntry."""
+    """Return the locus registry dict token -> LocusEntry."""
     global _LOCUS_REGISTRY_CACHE
     if _LOCUS_REGISTRY_CACHE is None:
         _reg = _vocab_loaders.load_locus_registry()
@@ -141,14 +141,14 @@ def _check_grammar_vocabulary_consistency(name: str) -> list[str]:
     Only flags cases where clear template patterns indicate missing vocabulary tokens.
     Does NOT flag compound base names like 'electron_temperature' or 'plasma_velocity'.
 
-    rc22: validators now check against vNext vocabulary loaders
+    rc22: validators now check against vocabulary loaders
     (``grammar/vocab_loaders.py``) rather than the rc20 Component/Position/Process
     enums in ``grammar/model_types``.  Those enums are retained for rc23 removal.
     """
     errors = []
 
     # ------------------------------------------------------------------
-    # 1. 'component_of' pattern -> check against vNext components.yml tokens
+    # 1. 'component_of' pattern -> check against components.yml tokens
     #
     # Example valid:   "radial_component_of_magnetic_field"
     # Example invalid: "nonexistent_component_of_magnetic_field"
@@ -168,7 +168,7 @@ def _check_grammar_vocabulary_consistency(name: str) -> list[str]:
             )
 
     # ------------------------------------------------------------------
-    # 2. Coordinate prefix pattern -> check against vNext coordinate_axes.yml
+    # 2. Coordinate prefix pattern -> check against coordinate_axes.yml
     #
     # Example valid:   "radial_outline_of_plasma_boundary"
     # Skip check when the captured prefix contains '_of_' -- a multi-word
@@ -190,7 +190,7 @@ def _check_grammar_vocabulary_consistency(name: str) -> list[str]:
             )
 
     # ------------------------------------------------------------------
-    # 3. 'at_' pattern -> check against vNext locus_registry.yml
+    # 3. 'at_' pattern -> check against locus_registry.yml
     #
     # Only raise an error when the token IS found in the locus registry but
     # that locus type does NOT permit the 'at' relation.  Tokens absent from
@@ -221,7 +221,7 @@ def _check_grammar_vocabulary_consistency(name: str) -> list[str]:
     # ------------------------------------------------------------------
     # 4. 'due_to_' pattern check INTENTIONALLY OMITTED in rc22.
     #
-    # The vNext parser's _strip_mechanism stage (grammar/parser.py) accepts
+    # The parser's _strip_mechanism stage (grammar/parser.py) accepts
     # any token after '_due_to_' without vocabulary enforcement.  Unknown
     # process tokens produce no error in the parser, so this validator must
     # not raise a false-positive either.  Process vocabulary coverage is

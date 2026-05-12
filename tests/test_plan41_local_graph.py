@@ -33,7 +33,7 @@ _DOMAIN_FIXTURE = [
     },
     # Unary-prefix argument (component axis=x).
     {
-        "name": "x_component_of_magnetic_field",
+        "name": "x_magnetic_field",
         "kind": "scalar",
         "unit": "T",
         "description": "X component.",
@@ -198,9 +198,9 @@ class TestBuildCatalogGraph:
     def test_nodes_and_edges_present(self, fixture_catalog: Path) -> None:
         g = build_catalog_graph(fixture_catalog)
         assert "magnetic_field" in g
-        assert "x_component_of_magnetic_field" in g
-        assert g.has_edge("x_component_of_magnetic_field", "magnetic_field")
-        data = g.get_edge_data("x_component_of_magnetic_field", "magnetic_field")
+        assert "x_magnetic_field" in g
+        assert g.has_edge("x_magnetic_field", "magnetic_field")
+        data = g.get_edge_data("x_magnetic_field", "magnetic_field")
         assert data["edge_type"] == "HAS_ARGUMENT"
         assert data["operator"] == "component"
         assert data["axis"] == "x"
@@ -271,7 +271,7 @@ class TestBuildCatalogGraph:
 class TestGraphTraversal:
     def test_neighbours_outgoing_only(self, fixture_catalog: Path) -> None:
         g = build_catalog_graph(fixture_catalog)
-        results = get_neighbours(g, "x_component_of_magnetic_field", direction="out")
+        results = get_neighbours(g, "x_magnetic_field", direction="out")
         assert len(results) == 1
         assert results[0]["neighbour"] == "magnetic_field"
         assert results[0]["edge_type"] == "HAS_ARGUMENT"
@@ -302,7 +302,7 @@ class TestGraphTraversal:
 
     def test_ancestors_unary_component(self, fixture_catalog: Path) -> None:
         g = build_catalog_graph(fixture_catalog)
-        assert get_ancestors(g, "x_component_of_magnetic_field") == ["magnetic_field"]
+        assert get_ancestors(g, "x_magnetic_field") == ["magnetic_field"]
 
     def test_ancestors_uncertainty_variant_reaches_base(
         self, fixture_catalog: Path
@@ -317,7 +317,7 @@ class TestGraphTraversal:
     ) -> None:
         g = build_catalog_graph(fixture_catalog)
         descendants = set(get_descendants(g, "magnetic_field"))
-        assert "x_component_of_magnetic_field" in descendants
+        assert "x_magnetic_field" in descendants
         assert "radial_projection_shape_3" in descendants
 
         temp_descendants = set(get_descendants(g, "temperature"))
@@ -327,9 +327,9 @@ class TestGraphTraversal:
 
     def test_shortest_path_records_edge_types(self, fixture_catalog: Path) -> None:
         g = build_catalog_graph(fixture_catalog)
-        path = shortest_path(g, "x_component_of_magnetic_field", "magnetic_field")
+        path = shortest_path(g, "x_magnetic_field", "magnetic_field")
         assert path == [
-            {"name": "x_component_of_magnetic_field", "edge_type_in": None},
+            {"name": "x_magnetic_field", "edge_type_in": None},
             {"name": "magnetic_field", "edge_type_in": "HAS_ARGUMENT"},
         ]
 
@@ -356,11 +356,9 @@ class TestLocalGraphMCPTool:
 
         tool = LocalGraphTool(catalog_root=str(fixture_catalog))
         result = asyncio.run(
-            tool.get_standard_name_neighbours(
-                "x_component_of_magnetic_field", direction="out"
-            )
+            tool.get_standard_name_neighbours("x_magnetic_field", direction="out")
         )
-        assert result["name"] == "x_component_of_magnetic_field"
+        assert result["name"] == "x_magnetic_field"
         assert result["count"] == 1
         assert result["results"][0]["neighbour"] == "magnetic_field"
 
@@ -381,18 +379,14 @@ class TestLocalGraphMCPTool:
         from imas_standard_names.tools.graph import LocalGraphTool
 
         tool = LocalGraphTool(catalog_root=str(fixture_catalog))
-        anc = asyncio.run(
-            tool.get_standard_name_ancestors("x_component_of_magnetic_field")
-        )
+        anc = asyncio.run(tool.get_standard_name_ancestors("x_magnetic_field"))
         assert "magnetic_field" in anc["ancestors"]
 
         desc = asyncio.run(tool.get_standard_name_descendants("magnetic_field"))
-        assert "x_component_of_magnetic_field" in desc["descendants"]
+        assert "x_magnetic_field" in desc["descendants"]
 
         path = asyncio.run(
-            tool.shortest_standard_name_path(
-                "x_component_of_magnetic_field", "magnetic_field"
-            )
+            tool.shortest_standard_name_path("x_magnetic_field", "magnetic_field")
         )
         assert path["hops"] == 1
         assert path["path"][-1]["edge_type_in"] == "HAS_ARGUMENT"
@@ -446,7 +440,7 @@ class TestRenderer:
         out = renderer.render_catalog()
         # magnetic_field is wrapped by x_component and the projection entry.
         assert "**Wrapped by:**" in out
-        assert "[x component of magnetic field](#x_component_of_magnetic_field)" in out
+        assert "[x magnetic field](#x_magnetic_field)" in out
 
     def test_sibling_nav_deprecates_and_superseded_by(
         self, fixture_catalog: Path

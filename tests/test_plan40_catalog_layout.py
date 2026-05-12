@@ -615,7 +615,7 @@ class TestTopologicalOrderingArguments:
                 "unit": "T",
             },
             {
-                "name": "x_component_of_magnetic_field",
+                "name": "x_magnetic_field",
                 "kind": "scalar",
                 "description": "X component of magnetic field.",
                 "documentation": "X projection of magnetic field.",
@@ -631,7 +631,7 @@ class TestTopologicalOrderingArguments:
                 ],
             },
             {
-                "name": "y_component_of_magnetic_field",
+                "name": "y_magnetic_field",
                 "kind": "scalar",
                 "description": "Y component of magnetic field.",
                 "documentation": "Y projection of magnetic field.",
@@ -656,5 +656,5 @@ class TestTopologicalOrderingArguments:
         order = list(ordered_model_names(models))
         idx = {name: i for i, name in enumerate(order)}
 
-        assert idx["magnetic_field"] < idx["x_component_of_magnetic_field"]
-        assert idx["magnetic_field"] < idx["y_component_of_magnetic_field"]
+        assert idx["magnetic_field"] < idx["x_magnetic_field"]
+        assert idx["magnetic_field"] < idx["y_magnetic_field"]

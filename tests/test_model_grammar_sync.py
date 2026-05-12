@@ -264,7 +264,7 @@ def test_names_tool_compose_creates_valid_model():
 
     assert "name" in result
     assert "parts" in result
-    assert result["name"] == "radial_component_of_electron_heat_flux"
+    assert result["name"] == "radial_electron_heat_flux"
 
     # Test with object parameter
     result = asyncio.run(

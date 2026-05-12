@@ -1,10 +1,10 @@
-"""Unit tests for the grammar vNext parser (plan 38 W2b).
+"""Unit tests for the grammar parser (plan 38 W2b).
 
 These tests exercise the staged parser against fixture-injected closed
 vocabularies (physical_bases and locus_registry stubs will be populated
 by W2a; the parser itself does not depend on YAML contents).
 
-For every canonical vNext name the test asserts ``compose(parse(name).ir)
+For every canonical grammar name the test asserts ``compose(parse(name).ir)
 == name`` (round-trip). For non-canonical and error cases, the test
 asserts specific diagnostic / exception behaviour.
 """
@@ -31,7 +31,7 @@ from imas_standard_names.grammar.parser import (
 from imas_standard_names.grammar.render import compose
 
 # ---------------------------------------------------------------------------
-# Fixture: a minimal vNext vocabulary bundle
+# Fixture: a minimal grammar vocabulary bundle
 # ---------------------------------------------------------------------------
 
 
@@ -327,7 +327,7 @@ def test_parse_unknown_axis_falls_through_to_base_error(vocabs: Vocabularies):
 
 
 def test_parse_random_invented_base_rejected(vocabs: Vocabularies):
-    """rc20 would open-fallback this; vNext must reject."""
+    """rc20 would open-fallback this; the parser must reject."""
     with pytest.raises(ParseError):
         parse("quokka_density", vocabs=vocabs)
 

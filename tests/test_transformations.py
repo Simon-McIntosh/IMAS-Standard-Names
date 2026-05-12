@@ -16,13 +16,13 @@ from imas_standard_names.grammar import (
 )
 
 # rc20 token forms (e.g. square_of, inverse_of) were replaced by bare tokens
-# (square, inverse) in vNext grammar (plan 38 §A7).  Tests that rely on the
+# (square, inverse) in the current grammar (plan 38 §A7).  Tests that rely on the
 # old forms are preserved for reference but marked as expected failures until
-# vNext grammar is finalised.
+# grammar is finalised.
 _XFAIL_RC20 = pytest.mark.xfail(
     strict=True,
     reason=(
-        "rc20 _of-suffixed tokens replaced by bare tokens in vNext grammar"
+        "rc20 _of-suffixed tokens replaced by bare tokens in current grammar"
         " (plan 38 §A7)"
     ),
 )

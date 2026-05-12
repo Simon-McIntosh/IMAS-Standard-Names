@@ -20,10 +20,10 @@ from imas_standard_names.grammar.model import (
 from imas_standard_names.grammar.model_types import Decomposition
 
 # Decomposition tokens use rc20 forms (fourier_coefficient_of, n_equals_1, …)
-# that are not yet present in the vNext operators registry (plan 38 §A7).
+# that are not yet present in the operators registry (plan 38 §A7).
 _XFAIL_RC20 = pytest.mark.xfail(
     strict=True,
-    reason="rc20 decomposition token forms not yet in vNext operators registry (plan 38 §A7)",
+    reason="rc20 decomposition token forms not yet in operators registry (plan 38 §A7)",
 )
 
 
