@@ -240,6 +240,49 @@ class TestRCAbandonWithBump:
         assert ver == "1.1.0rc1"
 
 
+class TestRCBumpMinorCollision:
+    """RC v0.7.0rc55 + --bump minor (stable=v0.6.0) → v0.8.0rc1, not v0.7.0rc1.
+
+    When the bumped version equals the current RC target, bump from the
+    target instead to avoid a tag collision.
+    """
+
+    def test_minor_collision_avoided(self, git_repo):
+        git_repo.tag("v0.6.0")
+        git_repo.commit("wip")
+        git_repo.tag("v0.7.0rc55")
+        tag, ver = compute_next_version("minor")
+        assert tag == "v0.8.0rc1"
+        assert ver == "0.8.0rc1"
+
+    def test_patch_collision_avoided(self, git_repo):
+        """RC v1.0.1rc5 + --bump patch (stable=v1.0.0) → v1.0.2rc1."""
+        git_repo.tag("v1.0.0")
+        git_repo.commit("wip")
+        git_repo.tag("v1.0.1rc5")
+        tag, ver = compute_next_version("patch")
+        assert tag == "v1.0.2rc1"
+        assert ver == "1.0.2rc1"
+
+    def test_major_collision_avoided(self, git_repo):
+        """RC v1.0.0rc3 + --bump major (stable=v0.9.0) → v2.0.0rc1."""
+        git_repo.tag("v0.9.0")
+        git_repo.commit("wip")
+        git_repo.tag("v1.0.0rc3")
+        tag, ver = compute_next_version("major")
+        assert tag == "v2.0.0rc1"
+        assert ver == "2.0.0rc1"
+
+    def test_no_collision_no_double_bump(self, git_repo):
+        """RC v2.0.0rc5 + --bump patch (stable=v1.0.0) → v1.0.1rc1 (no collision)."""
+        git_repo.tag("v1.0.0")
+        git_repo.commit("wip")
+        git_repo.tag("v2.0.0rc5")
+        tag, ver = compute_next_version("patch")
+        assert tag == "v1.0.1rc1"
+        assert ver == "1.0.1rc1"
+
+
 # ---------------------------------------------------------------------------
 # State detection
 # ---------------------------------------------------------------------------

@@ -157,6 +157,12 @@ def compute_next_version(bump: str | None, *, final: bool = False) -> tuple[str,
         else:
             s_maj, s_min, s_pat = major, minor, patch
         m, n, p = _apply_bump(s_maj, s_min, s_pat, bump)
+        # If bumped version collides with current RC target, bump from the
+        # RC target instead.  E.g. at v0.7.0rc55 (stable v0.6.0),
+        # --bump minor from stable → (0,7,0) which is our current target;
+        # bump again from the target → (0,8,0).
+        if (m, n, p) == (major, minor, patch):
+            m, n, p = _apply_bump(major, minor, patch, bump)
         rc = None if final else 1
         tag = _format_tag(m, n, p, rc)
         return tag, tag.lstrip("v")
@@ -360,10 +366,16 @@ def _show_release_status() -> None:
             f"→ {_format_tag(major, minor, patch, next_rc)}  (next RC)"
         )
         click.echo(f"  {cmd} --final -m '...'       → {target}  (finalize)")
-        click.echo(
-            f"  {cmd} --bump patch -m '...'  "
-            f"→ {_format_tag(s_maj, s_min, s_pat + 1, 1)}  (abandon RC)"
-        )
+
+        # Abandon RC — show each bump option with collision-safe targets
+        for b in ("patch", "minor", "major"):
+            m, n, p = _apply_bump(s_maj, s_min, s_pat, b)
+            if (m, n, p) == (major, minor, patch):
+                m, n, p = _apply_bump(major, minor, patch, b)
+            abandon_tag = _format_tag(m, n, p, 1)
+            click.echo(
+                f"  {cmd} --bump {b:<5s} -m '...'  → {abandon_tag}  (abandon RC)"
+            )
     else:
         click.echo("Release state: Stable")
         click.echo(f"  Current:  {tag}{commits_str}")
