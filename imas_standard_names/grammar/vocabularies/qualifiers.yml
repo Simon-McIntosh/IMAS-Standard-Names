@@ -211,3 +211,4 @@
 - internal                      # internal (thermodynamic/inductive): internal_inductance, internal_energy
 - mhd                           # magnetohydrodynamic: mhd_mode_frequency, mhd_stored_energy
 - wave                          # wave (electromagnetic/acoustic): wave_absorbed_power, wave_number
+- linear                        # linear (perturbative regime): linear_growth_rate, linear_frequency

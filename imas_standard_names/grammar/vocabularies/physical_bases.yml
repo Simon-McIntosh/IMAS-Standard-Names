@@ -46,6 +46,9 @@ bases:
   collisionality:
     aliases: []
     kind: scalar
+  conductivity:
+    aliases: []
+    kind: scalar
   confinement_time:
     aliases: []
     kind: scalar
@@ -258,6 +261,9 @@ bases:
   resistivity:
     aliases: []
     kind: scalar
+  rotation_frequency:
+    aliases: []
+    kind: scalar
   safety_factor:
     aliases: []
     kind: scalar
@@ -271,6 +277,9 @@ bases:
     aliases: []
     kind: scalar
   source:
+    aliases: []
+    kind: scalar
+  source_rate:
     aliases: []
     kind: scalar
   speed:
