@@ -114,8 +114,9 @@ def test_catalog_renderer_render_catalog_groups_by_physics_domain(tmp_path: Path
     # Names appear verbatim
     assert "electron_temperature" in catalog
     assert "ion_temperature" in catalog
-    # Unit rendered as bracket annotation
-    assert "[eV]" in catalog
+    # Unit rendered without brackets
+    assert "eV" in catalog
+    assert "[eV]" not in catalog
 
 
 def test_catalog_renderer_render_catalog_raw_base_name(tmp_path: Path):
@@ -345,9 +346,9 @@ sources:
     renderer = CatalogRenderer(tmp_path)
     catalog = renderer.render_catalog()
 
-    assert "<details" in catalog
     assert "sn-sources" in catalog
-    assert "equilibrium/time_slice/profiles_1d/psi" in catalog
+    # Sources shown as count footer, not inside <details>
+    assert "1 sources" in catalog
 
 
 def test_catalog_render_no_sources_block_when_absent(tmp_path: Path):
@@ -431,8 +432,9 @@ def test_locus_subgrouping_in_domain_page(tmp_path: Path):
     renderer = CatalogRenderer(tmp_path)
     page = renderer.render_domain_page("equilibrium")
 
-    # Locus sub-group heading should appear
-    assert "of magnetic axis" in page
+    # Locus sub-group heading uses bare token (no preposition prefix)
+    assert "magnetic axis" in page
+    assert "of magnetic axis" not in page
     assert "sn-locus-group" in page
 
     # Non-locus entry should appear outside the locus group

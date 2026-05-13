@@ -1,8 +1,8 @@
-/* Standard Names Catalog — Multi-page Design */
+/* Standard Names Catalog — Compact Inline Design */
 
-/* Entry — clean text with subtle separator */
+/* Entry — tight spacing with subtle separator */
 .sn-entry {
-    padding: 0.6rem 0 0.6rem 1.2rem;
+    padding: 0.3rem 0 0.3rem 1rem;
     border-bottom: 1px solid var(--md-default-fg-color--lightest);
 }
 
@@ -10,8 +10,9 @@
     background: var(--md-code-bg-color);
 }
 
-/* Inline code for name — slightly larger, distinct */
-.sn-entry > p:first-child code {
+/* Inline code for name — distinct, hoverable */
+.sn-entry > p:first-child code,
+.sn-name code {
     font-size: 0.92rem;
     font-weight: 500;
     background: none;
@@ -19,35 +20,56 @@
     color: var(--md-default-fg-color);
 }
 
-/* Unit annotation */
+/* Hoverable name wrapper — cursor hint */
+.sn-name {
+    cursor: help;
+    border-bottom: 1px dotted var(--md-default-fg-color--lighter);
+}
+
+/* Unit annotation — no brackets, subdued */
 .sn-unit {
-    font-size: 0.82rem;
+    font-size: 0.8rem;
     color: var(--md-default-fg-color--light);
     font-weight: 400;
-    margin-left: 0.3rem;
+    margin-left: 0.25rem;
+    font-style: italic;
 }
 
 /* Description as definition list indent */
 .sn-entry > dl {
-    margin: 0.2rem 0 0.3rem;
+    margin: 0.1rem 0 0.2rem;
 }
 
 .sn-entry > dl > dd {
     margin-left: 0;
-    font-size: 0.87rem;
-    line-height: 1.5;
+    font-size: 0.85rem;
+    line-height: 1.4;
     color: var(--md-default-fg-color--light);
 }
 
-/* Collapsed details — barely visible until needed */
+/* Inline documentation — compact, subdued */
+.sn-docs {
+    font-size: 0.82rem;
+    color: var(--md-default-fg-color--light);
+    line-height: 1.45;
+    margin: 0 0 0.2rem;
+    padding-left: 1.2rem;
+    border-left: 2px solid var(--md-default-fg-color--lightest);
+}
+
+.sn-docs p {
+    margin: 0.15rem 0;
+}
+
+/* Structural details — only for relationships */
 .sn-entry details {
-    margin: 0.2rem 0 0;
-    font-size: 0.84rem;
+    margin: 0.1rem 0 0;
+    font-size: 0.82rem;
 }
 
 .sn-entry details summary {
     cursor: pointer;
-    font-size: 0.78rem;
+    font-size: 0.76rem;
     color: var(--md-default-fg-color--lighter);
     user-select: none;
     font-style: italic;
@@ -58,21 +80,21 @@
 }
 
 .sn-entry details[open] {
-    padding: 0.3rem 0 0;
+    padding: 0.2rem 0 0;
     color: var(--md-default-fg-color--light);
 }
 
 /* See-also and sibling nav links */
 .sn-entry a[href^="#"] {
     overflow-wrap: anywhere;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
 }
 
-/* Base group headings — thin grey line */
+/* Base group headings */
 h2 {
     border-bottom: 2px solid var(--md-primary-fg-color--light);
-    padding-bottom: 0.4rem;
-    margin-top: 2rem;
+    padding-bottom: 0.3rem;
+    margin-top: 1.5rem;
 }
 
 /* Mermaid overflow */
@@ -83,37 +105,37 @@ h2 {
 
 /* Domain overview table */
 .md-typeset table:not([class]) {
-    font-size: 0.88rem;
+    font-size: 0.86rem;
 }
 
 .md-typeset table:not([class]) td,
 .md-typeset table:not([class]) th {
-    padding: 0.5rem 0.75rem;
+    padding: 0.4rem 0.6rem;
 }
 
 /* Locus sub-groups — indented with left accent */
 .sn-locus-group {
-    margin-left: 0.8rem;
-    padding-left: 0.8rem;
+    margin-left: 0.6rem;
+    padding-left: 0.6rem;
     border-left: 2px solid var(--md-accent-fg-color--transparent);
 }
 
 .sn-locus-group h3,
 .sn-locus-group h4 {
-    font-size: 0.88rem;
+    font-size: 0.86rem;
     font-weight: 500;
     color: var(--md-default-fg-color--light);
-    margin-top: 0.5rem;
-    margin-bottom: 0.3rem;
+    margin-top: 0.3rem;
+    margin-bottom: 0.2rem;
     font-style: italic;
 }
 
 /* Badge styles */
 .sn-badge {
     display: inline-block;
-    font-size: 0.72rem;
-    padding: 0.1rem 0.45rem;
-    border-radius: 0.7rem;
+    font-size: 0.7rem;
+    padding: 0.05rem 0.35rem;
+    border-radius: 0.6rem;
     font-weight: 500;
     vertical-align: middle;
 }
@@ -126,7 +148,7 @@ h2 {
 /* Compact source provenance */
 .sn-sources {
     display: block;
-    font-size: 0.74rem;
+    font-size: 0.72rem;
     color: var(--md-default-fg-color--lighter);
-    margin-top: 0.3rem;
+    margin-top: 0.1rem;
 }

@@ -400,8 +400,30 @@ class CatalogRenderer:
         lines += ["", "</details>", ""]
         return "\n".join(lines) + "\n"
 
+    @staticmethod
+    def _tooltip_text(documentation: str) -> str:
+        """Extract plain-text tooltip from documentation markdown.
+
+        Returns the first ~300 characters, stripped of markdown formatting,
+        suitable for an HTML ``title`` attribute.
+        """
+        if not documentation:
+            return ""
+        # Strip markdown bold/italic, code, links
+        text = re.sub(r"\*\*(.+?)\*\*", r"\1", documentation)
+        text = re.sub(r"\*(.+?)\*", r"\1", text)
+        text = re.sub(r"`(.+?)`", r"\1", text)
+        text = re.sub(r"\[([^\]]+)\]\([^)]+\)", r"\1", text)
+        # Collapse whitespace
+        text = " ".join(text.split())
+        if len(text) > 300:
+            text = text[:297] + "..."
+        # Escape HTML entities for title attribute
+        text = text.replace("&", "&amp;").replace('"', "&quot;")
+        return text
+
     def _render_entry(self, item: dict, wrapped_by: dict[str, list[str]]) -> str:
-        """Render a single standard name entry — minimal clean layout."""
+        """Render a single standard name entry — compact inline layout."""
         name = item.get("name", "Unknown")
         unit = item.get("unit", "")
         description = _rewrite_name_links(item.get("description", ""))
@@ -411,55 +433,49 @@ class CatalogRenderer:
 
         result = f'<div class="sn-entry" id="{name}" markdown>\n\n'
 
-        # Name with unit annotation
-        unit_annotation = f' <span class="sn-unit">[{unit}]</span>' if unit else ""
-        result += f"`{name}`{unit_annotation}\n\n"
+        # Name with unit — no brackets, hover shows docs
+        unit_annotation = f' <span class="sn-unit">{unit}</span>' if unit else ""
+        tooltip = self._tooltip_text(documentation)
+        if tooltip:
+            result += (
+                f'<span class="sn-name" title="{tooltip}">'
+                f"`{name}`{unit_annotation}</span>\n\n"
+            )
+        else:
+            result += f"`{name}`{unit_annotation}\n\n"
 
-        # Description as definition
+        # Description inline
         if description:
             result += f":   {description}\n\n"
 
-        # Docs-pending badge when no documentation exists
         if not documentation:
             result += '<span class="sn-badge sn-badge-pending">docs pending</span>\n\n'
 
-        # Collapsible detail section
-        details_parts: list[str] = []
+        # Documentation shown inline — no collapsible wrapper
         if documentation:
-            details_parts.append(documentation)
+            result += f'<div class="sn-docs" markdown>\n\n{documentation}\n\n</div>\n\n'
 
-        mermaid_md = self._render_mermaid(item)
-        if mermaid_md:
-            details_parts.append(mermaid_md)
-
+        # Links and sibling nav inline
         links_md = self._render_links(item.get("links", []))
         if links_md:
-            details_parts.append(links_md)
+            result += links_md
 
         sibling_md = self._render_sibling_nav(item, wrapped_by)
         if sibling_md:
-            details_parts.append(sibling_md)
+            result += sibling_md
 
-        # Source provenance as a compact footer
-        sources = item.get("sources") or []
-        if sources:
-            count = len(sources)
-            paths = ", ".join(
-                f"`{s.get('dd_path') or s.get('signal_id') or s.get('id', '?')}`"
-                for s in sources[:3]
-            )
-            suffix = f" + {count - 3} more" if count > 3 else ""
-            details_parts.append(
-                f'<span class="sn-sources">Sources ({count}): {paths}{suffix}</span>\n'
-            )
-
-        if details_parts:
+        # Structural relationships in collapsible only when present
+        mermaid_md = self._render_mermaid(item)
+        if mermaid_md:
             result += (
                 "<details markdown>\n"
-                "<summary>more</summary>\n\n"
-                + "\n\n".join(details_parts)
-                + "\n</details>\n\n"
+                "<summary>relationships</summary>\n\n" + mermaid_md + "</details>\n\n"
             )
+
+        # Source count as subtle footer
+        sources = item.get("sources") or []
+        if sources:
+            result += f'<span class="sn-sources">{len(sources)} sources</span>\n\n'
 
         result += "</div>\n\n"
         return result
@@ -528,14 +544,13 @@ class CatalogRenderer:
             for item in sorted(no_locus, key=lambda x: x.get("name", "")):
                 result += self._render_entry(item, wrapped_by)
 
-            # Render locus sub-groups with a subtle heading
+            # Render locus sub-groups — token only, no preposition prefix
             for locus_key in sorted(locus_groups.keys()):
-                relation, token = locus_key.split(":", 1)
+                _relation, token = locus_key.split(":", 1)
                 locus_items = locus_groups[locus_key]
-                heading = f"{relation} {_humanize(token)}"
                 result += (
                     f'<div class="sn-locus-group" markdown>\n\n'
-                    f"### {heading} {{: #{token} }}\n\n"
+                    f"### {_humanize(token)} {{: #{token} }}\n\n"
                 )
                 for item in sorted(locus_items, key=lambda x: x.get("name", "")):
                     result += self._render_entry(item, wrapped_by)
@@ -596,11 +611,11 @@ class CatalogRenderer:
                     result += self._render_entry(item, wrapped_by)
 
                 for locus_key in sorted(locus_groups.keys()):
-                    relation, token = locus_key.split(":", 1)
+                    _relation, token = locus_key.split(":", 1)
                     locus_items = locus_groups[locus_key]
-                    heading = f"{relation} {_humanize(token)}"
                     result += (
-                        f'<div class="sn-locus-group" markdown>\n\n#### {heading}\n\n'
+                        f'<div class="sn-locus-group" markdown>\n\n'
+                        f"#### {_humanize(token)}\n\n"
                     )
                     for item in sorted(locus_items, key=lambda x: x.get("name", "")):
                         result += self._render_entry(item, wrapped_by)
