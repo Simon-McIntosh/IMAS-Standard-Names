@@ -142,6 +142,9 @@ bases:
   heat_flux:
     aliases: []
     kind: scalar
+  height:
+    aliases: []
+    kind: scalar
   impedance:
     aliases: []
     kind: scalar
@@ -178,6 +181,9 @@ bases:
     kind: scalar
   mass:
     aliases: []
+    kind: scalar
+  mass_number:
+    aliases: [nucleon_number]
     kind: scalar
   metric_tensor:
     aliases: []
@@ -268,6 +274,9 @@ bases:
     aliases: []
     kind: scalar
   speed:
+    aliases: []
+    kind: scalar
+  spectral_radiance:
     aliases: []
     kind: scalar
   squareness:

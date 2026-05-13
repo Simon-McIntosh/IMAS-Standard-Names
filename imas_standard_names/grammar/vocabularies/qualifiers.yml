@@ -174,3 +174,31 @@
 - gyro_bohm                     # gyro-Bohm normalized
 - bohm                          # Bohm normalized
 - greenwald                     # Greenwald-normalized (density)
+
+# === rc21 vocabulary extensions (codex vocab gap analysis) ===
+# From comprehensive VocabGap graph analysis after 10-rotation bootstrap.
+# Only atomic tokens — compound gaps (lower_inner, upper_outer, etc.)
+# must compose from these atomic qualifiers.
+
+# --- Position modifiers ---
+- upper                         # upper position (upper divertor, upper triangularity)
+- lower                         # lower position (lower divertor, lower triangularity)
+- inner                         # inner position (inner midplane, inner strike point)
+
+# --- Diagnostic / measurement ---
+- floating                      # floating state (floating potential, Langmuir probe)
+- reflected                     # reflected wave/signal (reflectometry)
+- polarization                  # wave polarization property
+- spectral                      # spectral (wavelength-resolved) measurement
+
+# --- Physics / MHD ---
+- mode                          # mode (MHD/wave mode frequency, mode number)
+- quench                        # quench event (thermal quench, current quench)
+- vector                        # vector quantity qualifier (vector potential)
+- enhancement                   # enhancement (enhancement factor)
+
+# --- Control / engineering ---
+- requested                     # requested / reference setpoint (control systems)
+
+# --- Named parameters ---
+- ejima                         # Ejima (volt-second consumption coefficient)
