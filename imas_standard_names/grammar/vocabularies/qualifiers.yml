@@ -202,3 +202,12 @@
 
 # --- Named parameters ---
 - ejima                         # Ejima (volt-second consumption coefficient)
+
+# === rc5 vocabulary extensions (codex R1-R4 bootstrap gap analysis) ===
+# Genuine gaps surfaced by focus rotations across equilibrium, transport,
+# MHD, and wave domains. All verified against ISN parse() round-trip.
+
+# --- Physics regime / type ---
+- internal                      # internal (thermodynamic/inductive): internal_inductance, internal_energy
+- mhd                           # magnetohydrodynamic: mhd_mode_frequency, mhd_stored_energy
+- wave                          # wave (electromagnetic/acoustic): wave_absorbed_power, wave_number
