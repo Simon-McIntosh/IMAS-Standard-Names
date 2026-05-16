@@ -85,6 +85,12 @@ bases:
   distance:
     aliases: []
     kind: scalar
+  coulomb_logarithm:
+    aliases: []
+    kind: scalar
+  damping_rate:
+    aliases: []
+    kind: scalar
   distribution:
     aliases: []
     kind: scalar

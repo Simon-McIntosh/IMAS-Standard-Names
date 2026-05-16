@@ -212,3 +212,12 @@
 - mhd                           # magnetohydrodynamic: mhd_mode_frequency, mhd_stored_energy
 - wave                          # wave (electromagnetic/acoustic): wave_absorbed_power, wave_number
 - linear                        # linear (perturbative regime): linear_growth_rate, linear_frequency
+
+# === rc8 vocabulary extensions (codex R5 gap analysis) ===
+# Verified via ISN parse() round-trip after addition.
+
+# --- Position modifiers ---
+- outer                         # outer position (outer squareness, outer strike point) — counterpart to inner
+
+# --- Coupling / interaction ---
+- mutual                        # mutual interaction (mutual inductance, mutual coupling)
