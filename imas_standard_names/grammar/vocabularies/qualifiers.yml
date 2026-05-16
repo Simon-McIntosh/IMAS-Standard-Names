@@ -221,3 +221,13 @@
 
 # --- Coupling / interaction ---
 - mutual                        # mutual interaction (mutual inductance, mutual coupling)
+
+# === rc9 vocabulary extensions (codex R6-R7 gap analysis) ===
+# Verified via ISN parse() round-trip after addition.
+
+# --- Spatial / symmetry modifiers ---
+- angular                       # angular (angular_momentum, angular_frequency, angular_velocity)
+- non_axisymmetric              # non-axisymmetric (non_axisymmetric_magnetic_field)
+
+# --- Measurement / signal qualifiers ---
+- pulse                         # pulse (pulse_height, pulse_shape) — detector signal characteristics

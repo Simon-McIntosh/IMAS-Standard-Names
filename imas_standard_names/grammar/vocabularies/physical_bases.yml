@@ -342,3 +342,17 @@ bases:
   width:
     aliases: []
     kind: scalar
+
+  # === rc9 vocabulary extensions (codex R6-R7 gap analysis) ===
+  # Verified true gaps from FOCS, neutron diagnostics, and optical
+  # diagnostic DD paths.
+
+  dead_time:
+    aliases: []
+    kind: scalar
+  etendue:
+    aliases: [optical_throughput]
+    kind: scalar
+  verdet_constant:
+    aliases: []
+    kind: scalar
