@@ -282,15 +282,24 @@ _INHERENTLY_DIMENSIONAL_BASES = frozenset(
 )
 
 
+_NORMALIZATION_QUALIFIERS = frozenset({"normalized", "gyrocenter"})
+
+
 def _check_dimensionless_physical_quantity(
     name: str, entry: StandardNameEntry
 ) -> list[str]:
     """Flag dimensionless unit on physical bases that inherently carry units.
 
     Rule: Scalar/vector entries with ``unit="1"`` whose physical base is a
-    quantity that normally carries SI units are likely misconfigured.  Ratios
-    and other binary-operator names are excluded because they can legitimately
-    be dimensionless.
+    quantity that normally carries SI units are likely misconfigured. The
+    following constructs are excluded because they can legitimately be
+    dimensionless:
+
+    - binary operators (ratio, product, difference);
+    - the ``normalized`` transformation (e.g. ``normalized_density``);
+    - any qualifier in :data:`_NORMALIZATION_QUALIFIERS` (e.g.
+      ``gyrocenter_pressure`` is gyrokinetic-normalized by convention).
+
     Severity: Warning
     """
     issues: list[str] = []
@@ -307,11 +316,32 @@ def _check_dimensionless_physical_quantity(
         parsed = parse_standard_name(entry.name)
         physical_base = getattr(parsed, "physical_base", None)
         binary_operator = getattr(parsed, "binary_operator", None)
+        transformation = getattr(parsed, "transformation", None)
 
         # Binary operators (ratio, product, difference) can legitimately yield
         # dimensionless results, so skip the check for those.
         if binary_operator:
             return issues
+
+        # The ``normalized`` transformation explicitly produces a
+        # dimensionless quantity by construction.
+        tx_value = getattr(transformation, "value", transformation)
+        if tx_value == "normalized":
+            return issues
+
+        # Gyrokinetic-normalized quantities carry qualifiers like
+        # ``normalized`` or ``gyrocenter`` that imply dimensionless
+        # output even when no explicit transformation is parsed.
+        try:
+            from ..grammar.parser import parse as ir_parse  # noqa: PLC0415
+
+            ir = ir_parse(entry.name).ir
+            if ir is not None:
+                qualifier_tokens = {q.token for q in (ir.qualifiers or [])}
+                if qualifier_tokens & _NORMALIZATION_QUALIFIERS:
+                    return issues
+        except Exception:
+            pass
 
         if physical_base and physical_base in _INHERENTLY_DIMENSIONAL_BASES:
             issues.append(

@@ -120,22 +120,19 @@ def test_catalog_renderer_render_catalog_groups_by_physics_domain(tmp_path: Path
 
 
 def test_catalog_renderer_render_catalog_name_as_heading(tmp_path: Path):
-    """Each entry's canonical name is rendered as the H2 heading.
+    """Each entry's canonical name is rendered as an H3 anchored heading.
 
-    The new design drops group-level base/locus headings — the
-    snake_case standard name is itself the H2 with anchored id and
+    H2 is reserved for group titles (locus or quantity cluster). The
+    snake_case standard name is itself the H3 with anchored id and
     the ``.sn-name`` class for styling.
     """
     catalog_path = _make_test_catalog(tmp_path)
     renderer = CatalogRenderer(catalog_path)
     catalog = renderer.render_catalog()
 
-    # Each name becomes its own H2 anchored entry
-    assert "## electron_temperature { #electron_temperature .sn-name }" in catalog
-    assert "## ion_temperature { #ion_temperature .sn-name }" in catalog
-    # No group-level H2/H3 base/locus headings appear
-    assert "## temperature" not in catalog.lower()
-    assert "### temperature" not in catalog.lower()
+    # Each name becomes its own H3 anchored entry
+    assert "### electron_temperature { #electron_temperature .sn-name }" in catalog
+    assert "### ion_temperature { #ion_temperature .sn-name }" in catalog
     # No legacy backtick-style entries
     assert "### `" not in catalog
     # No legacy sn-entry div wrapper — entries use plain markdown headings
@@ -253,44 +250,108 @@ tags: [measured]
 
 
 def test_rewrite_name_links_single(tmp_path: Path):
-    """[label](name:foo) is rewritten to [label](#foo)."""
-    from imas_standard_names.rendering.catalog import _rewrite_name_links
+    """[label](name:foo) rewrites to anchor when target exists, span otherwise."""
+    (tmp_path / "a.yml").write_text(
+        """name: foo
+kind: scalar
+unit: m
+physics_domain: equilibrium
+description: Foo.
+""",
+        encoding="utf-8",
+    )
+    renderer = CatalogRenderer(tmp_path)
+    renderer.load_names()
 
-    assert _rewrite_name_links("[foo](#foo)") == "[foo](#foo)"  # already good
-    assert _rewrite_name_links("[foo](name:foo)") == "[foo](#foo)"
+    assert renderer._rewrite_name_links("[foo](#foo)") == "[foo](#foo)"
+    # Known target — anchor link
+    assert renderer._rewrite_name_links("[foo](name:foo)") == "[foo](#foo)"
+    # Unknown target — styled span instead of a dead anchor
+    out = renderer._rewrite_name_links("[bar](name:bar)")
+    assert '<span class="sn-missing"' in out
+    assert "bar" in out
+    assert "(#bar)" not in out
 
 
 def test_rewrite_name_links_external_untouched(tmp_path: Path):
     """External https:// links are not modified."""
-    from imas_standard_names.rendering.catalog import _rewrite_name_links
-
+    renderer = CatalogRenderer(tmp_path)
     link = "[ext](https://example.com/doc)"
-    assert _rewrite_name_links(link) == link
+    assert renderer._rewrite_name_links(link) == link
 
 
 def test_rewrite_name_links_multiple_in_paragraph(tmp_path: Path):
     """Multiple name: links in one paragraph are all rewritten."""
-    from imas_standard_names.rendering.catalog import _rewrite_name_links
+    (tmp_path / "a.yml").write_text(
+        """- name: foo
+  kind: scalar
+  unit: m
+  physics_domain: equilibrium
+  description: Foo.
+- name: bar_baz
+  kind: scalar
+  unit: m
+  physics_domain: equilibrium
+  description: Bar baz.
+""",
+        encoding="utf-8",
+    )
+    renderer = CatalogRenderer(tmp_path)
+    renderer.load_names()
 
     text = "See [foo](name:foo) and also [bar_baz](name:bar_baz) for details."
-    result = _rewrite_name_links(text)
+    result = renderer._rewrite_name_links(text)
     assert "[foo](#foo)" in result
     # Link text is humanized (underscores → spaces), anchor stays canonical
     assert "[bar baz](#bar_baz)" in result
     assert "name:" not in result
 
 
+def test_rewrite_name_links_cross_domain(tmp_path: Path):
+    """``name:target`` rewrites to a sibling-page URL when the target lives
+    in a different physics_domain."""
+    (tmp_path / "a.yml").write_text(
+        """- name: alpha
+  kind: scalar
+  unit: m
+  physics_domain: equilibrium
+  description: Alpha.
+- name: beta
+  kind: scalar
+  unit: m
+  physics_domain: transport
+  description: Beta.
+""",
+        encoding="utf-8",
+    )
+    renderer = CatalogRenderer(tmp_path)
+    renderer.load_names()
+    renderer._current_domain = "equilibrium"
+    out = renderer._rewrite_name_links("see [beta](name:beta)")
+    assert "(../transport/#beta)" in out
+
+    renderer._current_domain = "transport"
+    out_same = renderer._rewrite_name_links("see [beta](name:beta)")
+    assert "(#beta)" in out_same
+
+
 def test_catalog_render_rewrites_name_links_in_documentation(tmp_path: Path):
     """name: links inside documentation strings are rewritten to anchors."""
     (tmp_path / "alpha.yml").write_text(
-        """name: alpha_quantity
-kind: scalar
-status: active
-unit: m
-physics_domain: geometry
-description: See also [beta_quantity](name:beta_quantity).
-documentation: |
-  Detailed text referencing [beta_quantity](name:beta_quantity).
+        """- name: alpha_quantity
+  kind: scalar
+  status: active
+  unit: m
+  physics_domain: geometry
+  description: See also [beta_quantity](name:beta_quantity).
+  documentation: |
+    Detailed text referencing [beta_quantity](name:beta_quantity).
+- name: beta_quantity
+  kind: scalar
+  status: active
+  unit: m
+  physics_domain: geometry
+  description: Beta.
 """,
         encoding="utf-8",
     )
@@ -315,9 +376,12 @@ def test_render_sources_empty(tmp_path: Path):
 
 
 def test_render_sources_dd_path(tmp_path: Path):
-    """Sources block emits dd_path labels inside <details>."""
-    from imas_standard_names.rendering.catalog import CatalogRenderer
+    """Sources are emitted as an expandable list inside a ``<details>`` block.
 
+    Each source becomes one bullet line — a ``dd:`` path for DD-sourced
+    entries, the signal id otherwise — with the optional pipeline
+    status as italic context.
+    """
     renderer = CatalogRenderer(tmp_path)
     sources = [
         {"dd_path": "equilibrium/time_slice/profiles_1d/psi", "status": "extracted"},
@@ -326,17 +390,25 @@ def test_render_sources_dd_path(tmp_path: Path):
             "status": "composed",
         },
     ]
-    block = renderer._render_sources(sources)
+    block = renderer._render_sources_block(sources)
 
-    assert "<details>" in block
-    assert "<summary>Sources (debug)</summary>" in block
-    assert "`dd:equilibrium/time_slice/profiles_1d/psi` (extracted)" in block
-    assert "`dd:core_profiles/profiles_1d/electrons/temperature` (composed)" in block
+    assert '<details class="sn-sources-details">' in block
+    # Summary surfaces the count (plural form for >1)
+    assert "<summary>2 sources</summary>" in block
+    assert '<div class="sn-sources-list" markdown>' in block
+    # Each source is a markdown bullet with the dd:<path> in code style
+    assert (
+        "- `dd:equilibrium/time_slice/profiles_1d/psi` _(status: extracted)_" in block
+    )
+    assert (
+        "- `dd:core_profiles/profiles_1d/electrons/temperature` "
+        "_(status: composed)_" in block
+    )
     assert "</details>" in block
 
 
 def test_catalog_render_includes_sources_block(tmp_path: Path):
-    """Sources count appears in the meta line when present."""
+    """Sources surface as an expandable details block inside each entry."""
     (tmp_path / "psi.yml").write_text(
         """name: poloidal_flux
 kind: scalar
@@ -355,18 +427,20 @@ sources:
     renderer = CatalogRenderer(tmp_path)
     catalog = renderer.render_catalog()
 
-    assert "sn-sources" in catalog
+    assert '<details class="sn-sources-details">' in catalog
     # Singular form when there's exactly one source
-    assert "1 source</span>" in catalog
+    assert "<summary>1 source</summary>" in catalog
+    # The dd path is rendered as a code-styled bullet
+    assert "`dd:equilibrium/time_slice/profiles_1d/psi`" in catalog
 
 
 def test_catalog_render_no_sources_block_when_absent(tmp_path: Path):
-    """No sources span when sources field is absent from YAML."""
+    """No sources details block when sources field is absent from YAML."""
     catalog_path = _make_test_catalog(tmp_path)
     renderer = CatalogRenderer(catalog_path)
     catalog = renderer.render_catalog()
 
-    assert "sn-sources" not in catalog
+    assert "sn-sources-details" not in catalog
 
 
 @pytest.mark.xfail(
@@ -415,13 +489,12 @@ def test_parse_locus_none():
     assert CatalogRenderer._parse_locus("electron_temperature") is None
 
 
-def test_locus_grouping_orders_shared_locus_together(tmp_path: Path):
-    """Entries sharing a locus token are emitted consecutively.
+def test_locus_grouping_emits_group_titles_with_indented_names(tmp_path: Path):
+    """Each locus cluster gets an H2 group title; SNs are H3 underneath.
 
-    The new design has no visible group headings — locus drives the
-    internal ordering only. Two ``_of_magnetic_axis`` entries must
-    appear before the unrelated bare entry, so the locus cluster is
-    visually grouped on the page.
+    The two-level heading layout is what powers the left-hand TOC
+    sidebar: ``magnetic_axis`` (group) → ``major_radius_of_magnetic_axis``
+    (name) appears as an indented entry in the navigation tree.
     """
     (tmp_path / "eq.yml").write_text(
         """- name: major_radius_of_magnetic_axis
@@ -447,24 +520,31 @@ def test_locus_grouping_orders_shared_locus_together(tmp_path: Path):
     renderer = CatalogRenderer(tmp_path)
     page = renderer.render_domain_page("equilibrium")
 
-    # All three entries present as name-headings
+    # The locus cluster gets an H2 group title with the .sn-group class
     assert (
-        "## major_radius_of_magnetic_axis { #major_radius_of_magnetic_axis .sn-name }"
-        in page
-    )
-    assert "## vertical_coordinate_of_magnetic_axis" in page
-    assert "## electron_temperature" in page
+        '## magnetic axis { #group--magnetic_axis .sn-group data-group-size="2" }'
+    ) in page
+    # The bare quantity becomes its own one-entry group
+    assert "## temperature { #group--temperature .sn-group" in page
+    # SNs are H3 with the .sn-name class
+    assert (
+        "### major_radius_of_magnetic_axis { #major_radius_of_magnetic_axis .sn-name }"
+    ) in page
+    assert "### vertical_coordinate_of_magnetic_axis" in page
+    assert "### electron_temperature { #electron_temperature .sn-name }" in page
 
-    # No group headings or locus sub-group wrapper
+    # No legacy locus-group wrapper div
     assert "sn-locus-group" not in page
-    assert "## magnetic axis" not in page
-    assert "### magnetic axis" not in page
 
-    # Locus-sharing entries appear consecutively, before the bare one
-    pos_major = page.index("## major_radius_of_magnetic_axis")
-    pos_vert = page.index("## vertical_coordinate_of_magnetic_axis")
-    pos_te = page.index("## electron_temperature")
-    assert max(pos_major, pos_vert) < pos_te
+    # Entries are nested under their group title
+    pos_magnetic_axis_h2 = page.index("## magnetic axis ")
+    pos_temperature_h2 = page.index("## temperature ")
+    pos_major = page.index("### major_radius_of_magnetic_axis")
+    pos_vert = page.index("### vertical_coordinate_of_magnetic_axis")
+    pos_te = page.index("### electron_temperature")
+    assert pos_magnetic_axis_h2 < pos_major < pos_temperature_h2
+    assert pos_magnetic_axis_h2 < pos_vert < pos_temperature_h2
+    assert pos_temperature_h2 < pos_te
 
 
 def test_docs_pending_badge(tmp_path: Path):
@@ -490,17 +570,25 @@ def test_mermaid_rendered_inline_not_in_details(tmp_path: Path):
     The previous design wrapped mermaid in a collapsible ``<details>``
     block which the Material mermaid runtime never expanded, so
     diagrams never appeared on the deployed site. Mermaid must now be
-    emitted as a top-level fenced block.
+    emitted as a top-level fenced block. The click directive on the
+    target node is emitted only when the target exists in the
+    catalog.
     """
     (tmp_path / "psi.yml").write_text(
-        """name: poloidal_flux
-kind: scalar
-unit: Wb
-physics_domain: equilibrium
-description: Poloidal flux.
-arguments:
+        """- name: poloidal_flux
+  kind: scalar
+  unit: Wb
+  physics_domain: equilibrium
+  description: Poloidal flux.
+  arguments:
+  - name: magnetic_flux
+    operator: component
+
 - name: magnetic_flux
-  operator: component
+  kind: scalar
+  unit: Wb
+  physics_domain: equilibrium
+  description: Magnetic flux base quantity.
 """,
         encoding="utf-8",
     )
@@ -509,7 +597,7 @@ arguments:
 
     assert "```mermaid" in catalog
     assert "graph LR" in catalog
-    # Click handler still emitted for the target node
+    # Click handler emitted for the target node (same page → bare anchor)
     assert 'click n1 "#magnetic_flux"' in catalog
     # Mermaid block NOT wrapped in <details>...<summary>relationships</summary>
     assert "<summary>relationships</summary>" not in catalog

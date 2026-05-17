@@ -142,17 +142,31 @@ class YamlStore:
                         self.validation_warnings.append(w)
                         warnings.warn(w, stacklevel=1)
 
-        # Handle structural validation errors in permissive mode
+        # Separate warning/info-severity issues from genuine errors. The
+        # semantic checks tag their messages with " WARNING - " or " INFO -
+        # " prefixes; those should not abort loading in strict mode.
+        # Structural checks emit untagged messages, which are treated as
+        # errors.
         issues = validate_models({m.name: m for m in models})
         if issues:
-            if self.permissive:
-                self.validation_warnings.extend(
-                    [f"Structural: {issue}" for issue in issues]
-                )
-            else:
-                raise ValueError(
-                    "Structural validation failed on load:\n" + "\n".join(issues)
-                )
+            errors = [
+                i for i in issues if " WARNING - " not in i and " INFO - " not in i
+            ]
+            advisory = [i for i in issues if i not in errors]
+
+            for note in advisory:
+                self.validation_warnings.append(f"Structural: {note}")
+                warnings.warn(note, stacklevel=1)
+
+            if errors:
+                if self.permissive:
+                    self.validation_warnings.extend(
+                        [f"Structural: {issue}" for issue in errors]
+                    )
+                else:
+                    raise ValueError(
+                        "Structural validation failed on load:\n" + "\n".join(errors)
+                    )
         return models
 
 

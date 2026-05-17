@@ -3,22 +3,22 @@
 Provides reusable catalog rendering logic that can be used by both
 the main project docs and external catalog repositories.
 
-The renderer groups entries by *locus* (the structural or spatial
-"what is this attached to" token extracted by the ISN grammar IR
-parser). Locus-first grouping clusters names that refer to the same
-physical object/region/position together — e.g. all reflectometer
-antenna properties appear in one block, all separatrix quantities in
-another. Names without a locus fall back to grouping by their
-physical-base token (e.g. all magnetic-flux variants together).
+Entries on a per-domain page are clustered by *locus* — the structural
+or spatial "what is this attached to" token extracted by the ISN
+grammar IR parser. Each locus or quantity cluster gets a subtle group
+title (H2) and the standard names beneath it (H3). The group title +
+indented name layout shows up in the left-hand TOC sidebar as a
+two-level hierarchy: domain → group → name.
 
-The visual design emphasises the standard name itself as the primary
-heading for each entry. Group ordering is internal — no group
-heading clutter is rendered, so the page TOC is a flat list of
-canonical names.
+Cross-domain ``name:foo`` references in description and documentation
+fields are resolved against a global ``name → domain`` index so they
+point at the right page anchor even when the target lives on a
+different domain page.
 """
 
 from __future__ import annotations
 
+import html as _html
 import os
 import re
 from collections import defaultdict
@@ -26,20 +26,14 @@ from pathlib import Path
 
 import yaml
 
-# Rewrite [label](name:foo_bar) → [label](#foo_bar) for in-page anchors.
+# Rewrite [label](name:foo_bar) → in-page or cross-page anchor depending
+# on the global name → domain index attached to the renderer instance.
 _NAME_LINK_RE = re.compile(r"\[([^\]]+)\]\(name:([a-z0-9_]+)\)")
 
 
 def _humanize(name: str) -> str:
     """Convert ``snake_case`` standard name to readable text."""
     return name.replace("_", " ")
-
-
-def _rewrite_name_links(text: str) -> str:
-    """Replace ``name:foo`` protocol links with humanized in-page anchors."""
-    return _NAME_LINK_RE.sub(
-        lambda m: f"[{_humanize(m.group(2))}](#{m.group(2)})", text
-    )
 
 
 _UNIT_SUP_RE = re.compile(r"\^(-?\d+)")
@@ -72,6 +66,62 @@ class CatalogRenderer:
     def __init__(self, catalog_path: Path):
         self.catalog_path = Path(catalog_path)
         self._names: list[dict] | None = None
+        self._name_index: dict[str, str] | None = None  # name → physics_domain
+        self._current_domain: str | None = None
+
+    # ------------------------------------------------------------------
+    # Name index — used for cross-page link resolution
+    # ------------------------------------------------------------------
+    def _build_name_index(self) -> dict[str, str]:
+        if self._name_index is None:
+            self._name_index = {
+                item["name"]: (item.get("physics_domain") or "uncategorized")
+                for item in self.load_names()
+                if item.get("name")
+            }
+        return self._name_index
+
+    def _resolve_name_link(self, target: str) -> str | None:
+        """Return the markdown link URL for a ``name:target`` reference.
+
+        ``target`` is interpreted relative to ``self._current_domain``
+        (set while rendering a per-domain page). Returns:
+
+        - ``f"#{target}"`` if the target lives on the current page
+          (same domain, or domain context not set);
+        - ``f"../{domain}/#{target}"`` if it lives in a sibling domain
+          page;
+        - ``None`` if the target is not present in the catalog at all
+          (caller should degrade the reference to plain styled text).
+        """
+        index = self._build_name_index()
+        target_domain = index.get(target)
+        if target_domain is None:
+            return None
+        if self._current_domain is None or target_domain == self._current_domain:
+            return f"#{target}"
+        return f"../{target_domain}/#{target}"
+
+    def _rewrite_name_links(self, text: str) -> str:
+        """Replace ``name:foo`` protocol links with the resolved URL.
+
+        Missing targets degrade to a styled ``<span class="sn-missing">``
+        with the humanised name — the prose cue stays visible without
+        emitting a dead anchor that mkdocs would flag as a broken link.
+        """
+
+        def _sub(m: re.Match) -> str:
+            label = m.group(1)
+            target = m.group(2)
+            humanised = _humanize(target)
+            if label == target or label == humanised:
+                label = humanised
+            url = self._resolve_name_link(target)
+            if url is None:
+                return f'<span class="sn-missing" title="not in catalog">{label}</span>'
+            return f"[{label}]({url})"
+
+        return _NAME_LINK_RE.sub(_sub, text)
 
     def load_names(self) -> list[dict]:
         """Load all YAML standard names from the catalog directory.
@@ -263,16 +313,24 @@ class CatalogRenderer:
             return (1, base)
         return (2, "unknown")
 
+    @classmethod
+    def _group_title(cls, key: tuple[int, str]) -> str:
+        """Humanise a ``(priority, token)`` group key into a display title."""
+        priority, token = key
+        if priority == 2:
+            return "Other quantities"
+        return _humanize(token)
+
     # ------------------------------------------------------------------
     # Visual rendering helpers
     # ------------------------------------------------------------------
-    @staticmethod
-    def _render_links(links: list[str]) -> str:
-        """Render ``links:`` as markdown; ``name:X`` → humanized in-page anchor.
+    def _render_links(self, links: list[str]) -> str:
+        """Render ``links:`` as markdown.
 
-        Emitted as plain markdown so the link syntax resolves; the
-        leading ``.sn-see-also`` class is attached via ``attr_list``
-        for CSS targeting.
+        ``name:X`` tokens resolve through :meth:`_resolve_name_link` so
+        cross-domain anchors stay live on the deployed site. Targets
+        missing from the catalog degrade to styled-but-inert spans so
+        the See-also line never emits a dead anchor.
         """
         if not links:
             return ""
@@ -284,7 +342,15 @@ class CatalogRenderer:
             if link.startswith("name:"):
                 target = link[len("name:") :].strip()
                 if target:
-                    parts.append(f"[{_humanize(target)}](#{target})")
+                    label = _humanize(target)
+                    url = self._resolve_name_link(target)
+                    if url is None:
+                        parts.append(
+                            f'<span class="sn-missing" '
+                            f'title="not in catalog">{label}</span>'
+                        )
+                    else:
+                        parts.append(f"[{label}]({url})")
             elif link:
                 parts.append(f"[{link}]({link})")
         if not parts:
@@ -307,14 +373,16 @@ class CatalogRenderer:
             parts.append(f"shape={shape}")
         return " ".join(parts)
 
-    @classmethod
-    def _render_mermaid(cls, item: dict) -> str:
+    def _render_mermaid(self, item: dict) -> str:
         """Render a Mermaid hierarchy when structural fields exist.
 
         Emitted as a plain ```mermaid``` fenced block (no enclosing
         ``<details>``) so the diagram renders immediately on page load.
-        Nodes carry humanised labels and are clickable to in-page
-        anchors.
+        Nodes carry humanised labels and are clickable: in-page anchors
+        when the target lives on the same page, sibling-page URLs when
+        the target lives in another domain. Nodes that point at SNs not
+        present in the catalog still appear in the diagram but receive
+        no ``click`` directive (the click would dead-end).
         """
         arguments = item.get("arguments") or []
         error_variants = item.get("error_variants") or {}
@@ -350,7 +418,7 @@ class CatalogRenderer:
         src = _decl(name)
         for arg in arguments:
             if isinstance(arg, dict) and arg.get("name"):
-                label = cls._argument_label(arg)
+                label = self._argument_label(arg)
                 tgt = _decl(arg["name"])
                 lines.append(f'  {src} -- "{label}" --> {tgt}')
             elif isinstance(arg, str):
@@ -369,8 +437,14 @@ class CatalogRenderer:
             lines.append(f'  {src} -- "superseded by" --> {tgt}')
 
         for full_name, nid in nodes.items():
-            if full_name != name:
-                lines.append(f'  click {nid} "#{full_name}"')
+            if full_name == name:
+                continue
+            url = self._resolve_name_link(full_name)
+            if url is None:
+                # Target missing from the catalog — skip click directive
+                # to avoid creating a dead anchor.
+                continue
+            lines.append(f'  click {nid} "{url}"')
 
         lines.append("```")
         return "\n".join(lines) + "\n\n"
@@ -390,21 +464,26 @@ class CatalogRenderer:
                     wrapped_by.setdefault(target, []).append(src)
         return wrapped_by
 
-    @staticmethod
     def _render_sibling_nav(
+        self,
         item: dict,
         wrapped_by: dict[str, list[str]],
     ) -> str:
         """Render compact sibling navigation (arguments, wrappers, variants).
 
         Emitted as plain markdown paragraphs tagged with ``.sn-meta``
-        via ``attr_list``. Plain markdown is required so the embedded
-        ``[label](#anchor)`` links actually resolve.
+        via ``attr_list``. ``name:foo``-style references are routed
+        through :meth:`_resolve_name_link` so cross-domain targets stay
+        live.
         """
         lines: list[str] = []
 
         def _link(target: str) -> str:
-            return f"[{_humanize(target)}](#{target})"
+            label = _humanize(target)
+            url = self._resolve_name_link(target)
+            if url is None:
+                return f'<span class="sn-missing" title="not in catalog">{label}</span>'
+            return f"[{label}]({url})"
 
         arguments = item.get("arguments") or []
         arg_links = []
@@ -444,42 +523,70 @@ class CatalogRenderer:
         return "\n\n".join(line + "\n{: .sn-meta }" for line in lines) + "\n\n"
 
     @staticmethod
-    def _render_sources(sources: list[dict]) -> str:
-        """Render a collapsed ``<details>`` block listing debug source provenance."""
+    def _render_sources_block(sources: list[dict]) -> str:
+        """Render an expandable ``<details>`` block listing source provenance.
+
+        Each source becomes one line of preformatted text — a ``dd:``
+        path for DD-sourced entries, the signal id otherwise. The
+        ``<summary>`` carries the source count so the block doubles as
+        the meta-line indicator the user can click to drill in.
+        """
         if not sources:
             return ""
-        lines: list[str] = ["<details>", "<summary>Sources (debug)</summary>", ""]
+        n = len(sources)
+        summary = f"{n} source{'s' if n != 1 else ''}"
+        lines: list[str] = [
+            '<details class="sn-sources-details">',
+            f"<summary>{summary}</summary>",
+            "",
+            '<div class="sn-sources-list" markdown>',
+            "",
+        ]
         for src in sources:
             dd_path = src.get("dd_path")
             signal_id = src.get("signal_id")
             status = src.get("status") or ""
-            label = f"dd:{dd_path}" if dd_path else (signal_id or src.get("id", "?"))
-            status_str = f" ({status})" if status else ""
-            lines.append(f"- `{label}`{status_str}")
-        lines += ["", "</details>", ""]
+            if dd_path:
+                label = f"dd:{dd_path}"
+            elif signal_id:
+                label = signal_id
+            else:
+                label = src.get("id", "?")
+            status_str = f" _(status: {status})_" if status else ""
+            lines.append(f"- `{_html.escape(label)}`{status_str}")
+        lines += ["", "</div>", "", "</details>", ""]
         return "\n".join(lines) + "\n"
 
+    # Kept as a thin alias for backwards-compatible callers/tests.
+    @staticmethod
+    def _render_sources(sources: list[dict]) -> str:
+        return CatalogRenderer._render_sources_block(sources)
+
     def _render_entry(self, item: dict, wrapped_by: dict[str, list[str]]) -> str:
-        """Render a single standard name entry with a name-as-heading layout.
+        """Render a single standard name entry.
 
         Layout:
         ::
 
-            ## name { #name .sn-name }
-            <meta line: unit · sources count>
+            ### name { #name .sn-name }
+            <meta line: unit · expandable sources>
             > one-line description
             documentation paragraphs
             ```mermaid …``` (inline if present)
             <see-also / sibling-nav lines>
+
+        H3 is used so the entry sits one level below the group title
+        (H2) in the page TOC, giving the left-hand sidebar a natural
+        domain → group → name hierarchy.
         """
         name = item.get("name", "Unknown")
         unit = item.get("unit", "")
-        description = _rewrite_name_links(item.get("description", ""))
-        documentation = _rewrite_name_links(
+        description = self._rewrite_name_links(item.get("description", ""))
+        documentation = self._rewrite_name_links(
             self._fix_markdown_formatting(item.get("documentation", ""))
         )
 
-        result = f"## {name} {{ #{name} .sn-name }}\n\n"
+        result = f"### {name} {{ #{name} .sn-name }}\n\n"
 
         meta_bits: list[str] = []
         if unit:
@@ -487,12 +594,6 @@ class CatalogRenderer:
         kind = item.get("kind")
         if kind and kind not in ("scalar", None):
             meta_bits.append(f'<span class="sn-kind">{kind}</span>')
-        sources = item.get("sources") or []
-        if sources:
-            meta_bits.append(
-                f'<span class="sn-sources">{len(sources)} source'
-                f"{'s' if len(sources) != 1 else ''}</span>"
-            )
         if meta_bits:
             result += '<p class="sn-meta-line">' + " · ".join(meta_bits) + "</p>\n\n"
 
@@ -519,16 +620,21 @@ class CatalogRenderer:
         if sibling_md:
             result += sibling_md
 
+        sources = item.get("sources") or []
+        if sources:
+            result += self._render_sources_block(sources) + "\n"
+
         return result
 
-    def _ordered_items(self, items: list[dict]) -> list[dict]:
-        """Return items ordered by locus-first grouping.
+    def _grouped_items(
+        self, items: list[dict]
+    ) -> list[tuple[tuple[int, str], list[dict]]]:
+        """Return groups in display order.
 
         Within each group, entries are sorted alphabetically. Groups
-        are ordered largest first (so visually clustered topics appear
-        at the top of the page), then alphabetically by key as a
-        tie-breaker. Locus groups (priority 0) win ties against base
-        groups (priority 1).
+        are ordered largest first (so the most cohesive clusters
+        emerge at the top of the page), then by locus-priority and
+        finally alphabetically by token.
         """
         groups: dict[tuple[int, str], list[dict]] = defaultdict(list)
         for item in items:
@@ -539,40 +645,64 @@ class CatalogRenderer:
             (priority, token), bucket = entry
             return (-len(bucket), priority, token)
 
-        ordered: list[dict] = []
-        for _key, bucket in sorted(groups.items(), key=_sort_key):
+        ordered: list[tuple[tuple[int, str], list[dict]]] = []
+        for key, bucket in sorted(groups.items(), key=_sort_key):
             bucket.sort(key=lambda x: x.get("name", ""))
-            ordered.extend(bucket)
+            ordered.append((key, bucket))
         return ordered
 
-    def render_domain_page(self, domain: str) -> str:
-        """Generate a single domain page with locus-first ordering.
+    def _ordered_items(self, items: list[dict]) -> list[dict]:
+        """Flatten :meth:`_grouped_items` back into a single ordered list."""
+        out: list[dict] = []
+        for _key, bucket in self._grouped_items(items):
+            out.extend(bucket)
+        return out
 
-        The page renders a flat list of standard-name entries. Each
-        entry is its own H2 (the canonical snake_case name), so the
-        page TOC lists every name. Internal ordering follows
-        :meth:`_ordered_items` — entries that share a locus or base
-        appear together without any visible group heading.
+    def _group_anchor(self, key: tuple[int, str]) -> str:
+        """Stable HTML id for a group heading."""
+        _priority, token = key
+        return f"group--{token}"
+
+    def render_domain_page(self, domain: str) -> str:
+        """Generate a single domain page with two-level grouping.
+
+        Each group emits an H2 *group title* (``.sn-group``) followed
+        by its H3 *name entries* (``.sn-name``). With ``toc.integrate``
+        the left sidebar collapses the resulting heading tree into a
+        clean ``domain → group → name`` hierarchy.
         """
         domains = self.get_domains()
         items = domains.get(domain, [])
         if not items:
             return f"_No standard names found for domain: {domain}_\n"
 
-        domain_display = domain.replace("_", " ").title()
-        wrapped_by = self._build_wrapped_by_index(self.load_names())
+        # Set the current domain so cross-page link rewriting picks the
+        # right side of the same-page / sibling-page choice.
+        self._current_domain = domain
+        try:
+            domain_display = domain.replace("_", " ").title()
+            wrapped_by = self._build_wrapped_by_index(self.load_names())
 
-        result = f"# {domain_display}\n\n"
-        result += (
-            f'<p class="sn-domain-summary">'
-            f"<strong>{len(items)}</strong> standard names in this domain."
-            f"</p>\n\n"
-        )
+            result = f"# {domain_display}\n\n"
+            result += (
+                f'<p class="sn-domain-summary">'
+                f"<strong>{len(items)}</strong> standard names in this domain."
+                f"</p>\n\n"
+            )
 
-        for item in self._ordered_items(items):
-            result += self._render_entry(item, wrapped_by)
+            for key, bucket in self._grouped_items(items):
+                title = self._group_title(key)
+                anchor = self._group_anchor(key)
+                result += (
+                    f"## {title} "
+                    f'{{ #{anchor} .sn-group data-group-size="{len(bucket)}" }}\n\n'
+                )
+                for item in bucket:
+                    result += self._render_entry(item, wrapped_by)
 
-        return result
+            return result
+        finally:
+            self._current_domain = None
 
     def render_catalog(self) -> str:
         """Generate complete catalog organized by physics domain.
@@ -593,8 +723,15 @@ class CatalogRenderer:
         for domain, items in sorted(domains.items()):
             domain_display = domain.replace("_", " ").title()
             result += f"## {domain_display} {{: #{domain} }}\n\n"
-            for item in self._ordered_items(items):
-                result += self._render_entry(item, wrapped_by)
+            # Set domain context so cross-domain link resolution works
+            # the same way on the all-domains overview as on the
+            # per-domain pages.
+            self._current_domain = domain
+            try:
+                for item in self._ordered_items(items):
+                    result += self._render_entry(item, wrapped_by)
+            finally:
+                self._current_domain = None
 
         return result
 

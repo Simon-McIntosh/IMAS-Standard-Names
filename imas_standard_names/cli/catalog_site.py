@@ -42,7 +42,10 @@ theme:
     - navigation.top
     - search.highlight
     - search.suggest
-    - toc.follow
+    # toc.integrate folds the per-page TOC into the left navigation
+    # sidebar, giving us a single left-aligned tree of:
+    #   physics-domain → group title → standard name
+    - toc.integrate
     - content.code.copy
   palette:
     - scheme: default
@@ -71,7 +74,7 @@ markdown_extensions:
   - md_in_html
   - toc:
       permalink: true
-      toc_depth: 2
+      toc_depth: 3
 """
 
 _EXTRAS_BLOCK = """\
@@ -135,35 +138,94 @@ plugins:
 )
 
 CATALOG_CSS = """\
-/* Standard Names Catalog — name-as-heading reference design.
-   Goal: the canonical name is the most prominent element on every
-   entry, with no chromed accents or coloured rules that compete for
-   attention. Mermaid diagrams render inline. */
+/* Standard Names Catalog — two-level reference design.
 
-/* ---------- Layout & rhythm ---------- */
+   Each per-domain page is structured as:
+       H1 = physics domain
+       H2 = group title (locus or quantity cluster, .sn-group)
+       H3 = canonical standard name (.sn-name)
+
+   With toc.integrate the left sidebar collapses this tree into a
+   navigable domain → group → name index. Group titles are
+   deliberately quiet on the page so the canonical names remain the
+   primary visual element. */
+
+/* ---------- Left navigation — widen the sidebar so most names fit
+   without horizontal scroll, and indent group/name entries clearly. */
+.md-sidebar--primary,
+.md-sidebar--primary .md-sidebar__scrollwrap {
+    width: 22rem;
+}
+
+@media screen and (min-width: 76.25em) {
+    .md-grid {
+        max-width: 100%;
+    }
+    .md-content {
+        margin-left: 22rem;
+    }
+}
+
+/* Tighten nav item spacing and surface the second-level indent. */
+.md-nav__item .md-nav__item .md-nav__link {
+    padding-left: 0.6rem;
+    font-size: 0.74rem;
+    line-height: 1.3;
+}
+.md-nav__item .md-nav__item .md-nav__item .md-nav__link {
+    padding-left: 1.4rem;
+    font-family: var(--md-code-font, "Roboto Mono", monospace);
+    font-size: 0.72rem;
+    color: var(--md-default-fg-color--light);
+}
+.md-nav__item .md-nav__item .md-nav__item .md-nav__link:hover,
+.md-nav__item .md-nav__item .md-nav__item .md-nav__link--active {
+    color: var(--md-default-fg-color);
+}
+
+/* ---------- Domain summary line ---------- */
 .md-typeset .sn-domain-summary {
     color: var(--md-default-fg-color--light);
     font-size: 0.9rem;
     margin: 0.2rem 0 1.6rem;
 }
 
-/* Canonical name heading — monospace, prominent, no blue underline. */
-.md-typeset h2.sn-name,
-.md-typeset h2[id].sn-name {
+/* ---------- Group title (H2) — visible but quiet on the page;
+   prominent as a section header in the left nav. */
+.md-typeset h2.sn-group {
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--md-default-fg-color--light);
+    border-bottom: none !important;
+    margin: 2.4rem 0 0.4rem;
+    padding-bottom: 0.2rem;
+    border-top: 1px solid var(--md-default-fg-color--lightest);
+    padding-top: 1rem;
+}
+
+.md-typeset .sn-domain-summary + h2.sn-group {
+    border-top: none;
+    margin-top: 0.6rem;
+    padding-top: 0;
+}
+
+/* ---------- Canonical name heading (H3) — monospace, prominent. */
+.md-typeset h3.sn-name,
+.md-typeset h3[id].sn-name {
     font-family: var(--md-code-font, "Roboto Mono", monospace);
-    font-size: 1.18rem;
+    font-size: 1.15rem;
     font-weight: 600;
     letter-spacing: 0;
     color: var(--md-default-fg-color);
-    border-bottom: none !important;
-    margin: 2.4rem 0 0.4rem;
-    padding-top: 0.55rem;
-    border-top: 1px solid var(--md-default-fg-color--lightest);
+    margin: 1.6rem 0 0.3rem;
+    padding: 0.4rem 0 0;
     line-height: 1.3;
     overflow-wrap: anywhere;
 }
 
-.md-typeset h2.sn-name:target {
+.md-typeset h3.sn-name:target {
     color: var(--md-default-fg-color);
     background: linear-gradient(
         to right,
@@ -173,7 +235,7 @@ CATALOG_CSS = """\
     padding-left: 0.4rem;
 }
 
-[data-md-color-scheme="slate"] .md-typeset h2.sn-name:target {
+[data-md-color-scheme="slate"] .md-typeset h3.sn-name:target {
     background: linear-gradient(
         to right,
         rgba(255, 255, 255, 0.06),
@@ -181,11 +243,9 @@ CATALOG_CSS = """\
     );
 }
 
-/* First entry on the page sits flush with the summary line. */
-.md-typeset .sn-domain-summary + h2.sn-name {
-    border-top: none;
-    margin-top: 0.5rem;
-    padding-top: 0;
+/* First entry inside a group sits flush with the group title. */
+.md-typeset h2.sn-group + h3.sn-name {
+    margin-top: 0.4rem;
 }
 
 /* ---------- Meta line beneath name ---------- */
@@ -288,6 +348,69 @@ CATALOG_CSS = """\
     color: var(--md-default-fg-color--light);
 }
 
+/* ---------- Missing-target span — for references whose target was
+   filtered out of the catalog. Renders as italic muted text instead
+   of a dead anchor link. */
+.md-typeset .sn-missing {
+    font-style: italic;
+    color: var(--md-default-fg-color--light);
+    border-bottom: 1px dotted var(--md-default-fg-color--lighter);
+    cursor: help;
+}
+
+/* ---------- Sources expandable block ---------- */
+.md-typeset details.sn-sources-details {
+    margin: 0.6rem 0 1rem;
+    padding: 0;
+    background: transparent;
+    border: 1px solid var(--md-default-fg-color--lightest);
+    border-radius: 0.3rem;
+}
+
+.md-typeset details.sn-sources-details > summary {
+    font-size: 0.78rem;
+    color: var(--md-default-fg-color--light);
+    cursor: pointer;
+    padding: 0.35rem 0.7rem;
+    user-select: none;
+    font-weight: 500;
+}
+
+.md-typeset details.sn-sources-details > summary:hover {
+    color: var(--md-default-fg-color);
+    background: var(--md-code-bg-color);
+}
+
+.md-typeset details.sn-sources-details[open] > summary {
+    border-bottom: 1px solid var(--md-default-fg-color--lightest);
+}
+
+.md-typeset .sn-sources-list {
+    padding: 0.4rem 0.7rem 0.2rem;
+    font-size: 0.78rem;
+    line-height: 1.5;
+}
+
+.md-typeset .sn-sources-list ul {
+    margin: 0;
+    padding-left: 1.1rem;
+}
+
+.md-typeset .sn-sources-list li {
+    margin: 0.1rem 0;
+}
+
+.md-typeset .sn-sources-list code {
+    font-size: 0.78rem;
+    color: var(--md-default-fg-color);
+    word-break: break-all;
+}
+
+.md-typeset .sn-sources-list em {
+    color: var(--md-default-fg-color--lighter);
+    margin-left: 0.3rem;
+}
+
 /* ---------- Domain overview ---------- */
 .md-typeset .sn-domain-grid table {
     font-size: 0.9rem;
@@ -305,8 +428,9 @@ CATALOG_CSS = """\
     color: var(--md-default-fg-color);
 }
 
-/* Generic group headings (overview, indexes) — quiet underline. */
-.md-typeset h2 {
+/* Generic group headings (overview, indexes) — quiet underline.
+   Scoped to NOT touch h2.sn-group, which carries its own styling. */
+.md-typeset h2:not(.sn-group) {
     border-bottom: 1px solid var(--md-default-fg-color--lightest);
     padding-bottom: 0.2rem;
     margin-top: 1.6rem;
@@ -319,7 +443,8 @@ CATALOG_CSS = """\
     transition: opacity 0.1s;
 }
 
-.md-typeset h2:hover .headerlink {
+.md-typeset h2:hover .headerlink,
+.md-typeset h3:hover .headerlink {
     opacity: 1;
 }
 """
