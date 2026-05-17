@@ -119,20 +119,27 @@ def test_catalog_renderer_render_catalog_groups_by_physics_domain(tmp_path: Path
     assert "[eV]" not in catalog
 
 
-def test_catalog_renderer_render_catalog_raw_base_name(tmp_path: Path):
-    """Base name heading uses humanized physical_base text."""
+def test_catalog_renderer_render_catalog_name_as_heading(tmp_path: Path):
+    """Each entry's canonical name is rendered as the H2 heading.
+
+    The new design drops group-level base/locus headings — the
+    snake_case standard name is itself the H2 with anchored id and
+    the ``.sn-name`` class for styling.
+    """
     catalog_path = _make_test_catalog(tmp_path)
     renderer = CatalogRenderer(catalog_path)
     catalog = renderer.render_catalog()
 
-    # Should see physical_base in H2 headings (parser returns 'temperature')
-    assert "## temperature" in catalog.lower() or "## Temperature" in catalog
-    # Entries use minimal div styling
-    assert '<div class="sn-entry"' in catalog
-    # Should NOT see old backtick style
+    # Each name becomes its own H2 anchored entry
+    assert "## electron_temperature { #electron_temperature .sn-name }" in catalog
+    assert "## ion_temperature { #ion_temperature .sn-name }" in catalog
+    # No group-level H2/H3 base/locus headings appear
+    assert "## temperature" not in catalog.lower()
+    assert "### temperature" not in catalog.lower()
+    # No legacy backtick-style entries
     assert "### `" not in catalog
-    # Should NOT see count in parentheses
-    assert "###" in catalog and "(" not in catalog.split("###")[1].split("\n")[0]
+    # No legacy sn-entry div wrapper — entries use plain markdown headings
+    assert '<div class="sn-entry"' not in catalog
 
 
 def test_catalog_renderer_render_catalog_no_cocos_no_tags(tmp_path: Path):
@@ -173,9 +180,11 @@ def test_catalog_renderer_render_navigation(tmp_path: Path):
 
     # Navigation section uses title-cased domain
     assert "Transport" in nav
-    # Navigation shows base groups without counts
-    assert "temperature" in nav
-    assert "(2)" not in nav  # Counts removed for cleaner nav
+    # Navigation lists canonical names (snake_case, used as in-page anchors)
+    assert "electron_temperature" in nav
+    assert "ion_temperature" in nav
+    # No counts inline next to entries
+    assert "(2)" not in nav
 
 
 def test_catalog_renderer_loads_from_subdirectories(tmp_path: Path):
@@ -327,7 +336,7 @@ def test_render_sources_dd_path(tmp_path: Path):
 
 
 def test_catalog_render_includes_sources_block(tmp_path: Path):
-    """Sources <details> block appears in full catalog render when sources present."""
+    """Sources count appears in the meta line when present."""
     (tmp_path / "psi.yml").write_text(
         """name: poloidal_flux
 kind: scalar
@@ -347,8 +356,8 @@ sources:
     catalog = renderer.render_catalog()
 
     assert "sn-sources" in catalog
-    # Sources shown as count footer, not inside <details>
-    assert "1 sources" in catalog
+    # Singular form when there's exactly one source
+    assert "1 source</span>" in catalog
 
 
 def test_catalog_render_no_sources_block_when_absent(tmp_path: Path):
@@ -406,8 +415,14 @@ def test_parse_locus_none():
     assert CatalogRenderer._parse_locus("electron_temperature") is None
 
 
-def test_locus_subgrouping_in_domain_page(tmp_path: Path):
-    """Domain page renders locus sub-groups within base groups."""
+def test_locus_grouping_orders_shared_locus_together(tmp_path: Path):
+    """Entries sharing a locus token are emitted consecutively.
+
+    The new design has no visible group headings — locus drives the
+    internal ordering only. Two ``_of_magnetic_axis`` entries must
+    appear before the unrelated bare entry, so the locus cluster is
+    visually grouped on the page.
+    """
     (tmp_path / "eq.yml").write_text(
         """- name: major_radius_of_magnetic_axis
   kind: scalar
@@ -432,17 +447,28 @@ def test_locus_subgrouping_in_domain_page(tmp_path: Path):
     renderer = CatalogRenderer(tmp_path)
     page = renderer.render_domain_page("equilibrium")
 
-    # Locus sub-group heading uses bare token (no preposition prefix)
-    assert "magnetic axis" in page
-    assert "of magnetic axis" not in page
-    assert "sn-locus-group" in page
+    # All three entries present as name-headings
+    assert (
+        "## major_radius_of_magnetic_axis { #major_radius_of_magnetic_axis .sn-name }"
+        in page
+    )
+    assert "## vertical_coordinate_of_magnetic_axis" in page
+    assert "## electron_temperature" in page
 
-    # Non-locus entry should appear outside the locus group
-    assert "electron_temperature" in page
+    # No group headings or locus sub-group wrapper
+    assert "sn-locus-group" not in page
+    assert "## magnetic axis" not in page
+    assert "### magnetic axis" not in page
+
+    # Locus-sharing entries appear consecutively, before the bare one
+    pos_major = page.index("## major_radius_of_magnetic_axis")
+    pos_vert = page.index("## vertical_coordinate_of_magnetic_axis")
+    pos_te = page.index("## electron_temperature")
+    assert max(pos_major, pos_vert) < pos_te
 
 
 def test_docs_pending_badge(tmp_path: Path):
-    """Entries without documentation show a 'docs pending' badge."""
+    """Entries without documentation show a 'documentation pending' badge."""
     (tmp_path / "te.yml").write_text(
         """name: electron_temperature
 kind: scalar
@@ -454,5 +480,38 @@ description: Electron temperature.
     )
     renderer = CatalogRenderer(tmp_path)
     catalog = renderer.render_catalog()
-    assert "docs pending" in catalog
+    assert "documentation pending" in catalog
     assert "sn-badge-pending" in catalog
+
+
+def test_mermaid_rendered_inline_not_in_details(tmp_path: Path):
+    """Mermaid diagrams are rendered as plain fenced blocks (no <details>).
+
+    The previous design wrapped mermaid in a collapsible ``<details>``
+    block which the Material mermaid runtime never expanded, so
+    diagrams never appeared on the deployed site. Mermaid must now be
+    emitted as a top-level fenced block.
+    """
+    (tmp_path / "psi.yml").write_text(
+        """name: poloidal_flux
+kind: scalar
+unit: Wb
+physics_domain: equilibrium
+description: Poloidal flux.
+arguments:
+- name: magnetic_flux
+  operator: component
+""",
+        encoding="utf-8",
+    )
+    renderer = CatalogRenderer(tmp_path)
+    catalog = renderer.render_catalog()
+
+    assert "```mermaid" in catalog
+    assert "graph LR" in catalog
+    # Click handler still emitted for the target node
+    assert 'click n1 "#magnetic_flux"' in catalog
+    # Mermaid block NOT wrapped in <details>...<summary>relationships</summary>
+    assert "<summary>relationships</summary>" not in catalog
+    # It IS wrapped in the new .sn-mermaid container for styling
+    assert 'class="sn-mermaid"' in catalog

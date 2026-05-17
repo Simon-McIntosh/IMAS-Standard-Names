@@ -28,14 +28,71 @@ import click
 
 from ..rendering.catalog import CatalogRenderer
 
+# Shared markdown / theme / extras for both the served and deployed sites.
+# Mermaid is wired through ``pymdownx.superfences`` — the Material theme
+# automatically includes the mermaid.js runtime when this custom_fence is
+# configured, so ```mermaid blocks render inline without an extra plugin.
+_THEME_BLOCK = """\
+theme:
+  name: material
+  features:
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.top
+    - search.highlight
+    - search.suggest
+    - toc.follow
+    - content.code.copy
+  palette:
+    - scheme: default
+      primary: white
+      accent: grey
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: black
+      accent: grey
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+"""
+
+_MARKDOWN_BLOCK = """\
+markdown_extensions:
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.details
+  - pymdownx.tabbed:
+      alternate_style: true
+  - footnotes
+  - attr_list
+  - md_in_html
+  - toc:
+      permalink: true
+      toc_depth: 2
+"""
+
+_EXTRAS_BLOCK = """\
+extra_css:
+  - stylesheets/catalog.css
+
+extra_javascript:
+  - javascripts/mathjax.js
+  - https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js
+"""
+
 # Minimal mkdocs.yml template for versioned deployment (with mike plugin)
 # The nav: section is injected dynamically from the catalog structure.
-MKDOCS_DEPLOY_TEMPLATE = """\
+MKDOCS_DEPLOY_TEMPLATE = (
+    """\
 site_name: "{site_name}"
 site_url: "{site_url}"
 
 plugins:
   - search
+  - mermaid2
   - mike:
       canonical_version: latest
       version_selector: true
@@ -44,167 +101,220 @@ plugins:
 
 {nav_section}
 
-theme:
-  name: material
-  features:
-    - navigation.tracking
-    - navigation.tabs
-    - navigation.tabs.sticky
-    - navigation.sections
-    - navigation.expand
-    - navigation.top
-    - search.highlight
-    - search.suggest
-    - toc.integrate
-
+"""
+    + _THEME_BLOCK
+    + """
 extra:
   version:
     provider: mike
 
-markdown_extensions:
-  - pymdownx.arithmatex:
-      generic: true
-  - pymdownx.details
-  - footnotes
-  - attr_list
-  - md_in_html
-  - toc:
-      permalink: true
-      toc_depth: 3
-
-extra_css:
-  - stylesheets/catalog.css
-
-extra_javascript:
-  - javascripts/mathjax.js
-  - https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js
 """
+    + _MARKDOWN_BLOCK
+    + "\n"
+    + _EXTRAS_BLOCK
+)
 
 # Simpler mkdocs.yml template for local preview (no mike plugin)
-MKDOCS_SERVE_TEMPLATE = """\
+MKDOCS_SERVE_TEMPLATE = (
+    """\
 site_name: "{site_name}"
 site_url: "{site_url}"
 
 plugins:
   - search
+  - mermaid2
 
 {nav_section}
 
-theme:
-  name: material
-  features:
-    - navigation.tracking
-    - navigation.tabs
-    - navigation.tabs.sticky
-    - navigation.sections
-    - navigation.expand
-    - navigation.top
-    - search.highlight
-    - search.suggest
-    - toc.integrate
-
-markdown_extensions:
-  - pymdownx.arithmatex:
-      generic: true
-  - pymdownx.details
-  - footnotes
-  - attr_list
-  - md_in_html
-  - toc:
-      permalink: true
-      toc_depth: 3
-
-extra_css:
-  - stylesheets/catalog.css
-
-extra_javascript:
-  - javascripts/mathjax.js
-  - https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js
 """
+    + _THEME_BLOCK
+    + "\n"
+    + _MARKDOWN_BLOCK
+    + "\n"
+    + _EXTRAS_BLOCK
+)
 
 CATALOG_CSS = """\
-/* Standard Names Catalog — Minimal Reference Design */
+/* Standard Names Catalog — name-as-heading reference design.
+   Goal: the canonical name is the most prominent element on every
+   entry, with no chromed accents or coloured rules that compete for
+   attention. Mermaid diagrams render inline. */
 
-/* Entry — clean text with subtle separator */
-.sn-entry {
-    padding: 0.6rem 0 0.6rem 1.2rem;
-    border-bottom: 1px solid #e8e8e8;
+/* ---------- Layout & rhythm ---------- */
+.md-typeset .sn-domain-summary {
+    color: var(--md-default-fg-color--light);
+    font-size: 0.9rem;
+    margin: 0.2rem 0 1.6rem;
 }
 
-.sn-entry:target {
-    background: #f8f9fa;
+/* Canonical name heading — monospace, prominent, no blue underline. */
+.md-typeset h2.sn-name,
+.md-typeset h2[id].sn-name {
+    font-family: var(--md-code-font, "Roboto Mono", monospace);
+    font-size: 1.05rem;
+    font-weight: 600;
+    letter-spacing: 0;
+    color: var(--md-default-fg-color);
+    border-bottom: none !important;
+    margin: 2.2rem 0 0.35rem;
+    padding-top: 0.35rem;
+    border-top: 1px solid var(--md-default-fg-color--lightest);
+    line-height: 1.35;
+    overflow-wrap: anywhere;
 }
 
-/* Inline code for name — slightly larger, distinct */
-.sn-entry > p:first-child code {
-    font-size: 0.88rem;
-    font-weight: 500;
-    background: none;
-    padding: 0;
-    color: #1a1a2e;
+.md-typeset h2.sn-name:target {
+    color: var(--md-default-fg-color);
+    background: linear-gradient(
+        to right,
+        rgba(0, 0, 0, 0.04),
+        rgba(0, 0, 0, 0)
+    );
+    padding-left: 0.4rem;
 }
 
-/* Unit annotation */
-.sn-unit {
-    font-size: 0.82rem;
-    color: #888;
-    font-weight: 400;
-    margin-left: 0.3rem;
+[data-md-color-scheme="slate"] .md-typeset h2.sn-name:target {
+    background: linear-gradient(
+        to right,
+        rgba(255, 255, 255, 0.06),
+        rgba(255, 255, 255, 0)
+    );
 }
 
-/* Description as definition list indent */
-.sn-entry > dl {
-    margin: 0.2rem 0 0.3rem;
+/* First entry on the page sits flush with the summary line. */
+.md-typeset .sn-domain-summary + h2.sn-name {
+    border-top: none;
+    margin-top: 0.5rem;
+    padding-top: 0;
 }
 
-.sn-entry > dl > dd {
-    margin-left: 0;
-    font-size: 0.87rem;
-    line-height: 1.5;
-    color: #444;
-}
-
-/* Collapsed details — barely visible until needed */
-.sn-entry details {
-    margin: 0.2rem 0 0;
-    font-size: 0.84rem;
-}
-
-.sn-entry details summary {
-    cursor: pointer;
+/* ---------- Meta line beneath name ---------- */
+.md-typeset .sn-meta-line {
+    margin: 0 0 0.5rem;
     font-size: 0.78rem;
-    color: #999;
-    user-select: none;
+    color: var(--md-default-fg-color--light);
+    letter-spacing: 0.01em;
+}
+
+.md-typeset .sn-unit {
+    font-family: var(--md-code-font, "Roboto Mono", monospace);
+    background: var(--md-code-bg-color);
+    color: var(--md-default-fg-color);
+    padding: 0.05rem 0.4rem;
+    border-radius: 0.25rem;
+    font-size: 0.78rem;
+}
+
+.md-typeset .sn-kind,
+.md-typeset .sn-sources {
+    font-size: 0.74rem;
+    color: var(--md-default-fg-color--light);
+}
+
+/* ---------- Description (one-line italic blurb) ---------- */
+.md-typeset h2.sn-name + .sn-meta-line + p em,
+.md-typeset h2.sn-name + p em {
     font-style: italic;
 }
 
-.sn-entry details summary:hover {
-    color: #555;
+/* ---------- Documentation block ---------- */
+.md-typeset .sn-docs {
+    font-size: 0.86rem;
+    line-height: 1.55;
+    color: var(--md-default-fg-color);
+    margin: 0.4rem 0 0.6rem;
 }
 
-.sn-entry details[open] {
-    padding: 0.3rem 0 0;
-    color: #555;
+.md-typeset .sn-docs p {
+    margin: 0.4rem 0;
 }
 
-/* Base group headings — thin grey line */
-h2 {
-    border-bottom: 1px solid #ddd;
-    padding-bottom: 0.2rem;
-    margin-top: 1.8rem;
-    font-size: 1.15rem;
+/* ---------- Mermaid container — prominent and visible by default. */
+.md-typeset .sn-mermaid {
+    margin: 0.7rem 0 0.6rem;
+    padding: 0.5rem 0.6rem;
+    background: var(--md-code-bg-color);
+    border-radius: 0.3rem;
+    overflow-x: auto;
+}
+
+.md-typeset .sn-mermaid .mermaid {
+    text-align: center;
+}
+
+/* Make node click affordance discoverable. */
+.md-typeset .sn-mermaid .clickable {
+    cursor: pointer;
+}
+
+/* ---------- See also / sibling nav ---------- */
+.md-typeset .sn-see-also,
+.md-typeset .sn-meta {
+    margin: 0.25rem 0;
+    font-size: 0.82rem;
+    color: var(--md-default-fg-color--light);
+}
+
+.md-typeset .sn-meta-label {
+    font-weight: 600;
+    color: var(--md-default-fg-color);
+    margin-right: 0.2rem;
+}
+
+.md-typeset .sn-see-also a,
+.md-typeset .sn-meta a {
+    color: var(--md-typeset-a-color);
+    overflow-wrap: anywhere;
+}
+
+/* ---------- Badges ---------- */
+.md-typeset .sn-badge {
+    display: inline-block;
+    font-size: 0.7rem;
+    padding: 0.05rem 0.4rem;
+    border-radius: 0.6rem;
     font-weight: 500;
-    color: #333;
+    vertical-align: middle;
 }
 
-/* Domain overview table */
-.md-typeset table:not([class]) {
-    font-size: 0.88rem;
+.md-typeset .sn-badge-pending {
+    background: var(--md-default-fg-color--lightest);
+    color: var(--md-default-fg-color--light);
 }
 
-.md-typeset table:not([class]) td,
-.md-typeset table:not([class]) th {
-    padding: 0.4rem 0.6rem;
+/* ---------- Domain overview ---------- */
+.md-typeset .sn-domain-grid table {
+    font-size: 0.9rem;
+}
+
+.md-typeset .sn-domain-grid td,
+.md-typeset .sn-domain-grid th {
+    padding: 0.4rem 0.8rem;
+}
+
+/* Tone down the default H1 underline on domain pages. */
+.md-typeset h1 {
+    border-bottom: none;
+    padding-bottom: 0;
+    color: var(--md-default-fg-color);
+}
+
+/* Generic group headings (overview, indexes) — quiet underline. */
+.md-typeset h2 {
+    border-bottom: 1px solid var(--md-default-fg-color--lightest);
+    padding-bottom: 0.2rem;
+    margin-top: 1.6rem;
+}
+
+/* Permalink anchors — keep them but make them quiet until hover. */
+.md-typeset .headerlink {
+    color: var(--md-default-fg-color--lightest);
+    opacity: 0;
+    transition: opacity 0.1s;
+}
+
+.md-typeset h2:hover .headerlink {
+    opacity: 1;
 }
 """
 

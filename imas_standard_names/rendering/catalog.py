@@ -2,6 +2,19 @@
 
 Provides reusable catalog rendering logic that can be used by both
 the main project docs and external catalog repositories.
+
+The renderer groups entries by *locus* (the structural or spatial
+"what is this attached to" token extracted by the ISN grammar IR
+parser). Locus-first grouping clusters names that refer to the same
+physical object/region/position together — e.g. all reflectometer
+antenna properties appear in one block, all separatrix quantities in
+another. Names without a locus fall back to grouping by their
+physical-base token (e.g. all magnetic-flux variants together).
+
+The visual design emphasises the standard name itself as the primary
+heading for each entry. Group ordering is internal — no group
+heading clutter is rendered, so the page TOC is a flat list of
+canonical names.
 """
 
 from __future__ import annotations
@@ -129,11 +142,11 @@ class CatalogRenderer:
 
     @staticmethod
     def _fix_markdown_formatting(text: str) -> str:
-        """Fix markdown formatting and demote headers to bold text.
+        """Demote nested markdown headers to bold paragraphs.
 
-        Documentation content is rendered inside <details> blocks.
-        Any markdown headers (# ... ####) would leak into the MkDocs
-        page TOC, so we convert them to bold paragraphs instead.
+        Documentation content sits beneath an entry's H2 name heading.
+        Inline ``# … ####`` lines from the source would otherwise leak
+        into the page TOC and break the flat structure.
         """
         if not text:
             return ""
@@ -141,84 +154,111 @@ class CatalogRenderer:
         text = text.strip()
         text = text.replace("\\n", "\n")
 
-        # Demote markdown headers to bold text to prevent TOC pollution
         text = re.sub(r"^#{1,6}\s+(.+)$", r"**\1**", text, flags=re.MULTILINE)
 
         paragraphs = text.split("\n\n")
-        processed_paragraphs = []
-
+        processed: list[str] = []
         for paragraph in paragraphs:
             paragraph = paragraph.strip()
-            if not paragraph:
-                continue
-            processed_paragraphs.append(paragraph)
+            if paragraph:
+                processed.append(paragraph)
 
-        result = "\n\n".join(processed_paragraphs)
+        result = "\n\n".join(processed)
         result = re.sub(r"\n\s*\$\$", "\n\n$$", result)
         result = re.sub(r"\$\$\s*\n", "$$\n\n", result)
 
         return result
 
     @staticmethod
-    def _parse_base(name: str) -> str:
-        """Extract base physical quantity for catalog grouping.
+    def _parse_ir(name: str):
+        """Parse a name to its IR; returns ``None`` on failure."""
+        try:
+            from ..grammar.parser import parse as ir_parse  # noqa: PLC0415
 
-        Uses the ISN grammar parser directly — no heuristic stripping.
-        Groups by physical_base (or geometric_base) alone, so names
-        differing only by subject/orbit-class/species group together.
+            result = ir_parse(name)
+            return result.ir
+        except Exception:
+            return None
 
-        When a transformation is present, the parser leaves residue
-        (of_*, _with_respect_to_*) in physical_base — strip it so
-        derivatives group with their base quantity.
+    @classmethod
+    def _parse_base(cls, name: str) -> str:
+        """Return the physical-base / geometric-base token (best effort).
+
+        Kept for backwards compatibility with downstream callers and
+        for use as a fallback grouping key when no locus is present.
         """
+        ir = cls._parse_ir(name)
+        if ir is not None and getattr(ir, "base", None) is not None:
+            token = getattr(ir.base, "token", None)
+            if token:
+                return token
+
         try:
             from ..grammar.model import parse_standard_name  # noqa: PLC0415
 
             parsed = parse_standard_name(name)
             base = parsed.physical_base or ""
             if not base and parsed.geometric_base:
-                base = (
-                    parsed.geometric_base.value
-                    if hasattr(parsed.geometric_base, "value")
-                    else str(parsed.geometric_base)
-                )
-
-            # Strip transformation residue for grouping
+                gb = parsed.geometric_base
+                base = gb.value if hasattr(gb, "value") else str(gb)
             if parsed.transformation and base.startswith("of_"):
-                base = base[3:]  # Remove "of_" prefix
-                # Remove "_with_respect_to_*" suffix
+                base = base[3:]
                 wrt_idx = base.find("_with_respect_to_")
                 if wrt_idx > 0:
                     base = base[:wrt_idx]
-
             return base or "unknown"
         except Exception:
             return "unknown"
 
-    @staticmethod
-    def _parse_locus(name: str) -> tuple[str, str] | None:
-        """Extract locus token and relation from a standard name.
+    @classmethod
+    def _parse_locus(cls, name: str) -> tuple[str, str] | None:
+        """Return ``(token, relation)`` for a locus reference or ``None``.
 
-        Uses the structured IR parser to detect ``_of_``, ``_at_``, and
-        ``_over_`` locus references. Returns ``(token, relation)`` or
-        ``None`` if the name has no locus.
+        Recognises ``_of_``, ``_at_``, and ``_over_`` patterns. The
+        token is the bare locus name (e.g. ``magnetic_axis``, no
+        preposition prefix); the relation is one of ``of``, ``at``,
+        ``over``.
         """
-        try:
-            from ..grammar.parser import parse as ir_parse  # noqa: PLC0415
-
-            result = ir_parse(name)
-            if result.ir and result.ir.locus:
-                return (result.ir.locus.token, result.ir.locus.relation.value)
-        except Exception:
-            pass
+        ir = cls._parse_ir(name)
+        if ir is not None and getattr(ir, "locus", None) is not None:
+            locus = ir.locus
+            relation_value = (
+                locus.relation.value
+                if hasattr(locus.relation, "value")
+                else str(locus.relation)
+            )
+            return (locus.token, relation_value)
         return None
 
+    @classmethod
+    def _group_key(cls, name: str) -> tuple[int, str]:
+        """Return a sortable ``(priority, key)`` tuple for grouping.
+
+        Priorities:
+        - 0 = locus (object / region / position) — clusters by
+          structural locality (most distinctive)
+        - 1 = physical / geometric base — clusters by quantity
+        - 2 = unknown / unparseable — bucket at end
+        """
+        locus = cls._parse_locus(name)
+        if locus is not None:
+            return (0, locus[0])
+        base = cls._parse_base(name)
+        if base and base != "unknown":
+            return (1, base)
+        return (2, "unknown")
+
     # ------------------------------------------------------------------
-    # Plan 41 helpers: links, cocos, mermaid, sibling nav
+    # Visual rendering helpers
     # ------------------------------------------------------------------
     @staticmethod
     def _render_links(links: list[str]) -> str:
-        """Render ``links:`` as markdown; ``name:X`` → humanized in-page anchor."""
+        """Render ``links:`` as markdown; ``name:X`` → humanized in-page anchor.
+
+        Emitted as plain markdown so the link syntax resolves; the
+        leading ``.sn-see-also`` class is attached via ``attr_list``
+        for CSS targeting.
+        """
         if not links:
             return ""
         parts: list[str] = []
@@ -234,7 +274,7 @@ class CatalogRenderer:
                 parts.append(f"[{link}]({link})")
         if not parts:
             return ""
-        return "**See also:** " + " · ".join(parts) + "\n\n"
+        return "**See also:** " + " · ".join(parts) + "\n{: .sn-see-also }\n\n"
 
     @staticmethod
     def _argument_label(arg: dict) -> str:
@@ -254,11 +294,12 @@ class CatalogRenderer:
 
     @classmethod
     def _render_mermaid(cls, item: dict) -> str:
-        """Emit a Mermaid hierarchy block when structural fields exist.
+        """Render a Mermaid hierarchy when structural fields exist.
 
-        Uses short node IDs with humanized display labels to prevent
-        text overflow in diagrams. Nodes are clickable — linking to
-        the corresponding entry's anchor on the same page.
+        Emitted as a plain ```mermaid``` fenced block (no enclosing
+        ``<details>``) so the diagram renders immediately on page load.
+        Nodes carry humanised labels and are clickable to in-page
+        anchors.
         """
         arguments = item.get("arguments") or []
         error_variants = item.get("error_variants") or {}
@@ -275,8 +316,7 @@ class CatalogRenderer:
             return ""
 
         name = item.get("name", "")
-        # Build node registry for short IDs
-        nodes: dict[str, str] = {}  # full_name → short_id
+        nodes: dict[str, str] = {}
         node_counter = 0
 
         def _node(full_name: str) -> str:
@@ -287,7 +327,6 @@ class CatalogRenderer:
             return nodes[full_name]
 
         def _decl(full_name: str) -> str:
-            """Node declaration with humanized label."""
             nid = _node(full_name)
             label = _humanize(full_name)
             return f'{nid}["{label}"]'
@@ -314,9 +353,8 @@ class CatalogRenderer:
             tgt = _decl(superseded_by)
             lines.append(f'  {src} -- "superseded by" --> {tgt}')
 
-        # Make nodes clickable — link to in-page anchors
         for full_name, nid in nodes.items():
-            if full_name != name:  # Don't link to self
+            if full_name != name:
                 lines.append(f'  click {nid} "#{full_name}"')
 
         lines.append("```")
@@ -342,7 +380,12 @@ class CatalogRenderer:
         item: dict,
         wrapped_by: dict[str, list[str]],
     ) -> str:
-        """Emit neighbour lists below the entry body."""
+        """Render compact sibling navigation (arguments, wrappers, variants).
+
+        Emitted as plain markdown paragraphs tagged with ``.sn-meta``
+        via ``attr_list``. Plain markdown is required so the embedded
+        ``[label](#anchor)`` links actually resolve.
+        """
         lines: list[str] = []
 
         def _link(target: str) -> str:
@@ -355,7 +398,7 @@ class CatalogRenderer:
             if target:
                 arg_links.append(_link(target))
         if arg_links:
-            lines.append(f"**Arguments:** {' · '.join(arg_links)}")
+            lines.append("**Arguments:** " + " · ".join(arg_links))
 
         name = item.get("name", "")
         wrappers = wrapped_by.get(name) or []
@@ -364,13 +407,13 @@ class CatalogRenderer:
 
         error_variants = item.get("error_variants") or {}
         if isinstance(error_variants, dict) and error_variants:
-            variant_links = [
+            variant_parts = [
                 f"{etype}: {_link(target)}"
                 for etype, target in error_variants.items()
                 if target
             ]
-            if variant_links:
-                lines.append("**Error variants:** " + " · ".join(variant_links))
+            if variant_parts:
+                lines.append("**Error variants:** " + " · ".join(variant_parts))
 
         deprecates = item.get("deprecates")
         if deprecates:
@@ -382,7 +425,8 @@ class CatalogRenderer:
 
         if not lines:
             return ""
-        return "\n\n".join(lines) + "\n\n"
+        # Each line is its own paragraph carrying the .sn-meta class.
+        return "\n\n".join(line + "\n{: .sn-meta }" for line in lines) + "\n\n"
 
     @staticmethod
     def _render_sources(sources: list[dict]) -> str:
@@ -400,30 +444,19 @@ class CatalogRenderer:
         lines += ["", "</details>", ""]
         return "\n".join(lines) + "\n"
 
-    @staticmethod
-    def _tooltip_text(documentation: str) -> str:
-        """Extract plain-text tooltip from documentation markdown.
-
-        Returns the first ~300 characters, stripped of markdown formatting,
-        suitable for an HTML ``title`` attribute.
-        """
-        if not documentation:
-            return ""
-        # Strip markdown bold/italic, code, links
-        text = re.sub(r"\*\*(.+?)\*\*", r"\1", documentation)
-        text = re.sub(r"\*(.+?)\*", r"\1", text)
-        text = re.sub(r"`(.+?)`", r"\1", text)
-        text = re.sub(r"\[([^\]]+)\]\([^)]+\)", r"\1", text)
-        # Collapse whitespace
-        text = " ".join(text.split())
-        if len(text) > 300:
-            text = text[:297] + "..."
-        # Escape HTML entities for title attribute
-        text = text.replace("&", "&amp;").replace('"', "&quot;")
-        return text
-
     def _render_entry(self, item: dict, wrapped_by: dict[str, list[str]]) -> str:
-        """Render a single standard name entry — compact inline layout."""
+        """Render a single standard name entry with a name-as-heading layout.
+
+        Layout:
+        ::
+
+            ## name { #name .sn-name }
+            <meta line: unit · sources count>
+            > one-line description
+            documentation paragraphs
+            ```mermaid …``` (inline if present)
+            <see-also / sibling-nav lines>
+        """
         name = item.get("name", "Unknown")
         unit = item.get("unit", "")
         description = _rewrite_name_links(item.get("description", ""))
@@ -431,31 +464,38 @@ class CatalogRenderer:
             self._fix_markdown_formatting(item.get("documentation", ""))
         )
 
-        result = f'<div class="sn-entry" id="{name}" markdown>\n\n'
+        result = f"## {name} {{ #{name} .sn-name }}\n\n"
 
-        # Name with unit — no brackets, hover shows docs
-        unit_annotation = f' <span class="sn-unit">{unit}</span>' if unit else ""
-        tooltip = self._tooltip_text(documentation)
-        if tooltip:
-            result += (
-                f'<span class="sn-name" title="{tooltip}">'
-                f"`{name}`{unit_annotation}</span>\n\n"
+        meta_bits: list[str] = []
+        if unit:
+            meta_bits.append(f'<span class="sn-unit">{unit}</span>')
+        kind = item.get("kind")
+        if kind and kind not in ("scalar", None):
+            meta_bits.append(f'<span class="sn-kind">{kind}</span>')
+        sources = item.get("sources") or []
+        if sources:
+            meta_bits.append(
+                f'<span class="sn-sources">{len(sources)} source'
+                f"{'s' if len(sources) != 1 else ''}</span>"
             )
-        else:
-            result += f"`{name}`{unit_annotation}\n\n"
+        if meta_bits:
+            result += '<p class="sn-meta-line">' + " · ".join(meta_bits) + "</p>\n\n"
 
-        # Description inline
         if description:
-            result += f":   {description}\n\n"
+            result += f"_{description}_\n\n"
 
         if not documentation:
-            result += '<span class="sn-badge sn-badge-pending">docs pending</span>\n\n'
+            result += (
+                '<p class="sn-badge sn-badge-pending">documentation pending</p>\n\n'
+            )
 
-        # Documentation shown inline — no collapsible wrapper
         if documentation:
             result += f'<div class="sn-docs" markdown>\n\n{documentation}\n\n</div>\n\n'
 
-        # Links and sibling nav inline
+        mermaid_md = self._render_mermaid(item)
+        if mermaid_md:
+            result += f'<div class="sn-mermaid" markdown>\n\n{mermaid_md}</div>\n\n'
+
         links_md = self._render_links(item.get("links", []))
         if links_md:
             result += links_md
@@ -464,39 +504,40 @@ class CatalogRenderer:
         if sibling_md:
             result += sibling_md
 
-        # Structural relationships in collapsible only when present
-        mermaid_md = self._render_mermaid(item)
-        if mermaid_md:
-            result += (
-                "<details markdown>\n"
-                "<summary>relationships</summary>\n\n" + mermaid_md + "</details>\n\n"
-            )
-
-        # Source count as subtle footer
-        sources = item.get("sources") or []
-        if sources:
-            result += f'<span class="sn-sources">{len(sources)} sources</span>\n\n'
-
-        result += "</div>\n\n"
         return result
 
+    def _ordered_items(self, items: list[dict]) -> list[dict]:
+        """Return items ordered by locus-first grouping.
+
+        Within each group, entries are sorted alphabetically. Groups
+        are ordered largest first (so visually clustered topics appear
+        at the top of the page), then alphabetically by key as a
+        tie-breaker. Locus groups (priority 0) win ties against base
+        groups (priority 1).
+        """
+        groups: dict[tuple[int, str], list[dict]] = defaultdict(list)
+        for item in items:
+            key = self._group_key(item.get("name", ""))
+            groups[key].append(item)
+
+        def _sort_key(entry: tuple[tuple[int, str], list[dict]]):
+            (priority, token), bucket = entry
+            return (-len(bucket), priority, token)
+
+        ordered: list[dict] = []
+        for _key, bucket in sorted(groups.items(), key=_sort_key):
+            bucket.sort(key=lambda x: x.get("name", ""))
+            ordered.extend(bucket)
+        return ordered
+
     def render_domain_page(self, domain: str) -> str:
-        """Generate a single domain page with base-name and locus grouping.
+        """Generate a single domain page with locus-first ordering.
 
-        Groups are ordered semantically: core physics quantities first,
-        then geometry/structure, then diagnostics/metadata, with
-        "unknown" always last. Within each base group, entries sharing
-        a locus (e.g. "at magnetic axis") are sub-grouped together.
-
-        Parameters
-        ----------
-        domain : str
-            Physics domain key (e.g. "equilibrium", "transport").
-
-        Returns
-        -------
-        str
-            Markdown content for the domain page.
+        The page renders a flat list of standard-name entries. Each
+        entry is its own H2 (the canonical snake_case name), so the
+        page TOC lists every name. Internal ordering follows
+        :meth:`_ordered_items` — entries that share a locus or base
+        appear together without any visible group heading.
         """
         domains = self.get_domains()
         items = domains.get(domain, [])
@@ -507,69 +548,24 @@ class CatalogRenderer:
         wrapped_by = self._build_wrapped_by_index(self.load_names())
 
         result = f"# {domain_display}\n\n"
-        result += f"**{len(items)} standard names** in this domain.\n\n"
+        result += (
+            f'<p class="sn-domain-summary">'
+            f"<strong>{len(items)}</strong> standard names in this domain."
+            f"</p>\n\n"
+        )
 
-        # Group items by base name
-        base_groups: dict[str, list[dict]] = defaultdict(list)
-        for item in items:
-            name = item.get("name", "Unknown")
-            base = self._parse_base(name)
-            base_groups[base].append(item)
-
-        # Sort groups: larger groups first (more important concepts),
-        # then alphabetically within same size. "unknown" always last.
-        def _group_sort_key(base_name: str) -> tuple[int, int, str]:
-            if base_name == "unknown":
-                return (1, 0, base_name)
-            return (0, -len(base_groups[base_name]), base_name)
-
-        for base_name in sorted(base_groups.keys(), key=_group_sort_key):
-            base_items = base_groups[base_name]
-            result += f"## {_humanize(base_name)} {{: #{base_name} }}\n\n"
-
-            # Sub-group by locus within base group
-            locus_groups: dict[str, list[dict]] = defaultdict(list)
-            no_locus: list[dict] = []
-            for item in base_items:
-                name = item.get("name", "Unknown")
-                locus_info = self._parse_locus(name)
-                if locus_info:
-                    token, relation = locus_info
-                    key = f"{relation}:{token}"
-                    locus_groups[key].append(item)
-                else:
-                    no_locus.append(item)
-
-            # Render items without locus first
-            for item in sorted(no_locus, key=lambda x: x.get("name", "")):
-                result += self._render_entry(item, wrapped_by)
-
-            # Render locus sub-groups — token only, no preposition prefix
-            for locus_key in sorted(locus_groups.keys()):
-                _relation, token = locus_key.split(":", 1)
-                locus_items = locus_groups[locus_key]
-                result += (
-                    f'<div class="sn-locus-group" markdown>\n\n'
-                    f"### {_humanize(token)} {{: #{token} }}\n\n"
-                )
-                for item in sorted(locus_items, key=lambda x: x.get("name", "")):
-                    result += self._render_entry(item, wrapped_by)
-                result += "</div>\n\n"
+        for item in self._ordered_items(items):
+            result += self._render_entry(item, wrapped_by)
 
         return result
 
     def render_catalog(self) -> str:
-        """Generate complete catalog organized by physics_domain and base name.
+        """Generate complete catalog organized by physics domain.
 
-        Entries are rendered as anchored card-style blocks (not headings) to
-        keep the sidebar/TOC clean. Only domain (H2) and base group (H3)
-        levels appear in the page TOC. Long documentation is wrapped in a
-        collapsible ``<details>`` block.
-
-        Returns
-        -------
-        str
-            Markdown formatted catalog content.
+        Each domain is an H1 section; entries within follow the same
+        locus-first ordering used on per-domain pages. Entries are H2
+        — anchored, visible in the TOC, and free of redundant group
+        headings.
         """
         result = ""
         domains = self.get_domains()
@@ -582,44 +578,8 @@ class CatalogRenderer:
         for domain, items in sorted(domains.items()):
             domain_display = domain.replace("_", " ").title()
             result += f"## {domain_display} {{: #{domain} }}\n\n"
-
-            # Group items by base name
-            base_groups: dict[str, list[dict]] = defaultdict(list)
-            for item in items:
-                name = item.get("name", "Unknown")
-                base = self._parse_base(name)
-                base_groups[base].append(item)
-
-            for base_name in sorted(base_groups.keys()):
-                base_items = base_groups[base_name]
-                result += f"### {_humanize(base_name)} {{: #{base_name} }}\n\n"
-
-                # Sub-group by locus
-                locus_groups: dict[str, list[dict]] = defaultdict(list)
-                no_locus: list[dict] = []
-                for item in base_items:
-                    name = item.get("name", "Unknown")
-                    locus_info = self._parse_locus(name)
-                    if locus_info:
-                        token, relation = locus_info
-                        key = f"{relation}:{token}"
-                        locus_groups[key].append(item)
-                    else:
-                        no_locus.append(item)
-
-                for item in sorted(no_locus, key=lambda x: x.get("name", "")):
-                    result += self._render_entry(item, wrapped_by)
-
-                for locus_key in sorted(locus_groups.keys()):
-                    _relation, token = locus_key.split(":", 1)
-                    locus_items = locus_groups[locus_key]
-                    result += (
-                        f'<div class="sn-locus-group" markdown>\n\n'
-                        f"#### {_humanize(token)}\n\n"
-                    )
-                    for item in sorted(locus_items, key=lambda x: x.get("name", "")):
-                        result += self._render_entry(item, wrapped_by)
-                    result += "</div>\n\n"
+            for item in self._ordered_items(items):
+                result += self._render_entry(item, wrapped_by)
 
         return result
 
@@ -647,23 +607,27 @@ class CatalogRenderer:
         catalog_dir = output_dir / "catalog"
         catalog_dir.mkdir(parents=True, exist_ok=True)
 
-        # --- Catalog index page ---
         index_content = "# Standard Names Catalog\n\n"
-        index_content += f"**{stats['total_names']} standard names** "
-        index_content += f"across **{stats['total_domains']} physics domains**.\n\n"
         index_content += (
-            "Browse by domain using the navigation on the left, "
-            "or use the search bar to find specific quantities.\n\n"
+            f'<p class="sn-domain-summary">'
+            f"<strong>{stats['total_names']}</strong> standard names across "
+            f"<strong>{stats['total_domains']}</strong> physics domains."
+            f"</p>\n\n"
         )
-        index_content += "| Domain | Names |\n|--------|-------|\n"
+        index_content += (
+            "Browse by domain using the navigation, or use the search bar "
+            "(top right) to find specific quantities.\n\n"
+        )
+        index_content += '<div class="sn-domain-grid" markdown>\n\n'
+        index_content += "| Domain | Names |\n|--------|------:|\n"
         for domain in sorted(domains.keys()):
             domain_display = domain.replace("_", " ").title()
             count = len(domains[domain])
             index_content += f"| [{domain_display}]({domain}.md) | {count} |\n"
+        index_content += "\n</div>\n"
 
         (catalog_dir / "index.md").write_text(index_content)
 
-        # --- Per-domain pages ---
         nav_items: list[dict[str, str]] = [
             {"Overview": "catalog/index.md"},
         ]
@@ -701,20 +665,19 @@ class CatalogRenderer:
         for domain, items in sorted(stats["domains"].items()):
             domain_display = domain.replace("_", " ").title()
             count = len(items)
-            result += f"- **[{domain_display}]({link_prefix}{domain}/)** - {count} standard names\n"
+            result += (
+                f"- **[{domain_display}]({link_prefix}{domain}/)** - "
+                f"{count} standard names\n"
+            )
 
         return result
 
     def render_navigation(self) -> str:
-        """Generate navigation sidebar grouped by domain and base name.
+        """Generate navigation listing all canonical names per domain.
 
-        Individual standard names are omitted — they are anchored cards
-        within the page, reachable via search or in-page links.
-
-        Returns
-        -------
-        str
-            Markdown formatted navigation content.
+        Names are listed verbatim (snake_case) — the same form used as
+        their in-page anchors — so the navigation doubles as a direct
+        index of the catalog.
         """
         domains = self.get_domains()
 
@@ -722,20 +685,13 @@ class CatalogRenderer:
             return ""
 
         result = ""
-
         for domain, items in sorted(domains.items()):
             domain_display = domain.replace("_", " ").title()
             result += f"**[{domain_display}](#{domain})**\n\n"
-
-            base_groups: dict[str, int] = defaultdict(int)
-            for item in items:
-                name = item.get("name", "Unknown")
-                base = self._parse_base(name)
-                base_groups[base] += 1
-
-            for base_name in sorted(base_groups.keys()):
-                result += f"- [{_humanize(base_name)}](#{base_name})\n"
-
+            for item in self._ordered_items(items):
+                name = item.get("name", "")
+                if name:
+                    result += f"- [{name}](#{name})\n"
             result += "\n"
 
         return result
