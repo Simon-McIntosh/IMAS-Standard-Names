@@ -151,35 +151,58 @@ CATALOG_CSS = """\
    primary visual element. */
 
 /* ---------- Left navigation — widen the sidebar so most names fit
-   without horizontal scroll, and indent group/name entries clearly. */
+   without horizontal scroll, and indent group/name entries clearly.
+   Material's flex layout (``.md-main__inner { display: flex }``) gives
+   the content column whatever room the sidebar doesn't claim, so we
+   only need to set ``width`` on the sidebar and widen ``.md-grid``;
+   we deliberately do NOT override ``.md-content`` margins because that
+   would double-shift the column away from the sidebar. */
 .md-sidebar--primary,
 .md-sidebar--primary .md-sidebar__scrollwrap {
-    width: 22rem;
+    width: 17rem;
 }
 
 @media screen and (min-width: 76.25em) {
     .md-grid {
-        max-width: 100%;
-    }
-    .md-content {
-        margin-left: 22rem;
+        max-width: 78rem;
     }
 }
 
-/* Tighten nav item spacing and surface the second-level indent. */
-.md-nav__item .md-nav__item .md-nav__link {
-    padding-left: 0.6rem;
+@media screen and (min-width: 100em) {
+    .md-grid {
+        max-width: 92rem;
+    }
+}
+
+/* Tighten nav spacing for the second/third TOC levels (group title
+   and SN name). Long snake_case names need ``word-break: break-all``
+   so they wrap cleanly inside the narrower sidebar. */
+.md-sidebar--primary .md-nav__item .md-nav__item .md-nav__link {
+    padding-left: 0.55rem;
     font-size: 0.74rem;
-    line-height: 1.3;
+    line-height: 1.35;
 }
-.md-nav__item .md-nav__item .md-nav__item .md-nav__link {
-    padding-left: 1.4rem;
+.md-sidebar--primary
+    .md-nav__item
+    .md-nav__item
+    .md-nav__item
+    .md-nav__link {
+    padding-left: 1.25rem;
     font-family: var(--md-code-font, "Roboto Mono", monospace);
-    font-size: 0.72rem;
+    font-size: 0.7rem;
     color: var(--md-default-fg-color--light);
+    word-break: break-all;
 }
-.md-nav__item .md-nav__item .md-nav__item .md-nav__link:hover,
-.md-nav__item .md-nav__item .md-nav__item .md-nav__link--active {
+.md-sidebar--primary
+    .md-nav__item
+    .md-nav__item
+    .md-nav__item
+    .md-nav__link:hover,
+.md-sidebar--primary
+    .md-nav__item
+    .md-nav__item
+    .md-nav__item
+    .md-nav__link--active {
     color: var(--md-default-fg-color);
 }
 
