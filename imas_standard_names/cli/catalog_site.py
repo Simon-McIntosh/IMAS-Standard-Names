@@ -151,15 +151,15 @@ CATALOG_CSS = """\
 .md-typeset h2.sn-name,
 .md-typeset h2[id].sn-name {
     font-family: var(--md-code-font, "Roboto Mono", monospace);
-    font-size: 1.05rem;
+    font-size: 1.18rem;
     font-weight: 600;
     letter-spacing: 0;
     color: var(--md-default-fg-color);
     border-bottom: none !important;
-    margin: 2.2rem 0 0.35rem;
-    padding-top: 0.35rem;
+    margin: 2.4rem 0 0.4rem;
+    padding-top: 0.55rem;
     border-top: 1px solid var(--md-default-fg-color--lightest);
-    line-height: 1.35;
+    line-height: 1.3;
     overflow-wrap: anywhere;
 }
 
@@ -203,6 +203,12 @@ CATALOG_CSS = """\
     padding: 0.05rem 0.4rem;
     border-radius: 0.25rem;
     font-size: 0.78rem;
+}
+
+.md-typeset .sn-unit sup {
+    font-size: 0.65rem;
+    line-height: 1;
+    margin-left: 0.05rem;
 }
 
 .md-typeset .sn-kind,

@@ -42,6 +42,21 @@ def _rewrite_name_links(text: str) -> str:
     )
 
 
+_UNIT_SUP_RE = re.compile(r"\^(-?\d+)")
+
+
+def _format_unit(unit: str) -> str:
+    """Render a SI shorthand unit string as HTML with proper superscripts.
+
+    ``m^2``  → ``m<sup>2</sup>``
+    ``m.s^-1`` → ``m·s<sup>-1</sup>``  (the ``.`` separator becomes ``·``)
+    """
+    if not unit:
+        return ""
+    text = unit.replace(".", "·")
+    return _UNIT_SUP_RE.sub(r"<sup>\1</sup>", text)
+
+
 class CatalogRenderer:
     """Renders standard names catalog as Markdown documentation.
 
@@ -468,7 +483,7 @@ class CatalogRenderer:
 
         meta_bits: list[str] = []
         if unit:
-            meta_bits.append(f'<span class="sn-unit">{unit}</span>')
+            meta_bits.append(f'<span class="sn-unit">{_format_unit(unit)}</span>')
         kind = item.get("kind")
         if kind and kind not in ("scalar", None):
             meta_bits.append(f'<span class="sn-kind">{kind}</span>')
