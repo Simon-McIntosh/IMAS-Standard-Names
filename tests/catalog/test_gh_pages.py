@@ -41,6 +41,11 @@ def _isolate_git_identity(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("GIT_AUTHOR_EMAIL", "test@example.invalid")
     monkeypatch.setenv("GIT_COMMITTER_NAME", "test")
     monkeypatch.setenv("GIT_COMMITTER_EMAIL", "test@example.invalid")
+    # Remove environment-level git config overrides that may prevent
+    # bare repositories from working (e.g. safe.bareRepository=explicit).
+    monkeypatch.delenv("GIT_CONFIG_COUNT", raising=False)
+    monkeypatch.delenv("GIT_CONFIG_KEY_0", raising=False)
+    monkeypatch.delenv("GIT_CONFIG_VALUE_0", raising=False)
 
 
 def _run(args: list[str], cwd: Path) -> subprocess.CompletedProcess:
