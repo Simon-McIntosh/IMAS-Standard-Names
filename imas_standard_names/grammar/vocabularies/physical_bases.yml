@@ -75,7 +75,6 @@ bases:
   current_density:
     aliases: []
     kind: vector
-    inherently_dimensional: true
   debye_length:
     aliases: []
     kind: scalar
@@ -89,11 +88,9 @@ bases:
   diffusion_coefficient:
     aliases: []
     kind: scalar
-    inherently_dimensional: true
   diffusivity:
     aliases: []
     kind: scalar
-    inherently_dimensional: true
   distance:
     aliases: []
     kind: scalar
@@ -103,7 +100,6 @@ bases:
   damping_rate:
     aliases: []
     kind: scalar
-    inherently_dimensional: true
   distribution:
     aliases: []
     kind: scalar
@@ -117,11 +113,9 @@ bases:
   electrical_conductivity:
     aliases: []
     kind: scalar
-    inherently_dimensional: true
   electrostatic_potential:
     aliases: []
     kind: scalar
-    inherently_dimensional: true
   elongation:
     aliases: []
     kind: scalar
@@ -135,7 +129,6 @@ bases:
   energy_flux:
     aliases: []
     kind: vector
-    inherently_dimensional: true
   factor:
     aliases: []
     kind: scalar
@@ -169,18 +162,15 @@ bases:
   growth_rate:
     aliases: []
     kind: scalar
-    inherently_dimensional: true
   heat_flux:
     aliases: []
     kind: scalar
-    inherently_dimensional: true
   height:
     aliases: []
     kind: scalar
   impedance:
     aliases: []
     kind: scalar
-    inherently_dimensional: true
   index:
     aliases: []
     kind: scalar
@@ -206,7 +196,6 @@ bases:
   magnetic_flux:
     aliases: []
     kind: scalar
-    inherently_dimensional: true
   magnetic_moment:
     aliases: []
     kind: vector
@@ -236,14 +225,12 @@ bases:
   momentum_flux:
     aliases: []
     kind: vector
-    inherently_dimensional: true
   multiplicity:
     aliases: []
     kind: scalar
   number_density:
     aliases: []
     kind: scalar
-    inherently_dimensional: true
   opacity:
     aliases: []
     kind: scalar
@@ -253,7 +240,6 @@ bases:
   particle_flux:
     aliases: []
     kind: vector
-    inherently_dimensional: true
   period:
     aliases: []
     kind: scalar
@@ -266,7 +252,6 @@ bases:
   potential:
     aliases: []
     kind: scalar
-    inherently_dimensional: true
   power:
     aliases: []
     kind: scalar
@@ -274,7 +259,6 @@ bases:
   power_density:
     aliases: []
     kind: scalar
-    inherently_dimensional: true
   pressure:
     aliases: []
     kind: scalar
@@ -309,14 +293,12 @@ bases:
   rotation_frequency:
     aliases: []
     kind: scalar
-    inherently_dimensional: true
   safety_factor:
     aliases: []
     kind: scalar
   shearing_rate:
     aliases: []
     kind: scalar
-    inherently_dimensional: true
   size:
     aliases: []
     kind: scalar
@@ -329,15 +311,12 @@ bases:
   source_rate:
     aliases: []
     kind: scalar
-    inherently_dimensional: true
   speed:
     aliases: []
     kind: scalar
-    inherently_dimensional: true
   spectral_radiance:
     aliases: []
     kind: scalar
-    inherently_dimensional: true
   squareness:
     aliases: []
     kind: scalar
@@ -359,7 +338,6 @@ bases:
   torque_density:
     aliases: []
     kind: scalar
-    inherently_dimensional: true
   transmissivity:
     aliases: []
     kind: scalar
@@ -384,7 +362,6 @@ bases:
   wavelength:
     aliases: []
     kind: scalar
-    inherently_dimensional: true
   wave_vector:
     aliases: [wavevector]
     kind: vector

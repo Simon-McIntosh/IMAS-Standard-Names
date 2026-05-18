@@ -1,0 +1,12 @@
+# Normalizing qualifiers vocabulary
+#
+# Qualifier tokens that imply the resulting quantity is dimensionless
+# (gyrokinetic normalization, etc.). The validator uses this list to
+# suppress false-positive warnings when unit='1' is combined with an
+# inherently-dimensional physical base.
+#
+# These tokens are a SUBSET of qualifiers.yml — they must also appear
+# there to be valid in the grammar. This file only adds the semantic
+# annotation that they produce dimensionless output.
+
+- gyrocenter       # gyrokinetic-normalized quantities (ρ*, β normalization)

@@ -271,6 +271,13 @@ def _load_dimensionless_operators() -> frozenset[str]:
     )
 
 
+def _load_normalizing_qualifiers() -> frozenset[str]:
+    """Load qualifier tokens that imply dimensionless output from vocab."""
+    from ..grammar.vocab_loaders import load_normalizing_qualifiers  # noqa: PLC0415
+
+    return load_normalizing_qualifiers()
+
+
 def _check_dimensionless_physical_quantity(
     name: str, entry: StandardNameEntry
 ) -> list[str]:
@@ -284,8 +291,8 @@ def _check_dimensionless_physical_quantity(
     - binary operators (ratio, product, difference);
     - operators marked ``dimensionless: true`` in the operator vocabulary
       (e.g. normalized, perturbed, logarithm);
-    - any qualifier derived from a dimensionless operator token
-      (e.g. ``gyrocenter_pressure``).
+    - any qualifier listed in ``normalizing_qualifiers.yml``
+      (e.g. ``gyrocenter_pressure`` is gyrokinetic-normalized by convention).
 
     Severity: Warning
     """
@@ -317,16 +324,18 @@ def _check_dimensionless_physical_quantity(
         if tx_value in dimensionless_ops:
             return issues
 
-        # Qualifiers that correspond to dimensionless operator tokens imply
-        # dimensionless output even when parsed as qualifiers rather than
-        # transformations (e.g. gyrocenter_pressure).
+        # Qualifiers that imply normalization (from normalizing_qualifiers.yml)
+        # or that correspond to dimensionless operator tokens produce
+        # dimensionless output even when parsed as qualifiers.
+        normalizing_quals = _load_normalizing_qualifiers()
+        exempt_qualifiers = dimensionless_ops | normalizing_quals
         try:
             from ..grammar.parser import parse as ir_parse  # noqa: PLC0415
 
             ir = ir_parse(entry.name).ir
             if ir is not None:
                 qualifier_tokens = {q.token for q in (ir.qualifiers or [])}
-                if qualifier_tokens & dimensionless_ops:
+                if qualifier_tokens & exempt_qualifiers:
                     return issues
         except Exception:
             pass

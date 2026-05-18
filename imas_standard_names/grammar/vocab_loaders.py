@@ -214,6 +214,28 @@ def load_qualifiers() -> frozenset[str]:
 
 
 # ---------------------------------------------------------------------------
+# normalizing_qualifiers.yml
+# ---------------------------------------------------------------------------
+
+
+def load_normalizing_qualifiers() -> frozenset[str]:
+    """Load qualifier tokens that imply dimensionless output.
+
+    These are a subset of qualifier tokens (must also appear in
+    ``qualifiers.yml``) that indicate the quantity has been normalized
+    to dimensionless form (e.g. gyrokinetic normalization).
+    """
+    path = _VOCAB_DIR / "normalizing_qualifiers.yml"
+    with path.open(encoding="utf-8") as fh:
+        data = yaml.safe_load(fh)
+    if not data:
+        return frozenset()
+    if isinstance(data, list):
+        return frozenset(str(token) for token in data)
+    return frozenset()
+
+
+# ---------------------------------------------------------------------------
 # Cross-registry validation
 # ---------------------------------------------------------------------------
 

@@ -113,6 +113,10 @@ def test_vocab_cross_segment_uniqueness():
         frozenset({"locus_registry.yml", "subjects.yml"}),
         frozenset({"locus_registry.yml", "processes.yml"}),
         frozenset({"physics_domains.yml", "processes.yml"}),
+        # normalizing_qualifiers.yml is a metadata subset — tokens there
+        # intentionally appear in other segment vocabs (subjects, qualifiers)
+        frozenset({"normalizing_qualifiers.yml", "subjects.yml"}),
+        frozenset({"normalizing_qualifiers.yml", "qualifiers.yml"}),
     }
 
     # Filter out allowed overlaps
