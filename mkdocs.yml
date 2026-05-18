@@ -15,7 +15,6 @@ plugins:
         - docs.grammar_macros
   - search
   - table-reader
-  - mermaid2
   - mike:
       canonical_version: latest
       version_selector: true
