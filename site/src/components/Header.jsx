@@ -1,6 +1,19 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { useData } from '../lib/data.js';
 import { VersionSwitcher } from './VersionSwitcher.jsx';
+
+// Detect the current version from the URL path.
+// gh-pages serves under /<repo>/<version>/ — extract the version segment.
+function detectCurrentVersion() {
+  const segs = location.pathname.split('/').filter(Boolean);
+  // Look for common repo-name segment; version follows it.
+  const repoIdx = segs.findIndex((s) =>
+    s === 'imas-standard-names-catalog' || s === 'imas-standard-names'
+  );
+  if (repoIdx >= 0 && segs[repoIdx + 1]) return segs[repoIdx + 1];
+  // Fallback: last segment is the version directory.
+  return segs[segs.length - 1] || 'main';
+}
 
 // Top-bar: brand, search, view-segment (Browse | Map), density-segment
 // (≡ ☰ ⩬), theme toggle. ⌘K / Ctrl+K focuses the search input from
@@ -9,7 +22,14 @@ export function Header({
   query, setQuery, theme, setTheme, dense, setDense, view, setView,
 }) {
   const inp = useRef(null);
-  const { CATALOG_VERSION, versions } = useData();
+  const { NAMES, versions } = useData();
+  const currentVersion = useMemo(detectCurrentVersion, []);
+
+  const onVersionSelect = (v) => {
+    // Navigate to the selected version, preserving deep-link hash.
+    const base = location.pathname.replace(/\/[^/]+\/?$/, '/');
+    location.href = `${base}${v.version}/${location.hash}`;
+  };
 
   useEffect(() => {
     const onKey = (e) => {
@@ -34,7 +54,17 @@ export function Header({
         </div>
         <div className="brand-text">
           <div className="brand-title">IMAS Standard Names</div>
-          <div className="brand-sub">{CATALOG_VERSION}</div>
+          <div className="brand-sub">
+            {versions && (
+              <VersionSwitcher
+                versions={versions}
+                current={currentVersion}
+                onSelect={onVersionSelect}
+              />
+            )}
+            {versions && <span className="brand-sep">·</span>}
+            <span>{NAMES.length} names</span>
+          </div>
         </div>
       </div>
 
@@ -55,7 +85,6 @@ export function Header({
       </div>
 
       <div className="header-actions">
-        <VersionSwitcher versions={versions} current={CATALOG_VERSION} />
         <div className="seg view-seg">
           <button
             className={view === 'browse' ? 'on' : ''}
