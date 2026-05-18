@@ -1,0 +1,413 @@
+"""Tests for the SPA dataset builder (``imas_standard_names.catalog.dataset``).
+
+These tests exercise the conversion from the published per-domain YAML
+catalog into the SPA's flat-JSON shape (``CATALOG_VERSION`` +
+``CATEGORIES`` + ``GRAMMAR_VOCAB`` + ``NAMES``). Most assertions run
+against the real ISNC catalog when it is available; tests that depend
+on the live catalog auto-skip when the fixture path is missing so CI
+without the ISNC checkout still passes.
+"""
+
+from __future__ import annotations
+
+import json
+from pathlib import Path
+
+import pytest
+import yaml
+
+from imas_standard_names.catalog import build_site_dataset, write_site_dataset
+from imas_standard_names.catalog.dataset import (
+    _derive_grammar_facets,
+    _extract_sign,
+    _humanise_domain,
+    _normalise_see_also,
+    _normalise_sources,
+    _structural_kind,
+)
+
+# ---------------------------------------------------------------------------
+# Fixtures
+# ---------------------------------------------------------------------------
+
+ISNC_CATALOG_DIR = Path.home() / "Code/imas-standard-names-catalog/standard_names"
+
+
+@pytest.fixture
+def isnc_catalog_dir() -> Path:
+    """Path to the real ISNC catalog. Skips when the checkout is missing."""
+    if not ISNC_CATALOG_DIR.exists():
+        pytest.skip(f"ISNC catalog checkout not found at {ISNC_CATALOG_DIR}")
+    return ISNC_CATALOG_DIR
+
+
+@pytest.fixture
+def isnc_dataset(isnc_catalog_dir: Path) -> dict:
+    """Built dataset from the real ISNC catalog (one parse pass for all tests)."""
+    return build_site_dataset(isnc_catalog_dir)
+
+
+@pytest.fixture
+def isnc_manifest(isnc_catalog_dir: Path) -> dict:
+    """Parsed ``catalog.yml`` manifest from the real ISNC checkout."""
+    manifest_path = isnc_catalog_dir.parent / "catalog.yml"
+    if not manifest_path.exists():
+        pytest.skip("catalog.yml missing alongside catalog directory")
+    return yaml.safe_load(manifest_path.read_text(encoding="utf-8"))
+
+
+# ---------------------------------------------------------------------------
+# Pure-helper tests (no catalog dependency)
+# ---------------------------------------------------------------------------
+
+
+class TestHumaniseDomain:
+    """``_humanise_domain`` matches the SPA prototype's compact labels."""
+
+    def test_simple_two_word_slug(self) -> None:
+        assert _humanise_domain("auxiliary_heating") == "Auxiliary Heating"
+
+    def test_single_word_slug(self) -> None:
+        assert _humanise_domain("equilibrium") == "Equilibrium"
+
+    def test_measurement_abbreviated(self) -> None:
+        assert (
+            _humanise_domain("particle_measurement_diagnostics")
+            == "Particle Meas. Diagnostics"
+        )
+
+    def test_electromagnetic_abbreviated(self) -> None:
+        assert (
+            _humanise_domain("electromagnetic_wave_diagnostics")
+            == "EM Wave Diagnostics"
+        )
+
+    def test_empty_returns_empty(self) -> None:
+        assert _humanise_domain("") == ""
+
+
+class TestExtractSign:
+    """``_extract_sign`` separates the ``Sign convention:`` paragraph."""
+
+    def test_extracts_trailing_paragraph(self) -> None:
+        doc = (
+            "Body of documentation explaining the quantity.\n\n"
+            "Sign convention: Positive when the field points outward."
+        )
+        long, sign = _extract_sign(doc)
+        assert long == "Body of documentation explaining the quantity."
+        assert sign == "Positive when the field points outward."
+
+    def test_returns_none_when_absent(self) -> None:
+        long, sign = _extract_sign("Plain documentation only.")
+        assert long == "Plain documentation only."
+        assert sign is None
+
+    def test_empty_returns_empty(self) -> None:
+        long, sign = _extract_sign("")
+        assert long == ""
+        assert sign is None
+
+
+class TestNormaliseSeeAlso:
+    """``_normalise_see_also`` strips the ``name:`` prefix."""
+
+    def test_strips_name_prefix(self) -> None:
+        assert _normalise_see_also(["name:foo", "name:bar_baz"]) == ["foo", "bar_baz"]
+
+    def test_drops_external_urls(self) -> None:
+        assert _normalise_see_also(["https://example.org", "name:foo"]) == ["foo"]
+
+    def test_handles_none(self) -> None:
+        assert _normalise_see_also(None) == []
+
+
+class TestNormaliseSources:
+    """``_normalise_sources`` reduces to ``{path, status}`` records."""
+
+    def test_extracts_dd_path_and_status(self) -> None:
+        sources = [
+            {
+                "id": "dd:equilibrium/time_slice/ip",
+                "dd_path": "equilibrium/time_slice/ip",
+                "status": "composed",
+            }
+        ]
+        assert _normalise_sources(sources) == [
+            {"path": "equilibrium/time_slice/ip", "status": "composed"}
+        ]
+
+    def test_falls_back_to_id_minus_prefix(self) -> None:
+        sources = [{"id": "dd:foo/bar", "status": "attached"}]
+        assert _normalise_sources(sources) == [
+            {"path": "foo/bar", "status": "attached"}
+        ]
+
+    def test_handles_none(self) -> None:
+        assert _normalise_sources(None) == []
+
+
+class TestStructuralKind:
+    """``_structural_kind`` derives the SPA structural kind from grammar."""
+
+    def test_locus_yields_at_point(self) -> None:
+        facets = _derive_grammar_facets("safety_factor_at_magnetic_axis")
+        assert _structural_kind("safety_factor_at_magnetic_axis", "scalar", facets) == (
+            "at_point"
+        )
+
+    def test_projection_yields_component(self) -> None:
+        facets = _derive_grammar_facets("poloidal_magnetic_field")
+        assert _structural_kind("poloidal_magnetic_field", "scalar", facets) == (
+            "component"
+        )
+
+    def test_total_prefix_yields_global(self) -> None:
+        facets = _derive_grammar_facets("total_plasma_current")
+        assert _structural_kind("total_plasma_current", "scalar", facets) == "global"
+
+    def test_minimum_qualifier_yields_global(self) -> None:
+        facets = _derive_grammar_facets("minimum_safety_factor")
+        assert _structural_kind("minimum_safety_factor", "scalar", facets) == "global"
+
+    def test_pure_base_stays_base(self) -> None:
+        facets = _derive_grammar_facets("safety_factor")
+        assert _structural_kind("safety_factor", "scalar", facets) == "base"
+
+
+# ---------------------------------------------------------------------------
+# Real-catalog tests — auto-skip when ISNC checkout is missing
+# ---------------------------------------------------------------------------
+
+
+class TestDatasetShape:
+    """Top-level dataset keys and counts match the manifest."""
+
+    def test_loads_isnc_catalog(self, isnc_dataset: dict, isnc_manifest: dict) -> None:
+        assert "NAMES" in isnc_dataset
+        assert "CATEGORIES" in isnc_dataset
+        assert "GRAMMAR_VOCAB" in isnc_dataset
+        assert "CATALOG_VERSION" in isnc_dataset
+
+        names = isnc_dataset["NAMES"]
+        assert len(names) == isnc_manifest["published_count"]
+
+    def test_catalog_version_includes_grammar_and_count(
+        self, isnc_dataset: dict, isnc_manifest: dict
+    ) -> None:
+        version = isnc_dataset["CATALOG_VERSION"]
+        assert isnc_manifest["grammar_version"] in version
+        assert str(isnc_manifest["published_count"]) in version
+
+    def test_categories_derived(self, isnc_dataset: dict, isnc_manifest: dict) -> None:
+        cats = isnc_dataset["CATEGORIES"]
+        # Every domain in the manifest should appear in CATEGORIES.
+        category_ids = {c["id"] for c in cats}
+        for domain in isnc_manifest["domains_included"]:
+            assert domain in category_ids, f"domain {domain} missing from CATEGORIES"
+
+        # Counts sum to total NAMES length.
+        total = sum(c["count"] for c in cats)
+        assert total == len(isnc_dataset["NAMES"])
+
+        # Counts decrease (descending).
+        counts = [c["count"] for c in cats]
+        assert counts == sorted(counts, reverse=True)
+
+
+def _find_record(dataset: dict, name: str) -> dict:
+    """Helper — fetch a NAMES record by name, asserting it exists."""
+    for record in dataset["NAMES"]:
+        if record["name"] == name:
+            return record
+    pytest.fail(f"record {name!r} not found in dataset")
+
+
+class TestRecordShape:
+    """A representative NAMES record carries all SPA-expected fields."""
+
+    def test_total_plasma_current_full_shape(self, isnc_dataset: dict) -> None:
+        record = _find_record(isnc_dataset, "total_plasma_current")
+
+        # Identity
+        assert record["name"] == "total_plasma_current"
+        assert record["category"] == "equilibrium"
+
+        # Required keys all present.
+        required = {
+            "name",
+            "category",
+            "group",
+            "parent",
+            "kind",
+            "unit",
+            "tags",
+            "short",
+            "long",
+            "sign",
+            "seeAlso",
+            "arguments",
+            "sources",
+            "parse",
+        }
+        assert required.issubset(record.keys())
+
+        # Type checks.
+        assert isinstance(record["tags"], list)
+        assert isinstance(record["seeAlso"], list)
+        assert isinstance(record["arguments"], list)
+        assert isinstance(record["sources"], list)
+        assert isinstance(record["parse"], list)
+        assert all(
+            isinstance(seg, dict) and {"role", "text"}.issubset(seg.keys())
+            for seg in record["parse"]
+        )
+
+    def test_unit_present_for_physical_quantity(self, isnc_dataset: dict) -> None:
+        record = _find_record(isnc_dataset, "total_plasma_current")
+        assert record["unit"] == "A"
+
+
+class TestKindClassification:
+    """Each structural kind shows up where the SPA expects it."""
+
+    def test_total_plasma_current_is_global(self, isnc_dataset: dict) -> None:
+        record = _find_record(isnc_dataset, "total_plasma_current")
+        assert record["kind"] == "global"
+
+    def test_poloidal_magnetic_field_is_component(self, isnc_dataset: dict) -> None:
+        record = _find_record(isnc_dataset, "poloidal_magnetic_field")
+        assert record["kind"] == "component"
+        assert record["axis"] == "poloidal"
+
+    def test_safety_factor_at_magnetic_axis_is_at_point(
+        self, isnc_dataset: dict
+    ) -> None:
+        record = _find_record(isnc_dataset, "safety_factor_at_magnetic_axis")
+        assert record["kind"] == "at_point"
+        assert record["locus"] == "magnetic_axis"
+
+
+class TestParseSegments:
+    """Parse segments concatenate back to the input name (modulo separators)."""
+
+    @pytest.mark.parametrize(
+        "name",
+        [
+            "total_plasma_current",
+            "poloidal_magnetic_field",
+            "safety_factor_at_magnetic_axis",
+            "magnetic_field_magnitude",
+            "flux_surface_averaged_magnetic_field",
+            "minimum_safety_factor",
+        ],
+    )
+    def test_parse_segments_cover_name_tokens(
+        self, isnc_dataset: dict, name: str
+    ) -> None:
+        records = [r for r in isnc_dataset["NAMES"] if r["name"] == name]
+        if not records:
+            pytest.skip(f"{name} not present in current catalog")
+        segments = records[0]["parse"]
+        # Every token segment carries a non-empty text. Joining with
+        # underscores (after stripping any leading `_` artefacts) should
+        # cover all underscore-separated tokens in the original name.
+        original_tokens = set(name.split("_"))
+        emitted_tokens: set[str] = set()
+        for seg in segments:
+            text = seg["text"]
+            assert text, f"empty text segment in parse: {seg!r}"
+            for piece in text.split("_"):
+                if piece:
+                    emitted_tokens.add(piece)
+        # Tokens emitted should at minimum include all original tokens.
+        missing = original_tokens - emitted_tokens
+        assert not missing, f"parse missing tokens {missing} for {name}"
+
+    def test_parse_failure_is_graceful(self) -> None:
+        # A deliberately invalid base token (looks like a name but won't
+        # resolve in the closed vocabulary) must round-trip to a single
+        # ``unparseable`` segment instead of crashing the build.
+        from imas_standard_names.catalog.dataset import _derive_grammar_facets
+
+        facets = _derive_grammar_facets("definitely_not_a_known_thing_xyz")
+        assert facets.parsed is False
+        assert len(facets.parse_segments) == 1
+        assert facets.parse_segments[0]["role"] == "unparseable"
+
+    def test_unparseable_does_not_crash_dataset(
+        self, tmp_path: Path, isnc_dataset: dict
+    ) -> None:
+        # Construct a tiny standalone YAML with an unparseable name and
+        # run the builder on it — the result should still produce a
+        # record with an ``unparseable`` parse segment.
+        domain_yaml = tmp_path / "test_domain.yml"
+        domain_yaml.write_text(
+            yaml.safe_dump(
+                [
+                    {
+                        "name": "definitely_not_a_known_thing_xyz",
+                        "kind": "scalar",
+                        "status": "draft",
+                        "description": "Test entry that the parser cannot decompose.",
+                        "documentation": "This entry exists only to exercise the unparseable fallback.",
+                        "unit": "1",
+                        "physics_domain": "test_domain",
+                    }
+                ]
+            ),
+            encoding="utf-8",
+        )
+
+        dataset = build_site_dataset(tmp_path)
+        assert len(dataset["NAMES"]) == 1
+        record = dataset["NAMES"][0]
+        assert record["parse"][0]["role"] == "unparseable"
+
+
+class TestSeeAlsoNormalisation:
+    """``links: [name:foo]`` flattens to ``seeAlso: ['foo']``."""
+
+    def test_name_prefix_stripped(self, isnc_dataset: dict) -> None:
+        # Find a record with at least one internal link.
+        for record in isnc_dataset["NAMES"]:
+            if record["seeAlso"]:
+                for ref in record["seeAlso"]:
+                    assert not ref.startswith("name:"), (
+                        f"seeAlso entry {ref!r} should not retain 'name:' prefix"
+                    )
+                return
+        pytest.skip("no records with seeAlso links in current catalog")
+
+
+class TestSourcesNormalisation:
+    """Sources become ``[{path, status}]`` records."""
+
+    def test_sources_have_path_and_status(self, isnc_dataset: dict) -> None:
+        for record in isnc_dataset["NAMES"]:
+            if record["sources"]:
+                for src in record["sources"]:
+                    assert "path" in src
+                    assert "status" in src
+                    assert src["path"]  # non-empty
+                return
+        pytest.skip("no records with sources in current catalog")
+
+
+# ---------------------------------------------------------------------------
+# Roundtrip — write + load
+# ---------------------------------------------------------------------------
+
+
+class TestWriteSiteDataset:
+    """``write_site_dataset`` produces valid JSON on disk."""
+
+    def test_writes_to_disk(self, isnc_catalog_dir: Path, tmp_path: Path) -> None:
+        out = tmp_path / "dataset.json"
+        count = write_site_dataset(isnc_catalog_dir, out)
+
+        assert out.exists()
+        assert count > 0
+        # Round-trip the JSON.
+        data = json.loads(out.read_text(encoding="utf-8"))
+        assert len(data["NAMES"]) == count
