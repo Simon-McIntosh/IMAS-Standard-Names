@@ -1,5 +1,7 @@
-# mkdocs generated site
-site
+# mkdocs generated site (now uses _mkdocs_site/ — see mkdocs.yml site_dir)
+# SPA build artefacts only — the site/ source tree IS committed
+site/node_modules/
+site/dist/
 
 # pycache 
 __pycache__/

@@ -1,0 +1,196 @@
+{
+  "CATALOG_VERSION": "dev-fixture · 8 names",
+  "CATEGORIES": [
+    { "id": "equilibrium", "label": "Equilibrium", "count": 5 },
+    { "id": "magnetics", "label": "Magnetics", "count": 2 },
+    { "id": "geometry", "label": "Geometry", "count": 1 }
+  ],
+  "GRAMMAR_VOCAB": {
+    "reduction": ["flux_surface_averaged", "volume_averaged", "line_integrated"],
+    "axis": ["poloidal", "toroidal", "radial", "vertical", "parallel", "perpendicular"],
+    "modifier": ["total", "minimum", "maximum", "normalized", "diamagnetic", "effective", "thermal"],
+    "operator_suffix": ["magnitude", "density", "gradient", "shear"],
+    "base": ["magnetic_field", "safety_factor", "plasma_current", "electron_temperature", "major_radius"],
+    "preposition": ["at", "of"],
+    "locus": ["magnetic_axis", "x_point", "separatrix", "boundary"],
+    "subject": ["plasma", "poloidal_field_coil", "total_plasma"]
+  },
+  "NAMES": [
+    {
+      "name": "poloidal_magnetic_field",
+      "category": "equilibrium",
+      "group": "magnetic field",
+      "parent": "magnetic_field",
+      "kind": "component",
+      "unit": "T",
+      "tags": ["vector", "poloidal"],
+      "short": "Poloidal component of the magnetic field, $B_\\theta$.",
+      "long": "The poloidal component of the magnetic field $\\vec{B}$ — i.e. the projection onto the poloidal plane. In tokamak geometry this is the field arising primarily from the plasma current.",
+      "sign": "Positive in the direction of increasing poloidal angle in a right-handed cylindrical frame.",
+      "seeAlso": ["magnetic_field", "toroidal_magnetic_field", "safety_factor"],
+      "arguments": [],
+      "sources": [
+        { "path": "equilibrium/time_slice/profiles_1d/b_field_pol", "status": "composed" },
+        { "path": "equilibrium/time_slice/profiles_2d/b_field_pol", "status": "composed" }
+      ],
+      "parse": [
+        { "role": "axis", "text": "poloidal", "note": "vector component axis" },
+        { "role": "base", "text": "magnetic_field", "note": "base quantity" }
+      ],
+      "axis": "poloidal"
+    },
+    {
+      "name": "toroidal_magnetic_field",
+      "category": "equilibrium",
+      "group": "magnetic field",
+      "parent": "magnetic_field",
+      "kind": "component",
+      "unit": "T",
+      "tags": ["vector", "toroidal"],
+      "short": "Toroidal component of the magnetic field, $B_\\phi$.",
+      "long": "The toroidal component of the magnetic field $\\vec{B}$ — the dominant component in a tokamak, set by the toroidal field coils.",
+      "sign": "Positive in the direction defined by COCOS convention.",
+      "seeAlso": ["magnetic_field", "poloidal_magnetic_field"],
+      "arguments": [],
+      "sources": [
+        { "path": "equilibrium/time_slice/profiles_1d/b_field_tor", "status": "composed" }
+      ],
+      "parse": [
+        { "role": "axis", "text": "toroidal", "note": "vector component axis" },
+        { "role": "base", "text": "magnetic_field", "note": "base quantity" }
+      ],
+      "axis": "toroidal"
+    },
+    {
+      "name": "magnetic_field",
+      "category": "equilibrium",
+      "group": "magnetic field",
+      "parent": null,
+      "kind": "base",
+      "unit": "T",
+      "tags": ["base", "field"],
+      "short": "Magnetic field vector, $\\vec{B}$.",
+      "long": "The magnetic field $\\vec{B}$ throughout the plasma volume. Decomposes into poloidal and toroidal components in tokamak geometry.",
+      "sign": null,
+      "seeAlso": ["poloidal_magnetic_field", "toroidal_magnetic_field"],
+      "arguments": [],
+      "sources": [
+        { "path": "equilibrium/time_slice/profiles_2d/b_field", "status": "composed" }
+      ],
+      "parse": [
+        { "role": "base", "text": "magnetic_field", "note": "base quantity" }
+      ]
+    },
+    {
+      "name": "safety_factor_at_magnetic_axis",
+      "category": "equilibrium",
+      "group": "magnetic axis",
+      "parent": "safety_factor",
+      "kind": "at_point",
+      "unit": "1",
+      "tags": ["locus", "axis"],
+      "short": "Safety factor $q_0$ at the magnetic axis.",
+      "long": "The safety factor evaluated at the magnetic axis, $q_0 = q(\\psi=0)$. Sensitive indicator of central current density and onset of sawtooth instability when crossing unity.",
+      "sign": "Positive for conventional tokamak operation; sign depends on the COCOS convention used.",
+      "seeAlso": ["safety_factor", "magnetic_axis"],
+      "arguments": [],
+      "sources": [
+        { "path": "equilibrium/time_slice/global_quantities/q_axis", "status": "composed" },
+        { "path": "summary/local/magnetic_axis/q/value", "status": "attached" }
+      ],
+      "parse": [
+        { "role": "base", "text": "safety_factor", "note": "quantity" },
+        { "role": "preposition", "text": "at", "note": "locus indicator" },
+        { "role": "locus", "text": "magnetic_axis", "note": "evaluation point" }
+      ],
+      "locus": "magnetic_axis"
+    },
+    {
+      "name": "safety_factor",
+      "category": "equilibrium",
+      "group": "safety factor",
+      "parent": null,
+      "kind": "base",
+      "unit": "1",
+      "tags": ["base", "stability"],
+      "short": "Safety factor $q(\\psi)$ — the ratio of toroidal to poloidal field-line transits.",
+      "long": "The safety factor $q$ is the ratio of toroidal to poloidal transits of a magnetic field line on a flux surface. It is the canonical measure of magnetic shear and stability in tokamak plasmas.",
+      "sign": null,
+      "seeAlso": ["safety_factor_at_magnetic_axis"],
+      "arguments": [],
+      "sources": [
+        { "path": "equilibrium/time_slice/profiles_1d/q", "status": "composed" }
+      ],
+      "parse": [
+        { "role": "base", "text": "safety_factor", "note": "base quantity" }
+      ]
+    },
+    {
+      "name": "plasma_current",
+      "category": "magnetics",
+      "group": "plasma current",
+      "parent": null,
+      "kind": "global",
+      "unit": "A",
+      "tags": ["global", "current"],
+      "short": "Total plasma current, $I_p$.",
+      "long": "The total toroidal current flowing in the plasma column, $I_p$. Typically measured by flux loops and Rogowski coils and used as the primary control variable for ohmic and hybrid scenarios.",
+      "sign": "Positive in the direction of the toroidal magnetic field by convention.",
+      "seeAlso": [],
+      "arguments": [],
+      "sources": [
+        { "path": "magnetics/ip/data", "status": "composed" },
+        { "path": "summary/global_quantities/ip/value", "status": "composed" }
+      ],
+      "parse": [
+        { "role": "subject", "text": "plasma", "note": "entity the quantity applies to" },
+        { "role": "base", "text": "current", "note": "base quantity" }
+      ]
+    },
+    {
+      "name": "vacuum_toroidal_field",
+      "category": "magnetics",
+      "group": "vacuum field",
+      "parent": "toroidal_magnetic_field",
+      "kind": "global",
+      "unit": "T",
+      "tags": ["vacuum", "global"],
+      "short": "Vacuum toroidal magnetic field $B_0$ at the reference radius $R_0$.",
+      "long": "The toroidal magnetic field that would be present at the device reference major radius $R_0$ in the absence of plasma, $B_0 = B_\\phi(R_0)$. Used as the reference value for normalised parameters such as $\\beta_N$.",
+      "sign": null,
+      "seeAlso": ["toroidal_magnetic_field"],
+      "arguments": [],
+      "sources": [
+        { "path": "tf/b_field_tor_vacuum_r/data", "status": "skipped" }
+      ],
+      "parse": [
+        { "role": "modifier", "text": "vacuum", "note": "operating regime" },
+        { "role": "axis", "text": "toroidal", "note": "vector component axis" },
+        { "role": "base", "text": "field", "note": "base quantity" }
+      ]
+    },
+    {
+      "name": "major_radius_of_magnetic_axis",
+      "category": "geometry",
+      "group": "magnetic axis",
+      "parent": "major_radius",
+      "kind": "at_point",
+      "unit": "m",
+      "tags": ["geometry", "locus"],
+      "short": "Major radius $R_{\\mathrm{axis}}$ of the magnetic axis.",
+      "long": "The major radius coordinate $R$ of the magnetic axis $(\\psi = 0)$. Combined with the vertical coordinate this fully locates the axis in the poloidal plane.",
+      "sign": null,
+      "seeAlso": ["safety_factor_at_magnetic_axis", "magnetic_axis"],
+      "arguments": [],
+      "sources": [
+        { "path": "equilibrium/time_slice/global_quantities/magnetic_axis/r", "status": "composed" }
+      ],
+      "parse": [
+        { "role": "base", "text": "major_radius", "note": "base quantity" },
+        { "role": "preposition", "text": "of", "note": "locus indicator" },
+        { "role": "locus", "text": "magnetic_axis", "note": "evaluation point" }
+      ],
+      "locus": "magnetic_axis"
+    }
+  ]
+}
