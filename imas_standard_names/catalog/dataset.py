@@ -483,7 +483,7 @@ def _parent_token(name: str, facets: _GrammarFacets) -> str | None:
 def _group_title(name: str, facets: _GrammarFacets) -> str:
     """Compute the locus-first group title for SPA list clustering.
 
-    Priorities (mirrors :class:`CatalogRenderer._group_key`):
+    Priority order:
 
     1. Locus token — siblings clustered by structural locality
     2. Base token — siblings clustered by physical quantity

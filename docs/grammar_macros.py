@@ -6,9 +6,9 @@ specification from grammar.yml to the documentation build process.
 All tables and lists are generated at build time from the single source
 of truth, ensuring documentation stays synchronized with the implementation.
 
-Note: Catalog rendering macros have been moved to imas_standard_names.rendering.catalog
-for use by external catalog repositories. This file now contains only grammar-related
-macros for the main project documentation.
+The catalog itself is rendered by the Vite SPA pipeline (see ``site/``
+and ``imas_standard_names.catalog.dataset``); this module only emits the
+grammar-reference tables used by the project's mkdocs site.
 """
 
 from __future__ import annotations

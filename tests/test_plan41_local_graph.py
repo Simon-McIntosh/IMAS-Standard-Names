@@ -17,7 +17,6 @@ from imas_standard_names.graph.local_graph import (  # noqa: E402
     get_neighbours,
     shortest_path,
 )
-from imas_standard_names.rendering.catalog import CatalogRenderer  # noqa: E402
 
 # ---------------------------------------------------------------------------
 # Fixture catalog (plan 41 §6 — covers all edge types + stub)
@@ -390,62 +389,3 @@ class TestLocalGraphMCPTool:
         )
         assert path["hops"] == 1
         assert path["path"][-1]["edge_type_in"] == "HAS_ARGUMENT"
-
-
-# ---------------------------------------------------------------------------
-# Renderer upgrades
-# ---------------------------------------------------------------------------
-class TestRenderer:
-    def test_links_field_resolved_as_anchors(self, fixture_catalog: Path) -> None:
-        renderer = CatalogRenderer(fixture_catalog / "standard_names")
-        out = renderer.render_catalog()
-        assert "[magnetic field](#magnetic_field)" in out
-
-    def test_cocos_transformation_type_not_rendered(
-        self, fixture_catalog: Path
-    ) -> None:
-        """COCOS transformation is metadata clutter and must not appear in rendered output."""
-        renderer = CatalogRenderer(fixture_catalog / "standard_names")
-        out = renderer.render_catalog()
-        assert "**COCOS transformation:**" not in out
-        assert "psi_like" not in out
-
-    def test_mermaid_block_for_unary_argument(self, fixture_catalog: Path) -> None:
-        renderer = CatalogRenderer(fixture_catalog / "standard_names")
-        out = renderer.render_catalog()
-        assert "```mermaid" in out
-        # New format uses short node IDs (n0, n1) with humanized labels
-        assert '"x magnetic field"' in out
-        assert '"component axis=x"' in out
-        assert '"magnetic field"' in out
-
-    def test_mermaid_block_for_binary_argument(self, fixture_catalog: Path) -> None:
-        renderer = CatalogRenderer(fixture_catalog / "standard_names")
-        out = renderer.render_catalog()
-        assert '"ratio of pressure to density"' in out
-        assert '"ratio role=a"' in out
-        assert '"ratio role=b"' in out
-
-    def test_mermaid_block_for_error_variants(self, fixture_catalog: Path) -> None:
-        renderer = CatalogRenderer(fixture_catalog / "standard_names")
-        out = renderer.render_catalog()
-        # New format uses short node IDs with humanized labels
-        assert '"error upper"' in out
-        assert '"error lower"' in out
-        assert '"upper uncertainty of temperature"' in out
-        assert '"lower uncertainty of temperature"' in out
-
-    def test_sibling_nav_wrapped_by(self, fixture_catalog: Path) -> None:
-        renderer = CatalogRenderer(fixture_catalog / "standard_names")
-        out = renderer.render_catalog()
-        # magnetic_field is wrapped by x_component and the projection entry.
-        assert "**Wrapped by:**" in out
-        assert "[x magnetic field](#x_magnetic_field)" in out
-
-    def test_sibling_nav_deprecates_and_superseded_by(
-        self, fixture_catalog: Path
-    ) -> None:
-        renderer = CatalogRenderer(fixture_catalog / "standard_names")
-        out = renderer.render_catalog()
-        assert "**Deprecates:** [old name](#old_name)" in out
-        assert "**Superseded by:** [new name](#new_name)" in out
