@@ -1,4 +1,7 @@
-# mkdocs generated site (now uses _mkdocs_site/ — see mkdocs.yml site_dir)
+# mkdocs build output (renamed from ``site/`` so the Vite SPA source at
+# ``site/`` is not clobbered when ``mkdocs build`` runs)
+_mkdocs_site/
+
 # SPA build artefacts only — the site/ source tree IS committed
 site/node_modules/
 site/dist/
