@@ -17,3 +17,17 @@ export function MathInline({ tex }) {
   }, [tex]);
   return <span ref={ref} className="katex-host" />;
 }
+
+// Display KaTeX math block (centered, larger). Used for `$$...$$` segments.
+export function MathDisplay({ tex }) {
+  const ref = useRef(null);
+  useEffect(() => {
+    if (!ref.current) return;
+    try {
+      katex.render(tex, ref.current, { ...KATEX_OPTS, displayMode: true });
+    } catch {
+      ref.current.textContent = tex;
+    }
+  }, [tex]);
+  return <div ref={ref} className="katex-host katex-display-host" />;
+}

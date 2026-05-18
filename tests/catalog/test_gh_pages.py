@@ -346,6 +346,52 @@ def test_commit_message_override(repo: Path, site_v1: Path) -> None:
     assert "Custom: ship v0.1.0" in log
 
 
+def test_deploy_from_fresh_clone_preserves_remote_history(
+    repo: Path, site_v1: Path, site_v2: Path, tmp_path: Path
+) -> None:
+    """A fresh CI-style clone must not clobber a populated gh-pages remote.
+
+    Reproduces the production bug where each CI run created a brand new
+    orphan ``gh-pages`` branch (because ``_branch_exists`` only looked
+    at ``refs/heads/``) and force-pushed it over the remote, wiping
+    every previously-published version.
+    """
+    # Set up a bare remote that already has a v0.1.0 deploy on gh-pages.
+    bare = tmp_path / "remote.git"
+    _run(["git", "init", "--bare", str(bare)], cwd=tmp_path)
+    _run(["git", "remote", "add", "origin", str(bare)], cwd=repo)
+    deploy(repo_root=repo, src_dir=site_v1, version="v0.1.0", push=True)
+
+    # Simulate a fresh CI clone: clone the bare repo into a new dir,
+    # fetch gh-pages as a remote tracking ref only (no local branch).
+    fresh = tmp_path / "fresh"
+    _run(["git", "clone", str(bare), str(fresh)], cwd=tmp_path)
+    _run(["git", "config", "commit.gpgsign", "false"], cwd=fresh)
+    _run(["git", "fetch", "origin", "gh-pages", "--depth=1"], cwd=fresh)
+    # Confirm the precondition: no local gh-pages ref, only a remote one.
+    local_check = subprocess.run(
+        ["git", "show-ref", "--verify", "--quiet", "refs/heads/gh-pages"],
+        cwd=fresh,
+        check=False,
+    )
+    assert local_check.returncode != 0, "test precondition: no local gh-pages"
+
+    # Deploy v0.2.0 from this fresh clone, then push.
+    deploy(repo_root=fresh, src_dir=site_v2, version="v0.2.0", push=True)
+
+    # Inspect the remote's gh-pages: BOTH versions must be present.
+    inspect = tmp_path / "inspect"
+    _run(["git", "clone", str(bare), str(inspect)], cwd=tmp_path)
+    _run(["git", "checkout", "gh-pages"], cwd=inspect)
+    versions = json.loads((inspect / "versions.json").read_text(encoding="utf-8"))
+    versions_by_name = {v["version"] for v in versions}
+    assert versions_by_name == {"v0.1.0", "v0.2.0"}, (
+        f"Fresh-clone deploy wiped remote history: {versions_by_name}"
+    )
+    assert (inspect / "v0.1.0" / "index.html").exists()
+    assert (inspect / "v0.2.0" / "index.html").exists()
+
+
 def test_subsequent_deploys_versions_sorted_latest_first(
     repo: Path, site_v1: Path, site_v2: Path, gh_pages_files
 ) -> None:

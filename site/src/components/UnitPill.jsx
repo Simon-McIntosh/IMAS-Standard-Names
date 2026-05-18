@@ -6,7 +6,7 @@ export function UnitPill({ unit }) {
   }
   return (
     <span className="unit-pill">
-      <RichText text={unit} />
+      <RichText text={unit} inline />
     </span>
   );
 }

@@ -651,6 +651,12 @@ body {
 /* KaTeX tuning */
 .katex { font-size: 1em; }
 .katex-host { display: inline-block; }
+.katex-display-host { display: block; margin: 0.6em 0; text-align: center; }
+.katex-display-host > .katex-display { margin: 0; }
+
+/* RichText paragraph spacing — used by <RichText> in block mode */
+.rt-p { margin: 0 0 0.7em 0; }
+.rt-p:last-child { margin-bottom: 0; }
 
 /* Scrollbar */
 ::-webkit-scrollbar { width: 10px; height: 10px; }

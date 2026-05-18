@@ -73,22 +73,22 @@ export function DetailPanel({ name, onSelect, onClose, childIndex, groupIndex })
       </div>
 
       <section className="detail-section detail-short">
-        <RichText text={n.short} />
+        <RichText text={n.short} onSelect={onSelect} inline />
       </section>
 
       <section className="detail-section">
         <h3 className="detail-h">Description</h3>
-        <p className="detail-long">
-          <RichText text={n.long} />
-        </p>
+        <div className="detail-long">
+          <RichText text={n.long} onSelect={onSelect} />
+        </div>
       </section>
 
       {n.sign && (
         <section className="detail-section">
           <h3 className="detail-h">Sign convention</h3>
-          <p className="detail-sign">
-            <RichText text={n.sign} />
-          </p>
+          <div className="detail-sign">
+            <RichText text={n.sign} onSelect={onSelect} />
+          </div>
         </section>
       )}
 

@@ -57,30 +57,30 @@ describe('ParseBreakdown', () => {
     expect(screen.getByText('<subject> · <base>')).toBeInTheDocument();
   });
 
-  it('renders all nine roles when present', async () => {
+  it('renders every role the dataset emitter produces', async () => {
+    // Every role value emitted by dataset.py `_derive_grammar_facets`
+    // MUST resolve to a non-"Unknown" label in the SPA.
     const parse = [
-      { role: 'reduction', text: 'volume_averaged' },
-      { role: 'modifier', text: 'total' },
-      { role: 'subject', text: 'plasma' },
-      { role: 'axis', text: 'toroidal' },
-      { role: 'base', text: 'magnetic_field' },
       { role: 'operator', text: 'magnitude' },
-      { role: 'preposition', text: 'at' },
-      { role: 'locus', text: 'magnetic_axis' },
-      { role: 'unknown', text: 'foo' },
+      { role: 'axis', text: 'toroidal' },
+      { role: 'qualifier', text: 'major' },
+      { role: 'base', text: 'radius' },
+      { role: 'locus', text: 'of_plasma_boundary' },
+      { role: 'process', text: 'due_to_radiation' },
+      { role: 'unparseable', text: 'foo_bar' },
     ];
     await renderWithData(
       <ParseBreakdown name="anything" parse={parse} onSelect={() => {}} />,
     );
-    expect(screen.getByText('Reduction')).toBeInTheDocument();
-    expect(screen.getByText('Modifier')).toBeInTheDocument();
-    expect(screen.getByText('Subject')).toBeInTheDocument();
-    expect(screen.getByText('Axis')).toBeInTheDocument();
-    expect(screen.getByText('Base')).toBeInTheDocument();
     expect(screen.getByText('Operator')).toBeInTheDocument();
-    expect(screen.getByText('Preposition')).toBeInTheDocument();
+    expect(screen.getByText('Axis')).toBeInTheDocument();
+    expect(screen.getByText('Qualifier')).toBeInTheDocument();
+    expect(screen.getByText('Base')).toBeInTheDocument();
     expect(screen.getByText('Locus')).toBeInTheDocument();
-    expect(screen.getByText('Unknown')).toBeInTheDocument();
+    expect(screen.getByText('Process')).toBeInTheDocument();
+    expect(screen.getByText('Unparseable')).toBeInTheDocument();
+    // The bug we're regression-testing: 'qualifier' must NOT render as Unknown.
+    expect(screen.queryByText('Unknown')).toBeNull();
   });
 
   it('falls back to a plain mono source string when parse is empty', async () => {

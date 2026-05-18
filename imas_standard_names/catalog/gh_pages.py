@@ -144,7 +144,7 @@ def deploy(
             f"{src_dir}/index.html missing — SPA build is incomplete"
         )
 
-    _ensure_branch_exists(repo_root, branch)
+    _ensure_branch_exists(repo_root, branch, remote=remote)
 
     worktree_parent = Path(tempfile.mkdtemp(prefix="sn-gh-pages-"))
     worktree = worktree_parent / "wt"
@@ -218,13 +218,36 @@ def deploy(
 # ---------------------------------------------------------------------------
 
 
-def _ensure_branch_exists(repo_root: Path, branch: str) -> None:
-    """Create the deploy branch as an empty orphan if it does not exist.
+def _ensure_branch_exists(
+    repo_root: Path, branch: str, *, remote: str = "origin"
+) -> None:
+    """Ensure a local ``branch`` ref exists, preserving any remote history.
 
-    We avoid touching the working copy's HEAD: a temporary worktree is
-    created in a temp dir to seed the branch's first commit, then removed.
+    Order of operations:
+
+    1. If ``refs/heads/<branch>`` already exists locally, nothing to do.
+    2. Otherwise, if ``refs/remotes/<remote>/<branch>`` exists (the CI
+       case: the branch was fetched but never checked out), create a
+       local branch pointing at the remote ref. This is what stops a
+       fresh ``deploy()`` in CI from clobbering published history.
+    3. Otherwise the branch genuinely does not exist anywhere — seed an
+       empty orphan in a temporary worktree.
+
+    Without step 2, every CI run on a shallow / fresh clone would land
+    in the orphan path, force-push, and wipe every prior version on the
+    remote.
     """
     if _branch_exists(repo_root, branch):
+        return
+
+    if _remote_branch_exists(repo_root, remote, branch):
+        # Materialise the local ref from the remote tracking ref. We do
+        # not check it out — ``deploy()`` will create a worktree pointed
+        # at this ref in the next step.
+        _run_git(
+            ["branch", branch, f"refs/remotes/{remote}/{branch}"],
+            cwd=repo_root,
+        )
         return
 
     seed_parent = Path(tempfile.mkdtemp(prefix="sn-gh-pages-seed-"))
@@ -258,6 +281,21 @@ def _branch_exists(repo_root: Path, branch: str) -> bool:
     """Return True if ``branch`` exists locally."""
     proc = subprocess.run(
         ["git", "show-ref", "--verify", "--quiet", f"refs/heads/{branch}"],
+        cwd=repo_root,
+        check=False,
+    )
+    return proc.returncode == 0
+
+
+def _remote_branch_exists(repo_root: Path, remote: str, branch: str) -> bool:
+    """Return True if ``refs/remotes/<remote>/<branch>`` exists locally.
+
+    A True result means we have a fetched copy of the remote branch
+    (e.g. after a CI ``git fetch <remote> <branch>`` step) even though
+    no local working branch has been created from it yet.
+    """
+    proc = subprocess.run(
+        ["git", "show-ref", "--verify", "--quiet", f"refs/remotes/{remote}/{branch}"],
         cwd=repo_root,
         check=False,
     )
