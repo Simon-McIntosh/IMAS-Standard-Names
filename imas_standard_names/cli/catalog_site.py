@@ -37,10 +37,11 @@ from ..catalog.gh_pages import deploy as deploy_to_gh_pages
 # ``site/`` is checked into the repo at the same level as
 # ``imas_standard_names/``. ``__file__`` is
 # ``imas_standard_names/cli/catalog_site.py`` so two ``parents`` up
-# lands at the repo root.
-SITE_DIR = Path(__file__).resolve().parents[2] / "site"
+# lands at the repo root. This path is only valid in a source checkout;
+# when installed as a package, callers must pass ``--site-dir`` explicitly.
+_DEFAULT_SITE_DIR = Path(__file__).resolve().parents[2] / "site"
 
-__all__ = ["SITE_DIR", "deploy_cmd", "serve_cmd"]
+__all__ = ["deploy_cmd", "serve_cmd"]
 
 
 # ---------------------------------------------------------------------------
@@ -52,18 +53,21 @@ def _check_node_available() -> bool:
     return shutil.which("npm") is not None and shutil.which("node") is not None
 
 
-def _ensure_site_scaffold() -> None:
-    """Fail fast if the Vite scaffold is missing.
+def _resolve_site_dir(site_dir: Path | None) -> Path:
+    """Return the validated site directory path.
 
-    The ``site/`` directory is checked in. A missing ``package.json``
-    almost always means an incomplete checkout or stale install — a
-    user-friendly error is much better than a confusing npm trace.
+    If ``site_dir`` is provided explicitly (e.g. via ``--site-dir``),
+    use it directly. Otherwise fall back to the default source-checkout
+    relative path.
     """
-    if not (SITE_DIR / "package.json").exists():
+    resolved = (site_dir or _DEFAULT_SITE_DIR).resolve()
+    if not (resolved / "package.json").exists():
         raise click.ClickException(
-            f"site/ scaffold missing at {SITE_DIR}. "
-            "This indicates an incomplete checkout or a stale package install."
+            f"site/ scaffold missing at {resolved}. "
+            "Pass --site-dir pointing to the imas-standard-names site/ directory, "
+            "or run from a source checkout."
         )
+    return resolved
 
 
 def _ensure_node_toolchain() -> None:
@@ -83,20 +87,19 @@ def _run(cmd: list[str], *, cwd: Path) -> None:
         )
 
 
-def _build_spa(dist_dir: Path) -> None:
+def _build_spa(dist_dir: Path, site_dir: Path) -> None:
     """Build the Vite SPA into ``dist_dir``.
 
     Runs ``npm ci`` (lockfile-driven, reproducible) followed by
-    ``npm run build`` inside ``SITE_DIR``. The Vite build output lives
-    in ``SITE_DIR/dist`` by convention; we copy it into ``dist_dir`` so
+    ``npm run build`` inside ``site_dir``. The Vite build output lives
+    in ``site_dir/dist`` by convention; we copy it into ``dist_dir`` so
     callers can place it anywhere (e.g. a tempdir for deployment).
     """
     _ensure_node_toolchain()
-    _ensure_site_scaffold()
-    _run(["npm", "ci"], cwd=SITE_DIR)
-    _run(["npm", "run", "build"], cwd=SITE_DIR)
+    _run(["npm", "ci"], cwd=site_dir)
+    _run(["npm", "run", "build"], cwd=site_dir)
 
-    vite_dist = SITE_DIR / "dist"
+    vite_dist = site_dir / "dist"
     if not vite_dist.exists():
         raise click.ClickException(f"Vite build produced no output at {vite_dist}")
     if dist_dir.exists():
@@ -104,13 +107,13 @@ def _build_spa(dist_dir: Path) -> None:
     shutil.copytree(vite_dist, dist_dir)
 
 
-def _build_site(catalog_path: Path, dist_dir: Path) -> int:
+def _build_site(catalog_path: Path, dist_dir: Path, site_dir: Path) -> int:
     """Build the SPA and write the dataset JSON next to ``index.html``.
 
     Returns the number of standard names written so callers can surface
     the count to the user.
     """
-    _build_spa(dist_dir)
+    _build_spa(dist_dir, site_dir)
     return write_site_dataset(catalog_path, dist_dir / "data.json")
 
 
@@ -158,11 +161,19 @@ def _find_git_root(catalog_path: Path) -> Path:
     default=None,
     help="Deprecated; retained for backwards compatibility (no-op).",
 )
+@click.option(
+    "--site-dir",
+    "site_dir",
+    type=click.Path(exists=True, file_okay=False, path_type=Path),
+    default=None,
+    help="Path to the imas-standard-names site/ directory (Vite SPA source).",
+)
 def serve_cmd(
     catalog_path: Path,
     port: int,
     host: str,
     site_name: str | None,
+    site_dir: Path | None,
 ) -> None:
     """Serve the catalog SPA locally for preview.
 
@@ -175,12 +186,12 @@ def serve_cmd(
         click.echo("warning: --site-name is now a no-op", err=True)
 
     _ensure_node_toolchain()
-    _ensure_site_scaffold()
+    resolved_site_dir = _resolve_site_dir(site_dir)
 
     # Vite serves anything in ``public/`` at the site root, so writing
     # ``data.json`` here means the dev server sees it without any extra
     # plugin configuration.
-    public = SITE_DIR / "public"
+    public = resolved_site_dir / "public"
     public.mkdir(exist_ok=True)
     n = write_site_dataset(catalog_path, public / "data.json")
     if n == 0:
@@ -191,7 +202,7 @@ def serve_cmd(
 
     _run(
         ["npm", "run", "dev", "--", "--port", str(port), "--host", host],
-        cwd=SITE_DIR,
+        cwd=resolved_site_dir,
     )
 
 
@@ -238,6 +249,13 @@ def serve_cmd(
     show_default=True,
     help="Deploy branch name.",
 )
+@click.option(
+    "--site-dir",
+    "site_dir",
+    type=click.Path(exists=True, file_okay=False, path_type=Path),
+    default=None,
+    help="Path to the imas-standard-names site/ directory (Vite SPA source).",
+)
 def deploy_cmd(
     catalog_path: Path,
     doc_version: str,
@@ -247,6 +265,7 @@ def deploy_cmd(
     site_url: str | None,
     remote: str,
     branch: str,
+    site_dir: Path | None,
 ) -> None:
     """Build the SPA and deploy it to gh-pages/<version>/.
 
@@ -268,11 +287,12 @@ def deploy_cmd(
             err=True,
         )
 
+    resolved_site_dir = _resolve_site_dir(site_dir)
     repo_root = _find_git_root(catalog_path)
 
     with tempfile.TemporaryDirectory(prefix="sn-site-") as tmp:
         dist_dir = Path(tmp) / "dist"
-        n = _build_site(catalog_path, dist_dir)
+        n = _build_site(catalog_path, dist_dir, resolved_site_dir)
         if n == 0:
             click.echo("Warning: No standard names found in catalog", err=True)
         click.echo(f"Built SPA for {n} standard names")

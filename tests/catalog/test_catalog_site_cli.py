@@ -157,7 +157,7 @@ def test_serve_emits_deprecation_for_site_name(
     # Force the Node check to pass so we get past the toolchain guard,
     # then short-circuit the dataset write to avoid touching site/public.
     monkeypatch.setattr(catalog_site, "_check_node_available", lambda: True)
-    monkeypatch.setattr(catalog_site, "_ensure_site_scaffold", lambda: None)
+    monkeypatch.setattr(catalog_site, "_resolve_site_dir", lambda _d: empty_catalog_dir)
     monkeypatch.setattr(
         catalog_site,
         "write_site_dataset",
@@ -216,7 +216,7 @@ def test_site_deploy_fails_clearly_without_site_dir(
     """If ``site/`` is missing or has no ``package.json``, fail loudly."""
     fake_site = tmp_path / "no-such-site"
     monkeypatch.setattr(catalog_site, "_check_node_available", lambda: True)
-    monkeypatch.setattr(catalog_site, "SITE_DIR", fake_site)
+    monkeypatch.setattr(catalog_site, "_DEFAULT_SITE_DIR", fake_site)
     monkeypatch.setattr(catalog_site, "_find_git_root", lambda _p: empty_catalog_dir)
     result = runner.invoke(
         deploy_cmd,
