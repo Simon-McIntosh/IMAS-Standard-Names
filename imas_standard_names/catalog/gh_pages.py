@@ -194,7 +194,11 @@ def deploy(
         )
 
         if push:
-            _run_git(["push", remote, branch], cwd=worktree)
+            # Force-push is safe for the gh-pages deploy branch — it's a
+            # build artifact, not collaborative history. This handles the
+            # common CI scenario where a shallow fetch + concurrent deploy
+            # leaves the local branch behind the remote.
+            _run_git(["push", "--force", remote, branch], cwd=worktree)
     finally:
         # Best-effort cleanup. ``git worktree remove`` is the canonical
         # path; fall back to a plain rmtree if git's remove fails.
