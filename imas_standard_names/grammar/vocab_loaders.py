@@ -105,6 +105,7 @@ class OperatorDef(BaseModel, extra="forbid"):
     separator: str | None = None
     indexed: bool = False
     index_params: list[str] | None = None
+    dimensionless: bool = False
 
 
 class OperatorRegistry(BaseModel, extra="forbid"):
@@ -133,10 +134,13 @@ class PhysicalBaseDef(BaseModel, extra="forbid"):
     Attributes:
         aliases: Alternate tokens that map to this base.
         kind: Physical kind — scalar, vector, tensor, or complex.
+        inherently_dimensional: If true, this base normally carries SI units
+            and marking it dimensionless (unit='1') is flagged by the validator.
     """
 
     aliases: list[str] = []
     kind: BaseKind
+    inherently_dimensional: bool = False
 
 
 class PhysicalBasesRegistry(BaseModel, extra="forbid"):

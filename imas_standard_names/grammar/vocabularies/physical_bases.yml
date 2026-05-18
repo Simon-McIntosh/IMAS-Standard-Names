@@ -12,8 +12,12 @@
 #   the remainder is itself a valid base.
 #
 # Structure per entry:
-#   aliases  - list of alternate tokens (empty default)
-#   kind     - scalar | vector | tensor | complex
+#   aliases                - list of alternate tokens (empty default)
+#   kind                   - scalar | vector | tensor | complex
+#   inherently_dimensional - true if this base always carries SI units;
+#                            unit='1' on these is flagged by the validator
+#                            unless an operator (normalized, perturbed, …)
+#                            explicitly produces dimensionless output.
 
 bases:
   absorptivity:
@@ -25,6 +29,7 @@ bases:
   area:
     aliases: []
     kind: scalar
+    inherently_dimensional: true
   aspect_ratio:
     aliases: []
     kind: scalar
@@ -37,6 +42,7 @@ bases:
   capacitance:
     aliases: []
     kind: scalar
+    inherently_dimensional: true
   charge:
     aliases: []
     kind: scalar
@@ -49,6 +55,7 @@ bases:
   conductivity:
     aliases: []
     kind: scalar
+    inherently_dimensional: true
   confinement_time:
     aliases: []
     kind: scalar
@@ -64,9 +71,11 @@ bases:
   current:
     aliases: []
     kind: scalar
+    inherently_dimensional: true
   current_density:
     aliases: []
     kind: vector
+    inherently_dimensional: true
   debye_length:
     aliases: []
     kind: scalar
@@ -76,12 +85,15 @@ bases:
   density:
     aliases: []
     kind: scalar
+    inherently_dimensional: true
   diffusion_coefficient:
     aliases: []
     kind: scalar
+    inherently_dimensional: true
   diffusivity:
     aliases: []
     kind: scalar
+    inherently_dimensional: true
   distance:
     aliases: []
     kind: scalar
@@ -91,6 +103,7 @@ bases:
   damping_rate:
     aliases: []
     kind: scalar
+    inherently_dimensional: true
   distribution:
     aliases: []
     kind: scalar
@@ -100,12 +113,15 @@ bases:
   electric_field:
     aliases: []
     kind: vector
+    inherently_dimensional: true
   electrical_conductivity:
     aliases: []
     kind: scalar
+    inherently_dimensional: true
   electrostatic_potential:
     aliases: []
     kind: scalar
+    inherently_dimensional: true
   elongation:
     aliases: []
     kind: scalar
@@ -115,9 +131,11 @@ bases:
   energy:
     aliases: []
     kind: scalar
+    inherently_dimensional: true
   energy_flux:
     aliases: []
     kind: vector
+    inherently_dimensional: true
   factor:
     aliases: []
     kind: scalar
@@ -133,39 +151,47 @@ bases:
   flux:
     aliases: []
     kind: scalar
+    inherently_dimensional: true
   force:
     aliases: []
     kind: vector
+    inherently_dimensional: true
   fraction:
     aliases: []
     kind: scalar
   frequency:
     aliases: []
     kind: scalar
+    inherently_dimensional: true
   gap:
     aliases: []
     kind: scalar
   growth_rate:
     aliases: []
     kind: scalar
+    inherently_dimensional: true
   heat_flux:
     aliases: []
     kind: scalar
+    inherently_dimensional: true
   height:
     aliases: []
     kind: scalar
   impedance:
     aliases: []
     kind: scalar
+    inherently_dimensional: true
   index:
     aliases: []
     kind: scalar
   inductance:
     aliases: []
     kind: scalar
+    inherently_dimensional: true
   length:
     aliases: []
     kind: scalar
+    inherently_dimensional: true
   li:
     aliases:
     - internal_inductance_normalized
@@ -176,9 +202,11 @@ bases:
   magnetic_field:
     aliases: []
     kind: vector
+    inherently_dimensional: true
   magnetic_flux:
     aliases: []
     kind: scalar
+    inherently_dimensional: true
   magnetic_moment:
     aliases: []
     kind: vector
@@ -191,6 +219,7 @@ bases:
   mass:
     aliases: []
     kind: scalar
+    inherently_dimensional: true
   mass_number:
     aliases: [nucleon_number]
     kind: scalar
@@ -203,15 +232,18 @@ bases:
   momentum:
     aliases: []
     kind: scalar
+    inherently_dimensional: true
   momentum_flux:
     aliases: []
     kind: vector
+    inherently_dimensional: true
   multiplicity:
     aliases: []
     kind: scalar
   number_density:
     aliases: []
     kind: scalar
+    inherently_dimensional: true
   opacity:
     aliases: []
     kind: scalar
@@ -221,6 +253,7 @@ bases:
   particle_flux:
     aliases: []
     kind: vector
+    inherently_dimensional: true
   period:
     aliases: []
     kind: scalar
@@ -233,15 +266,19 @@ bases:
   potential:
     aliases: []
     kind: scalar
+    inherently_dimensional: true
   power:
     aliases: []
     kind: scalar
+    inherently_dimensional: true
   power_density:
     aliases: []
     kind: scalar
+    inherently_dimensional: true
   pressure:
     aliases: []
     kind: scalar
+    inherently_dimensional: true
   q_profile:
     aliases:
     - safety_factor_profile
@@ -264,18 +301,22 @@ bases:
   resistance:
     aliases: []
     kind: scalar
+    inherently_dimensional: true
   resistivity:
     aliases: []
     kind: scalar
+    inherently_dimensional: true
   rotation_frequency:
     aliases: []
     kind: scalar
+    inherently_dimensional: true
   safety_factor:
     aliases: []
     kind: scalar
   shearing_rate:
     aliases: []
     kind: scalar
+    inherently_dimensional: true
   size:
     aliases: []
     kind: scalar
@@ -288,30 +329,37 @@ bases:
   source_rate:
     aliases: []
     kind: scalar
+    inherently_dimensional: true
   speed:
     aliases: []
     kind: scalar
+    inherently_dimensional: true
   spectral_radiance:
     aliases: []
     kind: scalar
+    inherently_dimensional: true
   squareness:
     aliases: []
     kind: scalar
   temperature:
     aliases: []
     kind: scalar
+    inherently_dimensional: true
   tilt_angle:
     aliases: []
     kind: scalar
   time:
     aliases: []
     kind: scalar
+    inherently_dimensional: true
   torque:
     aliases: []
     kind: scalar
+    inherently_dimensional: true
   torque_density:
     aliases: []
     kind: scalar
+    inherently_dimensional: true
   transmissivity:
     aliases: []
     kind: scalar
@@ -321,18 +369,22 @@ bases:
   velocity:
     aliases: []
     kind: vector
+    inherently_dimensional: true
   voltage:
     aliases: []
     kind: scalar
+    inherently_dimensional: true
   volume:
     aliases: []
     kind: scalar
+    inherently_dimensional: true
   vorticity:
     aliases: []
     kind: scalar
   wavelength:
     aliases: []
     kind: scalar
+    inherently_dimensional: true
   wave_vector:
     aliases: [wavevector]
     kind: vector

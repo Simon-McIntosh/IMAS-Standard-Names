@@ -96,6 +96,7 @@ operators:
     kind: unary_prefix
     precedence: 20
     returns: scalar
+    dimensionless: true
 
   magnitude:
     kind: unary_postfix
@@ -127,6 +128,7 @@ operators:
     kind: unary_prefix
     precedence: 15
     returns: scalar_or_vector
+    dimensionless: true
 
   per_toroidal_mode:
     kind: unary_prefix
@@ -147,6 +149,7 @@ operators:
     kind: unary_prefix
     precedence: 15
     returns: scalar_or_vector
+    dimensionless: true
 
   radial_derivative:
     kind: unary_prefix

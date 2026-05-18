@@ -246,43 +246,29 @@ def _check_physical_base_with_object(name: str, entry: StandardNameEntry) -> lis
     return issues
 
 
-# Physical bases that inherently carry SI units — marking them dimensionless
-# is almost certainly a mistake.
-_INHERENTLY_DIMENSIONAL_BASES = frozenset(
-    {
-        "temperature",
-        "density",
-        "pressure",
-        "magnetic_field",
-        "electric_field",
-        "velocity",
-        "current",
-        "voltage",
-        "energy",
-        "power",
-        "force",
-        "mass",
-        "length",
-        "time",
-        "frequency",
-        "resistance",
-        "inductance",
-        "capacitance",
-        "flux",
-        "luminosity",
-        "torque",
-        "momentum",
-        "viscosity",
-        "conductivity",
-        "resistivity",
-        "charge",
-        "area",
-        "volume",
-    }
-)
+# ---------------------------------------------------------------------------
+# Dimensionless physical quantity check — vocabulary-driven
+# ---------------------------------------------------------------------------
 
 
-_NORMALIZATION_QUALIFIERS = frozenset({"normalized", "gyrocenter"})
+def _load_inherently_dimensional_bases() -> frozenset[str]:
+    """Load the set of physical bases marked ``inherently_dimensional`` in vocab."""
+    from ..grammar.vocab_loaders import load_physical_bases  # noqa: PLC0415
+
+    registry = load_physical_bases()
+    return frozenset(
+        token for token, defn in registry.bases.items() if defn.inherently_dimensional
+    )
+
+
+def _load_dimensionless_operators() -> frozenset[str]:
+    """Load operators marked ``dimensionless: true`` in the operator vocabulary."""
+    from ..grammar.vocab_loaders import load_operators  # noqa: PLC0415
+
+    registry = load_operators()
+    return frozenset(
+        token for token, defn in registry.operators.items() if defn.dimensionless
+    )
 
 
 def _check_dimensionless_physical_quantity(
@@ -296,9 +282,10 @@ def _check_dimensionless_physical_quantity(
     dimensionless:
 
     - binary operators (ratio, product, difference);
-    - the ``normalized`` transformation (e.g. ``normalized_density``);
-    - any qualifier in :data:`_NORMALIZATION_QUALIFIERS` (e.g.
-      ``gyrocenter_pressure`` is gyrokinetic-normalized by convention).
+    - operators marked ``dimensionless: true`` in the operator vocabulary
+      (e.g. normalized, perturbed, logarithm);
+    - any qualifier derived from a dimensionless operator token
+      (e.g. ``gyrocenter_pressure``).
 
     Severity: Warning
     """
@@ -323,27 +310,29 @@ def _check_dimensionless_physical_quantity(
         if binary_operator:
             return issues
 
-        # The ``normalized`` transformation explicitly produces a
-        # dimensionless quantity by construction.
+        # Operators marked dimensionless in the vocabulary always produce
+        # dimensionless output (normalized, perturbed, logarithm, etc.).
+        dimensionless_ops = _load_dimensionless_operators()
         tx_value = getattr(transformation, "value", transformation)
-        if tx_value == "normalized":
+        if tx_value in dimensionless_ops:
             return issues
 
-        # Gyrokinetic-normalized quantities carry qualifiers like
-        # ``normalized`` or ``gyrocenter`` that imply dimensionless
-        # output even when no explicit transformation is parsed.
+        # Qualifiers that correspond to dimensionless operator tokens imply
+        # dimensionless output even when parsed as qualifiers rather than
+        # transformations (e.g. gyrocenter_pressure).
         try:
             from ..grammar.parser import parse as ir_parse  # noqa: PLC0415
 
             ir = ir_parse(entry.name).ir
             if ir is not None:
                 qualifier_tokens = {q.token for q in (ir.qualifiers or [])}
-                if qualifier_tokens & _NORMALIZATION_QUALIFIERS:
+                if qualifier_tokens & dimensionless_ops:
                     return issues
         except Exception:
             pass
 
-        if physical_base and physical_base in _INHERENTLY_DIMENSIONAL_BASES:
+        inherently_dimensional = _load_inherently_dimensional_bases()
+        if physical_base and physical_base in inherently_dimensional:
             issues.append(
                 f"{name}: WARNING - dimensionless unit '1' on physical quantity "
                 f"'{physical_base}' is unexpected. Quantities like '{physical_base}' "
