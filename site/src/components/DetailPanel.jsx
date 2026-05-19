@@ -5,7 +5,7 @@ import { UnitPill } from './UnitPill.jsx';
 import { RichText } from './RichText.jsx';
 import { ParseBreakdown } from './ParseBreakdown.jsx';
 import { NeighborhoodGraph } from './NeighborhoodGraph.jsx';
-import { NameChip } from './NameChip.jsx';
+import { NameLink } from './NameLink.jsx';
 import { SourceGroup } from './SourceGroup.jsx';
 
 // Right pane: the definition of a single name.
@@ -117,8 +117,11 @@ export function DetailPanel({ name, onSelect, onClose, childIndex, groupIndex })
         <section className="detail-section">
           <h3 className="detail-h">See also</h3>
           <div className="see-also">
-            {n.seeAlso.map((s) => (
-              <NameChip key={s} name={s} onSelect={onSelect} />
+            {n.seeAlso.map((s, i) => (
+              <span key={s} className="see-also-item">
+                {i > 0 && <span className="see-also-sep">·</span>}
+                <NameLink name={s} onSelect={onSelect} />
+              </span>
             ))}
           </div>
         </section>

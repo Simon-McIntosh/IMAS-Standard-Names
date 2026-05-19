@@ -1,5 +1,5 @@
 import { MathInline, MathDisplay } from './MathInline.jsx';
-import { NameChip } from './NameChip.jsx';
+import { NameLink } from './NameLink.jsx';
 
 // Render a string with markdown-lite formatting.
 //
@@ -7,7 +7,9 @@ import { NameChip } from './NameChip.jsx';
 //
 //   - `$$ ... $$`           → display math block (KaTeX)
 //   - `$ ... $`             → inline math span (KaTeX)
-//   - `[label](name:foo)`   → cross-catalog link rendered as <NameChip>
+//   - `[label](name:foo)`   → cross-catalog link rendered as <NameLink>,
+//                             an inline span (NOT a button) so prose reflows
+//                             cleanly across line breaks.
 //   - blank lines           → paragraph break
 //
 // Two render modes:
@@ -79,11 +81,11 @@ function renderInline(text, onSelect, paraKey) {
         break;
       case 'name-link':
         out.push(
-          <NameChip
+          <NameLink
             key={key}
             name={tok.value}
+            label={tok.label}
             onSelect={onSelect || (() => {})}
-            kind="ref"
           />,
         );
         break;

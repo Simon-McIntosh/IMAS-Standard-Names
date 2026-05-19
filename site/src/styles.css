@@ -566,7 +566,50 @@ body {
 }
 .name-chip.chip-parent { border-color: color-mix(in oklch, var(--accent) 30%, var(--border)); }
 
-.see-also { display: flex; flex-wrap: wrap; gap: 6px; }
+/* Inline cross-reference link — flows with surrounding prose, never
+ * breaks the baseline. Span (not button) so display stays `inline`
+ * even when the link wraps across multiple lines. */
+.name-link {
+  display: inline;
+  padding: 1px 6px;
+  border: 0;
+  border-radius: 4px;
+  background: color-mix(in oklch, var(--accent) 8%, transparent);
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  text-decoration: none;
+  -webkit-box-decoration-break: clone;
+          box-decoration-break: clone;
+  transition: background 0.15s ease, box-shadow 0.15s ease;
+}
+.name-link:hover {
+  background: color-mix(in oklch, var(--accent) 16%, transparent);
+}
+.name-link:focus-visible {
+  outline: none;
+  background: color-mix(in oklch, var(--accent) 18%, transparent);
+  box-shadow: 0 0 0 2px color-mix(in oklch, var(--accent) 35%, transparent);
+}
+.name-link.missing {
+  background: color-mix(in oklch, var(--text) 5%, transparent);
+  color: var(--text-3);
+  cursor: help;
+}
+
+/* See-also row — flowing comma-separated NameLinks with a middle-dot
+ * separator. NOT a chip list. */
+.see-also {
+  display: block;
+  font-size: 13px;
+  line-height: 1.7;
+}
+.see-also-item { white-space: normal; }
+.see-also-sep {
+  color: var(--text-3);
+  margin: 0 6px;
+  user-select: none;
+}
 
 /* Mermaid */
 .mermaid-host {
