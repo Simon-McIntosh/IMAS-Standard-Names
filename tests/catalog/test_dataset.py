@@ -20,13 +20,13 @@ from imas_standard_names.catalog import build_site_dataset, write_site_dataset
 from imas_standard_names.catalog.dataset import (
     _arguments_parent,
     _derive_grammar_facets,
+    _display_kind,
     _extract_sign,
     _humanise_domain,
     _local_ir_peel,
     _normalise_see_also,
     _normalise_sources,
     _parent_token,
-    _structural_kind,
 )
 
 # ---------------------------------------------------------------------------
@@ -151,31 +151,31 @@ class TestNormaliseSources:
 
 
 class TestStructuralKind:
-    """``_structural_kind`` derives the SPA structural kind from grammar."""
+    """``_display_kind`` derives the SPA structural kind from grammar."""
 
     def test_locus_yields_at_point(self) -> None:
         facets = _derive_grammar_facets("safety_factor_at_magnetic_axis")
-        assert _structural_kind("safety_factor_at_magnetic_axis", "scalar", facets) == (
+        assert _display_kind("safety_factor_at_magnetic_axis", "scalar", facets) == (
             "at_point"
         )
 
     def test_projection_yields_component(self) -> None:
         facets = _derive_grammar_facets("poloidal_magnetic_field")
-        assert _structural_kind("poloidal_magnetic_field", "scalar", facets) == (
+        assert _display_kind("poloidal_magnetic_field", "scalar", facets) == (
             "component"
         )
 
     def test_total_prefix_yields_global(self) -> None:
         facets = _derive_grammar_facets("total_plasma_current")
-        assert _structural_kind("total_plasma_current", "scalar", facets) == "global"
+        assert _display_kind("total_plasma_current", "scalar", facets) == "global"
 
     def test_minimum_qualifier_yields_global(self) -> None:
         facets = _derive_grammar_facets("minimum_safety_factor")
-        assert _structural_kind("minimum_safety_factor", "scalar", facets) == "global"
+        assert _display_kind("minimum_safety_factor", "scalar", facets) == "global"
 
     def test_pure_base_stays_base(self) -> None:
         facets = _derive_grammar_facets("safety_factor")
-        assert _structural_kind("safety_factor", "scalar", facets) == "base"
+        assert _display_kind("safety_factor", "scalar", facets) == "base"
 
 
 # ---------------------------------------------------------------------------
@@ -184,23 +184,34 @@ class TestStructuralKind:
 
 
 class TestDatasetShape:
-    """Top-level dataset keys and counts match the manifest."""
+    """Top-level dataset keys and counts derive from the actual YAML files.
 
-    def test_loads_isnc_catalog(self, isnc_dataset: dict, isnc_manifest: dict) -> None:
+    The CATALOG_VERSION label and category counts use ``len(names)`` —
+    the actual number of records emitted — rather than the manifest's
+    ``published_count``. (Manifest counts can lag if the codex export
+    filter excluded entries after the manifest was written, and we
+    want the SPA to show the truth.)
+    """
+
+    def test_loads_isnc_catalog(self, isnc_dataset: dict) -> None:
         assert "NAMES" in isnc_dataset
         assert "CATEGORIES" in isnc_dataset
         assert "GRAMMAR_VOCAB" in isnc_dataset
         assert "CATALOG_VERSION" in isnc_dataset
 
         names = isnc_dataset["NAMES"]
-        assert len(names) == isnc_manifest["published_count"]
+        assert len(names) > 0, "real ISNC catalog must yield at least one record"
 
     def test_catalog_version_includes_grammar_and_count(
         self, isnc_dataset: dict, isnc_manifest: dict
     ) -> None:
         version = isnc_dataset["CATALOG_VERSION"]
+        names = isnc_dataset["NAMES"]
+        # Manifest's grammar_version always appears verbatim.
         assert isnc_manifest["grammar_version"] in version
-        assert str(isnc_manifest["published_count"]) in version
+        # The displayed count is the actual emitted count, not the
+        # manifest's possibly-stale ``published_count`` claim.
+        assert str(len(names)) in version
 
     def test_categories_derived(self, isnc_dataset: dict, isnc_manifest: dict) -> None:
         cats = isnc_dataset["CATEGORIES"]
@@ -229,20 +240,24 @@ def _find_record(dataset: dict, name: str) -> dict:
 class TestRecordShape:
     """A representative NAMES record carries all SPA-expected fields."""
 
-    def test_total_plasma_current_full_shape(self, isnc_dataset: dict) -> None:
-        record = _find_record(isnc_dataset, "total_plasma_current")
+    def test_plasma_inductance_full_shape(self, isnc_dataset: dict) -> None:
+        record = _find_record(isnc_dataset, "plasma_inductance")
 
         # Identity
-        assert record["name"] == "total_plasma_current"
+        assert record["name"] == "plasma_inductance"
         assert record["category"] == "equilibrium"
 
-        # Required keys all present.
+        # Required keys all present — new algebra/display_kind alongside
+        # the legacy ``kind`` alias and the new reverse-link fields.
         required = {
             "name",
             "category",
             "group",
             "parent",
+            "algebra",
+            "display_kind",
             "kind",
+            "status",
             "unit",
             "tags",
             "short",
@@ -252,8 +267,13 @@ class TestRecordShape:
             "arguments",
             "sources",
             "parse",
+            "components",
+            "magnitude",
+            "children",
         }
-        assert required.issubset(record.keys())
+        assert required.issubset(record.keys()), (
+            f"missing keys: {required - set(record.keys())}"
+        )
 
         # Type checks.
         assert isinstance(record["tags"], list)
@@ -261,22 +281,26 @@ class TestRecordShape:
         assert isinstance(record["arguments"], list)
         assert isinstance(record["sources"], list)
         assert isinstance(record["parse"], list)
+        assert isinstance(record["components"], list)
+        assert isinstance(record["children"], list)
         assert all(
             isinstance(seg, dict) and {"role", "text"}.issubset(seg.keys())
             for seg in record["parse"]
         )
 
     def test_unit_present_for_physical_quantity(self, isnc_dataset: dict) -> None:
-        record = _find_record(isnc_dataset, "total_plasma_current")
-        assert record["unit"] == "A"
+        record = _find_record(isnc_dataset, "plasma_inductance")
+        assert record["unit"] == "H"
 
 
 class TestKindClassification:
     """Each structural kind shows up where the SPA expects it."""
 
-    def test_total_plasma_current_is_global(self, isnc_dataset: dict) -> None:
-        record = _find_record(isnc_dataset, "total_plasma_current")
-        assert record["kind"] == "global"
+    def test_plasma_inductance_is_global(self, isnc_dataset: dict) -> None:
+        record = _find_record(isnc_dataset, "plasma_inductance")
+        assert record["display_kind"] == "global"
+        # ``kind`` retained as a one-cycle back-compat alias for display_kind.
+        assert record["kind"] == record["display_kind"]
 
     def test_poloidal_magnetic_field_is_component(self, isnc_dataset: dict) -> None:
         record = _find_record(isnc_dataset, "poloidal_magnetic_field")
@@ -289,6 +313,90 @@ class TestKindClassification:
         record = _find_record(isnc_dataset, "safety_factor_at_magnetic_axis")
         assert record["kind"] == "at_point"
         assert record["locus"] == "magnetic_axis"
+
+
+class TestAlgebraAxis:
+    """Algebraic kind (scalar/vector/tensor/complex/metadata) lives on each
+    record alongside the SPA's display_kind, so the UI can offer a
+    separate Algebra filter without losing the display shape."""
+
+    def test_magnetic_field_is_vector(self, isnc_dataset: dict) -> None:
+        record = _find_record(isnc_dataset, "magnetic_field")
+        assert record["algebra"] == "vector"
+        # Display kind is independent — magnetic_field is a base shape.
+        assert record["display_kind"] == "base"
+
+    def test_scalar_default(self, isnc_dataset: dict) -> None:
+        record = _find_record(isnc_dataset, "electron_temperature")
+        assert record["algebra"] == "scalar"
+
+    def test_every_record_has_algebra(self, isnc_dataset: dict) -> None:
+        valid = {"scalar", "vector", "tensor", "complex", "metadata"}
+        for record in isnc_dataset["NAMES"]:
+            assert record["algebra"] in valid, (
+                f"{record['name']}: bad algebra {record['algebra']!r}"
+            )
+
+
+class TestVectorReverseLinks:
+    """Vectors carry ``components`` and (when present) ``magnitude``."""
+
+    def test_magnetic_field_components(self, isnc_dataset: dict) -> None:
+        record = _find_record(isnc_dataset, "magnetic_field")
+        components = record["components"]
+        assert len(components) >= 2, (
+            f"magnetic_field should have ≥2 components, got {components}"
+        )
+        # Each component carries name + axis; axes are unique.
+        axes = {c["axis"] for c in components}
+        assert len(axes) == len(components)
+        for c in components:
+            assert isinstance(c["name"], str) and c["name"]
+            assert isinstance(c["axis"], str) and c["axis"]
+
+    def test_scalar_has_empty_components(self, isnc_dataset: dict) -> None:
+        record = _find_record(isnc_dataset, "electron_temperature")
+        assert record["components"] == []
+        assert record["magnitude"] is None
+
+    def test_magnitude_only_when_catalog_has_it(self, isnc_dataset: dict) -> None:
+        """``magnitude`` is set only when ``magnitude_of_<name>`` exists.
+
+        Source-driven invariant: no speculative magnitude creation.
+        Current catalog has no magnitudes of vectors, so all vectors'
+        ``magnitude`` should be None.
+        """
+        record = _find_record(isnc_dataset, "magnetic_field")
+        # Either it exists in the catalog (string), or None — never auto-faked.
+        magnitude = record["magnitude"]
+        assert magnitude is None or isinstance(magnitude, str)
+        if isinstance(magnitude, str):
+            # If set, the referenced name must exist in the dataset.
+            assert any(n["name"] == magnitude for n in isnc_dataset["NAMES"])
+
+    def test_children_index(self, isnc_dataset: dict) -> None:
+        record = _find_record(isnc_dataset, "magnetic_field")
+        children = record["children"]
+        # magnetic_field has projection + qualifier children.
+        assert any(c["operator_kind"] == "projection" for c in children), (
+            f"expected projection children, got {children}"
+        )
+
+
+class TestSubject:
+    """``subject`` is the first qualifier matching the closed Subject enum."""
+
+    def test_electron_subject(self, isnc_dataset: dict) -> None:
+        assert (
+            _find_record(isnc_dataset, "electron_temperature")["subject"] == "electron"
+        )
+
+    def test_ion_subject(self, isnc_dataset: dict) -> None:
+        assert _find_record(isnc_dataset, "ion_temperature")["subject"] == "ion"
+
+    def test_unqualified_has_no_subject(self, isnc_dataset: dict) -> None:
+        # ``magnetic_field`` is a bare base — no subject qualifier.
+        assert _find_record(isnc_dataset, "magnetic_field")["subject"] is None
 
 
 class TestParseSegments:

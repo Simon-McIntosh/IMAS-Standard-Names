@@ -76,8 +76,12 @@ function Shell() {
   const [filters, setFilters] = useState({
     category: new Set(),
     unit: new Set(),
-    kind: new Set(),
+    algebra: new Set(),
+    display_kind: new Set(),
     status: new Set(),
+    subject: new Set(),
+    locus: new Set(),
+    source_status: new Set(),
     ids: new Set(),
     system: new Set(),
   });
@@ -124,8 +128,21 @@ function Shell() {
     const filtered = NAMES.filter((n) => {
       if (filters.category.size && !filters.category.has(n.category)) return false;
       if (filters.unit.size && !filters.unit.has(n.unit)) return false;
-      if (filters.kind.size && !filters.kind.has(n.kind)) return false;
-      if (filters.status.size && !n.sources.some((s) => filters.status.has(s.status))) {
+      if (filters.algebra.size && !filters.algebra.has(n.algebra)) return false;
+      if (filters.display_kind.size && !filters.display_kind.has(n.display_kind ?? n.kind)) {
+        return false;
+      }
+      // Entry-level status (n.status) — drawn directly from the catalog
+      // entry, not aggregated over per-source statuses. Names without
+      // sources still pass this filter when their `status` matches.
+      if (filters.status.size && !filters.status.has(n.status)) return false;
+      if (filters.subject.size && !filters.subject.has(n.subject)) return false;
+      if (filters.locus.size && !filters.locus.has(n.locus)) return false;
+      // Per-source ingestion status (any source matches).
+      if (
+        filters.source_status.size &&
+        !n.sources.some((s) => filters.source_status.has(s.status))
+      ) {
         return false;
       }
       if (filters.ids.size && !n.sources.some((s) => filters.ids.has(s.path.split('/')[0]))) {
@@ -150,22 +167,40 @@ function Shell() {
   // Facet counts over the FULL corpus — stable as the user toggles filters.
   const faceted = useMemo(() => {
     const units = {};
-    const kinds = {};
+    const algebras = {};
+    const display_kinds = {};
+    const kinds = {}; // legacy alias — kept while old components read `kinds`
     const statuses = {};
+    const subjects = {};
+    const loci = {};
+    const source_statuses = {};
     const idses = {};
     for (const n of NAMES) {
       units[n.unit] = (units[n.unit] || 0) + 1;
+      const algebra = n.algebra || 'scalar';
+      algebras[algebra] = (algebras[algebra] || 0) + 1;
+      const display = n.display_kind ?? n.kind;
+      display_kinds[display] = (display_kinds[display] || 0) + 1;
       kinds[n.kind] = (kinds[n.kind] || 0) + 1;
+      const status = n.status || 'drafted';
+      statuses[status] = (statuses[status] || 0) + 1;
+      if (n.subject) subjects[n.subject] = (subjects[n.subject] || 0) + 1;
+      if (n.locus) loci[n.locus] = (loci[n.locus] || 0) + 1;
       for (const s of n.sources) {
-        statuses[s.status] = (statuses[s.status] || 0) + 1;
+        source_statuses[s.status] = (source_statuses[s.status] || 0) + 1;
         const root = s.path.split('/')[0];
         idses[root] = (idses[root] || 0) + 1;
       }
     }
     return {
       units: Object.entries(units).sort((a, b) => b[1] - a[1]),
+      algebras,
+      display_kinds,
       kinds,
       statuses,
+      subjects: Object.entries(subjects).sort((a, b) => b[1] - a[1]),
+      loci: Object.entries(loci).sort((a, b) => b[1] - a[1]).slice(0, 20),
+      source_statuses,
       idses: Object.entries(idses).sort((a, b) => b[1] - a[1]).slice(0, 20),
       totalSources: NAMES.reduce((s, n) => s + n.sources.length, 0),
     };

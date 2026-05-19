@@ -38,6 +38,7 @@ from typing import Any
 
 import yaml
 
+from imas_standard_names.grammar import Subject
 from imas_standard_names.grammar.context import get_grammar_context
 from imas_standard_names.grammar.parser import (
     ParseError,
@@ -91,6 +92,22 @@ _GLOBAL_SUBJECT_QUALIFIERS: frozenset[str] = frozenset(
         "plasma",
     }
 )
+
+
+_SUBJECT_TOKENS: frozenset[str] = frozenset(member.value for member in Subject)
+
+
+def _extract_subject(qualifier_tokens: tuple[str, ...]) -> str | None:
+    """Return the first qualifier token matching the Subject enum, if any.
+
+    Drives the SPA's subject filter so users can slice by species
+    (``electron``, ``ion``, ``deuterium``, …) without resorting to
+    free-text search.
+    """
+    for token in qualifier_tokens:
+        if token in _SUBJECT_TOKENS:
+            return token
+    return None
 
 
 # Match the ``Sign convention: Positive ...`` paragraph. We accept both
@@ -435,12 +452,13 @@ def _derive_grammar_facets(name: str) -> _GrammarFacets:
 # ---------------------------------------------------------------------------
 
 
-def _structural_kind(
-    name: str, pydantic_kind: str | None, facets: _GrammarFacets
-) -> str:
-    """Compute the SPA's structural kind from grammar + pydantic kind.
+def _display_kind(name: str, algebra: str | None, facets: _GrammarFacets) -> str:
+    """Compute the SPA's display shape from grammar + algebraic kind.
 
-    Order of precedence:
+    Display kind is one axis of the SPA's faceted view; the other axis
+    is the **algebraic** kind preserved on each record as ``algebra``
+    (scalar / vector / tensor / complex / metadata). Display kind
+    answers "what shape is this in the lineage tree?":
 
     1. ``location`` for ``metadata`` pydantic entries
     2. ``at_point`` when the IR carries a locus suffix
@@ -448,8 +466,11 @@ def _structural_kind(
     4. ``global`` for reductions / subject-scalars (``total_*``,
        ``minimum_*``, ``volume_integrated_*``, etc.)
     5. ``base`` otherwise (the default for a field-valued quantity)
+
+    Renamed from ``_structural_kind`` to disambiguate from the
+    algebraic kind that now lives alongside on each record.
     """
-    if pydantic_kind == "metadata":
+    if algebra == "metadata":
         return "location"
     if not facets.parsed:
         return "base"
@@ -599,7 +620,7 @@ def _group_title(name: str, facets: _GrammarFacets) -> str:
 def _derive_tags(
     entry_tags: list[str] | None,
     facets: _GrammarFacets,
-    structural_kind: str,
+    display_kind: str,
 ) -> list[str]:
     """Return the entry's explicit tags, falling back to grammar-derived ones.
 
@@ -612,9 +633,9 @@ def _derive_tags(
         return [str(t) for t in entry_tags if isinstance(t, str)]
 
     derived: list[str] = []
-    if structural_kind == "component":
+    if display_kind == "component":
         derived.append("component")
-    if structural_kind == "at_point":
+    if display_kind == "at_point":
         derived.append("locus")
     if "magnitude" in facets.operator_tokens:
         derived.append("magnitude")
@@ -633,16 +654,38 @@ def _derive_tags(
 
 
 def _build_record(entry: dict[str, Any]) -> dict[str, Any]:
-    """Build one NAMES record from a parsed YAML entry."""
+    """Build one NAMES record from a parsed YAML entry.
+
+    The record carries **two** orthogonal kind axes:
+
+    - ``algebra``: scalar / vector / tensor / complex / metadata —
+      the algebraic shape declared on the catalog entry (passed
+      through verbatim from ``entry["kind"]``).
+    - ``display_kind``: base / component / at_point / global / location
+      — the SPA's lineage-tree shape (computed from grammar facets).
+
+    ``kind`` is retained as a top-level alias for ``display_kind`` for
+    one cycle of back-compat with existing UI code; new code should
+    read ``algebra`` and ``display_kind`` explicitly.
+    """
     name = str(entry.get("name") or "")
     category = entry.get("physics_domain") or "uncategorized"
     facets = _derive_grammar_facets(name)
-    pydantic_kind = entry.get("kind")
+    algebra = entry.get("kind") or "scalar"
 
-    structural_kind = _structural_kind(name, pydantic_kind, facets)
+    display_kind = _display_kind(name, algebra, facets)
     parent = _parent_token(name, facets, entry)
     group = _group_title(name, facets)
-    tags = _derive_tags(entry.get("tags"), facets, structural_kind)
+    tags = _derive_tags(entry.get("tags"), facets, display_kind)
+
+    # Catalog-level status (published / drafted / accepted / superseded /
+    # deprecated). Surfaced so the SPA's status filter can target the
+    # entry itself, not just per-source statuses.
+    status = entry.get("status") or "drafted"
+    # Subject — first qualifier token matching the closed Subject enum
+    # (electron, ion, deuterium, …). Drives the SPA's subject filter so
+    # users can slice by species without text-search.
+    subject = _extract_subject(facets.qualifier_tokens)
 
     short = entry.get("description") or ""
     long_text, sign = _extract_sign(entry.get("documentation") or "")
@@ -655,7 +698,13 @@ def _build_record(entry: dict[str, Any]) -> dict[str, Any]:
         "category": str(category),
         "group": group,
         "parent": parent,
-        "kind": structural_kind,
+        "algebra": str(algebra),
+        "display_kind": display_kind,
+        # ``kind`` retained for one cycle of back-compat — old SPA code
+        # reads ``n.kind`` for the display badge. Equal to display_kind.
+        "kind": display_kind,
+        "status": str(status),
+        "subject": str(subject) if subject else None,
         "unit": entry.get("unit") or "",
         "tags": tags,
         "short": short,
@@ -817,6 +866,85 @@ def _build_grammar_vocab() -> dict[str, list[str]]:
 # ---------------------------------------------------------------------------
 
 
+def _enrich_with_reverse_links(
+    records: list[dict[str, Any]],
+    entries: list[dict[str, Any]],
+) -> None:
+    """Add ``components``, ``magnitude``, and ``children`` reverse-edges.
+
+    Each record gets:
+
+    - ``components`` (list of ``{name, axis}``): for ``algebra='vector'``
+      entries only — the axis-projection children that point at this
+      vector via ``arguments[*].operator_kind='projection'``. Empty if
+      no components are present in this catalog snapshot.
+    - ``magnitude`` (str | None): for ``algebra='vector'`` entries only
+      — the corresponding ``magnitude_of_<name>`` SN if it exists in
+      this catalog. Captures the algebraic vector ⇄ magnitude link
+      without requiring graph access (source-driven; only fires when
+      the magnitude SN was already composed from DD).
+    - ``children`` (list of ``{name, operator_kind}``): all direct
+      children regardless of algebra — anything whose first argument
+      points at this entry. Used by the SPA's detail panel.
+
+    Mutates *records* in place.
+    """
+    # Index records by name for fast lookups.
+    by_name: dict[str, dict[str, Any]] = {r["name"]: r for r in records}
+
+    # Build a child-by-parent index from the raw YAML entries (we want
+    # the operator_kind / axis on each edge, which the normalised
+    # ``arguments`` field on records flattens to just names).
+    child_index: dict[str, list[dict[str, Any]]] = {}
+    for entry in entries:
+        child_name = str(entry.get("name") or "")
+        if not child_name:
+            continue
+        for arg in entry.get("arguments") or []:
+            if not isinstance(arg, dict):
+                continue
+            parent_name = arg.get("name")
+            if not isinstance(parent_name, str) or not parent_name:
+                continue
+            child_index.setdefault(parent_name, []).append(
+                {
+                    "name": child_name,
+                    "operator_kind": arg.get("operator_kind"),
+                    "axis": arg.get("axis"),
+                }
+            )
+
+    for record in records:
+        name = record["name"]
+        children = sorted(
+            child_index.get(name, []),
+            key=lambda c: c["name"],
+        )
+        record["children"] = [
+            {
+                "name": c["name"],
+                "operator_kind": c.get("operator_kind"),
+            }
+            for c in children
+        ]
+
+        if record.get("algebra") == "vector":
+            # Components: projection children with axis.
+            record["components"] = [
+                {"name": c["name"], "axis": c.get("axis")}
+                for c in children
+                if c.get("operator_kind") == "projection" and c.get("axis")
+            ]
+            # Magnitude: the magnitude_of_<name> SN if it exists.
+            magnitude_id = f"magnitude_of_{name}"
+            record["magnitude"] = magnitude_id if magnitude_id in by_name else None
+        else:
+            # Mirror the vector branch with empty values so the SPA can
+            # rely on the keys being present without per-kind branching.
+            record["components"] = []
+            record["magnitude"] = None
+
+
 def build_site_dataset(catalog_path: Path) -> dict[str, Any]:
     """Build the SPA dataset from a directory of standard-name YAMLs.
 
@@ -838,11 +966,18 @@ def build_site_dataset(catalog_path: Path) -> dict[str, Any]:
     entries = _load_entries(catalog_path)
     names = [_build_record(entry) for entry in entries]
 
+    # Post-pass: enrich each record with reverse-edge lookups. Vectors
+    # get their ``components`` and ``magnitude``; every entry gets
+    # ``children`` for the detail panel.
+    _enrich_with_reverse_links(names, entries)
+
     manifest = _load_manifest(catalog_path)
     if manifest is not None:
+        # Use the ACTUAL number of records emitted, not the manifest's
+        # ``published_count`` — manifest counts can lag if the export
+        # filter excluded entries after the manifest was written.
         version = (
-            f"{manifest.catalog_name} {manifest.grammar_version}"
-            f" · {manifest.published_count} names"
+            f"{manifest.catalog_name} {manifest.grammar_version} · {len(names)} names"
         )
     else:
         version = f"{len(names)} names"

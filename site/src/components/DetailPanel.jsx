@@ -1,6 +1,6 @@
 import { useData } from '../lib/data.js';
 import { groupSources } from '../lib/indexes.js';
-import { KindBadge, KIND_GLYPHS } from './KindBadge.jsx';
+import { KindBadge, KIND_GLYPHS, ALGEBRA_CHIPS } from './KindBadge.jsx';
 import { UnitPill } from './UnitPill.jsx';
 import { RichText } from './RichText.jsx';
 import { ParseBreakdown } from './ParseBreakdown.jsx';
@@ -39,8 +39,11 @@ export function DetailPanel({ name, onSelect, onClose, childIndex, groupIndex })
       </div>
 
       <div className="detail-hero">
-        <KindBadge kind={n.kind} />
+        <KindBadge kind={n.display_kind ?? n.kind} algebra={n.algebra} />
         <h1 className="detail-name">{n.name}</h1>
+        {n.status && n.status !== 'drafted' && n.status !== 'draft' && (
+          <span className={`status-pill status-${n.status}`}>{n.status}</span>
+        )}
       </div>
 
       <div className="detail-attrs">
@@ -49,9 +52,23 @@ export function DetailPanel({ name, onSelect, onClose, childIndex, groupIndex })
           <div className="attr-v"><UnitPill unit={n.unit} /></div>
         </div>
         <div className="attr">
-          <div className="attr-k">Kind</div>
-          <div className="attr-v">{KIND_GLYPHS[n.kind]?.title}</div>
+          <div className="attr-k">Algebra</div>
+          <div className="attr-v">
+            {ALGEBRA_CHIPS[n.algebra]?.title ?? n.algebra ?? '—'}
+          </div>
         </div>
+        <div className="attr">
+          <div className="attr-k">Shape</div>
+          <div className="attr-v">
+            {KIND_GLYPHS[n.display_kind ?? n.kind]?.title ?? '—'}
+          </div>
+        </div>
+        {n.subject && (
+          <div className="attr">
+            <div className="attr-k">Subject</div>
+            <div className="attr-v mono">{n.subject}</div>
+          </div>
+        )}
         {n.locus && (
           <div className="attr">
             <div className="attr-k">At locus</div>
@@ -71,6 +88,37 @@ export function DetailPanel({ name, onSelect, onClose, childIndex, groupIndex })
           </div>
         </div>
       </div>
+
+      {n.algebra === 'vector' && (n.components?.length > 0 || n.magnitude) && (
+        <section className="detail-section detail-algebra">
+          <h3 className="detail-h">
+            Algebra
+            <span className="detail-h-sub">vector components and magnitude</span>
+          </h3>
+          {n.components?.length > 0 && (
+            <div className="detail-components">
+              <div className="detail-components-k">Components</div>
+              <div className="detail-components-v">
+                {n.components.map((c, i) => (
+                  <span key={c.name} className="detail-component">
+                    {i > 0 && <span className="component-sep">·</span>}
+                    <span className="component-axis mono">{c.axis}</span>
+                    <NameLink name={c.name} onSelect={onSelect} />
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+          {n.magnitude && (
+            <div className="detail-components">
+              <div className="detail-components-k">Magnitude</div>
+              <div className="detail-components-v">
+                <NameLink name={n.magnitude} onSelect={onSelect} />
+              </div>
+            </div>
+          )}
+        </section>
+      )}
 
       <section className="detail-section detail-short">
         <RichText text={n.short} onSelect={onSelect} inline />

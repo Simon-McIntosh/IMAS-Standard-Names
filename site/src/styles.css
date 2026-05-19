@@ -403,11 +403,129 @@ body {
 .kind-component { color: oklch(0.5 0.13 200); border-color: oklch(0.85 0.05 200); background: oklch(0.97 0.02 200); }
 .kind-at_point { color: oklch(0.5 0.13 30); border-color: oklch(0.85 0.05 30); background: oklch(0.97 0.02 30); }
 .kind-global { color: oklch(0.5 0.13 290); border-color: oklch(0.85 0.05 290); background: oklch(0.97 0.02 290); }
+.kind-location { color: oklch(0.5 0.10 120); border-color: oklch(0.85 0.04 120); background: oklch(0.97 0.02 120); }
 
 :root[data-theme="dark"] .kind-component { background: oklch(0.3 0.04 200); }
 :root[data-theme="dark"] .kind-at_point { background: oklch(0.3 0.04 30); }
 :root[data-theme="dark"] .kind-global { background: oklch(0.3 0.04 290); }
 :root[data-theme="dark"] .kind-base { background: oklch(0.3 0.04 260); }
+:root[data-theme="dark"] .kind-location { background: oklch(0.3 0.04 120); }
+
+/* Algebra chip — sits next to the display-kind glyph */
+.kind-badge-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.algebra-chip {
+  width: 18px; height: 18px;
+  display: grid; place-items: center;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text-2);
+}
+.algebra-scalar   { color: var(--text-2); }
+.algebra-vector   { color: oklch(0.45 0.16 240); border-color: oklch(0.85 0.06 240); background: oklch(0.97 0.025 240); }
+.algebra-tensor   { color: oklch(0.45 0.16 330); border-color: oklch(0.85 0.06 330); background: oklch(0.97 0.025 330); }
+.algebra-complex  { color: oklch(0.45 0.16 60);  border-color: oklch(0.85 0.06 60);  background: oklch(0.97 0.025 60); }
+.algebra-metadata { color: oklch(0.50 0.04 0);   border-color: oklch(0.85 0.02 0);   background: oklch(0.97 0.005 0); }
+
+:root[data-theme="dark"] .algebra-vector   { background: oklch(0.3 0.05 240); }
+:root[data-theme="dark"] .algebra-tensor   { background: oklch(0.3 0.05 330); }
+:root[data-theme="dark"] .algebra-complex  { background: oklch(0.3 0.05 60); }
+:root[data-theme="dark"] .algebra-metadata { background: oklch(0.3 0.01 0); }
+
+.detail-hero .algebra-chip { width: 22px; height: 22px; font-size: 12px; }
+
+/* Status pill (catalog-level lifecycle) */
+.status-pill {
+  display: inline-flex; align-items: center;
+  font-size: 10.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text-2);
+  margin-left: auto;
+}
+.status-published  { color: oklch(0.45 0.16 150); border-color: oklch(0.85 0.06 150); background: oklch(0.97 0.025 150); }
+.status-accepted   { color: oklch(0.45 0.16 170); border-color: oklch(0.85 0.06 170); background: oklch(0.97 0.025 170); }
+.status-superseded { color: oklch(0.45 0.10 60);  border-color: oklch(0.85 0.04 60);  background: oklch(0.97 0.015 60); }
+.status-deprecated { color: oklch(0.45 0.16 25);  border-color: oklch(0.85 0.06 25);  background: oklch(0.97 0.025 25); }
+
+/* Vector algebra section (components + magnitude) */
+.detail-algebra {
+  background: color-mix(in oklch, var(--accent) 3%, var(--surface));
+  border: 1px solid color-mix(in oklch, var(--accent) 15%, var(--border));
+  border-radius: 6px;
+  padding: 12px 16px;
+}
+.detail-components {
+  display: flex;
+  gap: 12px;
+  align-items: baseline;
+  padding: 4px 0;
+}
+.detail-components-k {
+  font-size: 11.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-2);
+  min-width: 96px;
+}
+.detail-components-v {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 4px;
+  align-items: baseline;
+}
+.detail-component {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+}
+.component-sep { color: var(--text-3); margin: 0 4px; }
+.component-axis {
+  font-size: 10.5px;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* Kind legend (in sidebar / empty-state) */
+.kind-legend {
+  padding: 12px 16px;
+  border-top: 1px solid var(--border);
+  font-size: 11.5px;
+  color: var(--text-2);
+}
+.kind-legend-title {
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-3);
+  margin-bottom: 8px;
+}
+.kind-legend-section {
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-3);
+  margin: 8px 0 4px;
+}
+.kind-legend-row {
+  display: flex; gap: 8px; align-items: center;
+  padding: 2px 0;
+}
 
 .unit-pill {
   display: inline-flex; align-items: center;
