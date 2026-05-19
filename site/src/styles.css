@@ -283,6 +283,13 @@ body {
 }
 .results-meta strong { color: var(--text); font-weight: 600; }
 .results-sub { color: var(--text-3); font-size: 11px; }
+.results-sort-by {
+  color: var(--text-3);
+  font-size: 11px;
+  font-style: italic;
+  margin-left: 4px;
+  cursor: help;
+}
 
 .group-toggle {
   display: inline-flex;

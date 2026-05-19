@@ -6,10 +6,23 @@ import { UnitPill } from './UnitPill.jsx';
 // Middle pane: filtered, optionally-grouped list of result rows.
 //
 // Group modes:
-//  - "none"     — flat, single empty-headed group, alpha by name
+//  - "none"     — flat, single empty-headed group, in the order `results`
+//                 arrived (search-mode preserves score order)
 //  - "category" — group by category label, alpha within
 //  - "cluster"  — group by "${category} · ${group}"; within a category,
 //                 bigger clusters first then alpha by key
+//
+// Score-ordered override:
+//  When `searchMode === 'scored'`, the user has asked a question and
+//  expects the most relevant hit at the top. Re-grouping into clusters
+//  and then sorting each group alphabetically destroys that — typing
+//  "pressure" then putting the result list into the Equilibrium cluster
+//  buries every `*_pressure` row under `area_of_flux_surface` because
+//  "a…" comes before "e…", and you see a row that only mentions
+//  pressure in its long description above the row that IS pressure.
+//  In score mode we therefore render the flat ordered list regardless
+//  of `groupBy`. The toggle still shows the user's preferred grouping
+//  for when they clear the query.
 export function ResultsList({
   results,
   selected,
@@ -22,8 +35,9 @@ export function ResultsList({
   searchMode,
 }) {
   const { CATEGORIES } = useData();
+  const scoreOrdered = searchMode === 'scored';
   const grouped = useMemo(() => {
-    if (groupBy === 'none') return [['', results]];
+    if (scoreOrdered || groupBy === 'none') return [['', results]];
     const catOf = (id) => CATEGORIES.find((c) => c.id === id)?.label || id;
     const map = new Map();
     for (const n of results) {
@@ -50,7 +64,7 @@ export function ResultsList({
       entries.sort((A, B) => A[0].localeCompare(B[0]));
     }
     return entries;
-  }, [results, groupBy, CATEGORIES]);
+  }, [results, groupBy, CATEGORIES, scoreOrdered]);
 
   const hasQuery = searchTokens && searchTokens.length > 0;
 
@@ -64,6 +78,11 @@ export function ResultsList({
       <div className="results-meta">
         <span>
           <strong>{results.length}</strong> {results.length === 1 ? 'name' : 'names'}
+          {scoreOrdered && (
+            <span className="results-sort-by" title="Sorted by search relevance — clear the query to re-enable grouping">
+              {' · sorted by relevance'}
+            </span>
+          )}
         </span>
         <div className="group-toggle" role="group" aria-label="Group results">
           {[
