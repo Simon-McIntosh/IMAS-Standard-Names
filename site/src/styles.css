@@ -975,8 +975,17 @@ body {
 .nb-card-sibling { border-left-color: oklch(0.7 0.04 250); }
 .nb-card-ref { border-left-color: var(--text-3); border-left-style: dashed; }
 
-/* ---------- map view ---------- */
+/* ---------- map view ----------
+ *
+ * `.app` is a flex column whose first child (`.app-header`) takes its
+ * intrinsic height. The view that follows MUST claim the rest with
+ * `flex: 1 1 auto` and `min-height: 0` — otherwise its intrinsic
+ * 0-height wins and the cluster grid never paints. Browse gets this
+ * via `.app-body { flex: 1; min-height: 0 }`; the map view needs the
+ * same treatment, which used to be missing. */
 .map-view {
+  flex: 1 1 auto;
+  min-height: 0;
   overflow-y: auto;
   padding: 28px 32px 80px;
   background: var(--bg);

@@ -6,7 +6,7 @@ import { useChildIndex, useGroupIndex } from './lib/indexes.js';
 import { setMermaidTheme } from './lib/mermaid.js';
 import { Header } from './components/Header.jsx';
 import { Browse } from './views/Browse.jsx';
-import { Map } from './views/Map.jsx';
+import { LineageMap } from './views/Map.jsx';
 
 // Lazy-load the dev tweaks panel — it never lands in the default bundle.
 const DevTweaks = lazy(() => import('./components/DevTweaks.jsx'));
@@ -92,6 +92,20 @@ function Shell() {
   useEffect(() => {
     setUrlState({ view, name: selected, query });
   }, [view, selected, query, setUrlState]);
+
+  // Dev-only height guard: if the active view ever paints with zero
+  // height the flex sizing regressed. Fire once per view change.
+  useEffect(() => {
+    if (typeof import.meta !== 'undefined' && import.meta.env?.PROD) return;
+    const id = requestAnimationFrame(() => {
+      const v = document.querySelector('[data-active-view]');
+      if (v && v.offsetHeight === 0) {
+        // eslint-disable-next-line no-console
+        console.error('[route] active view has 0 height', v);
+      }
+    });
+    return () => cancelAnimationFrame(id);
+  }, [view]);
 
   // Apply theme + accent.
   useEffect(() => {
@@ -210,7 +224,7 @@ function Shell() {
           groupIndex={groupIndex}
         />
       ) : (
-        <Map
+        <LineageMap
           onSelect={(name) => {
             setSelected(name);
             setView('browse');

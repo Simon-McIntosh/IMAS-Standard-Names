@@ -5,7 +5,11 @@ import { clusterKey, clusterDescriptor } from '../lib/indexes.js';
 // Lineage map: every distinct cluster (category+group) rendered as a
 // hand-drawn SVG "spoke" diagram. No Mermaid here — performance at 300+
 // names is fine with plain SVG.
-export function Map({ onSelect, activeCategory, setActiveCategory }) {
+//
+// Named LineageMap (not Map) to avoid shadowing the global `Map`
+// constructor used inside the body — a same-name function declaration
+// binds itself into its own scope.
+export function LineageMap({ onSelect, activeCategory, setActiveCategory }) {
   const { NAMES, CATEGORIES } = useData();
   const clusters = useMemo(() => {
     const byKey = new Map();
@@ -31,7 +35,7 @@ export function Map({ onSelect, activeCategory, setActiveCategory }) {
   }, [clusters, activeCategory]);
 
   return (
-    <div className="map-view">
+    <div className="map-view" data-active-view="map">
       <div className="map-head">
         <div className="map-title">
           <h2>Lineage map</h2>

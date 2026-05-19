@@ -11,7 +11,7 @@ export function Browse({
   childIndex, groupIndex,
 }) {
   return (
-    <div className="app-body">
+    <div className="app-body" data-active-view="browse">
       <Filters
         filters={filters}
         setFilters={setFilters}
