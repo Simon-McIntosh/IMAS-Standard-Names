@@ -18,11 +18,14 @@ import yaml
 
 from imas_standard_names.catalog import build_site_dataset, write_site_dataset
 from imas_standard_names.catalog.dataset import (
+    _arguments_parent,
     _derive_grammar_facets,
     _extract_sign,
     _humanise_domain,
+    _local_ir_peel,
     _normalise_see_also,
     _normalise_sources,
+    _parent_token,
     _structural_kind,
 )
 
@@ -411,3 +414,116 @@ class TestWriteSiteDataset:
         # Round-trip the JSON.
         data = json.loads(out.read_text(encoding="utf-8"))
         assert len(data["NAMES"]) == count
+
+
+# ---------------------------------------------------------------------------
+# Parent resolution — peel one layer (operator | projection | qualifier | locus)
+# ---------------------------------------------------------------------------
+
+
+class TestLocalIrPeel:
+    """Standalone IR peel: one layer at a time, recursion is implicit.
+
+    The rc8 SPA shortcut to ``ir.base.token`` collapsed every layer
+    in one go — these tests pin the corrected per-layer behaviour
+    so future refactors cannot regress.
+    """
+
+    def test_leaf_returns_none(self):
+        assert _local_ir_peel("temperature") is None
+        assert _local_ir_peel("elongation") is None
+
+    def test_qualifier_with_locus_peels_qualifier(self):
+        # The headline regression — `upper_elongation_of_plasma_boundary`
+        # used to report parent=`elongation` (skipping the boundary
+        # locus); should now stay on the boundary side of the family.
+        assert (
+            _local_ir_peel("upper_elongation_of_plasma_boundary")
+            == "elongation_of_plasma_boundary"
+        )
+        assert (
+            _local_ir_peel("lower_elongation_of_plasma_boundary")
+            == "elongation_of_plasma_boundary"
+        )
+
+    def test_locus_only_peels_locus(self):
+        assert _local_ir_peel("elongation_of_plasma_boundary") == "elongation"
+        assert _local_ir_peel("area_of_plasma_boundary") == "area"
+        assert _local_ir_peel("safety_factor_at_magnetic_axis") == "safety_factor"
+
+    def test_qualifier_only_peels_qualifier(self):
+        assert _local_ir_peel("electron_temperature") == "temperature"
+        assert _local_ir_peel("ion_pressure") == "pressure"
+
+    def test_two_qualifiers_peels_outermost_only(self):
+        # `volume_averaged_ion_temperature` — two qualifiers, peel one
+        # at a time. The inner SN runs its own derivation on the next
+        # hop.
+        assert _local_ir_peel("volume_averaged_ion_temperature") == "ion_temperature"
+
+    def test_unparseable_returns_none(self):
+        assert _local_ir_peel("garbage_name_!@#") is None
+
+
+class TestArgumentsParent:
+    """When the YAML carries an ``arguments`` block (canonical, graph-
+    derived), prefer it over local heuristics."""
+
+    def test_first_argument_wins(self):
+        entry = {"arguments": [{"name": "elongation_of_plasma_boundary"}]}
+        assert (
+            _arguments_parent("upper_elongation_of_plasma_boundary", entry)
+            == "elongation_of_plasma_boundary"
+        )
+
+    def test_self_loop_skipped(self):
+        entry = {"arguments": [{"name": "upper_elongation_of_plasma_boundary"}]}
+        assert _arguments_parent("upper_elongation_of_plasma_boundary", entry) is None
+
+    def test_missing_arguments_returns_none(self):
+        assert _arguments_parent("x", {}) is None
+        assert _arguments_parent("x", {"arguments": None}) is None
+        assert _arguments_parent("x", {"arguments": []}) is None
+
+    def test_falls_through_to_second_arg_when_first_is_self(self):
+        entry = {
+            "arguments": [
+                {"name": "upper_elongation_of_plasma_boundary"},
+                {"name": "elongation_of_plasma_boundary"},
+            ]
+        }
+        assert (
+            _arguments_parent("upper_elongation_of_plasma_boundary", entry)
+            == "elongation_of_plasma_boundary"
+        )
+
+
+class TestParentToken:
+    """End-to-end ``_parent_token`` resolution: arguments > local peel > facets."""
+
+    def test_arguments_preferred_over_local_peel(self):
+        # If the YAML carries arguments, use them even when local peel
+        # would say something different.
+        entry = {"arguments": [{"name": "some_specific_parent"}]}
+        facets = _derive_grammar_facets("upper_elongation_of_plasma_boundary")
+        assert (
+            _parent_token("upper_elongation_of_plasma_boundary", facets, entry)
+            == "some_specific_parent"
+        )
+
+    def test_local_peel_used_when_arguments_missing(self):
+        facets = _derive_grammar_facets("upper_elongation_of_plasma_boundary")
+        assert (
+            _parent_token("upper_elongation_of_plasma_boundary", facets, {})
+            == "elongation_of_plasma_boundary"
+        )
+
+    def test_leaf_returns_none(self):
+        facets = _derive_grammar_facets("elongation")
+        assert _parent_token("elongation", facets, {}) is None
+
+    def test_legacy_callsite_without_entry(self):
+        # Backwards-compat: callers that don't pass `entry` still get
+        # the corrected one-layer peel.
+        facets = _derive_grammar_facets("electron_temperature")
+        assert _parent_token("electron_temperature", facets) == "temperature"

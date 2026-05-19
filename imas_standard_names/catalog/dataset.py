@@ -41,6 +41,7 @@ import yaml
 from imas_standard_names.grammar.context import get_grammar_context
 from imas_standard_names.grammar.parser import (
     ParseError,
+    compose,
     load_default_vocabularies,
     parse,
 )
@@ -465,19 +466,108 @@ def _structural_kind(
     return "base"
 
 
-def _parent_token(name: str, facets: _GrammarFacets) -> str | None:
-    """Return the parent base token if the name decomposes onto a base.
+def _parent_token(
+    name: str, facets: _GrammarFacets, entry: dict[str, Any] | None = None
+) -> str | None:
+    """Return the structural parent name (one layer peeled), if any.
 
-    Heuristic per the SPA spec: when ``ir.base`` is set and the name
-    string is not itself the bare base, the parent is the base token.
-    Otherwise ``None``. We do not verify the parent exists in the
-    catalog — the SPA tolerates dangling parents.
+    Resolution order — preferring the canonical pipeline-derived parent
+    over heuristic local reconstruction:
+
+    1. **``arguments[0].name``** from the YAML entry, when present and
+       not a self-loop. The catalog exporter emits ``arguments`` from
+       the graph's outgoing ``COMPONENT_OF`` edges (one per name, for
+       unary peels; per-role for binary), which is the canonical
+       structural-parent signal. Using it here means imas-codex's
+       single source of truth — the derivation module — governs what
+       the SPA shows as parent.
+
+    2. **One-layer IR peel** (operator → projection → qualifier →
+       locus) when no ``arguments`` field is provided (standalone
+       catalog use, or pre-pipeline entries). This mirrors the
+       imas-codex derivation so the SPA stays self-consistent.
+
+    3. **``None``** for true leaves and unparseable names.
+
+    Historical note: the rc8 implementation shortcut to
+    ``facets.base_token`` here, jumping past every structural layer
+    in one go. That made `upper_elongation_of_plasma_boundary`
+    report `elongation` as parent — collapsing two distinct boundary
+    elongation variants into a flat-tree with unrelated flux-surface
+    elongation. The new resolution peels exactly one layer; recursion
+    is implicit because each parent recomputes its own one-layer peel.
     """
+    # --- (1) Canonical pipeline-derived parent from YAML arguments ---
+    if entry is not None:
+        canonical = _arguments_parent(name, entry)
+        if canonical is not None:
+            return canonical
+
+    # --- (2) Local IR peel — matches imas-codex/derivation.py ordering ---
+    local = _local_ir_peel(name)
+    if local is not None:
+        return local
+
+    # --- (3) Legacy fallback (preserved for unparseable names) ---
     if not facets.parsed or facets.base_token is None:
         return None
     if facets.base_token == name:
         return None
     return facets.base_token
+
+
+def _arguments_parent(name: str, entry: dict[str, Any]) -> str | None:
+    """Extract the first non-self argument target from the YAML entry."""
+    args = entry.get("arguments")
+    if not isinstance(args, list):
+        return None
+    for arg in args:
+        if not isinstance(arg, dict):
+            continue
+        target = arg.get("name")
+        if isinstance(target, str) and target and target != name:
+            return target
+    return None
+
+
+def _local_ir_peel(name: str) -> str | None:
+    """Peel ONE structural layer from *name* using the ISN IR parser.
+
+    Mirrors imas-codex/imas_codex/standard_names/derivation.py logic
+    so that catalogs built outside the imas-codex pipeline still
+    surface accurate parents in the SPA.
+
+    Returns ``None`` when the name is a leaf, unparseable, or when
+    the peeled inner name fails to round-trip.
+    """
+    try:
+        result = parse(name)
+    except Exception:
+        return None
+
+    ir = result.ir
+    stripped = None
+    if ir.operators:
+        # Outermost operator: drop the head of ir.operators
+        stripped = ir.model_copy(update={"operators": ir.operators[1:]})
+    elif ir.projection is not None:
+        stripped = ir.model_copy(update={"projection": None})
+    elif ir.qualifiers:
+        # Outermost qualifier — covers upper/lower/inner/outer/electron/ion/…
+        stripped = ir.model_copy(update={"qualifiers": ir.qualifiers[1:]})
+    elif ir.locus is not None:
+        stripped = ir.model_copy(update={"locus": None})
+    else:
+        return None  # leaf
+
+    try:
+        inner = compose(stripped)
+    except Exception:
+        return None
+
+    if not inner or inner == name:
+        return None
+    return inner
 
 
 def _group_title(name: str, facets: _GrammarFacets) -> str:
@@ -550,7 +640,7 @@ def _build_record(entry: dict[str, Any]) -> dict[str, Any]:
     pydantic_kind = entry.get("kind")
 
     structural_kind = _structural_kind(name, pydantic_kind, facets)
-    parent = _parent_token(name, facets)
+    parent = _parent_token(name, facets, entry)
     group = _group_title(name, facets)
     tags = _derive_tags(entry.get("tags"), facets, structural_kind)
 
