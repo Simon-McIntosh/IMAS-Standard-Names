@@ -393,7 +393,14 @@ class ArgumentRef(BaseModel):
 
     name: str
     operator: str
-    operator_kind: Literal["unary_prefix", "unary_postfix", "binary", "projection"]
+    operator_kind: Literal[
+        "unary_prefix",
+        "unary_postfix",
+        "binary",
+        "projection",
+        "qualifier",
+        "locus",
+    ]
     role: Literal["a", "b"] | None = None
     separator: Literal["and", "to"] | None = None
     axis: str | None = None
@@ -401,7 +408,31 @@ class ArgumentRef(BaseModel):
 
     @model_validator(mode="after")
     def _check_operator_kind_fields(self):
-        """Enforce field requirements based on operator_kind."""
+        """Enforce field requirements based on operator_kind.
+
+        The structural derivation in the imas-codex pipeline peels one
+        layer of the ISN grammar per ``COMPONENT_OF`` edge and stamps
+        the layer kind here. Supported kinds:
+
+        * ``unary_prefix`` / ``unary_postfix`` — operator layer
+          (e.g. ``maximum_of_x``, ``x_magnitude``). Only ``operator``
+          carries data; role/separator/axis/shape MUST be absent.
+        * ``binary`` — binary operator layer (e.g. ``ratio_of_x_to_y``).
+          Requires ``role`` and ``separator``; ``axis`` and ``shape``
+          MUST be absent.
+        * ``projection`` — axis projection layer
+          (e.g. ``toroidal_magnetic_field``). Requires ``axis`` and
+          ``shape``; ``role`` and ``separator`` MUST be absent.
+        * ``qualifier`` — outermost qualifier layer
+          (e.g. ``upper_elongation_of_plasma_boundary`` peels ``upper``).
+          Only ``operator`` carries the qualifier token; all other
+          fields MUST be absent.
+        * ``locus`` — locus suffix layer
+          (e.g. ``elongation_of_plasma_boundary`` peels
+          ``plasma_boundary``). Only ``operator`` carries the locus
+          token; the relation (``of`` vs ``at``) is recoverable from
+          the source name's parse so is not carried on the edge.
+        """
         if self.operator_kind == "binary":
             if self.role is None or self.separator is None:
                 raise ValueError(
@@ -421,7 +452,8 @@ class ArgumentRef(BaseModel):
                     "role and separator are forbidden when operator_kind is 'projection'"
                 )
         else:
-            # unary_prefix / unary_postfix
+            # unary_prefix / unary_postfix / qualifier / locus — bare
+            # operator, no other fields.
             if self.role is not None or self.separator is not None:
                 raise ValueError(
                     f"role and separator are forbidden when operator_kind is '{self.operator_kind}'"
