@@ -4,6 +4,7 @@ import { useUrlState } from './lib/url-state.js';
 import { useTweaks } from './hooks/useTweaks.js';
 import { useChildIndex, useGroupIndex } from './lib/indexes.js';
 import { setMermaidTheme } from './lib/mermaid.js';
+import { tokenize, searchNames } from './lib/search.js';
 import { Header } from './components/Header.jsx';
 import { Browse } from './views/Browse.jsx';
 import { LineageMap } from './views/Map.jsx';
@@ -114,10 +115,13 @@ function Shell() {
     setMermaidTheme(tweaks.theme);
   }, [tweaks.theme, tweaks.accent]);
 
-  // Filtered+sorted results. Predicate preserved verbatim from spec §1.2.
-  const results = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    return NAMES.filter((n) => {
+  // Apply facet filters first (cheap, exact), then route the free-text
+  // query through `searchNames` (tokenised, weighted, AND across tokens).
+  // The previous OR'd-substring scan let "pressure" match unrelated rows
+  // via incidental char-cluster overlap.
+  const searchTokens = useMemo(() => tokenize(query), [query]);
+  const { results, searchMode } = useMemo(() => {
+    const filtered = NAMES.filter((n) => {
       if (filters.category.size && !filters.category.has(n.category)) return false;
       if (filters.unit.size && !filters.unit.has(n.unit)) return false;
       if (filters.kind.size && !filters.kind.has(n.kind)) return false;
@@ -128,16 +132,20 @@ function Shell() {
         return false;
       }
       // `system` filter has no functional effect — UI only.
-      if (!q) return true;
-      return (
-        n.name.includes(q) ||
-        n.short.toLowerCase().includes(q) ||
-        n.long.toLowerCase().includes(q) ||
-        n.unit.toLowerCase() === q ||
-        n.tags?.some((t) => t.toLowerCase().includes(q))
-      );
-    }).sort((a, b) => a.name.localeCompare(b.name));
-  }, [query, filters, NAMES]);
+      return true;
+    });
+    const search = searchNames(filtered, searchTokens);
+    // When `searchNames` falls through to fuzzy (or has no query at all)
+    // alphabetical order is what users expect; the scored path retains
+    // its score-desc / name-length-asc tie-break ordering.
+    if (search.mode === 'scored') {
+      return { results: search.results, searchMode: search.mode };
+    }
+    return {
+      results: search.results.slice().sort((a, b) => a.name.localeCompare(b.name)),
+      searchMode: search.mode,
+    };
+  }, [searchTokens, filters, NAMES]);
 
   // Facet counts over the FULL corpus — stable as the user toggles filters.
   const faceted = useMemo(() => {
@@ -222,6 +230,9 @@ function Shell() {
           setGroupBy={(v) => setTweak('groupBy', v)}
           childIndex={childIndex}
           groupIndex={groupIndex}
+          query={query}
+          searchTokens={searchTokens}
+          searchMode={searchMode}
         />
       ) : (
         <LineageMap

@@ -10,7 +10,17 @@ import { UnitPill } from './UnitPill.jsx';
 //  - "category" — group by category label, alpha within
 //  - "cluster"  — group by "${category} · ${group}"; within a category,
 //                 bigger clusters first then alpha by key
-export function ResultsList({ results, selected, onSelect, dense, groupBy, setGroupBy }) {
+export function ResultsList({
+  results,
+  selected,
+  onSelect,
+  dense,
+  groupBy,
+  setGroupBy,
+  query,
+  searchTokens,
+  searchMode,
+}) {
   const { CATEGORIES } = useData();
   const grouped = useMemo(() => {
     if (groupBy === 'none') return [['', results]];
@@ -42,8 +52,15 @@ export function ResultsList({ results, selected, onSelect, dense, groupBy, setGr
     return entries;
   }, [results, groupBy, CATEGORIES]);
 
+  const hasQuery = searchTokens && searchTokens.length > 0;
+
   return (
     <div className={`results-list dense-${dense}`}>
+      {searchMode === 'fuzzy' && (
+        <div className="results-fuzzy" title="No exact matches — showing subsequence matches against name">
+          Fuzzy matches:
+        </div>
+      )}
       <div className="results-meta">
         <span>
           <strong>{results.length}</strong> {results.length === 1 ? 'name' : 'names'}
@@ -101,7 +118,21 @@ export function ResultsList({ results, selected, onSelect, dense, groupBy, setGr
       {results.length === 0 && (
         <div className="empty">
           <div className="empty-glyph">∅</div>
-          <div>No names match these filters.</div>
+          <div>
+            {hasQuery ? (
+              <>No matches for «{query}»</>
+            ) : (
+              <>No names match these filters.</>
+            )}
+          </div>
+          {hasQuery && (
+            <div className="empty-tokens" aria-label="Parsed search tokens">
+              <span className="empty-tokens-label">tokens parsed:</span>
+              {searchTokens.map((t) => (
+                <span key={t} className="empty-token mono">{t}</span>
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>

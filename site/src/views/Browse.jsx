@@ -9,6 +9,7 @@ export function Browse({
   results, selected, setSelected,
   dense, groupBy, setGroupBy,
   childIndex, groupIndex,
+  query, searchTokens, searchMode,
 }) {
   return (
     <div className="app-body" data-active-view="browse">
@@ -25,6 +26,9 @@ export function Browse({
         dense={dense}
         groupBy={groupBy}
         setGroupBy={setGroupBy}
+        query={query}
+        searchTokens={searchTokens}
+        searchMode={searchMode}
       />
       <DetailPanel
         name={selected}
