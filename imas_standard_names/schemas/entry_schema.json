@@ -17,7 +17,9 @@
             "unary_prefix",
             "unary_postfix",
             "binary",
-            "projection"
+            "projection",
+            "qualifier",
+            "locus"
           ],
           "title": "Operator Kind",
           "type": "string"
@@ -1219,5 +1221,5 @@
       "$ref": "#/$defs/StandardNameMetadataEntry"
     }
   ],
-  "$schema_version": "0.7.0rc55.dev0+g309343db7.d20260511"
+  "$schema_version": "0.8.0rc14.dev10+g6200b84a6.d20260518"
 }
