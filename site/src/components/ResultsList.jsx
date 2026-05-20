@@ -121,7 +121,7 @@ export function ResultsList({
               className={`result-row ${selected === n.name ? 'selected' : ''}`}
               onClick={() => onSelect(n.name)}
             >
-              <KindBadge kind={n.kind} />
+              <KindBadge name={n} />
               <div className="result-main">
                 <div className="result-name">{n.name}</div>
                 {dense !== 'dense' && <div className="result-desc">{n.short}</div>}

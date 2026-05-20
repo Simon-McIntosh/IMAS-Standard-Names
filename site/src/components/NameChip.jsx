@@ -15,7 +15,7 @@ export function NameChip({ name, onSelect, kind = 'ref' }) {
       onClick={() => exists && onSelect(name)}
       title={exists ? n.short : 'Not yet in catalog'}
     >
-      {exists && n.kind && <KindBadge kind={n.kind} />}
+      {exists && <KindBadge name={n} />}
       <span className="mono">{name}</span>
       {exists && <UnitPill unit={n.unit} />}
     </button>

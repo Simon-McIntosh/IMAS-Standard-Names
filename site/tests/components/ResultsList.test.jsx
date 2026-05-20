@@ -60,7 +60,7 @@ const ROW = (over) => ({
   name: 'x',
   short: '',
   unit: '',
-  kind: 'scalar',
+  algebra: 'scalar',
   sources: [],
   parse: [],
   seeAlso: [],

@@ -306,6 +306,8 @@ class TestGrammarMetadata:
     def test_poloidal_magnetic_field_keeps_axis(self, isnc_dataset: dict) -> None:
         record = _find_record(isnc_dataset, "poloidal_magnetic_field")
         assert record["axis"] == "poloidal"
+        # Vector components inherit vector algebra from their projection.
+        assert record["algebra"] == "vector"
 
     def test_safety_factor_at_magnetic_axis_keeps_locus(
         self, isnc_dataset: dict
@@ -333,6 +335,22 @@ class TestAlgebraAxis:
             assert record["algebra"] in valid, (
                 f"{record['name']}: bad algebra {record['algebra']!r}"
             )
+
+    def test_magnitude_is_scalar(self, isnc_dataset: dict) -> None:
+        # magnitude_of_<vector> is a true scalar (rotation-invariant norm).
+        import pytest
+
+        rec = next(
+            (
+                r
+                for r in isnc_dataset["NAMES"]
+                if r["name"] == "magnetic_field_magnitude"
+            ),
+            None,
+        )
+        if rec is None:
+            pytest.skip("magnetic_field_magnitude not in catalog")
+        assert rec["algebra"] == "scalar"
 
 
 class TestVectorReverseLinks:

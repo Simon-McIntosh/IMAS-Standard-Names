@@ -688,7 +688,11 @@ class StandardNameScalarEntry(StandardNameEntryBase):
 
 
 class StandardNameVectorEntry(StandardNameEntryBase):
-    """Vector standard name catalog entry."""
+    """Vector standard name catalog entry.
+
+    Individual named components (e.g. radial_magnetic_field) are also
+    classified as vector because they carry implicit directional structure.
+    """
 
     kind: Literal["vector"] = "vector"
     unit: Unit  # Required for vector (use "1" for dimensionless)

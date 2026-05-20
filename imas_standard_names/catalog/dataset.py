@@ -658,6 +658,14 @@ def _build_record(entry: dict[str, Any]) -> dict[str, Any]:
     category = entry.get("physics_domain") or "uncategorized"
     facets = _derive_grammar_facets(name)
     algebra = entry.get("kind") or "scalar"
+    # Vector components inherit vector algebra from their projection axis.
+    # A name like radial_magnetic_field carries axis="radial" — the
+    # coefficient B_R of a vector B = B_R r̂ + B_φ φ̂ + B_Z ẑ is not
+    # rotation-invariant and therefore must not be classified as scalar.
+    # Same parallel-construction reasoning as the schema's treatment of
+    # tensor components.
+    if algebra == "scalar" and facets.has_projection:
+        algebra = "vector"
 
     parent = _parent_token(name, facets, entry)
     group = _group_title(name, facets)

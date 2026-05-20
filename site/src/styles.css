@@ -398,49 +398,24 @@ body {
   background: var(--surface-2);
   border: 1px solid var(--border);
   color: var(--text-2);
+  flex-shrink: 0;
 }
-.kind-base { color: var(--accent); border-color: color-mix(in oklch, var(--accent) 30%, var(--border)); background: color-mix(in oklch, var(--accent) 8%, var(--surface)); }
-.kind-component { color: oklch(0.5 0.13 200); border-color: oklch(0.85 0.05 200); background: oklch(0.97 0.02 200); }
-.kind-at_point { color: oklch(0.5 0.13 30); border-color: oklch(0.85 0.05 30); background: oklch(0.97 0.02 30); }
-.kind-global { color: oklch(0.5 0.13 290); border-color: oklch(0.85 0.05 290); background: oklch(0.97 0.02 290); }
-.kind-location { color: oklch(0.5 0.10 120); border-color: oklch(0.85 0.04 120); background: oklch(0.97 0.02 120); }
+.kind-badge svg { width: 70%; height: 70%; display: block; }
 
-:root[data-theme="dark"] .kind-component { background: oklch(0.3 0.04 200); }
-:root[data-theme="dark"] .kind-at_point { background: oklch(0.3 0.04 30); }
-:root[data-theme="dark"] .kind-global { background: oklch(0.3 0.04 290); }
-:root[data-theme="dark"] .kind-base { background: oklch(0.3 0.04 260); }
-:root[data-theme="dark"] .kind-location { background: oklch(0.3 0.04 120); }
+/* Schema kinds — five canonical values from entry_schema.json.
+   Each gets its own OKLCH hue so colour reinforces shape during
+   row-level scanning. */
+.kind-scalar   { color: oklch(0.5 0.13 260); border-color: color-mix(in oklch, oklch(0.5 0.13 260) 25%, var(--border)); background: oklch(0.97 0.02 260); }
+.kind-vector   { color: oklch(0.5 0.13 200); border-color: color-mix(in oklch, oklch(0.5 0.13 200) 25%, var(--border)); background: oklch(0.97 0.02 200); }
+.kind-tensor   { color: oklch(0.5 0.13 145); border-color: color-mix(in oklch, oklch(0.5 0.13 145) 25%, var(--border)); background: oklch(0.97 0.02 145); }
+.kind-complex  { color: oklch(0.5 0.13 330); border-color: color-mix(in oklch, oklch(0.5 0.13 330) 25%, var(--border)); background: oklch(0.97 0.02 330); }
+.kind-metadata { color: oklch(0.5 0.04 250); border-color: color-mix(in oklch, oklch(0.5 0.04 250) 25%, var(--border)); background: oklch(0.97 0.01 250); }
 
-/* Algebra chip — sits next to the display-kind glyph */
-.kind-badge-group {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-}
-.algebra-chip {
-  width: 18px; height: 18px;
-  display: grid; place-items: center;
-  border-radius: 4px;
-  font-family: var(--font-mono);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  color: var(--text-2);
-}
-.algebra-scalar   { color: var(--text-2); }
-.algebra-vector   { color: oklch(0.45 0.16 240); border-color: oklch(0.85 0.06 240); background: oklch(0.97 0.025 240); }
-.algebra-tensor   { color: oklch(0.45 0.16 330); border-color: oklch(0.85 0.06 330); background: oklch(0.97 0.025 330); }
-.algebra-complex  { color: oklch(0.45 0.16 60);  border-color: oklch(0.85 0.06 60);  background: oklch(0.97 0.025 60); }
-.algebra-metadata { color: oklch(0.50 0.04 0);   border-color: oklch(0.85 0.02 0);   background: oklch(0.97 0.005 0); }
-
-:root[data-theme="dark"] .algebra-vector   { background: oklch(0.3 0.05 240); }
-:root[data-theme="dark"] .algebra-tensor   { background: oklch(0.3 0.05 330); }
-:root[data-theme="dark"] .algebra-complex  { background: oklch(0.3 0.05 60); }
-:root[data-theme="dark"] .algebra-metadata { background: oklch(0.3 0.01 0); }
-
-.detail-hero .algebra-chip { width: 22px; height: 22px; font-size: 12px; }
+:root[data-theme="dark"] .kind-scalar   { background: oklch(0.3 0.06 260); }
+:root[data-theme="dark"] .kind-vector   { background: oklch(0.3 0.06 200); }
+:root[data-theme="dark"] .kind-tensor   { background: oklch(0.3 0.06 145); }
+:root[data-theme="dark"] .kind-complex  { background: oklch(0.3 0.06 330); }
+:root[data-theme="dark"] .kind-metadata { background: oklch(0.3 0.02 250); }
 
 /* Status pill (catalog-level lifecycle) */
 .status-pill {

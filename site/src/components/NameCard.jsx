@@ -14,8 +14,8 @@ export function NameCard({ n, onSelect, relation, edgeLabel }) {
       title={missing ? 'Not yet in catalog' : n.short}
     >
       <div className="nb-card-top">
-        {(n.kind || n.display_kind) && (
-          <KindBadge kind={n.display_kind ?? n.kind} algebra={n.algebra} />
+        {(n.kind || n.algebra) && (
+          <KindBadge name={n} />
         )}
         <span className="nb-card-name mono">{n.name}</span>
         {n.unit && <UnitPill unit={n.unit} />}
