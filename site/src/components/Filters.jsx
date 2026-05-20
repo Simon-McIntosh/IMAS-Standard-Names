@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useData } from '../lib/data.js';
+import { KindBadge } from './KindBadge.jsx';
 
 function FilterGroup({ title, children, defaultOpen = true }) {
   const [open, setOpen] = useState(defaultOpen);
@@ -24,33 +25,13 @@ function FilterRow({ label, count, checked, onChange, mono }) {
   );
 }
 
-// Algebra (catalog `kind`) — rank/algebra of the quantity itself.
-const ALGEBRA_ROWS = [
-  ['scalar', 'Scalar'],
-  ['vector', 'Vector'],
-  ['tensor', 'Tensor'],
-  ['complex', 'Complex'],
+// Schema kinds — five canonical values from entry_schema.json.
+const KIND_ROWS = [
+  ['scalar',   'Scalar'],
+  ['vector',   'Vector'],
+  ['tensor',   'Tensor'],
+  ['complex',  'Complex'],
   ['metadata', 'Metadata'],
-];
-
-// Display kind (SPA's lineage-tree shape) — independent of algebra.
-const DISPLAY_KIND_ROWS = [
-  ['base', 'Base quantity'],
-  ['component', 'Vector component'],
-  ['at_point', 'At a locus'],
-  ['global', 'Global scalar'],
-  ['location', 'Location / metadata'],
-];
-
-// Catalog-level status (per ISN StandardNameStatus enum). Drawn from
-// `n.status` directly, not aggregated over `n.sources[].status`.
-const STATUS_ROWS = [
-  ['published', 'Published'],
-  ['drafted', 'Drafted'],
-  ['draft', 'Draft (legacy)'],
-  ['accepted', 'Accepted'],
-  ['superseded', 'Superseded'],
-  ['deprecated', 'Deprecated'],
 ];
 
 // Source-side status (per-source ingestion lifecycle on `n.sources[].status`).
@@ -63,15 +44,10 @@ const SOURCE_STATUS_ROWS = [
 
 const EMPTY_FILTERS = {
   category: new Set(),
+  kind: new Set(),
   unit: new Set(),
-  algebra: new Set(),
-  display_kind: new Set(),
-  status: new Set(),
-  subject: new Set(),
-  locus: new Set(),
   source_status: new Set(),
   ids: new Set(),
-  system: new Set(),
 };
 
 export const DEFAULT_FILTERS = EMPTY_FILTERS;
@@ -91,10 +67,6 @@ export function Filters({ filters, setFilters, faceted, allCounts }) {
     (a, s) => a + (s instanceof Set ? s.size : 0),
     0,
   );
-
-  // Filter rows for closed-vocabulary axes only render if any data
-  // points satisfy the value — avoids dead rows like "Tensor (0)".
-  const nonEmpty = (counts) => (k) => (counts?.[k] ?? 0) > 0;
 
   return (
     <aside className="filters">
@@ -122,6 +94,23 @@ export function Filters({ filters, setFilters, faceted, allCounts }) {
         ))}
       </FilterGroup>
 
+      <FilterGroup title="Kind">
+        {KIND_ROWS.filter(([k]) => (faceted.kinds[k] ?? 0) > 0).map(([k, lbl]) => (
+          <FilterRow
+            key={k}
+            label={
+              <span className="filter-kind-row">
+                <KindBadge kind={k} />
+                <span>{lbl}</span>
+              </span>
+            }
+            count={faceted.kinds[k] ?? 0}
+            checked={filters.kind.has(k)}
+            onChange={() => toggle('kind', k)}
+          />
+        ))}
+      </FilterGroup>
+
       <FilterGroup title="Unit">
         {faceted.units.map(([u, n]) => (
           <FilterRow
@@ -135,91 +124,22 @@ export function Filters({ filters, setFilters, faceted, allCounts }) {
         ))}
       </FilterGroup>
 
-      <FilterGroup title="Algebra">
-        {ALGEBRA_ROWS.filter(([k]) => nonEmpty(faceted.algebras)(k)).map(
-          ([k, lbl]) => (
-            <FilterRow
-              key={k}
-              label={lbl}
-              count={faceted.algebras[k] ?? 0}
-              checked={filters.algebra.has(k)}
-              onChange={() => toggle('algebra', k)}
-            />
-          ),
-        )}
-      </FilterGroup>
-
-      <FilterGroup title="Shape">
-        {DISPLAY_KIND_ROWS.filter(([k]) =>
-          nonEmpty(faceted.display_kinds)(k),
-        ).map(([k, lbl]) => (
-          <FilterRow
-            key={k}
-            label={lbl}
-            count={faceted.display_kinds[k] ?? 0}
-            checked={filters.display_kind.has(k)}
-            onChange={() => toggle('display_kind', k)}
-          />
-        ))}
-      </FilterGroup>
-
-      {faceted.subjects.length > 0 && (
-        <FilterGroup title="Subject" defaultOpen={false}>
-          {faceted.subjects.map(([s, n]) => (
+      <FilterGroup title="Advanced" defaultOpen={false}>
+        <div className="filter-subhead">Source ingestion status</div>
+        {SOURCE_STATUS_ROWS
+          .filter(([s]) => (faceted.source_statuses[s] ?? 0) > 0)
+          .map(([s, lbl]) => (
             <FilterRow
               key={s}
-              label={s.replace(/_/g, ' ')}
-              count={n}
-              checked={filters.subject.has(s)}
-              onChange={() => toggle('subject', s)}
-            />
-          ))}
-        </FilterGroup>
-      )}
-
-      {faceted.loci.length > 0 && (
-        <FilterGroup title="Locus" defaultOpen={false}>
-          {faceted.loci.map(([l, n]) => (
-            <FilterRow
-              key={l}
-              label={l.replace(/_/g, ' ')}
-              mono
-              count={n}
-              checked={filters.locus.has(l)}
-              onChange={() => toggle('locus', l)}
-            />
-          ))}
-        </FilterGroup>
-      )}
-
-      <FilterGroup title="Status" defaultOpen={false}>
-        {STATUS_ROWS.filter(([k]) => nonEmpty(faceted.statuses)(k)).map(
-          ([k, lbl]) => (
-            <FilterRow
-              key={k}
               label={lbl}
-              count={faceted.statuses[k] ?? 0}
-              checked={filters.status.has(k)}
-              onChange={() => toggle('status', k)}
+              count={faceted.source_statuses[s] ?? 0}
+              checked={filters.source_status.has(s)}
+              onChange={() => toggle('source_status', s)}
             />
-          ),
-        )}
-      </FilterGroup>
+          ))}
 
-      <FilterGroup title="Source status" defaultOpen={false}>
-        {SOURCE_STATUS_ROWS.map(([s, lbl]) => (
-          <FilterRow
-            key={s}
-            label={lbl}
-            count={faceted.source_statuses[s] ?? 0}
-            checked={filters.source_status.has(s)}
-            onChange={() => toggle('source_status', s)}
-          />
-        ))}
-      </FilterGroup>
-
-      <FilterGroup title="Source root" defaultOpen={false}>
-        {faceted.idses.map(([id, n]) => (
+        <div className="filter-subhead">Source root (IDS)</div>
+        {faceted.idses.slice(0, 12).map(([id, n]) => (
           <FilterRow
             key={id}
             label={id}
