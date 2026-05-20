@@ -48,17 +48,9 @@ def isnc_catalog_dir() -> Path:
 def isnc_dataset(isnc_catalog_dir: Path) -> dict:
     """Built dataset from the real ISNC catalog (one parse pass for all tests).
 
-    Uses ``include_draft=True`` so legacy live-catalog assertions keep
-    seeing entries while the catalog is still on ``status: draft``. A
-    separate :func:`isnc_dataset_active_only` fixture is available for
-    tests that need to assert the active-only default behaviour.
+    All statuses are now emitted unconditionally, so this fixture no
+    longer needs a flag — it uses the plain default.
     """
-    return build_site_dataset(isnc_catalog_dir, include_draft=True)
-
-
-@pytest.fixture
-def isnc_dataset_active_only(isnc_catalog_dir: Path) -> dict:
-    """Built dataset from the real ISNC catalog with active-only default."""
     return build_site_dataset(isnc_catalog_dir)
 
 
@@ -530,10 +522,7 @@ class TestWriteSiteDataset:
 
     def test_writes_to_disk(self, isnc_catalog_dir: Path, tmp_path: Path) -> None:
         out = tmp_path / "dataset.json"
-        # The live ISNC catalog is currently all ``status: draft`` — use
-        # ``include_draft=True`` so the round-trip count assertion has
-        # entries to work with.
-        count = write_site_dataset(isnc_catalog_dir, out, include_draft=True)
+        count = write_site_dataset(isnc_catalog_dir, out)
 
         assert out.exists()
         assert count > 0
@@ -702,49 +691,13 @@ class TestCanonicalKinds:
 
 
 class TestStatusFiltering:
-    """Default emit = active-only; --include-draft keeps everything."""
+    """All canonical statuses are always emitted; unknown statuses are dropped."""
 
     def _write_yaml(self, path: Path, entries: list[dict]) -> None:
         path.write_text(yaml.safe_dump(entries), encoding="utf-8")
 
-    def test_default_emit_filters_to_active(self, tmp_path: Path) -> None:
-        self._write_yaml(
-            tmp_path / "test_domain.yml",
-            [
-                {
-                    "name": "alpha",
-                    "physics_domain": "x",
-                    "kind": "scalar",
-                    "unit": "1",
-                    "status": "active",
-                    "description": "A",
-                    "documentation": "doc",
-                },
-                {
-                    "name": "beta",
-                    "physics_domain": "x",
-                    "kind": "scalar",
-                    "unit": "1",
-                    "status": "draft",
-                    "description": "B",
-                    "documentation": "doc",
-                },
-                {
-                    "name": "gamma",
-                    "physics_domain": "x",
-                    "kind": "scalar",
-                    "unit": "1",
-                    "status": "deprecated",
-                    "description": "C",
-                    "documentation": "doc",
-                },
-            ],
-        )
-        ds = build_site_dataset(tmp_path)
-        names = {r["name"] for r in ds["NAMES"]}
-        assert names == {"alpha"}
-
-    def test_include_draft_keeps_all(self, tmp_path: Path) -> None:
+    def test_default_emit_includes_all_known_statuses(self, tmp_path: Path) -> None:
+        """build_site_dataset emits draft, deprecated, superseded, and active."""
         self._write_yaml(
             tmp_path / "test_domain.yml",
             [
@@ -786,9 +739,49 @@ class TestStatusFiltering:
                 },
             ],
         )
-        ds = build_site_dataset(tmp_path, include_draft=True)
+        ds = build_site_dataset(tmp_path)
         names = {r["name"] for r in ds["NAMES"]}
         assert names == {"alpha", "beta", "gamma", "delta"}
+
+    def test_no_include_draft_parameter(self) -> None:
+        """build_site_dataset signature must not contain include_draft."""
+        import inspect
+
+        sig = inspect.signature(build_site_dataset)
+        assert "include_draft" not in sig.parameters, (
+            "include_draft has been removed — the function always emits all statuses"
+        )
+
+    def test_superseded_by_round_trips(self, tmp_path: Path) -> None:
+        """superseded_by from YAML is present on the emitted record."""
+        self._write_yaml(
+            tmp_path / "test_domain.yml",
+            [
+                {
+                    "name": "old_name",
+                    "physics_domain": "x",
+                    "kind": "scalar",
+                    "unit": "1",
+                    "status": "superseded",
+                    "superseded_by": "new_name",
+                    "description": "Old",
+                    "documentation": "doc",
+                },
+                {
+                    "name": "new_name",
+                    "physics_domain": "x",
+                    "kind": "scalar",
+                    "unit": "1",
+                    "status": "active",
+                    "description": "New",
+                    "documentation": "doc",
+                },
+            ],
+        )
+        ds = build_site_dataset(tmp_path)
+        records = {r["name"]: r for r in ds["NAMES"]}
+        assert records["old_name"]["superseded_by"] == "new_name"
+        assert records["new_name"]["superseded_by"] is None
 
     def test_legacy_status_values_mapped(self, tmp_path: Path) -> None:
         self._write_yaml(
@@ -823,17 +816,10 @@ class TestStatusFiltering:
                 },
             ],
         )
-        # default: accepted+published → active (kept); drafted → draft (filtered)
+        # All three legacy values normalise and are emitted.
         ds = build_site_dataset(tmp_path)
-        names = {r["name"] for r in ds["NAMES"]}
-        assert names == {"old_accepted", "old_published"}
-        # the kept entries should record the normalised value
-        statuses = {r["name"]: r["status"] for r in ds["NAMES"]}
-        assert statuses == {"old_accepted": "active", "old_published": "active"}
-        # with --include-draft all three are present, status normalised
-        ds2 = build_site_dataset(tmp_path, include_draft=True)
-        names2 = {r["name"]: r["status"] for r in ds2["NAMES"]}
-        assert names2 == {
+        names = {r["name"]: r["status"] for r in ds["NAMES"]}
+        assert names == {
             "old_drafted": "draft",
             "old_accepted": "active",
             "old_published": "active",
@@ -863,7 +849,7 @@ class TestStatusFiltering:
                 },
             ],
         )
-        ds = build_site_dataset(tmp_path, include_draft=True)
+        ds = build_site_dataset(tmp_path)
         names = {r["name"] for r in ds["NAMES"]}
         assert names == {"ok"}, "unknown status must be silently dropped"
 

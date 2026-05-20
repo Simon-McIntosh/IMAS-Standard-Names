@@ -1439,3 +1439,122 @@ body {
   color: var(--text-3);
   font-style: italic;
 }
+
+/* ============================================================
+   Lifecycle filter, result-row decoration, and detail banner
+   ============================================================ */
+
+/* Lifecycle filter row */
+.filter-lifecycle-row {
+  display: inline-flex; align-items: center; gap: 8px;
+  min-width: 0;
+}
+.lifecycle-swatch {
+  display: inline-block;
+  width: 12px; height: 12px;
+  border-radius: 3px;
+  border: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.lifecycle-swatch.lifecycle-active     { background: color-mix(in oklch, var(--ok) 30%, transparent); border-color: var(--ok); }
+.lifecycle-swatch.lifecycle-draft      { background: repeating-linear-gradient(45deg, var(--warn) 0 2px, transparent 2px 5px); border-color: var(--warn); }
+.lifecycle-swatch.lifecycle-deprecated { background: color-mix(in oklch, var(--bad) 30%, transparent); border-color: var(--bad); }
+.lifecycle-swatch.lifecycle-superseded { background: color-mix(in oklch, var(--text-3) 40%, transparent); border-color: var(--text-3); }
+
+/* Result-row lifecycle decoration */
+.result-row.lifecycle-draft      { border-left-color: color-mix(in oklch, var(--warn) 70%, transparent); }
+.result-row.lifecycle-deprecated { border-left-color: color-mix(in oklch, var(--bad) 70%, transparent); }
+.result-row.lifecycle-superseded { border-left-color: color-mix(in oklch, var(--text-3) 70%, transparent); }
+.result-row.lifecycle-draft      .result-name { color: color-mix(in oklch, var(--warn) 25%, var(--text)); }
+.result-row.lifecycle-deprecated .result-name {
+  color: color-mix(in oklch, var(--bad) 25%, var(--text));
+  text-decoration: line-through;
+  text-decoration-color: color-mix(in oklch, var(--bad) 55%, transparent);
+  text-decoration-thickness: 1.5px;
+}
+.result-row.lifecycle-superseded .result-name {
+  color: var(--text-2);
+  text-decoration: line-through;
+  text-decoration-color: color-mix(in oklch, var(--text-3) 70%, var(--text));
+  text-decoration-thickness: 1.5px;
+}
+.result-row.selected.lifecycle-draft,
+.result-row.selected.lifecycle-deprecated,
+.result-row.selected.lifecycle-superseded { border-left-color: var(--accent); }
+
+/* result-name-row layout */
+.result-name-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+  flex-wrap: wrap;
+}
+.result-name-row .result-name { flex-shrink: 0; }
+
+/* Inline successor pointer */
+.result-successor {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11.5px;
+  padding: 1px 7px 1px 5px;
+  border-radius: 3px;
+  background: color-mix(in oklch, var(--bad) 7%, transparent);
+  color: color-mix(in oklch, var(--bad) 55%, var(--text));
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+  border: 1px solid color-mix(in oklch, var(--bad) 18%, transparent);
+  transition: background 0.12s, color 0.12s;
+}
+.result-successor:hover {
+  background: color-mix(in oklch, var(--bad) 14%, transparent);
+  color: color-mix(in oklch, var(--bad) 75%, var(--text));
+}
+.result-successor-arrow {
+  color: color-mix(in oklch, var(--bad) 65%, var(--text-3));
+  font-weight: 400;
+  font-size: 12px;
+}
+.result-row.lifecycle-superseded .result-successor {
+  background: color-mix(in oklch, var(--text-3) 12%, transparent);
+  color: var(--text-2);
+  border-color: color-mix(in oklch, var(--text-3) 30%, transparent);
+}
+.result-row.lifecycle-superseded .result-successor:hover {
+  background: color-mix(in oklch, var(--text-3) 22%, transparent);
+  color: var(--text);
+}
+.result-row.lifecycle-superseded .result-successor-arrow { color: var(--text-3); }
+
+/* Lifecycle banner */
+.detail-lifecycle-banner {
+  display: flex; align-items: flex-start; gap: 10px;
+  margin: 0 32px 16px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.detail-lifecycle-banner .banner-glyph { font-size: 14px; flex-shrink: 0; line-height: 1.45; }
+.detail-lifecycle-banner .banner-body { flex: 1; min-width: 0; }
+.detail-lifecycle-banner strong { font-weight: 600; }
+.detail-lifecycle-banner .banner-subtle { color: var(--text-2); }
+.detail-lifecycle-banner.state-draft {
+  background: color-mix(in oklch, var(--warn) 8%, transparent);
+  border: 1px solid color-mix(in oklch, var(--warn) 35%, var(--border));
+}
+.detail-lifecycle-banner.state-draft strong { color: var(--warn); }
+.detail-lifecycle-banner.state-deprecated {
+  background: color-mix(in oklch, var(--bad) 8%, transparent);
+  border: 1px solid color-mix(in oklch, var(--bad) 35%, var(--border));
+}
+.detail-lifecycle-banner.state-deprecated strong { color: var(--bad); }
+.detail-lifecycle-banner.state-superseded {
+  background: color-mix(in oklch, var(--text) 5%, transparent);
+  border: 1px solid var(--border-strong);
+}
+.detail-lifecycle-banner.state-superseded strong { color: var(--text-2); }

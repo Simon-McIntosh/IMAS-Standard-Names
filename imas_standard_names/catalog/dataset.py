@@ -22,16 +22,16 @@ record carries:
   ``Sign convention:`` paragraph), ``sign`` (the extracted paragraph)
 * navigation: ``seeAlso`` (links normalised, ``name:`` prefix stripped),
   ``arguments`` (just the argument names), ``sources``
-  (``{path, status}``)
+  (``{path, status}``), ``superseded_by`` (name of replacement or
+  ``null``), ``deprecates`` (name being deprecated or ``null``)
 * ``parse`` — a list of role/text/note segments (operators, qualifiers,
   axis, base, locus, process) for the UI to render as chips.
 
 Status filtering
 ----------------
-``build_site_dataset`` accepts an ``include_draft`` flag (default
-``False``).  When ``False``, only entries whose normalised status is
-``"active"`` are emitted.  When ``True``, all entries (draft,
-deprecated, superseded, active) are included.
+``build_site_dataset`` emits every entry whose normalised status is one
+of the four canonical values: ``active``, ``draft``, ``deprecated``,
+``superseded``.
 
 Legacy status values are normalised before filtering:
 
@@ -770,6 +770,8 @@ def _build_record(entry: dict[str, Any]) -> dict[str, Any]:
     see_also = _normalise_see_also(entry.get("links"))
     sources = _normalise_sources(entry.get("sources"))
     arguments = _normalise_arguments(entry.get("arguments"))
+    superseded_by = entry.get("superseded_by") or None
+    deprecates = entry.get("deprecates") or None
 
     record: dict[str, Any] = {
         "name": name,
@@ -787,6 +789,8 @@ def _build_record(entry: dict[str, Any]) -> dict[str, Any]:
         "seeAlso": see_also,
         "arguments": arguments,
         "sources": sources,
+        "superseded_by": superseded_by,
+        "deprecates": deprecates,
         "parse": facets.parse_segments,
         "sort_tier": sort_tier,
         "sort_axis_index": sort_axis_index,
@@ -1023,8 +1027,6 @@ def _enrich_with_reverse_links(
 
 def build_site_dataset(
     catalog_path: Path,
-    *,
-    include_draft: bool = False,
 ) -> dict[str, Any]:
     """Build the SPA dataset from a directory of standard-name YAMLs.
 
@@ -1035,21 +1037,23 @@ def build_site_dataset(
         catalog manifest is read from ``catalog_path.parent/catalog.yml``
         when present (the published layout); a missing manifest is not
         an error.
-    include_draft : bool, optional
-        When ``False`` (default), only entries whose normalised status is
-        ``"active"`` are emitted.  When ``True``, all entries (draft,
-        active, deprecated, superseded) are included.
 
     Returns
     -------
     dict
         Keys: ``CATALOG_VERSION`` (str), ``CATEGORIES`` (list),
         ``GRAMMAR_VOCAB`` (dict), ``NAMES`` (list of records).
+
+    Notes
+    -----
+    All entries whose normalised status is one of the four canonical
+    values (``active``, ``draft``, ``deprecated``, ``superseded``) are
+    emitted.  Entries with unknown status values are logged and dropped.
     """
     catalog_path = Path(catalog_path)
     raw_entries = _load_entries(catalog_path)
 
-    # Normalise status and apply the active-only gate before building records.
+    # Normalise status — emit every entry with a known canonical status.
     entries: list[dict[str, Any]] = []
     for raw in raw_entries:
         entry = dict(raw)
@@ -1058,8 +1062,6 @@ def build_site_dataset(
             # Unknown status — already logged; drop silently.
             continue
         entry["status"] = normalised
-        if not include_draft and normalised != "active":
-            continue
         entries.append(entry)
 
     names = [_build_record(entry) for entry in entries]
@@ -1091,8 +1093,6 @@ def build_site_dataset(
 def write_site_dataset(
     catalog_path: Path,
     out_path: Path,
-    *,
-    include_draft: bool = False,
 ) -> int:
     """Build and write the SPA dataset to ``out_path`` as JSON.
 
@@ -1102,15 +1102,12 @@ def write_site_dataset(
         Directory of per-domain YAML files.
     out_path : Path
         Destination JSON file.
-    include_draft : bool, optional
-        Passed through to ``build_site_dataset``; when ``False``
-        (default) only active entries are emitted.
 
     Returns the number of NAMES records emitted.
     """
     catalog_path = Path(catalog_path)
     out_path = Path(out_path)
-    dataset = build_site_dataset(catalog_path, include_draft=include_draft)
+    dataset = build_site_dataset(catalog_path)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(
         json.dumps(dataset, indent=2, ensure_ascii=False) + "\n",

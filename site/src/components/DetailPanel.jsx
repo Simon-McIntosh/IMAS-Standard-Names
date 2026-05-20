@@ -66,6 +66,38 @@ export function DetailPanel({ name, onSelect, onClose, childIndex, groupIndex })
         <h1 className="detail-name">{n.name}</h1>
       </div>
 
+      {n.status && n.status !== 'active' && (() => {
+        const LABEL = {
+          draft: 'Draft',
+          deprecated: 'Deprecated',
+          superseded: 'Superseded',
+        };
+        const SUBTITLE = {
+          draft: ' · proposed name under review, not yet ratified',
+          deprecated: ' · scheduled for removal, no replacement',
+          superseded: null,
+        };
+        return (
+          <div className={`detail-lifecycle-banner state-${n.status}`} role="status">
+            <span className="banner-glyph" aria-hidden="true">
+              {n.status === 'draft' ? '✎' : '⚠'}
+            </span>
+            <div className="banner-body">
+              <strong>{LABEL[n.status] || n.status}</strong>
+              {n.status === 'superseded' && n.superseded_by && (
+                <>
+                  {' · superseded by '}
+                  <NameLink name={n.superseded_by} onSelect={onSelect} />
+                </>
+              )}
+              {SUBTITLE[n.status] && (
+                <span className="banner-subtle">{SUBTITLE[n.status]}</span>
+              )}
+            </div>
+          </div>
+        );
+      })()}
+
       <div className="detail-attrs">
         <div className="attr">
           <div className="attr-k">Unit</div>

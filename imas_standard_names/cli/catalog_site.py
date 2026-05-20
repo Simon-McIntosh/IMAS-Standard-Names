@@ -111,8 +111,6 @@ def _build_site(
     catalog_path: Path,
     dist_dir: Path,
     site_dir: Path,
-    *,
-    include_draft: bool = False,
 ) -> int:
     """Build the SPA and write the dataset JSON next to ``index.html``.
 
@@ -120,9 +118,7 @@ def _build_site(
     the count to the user.
     """
     _build_spa(dist_dir, site_dir)
-    return write_site_dataset(
-        catalog_path, dist_dir / "data.json", include_draft=include_draft
-    )
+    return write_site_dataset(catalog_path, dist_dir / "data.json")
 
 
 def _find_git_root(catalog_path: Path) -> Path:
@@ -176,19 +172,12 @@ def _find_git_root(catalog_path: Path) -> Path:
     default=None,
     help="Path to the imas-standard-names site/ directory (Vite SPA source).",
 )
-@click.option(
-    "--include-draft",
-    is_flag=True,
-    default=False,
-    help="Include draft / deprecated / superseded entries (active-only by default).",
-)
 def serve_cmd(
     catalog_path: Path,
     port: int,
     host: str,
     site_name: str | None,
     site_dir: Path | None,
-    include_draft: bool,
 ) -> None:
     """Serve the catalog SPA locally for preview.
 
@@ -208,9 +197,7 @@ def serve_cmd(
     # plugin configuration.
     public = resolved_site_dir / "public"
     public.mkdir(exist_ok=True)
-    n = write_site_dataset(
-        catalog_path, public / "data.json", include_draft=include_draft
-    )
+    n = write_site_dataset(catalog_path, public / "data.json")
     if n == 0:
         click.echo("Warning: No standard names found in catalog", err=True)
     click.echo(f"Generated dataset for {n} standard names")
@@ -273,12 +260,6 @@ def serve_cmd(
     default=None,
     help="Path to the imas-standard-names site/ directory (Vite SPA source).",
 )
-@click.option(
-    "--include-draft",
-    is_flag=True,
-    default=False,
-    help="Include draft / deprecated / superseded entries (active-only by default).",
-)
 def deploy_cmd(
     catalog_path: Path,
     doc_version: str,
@@ -289,7 +270,6 @@ def deploy_cmd(
     remote: str,
     branch: str,
     site_dir: Path | None,
-    include_draft: bool,
 ) -> None:
     """Build the SPA and deploy it to gh-pages/<version>/.
 
@@ -320,7 +300,6 @@ def deploy_cmd(
             catalog_path,
             dist_dir,
             resolved_site_dir,
-            include_draft=include_draft,
         )
         if n == 0:
             click.echo("Warning: No standard names found in catalog", err=True)

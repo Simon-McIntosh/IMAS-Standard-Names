@@ -181,24 +181,48 @@ export function ResultsList({
             )}
             {!collapsed && (
               <div className="result-group-body" id={`group-body-${heading}`}>
-                {items.map((n) => (
-                  <button
-                    key={n.name}
-                    className={`result-row ${selected === n.name ? 'selected' : ''}`}
-                    onClick={() => onSelect(n.name)}
-                  >
-                    {dense === 'comfortable' && <KindBadge name={n} />}
-                    <div className="result-main">
-                      <div className="result-name">{n.name}</div>
-                      {dense === 'comfortable' && <div className="result-desc">{n.short}</div>}
-                    </div>
-                    {dense !== 'dense' && (
-                      <div className="result-meta">
-                        <UnitPill unit={n.unit} />
+                {items.map((n) => {
+                  const lc = n.status || 'active';
+                  return (
+                    <button
+                      key={n.name}
+                      className={`result-row lifecycle-${lc} ${selected === n.name ? 'selected' : ''}`}
+                      onClick={() => onSelect(n.name)}
+                      title={lc !== 'active' ? `${n.name} — ${lc}` : undefined}
+                    >
+                      {dense === 'comfortable' && <KindBadge name={n} />}
+                      <div className="result-main">
+                        <div className="result-name-row">
+                          <span className="result-name">{n.name}</span>
+                          {/* Successor pointer — only rendered for SUPERSEDED names.
+                              Deprecated entries are being retired with no committed
+                              replacement, so we do not invent a "use this instead". */}
+                          {lc === 'superseded' && n.superseded_by && dense !== 'dense' && (
+                            <span
+                              className="result-successor mono"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onSelect(n.superseded_by);
+                              }}
+                              title={`Open ${n.superseded_by}`}
+                            >
+                              <span className="result-successor-arrow" aria-hidden="true">→</span>
+                              {n.superseded_by}
+                            </span>
+                          )}
+                        </div>
+                        {dense === 'comfortable' && (
+                          <div className="result-desc">{n.short}</div>
+                        )}
                       </div>
-                    )}
-                  </button>
-                ))}
+                      {dense !== 'dense' && (
+                        <div className="result-meta">
+                          <UnitPill unit={n.unit} />
+                        </div>
+                      )}
+                    </button>
+                  );
+                })}
               </div>
             )}
           </div>

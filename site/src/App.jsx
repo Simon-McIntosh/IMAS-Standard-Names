@@ -76,9 +76,8 @@ function Shell() {
   const [filters, setFilters] = useState({
     category: new Set(),
     kind: new Set(),
+    lifecycle: new Set(),
     unit: new Set(),
-    source_status: new Set(),
-    ids: new Set(),
   });
   const [selected, setSelected] = useState(urlState.name);
   const [view, setView] = useState(urlState.view);
@@ -123,17 +122,8 @@ function Shell() {
     const filtered = NAMES.filter((n) => {
       if (filters.category.size && !filters.category.has(n.category)) return false;
       if (filters.kind.size && !filters.kind.has(n.algebra || 'scalar')) return false;
+      if (filters.lifecycle.size && !filters.lifecycle.has(n.status || 'active')) return false;
       if (filters.unit.size && !filters.unit.has(n.unit)) return false;
-      // Per-source ingestion status (any source matches).
-      if (
-        filters.source_status.size &&
-        !n.sources.some((s) => filters.source_status.has(s.status))
-      ) {
-        return false;
-      }
-      if (filters.ids.size && !n.sources.some((s) => filters.ids.has(s.path.split('/')[0]))) {
-        return false;
-      }
       return true;
     });
     const search = searchNames(filtered, searchTokens);
@@ -153,23 +143,18 @@ function Shell() {
   const faceted = useMemo(() => {
     const units = {};
     const kinds = {};
-    const source_statuses = {};
-    const idses = {};
+    const lifecycle = {};
     for (const n of NAMES) {
       units[n.unit] = (units[n.unit] || 0) + 1;
       const kind = n.algebra || 'scalar';
       kinds[kind] = (kinds[kind] || 0) + 1;
-      for (const s of n.sources) {
-        source_statuses[s.status] = (source_statuses[s.status] || 0) + 1;
-        const root = s.path.split('/')[0];
-        idses[root] = (idses[root] || 0) + 1;
-      }
+      const lc = n.status || 'active';
+      lifecycle[lc] = (lifecycle[lc] || 0) + 1;
     }
     return {
       units: Object.entries(units).sort((a, b) => b[1] - a[1]),
       kinds,
-      source_statuses,
-      idses: Object.entries(idses).sort((a, b) => b[1] - a[1]).slice(0, 20),
+      lifecycle,
       totalSources: NAMES.reduce((s, n) => s + n.sources.length, 0),
     };
   }, [NAMES]);

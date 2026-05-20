@@ -34,20 +34,19 @@ const KIND_ROWS = [
   ['metadata', 'Metadata'],
 ];
 
-// Source-side status (per-source ingestion lifecycle on `n.sources[].status`).
-const SOURCE_STATUS_ROWS = [
-  ['composed', 'Composed'],
-  ['attached', 'Attached'],
-  ['skipped', 'Skipped'],
-  ['vocab_gap', 'Vocab gap'],
+// Lifecycle status rows — four canonical values.
+const LIFECYCLE_ROWS = [
+  ['active',     'Active'],
+  ['draft',      'Draft'],
+  ['deprecated', 'Deprecated'],
+  ['superseded', 'Superseded'],
 ];
 
-const EMPTY_FILTERS = {
+export const EMPTY_FILTERS = {
   category: new Set(),
   kind: new Set(),
+  lifecycle: new Set(),
   unit: new Set(),
-  source_status: new Set(),
-  ids: new Set(),
 };
 
 export const DEFAULT_FILTERS = EMPTY_FILTERS;
@@ -111,6 +110,25 @@ export function Filters({ filters, setFilters, faceted, allCounts }) {
         ))}
       </FilterGroup>
 
+      <FilterGroup title="Lifecycle">
+        {LIFECYCLE_ROWS
+          .filter(([k]) => (faceted.lifecycle?.[k] ?? 0) > 0)
+          .map(([k, lbl]) => (
+            <FilterRow
+              key={k}
+              label={
+                <span className="filter-lifecycle-row">
+                  <span className={`lifecycle-swatch lifecycle-${k}`} aria-hidden />
+                  <span>{lbl}</span>
+                </span>
+              }
+              count={faceted.lifecycle?.[k] ?? 0}
+              checked={filters.lifecycle.has(k)}
+              onChange={() => toggle('lifecycle', k)}
+            />
+          ))}
+      </FilterGroup>
+
       <FilterGroup title="Unit">
         {faceted.units.map(([u, n]) => (
           <FilterRow
@@ -120,33 +138,6 @@ export function Filters({ filters, setFilters, faceted, allCounts }) {
             count={n}
             checked={filters.unit.has(u)}
             onChange={() => toggle('unit', u)}
-          />
-        ))}
-      </FilterGroup>
-
-      <FilterGroup title="Advanced" defaultOpen={false}>
-        <div className="filter-subhead">Source ingestion status</div>
-        {SOURCE_STATUS_ROWS
-          .filter(([s]) => (faceted.source_statuses[s] ?? 0) > 0)
-          .map(([s, lbl]) => (
-            <FilterRow
-              key={s}
-              label={lbl}
-              count={faceted.source_statuses[s] ?? 0}
-              checked={filters.source_status.has(s)}
-              onChange={() => toggle('source_status', s)}
-            />
-          ))}
-
-        <div className="filter-subhead">Source root (IDS)</div>
-        {faceted.idses.slice(0, 12).map(([id, n]) => (
-          <FilterRow
-            key={id}
-            label={id}
-            mono
-            count={n}
-            checked={filters.ids.has(id)}
-            onChange={() => toggle('ids', id)}
           />
         ))}
       </FilterGroup>
