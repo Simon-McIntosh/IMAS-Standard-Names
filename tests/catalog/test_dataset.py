@@ -20,12 +20,12 @@ from imas_standard_names.catalog import build_site_dataset, write_site_dataset
 from imas_standard_names.catalog.dataset import (
     _arguments_parent,
     _derive_grammar_facets,
-    _display_kind,
     _extract_sign,
     _humanise_domain,
     _local_ir_peel,
     _normalise_see_also,
     _normalise_sources,
+    _normalise_status,
     _parent_token,
 )
 
@@ -46,7 +46,19 @@ def isnc_catalog_dir() -> Path:
 
 @pytest.fixture
 def isnc_dataset(isnc_catalog_dir: Path) -> dict:
-    """Built dataset from the real ISNC catalog (one parse pass for all tests)."""
+    """Built dataset from the real ISNC catalog (one parse pass for all tests).
+
+    Uses ``include_draft=True`` so legacy live-catalog assertions keep
+    seeing entries while the catalog is still on ``status: draft``. A
+    separate :func:`isnc_dataset_active_only` fixture is available for
+    tests that need to assert the active-only default behaviour.
+    """
+    return build_site_dataset(isnc_catalog_dir, include_draft=True)
+
+
+@pytest.fixture
+def isnc_dataset_active_only(isnc_catalog_dir: Path) -> dict:
+    """Built dataset from the real ISNC catalog with active-only default."""
     return build_site_dataset(isnc_catalog_dir)
 
 
@@ -150,32 +162,24 @@ class TestNormaliseSources:
         assert _normalise_sources(None) == []
 
 
-class TestStructuralKind:
-    """``_display_kind`` derives the SPA structural kind from grammar."""
+class TestGrammarFacets:
+    """``_derive_grammar_facets`` extracts the IR signals the emitter needs."""
 
-    def test_locus_yields_at_point(self) -> None:
+    def test_locus_detected(self) -> None:
         facets = _derive_grammar_facets("safety_factor_at_magnetic_axis")
-        assert _display_kind("safety_factor_at_magnetic_axis", "scalar", facets) == (
-            "at_point"
-        )
+        assert facets.has_locus is True
+        assert facets.locus_token == "magnetic_axis"
 
-    def test_projection_yields_component(self) -> None:
+    def test_projection_detected(self) -> None:
         facets = _derive_grammar_facets("poloidal_magnetic_field")
-        assert _display_kind("poloidal_magnetic_field", "scalar", facets) == (
-            "component"
-        )
+        assert facets.has_projection is True
+        assert facets.axis == "poloidal"
 
-    def test_total_prefix_yields_global(self) -> None:
-        facets = _derive_grammar_facets("total_plasma_current")
-        assert _display_kind("total_plasma_current", "scalar", facets) == "global"
-
-    def test_minimum_qualifier_yields_global(self) -> None:
-        facets = _derive_grammar_facets("minimum_safety_factor")
-        assert _display_kind("minimum_safety_factor", "scalar", facets) == "global"
-
-    def test_pure_base_stays_base(self) -> None:
+    def test_pure_base_has_no_facets(self) -> None:
         facets = _derive_grammar_facets("safety_factor")
-        assert _display_kind("safety_factor", "scalar", facets) == "base"
+        assert facets.has_projection is False
+        assert facets.has_locus is False
+        assert facets.base_token == "safety_factor"
 
 
 # ---------------------------------------------------------------------------
@@ -247,16 +251,15 @@ class TestRecordShape:
         assert record["name"] == "plasma_inductance"
         assert record["category"] == "equilibrium"
 
-        # Required keys all present — new algebra/display_kind alongside
-        # the legacy ``kind`` alias and the new reverse-link fields.
+        # Required keys all present. ``display_kind`` / ``kind`` have
+        # been retired; ``algebra`` (scalar/vector/tensor/complex/metadata)
+        # is the canonical kind axis.
         required = {
             "name",
             "category",
             "group",
             "parent",
             "algebra",
-            "display_kind",
-            "kind",
             "status",
             "unit",
             "tags",
@@ -274,6 +277,9 @@ class TestRecordShape:
         assert required.issubset(record.keys()), (
             f"missing keys: {required - set(record.keys())}"
         )
+        # The retired synthetic kind axes must NOT be present.
+        assert "display_kind" not in record
+        assert "kind" not in record
 
         # Type checks.
         assert isinstance(record["tags"], list)
@@ -293,38 +299,29 @@ class TestRecordShape:
         assert record["unit"] == "H"
 
 
-class TestKindClassification:
-    """Each structural kind shows up where the SPA expects it."""
+class TestGrammarMetadata:
+    """Structural cues (axis, locus) still surface on the record even
+    though ``display_kind`` no longer does."""
 
-    def test_plasma_inductance_is_global(self, isnc_dataset: dict) -> None:
-        record = _find_record(isnc_dataset, "plasma_inductance")
-        assert record["display_kind"] == "global"
-        # ``kind`` retained as a one-cycle back-compat alias for display_kind.
-        assert record["kind"] == record["display_kind"]
-
-    def test_poloidal_magnetic_field_is_component(self, isnc_dataset: dict) -> None:
+    def test_poloidal_magnetic_field_keeps_axis(self, isnc_dataset: dict) -> None:
         record = _find_record(isnc_dataset, "poloidal_magnetic_field")
-        assert record["kind"] == "component"
         assert record["axis"] == "poloidal"
 
-    def test_safety_factor_at_magnetic_axis_is_at_point(
+    def test_safety_factor_at_magnetic_axis_keeps_locus(
         self, isnc_dataset: dict
     ) -> None:
         record = _find_record(isnc_dataset, "safety_factor_at_magnetic_axis")
-        assert record["kind"] == "at_point"
         assert record["locus"] == "magnetic_axis"
 
 
 class TestAlgebraAxis:
-    """Algebraic kind (scalar/vector/tensor/complex/metadata) lives on each
-    record alongside the SPA's display_kind, so the UI can offer a
-    separate Algebra filter without losing the display shape."""
+    """Algebraic kind (scalar/vector/tensor/complex/metadata) is the sole
+    kind axis on each record. The retired synthetic ``display_kind`` is
+    gone from the JSON output."""
 
     def test_magnetic_field_is_vector(self, isnc_dataset: dict) -> None:
         record = _find_record(isnc_dataset, "magnetic_field")
         assert record["algebra"] == "vector"
-        # Display kind is independent — magnetic_field is a base shape.
-        assert record["display_kind"] == "base"
 
     def test_scalar_default(self, isnc_dataset: dict) -> None:
         record = _find_record(isnc_dataset, "electron_temperature")
@@ -459,7 +456,7 @@ class TestParseSegments:
                     {
                         "name": "definitely_not_a_known_thing_xyz",
                         "kind": "scalar",
-                        "status": "draft",
+                        "status": "active",
                         "description": "Test entry that the parser cannot decompose.",
                         "documentation": "This entry exists only to exercise the unparseable fallback.",
                         "unit": "1",
@@ -515,7 +512,10 @@ class TestWriteSiteDataset:
 
     def test_writes_to_disk(self, isnc_catalog_dir: Path, tmp_path: Path) -> None:
         out = tmp_path / "dataset.json"
-        count = write_site_dataset(isnc_catalog_dir, out)
+        # The live ISNC catalog is currently all ``status: draft`` — use
+        # ``include_draft=True`` so the round-trip count assertion has
+        # entries to work with.
+        count = write_site_dataset(isnc_catalog_dir, out, include_draft=True)
 
         assert out.exists()
         assert count > 0
@@ -635,3 +635,216 @@ class TestParentToken:
         # the corrected one-layer peel.
         facets = _derive_grammar_facets("electron_temperature")
         assert _parent_token("electron_temperature", facets) == "temperature"
+
+
+# ---------------------------------------------------------------------------
+# Status normalisation + include-draft filtering
+# ---------------------------------------------------------------------------
+
+
+class TestNormaliseStatus:
+    """Legacy status values map to the canonical set; unknowns drop."""
+
+    def test_canonical_values_pass_through(self) -> None:
+        for value in ("draft", "active", "deprecated", "superseded"):
+            assert _normalise_status(value) == value
+
+    def test_legacy_drafted_maps_to_draft(self) -> None:
+        assert _normalise_status("drafted") == "draft"
+
+    def test_legacy_accepted_maps_to_active(self) -> None:
+        assert _normalise_status("accepted") == "active"
+
+    def test_legacy_published_maps_to_active(self) -> None:
+        assert _normalise_status("published") == "active"
+
+    def test_unknown_value_returns_none(self) -> None:
+        assert _normalise_status("not_a_real_status") is None
+        assert _normalise_status("nonsense") is None
+
+    def test_missing_value_defaults_to_draft(self) -> None:
+        # Catalog entries written before status was required should fall
+        # to "draft" rather than be silently dropped.
+        assert _normalise_status(None) == "draft"
+        assert _normalise_status("") == "draft"
+
+
+class TestCanonicalKinds:
+    """Output JSON exposes only the five schema kinds — no display_kind."""
+
+    def test_no_display_kind_in_records(self, isnc_dataset: dict) -> None:
+        for record in isnc_dataset["NAMES"]:
+            assert "display_kind" not in record
+            assert "kind" not in record  # alias also dropped
+
+    def test_algebra_is_one_of_five_canonical(self, isnc_dataset: dict) -> None:
+        valid = {"scalar", "vector", "tensor", "complex", "metadata"}
+        for record in isnc_dataset["NAMES"]:
+            assert record["algebra"] in valid
+
+
+class TestStatusFiltering:
+    """Default emit = active-only; --include-draft keeps everything."""
+
+    def _write_yaml(self, path: Path, entries: list[dict]) -> None:
+        path.write_text(yaml.safe_dump(entries), encoding="utf-8")
+
+    def test_default_emit_filters_to_active(self, tmp_path: Path) -> None:
+        self._write_yaml(
+            tmp_path / "test_domain.yml",
+            [
+                {
+                    "name": "alpha",
+                    "physics_domain": "x",
+                    "kind": "scalar",
+                    "unit": "1",
+                    "status": "active",
+                    "description": "A",
+                    "documentation": "doc",
+                },
+                {
+                    "name": "beta",
+                    "physics_domain": "x",
+                    "kind": "scalar",
+                    "unit": "1",
+                    "status": "draft",
+                    "description": "B",
+                    "documentation": "doc",
+                },
+                {
+                    "name": "gamma",
+                    "physics_domain": "x",
+                    "kind": "scalar",
+                    "unit": "1",
+                    "status": "deprecated",
+                    "description": "C",
+                    "documentation": "doc",
+                },
+            ],
+        )
+        ds = build_site_dataset(tmp_path)
+        names = {r["name"] for r in ds["NAMES"]}
+        assert names == {"alpha"}
+
+    def test_include_draft_keeps_all(self, tmp_path: Path) -> None:
+        self._write_yaml(
+            tmp_path / "test_domain.yml",
+            [
+                {
+                    "name": "alpha",
+                    "physics_domain": "x",
+                    "kind": "scalar",
+                    "unit": "1",
+                    "status": "active",
+                    "description": "A",
+                    "documentation": "doc",
+                },
+                {
+                    "name": "beta",
+                    "physics_domain": "x",
+                    "kind": "scalar",
+                    "unit": "1",
+                    "status": "draft",
+                    "description": "B",
+                    "documentation": "doc",
+                },
+                {
+                    "name": "gamma",
+                    "physics_domain": "x",
+                    "kind": "scalar",
+                    "unit": "1",
+                    "status": "deprecated",
+                    "description": "C",
+                    "documentation": "doc",
+                },
+                {
+                    "name": "delta",
+                    "physics_domain": "x",
+                    "kind": "scalar",
+                    "unit": "1",
+                    "status": "superseded",
+                    "description": "D",
+                    "documentation": "doc",
+                },
+            ],
+        )
+        ds = build_site_dataset(tmp_path, include_draft=True)
+        names = {r["name"] for r in ds["NAMES"]}
+        assert names == {"alpha", "beta", "gamma", "delta"}
+
+    def test_legacy_status_values_mapped(self, tmp_path: Path) -> None:
+        self._write_yaml(
+            tmp_path / "test_domain.yml",
+            [
+                {
+                    "name": "old_drafted",
+                    "physics_domain": "x",
+                    "kind": "scalar",
+                    "unit": "1",
+                    "status": "drafted",
+                    "description": "D",
+                    "documentation": "doc",
+                },
+                {
+                    "name": "old_accepted",
+                    "physics_domain": "x",
+                    "kind": "scalar",
+                    "unit": "1",
+                    "status": "accepted",
+                    "description": "E",
+                    "documentation": "doc",
+                },
+                {
+                    "name": "old_published",
+                    "physics_domain": "x",
+                    "kind": "scalar",
+                    "unit": "1",
+                    "status": "published",
+                    "description": "F",
+                    "documentation": "doc",
+                },
+            ],
+        )
+        # default: accepted+published → active (kept); drafted → draft (filtered)
+        ds = build_site_dataset(tmp_path)
+        names = {r["name"] for r in ds["NAMES"]}
+        assert names == {"old_accepted", "old_published"}
+        # the kept entries should record the normalised value
+        statuses = {r["name"]: r["status"] for r in ds["NAMES"]}
+        assert statuses == {"old_accepted": "active", "old_published": "active"}
+        # with --include-draft all three are present, status normalised
+        ds2 = build_site_dataset(tmp_path, include_draft=True)
+        names2 = {r["name"]: r["status"] for r in ds2["NAMES"]}
+        assert names2 == {
+            "old_drafted": "draft",
+            "old_accepted": "active",
+            "old_published": "active",
+        }
+
+    def test_unknown_status_dropped(self, tmp_path: Path) -> None:
+        self._write_yaml(
+            tmp_path / "test_domain.yml",
+            [
+                {
+                    "name": "weird",
+                    "physics_domain": "x",
+                    "kind": "scalar",
+                    "unit": "1",
+                    "status": "not_a_real_status",
+                    "description": "W",
+                    "documentation": "doc",
+                },
+                {
+                    "name": "ok",
+                    "physics_domain": "x",
+                    "kind": "scalar",
+                    "unit": "1",
+                    "status": "active",
+                    "description": "O",
+                    "documentation": "doc",
+                },
+            ],
+        )
+        ds = build_site_dataset(tmp_path, include_draft=True)
+        names = {r["name"] for r in ds["NAMES"]}
+        assert names == {"ok"}, "unknown status must be silently dropped"

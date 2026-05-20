@@ -15,8 +15,8 @@ The output is consumed by the SPA's read-only renderer. Each NAMES
 record carries:
 
 * identity: ``name``, ``category``, ``group``, ``parent``
-* structural ``kind`` (``base | component | at_point | global | location``)
-  derived from the grammar IR
+* algebraic ``algebra`` (``scalar | vector | tensor | complex | metadata``)
+  declared on the catalog entry
 * physical metadata: ``unit``, ``tags``, ``axis``, ``locus``
 * prose: ``short`` (description), ``long`` (documentation minus the
   ``Sign convention:`` paragraph), ``sign`` (the extracted paragraph)
@@ -25,11 +25,27 @@ record carries:
   (``{path, status}``)
 * ``parse`` — a list of role/text/note segments (operators, qualifiers,
   axis, base, locus, process) for the UI to render as chips.
+
+Status filtering
+----------------
+``build_site_dataset`` accepts an ``include_draft`` flag (default
+``False``).  When ``False``, only entries whose normalised status is
+``"active"`` are emitted.  When ``True``, all entries (draft,
+deprecated, superseded, active) are included.
+
+Legacy status values are normalised before filtering:
+
+* ``"drafted"``   → ``"draft"``
+* ``"accepted"``  → ``"active"``
+* ``"published"`` → ``"active"``
+
+Unknown values are logged as warnings and the entry is dropped.
 """
 
 from __future__ import annotations
 
 import json
+import logging
 import re
 from collections import Counter
 from dataclasses import dataclass
@@ -48,6 +64,8 @@ from imas_standard_names.grammar.parser import (
 )
 from imas_standard_names.models import StandardNameCatalogManifest
 
+_log = logging.getLogger(__name__)
+
 __all__ = [
     "build_site_dataset",
     "write_site_dataset",
@@ -59,11 +77,10 @@ __all__ = [
 # ---------------------------------------------------------------------------
 
 
-# Prefix operator tokens treated as "reductions": when present as the
-# outermost qualifier on an otherwise base-style name (no projection, no
-# locus, no _due_to_ tail), the result is a scalar summary (``global``).
-# Operators like ``flux_surface_averaged`` and ``normalized`` do NOT
-# reduce to a scalar — they remain field-like and so stay as ``base``.
+# Prefix operator tokens classified as "reductions" — used by the grammar
+# vocab builder below (``_build_grammar_vocab``) to populate the
+# ``"reduction"`` chip rail in the SPA.  NOT used for display_kind
+# (which has been removed; only ``algebra`` is emitted on each record).
 _REDUCTION_PREFIX_OPS: frozenset[str] = frozenset(
     {
         "maximum",
@@ -78,18 +95,6 @@ _REDUCTION_PREFIX_OPS: frozenset[str] = frozenset(
         "cumulative_inside_flux_surface",
         "time_average",
         "root_mean_square",
-    }
-)
-
-
-# Subject-style qualifier tokens that indicate the name is a global
-# scalar summary rather than a field. ``total_`` is the canonical prefix
-# but a few enum subjects (``total_plasma``) carry the same meaning.
-_GLOBAL_SUBJECT_QUALIFIERS: frozenset[str] = frozenset(
-    {
-        "total",
-        "total_plasma",
-        "plasma",
     }
 )
 
@@ -275,9 +280,9 @@ def _normalise_arguments(arguments: list[dict[str, Any]] | None) -> list[str]:
 class _GrammarFacets:
     """Facets derived from the grammar IR for a single name.
 
-    These drive the structural ``kind``, ``parent``, ``axis``, ``locus``,
-    grammar-derived ``tags``, and ``parse`` segments. Holding them in a
-    single dataclass keeps the helper logic testable and clear.
+    These drive ``parent``, ``axis``, ``locus``, grammar-derived
+    ``tags``, and ``parse`` segments. Holding them in a single dataclass
+    keeps the helper logic testable and clear.
     """
 
     parsed: bool
@@ -287,8 +292,6 @@ class _GrammarFacets:
     locus_token: str | None
     has_projection: bool
     has_locus: bool
-    has_reduction_qualifier: bool
-    has_global_subject_qualifier: bool
     qualifier_tokens: tuple[str, ...]
     operator_tokens: tuple[str, ...]
     has_mechanism: bool
@@ -318,8 +321,6 @@ def _derive_grammar_facets(name: str) -> _GrammarFacets:
             locus_token=None,
             has_projection=False,
             has_locus=False,
-            has_reduction_qualifier=False,
-            has_global_subject_qualifier=False,
             qualifier_tokens=(),
             operator_tokens=(),
             has_mechanism=False,
@@ -369,15 +370,9 @@ def _derive_grammar_facets(name: str) -> _GrammarFacets:
 
     # Qualifiers (insertion order matches parse order).
     qualifier_tokens: list[str] = []
-    has_reduction_qualifier = False
-    has_global_subject_qualifier = False
     for qualifier in ir.qualifiers:
         token = qualifier.token
         qualifier_tokens.append(token)
-        if token in _REDUCTION_PREFIX_OPS:
-            has_reduction_qualifier = True
-        if token in _GLOBAL_SUBJECT_QUALIFIERS or token.startswith("total_"):
-            has_global_subject_qualifier = True
         segments.append(
             {
                 "role": "qualifier",
@@ -439,8 +434,6 @@ def _derive_grammar_facets(name: str) -> _GrammarFacets:
         locus_token=locus_token,
         has_projection=ir.projection is not None,
         has_locus=ir.locus is not None,
-        has_reduction_qualifier=has_reduction_qualifier,
-        has_global_subject_qualifier=has_global_subject_qualifier,
         qualifier_tokens=tuple(qualifier_tokens),
         operator_tokens=tuple(operator_tokens),
         has_mechanism=has_mechanism,
@@ -448,43 +441,8 @@ def _derive_grammar_facets(name: str) -> _GrammarFacets:
 
 
 # ---------------------------------------------------------------------------
-# Helpers — structural kind / parent / group
+# Helpers — parent / group
 # ---------------------------------------------------------------------------
-
-
-def _display_kind(name: str, algebra: str | None, facets: _GrammarFacets) -> str:
-    """Compute the SPA's display shape from grammar + algebraic kind.
-
-    Display kind is one axis of the SPA's faceted view; the other axis
-    is the **algebraic** kind preserved on each record as ``algebra``
-    (scalar / vector / tensor / complex / metadata). Display kind
-    answers "what shape is this in the lineage tree?":
-
-    1. ``location`` for ``metadata`` pydantic entries
-    2. ``at_point`` when the IR carries a locus suffix
-    3. ``component`` when the IR carries an axis projection
-    4. ``global`` for reductions / subject-scalars (``total_*``,
-       ``minimum_*``, ``volume_integrated_*``, etc.)
-    5. ``base`` otherwise (the default for a field-valued quantity)
-
-    Renamed from ``_structural_kind`` to disambiguate from the
-    algebraic kind that now lives alongside on each record.
-    """
-    if algebra == "metadata":
-        return "location"
-    if not facets.parsed:
-        return "base"
-    if facets.has_locus:
-        return "at_point"
-    if facets.has_projection:
-        return "component"
-    if name.startswith("total_"):
-        return "global"
-    if facets.has_reduction_qualifier:
-        return "global"
-    if facets.has_global_subject_qualifier:
-        return "global"
-    return "base"
 
 
 def _parent_token(
@@ -620,22 +578,21 @@ def _group_title(name: str, facets: _GrammarFacets) -> str:
 def _derive_tags(
     entry_tags: list[str] | None,
     facets: _GrammarFacets,
-    display_kind: str,
 ) -> list[str]:
     """Return the entry's explicit tags, falling back to grammar-derived ones.
 
     Many catalog entries omit the ``tags`` field. The SPA still wants
     something descriptive; we synthesise a small set of tags from the
-    IR (e.g. ``component``, ``averaged``, ``magnitude``) to keep the
-    sidebar useful when the catalog has not yet been hand-tagged.
+    IR (e.g. ``component``, ``locus``, ``averaged``, ``magnitude``) to
+    keep the sidebar useful when the catalog has not yet been hand-tagged.
     """
     if entry_tags:
         return [str(t) for t in entry_tags if isinstance(t, str)]
 
     derived: list[str] = []
-    if display_kind == "component":
+    if facets.has_projection:
         derived.append("component")
-    if display_kind == "at_point":
+    if facets.has_locus:
         derived.append("locus")
     if "magnitude" in facets.operator_tokens:
         derived.append("magnitude")
@@ -653,35 +610,61 @@ def _derive_tags(
 # ---------------------------------------------------------------------------
 
 
+def _normalise_status(raw: str | None) -> str | None:
+    """Map legacy status values to the canonical set; return None to drop.
+
+    Canonical values (pass through unchanged):
+        ``"draft"``, ``"active"``, ``"deprecated"``, ``"superseded"``
+
+    Legacy mappings:
+        ``"drafted"``   → ``"draft"``
+        ``"accepted"``  → ``"active"``
+        ``"published"`` → ``"active"``
+
+    Unknown values are logged as warnings and ``None`` is returned so
+    the entry is silently dropped from the emitted dataset.
+    """
+    if not raw:
+        return "draft"
+    _LEGACY: dict[str, str] = {
+        "drafted": "draft",
+        "accepted": "active",
+        "published": "active",
+    }
+    _CANONICAL: frozenset[str] = frozenset(
+        {"draft", "active", "deprecated", "superseded"}
+    )
+    if raw in _CANONICAL:
+        return raw
+    mapped = _LEGACY.get(raw)
+    if mapped is not None:
+        return mapped
+    _log.warning("unknown status %r — entry will be dropped", raw)
+    return None
+
+
 def _build_record(entry: dict[str, Any]) -> dict[str, Any]:
     """Build one NAMES record from a parsed YAML entry.
 
-    The record carries **two** orthogonal kind axes:
+    Emits ``algebra`` (scalar / vector / tensor / complex / metadata)
+    from the catalog entry's ``kind`` field.  The synthetic
+    ``display_kind`` / ``kind`` fields are no longer emitted; the SPA
+    reads only ``algebra`` for kind-based filtering and badging.
 
-    - ``algebra``: scalar / vector / tensor / complex / metadata —
-      the algebraic shape declared on the catalog entry (passed
-      through verbatim from ``entry["kind"]``).
-    - ``display_kind``: base / component / at_point / global / location
-      — the SPA's lineage-tree shape (computed from grammar facets).
-
-    ``kind`` is retained as a top-level alias for ``display_kind`` for
-    one cycle of back-compat with existing UI code; new code should
-    read ``algebra`` and ``display_kind`` explicitly.
+    The ``status`` field on the entry is expected to have already been
+    normalised by ``_normalise_status`` before this function is called.
     """
     name = str(entry.get("name") or "")
     category = entry.get("physics_domain") or "uncategorized"
     facets = _derive_grammar_facets(name)
     algebra = entry.get("kind") or "scalar"
 
-    display_kind = _display_kind(name, algebra, facets)
     parent = _parent_token(name, facets, entry)
     group = _group_title(name, facets)
-    tags = _derive_tags(entry.get("tags"), facets, display_kind)
+    tags = _derive_tags(entry.get("tags"), facets)
 
-    # Catalog-level status (published / drafted / accepted / superseded /
-    # deprecated). Surfaced so the SPA's status filter can target the
-    # entry itself, not just per-source statuses.
-    status = entry.get("status") or "drafted"
+    # Status has already been normalised by build_site_dataset.
+    status = entry.get("status") or "draft"
     # Subject — first qualifier token matching the closed Subject enum
     # (electron, ion, deuterium, …). Drives the SPA's subject filter so
     # users can slice by species without text-search.
@@ -699,10 +682,6 @@ def _build_record(entry: dict[str, Any]) -> dict[str, Any]:
         "group": group,
         "parent": parent,
         "algebra": str(algebra),
-        "display_kind": display_kind,
-        # ``kind`` retained for one cycle of back-compat — old SPA code
-        # reads ``n.kind`` for the display badge. Equal to display_kind.
-        "kind": display_kind,
         "status": str(status),
         "subject": str(subject) if subject else None,
         "unit": entry.get("unit") or "",
@@ -945,7 +924,11 @@ def _enrich_with_reverse_links(
             record["magnitude"] = None
 
 
-def build_site_dataset(catalog_path: Path) -> dict[str, Any]:
+def build_site_dataset(
+    catalog_path: Path,
+    *,
+    include_draft: bool = False,
+) -> dict[str, Any]:
     """Build the SPA dataset from a directory of standard-name YAMLs.
 
     Parameters
@@ -955,6 +938,10 @@ def build_site_dataset(catalog_path: Path) -> dict[str, Any]:
         catalog manifest is read from ``catalog_path.parent/catalog.yml``
         when present (the published layout); a missing manifest is not
         an error.
+    include_draft : bool, optional
+        When ``False`` (default), only entries whose normalised status is
+        ``"active"`` are emitted.  When ``True``, all entries (draft,
+        active, deprecated, superseded) are included.
 
     Returns
     -------
@@ -963,7 +950,21 @@ def build_site_dataset(catalog_path: Path) -> dict[str, Any]:
         ``GRAMMAR_VOCAB`` (dict), ``NAMES`` (list of records).
     """
     catalog_path = Path(catalog_path)
-    entries = _load_entries(catalog_path)
+    raw_entries = _load_entries(catalog_path)
+
+    # Normalise status and apply the active-only gate before building records.
+    entries: list[dict[str, Any]] = []
+    for raw in raw_entries:
+        entry = dict(raw)
+        normalised = _normalise_status(entry.get("status"))
+        if normalised is None:
+            # Unknown status — already logged; drop silently.
+            continue
+        entry["status"] = normalised
+        if not include_draft and normalised != "active":
+            continue
+        entries.append(entry)
+
     names = [_build_record(entry) for entry in entries]
 
     # Post-pass: enrich each record with reverse-edge lookups. Vectors
@@ -990,14 +991,29 @@ def build_site_dataset(catalog_path: Path) -> dict[str, Any]:
     }
 
 
-def write_site_dataset(catalog_path: Path, out_path: Path) -> int:
+def write_site_dataset(
+    catalog_path: Path,
+    out_path: Path,
+    *,
+    include_draft: bool = False,
+) -> int:
     """Build and write the SPA dataset to ``out_path`` as JSON.
+
+    Parameters
+    ----------
+    catalog_path : Path
+        Directory of per-domain YAML files.
+    out_path : Path
+        Destination JSON file.
+    include_draft : bool, optional
+        Passed through to ``build_site_dataset``; when ``False``
+        (default) only active entries are emitted.
 
     Returns the number of NAMES records emitted.
     """
     catalog_path = Path(catalog_path)
     out_path = Path(out_path)
-    dataset = build_site_dataset(catalog_path)
+    dataset = build_site_dataset(catalog_path, include_draft=include_draft)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(
         json.dumps(dataset, indent=2, ensure_ascii=False) + "\n",
