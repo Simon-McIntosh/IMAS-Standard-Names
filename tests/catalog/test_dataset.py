@@ -866,3 +866,82 @@ class TestStatusFiltering:
         ds = build_site_dataset(tmp_path, include_draft=True)
         names = {r["name"] for r in ds["NAMES"]}
         assert names == {"ok"}, "unknown status must be silently dropped"
+
+
+class TestSortKeys:
+    """``sort_tier`` and ``sort_axis_index`` drive canonical grouping order."""
+
+    def test_every_record_has_sort_keys(self, isnc_dataset: dict) -> None:
+        for record in isnc_dataset["NAMES"]:
+            assert isinstance(record.get("sort_tier"), int)
+            assert isinstance(record.get("sort_axis_index"), int)
+            assert 0 <= record["sort_tier"] <= 7
+            assert (
+                0 <= record["sort_axis_index"] <= 5 or record["sort_axis_index"] == 99
+            )
+
+    def test_magnetic_field_family_order(self, isnc_dataset: dict) -> None:
+        """Snapshot the magnetic_field family ordering.
+
+        Expected order per Design Review §8:
+            magnetic_field           (tier 0, vector base)
+            radial_magnetic_field    (tier 1, axis index 0)
+            toroidal_magnetic_field  (tier 1, axis index 1)
+            vertical_magnetic_field  (tier 1, axis index 2)
+            poloidal_magnetic_field  (tier 1, axis index 3)
+            magnetic_field_magnitude (tier 2)
+            flux_surface_averaged_magnetic_field (tier 3)
+
+        Names not present in the catalog snapshot are skipped — the
+        relative order of those that ARE present must match the above.
+        """
+        expected = [
+            "magnetic_field",
+            "radial_magnetic_field",
+            "toroidal_magnetic_field",
+            "vertical_magnetic_field",
+            "poloidal_magnetic_field",
+            "magnetic_field_magnitude",
+            "flux_surface_averaged_magnetic_field",
+        ]
+        # Build a map name -> (tier, axis_idx) for fast assertion.
+        records = {r["name"]: r for r in isnc_dataset["NAMES"] if r["name"] in expected}
+        if len(records) < 2:
+            pytest.skip(
+                f"need at least 2 magnetic_field family entries in catalog, "
+                f"got {len(records)}"
+            )
+
+        # Sort the expected names that DO exist by (tier, axis_idx, length, name)
+        # and confirm the order matches the expected list (filtered to
+        # only-present names).
+        present_expected = [n for n in expected if n in records]
+
+        def sort_key(name: str):
+            r = records[name]
+            return (r["sort_tier"], r["sort_axis_index"], len(name), name)
+
+        sorted_present = sorted(present_expected, key=sort_key)
+        assert sorted_present == present_expected, (
+            f"family ordering wrong:\n"
+            f"  expected (present subset): {present_expected}\n"
+            f"  got after sort:            {sorted_present}"
+        )
+
+    def test_vector_base_is_tier_zero(self, isnc_dataset: dict) -> None:
+        record = _find_record(isnc_dataset, "magnetic_field")
+        assert record["sort_tier"] == 0
+        assert record["sort_axis_index"] == 99  # no axis projection
+
+    def test_component_carries_axis_index(self, isnc_dataset: dict) -> None:
+        record = _find_record(isnc_dataset, "poloidal_magnetic_field")
+        assert record["sort_tier"] == 1
+        assert record["sort_axis_index"] == 3  # poloidal
+
+    def test_magnitude_is_tier_two(self, isnc_dataset: dict) -> None:
+        records = [
+            r for r in isnc_dataset["NAMES"] if r["name"] == "magnetic_field_magnitude"
+        ]
+        if not records:
+            pytest.skip("magnetic_field_magnitude not present in current catalog")
+        assert records[0]["sort_tier"] == 2

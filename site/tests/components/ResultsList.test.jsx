@@ -3,6 +3,16 @@ import { act, render } from '@testing-library/react';
 import { ResultsList } from '../../src/components/ResultsList.jsx';
 import { DataProvider } from '../../src/lib/data.js';
 
+const MAGNETIC_FAMILY = [
+  { name: 'magnetic_field',           algebra: 'vector', sort_tier: 0, sort_axis_index: 99, category: 'magnetic', group: 'magnetic field', short: '', sources: [], unit: 'T' },
+  { name: 'radial_magnetic_field',    algebra: 'vector', sort_tier: 1, sort_axis_index: 0,  category: 'magnetic', group: 'magnetic field', short: '', sources: [], unit: 'T', axis: 'radial' },
+  { name: 'toroidal_magnetic_field',  algebra: 'vector', sort_tier: 1, sort_axis_index: 1,  category: 'magnetic', group: 'magnetic field', short: '', sources: [], unit: 'T', axis: 'toroidal' },
+  { name: 'vertical_magnetic_field',  algebra: 'vector', sort_tier: 1, sort_axis_index: 2,  category: 'magnetic', group: 'magnetic field', short: '', sources: [], unit: 'T', axis: 'vertical' },
+  { name: 'poloidal_magnetic_field',  algebra: 'vector', sort_tier: 1, sort_axis_index: 3,  category: 'magnetic', group: 'magnetic field', short: '', sources: [], unit: 'T', axis: 'poloidal' },
+  { name: 'magnetic_field_magnitude', algebra: 'scalar', sort_tier: 2, sort_axis_index: 99, category: 'magnetic', group: 'magnetic field', short: '', sources: [], unit: 'T' },
+  { name: 'flux_surface_averaged_magnetic_field', algebra: 'scalar', sort_tier: 3, sort_axis_index: 99, category: 'magnetic', group: 'magnetic field', short: '', sources: [], unit: 'T' },
+];
+
 // Why this test exists:
 //   The first ship of the new weighted-AND search produced correct
 //   per-row scores but the UI buried them under cluster grouping —
@@ -164,5 +174,35 @@ describe('ResultsList score ordering', () => {
     // groups present.
     expect(container.querySelectorAll('.result-group-head').length).toBe(2);
     expect(container.querySelector('.results-sort-by')).toBeNull();
+  });
+});
+
+describe('ResultsList canonical ordering', () => {
+  it('renders magnetic_field family in tier order (cluster mode)', async () => {
+    // Insert in a deliberately wrong order; cmpOrderKey should reorder them.
+    const shuffled = [
+      MAGNETIC_FAMILY[6], MAGNETIC_FAMILY[3], MAGNETIC_FAMILY[1],
+      MAGNETIC_FAMILY[5], MAGNETIC_FAMILY[0], MAGNETIC_FAMILY[4], MAGNETIC_FAMILY[2],
+    ];
+    const { container } = await renderList({
+      results: shuffled,
+      groupBy: 'cluster',
+      searchMode: 'all',
+      query: '',
+      searchTokens: [],
+    });
+    // Grab every rendered result row's name. The DOM order should match
+    // the canonical tier ordering.
+    const rows = container.querySelectorAll('.result-row .result-name');
+    const order = Array.from(rows).map((el) => el.textContent);
+    expect(order).toEqual([
+      'magnetic_field',
+      'radial_magnetic_field',
+      'toroidal_magnetic_field',
+      'vertical_magnetic_field',
+      'poloidal_magnetic_field',
+      'magnetic_field_magnitude',
+      'flux_surface_averaged_magnetic_field',
+    ]);
   });
 });

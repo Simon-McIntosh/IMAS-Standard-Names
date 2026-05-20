@@ -15,6 +15,21 @@ const EMPTY = {
   NAMES: [],
 };
 
+// Canonical sort order from the upstream emitter. `sort_tier` and
+// `sort_axis_index` are populated by imas_standard_names/catalog/dataset.py
+// per Design Review §8; the SPA reads them directly so the same order
+// holds across consumers.
+export function cmpOrderKey(a, b) {
+  const ta = a.sort_tier ?? 7;
+  const tb = b.sort_tier ?? 7;
+  if (ta !== tb) return ta - tb;
+  const xa = a.sort_axis_index ?? 99;
+  const xb = b.sort_axis_index ?? 99;
+  if (xa !== xb) return xa - xb;
+  if (a.name.length !== b.name.length) return a.name.length - b.name.length;
+  return a.name.localeCompare(b.name);
+}
+
 const DataContext = createContext({
   ...EMPTY,
   loading: true,

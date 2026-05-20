@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { useData } from '../lib/data.js';
+import { useData, cmpOrderKey } from '../lib/data.js';
 import { KindBadge } from './KindBadge.jsx';
 import { UnitPill } from './UnitPill.jsx';
 
@@ -48,7 +48,7 @@ export function ResultsList({
     }
     const entries = [...map.entries()].map(([k, items]) => [
       k,
-      items.slice().sort((a, b) => a.name.localeCompare(b.name)),
+      items.slice().sort(cmpOrderKey),
     ]);
     if (groupBy === 'cluster') {
       entries.sort((A, B) => {

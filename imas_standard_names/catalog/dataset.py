@@ -102,6 +102,34 @@ _REDUCTION_PREFIX_OPS: frozenset[str] = frozenset(
 _SUBJECT_TOKENS: frozenset[str] = frozenset(member.value for member in Subject)
 
 
+# Coordinate-axis ordering for sort_axis_index emission.
+# A vector or tensor component projected onto one of these axes sorts
+# by this index within the component tier (tier 1). Names with no axis
+# get index 99 so they sort after axis-bearing siblings (rare; only
+# matters for tier 1).
+_AXIS_ORDER: dict[str, int] = {
+    "radial": 0,
+    "toroidal": 1,
+    "vertical": 2,
+    "poloidal": 3,
+    "parallel": 4,
+    "perpendicular": 5,
+}
+
+# Operator tokens that signal a domain-wide aggregation (tier 3). The
+# parser surfaces these as ``qualifier_tokens``; we recompute the
+# "reduction qualifier" flag inline since :class:`_GrammarFacets` no
+# longer caches it (was used by the retired display_kind heuristic).
+_AGGREGATION_PREFIXES: frozenset[str] = frozenset(
+    {
+        "total",
+        "minimum",
+        "maximum",
+        "effective",
+    }
+)
+
+
 def _extract_subject(qualifier_tokens: tuple[str, ...]) -> str | None:
     """Return the first qualifier token matching the Subject enum, if any.
 
@@ -440,6 +468,63 @@ def _derive_grammar_facets(name: str) -> _GrammarFacets:
     )
 
 
+def _sort_tier(
+    name: str,
+    algebra: str,
+    parent: str | None,
+    facets: _GrammarFacets,
+) -> int:
+    """Compute the canonical sort tier for a name (0–7).
+
+    Drives result-list ordering inside a cluster group, so the family
+    reads top-to-bottom as base → components → magnitude → aggregation
+    → operator-derived → locus-evaluated → metadata → variant.
+
+    See Design Review §8 (catalog redesign) for the rule table. The
+    classifier derives from grammar IR fields where available; tiers 2
+    (magnitude / norm) and 4 (gradient / shear / etc.) fall back to
+    substring tests on the name string because the parser exposes those
+    operators only as bare tokens inside ``qualifier_tokens`` /
+    ``operator_tokens`` without a dedicated semantic flag.
+    """
+    if algebra == "metadata":
+        return 6
+    if parent is None and algebra in {"vector", "tensor", "complex"}:
+        return 0
+    if facets.has_projection and algebra in {"vector", "tensor", "complex"}:
+        return 1
+    # Tier 2 — magnitude / norm.
+    if "magnitude" in facets.operator_tokens:
+        return 2
+    if "_magnitude_" in f"_{name}_" or "_norm_" in f"_{name}_":
+        return 2
+    # Tier 3 — aggregation. Either a known reduction prefix (from the
+    # ``_REDUCTION_PREFIX_OPS`` set already used by the vocab builder)
+    # appears as a qualifier, or the name carries one of the
+    # subject-style aggregation prefixes (total/minimum/maximum/…).
+    if any(q in _REDUCTION_PREFIX_OPS for q in facets.qualifier_tokens):
+        return 3
+    if any(name.startswith(p + "_") for p in _AGGREGATION_PREFIXES):
+        return 3
+    # Tier 4 — operator-style derived. Driven by substring tests on
+    # specific token suffixes that classify as differential operators.
+    for token in ("_gradient", "_shear", "_divergence", "_curl", "_density"):
+        if token in f"_{name}_":
+            return 4
+    # Tier 5 — point evaluation at a locus.
+    if facets.has_locus:
+        return 5
+    # Tier 7 — variant / unclassified scalars (base scalars, etc.).
+    return 7
+
+
+def _sort_axis_index(facets: _GrammarFacets) -> int:
+    """Return the axis index (0–5) for a projection name, 99 otherwise."""
+    if facets.axis is None:
+        return 99
+    return _AXIS_ORDER.get(facets.axis, 99)
+
+
 # ---------------------------------------------------------------------------
 # Helpers — parent / group
 # ---------------------------------------------------------------------------
@@ -668,6 +753,8 @@ def _build_record(entry: dict[str, Any]) -> dict[str, Any]:
         algebra = "vector"
 
     parent = _parent_token(name, facets, entry)
+    sort_tier = _sort_tier(name, str(algebra), parent, facets)
+    sort_axis_index = _sort_axis_index(facets)
     group = _group_title(name, facets)
     tags = _derive_tags(entry.get("tags"), facets)
 
@@ -701,6 +788,8 @@ def _build_record(entry: dict[str, Any]) -> dict[str, Any]:
         "arguments": arguments,
         "sources": sources,
         "parse": facets.parse_segments,
+        "sort_tier": sort_tier,
+        "sort_axis_index": sort_axis_index,
     }
     if facets.axis is not None:
         record["axis"] = facets.axis
