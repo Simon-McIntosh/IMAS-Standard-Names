@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { act, render } from '@testing-library/react';
+import { act, render, fireEvent } from '@testing-library/react';
 import { ResultsList } from '../../src/components/ResultsList.jsx';
 import { DataProvider } from '../../src/lib/data.js';
 
@@ -239,5 +239,138 @@ describe('ResultsList canonical ordering', () => {
       'magnetic_field_magnitude',
       'flux_surface_averaged_magnetic_field',
     ]);
+  });
+});
+
+describe('ResultsList collapsible groups', () => {
+  // Two rows in different categories to exercise multi-group behaviour.
+  const TWO_CATS = [
+    ROW({ name: 'equilibrium_name', category: 'equilibrium', group: 'g1' }),
+    ROW({ name: 'transport_name',   category: 'transport',   group: 'g2' }),
+  ];
+
+  it('Outline button collapses all groups; Expand all re-expands them', async () => {
+    const { container } = await renderList({
+      results: TWO_CATS,
+      groupBy: 'category',
+      searchMode: 'all',
+      query: '',
+      searchTokens: [],
+    });
+
+    // Initially both rows should be visible.
+    expect(container.querySelectorAll('.result-row').length).toBe(2);
+    expect(container.querySelectorAll('.result-group-head').length).toBe(2);
+
+    // Click "Outline" to collapse all.
+    const outlineBtn = container.querySelector('.collapse-all');
+    expect(outlineBtn).not.toBeNull();
+    await act(async () => { fireEvent.click(outlineBtn); });
+
+    // No result rows rendered; headings still present.
+    expect(container.querySelectorAll('.result-row').length).toBe(0);
+    expect(container.querySelectorAll('.result-group-head').length).toBe(2);
+    expect(outlineBtn.textContent).toContain('Expand all');
+
+    // Click "Expand all" to restore.
+    await act(async () => { fireEvent.click(outlineBtn); });
+    expect(container.querySelectorAll('.result-row').length).toBe(2);
+    expect(outlineBtn.textContent).toContain('Outline');
+  });
+
+  it('clicking a single group header toggles only that group', async () => {
+    const { container } = await renderList({
+      results: TWO_CATS,
+      groupBy: 'category',
+      searchMode: 'all',
+      query: '',
+      searchTokens: [],
+    });
+
+    const heads = container.querySelectorAll('.result-group-head');
+    expect(heads.length).toBe(2);
+
+    // Collapse the first group.
+    await act(async () => { fireEvent.click(heads[0]); });
+
+    // One group is collapsed; the other still has its row.
+    expect(container.querySelectorAll('.result-row').length).toBe(1);
+    // Both headings remain.
+    expect(container.querySelectorAll('.result-group-head').length).toBe(2);
+  });
+
+  it('re-clicking the active group-mode button resets collapsed state', async () => {
+    // We need a controlled wrapper that owns groupBy so we can simulate
+    // clicking the active "Domain" button while staying in category mode.
+    const { useState: useStateOuter } = await import('react');
+
+    function ControlledWrapper() {
+      const [groupBy, setGroupBy] = useStateOuter('category');
+      return (
+        <DataProvider>
+          <ResultsList
+            results={TWO_CATS}
+            selected={null}
+            onSelect={() => {}}
+            dense="comfortable"
+            groupBy={groupBy}
+            setGroupBy={setGroupBy}
+            query=""
+            searchTokens={[]}
+            searchMode="all"
+          />
+        </DataProvider>
+      );
+    }
+
+    // Import DataProvider for the wrapper.
+    const { DataProvider: DP } = await import('../../src/lib/data.js');
+    // Patch so mockFetch is set before render.
+    mockFetch(TWO_CATS, [
+      { id: 'equilibrium', label: 'Equilibrium', count: 0 },
+      { id: 'transport', label: 'Transport', count: 0 },
+    ]);
+
+    let result;
+    await act(async () => {
+      result = render(<ControlledWrapper />);
+      await new Promise((r) => setTimeout(r, 0));
+    });
+    const { container } = result;
+
+    // Collapse one group.
+    const heads = container.querySelectorAll('.result-group-head');
+    await act(async () => { fireEvent.click(heads[0]); });
+    expect(container.querySelectorAll('.result-row').length).toBe(1);
+
+    // Click the active "Domain" (category) group-mode button.
+    const groupBtns = container.querySelectorAll('.group-toggle button');
+    // "Domain" is the second button (index 1).
+    const domainBtn = [...groupBtns].find((b) => b.textContent === 'Domain');
+    await act(async () => { fireEvent.click(domainBtn); });
+
+    // Collapsed Set should be reset — both rows visible again.
+    expect(container.querySelectorAll('.result-row').length).toBe(2);
+  });
+
+  it('aria-expanded on group headers matches rendered state', async () => {
+    const { container } = await renderList({
+      results: TWO_CATS,
+      groupBy: 'category',
+      searchMode: 'all',
+      query: '',
+      searchTokens: [],
+    });
+
+    const heads = container.querySelectorAll('.result-group-head');
+    // All start expanded.
+    for (const h of heads) {
+      expect(h.getAttribute('aria-expanded')).toBe('true');
+    }
+
+    // Collapse the first.
+    await act(async () => { fireEvent.click(heads[0]); });
+    expect(heads[0].getAttribute('aria-expanded')).toBe('false');
+    expect(heads[1].getAttribute('aria-expanded')).toBe('true');
   });
 });

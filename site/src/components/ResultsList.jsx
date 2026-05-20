@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useData, cmpOrderKey } from '../lib/data.js';
 import { KindBadge } from './KindBadge.jsx';
 import { UnitPill } from './UnitPill.jsx';
@@ -66,6 +66,36 @@ export function ResultsList({
     return entries;
   }, [results, groupBy, CATEGORIES, scoreOrdered]);
 
+  // Per-heading collapsed state. Clicking a group header toggles
+  // visibility of its names. A single "Outline / Expand all" button
+  // in the meta row flips every group at once.
+  const [collapsedHeadings, setCollapsedHeadings] = useState(new Set());
+  const toggleCollapse = (heading) => {
+    setCollapsedHeadings((cur) => {
+      const next = new Set(cur);
+      next.has(heading) ? next.delete(heading) : next.add(heading);
+      return next;
+    });
+  };
+
+  const hasGroups = grouped.length > 0 && grouped[0][0] !== '';
+  const allCollapsed = hasGroups
+    && grouped.every(([h]) => collapsedHeadings.has(h));
+  const collapseAll = () => {
+    if (!hasGroups) return;
+    if (allCollapsed) setCollapsedHeadings(new Set());
+    else setCollapsedHeadings(new Set(grouped.map(([h]) => h)));
+  };
+
+  // Re-clicks of the active mode button reset the collapsed Set so
+  // the gesture always reads as "fresh view". `useEffect` keyed on
+  // groupBy would NOT fire on same-value clicks; an explicit reset
+  // in the handler is the clearer contract.
+  const handleSetGroupBy = (v) => {
+    setCollapsedHeadings(new Set());
+    setGroupBy(v);
+  };
+
   const hasQuery = searchTokens && searchTokens.length > 0;
 
   return (
@@ -84,6 +114,23 @@ export function ResultsList({
             </span>
           )}
         </span>
+        {hasGroups && (
+          <button
+            className={`collapse-all ${allCollapsed ? 'is-collapsed' : ''}`}
+            onClick={collapseAll}
+            title={allCollapsed ? 'Expand all categories'
+                                : 'Collapse to category outline'}
+            aria-pressed={allCollapsed}
+          >
+            <svg width="11" height="11" viewBox="0 0 16 16" fill="none"
+                 aria-hidden="true">
+              <path d={allCollapsed ? 'M3 6L8 11L13 6' : 'M3 10L8 5L13 10'}
+                    stroke="currentColor" strokeWidth="1.6"
+                    strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+            </svg>
+            <span>{allCollapsed ? 'Expand all' : 'Outline'}</span>
+          </button>
+        )}
         <div className="group-toggle" role="group" aria-label="Group results">
           {[
             ['none', 'A–Z'],
@@ -93,7 +140,7 @@ export function ResultsList({
             <button
               key={v}
               className={groupBy === v ? 'on' : ''}
-              onClick={() => setGroupBy(v)}
+              onClick={() => handleSetGroupBy(v)}
               title={
                 v === 'cluster'
                   ? 'Group by concept (locus or base quantity)'
@@ -107,34 +154,56 @@ export function ResultsList({
           ))}
         </div>
       </div>
-      {grouped.map(([heading, items]) => (
-        <div key={heading} className="result-group">
-          {heading && (
-            <div className="result-group-head">
-              <span className="result-group-label">{heading}</span>
-              <span className="result-group-count">{items.length}</span>
-            </div>
-          )}
-          {items.map((n) => (
-            <button
-              key={n.name}
-              className={`result-row ${selected === n.name ? 'selected' : ''}`}
-              onClick={() => onSelect(n.name)}
-            >
-              {dense === 'comfortable' && <KindBadge name={n} />}
-              <div className="result-main">
-                <div className="result-name">{n.name}</div>
-                {dense === 'comfortable' && <div className="result-desc">{n.short}</div>}
+      {grouped.map(([heading, items]) => {
+        const collapsed = collapsedHeadings.has(heading);
+        return (
+          <div key={heading}
+               className={`result-group ${collapsed ? 'is-collapsed' : ''}`}>
+            {heading && (
+              <button
+                type="button"
+                className="result-group-head"
+                onClick={() => toggleCollapse(heading)}
+                aria-expanded={!collapsed}
+                aria-controls={`group-body-${heading}`}
+                title={collapsed ? 'Expand category' : 'Collapse category'}
+              >
+                <svg className="result-group-caret"
+                     width="10" height="10" viewBox="0 0 12 12" fill="none"
+                     aria-hidden="true">
+                  <path d="M3 4.5L6 7.5L9 4.5"
+                        stroke="currentColor" strokeWidth="1.6"
+                        strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+                </svg>
+                <span className="result-group-label">{heading}</span>
+                <span className="result-group-count">{items.length}</span>
+              </button>
+            )}
+            {!collapsed && (
+              <div className="result-group-body" id={`group-body-${heading}`}>
+                {items.map((n) => (
+                  <button
+                    key={n.name}
+                    className={`result-row ${selected === n.name ? 'selected' : ''}`}
+                    onClick={() => onSelect(n.name)}
+                  >
+                    {dense === 'comfortable' && <KindBadge name={n} />}
+                    <div className="result-main">
+                      <div className="result-name">{n.name}</div>
+                      {dense === 'comfortable' && <div className="result-desc">{n.short}</div>}
+                    </div>
+                    {dense !== 'dense' && (
+                      <div className="result-meta">
+                        <UnitPill unit={n.unit} />
+                      </div>
+                    )}
+                  </button>
+                ))}
               </div>
-              {dense !== 'dense' && (
-                <div className="result-meta">
-                  <UnitPill unit={n.unit} />
-                </div>
-              )}
-            </button>
-          ))}
-        </div>
-      ))}
+            )}
+          </div>
+        );
+      })}
       {results.length === 0 && (
         <div className="empty">
           <div className="empty-glyph">∅</div>

@@ -378,16 +378,59 @@ body {
 .result-group-head {
   position: sticky; top: 34px;
   display: flex; align-items: center; gap: 8px;
+  width: 100%;
   padding: 6px 16px;
   background: var(--surface-2);
+  border: 0;
   border-top: 1px solid var(--border);
   border-bottom: 1px solid var(--border);
+  font: inherit;
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--text-3);
   font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.1s, color 0.1s;
 }
+.result-group-head:hover { background: var(--hover); color: var(--text-2); }
+.result-group-head:focus-visible {
+  outline: 2px solid color-mix(in oklch, var(--accent) 45%, transparent);
+  outline-offset: -2px;
+}
+.result-group-caret {
+  color: var(--text-3);
+  transition: transform 0.15s ease;
+  flex-shrink: 0;
+}
+.result-group-head[aria-expanded="false"] .result-group-caret {
+  transform: rotate(-90deg);
+}
+.result-group.is-collapsed .result-group-head {
+  border-bottom-color: transparent;
+}
+.result-group-body { display: contents; }
+
+.collapse-all {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: transparent;
+  border: 0;
+  padding: 3px 7px;
+  margin-left: auto;
+  margin-right: 4px;
+  font: inherit;
+  font-size: 11px;
+  color: var(--text-3);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.1s, color 0.1s;
+}
+.collapse-all:hover { background: var(--hover); color: var(--text-2); }
+.collapse-all.is-collapsed { color: var(--accent); }
+
 .result-group-count {
   margin-left: auto;
   font-family: var(--font-mono);
