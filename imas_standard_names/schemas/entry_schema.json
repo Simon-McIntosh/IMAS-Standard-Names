@@ -986,7 +986,7 @@
     },
     "StandardNameVectorEntry": {
       "additionalProperties": false,
-      "description": "Vector standard name catalog entry.",
+      "description": "Vector standard name catalog entry.\n\nIndividual named components (e.g. radial_magnetic_field) are also\nclassified as vector because they carry implicit directional structure.",
       "properties": {
         "name": {
           "description": "Standard name token: snake_case (^[a-z][a-z0-9_]*$); starts with a letter; no double '__'.",

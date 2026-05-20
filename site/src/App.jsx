@@ -7,7 +7,7 @@ import { setMermaidTheme } from './lib/mermaid.js';
 import { tokenize, searchNames } from './lib/search.js';
 import { Header } from './components/Header.jsx';
 import { Browse } from './views/Browse.jsx';
-import { LineageMap } from './views/Map.jsx';
+import { VocabularyMatrix } from './views/Matrix.jsx';
 
 // Lazy-load the dev tweaks panel — it never lands in the default bundle.
 const DevTweaks = lazy(() => import('./components/DevTweaks.jsx'));
@@ -93,7 +93,6 @@ function Shell() {
   });
   const [selected, setSelected] = useState(urlState.name);
   const [view, setView] = useState(urlState.view);
-  const [mapCategory, setMapCategory] = useState(null);
   const [tweaks, setTweak] = useTweaks();
 
   const childIndex = useChildIndex(NAMES);
@@ -248,13 +247,10 @@ function Shell() {
           searchMode={searchMode}
         />
       ) : (
-        <LineageMap
-          onSelect={(name) => {
-            setSelected(name);
-            setView('browse');
-          }}
-          activeCategory={mapCategory}
-          setActiveCategory={setMapCategory}
+        <VocabularyMatrix
+          onSelect={(name) => { setSelected(name); setView('browse'); }}
+          setFilters={setFilters}
+          setView={setView}
         />
       )}
       {tweaksEnabled() && (

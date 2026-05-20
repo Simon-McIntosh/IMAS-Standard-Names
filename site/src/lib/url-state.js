@@ -11,7 +11,7 @@ export function parseHash() {
   const [view = 'browse', name = ''] = path.split('/');
   const params = new URLSearchParams(q);
   return {
-    view: view === 'map' ? 'map' : 'browse',
+    view: view === 'matrix' ? 'matrix' : 'browse',
     name: name ? decodeURIComponent(name) : null,
     query: params.get('q') || '',
   };

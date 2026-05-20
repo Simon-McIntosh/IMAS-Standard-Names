@@ -15,7 +15,7 @@ function detectCurrentVersion() {
   return segs[segs.length - 1] || 'main';
 }
 
-// Top-bar: brand, search, view-segment (Browse | Map), density-segment
+// Top-bar: brand, search, view-segment (Browse | Matrix), density-segment
 // (list-row SVGs), settings menu with theme picker. ⌘K / Ctrl+K focuses
 // the search input from anywhere in the app.
 export function Header({
@@ -111,19 +111,22 @@ export function Header({
             Browse
           </button>
           <button
-            className={view === 'map' ? 'on' : ''}
-            onClick={() => setView('map')}
-            title="Lineage map"
+            className={view === 'matrix' ? 'on' : ''}
+            onClick={() => setView('matrix')}
+            title="Vocabulary map (base × facet matrix)"
           >
-            <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
-              <circle cx="8" cy="8" r="2" stroke="currentColor" strokeWidth="1.4" />
-              <circle cx="2.5" cy="3" r="1.4" stroke="currentColor" strokeWidth="1.4" />
-              <circle cx="13.5" cy="3" r="1.4" stroke="currentColor" strokeWidth="1.4" />
-              <circle cx="2.5" cy="13" r="1.4" stroke="currentColor" strokeWidth="1.4" />
-              <circle cx="13.5" cy="13" r="1.4" stroke="currentColor" strokeWidth="1.4" />
-              <path d="M3.5 4l3.2 3M12.5 4L9.3 7M3.5 12l3.2-3M12.5 12L9.3 9" stroke="currentColor" strokeWidth="1.2" />
+            <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <rect x="2"   y="2"   width="3" height="3" rx="0.6" fill="currentColor"/>
+              <rect x="6.5" y="2"   width="3" height="3" rx="0.6" fill="currentColor"/>
+              <rect x="11"  y="2"   width="3" height="3" rx="0.6" fill="currentColor"/>
+              <rect x="2"   y="6.5" width="3" height="3" rx="0.6" fill="currentColor"/>
+              <rect x="6.5" y="6.5" width="3" height="3" rx="0.6" fill="currentColor"/>
+              <rect x="11"  y="6.5" width="3" height="3" rx="0.6" fill="currentColor"/>
+              <rect x="2"   y="11"  width="3" height="3" rx="0.6" fill="currentColor"/>
+              <rect x="6.5" y="11"  width="3" height="3" rx="0.6" fill="currentColor"/>
+              <rect x="11"  y="11"  width="3" height="3" rx="0.6" fill="currentColor"/>
             </svg>
-            Map
+            Matrix
           </button>
         </div>
         <div className="seg density-seg">

@@ -10,9 +10,14 @@ describe('parseHash', () => {
     expect(parseHash()).toEqual({ view: 'browse', name: null, query: '' });
   });
 
-  it('reads view from the first path segment', () => {
+  it('reads matrix view from the first path segment', () => {
+    location.hash = '#/matrix';
+    expect(parseHash().view).toBe('matrix');
+  });
+
+  it('coerces legacy #/map to browse', () => {
     location.hash = '#/map';
-    expect(parseHash().view).toBe('map');
+    expect(parseHash().view).toBe('browse');
   });
 
   it('coerces unknown views to browse', () => {
@@ -51,9 +56,9 @@ describe('writeHash', () => {
     history.replaceState(null, '', '/');
   });
 
-  it('writes view-only path', () => {
-    writeHash({ view: 'map', name: null, query: '' });
-    expect(location.hash).toBe('#/map');
+  it('writes view-only path for matrix', () => {
+    writeHash({ view: 'matrix', name: null, query: '' });
+    expect(location.hash).toBe('#/matrix');
   });
 
   it('writes view + name', () => {
@@ -81,7 +86,7 @@ describe('round-trip', () => {
 
   for (const s of [
     { view: 'browse', name: null, query: '' },
-    { view: 'map', name: null, query: '' },
+    { view: 'matrix', name: null, query: '' },
     { view: 'browse', name: 'safety_factor', query: '' },
     { view: 'browse', name: 'poloidal_magnetic_field', query: 'magnetic' },
     { view: 'browse', name: 'a:b#c', query: 'q with spaces' },
