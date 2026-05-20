@@ -39,7 +39,7 @@ function mockFetch(names, categories = []) {
   });
 }
 
-async function renderList({ results, groupBy, searchMode, query, searchTokens }) {
+async function renderList({ results, groupBy, searchMode, query, searchTokens, dense = 'comfortable' }) {
   mockFetch(results, [
     { id: 'equilibrium', label: 'Equilibrium', count: 0 },
     { id: 'transport', label: 'Transport', count: 0 },
@@ -52,7 +52,7 @@ async function renderList({ results, groupBy, searchMode, query, searchTokens })
           results={results}
           selected={null}
           onSelect={() => {}}
-          dense="comfortable"
+          dense={dense}
           groupBy={groupBy}
           setGroupBy={() => {}}
           query={query}
@@ -174,6 +174,41 @@ describe('ResultsList score ordering', () => {
     // groups present.
     expect(container.querySelectorAll('.result-group-head').length).toBe(2);
     expect(container.querySelector('.results-sort-by')).toBeNull();
+  });
+});
+
+describe('ResultsList density', () => {
+  const ROWS = [ROW({ name: 'a' }), ROW({ name: 'b' })];
+
+  it('comfortable: shows KindBadge, result-desc, result-meta; no result-sources', async () => {
+    const { container } = await renderList({
+      results: ROWS, groupBy: 'none', searchMode: 'all', query: '', searchTokens: [],
+      dense: 'comfortable',
+    });
+    expect(container.querySelectorAll('.kind-badge').length).toBe(ROWS.length);
+    expect(container.querySelectorAll('.result-desc').length).toBe(ROWS.length);
+    expect(container.querySelectorAll('.result-meta').length).toBe(ROWS.length);
+    expect(container.querySelectorAll('.result-sources').length).toBe(0);
+  });
+
+  it('compact: no KindBadge, no result-desc; result-meta still present', async () => {
+    const { container } = await renderList({
+      results: ROWS, groupBy: 'none', searchMode: 'all', query: '', searchTokens: [],
+      dense: 'compact',
+    });
+    expect(container.querySelectorAll('.kind-badge').length).toBe(0);
+    expect(container.querySelectorAll('.result-desc').length).toBe(0);
+    expect(container.querySelectorAll('.result-meta').length).toBe(ROWS.length);
+  });
+
+  it('dense: no KindBadge, no result-desc, no result-meta', async () => {
+    const { container } = await renderList({
+      results: ROWS, groupBy: 'none', searchMode: 'all', query: '', searchTokens: [],
+      dense: 'dense',
+    });
+    expect(container.querySelectorAll('.kind-badge').length).toBe(0);
+    expect(container.querySelectorAll('.result-desc').length).toBe(0);
+    expect(container.querySelectorAll('.result-meta').length).toBe(0);
   });
 });
 

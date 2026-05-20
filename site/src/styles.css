@@ -398,10 +398,9 @@ body {
 
 .result-row {
   width: 100%;
-  display: grid;
-  grid-template-columns: 22px 1fr auto;
-  gap: 10px;
+  display: flex;
   align-items: center;
+  gap: 10px;
   padding: 8px 16px;
   background: transparent;
   border: 0;
@@ -417,6 +416,7 @@ body {
   background: var(--selected);
   border-left-color: var(--accent);
 }
+.result-main { flex: 1; min-width: 0; }
 .result-name {
   font-family: var(--font-mono);
   font-size: 12.5px;
@@ -434,16 +434,11 @@ body {
   margin-top: 2px;
   line-height: 1.4;
 }
-.result-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
-.result-sources {
-  font-family: var(--font-mono);
-  font-size: 10.5px;
-  color: var(--text-3);
-}
+.result-meta { display: flex; align-items: center; flex-shrink: 0; }
 
-.dense-compact .result-row { padding: 6px 16px; }
+.dense-compact .result-row { padding: 5px 16px; }
 .dense-compact .result-desc { -webkit-line-clamp: 1; font-size: 11.5px; }
-.dense-dense .result-row { padding: 4px 16px; }
+.dense-dense .result-row { padding: 3px 16px; gap: 8px; }
 .dense-dense .result-name { font-size: 12px; }
 
 .kind-badge {

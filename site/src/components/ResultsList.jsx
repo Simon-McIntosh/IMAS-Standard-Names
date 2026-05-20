@@ -121,15 +121,16 @@ export function ResultsList({
               className={`result-row ${selected === n.name ? 'selected' : ''}`}
               onClick={() => onSelect(n.name)}
             >
-              <KindBadge name={n} />
+              {dense === 'comfortable' && <KindBadge name={n} />}
               <div className="result-main">
                 <div className="result-name">{n.name}</div>
-                {dense !== 'dense' && <div className="result-desc">{n.short}</div>}
+                {dense === 'comfortable' && <div className="result-desc">{n.short}</div>}
               </div>
-              <div className="result-meta">
-                <UnitPill unit={n.unit} />
-                <span className="result-sources">{n.sources.length}</span>
-              </div>
+              {dense !== 'dense' && (
+                <div className="result-meta">
+                  <UnitPill unit={n.unit} />
+                </div>
+              )}
             </button>
           ))}
         </div>
