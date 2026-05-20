@@ -64,9 +64,6 @@ export function DetailPanel({ name, onSelect, onClose, childIndex, groupIndex })
       <div className="detail-hero" ref={heroRef}>
         <KindBadge name={n} />
         <h1 className="detail-name">{n.name}</h1>
-        {n.status && n.status !== 'drafted' && n.status !== 'draft' && (
-          <span className={`status-pill status-${n.status}`}>{n.status}</span>
-        )}
       </div>
 
       <div className="detail-attrs">

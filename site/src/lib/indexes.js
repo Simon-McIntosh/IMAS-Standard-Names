@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { cmpOrderKey } from './data.js';
 
 // Cluster key combines category + group so locus clusters from different
 // categories (e.g. two "magnetic axis" groups) stay distinct.
@@ -30,12 +31,14 @@ export function clusterDescriptor(members, allNames) {
 }
 
 // Build the parent → children index. Memoised because all NAMES are scanned.
+// Children are sorted by `cmpOrderKey` so consumers never need to re-sort.
 export function useChildIndex(names) {
   return useMemo(() => {
     const idx = {};
     for (const n of names) {
       if (n.parent) (idx[n.parent] ||= []).push(n);
     }
+    for (const k in idx) idx[k].sort(cmpOrderKey);
     return idx;
   }, [names]);
 }
@@ -48,7 +51,7 @@ export function useGroupIndex(names) {
       const k = clusterKey(n);
       (idx[k] ||= []).push(n);
     }
-    for (const k in idx) idx[k].sort((a, b) => a.name.localeCompare(b.name));
+    for (const k in idx) idx[k].sort(cmpOrderKey);
     return idx;
   }, [names]);
 }

@@ -1,5 +1,12 @@
 import { describe, it, expect } from 'vitest';
-import { clusterKey, clusterDescriptor, groupSources } from '../../src/lib/indexes.js';
+import { renderHook } from '@testing-library/react';
+import {
+  clusterKey,
+  clusterDescriptor,
+  groupSources,
+  useGroupIndex,
+  useChildIndex,
+} from '../../src/lib/indexes.js';
 
 const NAMES = [
   {
@@ -83,6 +90,39 @@ describe('clusterDescriptor', () => {
     );
     expect(desc.kind).toBe('concept');
     expect(desc.real).toBe(false);
+  });
+});
+
+describe('useGroupIndex', () => {
+  it('sorts cluster members by cmpOrderKey (tier order, not alpha)', () => {
+    // magnetic_field family: vector base (tier 0) before components
+    // (tier 1, ordered by axis index) before magnitude (tier 2).
+    const family = [
+      { name: 'poloidal_magnetic_field',  algebra: 'vector', sort_tier: 1, sort_axis_index: 3, category: 'magnetic', group: 'mf' },
+      { name: 'magnetic_field',           algebra: 'vector', sort_tier: 0, sort_axis_index: 99, category: 'magnetic', group: 'mf' },
+      { name: 'magnetic_field_magnitude', algebra: 'scalar', sort_tier: 2, sort_axis_index: 99, category: 'magnetic', group: 'mf' },
+      { name: 'radial_magnetic_field',    algebra: 'vector', sort_tier: 1, sort_axis_index: 0, category: 'magnetic', group: 'mf' },
+    ];
+    const { result } = renderHook(() => useGroupIndex(family));
+    const ordered = result.current['magnetic::mf'].map((n) => n.name);
+    expect(ordered).toEqual([
+      'magnetic_field',
+      'radial_magnetic_field',
+      'poloidal_magnetic_field',
+      'magnetic_field_magnitude',
+    ]);
+  });
+});
+
+describe('useChildIndex', () => {
+  it('sorts children by cmpOrderKey', () => {
+    const all = [
+      { name: 'B', parent: 'P', sort_tier: 1, sort_axis_index: 2 },
+      { name: 'A', parent: 'P', sort_tier: 1, sort_axis_index: 0 },
+      { name: 'C', parent: 'P', sort_tier: 1, sort_axis_index: 1 },
+    ];
+    const { result } = renderHook(() => useChildIndex(all));
+    expect(result.current['P'].map((n) => n.name)).toEqual(['A', 'C', 'B']);
   });
 });
 

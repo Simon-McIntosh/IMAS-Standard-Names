@@ -1,4 +1,4 @@
-import { useData, cmpOrderKey } from '../lib/data.js';
+import { useData } from '../lib/data.js';
 import { clusterKey, clusterDescriptor } from '../lib/indexes.js';
 import { NameCard } from './NameCard.jsx';
 
@@ -13,16 +13,12 @@ export function NeighborhoodGraph({ n, onSelect, childIndex, groupIndex }) {
     : null;
 
   const myCluster = groupIndex[clusterKey(n)] || [];
-  const clusterMembers = myCluster
-    .filter((x) => x.name !== n.name)
-    .slice()
-    .sort(cmpOrderKey);
+  const clusterMembers = myCluster.filter((x) => x.name !== n.name);
   const descriptor = clusterDescriptor(myCluster, NAMES);
 
-  const children = (childIndex[n.name] || [])
-    .filter((c) => !clusterMembers.some((s) => s.name === c.name))
-    .slice()
-    .sort(cmpOrderKey);
+  const children = (childIndex[n.name] || []).filter(
+    (c) => !clusterMembers.some((s) => s.name === c.name),
+  );
 
   const seeAlso = (n.seeAlso || [])
     .map((s) => NAMES.find((x) => x.name === s))

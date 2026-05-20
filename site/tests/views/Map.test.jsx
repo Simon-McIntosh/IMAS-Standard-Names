@@ -89,4 +89,19 @@ describe('Map view', () => {
     // viewBox is fixed (not aspect-ratio-driven), so first paint cannot collapse
     expect(svg.getAttribute('viewBox')).toBe('0 0 320 220');
   });
+
+  it('cluster-node <title> never contains the string "undefined"', async () => {
+    // Records emitted by dataset.py carry `algebra` (schema kind), not the
+    // legacy `kind` field. The tooltip was reading `p.m.kind` so vector /
+    // scalar records rendered "… · undefined". Switched to schemaKindOf().
+    const { container } = await renderMap([
+      N({ name: 'magnetic_field', kind: undefined, algebra: 'vector', unit: 'T' }),
+    ]);
+    const titles = [...container.querySelectorAll('.cluster-node title')]
+      .map((t) => t.textContent || '');
+    expect(titles.length).toBeGreaterThan(0);
+    for (const t of titles) {
+      expect(t).not.toContain('undefined');
+    }
+  });
 });

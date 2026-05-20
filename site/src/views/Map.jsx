@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { useData } from '../lib/data.js';
 import { clusterKey, clusterDescriptor } from '../lib/indexes.js';
+import { schemaKindOf } from '../components/KindBadge.jsx';
 
 // Lineage map: every distinct cluster (category+group) rendered as a
 // hand-drawn SVG "spoke" diagram. No Mermaid here — performance at 300+
@@ -155,7 +156,7 @@ function ClusterCard({ cluster, onSelect }) {
           >
             <circle r="11" fill={catColor(p.m.category)} />
             <title>
-              {p.m.name} · {p.m.unit || '1'} · {p.m.kind}
+              {p.m.name} · {p.m.unit || '1'} · {schemaKindOf(p.m)}
             </title>
           </g>
         ))}
