@@ -21,12 +21,14 @@ from imas_standard_names.catalog.dataset import (
     _arguments_parent,
     _derive_grammar_facets,
     _extract_sign,
+    _GrammarFacets,
     _humanise_domain,
     _local_ir_peel,
     _normalise_see_also,
     _normalise_sources,
     _normalise_status,
     _parent_token,
+    _sort_tier,
 )
 
 # ---------------------------------------------------------------------------
@@ -931,3 +933,104 @@ class TestSortKeys:
         if not records:
             pytest.skip("magnetic_field_magnitude not present in current catalog")
         assert records[0]["sort_tier"] == 2
+
+
+# ---------------------------------------------------------------------------
+# _sort_tier operator-token classification (unit tests, no catalog needed)
+# ---------------------------------------------------------------------------
+
+
+def _make_facets(
+    *,
+    parsed: bool = True,
+    operator_tokens: tuple[str, ...] = (),
+    qualifier_tokens: tuple[str, ...] = (),
+    has_projection: bool = False,
+    has_locus: bool = False,
+    has_mechanism: bool = False,
+    base_token: str | None = "temperature",
+    axis: str | None = None,
+    locus_token: str | None = None,
+) -> _GrammarFacets:
+    """Build a synthetic _GrammarFacets for deterministic _sort_tier tests."""
+    return _GrammarFacets(
+        parsed=parsed,
+        parse_segments=[],
+        base_token=base_token,
+        axis=axis,
+        locus_token=locus_token,
+        has_projection=has_projection,
+        has_locus=has_locus,
+        qualifier_tokens=qualifier_tokens,
+        operator_tokens=operator_tokens,
+        has_mechanism=has_mechanism,
+    )
+
+
+class TestSortTierOperatorTokens:
+    """``_sort_tier`` uses ``facets.operator_tokens`` as the primary signal
+    for tiers 2 and 4, with name-substring tests as the fallback only.
+    """
+
+    def test_magnitude_operator_token_gives_tier_2(self) -> None:
+        facets = _make_facets(operator_tokens=("magnitude",))
+        assert _sort_tier("some_field_magnitude", "scalar", "some_field", facets) == 2
+
+    def test_norm_operator_token_gives_tier_2(self) -> None:
+        facets = _make_facets(operator_tokens=("norm",))
+        assert _sort_tier("some_field_norm", "scalar", "some_field", facets) == 2
+
+    def test_gradient_operator_token_gives_tier_4(self) -> None:
+        facets = _make_facets(operator_tokens=("gradient",))
+        assert _sort_tier("temperature_gradient", "scalar", "temperature", facets) == 4
+
+    def test_shear_operator_token_gives_tier_4(self) -> None:
+        facets = _make_facets(operator_tokens=("shear",))
+        assert _sort_tier("velocity_shear", "scalar", "velocity", facets) == 4
+
+    def test_divergence_operator_token_gives_tier_4(self) -> None:
+        facets = _make_facets(operator_tokens=("divergence",))
+        assert _sort_tier("heat_flux_divergence", "scalar", "heat_flux", facets) == 4
+
+    def test_curl_operator_token_gives_tier_4(self) -> None:
+        facets = _make_facets(operator_tokens=("curl",))
+        assert (
+            _sort_tier("magnetic_field_curl", "scalar", "magnetic_field", facets) == 4
+        )
+
+    def test_density_operator_token_gives_tier_4(self) -> None:
+        # A synthetic entry whose operator_tokens contains "density" sorts tier 4.
+        facets = _make_facets(operator_tokens=("density",))
+        assert _sort_tier("neutron_density", "scalar", "neutron", facets) == 4
+
+    def test_locus_only_gives_tier_5(self) -> None:
+        # Base + locus (no operator token, no tier-4 substring in name)
+        # → tier 5 (point evaluation), not tier 4.
+        # Note: ``neutron_density_at_x_point`` contains ``_density``
+        # which triggers the regex fallback → tier 4.  The parser's
+        # operator_tokens is the correct disambiguation signal; use a
+        # name that parses as a pure locus to exercise tier 5.
+        facets = _make_facets(has_locus=True, locus_token="magnetic_axis")
+        assert (
+            _sort_tier(
+                "safety_factor_at_magnetic_axis", "scalar", "safety_factor", facets
+            )
+            == 5
+        )
+
+    def test_fallback_regex_tier2_for_unparseable(self) -> None:
+        # Unparseable: no operator_tokens → regex fallback still classifies tier 2.
+        facets = _make_facets(parsed=False, operator_tokens=())
+        assert _sort_tier("something_magnitude_x", "scalar", "something", facets) == 2
+
+    def test_fallback_regex_tier4_for_unparseable(self) -> None:
+        # Unparseable: no operator_tokens → regex fallback still classifies tier 4.
+        facets = _make_facets(parsed=False, operator_tokens=())
+        assert (
+            _sort_tier("temperature_gradient_profile", "scalar", "temperature", facets)
+            == 4
+        )
+
+    def test_unclassified_scalar_gives_tier_7(self) -> None:
+        facets = _make_facets(operator_tokens=())
+        assert _sort_tier("electron_temperature", "scalar", "temperature", facets) == 7

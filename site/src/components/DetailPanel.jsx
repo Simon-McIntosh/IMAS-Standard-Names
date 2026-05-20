@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useData } from '../lib/data.js';
 import { groupSources } from '../lib/indexes.js';
-import { KindBadge, KIND_GLYPHS, schemaKindOf } from './KindBadge.jsx';
+import { KindBadge } from './KindBadge.jsx';
 import { UnitPill } from './UnitPill.jsx';
 import { RichText } from './RichText.jsx';
 import { ParseBreakdown } from './ParseBreakdown.jsx';
@@ -103,12 +103,6 @@ export function DetailPanel({ name, onSelect, onClose, childIndex, groupIndex })
           <div className="attr-k">Unit</div>
           <div className="attr-v"><UnitPill unit={n.unit} /></div>
         </div>
-        <div className="attr">
-          <div className="attr-k">Kind</div>
-          <div className="attr-v">
-            {KIND_GLYPHS[schemaKindOf(n)]?.title ?? '—'}
-          </div>
-        </div>
         {n.subject && (
           <div className="attr">
             <div className="attr-k">Subject</div>
@@ -127,6 +121,22 @@ export function DetailPanel({ name, onSelect, onClose, childIndex, groupIndex })
             <div className="attr-v mono">{n.axis}</div>
           </div>
         )}
+        {n.algebra === 'vector' && n.magnitude && (
+          <div className="attr">
+            <div className="attr-k">Norm</div>
+            <div className="attr-v"><NameLink name={n.magnitude} onSelect={onSelect} /></div>
+          </div>
+        )}
+        {(() => {
+          const op = (n.parse || []).find((seg) => seg.role === 'operator');
+          if (!op) return null;
+          return (
+            <div className="attr">
+              <div className="attr-k">Operator</div>
+              <div className="attr-v mono">{op.text ?? ''}</div>
+            </div>
+          );
+        })()}
         <div className="attr">
           <div className="attr-k">Sources</div>
           <div className="attr-v">

@@ -482,10 +482,10 @@ def _sort_tier(
 
     See Design Review §8 (catalog redesign) for the rule table. The
     classifier derives from grammar IR fields where available; tiers 2
-    (magnitude / norm) and 4 (gradient / shear / etc.) fall back to
-    substring tests on the name string because the parser exposes those
-    operators only as bare tokens inside ``qualifier_tokens`` /
-    ``operator_tokens`` without a dedicated semantic flag.
+    (magnitude / norm) and 4 (gradient / shear / etc.) use the
+    parser's ``operator_tokens`` as the primary signal, with substring
+    tests on the name string as a defensive fallback for unparseable
+    names.
     """
     if algebra == "metadata":
         return 6
@@ -493,9 +493,11 @@ def _sort_tier(
         return 0
     if facets.has_projection and algebra in {"vector", "tensor", "complex"}:
         return 1
-    # Tier 2 — magnitude / norm.
-    if "magnitude" in facets.operator_tokens:
+    # Tier 2 — magnitude / norm. Driven by the parser's classified
+    # postfix operator tokens, not by name-string regex.
+    if any(op in {"magnitude", "norm"} for op in facets.operator_tokens):
         return 2
+    # Regex fallback for unparseable names.
     if "_magnitude_" in f"_{name}_" or "_norm_" in f"_{name}_":
         return 2
     # Tier 3 — aggregation. Either a known reduction prefix (from the
@@ -506,8 +508,13 @@ def _sort_tier(
         return 3
     if any(name.startswith(p + "_") for p in _AGGREGATION_PREFIXES):
         return 3
-    # Tier 4 — operator-style derived. Driven by substring tests on
-    # specific token suffixes that classify as differential operators.
+    # Tier 4 — operator-style derived. Primary: parser-classified
+    # operator tokens. Fallback: substring tests for unparseable names.
+    if any(
+        op in {"gradient", "shear", "divergence", "curl", "density"}
+        for op in facets.operator_tokens
+    ):
+        return 4
     for token in ("_gradient", "_shear", "_divergence", "_curl", "_density"):
         if token in f"_{name}_":
             return 4
