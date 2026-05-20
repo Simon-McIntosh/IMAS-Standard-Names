@@ -62,6 +62,9 @@ describe('DetailPanel sticky strip', () => {
             onClose={() => {}}
             childIndex={{}}
             groupIndex={{}}
+            filters={{}}
+            setFilters={() => {}}
+            setView={() => {}}
           />
         </DataProvider>
       );
@@ -89,6 +92,9 @@ describe('DetailPanel sticky strip', () => {
             onClose={() => {}}
             childIndex={{}}
             groupIndex={{}}
+            filters={{}}
+            setFilters={() => {}}
+            setView={() => {}}
           />
         </DataProvider>
       );
@@ -96,170 +102,6 @@ describe('DetailPanel sticky strip', () => {
       const detail = container.querySelector('.detail');
       expect(detail).not.toBeNull();
       expect(detail.classList.contains('detail-scrolled')).toBe(false);
-    } finally {
-      global.fetch = origFetch;
-    }
-  });
-});
-
-describe('DetailPanel detail-attrs rows', () => {
-  it('Kind row is absent from .detail-attrs', async () => {
-    const origFetch = global.fetch;
-    global.fetch = mockFetch(makeDataset(MOCK_ENTRY));
-    try {
-      const { container, findByText } = render(
-        <DataProvider>
-          <DetailPanel
-            name="electron_temperature"
-            onSelect={() => {}}
-            onClose={() => {}}
-            childIndex={{}}
-            groupIndex={{}}
-          />
-        </DataProvider>
-      );
-      await findByText('Test description');
-      const attrs = container.querySelector('.detail-attrs');
-      expect(attrs).not.toBeNull();
-      const attrKeys = Array.from(attrs.querySelectorAll('.attr-k')).map(
-        (el) => el.textContent,
-      );
-      expect(attrKeys).not.toContain('Kind');
-    } finally {
-      global.fetch = origFetch;
-    }
-  });
-
-  it('vector entry with magnitude renders a Norm row', async () => {
-    const origFetch = global.fetch;
-    const vectorEntry = {
-      ...MOCK_ENTRY,
-      name: 'magnetic_field',
-      algebra: 'vector',
-      magnitude: 'magnetic_field_magnitude',
-      parse: [],
-    };
-    global.fetch = mockFetch(makeDataset(vectorEntry));
-    try {
-      const { container, findByText } = render(
-        <DataProvider>
-          <DetailPanel
-            name="magnetic_field"
-            onSelect={() => {}}
-            onClose={() => {}}
-            childIndex={{}}
-            groupIndex={{}}
-          />
-        </DataProvider>
-      );
-      await findByText('Test description');
-      const attrs = container.querySelector('.detail-attrs');
-      const attrKeys = Array.from(attrs.querySelectorAll('.attr-k')).map(
-        (el) => el.textContent,
-      );
-      expect(attrKeys).toContain('Norm');
-      // NameLink renders with data-name attribute
-      const normRow = Array.from(attrs.querySelectorAll('.attr')).find((el) =>
-        el.querySelector('.attr-k')?.textContent === 'Norm',
-      );
-      expect(normRow).not.toBeNull();
-      const link = normRow.querySelector('[data-name="magnetic_field_magnitude"]');
-      expect(link).not.toBeNull();
-    } finally {
-      global.fetch = origFetch;
-    }
-  });
-
-  it('scalar entry does NOT render a Norm row even if magnitude set', async () => {
-    const origFetch = global.fetch;
-    const scalarEntry = {
-      ...MOCK_ENTRY,
-      algebra: 'scalar',
-      magnitude: 'some_magnitude',
-    };
-    global.fetch = mockFetch(makeDataset(scalarEntry));
-    try {
-      const { container, findByText } = render(
-        <DataProvider>
-          <DetailPanel
-            name="electron_temperature"
-            onSelect={() => {}}
-            onClose={() => {}}
-            childIndex={{}}
-            groupIndex={{}}
-          />
-        </DataProvider>
-      );
-      await findByText('Test description');
-      const attrs = container.querySelector('.detail-attrs');
-      const attrKeys = Array.from(attrs.querySelectorAll('.attr-k')).map(
-        (el) => el.textContent,
-      );
-      expect(attrKeys).not.toContain('Norm');
-    } finally {
-      global.fetch = origFetch;
-    }
-  });
-
-  it('entry with operator parse segment renders an Operator row', async () => {
-    const origFetch = global.fetch;
-    const entryWithOp = {
-      ...MOCK_ENTRY,
-      parse: [
-        { role: 'operator', text: 'gradient', note: 'Postfix operator' },
-        { role: 'base', text: 'temperature', note: 'physical_quantity' },
-      ],
-    };
-    global.fetch = mockFetch(makeDataset(entryWithOp));
-    try {
-      const { container, findByText } = render(
-        <DataProvider>
-          <DetailPanel
-            name="electron_temperature"
-            onSelect={() => {}}
-            onClose={() => {}}
-            childIndex={{}}
-            groupIndex={{}}
-          />
-        </DataProvider>
-      );
-      await findByText('Test description');
-      const attrs = container.querySelector('.detail-attrs');
-      const attrKeys = Array.from(attrs.querySelectorAll('.attr-k')).map(
-        (el) => el.textContent,
-      );
-      expect(attrKeys).toContain('Operator');
-      const opRow = Array.from(attrs.querySelectorAll('.attr')).find((el) =>
-        el.querySelector('.attr-k')?.textContent === 'Operator',
-      );
-      expect(opRow).not.toBeNull();
-      expect(opRow.querySelector('.attr-v')?.textContent).toBe('gradient');
-    } finally {
-      global.fetch = origFetch;
-    }
-  });
-
-  it('entry with no operator parse segment does NOT render an Operator row', async () => {
-    const origFetch = global.fetch;
-    global.fetch = mockFetch(makeDataset(MOCK_ENTRY));
-    try {
-      const { container, findByText } = render(
-        <DataProvider>
-          <DetailPanel
-            name="electron_temperature"
-            onSelect={() => {}}
-            onClose={() => {}}
-            childIndex={{}}
-            groupIndex={{}}
-          />
-        </DataProvider>
-      );
-      await findByText('Test description');
-      const attrs = container.querySelector('.detail-attrs');
-      const attrKeys = Array.from(attrs.querySelectorAll('.attr-k')).map(
-        (el) => el.textContent,
-      );
-      expect(attrKeys).not.toContain('Operator');
     } finally {
       global.fetch = origFetch;
     }
@@ -279,6 +121,9 @@ describe('DetailPanel lifecycle banner', () => {
             onClose={() => {}}
             childIndex={{}}
             groupIndex={{}}
+            filters={{}}
+            setFilters={() => {}}
+            setView={() => {}}
           />
         </DataProvider>
       );
@@ -301,6 +146,9 @@ describe('DetailPanel lifecycle banner', () => {
             onClose={() => {}}
             childIndex={{}}
             groupIndex={{}}
+            filters={{}}
+            setFilters={() => {}}
+            setView={() => {}}
           />
         </DataProvider>
       );
@@ -328,6 +176,9 @@ describe('DetailPanel lifecycle banner', () => {
             onClose={() => {}}
             childIndex={{}}
             groupIndex={{}}
+            filters={{}}
+            setFilters={() => {}}
+            setView={() => {}}
           />
         </DataProvider>
       );
@@ -359,6 +210,9 @@ describe('DetailPanel lifecycle banner', () => {
             onClose={() => {}}
             childIndex={{}}
             groupIndex={{}}
+            filters={{}}
+            setFilters={() => {}}
+            setView={() => {}}
           />
         </DataProvider>
       );
@@ -369,6 +223,65 @@ describe('DetailPanel lifecycle banner', () => {
       // (underscores → spaces) so query by data-name attribute.
       const link = banner.querySelector('[data-name="new_temperature"]');
       expect(link).not.toBeNull();
+    } finally {
+      global.fetch = origFetch;
+    }
+  });
+});
+
+describe('DetailPanel hero', () => {
+  it('renders the hero with KindBadge + name + UnitPill', async () => {
+    const origFetch = global.fetch;
+    global.fetch = mockFetch(makeDataset(MOCK_ENTRY));
+    try {
+      const { container, findByText } = render(
+        <DataProvider>
+          <DetailPanel
+            name="electron_temperature"
+            onSelect={() => {}}
+            onClose={() => {}}
+            childIndex={{}}
+            groupIndex={{}}
+            filters={{}}
+            setFilters={() => {}}
+            setView={() => {}}
+          />
+        </DataProvider>
+      );
+      await findByText('Test description');
+      const hero = container.querySelector('.detail-hero');
+      expect(hero).not.toBeNull();
+      // KindBadge present
+      expect(hero.querySelector('.kind-badge')).not.toBeNull();
+      // Name
+      expect(hero.querySelector('.detail-name')?.textContent).toBe('electron_temperature');
+      // UnitPill present in the hero
+      expect(hero.querySelector('.unit-pill')).not.toBeNull();
+    } finally {
+      global.fetch = origFetch;
+    }
+  });
+
+  it('detail-attrs grid is gone', async () => {
+    const origFetch = global.fetch;
+    global.fetch = mockFetch(makeDataset(MOCK_ENTRY));
+    try {
+      const { container, findByText } = render(
+        <DataProvider>
+          <DetailPanel
+            name="electron_temperature"
+            onSelect={() => {}}
+            onClose={() => {}}
+            childIndex={{}}
+            groupIndex={{}}
+            filters={{}}
+            setFilters={() => {}}
+            setView={() => {}}
+          />
+        </DataProvider>
+      );
+      await findByText('Test description');
+      expect(container.querySelector('.detail-attrs')).toBeNull();
     } finally {
       global.fetch = origFetch;
     }

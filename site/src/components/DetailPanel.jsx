@@ -10,7 +10,10 @@ import { NameLink } from './NameLink.jsx';
 import { SourceGroup } from './SourceGroup.jsx';
 
 // Right pane: the definition of a single name.
-export function DetailPanel({ name, onSelect, onClose, childIndex, groupIndex }) {
+export function DetailPanel({
+  name, onSelect, onClose, childIndex, groupIndex,
+  filters, setFilters, setView,
+}) {
   const { NAMES, CATEGORIES } = useData();
   const n = NAMES.find((x) => x.name === name);
 
@@ -64,6 +67,7 @@ export function DetailPanel({ name, onSelect, onClose, childIndex, groupIndex })
       <div className="detail-hero" ref={heroRef}>
         <KindBadge name={n} />
         <h1 className="detail-name">{n.name}</h1>
+        <UnitPill unit={n.unit} />
       </div>
 
       {n.status && n.status !== 'active' && (() => {
@@ -97,53 +101,6 @@ export function DetailPanel({ name, onSelect, onClose, childIndex, groupIndex })
           </div>
         );
       })()}
-
-      <div className="detail-attrs">
-        <div className="attr">
-          <div className="attr-k">Unit</div>
-          <div className="attr-v"><UnitPill unit={n.unit} /></div>
-        </div>
-        {n.subject && (
-          <div className="attr">
-            <div className="attr-k">Subject</div>
-            <div className="attr-v mono">{n.subject}</div>
-          </div>
-        )}
-        {n.locus && (
-          <div className="attr">
-            <div className="attr-k">At locus</div>
-            <div className="attr-v mono">{n.locus}</div>
-          </div>
-        )}
-        {n.axis && (
-          <div className="attr">
-            <div className="attr-k">Axis</div>
-            <div className="attr-v mono">{n.axis}</div>
-          </div>
-        )}
-        {n.algebra === 'vector' && n.magnitude && (
-          <div className="attr">
-            <div className="attr-k">Norm</div>
-            <div className="attr-v"><NameLink name={n.magnitude} onSelect={onSelect} /></div>
-          </div>
-        )}
-        {(() => {
-          const op = (n.parse || []).find((seg) => seg.role === 'operator');
-          if (!op) return null;
-          return (
-            <div className="attr">
-              <div className="attr-k">Operator</div>
-              <div className="attr-v mono">{op.text ?? ''}</div>
-            </div>
-          );
-        })()}
-        <div className="attr">
-          <div className="attr-k">Sources</div>
-          <div className="attr-v">
-            {n.sources.length} data dictionary {sourceWord}
-          </div>
-        </div>
-      </div>
 
       {n.algebra === 'vector' && (n.components?.length > 0 || n.magnitude) && (
         <section className="detail-section detail-algebra">
@@ -201,7 +158,12 @@ export function DetailPanel({ name, onSelect, onClose, childIndex, groupIndex })
           Grammar
           <span className="detail-h-sub">canonical decomposition into tokens</span>
         </h3>
-        <ParseBreakdown name={n.name} parse={n.parse} onSelect={onSelect} />
+        <ParseBreakdown
+          name={n.name}
+          parse={n.parse}
+          filters={filters}
+          setFilters={setFilters}
+        />
       </section>
 
       <section className="detail-section">

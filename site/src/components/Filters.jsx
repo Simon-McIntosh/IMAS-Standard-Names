@@ -43,10 +43,17 @@ const LIFECYCLE_ROWS = [
 ];
 
 export const EMPTY_FILTERS = {
-  category: new Set(),
-  kind: new Set(),
+  category:  new Set(),
+  unit:      new Set(),
+  kind:      new Set(),
   lifecycle: new Set(),
-  unit: new Set(),
+  base:      new Set(),
+  operator:  new Set(),
+  reduction: new Set(),
+  modifier:  new Set(),
+  axis:      new Set(),
+  locus:     new Set(),
+  subject:   new Set(),
 };
 
 export const DEFAULT_FILTERS = EMPTY_FILTERS;

@@ -28,6 +28,3 @@ export const ROLE_META = {
   unknown:     { label: 'Unknown',     hue: 0,   desc: 'Not recognised by the parser vocabulary' },
 };
 
-// Roles whose token can be clicked through to open another catalog entry
-// (provided that target name exists in NAMES).
-export const CLICKABLE_ROLES = new Set(['base', 'locus', 'subject']);

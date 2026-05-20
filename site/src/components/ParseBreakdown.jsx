@@ -1,6 +1,5 @@
 import { useMemo } from 'react';
-import { useData } from '../lib/data.js';
-import { ROLE_META, CLICKABLE_ROLES } from '../lib/grammar.js';
+import { ROLE_META } from '../lib/grammar.js';
 
 // Grammar token chips + highlighted source string + production footer.
 //
@@ -8,10 +7,16 @@ import { ROLE_META, CLICKABLE_ROLES } from '../lib/grammar.js';
 // there is NO `parseSN` heuristic here. Spans in the original name are
 // reconstructed by walking each token with a cursor.
 //
+// Each filterable token acts as a filter toggle via setFilters.
 // (Named ParseBreakdown rather than GrammarTree because it's a flat
 // token list with a source overlay, not a tree.)
-export function ParseBreakdown({ name, parse, onSelect }) {
-  const { NAMES } = useData();
+
+const FILTERABLE_ROLES = new Set([
+  'base', 'operator', 'reduction', 'modifier',
+  'axis', 'locus', 'subject',
+]);
+
+export function ParseBreakdown({ name, parse, filters, setFilters }) {
   const spans = useMemo(() => {
     if (!parse || parse.length === 0) return [];
     const out = [];
@@ -72,6 +77,16 @@ export function ParseBreakdown({ name, parse, onSelect }) {
     return segs;
   })();
 
+  const isActiveFilter = (role, text) => filters?.[role]?.has(text) === true;
+  const toggleFilter = (role, text) => {
+    if (!setFilters) return;
+    setFilters(f => {
+      const cur = new Set(f[role] || []);
+      cur.has(text) ? cur.delete(text) : cur.add(text);
+      return { ...f, [role]: cur };
+    });
+  };
+
   return (
     <div className="grammar">
       <div className="grammar-source">{sourceSegments}</div>
@@ -79,17 +94,24 @@ export function ParseBreakdown({ name, parse, onSelect }) {
       <div className="grammar-tree">
         {parse.map((t, i) => {
           const meta = ROLE_META[t.role] || ROLE_META.unknown;
-          const isClickable =
-            CLICKABLE_ROLES.has(t.role) && NAMES.some((n) => n.name === t.text);
+          const filterable = FILTERABLE_ROLES.has(t.role);
+          const active = isActiveFilter(t.role, t.text);
           return (
             <div
               key={i}
-              className={`gtoken gtoken-${t.role} ${isClickable ? 'clickable' : ''}`}
+              className={`gtoken gtoken-${t.role} ${filterable ? 'clickable' : ''} ${active ? 'is-filter-active' : ''}`}
               style={{ '--role-hue': meta.hue }}
-              onClick={() => isClickable && onSelect(t.text)}
-              title={isClickable ? `Open ${t.text}` : meta.desc}
+              onClick={() => filterable && toggleFilter(t.role, t.text)}
+              title={
+                filterable
+                  ? (active ? `Remove ${t.role} filter` : `Filter to names with ${t.role} = ${t.text}`)
+                  : meta.desc
+              }
             >
-              <div className="gtoken-role">{meta.label}</div>
+              <div className="gtoken-role">
+                {meta.label}
+                {filterable && <span className="gtoken-filter-glyph" aria-hidden>{active ? '×' : '+'}</span>}
+              </div>
               <div className="gtoken-text mono">{t.text}</div>
               <div className="gtoken-note">{t.note || meta.desc}</div>
             </div>

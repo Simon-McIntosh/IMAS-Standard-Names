@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { useData, cmpOrderKey } from '../lib/data.js';
 import { KindBadge } from './KindBadge.jsx';
 import { UnitPill } from './UnitPill.jsx';
+import { ActiveFilterStrip } from './ActiveFilterStrip.jsx';
 
 // Middle pane: filtered, optionally-grouped list of result rows.
 //
@@ -33,6 +34,8 @@ export function ResultsList({
   query,
   searchTokens,
   searchMode,
+  filters,
+  setFilters,
 }) {
   const { CATEGORIES } = useData();
   const scoreOrdered = searchMode === 'scored';
@@ -100,6 +103,7 @@ export function ResultsList({
 
   return (
     <div className={`results-list dense-${dense}`}>
+      <ActiveFilterStrip filters={filters} setFilters={setFilters} />
       {searchMode === 'fuzzy' && (
         <div className="results-fuzzy" title="No exact matches — showing subsequence matches against name">
           Fuzzy matches:

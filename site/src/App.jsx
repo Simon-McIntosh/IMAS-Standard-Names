@@ -69,15 +69,27 @@ function ErrorScreen({ error }) {
   );
 }
 
+const PARSE_FILTER_KEYS = [
+  'base', 'operator', 'reduction', 'modifier',
+  'axis', 'locus', 'subject',
+];
+
 function Shell() {
   const { NAMES, loading, error } = useData();
   const [urlState, setUrlState] = useUrlState();
   const [query, setQuery] = useState(urlState.query);
   const [filters, setFilters] = useState({
-    category: new Set(),
-    kind: new Set(),
+    category:  new Set(),
+    unit:      new Set(),
+    kind:      new Set(),
     lifecycle: new Set(),
-    unit: new Set(),
+    base:      new Set(),
+    operator:  new Set(),
+    reduction: new Set(),
+    modifier:  new Set(),
+    axis:      new Set(),
+    locus:     new Set(),
+    subject:   new Set(),
   });
   const [selected, setSelected] = useState(urlState.name);
   const [view, setView] = useState(urlState.view);
@@ -124,6 +136,17 @@ function Shell() {
       if (filters.kind.size && !filters.kind.has(n.algebra || 'scalar')) return false;
       if (filters.lifecycle.size && !filters.lifecycle.has(n.status || 'active')) return false;
       if (filters.unit.size && !filters.unit.has(n.unit)) return false;
+      const anyParseFilter = PARSE_FILTER_KEYS.some((k) => filters[k].size > 0);
+      if (anyParseFilter) {
+        const parse = n.parse || [];
+        for (const k of PARSE_FILTER_KEYS) {
+          if (filters[k].size === 0) continue;
+          const matchesAll = [...filters[k]].every((text) =>
+            parse.some((tok) => tok.role === k && tok.text === text),
+          );
+          if (!matchesAll) return false;
+        }
+      }
       return true;
     });
     const search = searchNames(filtered, searchTokens);
@@ -208,6 +231,8 @@ function Shell() {
         <Browse
           filters={filters}
           setFilters={setFilters}
+          view={view}
+          setView={setView}
           faceted={faceted}
           allCounts={allCounts}
           results={results}

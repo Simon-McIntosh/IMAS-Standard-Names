@@ -5,7 +5,7 @@ import { DetailPanel } from '../components/DetailPanel.jsx';
 // Three-pane browse layout. Thin wrapper around the three top-level
 // components so App.jsx stays focused on state.
 export function Browse({
-  filters, setFilters, faceted, allCounts,
+  filters, setFilters, view, setView, faceted, allCounts,
   results, selected, setSelected,
   dense, groupBy, setGroupBy,
   childIndex, groupIndex,
@@ -29,6 +29,8 @@ export function Browse({
         query={query}
         searchTokens={searchTokens}
         searchMode={searchMode}
+        filters={filters}
+        setFilters={setFilters}
       />
       <DetailPanel
         name={selected}
@@ -36,6 +38,9 @@ export function Browse({
         onClose={() => setSelected(null)}
         childIndex={childIndex}
         groupIndex={groupIndex}
+        filters={filters}
+        setFilters={setFilters}
+        setView={setView}
       />
     </div>
   );
