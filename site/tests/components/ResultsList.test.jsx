@@ -191,14 +191,16 @@ describe('ResultsList density', () => {
     expect(container.querySelectorAll('.result-sources').length).toBe(0);
   });
 
-  it('compact: no KindBadge, no result-desc; result-meta still present', async () => {
+  it('compact: shows KindBadge and result-desc (one-line clamp via CSS); result-meta present', async () => {
     const { container } = await renderList({
       results: ROWS, groupBy: 'none', searchMode: 'all', query: '', searchTokens: [],
       dense: 'compact',
     });
-    expect(container.querySelectorAll('.kind-badge').length).toBe(0);
-    expect(container.querySelectorAll('.result-desc').length).toBe(0);
+    expect(container.querySelectorAll('.kind-badge').length).toBe(ROWS.length);
+    expect(container.querySelectorAll('.result-desc').length).toBe(ROWS.length);
     expect(container.querySelectorAll('.result-meta').length).toBe(ROWS.length);
+    // .dense-compact wrapper class is what the CSS line-clamp rule targets.
+    expect(container.querySelector('.dense-compact')).not.toBeNull();
   });
 
   it('dense: no KindBadge, no result-desc, no result-meta', async () => {

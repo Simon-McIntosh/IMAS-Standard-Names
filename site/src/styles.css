@@ -661,7 +661,7 @@ body {
 .detail > .detail-hero,
 .detail > .detail-attrs,
 .detail > .detail-section { padding-left: 32px; padding-right: 32px; }
-.detail > .detail-top { padding-top: 24px; }
+.detail > .detail-top { padding-top: 16px; }
 .detail > .detail-section:last-of-type { padding-bottom: 80px; }
 .detail-empty {
   padding: 24px 32px 80px;
@@ -682,20 +682,24 @@ body {
   top: 0;
   z-index: 5;
   display: flex; align-items: center; gap: 10px;
-  padding: 10px 16px;
+  padding: 0 16px;
+  max-height: 0;
+  overflow: hidden;
   background: color-mix(in oklch, var(--bg) 92%, transparent);
   -webkit-backdrop-filter: saturate(140%) blur(8px);
           backdrop-filter: saturate(140%) blur(8px);
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid transparent;
   opacity: 0;
   pointer-events: none;
-  transform: translateY(-4px);
-  transition: opacity 0.18s ease, transform 0.18s ease;
+  transition: max-height 0.18s ease, opacity 0.18s ease,
+              padding 0.18s ease, border-color 0.18s ease;
 }
 .detail-scrolled .detail-sticky {
+  max-height: 56px;
+  padding: 10px 16px;
   opacity: 1;
   pointer-events: auto;
-  transform: translateY(0);
+  border-bottom-color: var(--border);
 }
 .detail-sticky-name {
   font-size: 13px;

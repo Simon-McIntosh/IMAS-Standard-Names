@@ -194,7 +194,9 @@ export function ResultsList({
                       onClick={() => onSelect(n.name)}
                       title={lc !== 'active' ? `${n.name} — ${lc}` : undefined}
                     >
-                      {dense === 'comfortable' && <KindBadge name={n} />}
+                      {/* Kind badge — visible at Comfortable and Compact;
+                          dropped only at Dense where every pixel goes to the name. */}
+                      {dense !== 'dense' && <KindBadge name={n} />}
                       <div className="result-main">
                         <div className="result-name-row">
                           <span className="result-name">{n.name}</span>
@@ -215,7 +217,9 @@ export function ResultsList({
                             </span>
                           )}
                         </div>
-                        {dense === 'comfortable' && (
+                        {/* Description shown at Comfortable + Compact;
+                            CSS clamps Compact to one line. */}
+                        {dense !== 'dense' && (
                           <div className="result-desc">{n.short}</div>
                         )}
                       </div>
