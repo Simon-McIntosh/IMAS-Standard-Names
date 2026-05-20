@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import { useData } from '../lib/data.js';
 import { groupSources } from '../lib/indexes.js';
 import { KindBadge, KIND_GLYPHS, schemaKindOf } from './KindBadge.jsx';
@@ -12,6 +13,22 @@ import { SourceGroup } from './SourceGroup.jsx';
 export function DetailPanel({ name, onSelect, onClose, childIndex, groupIndex }) {
   const { NAMES, CATEGORIES } = useData();
   const n = NAMES.find((x) => x.name === name);
+
+  const scrollRef = useRef(null);
+  const heroRef = useRef(null);
+  useEffect(() => {
+    const root = scrollRef.current;
+    const hero = heroRef.current;
+    if (!root || !hero) return;
+    const obs = new IntersectionObserver(
+      ([entry]) => {
+        root.classList.toggle('detail-scrolled', !entry.isIntersecting);
+      },
+      { root, threshold: 0, rootMargin: '-8px 0px 0px 0px' },
+    );
+    obs.observe(hero);
+    return () => obs.disconnect();
+  }, [name]);
 
   if (!n) {
     return (
@@ -28,7 +45,13 @@ export function DetailPanel({ name, onSelect, onClose, childIndex, groupIndex })
   const sourceWord = n.sources.length === 1 ? 'path' : 'paths';
 
   return (
-    <div className="detail">
+    <div className="detail" ref={scrollRef}>
+      <div className="detail-sticky" aria-hidden="false">
+        <KindBadge name={n} />
+        <span className="detail-sticky-name mono">{n.name}</span>
+        <UnitPill unit={n.unit} />
+        <button className="icon-btn detail-sticky-close" onClick={onClose} title="Close">✕</button>
+      </div>
       <div className="detail-top">
         <div className="detail-breadcrumb">
           <span>{cat?.label}</span>
@@ -38,7 +61,7 @@ export function DetailPanel({ name, onSelect, onClose, childIndex, groupIndex })
         <button className="icon-btn" onClick={onClose} title="Close">✕</button>
       </div>
 
-      <div className="detail-hero">
+      <div className="detail-hero" ref={heroRef}>
         <KindBadge name={n} />
         <h1 className="detail-name">{n.name}</h1>
         {n.status && n.status !== 'drafted' && n.status !== 'draft' && (

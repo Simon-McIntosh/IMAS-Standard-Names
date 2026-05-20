@@ -616,9 +616,17 @@ body {
 .detail, .detail-empty {
   overflow-y: auto;
   background: var(--bg);
-  padding: 24px 32px 80px;
+  position: relative;
 }
+.detail { padding: 0; }
+.detail > .detail-top,
+.detail > .detail-hero,
+.detail > .detail-attrs,
+.detail > .detail-section { padding-left: 32px; padding-right: 32px; }
+.detail > .detail-top { padding-top: 24px; }
+.detail > .detail-section:last-of-type { padding-bottom: 80px; }
 .detail-empty {
+  padding: 24px 32px 80px;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   color: var(--text-3);
   text-align: center;
@@ -626,6 +634,42 @@ body {
 .detail-empty-glyph { font-size: 48px; opacity: 0.4; margin-bottom: 8px; }
 .detail-empty-text { font-size: 14px; }
 .detail-empty-hint { font-size: 12px; margin-top: 8px; color: var(--text-3); }
+
+/* Sticky condensed header — fades in when the hero scrolls out of view.
+   Position:sticky pins it to the top of the scroll container; the
+   IntersectionObserver on DetailPanel toggles `.detail-scrolled` on the
+   scroll container to drive the fade. */
+.detail-sticky {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 16px;
+  background: color-mix(in oklch, var(--bg) 92%, transparent);
+  -webkit-backdrop-filter: saturate(140%) blur(8px);
+          backdrop-filter: saturate(140%) blur(8px);
+  border-bottom: 1px solid var(--border);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-4px);
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+.detail-scrolled .detail-sticky {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+.detail-sticky-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+  min-width: 0;
+}
+.detail-sticky-close { margin-left: auto; }
 
 .detail-top {
   display: flex; justify-content: space-between; align-items: center;
@@ -781,9 +825,10 @@ body {
   box-shadow: 0 0 0 2px color-mix(in oklch, var(--accent) 35%, transparent);
 }
 .name-link.missing {
-  background: color-mix(in oklch, var(--text) 5%, transparent);
-  color: var(--text-3);
+  background: transparent;
+  color: var(--text-2);
   cursor: help;
+  padding: 0;
 }
 
 /* See-also row — flowing comma-separated NameLinks with a middle-dot

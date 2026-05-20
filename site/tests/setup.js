@@ -1,5 +1,16 @@
 import '@testing-library/jest-dom/vitest';
 
+if (typeof IntersectionObserver === 'undefined') {
+  global.IntersectionObserver = class {
+    constructor(callback) {
+      this.callback = callback;
+    }
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  };
+}
+
 global.fetch = (url) => {
   if (typeof url === 'string' && url.includes('data.json')) {
     return Promise.resolve({

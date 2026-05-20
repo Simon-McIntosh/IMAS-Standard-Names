@@ -9,12 +9,7 @@ export function NeighborhoodGraph({ n, onSelect, childIndex, groupIndex }) {
   const { NAMES } = useData();
 
   const parent = n.parent
-    ? NAMES.find((x) => x.name === n.parent) || {
-        name: n.parent,
-        missing: true,
-        kind: 'base',
-        unit: '',
-      }
+    ? NAMES.find((x) => x.name === n.parent) ?? null
     : null;
 
   const myCluster = groupIndex[clusterKey(n)] || [];
@@ -26,10 +21,8 @@ export function NeighborhoodGraph({ n, onSelect, childIndex, groupIndex }) {
   );
 
   const seeAlso = (n.seeAlso || [])
-    .map(
-      (s) =>
-        NAMES.find((x) => x.name === s) || { name: s, missing: true, kind: null, unit: null },
-    )
+    .map((s) => NAMES.find((x) => x.name === s))
+    .filter((s) => s != null)
     .filter(
       (s) =>
         s.name !== parent?.name &&
@@ -37,12 +30,11 @@ export function NeighborhoodGraph({ n, onSelect, childIndex, groupIndex }) {
         !children.some((x) => x.name === s.name),
     );
 
-  const parentEdge =
-    n.kind === 'component'
-      ? `axis = ${n.axis || '?'}`
-      : n.locus
-      ? `evaluated at ${n.locus}`
-      : 'is-a';
+  const parentEdge = n.axis
+    ? `axis = ${n.axis}`
+    : n.locus
+    ? `evaluated at ${n.locus}`
+    : 'is-a';
 
   let clusterTitle;
   let clusterSubtitle;
@@ -113,7 +105,7 @@ export function NeighborhoodGraph({ n, onSelect, childIndex, groupIndex }) {
                 onSelect={onSelect}
                 relation="sibling"
                 edgeLabel={
-                  s.kind === 'component'
+                  s.axis
                     ? `axis = ${s.axis}`
                     : s.locus && s.locus !== descriptor.root
                     ? `at ${s.locus}`
@@ -141,7 +133,7 @@ export function NeighborhoodGraph({ n, onSelect, childIndex, groupIndex }) {
                 onSelect={onSelect}
                 relation="child"
                 edgeLabel={
-                  c.kind === 'component'
+                  c.axis
                     ? `axis = ${c.axis}`
                     : c.locus
                     ? `at ${c.locus}`
