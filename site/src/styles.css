@@ -1273,7 +1273,7 @@ body {
   flex: 1 1 auto;
   min-height: 0;
   overflow: auto;
-  padding: 18px 32px 60px;
+  padding: 0 32px 60px;
   position: relative;
 }
 .matrix-table {
@@ -1303,12 +1303,10 @@ body {
   background-color: var(--surface) !important;
 }
 .matrix-col-btn {
-  position: absolute;
-  bottom: 8px;
-  left: 0;
-  right: 0;
-  max-height: 132px;
-  overflow: hidden;
+  display: block;
+  height: 140px;
+  box-sizing: border-box;
+  padding: 8px 2px 0;
   writing-mode: vertical-rl;
   transform: rotate(180deg);
   font-family: var(--font-mono);
@@ -1317,7 +1315,6 @@ body {
   background: transparent;
   border: 0;
   cursor: pointer;
-  padding: 0 4px;
   -webkit-font-smoothing: subpixel-antialiased;
   -moz-osx-font-smoothing: auto;
   text-rendering: geometricPrecision;
