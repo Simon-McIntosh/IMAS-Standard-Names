@@ -1327,7 +1327,7 @@ body {
   display: block;
   height: 140px;
   box-sizing: border-box;
-  padding: 8px 2px 0;
+  padding: 2px 2px 0;
   writing-mode: vertical-rl;
   transform: rotate(180deg);
   font-family: var(--font-mono);
@@ -1348,8 +1348,8 @@ body {
   font-size: 12px;
   color: var(--text-2);
   cursor: pointer;
-  padding: 4px 10px 4px 4px;
-  text-align: left;
+  padding: 4px 4px 4px 10px;
+  text-align: right;
 }
 .matrix-row-btn:hover { color: var(--accent); }
 .matrix-td { padding: 2px; }

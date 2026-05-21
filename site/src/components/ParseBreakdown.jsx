@@ -113,7 +113,7 @@ export function ParseBreakdown({ name, parse, filters, setFilters }) {
                 {filterable && <span className="gtoken-filter-glyph" aria-hidden>{active ? '×' : '+'}</span>}
               </div>
               <div className="gtoken-text mono">{t.text}</div>
-              <div className="gtoken-note">{t.note || meta.desc}</div>
+              <div className="gtoken-note">{meta.desc}</div>
             </div>
           );
         })}
