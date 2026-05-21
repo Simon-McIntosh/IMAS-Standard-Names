@@ -6,19 +6,31 @@ const COL_CAP = 14;
 
 const MATRIX_COLS = [
   {
-    id: 'axis', label: 'Axis', filterKey: 'axis',
+    id: 'axis', label: 'Axis', roleHue: 200,
     get: (n) => n.parse?.find((t) => t.role === 'axis')?.text || null,
   },
   {
-    id: 'locus', label: 'Locus', filterKey: 'locus',
+    id: 'locus', label: 'Locus', roleHue: 145,
     get: (n) => n.parse?.find((t) => t.role === 'locus')?.text || null,
   },
   {
-    id: 'operator', label: 'Operator', filterKey: 'operator',
+    id: 'operator', label: 'Operator', roleHue: 320,
     get: (n) => n.parse?.find((t) => t.role === 'operator')?.text || null,
   },
   {
-    id: 'domain', label: 'Domain', filterKey: 'category',
+    id: 'reduction', label: 'Reduction', roleHue: 65,
+    get: (n) => n.parse?.find((t) => t.role === 'reduction')?.text || null,
+  },
+  {
+    id: 'subject', label: 'Subject', roleHue: 15,
+    get: (n) => n.parse?.find((t) => t.role === 'subject')?.text || n.subject || null,
+  },
+  {
+    id: 'mechanism', label: 'Mechanism', roleHue: 290,
+    get: (n) => n.parse?.find((t) => t.role === 'process' || t.role === 'mechanism')?.text || null,
+  },
+  {
+    id: 'category', label: 'Domain', roleHue: null,
     get: (n) => n.category || null,
   },
 ];
@@ -39,11 +51,11 @@ function topN(freqMap, cap) {
 
 export function VocabularyMatrix({ onSelect, setFilters, setView }) {
   const { NAMES } = useData();
-  const [activeColId, setActiveColId] = useState(MATRIX_COLS[0].id);
+  const [colId, setColId] = useState(MATRIX_COLS[0].id);
   const [popover, setPopover] = useState(null);
   const popoverRef = useRef(null);
 
-  const colDef = MATRIX_COLS.find((c) => c.id === activeColId) ?? MATRIX_COLS[0];
+  const colDef = MATRIX_COLS.find((c) => c.id === colId) ?? MATRIX_COLS[0];
 
   const { rows, cols, cells } = useMemo(() => {
     const rowFreq = new Map();
@@ -68,11 +80,6 @@ export function VocabularyMatrix({ onSelect, setFilters, setView }) {
     };
   }, [NAMES, colDef]);
 
-  const totalWithCol = useMemo(
-    () => NAMES.filter((n) => colDef.get(n)).length,
-    [NAMES, colDef],
-  );
-
   useEffect(() => {
     if (!popover) return;
     const onKey = (e) => { if (e.key === 'Escape') setPopover(null); };
@@ -93,7 +100,7 @@ export function VocabularyMatrix({ onSelect, setFilters, setView }) {
   };
 
   const handleColClick = (col) => {
-    setFilters((prev) => ({ ...prev, [colDef.filterKey]: new Set([col]) }));
+    setFilters((prev) => ({ ...prev, [colDef.id]: new Set([col]) }));
     setView('browse');
   };
 
@@ -107,20 +114,13 @@ export function VocabularyMatrix({ onSelect, setFilters, setView }) {
   return (
     <div className="matrix-view" data-active-view="matrix">
       <div className="matrix-head">
-        <div className="matrix-title">
-          <h2>Vocabulary map</h2>
-          <p>
-            Base quantities (rows) × {colDef.label.toLowerCase()} values (columns).
-            Click a filled cell to browse names at that intersection; click a row or column
-            header to filter the catalog by that value.
-          </p>
-        </div>
-        <div className="seg">
+        <div className="seg matrix-col-seg" role="group" aria-label="Grammar segment">
           {MATRIX_COLS.map((c) => (
             <button
               key={c.id}
-              className={activeColId === c.id ? 'on' : ''}
-              onClick={() => setActiveColId(c.id)}
+              className={colId === c.id ? 'on' : ''}
+              style={c.roleHue != null ? { '--role-hue': c.roleHue } : undefined}
+              onClick={() => { setColId(c.id); setPopover(null); }}
             >
               {c.label}
             </button>
@@ -134,11 +134,10 @@ export function VocabularyMatrix({ onSelect, setFilters, setView }) {
             <tr>
               <th className="matrix-corner" />
               {cols.map((col) => (
-                <th key={col} className="matrix-col">
+                <th key={col} className="matrix-col" title={col}>
                   <button
                     className="matrix-col-btn"
                     onClick={() => handleColClick(col)}
-                    title={`Filter by ${colDef.label}: ${col}`}
                   >
                     {col}
                   </button>
@@ -153,7 +152,6 @@ export function VocabularyMatrix({ onSelect, setFilters, setView }) {
                   <button
                     className="matrix-row-btn mono"
                     onClick={() => handleRowClick(row)}
-                    title={`Filter by base: ${row}`}
                   >
                     {row}
                   </button>
@@ -215,11 +213,6 @@ export function VocabularyMatrix({ onSelect, setFilters, setView }) {
         )}
       </div>
 
-      <div className="matrix-stats">
-        <span className="mono">
-          {totalWithCol} named entries · {rows.length}×{cols.length} shown
-        </span>
-      </div>
     </div>
   );
 }

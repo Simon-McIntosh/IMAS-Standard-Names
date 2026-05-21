@@ -156,18 +156,47 @@ describe('VocabularyMatrix', () => {
     expect(setView).toHaveBeenCalledWith('browse');
   });
 
-  it('stats element shows count × dimensions and does not contain a percentage or "coverage"', async () => {
+  it('header contains no h2, no stats element, and no "COLUMNS" text', async () => {
+    const { container } = await renderMatrix([N('electron_pressure')]);
+    expect(container.querySelector('h2')).toBeNull();
+    expect(container.querySelector('.matrix-stats')).toBeNull();
+    expect(container.textContent).not.toContain('COLUMNS');
+  });
+
+  it('renders all seven MATRIX_COLS as segmented-control buttons', async () => {
+    const { getByText } = await renderMatrix([N('electron_pressure')]);
+    for (const label of ['Axis', 'Locus', 'Operator', 'Reduction', 'Subject', 'Mechanism', 'Domain']) {
+      expect(getByText(label)).toBeTruthy();
+    }
+  });
+
+  it('grammar-segment active button carries --role-hue inline style', async () => {
+    const { getByText, container } = await renderMatrix([N('electron_pressure')]);
+    for (const label of ['Axis', 'Locus', 'Operator', 'Reduction', 'Subject', 'Mechanism']) {
+      await act(async () => { fireEvent.click(getByText(label)); });
+      const active = container.querySelector('.seg button.on');
+      expect(active).not.toBeNull();
+      expect(active.style.getPropertyValue('--role-hue')).not.toBe('');
+    }
+  });
+
+  it('Domain active button does NOT carry --role-hue inline style', async () => {
+    const { getByText, container } = await renderMatrix([N('electron_pressure')]);
+    await act(async () => { fireEvent.click(getByText('Domain')); });
+    const active = container.querySelector('.seg button.on');
+    expect(active).not.toBeNull();
+    expect(active.style.getPropertyValue('--role-hue')).toBe('');
+    expect(active.hasAttribute('style')).toBeFalsy();
+  });
+
+  it('column and row header buttons have no title starting with "Filter Browse to"', async () => {
     const names = [
       N('electron_pressure', { base: 'pressure', parse: [{ role: 'base', text: 'pressure' }, { role: 'axis', text: 'r' }] }),
-      N('ion_pressure',      { base: 'pressure', parse: [{ role: 'base', text: 'pressure' }, { role: 'axis', text: 'r' }] }),
     ];
     const { container } = await renderMatrix(names);
-
-    const stats = container.querySelector('.matrix-stats');
-    expect(stats).not.toBeNull();
-    expect(stats.textContent).toMatch(/\d+ named entries/);
-    expect(stats.textContent).toMatch(/\d+×\d+ shown/);
-    expect(stats.textContent).not.toContain('%');
-    expect(stats.textContent).not.toContain('coverage');
+    for (const btn of container.querySelectorAll('.matrix-col-btn, .matrix-row-btn')) {
+      const t = btn.getAttribute('title') ?? '';
+      expect(t.startsWith('Filter Browse to')).toBe(false);
+    }
   });
 });
