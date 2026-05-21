@@ -54,6 +54,7 @@ export const EMPTY_FILTERS = {
   axis:      new Set(),
   locus:     new Set(),
   subject:   new Set(),
+  process:   new Set(),
 };
 
 export const DEFAULT_FILTERS = EMPTY_FILTERS;

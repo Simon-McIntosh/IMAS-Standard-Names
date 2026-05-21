@@ -1287,7 +1287,7 @@ body {
 .matrix-col {
   position: sticky; top: 0; z-index: 4;
   height: 140px; width: 30px; min-width: 30px; max-width: 30px;
-  vertical-align: bottom; padding: 0 0 8px;
+  vertical-align: bottom; padding: 0;
 }
 .matrix-row {
   position: sticky; left: 0; z-index: 1;
@@ -1303,7 +1303,12 @@ body {
   background-color: var(--surface) !important;
 }
 .matrix-col-btn {
-  display: inline-block;
+  position: absolute;
+  bottom: 8px;
+  left: 0;
+  right: 0;
+  max-height: 132px;
+  overflow: hidden;
   writing-mode: vertical-rl;
   transform: rotate(180deg);
   font-family: var(--font-mono);
@@ -1312,7 +1317,7 @@ body {
   background: transparent;
   border: 0;
   cursor: pointer;
-  padding: 6px 4px;
+  padding: 0 4px;
   -webkit-font-smoothing: subpixel-antialiased;
   -moz-osx-font-smoothing: auto;
   text-rendering: geometricPrecision;

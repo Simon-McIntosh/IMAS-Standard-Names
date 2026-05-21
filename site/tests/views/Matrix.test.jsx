@@ -226,6 +226,55 @@ describe('VocabularyMatrix', () => {
     expect(th.getAttribute('title')).toBe('of_plasma_boundary');
   });
 
+  it('clicking Mechanism column header sets process filter key (not mechanism)', async () => {
+    const setFilters = vi.fn();
+    const setView = vi.fn();
+    const names = [
+      N('electron_pressure_due_to_radiation', {
+        base: 'pressure',
+        parse: [{ role: 'base', text: 'pressure' }, { role: 'process', text: 'radiation' }],
+      }),
+    ];
+    const { container, getByText } = await renderMatrix(names, [], { setFilters, setView });
+
+    await act(async () => { fireEvent.click(getByText('Mechanism')); });
+
+    const colBtn = container.querySelector('.matrix-col-btn');
+    expect(colBtn).not.toBeNull();
+    await act(async () => { fireEvent.click(colBtn); });
+
+    expect(setFilters).toHaveBeenCalled();
+    const updater = setFilters.mock.calls[0][0];
+    const next = updater({ base: new Set(), process: new Set() });
+    expect([...next.process]).toContain('radiation');
+    expect(setView).toHaveBeenCalledWith('browse');
+  });
+
+  it('Subject column uses n.subject property when no parse token has role="subject"', async () => {
+    const setFilters = vi.fn();
+    const setView = vi.fn();
+    const names = [
+      N('electron_temperature', {
+        base: 'temperature',
+        parse: [{ role: 'base', text: 'temperature' }],
+        subject: 'electron',
+      }),
+    ];
+    const { container, getByText } = await renderMatrix(names, [], { setFilters, setView });
+
+    await act(async () => { fireEvent.click(getByText('Subject')); });
+
+    const colBtn = container.querySelector('.matrix-col-btn');
+    expect(colBtn).not.toBeNull();
+    await act(async () => { fireEvent.click(colBtn); });
+
+    expect(setFilters).toHaveBeenCalled();
+    const updater = setFilters.mock.calls[0][0];
+    const next = updater({ base: new Set(), subject: new Set() });
+    expect([...next.subject]).toContain('electron');
+    expect(setView).toHaveBeenCalledWith('browse');
+  });
+
   it('clicking row header invokes setFilters with canonical (un-prettified) value', async () => {
     const setFilters = vi.fn();
     const setView = vi.fn();

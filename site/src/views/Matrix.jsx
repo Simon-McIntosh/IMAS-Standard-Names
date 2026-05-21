@@ -26,7 +26,7 @@ const MATRIX_COLS = [
     get: (n) => n.parse?.find((t) => t.role === 'subject')?.text || n.subject || null,
   },
   {
-    id: 'mechanism', label: 'Mechanism', roleHue: 290,
+    id: 'process', label: 'Mechanism', roleHue: 290,
     get: (n) => n.parse?.find((t) => t.role === 'process' || t.role === 'mechanism')?.text || null,
   },
   {

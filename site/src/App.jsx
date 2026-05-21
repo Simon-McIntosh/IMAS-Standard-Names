@@ -71,7 +71,7 @@ function ErrorScreen({ error }) {
 
 const PARSE_FILTER_KEYS = [
   'base', 'operator', 'reduction', 'modifier',
-  'axis', 'locus', 'subject',
+  'axis', 'locus', 'subject', 'process',
 ];
 
 function Shell() {
@@ -90,6 +90,7 @@ function Shell() {
     axis:      new Set(),
     locus:     new Set(),
     subject:   new Set(),
+    process:   new Set(),
   });
   const [selected, setSelected] = useState(urlState.name);
   const [view, setView] = useState(urlState.view);
@@ -141,7 +142,7 @@ function Shell() {
         for (const k of PARSE_FILTER_KEYS) {
           if (filters[k].size === 0) continue;
           const matchesAll = [...filters[k]].every((text) =>
-            parse.some((tok) => tok.role === k && tok.text === text),
+            parse.some((tok) => tok.role === k && tok.text === text) || n[k] === text,
           );
           if (!matchesAll) return false;
         }

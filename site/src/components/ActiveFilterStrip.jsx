@@ -12,6 +12,7 @@ const FILTER_LABEL = {
   axis:      'Axis',
   locus:     'Locus',
   subject:   'Subject',
+  process:   'Mechanism',
 };
 
 export function ActiveFilterStrip({ filters, setFilters }) {
