@@ -12,7 +12,7 @@ import { SourceGroup } from './SourceGroup.jsx';
 // Right pane: the definition of a single name.
 export function DetailPanel({
   name, onSelect, onClose, childIndex, groupIndex,
-  filters, setFilters, setView,
+  filters, setFilters, setView, dense,
 }) {
   const { NAMES, CATEGORIES } = useData();
   const n = NAMES.find((x) => x.name === name);
@@ -176,22 +176,9 @@ export function DetailPanel({
           onSelect={onSelect}
           childIndex={childIndex}
           groupIndex={groupIndex}
+          dense={dense}
         />
       </section>
-
-      {n.seeAlso?.length > 0 && (
-        <section className="detail-section">
-          <h3 className="detail-h">See also</h3>
-          <div className="see-also">
-            {n.seeAlso.map((s, i) => (
-              <span key={s} className="see-also-item">
-                {i > 0 && <span className="see-also-sep">·</span>}
-                <NameLink name={s} onSelect={onSelect} />
-              </span>
-            ))}
-          </div>
-        </section>
-      )}
 
       <section className="detail-section">
         <h3 className="detail-h">

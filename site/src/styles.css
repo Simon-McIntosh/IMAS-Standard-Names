@@ -73,9 +73,15 @@ body {
 }
 .brand { display: flex; align-items: center; gap: 10px; min-width: 248px; }
 .brand-mark {
-  width: 28px; height: 28px; border-radius: 6px;
-  background: var(--accent); color: white;
+  width: 32px; height: 32px;
   display: grid; place-items: center;
+  background: transparent;
+  flex-shrink: 0;
+}
+.brand-mark img {
+  width: 32px; height: 32px;
+  display: block;
+  object-fit: contain;
 }
 .brand-text { display: flex; flex-direction: column; }
 .brand-title { font-weight: 600; font-size: 13px; letter-spacing: -0.01em; }
@@ -483,6 +489,7 @@ body {
 .dense-compact .result-desc { -webkit-line-clamp: 1; font-size: 11.5px; }
 .dense-dense .result-row { padding: 3px 16px; gap: 8px; }
 .dense-dense .result-name { font-size: 12px; }
+.dense-dense .result-row { border-bottom: 0; }
 
 .kind-badge {
   width: 22px; height: 22px;
@@ -873,19 +880,6 @@ body {
   padding: 0;
 }
 
-/* See-also row — flowing comma-separated NameLinks with a middle-dot
- * separator. NOT a chip list. */
-.see-also {
-  display: block;
-  font-size: 13px;
-  line-height: 1.7;
-}
-.see-also-item { white-space: normal; }
-.see-also-sep {
-  color: var(--text-3);
-  margin: 0 6px;
-  user-select: none;
-}
 
 /* Mermaid */
 .mermaid-host {
@@ -1171,10 +1165,10 @@ body {
   flex-wrap: wrap;
   gap: 8px;
 }
-.nb-cards-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 8px;
+.nb-cards-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .nb-card {
@@ -1233,6 +1227,33 @@ body {
   padding-top: 4px;
   border-top: 1px dashed var(--border);
 }
+
+/* Density variants for neighborhood cards */
+.nb-card.dense-compact {
+  padding: 8px 12px;
+  gap: 4px;
+}
+.nb-card.dense-compact .nb-card-desc {
+  -webkit-line-clamp: 1;
+  font-size: 11.5px;
+}
+
+.nb-card.dense-dense {
+  padding: 3px 0;
+  border: 0;
+  background: transparent;
+  border-radius: 0;
+  flex-direction: row;
+  align-items: center;
+}
+.nb-card.dense-dense:hover {
+  background: transparent;
+  border: 0;
+  border-left: 0;
+  color: var(--accent);
+}
+.nb-card.dense-dense .nb-card-top { flex: 1; gap: 8px; }
+.nb-card.dense-dense .nb-card-name { font-size: 12px; }
 
 /* Self card — hero treatment */
 .nb-card-self {

@@ -287,3 +287,36 @@ describe('DetailPanel hero', () => {
     }
   });
 });
+
+describe('DetailPanel see-also section removed', () => {
+  it('renders no section with heading "See also"', async () => {
+    const origFetch = global.fetch;
+    global.fetch = mockFetch(makeDataset({
+      ...MOCK_ENTRY,
+      seeAlso: ['some_other_name'],
+    }));
+    try {
+      const { container, findByText } = render(
+        <DataProvider>
+          <DetailPanel
+            name="electron_temperature"
+            onSelect={() => {}}
+            onClose={() => {}}
+            childIndex={{}}
+            groupIndex={{}}
+            filters={{}}
+            setFilters={() => {}}
+            setView={() => {}}
+          />
+        </DataProvider>
+      );
+      await findByText('Test description');
+      // No section heading "See also" should exist — it was removed.
+      const headings = Array.from(container.querySelectorAll('.detail-h'));
+      const seeAlsoHeading = headings.find((h) => h.textContent.trim() === 'See also');
+      expect(seeAlsoHeading).toBeUndefined();
+    } finally {
+      global.fetch = origFetch;
+    }
+  });
+});

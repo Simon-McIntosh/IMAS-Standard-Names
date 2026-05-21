@@ -57,14 +57,10 @@ export function Header({
     <header className="app-header">
       <div className="brand">
         <div className="brand-mark">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-            <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5" />
-            <ellipse cx="12" cy="12" rx="6" ry="10" stroke="currentColor" strokeWidth="1.2" />
-            <ellipse cx="12" cy="12" rx="10" ry="3" stroke="currentColor" strokeWidth="1.2" />
-          </svg>
+          <img src="./imas-logo.png" alt="IMAS" width="32" height="32" />
         </div>
         <div className="brand-text">
-          <div className="brand-title">IMAS Standard Names</div>
+          <div className="brand-title">Standard Names</div>
           <div className="brand-sub">
             {versions && (
               <VersionSwitcher

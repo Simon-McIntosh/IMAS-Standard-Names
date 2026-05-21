@@ -41,6 +41,7 @@ export function Browse({
         filters={filters}
         setFilters={setFilters}
         setView={setView}
+        dense={dense}
       />
     </div>
   );

@@ -3,23 +3,25 @@ import { UnitPill } from './UnitPill.jsx';
 
 // One card inside the neighborhood graph. `relation` controls the
 // left-border colour via `.nb-card-${relation}` rules in styles.css.
-export function NameCard({ n, onSelect, relation, edgeLabel }) {
+// `dense` mirrors the main list density selector ('comfortable' | 'compact' | 'dense').
+export function NameCard({ n, onSelect, relation, edgeLabel, dense }) {
   const isSelf = relation === 'self';
   const missing = n.missing;
+  const d = dense || 'comfortable';
   return (
     <button
-      className={`nb-card nb-card-${relation} ${missing ? 'missing' : ''}`}
+      className={`nb-card nb-card-${relation} dense-${d} ${missing ? 'missing' : ''}`}
       onClick={() => !isSelf && !missing && onSelect && onSelect(n.name)}
       disabled={isSelf || missing}
       title={missing ? 'Not yet in catalog' : n.short}
     >
       <div className="nb-card-top">
-        {n.algebra && <KindBadge name={n} />}
+        {d !== 'dense' && n.algebra && <KindBadge name={n} />}
         <span className="nb-card-name mono">{n.name}</span>
-        {n.unit && <UnitPill unit={n.unit} />}
+        {d !== 'dense' && n.unit && <UnitPill unit={n.unit} />}
       </div>
-      {n.short && <div className="nb-card-desc">{n.short}</div>}
-      {edgeLabel && <div className="nb-card-edge mono">{edgeLabel}</div>}
+      {d !== 'dense' && n.short && <div className="nb-card-desc">{n.short}</div>}
+      {d === 'comfortable' && edgeLabel && <div className="nb-card-edge mono">{edgeLabel}</div>}
     </button>
   );
 }

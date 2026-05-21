@@ -2,10 +2,11 @@ import { useData } from '../lib/data.js';
 import { clusterKey, clusterDescriptor } from '../lib/indexes.js';
 import { NameCard } from './NameCard.jsx';
 
-// Card-grid showing the local graph around a single name: parent,
-// "this name", cluster mates (same locus / same base / same concept),
+// Card-list showing the local graph around a single name: parent,
+// cluster mates (same locus / same base / same concept),
 // children (names whose parent === n.name), and cross-reference chips.
-export function NeighborhoodGraph({ n, onSelect, childIndex, groupIndex }) {
+// `dense` mirrors the main list density selector and reflows every card.
+export function NeighborhoodGraph({ n, onSelect, childIndex, groupIndex, dense }) {
   const { NAMES } = useData();
 
   const parent = n.parent
@@ -74,20 +75,11 @@ export function NeighborhoodGraph({ n, onSelect, childIndex, groupIndex }) {
             <span className="nb-row-label">Parent</span>
             <span className="nb-row-edge mono">{parentEdge}</span>
           </div>
-          <div className="nb-cards">
-            <NameCard n={parent} onSelect={onSelect} relation="parent" />
+          <div className={`nb-cards nb-cards-list dense-${dense || 'comfortable'}`}>
+            <NameCard n={parent} onSelect={onSelect} relation="parent" dense={dense} />
           </div>
         </div>
       )}
-
-      <div className="nb-row nb-row-self">
-        <div className="nb-row-head">
-          <span className="nb-row-label">This name</span>
-        </div>
-        <div className="nb-cards">
-          <NameCard n={n} relation="self" />
-        </div>
-      </div>
 
       {clusterMembers.length > 0 && (
         <div className="nb-row">
@@ -97,13 +89,14 @@ export function NeighborhoodGraph({ n, onSelect, childIndex, groupIndex }) {
               {clusterMembers.length} other · {clusterSubtitle}
             </span>
           </div>
-          <div className="nb-cards nb-cards-grid">
+          <div className={`nb-cards nb-cards-list dense-${dense || 'comfortable'}`}>
             {clusterMembers.map((s) => (
               <NameCard
                 key={s.name}
                 n={s}
                 onSelect={onSelect}
                 relation="sibling"
+                dense={dense}
                 edgeLabel={
                   s.axis
                     ? `axis = ${s.axis}`
@@ -125,13 +118,14 @@ export function NeighborhoodGraph({ n, onSelect, childIndex, groupIndex }) {
               {children.length} {children.length === 1 ? 'name' : 'names'}
             </span>
           </div>
-          <div className="nb-cards nb-cards-grid">
+          <div className={`nb-cards nb-cards-list dense-${dense || 'comfortable'}`}>
             {children.map((c) => (
               <NameCard
                 key={c.name}
                 n={c}
                 onSelect={onSelect}
                 relation="child"
+                dense={dense}
                 edgeLabel={
                   c.axis
                     ? `axis = ${c.axis}`
@@ -151,9 +145,9 @@ export function NeighborhoodGraph({ n, onSelect, childIndex, groupIndex }) {
             <span className="nb-row-label">References</span>
             <span className="nb-row-count">cross-links from description</span>
           </div>
-          <div className="nb-cards nb-cards-grid">
+          <div className={`nb-cards nb-cards-list dense-${dense || 'comfortable'}`}>
             {seeAlso.map((s) => (
-              <NameCard key={s.name} n={s} onSelect={onSelect} relation="ref" />
+              <NameCard key={s.name} n={s} onSelect={onSelect} relation="ref" dense={dense} />
             ))}
           </div>
         </div>

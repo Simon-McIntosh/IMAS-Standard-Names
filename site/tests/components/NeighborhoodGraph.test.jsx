@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { render } from '@testing-library/react';
+import { act, render } from '@testing-library/react';
 import { NeighborhoodGraph } from '../../src/components/NeighborhoodGraph.jsx';
 import { DataProvider } from '../../src/lib/data.js';
 
@@ -16,6 +16,7 @@ function renderNb(n, opts = {}) {
         onSelect={() => {}}
         childIndex={opts.childIndex ?? {}}
         groupIndex={opts.groupIndex ?? {}}
+        dense={opts.dense}
       />
     </DataProvider>
   );
@@ -58,5 +59,57 @@ describe('NeighborhoodGraph see-also filtering', () => {
     // Neither "unresolved_a" nor "unresolved_b" should appear.
     expect(queryByText(/unresolved_a/)).not.toBeInTheDocument();
     expect(queryByText(/unresolved_b/)).not.toBeInTheDocument();
+  });
+});
+
+describe('NeighborhoodGraph layout and structure', () => {
+  it('does not render a .nb-row-self block', async () => {
+    const n = {
+      name: 'electron_temperature',
+      category: 'transport',
+      group: 'temperature',
+      parent: null,
+      algebra: 'scalar',
+      unit: 'eV',
+      sources: [],
+      seeAlso: [],
+    };
+    // With no parent/cluster/children/seeAlso the empty state renders,
+    // which also must not contain a self row.
+    const { container, findByText } = renderNb(n);
+    await findByText(/no recorded parents/i);
+    expect(container.querySelector('.nb-row-self')).toBeNull();
+  });
+
+  it('uses .nb-cards-list (not .nb-cards-grid) for every card row', async () => {
+    // Supply a childIndex entry so the children row renders.
+    const child = {
+      name: 'electron_temperature_at_pedestal',
+      category: 'transport',
+      group: 'temperature',
+      parent: 'electron_temperature',
+      algebra: 'scalar',
+      unit: 'eV',
+      sources: [],
+      seeAlso: [],
+    };
+    const n = {
+      name: 'electron_temperature',
+      category: 'transport',
+      group: 'temperature',
+      parent: null,
+      algebra: 'scalar',
+      unit: 'eV',
+      sources: [],
+      seeAlso: [],
+    };
+    const childIndex = { electron_temperature: [child] };
+    const { container } = await act(async () =>
+      renderNb(n, { childIndex })
+    );
+    // At least one card row should be present.
+    expect(container.querySelector('.nb-cards-list')).not.toBeNull();
+    // No grid layout should exist.
+    expect(container.querySelector('.nb-cards-grid')).toBeNull();
   });
 });
