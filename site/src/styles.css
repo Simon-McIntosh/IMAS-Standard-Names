@@ -1277,21 +1277,30 @@ body {
   position: relative;
 }
 .matrix-table {
-  border-collapse: collapse;
+  border-collapse: separate;
   border-spacing: 0;
 }
+.matrix-table th, .matrix-table td { background-clip: padding-box; }
 /* Sticky row + col + corner — cells have no position:relative to avoid
    stacking context above sticky headers. */
-.matrix-corner { position: sticky; top: 0; left: 0; z-index: 5; background: var(--surface); }
+.matrix-corner { position: sticky; top: 0; left: 0; z-index: 5; }
 .matrix-col {
-  position: sticky; top: 0; z-index: 4; background: var(--surface);
+  position: sticky; top: 0; z-index: 4;
   height: 140px; width: 30px; min-width: 30px; max-width: 30px;
   vertical-align: bottom; padding: 0 0 8px;
 }
 .matrix-row {
-  position: sticky; left: 0; z-index: 1; background: var(--surface);
+  position: sticky; left: 0; z-index: 1;
   border-right: 1px solid var(--border-strong);
   white-space: nowrap;
+}
+.matrix-col, .matrix-row, .matrix-corner {
+  background-color: var(--surface) !important;
+}
+:root[data-theme="dark"] .matrix-col,
+:root[data-theme="dark"] .matrix-row,
+:root[data-theme="dark"] .matrix-corner {
+  background-color: var(--surface) !important;
 }
 .matrix-col-btn {
   display: inline-block;
@@ -1304,6 +1313,9 @@ body {
   border: 0;
   cursor: pointer;
   padding: 6px 4px;
+  -webkit-font-smoothing: subpixel-antialiased;
+  -moz-osx-font-smoothing: auto;
+  text-rendering: geometricPrecision;
 }
 .matrix-col-btn:hover { color: var(--accent); }
 .matrix-row-btn {

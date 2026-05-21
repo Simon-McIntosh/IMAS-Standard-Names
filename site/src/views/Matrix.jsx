@@ -35,6 +35,11 @@ const MATRIX_COLS = [
   },
 ];
 
+function prettyMatrixLabel(value) {
+  if (!value) return '';
+  return value.replace(/^(?:at|of|due_to)_/, '').replace(/_/g, ' ');
+}
+
 function rowBaseOf(n) {
   const baseTok = n.parse?.find((t) => t.role === 'base');
   if (baseTok?.text) return baseTok.text;
@@ -139,7 +144,7 @@ export function VocabularyMatrix({ onSelect, setFilters, setView }) {
                     className="matrix-col-btn"
                     onClick={() => handleColClick(col)}
                   >
-                    {col}
+                    {prettyMatrixLabel(col)}
                   </button>
                 </th>
               ))}
@@ -153,7 +158,7 @@ export function VocabularyMatrix({ onSelect, setFilters, setView }) {
                     className="matrix-row-btn mono"
                     onClick={() => handleRowClick(row)}
                   >
-                    {row}
+                    {prettyMatrixLabel(row)}
                   </button>
                 </td>
                 {cols.map((col) => {

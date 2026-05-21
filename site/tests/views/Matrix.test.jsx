@@ -199,4 +199,45 @@ describe('VocabularyMatrix', () => {
       expect(t.startsWith('Filter Browse to')).toBe(false);
     }
   });
+
+  it('row label safety_factor renders as "safety factor"', async () => {
+    const names = [
+      N('safety_factor', { base: 'safety_factor', parse: [{ role: 'base', text: 'safety_factor' }, { role: 'axis', text: 'r' }] }),
+    ];
+    const { container } = await renderMatrix(names);
+    const rowBtn = container.querySelector('.matrix-row-btn');
+    expect(rowBtn).not.toBeNull();
+    expect(rowBtn.textContent).toBe('safety factor');
+  });
+
+  it('locus column value "of_plasma_boundary" renders as "plasma boundary"; th title stays canonical', async () => {
+    const names = [
+      N('pressure_at_plasma_boundary', {
+        base: 'pressure',
+        parse: [{ role: 'base', text: 'pressure' }, { role: 'locus', text: 'of_plasma_boundary' }],
+      }),
+    ];
+    const { getByText, container } = await renderMatrix(names);
+    await act(async () => { fireEvent.click(getByText('Locus')); });
+    const colBtn = container.querySelector('.matrix-col-btn');
+    expect(colBtn).not.toBeNull();
+    expect(colBtn.textContent).toBe('plasma boundary');
+    const th = container.querySelector('.matrix-col');
+    expect(th.getAttribute('title')).toBe('of_plasma_boundary');
+  });
+
+  it('clicking row header invokes setFilters with canonical (un-prettified) value', async () => {
+    const setFilters = vi.fn();
+    const setView = vi.fn();
+    const names = [
+      N('safety_factor', { base: 'safety_factor', parse: [{ role: 'base', text: 'safety_factor' }, { role: 'axis', text: 'r' }] }),
+    ];
+    const { container } = await renderMatrix(names, [], { setFilters, setView });
+    const rowBtn = container.querySelector('.matrix-row-btn');
+    await act(async () => { fireEvent.click(rowBtn); });
+    expect(setFilters).toHaveBeenCalled();
+    const updater = setFilters.mock.calls[0][0];
+    const next = updater({ base: new Set() });
+    expect([...next.base]).toContain('safety_factor');
+  });
 });
