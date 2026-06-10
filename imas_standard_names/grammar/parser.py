@@ -34,6 +34,7 @@ edit-distance suggestions. No rc20 open-fallback behaviour is retained.
 
 from __future__ import annotations
 
+import re
 from collections.abc import Mapping
 from dataclasses import dataclass, field
 from difflib import get_close_matches
@@ -266,22 +267,32 @@ def _strip_mechanism(s: str) -> tuple[Process | None, str]:
     return Process(token=token), head
 
 
+# Value-parameterized at-locus: ``at_<token>_equal_to_<value>`` where <value>
+# is a numeric literal with underscores as decimal separators (0_95, 1_0, 2).
+_LOCUS_VALUE_SUFFIX = re.compile(
+    r"^(?P<head>[a-z][a-z0-9_]*)_equal_to_(?P<value>\d+(?:_\d+)?)$"
+)
+
+
 def _strip_locus(
     s: str, v: Vocabularies
 ) -> tuple[LocusRef | None, str, list[Diagnostic]]:
     """Strip a trailing locus suffix.
 
-    Preference order: rightmost registry-backed ``_<rel>_<token>`` match.
-    ``_at_`` and ``_over_`` have no operator collisions, so an unregistered
-    token still strips with a ``vocab_gap`` diagnostic. ``_of_`` without a
-    registry hit is LEFT alone so step-4 operator peeling can resolve it
-    as a binary-operator template.
+    Preference order: rightmost registry-backed ``_<rel>_<token>`` match,
+    including the value-parameterized form ``_at_<token>_equal_to_<value>``
+    (the ``_equal_to_<value>`` suffix is split off BEFORE registry lookup;
+    only position-typed registry tokens admit a value). ``_at_`` and
+    ``_over_`` have no operator collisions, so an unregistered token still
+    strips with a ``vocab_gap`` diagnostic. ``_of_`` without a registry hit
+    is LEFT alone so step-4 operator peeling can resolve it as a
+    binary-operator template.
     """
 
     diagnostics: list[Diagnostic] = []
 
     # 1. Registry-backed rightmost match.
-    best: tuple[str, int, str] | None = None
+    best: tuple[str, int, str, str | None] | None = None
     for rel in ("over", "at", "of"):
         marker = f"_{rel}_"
         idx = s.rfind(marker)
@@ -289,12 +300,30 @@ def _strip_locus(
             token = s[idx + len(marker) :]
             if token and token in v.loci:
                 if best is None or idx > best[1]:
-                    best = (rel, idx, token)
+                    best = (rel, idx, token, None)
                 break
+            # Value-parameterized position: at_<token>_equal_to_<value>.
+            # Split the value suffix BEFORE the registry lookup; only
+            # position-typed tokens admit a value (relation 'at').
+            if rel == "at" and token:
+                value_match = _LOCUS_VALUE_SUFFIX.match(token)
+                if (
+                    value_match
+                    and value_match.group("head") in v.loci
+                    and v.loci[value_match.group("head")][0] is LocusType.POSITION
+                ):
+                    if best is None or idx > best[1]:
+                        best = (
+                            rel,
+                            idx,
+                            value_match.group("head"),
+                            value_match.group("value"),
+                        )
+                    break
             idx = s.rfind(marker, 0, idx)
 
     if best is not None:
-        rel_str, idx, token = best
+        rel_str, idx, token, value = best
         locus_type, allowed = v.loci[token]
         relation = LocusRelation(rel_str)
         if relation not in allowed:
@@ -312,7 +341,7 @@ def _strip_locus(
                 )
             )
             return None, s, diagnostics
-        locus = LocusRef(relation=relation, token=token, type=locus_type)
+        locus = LocusRef(relation=relation, token=token, type=locus_type, value=value)
         return locus, s[:idx], diagnostics
 
     # 2. Unregistered-but-unambiguous fallback for _at_ / _over_.

@@ -451,10 +451,14 @@ def _derive_grammar_facets(name: str) -> _GrammarFacets:
     if ir.locus is not None:
         locus_token = ir.locus.token
         relation = ir.locus.relation.value
+        locus_text = f"{relation}_{ir.locus.token}"
+        if ir.locus.value is not None:
+            # Value-parameterized position: at_<token>_equal_to_<value>.
+            locus_text += f"_equal_to_{ir.locus.value}"
         segments.append(
             {
                 "role": "locus",
-                "text": f"{relation}_{ir.locus.token}",
+                "text": locus_text,
                 "note": ir.locus.type.value,
             }
         )

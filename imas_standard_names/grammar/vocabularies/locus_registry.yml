@@ -393,7 +393,10 @@ loci:
   neoclassical_tearing_mode_onset:
     type: position
     allowed_relations: [at, of]
-  normalized_poloidal_flux:
+  # Named after the poloidal_magnetic_flux physical-base family (the legacy
+  # short form normalized_poloidal_flux was inconsistent with it). Supports
+  # value parameterization: at_normalized_poloidal_magnetic_flux_equal_to_0_95.
+  normalized_poloidal_magnetic_flux:
     type: position
     allowed_relations: [at, of]
   outboard_midplane:

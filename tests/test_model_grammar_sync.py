@@ -71,6 +71,7 @@ def test_model_has_all_grammar_segments():
         "decomposition",
         "binary_operator",
         "secondary_base",
+        "position_value",
     }
 
     assert grammar_segments <= model_fields, (
@@ -195,7 +196,12 @@ def test_names_tool_has_all_segment_parameters():
 
     # Get expected segments from grammar plus extension fields
     grammar_segments = {segment.identifier for segment in spec.segments}
-    extension_params = {"transformation", "binary_operator", "secondary_base"}
+    extension_params = {
+        "transformation",
+        "binary_operator",
+        "secondary_base",
+        "position_value",
+    }
     expected_params = grammar_segments | extension_params
 
     assert tool_params == expected_params, (

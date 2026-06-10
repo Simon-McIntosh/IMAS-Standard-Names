@@ -18,6 +18,7 @@ from imas_standard_names.grammar.constants import (
     GENERIC_PHYSICAL_BASES,
 )
 from imas_standard_names.grammar.ir import (
+    LOCUS_VALUE_PATTERN,
     AxisProjection,
     BaseKind,
     LocusRef,
@@ -273,26 +274,64 @@ def _ir_to_model_dict(ir: StandardNameIR) -> dict[str, str]:
             else:
                 d["physical_base"] = ir.base.token
 
-    # Locus → object/geometry/position/region
+    # Locus → object/geometry/position/region. STRICT projection: a locus
+    # token the model cannot represent is a hard error — silently dropping
+    # it would lose the entire locus and collide with the locus-free name
+    # (e.g. safety_factor_at_<unknown> degrading to bare safety_factor).
     if ir.locus is not None:
         token = ir.locus.token
         if ir.locus.type == LocusType.POSITION:
-            if ir.locus.relation == LocusRelation.OVER and token in _REGION_VALUES:
-                d["region"] = token
+            if ir.locus.relation == LocusRelation.OVER:
+                if token in _REGION_VALUES:
+                    d["region"] = token
+                else:
+                    msg = (
+                        f"locus token '{token}' (relation 'over') is not a "
+                        f"registered 'region' segment token; cannot project "
+                        f"onto the model without dropping the locus"
+                    )
+                    raise ValueError(msg)
             elif ir.locus.relation == LocusRelation.AT:
                 if token in _POSITION_VALUES:
                     d["position"] = token
+                    if ir.locus.value is not None:
+                        d["position_value"] = ir.locus.value
+                else:
+                    msg = (
+                        f"locus token '{token}' (relation 'at') is not a "
+                        f"registered 'position' segment token; cannot project "
+                        f"onto the model without dropping the locus"
+                    )
+                    raise ValueError(msg)
             else:
                 if token in _POSITION_VALUES or token in _GEOMETRY_VALUES:
                     d["geometry"] = token
-                # else: unregistered geometry token, skip
+                else:
+                    msg = (
+                        f"locus token '{token}' (relation 'of') is not a "
+                        f"registered 'geometry' segment token; cannot project "
+                        f"onto the model without dropping the locus"
+                    )
+                    raise ValueError(msg)
         elif ir.locus.type == LocusType.REGION:
             if token in _REGION_VALUES:
                 d["region"] = token
+            else:
+                msg = (
+                    f"locus token '{token}' is not a registered 'region' "
+                    f"segment token; cannot project onto the model without "
+                    f"dropping the locus"
+                )
+                raise ValueError(msg)
         else:
             field_name = _LOCUS_TYPE_TO_FIELD.get(ir.locus.type)
-            if field_name:
-                d[field_name] = token
+            if field_name is None:
+                msg = (
+                    f"locus token '{token}' has unmapped locus type "
+                    f"'{ir.locus.type.value}'; cannot project onto the model"
+                )
+                raise ValueError(msg)
+            d[field_name] = token
 
     # Mechanism → process
     if ir.mechanism is not None:
@@ -397,12 +436,17 @@ def _model_to_ir(model: StandardName) -> StandardNameIR:
             raise ValueError("Either geometric_base or physical_base must be set")
 
     # Locus — position field uses _at_, geometry field uses _of_ for
-    # POSITION-type loci. Other fields use their fixed defaults.
+    # POSITION-type loci. Other fields use their fixed defaults. The
+    # position field may carry a numeric parameterization (position_value),
+    # rendered as _at_<position>_equal_to_<value>.
     for field_name, (default_relation, locus_type) in _FIELD_TO_LOCUS.items():
         value = getattr(model, field_name, None)
         if value is not None:
             locus = LocusRef(
-                relation=default_relation, token=_value_of(value), type=locus_type
+                relation=default_relation,
+                token=_value_of(value),
+                type=locus_type,
+                value=model.position_value if field_name == "position" else None,
             )
             break
 
@@ -496,6 +540,15 @@ class StandardName(BaseModel):
     object: Object | None = None
     geometry: Position | None = None
     position: Position | None = None
+    position_value: str | None = Field(
+        default=None,
+        description=(
+            "Numeric parameterization of the position locus, rendered as "
+            "at_<position>_equal_to_<position_value>. Underscores act as "
+            "decimal separators (e.g. '0_95' for 0.95). Requires position."
+        ),
+        examples=["0_95", "1_0", "2"],
+    )
     region: Region | None = None
     process: Process | None = None
     transformation: Transformation | None = None
@@ -518,6 +571,24 @@ class StandardName(BaseModel):
             msg = "secondary_base segment must match the canonical token pattern"
             raise ValueError(msg)
         return value
+
+    @field_validator("position_value")
+    @classmethod
+    def _validate_position_value(cls, value: str | None) -> str | None:
+        if value is not None and not LOCUS_VALUE_PATTERN.fullmatch(value):
+            msg = (
+                f"position_value {value!r} must be a numeric literal with "
+                f"underscores as decimal separators (e.g. '0_95', '1_0', '2')"
+            )
+            raise ValueError(msg)
+        return value
+
+    @model_validator(mode="after")
+    def _check_position_value_requires_position(self) -> StandardName:
+        if self.position_value is not None and self.position is None:
+            msg = "position_value can only be set when position is set"
+            raise ValueError(msg)
+        return self
 
     @model_validator(mode="after")
     def _check_exclusive(self) -> StandardName:

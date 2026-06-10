@@ -367,7 +367,7 @@ class Position(StrEnum):
     MINIMUM_SAFETY_FACTOR = "minimum_safety_factor"
     NEOCLASSICAL_TEARING_MODE_CENTER = "neoclassical_tearing_mode_center"
     NEOCLASSICAL_TEARING_MODE_ONSET = "neoclassical_tearing_mode_onset"
-    NORMALIZED_POLOIDAL_FLUX = "normalized_poloidal_flux"
+    NORMALIZED_POLOIDAL_MAGNETIC_FLUX = "normalized_poloidal_magnetic_flux"
     OUTBOARD_MIDPLANE = "outboard_midplane"
     OUTBOARD_MIDPLANE_SEPARATRIX = "outboard_midplane_separatrix"
     OUTER = "outer"

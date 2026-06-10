@@ -80,15 +80,19 @@ def render_qualifiers(qualifiers: Iterable[Qualifier]) -> str:
 
 
 def render_locus(locus: LocusRef | None) -> str:
-    """Render a locus as ``_<relation>_<token>``.
+    """Render a locus as ``_<relation>_<token>[_equal_to_<value>]``.
 
     Returns an empty string when ``locus`` is ``None``. Relation/type
-    compatibility is enforced by :class:`LocusRef`'s own validator.
+    compatibility and value constraints are enforced by :class:`LocusRef`'s
+    own validators.
     """
 
     if locus is None:
         return ""
-    return f"_{locus.relation.value}_{locus.token}"
+    rendered = f"_{locus.relation.value}_{locus.token}"
+    if locus.value is not None:
+        rendered += f"_equal_to_{locus.value}"
+    return rendered
 
 
 def render_mechanism(mechanism: Process | None) -> str:

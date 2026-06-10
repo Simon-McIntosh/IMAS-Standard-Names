@@ -110,7 +110,12 @@ class TestD5PositionTokens:
         "token,enum_member",
         [
             ("tearing_mode_center", Position.TEARING_MODE_CENTER),
-            ("normalized_poloidal_flux", Position.NORMALIZED_POLOIDAL_FLUX),
+            # Renamed from normalized_poloidal_flux to align with the
+            # poloidal_magnetic_flux physical-base family naming.
+            (
+                "normalized_poloidal_magnetic_flux",
+                Position.NORMALIZED_POLOIDAL_MAGNETIC_FLUX,
+            ),
         ],
     )
     def test_position_enum_membership(self, token, enum_member):

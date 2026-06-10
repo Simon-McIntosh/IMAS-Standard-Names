@@ -89,7 +89,7 @@ canonical_pattern: >
   [<device>]?
   <geometric_base | physical_base>
   [of_<object>]?
-  [of_<geometry> | at_<position> | over_<region>]?
+  [of_<geometry> | at_<position>[_equal_to_<value>]? | over_<region>]?
   [due_to_<process>]?
 
 #===============================================================================
@@ -254,8 +254,13 @@ segments:
       - geometry
       - region
     description: >
-      Field quantity evaluated AT the spatial location 
-      (temperatures, densities, fluxes measured there)
+      Field quantity evaluated AT the spatial location
+      (temperatures, densities, fluxes measured there).
+      Supports value parameterization at_<position>_equal_to_<value> where
+      <value> is a numeric literal with underscores as decimal separators
+      (e.g. safety_factor_at_normalized_poloidal_magnetic_flux_equal_to_0_95
+      for q at psi_norm = 0.95). The model carries the value in the
+      position_value extension field.
   - id: region
     optional: true
     vocabulary: regions

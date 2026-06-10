@@ -30,6 +30,7 @@ from typing import Any, Literal
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 __all__ = [
+    "LOCUS_VALUE_PATTERN",
     "TOKEN_PATTERN",
     "AxisProjection",
     "BaseKind",
@@ -53,6 +54,10 @@ __all__ = [
 # A grammar token is lowercase ASCII snake_case. No leading/trailing underscore,
 # no digits-only segments (``m_2`` is allowed; ``2`` alone is not).
 TOKEN_PATTERN = re.compile(r"^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$")
+
+# A locus value is a numeric literal with underscores as decimal separators:
+# ``0_95`` (= 0.95), ``1_0`` (= 1.0), ``2`` (= 2). At most one decimal point.
+LOCUS_VALUE_PATTERN = re.compile(r"^\d+(?:_\d+)?$")
 
 
 def _validate_token(value: str, *, field_name: str) -> str:
@@ -196,18 +201,42 @@ class QuantityOrCarrier(BaseModel):
 
 
 class LocusRef(BaseModel):
-    """Typed locus reference with a relation preposition."""
+    """Typed locus reference with a relation preposition.
+
+    ``value`` carries an optional numeric parameterization rendered as
+    ``_equal_to_<value>`` after the locus token (underscore as decimal
+    separator, e.g. ``0_95`` for 0.95):
+    ``safety_factor_at_normalized_poloidal_magnetic_flux_equal_to_0_95``.
+    Only position-typed loci with the ``at`` relation admit a value.
+    """
 
     model_config = ConfigDict(frozen=True, extra="forbid")
 
     relation: LocusRelation
     token: str = Field(description="Locus registry token.")
     type: LocusType
+    value: str | None = Field(
+        default=None,
+        description=(
+            "Numeric literal parameterizing the locus (underscores as decimal "
+            "separators, e.g. '0_95'); rendered as '_equal_to_<value>'."
+        ),
+    )
 
     @field_validator("token")
     @classmethod
     def _check_token(cls, value: str) -> str:
         return _validate_token(value, field_name="locus token")
+
+    @field_validator("value")
+    @classmethod
+    def _check_value(cls, value: str | None) -> str | None:
+        if value is not None and not LOCUS_VALUE_PATTERN.fullmatch(value):
+            raise ValueError(
+                f"locus value {value!r} must be a numeric literal with "
+                f"underscores as decimal separators (e.g. '0_95', '1_0', '2')"
+            )
+        return value
 
     @model_validator(mode="after")
     def _check_relation_matrix(self) -> LocusRef:
@@ -217,6 +246,14 @@ class LocusRef(BaseModel):
             raise ValueError(
                 f"locus type {self.type.value!r} does not permit relation "
                 f"{self.relation.value!r}; allowed: {allowed_names}"
+            )
+        if self.value is not None and (
+            self.type is not LocusType.POSITION or self.relation is not LocusRelation.AT
+        ):
+            raise ValueError(
+                f"locus value {self.value!r} is only permitted on "
+                f"position-typed loci with the 'at' relation "
+                f"(got type={self.type.value!r}, relation={self.relation.value!r})"
             )
         return self
 
@@ -457,6 +494,8 @@ def assert_locus_is_trailing(rendered: str, ir: StandardNameIR) -> None:
     relation = ir.locus.relation.value
     token = ir.locus.token
     locus_segment = f"_{relation}_{token}"
+    if ir.locus.value is not None:
+        locus_segment += f"_equal_to_{ir.locus.value}"
 
     tail = rendered
     if ir.mechanism is not None:
