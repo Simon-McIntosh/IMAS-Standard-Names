@@ -155,6 +155,11 @@ def load_default_vocabularies() -> Vocabularies:
     subject_quals = frozenset(s.value for s in Subject)
     object_quals = frozenset(o.value for o in Object)
     modifier_quals = vocab_loaders.load_qualifiers()
+    # Population (energy-state) + orbit (transit class) modifiers peel like
+    # qualifiers; the StandardName model retains them in the dedicated
+    # ``population`` / ``orbit`` single-token segments.
+    population_quals = vocab_loaders.load_populations()
+    orbit_quals = vocab_loaders.load_orbits()
 
     # Add unary_prefix operator tokens as qualifiers so that "bare" prefix
     # operators (those that attach without _of_, like volume_averaged,
@@ -167,7 +172,14 @@ def load_default_vocabularies() -> Vocabularies:
         if meta.get("kind") == OperatorKind.UNARY_PREFIX.value
     )
 
-    qualifiers = subject_quals | object_quals | modifier_quals | prefix_op_quals
+    qualifiers = (
+        subject_quals
+        | object_quals
+        | modifier_quals
+        | population_quals
+        | orbit_quals
+        | prefix_op_quals
+    )
 
     return Vocabularies(
         axes=frozenset(axes_reg.axes),

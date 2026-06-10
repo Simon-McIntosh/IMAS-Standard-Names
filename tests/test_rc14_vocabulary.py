@@ -76,30 +76,25 @@ class TestD1ProcessTokens:
 
 
 class TestD2SubjectTokens:
-    """Verify rc14 subject vocabulary additions."""
+    """rc14 modifier-subjects were decomposed into population + species (rc32).
+
+    thermal_electron / thermal_ion / suprathermal_electrons are no longer
+    compound Subject tokens; the modifier is the orthogonal ``population``
+    segment and the species is the ``subject``. (The old ``suprathermal_
+    electrons`` plural is gone — the singular ``electron`` species is used.)
+    """
 
     @pytest.mark.parametrize(
-        "token,enum_member",
+        "name,population,subject",
         [
-            ("suprathermal_electrons", Subject.SUPRATHERMAL_ELECTRONS),
-            ("thermal_electron", Subject.THERMAL_ELECTRON),
-            ("thermal_ion", Subject.THERMAL_ION),
+            ("suprathermal_electron_temperature", "suprathermal", "electron"),
+            ("thermal_electron_temperature", "thermal", "electron"),
+            ("thermal_ion_temperature", "thermal", "ion"),
         ],
     )
-    def test_subject_enum_membership(self, token, enum_member):
-        assert Subject(token) == enum_member
-
-    @pytest.mark.parametrize(
-        "subject",
-        [
-            "suprathermal_electrons",
-            "thermal_electron",
-            "thermal_ion",
-        ],
-    )
-    def test_subject_round_trip(self, subject):
-        name = f"{subject}_temperature"
+    def test_population_decomposition_round_trip(self, name, population, subject):
         parsed = parse_standard_name(name)
+        assert parsed.population == population
         assert parsed.subject == Subject(subject)
         assert parsed.physical_base == "temperature"
         assert compose_standard_name(parsed) == name
@@ -107,7 +102,8 @@ class TestD2SubjectTokens:
     def test_thermal_electron_density_at_position(self):
         name = "thermal_electron_density_at_magnetic_axis"
         parsed = parse_standard_name(name)
-        assert parsed.subject == Subject.THERMAL_ELECTRON
+        assert parsed.population == "thermal"
+        assert parsed.subject == Subject.ELECTRON
         assert parsed.physical_base == "density"
         assert parsed.position == Position.MAGNETIC_AXIS
         assert compose_standard_name(parsed) == name

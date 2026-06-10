@@ -65,12 +65,12 @@ class TestSubjectTokens:
             "tritium_tritium",
             "hydrogenic",
             "neutral_beam",
-            "fast_neutral",
-            "fast_electron",
             "impurity_ion",
         ],
     )
     def test_subject_round_trip(self, subject):
+        # NOTE: fast_neutral/fast_electron decomposed into population+species
+        # (rc32) — see test_population_segment.py.
         """Each subject token should compose and parse correctly."""
         parts = {"subject": subject, "physical_base": "temperature"}
         name = compose_name(parts)

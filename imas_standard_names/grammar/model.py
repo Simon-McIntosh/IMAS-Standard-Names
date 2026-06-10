@@ -37,6 +37,8 @@ from imas_standard_names.grammar.model_types import (
     Decomposition,
     GeometricBase,
     Object,
+    Orbit,
+    Population,
     Position,
     Process,
     Region,
@@ -74,55 +76,13 @@ _POSITION_VALUES: frozenset[str] = frozenset(p.value for p in Position)
 _REGION_VALUES: frozenset[str] = frozenset(r.value for r in Region)
 _GEOMETRY_VALUES: frozenset[str] = frozenset(g.value for g in GeometricBase)
 
-# Population qualifiers: orthogonal modifier tokens (energy-state, orbit class,
-# molecularity, aggregation, regime, polarization) that compose with a species
-# ``subject`` and a ``physical_base`` rather than being baked into compound
-# subject tokens. Retained on the model as the scalar ``population`` segment in
-# canonical (outer-to-inner) order, e.g. ``trapped_fast_ion_density`` →
-# population=``trapped_fast``, subject=``ion``, base=``density``.
-# Closed vocabulary; multi-underscore tokens (``co_passing``) are recovered by
-# greedy longest-match in :func:`_tokenize_population`.
-_POPULATION_VALUES: frozenset[str] = frozenset(
-    {
-        "fast",
-        "thermal",
-        "cold",
-        "hot",
-        "suprathermal",
-        "runaway",
-        "molecular",
-        "bulk",
-        "trapped",
-        "co_passing",
-        "counter_passing",
-        "co_current",
-        "counter_current",
-        "inertial",
-        "sonic",
-        "gyrocenter",
-    }
-)
-
-
-def _tokenize_population(value: str) -> list[str]:
-    """Split a ``population`` scalar into ordered tokens via greedy
-    longest-prefix match against the closed population vocabulary.
-
-    Mirrors the parser's longest-match peeling so multi-underscore tokens
-    (``co_passing``) survive the scalar round-trip. Raises ``ValueError`` on
-    an unrecognised residue.
-    """
-    tokens: list[str] = []
-    s = value
-    while s:
-        for cand in sorted(_POPULATION_VALUES, key=len, reverse=True):
-            if s == cand or s.startswith(cand + "_"):
-                tokens.append(cand)
-                s = s[len(cand) :].lstrip("_")
-                break
-        else:
-            raise ValueError(f"Unknown population token in {value!r} (residue {s!r})")
-    return tokens
+# Population + orbit: two orthogonal single-token modifier segments split out of
+# the old compound subject tokens (rc32 decomposition). Each contributes at most
+# one token (no intra-segment stacking) and renders as a prefix before the
+# species subject: ``<orbit>_<population>_<subject>_<base>``, e.g.
+# ``trapped_fast_ion_density`` → orbit=trapped, population=fast, subject=ion.
+_POPULATION_VALUES: frozenset[str] = frozenset(p.value for p in Population)
+_ORBIT_VALUES: frozenset[str] = frozenset(o.value for o in Orbit)
 
 
 # Map from LocusType to model field name
@@ -238,15 +198,17 @@ def _ir_to_model_dict(ir: StandardNameIR) -> dict[str, str]:
             subject = None
             device = None
             transformation_token = None
-            population_tokens: list[str] = []
+            population = None
+            orbit = None
             base_qualifiers: list[str] = []
             for q in ir.qualifiers:
-                # Population modifiers take priority over the subject branch:
-                # some (trapped, co_passing) are also Subject-enum members during
-                # the decomposition transition, and they must be retained in the
-                # population segment rather than overwriting/dropping the species.
-                if q.token in _POPULATION_VALUES:
-                    population_tokens.append(q.token)
+                # Orbit + population are orthogonal single-token modifier
+                # segments; they take priority over the subject branch (each
+                # contributes at most one token) and render before the species.
+                if q.token in _ORBIT_VALUES:
+                    orbit = q.token
+                elif q.token in _POPULATION_VALUES:
+                    population = q.token
                 elif q.token in _SUBJECT_VALUES:
                     subject = q.token
                 elif q.token in _OBJECT_VALUES:
@@ -258,8 +220,10 @@ def _ir_to_model_dict(ir: StandardNameIR) -> dict[str, str]:
                     transformation_token = q.token
                 else:
                     base_qualifiers.append(q.token)
-            if population_tokens:
-                d["population"] = "_".join(population_tokens)
+            if orbit:
+                d["orbit"] = orbit
+            if population:
+                d["population"] = population
             if subject:
                 d["subject"] = subject
             if device:
@@ -381,7 +345,11 @@ def _model_to_ir(model: StandardName) -> StandardNameIR:
         elif model.physical_base:
             # Re-parse the physical_base to decompose qualifiers + base
             base, qualifiers = _decompose_physical_base(
-                model.physical_base, model.subject, model.device, model.population
+                model.physical_base,
+                model.subject,
+                model.device,
+                model.population,
+                model.orbit,
             )
             # Insert bare-prefix transformation qualifier at the front
             # (transformation is outermost: <transform>_<subject>_<base>)
@@ -434,22 +402,23 @@ def _decompose_physical_base(
     physical_base: str,
     subject: Subject | None,
     device: Object | None,
-    population: str | None = None,
+    population: Population | None = None,
+    orbit: Orbit | None = None,
 ) -> tuple[QuantityOrCarrier, list[Qualifier]]:
     """Decompose a physical_base string into IR base + qualifiers.
 
     The physical_base may be a compound like 'magnetic_field' or
-    'diamagnetic_drift_velocity'. We use the parser to decompose
-    it correctly, then prepend population/subject/device as qualifiers.
+    'diamagnetic_drift_velocity'. We use the parser to decompose it correctly,
+    then prepend orbit/population/subject/device as qualifiers.
     """
     qualifiers: list[Qualifier] = []
 
-    # Render order is outer-to-inner: population modifiers precede the species
-    # subject, which precedes the device — <population>_<subject>_<base>.
+    # Render order outer-to-inner: orbit, then population, then the species
+    # subject, then the device — <orbit>_<population>_<subject>_<base>.
+    if orbit:
+        qualifiers.append(Qualifier(token=_value_of(orbit)))
     if population:
-        qualifiers.extend(
-            Qualifier(token=tok) for tok in _tokenize_population(population)
-        )
+        qualifiers.append(Qualifier(token=_value_of(population)))
     if subject:
         qualifiers.append(Qualifier(token=_value_of(subject)))
     if device:
@@ -475,7 +444,8 @@ class StandardName(BaseModel):
 
     component: Component | None = None
     coordinate: Component | None = None
-    population: str | None = None
+    orbit: Orbit | None = None
+    population: Population | None = None
     subject: Subject | None = None
     device: Object | None = None
     geometric_base: GeometricBase | None = None
@@ -496,18 +466,6 @@ class StandardName(BaseModel):
         if value is not None and not TOKEN_PATTERN.fullmatch(value):
             msg = "physical_base segment must match the canonical token pattern"
             raise ValueError(msg)
-        return value
-
-    @field_validator("population")
-    @classmethod
-    def _validate_population(cls, value: str | None) -> str | None:
-        if value is None:
-            return value
-        if not TOKEN_PATTERN.fullmatch(value):
-            msg = "population segment must match the canonical token pattern"
-            raise ValueError(msg)
-        # Every constituent must be a registered population token.
-        _tokenize_population(value)
         return value
 
     @field_validator("secondary_base")

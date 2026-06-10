@@ -335,7 +335,9 @@ class TestQualifierOrderingPreserved:
     @pytest.mark.parametrize(
         "name,expected_qualifiers",
         [
-            ("trapped_fast_particle_density", ["trapped", "fast_particle"]),
+            # Decomposed: fast/trapped are population qualifiers, particle is the
+            # species subject — no compound fast_particle token (rc32 decomposition).
+            ("trapped_fast_particle_density", ["trapped", "fast", "particle"]),
             ("co_passing_particle_density", ["co_passing", "particle"]),
             ("collisional_power_density", ["collisional"]),
             ("ohmic_current_density", ["ohmic"]),
@@ -381,15 +383,20 @@ class TestQualifierOrderingPreserved:
 
 
 class TestSubjectQualifierBoundary:
-    """Compound subjects remain atomic — not split into qualifiers."""
+    """Modifier qualifiers decompose; genuine compound species stay atomic.
+
+    rc32 decomposition: energy-state/orbit modifiers (fast, thermal, trapped, …)
+    are NOT subject tokens — they peel as population qualifiers and the species
+    is the subject. Genuine atomic species compounds (alpha_particle, the
+    reaction pairs) remain single tokens.
+    """
 
     @pytest.mark.parametrize(
         "name,expected_subject_qualifier,expected_base",
         [
-            # "fast_ion" is not a registered subject; "fast" is a qualifier
-            # "fast_ion" is a registered compound Subject token
-            ("fast_ion_pressure", ["fast_ion"], "pressure"),
-            # "trapped" is qualifier, rest peels normally
+            # Decomposed: 'fast' is a population qualifier, 'ion' is the subject.
+            ("fast_ion_pressure", ["fast", "ion"], "pressure"),
+            # "trapped" is a population qualifier, rest peels normally
             ("trapped_particle_density", ["trapped", "particle"], "density"),
             # Single subject
             ("electron_temperature", ["electron"], "temperature"),
@@ -451,5 +458,8 @@ class TestSegmentTokenMapClosed:
 
         quals = SEGMENT_TOKEN_MAP["qualifier"]
         assert len(quals) >= 90, f"Expected >= 90 qualifiers, got {len(quals)}"
-        assert "trapped" in quals
         assert "collisional" in quals
+        # Modifier qualifiers moved to dedicated single-token segments in the
+        # rc32 decomposition: orbit class → 'orbit', energy-state → 'population'.
+        assert "trapped" in SEGMENT_TOKEN_MAP["orbit"]
+        assert "fast" in SEGMENT_TOKEN_MAP["population"]

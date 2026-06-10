@@ -1,30 +1,48 @@
-# Subject vocabulary: particle species and plasma populations
+# Subject vocabulary: particle species and plasma entities
 #
-# Usage: <subject>_<base>
+# Usage: <subject>_<base>  (optionally with a population modifier prefix:
+#   <population>_<subject>_<base>, e.g. fast_ion_pressure, thermal_electron_density)
+#
 # Examples:
 #   - electron_temperature
 #   - ion_density
 #   - deuterium_pressure
+#
+# SUBJECTS ARE SPECIES / ENTITIES ONLY. Modifier qualifiers (energy-state
+# fast/thermal/cold/hot/suprathermal, orbit class trapped/co_passing/…,
+# molecularity, aggregation total/bulk, regime, polarization) live in the
+# orthogonal `population` segment (populations.yml) as of the rc32 vocab
+# decomposition — they are NOT subject tokens.
+#
+# Kept atomic (not decomposed): runaway_electron, gyrocenter, neutral_beam,
+# edge_localized_mode, halo, the reaction pairs, the SPI/pellet/gas species,
+# and the ionisation-state qualifiers (ion_state, ion_charge_state, …).
+#
+# Source of truth is the Subject enum in grammar/model_types.py; this list
+# mirrors it for cross-segment vocabulary validation.
 
 # === Core plasma species ===
+# NOTE: 'plasma' is intentionally NOT a subject — 'plasma_current', 'plasma_
+# volume', etc. are lexicalised physical_bases (generic base + implicit plasma).
+# Aggregation modifiers compose as total_plasma_current = population=total +
+# base=plasma_current.
 - electron
 - ion
+- neutral
+- particle
+- neutron
+
+# === Fusion fuel + isotopes ===
+- hydrogen
+- hydrogenic
 - deuterium
 - tritium
 - helium
-- impurity_species
-- fast_ion
-- neutral
-- runaway_electron
-- pfirsch_schlueter
-
-# === Tier 1: Core fusion species ===
-- hydrogen
-- alpha_particle
 - helium_3
 - helium_4
+- alpha_particle
 
-# === Tier 2: Impurity elements ===
+# === Impurity elements ===
 - carbon
 - nitrogen
 - neon
@@ -35,80 +53,38 @@
 - iron
 - lithium
 - oxygen
-
-# === Tier 3: Extended species ===
 - krypton
 - xenon
+
+# === Reaction channels (atomic pairs) ===
 - deuterium_tritium
 - deuterium_deuterium
 - tritium_tritium
-- hydrogenic
+
+# === Distinct atomic populations / entities (kept atomic) ===
+- runaway_electron
+- pfirsch_schlueter
 - neutral_beam
-- fast_neutral
-- fast_electron
 - impurity_ion
+- impurity_species
+- ion_species
+- neutral_species
+- gyrocenter
+- gyrokinetic
+- halo
+- hard_xray
+- edge_localized_mode
 
-# === rc14 vocabulary extensions (codex plan 31) ===
-- suprathermal_electrons       # suprathermal population tier (ECRH, LH-driven)
-- thermal_electron             # explicit thermal electron population
-- thermal_ion                  # explicit thermal ion population
+# === Ionisation / atomic-state qualifiers ===
+- ion_state
+- ion_charge_state
+- neutral_state
+- state
 
-# === rc16 vocabulary extensions (VocabGap closure) ===
-# From codex VocabGap graph analysis (2026-04-20).
-- thermal_neutral              # thermal neutral particle population
-- total_ion                    # total ion population (summed over species)
-- molecular_ion                # molecular ion species (e.g. D₂⁺, T₂⁺)
-- molecular_neutral            # molecular neutral species (e.g. D₂, T₂)
-- cold_neutral                 # cold neutral population (recycled wall neutrals)
-- hot_neutral                  # hot neutral population (charge-exchange neutrals)
-- trapped                      # trapped-particle population (banana orbits)
-- co_passing                   # co-passing particle population
-- counter_passing              # counter-passing particle population
-- fast_particle                # generic fast (non-thermal) particle
-- ion_species                  # generic ion species (unresolved)
-- neutral_species              # generic neutral species (unresolved)
-- total                        # total / summed-over-all-species population
-
-# === rc18 vocabulary extensions (VocabGap closure, codex plan 40) ===
-# From codex VocabGap graph analysis (2026-04-21).
-# Atomic-state qualifiers for ion / neutral populations.
-- ion_state                    # ionisation-state index as a subject qualifier
-- fast_ion_state               # ionisation state of a fast-ion population
-- ion_charge_state             # specific atomic charge state of an ion
-- neutral_state                # electronic/vibrational state of a neutral
-# Orbital-class resolved fast populations (distribution_sources / distributions).
-# NOTE: orbit class alone (trapped, co_passing, counter_passing) is the subject.
-# The species qualifier (fast_ion, fast_particle, particle) is part of physical_base
-# to ensure consistent grouping (all orbit variants of the same quantity together).
-# Gyrokinetic representation.
-- gyrocenter                   # gyrocentre distribution representation
-# Halo / pellet / SPI populations.
-- halo                         # halo (edge / scrape-off) particle population
-- pellet                       # injected-pellet species population
-- shattered_pellet             # shattered pellet injector (SPI) population
-- shattered_pellet_fragment    # individual SPI fragment
-- shattered_pellet_species     # species composing an SPI pellet
-# Radiation channels (used as subject of emitted_* bases).
-- hard_xray                    # hard X-ray emission population
-# Aggregate plasma populations.
-- bulk_plasma                  # bulk (thermal) plasma population
-- total_plasma                 # total plasma population (all species)
-# Recycling / fuelling gas species.
-- ammonia                      # ammonia (NH₃) recycling / injection species
-- silane                       # silane (SiH₄) recycling / injection species
-# ELM population marker.
-- edge_localized_mode          # edge-localized-mode population marker
-
-# === W2a corpus mining additions (plan 38 §A9) ===
-# From 67 subject classifications in rc20 corpus mining.
-- gyrokinetic                  # gyrokinetic representation qualifier
-- neutron                      # neutron species
-- particle                     # bare particle qualifier
-- state                        # generic state qualifier
-- thermal                      # thermal population qualifier
-- co_current
-- counter_current
-- inertial
-- sonic
-- left_hand_circularly_polarized
-- right_hand_circularly_polarized
+# === Injected / fuelling species ===
+- pellet
+- shattered_pellet
+- shattered_pellet_fragment
+- shattered_pellet_species
+- ammonia
+- silane

@@ -1,0 +1,19 @@
+# Orbit vocabulary: particle orbit / transit class (single closed segment)
+#
+# An orbit token describes the orbit topology / transit direction of a
+# population. It is orthogonal to `population` (energy-state) and `subject`
+# (species), and renders as a prefix outermost of population:
+#   <orbit>_<population>_<subject>_<base>, e.g.
+#   - trapped_fast_ion_density          (orbit=trapped, population=fast, subject=ion)
+#   - co_passing_ion_density            (orbit=co_passing, subject=ion)
+#   - counter_current_fast_ion_pressure (orbit=counter_current, population=fast, subject=ion)
+#
+# Single-token closed segment (at most one orbit class per name). Kept separate
+# from population so each dimension is independently validated and queryable
+# (rc32 decomposition).
+
+- trapped            # trapped (banana) orbit class
+- co_passing         # co-passing orbit class
+- counter_passing    # counter-passing orbit class
+- co_current         # co-current (parallel to Ip) transit direction
+- counter_current    # counter-current (anti-parallel to Ip) transit direction

@@ -150,10 +150,24 @@ segments:
     description: >
       Coordinate axis for geometric/spatial vector decomposition 
       (position, vertex, centroid, trajectory, displacement)
+  - id: orbit
+    optional: true
+    vocabulary: orbits
+    description: >
+      Particle orbit / transit class (trapped, co_passing, counter_passing,
+      co_current, counter_current). Single-token closed segment, orthogonal to
+      population and subject; renders outermost: <orbit>_<population>_<subject>_<base>.
+  - id: population
+    optional: true
+    vocabulary: populations
+    description: >
+      Species-population kind/state (energy-state fast/thermal/cold/hot/
+      suprathermal, molecularity molecular, aggregation total/bulk). Single-token
+      closed segment; renders before the subject: <population>_<subject>_<base>.
   - id: subject
     optional: true
     vocabulary: subjects
-    description: "Particle species or plasma population"
+    description: "Particle species or plasma entity"
   - id: device
     optional: true
     vocabulary: objects
@@ -260,6 +274,10 @@ segments:
 vocabularies:
   components: !include vocabularies/components.yml
   subjects: !include vocabularies/subjects.yml
+  # rc32 subject-vocabulary decomposition: orthogonal single-token modifier
+  # segments split out of the old compound subjects.
+  populations: !include vocabularies/populations.yml
+  orbits: !include vocabularies/orbits.yml
   regions: !include vocabularies/regions.yml
   processes: !include vocabularies/processes.yml
   generic_physical_bases: !include vocabularies/generic_physical_bases.yml

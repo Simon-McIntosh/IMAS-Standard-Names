@@ -30,6 +30,8 @@ from .model_types import (
     Component,
     GeometricBase,
     Object,
+    Orbit,
+    Population,
     Position,
     Process,
     Region,
@@ -50,6 +52,8 @@ class SegmentRule:
 SEGMENT_TOKEN_MAP: dict[str, tuple[str, ...]] = {
     "component": tuple(member.value for member in Component),
     "coordinate": tuple(member.value for member in Component),
+    "orbit": tuple(member.value for member in Orbit),
+    "population": tuple(member.value for member in Population),
     "subject": tuple(member.value for member in Subject),
     "device": tuple(member.value for member in Object),
     "geometric_base": tuple(member.value for member in GeometricBase),
@@ -76,6 +80,20 @@ SEGMENT_RULES: tuple[SegmentRule, ...] = (
         template=None,
         exclusive_with=("component",),
         tokens=SEGMENT_TOKEN_MAP["coordinate"],
+    ),
+    SegmentRule(
+        identifier="orbit",
+        optional=True,
+        template=None,
+        exclusive_with=(),
+        tokens=SEGMENT_TOKEN_MAP["orbit"],
+    ),
+    SegmentRule(
+        identifier="population",
+        optional=True,
+        template=None,
+        exclusive_with=(),
+        tokens=SEGMENT_TOKEN_MAP["population"],
     ),
     SegmentRule(
         identifier="subject",
@@ -152,6 +170,8 @@ SEGMENT_RULES: tuple[SegmentRule, ...] = (
 SEGMENT_ORDER: tuple[str, ...] = (
     "component",
     "coordinate",
+    "orbit",
+    "population",
     "subject",
     "device",
     "geometric_base",
@@ -163,9 +183,9 @@ SEGMENT_ORDER: tuple[str, ...] = (
     "process",
 )
 
-# Base segments are at indices [4, 5] in SEGMENT_ORDER
+# Base segments are at indices [6, 7] in SEGMENT_ORDER
 # They mark the boundary between prefix (component, coordinate, subject) and suffix (object, geometry, position, process) segments
-BASE_SEGMENT_INDICES: tuple[int, ...] = (4, 5)
+BASE_SEGMENT_INDICES: tuple[int, ...] = (6, 7)
 BASE_SEGMENTS: tuple[str, ...] = ("geometric_base", "physical_base")
 PREFIX_SEGMENTS: tuple[str, ...] = SEGMENT_ORDER[: BASE_SEGMENT_INDICES[0]]
 SUFFIX_SEGMENTS: tuple[str, ...] = SEGMENT_ORDER[BASE_SEGMENT_INDICES[-1] + 1 :]

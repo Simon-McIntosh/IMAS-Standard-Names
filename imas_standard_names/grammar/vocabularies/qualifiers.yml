@@ -27,23 +27,21 @@
 - heat                          # heat transport channel (heat_flux, heat_viscosity)
 
 # --- Aggregate/net qualifiers ---
-- total                         # total / summed quantity [also-subject]
+# NOTE: 'total' moved to populations.yml (aggregation population modifier).
 - net                           # net (signed sum) quantity
 
 # --- Collision/transport regime ---
+# NOTE: 'thermal' moved to populations.yml (energy-state population modifier).
 - collisional                   # collisional regime (collisional_power_density)
-- thermal                       # thermal population/component [also-subject]
 
 # --- Source/mechanism ---
 - ohmic                         # ohmic heating/current
 - inductive                     # inductively driven
 - non_inductive                 # non-inductively driven
 
-# --- Orbit class ---
-- trapped                       # trapped particle orbit class [also-subject]
-- co_passing                    # co-passing orbit class [also-subject]
-- counter_passing               # counter-passing orbit class [also-subject]
-- fast                          # fast (suprathermal) population [also-subject]
+# --- Orbit class / energy-state ---
+# Moved to populations.yml (orthogonal population segment): trapped, co_passing,
+# counter_passing, fast — they compose as <population>_<subject>_<base>.
 
 # --- Nuclear/material ---
 - nuclear                       # nuclear heating/energy
@@ -137,8 +135,17 @@
 
 # --- Species-related (non-subject) ---
 - slow                          # slow (sub-thermal) population
-- suprathermal                  # suprathermal population
-- plasma                        # plasma (ionized) qualifier
+# NOTE: 'suprathermal' moved to populations.yml (energy-state population modifier).
+- plasma                        # plasma (ionized) qualifier; plasma_current etc.
+                                # are lexicalised bases (plasma folds into base)
+
+# --- Flow regime ---
+- inertial                      # inertial flow regime
+- sonic                         # sonic flow regime
+
+# --- Wave polarization ---
+- left_hand_circularly_polarized    # left-hand circularly polarized wave
+- right_hand_circularly_polarized   # right-hand circularly polarized wave
 
 # --- Sign / polarity ---
 - positive                      # positive sign/direction

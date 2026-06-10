@@ -1,0 +1,33 @@
+# Population vocabulary: species-population modifier (single closed segment)
+#
+# A population token describes the KIND/state of the species population
+# (energy-state, molecularity, aggregation). It composes orthogonally with a
+# species `subject` and renders as a prefix before it:
+#   <population>_<subject>_<base>, e.g.
+#   - fast_ion_pressure          (population=fast,     subject=ion,      base=pressure)
+#   - thermal_electron_density   (population=thermal,  subject=electron, base=density)
+#   - total_plasma_current       (population=total,    subject=plasma,   base=current)
+#
+# Single-token closed segment (at most one population per name — no intra-
+# segment stacking). Orbit/transit class is a SEPARATE segment (orbits.yml),
+# so trapped_fast_ion_density = orbit=trapped + population=fast + subject=ion.
+#
+# Replaces the energy-state/molecularity/aggregation compound modifier-subjects
+# removed from the Subject enum in the rc32 decomposition. molecular/total/bulk
+# live here (not in qualifiers) because they modify the species population and
+# must render BEFORE the subject; placing them in the generic qualifier segment
+# would mis-order them (ion_molecular_density) and scatter physical_base families.
+
+# === Energy-state / thermalisation tier ===
+- fast            # non-thermal / energetic population
+- thermal         # thermalised (Maxwellian) population
+- cold            # cold population (e.g. recycled wall neutrals)
+- hot             # hot population (e.g. charge-exchange neutrals)
+- suprathermal    # suprathermal tail (ECRH/LH-driven)
+
+# === Molecularity ===
+- molecular       # molecular species (e.g. D2+, D2)
+
+# === Aggregation ===
+- total           # total / summed over the population
+- bulk            # bulk (thermal core) population

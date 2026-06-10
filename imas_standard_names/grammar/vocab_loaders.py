@@ -214,6 +214,50 @@ def load_qualifiers() -> frozenset[str]:
 
 
 # ---------------------------------------------------------------------------
+# populations.yml
+# ---------------------------------------------------------------------------
+
+
+def load_populations() -> frozenset[str]:
+    """Load population modifier tokens from ``populations.yml``.
+
+    Population tokens (energy-state, orbit class, molecularity, aggregation,
+    regime, polarization) compose orthogonally with a species subject. The
+    parser unions these into its qualifier vocabulary so they peel; the
+    StandardName model retains them in the scalar ``population`` segment.
+    Flat YAML list of string tokens (with optional inline comments).
+    """
+    return _load_flat_token_list("populations.yml", "populations")
+
+
+def load_orbits() -> frozenset[str]:
+    """Load orbit/transit-class tokens from ``orbits.yml``.
+
+    Orbit tokens (trapped, co_passing, counter_passing, co_current,
+    counter_current) form a single-token closed segment orthogonal to
+    ``population`` and ``subject``. Unioned into the parser qualifier
+    vocabulary so they peel; retained on the model in the ``orbit`` segment.
+    """
+    return _load_flat_token_list("orbits.yml", "orbits")
+
+
+def _load_flat_token_list(filename: str, dict_key: str) -> frozenset[str]:
+    """Load a flat YAML token list (or ``{<dict_key>: [...]}``)."""
+    path = _VOCAB_DIR / filename
+    if not path.exists():
+        return frozenset()
+    with path.open(encoding="utf-8") as fh:
+        data = yaml.safe_load(fh)
+    if not data:
+        return frozenset()
+    if isinstance(data, list):
+        return frozenset(str(token) for token in data)
+    if isinstance(data, dict) and dict_key in data:
+        return frozenset(str(token) for token in (data[dict_key] or []))
+    return frozenset()
+
+
+# ---------------------------------------------------------------------------
 # normalizing_qualifiers.yml
 # ---------------------------------------------------------------------------
 

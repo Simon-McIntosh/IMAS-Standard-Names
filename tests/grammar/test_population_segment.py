@@ -1,12 +1,13 @@
-"""Population segment: modifier qualifiers (energy-state, orbit class, …) are
-retained on the StandardName model as a scalar ``population`` segment rather
-than being dropped or folded into ``physical_base``.
+"""Population + orbit segments: modifier qualifiers (energy-state and orbit
+class) are retained on the StandardName model as orthogonal single-token
+``population`` / ``orbit`` segments rather than dropped or folded into
+``physical_base``.
 
-Decomposition contract (codex 2026-06-09): ``fast``/``thermal``/``trapped``/…
-are population qualifiers composed orthogonally with a species ``subject`` and
-the ``physical_base`` — e.g. ``trapped_fast_ion_density`` →
-population=``trapped_fast``, subject=``ion``, base=``density`` — and must
-round-trip.
+Decomposition contract (rc32): ``fast``/``thermal``/… are population
+qualifiers; ``trapped``/``co_passing``/… are orbit qualifiers; both compose
+orthogonally with a species ``subject`` and render before it —
+``trapped_fast_ion_density`` → orbit=trapped, population=fast, subject=ion,
+base=density — and must round-trip.
 """
 
 from __future__ import annotations
@@ -16,26 +17,38 @@ import pytest
 from imas_standard_names.grammar import compose_standard_name, parse_standard_name
 
 
+def _v(seg):
+    return seg.value if seg is not None else None
+
+
 @pytest.mark.parametrize(
-    ("name", "population", "subject", "base"),
+    ("name", "orbit", "population", "subject", "base"),
     [
-        # Single population qualifier + species + base.
-        ("trapped_electron_density", "trapped", "electron", "density"),
-        ("co_passing_ion_density", "co_passing", "ion", "density"),
+        # population only
+        ("fast_ion_pressure", None, "fast", "ion", "pressure"),
+        ("thermal_electron_density", None, "thermal", "electron", "density"),
+        # 'plasma' is not a subject; plasma_current is a lexicalised base.
+        ("total_plasma_current", None, "total", None, "plasma_current"),
+        # orbit only
+        ("trapped_electron_density", "trapped", None, "electron", "density"),
+        ("co_passing_ion_density", "co_passing", None, "ion", "density"),
+        # orbit + population stacked (one token each, distinct segments)
+        ("trapped_fast_ion_density", "trapped", "fast", "ion", "density"),
     ],
 )
-def test_population_retained_and_round_trips(name, population, subject, base):
+def test_population_orbit_retained_and_round_trip(
+    name, orbit, population, subject, base
+):
     model = parse_standard_name(name)
-    assert model.population == population, (
-        f"{name!r}: population dropped/folded (got {model.population!r})"
-    )
-    assert (model.subject and model.subject.value) == subject
+    assert _v(model.orbit) == orbit, f"{name!r}: orbit"
+    assert _v(model.population) == population, f"{name!r}: population"
+    assert _v(model.subject) == subject, f"{name!r}: subject"
     assert model.physical_base == base
-    # Round-trip: the population prefix must be reproduced verbatim.
     assert compose_standard_name(model) == name
 
 
-def test_bare_species_has_no_population():
+def test_bare_species_has_no_modifiers():
     model = parse_standard_name("electron_density")
     assert model.population is None
+    assert model.orbit is None
     assert compose_standard_name(model) == "electron_density"
