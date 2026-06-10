@@ -53,6 +53,69 @@ def test_non_canonical_order_rejected_with_canonical_form(name, canonical):
 
 
 # ---------------------------------------------------------------------------
+# Subject stacking is a hard error; canonical_form is NEVER lossy
+# ---------------------------------------------------------------------------
+
+
+def test_two_subject_tokens_rejected_without_canonical_form():
+    # Two species subjects must raise the C1-style stacking error naming both
+    # tokens — never a NonCanonicalNameError offering the lossy render
+    # ('deuterium_density' silently dropping electron) that downstream
+    # pipelines would auto-adopt.
+    with pytest.raises(
+        ValueError, match=r"Two 'subject' tokens \('electron' and 'deuterium'\)"
+    ) as excinfo:
+        parse_standard_name("electron_deuterium_density")
+    assert not hasattr(excinfo.value, "canonical_form")
+
+
+@pytest.mark.parametrize(
+    "name",
+    [
+        # Atomic multi-word subject tokens are SINGLE enum tokens: unaffected.
+        "deuterium_tritium_fusion_power_density",
+        "runaway_electron_density",
+    ],
+)
+def test_atomic_multiword_subjects_unaffected(name):
+    assert compose_standard_name(parse_standard_name(name)) == name
+
+
+def test_ratio_to_template_behaviour_pinned():
+    # tritium_to_deuterium_density_ratio does not parse today (the to_
+    # connector blocks base resolution); pin that it raises the unknown-base
+    # error and NOT a subject-stacking error.
+    from imas_standard_names.grammar import UnknownBaseTokenError
+
+    with pytest.raises(UnknownBaseTokenError):
+        parse_standard_name("tritium_to_deuterium_density_ratio")
+
+
+def test_lossy_canonical_never_offered():
+    # Device tokens still project last-wins (out of C1 scope): the canonical
+    # render of flux_loop_mse_voltage drops flux_loop. The lossless guard must
+    # surface a distinct error WITHOUT canonical_form instead of offering the
+    # lossy rename.
+    with pytest.raises(ValueError, match=r"projection lost token\(s\)") as excinfo:
+        parse_standard_name("flux_loop_mse_voltage")
+    assert not isinstance(excinfo.value, NonCanonicalNameError)
+    assert not hasattr(excinfo.value, "canonical_form")
+
+
+def test_lossless_guard_unit():
+    from imas_standard_names.grammar.model import _assert_lossless_canonical
+
+    # Pure reorder: identical token multisets — guard passes silently.
+    _assert_lossless_canonical("fast_trapped_ion_density", "trapped_fast_ion_density")
+    # Lost tokens: raises without canonical_form.
+    with pytest.raises(ValueError, match="lost token"):
+        _assert_lossless_canonical("electron_deuterium_density", "deuterium_density")
+    # Gained tokens (synthetic): also refused.
+    with pytest.raises(ValueError, match="gained token"):
+        _assert_lossless_canonical("ion_density", "thermal_ion_density")
+
+
+# ---------------------------------------------------------------------------
 # Energy-state modifiers after a qualifier/subject are non-canonical
 # (no lexical thermal bases — rule 1 does all the work)
 # ---------------------------------------------------------------------------

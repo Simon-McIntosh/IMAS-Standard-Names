@@ -7,6 +7,7 @@ StandardName model used by the rest of the codebase.
 
 from __future__ import annotations
 
+from collections import Counter
 from collections.abc import Mapping
 from typing import Annotated, Any
 
@@ -263,6 +264,16 @@ def _ir_to_model_dict(ir: StandardNameIR) -> dict[str, str]:
                         raise ValueError(msg)
                     population = q.token
                 elif q.token in _SUBJECT_VALUES:
+                    if subject is not None:
+                        msg = (
+                            f"Two 'subject' tokens ('{subject}' and "
+                            f"'{q.token}') cannot stack in a single name; the "
+                            f"subject segment admits at most one species "
+                            f"token. Atomic multi-word subjects "
+                            f"(deuterium_tritium, runaway_electron, ...) are "
+                            f"single tokens and unaffected."
+                        )
+                        raise ValueError(msg)
                     subject = q.token
                 elif q.token in _OBJECT_VALUES:
                     device = q.token
@@ -813,8 +824,37 @@ def parse_standard_name(name: str) -> StandardName:
     # it serves diagnostics.
     canonical = _compose_ir(_model_to_ir(model))
     if canonical != name:
+        _assert_lossless_canonical(name, canonical)
         raise NonCanonicalNameError(name, canonical)
     return model
+
+
+def _assert_lossless_canonical(name: str, canonical: str) -> None:
+    """Refuse to offer a canonical_form that lost or gained tokens.
+
+    Downstream pipelines auto-adopt ``NonCanonicalNameError.canonical_form``
+    for deterministic normalization, so a projection path that silently drops
+    a token (e.g. a last-wins device assignment) must NEVER surface its lossy
+    render as the canonical form — that would launder token loss into
+    persisted names. A pure reorder has identical underscore-token multisets;
+    anything else raises a plain ValueError with NO canonical_form attribute.
+    """
+    input_tokens = Counter(name.split("_"))
+    canonical_tokens = Counter(canonical.split("_"))
+    if input_tokens == canonical_tokens:
+        return
+    lost = sorted((input_tokens - canonical_tokens).elements())
+    gained = sorted((canonical_tokens - input_tokens).elements())
+    detail = []
+    if lost:
+        detail.append(f"projection lost token(s) {set(lost)}")
+    if gained:
+        detail.append(f"projection gained token(s) {set(gained)}")
+    msg = (
+        f"{' and '.join(detail)} for '{name}' — name is ungrammatical "
+        f"(no canonical form is offered)"
+    )
+    raise ValueError(msg)
 
 
 __all__ = [
