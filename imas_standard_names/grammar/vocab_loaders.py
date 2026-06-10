@@ -221,8 +221,8 @@ def load_qualifiers() -> frozenset[str]:
 def load_populations() -> frozenset[str]:
     """Load population modifier tokens from ``populations.yml``.
 
-    Population tokens (energy-state, orbit class, molecularity, aggregation,
-    regime, polarization) compose orthogonally with a species subject. The
+    Population tokens (energy-state fast/thermal/cold/hot/suprathermal,
+    molecularity, bulk core) compose orthogonally with a species subject. The
     parser unions these into its qualifier vocabulary so they peel; the
     StandardName model retains them in the scalar ``population`` segment.
     Flat YAML list of string tokens (with optional inline comments).
@@ -239,6 +239,18 @@ def load_orbits() -> frozenset[str]:
     vocabulary so they peel; retained on the model in the ``orbit`` segment.
     """
     return _load_flat_token_list("orbits.yml", "orbits")
+
+
+def load_aggregations() -> frozenset[str]:
+    """Load aggregation tokens from ``aggregations.yml``.
+
+    Aggregation tokens (total, net) mark a population/species/contribution
+    reduction. Single-token closed segment, orthogonal to ``population`` (it
+    legitimately stacks with it) and rendered outermost. Unioned into the parser
+    qualifier vocabulary so they peel; retained on the model in the
+    ``aggregation`` segment.
+    """
+    return _load_flat_token_list("aggregations.yml", "aggregations")
 
 
 def _load_flat_token_list(filename: str, dict_key: str) -> frozenset[str]:

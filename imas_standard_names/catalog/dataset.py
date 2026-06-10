@@ -56,7 +56,7 @@ import yaml
 
 from imas_standard_names.grammar import Subject
 from imas_standard_names.grammar.context import get_grammar_context
-from imas_standard_names.grammar.model_types import Orbit, Population
+from imas_standard_names.grammar.model_types import Aggregation, Orbit, Population
 from imas_standard_names.grammar.parser import (
     ParseError,
     compose,
@@ -103,6 +103,7 @@ _REDUCTION_PREFIX_OPS: frozenset[str] = frozenset(
 _SUBJECT_TOKENS: frozenset[str] = frozenset(member.value for member in Subject)
 _ORBIT_TOKENS: frozenset[str] = frozenset(member.value for member in Orbit)
 _POPULATION_TOKENS: frozenset[str] = frozenset(member.value for member in Population)
+_AGGREGATION_TOKENS: frozenset[str] = frozenset(member.value for member in Aggregation)
 
 
 # Coordinate-axis ordering for sort_axis_index emission.
@@ -405,8 +406,10 @@ def _derive_grammar_facets(name: str) -> _GrammarFacets:
         token = qualifier.token
         qualifier_tokens.append(token)
         # Classify into the dedicated single-token segments so the SPA renders
-        # distinct, filterable cards (rc32 decomposition).
-        if token in _ORBIT_TOKENS:
+        # distinct, filterable cards (rc32 decomposition + aggregation segment).
+        if token in _AGGREGATION_TOKENS:
+            role, note = "aggregation", "Aggregation (total / net)"
+        elif token in _ORBIT_TOKENS:
             role, note = "orbit", "Orbit / transit class"
         elif token in _POPULATION_TOKENS:
             role, note = "population", "Species population (energy-state, …)"

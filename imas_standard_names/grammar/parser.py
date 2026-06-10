@@ -155,9 +155,11 @@ def load_default_vocabularies() -> Vocabularies:
     subject_quals = frozenset(s.value for s in Subject)
     object_quals = frozenset(o.value for o in Object)
     modifier_quals = vocab_loaders.load_qualifiers()
-    # Population (energy-state) + orbit (transit class) modifiers peel like
-    # qualifiers; the StandardName model retains them in the dedicated
-    # ``population`` / ``orbit`` single-token segments.
+    # Aggregation (total/net) + population (energy-state) + orbit (transit
+    # class) modifiers peel like qualifiers; the StandardName model retains
+    # them in the dedicated ``aggregation`` / ``population`` / ``orbit``
+    # single-token segments.
+    aggregation_quals = vocab_loaders.load_aggregations()
     population_quals = vocab_loaders.load_populations()
     orbit_quals = vocab_loaders.load_orbits()
 
@@ -176,6 +178,7 @@ def load_default_vocabularies() -> Vocabularies:
         subject_quals
         | object_quals
         | modifier_quals
+        | aggregation_quals
         | population_quals
         | orbit_quals
         | prefix_op_quals

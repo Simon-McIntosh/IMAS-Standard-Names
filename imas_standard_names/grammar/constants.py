@@ -27,6 +27,7 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 
 from .model_types import (
+    Aggregation,
     Component,
     GeometricBase,
     Object,
@@ -52,6 +53,7 @@ class SegmentRule:
 SEGMENT_TOKEN_MAP: dict[str, tuple[str, ...]] = {
     "component": tuple(member.value for member in Component),
     "coordinate": tuple(member.value for member in Component),
+    "aggregation": tuple(member.value for member in Aggregation),
     "orbit": tuple(member.value for member in Orbit),
     "population": tuple(member.value for member in Population),
     "subject": tuple(member.value for member in Subject),
@@ -80,6 +82,13 @@ SEGMENT_RULES: tuple[SegmentRule, ...] = (
         template=None,
         exclusive_with=("component",),
         tokens=SEGMENT_TOKEN_MAP["coordinate"],
+    ),
+    SegmentRule(
+        identifier="aggregation",
+        optional=True,
+        template=None,
+        exclusive_with=(),
+        tokens=SEGMENT_TOKEN_MAP["aggregation"],
     ),
     SegmentRule(
         identifier="orbit",
@@ -170,6 +179,7 @@ SEGMENT_RULES: tuple[SegmentRule, ...] = (
 SEGMENT_ORDER: tuple[str, ...] = (
     "component",
     "coordinate",
+    "aggregation",
     "orbit",
     "population",
     "subject",
@@ -183,9 +193,9 @@ SEGMENT_ORDER: tuple[str, ...] = (
     "process",
 )
 
-# Base segments are at indices [6, 7] in SEGMENT_ORDER
+# Base segments are at indices [7, 8] in SEGMENT_ORDER
 # They mark the boundary between prefix (component, coordinate, subject) and suffix (object, geometry, position, process) segments
-BASE_SEGMENT_INDICES: tuple[int, ...] = (6, 7)
+BASE_SEGMENT_INDICES: tuple[int, ...] = (7, 8)
 BASE_SEGMENTS: tuple[str, ...] = ("geometric_base", "physical_base")
 PREFIX_SEGMENTS: tuple[str, ...] = SEGMENT_ORDER[: BASE_SEGMENT_INDICES[0]]
 SUFFIX_SEGMENTS: tuple[str, ...] = SEGMENT_ORDER[BASE_SEGMENT_INDICES[-1] + 1 :]

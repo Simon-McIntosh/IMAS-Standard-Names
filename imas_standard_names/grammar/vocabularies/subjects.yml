@@ -8,11 +8,14 @@
 #   - ion_density
 #   - deuterium_pressure
 #
-# SUBJECTS ARE SPECIES / ENTITIES ONLY. Modifier qualifiers (energy-state
-# fast/thermal/cold/hot/suprathermal, orbit class trapped/co_passing/…,
-# molecularity, aggregation total/bulk, regime, polarization) live in the
-# orthogonal `population` segment (populations.yml) as of the rc32 vocab
-# decomposition — they are NOT subject tokens.
+# SUBJECTS ARE SPECIES / ENTITIES ONLY. Modifier qualifiers live in dedicated
+# orthogonal segments as of the rc32 vocab decomposition — they are NOT subject
+# tokens:
+#   - energy-state fast/thermal/cold/hot/suprathermal, molecularity, bulk →
+#     `population` segment (populations.yml)
+#   - orbit class trapped/co_passing/… → `orbit` segment (orbits.yml)
+#   - aggregation total/net → `aggregation` segment (aggregations.yml)
+#   - regime, polarization → `qualifier` segment (qualifiers.yml)
 #
 # Kept atomic (not decomposed): runaway_electron, gyrocenter, neutral_beam,
 # edge_localized_mode, halo, the reaction pairs, the SPI/pellet/gas species,
@@ -24,7 +27,7 @@
 # === Core plasma species ===
 # NOTE: 'plasma' is intentionally NOT a subject — 'plasma_current', 'plasma_
 # volume', etc. are lexicalised physical_bases (generic base + implicit plasma).
-# Aggregation modifiers compose as total_plasma_current = population=total +
+# Aggregation modifiers compose as total_plasma_current = aggregation=total +
 # base=plasma_current.
 - electron
 - ion

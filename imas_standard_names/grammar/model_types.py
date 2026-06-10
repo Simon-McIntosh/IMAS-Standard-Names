@@ -103,7 +103,6 @@ class Population(StrEnum):
     HOT = "hot"
     SUPRATHERMAL = "suprathermal"
     MOLECULAR = "molecular"
-    TOTAL = "total"
     BULK = "bulk"
 
 
@@ -113,6 +112,11 @@ class Orbit(StrEnum):
     COUNTER_PASSING = "counter_passing"
     CO_CURRENT = "co_current"
     COUNTER_CURRENT = "counter_current"
+
+
+class Aggregation(StrEnum):
+    TOTAL = "total"
+    NET = "net"
 
 
 class Region(StrEnum):
@@ -539,6 +543,7 @@ __all__ = [
     "Subject",
     "Population",
     "Orbit",
+    "Aggregation",
     "Region",
     "Process",
     "GenericPhysicalBase",

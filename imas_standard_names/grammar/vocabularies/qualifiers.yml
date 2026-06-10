@@ -27,8 +27,8 @@
 - heat                          # heat transport channel (heat_flux, heat_viscosity)
 
 # --- Aggregate/net qualifiers ---
-# NOTE: 'total' moved to populations.yml (aggregation population modifier).
-- net                           # net (signed sum) quantity
+# NOTE: 'total' and 'net' moved to aggregations.yml (the aggregation segment —
+# summed/netted over sub-populations, species, or additive contributions).
 
 # --- Collision/transport regime ---
 # NOTE: 'thermal' moved to populations.yml (energy-state population modifier).

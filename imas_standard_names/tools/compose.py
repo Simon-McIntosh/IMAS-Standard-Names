@@ -56,6 +56,7 @@ class ComposeTool(Tool):
         physical_base: str | None = None,
         component: grammar_types.Component | str | None = None,
         coordinate: grammar_types.Component | str | None = None,
+        aggregation: grammar_types.Aggregation | str | None = None,
         orbit: grammar_types.Orbit | str | None = None,
         population: grammar_types.Population | str | None = None,
         subject: grammar_types.Subject | str | None = None,
@@ -79,6 +80,7 @@ class ComposeTool(Tool):
         geo_base = coerce_enum(grammar_types.GeometricBase, geometric_base)
         comp = coerce_enum(grammar_types.Component, component)
         coord = coerce_enum(grammar_types.Component, coordinate)
+        agg = coerce_enum(grammar_types.Aggregation, aggregation)
         orb = coerce_enum(grammar_types.Orbit, orbit)
         pop = coerce_enum(grammar_types.Population, population)
         subj = coerce_enum(grammar_types.Subject, subject)
@@ -96,6 +98,7 @@ class ComposeTool(Tool):
             physical_base=physical_base,
             component=comp,
             coordinate=coord,
+            aggregation=agg,
             orbit=orb,
             population=pop,
             subject=subj,

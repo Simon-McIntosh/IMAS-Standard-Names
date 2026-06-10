@@ -32,6 +32,7 @@ from imas_standard_names.grammar.ir import (
     StandardNameIR,
 )
 from imas_standard_names.grammar.model_types import (
+    Aggregation,
     BinaryOperator,
     Component,
     Decomposition,
@@ -76,11 +77,17 @@ _POSITION_VALUES: frozenset[str] = frozenset(p.value for p in Position)
 _REGION_VALUES: frozenset[str] = frozenset(r.value for r in Region)
 _GEOMETRY_VALUES: frozenset[str] = frozenset(g.value for g in GeometricBase)
 
-# Population + orbit: two orthogonal single-token modifier segments split out of
-# the old compound subject tokens (rc32 decomposition). Each contributes at most
-# one token (no intra-segment stacking) and renders as a prefix before the
-# species subject: ``<orbit>_<population>_<subject>_<base>``, e.g.
-# ``trapped_fast_ion_density`` → orbit=trapped, population=fast, subject=ion.
+# Aggregation, population, and orbit: orthogonal single-token modifier segments
+# split out of the old compound subject tokens (rc32 decomposition) plus the
+# aggregation segment. Each contributes at most one token (no intra-segment
+# stacking — a second same-segment token is a hard error, see
+# ``_ir_to_model_dict``). Aggregation (total/net) is a distinct dimension that
+# legitimately STACKS with population (energy-state); orbit is the transit class.
+# They render as prefixes outermost-to-inner:
+# ``<aggregation>_<orbit>_<population>_<subject>_<base>``, e.g.
+# ``total_trapped_fast_ion_energy`` → aggregation=total, orbit=trapped,
+# population=fast, subject=ion.
+_AGGREGATION_VALUES: frozenset[str] = frozenset(a.value for a in Aggregation)
 _POPULATION_VALUES: frozenset[str] = frozenset(p.value for p in Population)
 _ORBIT_VALUES: frozenset[str] = frozenset(o.value for o in Orbit)
 
@@ -198,16 +205,44 @@ def _ir_to_model_dict(ir: StandardNameIR) -> dict[str, str]:
             subject = None
             device = None
             transformation_token = None
+            aggregation = None
             population = None
             orbit = None
             base_qualifiers: list[str] = []
             for q in ir.qualifiers:
-                # Orbit + population are orthogonal single-token modifier
-                # segments; they take priority over the subject branch (each
-                # contributes at most one token) and render before the species.
-                if q.token in _ORBIT_VALUES:
+                # Aggregation, orbit, and population are orthogonal single-token
+                # modifier segments; they take priority over the subject branch
+                # and render before the species. Each contributes AT MOST one
+                # token: a second token of the same segment is a hard error
+                # (never silent last-wins — that would drop a token from the
+                # name, e.g. fast_thermal_ion_density). Aggregation legitimately
+                # stacks with population, so total_fast_ion_energy is valid.
+                if q.token in _AGGREGATION_VALUES:
+                    if aggregation is not None:
+                        msg = (
+                            f"Two 'aggregation' tokens ('{aggregation}' and "
+                            f"'{q.token}') cannot stack in a single name; the "
+                            f"aggregation segment admits at most one token."
+                        )
+                        raise ValueError(msg)
+                    aggregation = q.token
+                elif q.token in _ORBIT_VALUES:
+                    if orbit is not None:
+                        msg = (
+                            f"Two 'orbit' tokens ('{orbit}' and '{q.token}') "
+                            f"cannot stack in a single name; the orbit segment "
+                            f"admits at most one token."
+                        )
+                        raise ValueError(msg)
                     orbit = q.token
                 elif q.token in _POPULATION_VALUES:
+                    if population is not None:
+                        msg = (
+                            f"Two 'population' tokens ('{population}' and "
+                            f"'{q.token}') cannot stack in a single name; the "
+                            f"population segment admits at most one token."
+                        )
+                        raise ValueError(msg)
                     population = q.token
                 elif q.token in _SUBJECT_VALUES:
                     subject = q.token
@@ -220,6 +255,8 @@ def _ir_to_model_dict(ir: StandardNameIR) -> dict[str, str]:
                     transformation_token = q.token
                 else:
                     base_qualifiers.append(q.token)
+            if aggregation:
+                d["aggregation"] = aggregation
             if orbit:
                 d["orbit"] = orbit
             if population:
@@ -350,6 +387,7 @@ def _model_to_ir(model: StandardName) -> StandardNameIR:
                 model.device,
                 model.population,
                 model.orbit,
+                model.aggregation,
             )
             # Insert bare-prefix transformation qualifier at the front
             # (transformation is outermost: <transform>_<subject>_<base>)
@@ -404,17 +442,21 @@ def _decompose_physical_base(
     device: Object | None,
     population: Population | None = None,
     orbit: Orbit | None = None,
+    aggregation: Aggregation | None = None,
 ) -> tuple[QuantityOrCarrier, list[Qualifier]]:
     """Decompose a physical_base string into IR base + qualifiers.
 
     The physical_base may be a compound like 'magnetic_field' or
     'diamagnetic_drift_velocity'. We use the parser to decompose it correctly,
-    then prepend orbit/population/subject/device as qualifiers.
+    then prepend aggregation/orbit/population/subject/device as qualifiers.
     """
     qualifiers: list[Qualifier] = []
 
-    # Render order outer-to-inner: orbit, then population, then the species
-    # subject, then the device — <orbit>_<population>_<subject>_<base>.
+    # Render order outer-to-inner: aggregation, then orbit, then population,
+    # then the species subject, then the device —
+    # <aggregation>_<orbit>_<population>_<subject>_<base>.
+    if aggregation:
+        qualifiers.append(Qualifier(token=_value_of(aggregation)))
     if orbit:
         qualifiers.append(Qualifier(token=_value_of(orbit)))
     if population:
@@ -444,6 +486,7 @@ class StandardName(BaseModel):
 
     component: Component | None = None
     coordinate: Component | None = None
+    aggregation: Aggregation | None = None
     orbit: Orbit | None = None
     population: Population | None = None
     subject: Subject | None = None
@@ -608,6 +651,9 @@ class StandardName(BaseModel):
             # Transformations, binary operators, and processes also qualify generic bases
             has_qualification = any(
                 [
+                    self.aggregation,
+                    self.orbit,
+                    self.population,
                     self.subject,
                     self.device,
                     self.object,
