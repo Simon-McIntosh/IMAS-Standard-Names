@@ -204,10 +204,13 @@ class TestSynonymRewrites:
         assert normalize_standard_name(name) == name
 
     def test_parse_applies_synonym_rewrite(self):
-        """Parser should normalize before parsing."""
-        parsed = parse_standard_name("electron_per_toroidal_mode_power")
-        # After rewrite: electron_per_toroidal_mode_power
-        # per_toroidal_mode is a transformation token
+        """per_toroidal_mode parses as a transformation in canonical position.
+
+        Canonical order renders the transformation outermost
+        (per_toroidal_mode_electron_power); the legacy subject-first spelling
+        is non-canonical and rejected by strict canonical-form parsing.
+        """
+        parsed = parse_standard_name("per_toroidal_mode_electron_power")
         assert parsed.transformation == Transformation.PER_TOROIDAL_MODE
 
 

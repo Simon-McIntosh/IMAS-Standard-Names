@@ -164,6 +164,24 @@ _BARE_PREFIX_TRANSFORMATIONS: frozenset[str] = frozenset(
 )
 
 
+class NonCanonicalNameError(ValueError):
+    """Name parses but its token order is not the canonical form.
+
+    The grammar locks modifier ordering the way English locks adjective
+    order: non-canonical order is ungrammatical, never silently reordered.
+    ``canonical_form`` carries the unique canonical spelling so downstream
+    pipelines can deterministically normalize instead of guessing.
+    """
+
+    def __init__(self, name: str, canonical_form: str) -> None:
+        super().__init__(
+            f"non-canonical token order in '{name}': "
+            f"canonical form is '{canonical_form}'"
+        )
+        self.name = name
+        self.canonical_form = canonical_form
+
+
 # ---------------------------------------------------------------------------
 # IR ↔ Model adapters
 # ---------------------------------------------------------------------------
@@ -629,6 +647,55 @@ class StandardName(BaseModel):
         return self
 
     @model_validator(mode="after")
+    def _check_population_form_with_subject(self) -> StandardName:
+        """With a species subject, the population form is canonical.
+
+        After the lexicalisation of thermal_pressure/thermal_energy, two
+        spellings of the same quantity would otherwise be grammatical:
+        ``thermal_electron_pressure`` (population + subject + base) and
+        ``electron_thermal_pressure`` (subject + lexical base). When a
+        species subject is present AND the lexical base's LEADING token is
+        also a population/orbit/aggregation token (data-driven against
+        those segment token sets), reject and direct to the population
+        form. The lexical-base spelling remains canonical only in
+        species-aggregated names (thermal_pressure, plasma_thermal_pressure,
+        total_plasma_thermal_pressure).
+        """
+        if self.subject is None or self.physical_base is None:
+            return self
+        head, sep, rest = self.physical_base.partition("_")
+        if not sep:
+            return self
+        if head in _POPULATION_VALUES:
+            segment = "population"
+        elif head in _ORBIT_VALUES:
+            segment = "orbit"
+        elif head in _AGGREGATION_VALUES:
+            segment = "aggregation"
+        else:
+            return self
+        canonical = self._population_form(segment, head, rest)
+        hint = f": use population form '{canonical}'" if canonical else ""
+        msg = (
+            f"with a species subject, '{head}' must be expressed in the "
+            f"'{segment}' segment, not embedded in physical_base "
+            f"'{self.physical_base}'{hint}"
+        )
+        raise ValueError(msg)
+
+    def _population_form(self, segment: str, head: str, rest: str) -> str | None:
+        """Compose the canonical population-form spelling, if constructible."""
+        if getattr(self, segment) is not None:
+            return None  # segment already occupied; no canonical relocation
+        try:
+            parts = self.model_dump_compact()
+            parts["physical_base"] = rest
+            parts[segment] = head
+            return StandardName.model_validate(parts).compose()
+        except ValueError:
+            return None
+
+    @model_validator(mode="after")
     def _check_exclusive(self) -> StandardName:
         for left, right in EXCLUSIVE_SEGMENT_PAIRS:
             if getattr(self, left, None) and getattr(self, right, None):
@@ -825,10 +892,21 @@ def parse_standard_name(name: str) -> StandardName:
             known = tuple(sorted(vocabs.bases | vocabs.carriers))
             raise UnknownBaseTokenError(exc.residue, known) from exc
         raise
-    return StandardName.model_validate(_ir_to_model_dict(result.ir))
+    model = StandardName.model_validate(_ir_to_model_dict(result.ir))
+    # Strict canonical-form parsing: the grammar admits exactly ONE spelling
+    # per name. A name whose tokens parse but sit in non-canonical order
+    # (e.g. fast_trapped_ion_density vs trapped_fast_ion_density) is
+    # ungrammatical — raise with the canonical form attached rather than
+    # silently reordering on compose. The IR-level parse() stays lenient;
+    # it serves diagnostics.
+    canonical = _compose_ir(_model_to_ir(model))
+    if canonical != name:
+        raise NonCanonicalNameError(name, canonical)
+    return model
 
 
 __all__ = [
+    "NonCanonicalNameError",
     "StandardName",
     "compose_standard_name",
     "parse_standard_name",

@@ -44,14 +44,20 @@ def test_with_position_process():
     assert back.process == Process.EXTERNAL_COIL
 
 
-def test_order_flexible_in_short_form():
-    """In the short-form grammar the component prefix is position-independent.
+def test_non_canonical_order_is_ungrammatical():
+    """Token order is locked: only the canonical spelling parses.
 
-    The parser can identify 'radial' as a component token regardless of whether
-    it appears before or after a subject token like 'electron'.
-    Both orderings produce the same canonical composition.
+    'electron_radial_heat_flux' places the component after the subject; the
+    canonical form is 'radial_electron_heat_flux'. Non-canonical order raises
+    NonCanonicalNameError carrying the canonical form (no silent reordering).
     """
-    parsed = parse_name("electron_radial_heat_flux")
+    from imas_standard_names.grammar import NonCanonicalNameError
+
+    with pytest.raises(NonCanonicalNameError) as excinfo:
+        parse_name("electron_radial_heat_flux")
+    assert excinfo.value.canonical_form == "radial_electron_heat_flux"
+
+    parsed = parse_name("radial_electron_heat_flux")
     assert parsed.component == Component.RADIAL
     assert parsed.subject == "electron"
     assert parsed.physical_base == "heat_flux"

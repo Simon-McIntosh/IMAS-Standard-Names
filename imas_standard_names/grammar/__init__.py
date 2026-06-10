@@ -5,6 +5,7 @@ vocabulary/metadata (grammar_models).
 """
 
 from .model import (
+    NonCanonicalNameError,
     StandardName,
     compose_standard_name,
     parse_standard_name,
@@ -57,6 +58,7 @@ compose_name = compose_standard_name
 parse_name = parse_standard_name
 
 __all__ = [
+    "NonCanonicalNameError",
     "TOKEN_PATTERN",
     "UnknownBaseTokenError",
     "compose_standard_name",
