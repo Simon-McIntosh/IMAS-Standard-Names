@@ -23,16 +23,19 @@
 #   geometric_base or physical_base is required (mutually exclusive).
 #
 # component (for physical vectors) vs coordinate (for geometric/spatial vectors):
-#   * Use "component" for physical field vectors 
+#   * Use "component" for physical field vectors
 #     (magnetic_field, heat_flux, velocity) with physical_base
-#     Template: {axis}_component_of_{vector} 
-#     (e.g., radial_component_of_magnetic_field)
-#   * Use "coordinate" for geometric/spatial quantities 
+#     Short form only: {axis}_{vector} (e.g., radial_magnetic_field).
+#     The long form {axis}_component_of_{vector} is RETIRED and does not parse.
+#   * Use "coordinate" for geometric/spatial quantities
 #     (position, vertex, centroid, trajectory) with geometric_base
-#     Template: {axis}_{geometric_base} 
+#     Template: {axis}_{geometric_base}
 #     (e.g., radial_position_of_flux_loop_contour)
 #   * component and coordinate are mutually exclusive
 #   * coordinate requires geometric_base; component requires physical_base
+#   * component/coordinate is the FIRST (outermost) prefix segment — it
+#     precedes aggregation/orbit/population/subject in the locked order
+#     (radial_total_ion_energy_diffusivity, NOT total_radial_...)
 #
 # device (<device>_):
 #   * Use prefix pattern for device signals/outputs where device IS the source
@@ -81,7 +84,7 @@
 #===============================================================================
 
 canonical_pattern: >
-  [<component>_component_of | <coordinate>]?
+  [<component> | <coordinate>]?
   [<aggregation>]?
   [<orbit>]?
   [<population>]?
@@ -139,12 +142,14 @@ segments:
   - id: component
     optional: true
     vocabulary: components
-    template: "{token}_component_of"
+    # Short form only ({token}_<vector>, e.g. radial_magnetic_field); the
+    # long-form template {token}_component_of_<vector> is retired.
     exclusive_with:
       - coordinate
     description: >
-      Directional component of a physical vector quantity 
-      (fields, fluxes, velocities)
+      Directional component of a physical vector quantity
+      (fields, fluxes, velocities). Renders as the first (outermost) prefix:
+      <component>_<aggregation>_<orbit>_<population>_<subject>_<base>.
   - id: coordinate
     optional: true
     vocabulary: components
@@ -219,7 +224,7 @@ segments:
       Can represent physical fields (magnetic_field, temperature, voltage, flux, current),
       derived quantities (gradient, divergence), measurement signals,
       or hardware characteristics (area, resistance, capacitance).
-      Used with component prefix for physical vector components (e.g., radial_component_of_magnetic_field).
+      Used with component prefix for physical vector components (e.g., radial_magnetic_field).
   - id: object
     optional: true
     vocabulary: objects
@@ -350,7 +355,7 @@ entry_schema:
       examples:
         - electron_temperature
         - gradient_of_electron_temperature
-        - radial_component_of_magnetic_field
+        - radial_magnetic_field
       guidance:
         validation: "Must follow grammar canonical pattern. Use get_grammar for composition rules."
         common_mistakes:

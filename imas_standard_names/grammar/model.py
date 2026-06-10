@@ -16,7 +16,6 @@ from imas_standard_names.grammar.constants import (
     BINARY_OPERATOR_CONNECTORS,
     EXCLUSIVE_SEGMENT_PAIRS,
     GENERIC_PHYSICAL_BASES,
-    SEGMENT_TOKEN_MAP,
 )
 from imas_standard_names.grammar.ir import (
     LOCUS_VALUE_PATTERN,
@@ -92,14 +91,6 @@ _GEOMETRY_VALUES: frozenset[str] = frozenset(g.value for g in GeometricBase)
 _AGGREGATION_VALUES: frozenset[str] = frozenset(a.value for a in Aggregation)
 _POPULATION_VALUES: frozenset[str] = frozenset(p.value for p in Population)
 _ORBIT_VALUES: frozenset[str] = frozenset(o.value for o in Orbit)
-
-# Closed physical-base vocabulary, used by the lexical-base collision guard:
-# a modifier+base combination whose rendered prefix-adjacent form IS a lexical
-# base token (e.g. population=thermal + physical_base=pressure rendering
-# 'thermal_pressure') would not round-trip — the parser reads the compound as
-# the lexical base. Such combinations are rejected at construction.
-_PHYSICAL_BASE_TOKENS: frozenset[str] = frozenset(SEGMENT_TOKEN_MAP["physical_base"])
-
 
 # Map from LocusType to model field name
 _LOCUS_TYPE_TO_FIELD: dict[LocusType, str] = {
@@ -615,85 +606,6 @@ class StandardName(BaseModel):
             msg = "position_value can only be set when position is set"
             raise ValueError(msg)
         return self
-
-    @model_validator(mode="after")
-    def _check_lexical_base_collision(self) -> StandardName:
-        """Reject modifier+base combos that render as a lexical base token.
-
-        ``StandardName(population='thermal', physical_base='pressure')`` would
-        compose to the string ``thermal_pressure``, which re-parses as the
-        lexical physical base — parse(compose(m)) != m. Only the modifier
-        rendered ADJACENT to the base can collide, so the check is skipped
-        when a subject or device sits between them.
-        """
-        if (
-            self.physical_base is None
-            or self.subject is not None
-            or self.device is not None
-        ):
-            return self
-        adjacent = self.population or self.orbit or self.aggregation
-        if adjacent is None:
-            return self
-        candidate = f"{_value_of(adjacent)}_{self.physical_base}"
-        if candidate in _PHYSICAL_BASE_TOKENS:
-            msg = (
-                f"population/orbit/aggregation token '{_value_of(adjacent)}' "
-                f"with physical_base '{self.physical_base}' renders "
-                f"'{candidate}', which is a lexical physical base — use "
-                f"physical_base='{candidate}' instead"
-            )
-            raise ValueError(msg)
-        return self
-
-    @model_validator(mode="after")
-    def _check_population_form_with_subject(self) -> StandardName:
-        """With a species subject, the population form is canonical.
-
-        After the lexicalisation of thermal_pressure/thermal_energy, two
-        spellings of the same quantity would otherwise be grammatical:
-        ``thermal_electron_pressure`` (population + subject + base) and
-        ``electron_thermal_pressure`` (subject + lexical base). When a
-        species subject is present AND the lexical base's LEADING token is
-        also a population/orbit/aggregation token (data-driven against
-        those segment token sets), reject and direct to the population
-        form. The lexical-base spelling remains canonical only in
-        species-aggregated names (thermal_pressure, plasma_thermal_pressure,
-        total_plasma_thermal_pressure).
-        """
-        if self.subject is None or self.physical_base is None:
-            return self
-        head, sep, rest = self.physical_base.partition("_")
-        if not sep:
-            return self
-        if head in _POPULATION_VALUES:
-            segment = "population"
-        elif head in _ORBIT_VALUES:
-            segment = "orbit"
-        elif head in _AGGREGATION_VALUES:
-            segment = "aggregation"
-        else:
-            return self
-        canonical = self._population_form(segment, head, rest)
-        hint = f": use population form '{canonical}'" if canonical else ""
-        msg = (
-            f"with a species subject, '{head}' must be expressed in the "
-            f"'{segment}' segment, not embedded in physical_base "
-            f"'{self.physical_base}'{hint}"
-        )
-        raise ValueError(msg)
-
-    def _population_form(self, segment: str, head: str, rest: str) -> str | None:
-        """Compose the canonical population-form spelling, if constructible."""
-        if getattr(self, segment) is not None:
-            return None  # segment already occupied; no canonical relocation
-        try:
-            parts = self.model_dump_compact()
-            parts["physical_base"] = rest
-            parts[segment] = head
-            return StandardName.model_validate(parts).compose()
-        except ValueError:
-            return None
 
     @model_validator(mode="after")
     def _check_exclusive(self) -> StandardName:

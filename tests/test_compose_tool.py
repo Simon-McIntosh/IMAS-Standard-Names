@@ -65,4 +65,4 @@ def test_vocabulary_in_grammar_tool():
 
     # Check that vocabulary structure includes templates
     assert "template" in vocab["component"]
-    assert vocab["component"]["template"] == "{token}_component_of"
+    assert vocab["component"]["template"] is None  # long form retired - short form only

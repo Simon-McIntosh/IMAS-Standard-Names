@@ -202,7 +202,7 @@
           "examples": [
             "electron_temperature",
             "gradient_of_electron_temperature",
-            "radial_component_of_magnetic_field"
+            "radial_magnetic_field"
           ],
           "pattern": "^[a-z][a-z0-9_]*$",
           "title": "Name",
@@ -227,7 +227,7 @@
               "examples": [
                 "electron_temperature",
                 "gradient_of_electron_temperature",
-                "radial_component_of_magnetic_field"
+                "radial_magnetic_field"
               ],
               "pattern": "^[a-z][a-z0-9_]*$",
               "type": "string"
@@ -246,7 +246,7 @@
               "examples": [
                 "electron_temperature",
                 "gradient_of_electron_temperature",
-                "radial_component_of_magnetic_field"
+                "radial_magnetic_field"
               ],
               "pattern": "^[a-z][a-z0-9_]*$",
               "type": "string"
@@ -411,7 +411,7 @@
           "examples": [
             "electron_temperature",
             "gradient_of_electron_temperature",
-            "radial_component_of_magnetic_field"
+            "radial_magnetic_field"
           ],
           "pattern": "^[a-z][a-z0-9_]*$",
           "title": "Name",
@@ -436,7 +436,7 @@
               "examples": [
                 "electron_temperature",
                 "gradient_of_electron_temperature",
-                "radial_component_of_magnetic_field"
+                "radial_magnetic_field"
               ],
               "pattern": "^[a-z][a-z0-9_]*$",
               "type": "string"
@@ -455,7 +455,7 @@
               "examples": [
                 "electron_temperature",
                 "gradient_of_electron_temperature",
-                "radial_component_of_magnetic_field"
+                "radial_magnetic_field"
               ],
               "pattern": "^[a-z][a-z0-9_]*$",
               "type": "string"
@@ -575,7 +575,7 @@
           "examples": [
             "electron_temperature",
             "gradient_of_electron_temperature",
-            "radial_component_of_magnetic_field"
+            "radial_magnetic_field"
           ],
           "pattern": "^[a-z][a-z0-9_]*$",
           "title": "Name",
@@ -600,7 +600,7 @@
               "examples": [
                 "electron_temperature",
                 "gradient_of_electron_temperature",
-                "radial_component_of_magnetic_field"
+                "radial_magnetic_field"
               ],
               "pattern": "^[a-z][a-z0-9_]*$",
               "type": "string"
@@ -619,7 +619,7 @@
               "examples": [
                 "electron_temperature",
                 "gradient_of_electron_temperature",
-                "radial_component_of_magnetic_field"
+                "radial_magnetic_field"
               ],
               "pattern": "^[a-z][a-z0-9_]*$",
               "type": "string"
@@ -784,7 +784,7 @@
           "examples": [
             "electron_temperature",
             "gradient_of_electron_temperature",
-            "radial_component_of_magnetic_field"
+            "radial_magnetic_field"
           ],
           "pattern": "^[a-z][a-z0-9_]*$",
           "title": "Name",
@@ -809,7 +809,7 @@
               "examples": [
                 "electron_temperature",
                 "gradient_of_electron_temperature",
-                "radial_component_of_magnetic_field"
+                "radial_magnetic_field"
               ],
               "pattern": "^[a-z][a-z0-9_]*$",
               "type": "string"
@@ -828,7 +828,7 @@
               "examples": [
                 "electron_temperature",
                 "gradient_of_electron_temperature",
-                "radial_component_of_magnetic_field"
+                "radial_magnetic_field"
               ],
               "pattern": "^[a-z][a-z0-9_]*$",
               "type": "string"
@@ -993,7 +993,7 @@
           "examples": [
             "electron_temperature",
             "gradient_of_electron_temperature",
-            "radial_component_of_magnetic_field"
+            "radial_magnetic_field"
           ],
           "pattern": "^[a-z][a-z0-9_]*$",
           "title": "Name",
@@ -1018,7 +1018,7 @@
               "examples": [
                 "electron_temperature",
                 "gradient_of_electron_temperature",
-                "radial_component_of_magnetic_field"
+                "radial_magnetic_field"
               ],
               "pattern": "^[a-z][a-z0-9_]*$",
               "type": "string"
@@ -1037,7 +1037,7 @@
               "examples": [
                 "electron_temperature",
                 "gradient_of_electron_temperature",
-                "radial_component_of_magnetic_field"
+                "radial_magnetic_field"
               ],
               "pattern": "^[a-z][a-z0-9_]*$",
               "type": "string"

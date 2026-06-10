@@ -15,7 +15,7 @@ def test_overview_structure(sample_catalog):
     # Should have canonical pattern in overview
     assert "canonical_pattern" in result
     expected_pattern = (
-        "[<component>_component_of | <coordinate>]? [<aggregation>]? [<orbit>]? "
+        "[<component> | <coordinate>]? [<aggregation>]? [<orbit>]? "
         "[<population>]? [<subject>]? [<device> | of_<object>]? "
         "[<geometric_base> | <physical_base>]? "
         "[of_<geometry> | at_<position> | over_<region>]? [due_to_<process>]? [<qualifier>]?"
@@ -46,7 +46,7 @@ def test_overview_structure(sample_catalog):
     assert "templates" in result
     templates = result["templates"]
     assert isinstance(templates, dict)
-    assert templates["component"] == "{token}_component_of"
+    assert templates["component"] == "{token}"  # long form retired - short form only
     assert templates["object"] == "of_{token}"
     assert templates["position"] == "at_{token}"
     assert templates["coordinate"] == "{token}"  # No template - token used as-is
@@ -99,7 +99,7 @@ def test_overview_full_section(sample_catalog):
 
     # Check that vocabulary items have expected structure
     assert "template" in vocab["component"]
-    assert vocab["component"]["template"] == "{token}_component_of"
+    assert vocab["component"]["template"] is None  # long form retired - short form only
     assert "tokens" in vocab["component"]
     assert isinstance(vocab["component"]["tokens"], list)
 

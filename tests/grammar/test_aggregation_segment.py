@@ -65,16 +65,23 @@ def test_two_aggregations_rejected():
 # ---------------------------------------------------------------------------
 
 
-def test_total_plasma_thermal_pressure_round_trips():
-    # 'thermal' here is part of the lexical base thermal_pressure (the
-    # thermodynamic compound), NOT a population token — the catalog string
-    # round-trips identically with plasma folded as a base qualifier.
-    name = "total_plasma_thermal_pressure"
+def test_total_thermal_plasma_pressure_canonical():
+    # Energy-state modifiers live only in population: canonical order is
+    # total(thermal(plasma_pressure)). The legacy catalog spelling
+    # total_plasma_thermal_pressure is non-canonical and rejected with the
+    # canonical form attached.
+    from imas_standard_names.grammar import NonCanonicalNameError
+
+    name = "total_thermal_plasma_pressure"
     model = parse_standard_name(name)
     assert _v(model.aggregation) == "total"
-    assert model.population is None
-    assert model.physical_base == "plasma_thermal_pressure"
+    assert _v(model.population) == "thermal"
+    assert model.physical_base == "plasma_pressure"
     assert compose_standard_name(model) == name
+
+    with pytest.raises(NonCanonicalNameError) as excinfo:
+        parse_standard_name("total_plasma_thermal_pressure")
+    assert excinfo.value.canonical_form == name
 
 
 def test_total_thermal_ion_species_density_round_trips():

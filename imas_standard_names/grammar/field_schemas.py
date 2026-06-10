@@ -195,7 +195,7 @@ FIELD_CONSTRAINTS: dict[str, dict[str, Any]] = {
         "examples": [
             "electron_temperature",
             "gradient_of_electron_temperature",
-            "radial_component_of_magnetic_field",
+            "radial_magnetic_field",
         ],
     },
     "description": {

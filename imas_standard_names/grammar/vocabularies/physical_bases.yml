@@ -324,20 +324,11 @@ bases:
     aliases: []
     kind: scalar
     inherently_dimensional: true
-  # Lexical physics compounds: 'thermal' here is part of the thermodynamic
-  # quantity name (thermal pressure vs magnetic/fast-particle pressure; thermal
-  # stored energy W_th) — it attaches to the base, NOT to a species population.
-  # plasma_thermal_pressure = plasma qualifier + base thermal_pressure;
-  # thermal_ion_pressure = population thermal + subject ion + base pressure
-  # (no suffix collision — full-base match only wins on the exact compound).
-  thermal_energy:
-    aliases: []
-    kind: scalar
-    inherently_dimensional: true
-  thermal_pressure:
-    aliases: []
-    kind: scalar
-    inherently_dimensional: true
+  # NOTE: thermal_pressure / thermal_energy are deliberately NOT lexical bases.
+  # Energy-state modifiers live ONLY in the population segment (locked
+  # adjective order): thermal_pressure = population=thermal + base=pressure,
+  # and compounds order modifier-first (thermal_plasma_pressure,
+  # thermal_electron_pressure, total_thermal_plasma_pressure).
   tilt_angle:
     aliases: []
     kind: scalar

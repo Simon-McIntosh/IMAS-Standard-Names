@@ -218,6 +218,13 @@
 - internal                      # internal (thermodynamic/inductive): internal_inductance, internal_energy
 - mhd                           # magnetohydrodynamic: mhd_mode_frequency, mhd_stored_energy
 - wave                          # wave (electromagnetic/acoustic): wave_absorbed_power, wave_number
+# fast_wave / slow_wave: ICRF wave-branch lexical terms (fast magnetosonic /
+# slow wave). Single qualifier tokens so 'fast'/'slow' here never read as an
+# energy-state population: fast_wave_power = qualifier fast_wave + base power
+# (NOT population=fast + wave_power). Longest-prefix matching makes the
+# lexical wave term win over the population token automatically.
+- fast_wave                     # fast (magnetosonic) wave branch: fast_wave_power
+- slow_wave                     # slow wave branch: slow_wave_power
 - linear                        # linear (perturbative regime): linear_growth_rate, linear_frequency
 
 # === rc8 vocabulary extensions (codex R5 gap analysis) ===
