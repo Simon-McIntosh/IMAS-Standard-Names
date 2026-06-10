@@ -13,7 +13,7 @@ import { ROLE_META } from '../lib/grammar.js';
 
 const FILTERABLE_ROLES = new Set([
   'base', 'operator', 'reduction', 'modifier',
-  'axis', 'locus', 'subject',
+  'axis', 'locus', 'subject', 'orbit', 'population',
 ]);
 
 export function ParseBreakdown({ name, parse, filters, setFilters }) {

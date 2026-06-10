@@ -15,6 +15,8 @@ export const ROLE_META = {
   operator:    { label: 'Operator',    hue: 320, desc: 'Operator applied to a base quantity' },
   axis:        { label: 'Axis',        hue: 200, desc: 'Vector component direction' },
   qualifier:   { label: 'Qualifier',   hue: 35,  desc: 'Qualifier scoping the quantity' },
+  orbit:       { label: 'Orbit',       hue: 5,   desc: 'Particle orbit / transit class (trapped, co-passing, …)' },
+  population:  { label: 'Population',   hue: 25,  desc: 'Species population kind/state (fast, thermal, total, …)' },
   base:        { label: 'Base',        hue: 260, desc: 'Root quantity from the canonical vocabulary' },
   locus:       { label: 'Locus',       hue: 145, desc: 'Geometric or topological location' },
   process:     { label: 'Process',     hue: 105, desc: 'Mechanism the quantity is due to' },
