@@ -65,18 +65,16 @@ def test_two_aggregations_rejected():
 # ---------------------------------------------------------------------------
 
 
-def test_total_plasma_thermal_pressure_lossless():
-    # Legacy catalog string; recomposes in canonical render order. No token may
-    # be lost: {total, thermal, plasma, pressure} must all survive.
-    model = parse_standard_name("total_plasma_thermal_pressure")
+def test_total_plasma_thermal_pressure_round_trips():
+    # 'thermal' here is part of the lexical base thermal_pressure (the
+    # thermodynamic compound), NOT a population token — the catalog string
+    # round-trips identically with plasma folded as a base qualifier.
+    name = "total_plasma_thermal_pressure"
+    model = parse_standard_name(name)
     assert _v(model.aggregation) == "total"
-    assert _v(model.population) == "thermal"
-    assert model.physical_base == "plasma_pressure"
-    canonical = compose_standard_name(model)
-    assert canonical == "total_thermal_plasma_pressure"
-    # No token dropped: every legacy token appears in the canonical render.
-    for token in ("total", "thermal", "plasma", "pressure"):
-        assert token in canonical.split("_")
+    assert model.population is None
+    assert model.physical_base == "plasma_thermal_pressure"
+    assert compose_standard_name(model) == name
 
 
 def test_total_thermal_ion_species_density_round_trips():

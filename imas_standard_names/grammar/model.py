@@ -16,6 +16,7 @@ from imas_standard_names.grammar.constants import (
     BINARY_OPERATOR_CONNECTORS,
     EXCLUSIVE_SEGMENT_PAIRS,
     GENERIC_PHYSICAL_BASES,
+    SEGMENT_TOKEN_MAP,
 )
 from imas_standard_names.grammar.ir import (
     LOCUS_VALUE_PATTERN,
@@ -91,6 +92,13 @@ _GEOMETRY_VALUES: frozenset[str] = frozenset(g.value for g in GeometricBase)
 _AGGREGATION_VALUES: frozenset[str] = frozenset(a.value for a in Aggregation)
 _POPULATION_VALUES: frozenset[str] = frozenset(p.value for p in Population)
 _ORBIT_VALUES: frozenset[str] = frozenset(o.value for o in Orbit)
+
+# Closed physical-base vocabulary, used by the lexical-base collision guard:
+# a modifier+base combination whose rendered prefix-adjacent form IS a lexical
+# base token (e.g. population=thermal + physical_base=pressure rendering
+# 'thermal_pressure') would not round-trip — the parser reads the compound as
+# the lexical base. Such combinations are rejected at construction.
+_PHYSICAL_BASE_TOKENS: frozenset[str] = frozenset(SEGMENT_TOKEN_MAP["physical_base"])
 
 
 # Map from LocusType to model field name
@@ -587,6 +595,36 @@ class StandardName(BaseModel):
     def _check_position_value_requires_position(self) -> StandardName:
         if self.position_value is not None and self.position is None:
             msg = "position_value can only be set when position is set"
+            raise ValueError(msg)
+        return self
+
+    @model_validator(mode="after")
+    def _check_lexical_base_collision(self) -> StandardName:
+        """Reject modifier+base combos that render as a lexical base token.
+
+        ``StandardName(population='thermal', physical_base='pressure')`` would
+        compose to the string ``thermal_pressure``, which re-parses as the
+        lexical physical base — parse(compose(m)) != m. Only the modifier
+        rendered ADJACENT to the base can collide, so the check is skipped
+        when a subject or device sits between them.
+        """
+        if (
+            self.physical_base is None
+            or self.subject is not None
+            or self.device is not None
+        ):
+            return self
+        adjacent = self.population or self.orbit or self.aggregation
+        if adjacent is None:
+            return self
+        candidate = f"{_value_of(adjacent)}_{self.physical_base}"
+        if candidate in _PHYSICAL_BASE_TOKENS:
+            msg = (
+                f"population/orbit/aggregation token '{_value_of(adjacent)}' "
+                f"with physical_base '{self.physical_base}' renders "
+                f"'{candidate}', which is a lexical physical base — use "
+                f"physical_base='{candidate}' instead"
+            )
             raise ValueError(msg)
         return self
 
