@@ -149,6 +149,7 @@ class Process(StrEnum):
     RECOMBINATION = "recombination"
     IONIZATION = "ionization"
     CHARGE_EXCHANGE = "charge_exchange"
+    RECYCLING = "recycling"
     INDUCTION = "induction"
     BOOTSTRAP = "bootstrap"
     NON_INDUCTIVE = "non_inductive"

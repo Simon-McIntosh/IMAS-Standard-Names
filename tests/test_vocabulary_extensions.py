@@ -131,3 +131,14 @@ class TestProcessTokens:
         assert parsed.subject.value == "deuterium"
         assert parsed.physical_base == "particle_flux"
         assert parsed.process.value == "gas_injection"
+
+
+class TestRecyclingProcess:
+    """recycling process token (codex R4 VocabGap: divertor recycling)."""
+
+    def test_particle_flux_due_to_recycling_round_trips(self):
+        name = "particle_flux_due_to_recycling"
+        parsed = parse_name(name)
+        assert parsed.process.value == "recycling"
+        assert parsed.physical_base == "particle_flux"
+        assert compose_name(parsed) == name

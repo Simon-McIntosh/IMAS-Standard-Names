@@ -37,27 +37,25 @@
 #     precedes aggregation/orbit/population/subject in the locked order
 #     (radial_total_ion_energy_diffusivity, NOT total_radial_...)
 #
-# device (<device>_):
-#   * Use prefix pattern for device signals/outputs where device IS the source
-#     (e.g., flux_loop_voltage, passive_loop_current,
-#      poloidal_magnetic_field_probe_voltage)
-#   * For time-varying signals, measurements, or outputs FROM/THROUGH the device
-#   * Shares objects vocabulary with object segment
-#   * Mutually exclusive with of_object suffix
-#
-# object (of_<object>):
-#   * Use "of_" suffix for intrinsic properties/characteristics OF the hardware
-#     (e.g., area_of_flux_loop, position_of_poloidal_field_coil,
+# instrument / entity naming — postfix locus (of_<entity>) is the AUTHORING
+# convention:
+#   * Instrument and hardware entity names attach as the of_<entity> postfix
+#     locus for BOTH dynamic signals and intrinsic properties:
+#     (e.g., voltage_of_flux_loop, current_of_rogowski_coil,
+#      area_of_flux_loop, position_of_poloidal_field_coil,
 #      number_of_turns_of_passive_loop)
-#   * For static properties: dimensions, configuration parameters, geometric attributes
-#   * Shares objects vocabulary with device segment
-#   * Mutually exclusive with device_ prefix
-#
-# device vs object distinction:
-#   * device_<signal>: Dynamic signals/outputs (flux_loop_voltage)
-#   * <property>_of_object: Static characteristics (area_of_flux_loop)
+#   * This is the operating convention enforced by the codex compose prompts
+#     and validated in production review (voltage_of_flux_loop accepted at
+#     0.96; the device-prefix variant rejected).
 #   * For physics quantities measured BY devices, use generic names and
 #     document measurement method in metadata (per fusion metadata conventions)
+#
+# device (<device>_) — retained for parse compatibility only:
+#   * The device prefix segment (flux_loop_voltage-style) remains in the
+#     grammar so existing names keep parsing, but it is NOT the preferred
+#     authoring form — compose new names with the of_<entity> postfix locus.
+#   * Shares objects vocabulary with the object segment
+#   * Mutually exclusive with of_object suffix
 #
 # geometry (of_<target>) vs position (at_<location>):
 #   * Use "of_" for intrinsic properties/characteristics 
@@ -196,13 +194,13 @@ segments:
       - object
     description: >
       Diagnostic hardware or actuator device producing/conducting the signal.
-      Used for device signals and outputs where the device IS the source/conductor.
-      Pattern: <device>_<signal> where signal is the physical_base.
-      Examples: flux_loop_voltage (voltage from loop), 
-      passive_loop_current (current through loop),
-      poloidal_magnetic_field_probe_voltage (probe output),
-      ion_cyclotron_heating_antenna_forward_power (antenna power).
-      Distinction: device_ prefix for dynamic signals vs of_object suffix for static properties.
+      Retained for parse compatibility only — NOT the preferred authoring
+      form. Compose new names with the of_<entity> postfix locus instead
+      (voltage_of_flux_loop, current_of_rogowski_coil); the postfix-locus
+      convention covers both dynamic signals and intrinsic properties and is
+      the form enforced by compose tooling and production review.
+      Legacy pattern: <device>_<signal> where signal is the physical_base
+      (flux_loop_voltage, passive_loop_current) — still parses.
   - id: geometric_base
     optional: true
     vocabulary: geometric_bases
@@ -232,15 +230,17 @@ segments:
     exclusive_with:
       - device
     description: >
-      Physical object, diagnostic hardware, or equipment whose intrinsic
-      property or characteristic is described.
-      Used for static properties: geometric dimensions, configuration parameters,
-      physical attributes that define the object.
-      Pattern: <property>_of_<object>
-      Examples: area_of_flux_loop (loop dimension),
+      Physical object, diagnostic hardware, or equipment the quantity
+      belongs to — the preferred postfix-locus authoring form for BOTH
+      dynamic signals and intrinsic properties.
+      Pattern: <quantity>_of_<object>
+      Examples: voltage_of_flux_loop (loop signal),
+      current_of_rogowski_coil (coil signal),
+      area_of_flux_loop (loop dimension),
       position_of_poloidal_field_coil (coil location),
       number_of_turns_of_passive_loop (construction parameter).
-      Distinction: of_object suffix for static properties vs device_ prefix for dynamic signals.
+      The legacy device_ prefix (flux_loop_voltage) still parses but is not
+      the preferred authoring form.
   - id: geometry
     optional: true
     vocabulary: positions

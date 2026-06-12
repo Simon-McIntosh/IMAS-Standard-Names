@@ -29,6 +29,7 @@
 - recombination
 - ionization
 - charge_exchange
+- recycling          # plasma-wall recycling (divertor/wall neutral re-emission): particle_flux_due_to_recycling
 
 # === Current drive mechanisms ===
 - induction
