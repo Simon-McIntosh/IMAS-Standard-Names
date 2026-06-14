@@ -268,6 +268,22 @@ loci:
     type: entity
     allowed_relations: [of]
 
+  # ── breadth-rotation gap closure (codex VocabGap analysis) ──────────
+  # Genuine hardware/structure entities surfaced by parser-rejected loci.
+  cryostat:
+    # large vacuum enclosure surrounding the magnet system (ITER-scale
+    # cryostat); intrinsic properties via _of_cryostat
+    type: entity
+    allowed_relations: [of]
+  gauge:
+    # pressure/vacuum gauge sensor (intrinsic properties via _of_gauge)
+    type: entity
+    allowed_relations: [of]
+  strain_gauge_sensor:
+    # mechanical strain-gauge sensor on structural components
+    type: entity
+    allowed_relations: [of]
+
   # ====================================================================
   # Position-typed loci (field at location: _at_<position>, _of_<position>)
   # Physics-meaningful spatial locations in tokamak geometry
@@ -490,6 +506,20 @@ loci:
     type: position
     allowed_relations: [at, of]
   x_point:
+    type: position
+    allowed_relations: [at, of]
+
+  # ── breadth-rotation gap closure (codex VocabGap analysis) ──────────
+  # Genuine physics-meaningful boundary loci (DD-confirmed control /
+  # equilibrium geometry points; not ordinal outline labels).
+  active_limiter_point:
+    # plasma boundary point currently in contact with the device limiter
+    # (real-time shape/position control reference)
+    type: position
+    allowed_relations: [at, of]
+  dr_dz_zero_point:
+    # plasma boundary location where dr/dz = 0 — the outboard local
+    # major-radius maximum (widest point of the separatrix)
     type: position
     allowed_relations: [at, of]
 

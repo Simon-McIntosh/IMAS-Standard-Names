@@ -325,6 +325,9 @@ class Object(StrEnum):
     WALL_MATERIAL = "wall_material"
     WAVE_BEAM = "wave_beam"
     WORKING_FLUID = "working_fluid"
+    CRYOSTAT = "cryostat"
+    GAUGE = "gauge"
+    STRAIN_GAUGE_SENSOR = "strain_gauge_sensor"
 
 
 class Position(StrEnum):
@@ -400,6 +403,8 @@ class Position(StrEnum):
     TEARING_MODE_CENTER = "tearing_mode_center"
     WALL = "wall"
     X_POINT = "x_point"
+    ACTIVE_LIMITER_POINT = "active_limiter_point"
+    DR_DZ_ZERO_POINT = "dr_dz_zero_point"
 
 
 class GeometricBase(StrEnum):

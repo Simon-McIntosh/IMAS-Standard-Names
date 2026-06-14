@@ -245,3 +245,27 @@
 
 # --- Measurement / signal qualifiers ---
 - pulse                         # pulse (pulse_height, pulse_shape) — detector signal characteristics
+
+# === breadth-rotation gap closure (codex VocabGap analysis) ===
+# Genuine atomic qualifiers surfaced by parser-rejected compound tokens.
+# Verified via parse() round-trip; named-physics and diagnostic-band terms.
+
+# --- State / region condition ---
+- vacuum                        # vacuum field/region (vacuum_magnetic_field, vacuum_toroidal_field)
+- stray                         # stray field/light (stray_magnetic_field, stray_light)
+- external                      # externally applied/sourced (external_magnetic_field, external_current)
+- breakdown                     # plasma breakdown phase (breakdown_voltage, breakdown_electric_field)
+
+# --- Diagnostic / measurement band & method ---
+- soft_xray                     # soft X-ray spectral band (soft_xray_emissivity, soft_xray_power)
+- doppler                       # Doppler-shifted/broadened (doppler_frequency, doppler_velocity)
+- viewing                       # line-of-sight viewing geometry (viewing_angle, viewing_direction)
+- calibration                   # calibration quantity (calibration_factor, calibration_coefficient)
+- beat                          # heterodyne beat (beat_frequency) — mixed-signal difference frequency
+- trigger                       # control/timing trigger (trigger_time, trigger_voltage)
+
+# --- Named physics ---
+- alfven                        # Alfven (alfven_velocity, alfven_frequency, alfven_mach_number)
+- townsend                      # Townsend (townsend_coefficient) — avalanche ionization in breakdown
+- sawtooth                      # sawtooth instability (sawtooth_period, sawtooth_amplitude)
+- decay                         # decay (decay_time, decay_rate, decay_length)

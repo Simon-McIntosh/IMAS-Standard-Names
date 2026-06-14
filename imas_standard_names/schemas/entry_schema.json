@@ -1221,5 +1221,5 @@
       "$ref": "#/$defs/StandardNameMetadataEntry"
     }
   ],
-  "$schema_version": "0.8.0rc36"
+  "$schema_version": "0.8.0rc38"
 }

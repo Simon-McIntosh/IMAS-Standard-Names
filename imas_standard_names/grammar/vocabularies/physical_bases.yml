@@ -390,3 +390,66 @@ bases:
   verdet_constant:
     aliases: []
     kind: scalar
+
+  # === breadth-rotation gap closure (codex VocabGap analysis) ===
+  # Genuine atomic dimensional/dimensionless bases surfaced by parser-
+  # rejected tokens that blocked name composition. Verified against the
+  # IMAS DD (equilibrium, FOCS, polarimeter, blanket, SOL domains).
+
+  thickness:
+    # layer/wall/blanket material thickness (length normal to a surface);
+    # distinct from width (in-plane span) and length (path extent)
+    aliases: []
+    kind: scalar
+    inherently_dimensional: true
+  diameter:
+    # full transverse extent of a circular feature (= 2*radius); atomic
+    # because DD stores diameters directly (apertures, beams, pipes)
+    aliases: []
+    kind: scalar
+    inherently_dimensional: true
+  connection_length:
+    # scrape-off-layer parallel field-line connection length (target-to-
+    # target along B); a defining SOL transport scale
+    aliases: []
+    kind: scalar
+    inherently_dimensional: true
+  loop_voltage:
+    # toroidal one-turn loop voltage V_loop = dPsi/dt driving the plasma
+    # current; a lexicalised plasma quantity distinct from voltage_of_flux_loop
+    aliases: []
+    kind: scalar
+    inherently_dimensional: true
+  permeability:
+    # magnetic permeability mu relating B and H in a material/medium
+    aliases: []
+    kind: scalar
+    inherently_dimensional: true
+  poloidal_current_function:
+    # equilibrium F = R*B_phi (the "f" / poloidal-current flux function);
+    # its flux derivative gives the FF' source term in Grad-Shafranov
+    aliases: [diamagnetic_function]
+    kind: scalar
+    inherently_dimensional: true
+  flux_surface_averaged_metric:
+    # flux-surface-averaged geometric metric coefficient (the equilibrium
+    # gm1..gm9 family: <1/R^2>, <|grad rho|^2>, ...); the specific moment is
+    # named via qualifiers/object, not separate ordinal bases
+    aliases: [flux_surface_metric_coefficient]
+    kind: scalar
+  stokes_parameter:
+    # polarimetry Stokes parameter (I/Q/U/V intensity components of the
+    # polarization state); FOCS/polarimeter S0..S3. The specific component is
+    # named via qualifiers, not separate compound bases
+    aliases: []
+    kind: scalar
+  turn_count:
+    # number of conductor turns of a coil/loop (engineering construction
+    # parameter); dimensionless integer count
+    aliases: [number_of_turns]
+    kind: scalar
+  turns_per_metre:
+    # linear turn density of a solenoid/coil winding (turns per unit length)
+    aliases: []
+    kind: scalar
+    inherently_dimensional: true
