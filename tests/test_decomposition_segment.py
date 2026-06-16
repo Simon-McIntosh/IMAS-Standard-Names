@@ -17,7 +17,7 @@ from imas_standard_names.grammar.model import (
     compose_standard_name,
     parse_standard_name,
 )
-from imas_standard_names.grammar.model_types import Decomposition
+from imas_standard_names.grammar.model_types import Decomposition, Transformation
 
 # Decomposition tokens use rc20 forms (fourier_coefficient_of, n_equals_1, …)
 # that are not yet present in the operators registry (plan 38 §A7).
@@ -85,14 +85,28 @@ def test_decomposition_with_prefix_segments() -> None:
     assert compose_standard_name(parsed) == name
 
 
-def test_decomposition_exclusive_with_transformation() -> None:
-    """Setting both transformation and decomposition must raise ValueError."""
-    with pytest.raises(ValueError, match="transformation"):
-        StandardName(
-            transformation="square_of",
-            decomposition="fourier_coefficient_of",
-            physical_base="magnetic_field",
-        )
+def test_decomposition_coexists_with_transformation() -> None:
+    """A prefix transformation and a postfix decomposition now coexist.
+
+    The two operators occupy structurally distinct, unambiguous positions in
+    the canonical string — the prefix renders at the front
+    (``<transform>_of_<...>``) and the postfix at the tail
+    (``<...>_<decomposition>``). The parser peels the trailing postfix before
+    the leading prefix, so the round-trip is deterministic. The previously
+    cited ``square_of_..._fourier_coefficient`` ambiguity does not exist.
+    """
+    model = StandardName(
+        transformation="square",
+        decomposition="fourier_coefficient",
+        physical_base="magnetic_field",
+    )
+    name = "square_of_magnetic_field_fourier_coefficient"
+    assert compose_standard_name(model) == name
+    # Full string round-trip recovers the same two operator slots.
+    reparsed = parse_standard_name(name)
+    assert reparsed.transformation == Transformation.SQUARE
+    assert reparsed.decomposition == Decomposition.FOURIER_COEFFICIENT
+    assert compose_standard_name(reparsed) == name
 
 
 def test_decomposition_exclusive_with_geometric_base() -> None:

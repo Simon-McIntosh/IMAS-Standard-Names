@@ -718,20 +718,23 @@ class StandardName(BaseModel):
 
     @model_validator(mode="after")
     def _check_decomposition_exclusivity(self) -> StandardName:
-        """Decomposition is exclusive with transformation and geometric_base.
+        """Decomposition is exclusive with geometric_base.
 
-        Spec reference: plan 29 / ADR-4 grammar findings F3.
-        Decomposition wraps physical_base only; stacking with transformation
-        would produce names like ``square_of_fourier_coefficient_of_...`` that
-        are not useful enough to justify the parsing ambiguity.
+        A decomposition (postfix operator: ``magnitude``, ``moment``, ...)
+        wraps a physical_base; a geometry carrier has no vector/complex
+        structure to decompose, so the pairing is unrepresentable.
+
+        Decomposition DOES coexist with a transformation (prefix operator:
+        ``maximum``, ``square``, ...). The two occupy structurally distinct,
+        unambiguous positions in the canonical string — the prefix renders at
+        the front (``<transform>_of_<...>``) and the postfix at the tail
+        (``<...>_<decomposition>``), e.g. ``maximum_of_magnetic_field_magnitude``.
+        The parser peels the trailing postfix before the leading prefix, so the
+        round-trip is deterministic; there is no parsing ambiguity to forbid.
         """
-        if self.decomposition:
-            if self.transformation:
-                msg = "Segments 'decomposition' and 'transformation' cannot both be set"
-                raise ValueError(msg)
-            if self.geometric_base:
-                msg = "Segments 'decomposition' and 'geometric_base' cannot both be set"
-                raise ValueError(msg)
+        if self.decomposition and self.geometric_base:
+            msg = "Segments 'decomposition' and 'geometric_base' cannot both be set"
+            raise ValueError(msg)
         return self
 
     @model_validator(mode="after")

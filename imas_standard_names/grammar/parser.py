@@ -504,6 +504,35 @@ def _peel_outer_operator(
     return None, s, []
 
 
+def _peel_trailing_postfix_operator(
+    s: str, v: Vocabularies
+) -> tuple[OperatorApplication | None, str]:
+    """Peel ONE trailing unary-postfix operator off the END of ``s``.
+
+    A postfix decomposition operator renders at the very tail of the canonical
+    string (``{core}_{op}``), after any locus/mechanism suffix. Peeling it
+    before the mechanism/locus strips keeps those strips from greedily
+    absorbing the operator token into a fabricated process/locus token.
+
+    Returns ``(None, s)`` when no postfix operator suffix is present.
+    """
+    postfix_ops = {
+        name
+        for name, meta in v.operators.items()
+        if meta.get("kind") == OperatorKind.UNARY_POSTFIX.value
+    }
+    match = _longest_suffix_match(s, postfix_ops)
+    if match is None:
+        return None, s
+    new_s = s[: -len(match) - 1]  # drop "_<op>"
+    if not new_s:
+        return None, s
+    return (
+        OperatorApplication(kind=OperatorKind.UNARY_POSTFIX, op=match),
+        new_s,
+    )
+
+
 def _longest_suffix_match(s: str, tokens: set[str]) -> str | None:
     best: str | None = None
     for tok in tokens:
@@ -634,16 +663,38 @@ def parse(name: str, vocabs: Vocabularies | None = None) -> ParseResult:
 
     v = vocabs if vocabs is not None else _default_vocabs()
     diagnostics: list[Diagnostic] = []
+    s = name
+
+    # Stage 0: trailing postfix operators.
+    #
+    # A postfix decomposition operator (``magnitude``, ``moment``, ...) renders
+    # at the very END of the canonical string — AFTER any locus/mechanism
+    # suffix (``compose`` wraps ``base + locus + mechanism`` as
+    # ``{core}_{op}``). Peel these BEFORE the mechanism/locus strips so a
+    # postfix token sitting after a locus/mechanism is not greedily absorbed
+    # into the process/locus token (which would silently drop the operator,
+    # e.g. ``velocity_due_to_pellet_injection_magnitude`` fabricating a
+    # ``pellet_injection_magnitude`` process). These ops are the OUTERMOST
+    # trailing wrap, so they go to the FRONT of the operator stack.
+    trailing_postfix: list[OperatorApplication] = []
+    while True:
+        op_app, new_s = _peel_trailing_postfix_operator(s, v)
+        if op_app is None:
+            break
+        trailing_postfix.append(op_app)
+        s = new_s
 
     # Stage 1: mechanism
-    mechanism, s = _strip_mechanism(name)
+    mechanism, s = _strip_mechanism(s)
 
     # Stage 2: locus
     locus, s, locus_diags = _strip_locus(s, v)
     diagnostics.extend(locus_diags)
 
     # Stage 3: operator peeling (outermost layer after locus/mechanism).
-    operator_stack: list[OperatorApplication] = []
+    # Trailing postfix operators peeled in stage 0 are the outermost wrap and
+    # precede anything peeled here (a prefix/binary operator-of form).
+    operator_stack: list[OperatorApplication] = list(trailing_postfix)
     binary_terminator: OperatorApplication | None = None
     while True:
         op_app, new_s, _ = _peel_outer_operator(s, v)
@@ -666,8 +717,10 @@ def parse(name: str, vocabs: Vocabularies | None = None) -> ParseResult:
         # Synthesise a placeholder base so the outer IR validates. The
         # binary operator lives on the outer IR's operators stack and its
         # args carry the real structure. The placeholder is never rendered.
+        # Trailing postfix operators (stage 0) wrap the binary result and stay
+        # outermost.
         ir = StandardNameIR(
-            operators=[binary_terminator],
+            operators=[*trailing_postfix, binary_terminator],
             base=QuantityOrCarrier(token="placeholder", kind=BaseKind.QUANTITY),
             locus=locus,
             mechanism=mechanism,
