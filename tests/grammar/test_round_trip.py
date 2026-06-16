@@ -589,6 +589,11 @@ def test_round_trip_combined_large(vocabs: Vocabularies) -> None:
             # Projection component + base
             axis = rng.choice(sorted(vocabs.axes))
             base = rng.choice(base_pool)
+            # Skip if the composed short form collides with an existing base
+            # or carrier (e.g. poloidal + angle -> poloidal_angle carrier),
+            # which would re-parse as that token rather than projection + base.
+            if f"{axis}_{base}" in vocabs.carriers or f"{axis}_{base}" in vocabs.bases:
+                continue
             proj = AxisProjection(axis=axis, shape=ProjectionShape.COMPONENT)
             ir = _make_base_ir(base, BaseKind.QUANTITY, projection=proj)
         elif scenario == 8:
@@ -611,9 +616,13 @@ def test_round_trip_combined_large(vocabs: Vocabularies) -> None:
             tok, lt = rng.choice(pos_loci_at)
             locus = LocusRef(relation=LocusRelation.AT, token=tok, type=lt)
             mech = Process(token=rng.choice(processes))
-            proj = AxisProjection(
-                axis=rng.choice(sorted(vocabs.axes)), shape=ProjectionShape.COMPONENT
-            )
+            axis = rng.choice(sorted(vocabs.axes))
+            # Skip if the composed short form collides with an existing base
+            # or carrier (e.g. poloidal + angle -> poloidal_angle carrier),
+            # which would re-parse as that token rather than projection + base.
+            if f"{axis}_{base}" in vocabs.carriers or f"{axis}_{base}" in vocabs.bases:
+                continue
+            proj = AxisProjection(axis=axis, shape=ProjectionShape.COMPONENT)
             ir = _make_base_ir(
                 base,
                 BaseKind.QUANTITY,

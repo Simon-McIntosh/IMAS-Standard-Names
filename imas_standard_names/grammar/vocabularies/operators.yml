@@ -33,11 +33,6 @@ operators:
     precedence: 15
     returns: scalar
 
-  amplitude:
-    kind: unary_prefix
-    precedence: 20
-    returns: scalar
-
   cumulative:
     kind: unary_prefix
     precedence: 15
@@ -70,12 +65,6 @@ operators:
     precedence: 20
     returns: vector
     arg_types: [scalar]
-
-  imaginary_part:
-    kind: unary_prefix
-    precedence: 10
-    returns: scalar
-    arg_types: [complex]
 
   inverse:
     kind: unary_prefix
@@ -156,12 +145,6 @@ operators:
     precedence: 20
     returns: scalar_or_vector
 
-  real_part:
-    kind: unary_prefix
-    precedence: 10
-    returns: scalar
-    arg_types: [complex]
-
   root_mean_square:
     kind: unary_prefix
     precedence: 30
@@ -241,6 +224,27 @@ operators:
   # Unary postfix operators (rendered: <inner>_<token>)
   # ====================================================================
 
+  # Scalar-extraction operators.  Postfix like magnitude so they compose
+  # with a projection: radial_electric_field_amplitude, not
+  # amplitude_of_radial_electric_field (prefix + component are mutually
+  # exclusive in the flat model).
+  amplitude:
+    kind: unary_postfix
+    precedence: 10
+    returns: scalar
+
+  real_part:
+    kind: unary_postfix
+    precedence: 10
+    returns: scalar
+    arg_types: [complex]
+
+  imaginary_part:
+    kind: unary_postfix
+    precedence: 10
+    returns: scalar
+    arg_types: [complex]
+
   bessel_0:
     kind: unary_postfix
     precedence: 10
@@ -271,22 +275,10 @@ operators:
     precedence: 10
     returns: scalar_or_vector
 
-  imaginary_part_postfix:
-    kind: unary_postfix
-    precedence: 10
-    returns: scalar
-    arg_types: [complex]
-
   moment:
     kind: unary_postfix
     precedence: 10
     returns: scalar
-
-  real_part_postfix:
-    kind: unary_postfix
-    precedence: 10
-    returns: scalar
-    arg_types: [complex]
 
   reference_waveform:
     kind: unary_postfix

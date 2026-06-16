@@ -161,9 +161,13 @@ def test_ambiguity_prefix_maximum_vs_postfix_magnitude(vocabs: Vocabularies) -> 
     _assert_distinct_ir("maximum_of_pressure", "pressure_magnitude", vocabs)
 
 
-def test_ambiguity_prefix_amplitude_vs_postfix_magnitude(vocabs: Vocabularies) -> None:
-    """``amplitude_of_temperature`` (prefix) vs ``temperature_magnitude`` (postfix)."""
-    _assert_distinct_ir("amplitude_of_temperature", "temperature_magnitude", vocabs)
+def test_ambiguity_amplitude_vs_magnitude_postfix(vocabs: Vocabularies) -> None:
+    """``temperature_amplitude`` vs ``temperature_magnitude`` — distinct postfix ops.
+
+    Both scalar-extraction operators are postfix; they differ only in the
+    operator token, so their IR must remain distinct.
+    """
+    _assert_distinct_ir("temperature_amplitude", "temperature_magnitude", vocabs)
 
 
 def test_ambiguity_prefix_vs_no_operator(vocabs: Vocabularies) -> None:
@@ -186,9 +190,9 @@ def test_ambiguity_prefix_flux_surface_averaged_vs_no_op(vocabs: Vocabularies) -
 # ---------------------------------------------------------------------------
 
 
-def test_ambiguity_maximum_vs_amplitude_prefix(vocabs: Vocabularies) -> None:
-    """``maximum_of_X`` vs ``amplitude_of_X`` differ in operator."""
-    _assert_distinct_ir("maximum_of_pressure", "amplitude_of_pressure", vocabs)
+def test_ambiguity_maximum_vs_amplitude(vocabs: Vocabularies) -> None:
+    """``maximum_of_X`` (prefix) vs ``X_amplitude`` (postfix) differ in operator."""
+    _assert_distinct_ir("maximum_of_pressure", "pressure_amplitude", vocabs)
 
 
 def test_ambiguity_maximum_vs_time_average(vocabs: Vocabularies) -> None:
@@ -222,11 +226,15 @@ def test_ambiguity_flux_surface_averaged_vs_volume_average(
 # ---------------------------------------------------------------------------
 
 
-def test_ambiguity_nested_order_max_then_amplitude(vocabs: Vocabularies) -> None:
-    """``maximum_of_amplitude_of_X`` vs ``amplitude_of_maximum_of_X``."""
+def test_ambiguity_nested_prefix_over_postfix_amplitude(vocabs: Vocabularies) -> None:
+    """Different prefix outer op wrapping a postfix-amplitude inner base.
+
+    ``amplitude`` is postfix and attaches to the base, so it can only sit
+    INSIDE a prefix operator. The prefix outer op distinguishes the IR.
+    """
     _assert_distinct_ir(
-        "maximum_of_amplitude_of_pressure",
-        "amplitude_of_maximum_of_pressure",
+        "maximum_of_pressure_amplitude",
+        "time_average_of_pressure_amplitude",
         vocabs,
     )
 
@@ -261,10 +269,14 @@ def test_ambiguity_nested_derivative_gradient(vocabs: Vocabularies) -> None:
 
 
 def test_ambiguity_three_operators_ordering(vocabs: Vocabularies) -> None:
-    """Three operators: different outer vs inner."""
+    """Three operators: swapping the two prefix ops over a postfix base.
+
+    ``amplitude`` is postfix (innermost, on the base); the two prefix ops
+    (maximum, gradient) swap outer/inner to yield distinct IR.
+    """
     _assert_distinct_ir(
-        "maximum_of_amplitude_of_gradient_of_pressure",
-        "amplitude_of_maximum_of_gradient_of_pressure",
+        "maximum_of_gradient_of_pressure_amplitude",
+        "gradient_of_maximum_of_pressure_amplitude",
         vocabs,
     )
 

@@ -358,7 +358,8 @@ class TestExistingRoundTripRegression:
             "major_radius_of_plasma_boundary",
             "power_due_to_ohmic",
             "flux_surface_averaged_density",
-            "real_part_of_magnetic_field",
+            # real_part is a postfix scalar-extraction operator: <base>_real_part
+            "magnetic_field_real_part",
             "cumulative_inside_flux_surface_power",
             # rc13 tokens
             "power_due_to_collisions",
