@@ -209,6 +209,34 @@ def _ir_to_model_dict(ir: StandardNameIR) -> dict[str, str]:
             elif op.kind is OperatorKind.UNARY_POSTFIX:
                 d["decomposition"] = op.op
 
+        # When a single OUTER unary operator wraps an inner expression that
+        # itself contains a bare-prefix transformation qualifier (e.g.
+        # volume_averaged), the inner qualifier collides with the operator's
+        # `transformation`/`decomposition` slot in the flat model and the
+        # subject/qualifier split reorders tokens. Mirror the binary-operand
+        # treatment: fold the inner expression (projection + qualifiers +
+        # base, EXCLUDING the operator, locus and mechanism — which stay on
+        # the outer model) into a single physical_base compound string via
+        # the canonical renderer, so the operator slot stays free.
+        #
+        # The flat model has exactly one transformation/decomposition slot
+        # and a flat physical_base, so this fold is sound only for a single
+        # unary operator wrapping a projection-free inner expression. Inner
+        # projections (radial_electric_field) and operator-of-operator nests
+        # collapse a token when folded; we leave those alone so the strict
+        # lossless-canonical guard rejects them rather than dropping a token.
+        if _should_fold_inner_operand(ir, unary_ops):
+            inner_ir = StandardNameIR(
+                operators=[],
+                projection=ir.projection,
+                qualifiers=list(ir.qualifiers),
+                base=ir.base,
+                locus=None,
+                mechanism=None,
+            )
+            d["physical_base"] = _compose_ir(inner_ir)
+            return _apply_locus_and_mechanism(d, ir)
+
         # Projection → component or coordinate
         if ir.projection is not None:
             if ir.projection.shape is ProjectionShape.COMPONENT:
@@ -302,10 +330,48 @@ def _ir_to_model_dict(ir: StandardNameIR) -> dict[str, str]:
             else:
                 d["physical_base"] = ir.base.token
 
-    # Locus → object/geometry/position/region. STRICT projection: a locus
-    # token the model cannot represent is a hard error — silently dropping
-    # it would lose the entire locus and collide with the locus-free name
-    # (e.g. safety_factor_at_<unknown> degrading to bare safety_factor).
+    return _apply_locus_and_mechanism(d, ir)
+
+
+def _should_fold_inner_operand(
+    ir: StandardNameIR, unary_ops: list[OperatorApplication]
+) -> bool:
+    """Whether to fold a unary operator's inner expression into physical_base.
+
+    The flat :class:`StandardName` model carries a single transformation and
+    a single decomposition slot. A name with an OUTER unary operator wrapping
+    an inner expression that contains a bare-prefix transformation qualifier
+    (``volume_averaged``, ``flux_surface_averaged``, ``normalized``, ...) only
+    round-trips when the inner expression is folded into one physical_base
+    string instead of being split into colliding model fields.
+
+    The fold is sound only for exactly ONE unary operator wrapping a
+    projection-free inner expression. With a projection axis or a second
+    structurally-distinct operator the fold collapses a token (the flat model
+    cannot represent the nest), so we decline and let the strict
+    lossless-canonical guard reject the name rather than drop a token.
+    """
+    if len(unary_ops) != 1:
+        return False
+    if ir.projection is not None:
+        return False
+    if ir.base.kind is BaseKind.GEOMETRY:
+        return False
+    # Only fold when an inner bare-prefix transformation qualifier would
+    # otherwise collide with the operator's transformation slot. Without one,
+    # the existing subject/qualifier split already round-trips.
+    return any(q.token in _BARE_PREFIX_TRANSFORMATIONS for q in ir.qualifiers)
+
+
+def _apply_locus_and_mechanism(d: dict[str, str], ir: StandardNameIR) -> dict[str, str]:
+    """Project the IR locus and mechanism onto the flat model dict.
+
+    Shared by the standard subject/qualifier path and the folded-operand
+    path. STRICT projection: a locus token the model cannot represent is a
+    hard error — silently dropping it would lose the entire locus and collide
+    with the locus-free name (e.g. safety_factor_at_<unknown> degrading to
+    bare safety_factor).
+    """
     if ir.locus is not None:
         token = ir.locus.token
         if ir.locus.type == LocusType.POSITION:
