@@ -207,6 +207,9 @@ loci:
   port:
     type: entity
     allowed_relations: [of]
+  polarimeter_beam:
+    type: entity
+    allowed_relations: [of]
   radial_magnetic_field_probe:
     type: entity
     allowed_relations: [of]

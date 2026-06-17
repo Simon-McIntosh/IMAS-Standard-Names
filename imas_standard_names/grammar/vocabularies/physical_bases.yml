@@ -364,6 +364,9 @@ bases:
   vorticity:
     aliases: []
     kind: scalar
+  photon_energy:
+    aliases: []
+    kind: scalar
   wavelength:
     aliases: []
     kind: scalar

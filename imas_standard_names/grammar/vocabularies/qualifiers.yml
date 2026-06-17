@@ -104,6 +104,7 @@
 - minimum                       # minimum value
 - maximum                       # maximum value
 - upper_bound                   # upper bound: maximum value of a bounded quantity
+- lower_bound                   # lower bound: minimum value of a bounded quantity (e.g. bin edge)
 - saturated                     # saturated state
 - steady_state                  # steady-state condition
 - transient                     # transient / time-varying

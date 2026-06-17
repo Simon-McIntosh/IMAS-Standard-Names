@@ -305,6 +305,7 @@ class Object(StrEnum):
     POLOIDAL_FIELD_COIL = "poloidal_field_coil"
     POLOIDAL_MAGNETIC_FIELD_PROBE = "poloidal_magnetic_field_probe"
     PORT = "port"
+    POLARIMETER_BEAM = "polarimeter_beam"
     RADIAL_MAGNETIC_FIELD_PROBE = "radial_magnetic_field_probe"
     RECIPROCATING_PROBE = "reciprocating_probe"
     REFLECTOMETER_ANTENNA = "reflectometer_antenna"
