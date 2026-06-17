@@ -135,6 +135,7 @@ _TRANSFORMATION_VALUES: frozenset[str] = frozenset(t.value for t in Transformati
 _BARE_PREFIX_TRANSFORMATIONS: frozenset[str] = frozenset(
     {
         "accumulated",
+        "change_in",
         "cumulative",
         "cumulative_inside_flux_surface",
         "flux_surface_averaged",
@@ -701,19 +702,30 @@ class StandardName(BaseModel):
 
     @model_validator(mode="after")
     def _check_transformation_exclusivity(self) -> StandardName:
-        """Transformation is exclusive with component, coordinate, and geometric_base."""
-        if self.transformation:
-            if self.component:
-                msg = "Segments 'transformation' and 'component' cannot both be set"
-                raise ValueError(msg)
-            if self.coordinate:
-                msg = "Segments 'transformation' and 'coordinate' cannot both be set"
-                raise ValueError(msg)
-            if self.geometric_base:
-                msg = (
-                    "Segments 'transformation' and 'geometric_base' cannot both be set"
-                )
-                raise ValueError(msg)
+        """Transformation is exclusive with geometric_base only.
+
+        A transformation (prefix operator: ``tendency``, ``gradient``,
+        ``change_in``, ...) DOES coexist with a component or coordinate
+        projection. The two occupy structurally distinct, unambiguous
+        positions in the canonical string:
+
+        * an ``_of_``-form transformation renders OUTERMOST, wrapping the
+          projection — ``tendency_of_toroidal_current_density``
+          (``gradient_of_radial_electron_temperature``). The parser peels the
+          leading ``<op>_of_`` first, then resolves the projected base, so the
+          round-trip is deterministic.
+        * a BARE-prefix transformation (``change_in``, ``volume_averaged``,
+          ...) folds into the qualifier run, so the projection stays outermost
+          — ``poloidal_change_in_ion_velocity``.
+
+        Either way the segments are unambiguous; there is no parsing collision
+        to forbid. Only ``geometric_base`` stays exclusive: a geometry carrier
+        has no field/operator structure for a transformation to act on, so the
+        pairing is unrepresentable.
+        """
+        if self.transformation and self.geometric_base:
+            msg = "Segments 'transformation' and 'geometric_base' cannot both be set"
+            raise ValueError(msg)
         return self
 
     @model_validator(mode="after")

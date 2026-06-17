@@ -423,23 +423,24 @@ class TestTransformationRoundTrip:
 class TestTransformationExclusivity:
     """Test mutual exclusivity constraints for transformations."""
 
-    @_XFAIL_RC20
-    def test_transformation_excludes_component(self):
-        with pytest.raises(ValueError, match="transformation.*component"):
-            StandardName(
-                transformation="square_of",
-                component="radial",
-                physical_base="magnetic_field",
-            )
+    def test_transformation_coexists_with_component(self):
+        """A transformation now coexists with a component projection.
 
-    @_XFAIL_RC20
-    def test_transformation_excludes_coordinate(self):
-        with pytest.raises(ValueError, match="transformation.*coordinate"):
-            StandardName(
-                transformation="square_of",
-                coordinate="radial",
-                geometric_base="position",
-            )
+        The exclusivity these two rc20 cases asserted has been REMOVED: an
+        ``_of_``-form transformation wraps the component
+        (``tendency_of_toroidal_current_density``) and a bare-prefix
+        transformation folds in after it (``poloidal_change_in_ion_velocity``).
+        Authoritative round-trip coverage lives in
+        ``tests/grammar/test_operator_projection_coexistence.py``; this is a
+        focused regression that the model no longer rejects the pairing.
+        """
+        model = StandardName(
+            transformation="tendency",
+            component="toroidal",
+            physical_base="current_density",
+        )
+        assert model.transformation == Transformation.TENDENCY
+        assert model.component is not None
 
     @_XFAIL_RC20
     def test_transformation_excludes_geometric_base(self):

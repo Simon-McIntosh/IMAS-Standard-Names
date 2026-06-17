@@ -19,10 +19,13 @@ expression (projection + qualifiers + base, minus the outer operator,
 locus and mechanism) must be folded into a single ``physical_base``
 compound string — mirroring how binary operands are folded.
 
-The flat model cannot represent two structurally distinct unary
-operators, nor an inner expression that still carries a projection axis;
-those names are a documented limitation and must keep raising rather than
-silently dropping tokens.
+A single transformation DOES now coexist with a projection axis
+(``time_derivative_of_radial_electric_field`` — the projection lives in
+``component``, the operator in ``transformation``; see
+``test_operator_projection_coexistence.py``). The flat model still cannot
+represent two structurally distinct PREFIX operators
+(``gradient_of_time_derivative_of_...``); those names are a documented
+limitation and must keep raising rather than silently dropping tokens.
 """
 
 from __future__ import annotations
@@ -47,6 +50,10 @@ IN_SCOPE = [
     "volume_averaged_electron_density_magnitude",
     # outer operator + inner bare-transformation + trailing locus
     "time_derivative_of_volume_averaged_electron_density_at_magnetic_axis",
+    # of-prefix transformation wrapping a PROJECTION axis: the projection
+    # stays in `component`, no fold, so it round-trips (transformation ×
+    # component coexistence — formerly out of scope).
+    "time_derivative_of_radial_electric_field",
 ]
 
 # Single-operator and binary cases that already round-tripped and must
@@ -66,9 +73,8 @@ ALREADY_WORKING = [
 # token-dropped name. Documented limitation; tracked for a future nested
 # model. Each entry is (name, the token folding would drop).
 OUT_OF_SCOPE = [
-    # outer operator wraps a PROJECTION axis: folding drops 'radial'
-    "time_derivative_of_radial_electric_field",
-    # operator-of-operator: folding drops the inner 'time_derivative'
+    # operator-of-operator: two structurally-distinct PREFIX operators;
+    # folding drops the inner 'time_derivative'
     "gradient_of_time_derivative_of_electron_temperature",
 ]
 

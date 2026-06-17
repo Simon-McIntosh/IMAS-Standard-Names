@@ -175,6 +175,17 @@ operators:
     precedence: 20
     returns: rate
 
+  # Finite/discrete increment (Delta) of the base over an event — NOT a rate.
+  # Unlike tendency/time_derivative (which return a per-time rate and render
+  # with _of_), change_in preserves the base unit and renders BARE
+  # (change_in_electron_density). It therefore also appears in the
+  # _BARE_PREFIX_TRANSFORMATIONS set in model.py. Suits discrete event-driven
+  # changes (sawtooth, ELM, pellet) under core_instant_changes/.
+  change_in:
+    kind: unary_prefix
+    precedence: 20
+    returns: scalar_or_vector
+
   time_average:
     kind: unary_prefix
     precedence: 30

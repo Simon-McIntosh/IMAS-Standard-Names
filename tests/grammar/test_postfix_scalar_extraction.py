@@ -9,11 +9,13 @@ Postfix is required for two reasons:
 1. Consistency — the other scalar-extraction / spectral operators
    (``magnitude``, ``fourier_coefficient``, ``moment``, ``waveform``) are
    already postfix; these three were the only prefix outliers.
-2. Composability with a projection — the prefix ``<op>_of_<base>`` form
-   cannot combine with a component/coordinate projection because the flat
-   model treats ``transformation`` and ``component`` as mutually exclusive
-   (``amplitude_of_radial_electric_field`` raises ValidationError), whereas
-   the postfix form ``radial_electric_field_amplitude`` round-trips.
+2. Consistency of the scalar-extraction family — these three are scalar
+   reductions of a vector/complex quantity, so they read most naturally as a
+   trailing ``<base>_<op>`` (``radial_electric_field_amplitude``) alongside
+   their projection. (A prefix ``_of_`` transformation now also coexists with
+   a component projection — see
+   ``tests/grammar/test_operator_projection_coexistence.py`` — so the postfix
+   choice here is about family consistency, not a projection limitation.)
 
 There is exactly ONE token per operation: the previously-duplicated
 ``real_part_postfix`` / ``imaginary_part_postfix`` tokens are removed.
