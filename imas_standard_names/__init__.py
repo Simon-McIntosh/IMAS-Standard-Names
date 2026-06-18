@@ -60,6 +60,34 @@ except Exception:  # pragma: no cover - defensive for code-generation stages
 
 
 # ---------------------------------------------------------------------------
+# Value-provenance (estimator) controlled vocabulary — link metadata, not a
+# grammar segment. See imas_standard_names.value_provenance.
+# ---------------------------------------------------------------------------
+
+try:
+    from imas_standard_names.value_provenance import (
+        VALUE_PROVENANCE,
+        ValueProvenanceTerm,
+        get_value_provenance,
+        is_value_provenance,
+        provenance_for_dd_facet,
+        value_provenance_terms,
+    )
+
+    __all__ = [
+        *__all__,
+        "VALUE_PROVENANCE",
+        "ValueProvenanceTerm",
+        "get_value_provenance",
+        "is_value_provenance",
+        "provenance_for_dd_facet",
+        "value_provenance_terms",
+    ]
+except Exception:  # pragma: no cover - defensive for code-generation stages
+    pass
+
+
+# ---------------------------------------------------------------------------
 # Pint custom unit formatting (register format 'F' when pint is available)
 # ---------------------------------------------------------------------------
 
