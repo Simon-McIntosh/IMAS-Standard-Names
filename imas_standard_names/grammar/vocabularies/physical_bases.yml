@@ -212,6 +212,10 @@ bases:
   mass_number:
     aliases: [nucleon_number]
     kind: scalar
+  mass_density:
+    aliases: []
+    kind: scalar
+    inherently_dimensional: true
   metric_tensor:
     aliases: []
     kind: tensor
