@@ -344,14 +344,19 @@ def _strip_locus(
         locus = LocusRef(relation=relation, token=token, type=locus_type, value=value)
         return locus, s[:idx], diagnostics
 
-    # 2. Unregistered-but-unambiguous fallback for _at_ / _over_.
+    # 2. Unregistered-but-unambiguous fallback for _at_ only.
     #    Skip if the core that would remain is a known qualifier or operator
-    #    token — that indicates the _over_/_at_ is part of a compound token,
-    #    not a locus marker (e.g. maximum_over_flux_surface).
-    for rel, default_type in (
-        ("at", LocusType.POSITION),
-        ("over", LocusType.REGION),
-    ):
+    #    token — that indicates the _at_ is part of a compound token, not a
+    #    locus marker (e.g. maximum_over_flux_surface for the analogous _over_
+    #    case).
+    #
+    #    The _over_ relation does NOT take this fallback: it is valid solely
+    #    for region-typed loci (the locus_registry compatibility matrix), and
+    #    those are matched in step 1. An unregistered _over_<X> would otherwise
+    #    fabricate a spurious region locus (e.g. velocity_over_magnetic_field),
+    #    masking the correct construction (ratio_of_velocity_to_magnetic_field).
+    #    Leaving it in the residue makes the base match fail → ParseError.
+    for rel, default_type in (("at", LocusType.POSITION),):
         marker = f"_{rel}_"
         idx = s.rfind(marker)
         if idx <= 0:
@@ -459,6 +464,22 @@ def _peel_outer_operator(
                 [],
             )
 
+    # b1) indexed unary prefix: s starts with "<op>_<coord>_of_" where <op> is
+    # an indexed prefix operator (index_params) and <coord> is a registered
+    # coordinate token. The bound index is fused into the operator token
+    # (<op>_<coord>) so the canonical renderer reproduces the prefix form
+    # "<op>_<coord>_of_<inner>" verbatim.
+    indexed_match = _longest_indexed_prefix_operator_match(s, prefix_ops, v)
+    if indexed_match is not None:
+        fused_op, consumed_len = indexed_match
+        new_s = s[consumed_len + len("_of_") :]
+        if new_s:
+            return (
+                OperatorApplication(kind=OperatorKind.UNARY_PREFIX, op=fused_op),
+                new_s,
+                [],
+            )
+
     # b2) bare unary prefix: These operators (normalized, volume_averaged, etc.)
     # fall through to the qualifier + base matching stage and are handled
     # by the IR→Model adapter in model.py. We do NOT peel them here because
@@ -550,6 +571,61 @@ def _longest_prefix_operator_match(s: str, tokens: set[str]) -> str | None:
         if s.startswith(marker) and len(s) > len(marker):
             if best is None or len(tok) > len(best):
                 best = tok
+    return best
+
+
+def _coordinate_universe(v: Vocabularies) -> frozenset[str]:
+    """Tokens admissible as an indexed-operator coordinate index.
+
+    The ``coord`` index of operators like ``derivative_with_respect_to`` is
+    drawn from the coordinate / flux-coordinate vocabulary: the geometry
+    carriers (``radial_coordinate``, ``toroidal_flux_coordinate``,
+    ``normalized_poloidal_flux_coordinate``, …) plus the bare coordinate axes
+    (``radial``, ``poloidal``, …).
+    """
+    return v.carriers | frozenset(v.axes)
+
+
+def _longest_indexed_prefix_operator_match(
+    s: str, prefix_ops: set[str], v: Vocabularies
+) -> tuple[str, int] | None:
+    """Match ``<op>_<coord>_of_`` for an indexed unary-prefix operator.
+
+    ``<op>`` must be an indexed prefix operator (``index_params`` declared with
+    a single ``coord`` parameter) and ``<coord>`` must be a registered
+    coordinate token (see :func:`_coordinate_universe`). Returns the fused
+    operator token ``<op>_<coord>`` together with the byte length consumed up
+    to (but excluding) the ``_of_`` separator, or ``None`` when no indexed
+    operator binds.
+
+    The longest fused match wins (operator length first, then coordinate
+    length) so an overlapping plain-prefix match never shadows it.
+    """
+    coords = _coordinate_universe(v)
+    best: tuple[str, int] | None = None
+    for op in prefix_ops:
+        meta = v.operators.get(op, {})
+        if not meta.get("indexed"):
+            continue
+        params = meta.get("index_params") or []
+        # Only the single-coordinate index form is supported in the prefix
+        # position (``<op>_<coord>_of_<base>``).
+        if list(params) != ["coord"]:
+            continue
+        op_prefix = f"{op}_"
+        if not s.startswith(op_prefix):
+            continue
+        remainder = s[len(op_prefix) :]
+        of_idx = remainder.find("_of_")
+        if of_idx <= 0:
+            continue
+        coord = remainder[:of_idx]
+        if coord not in coords:
+            continue
+        fused = f"{op}_{coord}"
+        consumed = len(fused)
+        if best is None or consumed > best[1]:
+            best = (fused, consumed)
     return best
 
 

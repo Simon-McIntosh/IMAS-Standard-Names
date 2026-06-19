@@ -116,7 +116,10 @@ def test_unknown_at_locus_raises():
 
 
 def test_unknown_over_locus_raises():
-    with pytest.raises(ValueError, match="region"):
+    # The ``over`` relation is valid only for region-typed loci (closed
+    # vocabulary). An unregistered region does not strip as a locus; it stays
+    # in the residue and the unknown-base match fails, rejecting the name.
+    with pytest.raises(ValueError, match="made_up_zone"):
         parse_standard_name("electron_density_over_made_up_zone")
 
 

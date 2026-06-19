@@ -13,11 +13,14 @@ relies on:
    ``.suggestions`` list contains the nearest closed-vocab candidates
    (edit-distance ranking via :func:`difflib.get_close_matches`).
 
-3. **vocab_gap diagnostic for unknown locus tokens**: parsing a name whose
-   ``_at_`` or ``_over_`` suffix points to an unregistered locus token
-   emits a :class:`~imas_standard_names.grammar.parser.Diagnostic` with
+3. **vocab_gap diagnostic for unknown ``_at_`` locus tokens**: parsing a name
+   whose ``_at_`` suffix points to an unregistered position token emits a
+   :class:`~imas_standard_names.grammar.parser.Diagnostic` with
    ``category == "vocab_gap"`` in the returned ``ParseResult.diagnostics``
-   list (the name still parses; gap is a warning, not an error).
+   list (the name still parses; gap is a warning, not an error). The
+   ``_over_`` relation is NOT liberal: it is valid only for region-typed
+   loci, so an unregistered ``_over_<X>`` raises :class:`ParseError` rather
+   than fabricating a spurious region locus.
 
 4. **Vocabulary immutability**: the ``Vocabularies`` bundle is a frozen
    dataclass; attempting to mutate it raises an error.
@@ -175,15 +178,15 @@ def test_unknown_at_locus_emits_vocab_gap_diagnostic(vocabs: Vocabularies) -> No
     assert all(isinstance(d, Diagnostic) for d in vocab_gap_diags)
 
 
-def test_unknown_over_locus_emits_vocab_gap_diagnostic(vocabs: Vocabularies) -> None:
-    """Unknown ``_over_`` locus token → ``vocab_gap`` Diagnostic."""
-    result = parse("temperature_over_unknown_region_token", vocabs)
+def test_unknown_over_locus_raises_parse_error(vocabs: Vocabularies) -> None:
+    """Unknown ``_over_`` locus token → ParseError (region vocab is closed).
 
-    vocab_gap_diags = [d for d in result.diagnostics if d.category == "vocab_gap"]
-    assert vocab_gap_diags, (
-        f"Expected vocab_gap diagnostic for unknown _over_ locus token; "
-        f"got: {result.diagnostics}"
-    )
+    The ``over`` relation is only valid for region-typed loci. An
+    unregistered ``_over_<X>`` must not strip as a spurious region locus —
+    it stays in the residue, the base match fails, and the name is rejected.
+    """
+    with pytest.raises(ParseError):
+        parse("temperature_over_unknown_region_token", vocabs)
 
 
 def test_vocab_gap_diagnostic_identifies_locus_layer(vocabs: Vocabularies) -> None:

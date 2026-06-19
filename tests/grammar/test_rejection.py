@@ -229,15 +229,18 @@ def test_parse_unknown_at_locus_emits_vocab_gap_diagnostic(
     assert result2.ir == result.ir
 
 
-def test_parse_unknown_over_locus_emits_vocab_gap_diagnostic(
+def test_parse_unknown_over_locus_raises_parse_error(
     vocabs: Vocabularies,
 ) -> None:
-    """``temperature_over_some_region`` — unknown ``_over_`` token falls back
-    with a ``vocab_gap`` diagnostic."""
-    result = parse("temperature_over_some_region", vocabs)
-    assert any(d.category == "vocab_gap" for d in result.diagnostics), (
-        f"Expected vocab_gap diagnostic; got {result.diagnostics}"
-    )
+    """``temperature_over_some_region`` — unknown ``_over_`` token is rejected.
+
+    The ``over`` relation is valid only for region-typed loci (closed
+    vocabulary). An unregistered region does not strip as a locus; it stays
+    in the residue and the base match fails, so the name is rejected. This
+    forces the correct construction (``ratio_of_X_to_Y``) instead of a
+    spurious region locus.
+    """
+    _assert_parse_error("temperature_over_some_region", vocabs)
 
 
 # ---------------------------------------------------------------------------
