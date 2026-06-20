@@ -144,3 +144,11 @@
 - compton_scattering           # Compton scattering interaction
 - perturbed_parallel_magnetic_field     # perturbed parallel magnetic field process
 - perturbed_parallel_vector_potential   # perturbed parallel vector potential process
+
+# === radiation and fast-particle-loss mechanism additions ===
+# Genuine mechanism gaps from codex VocabGap analysis (runaway, fast-ion,
+# radiometry DD paths). Each distinct from existing process tokens.
+- avalanche                    # runaway-electron avalanche generation (secondary RE multiplication; distinct from dreicer/hot_tail)
+- first_orbit_loss             # prompt fast-ion first-orbit loss (unconfined fast ions lost on their first orbit)
+- line_radiation               # bound-bound atomic line radiation (distinct from impurity_radiation / radiation)
+- synchrotron_radiation        # synchrotron / electron-cyclotron radiation losses

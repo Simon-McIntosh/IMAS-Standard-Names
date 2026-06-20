@@ -460,3 +460,49 @@ bases:
     aliases: []
     kind: scalar
     inherently_dimensional: true
+
+  # === radiometric, atomic, MHD, and diagnostic base additions ===
+  # Genuine irreducible bases from codex VocabGap analysis. DD-confirmed
+  # (spectrometers, SXR/HXR cameras, sawteeth, atomic state, equilibrium).
+  # Each is irreducible: no qualifier+base decomposition yields it.
+
+  ionisation_potential:
+    # cumulative/average atomic ionisation potential of an ion charge state
+    # (energy to strip electrons); British spelling matches the DD path name
+    # (core_profiles/.../ion/state/ionisation_potential). eV.
+    aliases: [ionization_potential]
+    kind: scalar
+    inherently_dimensional: true
+  radiance:
+    # radiometric radiance: power per unit area per unit solid angle
+    # (W.m^-2.sr^-1); the broadband counterpart to spectral_radiance.
+    # DD: spectrometer_*/processed_line/radiance, soft_x_rays/channel/intensity
+    aliases: []
+    kind: scalar
+    inherently_dimensional: true
+  brightness:
+    # radiometric brightness: power flux per unit solid angle per unit area
+    # (= power / etendue). DD names this distinctly from radiance
+    # (hard_x_rays/channel/brightness), so it is its own base.
+    aliases: []
+    kind: scalar
+    inherently_dimensional: true
+  instrument_function:
+    # spectrometer / diagnostic instrument response function (PSF); the
+    # detector line-shape that convolves the true spectrum. DD:
+    # spectrometer_*/channel/instrument_function. Units vary (may be
+    # normalized), so not inherently_dimensional.
+    aliases: []
+    kind: scalar
+  rotational_transform:
+    # rotational transform iota = 1/q (field-line winding per toroidal
+    # transit); dimensionless. Distinct from safety_factor. DD: summary
+    # iota, distributions SFL grids.
+    aliases: [iota]
+    kind: scalar
+  psi_star:
+    # perturbed poloidal flux Psi* = psi - phi (MHD sawtooth analysis);
+    # poloidal magnetic flux (Wb). DD: sawteeth/profiles_1d/psi_star_*.
+    aliases: []
+    kind: scalar
+    inherently_dimensional: true

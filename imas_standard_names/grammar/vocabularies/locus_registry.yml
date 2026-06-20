@@ -287,6 +287,48 @@ loci:
     type: entity
     allowed_relations: [of]
 
+  # ── coil-conductor and diagnostic-optic entities (VocabGap analysis) ──
+  # Genuine DD hardware objects (PF/TF/non-axisymmetric coil conductor
+  # geometry; diagnostic apertures, filter windows, fibre bundles).
+  # Intrinsic properties via _of_<entity>. Entity loci only — ordinal
+  # outline/element points stay in DD metadata, not the registry.
+  conductor:
+    # current-carrying conductor of a coil (tf/coil/conductor,
+    # coils_non_axisymmetric/coil/conductor)
+    type: entity
+    allowed_relations: [of]
+  coil_conductor:
+    # the conductor of a magnetic-field coil, as a named object
+    # (coils_non_axisymmetric/coil/conductor/...)
+    type: entity
+    allowed_relations: [of]
+  coil_conductor_element:
+    # a discrete element of a coil conductor's discretized path
+    # (coils_non_axisymmetric/coil/conductor/elements)
+    type: entity
+    allowed_relations: [of]
+  conductor_cross_section:
+    # the cross-sectional profile of a coil conductor
+    # (coil/conductor/cross_section, pf_active/coil/geometry annulus)
+    type: entity
+    allowed_relations: [of]
+  aperture:
+    # generic diagnostic aperture (utilities/aperture substructure;
+    # camera_x_rays/aperture, soft_x_rays/channel/aperture); distinct
+    # from the more specific diagnostic_aperture entity
+    type: entity
+    allowed_relations: [of]
+  filter_window:
+    # optical filter window of a camera/detector
+    # (camera_x_rays/filter_window, hard_x_rays/channel/filter_window)
+    type: entity
+    allowed_relations: [of]
+  fibre_bundle:
+    # fibre-optic bundle of a visible/spectroscopic diagnostic
+    # (camera_visible/channel/fibre_bundle, spectrometer_visible)
+    type: entity
+    allowed_relations: [of]
+
   # ====================================================================
   # Position-typed loci (field at location: _at_<position>, _of_<position>)
   # Physics-meaningful spatial locations in tokamak geometry

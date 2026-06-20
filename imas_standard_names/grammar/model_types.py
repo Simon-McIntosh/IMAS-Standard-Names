@@ -220,6 +220,10 @@ class Process(StrEnum):
     COMPTON_SCATTERING = "compton_scattering"
     PERTURBED_PARALLEL_MAGNETIC_FIELD = "perturbed_parallel_magnetic_field"
     PERTURBED_PARALLEL_VECTOR_POTENTIAL = "perturbed_parallel_vector_potential"
+    AVALANCHE = "avalanche"
+    FIRST_ORBIT_LOSS = "first_orbit_loss"
+    LINE_RADIATION = "line_radiation"
+    SYNCHROTRON_RADIATION = "synchrotron_radiation"
 
 
 class GenericPhysicalBase(StrEnum):
@@ -329,6 +333,13 @@ class Object(StrEnum):
     CRYOSTAT = "cryostat"
     GAUGE = "gauge"
     STRAIN_GAUGE_SENSOR = "strain_gauge_sensor"
+    CONDUCTOR = "conductor"
+    COIL_CONDUCTOR = "coil_conductor"
+    COIL_CONDUCTOR_ELEMENT = "coil_conductor_element"
+    CONDUCTOR_CROSS_SECTION = "conductor_cross_section"
+    APERTURE = "aperture"
+    FILTER_WINDOW = "filter_window"
+    FIBRE_BUNDLE = "fibre_bundle"
 
 
 class Position(StrEnum):

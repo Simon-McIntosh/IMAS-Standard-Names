@@ -105,6 +105,11 @@ _KNOWN_IRREDUCIBLE_COMPOUNDS = frozenset(
         "fusion_power_density",
         "thermal_energy_pedestal",
         "fast_wave_field",
+        # spectral_radiance is radiance per unit wavelength/frequency
+        # (W.m^-2.sr^-1.nm^-1) — a distinct radiometric quantity with an
+        # extra spectral dimension, not merely [spectral] + [radiance].
+        # Lexicalised; kept irreducible alongside the broadband 'radiance' base.
+        "spectral_radiance",
     }
 )
 

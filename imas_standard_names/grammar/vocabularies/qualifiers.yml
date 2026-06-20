@@ -270,3 +270,24 @@
 - townsend                      # Townsend (townsend_coefficient) — avalanche ionization in breakdown
 - sawtooth                      # sawtooth instability (sawtooth_period, sawtooth_amplitude)
 - decay                         # decay (decay_time, decay_rate, decay_length)
+
+# === wave-diagnostic, MSE, numerical-split, and PFC-face additions ===
+# Genuine atomic qualifiers from codex VocabGap analysis. DD-confirmed.
+
+# --- Wave polarization / diagnostic method ---
+- faraday                       # Faraday rotation (polarimetry / FOCS): faraday_rotation_angle
+- ordinary_mode                 # O-mode wave polarization (reflectometry/ECE): ordinary_mode_temperature (ece t_radiation_o)
+- extraordinary_mode            # X-mode wave polarization (reflectometry/ECE): extraordinary_mode_temperature (ece t_radiation_x)
+- motional_stark                # motional Stark effect diagnostic (MSE): motional_stark_angle
+- straight_field_line           # straight-field-line flux coordinate (SFL): straight_field_line_angle
+
+# --- Turbulence ---
+- reynolds                      # Reynolds stress (turbulence momentum transport): reynolds_stress
+
+# --- Numerical source-term split (transport_solver_numerics) ---
+- implicit                      # implicit source-term contribution (decomposed source: implicit_part)
+- explicit                      # explicit source-term contribution (decomposed source: explicit_part)
+
+# --- Plasma-facing-component / optical-element face ---
+- back_surface                  # back (rear) face of a PFC / optical element
+- front_surface                 # front (plasma-facing) face of a PFC / optical element
