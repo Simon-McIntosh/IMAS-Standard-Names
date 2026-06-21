@@ -520,6 +520,11 @@ loci:
   sawtooth_inversion_radius:
     type: position
     allowed_relations: [at, of]
+  sawtooth_mixing_radius:
+    # outer radius of the sawtooth reconnection/mixing region (companion to
+    # the sawtooth_inversion_radius); DD: sawteeth diagnostics
+    type: position
+    allowed_relations: [at, of]
   secondary_separatrix:
     type: position
     allowed_relations: [at, of]

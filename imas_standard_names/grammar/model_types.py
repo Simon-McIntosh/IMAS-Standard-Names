@@ -94,6 +94,13 @@ class Subject(StrEnum):
     SHATTERED_PELLET_SPECIES = "shattered_pellet_species"
     AMMONIA = "ammonia"
     SILANE = "silane"
+    ETHANE = "ethane"
+    PROPANE = "propane"
+    ETHYLENE = "ethylene"
+    METHANE = "methane"
+    AMMONIA_DEUTERATED = "ammonia_deuterated"
+    METHANE_CARBON_13 = "methane_carbon_13"
+    DEUTERATED_METHANE = "deuterated_methane"
 
 
 class Population(StrEnum):
@@ -404,6 +411,7 @@ class Position(StrEnum):
     PRIMARY_STRIKE_POINT = "primary_strike_point"
     PRIMARY_X_POINT = "primary_x_point"
     SAWTOOTH_INVERSION_RADIUS = "sawtooth_inversion_radius"
+    SAWTOOTH_MIXING_RADIUS = "sawtooth_mixing_radius"
     SECONDARY_SEPARATRIX = "secondary_separatrix"
     SECONDARY_STRIKE_POINT = "secondary_strike_point"
     SECONDARY_X_POINT = "secondary_x_point"

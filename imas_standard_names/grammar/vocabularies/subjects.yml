@@ -91,3 +91,12 @@
 - shattered_pellet_species
 - ammonia
 - silane
+# Injected gas species (hydrocarbons + ammonia/methane isotopologues).
+# Canonical isotopologue spelling is deuterated_methane (NOT methane_deuterated).
+- ethane
+- propane
+- ethylene
+- methane
+- ammonia_deuterated
+- methane_carbon_13
+- deuterated_methane

@@ -506,3 +506,73 @@ bases:
     aliases: []
     kind: scalar
     inherently_dimensional: true
+
+  # === grammar-stabilisation vocabulary additions (codex full-DD compose
+  # gap analysis) === Genuine irreducible bases surfaced by parser-rejected
+  # tokens that blocked name composition across the full DD. DD-confirmed.
+
+  magnetic_vector_potential:
+    # magnetic vector potential A (B = curl A); SI unit m.T (= V.s.m^-1 = Wb.m^-1).
+    # DD: a_field (n=34). Vector base distinct from scalar magnetic_flux.
+    aliases: [vector_potential]
+    kind: vector
+    inherently_dimensional: true
+  larmor_radius:
+    # gyroradius of a charged particle in a magnetic field (m); enables the
+    # dimensionless normalized_larmor_radius (rho*) via the normalized operator.
+    aliases: [gyroradius]
+    kind: scalar
+    inherently_dimensional: true
+  vibrational_level:
+    # molecular vibrational quantum level (dimensionless quantum number);
+    # atomic/molecular state index, not a physical length.
+    aliases: []
+    kind: scalar
+  probability:
+    # dimensionless probability (0..1) of an event/state.
+    aliases: []
+    kind: scalar
+  parity:
+    # gyrokinetic eigenmode parity (dimensionless: even/odd symmetry indicator).
+    aliases: []
+    kind: scalar
+  efficiency:
+    # dimensionless efficiency / yield ratio (0..1); dedups detection_efficiency,
+    # light_collection_efficiency, balance-of-plant efficiencies into one base.
+    aliases: []
+    kind: scalar
+  peaking_factor:
+    # dimensionless profile peaking factor (e.g. central/volume-averaged ratio,
+    # t_e_peaking); a shape descriptor of a 1D profile.
+    aliases: []
+    kind: scalar
+  field_current_coupling_coefficient:
+    # electromagnetic coupling (Green's-function) response of a magnetic field
+    # to a coil current: B per unit I (SI unit A^-1.T). DD: em_coupling.
+    aliases: [field_per_current_coupling, magnetic_field_response]
+    kind: scalar
+    inherently_dimensional: true
+  roughness:
+    # optical-element surface roughness (RMS height); units vary (length or
+    # normalized), so not inherently_dimensional.
+    aliases: []
+    kind: scalar
+  fluence:
+    # time-integrated surface particle/photon flux (m^-2); cumulative areal dose.
+    aliases: []
+    kind: scalar
+    inherently_dimensional: true
+  tritium_breeding_ratio:
+    # dimensionless tritium breeding ratio (TBR) of a blanket.
+    aliases: []
+    kind: scalar
+  fusion_gain:
+    # dimensionless fusion energy gain Q (fusion power / input heating power).
+    aliases: []
+    kind: scalar
+  charge_number:
+    # signed integer charge number Z of an ion charge state (dimensionless);
+    # distinct from `charge` (the dimensional electric charge in C). Enables
+    # square_of_ion_charge_number (z_ion_square).
+    aliases: []
+    kind: scalar

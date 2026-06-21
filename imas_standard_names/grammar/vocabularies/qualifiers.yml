@@ -291,3 +291,18 @@
 # --- Plasma-facing-component / optical-element face ---
 - back_surface                  # back (rear) face of a PFC / optical element
 - front_surface                 # front (plasma-facing) face of a PFC / optical element
+
+# === grammar-stabilisation qualifier additions (codex full-DD compose
+# gap analysis) === Genuine atomic qualifiers surfaced by parser-rejected
+# tokens. DD-confirmed.
+
+# --- Power/flux direction (wall + antenna) ---
+- incident                      # incident (impinging) wall power/flux — companion to absorbed/reflected
+- forward                       # forward antenna power — companion to reflected (launcher coupling)
+
+# --- Geometry / surface ---
+- wetted                        # wetted (heat-flux-receiving) divertor area: wetted_area
+
+# --- FOCS fibre (spun fibre period) ---
+- spun                          # spun optical fibre (FOCS) qualifier: spun_period
+- twist                         # fibre twist period (FOCS): twist_period
