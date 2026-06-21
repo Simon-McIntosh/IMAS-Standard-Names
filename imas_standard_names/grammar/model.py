@@ -132,6 +132,7 @@ for _model_tok, _connector in BINARY_OPERATOR_CONNECTORS.items():
 # qualifiers (not operators) since they lack the _of_ joining marker.
 # Determined by corpus analysis of canonical standard names.
 _TRANSFORMATION_VALUES: frozenset[str] = frozenset(t.value for t in Transformation)
+_DECOMPOSITION_VALUES: frozenset[str] = frozenset(d.value for d in Decomposition)
 _BARE_PREFIX_TRANSFORMATIONS: frozenset[str] = frozenset(
     {
         "accumulated",
@@ -155,6 +156,112 @@ _BARE_PREFIX_TRANSFORMATIONS: frozenset[str] = frozenset(
         "volume_integrated",
     }
 )
+
+
+# ---------------------------------------------------------------------------
+# Indexed-operator token validation
+# ---------------------------------------------------------------------------
+# An indexed unary operator (``derivative_with_respect_to[coord]``,
+# ``bessel_0[order]``, ``fourier_coefficient[m,n]``) binds its index into the
+# operator token: the parser fuses ``<op>_<index>`` so the canonical renderer
+# reproduces it verbatim (``derivative_with_respect_to_radial_coordinate_of_
+# pressure``). The flat StandardName model therefore has to accept the FUSED
+# token in its ``transformation`` / ``decomposition`` slot, not only the bare
+# registered enum members. The closed StrEnums emitted by the codegen carry
+# only the bare tokens, so the slots are validated by token RULE here instead
+# of by enum membership — accepting either a bare registered operator OR a
+# ``<indexed_op>_<index>`` form whose base operator declares ``index_params``.
+#
+# The coordinate index of ``derivative_with_respect_to`` is drawn from the same
+# coordinate / flux-coordinate universe the parser uses (carriers + axes), so
+# the model and parser agree on exactly which fused tokens round-trip. Loading
+# is lazy + cached to avoid importing the vocabulary loaders at module import.
+
+
+class _IndexedOperatorRules:
+    """Lazily-loaded vocabulary view for indexed-operator token validation."""
+
+    def __init__(self) -> None:
+        self._loaded = False
+        self._indexed_coord_prefix_ops: frozenset[str] = frozenset()
+        self._coordinate_universe: frozenset[str] = frozenset()
+
+    def _load(self) -> None:
+        if self._loaded:
+            return
+        # Deferred import: the parser pulls in the vocabulary loaders, which we
+        # do not want to trigger at module import time (model.py is imported
+        # widely, including during codegen-adjacent paths).
+        from imas_standard_names.grammar.parser import (  # noqa: PLC0415
+            _coordinate_universe,
+            load_default_vocabularies,
+        )
+
+        vocabs = load_default_vocabularies()
+        self._coordinate_universe = frozenset(_coordinate_universe(vocabs))
+        # Indexed unary operators whose single index parameter is ``coord`` bind
+        # a coordinate token in the fused form ``<op>_<coord>`` (prefix derivative
+        # family). Other indexed operators (bessel_*[order], fourier_coefficient
+        # [m,n]) bind their index purely positionally and the parser only ever
+        # emits their BARE token, so they are already covered by enum membership.
+        self._indexed_coord_prefix_ops = frozenset(
+            op
+            for op, meta in vocabs.operators.items()
+            if meta.get("indexed") and list(meta.get("index_params") or []) == ["coord"]
+        )
+        self._loaded = True
+
+    def coord_index_operators(self) -> frozenset[str]:
+        self._load()
+        return self._indexed_coord_prefix_ops
+
+    def coordinate_universe(self) -> frozenset[str]:
+        self._load()
+        return self._coordinate_universe
+
+
+_INDEXED_OPERATOR_RULES = _IndexedOperatorRules()
+
+
+def _split_fused_indexed_operator(token: str) -> tuple[str, str] | None:
+    """Split ``<op>_<index>`` for a registered coordinate-indexed operator.
+
+    Returns ``(base_op, index)`` when ``token`` is a coordinate-indexed
+    operator (``derivative_with_respect_to``) followed by a registered
+    coordinate token, else ``None``. The longest base-operator match wins so
+    overlapping prefixes never shadow the real operator.
+    """
+    coord_ops = _INDEXED_OPERATOR_RULES.coord_index_operators()
+    coords = _INDEXED_OPERATOR_RULES.coordinate_universe()
+    best: tuple[str, str] | None = None
+    for op in coord_ops:
+        marker = f"{op}_"
+        if not token.startswith(marker):
+            continue
+        index = token[len(marker) :]
+        if index not in coords:
+            continue
+        if best is None or len(op) > len(best[0]):
+            best = (op, index)
+    return best
+
+
+def _validate_operator_token(value: str | None, *, registered: frozenset[str]) -> None:
+    """Reject a transformation/decomposition token that is neither a registered
+    bare operator nor a valid fused ``<indexed_op>_<index>`` form.
+
+    Raises ``ValueError`` with the same guidance shape the closed StrEnum used
+    to emit, so callers see a clear allowed-token message.
+    """
+    if value is None or value in registered:
+        return
+    if _split_fused_indexed_operator(value) is not None:
+        return
+    raise ValueError(
+        f"Invalid operator token '{value}': expected a registered operator "
+        f"token or a fused '<indexed_operator>_<coordinate>' form "
+        f"(e.g. 'derivative_with_respect_to_radial_coordinate')."
+    )
 
 
 class NonCanonicalNameError(ValueError):
@@ -646,8 +753,14 @@ class StandardName(BaseModel):
     )
     region: Region | None = None
     process: Process | None = None
-    transformation: Transformation | None = None
-    decomposition: Decomposition | None = None
+    # transformation / decomposition accept the closed registered operator
+    # tokens AND fused indexed-operator tokens (``<indexed_op>_<index>``, e.g.
+    # ``derivative_with_respect_to_radial_coordinate``). The codegen StrEnums
+    # carry only the bare tokens, so these slots are typed ``str`` and validated
+    # by the rule in ``_validate_operator_token`` rather than by enum
+    # membership — see the indexed-operator note above.
+    transformation: str | None = None
+    decomposition: str | None = None
     binary_operator: BinaryOperator | None = None
     secondary_base: BaseToken | None = None
 
@@ -666,6 +779,21 @@ class StandardName(BaseModel):
             msg = "secondary_base segment must match the canonical token pattern"
             raise ValueError(msg)
         return value
+
+    @field_validator("transformation", mode="before")
+    @classmethod
+    def _validate_transformation(cls, value: Any) -> str | None:
+        # Accept enum members (StrEnum) by coercing to their .value first.
+        token = _value_of(value) if value is not None else None
+        _validate_operator_token(token, registered=_TRANSFORMATION_VALUES)
+        return token
+
+    @field_validator("decomposition", mode="before")
+    @classmethod
+    def _validate_decomposition(cls, value: Any) -> str | None:
+        token = _value_of(value) if value is not None else None
+        _validate_operator_token(token, registered=_DECOMPOSITION_VALUES)
+        return token
 
     @field_validator("position_value")
     @classmethod

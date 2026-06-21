@@ -229,7 +229,9 @@ class TestTransformationParse:
 
     def test_parse_volume_averaged(self):
         result = parse_name("volume_averaged_electron_temperature")
-        assert result.transformation.value == "volume_averaged"
+        # transformation is a plain str token (it accepts fused indexed-operator
+        # tokens beyond the closed Transformation enum members).
+        assert result.transformation == "volume_averaged"
         assert result.subject.value == "electron"
         assert result.physical_base == "temperature"
 
@@ -241,19 +243,19 @@ class TestTransformationParse:
 
     def test_parse_normalized(self):
         result = parse_name("normalized_electron_pressure")
-        assert result.transformation.value == "normalized"
+        assert result.transformation == "normalized"
         assert result.subject.value == "electron"
         assert result.physical_base == "pressure"
 
     def test_parse_flux_surface_averaged(self):
         result = parse_name("flux_surface_averaged_electron_temperature")
-        assert result.transformation.value == "flux_surface_averaged"
+        assert result.transformation == "flux_surface_averaged"
         assert result.subject.value == "electron"
         assert result.physical_base == "temperature"
 
     def test_parse_maximum_over_flux_surface(self):
         result = parse_name("maximum_over_flux_surface_electron_temperature")
-        assert result.transformation.value == "maximum_over_flux_surface"
+        assert result.transformation == "maximum_over_flux_surface"
         assert result.subject.value == "electron"
         assert result.physical_base == "temperature"
 
