@@ -92,6 +92,10 @@ class Vocabularies:
     bases: frozenset[str] = field(default_factory=frozenset)
     carriers: frozenset[str] = field(default_factory=frozenset)
     qualifiers: frozenset[str] = field(default_factory=frozenset)
+    # token → normalized category for the genuine modifier qualifiers
+    # (qualifiers.yml). Empty for tokens that only peel as qualifiers via the
+    # acceptance union (operators, loci, subjects); IR metadata only.
+    qualifier_categories: Mapping[str, str] = field(default_factory=dict)
 
     def base_universe(self) -> frozenset[str]:
         return self.bases | self.carriers
@@ -192,6 +196,7 @@ def load_default_vocabularies() -> Vocabularies:
         bases=frozenset(bases_reg.bases),
         carriers=frozenset(carriers_reg.carriers),
         qualifiers=qualifiers,
+        qualifier_categories=vocab_loaders.load_qualifier_categories(),
     )
 
 
@@ -707,7 +712,14 @@ def _match_base_with_qualifiers(
             )
         except ParseError:
             continue
-        return base, [Qualifier(token=prefix), *deeper], proj
+        return (
+            base,
+            [
+                Qualifier(token=prefix, category=v.qualifier_categories.get(prefix)),
+                *deeper,
+            ],
+            proj,
+        )
 
     suggestions = get_close_matches(s, list(v.base_universe()), n=3)
     raise ParseError(

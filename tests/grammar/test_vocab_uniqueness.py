@@ -43,7 +43,14 @@ def load_vocab_tokens() -> dict[str, set[str]]:
     )
     vocab_tokens = {}
 
+    # qualifier_categories.yml is a token→category MAP, not a token-defining
+    # vocabulary: it intentionally re-lists qualifiers.yml tokens and its
+    # top-level keys are category names. Exclude it from the uniqueness scan.
+    skip = {"qualifier_categories.yml"}
+
     for yml_file in sorted(vocab_dir.glob("*.yml")):
+        if yml_file.name in skip:
+            continue
         with open(yml_file) as f:
             data = yaml.safe_load(f)
 

@@ -213,6 +213,29 @@ def load_qualifiers() -> frozenset[str]:
     return frozenset()
 
 
+def load_qualifier_categories() -> dict[str, str]:
+    """Load the token → category map from ``qualifier_categories.yml``.
+
+    The file groups every ``qualifiers.yml`` token under one of a small set of
+    normalized presentation categories (transport, source, geometry, region,
+    state, energy, diagnostic, polarization, temporal, normalized, species,
+    engineering). Returns a flat ``{token: category}`` mapping; missing or
+    malformed file yields an empty dict so callers degrade gracefully.
+    """
+    try:
+        data = _load_yaml("qualifier_categories.yml")
+    except Exception:
+        return {}
+    sections = data.get("qualifier_categories") if isinstance(data, dict) else None
+    if not isinstance(sections, dict):
+        return {}
+    out: dict[str, str] = {}
+    for category, tokens in sections.items():
+        for token in tokens or []:
+            out[str(token)] = str(category)
+    return out
+
+
 # ---------------------------------------------------------------------------
 # populations.yml
 # ---------------------------------------------------------------------------

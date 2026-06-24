@@ -20,9 +20,12 @@ const VOCAB = {
   orbits: [],
   populations: [],
   subjects: [{ token: 'electron' }],
+  // Genuine generic qualifiers, each with its emitted category (no subjects).
   qualifiers: [
-    { token: 'total' }, { token: 'external' }, { token: 'heating' },
-    { token: 'major' }, { token: 'electron' },
+    { token: 'external', category: 'state' },
+    { token: 'heating', category: 'engineering' },
+    { token: 'major', category: 'geometry' },
+    { token: 'minor', category: 'geometry' },
   ],
 };
 
@@ -139,6 +142,28 @@ describe('Grammar composer', () => {
     );
     await act(async () => { fireEvent.click(processChip); });
     expect(container.querySelector('.gx-dd')).not.toBeNull();
+  });
+
+  it('groups the generic qualifier picker by category (no subject group)', async () => {
+    const { container } = await renderGrammar();
+    // Toggle the generic "qualifier" rail node → adds an empty generic chip.
+    const qNode = [...container.querySelectorAll('.gx-chain .gx-node')].find(
+      (n) => n.querySelector('.gx-node-label').textContent === 'qualifier',
+    );
+    await act(async () => { fireEvent.click(qNode); });
+    const chip = [...container.querySelectorAll('.gx-namebar .gx-tok')].find(
+      (c) => c.querySelector('.gx-tok-ph')?.textContent === 'qualifier',
+    );
+    await act(async () => { fireEvent.click(chip); });
+    const groupHeaders = [...container.querySelectorAll('.gx-dd .gx-dd-grouph')].map(
+      (g) => g.firstChild.textContent.trim(),
+    );
+    // Grouped by emitted category…
+    expect(groupHeaders).toContain('geometry');
+    expect(groupHeaders).toContain('state');
+    // …and the named sub-kinds are NOT mixed into the generic picker.
+    expect(groupHeaders).not.toContain('subject');
+    expect(groupHeaders).not.toContain('aggregation');
   });
 
   it('narrows results to names matching the seeded composition', async () => {

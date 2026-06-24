@@ -174,16 +174,25 @@ export function Grammar({ onSelect, setView, query, seedName, seedNonce }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [seedNonce, nameStates]);
 
-  // Genuine generic qualifiers: the qualifier vocab minus the named sub-kinds
-  // AND minus tokens that really belong to other segments (locus entities,
-  // operators, components, bases) — the parser accepts those as qualifiers for
-  // matching, but they are not qualifiers and must not be offered here.
-  const otherQualifiers = useMemo(() => {
-    const claimed = new Set();
-    const add = (key) => (V[key] || []).forEach((t) => claimed.add(t.token));
-    ['aggregations', 'orbits', 'populations', 'subjects', 'locus_registry', 'operators',
-      'components', 'coordinate_axes', 'physical_bases', 'geometry_carriers'].forEach(add);
-    return (V.qualifiers || []).filter((t) => !claimed.has(t.token));
+  // Generic qualifiers, grouped by the normalized category emitted in
+  // GRAMMAR_VOCAB (authoritative — categorized in ISN by qualifier_categories.yml,
+  // no SPA-side subtraction or named sub-kinds mixed in). The picker for a
+  // generic 'qualifier' chip sub-groups by these categories.
+  const QUALIFIER_CATEGORY_ORDER = [
+    'transport', 'source', 'geometry', 'region', 'state', 'energy',
+    'diagnostic', 'polarization', 'temporal', 'normalized', 'species', 'engineering',
+  ];
+  const categoryGroups = useMemo(() => {
+    const byCat = new Map();
+    for (const t of V.qualifiers || []) {
+      const c = t.category || 'other';
+      if (!byCat.has(c)) byCat.set(c, []);
+      byCat.get(c).push(t);
+    }
+    const known = QUALIFIER_CATEGORY_ORDER.filter((c) => byCat.has(c));
+    const extra = [...byCat.keys()].filter((c) => !QUALIFIER_CATEGORY_ORDER.includes(c)).sort();
+    return [...known, ...extra].map((c) => ({ label: c, items: byCat.get(c) }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [V]);
 
   const composed = composeName(state);
@@ -332,10 +341,15 @@ export function Grammar({ onSelect, setView, query, seedName, seedNonce }) {
   const dropdown = () => {
     if (!open) return null;
     const t = open.target;
-    const QGROUPS = [
-      ...QUAL_GROUPS.map((g) => ({ label: g.label, items: V[g.key] || [] })),
-      { label: 'other', items: otherQualifiers },
-    ].filter((g) => g.items.length);
+    // A qualifier chip's picker depends on its kind: a named sub-kind chip
+    // (aggregation/orbit/population/subject) offers that section's flat vocab;
+    // a generic qualifier chip offers the genuine qualifiers grouped by their
+    // emitted category (no named sub-kinds, no cross-segment tokens).
+    const chipKind = t.seg === 'qualifier' ? state.qualifiers[t.index]?.kind : null;
+    const namedGroup = QUAL_GROUPS.find((g) => g.kind === chipKind);
+    const qualifierCfg = namedGroup
+      ? { title: namedGroup.label, hue: HUE[namedGroup.kind], options: V[namedGroup.key] || [] }
+      : { title: 'qualifier', hue: HUE.qualifier, grouped: true, options: categoryGroups };
     const cfg = {
       operator: { title: 'operator', hue: HUE.operator, options: V.operators || [], current: state.operator?.token },
       projection: {
@@ -353,10 +367,7 @@ export function Grammar({ onSelect, setView, query, seedName, seedNonce }) {
         options: [...(V.locus_registry || []), ...(V.regions || [])], current: state.locus?.token,
       },
       process: { title: 'process', hue: HUE.process, options: V.processes || [], current: state.mechanism?.token },
-      qualifier: {
-        title: 'qualifier', hue: HUE.qualifier, grouped: true, options: QGROUPS,
-        current: state.qualifiers[t.index]?.token,
-      },
+      qualifier: { ...qualifierCfg, current: state.qualifiers[t.index]?.token },
     }[t.seg];
     return (
       <VocabDropdown

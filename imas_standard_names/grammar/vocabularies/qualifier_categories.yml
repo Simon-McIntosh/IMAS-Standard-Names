@@ -1,0 +1,209 @@
+# Qualifier categories — presentation grouping for the Grammar composer.
+#
+# Maps each qualifier token in qualifiers.yml to exactly one normalized
+# category, collapsing the ~39 historical comment-families into 12 buckets.
+# Authoritative source for token->category. The grammar parser populates
+# IR Qualifier.category from this file; the catalog dataset emits it in
+# GRAMMAR_VOCAB so the SPA's qualifier picker can sub-group cleanly.
+#
+# Invariant (enforced by tests): every qualifiers.yml token appears in
+# EXACTLY ONE category here, and no extra tokens. Add a token here in the
+# same change that adds it to qualifiers.yml.
+
+qualifier_categories:
+  # Transport channel, regime, and flow type
+  transport:
+    - anomalous
+    - classical
+    - collisional
+    - convection
+    - energy
+    - fast_wave
+    - heat
+    - inertial
+    - internal
+    - linear
+    - mhd
+    - momentum
+    - neoclassical
+    - particle
+    - reynolds
+    - slow_wave
+    - sonic
+    - turbulent
+    - wave
+
+  # Source / drive mechanism and material
+  source:
+    - alpha
+    - beam
+    - bootstrap
+    - bremsstrahlung
+    - ferritic
+    - fusion
+    - gas
+    - inductive
+    - mutual
+    - nbi
+    - non_inductive
+    - nuclear
+    - ohmic
+    - radiative
+    - rf
+    - waste
+    - wave_driven
+
+  # Geometric, directional, and tensor qualifiers
+  geometry:
+    - angular
+    - center_of_mass
+    - contravariant
+    - covariant
+    - cross_field
+    - diamagnetic
+    - direction
+    - e_cross_b
+    - e_cross_b_drift
+    - field_aligned
+    - field_line
+    - flux_surface
+    - line_integrated
+    - major
+    - minor
+    - non_axisymmetric
+    - surface
+    - volume_averaged
+    - volumetric
+    - wetted
+
+  # Plasma region and position modifiers
+  region:
+    - core
+    - divertor
+    - edge
+    - inner
+    - lower
+    - outer
+    - pedestal
+    - scrape_off_layer
+    - separatrix
+    - upper
+
+  # State, condition, mode, and named-physics qualifiers
+  state:
+    - alfven
+    - atomic
+    - average
+    - breakdown
+    - critical
+    - decay
+    - effective
+    - enhancement
+    - equilibrium
+    - external
+    - fluctuating
+    - gyroaveraged
+    - ideal
+    - lower_bound
+    - maximum
+    - mean
+    - minimum
+    - mode
+    - normalized
+    - peak
+    - perturbed
+    - quench
+    - resistive
+    - saturated
+    - sawtooth
+    - state
+    - steady_state
+    - stray
+    - townsend
+    - transient
+    - upper_bound
+    - vacuum
+    - vector
+
+  # Energy type and power/flux direction
+  energy:
+    - absorbed
+    - conducted
+    - convected
+    - current_weighted
+    - deposited
+    - forward
+    - incident
+    - kinetic
+    - launched
+    - lost
+    - radiated
+    - stored
+
+  # Measurement, diagnostic method, and signal qualifiers
+  diagnostic:
+    - beat
+    - bragg
+    - calibration
+    - doppler
+    - extraordinary_mode
+    - faraday
+    - fitted
+    - floating
+    - measured
+    - motional_stark
+    - ordinary_mode
+    - polarization
+    - pulse
+    - reconstructed
+    - reference
+    - reflected
+    - simulated
+    - soft_xray
+    - spectral
+    - spun
+    - straight_field_line
+    - target
+    - trigger
+    - twist
+    - viewing
+
+  # Wave polarization and sign/polarity
+  polarization:
+    - left_hand_circularly_polarized
+    - negative
+    - positive
+    - right_hand_circularly_polarized
+
+  # Temporal qualifiers
+  temporal:
+    - final
+    - initial
+    - instantaneous
+    - time_averaged
+
+  # Dimensionless / normalized forms
+  normalized:
+    - bohm
+    - ejima
+    - greenwald
+    - gyro_bohm
+
+  # Species-related (non-subject) qualifiers
+  species:
+    - plasma
+    - slow
+
+  # Engineering subsystem and numerical-split qualifiers
+  engineering:
+    - accumulated
+    - back_surface
+    - coolant
+    - explicit
+    - front_surface
+    - heating
+    - implicit
+    - inlet
+    - outlet
+    - prefill
+    - requested

@@ -59,7 +59,6 @@ from imas_standard_names.grammar.model_types import Aggregation, Orbit, Populati
 from imas_standard_names.grammar.parser import (
     ParseError,
     compose,
-    load_default_vocabularies,
     parse,
 )
 from imas_standard_names.models import StandardNameCatalogManifest
@@ -974,15 +973,17 @@ def _build_grammar_vocab() -> dict[str, list[dict[str, Any]]]:
     aggregations = _safe(vocab_loaders.load_aggregations, frozenset())
     orbits = _safe(vocab_loaders.load_orbits, frozenset())
     populations = _safe(vocab_loaders.load_populations, frozenset())
-    # The full qualifier set the parser accepts (qualifiers.yml ∪ subjects ∪
-    # aggregations ∪ orbits ∪ populations ∪ …). The Grammar composer needs
-    # this so EVERY qualifier token a name can carry (``external``, ``major``,
-    # ``absorbed``, …) is selectable — not just the aggregation/orbit/
-    # population/subject sub-kinds.
-    try:
-        all_qualifiers = load_default_vocabularies().qualifiers
-    except Exception:
-        all_qualifiers = frozenset()
+    # Genuine modifier qualifiers = qualifiers.yml, each carrying its normalized
+    # category (qualifier_categories.yml). We deliberately do NOT publish the
+    # parser's full acceptance union here: that union also contains operator,
+    # locus, and subject tokens (added so they peel during parsing), which are
+    # not qualifiers and belong to their own segments. Subjects are excluded
+    # too — they have their own segment. So the Grammar composer's qualifier
+    # picker offers only true generic qualifiers (external, major, absorbed, …),
+    # sub-grouped by category.
+    qualifier_tokens = _safe(vocab_loaders.load_qualifiers, frozenset())
+    qualifier_cats = _safe(vocab_loaders.load_qualifier_categories, {})
+    subject_tokens = set(_flat_vocab_tokens("subjects.yml"))
 
     physics_domains = (
         _safe(lambda: vocab_loaders._load_yaml("physics_domains.yml"), {}).get(
@@ -1010,7 +1011,10 @@ def _build_grammar_vocab() -> dict[str, list[dict[str, Any]]]:
         "orbits": _tok_list(orbits),
         "populations": _tok_list(populations),
         "subjects": [{"token": t} for t in _flat_vocab_tokens("subjects.yml")],
-        "qualifiers": _tok_list(all_qualifiers),
+        "qualifiers": [
+            {"token": t, "category": qualifier_cats.get(t, "other")}
+            for t in sorted(qualifier_tokens - subject_tokens)
+        ],
         "physical_bases": [
             {
                 "token": token,
