@@ -155,7 +155,17 @@ export function DetailPanel({
 
       <section className="detail-section">
         <h3 className="detail-h">
-          Grammar
+          <button
+            className="detail-h-link"
+            onClick={() => setView && setView('grammar')}
+            title={`Open ${n.name} in the Grammar composer`}
+          >
+            Grammar
+            <svg className="jump-arrow" width="11" height="11" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <path d="M5 11L11 5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+              <path d="M6 5h5v5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
           <span className="detail-h-sub">canonical decomposition into tokens</span>
         </h3>
         <ParseBreakdown

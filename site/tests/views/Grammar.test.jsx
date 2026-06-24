@@ -1,63 +1,51 @@
 import { describe, it, expect } from 'vitest';
-import { act, render, fireEvent } from '@testing-library/react';
+import { act, render } from '@testing-library/react';
 import { Grammar } from '../../src/views/Grammar.jsx';
 import { DataProvider } from '../../src/lib/data.js';
 
-// A trimmed but structurally-faithful GRAMMAR_VOCAB — one entry list per
-// segment, each entry an object carrying a `token` (and `kind`/`relations`
-// where the composer needs them).
+// Faithful (trimmed) GRAMMAR_VOCAB — the composer reads these sections.
 const VOCAB = {
-  operators: [
-    { token: 'magnitude', kind: 'unary_prefix' },
-    { token: 'amplitude', kind: 'unary_postfix' },
-  ],
-  components: [{ token: 'poloidal' }, { token: 'radial' }, { token: 'toroidal' }],
-  aggregations: [{ token: 'total' }],
-  orbits: [{ token: 'trapped' }],
-  populations: [{ token: 'fast' }],
-  subjects: [{ token: 'electron' }, { token: 'ion' }],
+  operators: [{ token: 'magnitude', kind: 'unary_postfix' }],
+  components: [{ token: 'poloidal' }, { token: 'radial' }],
   physical_bases: [
-    { token: 'magnetic_field', kind: 'vector' },
-    { token: 'pressure', kind: 'scalar' },
-    { token: 'temperature', kind: 'scalar' },
+    { token: 'magnetic_field' },
+    { token: 'power' },
+    { token: 'temperature' },
+    { token: 'radius' },
   ],
-  geometry_carriers: [{ token: 'centroid' }],
-  locus_registry: [{ token: 'magnetic_axis', type: 'position', relations: ['at', 'of'] }],
-  regions: [{ token: 'core_region' }],
-  processes: [{ token: 'conduction' }],
-  physics_domains: [{ token: 'equilibrium' }],
+  geometry_carriers: [{ token: 'flux_loop_carrier' }],
+  locus_registry: [{ token: 'flux_loop', type: 'entity', relations: ['of'] }],
+  regions: [],
+  aggregations: [{ token: 'total' }],
+  orbits: [],
+  populations: [],
+  subjects: [{ token: 'electron' }],
+  qualifiers: [
+    { token: 'total' }, { token: 'external' }, { token: 'heating' },
+    { token: 'major' }, { token: 'electron' },
+  ],
 };
 
 const N = (name, parse) => ({
-  name,
-  short: name.replace(/_/g, ' '),
-  unit: '1',
-  kind: 'scalar',
-  sources: [],
-  parse,
-  seeAlso: [],
-  category: 'equilibrium',
-  group: 'default',
+  name, short: name.replace(/_/g, ' '), unit: '1', kind: 'scalar',
+  sources: [], parse, seeAlso: [], category: 'equilibrium', group: 'default',
 });
 
 const NAMES = [
-  N('temperature', [{ role: 'base', text: 'temperature' }]),
-  N('electron_temperature', [
-    { role: 'subject', text: 'electron' },
-    { role: 'base', text: 'temperature' },
+  N('total_external_heating_power', [
+    { role: 'aggregation', text: 'total' },
+    { role: 'qualifier', text: 'external' },
+    { role: 'qualifier', text: 'heating' },
+    { role: 'base', text: 'power' },
+  ]),
+  N('major_radius_of_flux_loop', [
+    { role: 'qualifier', text: 'major' },
+    { role: 'base', text: 'radius' },
+    { role: 'locus', text: 'of_flux_loop' },
   ]),
   N('poloidal_magnetic_field', [
     { role: 'axis', text: 'poloidal' },
     { role: 'base', text: 'magnetic_field' },
-  ]),
-  N('radial_magnetic_field', [
-    { role: 'axis', text: 'radial' },
-    { role: 'base', text: 'magnetic_field' },
-  ]),
-  // The emitter renders the locus segment WITH its relation connector.
-  N('safety_factor_at_magnetic_axis', [
-    { role: 'base', text: 'safety_factor' },
-    { role: 'locus', text: 'at_magnetic_axis' },
   ]),
 ];
 
@@ -65,12 +53,7 @@ function mockFetch() {
   globalThis.fetch = async () => ({
     ok: true,
     async json() {
-      return {
-        CATALOG_VERSION: 'test',
-        CATEGORIES: [],
-        GRAMMAR_VOCAB: VOCAB,
-        NAMES,
-      };
+      return { CATALOG_VERSION: 'test', CATEGORIES: [], GRAMMAR_VOCAB: VOCAB, NAMES };
     },
   });
 }
@@ -95,76 +78,42 @@ async function renderGrammar(props = {}) {
   return result;
 }
 
+const filledTokens = (c) =>
+  [...c.querySelectorAll('.gx-namebar .gx-tok.is-filled .mono')].map((s) => s.textContent);
+
 describe('Grammar composer', () => {
   it('marks the root as data-active-view="grammar"', async () => {
     const { container } = await renderGrammar();
     const root = container.querySelector('.grammar-view');
-    expect(root).not.toBeNull();
-    expect(root.getAttribute('data-active-view')).toBe('grammar');
+    expect(root?.getAttribute('data-active-view')).toBe('grammar');
   });
 
-  it('renders the eleven locked-order segment nodes', async () => {
+  it('renders the six locked-order rail nodes', async () => {
     const { container } = await renderGrammar();
-    const nodes = container.querySelectorAll('.gx-chain .gx-node');
-    expect(nodes.length).toBe(11);
-    const labels = [...nodes].map((n) => n.querySelector('.gx-node-label').textContent);
-    expect(labels).toEqual([
-      'operator', 'component', 'coordinate', 'aggregation', 'orbit',
-      'population', 'subject', 'physical base', 'geometric base', 'locus', 'process',
-    ]);
+    const labels = [...container.querySelectorAll('.gx-chain .gx-node-label')].map((n) => n.textContent);
+    expect(labels).toEqual(['operator', 'component', 'qualifier', 'base', 'locus', 'process']);
   });
 
-  it('starts with the physical base active and the geometric base inactive', async () => {
-    const { container } = await renderGrammar();
-    const byLabel = (label) =>
-      [...container.querySelectorAll('.gx-node')].find(
-        (n) => n.querySelector('.gx-node-label').textContent === label,
-      );
-    expect(byLabel('physical base').className).toContain('is-on');
-    expect(byLabel('geometric base').className).not.toContain('is-on');
-  });
-
-  it('keeps a base mandatory — clicking the active base does not remove it', async () => {
-    const { container } = await renderGrammar();
-    const base = [...container.querySelectorAll('.gx-node')].find(
-      (n) => n.querySelector('.gx-node-label').textContent === 'physical base',
-    );
-    await act(async () => { fireEvent.click(base); });
-    expect(base.className).toContain('is-on');
-  });
-
-  it('seeds the builder from a name and composes it back', async () => {
-    const { container } = await renderGrammar({ seedName: 'poloidal_magnetic_field', seedNonce: 1 });
-    // The base token slot is filled with the seeded base.
-    const filled = [...container.querySelectorAll('.gx-tok.is-filled .mono')].map((s) => s.textContent);
-    expect(filled).toContain('magnetic_field');
-    expect(filled).toContain('poloidal');
-    // The composed name round-trips and is flagged as an existing catalog hit.
+  it('decomposes total_external_heating_power into ordered qualifiers and round-trips (was: fabricated total_power_due_to_heating)', async () => {
+    const { container } = await renderGrammar({ seedName: 'total_external_heating_power', seedNonce: 1 });
+    // All four tokens present, in order — nothing dropped, nothing invented.
+    expect(filledTokens(container)).toEqual(['total', 'external', 'heating', 'power']);
+    // The composition round-trips and is flagged as a real catalog hit.
     const hit = container.querySelector('.gx-name.is-hit');
-    expect(hit).not.toBeNull();
-    expect(hit.textContent).toBe('poloidal_magnetic_field');
+    expect(hit?.textContent).toBe('total_external_heating_power');
+    // The cross-view "STANDARD NAME ↗" link is present (name exists).
+    expect(container.querySelector('.gx-comp-k.is-link')).not.toBeNull();
   });
 
-  it('narrows the results list to names matching the composition', async () => {
+  it('keeps the major qualifier and locus on major_radius_of_flux_loop (was: dropped to radius_of_flux_loop)', async () => {
+    const { container } = await renderGrammar({ seedName: 'major_radius_of_flux_loop', seedNonce: 1 });
+    expect(filledTokens(container)).toEqual(['major', 'radius', 'flux_loop']);
+    expect(container.querySelector('.gx-name.is-hit')?.textContent).toBe('major_radius_of_flux_loop');
+  });
+
+  it('narrows results to names matching the seeded composition', async () => {
     const { container } = await renderGrammar({ seedName: 'poloidal_magnetic_field', seedNonce: 1 });
     const names = [...container.querySelectorAll('.gx-list .gx-name')].map((b) => b.textContent);
-    expect(names).toContain('poloidal_magnetic_field');
-    // radial_magnetic_field shares the base but not the poloidal component.
-    expect(names).not.toContain('radial_magnetic_field');
-  });
-
-  it('seeds a locus (stripping its relation connector) and exposes the at|of switch', async () => {
-    const { container } = await renderGrammar({ seedName: 'safety_factor_at_magnetic_axis', seedNonce: 1 });
-    const filled = [...container.querySelectorAll('.gx-tok.is-filled .mono')].map((s) => s.textContent);
-    // The bare registry token is recovered from the `at_…` parse text.
-    expect(filled).toContain('magnetic_axis');
-    // A position locus admits at|of, so the connector renders as a switch
-    // showing the relation actually used in the name.
-    const sw = container.querySelector('.gx-relsw');
-    expect(sw).not.toBeNull();
-    expect(sw.textContent).toContain('at');
-    // The composed name round-trips to the seeded catalog entry.
-    const hit = container.querySelector('.gx-name.is-hit');
-    expect(hit?.textContent).toBe('safety_factor_at_magnetic_axis');
+    expect(names).toEqual(['poloidal_magnetic_field']);
   });
 });

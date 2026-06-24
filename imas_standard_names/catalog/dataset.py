@@ -59,6 +59,7 @@ from imas_standard_names.grammar.model_types import Aggregation, Orbit, Populati
 from imas_standard_names.grammar.parser import (
     ParseError,
     compose,
+    load_default_vocabularies,
     parse,
 )
 from imas_standard_names.models import StandardNameCatalogManifest
@@ -973,6 +974,15 @@ def _build_grammar_vocab() -> dict[str, list[dict[str, Any]]]:
     aggregations = _safe(vocab_loaders.load_aggregations, frozenset())
     orbits = _safe(vocab_loaders.load_orbits, frozenset())
     populations = _safe(vocab_loaders.load_populations, frozenset())
+    # The full qualifier set the parser accepts (qualifiers.yml ∪ subjects ∪
+    # aggregations ∪ orbits ∪ populations ∪ …). The Grammar composer needs
+    # this so EVERY qualifier token a name can carry (``external``, ``major``,
+    # ``absorbed``, …) is selectable — not just the aggregation/orbit/
+    # population/subject sub-kinds.
+    try:
+        all_qualifiers = load_default_vocabularies().qualifiers
+    except Exception:
+        all_qualifiers = frozenset()
 
     physics_domains = (
         _safe(lambda: vocab_loaders._load_yaml("physics_domains.yml"), {}).get(
@@ -1000,6 +1010,7 @@ def _build_grammar_vocab() -> dict[str, list[dict[str, Any]]]:
         "orbits": _tok_list(orbits),
         "populations": _tok_list(populations),
         "subjects": [{"token": t} for t in _flat_vocab_tokens("subjects.yml")],
+        "qualifiers": _tok_list(all_qualifiers),
         "physical_bases": [
             {
                 "token": token,

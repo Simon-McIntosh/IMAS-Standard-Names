@@ -1,97 +1,50 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useData } from '../lib/data.js';
+import {
+  composeName,
+  emptyState,
+  matchesComposition,
+  qualifierKind,
+  seedFromParse,
+} from '../lib/grammar-compose.js';
 
-// Grammar view — a STRICT, grammar-faithful composer.
+// Grammar view — a STRICT, grammar-faithful Standard-Name composer.
 //
-// This is NOT a free-form composer. It mirrors the canonical pattern from the
-// IMAS Standard Names grammar specification exactly:
-//
-//   [<component> | <coordinate>]   (outermost prefix; mutually exclusive)
-//   [<aggregation>] [<orbit>] [<population>] [<subject>]
-//   <physical_base | geometric_base>            (REQUIRED; mutually exclusive)
-//   [of_<object> | at_<position> | over_<region>]   (locus; connector by type)
-//   [due_to_<process>]
-//   …all wrapped by an optional operator (prefix `op_of_…` / postfix `…_op`).
-//
-// Every segment occupies one LOCKED position — there is no reordering and no
-// repetition. component requires a physical base, coordinate requires a
-// geometric base; component/coordinate are mutually exclusive and draw from
-// the SAME `components` vocabulary (per the spec).
-//
-// Data comes from the catalog dataset: `GRAMMAR_VOCAB` (the closed
-// vocabularies emitted by imas_standard_names/catalog/dataset.py) and the
-// pre-parsed `parse[]` segments on each name (no in-browser parser).
-// Seeds from / hands back to Browse.
+// It mirrors the ISN grammar exactly (see lib/grammar-compose.js, a JS mirror
+// of imas_standard_names/grammar/render.py): a name decomposes into an
+// optional operator, an optional projection axis, an ORDERED list of
+// qualifiers, a required base, an optional locus, and an optional mechanism.
+// Seeding reads a name's authoritative emitted `parse[]` (no in-browser
+// parser, no vocabulary guessing) and the composition reconstructs the name
+// verbatim — every catalogue name round-trips. Seeds from / hands back to
+// Browse.
 
-// ---- canonical segments, in locked order --------------------------------
-// `vocabKey` names the GRAMMAR_VOCAB section the segment draws from; the
-// locus segment unions locus_registry + regions (see `vocabFor`). `alt`
-// marks a mutually-exclusive group; `altReq` marks the group as mandatory.
-const SEGS = [
-  { id: 'operator', label: 'operator', hue: 320, opt: true, wrap: true, vocabKey: 'operators' },
-  { id: 'component', label: 'component', hue: 200, opt: true, alt: 'proj', vocabKey: 'components' },
-  { id: 'coordinate', label: 'coordinate', hue: 200, opt: true, alt: 'proj', vocabKey: 'components' },
-  { id: 'aggregation', label: 'aggregation', hue: 65, opt: true, vocabKey: 'aggregations' },
-  { id: 'orbit', label: 'orbit', hue: 5, opt: true, vocabKey: 'orbits' },
-  { id: 'population', label: 'population', hue: 25, opt: true, vocabKey: 'populations' },
-  { id: 'subject', label: 'subject', hue: 15, opt: true, vocabKey: 'subjects' },
-  { id: 'physical_base', label: 'physical base', hue: 260, alt: 'base', altReq: true, vocabKey: 'physical_bases' },
-  { id: 'geometric_base', label: 'geometric base', hue: 285, alt: 'base', altReq: true, vocabKey: 'geometry_carriers' },
-  { id: 'locus', label: 'locus', hue: 145, opt: true, isLocus: true, vocabKey: '__locus__' },
-  { id: 'process', label: 'process', hue: 290, opt: true, conn: '_due_to_', vocabKey: 'processes' },
-];
-const DOMAIN = { id: 'domain', label: 'domain', hue: null, opt: true, vocabKey: 'physics_domains' };
-const ALL = [...SEGS, DOMAIN];
-const segById = (id) => ALL.find((s) => s.id === id);
-const hueOf = (s) => (s && s.hue != null ? s.hue : 250);
-
-// physical_base ↔ component, geometric_base ↔ coordinate (each pair mutually
-// exclusive). The spec's canonical pattern: <geometric_base | physical_base>.
-const BASE_FOR_PROJ = { component: 'physical_base', coordinate: 'geometric_base' };
-const PROJ_FOR_BASE = { physical_base: 'component', geometric_base: 'coordinate' };
-
-// Locus relation = the LocusRef.relation in the ISN IR. Fallback when a
-// registry token carries no explicit relations: entity/geometry → of,
-// region → over, position → at|of (a genuine per-name choice).
-const REL_BY_TYPE = { entity: ['of'], position: ['at', 'of'], geometry: ['of'], region: ['over'] };
-
-// Token → owning segment, by descending claim priority.
-const SEED_PRIORITY = [
-  'physical_base', 'geometric_base', 'locus', 'component', 'operator',
-  'aggregation', 'subject', 'orbit', 'population', 'process', 'domain',
-];
-const ROLE_DEFAULT = {
-  base: 'physical_base', axis: 'component', reduction: 'operator', modifier: 'aggregation',
-  operator: 'operator', subject: 'subject', locus: 'locus',
+// Role hues — match the Browse parse-breakdown colours.
+const HUE = {
+  operator: 320,
+  projection: 200,
+  base_physical: 260,
+  base_geometric: 285,
+  locus: 145,
+  process: 290,
+  aggregation: 65,
+  orbit: 5,
+  population: 25,
+  subject: 15,
+  qualifier: 35,
 };
 
-// Resolve a segment's vocabulary entry list from the GRAMMAR_VOCAB object.
-function vocabFor(V, seg) {
-  if (seg.vocabKey === '__locus__') {
-    return [
-      ...(V.locus_registry || []),
-      ...((V.regions || []).map((r) => ({ ...r, type: 'region' }))),
-    ];
-  }
-  return V[seg.vocabKey] || [];
+const REL_BY_TYPE = { entity: ['of'], position: ['at', 'of'], geometry: ['of'], region: ['over'] };
+
+// Locus token → allowed relations (of / at / over), from the registry.
+function locusRelationsFor(vocab, token) {
+  const reg = (vocab.locus_registry || []).find((x) => x.token === token);
+  if (reg) return reg.relations && reg.relations.length ? reg.relations : REL_BY_TYPE[reg.type] || ['of'];
+  if ((vocab.regions || []).some((r) => r.token === token)) return ['over'];
+  return ['of'];
 }
 
-// Flatten composed parts back to a name string. A position locus renders its
-// connector as an interactive `at|of` switch (a `locusrel` part rather than a
-// plain `sep`), so its `_<rel>_` connector must be re-emitted here — otherwise
-// the composed name drops the connector and never round-trips to its catalog
-// entry.
-const partsToName = (parts) =>
-  parts
-    .map((p) => {
-      if (p.kind === 'sep') return p.text;
-      if (p.kind === 'locusrel') return `_${p.rel}_`;
-      return p.token;
-    })
-    .filter(Boolean)
-    .join('');
-
-// ---- jump arrow (the cross-view "open in Browse" affordance) -------------
+// ---- jump arrow (cross-view affordance) ----------------------------------
 function JumpArrow() {
   return (
     <svg className="jump-arrow" width="11" height="11" viewBox="0 0 16 16" fill="none" aria-hidden="true">
@@ -102,7 +55,9 @@ function JumpArrow() {
 }
 
 // ---- vocabulary dropdown (module-level so its search box keeps state) ----
-function VocabDropdown({ seg, vocab, anchor, residual, matchConstraint, current, onChoose, onClear, onClose }) {
+// `options` is either a flat list of {token, note?} or a list of groups
+// {label, items:[{token, note?}]}. `count(token)` returns the catalog usage.
+function VocabDropdown({ title, hue, options, grouped, anchor, count, current, onChoose, onClear, onClose }) {
   const [term, setTerm] = useState('');
   const ref = useRef(null);
   useEffect(() => {
@@ -116,33 +71,41 @@ function VocabDropdown({ seg, vocab, anchor, residual, matchConstraint, current,
       document.removeEventListener('mousedown', onDown);
     };
   }, [onClose]);
+
   const q = term.trim().toLowerCase();
-  const total = vocab.length;
-  const flat = useMemo(() => {
-    const out = vocab
-      .filter((t) => !q || t.token.includes(q) || (t.note && t.note.toLowerCase().includes(q)))
-      .map((t) => ({ t, count: residual.filter((n) => matchConstraint(n, seg.id, t.token)).length }));
-    out.sort((a, b) => b.count - a.count || a.t.token.localeCompare(b.t.token));
-    return out;
-  }, [q, residual, vocab, matchConstraint, seg.id]);
+  const match = (t) => !q || t.token.includes(q) || (t.note && t.note.toLowerCase().includes(q));
+  const score = (items) =>
+    items
+      .filter(match)
+      .map((t) => ({ t, c: count(t.token) }))
+      .sort((a, b) => b.c - a.c || a.t.token.localeCompare(b.t.token));
+
+  const total = grouped
+    ? options.reduce((a, g) => a + g.items.length, 0)
+    : options.length;
+  const groups = grouped ? options.map((g) => ({ label: g.label, rows: score(g.items) })) : null;
+  const flat = grouped ? null : score(options);
+
   const W = 300;
   const H = 380;
   const left = Math.max(8, Math.min(anchor.x, window.innerWidth - W - 8));
   const top = Math.min(anchor.y + 6, window.innerHeight - H - 8);
-  const Row = ({ t, count }) => (
+
+  const Row = ({ t, c }) => (
     <button
-      className={`gx-dd-row ${count > 0 ? 'is-avail' : 'is-dead'} ${current === t.token ? 'is-current' : ''}`}
+      className={`gx-dd-row ${c > 0 ? 'is-avail' : 'is-dead'} ${current === t.token ? 'is-current' : ''}`}
       onClick={() => onChoose(t.token)}
       title={t.note || t.token}
     >
       <span className="gx-dd-tok mono">{t.token}</span>
-      <span className="gx-dd-count">{count || '—'}</span>
+      <span className="gx-dd-count">{c || '—'}</span>
     </button>
   );
+
   return (
-    <div className="gx-dd" ref={ref} style={{ left, top, '--role-hue': hueOf(seg) }}>
+    <div className="gx-dd" ref={ref} style={{ left, top, '--role-hue': hue }}>
       <div className="gx-dd-head">
-        <span className="gx-dd-title">{seg.label}</span>
+        <span className="gx-dd-title">{title}</span>
         <span className="gx-dd-sub">{total} in vocabulary · <b>bold</b> = in catalog</span>
       </div>
       <input
@@ -154,114 +117,38 @@ function VocabDropdown({ seg, vocab, anchor, residual, matchConstraint, current,
         spellCheck="false"
       />
       <div className="gx-dd-list">
-        {current && <button className="gx-dd-clear" onClick={onClear}>× clear {seg.label}</button>}
-        {flat.map(({ t, count }) => <Row key={t.token} t={t} count={count} />)}
-        {flat.length === 0 && <div className="gx-dd-empty">no tokens match “{term}”</div>}
+        {current && <button className="gx-dd-clear" onClick={onClear}>× clear</button>}
+        {groups &&
+          groups.map((g) => (
+            <div key={g.label} className="gx-dd-group">
+              <div className="gx-dd-grouph">
+                {g.label}
+                <span className="gx-dd-groupn">{g.rows.length}</span>
+              </div>
+              {g.rows.map(({ t, c }) => <Row key={t.token} t={t} c={c} />)}
+              {g.rows.length === 0 && <div className="gx-dd-empty">—</div>}
+            </div>
+          ))}
+        {flat && flat.map(({ t, c }) => <Row key={t.token} t={t} c={c} />)}
+        {flat && flat.length === 0 && <div className="gx-dd-empty">no tokens match “{term}”</div>}
       </div>
     </div>
   );
 }
 
-// ---- grammar chain (locked-order syntax diagram + toggles) ---------------
-function ChainNode({ seg, on, filled, onToggle }) {
-  const noTick = seg.req || seg.altReq;
+// ---- chain rail: locked-order syntax diagram ------------------------------
+function RailNode({ label, hue, on, filled, optional, onClick, title }) {
   return (
     <button
-      className={`gx-node ${seg.req ? 'is-req' : 'is-opt'} ${on ? 'is-on' : 'is-off'} ${filled ? 'is-filled' : ''}`}
-      style={{ '--role-hue': hueOf(seg) }}
-      onClick={() => { if (!seg.req) onToggle(seg.id); }}
-      title={seg.altReq ? (on ? `${seg.label} — active` : `Switch to ${seg.label}`) : (on ? `Remove ${seg.label}` : `Add ${seg.label}`)}
+      className={`gx-node ${optional ? 'is-opt' : 'is-req'} ${on ? 'is-on' : 'is-off'} ${filled ? 'is-filled' : ''}`}
+      style={{ '--role-hue': hue }}
+      onClick={onClick}
+      title={title}
     >
       <span className="gx-node-dot" aria-hidden />
-      <span className="gx-node-label">{seg.label}</span>
-      {!noTick && <span className="gx-node-tick" aria-hidden>{on ? '−' : '+'}</span>}
+      <span className="gx-node-label">{label}</span>
+      {optional && <span className="gx-node-tick" aria-hidden>{on ? '−' : '+'}</span>}
     </button>
-  );
-}
-
-function Chain({ active, vals, onToggle }) {
-  const isOn = (id) => active.has(id);
-  const isFilled = (id) => !!vals[id];
-  const node = (id) => {
-    const s = segById(id);
-    return <ChainNode key={id} seg={s} on={isOn(id)} filled={isFilled(id)} onToggle={onToggle} />;
-  };
-  return (
-    <div className="gx-chain">
-      <div className="gx-rail">
-        {node('operator')}<span className="gx-rail-link" />
-        {node('component')}<span className="gx-alt-pipe" aria-hidden>|</span>{node('coordinate')}<span className="gx-rail-link" />
-        {node('aggregation')}<span className="gx-rail-link" />
-        {node('orbit')}<span className="gx-rail-link" />
-        {node('population')}<span className="gx-rail-link" />
-        {node('subject')}<span className="gx-rail-link" />
-        {node('physical_base')}<span className="gx-alt-pipe" aria-hidden>|</span>{node('geometric_base')}
-        <span className="gx-conn mono">of_/at_/over_</span>
-        {node('locus')}
-        <span className="gx-conn mono">due_to_</span>
-        {node('process')}
-      </div>
-    </div>
-  );
-}
-
-// ---- composition box -----------------------------------------------------
-function Composition({ parts, onOpen, openId, name, exists, onOpenInBrowse, onClear, showClear, onCycleRel }) {
-  const prod = [];
-  parts.forEach((p) => {
-    if (p.kind === 'sep' && /[a-z]/.test(p.text)) {
-      prod.push(<span key={`c${prod.length}`} className="gx-prod-conn mono">{p.text.replace(/_/g, '')}_</span>);
-    }
-    if (p.kind === 'locusrel') {
-      prod.push(<span key={`c${prod.length}`} className="gx-prod-conn mono">{p.rel}_</span>);
-    }
-    if (p.kind === 'token') {
-      prod.push(<span key={`t${prod.length}`} className="gx-prod-seg" style={{ '--role-hue': p.hue }}>&lt;{segById(p.segId).label}&gt;</span>);
-    }
-  });
-  return (
-    <div className="gx-comp">
-      <div className="gx-comp-head">
-        {name && exists
-          ? <button className="gx-comp-k is-link" onClick={() => onOpenInBrowse(name)} title={`Open ${name} in Browse`}>standard name<JumpArrow /></button>
-          : <span className="gx-comp-k">standard name</span>}
-        {showClear && <button className="gx-clear" onClick={onClear}>clear</button>}
-      </div>
-      <div className="gx-namebar">
-        {parts.length === 0 && <span className="gx-name-empty">pick a base to begin</span>}
-        {parts.map((p, i) => {
-          if (p.kind === 'locusrel') {
-            return (
-              <button key={i} className="gx-relsw mono" onClick={onCycleRel}
-                title={`locus relation — ${p.allowed.join(' | ')} both valid for this position; click to switch`}>
-                _{p.rel}_<span className="gx-relsw-cue" aria-hidden>⇅</span>
-              </button>
-            );
-          }
-          if (p.kind === 'sep') return <span key={i} className="gx-sep mono">{p.text}</span>;
-          const seg = segById(p.segId);
-          const filled = !!p.token;
-          return (
-            <button
-              key={i}
-              className={`gx-tok ${filled ? 'is-filled' : 'is-empty'} ${openId === p.segId ? 'is-open' : ''}`}
-              style={{ '--role-hue': p.hue }}
-              onClick={(e) => onOpen(seg, e.currentTarget.getBoundingClientRect())}
-              title={filled ? `${seg.label} = ${p.token} — click to change` : `choose a ${seg.label}`}
-            >
-              {filled ? <span className="mono">{p.token}</span> : <span className="gx-tok-ph">{seg.label}</span>}
-              <svg className="gx-tok-caret" width="9" height="9" viewBox="0 0 12 12"><path d="M2 4l4 4 4-4" stroke="currentColor" strokeWidth="1.7" fill="none" strokeLinecap="round" strokeLinejoin="round" /></svg>
-            </button>
-          );
-        })}
-      </div>
-      {parts.length > 0 && (
-        <div className="gx-prod">
-          <span className="gx-prod-k">production</span>
-          <code className="gx-prod-body">{prod.length ? prod : <span className="gx-prod-seg">&lt;base&gt;</span>}</code>
-        </div>
-      )}
-    </div>
   );
 }
 
@@ -270,295 +157,389 @@ export function Grammar({ onSelect, setView, query, seedName, seedNonce }) {
   const { NAMES, GRAMMAR_VOCAB } = useData();
   const V = GRAMMAR_VOCAB || {};
 
-  const [active, setActive] = useState(() => new Set(['physical_base']));
-  const [vals, setVals] = useState({});
-  const [open, setOpen] = useState(null); // { seg, anchor }
+  const [state, setState] = useState(emptyState);
+  const [open, setOpen] = useState(null); // { target, anchor }
 
-  // Parse map straight from the emitted `parse[]` segments — no in-browser
-  // parser. matchConstraint is role-agnostic (text match), so the emitter's
-  // role labels need not line up with the composer's segment ids.
-  //
-  // The emitter renders the locus segment WITH its relation connector
-  // (`of_<tok>` / `at_<tok>` / `over_<tok>`); the composer matches and seeds
-  // against the BARE registry token, so strip the leading connector here.
-  const parseMap = useMemo(() => {
+  // Pre-decompose every catalogue name once (role-driven, authoritative).
+  const nameStates = useMemo(() => {
     const m = new Map();
-    for (const n of NAMES) {
-      const parse = (n.parse || []).map((t) =>
-        t.role === 'locus' ? { ...t, text: t.text.replace(/^(?:of|at|over)_/, '') } : t,
-      );
-      m.set(n.name, parse);
-    }
+    for (const n of NAMES) m.set(n.name, seedFromParse(n.parse, V, n.name));
     return m;
-  }, [NAMES]);
+  }, [NAMES, V]);
 
-  // V-derived helpers — rebuilt only when the vocabulary changes.
-  const helpers = useMemo(() => {
-    const PHYS = new Set((V.physical_bases || []).map((t) => t.token));
-    const GEO = new Set((V.geometry_carriers || []).map((t) => t.token));
-    const locusEntry = (tok) =>
-      (V.locus_registry || []).find((x) => x.token === tok)
-      || ((V.regions || []).some((r) => r.token === tok) ? { token: tok, type: 'region', relations: ['over'] } : null);
-    const locusRelations = (tok) => {
-      const e = locusEntry(tok);
-      if (!e) return ['of'];
-      return (e.relations && e.relations.length) ? e.relations : (REL_BY_TYPE[e.type] || ['of']);
-    };
-    const pickRel = (tok, rel) => {
-      const al = locusRelations(tok);
-      return (rel && al.includes(rel)) ? rel : al[0];
-    };
-
-    // token → owning segment, claimed by descending priority
-    const TOKEN_SEG = {};
-    for (const id of SEED_PRIORITY) {
-      const s = segById(id);
-      for (const t of vocabFor(V, s)) if (!(t.token in TOKEN_SEG)) TOKEN_SEG[t.token] = id;
-    }
-    const segForSeed = (role, text) => {
-      const pref = ({
-        base: ['physical_base', 'geometric_base'], axis: ['component'], reduction: ['operator', 'aggregation'],
-        modifier: ['aggregation', 'operator', 'subject'], operator: ['operator'], subject: ['subject'], locus: ['locus'],
-      })[role] || [];
-      for (const id of pref) if (vocabFor(V, segById(id)).some((t) => t.token === text)) return id;
-      return TOKEN_SEG[text] || ROLE_DEFAULT[role] || null;
-    };
-
-    const composeParts = (act, v) => {
-      const chain = [];
-      const push = (segId, token, conn) => chain.push({ segId, token: token || null, conn });
-      if (act.has('component')) push('component', v.component);
-      if (act.has('coordinate')) push('coordinate', v.coordinate);
-      if (act.has('aggregation')) push('aggregation', v.aggregation);
-      if (act.has('orbit')) push('orbit', v.orbit);
-      if (act.has('population')) push('population', v.population);
-      if (act.has('subject')) push('subject', v.subject);
-      const baseId = act.has('geometric_base') ? 'geometric_base' : 'physical_base';
-      push(baseId, v[baseId]);
-      if (act.has('locus')) {
-        const tok = v.locus;
-        const allowed = tok ? locusRelations(tok) : ['of'];
-        const rel = pickRel(tok, v.locusRel);
-        chain.push({ segId: 'locus', token: tok || null, conn: `_${rel}_`, rel, allowed });
-      }
-      if (act.has('process')) push('process', v.process, '_due_to_');
-
-      const parts = [];
-      chain.forEach((c, i) => {
-        if (c.conn) {
-          if (c.segId === 'locus' && c.allowed && c.allowed.length > 1) {
-            parts.push({ kind: 'locusrel', rel: c.rel, allowed: c.allowed });
-          } else {
-            parts.push({ kind: 'sep', text: c.conn });
-          }
-        } else if (i > 0) {
-          parts.push({ kind: 'sep', text: '_' });
-        }
-        parts.push({ kind: 'token', segId: c.segId, token: c.token, hue: hueOf(segById(c.segId)) });
-      });
-
-      if (act.has('operator')) {
-        const op = v.operator;
-        const od = op ? (V.operators || []).find((o) => o.token === op) : null;
-        const postfix = od && od.kind === 'unary_postfix';
-        const tokPart = { kind: 'token', segId: 'operator', token: op || null, hue: hueOf(segById('operator')) };
-        if (postfix) {
-          parts.push({ kind: 'sep', text: '_' }, tokPart);
-        } else {
-          parts.unshift({ kind: 'sep', text: '_of_' });
-          parts.unshift(tokPart);
-        }
-      }
-      return parts;
-    };
-
-    return { PHYS, GEO, locusEntry, locusRelations, pickRel, segForSeed, composeParts };
-  }, [V]);
-
-  const { locusRelations, pickRel, segForSeed, composeParts } = helpers;
-
-  // n matches a constraint when its emitted parse carries the token (or, for
-  // process, when the name contains the `_due_to_<token>` connector; for
-  // domain, when the record's category equals the token).
-  const matchConstraint = useMemo(() => (n, segId, token) => {
-    if (!token) return true;
-    if (segId === 'domain') return n.category === token;
-    const p = parseMap.get(n.name) || [];
-    if (p.some((t) => t.text === token)) return true;
-    if (segId === 'process') return n.name.includes('_due_to_' + token);
-    return false;
-  }, [parseMap]);
-
-  // Seed the builder from an existing name's emitted parse.
-  const seedFrom = useMemo(() => (name) => {
-    const a = new Set();
-    const v = {};
-    for (const t of (parseMap.get(name) || [])) {
-      const id = segForSeed(t.role, t.text);
-      if (!id) continue;
-      a.add(id);
-      v[id] = t.text;
-    }
-    if (!a.has('physical_base') && !a.has('geometric_base')) a.add('physical_base');
-    if (a.has('locus') && v.locus) {
-      for (const rel of ['over', 'at', 'of']) if (name.includes(`_${rel}_${v.locus}`)) { v.locusRel = rel; break; }
-      if (!v.locusRel) v.locusRel = locusRelations(v.locus)[0];
-    }
-    // keep projection ↔ base kind consistent
-    if (a.has('geometric_base') && a.has('component')) { if (v.component != null) v.coordinate = v.component; a.delete('component'); delete v.component; a.add('coordinate'); }
-    if (a.has('physical_base') && a.has('coordinate')) { if (v.coordinate != null) v.component = v.coordinate; a.delete('coordinate'); delete v.coordinate; a.add('component'); }
-    const m = name.match(/_due_to_(.+)$/);
-    if (m) { a.add('process'); v.process = m[1]; }
-    return { active: a, vals: v };
-  }, [parseMap, segForSeed, locusRelations]);
-
+  // Seed from a name's authoritative parse — verbatim round-trip guaranteed.
   const loadName = (nm) => {
     if (!nm) return;
-    const { active: a, vals: v } = seedFrom(nm);
-    setActive(a);
-    setVals(v);
+    const ns = nameStates.get(nm);
+    setState(ns ? structuredClone(ns) : emptyState());
     setOpen(null);
   };
 
-  // Re-seed whenever Browse hands over a new selection (nonce forces a
-  // re-seed even when the name is unchanged). Also keyed on `parseMap` so a
-  // seed requested before the dataset finished loading applies once the
-  // names arrive (parseMap is stable thereafter, so this never clobbers a
-  // user's in-progress edits).
+  // Re-seed when Browse hands over a selection (nonce forces re-seed even on
+  // the same name); also keyed on nameStates so a seed requested before the
+  // dataset loaded applies once names arrive.
   useEffect(() => {
-    if (seedName && parseMap.size) loadName(seedName);
+    if (seedName && nameStates.size) loadName(seedName);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [seedNonce, parseMap]);
+  }, [seedNonce, nameStates]);
 
-  const constraints = useMemo(() => {
-    const out = [];
-    for (const id of active) if (vals[id]) out.push([id, vals[id]]);
-    return out;
-  }, [active, vals]);
+  const composed = composeName(state);
+  const exists = composed && nameStates.has(composed);
 
+  // Grouped qualifier vocabulary: sub-kinds first, then everything else.
+  const qualifierGroups = useMemo(() => {
+    const sub = ['aggregations', 'orbits', 'populations', 'subjects'];
+    const claimed = new Set();
+    const groups = [];
+    const labels = {
+      aggregations: 'Aggregation',
+      orbits: 'Orbit',
+      populations: 'Population',
+      subjects: 'Subject',
+    };
+    for (const key of sub) {
+      const items = V[key] || [];
+      items.forEach((t) => claimed.add(t.token));
+      if (items.length) groups.push({ label: labels[key], items });
+    }
+    const other = (V.qualifiers || []).filter((t) => !claimed.has(t.token));
+    if (other.length) groups.push({ label: 'Other', items: other });
+    return groups;
+  }, [V]);
+
+  // Constraint-filtered results (AND across every filled slot).
   const q = (query || '').trim().toLowerCase();
   const results = useMemo(
-    () => NAMES.filter((n) =>
-      constraints.every(([id, tok]) => matchConstraint(n, id, tok))
-      && (!q || n.name.includes(q) || (n.short && n.short.toLowerCase().includes(q)))),
-    [NAMES, constraints, matchConstraint, q],
+    () =>
+      NAMES.filter(
+        (n) =>
+          matchesComposition(nameStates.get(n.name), state) &&
+          (!q || n.name.includes(q) || (n.short && n.short.toLowerCase().includes(q))),
+      ),
+    [NAMES, nameStates, state, q],
   );
+
+  const hasConstraints =
+    !!(state.operator || state.axis || state.base || state.locus || state.mechanism) ||
+    state.qualifiers.length > 0;
+
+  // Residual corpus for dropdown counts (all constraints except the open one).
   const residual = useMemo(() => {
     if (!open) return NAMES;
-    const others = constraints.filter(([id]) => id !== open.seg.id);
-    return NAMES.filter((n) => others.every(([id, tok]) => matchConstraint(n, id, tok)));
-  }, [open, NAMES, constraints, matchConstraint]);
-
-  const parts = composeParts(active, vals);
-  const composed = partsToName(parts);
-  const exists = composed && NAMES.some((n) => n.name === composed);
-
-  // Keep projection (component｜coordinate) and base kind
-  // (physical_base｜geometric_base) consistent: switching one switches the
-  // other; component/coordinate share a vocabulary so the axis token carries.
-  const couple = (changedId, a, v) => {
-    if (BASE_FOR_PROJ[changedId]) {
-      const need = BASE_FOR_PROJ[changedId];
-      const other = need === 'physical_base' ? 'geometric_base' : 'physical_base';
-      if (a.has(other)) { a.delete(other); a.add(need); }
+    const probe = { ...state };
+    switch (open.target.kind) {
+      case 'operator': probe.operator = null; break;
+      case 'projection': probe.axis = null; break;
+      case 'base': probe.base = null; break;
+      case 'locus': probe.locus = null; break;
+      case 'process': probe.mechanism = null; break;
+      case 'qualifier-edit':
+        probe.qualifiers = state.qualifiers.filter((_, i) => i !== open.target.index);
+        break;
+      default: break; // qualifier-add keeps all current constraints
     }
-    if (PROJ_FOR_BASE[changedId]) {
-      const need = PROJ_FOR_BASE[changedId];
-      const other = need === 'component' ? 'coordinate' : 'component';
-      if (a.has(other)) { if (v[other] != null) v[need] = v[other]; a.delete(other); delete v[other]; a.add(need); }
+    return NAMES.filter((n) => matchesComposition(nameStates.get(n.name), probe));
+  }, [open, NAMES, nameStates, state]);
+
+  // Count of residual names carrying `token` in the open slot's role.
+  const counter = (target) => (token) => {
+    let key;
+    switch (target.kind) {
+      case 'operator': key = (ns) => ns.operator?.token === token; break;
+      case 'projection': key = (ns) => ns.axis === token; break;
+      case 'base': key = (ns) => ns.base?.token === token; break;
+      case 'locus': key = (ns) => ns.locus?.token === token; break;
+      case 'process': key = (ns) => ns.mechanism === token; break;
+      default: key = (ns) => (ns.qualifiers || []).includes(token); // qualifier add/edit
     }
+    return residual.filter((n) => key(nameStates.get(n.name) || {})).length;
   };
 
-  const toggle = (id) => {
-    const seg = segById(id);
-    const a = new Set(active);
-    const v = { ...vals };
-    const sibs = seg.alt ? SEGS.filter((s) => s.alt === seg.alt) : [];
-    const required = sibs.some((s) => s.altReq);
-    if (a.has(id)) {
-      if (required) return; // exactly one base is mandatory
-      a.delete(id);
-      delete v[id];
-      if (open && open.seg.id === id) setOpen(null);
-    } else {
-      for (const s of sibs) {
-        if (s.id !== id && a.has(s.id)) {
-          if (seg.alt === 'proj' && v[s.id] != null) v[id] = v[s.id]; // carry axis token
-          a.delete(s.id);
-          if (seg.alt !== 'base') delete v[s.id]; // keep the other base's token as memory
-        }
-      }
-      a.add(id);
-      couple(id, a, v);
-    }
-    setActive(a);
-    setVals(v);
-  };
-
-  const openDD = (seg, rect) => {
-    if (open && open.seg.id === seg.id) { setOpen(null); return; }
-    setOpen({ seg, anchor: { x: rect.left, y: rect.bottom } });
+  // ---- mutations ---------------------------------------------------------
+  const openDD = (target, el) => {
+    const r = el.getBoundingClientRect();
+    setOpen((o) =>
+      o && o.target.kind === target.kind && o.target.index === target.index
+        ? null
+        : { target, anchor: { x: r.left, y: r.bottom } },
+    );
   };
 
   const choose = (token) => {
-    const seg = open.seg;
-    const a = new Set(active);
-    const v = { ...vals, [seg.id]: token };
-    if (seg.id === 'locus') v.locusRel = locusRelations(token)[0];
-    if (!a.has(seg.id)) a.add(seg.id);
-    setActive(a);
-    setVals(v);
+    const t = open.target;
+    setState((s) => {
+      const next = { ...s, qualifiers: [...s.qualifiers] };
+      switch (t.kind) {
+        case 'operator': {
+          const o = (V.operators || []).find((x) => x.token === token);
+          next.operator = { token, kind: o ? o.kind : 'unary_prefix' };
+          break;
+        }
+        case 'projection': next.axis = token; break;
+        case 'base': {
+          const physical = (V.physical_bases || []).some((b) => b.token === token);
+          next.base = { token, kind: physical ? 'physical' : 'geometric' };
+          break;
+        }
+        case 'locus':
+          next.locus = { token, relation: locusRelationsFor(V, token)[0] };
+          break;
+        case 'process': next.mechanism = token; break;
+        case 'qualifier-add': next.qualifiers.push(token); break;
+        case 'qualifier-edit': next.qualifiers[t.index] = token; break;
+        default: break;
+      }
+      return next;
+    });
+    setOpen(null);
+  };
+
+  const clearSlot = () => {
+    const t = open.target;
+    setState((s) => {
+      const next = { ...s, qualifiers: [...s.qualifiers] };
+      switch (t.kind) {
+        case 'operator': next.operator = null; break;
+        case 'projection': next.axis = null; break;
+        case 'base': next.base = null; break;
+        case 'locus': next.locus = null; break;
+        case 'process': next.mechanism = null; break;
+        case 'qualifier-edit': next.qualifiers.splice(t.index, 1); break;
+        default: break;
+      }
+      return next;
+    });
     setOpen(null);
   };
 
   const cycleLocusRel = () => {
-    const tok = vals.locus;
-    if (!tok) return;
-    const al = locusRelations(tok);
-    if (al.length < 2) return;
-    const cur = pickRel(tok, vals.locusRel);
-    setVals((v) => ({ ...v, locusRel: al[(al.indexOf(cur) + 1) % al.length] }));
+    setState((s) => {
+      if (!s.locus) return s;
+      const al = locusRelationsFor(V, s.locus.token);
+      if (al.length < 2) return s;
+      const i = al.indexOf(s.locus.relation);
+      return { ...s, locus: { ...s.locus, relation: al[(i + 1) % al.length] } };
+    });
   };
 
-  const clearVal = () => {
-    const seg = open.seg;
-    const v = { ...vals };
-    delete v[seg.id];
-    if (seg.id === 'locus') delete v.locusRel;
-    setVals(v);
-    setOpen(null);
-  };
   const clearAll = () => {
-    setActive(new Set(['physical_base']));
-    setVals({});
+    setState(emptyState());
     setOpen(null);
   };
 
-  const openVocab = open ? vocabFor(V, open.seg) : [];
+  // ---- dropdown config for the open target -------------------------------
+  const dropdown = () => {
+    if (!open) return null;
+    const t = open.target;
+    const cfg = {
+      operator: { title: 'operator', hue: HUE.operator, options: V.operators || [], current: state.operator?.token },
+      projection: { title: 'component', hue: HUE.projection, options: V.components || [], current: state.axis },
+      base: {
+        title: 'base',
+        hue: state.base?.kind === 'geometric' ? HUE.base_geometric : HUE.base_physical,
+        options: [...(V.physical_bases || []), ...(V.geometry_carriers || [])],
+        current: state.base?.token,
+      },
+      locus: {
+        title: 'locus',
+        hue: HUE.locus,
+        options: [...(V.locus_registry || []), ...(V.regions || [])],
+        current: state.locus?.token,
+      },
+      process: { title: 'process', hue: HUE.process, options: V.processes || [], current: state.mechanism },
+      'qualifier-add': { title: 'qualifier', hue: HUE.qualifier, grouped: true, options: qualifierGroups, current: null },
+      'qualifier-edit': {
+        title: 'qualifier',
+        hue: HUE.qualifier,
+        grouped: true,
+        options: qualifierGroups,
+        current: state.qualifiers[t.index],
+      },
+    }[t.kind];
+    return (
+      <VocabDropdown
+        title={cfg.title}
+        hue={cfg.hue}
+        options={cfg.options}
+        grouped={cfg.grouped}
+        anchor={open.anchor}
+        count={counter(t)}
+        current={cfg.current}
+        onChoose={choose}
+        onClear={clearSlot}
+        onClose={() => setOpen(null)}
+      />
+    );
+  };
 
+  // ---- composition bar parts ---------------------------------------------
+  // Each token chip in canonical order; qualifiers are coloured per sub-kind.
+  const isPostfix = state.operator?.kind === 'unary_postfix';
+
+  const tokChip = (key, label, token, hue, target) => (
+    <button
+      key={key}
+      className={`gx-tok ${token ? 'is-filled' : 'is-empty'} ${open && open.target.kind === target.kind && open.target.index === target.index ? 'is-open' : ''}`}
+      style={{ '--role-hue': hue }}
+      onClick={(e) => openDD(target, e.currentTarget)}
+      title={token ? `${label} = ${token} — click to change` : `choose a ${label}`}
+    >
+      {token ? <span className="mono">{token}</span> : <span className="gx-tok-ph">{label}</span>}
+      <svg className="gx-tok-caret" width="9" height="9" viewBox="0 0 12 12">
+        <path d="M2 4l4 4 4-4" stroke="currentColor" strokeWidth="1.7" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    </button>
+  );
+  const sep = (key, text) => <span key={key} className="gx-sep mono">{text}</span>;
+
+  const barParts = [];
+  let needSep = false;
+  const pushSep = (k) => { if (needSep) barParts.push(sep(k, '_')); };
+
+  // operator prefix
+  if (state.operator && !isPostfix) {
+    barParts.push(tokChip('op', 'operator', state.operator.token, HUE.operator, { kind: 'operator' }));
+    barParts.push(sep('opsep', '_of_'));
+    needSep = false;
+  }
+  // projection axis
+  if (state.axis) {
+    pushSep('axsep');
+    barParts.push(tokChip('axis', 'component', state.axis, HUE.projection, { kind: 'projection' }));
+    needSep = true;
+  }
+  // qualifiers (ordered, per-kind colour)
+  state.qualifiers.forEach((tok, i) => {
+    pushSep('qs' + i);
+    barParts.push(
+      tokChip('q' + i, 'qualifier', tok, HUE[qualifierKind(tok, V)] ?? HUE.qualifier, {
+        kind: 'qualifier-edit',
+        index: i,
+      }),
+    );
+    needSep = true;
+  });
+  // base (required)
+  pushSep('bsep');
+  barParts.push(
+    tokChip(
+      'base',
+      'base',
+      state.base?.token,
+      state.base?.kind === 'geometric' ? HUE.base_geometric : HUE.base_physical,
+      { kind: 'base' },
+    ),
+  );
+  needSep = true;
+  // locus (relation switch + token)
+  if (state.locus) {
+    const allowed = locusRelationsFor(V, state.locus.token);
+    if (allowed.length > 1) {
+      barParts.push(
+        <button
+          key="rel"
+          className="gx-relsw mono"
+          onClick={cycleLocusRel}
+          title={`locus relation — ${allowed.join(' | ')} valid here; click to switch`}
+        >
+          _{state.locus.relation}_<span className="gx-relsw-cue" aria-hidden>⇅</span>
+        </button>,
+      );
+    } else {
+      barParts.push(sep('relsep', `_${state.locus.relation}_`));
+    }
+    barParts.push(tokChip('locus', 'locus', state.locus.token, HUE.locus, { kind: 'locus' }));
+    needSep = true;
+  }
+  // mechanism (process)
+  if (state.mechanism) {
+    barParts.push(sep('mechsep', '_due_to_'));
+    barParts.push(tokChip('mech', 'process', state.mechanism, HUE.process, { kind: 'process' }));
+    needSep = true;
+  }
+  // operator postfix
+  if (state.operator && isPostfix) {
+    barParts.push(sep('opsep2', '_'));
+    barParts.push(tokChip('op', 'operator', state.operator.token, HUE.operator, { kind: 'operator' }));
+  }
+
+  // ---- production line ----------------------------------------------------
+  const prod = [];
+  const prodConn = (k, txt) => prod.push(<span key={k} className="gx-prod-conn mono">{txt}</span>);
+  const prodSeg = (k, label, hue) => prod.push(<span key={k} className="gx-prod-seg" style={{ '--role-hue': hue }}>&lt;{label}&gt;</span>);
+  if (state.operator && !isPostfix) { prodSeg('po', 'operator', HUE.operator); prodConn('poc', 'of_'); }
+  if (state.axis) prodSeg('pa', 'component', HUE.projection);
+  state.qualifiers.forEach((tok, i) => prodSeg('pq' + i, qualifierKind(tok, V), HUE[qualifierKind(tok, V)] ?? HUE.qualifier));
+  prodSeg('pb', state.base?.kind === 'geometric' ? 'geometric base' : 'base', state.base?.kind === 'geometric' ? HUE.base_geometric : HUE.base_physical);
+  if (state.locus) { prodConn('plc', `${state.locus.relation}_`); prodSeg('pl', 'locus', HUE.locus); }
+  if (state.mechanism) { prodConn('pmc', 'due_to_'); prodSeg('pm', 'process', HUE.process); }
+  if (state.operator && isPostfix) prodSeg('po2', 'operator', HUE.operator);
+
+  // ---- render -------------------------------------------------------------
   return (
     <div className="grammar-view" data-active-view="grammar">
-      <Chain active={active} vals={vals} onToggle={toggle} />
-      <Composition
-        parts={parts}
-        onOpen={openDD}
-        openId={open && open.seg.id}
-        name={composed}
-        exists={exists}
-        onOpenInBrowse={(nm) => { onSelect(nm); setView('browse'); }}
-        onClear={clearAll}
-        showClear={constraints.length > 0}
-        onCycleRel={cycleLocusRel}
-      />
+      <div className="gx-chain">
+        <div className="gx-rail">
+          <RailNode label="operator" hue={HUE.operator} optional on={!!state.operator} filled={!!state.operator}
+            onClick={(e) => openDD({ kind: 'operator' }, e.currentTarget)} title="Operator (prefix / postfix)" />
+          <span className="gx-rail-link" />
+          <RailNode label="component" hue={HUE.projection} optional on={!!state.axis} filled={!!state.axis}
+            onClick={(e) => openDD({ kind: 'projection' }, e.currentTarget)} title="Projection axis" />
+          <span className="gx-rail-link" />
+          <RailNode label="qualifier" hue={HUE.qualifier} optional on={state.qualifiers.length > 0}
+            filled={state.qualifiers.length > 0}
+            onClick={(e) => openDD({ kind: 'qualifier-add' }, e.currentTarget)}
+            title="Add a qualifier (aggregation / orbit / population / subject / other)" />
+          <span className="gx-rail-link" />
+          <RailNode label="base" hue={state.base?.kind === 'geometric' ? HUE.base_geometric : HUE.base_physical}
+            on={!!state.base} filled={!!state.base}
+            onClick={(e) => openDD({ kind: 'base' }, e.currentTarget)} title="Base quantity / geometric carrier (required)" />
+          <span className="gx-conn mono">of_/at_/over_</span>
+          <RailNode label="locus" hue={HUE.locus} optional on={!!state.locus} filled={!!state.locus}
+            onClick={(e) => openDD({ kind: 'locus' }, e.currentTarget)} title="Locus (object / position / region)" />
+          <span className="gx-conn mono">due_to_</span>
+          <RailNode label="process" hue={HUE.process} optional on={!!state.mechanism} filled={!!state.mechanism}
+            onClick={(e) => openDD({ kind: 'process' }, e.currentTarget)} title="Mechanism (due_to)" />
+        </div>
+      </div>
+
+      <div className="gx-comp">
+        <div className="gx-comp-head">
+          {composed && exists ? (
+            <button className="gx-comp-k is-link" onClick={() => { onSelect(composed); setView('browse'); }}
+              title={`Open ${composed} in Browse`}>
+              standard name<JumpArrow />
+            </button>
+          ) : (
+            <span className="gx-comp-k">standard name</span>
+          )}
+          {hasConstraints && <button className="gx-clear" onClick={clearAll}>clear</button>}
+        </div>
+        <div className="gx-namebar">
+          {!state.base && state.qualifiers.length === 0 && !state.axis ? (
+            <span className="gx-name-empty">pick a base to begin</span>
+          ) : (
+            barParts
+          )}
+        </div>
+        {(state.base || state.qualifiers.length || state.axis) && (
+          <div className="gx-prod">
+            <span className="gx-prod-k">production</span>
+            <code className="gx-prod-body">{prod}</code>
+          </div>
+        )}
+      </div>
 
       <div className="gx-results">
         <div className="gx-results-meta">
           <strong>{results.length}</strong> {results.length === 1 ? 'name' : 'names'}
-          {constraints.length ? ' match this composition' : ' in the catalog'}
+          {hasConstraints ? ' match this composition' : ' in the catalog'}
           {q ? <> · filtered by “{query.trim()}”</> : null}
         </div>
         {results.length === 0 ? (
-          <div className="gx-empty">No catalogued name matches this combination — the composition is grammatically valid but not yet in the catalog.</div>
+          <div className="gx-empty">
+            No catalogued name matches this combination — the composition is grammatically valid but not yet in the catalog.
+          </div>
         ) : (
           <ul className="gx-list">
             {results.slice(0, 500).map((n) => (
@@ -576,19 +557,7 @@ export function Grammar({ onSelect, setView, query, seedName, seedNonce }) {
         )}
       </div>
 
-      {open && (
-        <VocabDropdown
-          seg={open.seg}
-          vocab={openVocab}
-          anchor={open.anchor}
-          residual={residual}
-          matchConstraint={matchConstraint}
-          current={vals[open.seg.id]}
-          onChoose={choose}
-          onClear={clearVal}
-          onClose={() => setOpen(null)}
-        />
-      )}
+      {dropdown()}
     </div>
   );
 }
