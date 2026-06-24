@@ -14,20 +14,28 @@
 // where qualifiers are joined in PARSE ORDER, and a unary-prefix operator
 // renders `<op>_of_<inner>` while a unary-postfix operator renders
 // `<inner>_<op>`.
+//
+// State shape — every segment is an object (or null = absent). A present
+// segment whose `token` is null is an EMPTY slot: the rail toggled it on but
+// no token is chosen yet. Empty slots contribute nothing to the composed
+// name and impose no filter constraint; they only drive the editable chips.
+//   operator:   null | { token, kind }            kind: unary_prefix|unary_postfix|binary
+//   axis:       null | { token }                  projection
+//   qualifiers: [ { token, kind } ]               ordered; kind = sub-kind for colour
+//   base:       null | { token, kind }            kind: physical|geometric
+//   locus:      null | { token, relation }        relation: of|at|over
+//   mechanism:  null | { token }                  process
+//   raw:        null | string                     verbatim fallback (lossy parses)
 
-// The composer's editable state. `qualifiers` is an ordered list — this is
-// the key fidelity fix: the ISN grammar's qualifier group is an arbitrary
-// ordered sequence (e.g. total · external · heating), not a fixed set of
-// aggregation/orbit/population/subject slots.
 export function emptyState() {
   return {
-    operator: null, // { token, kind }
-    axis: null, // projection token
-    qualifiers: [], // ordered list of tokens
-    base: null, // { token, kind: 'physical' | 'geometric' }
-    locus: null, // { token, relation: 'of' | 'at' | 'over' }
-    mechanism: null, // process token
-    raw: null, // verbatim fallback for unparseable names
+    operator: null,
+    axis: null,
+    qualifiers: [],
+    base: null,
+    locus: null,
+    mechanism: null,
+    raw: null,
   };
 }
 
@@ -43,10 +51,8 @@ export function qualifierKind(token, vocab) {
 }
 
 // Seed editable state from a name's emitted `parse[]` — role-driven, no
-// vocabulary guessing. Roles map 1:1 to grammar positions; every qualifier
-// sub-role (aggregation/orbit/population/subject) and the generic
-// `qualifier` role all append to the ordered qualifier list, preserving
-// parse order so the name reconstructs verbatim.
+// vocabulary guessing. Every qualifier sub-role and the generic `qualifier`
+// role append to the ordered qualifier list in parse order.
 export function seedFromParse(parse, vocab, name) {
   const state = emptyState();
   const opByToken = new Map((vocab.operators || []).map((o) => [o.token, o]));
@@ -62,7 +68,7 @@ export function seedFromParse(parse, vocab, name) {
         break;
       }
       case 'axis':
-        state.axis = text;
+        state.axis = { token: text };
         break;
       case 'aggregation':
       case 'orbit':
@@ -71,7 +77,7 @@ export function seedFromParse(parse, vocab, name) {
       case 'qualifier':
       case 'modifier':
       case 'reduction':
-        if (text) state.qualifiers.push(text);
+        if (text) state.qualifiers.push({ token: text, kind: qualifierKind(text, vocab) });
         break;
       case 'base':
         state.base = {
@@ -82,52 +88,46 @@ export function seedFromParse(parse, vocab, name) {
       case 'locus': {
         const m = text.match(/^(of|at|over)_(.+)$/);
         state.locus = m
-          ? { relation: m[1], token: m[2] }
-          : { relation: 'of', token: text.replace(/^(?:of|at|over)_/, '') };
+          ? { token: m[2], relation: m[1] }
+          : { token: text.replace(/^(?:of|at|over)_/, ''), relation: 'of' };
         break;
       }
       case 'process':
       case 'mechanism':
-        state.mechanism = text.replace(/^due_to_/, '');
+        state.mechanism = { token: text.replace(/^due_to_/, '') };
         break;
       case 'unparseable':
         state.raw = text;
         break;
       default:
-        // Any unexpected role with text is preserved as a qualifier rather
-        // than dropped, so the name still round-trips.
-        if (text) state.qualifiers.push(text);
+        if (text) state.qualifiers.push({ token: text, kind: qualifierKind(text, vocab) });
     }
   }
 
   // Fidelity guarantee: if the seeded segments don't reconstruct the exact
-  // name (the parse was lossy — e.g. a BINARY operator whose operands the
-  // emitter collapses to a `placeholder` base), fall back to the verbatim
-  // name. The composer then DISPLAYS the true name rather than fabricating a
-  // different one; the (non-decomposable) chain is simply not editable.
-  if (name != null && composeName(state) !== name) {
-    state.raw = name;
-  }
+  // name (a lossy parse — e.g. a BINARY operator whose operands the emitter
+  // collapses to a `placeholder` base), fall back to the verbatim name so the
+  // composer DISPLAYS the true name rather than fabricating a different one.
+  if (name != null && composeName(state) !== name) state.raw = name;
   return state;
 }
 
 // Reconstruct the canonical name from editable state — a faithful mirror of
-// render.py's `compose`. Round-trips any state produced by `seedFromParse`.
+// render.py's `compose`. Empty (token-null) slots are skipped.
 export function composeName(state) {
   if (state.raw != null) return state.raw;
 
   const parts = [];
-  if (state.axis) parts.push(state.axis);
-  if (state.qualifiers && state.qualifiers.length) parts.push(state.qualifiers.join('_'));
-  if (state.base && state.base.token) parts.push(state.base.token);
+  if (state.axis?.token) parts.push(state.axis.token);
+  const quals = state.qualifiers.map((q) => q.token).filter(Boolean);
+  if (quals.length) parts.push(quals.join('_'));
+  if (state.base?.token) parts.push(state.base.token);
   let core = parts.join('_');
 
-  if (state.locus && state.locus.token) {
-    core += `_${state.locus.relation || 'of'}_${state.locus.token}`;
-  }
-  if (state.mechanism) core += `_due_to_${state.mechanism}`;
+  if (state.locus?.token) core += `_${state.locus.relation || 'of'}_${state.locus.token}`;
+  if (state.mechanism?.token) core += `_due_to_${state.mechanism.token}`;
 
-  if (state.operator && state.operator.token) {
+  if (state.operator?.token) {
     const { token, kind } = state.operator;
     if (kind === 'unary_postfix') core = `${core}_${token}`;
     else core = `${token}_of_${core}`; // unary_prefix (and binary fallback)
@@ -136,23 +136,20 @@ export function composeName(state) {
 }
 
 // Does a candidate name's decomposed state satisfy every FILLED slot of the
-// builder state? Drives the "names matching this composition" result list:
-// each filled segment is an AND constraint; an empty builder matches all.
+// builder? Empty slots impose no constraint; an empty builder matches all.
 export function matchesComposition(nameState, builder) {
   if (!nameState) return false;
-  if (builder.operator && nameState.operator?.token !== builder.operator.token) {
+  if (builder.operator?.token && nameState.operator?.token !== builder.operator.token) {
     return false;
   }
-  if (builder.axis && nameState.axis !== builder.axis) return false;
+  if (builder.axis?.token && nameState.axis?.token !== builder.axis.token) return false;
   for (const q of builder.qualifiers || []) {
-    if (!(nameState.qualifiers || []).includes(q)) return false;
+    if (q.token && !(nameState.qualifiers || []).some((n) => n.token === q.token)) return false;
   }
-  if (builder.base?.token && nameState.base?.token !== builder.base.token) {
+  if (builder.base?.token && nameState.base?.token !== builder.base.token) return false;
+  if (builder.locus?.token && nameState.locus?.token !== builder.locus.token) return false;
+  if (builder.mechanism?.token && nameState.mechanism?.token !== builder.mechanism.token) {
     return false;
   }
-  if (builder.locus?.token && nameState.locus?.token !== builder.locus.token) {
-    return false;
-  }
-  if (builder.mechanism && nameState.mechanism !== builder.mechanism) return false;
   return true;
 }

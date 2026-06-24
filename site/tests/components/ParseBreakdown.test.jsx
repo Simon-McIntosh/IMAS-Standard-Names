@@ -159,3 +159,30 @@ describe('ParseBreakdown', () => {
     expect(called).toBe(false);
   });
 });
+
+  it('shows the bare locus/mechanism token in the chip and the connector as a grey separator (matches the Grammar tab)', async () => {
+    const parse = [
+      { role: 'qualifier', text: 'plasma', note: 'q' },
+      { role: 'base', text: 'power', note: 'b' },
+      { role: 'locus', text: 'at_wall', note: 'l' },
+      { role: 'process', text: 'due_to_recombination', note: 'p' },
+    ];
+    const { container } = await renderWithData(
+      <ParseBreakdown
+        name="plasma_power_at_wall_due_to_recombination"
+        parse={parse}
+        filters={{}}
+        setFilters={() => {}}
+      />,
+    );
+    const chipText = [...container.querySelectorAll('.grammar-tree .gtoken-text')].map((e) => e.textContent);
+    // The chips carry the TRUE in-vocabulary tokens, not the connector-bearing form.
+    expect(chipText).toContain('wall');
+    expect(chipText).toContain('recombination');
+    expect(chipText).not.toContain('at_wall');
+    expect(chipText).not.toContain('due_to_recombination');
+    // The connectors render as grey source separators.
+    const seps = [...container.querySelectorAll('.grammar-source .grammar-sep')].map((e) => e.textContent).join('');
+    expect(seps).toContain('at');
+    expect(seps).toContain('due_to');
+  });

@@ -10,16 +10,17 @@ import {
 
 // Grammar view — a STRICT, grammar-faithful Standard-Name composer.
 //
-// It mirrors the ISN grammar exactly (see lib/grammar-compose.js, a JS mirror
-// of imas_standard_names/grammar/render.py): a name decomposes into an
-// optional operator, an optional projection axis, an ORDERED list of
-// qualifiers, a required base, an optional locus, and an optional mechanism.
-// Seeding reads a name's authoritative emitted `parse[]` (no in-browser
-// parser, no vocabulary guessing) and the composition reconstructs the name
-// verbatim — every catalogue name round-trips. Seeds from / hands back to
-// Browse.
+// Interaction model:
+//   • the upper RAIL is select/deselect only — clicking a node toggles that
+//     grammar segment into or out of the composition (no vocabulary dropdown);
+//   • the composed-name CHIPS carry the dropdowns — click a chip to pick or
+//     change its token.
+// It mirrors the ISN grammar exactly (lib/grammar-compose.js, a JS mirror of
+// imas_standard_names/grammar/render.py): operator · projection axis · an
+// ORDERED qualifier list · required base · locus (with relation) · mechanism.
+// Seeding reads a name's authoritative emitted parse[] (no in-browser parser,
+// no vocabulary guessing) and the composition reconstructs the name verbatim.
 
-// Role hues — match the Browse parse-breakdown colours.
 const HUE = {
   operator: 320,
   projection: 200,
@@ -36,9 +37,9 @@ const HUE = {
 
 const REL_BY_TYPE = { entity: ['of'], position: ['at', 'of'], geometry: ['of'], region: ['over'] };
 
-// Qualifier sub-kinds get their own rail node (matching the grammar's
-// colour language); the generic "qualifier" node covers everything else.
-// `group` keys map to a GRAMMAR_VOCAB section and to the qualifierKind label.
+// Named qualifier sub-kinds get their own rail toggle; the generic 'qualifier'
+// node covers everything else. `key` = GRAMMAR_VOCAB section, `kind` =
+// qualifierKind label.
 const QUAL_GROUPS = [
   { key: 'aggregations', kind: 'aggregation', label: 'aggregation' },
   { key: 'orbits', kind: 'orbit', label: 'orbit' },
@@ -46,15 +47,13 @@ const QUAL_GROUPS = [
   { key: 'subjects', kind: 'subject', label: 'subject' },
 ];
 
-// Locus token → allowed relations (of / at / over), from the registry.
 function locusRelationsFor(vocab, token) {
   const reg = (vocab.locus_registry || []).find((x) => x.token === token);
-  if (reg) return reg.relations && reg.relations.length ? reg.relations : REL_BY_TYPE[reg.type] || ['of'];
+  if (reg) return reg.relations?.length ? reg.relations : REL_BY_TYPE[reg.type] || ['of'];
   if ((vocab.regions || []).some((r) => r.token === token)) return ['over'];
   return ['of'];
 }
 
-// ---- jump arrow (cross-view affordance) ----------------------------------
 function JumpArrow() {
   return (
     <svg className="jump-arrow" width="11" height="11" viewBox="0 0 16 16" fill="none" aria-hidden="true">
@@ -64,9 +63,7 @@ function JumpArrow() {
   );
 }
 
-// ---- vocabulary dropdown (module-level so its search box keeps state) ----
-// `options` is either a flat list of {token, note?} or a list of groups
-// {label, items:[{token, note?}]}. `count(token)` returns the catalog usage.
+// ---- vocabulary dropdown (composed-name chips only) ----------------------
 function VocabDropdown({ title, hue, options, grouped, anchor, count, current, onChoose, onClear, onClose }) {
   const [term, setTerm] = useState('');
   const ref = useRef(null);
@@ -83,16 +80,14 @@ function VocabDropdown({ title, hue, options, grouped, anchor, count, current, o
   }, [onClose]);
 
   const q = term.trim().toLowerCase();
-  const match = (t) => !q || t.token.includes(q) || (t.note && t.note.toLowerCase().includes(q));
+  const matches = (t) => !q || t.token.includes(q) || (t.note && t.note.toLowerCase().includes(q));
   const score = (items) =>
     items
-      .filter(match)
+      .filter(matches)
       .map((t) => ({ t, c: count(t.token) }))
       .sort((a, b) => b.c - a.c || a.t.token.localeCompare(b.t.token));
 
-  const total = grouped
-    ? options.reduce((a, g) => a + g.items.length, 0)
-    : options.length;
+  const total = grouped ? options.reduce((a, g) => a + g.items.length, 0) : options.length;
   const groups = grouped ? options.map((g) => ({ label: g.label, rows: score(g.items) })) : null;
   const flat = grouped ? null : score(options);
 
@@ -118,23 +113,14 @@ function VocabDropdown({ title, hue, options, grouped, anchor, count, current, o
         <span className="gx-dd-title">{title}</span>
         <span className="gx-dd-sub">{total} in vocabulary · <b>bold</b> = in catalog</span>
       </div>
-      <input
-        className="gx-dd-search mono"
-        autoFocus
-        value={term}
-        onChange={(e) => setTerm(e.target.value)}
-        placeholder="filter vocabulary…"
-        spellCheck="false"
-      />
+      <input className="gx-dd-search mono" autoFocus value={term}
+        onChange={(e) => setTerm(e.target.value)} placeholder="filter vocabulary…" spellCheck="false" />
       <div className="gx-dd-list">
-        {current && <button className="gx-dd-clear" onClick={onClear}>× clear</button>}
+        {current && <button className="gx-dd-clear" onClick={onClear}>× remove</button>}
         {groups &&
           groups.map((g) => (
             <div key={g.label} className="gx-dd-group">
-              <div className="gx-dd-grouph">
-                {g.label}
-                <span className="gx-dd-groupn">{g.rows.length}</span>
-              </div>
+              <div className="gx-dd-grouph">{g.label}<span className="gx-dd-groupn">{g.rows.length}</span></div>
               {g.rows.map(({ t, c }) => <Row key={t.token} t={t} c={c} />)}
               {g.rows.length === 0 && <div className="gx-dd-empty">—</div>}
             </div>
@@ -146,18 +132,18 @@ function VocabDropdown({ title, hue, options, grouped, anchor, count, current, o
   );
 }
 
-// ---- chain rail: locked-order syntax diagram ------------------------------
-function RailNode({ label, hue, on, filled, optional, onClick, title }) {
+// ---- rail node: pure toggle (no dropdown) --------------------------------
+function RailNode({ label, hue, on, filled, onToggle, title }) {
   return (
     <button
-      className={`gx-node ${optional ? 'is-opt' : 'is-req'} ${on ? 'is-on' : 'is-off'} ${filled ? 'is-filled' : ''}`}
+      className={`gx-node is-opt ${on ? 'is-on' : 'is-off'} ${filled ? 'is-filled' : ''}`}
       style={{ '--role-hue': hue }}
-      onClick={onClick}
+      onClick={onToggle}
       title={title}
     >
       <span className="gx-node-dot" aria-hidden />
       <span className="gx-node-label">{label}</span>
-      {optional && <span className="gx-node-tick" aria-hidden>{on ? '−' : '+'}</span>}
+      <span className="gx-node-tick" aria-hidden>{on ? '−' : '+'}</span>
     </button>
   );
 }
@@ -169,62 +155,40 @@ export function Grammar({ onSelect, setView, query, seedName, seedNonce }) {
 
   const [state, setState] = useState(emptyState);
   const [open, setOpen] = useState(null); // { target, anchor }
+  const update = (fn) => setState((s) => fn(structuredClone(s)));
 
-  // Pre-decompose every catalogue name once (role-driven, authoritative).
   const nameStates = useMemo(() => {
     const m = new Map();
     for (const n of NAMES) m.set(n.name, seedFromParse(n.parse, V, n.name));
     return m;
   }, [NAMES, V]);
 
-  // Seed from a name's authoritative parse — verbatim round-trip guaranteed.
   const loadName = (nm) => {
     if (!nm) return;
     const ns = nameStates.get(nm);
     setState(ns ? structuredClone(ns) : emptyState());
     setOpen(null);
   };
-
-  // Re-seed when Browse hands over a selection (nonce forces re-seed even on
-  // the same name); also keyed on nameStates so a seed requested before the
-  // dataset loaded applies once names arrive.
   useEffect(() => {
     if (seedName && nameStates.size) loadName(seedName);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [seedNonce, nameStates]);
 
-  const composed = composeName(state);
-  const exists = composed && nameStates.has(composed);
-
-  // Grouped qualifier vocabulary: sub-kinds first, then everything else.
-  const qualifierGroups = useMemo(() => {
-    const sub = ['aggregations', 'orbits', 'populations', 'subjects'];
-    const claimed = new Set();
-    const groups = [];
-    const labels = {
-      aggregations: 'Aggregation',
-      orbits: 'Orbit',
-      populations: 'Population',
-      subjects: 'Subject',
-    };
-    for (const key of sub) {
-      const items = V[key] || [];
-      items.forEach((t) => claimed.add(t.token));
-      if (items.length) groups.push({ label: labels[key], items });
-    }
-    const other = (V.qualifiers || []).filter((t) => !claimed.has(t.token));
-    if (other.length) groups.push({ label: 'Other', items: other });
-    return groups;
-  }, [V]);
-
-  // Generic qualifiers — those not covered by a named sub-kind node.
+  // Genuine generic qualifiers: the qualifier vocab minus the named sub-kinds
+  // AND minus tokens that really belong to other segments (locus entities,
+  // operators, components, bases) — the parser accepts those as qualifiers for
+  // matching, but they are not qualifiers and must not be offered here.
   const otherQualifiers = useMemo(() => {
     const claimed = new Set();
-    for (const g of QUAL_GROUPS) (V[g.key] || []).forEach((t) => claimed.add(t.token));
+    const add = (key) => (V[key] || []).forEach((t) => claimed.add(t.token));
+    ['aggregations', 'orbits', 'populations', 'subjects', 'locus_registry', 'operators',
+      'components', 'coordinate_axes', 'physical_bases', 'geometry_carriers'].forEach(add);
     return (V.qualifiers || []).filter((t) => !claimed.has(t.token));
   }, [V]);
 
-  // Constraint-filtered results (AND across every filled slot).
+  const composed = composeName(state);
+  const exists = composed && nameStates.has(composed);
+
   const q = (query || '').trim().toLowerCase();
   const results = useMemo(
     () =>
@@ -240,191 +204,177 @@ export function Grammar({ onSelect, setView, query, seedName, seedNonce }) {
     !!(state.operator || state.axis || state.base || state.locus || state.mechanism) ||
     state.qualifiers.length > 0;
 
-  // Residual corpus for dropdown counts (all constraints except the open one).
-  const residual = useMemo(() => {
-    if (!open) return NAMES;
-    const probe = { ...state };
-    switch (open.target.kind) {
-      case 'operator': probe.operator = null; break;
-      case 'projection': probe.axis = null; break;
-      case 'base': probe.base = null; break;
-      case 'locus': probe.locus = null; break;
-      case 'process': probe.mechanism = null; break;
-      case 'qualifier-edit':
-        probe.qualifiers = state.qualifiers.filter((_, i) => i !== open.target.index);
-        break;
-      default: break; // qualifier-add keeps all current constraints
-    }
-    return NAMES.filter((n) => matchesComposition(nameStates.get(n.name), probe));
-  }, [open, NAMES, nameStates, state]);
+  const hasQual = (kind) => state.qualifiers.some((qq) => (qq.kind || qualifierKind(qq.token, V)) === kind);
 
-  // Count of residual names carrying `token` in the open slot's role.
-  const counter = (target) => (token) => {
-    let key;
-    switch (target.kind) {
-      case 'operator': key = (ns) => ns.operator?.token === token; break;
-      case 'projection': key = (ns) => ns.axis === token; break;
-      case 'base': key = (ns) => ns.base?.token === token; break;
-      case 'locus': key = (ns) => ns.locus?.token === token; break;
-      case 'process': key = (ns) => ns.mechanism === token; break;
-      default: key = (ns) => (ns.qualifiers || []).includes(token); // qualifier add/edit
-    }
-    return residual.filter((n) => key(nameStates.get(n.name) || {})).length;
-  };
+  // ---- rail toggles (presence only) --------------------------------------
+  const toggleOperator = () => update((s) => { s.operator = s.operator ? null : { token: null, kind: null }; return s; });
+  const toggleProjection = (baseKind) =>
+    update((s) => {
+      if (s.axis) { s.axis = null; }
+      else { s.axis = { token: null }; if (s.base) s.base.kind = baseKind; }
+      return s;
+    });
+  const toggleBase = (baseKind) =>
+    update((s) => {
+      if (s.base && s.base.kind === baseKind) s.base = null;
+      else {
+        s.base = { token: s.base?.token ?? null, kind: baseKind };
+        // couple the projection: physical↔component, geometric↔coordinate
+        // (the projection token carries across; only its base-kind view flips)
+      }
+      return s;
+    });
+  const toggleLocus = () => update((s) => { s.locus = s.locus ? null : { token: null, relation: 'of' }; return s; });
+  const toggleProcess = () => update((s) => { s.mechanism = s.mechanism ? null : { token: null }; return s; });
+  const toggleQualKind = (kind) =>
+    update((s) => {
+      const i = s.qualifiers.findIndex((qq) => (qq.kind || qualifierKind(qq.token, V)) === kind);
+      if (i >= 0) s.qualifiers.splice(i, 1);
+      else s.qualifiers.push({ token: null, kind });
+      return s;
+    });
+  const addGenericQualifier = () =>
+    update((s) => { s.qualifiers.push({ token: null, kind: 'qualifier' }); return s; });
 
-  // ---- mutations ---------------------------------------------------------
+  // ---- composed-name chip dropdowns --------------------------------------
   const openDD = (target, el) => {
     const r = el.getBoundingClientRect();
     setOpen((o) =>
-      o &&
-      o.target.kind === target.kind &&
-      o.target.index === target.index &&
-      o.target.group === target.group
+      o && o.target.seg === target.seg && o.target.index === target.index
         ? null
         : { target, anchor: { x: r.left, y: r.bottom } },
     );
   };
 
-  // Is a qualifier of the given sub-kind ('aggregation'|'orbit'|… |'qualifier')
-  // currently in the ordered list? Drives rail-node on/filled state.
-  const hasQual = (kind) => state.qualifiers.some((q) => qualifierKind(q, V) === kind);
-
   const choose = (token) => {
     const t = open.target;
-    setState((s) => {
-      const next = { ...s, qualifiers: [...s.qualifiers] };
-      switch (t.kind) {
+    update((s) => {
+      switch (t.seg) {
         case 'operator': {
           const o = (V.operators || []).find((x) => x.token === token);
-          next.operator = { token, kind: o ? o.kind : 'unary_prefix' };
+          s.operator = { token, kind: o ? o.kind : 'unary_prefix' };
           break;
         }
-        case 'projection': next.axis = token; break;
+        case 'projection': s.axis = { token }; break;
         case 'base': {
-          const kind =
-            t.baseKind ||
-            ((V.physical_bases || []).some((b) => b.token === token) ? 'physical' : 'geometric');
-          next.base = { token, kind };
+          const physical = (V.physical_bases || []).some((b) => b.token === token);
+          s.base = { token, kind: physical ? 'physical' : 'geometric' };
           break;
         }
-        case 'locus':
-          next.locus = { token, relation: locusRelationsFor(V, token)[0] };
+        case 'locus': s.locus = { token, relation: locusRelationsFor(V, token)[0] }; break;
+        case 'process': s.mechanism = { token }; break;
+        case 'qualifier':
+          s.qualifiers[t.index] = { token, kind: qualifierKind(token, V) };
           break;
-        case 'process': next.mechanism = token; break;
-        case 'qualifier-add': {
-          // A named sub-kind is single-occurrence: replace the existing
-          // qualifier of that kind in place (preserving order); the generic
-          // "other" group appends, since multiple plain qualifiers are valid.
-          const subKind = QUAL_GROUPS.find((g) => g.key === t.group)?.kind;
-          const idx = subKind
-            ? next.qualifiers.findIndex((q) => qualifierKind(q, V) === subKind)
-            : -1;
-          if (idx >= 0) next.qualifiers[idx] = token;
-          else next.qualifiers.push(token);
-          break;
-        }
-        case 'qualifier-edit': next.qualifiers[t.index] = token; break;
         default: break;
       }
-      return next;
+      return s;
     });
     setOpen(null);
   };
 
   const clearSlot = () => {
     const t = open.target;
-    setState((s) => {
-      const next = { ...s, qualifiers: [...s.qualifiers] };
-      switch (t.kind) {
-        case 'operator': next.operator = null; break;
-        case 'projection': next.axis = null; break;
-        case 'base': next.base = null; break;
-        case 'locus': next.locus = null; break;
-        case 'process': next.mechanism = null; break;
-        case 'qualifier-edit': next.qualifiers.splice(t.index, 1); break;
+    update((s) => {
+      switch (t.seg) {
+        case 'operator': s.operator = null; break;
+        case 'projection': s.axis = null; break;
+        case 'base': s.base = null; break;
+        case 'locus': s.locus = null; break;
+        case 'process': s.mechanism = null; break;
+        case 'qualifier': s.qualifiers.splice(t.index, 1); break;
         default: break;
       }
-      return next;
+      return s;
     });
     setOpen(null);
   };
 
-  const cycleLocusRel = () => {
-    setState((s) => {
-      if (!s.locus) return s;
+  const cycleLocusRel = () =>
+    update((s) => {
+      if (!s.locus?.token) return s;
       const al = locusRelationsFor(V, s.locus.token);
-      if (al.length < 2) return s;
-      const i = al.indexOf(s.locus.relation);
-      return { ...s, locus: { ...s.locus, relation: al[(i + 1) % al.length] } };
+      if (al.length > 1) s.locus.relation = al[(al.indexOf(s.locus.relation) + 1) % al.length];
+      return s;
     });
+
+  const clearAll = () => { setState(emptyState()); setOpen(null); };
+
+  // residual corpus for dropdown counts (all constraints except the open slot)
+  const residual = useMemo(() => {
+    if (!open) return NAMES;
+    const probe = structuredClone(state);
+    switch (open.target.seg) {
+      case 'operator': probe.operator = null; break;
+      case 'projection': probe.axis = null; break;
+      case 'base': probe.base = null; break;
+      case 'locus': probe.locus = null; break;
+      case 'process': probe.mechanism = null; break;
+      case 'qualifier': probe.qualifiers.splice(open.target.index, 1); break;
+      default: break;
+    }
+    return NAMES.filter((n) => matchesComposition(nameStates.get(n.name), probe));
+  }, [open, NAMES, nameStates, state]);
+
+  const counter = (target) => (token) => {
+    const key = {
+      operator: (ns) => ns.operator?.token === token,
+      projection: (ns) => ns.axis?.token === token,
+      base: (ns) => ns.base?.token === token,
+      locus: (ns) => ns.locus?.token === token,
+      process: (ns) => ns.mechanism?.token === token,
+      qualifier: (ns) => (ns.qualifiers || []).some((x) => x.token === token),
+    }[target.seg];
+    return residual.filter((n) => key(nameStates.get(n.name) || {})).length;
   };
 
-  const clearAll = () => {
-    setState(emptyState());
-    setOpen(null);
-  };
-
-  // ---- dropdown config for the open target -------------------------------
+  // ---- dropdown config for the open chip ---------------------------------
   const dropdown = () => {
     if (!open) return null;
     const t = open.target;
-    const group = QUAL_GROUPS.find((g) => g.key === t.group);
+    const QGROUPS = [
+      ...QUAL_GROUPS.map((g) => ({ label: g.label, items: V[g.key] || [] })),
+      { label: 'other', items: otherQualifiers },
+    ].filter((g) => g.items.length);
     const cfg = {
       operator: { title: 'operator', hue: HUE.operator, options: V.operators || [], current: state.operator?.token },
       projection: {
-        title: t.baseKind === 'geometric' ? 'coordinate' : 'component',
-        hue: HUE.projection,
-        options: V.components || [],
-        current: state.axis,
+        title: state.base?.kind === 'geometric' ? 'coordinate' : 'component',
+        hue: HUE.projection, options: V.components || [], current: state.axis?.token,
       },
       base: {
-        title: t.baseKind === 'geometric' ? 'geometric base' : 'physical base',
-        hue: t.baseKind === 'geometric' ? HUE.base_geometric : HUE.base_physical,
-        options: t.baseKind === 'geometric' ? V.geometry_carriers || [] : V.physical_bases || [],
+        title: state.base?.kind === 'geometric' ? 'geometric base' : 'physical base',
+        hue: state.base?.kind === 'geometric' ? HUE.base_geometric : HUE.base_physical,
+        options: state.base?.kind === 'geometric' ? V.geometry_carriers || [] : V.physical_bases || [],
         current: state.base?.token,
       },
       locus: {
-        title: 'locus',
-        hue: HUE.locus,
-        options: [...(V.locus_registry || []), ...(V.regions || [])],
-        current: state.locus?.token,
+        title: 'locus', hue: HUE.locus,
+        options: [...(V.locus_registry || []), ...(V.regions || [])], current: state.locus?.token,
       },
-      process: { title: 'process', hue: HUE.process, options: V.processes || [], current: state.mechanism },
-      'qualifier-add': group
-        ? { title: group.label, hue: HUE[group.kind], options: V[group.key] || [], current: null }
-        : { title: 'qualifier', hue: HUE.qualifier, options: otherQualifiers, current: null },
-      'qualifier-edit': {
-        title: 'qualifier',
-        hue: HUE.qualifier,
-        grouped: true,
-        options: qualifierGroups,
-        current: state.qualifiers[t.index],
+      process: { title: 'process', hue: HUE.process, options: V.processes || [], current: state.mechanism?.token },
+      qualifier: {
+        title: 'qualifier', hue: HUE.qualifier, grouped: true, options: QGROUPS,
+        current: state.qualifiers[t.index]?.token,
       },
-    }[t.kind];
+    }[t.seg];
     return (
       <VocabDropdown
-        title={cfg.title}
-        hue={cfg.hue}
-        options={cfg.options}
-        grouped={cfg.grouped}
-        anchor={open.anchor}
-        count={counter(t)}
-        current={cfg.current}
-        onChoose={choose}
-        onClear={clearSlot}
-        onClose={() => setOpen(null)}
+        title={cfg.title} hue={cfg.hue} options={cfg.options} grouped={cfg.grouped}
+        anchor={open.anchor} count={counter(t)} current={cfg.current}
+        onChoose={choose} onClear={clearSlot} onClose={() => setOpen(null)}
       />
     );
   };
 
-  // ---- composition bar parts ---------------------------------------------
-  // Each token chip in canonical order; qualifiers are coloured per sub-kind.
+  // ---- composition bar ----------------------------------------------------
   const isPostfix = state.operator?.kind === 'unary_postfix';
+  const isOpen = (seg, index) => open && open.target.seg === seg && open.target.index === index;
 
-  const tokChip = (key, label, token, hue, target) => (
+  const chip = (key, label, token, hue, target) => (
     <button
       key={key}
-      className={`gx-tok ${token ? 'is-filled' : 'is-empty'} ${open && open.target.kind === target.kind && open.target.index === target.index ? 'is-open' : ''}`}
+      className={`gx-tok ${token ? 'is-filled' : 'is-empty'} ${isOpen(target.seg, target.index) ? 'is-open' : ''}`}
       style={{ '--role-hue': hue }}
       onClick={(e) => openDD(target, e.currentTarget)}
       title={token ? `${label} = ${token} — click to change` : `choose a ${label}`}
@@ -437,133 +387,112 @@ export function Grammar({ onSelect, setView, query, seedName, seedNonce }) {
   );
   const sep = (key, text) => <span key={key} className="gx-sep mono">{text}</span>;
 
-  const barParts = [];
+  const bar = [];
   let needSep = false;
-  const pushSep = (k) => { if (needSep) barParts.push(sep(k, '_')); };
+  const maybeSep = (k) => { if (needSep) bar.push(sep(k, '_')); };
 
-  // operator prefix
   if (state.operator && !isPostfix) {
-    barParts.push(tokChip('op', 'operator', state.operator.token, HUE.operator, { kind: 'operator' }));
-    barParts.push(sep('opsep', '_of_'));
+    bar.push(chip('op', 'operator', state.operator.token, HUE.operator, { seg: 'operator' }));
+    bar.push(sep('ops', '_of_'));
     needSep = false;
   }
-  // projection axis
   if (state.axis) {
-    pushSep('axsep');
-    barParts.push(tokChip('axis', 'component', state.axis, HUE.projection, { kind: 'projection' }));
+    maybeSep('axs');
+    bar.push(chip('axis', state.base?.kind === 'geometric' ? 'coordinate' : 'component', state.axis.token, HUE.projection, { seg: 'projection' }));
     needSep = true;
   }
-  // qualifiers (ordered, per-kind colour)
-  state.qualifiers.forEach((tok, i) => {
-    pushSep('qs' + i);
-    barParts.push(
-      tokChip('q' + i, 'qualifier', tok, HUE[qualifierKind(tok, V)] ?? HUE.qualifier, {
-        kind: 'qualifier-edit',
-        index: i,
-      }),
-    );
+  state.qualifiers.forEach((qq, i) => {
+    maybeSep('qs' + i);
+    const k = qq.kind || qualifierKind(qq.token, V);
+    bar.push(chip('q' + i, k, qq.token, HUE[k] ?? HUE.qualifier, { seg: 'qualifier', index: i }));
     needSep = true;
   });
-  // base (required)
-  pushSep('bsep');
-  barParts.push(
-    tokChip(
-      'base',
-      'base',
-      state.base?.token,
-      state.base?.kind === 'geometric' ? HUE.base_geometric : HUE.base_physical,
-      { kind: 'base' },
-    ),
-  );
+  if (state.qualifiers.length > 0 || hasConstraints) {
+    bar.push(
+      <button key="addq" className="gx-add-q" onClick={addGenericQualifier} title="Add another qualifier">+</button>,
+    );
+  }
+  maybeSep('bs');
+  bar.push(chip('base', 'base', state.base?.token, state.base?.kind === 'geometric' ? HUE.base_geometric : HUE.base_physical, { seg: 'base' }));
   needSep = true;
-  // locus (relation switch + token)
   if (state.locus) {
-    const allowed = locusRelationsFor(V, state.locus.token);
+    const allowed = state.locus.token ? locusRelationsFor(V, state.locus.token) : ['of', 'at', 'over'];
     if (allowed.length > 1) {
-      barParts.push(
-        <button
-          key="rel"
-          className="gx-relsw mono"
-          onClick={cycleLocusRel}
-          title={`locus relation — ${allowed.join(' | ')} valid here; click to switch`}
-        >
+      bar.push(
+        <button key="rel" className="gx-relsw mono" onClick={cycleLocusRel}
+          title={`locus relation — ${allowed.join(' | ')} valid here; click to switch`}>
           _{state.locus.relation}_<span className="gx-relsw-cue" aria-hidden>⇅</span>
         </button>,
       );
     } else {
-      barParts.push(sep('relsep', `_${state.locus.relation}_`));
+      bar.push(sep('rels', `_${state.locus.relation}_`));
     }
-    barParts.push(tokChip('locus', 'locus', state.locus.token, HUE.locus, { kind: 'locus' }));
+    bar.push(chip('locus', 'locus', state.locus.token, HUE.locus, { seg: 'locus' }));
     needSep = true;
   }
-  // mechanism (process)
   if (state.mechanism) {
-    barParts.push(sep('mechsep', '_due_to_'));
-    barParts.push(tokChip('mech', 'process', state.mechanism, HUE.process, { kind: 'process' }));
+    bar.push(sep('mechs', '_due_to_'));
+    bar.push(chip('mech', 'process', state.mechanism.token, HUE.process, { seg: 'process' }));
     needSep = true;
   }
-  // operator postfix
   if (state.operator && isPostfix) {
-    barParts.push(sep('opsep2', '_'));
-    barParts.push(tokChip('op', 'operator', state.operator.token, HUE.operator, { kind: 'operator' }));
+    bar.push(sep('ops2', '_'));
+    bar.push(chip('op', 'operator', state.operator.token, HUE.operator, { seg: 'operator' }));
   }
 
-  // ---- production line ----------------------------------------------------
+  // production line
   const prod = [];
-  const prodConn = (k, txt) => prod.push(<span key={k} className="gx-prod-conn mono">{txt}</span>);
-  const prodSeg = (k, label, hue) => prod.push(<span key={k} className="gx-prod-seg" style={{ '--role-hue': hue }}>&lt;{label}&gt;</span>);
-  if (state.operator && !isPostfix) { prodSeg('po', 'operator', HUE.operator); prodConn('poc', 'of_'); }
-  if (state.axis) prodSeg('pa', 'component', HUE.projection);
-  state.qualifiers.forEach((tok, i) => prodSeg('pq' + i, qualifierKind(tok, V), HUE[qualifierKind(tok, V)] ?? HUE.qualifier));
-  prodSeg('pb', state.base?.kind === 'geometric' ? 'geometric base' : 'base', state.base?.kind === 'geometric' ? HUE.base_geometric : HUE.base_physical);
-  if (state.locus) { prodConn('plc', `${state.locus.relation}_`); prodSeg('pl', 'locus', HUE.locus); }
-  if (state.mechanism) { prodConn('pmc', 'due_to_'); prodSeg('pm', 'process', HUE.process); }
-  if (state.operator && isPostfix) prodSeg('po2', 'operator', HUE.operator);
+  const pConn = (k, txt) => prod.push(<span key={k} className="gx-prod-conn mono">{txt}</span>);
+  const pSeg = (k, label, hue) => prod.push(<span key={k} className="gx-prod-seg" style={{ '--role-hue': hue }}>&lt;{label}&gt;</span>);
+  if (state.operator && !isPostfix) { pSeg('po', 'operator', HUE.operator); pConn('poc', 'of_'); }
+  if (state.axis) pSeg('pa', state.base?.kind === 'geometric' ? 'coordinate' : 'component', HUE.projection);
+  state.qualifiers.forEach((qq, i) => {
+    const k = qq.kind || qualifierKind(qq.token, V);
+    pSeg('pq' + i, k, HUE[k] ?? HUE.qualifier);
+  });
+  pSeg('pb', state.base?.kind === 'geometric' ? 'geometric base' : 'base', state.base?.kind === 'geometric' ? HUE.base_geometric : HUE.base_physical);
+  if (state.locus) { pConn('plc', `${state.locus.relation}_`); pSeg('pl', 'locus', HUE.locus); }
+  if (state.mechanism) { pConn('pmc', 'due_to_'); pSeg('pm', 'process', HUE.process); }
+  if (state.operator && isPostfix) pSeg('po2', 'operator', HUE.operator);
 
-  // ---- render -------------------------------------------------------------
+  const anySegment = state.base || state.qualifiers.length || state.axis || state.operator || state.locus || state.mechanism;
+
   return (
     <div className="grammar-view" data-active-view="grammar">
       <div className="gx-chain">
         <div className="gx-rail">
-          <RailNode label="operator" hue={HUE.operator} optional on={!!state.operator} filled={!!state.operator}
-            onClick={(e) => openDD({ kind: 'operator' }, e.currentTarget)} title="Operator (prefix / postfix)" />
+          <RailNode label="operator" hue={HUE.operator} on={!!state.operator} filled={!!state.operator?.token}
+            onToggle={toggleOperator} title="Operator (prefix / postfix)" />
           <span className="gx-rail-link" />
-          <RailNode label="component" hue={HUE.projection} optional
-            on={!!state.axis && state.base?.kind !== 'geometric'} filled={!!state.axis}
-            onClick={(e) => openDD({ kind: 'projection', baseKind: 'physical' }, e.currentTarget)}
-            title="Vector component (projection of a physical base)" />
+          <RailNode label="component" hue={HUE.projection}
+            on={!!state.axis && state.base?.kind !== 'geometric'} filled={!!state.axis?.token}
+            onToggle={() => toggleProjection('physical')} title="Vector component (projection of a physical base)" />
           <span className="gx-alt-pipe" aria-hidden>|</span>
-          <RailNode label="coordinate" hue={HUE.projection} optional
-            on={!!state.axis && state.base?.kind === 'geometric'} filled={!!state.axis}
-            onClick={(e) => openDD({ kind: 'projection', baseKind: 'geometric' }, e.currentTarget)}
-            title="Coordinate (projection of a geometric base)" />
+          <RailNode label="coordinate" hue={HUE.projection}
+            on={!!state.axis && state.base?.kind === 'geometric'} filled={!!state.axis?.token}
+            onToggle={() => toggleProjection('geometric')} title="Coordinate (projection of a geometric base)" />
           <span className="gx-rail-link" />
           {QUAL_GROUPS.map((g) => (
-            <RailNode key={g.key} label={g.label} hue={HUE[g.kind]} optional
-              on={hasQual(g.kind)} filled={hasQual(g.kind)}
-              onClick={(e) => openDD({ kind: 'qualifier-add', group: g.key }, e.currentTarget)}
-              title={`Add ${g.label} qualifier`} />
+            <RailNode key={g.key} label={g.label} hue={HUE[g.kind]} on={hasQual(g.kind)} filled={hasQual(g.kind)}
+              onToggle={() => toggleQualKind(g.kind)} title={`Toggle a ${g.label} qualifier`} />
           ))}
-          <RailNode label="qualifier" hue={HUE.qualifier} optional
-            on={hasQual('qualifier')} filled={hasQual('qualifier')}
-            onClick={(e) => openDD({ kind: 'qualifier-add' }, e.currentTarget)}
-            title="Add any other qualifier (e.g. major, external, absorbed)" />
+          <RailNode label="qualifier" hue={HUE.qualifier} on={hasQual('qualifier')} filled={hasQual('qualifier')}
+            onToggle={() => toggleQualKind('qualifier')}
+            title="Toggle a generic qualifier (major, external, absorbed, …); use + to add more" />
           <span className="gx-rail-link" />
           <RailNode label="physical base" hue={HUE.base_physical}
-            on={state.base?.kind === 'physical'} filled={state.base?.kind === 'physical'}
-            onClick={(e) => openDD({ kind: 'base', baseKind: 'physical' }, e.currentTarget)}
-            title="Physical base quantity (required: pick one base)" />
+            on={state.base?.kind === 'physical'} filled={state.base?.kind === 'physical' && !!state.base?.token}
+            onToggle={() => toggleBase('physical')} title="Physical base quantity" />
           <span className="gx-alt-pipe" aria-hidden>|</span>
           <RailNode label="geometric base" hue={HUE.base_geometric}
-            on={state.base?.kind === 'geometric'} filled={state.base?.kind === 'geometric'}
-            onClick={(e) => openDD({ kind: 'base', baseKind: 'geometric' }, e.currentTarget)}
-            title="Geometric carrier base (required: pick one base)" />
+            on={state.base?.kind === 'geometric'} filled={state.base?.kind === 'geometric' && !!state.base?.token}
+            onToggle={() => toggleBase('geometric')} title="Geometric carrier base" />
           <span className="gx-conn mono">of_/at_/over_</span>
-          <RailNode label="locus" hue={HUE.locus} optional on={!!state.locus} filled={!!state.locus}
-            onClick={(e) => openDD({ kind: 'locus' }, e.currentTarget)} title="Locus (object / position / region)" />
+          <RailNode label="locus" hue={HUE.locus} on={!!state.locus} filled={!!state.locus?.token}
+            onToggle={toggleLocus} title="Locus (object / position / region)" />
           <span className="gx-conn mono">due_to_</span>
-          <RailNode label="process" hue={HUE.process} optional on={!!state.mechanism} filled={!!state.mechanism}
-            onClick={(e) => openDD({ kind: 'process' }, e.currentTarget)} title="Mechanism (due_to)" />
+          <RailNode label="process" hue={HUE.process} on={!!state.mechanism} filled={!!state.mechanism?.token}
+            onToggle={toggleProcess} title="Mechanism (due_to)" />
         </div>
       </div>
 
@@ -580,18 +509,14 @@ export function Grammar({ onSelect, setView, query, seedName, seedNonce }) {
           {hasConstraints && <button className="gx-clear" onClick={clearAll}>clear</button>}
         </div>
         <div className="gx-namebar">
-          {!state.base && state.qualifiers.length === 0 && !state.axis ? (
-            <span className="gx-name-empty">pick a base to begin</span>
-          ) : (
-            barParts
-          )}
+          {!anySegment ? <span className="gx-name-empty">toggle a segment above to begin</span> : bar}
         </div>
-        {(state.base || state.qualifiers.length || state.axis) && (
+        {anySegment ? (
           <div className="gx-prod">
             <span className="gx-prod-k">production</span>
             <code className="gx-prod-body">{prod}</code>
           </div>
-        )}
+        ) : null}
       </div>
 
       <div className="gx-results">
@@ -608,11 +533,8 @@ export function Grammar({ onSelect, setView, query, seedName, seedNonce }) {
           <ul className="gx-list">
             {results.slice(0, 500).map((n) => (
               <li key={n.name}>
-                <button
-                  className={`gx-name mono ${n.name === composed ? 'is-hit' : ''}`}
-                  onClick={() => loadName(n.name)}
-                  title={`Load ${n.name} into the builder`}
-                >
+                <button className={`gx-name mono ${n.name === composed ? 'is-hit' : ''}`}
+                  onClick={() => loadName(n.name)} title={`Load ${n.name} into the builder`}>
                   {n.name}
                 </button>
               </li>

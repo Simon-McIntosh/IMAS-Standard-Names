@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { act, render } from '@testing-library/react';
+import { act, render, fireEvent } from '@testing-library/react';
 import { Grammar } from '../../src/views/Grammar.jsx';
 import { DataProvider } from '../../src/lib/data.js';
 
@@ -121,6 +121,24 @@ describe('Grammar composer', () => {
     const { container } = await renderGrammar({ seedName: 'major_radius_of_flux_loop', seedNonce: 1 });
     expect(filledTokens(container)).toEqual(['major', 'radius', 'flux_loop']);
     expect(container.querySelector('.gx-name.is-hit')?.textContent).toBe('major_radius_of_flux_loop');
+  });
+
+  it('rail is select/deselect only — toggling a node adds an empty chip without opening a dropdown; the chip opens it', async () => {
+    const { container } = await renderGrammar();
+    const processNode = [...container.querySelectorAll('.gx-chain .gx-node')].find(
+      (n) => n.querySelector('.gx-node-label').textContent === 'process',
+    );
+    await act(async () => { fireEvent.click(processNode); });
+    // An empty process chip is now in the composed name; no dropdown opened.
+    const emptyChips = [...container.querySelectorAll('.gx-namebar .gx-tok.is-empty .gx-tok-ph')].map((e) => e.textContent);
+    expect(emptyChips).toContain('process');
+    expect(container.querySelector('.gx-dd')).toBeNull();
+    // Clicking the composed-name chip DOES open the dropdown.
+    const processChip = [...container.querySelectorAll('.gx-namebar .gx-tok')].find(
+      (c) => c.querySelector('.gx-tok-ph')?.textContent === 'process',
+    );
+    await act(async () => { fireEvent.click(processChip); });
+    expect(container.querySelector('.gx-dd')).not.toBeNull();
   });
 
   it('narrows results to names matching the seeded composition', async () => {

@@ -83,16 +83,16 @@ describe('grammar-compose round-trip', () => {
 
   it('decomposes total_external_heating_power into ordered qualifiers (the reported bug)', () => {
     const state = seedFromParse(CASES[0][1], VOCAB, 'total_external_heating_power');
-    expect(state.qualifiers).toEqual(['total', 'external', 'heating']);
+    expect(state.qualifiers.map((q) => q.token)).toEqual(['total', 'external', 'heating']);
     expect(state.base.token).toBe('power');
     expect(state.mechanism).toBeNull(); // 'heating' must NOT become a due_to process
   });
 
   it('keeps the major qualifier on major_radius_of_flux_loop (the reported bug)', () => {
     const state = seedFromParse(CASES[1][1], VOCAB, 'major_radius_of_flux_loop');
-    expect(state.qualifiers).toEqual(['major']);
+    expect(state.qualifiers.map((q) => q.token)).toEqual(['major']);
     expect(state.base.token).toBe('radius');
-    expect(state.locus).toEqual({ relation: 'of', token: 'flux_loop' });
+    expect(state.locus).toEqual({ token: 'flux_loop', relation: 'of' });
   });
 
   it('falls back to the verbatim name when the parse is lossy (binary operator)', () => {
@@ -135,14 +135,15 @@ describe('matchesComposition', () => {
   });
 
   it('filters by projection axis', () => {
-    const builder = { qualifiers: [], axis: 'poloidal' };
+    const builder = { qualifiers: [], axis: { token: 'poloidal' } };
     expect(matchesComposition(poloidal, builder)).toBe(true);
     expect(matchesComposition(bareField, builder)).toBe(false);
   });
 
   it('filters by every qualifier in the ordered list', () => {
     const total = ns('total_external_heating_power', CASES[0][1]);
-    expect(matchesComposition(total, { qualifiers: ['external', 'heating'] })).toBe(true);
-    expect(matchesComposition(total, { qualifiers: ['external', 'absent'] })).toBe(false);
+    const q = (...toks) => ({ qualifiers: toks.map((t) => ({ token: t })) });
+    expect(matchesComposition(total, q('external', 'heating'))).toBe(true);
+    expect(matchesComposition(total, q('external', 'absent'))).toBe(false);
   });
 });

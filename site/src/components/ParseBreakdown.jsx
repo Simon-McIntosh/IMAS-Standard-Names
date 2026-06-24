@@ -16,12 +16,29 @@ const FILTERABLE_ROLES = new Set([
   'axis', 'locus', 'subject', 'aggregation', 'orbit', 'population',
 ]);
 
+// Strip the grammar connector from a locus/mechanism token so the chip shows
+// the TRUE in-vocabulary token (``wall``, ``recombination``) and the connector
+// (``at_``, ``due_to_``) falls into the grey separator gap — matching the
+// Grammar tab. ``filterText`` keeps the emitter's original text so the facet
+// filter still matches ``n.parse`` (which carries the connector-bearing form).
+function displayToken(t) {
+  if (t.role === 'locus') {
+    const m = t.text.match(/^(of|at|over)_(.+)$/);
+    if (m) return m[2];
+  } else if (t.role === 'process' || t.role === 'mechanism') {
+    const m = t.text.match(/^due_to_(.+)$/);
+    if (m) return m[1];
+  }
+  return t.text;
+}
+
 export function ParseBreakdown({ name, parse, filters, setFilters }) {
   const spans = useMemo(() => {
     if (!parse || parse.length === 0) return [];
     const out = [];
     let cursor = 0;
-    for (const t of parse) {
+    for (const raw of parse) {
+      const t = { ...raw, text: displayToken(raw), filterText: raw.text };
       const start = name.indexOf(t.text, cursor);
       if (start === -1) {
         // Token doesn't appear at or after the cursor — fall back to a
@@ -95,7 +112,9 @@ export function ParseBreakdown({ name, parse, filters, setFilters }) {
         {parse.map((t, i) => {
           const meta = ROLE_META[t.role] || ROLE_META.unknown;
           const filterable = FILTERABLE_ROLES.has(t.role);
+          // Filter on the emitter's original text; display the bare token.
           const active = isActiveFilter(t.role, t.text);
+          const shown = displayToken(t);
           return (
             <div
               key={i}
@@ -104,7 +123,7 @@ export function ParseBreakdown({ name, parse, filters, setFilters }) {
               onClick={() => filterable && toggleFilter(t.role, t.text)}
               title={
                 filterable
-                  ? (active ? `Remove ${t.role} filter` : `Filter to names with ${t.role} = ${t.text}`)
+                  ? (active ? `Remove ${t.role} filter` : `Filter to names with ${t.role} = ${shown}`)
                   : meta.desc
               }
             >
@@ -112,7 +131,7 @@ export function ParseBreakdown({ name, parse, filters, setFilters }) {
                 {meta.label}
                 {filterable && <span className="gtoken-filter-glyph" aria-hidden>{active ? '×' : '+'}</span>}
               </div>
-              <div className="gtoken-text mono">{t.text}</div>
+              <div className="gtoken-text mono">{shown}</div>
               <div className="gtoken-note">{meta.desc}</div>
             </div>
           );
