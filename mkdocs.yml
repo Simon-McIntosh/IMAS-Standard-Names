@@ -7,6 +7,17 @@ site_url:
 # mkdocs grammar-reference site writes here.
 site_dir: _mkdocs_site/
 
+# Reckon plan-system artifacts live under docs/ (served by the local reckon
+# server, not published here). Keep them out of the mkdocs build so the SPA
+# index.html does not collide with index.md and the plan/state files are not
+# copied into the published site.
+exclude_docs: |
+  /index.html
+  /*.html
+  /_shared/
+  /state/
+  /.nojekyll
+
 plugins:
   - include-markdown
   - macros:

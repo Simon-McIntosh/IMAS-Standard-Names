@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"   content="imas-standard-names">
+  <meta name="reckon-type"    content="plan">
+  <meta name="plan-slug"      content="qualifier-vocabulary-categorization">
+  <meta name="plan-title"     content="Qualifier Vocabulary Categorization">
+  <meta name="plan-summary"   content="Categorize the open qualifier vocabulary and de-pollute the parser's qualifier acceptance set, so the catalog SPA Grammar composer can offer a clean, sub-grouped qualifier picker.">
+  <meta name="plan-status"    content="draft">
+  <meta name="plan-roi"       content="mid">
+  <meta name="plan-effort"    content="L">
+  <meta name="plan-tier"      content="opus">
+  <meta name="plan-owner"     content="Simon McIntosh">
+  <title>Qualifier Vocabulary Categorization | imas-standard-names</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h2 id="s1">§1 — Why this plan exists</h2>
+    <p>
+      The catalog SPA's <strong>Grammar composer</strong> (<code>site/src/views/Grammar.jsx</code>,
+      backed by <code>site/src/lib/grammar-compose.js</code> — a JS mirror of
+      <code>imas_standard_names/grammar/render.py</code>) lets a user toggle grammar segments and pick
+      tokens from each segment's closed vocabulary. Four qualifier sub-kinds —
+      <em>aggregation, orbit, population, subject</em> — were promoted out of the qualifier group into
+      their own segments because they are orthogonal, closed, single-occurrence dimensions. Everything
+      else is the open, recursive, multi-occurrence <strong>qualifier</strong> class
+      (<code>&lt;qualifier&gt;_&lt;base&gt;</code>, e.g. <code>major</code> in
+      <code>major_radius_of_flux_loop</code>, <code>external</code>/<code>heating</code> in
+      <code>total_external_heating_power</code>).
+    </p>
+    <p>
+      Building the composer surfaced two problems in how the qualifier vocabulary is published and
+      consumed. The parser accepts <strong>348</strong> qualifier tokens
+      (<code>Vocabularies.qualifiers</code>). Of those, 71 are the named sub-kinds and
+      <strong>277</strong> are "other". But that 277 is <strong>not</strong> a clean set:
+    </p>
+    <ul>
+      <li>
+        <strong>136 of the 277 are cross-listed</strong> with other segments — locus entities
+        (<code>bolometer</code>, <code>antenna_strap</code>, <code>beam_tracing_beam</code>,
+        <code>coil_conductor</code>) and operators (<code>gradient</code>, <code>derivative</code>,
+        <code>flux_surface_averaged</code>, <code>cumulative</code>). The parser accepts them as
+        qualifiers <em>for matching</em>, but they are not qualifiers and must not be offered as such.
+      </li>
+      <li>
+        The <strong>141 genuine</strong> generic qualifiers (<code>absorbed</code>,
+        <code>alfven</code>, <code>anomalous</code>, <code>bootstrap</code>, <code>collisional</code>,
+        <code>diamagnetic</code>, <code>doppler</code>, <code>e_cross_b</code>, …) are <em>not</em> a
+        jumble — they already fall into ~30 coherent families that exist as <em>section comments</em>
+        in <code>qualifiers.yml</code> (transport regime, source/mechanism, geometry/position,
+        diagnostic, wave polarization, sign, temporal, normalized, …). But that structure is comments
+        only: the tokens are a flat list, and the IR's <code>Qualifier.category</code> field
+        (<code>imas_standard_names/grammar/ir.py</code>) is a forward-compat slot that is
+        <strong>never populated</strong>.
+      </li>
+    </ul>
+
+    <figure>
+      <svg viewBox="0 0 720 150" width="100%" style="max-width:720px;font-family:system-ui,sans-serif" role="img" aria-label="Breakdown of the 348 accepted qualifier tokens">
+        <!-- bar -->
+        <rect x="20" y="34" width="139" height="34" fill="#eef2ff" stroke="#3654c8" stroke-width="1"/>
+        <rect x="159" y="34" width="276" height="34" fill="#eafbf0" stroke="#1a9c52" stroke-width="1"/>
+        <rect x="435" y="34" width="265" height="34" fill="#fdeeee" stroke="#c0392b" stroke-width="1"/>
+        <!-- segment counts (inside, dark text) -->
+        <text x="89"  y="56" text-anchor="middle" font-size="14" font-weight="600" fill="#1c2030">71</text>
+        <text x="297" y="56" text-anchor="middle" font-size="14" font-weight="600" fill="#13351f">141</text>
+        <text x="567" y="56" text-anchor="middle" font-size="14" font-weight="600" fill="#3d1714">136</text>
+        <!-- labels below -->
+        <text x="89"  y="88" text-anchor="middle" font-size="12.5" fill="#1c2030">named sub-kinds</text>
+        <text x="89"  y="104" text-anchor="middle" font-size="11.5" fill="#5b6072">agg · orbit · pop · subject</text>
+        <text x="297" y="88" text-anchor="middle" font-size="12.5" fill="#13351f">genuine generic qualifiers</text>
+        <text x="297" y="104" text-anchor="middle" font-size="11.5" fill="#5b6072">~30 latent families → categorize</text>
+        <text x="567" y="88" text-anchor="middle" font-size="12.5" fill="#3d1714">mis-filed (cross-listed)</text>
+        <text x="567" y="104" text-anchor="middle" font-size="11.5" fill="#5b6072">locus · operator · component · base</text>
+        <!-- title + total -->
+        <text x="20" y="22" font-size="13" font-weight="600" fill="#1c2030">348 accepted qualifier tokens (Vocabularies.qualifiers)</text>
+        <text x="20" y="140" font-size="11.5" fill="#5b6072">The composer currently offers only the 141 genuine tokens (subtracting the other three groups in the SPA). This plan makes that authoritative + categorized in ISN.</text>
+      </svg>
+      <figcaption style="font-size:12.5px;color:#5b6072;margin-top:4px">
+        Partition of the parser's qualifier acceptance set. The work below removes the red group from
+        the qualifier role and gives the green group machine-readable categories.
+      </figcaption>
+    </figure>
+
+    <p>
+      <strong>Interim mitigation already shipped (site):</strong> the Grammar composer's generic
+      "qualifier" picker computes the genuine set by subtracting the named sub-kinds <em>and</em> the
+      locus/operator/component/base vocabularies in the SPA, so it offers ~141 tokens, not 277. That
+      is a client-side workaround; this plan makes the partition <em>authoritative in ISN</em> and adds
+      categories the composer can sub-group by.
+    </p>
+
+    <h2 id="s2">§2 — Scope of ISN changes</h2>
+
+    <h3 id="s2a">§2a — Audit &amp; de-pollute the qualifier acceptance set</h3>
+    <p>
+      Determine, for each of the 136 cross-listed tokens, whether it is genuinely needed in
+      <code>Vocabularies.qualifiers</code> for the parser to match real names, or whether it is an
+      artifact that should be removed from the qualifier role and resolved only via its true segment
+      (locus / operator / component / base). <strong>Constraint:</strong> the parser strips qualifiers
+      recursively before matching the base, so removing a token the parser depends on can break
+      <code>parse()</code> round-trip. Every removal MUST be verified against full-catalog round-trip
+      (<code>build_site_dataset</code> over the ISNC catalog: 1364/1364 today). Produce a
+      keep/remove/reclassify verdict per token, not a blanket delete.
+    </p>
+
+    <h3 id="s2b">§2b — Categorize the genuine generic qualifiers</h3>
+    <p>
+      Promote the ~30 comment-families in <code>qualifiers.yml</code> to machine-readable per-token
+      categories, and populate the IR's existing <code>Qualifier.category</code> field at parse time so
+      the category travels with each parsed qualifier. Decide the category taxonomy (reuse the existing
+      comment-family labels vs. a smaller normalized set) under §3.
+    </p>
+
+    <h3 id="s2c">§2c — Emit qualifier categories in the dataset</h3>
+    <p>
+      Extend <code>imas_standard_names/catalog/dataset.py::_build_grammar_vocab</code> so the SPA's
+      <code>GRAMMAR_VOCAB.qualifiers</code> entries carry their category (and the cross-listed tokens
+      are excluded from the qualifier role authoritatively, not by SPA subtraction). This is the single
+      contract point the site consumes.
+    </p>
+
+    <h3 id="s2d">§2d — Site Grammar composer consumption (links back to the design)</h3>
+    <p>
+      Once categories are emitted, replace the SPA's subtraction-based "genuine qualifier" computation
+      (<code>otherQualifiers</code> in <code>site/src/views/Grammar.jsx</code>) with the authoritative
+      emitted set, and sub-group the generic qualifier picker by category — mirroring the named
+      sub-kind grouping. No change to the round-trip/compose contract
+      (<code>grammar-compose.js</code>); this is presentation + data-source only.
+    </p>
+
+    <h2 id="s3">§3 — Open decisions</h2>
+    <p>See the decisions panel below. These gate §2a and §2b.</p>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+      <h2><span class="sec">§</span> Decisions</h2>
+
+      <div class="r-dec" data-key="cross-listed-tokens" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">
+          How to handle the 136 tokens cross-listed between the qualifier role and locus/operator/
+          component/base?
+        </p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="remove-verified">Remove from the qualifier set where round-trip stays green; keep only those the parser provably needs</button>
+          <button class="r-opt" data-value="keep-flag">Keep in the acceptance set but flag/exclude them from the published qualifier role (SPA + categories)</button>
+          <button class="r-opt" data-value="audit-first">Audit per-token first; decide token-by-token (no blanket rule)</button>
+        </p>
+        <p class="r-dec-rat"></p>
+      </div>
+
+      <div class="r-dec" data-key="category-taxonomy" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">
+          What category taxonomy for the genuine qualifiers?
+        </p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="reuse-comment-families">Reuse the ~30 existing comment-family labels in qualifiers.yml verbatim</button>
+          <button class="r-opt" data-value="normalized-set">Define a smaller normalized set (e.g. ~8–12: transport, source, geometry, diagnostic, polarization, sign, temporal, normalized, species, regime)</button>
+        </p>
+        <p class="r-dec-rat"></p>
+      </div>
+
+      <div class="r-dec" data-key="category-storage" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">
+          Where do per-token categories live?
+        </p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="yaml-structured">Restructure qualifiers.yml from a flat list to category-keyed sections (machine-readable)</button>
+          <button class="r-opt" data-value="sidecar-map">Keep qualifiers.yml flat; add a separate token→category map loaded by the parser</button>
+        </p>
+        <p class="r-dec-rat"></p>
+      </div>
+    </section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+      <h2><span class="sec">§</span> Followups</h2>
+      <article class="r-fu" data-id="f-qvc-001" data-status="open" data-tier="opus"
+               data-written-by="reckon-create" data-written-at="2026-06-25">
+        <h4 class="r-fu-title">§2a — Audit the 136 cross-listed qualifier tokens</h4>
+        <div class="r-fu-body">
+          First shippable step: produce the per-token keep/remove/reclassify verdict for the qualifier
+          tokens that are also locus/operator/component/base, gated on full-catalog round-trip. This
+          unblocks the de-pollution (§2a) and informs the category work (§2b).
+        </div>
+        <pre class="r-fu-prompt">Project: imas-standard-names
+Plan:    qualifier-vocabulary-categorization (http://localhost:8765/imas-standard-names/qualifier-vocabulary-categorization.html)
+Section: §2a
+Tier:    opus
+
+Context
+  The parser accepts 348 qualifier tokens; 136 are cross-listed with locus/
+  operator/component/base and are not genuinely qualifiers. Honour the Open
+  decisions shown live above this brief (esp. cross-listed-tokens) before
+  acting.
+
+State to read  (code/files, not the plan)
+  imas_standard_names/grammar/vocabularies/qualifiers.yml
+  imas_standard_names/grammar/parser.py  (load_default_vocabularies, the
+    recursive qualifier-stripping in _match_base_with_qualifiers)
+  imas_standard_names/grammar/vocab_loaders.py
+  imas_standard_names/catalog/dataset.py::_build_grammar_vocab
+  site/src/views/Grammar.jsx  (otherQualifiers — the current SPA workaround)
+
+Scope locks / constraints  (non-decision)
+  - Do NOT regress parse()/compose round-trip: build_site_dataset over the
+    ISNC catalog must stay 1364/1364 (8 binary-operator names use the verbatim
+    fallback). Verify with the round-trip harness before/after any removal.
+  - No change to grammar-compose.js compose/seed contract.
+
+Done-when
+  1. A per-token verdict table (keep / remove / reclassify-to-segment) for the
+     136 cross-listed tokens, committed under the plan or docs/.
+  2. Round-trip verified green at each removal.
+  3. Followup written for §2b (categorize the genuine set) + this one resolved.</pre>
+      </article>
+    </section>
+
+  </main>
+</body>
+</html>
