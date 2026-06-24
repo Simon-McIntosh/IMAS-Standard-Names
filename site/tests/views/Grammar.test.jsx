@@ -88,10 +88,22 @@ describe('Grammar composer', () => {
     expect(root?.getAttribute('data-active-view')).toBe('grammar');
   });
 
-  it('renders the six locked-order rail nodes', async () => {
+  it('renders the full locked-order rail (incl. qualifier sub-kinds and base alt-pair)', async () => {
     const { container } = await renderGrammar();
     const labels = [...container.querySelectorAll('.gx-chain .gx-node-label')].map((n) => n.textContent);
-    expect(labels).toEqual(['operator', 'component', 'qualifier', 'base', 'locus', 'process']);
+    expect(labels).toEqual([
+      'operator', 'component', 'coordinate',
+      'aggregation', 'orbit', 'population', 'subject', 'qualifier',
+      'physical base', 'geometric base', 'locus', 'process',
+    ]);
+  });
+
+  it('lights the aggregation rail node (not a generic slot) for a seeded aggregation', async () => {
+    const { container } = await renderGrammar({ seedName: 'total_external_heating_power', seedNonce: 1 });
+    const node = [...container.querySelectorAll('.gx-chain .gx-node')].find(
+      (n) => n.querySelector('.gx-node-label').textContent === 'aggregation',
+    );
+    expect(node.className).toContain('is-on');
   });
 
   it('decomposes total_external_heating_power into ordered qualifiers and round-trips (was: fabricated total_power_due_to_heating)', async () => {

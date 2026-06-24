@@ -1748,10 +1748,10 @@ body {
   display: inline-flex; align-items: center; gap: 2px;
   font-family: var(--font-mono); font-size: 16px;
   color: var(--text-2); background: transparent;
-  border: 0; border-bottom: 1px dashed var(--text-3);
-  cursor: pointer; padding: 0 1px; line-height: 1.2;
+  border: 0;
+  cursor: pointer; padding: 0 2px; line-height: 1.2; border-radius: 5px;
 }
-.gx-relsw:hover { color: var(--accent); border-bottom-color: var(--accent); }
+.gx-relsw:hover { color: var(--accent); background: var(--hover); }
 .gx-relsw-cue { font-size: 10px; opacity: 0.6; }
 .gx-tok {
   display: inline-flex; align-items: center; gap: 5px;
@@ -1760,9 +1760,15 @@ body {
   color: oklch(0.45 0.15 var(--role-hue));
   transition: background 0.1s, border-color 0.1s;
 }
-:root[data-theme="dark"] .gx-tok.is-filled { color: oklch(0.78 0.13 var(--role-hue)); }
-.gx-tok.is-filled { font-weight: 600; border-bottom: 2.5px solid oklch(0.6 0.14 var(--role-hue)); border-radius: 6px 6px 2px 2px; }
-.gx-tok.is-filled:hover { background: color-mix(in oklch, oklch(0.62 0.13 var(--role-hue)) 12%, transparent); }
+:root[data-theme="dark"] .gx-tok.is-filled { color: oklch(0.82 0.12 var(--role-hue)); }
+/* Filled tokens read as soft role-coloured pills — no underline, so the
+   composition string is not cut through by a continuous baseline rule. */
+.gx-tok.is-filled {
+  font-weight: 600;
+  border-radius: 6px;
+  background: color-mix(in oklch, oklch(0.62 0.13 var(--role-hue)) 13%, var(--surface));
+}
+.gx-tok.is-filled:hover { background: color-mix(in oklch, oklch(0.62 0.13 var(--role-hue)) 22%, var(--surface)); }
 .gx-tok.is-empty {
   font-size: 12.5px; color: var(--text-3);
   border: 1px dashed color-mix(in oklch, oklch(0.6 0.13 var(--role-hue)) 40%, var(--border-strong));
@@ -1800,7 +1806,9 @@ body {
 .gx-results-hint { color: var(--text-3); font-size: 11.5px; }
 .gx-reset:hover { color: var(--accent); }
 .gx-empty { padding: 22px 16px; max-width: 600px; font-size: 13px; line-height: 1.6; color: var(--text-2); background: var(--surface-2); border: 1px dashed var(--border); border-radius: var(--radius); text-wrap: pretty; }
-.gx-list { list-style: none; margin: 0; padding: 0; columns: 220px; column-gap: 40px; }
+/* Wide columns so full names fit without clipping; only the rare very long
+   (e.g. binary-operator) name ellipsises. */
+.gx-list { list-style: none; margin: 0; padding: 0; columns: 340px; column-gap: 36px; }
 .gx-list li { break-inside: avoid; }
 .gx-name {
   display: block; width: 100%; text-align: left; border: 0; border-left: 2px solid transparent;

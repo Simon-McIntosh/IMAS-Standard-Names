@@ -36,6 +36,16 @@ const HUE = {
 
 const REL_BY_TYPE = { entity: ['of'], position: ['at', 'of'], geometry: ['of'], region: ['over'] };
 
+// Qualifier sub-kinds get their own rail node (matching the grammar's
+// colour language); the generic "qualifier" node covers everything else.
+// `group` keys map to a GRAMMAR_VOCAB section and to the qualifierKind label.
+const QUAL_GROUPS = [
+  { key: 'aggregations', kind: 'aggregation', label: 'aggregation' },
+  { key: 'orbits', kind: 'orbit', label: 'orbit' },
+  { key: 'populations', kind: 'population', label: 'population' },
+  { key: 'subjects', kind: 'subject', label: 'subject' },
+];
+
 // Locus token → allowed relations (of / at / over), from the registry.
 function locusRelationsFor(vocab, token) {
   const reg = (vocab.locus_registry || []).find((x) => x.token === token);
@@ -207,6 +217,13 @@ export function Grammar({ onSelect, setView, query, seedName, seedNonce }) {
     return groups;
   }, [V]);
 
+  // Generic qualifiers — those not covered by a named sub-kind node.
+  const otherQualifiers = useMemo(() => {
+    const claimed = new Set();
+    for (const g of QUAL_GROUPS) (V[g.key] || []).forEach((t) => claimed.add(t.token));
+    return (V.qualifiers || []).filter((t) => !claimed.has(t.token));
+  }, [V]);
+
   // Constraint-filtered results (AND across every filled slot).
   const q = (query || '').trim().toLowerCase();
   const results = useMemo(
@@ -259,11 +276,18 @@ export function Grammar({ onSelect, setView, query, seedName, seedNonce }) {
   const openDD = (target, el) => {
     const r = el.getBoundingClientRect();
     setOpen((o) =>
-      o && o.target.kind === target.kind && o.target.index === target.index
+      o &&
+      o.target.kind === target.kind &&
+      o.target.index === target.index &&
+      o.target.group === target.group
         ? null
         : { target, anchor: { x: r.left, y: r.bottom } },
     );
   };
+
+  // Is a qualifier of the given sub-kind ('aggregation'|'orbit'|… |'qualifier')
+  // currently in the ordered list? Drives rail-node on/filled state.
+  const hasQual = (kind) => state.qualifiers.some((q) => qualifierKind(q, V) === kind);
 
   const choose = (token) => {
     const t = open.target;
@@ -277,15 +301,28 @@ export function Grammar({ onSelect, setView, query, seedName, seedNonce }) {
         }
         case 'projection': next.axis = token; break;
         case 'base': {
-          const physical = (V.physical_bases || []).some((b) => b.token === token);
-          next.base = { token, kind: physical ? 'physical' : 'geometric' };
+          const kind =
+            t.baseKind ||
+            ((V.physical_bases || []).some((b) => b.token === token) ? 'physical' : 'geometric');
+          next.base = { token, kind };
           break;
         }
         case 'locus':
           next.locus = { token, relation: locusRelationsFor(V, token)[0] };
           break;
         case 'process': next.mechanism = token; break;
-        case 'qualifier-add': next.qualifiers.push(token); break;
+        case 'qualifier-add': {
+          // A named sub-kind is single-occurrence: replace the existing
+          // qualifier of that kind in place (preserving order); the generic
+          // "other" group appends, since multiple plain qualifiers are valid.
+          const subKind = QUAL_GROUPS.find((g) => g.key === t.group)?.kind;
+          const idx = subKind
+            ? next.qualifiers.findIndex((q) => qualifierKind(q, V) === subKind)
+            : -1;
+          if (idx >= 0) next.qualifiers[idx] = token;
+          else next.qualifiers.push(token);
+          break;
+        }
         case 'qualifier-edit': next.qualifiers[t.index] = token; break;
         default: break;
       }
@@ -331,13 +368,19 @@ export function Grammar({ onSelect, setView, query, seedName, seedNonce }) {
   const dropdown = () => {
     if (!open) return null;
     const t = open.target;
+    const group = QUAL_GROUPS.find((g) => g.key === t.group);
     const cfg = {
       operator: { title: 'operator', hue: HUE.operator, options: V.operators || [], current: state.operator?.token },
-      projection: { title: 'component', hue: HUE.projection, options: V.components || [], current: state.axis },
+      projection: {
+        title: t.baseKind === 'geometric' ? 'coordinate' : 'component',
+        hue: HUE.projection,
+        options: V.components || [],
+        current: state.axis,
+      },
       base: {
-        title: 'base',
-        hue: state.base?.kind === 'geometric' ? HUE.base_geometric : HUE.base_physical,
-        options: [...(V.physical_bases || []), ...(V.geometry_carriers || [])],
+        title: t.baseKind === 'geometric' ? 'geometric base' : 'physical base',
+        hue: t.baseKind === 'geometric' ? HUE.base_geometric : HUE.base_physical,
+        options: t.baseKind === 'geometric' ? V.geometry_carriers || [] : V.physical_bases || [],
         current: state.base?.token,
       },
       locus: {
@@ -347,7 +390,9 @@ export function Grammar({ onSelect, setView, query, seedName, seedNonce }) {
         current: state.locus?.token,
       },
       process: { title: 'process', hue: HUE.process, options: V.processes || [], current: state.mechanism },
-      'qualifier-add': { title: 'qualifier', hue: HUE.qualifier, grouped: true, options: qualifierGroups, current: null },
+      'qualifier-add': group
+        ? { title: group.label, hue: HUE[group.kind], options: V[group.key] || [], current: null }
+        : { title: 'qualifier', hue: HUE.qualifier, options: otherQualifiers, current: null },
       'qualifier-edit': {
         title: 'qualifier',
         hue: HUE.qualifier,
@@ -483,17 +528,36 @@ export function Grammar({ onSelect, setView, query, seedName, seedNonce }) {
           <RailNode label="operator" hue={HUE.operator} optional on={!!state.operator} filled={!!state.operator}
             onClick={(e) => openDD({ kind: 'operator' }, e.currentTarget)} title="Operator (prefix / postfix)" />
           <span className="gx-rail-link" />
-          <RailNode label="component" hue={HUE.projection} optional on={!!state.axis} filled={!!state.axis}
-            onClick={(e) => openDD({ kind: 'projection' }, e.currentTarget)} title="Projection axis" />
+          <RailNode label="component" hue={HUE.projection} optional
+            on={!!state.axis && state.base?.kind !== 'geometric'} filled={!!state.axis}
+            onClick={(e) => openDD({ kind: 'projection', baseKind: 'physical' }, e.currentTarget)}
+            title="Vector component (projection of a physical base)" />
+          <span className="gx-alt-pipe" aria-hidden>|</span>
+          <RailNode label="coordinate" hue={HUE.projection} optional
+            on={!!state.axis && state.base?.kind === 'geometric'} filled={!!state.axis}
+            onClick={(e) => openDD({ kind: 'projection', baseKind: 'geometric' }, e.currentTarget)}
+            title="Coordinate (projection of a geometric base)" />
           <span className="gx-rail-link" />
-          <RailNode label="qualifier" hue={HUE.qualifier} optional on={state.qualifiers.length > 0}
-            filled={state.qualifiers.length > 0}
+          {QUAL_GROUPS.map((g) => (
+            <RailNode key={g.key} label={g.label} hue={HUE[g.kind]} optional
+              on={hasQual(g.kind)} filled={hasQual(g.kind)}
+              onClick={(e) => openDD({ kind: 'qualifier-add', group: g.key }, e.currentTarget)}
+              title={`Add ${g.label} qualifier`} />
+          ))}
+          <RailNode label="qualifier" hue={HUE.qualifier} optional
+            on={hasQual('qualifier')} filled={hasQual('qualifier')}
             onClick={(e) => openDD({ kind: 'qualifier-add' }, e.currentTarget)}
-            title="Add a qualifier (aggregation / orbit / population / subject / other)" />
+            title="Add any other qualifier (e.g. major, external, absorbed)" />
           <span className="gx-rail-link" />
-          <RailNode label="base" hue={state.base?.kind === 'geometric' ? HUE.base_geometric : HUE.base_physical}
-            on={!!state.base} filled={!!state.base}
-            onClick={(e) => openDD({ kind: 'base' }, e.currentTarget)} title="Base quantity / geometric carrier (required)" />
+          <RailNode label="physical base" hue={HUE.base_physical}
+            on={state.base?.kind === 'physical'} filled={state.base?.kind === 'physical'}
+            onClick={(e) => openDD({ kind: 'base', baseKind: 'physical' }, e.currentTarget)}
+            title="Physical base quantity (required: pick one base)" />
+          <span className="gx-alt-pipe" aria-hidden>|</span>
+          <RailNode label="geometric base" hue={HUE.base_geometric}
+            on={state.base?.kind === 'geometric'} filled={state.base?.kind === 'geometric'}
+            onClick={(e) => openDD({ kind: 'base', baseKind: 'geometric' }, e.currentTarget)}
+            title="Geometric carrier base (required: pick one base)" />
           <span className="gx-conn mono">of_/at_/over_</span>
           <RailNode label="locus" hue={HUE.locus} optional on={!!state.locus} filled={!!state.locus}
             onClick={(e) => openDD({ kind: 'locus' }, e.currentTarget)} title="Locus (object / position / region)" />
