@@ -107,6 +107,22 @@ export function Header({
             Browse
           </button>
           <button
+            className={view === 'grammar' ? 'on' : ''}
+            onClick={() => setView('grammar')}
+            title="Grammar & controlled vocabulary"
+          >
+            {/* Tokenised name — staggered rounded bars read as a name split
+                into grammar segments, distinct from the Browse 2×2 and the
+                Matrix 3×3 grids. */}
+            <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <rect x="1.5" y="3.5" width="4.5" height="3.2" rx="1.2" fill="currentColor"/>
+              <rect x="7"   y="3.5" width="3"   height="3.2" rx="1.2" fill="currentColor" opacity="0.55"/>
+              <rect x="1.5" y="9.3" width="7"   height="3.2" rx="1.2" fill="currentColor"/>
+              <rect x="9.5" y="9.3" width="5"   height="3.2" rx="1.2" fill="currentColor" opacity="0.55"/>
+            </svg>
+            Grammar
+          </button>
+          <button
             className={view === 'matrix' ? 'on' : ''}
             onClick={() => setView('matrix')}
             title="Vocabulary map (base × facet matrix)"

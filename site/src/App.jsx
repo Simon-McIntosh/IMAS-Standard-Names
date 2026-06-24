@@ -7,6 +7,7 @@ import { setMermaidTheme } from './lib/mermaid.js';
 import { tokenize, searchNames } from './lib/search.js';
 import { Header } from './components/Header.jsx';
 import { Browse } from './views/Browse.jsx';
+import { Grammar } from './views/Grammar.jsx';
 import { VocabularyMatrix } from './views/Matrix.jsx';
 
 // Lazy-load the dev tweaks panel — it never lands in the default bundle.
@@ -95,6 +96,14 @@ function Shell() {
   const [selected, setSelected] = useState(urlState.name);
   const [view, setView] = useState(urlState.view);
   const [tweaks, setTweak] = useTweaks();
+
+  // Grammar seed: every Browse selection re-seeds the Grammar builder so the
+  // two surfaces stay in lock-step. The nonce forces a re-seed even when the
+  // name is unchanged (e.g. switching to the Grammar tab on the same name).
+  const [grammarSeed, setGrammarSeed] = useState({ name: urlState.name, nonce: 0 });
+  useEffect(() => {
+    setGrammarSeed((s) => ({ name: selected, nonce: s.nonce + 1 }));
+  }, [selected]);
 
   const childIndex = useChildIndex(NAMES);
   const groupIndex = useGroupIndex(NAMES);
@@ -246,6 +255,14 @@ function Shell() {
           query={query}
           searchTokens={searchTokens}
           searchMode={searchMode}
+        />
+      ) : view === 'grammar' ? (
+        <Grammar
+          onSelect={(name) => { setSelected(name); setView('browse'); }}
+          setView={setView}
+          query={query}
+          seedName={grammarSeed.name}
+          seedNonce={grammarSeed.nonce}
         />
       ) : (
         <VocabularyMatrix

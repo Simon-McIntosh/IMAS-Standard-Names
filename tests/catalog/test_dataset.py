@@ -19,6 +19,7 @@ import yaml
 from imas_standard_names.catalog import build_site_dataset, write_site_dataset
 from imas_standard_names.catalog.dataset import (
     _arguments_parent,
+    _build_grammar_vocab,
     _derive_grammar_facets,
     _extract_sign,
     _GrammarFacets,
@@ -1034,3 +1035,80 @@ class TestSortTierOperatorTokens:
     def test_unclassified_scalar_gives_tier_7(self) -> None:
         facets = _make_facets(operator_tokens=())
         assert _sort_tier("electron_temperature", "scalar", "temperature", facets) == 7
+
+
+# ---------------------------------------------------------------------------
+# GRAMMAR_VOCAB — the Grammar composer's data contract
+# ---------------------------------------------------------------------------
+
+
+class TestGrammarVocab:
+    """``_build_grammar_vocab`` emits one entry list per closed-vocabulary
+    segment the Grammar composer view consumes.
+
+    These run against the vocabulary YAML files shipped inside the package,
+    so they need no ISNC catalog checkout.
+    """
+
+    SECTIONS = (
+        "operators",
+        "components",
+        "aggregations",
+        "orbits",
+        "populations",
+        "subjects",
+        "physical_bases",
+        "geometry_carriers",
+        "locus_registry",
+        "regions",
+        "processes",
+        "physics_domains",
+    )
+
+    def test_all_sections_present_and_nonempty(self) -> None:
+        vocab = _build_grammar_vocab()
+        for section in self.SECTIONS:
+            assert section in vocab, f"missing GRAMMAR_VOCAB section {section!r}"
+            assert vocab[section], f"GRAMMAR_VOCAB section {section!r} is empty"
+
+    def test_entries_are_token_objects(self) -> None:
+        """Every entry, in every section, is an object carrying a ``token``."""
+        vocab = _build_grammar_vocab()
+        for section in self.SECTIONS:
+            for entry in vocab[section]:
+                assert isinstance(entry, dict)
+                assert isinstance(entry.get("token"), str) and entry["token"]
+
+    def test_operators_carry_kind(self) -> None:
+        """The composer keys prefix/postfix rendering off ``kind``."""
+        vocab = _build_grammar_vocab()
+        kinds = {o["kind"] for o in vocab["operators"]}
+        assert "unary_prefix" in kinds
+        assert "unary_postfix" in kinds
+
+    def test_locus_entries_carry_relations(self) -> None:
+        """The locus connector switch reads ``relations`` (of / at / over)."""
+        vocab = _build_grammar_vocab()
+        by_token = {entry["token"]: entry for entry in vocab["locus_registry"]}
+        magnetic_axis = by_token.get("magnetic_axis")
+        assert magnetic_axis is not None
+        assert magnetic_axis["type"] == "position"
+        # A position locus admits both ``at`` and ``of``.
+        assert set(magnetic_axis["relations"]) == {"at", "of"}
+
+    def test_physical_and_geometric_bases_are_disjoint(self) -> None:
+        """``baseKindOf`` in the composer relies on the two base sets being
+        distinct, so a token classifies as exactly one base kind."""
+        vocab = _build_grammar_vocab()
+        physical = {b["token"] for b in vocab["physical_bases"]}
+        geometric = {c["token"] for c in vocab["geometry_carriers"]}
+        assert "magnetic_field" in physical
+        assert "centroid" in geometric
+        assert physical.isdisjoint(geometric)
+
+    def test_physics_domains_match_category_field(self) -> None:
+        """The domain segment matches a name's ``category`` against a
+        physics-domain token, so the tokens must be the domain slugs."""
+        vocab = _build_grammar_vocab()
+        tokens = {d["token"] for d in vocab["physics_domains"]}
+        assert "equilibrium" in tokens

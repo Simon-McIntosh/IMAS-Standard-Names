@@ -54,13 +54,11 @@ from typing import Any
 
 import yaml
 
-from imas_standard_names.grammar import Subject
-from imas_standard_names.grammar.context import get_grammar_context
+from imas_standard_names.grammar import Subject, vocab_loaders
 from imas_standard_names.grammar.model_types import Aggregation, Orbit, Population
 from imas_standard_names.grammar.parser import (
     ParseError,
     compose,
-    load_default_vocabularies,
     parse,
 )
 from imas_standard_names.models import StandardNameCatalogManifest
@@ -914,57 +912,126 @@ def _build_categories(names: list[dict[str, Any]]) -> list[dict[str, Any]]:
     ]
 
 
-def _build_grammar_vocab() -> dict[str, list[str]]:
-    """Build the SPA's GRAMMAR_VOCAB sections from the ISN grammar context.
+def _flat_vocab_tokens(filename: str) -> list[str]:
+    """Read a flat-list vocabulary YAML and return its tokens in file order.
 
-    The SPA uses a small subset of the full grammar context, organised
-    by UI role (reduction / axis / modifier / operator_suffix / base /
-    preposition / locus / subject). We populate each role from the
-    canonical vocabularies so the SPA's chip styling lines up with the
-    parser's tokens.
+    The closed-vocabulary files ``components.yml``, ``subjects.yml``,
+    ``regions.yml``, and ``processes.yml`` are bare YAML lists of string
+    tokens (``- token`` with optional inline comments). File order is
+    preserved because it groups tokens meaningfully (the dropdown re-sorts
+    by catalog usage at render time, so emission order is cosmetic).
+    Returns ``[]`` on any read failure so the dataset never crashes on a
+    missing or malformed vocabulary file.
     """
     try:
-        vocabs = load_default_vocabularies()
+        data = vocab_loaders._load_yaml(filename)
     except Exception:
-        return {}
+        return []
+    if isinstance(data, dict):
+        # A ``{key: [...]}`` wrapper — take the first list-valued entry.
+        for value in data.values():
+            if isinstance(value, list):
+                return [str(token) for token in value]
+        return [str(token) for token in data]
+    if isinstance(data, list):
+        return [str(token) for token in data]
+    return []
 
-    try:
-        grammar = get_grammar_context().get("grammar", {})
-    except Exception:
-        grammar = {}
 
-    operators = grammar.get("vocabularies", {}).get("operators", {}) or {}
+def _build_grammar_vocab() -> dict[str, list[dict[str, Any]]]:
+    """Build the SPA's ``GRAMMAR_VOCAB`` from the canonical vocabularies.
 
-    reduction_tokens = sorted(
-        token
-        for token, meta in operators.items()
-        if meta.get("kind") == "unary_prefix"
-        and token
-        in _REDUCTION_PREFIX_OPS
-        | {"flux_surface_averaged", "volume_averaged", "line_averaged"}
+    The Grammar composer view consumes one entry list per closed-vocabulary
+    segment. Every entry is an object carrying at least a ``token``; richer
+    segments add the metadata the composer needs:
+
+    * ``operators`` — ``kind`` drives prefix (``op_of_…``) vs postfix
+      (``…_op``) rendering; ``returns`` is the result kind.
+    * ``locus_registry`` — ``type`` and ``relations`` (the allowed
+      ``of``/``at``/``over`` connectors) drive the locus connector switch.
+    * ``physical_bases`` / ``geometry_carriers`` — ``kind`` and ``aliases``
+      classify the base and pair it with its projection segment.
+    * ``physics_domains`` — ``category`` matches the ``category`` field on
+      each name record.
+
+    Each section is built independently and tolerates a loader failure by
+    falling back to an empty list, so a single malformed vocabulary file
+    never sinks the whole dataset build.
+    """
+
+    def _safe(fn, default):  # type: ignore[no-untyped-def]
+        try:
+            return fn()
+        except Exception:
+            return default
+
+    operators = _safe(vocab_loaders.load_operators, None)
+    loci = _safe(vocab_loaders.load_locus_registry, None)
+    bases = _safe(vocab_loaders.load_physical_bases, None)
+    carriers = _safe(vocab_loaders.load_geometry_carriers, None)
+    axes = _safe(vocab_loaders.load_coordinate_axes, None)
+    aggregations = _safe(vocab_loaders.load_aggregations, frozenset())
+    orbits = _safe(vocab_loaders.load_orbits, frozenset())
+    populations = _safe(vocab_loaders.load_populations, frozenset())
+
+    physics_domains = (
+        _safe(lambda: vocab_loaders._load_yaml("physics_domains.yml"), {}).get(
+            "physics_domains", {}
+        )
+        or {}
     )
-    modifier_tokens = sorted(
-        token
-        for token, meta in operators.items()
-        if meta.get("kind") == "unary_prefix"
-        and token not in _REDUCTION_PREFIX_OPS
-        and token not in {"flux_surface_averaged", "volume_averaged", "line_averaged"}
-    )
-    operator_suffix_tokens = sorted(
-        token
-        for token, meta in operators.items()
-        if meta.get("kind") == "unary_postfix"
-    )
+
+    def _tok_list(tokens) -> list[dict[str, Any]]:
+        return [{"token": str(token)} for token in sorted(tokens)]
 
     return {
-        "reduction": reduction_tokens,
-        "axis": sorted(vocabs.axes),
-        "modifier": modifier_tokens,
-        "operator_suffix": operator_suffix_tokens,
-        "base": sorted(vocabs.bases),
-        "preposition": sorted(["of", "at", "over"]),
-        "locus": sorted(vocabs.loci),
-        "subject": sorted(vocabs.qualifiers - vocabs.axes - set(operators.keys())),
+        "operators": [
+            {"token": token, "kind": entry.kind, "returns": entry.returns}
+            for token, entry in (
+                sorted(operators.operators.items()) if operators else ()
+            )
+        ],
+        "components": [{"token": t} for t in _flat_vocab_tokens("components.yml")],
+        "coordinate_axes": [
+            {"token": token, "aliases": list(entry.aliases)}
+            for token, entry in (sorted(axes.axes.items()) if axes else ())
+        ],
+        "aggregations": _tok_list(aggregations),
+        "orbits": _tok_list(orbits),
+        "populations": _tok_list(populations),
+        "subjects": [{"token": t} for t in _flat_vocab_tokens("subjects.yml")],
+        "physical_bases": [
+            {
+                "token": token,
+                "kind": entry.kind,
+                "aliases": list(entry.aliases),
+                "dimensional": entry.inherently_dimensional,
+            }
+            for token, entry in (sorted(bases.bases.items()) if bases else ())
+        ],
+        "geometry_carriers": [
+            {"token": token, "aliases": list(entry.aliases)}
+            for token, entry in (sorted(carriers.carriers.items()) if carriers else ())
+        ],
+        "locus_registry": [
+            {
+                "token": token,
+                "type": entry.type,
+                "relations": list(entry.allowed_relations),
+            }
+            for token, entry in (sorted(loci.loci.items()) if loci else ())
+        ],
+        "regions": [{"token": t} for t in _flat_vocab_tokens("regions.yml")],
+        "processes": [{"token": t} for t in _flat_vocab_tokens("processes.yml")],
+        "physics_domains": [
+            {
+                "token": token,
+                "note": (meta or {}).get("description", ""),
+                "category": (meta or {}).get("category", ""),
+                "ids": list((meta or {}).get("ids", []) or []),
+            }
+            for token, meta in sorted(physics_domains.items())
+        ],
     }
 
 
