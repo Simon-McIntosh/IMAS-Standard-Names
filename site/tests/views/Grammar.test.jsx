@@ -91,22 +91,13 @@ describe('Grammar composer', () => {
     expect(root?.getAttribute('data-active-view')).toBe('grammar');
   });
 
-  it('renders the full locked-order rail (incl. qualifier sub-kinds and base alt-pair)', async () => {
+  it('renders the rail with a single unified qualifier node + base alt-pair', async () => {
     const { container } = await renderGrammar();
     const labels = [...container.querySelectorAll('.gx-chain .gx-node-label')].map((n) => n.textContent);
     expect(labels).toEqual([
-      'operator', 'component', 'coordinate',
-      'aggregation', 'orbit', 'population', 'subject', 'qualifier',
+      'operator', 'component', 'coordinate', 'qualifier',
       'physical base', 'geometric base', 'locus', 'process',
     ]);
-  });
-
-  it('lights the aggregation rail node (not a generic slot) for a seeded aggregation', async () => {
-    const { container } = await renderGrammar({ seedName: 'total_external_heating_power', seedNonce: 1 });
-    const node = [...container.querySelectorAll('.gx-chain .gx-node')].find(
-      (n) => n.querySelector('.gx-node-label').textContent === 'aggregation',
-    );
-    expect(node.className).toContain('is-on');
   });
 
   it('decomposes total_external_heating_power into ordered qualifiers and round-trips (was: fabricated total_power_due_to_heating)', async () => {
@@ -144,26 +135,46 @@ describe('Grammar composer', () => {
     expect(container.querySelector('.gx-dd')).not.toBeNull();
   });
 
-  it('groups the generic qualifier picker by category (no subject group)', async () => {
+  it('opens ONE multi-select qualifier picker: named sub-kinds + generic categories', async () => {
     const { container } = await renderGrammar();
-    // Toggle the generic "qualifier" rail node → adds an empty generic chip.
+    const qNode = [...container.querySelectorAll('.gx-chain .gx-node')].find(
+      (n) => n.querySelector('.gx-node-label').textContent === 'qualifier',
+    );
+    // The rail node opens the picker directly (no empty chip, no '+').
+    await act(async () => { fireEvent.click(qNode); });
+    const dd = container.querySelector('.gx-dd');
+    expect(dd).not.toBeNull();
+    const groupHeaders = [...dd.querySelectorAll('.gx-dd-grouph')].map((g) => g.firstChild.textContent.trim());
+    // Named sub-kinds AND generic categories are all groups in the one picker.
+    expect(groupHeaders).toEqual(expect.arrayContaining(['aggregation', 'subject', 'geometry', 'state']));
+    // It is multi-select (rows carry the tick column).
+    expect(dd.querySelector('.gx-dd-check')).not.toBeNull();
+  });
+
+  it('multi-selects qualifiers into removable chips (no inline +)', async () => {
+    const { container } = await renderGrammar();
     const qNode = [...container.querySelectorAll('.gx-chain .gx-node')].find(
       (n) => n.querySelector('.gx-node-label').textContent === 'qualifier',
     );
     await act(async () => { fireEvent.click(qNode); });
-    const chip = [...container.querySelectorAll('.gx-namebar .gx-tok')].find(
-      (c) => c.querySelector('.gx-tok-ph')?.textContent === 'qualifier',
+    const pick = (tok) => {
+      const row = [...container.querySelectorAll('.gx-dd .gx-dd-row')].find(
+        (r) => r.querySelector('.gx-dd-tok')?.textContent === tok,
+      );
+      return act(async () => { fireEvent.click(row); });
+    };
+    await pick('external');
+    await pick('major');
+    // Both selected, in selection order; the picker stays open (multi-select).
+    expect(filledTokens(container)).toEqual(['external', 'major']);
+    expect(container.querySelector('.gx-dd')).not.toBeNull();
+    expect(container.querySelector('.gx-add-q')).toBeNull(); // no inline '+'
+    // A qualifier chip deselects on click.
+    const ext = [...container.querySelectorAll('.gx-namebar .gx-tok-removable')].find(
+      (c) => c.querySelector('.mono')?.textContent === 'external',
     );
-    await act(async () => { fireEvent.click(chip); });
-    const groupHeaders = [...container.querySelectorAll('.gx-dd .gx-dd-grouph')].map(
-      (g) => g.firstChild.textContent.trim(),
-    );
-    // Grouped by emitted category…
-    expect(groupHeaders).toContain('geometry');
-    expect(groupHeaders).toContain('state');
-    // …and the named sub-kinds are NOT mixed into the generic picker.
-    expect(groupHeaders).not.toContain('subject');
-    expect(groupHeaders).not.toContain('aggregation');
+    await act(async () => { fireEvent.click(ext); });
+    expect(filledTokens(container)).toEqual(['major']);
   });
 
   it('narrows results to names matching the seeded composition', async () => {

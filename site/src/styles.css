@@ -1877,3 +1877,13 @@ body {
   .gx-chain, .gx-comp, .gx-results { padding-left: 18px; padding-right: 18px; }
   .gx-legend-hint { display: none; }
 }
+
+/* ---------- grammar qualifier multi-select + removable chips ---------- */
+/* Tick column in the multi-select qualifier picker. */
+.gx-dd-check { width: 14px; flex-shrink: 0; color: oklch(0.55 0.14 var(--role-hue)); font-weight: 700; }
+.gx-dd-row.is-current .gx-dd-tok { color: var(--text); font-weight: 700; }
+/* Qualifier chips read as removable pills (click to deselect). */
+.gx-tok-removable { cursor: pointer; }
+.gx-tok-x { font-size: 13px; opacity: 0.45; margin-left: 1px; }
+.gx-tok-removable:hover { background: color-mix(in oklch, oklch(0.62 0.13 var(--role-hue)) 22%, var(--surface)); }
+.gx-tok-removable:hover .gx-tok-x { opacity: 0.9; }

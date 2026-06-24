@@ -63,8 +63,11 @@ function JumpArrow() {
   );
 }
 
-// ---- vocabulary dropdown (composed-name chips only) ----------------------
-function VocabDropdown({ title, hue, options, grouped, anchor, count, current, onChoose, onClear, onClose }) {
+// ---- vocabulary dropdown -------------------------------------------------
+// Single-select (chips) by default. In `multi` mode (the qualifier picker)
+// rows are toggles showing a ✓ when selected, the picker stays open as you
+// pick several, and the single-select "× remove" affordance is hidden.
+function VocabDropdown({ title, hue, options, grouped, anchor, count, current, multi, selected, onChoose, onClear, onClose }) {
   const [term, setTerm] = useState('');
   const ref = useRef(null);
   useEffect(() => {
@@ -96,12 +99,14 @@ function VocabDropdown({ title, hue, options, grouped, anchor, count, current, o
   const left = Math.max(8, Math.min(anchor.x, window.innerWidth - W - 8));
   const top = Math.min(anchor.y + 6, window.innerHeight - H - 8);
 
+  const isSel = (tok) => (multi ? selected?.has(tok) : current === tok);
   const Row = ({ t, c }) => (
     <button
-      className={`gx-dd-row ${c > 0 ? 'is-avail' : 'is-dead'} ${current === t.token ? 'is-current' : ''}`}
+      className={`gx-dd-row ${c > 0 ? 'is-avail' : 'is-dead'} ${isSel(t.token) ? 'is-current' : ''}`}
       onClick={() => onChoose(t.token)}
       title={t.note || t.token}
     >
+      {multi && <span className="gx-dd-check" aria-hidden>{isSel(t.token) ? '✓' : ''}</span>}
       <span className="gx-dd-tok mono">{t.token}</span>
       <span className="gx-dd-count">{c || '—'}</span>
     </button>
@@ -111,12 +116,14 @@ function VocabDropdown({ title, hue, options, grouped, anchor, count, current, o
     <div className="gx-dd" ref={ref} style={{ left, top, '--role-hue': hue }}>
       <div className="gx-dd-head">
         <span className="gx-dd-title">{title}</span>
-        <span className="gx-dd-sub">{total} in vocabulary · <b>bold</b> = in catalog</span>
+        <span className="gx-dd-sub">
+          {total} in vocabulary · <b>bold</b> = in catalog{multi ? ' · pick any' : ''}
+        </span>
       </div>
       <input className="gx-dd-search mono" autoFocus value={term}
         onChange={(e) => setTerm(e.target.value)} placeholder="filter vocabulary…" spellCheck="false" />
       <div className="gx-dd-list">
-        {current && <button className="gx-dd-clear" onClick={onClear}>× remove</button>}
+        {!multi && current && <button className="gx-dd-clear" onClick={onClear}>× remove</button>}
         {groups &&
           groups.map((g) => (
             <div key={g.label} className="gx-dd-group">
@@ -133,7 +140,7 @@ function VocabDropdown({ title, hue, options, grouped, anchor, count, current, o
 }
 
 // ---- rail node: pure toggle (no dropdown) --------------------------------
-function RailNode({ label, hue, on, filled, onToggle, title }) {
+function RailNode({ label, hue, on, filled, onToggle, title, caret }) {
   return (
     <button
       className={`gx-node is-opt ${on ? 'is-on' : 'is-off'} ${filled ? 'is-filled' : ''}`}
@@ -143,7 +150,7 @@ function RailNode({ label, hue, on, filled, onToggle, title }) {
     >
       <span className="gx-node-dot" aria-hidden />
       <span className="gx-node-label">{label}</span>
-      <span className="gx-node-tick" aria-hidden>{on ? '−' : '+'}</span>
+      <span className="gx-node-tick" aria-hidden>{caret ? '▾' : on ? '−' : '+'}</span>
     </button>
   );
 }
@@ -195,6 +202,22 @@ export function Grammar({ onSelect, setView, query, seedName, seedNonce }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [V]);
 
+  // The single qualifier picker: the named sub-kinds first (in canonical
+  // aggregation→orbit→population→subject order), then the generic qualifiers
+  // grouped by category. All are qualifiers in the IR; the named ones are just
+  // surfaced as their own groups.
+  const qualifierPickerGroups = useMemo(
+    () => [
+      ...QUAL_GROUPS.map((g) => ({ label: g.label, items: V[g.key] || [] })),
+      ...categoryGroups,
+    ].filter((g) => g.items.length),
+    [V, categoryGroups],
+  );
+  const selectedQualTokens = useMemo(
+    () => new Set(state.qualifiers.map((qq) => qq.token)),
+    [state.qualifiers],
+  );
+
   const composed = composeName(state);
   const exists = composed && nameStates.has(composed);
 
@@ -212,8 +235,6 @@ export function Grammar({ onSelect, setView, query, seedName, seedNonce }) {
   const hasConstraints =
     !!(state.operator || state.axis || state.base || state.locus || state.mechanism) ||
     state.qualifiers.length > 0;
-
-  const hasQual = (kind) => state.qualifiers.some((qq) => (qq.kind || qualifierKind(qq.token, V)) === kind);
 
   // ---- rail toggles (presence only) --------------------------------------
   const toggleOperator = () => update((s) => { s.operator = s.operator ? null : { token: null, kind: null }; return s; });
@@ -235,15 +256,27 @@ export function Grammar({ onSelect, setView, query, seedName, seedNonce }) {
     });
   const toggleLocus = () => update((s) => { s.locus = s.locus ? null : { token: null, relation: 'of' }; return s; });
   const toggleProcess = () => update((s) => { s.mechanism = s.mechanism ? null : { token: null }; return s; });
-  const toggleQualKind = (kind) =>
+  // Qualifiers are added/removed through ONE multi-select picker. Toggling a
+  // token adds it (named sub-kinds — aggregation/orbit/population/subject — are
+  // single-occurrence, so a new one replaces the existing of that kind) or
+  // removes it if already present. New qualifiers append in selection order;
+  // seeded names keep their parsed order (generic qualifier order is
+  // meaning-bearing in the grammar, not a fixed rank, so we never reorder).
+  const NAMED_KINDS = new Set(['aggregation', 'orbit', 'population', 'subject']);
+  const toggleQualifierToken = (token) =>
     update((s) => {
-      const i = s.qualifiers.findIndex((qq) => (qq.kind || qualifierKind(qq.token, V)) === kind);
-      if (i >= 0) s.qualifiers.splice(i, 1);
-      else s.qualifiers.push({ token: null, kind });
+      const i = s.qualifiers.findIndex((qq) => qq.token === token);
+      if (i >= 0) { s.qualifiers.splice(i, 1); return s; }
+      const kind = qualifierKind(token, V);
+      if (NAMED_KINDS.has(kind)) {
+        const j = s.qualifiers.findIndex((qq) => (qq.kind || qualifierKind(qq.token, V)) === kind);
+        if (j >= 0) s.qualifiers.splice(j, 1);
+      }
+      s.qualifiers.push({ token, kind });
       return s;
     });
-  const addGenericQualifier = () =>
-    update((s) => { s.qualifiers.push({ token: null, kind: 'qualifier' }); return s; });
+  const removeQualifier = (index) =>
+    update((s) => { s.qualifiers.splice(index, 1); return s; });
 
   // ---- composed-name chip dropdowns --------------------------------------
   const openDD = (target, el) => {
@@ -272,9 +305,6 @@ export function Grammar({ onSelect, setView, query, seedName, seedNonce }) {
         }
         case 'locus': s.locus = { token, relation: locusRelationsFor(V, token)[0] }; break;
         case 'process': s.mechanism = { token }; break;
-        case 'qualifier':
-          s.qualifiers[t.index] = { token, kind: qualifierKind(token, V) };
-          break;
         default: break;
       }
       return s;
@@ -291,7 +321,6 @@ export function Grammar({ onSelect, setView, query, seedName, seedNonce }) {
         case 'base': s.base = null; break;
         case 'locus': s.locus = null; break;
         case 'process': s.mechanism = null; break;
-        case 'qualifier': s.qualifiers.splice(t.index, 1); break;
         default: break;
       }
       return s;
@@ -319,7 +348,7 @@ export function Grammar({ onSelect, setView, query, seedName, seedNonce }) {
       case 'base': probe.base = null; break;
       case 'locus': probe.locus = null; break;
       case 'process': probe.mechanism = null; break;
-      case 'qualifier': probe.qualifiers.splice(open.target.index, 1); break;
+      case 'qualifier-multi': probe.qualifiers = []; break;
       default: break;
     }
     return NAMES.filter((n) => matchesComposition(nameStates.get(n.name), probe));
@@ -332,7 +361,7 @@ export function Grammar({ onSelect, setView, query, seedName, seedNonce }) {
       base: (ns) => ns.base?.token === token,
       locus: (ns) => ns.locus?.token === token,
       process: (ns) => ns.mechanism?.token === token,
-      qualifier: (ns) => (ns.qualifiers || []).some((x) => x.token === token),
+      'qualifier-multi': (ns) => (ns.qualifiers || []).some((x) => x.token === token),
     }[target.seg];
     return residual.filter((n) => key(nameStates.get(n.name) || {})).length;
   };
@@ -341,15 +370,17 @@ export function Grammar({ onSelect, setView, query, seedName, seedNonce }) {
   const dropdown = () => {
     if (!open) return null;
     const t = open.target;
-    // A qualifier chip's picker depends on its kind: a named sub-kind chip
-    // (aggregation/orbit/population/subject) offers that section's flat vocab;
-    // a generic qualifier chip offers the genuine qualifiers grouped by their
-    // emitted category (no named sub-kinds, no cross-segment tokens).
-    const chipKind = t.seg === 'qualifier' ? state.qualifiers[t.index]?.kind : null;
-    const namedGroup = QUAL_GROUPS.find((g) => g.kind === chipKind);
-    const qualifierCfg = namedGroup
-      ? { title: namedGroup.label, hue: HUE[namedGroup.kind], options: V[namedGroup.key] || [] }
-      : { title: 'qualifier', hue: HUE.qualifier, grouped: true, options: categoryGroups };
+    // The qualifier picker is multi-select (one node → many qualifiers, grouped
+    // by named sub-kind + category). Every other segment is single-select.
+    if (t.seg === 'qualifier-multi') {
+      return (
+        <VocabDropdown
+          title="qualifier" hue={HUE.qualifier} options={qualifierPickerGroups} grouped multi
+          selected={selectedQualTokens} anchor={open.anchor} count={counter(t)}
+          onChoose={toggleQualifierToken} onClose={() => setOpen(null)}
+        />
+      );
+    }
     const cfg = {
       operator: { title: 'operator', hue: HUE.operator, options: V.operators || [], current: state.operator?.token },
       projection: {
@@ -367,7 +398,6 @@ export function Grammar({ onSelect, setView, query, seedName, seedNonce }) {
         options: [...(V.locus_registry || []), ...(V.regions || [])], current: state.locus?.token,
       },
       process: { title: 'process', hue: HUE.process, options: V.processes || [], current: state.mechanism?.token },
-      qualifier: { ...qualifierCfg, current: state.qualifiers[t.index]?.token },
     }[t.seg];
     return (
       <VocabDropdown
@@ -396,6 +426,20 @@ export function Grammar({ onSelect, setView, query, seedName, seedNonce }) {
       </svg>
     </button>
   );
+  // Qualifier chips deselect on click (a qualifier is added/removed only via
+  // the multi-select picker on the rail's "qualifier" node).
+  const qchip = (key, kind, token, index) => (
+    <button
+      key={key}
+      className="gx-tok is-filled gx-tok-removable"
+      style={{ '--role-hue': HUE[kind] ?? HUE.qualifier }}
+      onClick={() => removeQualifier(index)}
+      title={`${kind} = ${token} — click to remove`}
+    >
+      <span className="mono">{token}</span>
+      <span className="gx-tok-x" aria-hidden>×</span>
+    </button>
+  );
   const sep = (key, text) => <span key={key} className="gx-sep mono">{text}</span>;
 
   const bar = [];
@@ -415,14 +459,9 @@ export function Grammar({ onSelect, setView, query, seedName, seedNonce }) {
   state.qualifiers.forEach((qq, i) => {
     maybeSep('qs' + i);
     const k = qq.kind || qualifierKind(qq.token, V);
-    bar.push(chip('q' + i, k, qq.token, HUE[k] ?? HUE.qualifier, { seg: 'qualifier', index: i }));
+    bar.push(qchip('q' + i, k, qq.token, i));
     needSep = true;
   });
-  if (state.qualifiers.length > 0 || hasConstraints) {
-    bar.push(
-      <button key="addq" className="gx-add-q" onClick={addGenericQualifier} title="Add another qualifier">+</button>,
-    );
-  }
   maybeSep('bs');
   bar.push(chip('base', 'base', state.base?.token, state.base?.kind === 'geometric' ? HUE.base_geometric : HUE.base_physical, { seg: 'base' }));
   needSep = true;
@@ -483,13 +522,10 @@ export function Grammar({ onSelect, setView, query, seedName, seedNonce }) {
             on={!!state.axis && state.base?.kind === 'geometric'} filled={!!state.axis?.token}
             onToggle={() => toggleProjection('geometric')} title="Coordinate (projection of a geometric base)" />
           <span className="gx-rail-link" />
-          {QUAL_GROUPS.map((g) => (
-            <RailNode key={g.key} label={g.label} hue={HUE[g.kind]} on={hasQual(g.kind)} filled={hasQual(g.kind)}
-              onToggle={() => toggleQualKind(g.kind)} title={`Toggle a ${g.label} qualifier`} />
-          ))}
-          <RailNode label="qualifier" hue={HUE.qualifier} on={hasQual('qualifier')} filled={hasQual('qualifier')}
-            onToggle={() => toggleQualKind('qualifier')}
-            title="Toggle a generic qualifier (major, external, absorbed, …); use + to add more" />
+          <RailNode label="qualifier" hue={HUE.qualifier} caret
+            on={state.qualifiers.length > 0} filled={state.qualifiers.length > 0}
+            onToggle={(e) => openDD({ seg: 'qualifier-multi' }, e.currentTarget)}
+            title="Add qualifiers — aggregation · orbit · population · subject and generic qualifiers, grouped by category; pick any number" />
           <span className="gx-rail-link" />
           <RailNode label="physical base" hue={HUE.base_physical}
             on={state.base?.kind === 'physical'} filled={state.base?.kind === 'physical' && !!state.base?.token}
