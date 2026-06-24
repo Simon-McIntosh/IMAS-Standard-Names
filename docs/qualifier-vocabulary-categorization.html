@@ -4,18 +4,21 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="docs-project"   content="imas-standard-names">
-  <meta name="reckon-type"    content="plan">
-  <meta name="plan-slug"      content="qualifier-vocabulary-categorization">
-  <meta name="plan-title"     content="Qualifier Vocabulary Categorization">
-  <meta name="plan-summary"   content="Categorize the open qualifier vocabulary and de-pollute the parser's qualifier acceptance set, so the catalog SPA Grammar composer can offer a clean, sub-grouped qualifier picker.">
-  <meta name="plan-status"    content="draft">
-  <meta name="plan-roi"       content="mid">
-  <meta name="plan-effort"    content="L">
-  <meta name="plan-tier"      content="opus">
-  <meta name="plan-owner"     content="Simon McIntosh">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="qualifier-vocabulary-categorization">
+  <meta name="plan-title" content="Qualifier Vocabulary Categorization">
+  <meta name="plan-summary" content="Categorize the open qualifier vocabulary and de-pollute the parser&#x27;s qualifier acceptance set, so the catalog SPA Grammar composer can offer a clean, sub-grouped qualifier picker.">
+  <meta name="plan-status" content="shipped">
+  <meta name="plan-roi" content="mid">
+  <meta name="plan-effort" content="L">
+  <meta name="plan-tier" content="opus">
+  <meta name="plan-owner" content="Simon McIntosh">
   <title>Qualifier Vocabulary Categorization | imas-standard-names</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-06-24">
+<meta name="plan-version" content="2">
+<meta name="plan-impl" content="1.0">
 </head>
 <body>
   <main class="plan-doc">
@@ -95,7 +98,21 @@
       categories the composer can sub-group by.
     </p>
 
-    <h2 id="s2">§2 — Scope of ISN changes</h2>
+    <h2 id="s2">§2 — Scope of ISN changes <span class="badge badge-shipped">✓ landed 2026-06-25</span></h2>
+
+    <p class="landed-summary" style="border-left:3px solid #1a9c52;padding:8px 12px;background:#f3fbf6">
+      <strong>Landed (commit on main + RC).</strong> Added
+      <code>qualifier_categories.yml</code> mapping all 161 <code>qualifiers.yml</code>
+      tokens to 12 normalized categories; the parser populates IR
+      <code>Qualifier.category</code> from it; <code>dataset.py</code> now emits
+      <code>GRAMMAR_VOCAB.qualifiers</code> as the genuine modifier set (159 = qualifiers.yml − subjects),
+      each with its category — the 136 cross-listed operator/locus/subject tokens no longer leak into the
+      qualifier role (decision <em>keep-flag</em>: they stay in the parser's acceptance union for
+      stripping, excluded only from the published role). The SPA qualifier picker now sub-groups by the
+      emitted category, dropping the subtraction workaround. Full round-trip stays 1364/1364; full Python
+      suite + 154 SPA tests green. Detail: <a href="archive/qualifier-vocabulary-categorization-s2-landed.html">§2 landed</a>.
+      Decisions: <em>category-taxonomy=normalized-set</em>, <em>category-storage=sidecar-map</em>.
+    </p>
 
     <h3 id="s2a">§2a — Audit &amp; de-pollute the qualifier acceptance set</h3>
     <p>
@@ -138,55 +155,43 @@
     <p>See the decisions panel below. These gate §2a and §2b.</p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
-      <h2><span class="sec">§</span> Decisions</h2>
-
-      <div class="r-dec" data-key="cross-listed-tokens" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">
-          How to handle the 136 tokens cross-listed between the qualifier role and locus/operator/
-          component/base?
-        </p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="remove-verified">Remove from the qualifier set where round-trip stays green; keep only those the parser provably needs</button>
-          <button class="r-opt" data-value="keep-flag">Keep in the acceptance set but flag/exclude them from the published qualifier role (SPA + categories)</button>
-          <button class="r-opt" data-value="audit-first">Audit per-token first; decide token-by-token (no blanket rule)</button>
-        </p>
-        <p class="r-dec-rat"></p>
-      </div>
-
-      <div class="r-dec" data-key="category-taxonomy" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">
-          What category taxonomy for the genuine qualifiers?
-        </p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="reuse-comment-families">Reuse the ~30 existing comment-family labels in qualifiers.yml verbatim</button>
-          <button class="r-opt" data-value="normalized-set">Define a smaller normalized set (e.g. ~8–12: transport, source, geometry, diagnostic, polarization, sign, temporal, normalized, species, regime)</button>
-        </p>
-        <p class="r-dec-rat"></p>
-      </div>
-
-      <div class="r-dec" data-key="category-storage" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">
-          Where do per-token categories live?
-        </p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="yaml-structured">Restructure qualifiers.yml from a flat list to category-keyed sections (machine-readable)</button>
-          <button class="r-opt" data-value="sidecar-map">Keep qualifiers.yml flat; add a separate token→category map loaded by the parser</button>
-        </p>
-        <p class="r-dec-rat"></p>
-      </div>
-    </section>
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="cross-listed-tokens" data-choice="keep-flag" data-by="reckon-ship" data-when="2026-06-24T18:36:29+00:00">
+    <p class="r-dec-q">How to handle the 136 tokens cross-listed between the qualifier role and locus/operator/
+          component/base?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="remove-verified">Remove from the qualifier set where round-trip stays green; keep only those the parser provably needs</button>
+      <button class="r-opt chosen" data-value="keep-flag">Keep in the acceptance set but flag/exclude them from the published qualifier role (SPA + categories)</button>
+      <button class="r-opt" data-value="audit-first">Audit per-token first; decide token-by-token (no blanket rule)</button>
+      </p>
+    <p class="r-dec-rat">The 136 cross-listed tokens are NOT in qualifiers.yml — they enter Vocabularies.qualifiers only because the parser unions unary_prefix operators + locus/object tokens into its acceptance set so they can be stripped during parsing. Publishing qualifiers.yml&#x27;s genuine modifier set (minus subjects) as the qualifier role excludes them with zero parser/round-trip risk. No change to the acceptance union.</p>
+    </div>
+<div class="r-dec" data-key="category-taxonomy" data-choice="normalized-set" data-by="reckon-ship" data-when="2026-06-24T18:36:29+00:00">
+    <p class="r-dec-q">What category taxonomy for the genuine qualifiers?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="reuse-comment-families">Reuse the ~30 existing comment-family labels in qualifiers.yml verbatim</button>
+      <button class="r-opt chosen" data-value="normalized-set">Define a smaller normalized set (e.g. ~8–12: transport, source, geometry, diagnostic, polarization, sign, temporal, normalized, species, regime)</button>
+      </p>
+    <p class="r-dec-rat">qualifiers.yml&#x27;s 39 comment-section families are redundant/inconsistent (e.g. &#x27;Source/mechanism&#x27; vs &#x27;Source / drive mechanism&#x27;; three near-duplicate &#x27;Diagnostic / measurement&#x27; families). Collapse them into ~12 normalized categories for a usable grouped picker; the 39 families bootstrap the mapping.</p>
+    </div>
+<div class="r-dec" data-key="category-storage" data-choice="sidecar-map" data-by="reckon-ship" data-when="2026-06-24T18:36:29+00:00">
+    <p class="r-dec-q">Where do per-token categories live?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="yaml-structured">Restructure qualifiers.yml from a flat list to category-keyed sections (machine-readable)</button>
+      <button class="r-opt chosen" data-value="sidecar-map">Keep qualifiers.yml flat; add a separate token→category map loaded by the parser</button>
+      </p>
+    <p class="r-dec-rat">Add qualifier_categories.yml (category -&gt; tokens) in the vocabularies dir as the authoritative category source, bootstrapped from the comment families. qualifiers.yml stays the flat token source (no churn, no parser risk); a validation test enforces every qualifier token has exactly one category. Populate the IR Qualifier.category from it at parse time.</p>
+    </div>
+</section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
-      <h2><span class="sec">§</span> Followups</h2>
-      <article class="r-fu" data-id="f-qvc-001" data-status="open" data-tier="opus"
-               data-written-by="reckon-create" data-written-at="2026-06-25">
-        <h4 class="r-fu-title">§2a — Audit the 136 cross-listed qualifier tokens</h4>
-        <div class="r-fu-body">
-          First shippable step: produce the per-token keep/remove/reclassify verdict for the qualifier
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-qvc-001" data-status="resolved" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-06-25" data-recommends-skill="" data-resolved-at="2026-06-24T18:57:21+00:00" data-resolved-by="reckon-ship">
+    <h4 class="r-fu-title">§2a — Audit the 136 cross-listed qualifier tokens</h4>
+    <div class="r-fu-body">First shippable step: produce the per-token keep/remove/reclassify verdict for the qualifier
           tokens that are also locus/operator/component/base, gated on full-catalog round-trip. This
-          unblocks the de-pollution (§2a) and informs the category work (§2b).
-        </div>
-        <pre class="r-fu-prompt">Project: imas-standard-names
+          unblocks the de-pollution (§2a) and informs the category work (§2b).</div>
+    <pre class="r-fu-prompt">Project: imas-standard-names
 Plan:    qualifier-vocabulary-categorization (http://localhost:8765/imas-standard-names/qualifier-vocabulary-categorization.html)
 Section: §2a
 Tier:    opus
@@ -216,8 +221,38 @@ Done-when
      136 cross-listed tokens, committed under the plan or docs/.
   2. Round-trip verified green at each removal.
   3. Followup written for §2b (categorize the genuine set) + this one resolved.</pre>
-      </article>
-    </section>
+    <p class="r-fu-outcome">§2 landed (all sub-sections). Finding: the 136 cross-listed tokens are NOT in qualifiers.yml — they enter the parser's acceptance union via operator/locus stripping; fixed by publishing qualifiers.yml (genuine set) at the emitter, parser untouched, round-trip 1364/1364. Added qualifier_categories.yml (12 cats), IR Qualifier.category populated, GRAMMAR_VOCAB emits {token,category}, SPA picker grouped by category.</p>
+    </article>
+<article class="r-fu" data-id="f-qvc-002" data-status="open" data-tier="sonnet" data-written-by="reckon-ship" data-written-at="2026-06-25" data-recommends-skill="/reckon-ship qualifier-vocabulary-categorization" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Optional: domain-expert review of the 12-category bucketing + deeper acceptance-union audit</h4>
+    <div class="r-fu-body">The 12-category mapping was derived family-by-family from qualifiers.yml's comment sections (deterministic, not per-token tuned). A domain-expert pass could re-bucket edge cases (e.g. ferritic: material vs source; normalized currently lands under state→normalized via its comment family). Separately, a deeper audit could decide whether any genuinely mis-filed locus/operator tokens should be removed from the parser's qualifier acceptance union (not just excluded from the published role). Neither blocks the shipped picker.</div>
+    <pre class="r-fu-prompt">Project: imas-standard-names
+Plan:    qualifier-vocabulary-categorization (http://localhost:8765/imas-standard-names/qualifier-vocabulary-categorization.html)
+Section: refinement (optional)
+Tier:    sonnet
+
+Context
+  §2 shipped: qualifiers categorized into 12 buckets (qualifier_categories.yml),
+  emitted + grouped in the SPA picker. This is an OPTIONAL polish pass; the
+  picker already works. Honour the locked decisions above.
+
+State to read (code/files)
+  imas_standard_names/grammar/vocabularies/qualifier_categories.yml
+  imas_standard_names/grammar/vocabularies/qualifiers.yml  (comment families)
+  tests/grammar/test_qualifier_categories.py  (coverage invariant)
+
+Scope locks / constraints
+  - Keep the coverage invariant green: every qualifiers.yml token categorized
+    exactly once; categories stay within the 12-member normalized set unless
+    the test&#x27;s EXPECTED_CATEGORIES is updated in the same change.
+  - Do NOT regress parse()/compose round-trip (1364/1364) or the full suite.
+
+Done-when
+  1. Re-bucketed tokens (if any) committed with rationale; tests green.
+  2. Verdict recorded on the acceptance-union audit (remove vs keep-excluded).
+  3. This followup resolved (or re-scoped) in the plan.</pre>
+    </article>
+</section>
 
   </main>
 </body>
