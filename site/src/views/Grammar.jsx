@@ -426,19 +426,27 @@ export function Grammar({ onSelect, setView, query, seedName, seedNonce }) {
       </svg>
     </button>
   );
-  // Qualifier chips deselect on click (a qualifier is added/removed only via
-  // the multi-select picker on the rail's "qualifier" node).
-  const qchip = (key, kind, token, index) => (
+  // A selected qualifier is controlled from the GRAMMAR rail: each one shows
+  // as a category-coloured tab (group name + token) that deselects on click.
+  const qtab = (kind, token, index) => (
     <button
-      key={key}
-      className="gx-tok is-filled gx-tok-removable"
+      key={`qt${index}`}
+      className="gx-qtab"
       style={{ '--role-hue': HUE[kind] ?? HUE.qualifier }}
       onClick={() => removeQualifier(index)}
-      title={`${kind} = ${token} — click to remove`}
+      title={`${kind} qualifier “${token}” — click to remove`}
     >
-      <span className="mono">{token}</span>
-      <span className="gx-tok-x" aria-hidden>×</span>
+      <span className="gx-qtab-cat">{kind}</span>
+      <span className="gx-qtab-tok mono">{token}</span>
+      <span className="gx-qtab-x" aria-hidden>×</span>
     </button>
+  );
+  // In the STANDARD NAME row the qualifier just reads as part of the name
+  // (non-interactive); the deselect control lives on the rail tab above.
+  const qstatic = (kind, token, index) => (
+    <span key={`q${index}`} className="gx-tok is-filled gx-tok-static" style={{ '--role-hue': HUE[kind] ?? HUE.qualifier }}>
+      <span className="mono">{token}</span>
+    </span>
   );
   const sep = (key, text) => <span key={key} className="gx-sep mono">{text}</span>;
 
@@ -459,7 +467,7 @@ export function Grammar({ onSelect, setView, query, seedName, seedNonce }) {
   state.qualifiers.forEach((qq, i) => {
     maybeSep('qs' + i);
     const k = qq.kind || qualifierKind(qq.token, V);
-    bar.push(qchip('q' + i, k, qq.token, i));
+    bar.push(qstatic(k, qq.token, i));
     needSep = true;
   });
   maybeSep('bs');
@@ -510,6 +518,7 @@ export function Grammar({ onSelect, setView, query, seedName, seedNonce }) {
   return (
     <div className="grammar-view" data-active-view="grammar">
       <div className="gx-chain">
+        <div className="gx-chain-head"><span className="gx-chain-k">grammar</span></div>
         <div className="gx-rail">
           <RailNode label="operator" hue={HUE.operator} on={!!state.operator} filled={!!state.operator?.token}
             onToggle={toggleOperator} title="Operator (prefix / postfix)" />
@@ -523,9 +532,10 @@ export function Grammar({ onSelect, setView, query, seedName, seedNonce }) {
             onToggle={() => toggleProjection('geometric')} title="Coordinate (projection of a geometric base)" />
           <span className="gx-rail-link" />
           <RailNode label="qualifier" hue={HUE.qualifier} caret
-            on={state.qualifiers.length > 0} filled={state.qualifiers.length > 0}
+            on={state.qualifiers.length > 0} filled={false}
             onToggle={(e) => openDD({ seg: 'qualifier-multi' }, e.currentTarget)}
             title="Add qualifiers — aggregation · orbit · population · subject and generic qualifiers, grouped by category; pick any number" />
+          {state.qualifiers.map((qq, i) => qtab(qq.kind || qualifierKind(qq.token, V), qq.token, i))}
           <span className="gx-rail-link" />
           <RailNode label="physical base" hue={HUE.base_physical}
             on={state.base?.kind === 'physical'} filled={state.base?.kind === 'physical' && !!state.base?.token}

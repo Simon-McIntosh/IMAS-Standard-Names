@@ -169,12 +169,16 @@ describe('Grammar composer', () => {
     expect(filledTokens(container)).toEqual(['external', 'major']);
     expect(container.querySelector('.gx-dd')).not.toBeNull();
     expect(container.querySelector('.gx-add-q')).toBeNull(); // no inline '+'
-    // A qualifier chip deselects on click.
-    const ext = [...container.querySelectorAll('.gx-namebar .gx-tok-removable')].find(
-      (c) => c.querySelector('.mono')?.textContent === 'external',
+    // Each selected qualifier shows as a deselectable tab in the GRAMMAR rail.
+    const railTabs = [...container.querySelectorAll('.gx-rail .gx-qtab .gx-qtab-tok')].map((e) => e.textContent);
+    expect(railTabs).toEqual(['external', 'major']);
+    // Clicking a rail tab deselects that qualifier.
+    const extTab = [...container.querySelectorAll('.gx-rail .gx-qtab')].find(
+      (c) => c.querySelector('.gx-qtab-tok')?.textContent === 'external',
     );
-    await act(async () => { fireEvent.click(ext); });
+    await act(async () => { fireEvent.click(extTab); });
     expect(filledTokens(container)).toEqual(['major']);
+    expect([...container.querySelectorAll('.gx-rail .gx-qtab .gx-qtab-tok')].map((e) => e.textContent)).toEqual(['major']);
   });
 
   it('narrows results to names matching the seeded composition', async () => {

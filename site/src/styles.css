@@ -1887,3 +1887,37 @@ body {
 .gx-tok-x { font-size: 13px; opacity: 0.45; margin-left: 1px; }
 .gx-tok-removable:hover { background: color-mix(in oklch, oklch(0.62 0.13 var(--role-hue)) 22%, var(--surface)); }
 .gx-tok-removable:hover .gx-tok-x { opacity: 0.9; }
+
+/* ---------- grammar rail: title + prominence + qualifier tabs ---------- */
+/* GRAMMAR row title, matching the STANDARD NAME label on the row below. */
+.gx-chain-head { padding: 0 32px; margin-bottom: 8px; }
+.gx-chain-k {
+  font-size: 11px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.08em; color: var(--text-3);
+}
+/* Make the grammar bar prominent: larger, clearer segment buttons. */
+.gx-chain { padding-top: 14px; }
+.gx-rail { gap: 6px 5px; }
+.gx-node { padding: 7px 13px; font-size: 13px; border-radius: 9px; }
+.gx-node-dot { width: 9px; height: 9px; }
+
+/* A selected qualifier shows as a category-coloured tab in the rail:
+   group name + token + × (click to deselect). */
+.gx-qtab {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 10px; border-radius: 9px; cursor: pointer; font-size: 13px;
+  border: 1.5px solid oklch(0.6 0.13 var(--role-hue));
+  background: color-mix(in oklch, oklch(0.62 0.13 var(--role-hue)) 16%, var(--surface));
+  color: oklch(0.42 0.15 var(--role-hue));
+}
+:root[data-theme="dark"] .gx-qtab { color: oklch(0.85 0.12 var(--role-hue)); }
+.gx-qtab:hover { background: color-mix(in oklch, oklch(0.62 0.13 var(--role-hue)) 28%, var(--surface)); }
+.gx-qtab-cat { font-size: 9.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.8; }
+.gx-qtab-tok { font-weight: 600; }
+.gx-qtab-x { font-size: 14px; opacity: 0.55; }
+.gx-qtab:hover .gx-qtab-x { opacity: 0.95; }
+
+/* Qualifier token in the STANDARD NAME row is non-interactive (it just reads
+   as part of the name; the control is the rail tab). */
+.gx-tok-static { cursor: default; }
+.gx-tok-static:hover { background: color-mix(in oklch, oklch(0.62 0.13 var(--role-hue)) 13%, var(--surface)); }
