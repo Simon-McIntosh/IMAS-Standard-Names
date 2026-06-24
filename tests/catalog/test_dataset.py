@@ -2,10 +2,12 @@
 
 These tests exercise the conversion from the published per-domain YAML
 catalog into the SPA's flat-JSON shape (``CATALOG_VERSION`` +
-``CATEGORIES`` + ``GRAMMAR_VOCAB`` + ``NAMES``). Most assertions run
-against the real ISNC catalog when it is available; tests that depend
-on the live catalog auto-skip when the fixture path is missing so CI
-without the ISNC checkout still passes.
+``CATEGORIES`` + ``GRAMMAR_VOCAB`` + ``NAMES``). End-to-end assertions
+run against a small, self-contained synthetic catalog written to a tmp
+dir (see ``catalog_dir`` / ``site_dataset``), so they are deterministic
+and need no external checkout. We deliberately avoid asserting against
+the live generated ISNC catalog — its data drifts as the upstream
+vocabulary evolves, which made name-specific assertions flaky.
 """
 
 from __future__ import annotations
@@ -36,34 +38,169 @@ from imas_standard_names.catalog.dataset import (
 # Fixtures
 # ---------------------------------------------------------------------------
 
-ISNC_CATALOG_DIR = Path.home() / "Code/imas-standard-names-catalog/standard_names"
+# A small, curated catalog covering the behaviours the dataset tests
+# assert: scalar vs vector algebra, axis-projection components + magnitude,
+# locus metadata, subject extraction, see-also / source normalisation, and
+# canonical sort tiers. Every name is a real, parseable Standard Name, so
+# the grammar parser produces genuine facets — but the corpus is fixed in
+# this file, so the dataset never depends on the drifting live catalog.
+_DOC = "Body documentation paragraph for the synthetic fixture entry."
+
+SYNTHETIC_EQUILIBRIUM: list[dict] = [
+    {
+        "name": "magnetic_field",
+        "kind": "vector",
+        "status": "active",
+        "description": "Magnetic flux density vector.",
+        "documentation": _DOC,
+        "unit": "T",
+        "physics_domain": "equilibrium",
+        "links": [],
+        "sources": [],
+    },
+    {
+        "name": "radial_magnetic_field",
+        "kind": "scalar",
+        "status": "active",
+        "description": "Radial component of the magnetic field.",
+        "documentation": _DOC,
+        "unit": "T",
+        "physics_domain": "equilibrium",
+        "arguments": [
+            {"name": "magnetic_field", "operator_kind": "projection", "axis": "radial"}
+        ],
+    },
+    {
+        "name": "poloidal_magnetic_field",
+        "kind": "scalar",
+        "status": "active",
+        "description": "Poloidal component of the magnetic field.",
+        "documentation": _DOC,
+        "unit": "T",
+        "physics_domain": "equilibrium",
+        "arguments": [
+            {
+                "name": "magnetic_field",
+                "operator_kind": "projection",
+                "axis": "poloidal",
+            }
+        ],
+    },
+    {
+        "name": "magnetic_field_magnitude",
+        "kind": "scalar",
+        "status": "active",
+        "description": "Magnitude of the magnetic field.",
+        "documentation": _DOC,
+        "unit": "T",
+        "physics_domain": "equilibrium",
+        "arguments": [{"name": "magnetic_field", "operator_kind": "magnitude"}],
+    },
+    {
+        "name": "safety_factor",
+        "kind": "scalar",
+        "status": "active",
+        "description": "Safety factor q.",
+        "documentation": _DOC,
+        "unit": "1",
+        "physics_domain": "equilibrium",
+    },
+    {
+        "name": "safety_factor_at_magnetic_axis",
+        "kind": "scalar",
+        "status": "active",
+        "description": "Safety factor at the magnetic axis.",
+        "documentation": _DOC,
+        "unit": "1",
+        "physics_domain": "equilibrium",
+        "arguments": [{"name": "safety_factor", "operator_kind": "locus"}],
+    },
+    {
+        "name": "plasma_inductance",
+        "kind": "scalar",
+        "status": "active",
+        "description": "Plasma self-inductance.",
+        "documentation": (
+            "Self-inductance of the plasma current.\n\n"
+            "Sign convention: Positive for a current in the +phi direction."
+        ),
+        "unit": "H",
+        "physics_domain": "equilibrium",
+    },
+]
+
+SYNTHETIC_CORE: list[dict] = [
+    {
+        "name": "electron_temperature",
+        "kind": "scalar",
+        "status": "active",
+        "description": "Electron temperature.",
+        "documentation": _DOC,
+        "unit": "eV",
+        "physics_domain": "core_plasma_physics",
+        "links": ["name:ion_temperature"],
+        "sources": [
+            {
+                "id": "dd:core_profiles/profiles_1d/electrons/temperature",
+                "dd_path": "core_profiles/profiles_1d/electrons/temperature",
+                "status": "composed",
+            }
+        ],
+    },
+    {
+        "name": "ion_temperature",
+        "kind": "scalar",
+        "status": "active",
+        "description": "Ion temperature.",
+        "documentation": _DOC,
+        "unit": "eV",
+        "physics_domain": "core_plasma_physics",
+    },
+]
+
+SYNTHETIC_MANIFEST: dict = {
+    "catalog_name": "synthetic-test-catalog",
+    "cocos_convention": 11,
+    "grammar_version": "test-grammar-1.0",
+    "isn_model_version": "test-model-1.0",
+    "dd_version_lineage": ["4.0.0"],
+    "generated_by": "test",
+    "generated_at": "2026-01-01T00:00:00Z",
+    "candidate_count": 9,
+    "published_count": 9,
+    "domains_included": ["equilibrium", "core_plasma_physics"],
+}
 
 
 @pytest.fixture
-def isnc_catalog_dir() -> Path:
-    """Path to the real ISNC catalog. Skips when the checkout is missing."""
-    if not ISNC_CATALOG_DIR.exists():
-        pytest.skip(f"ISNC catalog checkout not found at {ISNC_CATALOG_DIR}")
-    return ISNC_CATALOG_DIR
+def catalog_dir(tmp_path: Path) -> Path:
+    """Write the synthetic catalog (entries + manifest) to a tmp dir and
+    return its ``standard_names`` directory. Deterministic — no live
+    checkout, so the dataset tests never depend on drifting catalog data."""
+    names_dir = tmp_path / "standard_names"
+    names_dir.mkdir()
+    (names_dir / "equilibrium.yml").write_text(
+        yaml.safe_dump(SYNTHETIC_EQUILIBRIUM), encoding="utf-8"
+    )
+    (names_dir / "core_plasma_physics.yml").write_text(
+        yaml.safe_dump(SYNTHETIC_CORE), encoding="utf-8"
+    )
+    (tmp_path / "catalog.yml").write_text(
+        yaml.safe_dump(SYNTHETIC_MANIFEST), encoding="utf-8"
+    )
+    return names_dir
 
 
 @pytest.fixture
-def isnc_dataset(isnc_catalog_dir: Path) -> dict:
-    """Built dataset from the real ISNC catalog (one parse pass for all tests).
-
-    All statuses are now emitted unconditionally, so this fixture no
-    longer needs a flag — it uses the plain default.
-    """
-    return build_site_dataset(isnc_catalog_dir)
+def site_dataset(catalog_dir: Path) -> dict:
+    """Built dataset from the synthetic catalog (one parse pass per test)."""
+    return build_site_dataset(catalog_dir)
 
 
 @pytest.fixture
-def isnc_manifest(isnc_catalog_dir: Path) -> dict:
-    """Parsed ``catalog.yml`` manifest from the real ISNC checkout."""
-    manifest_path = isnc_catalog_dir.parent / "catalog.yml"
-    if not manifest_path.exists():
-        pytest.skip("catalog.yml missing alongside catalog directory")
-    return yaml.safe_load(manifest_path.read_text(encoding="utf-8"))
+def manifest() -> dict:
+    """The synthetic manifest dict (mirrors the on-disk ``catalog.yml``)."""
+    return dict(SYNTHETIC_MANIFEST)
 
 
 # ---------------------------------------------------------------------------
@@ -192,36 +329,36 @@ class TestDatasetShape:
     want the SPA to show the truth.)
     """
 
-    def test_loads_isnc_catalog(self, isnc_dataset: dict) -> None:
-        assert "NAMES" in isnc_dataset
-        assert "CATEGORIES" in isnc_dataset
-        assert "GRAMMAR_VOCAB" in isnc_dataset
-        assert "CATALOG_VERSION" in isnc_dataset
+    def test_loads_catalog(self, site_dataset: dict) -> None:
+        assert "NAMES" in site_dataset
+        assert "CATEGORIES" in site_dataset
+        assert "GRAMMAR_VOCAB" in site_dataset
+        assert "CATALOG_VERSION" in site_dataset
 
-        names = isnc_dataset["NAMES"]
+        names = site_dataset["NAMES"]
         assert len(names) > 0, "real ISNC catalog must yield at least one record"
 
     def test_catalog_version_includes_grammar_and_count(
-        self, isnc_dataset: dict, isnc_manifest: dict
+        self, site_dataset: dict, manifest: dict
     ) -> None:
-        version = isnc_dataset["CATALOG_VERSION"]
-        names = isnc_dataset["NAMES"]
+        version = site_dataset["CATALOG_VERSION"]
+        names = site_dataset["NAMES"]
         # Manifest's grammar_version always appears verbatim.
-        assert isnc_manifest["grammar_version"] in version
+        assert manifest["grammar_version"] in version
         # The displayed count is the actual emitted count, not the
         # manifest's possibly-stale ``published_count`` claim.
         assert str(len(names)) in version
 
-    def test_categories_derived(self, isnc_dataset: dict, isnc_manifest: dict) -> None:
-        cats = isnc_dataset["CATEGORIES"]
+    def test_categories_derived(self, site_dataset: dict, manifest: dict) -> None:
+        cats = site_dataset["CATEGORIES"]
         # Every domain in the manifest should appear in CATEGORIES.
         category_ids = {c["id"] for c in cats}
-        for domain in isnc_manifest["domains_included"]:
+        for domain in manifest["domains_included"]:
             assert domain in category_ids, f"domain {domain} missing from CATEGORIES"
 
         # Counts sum to total NAMES length.
         total = sum(c["count"] for c in cats)
-        assert total == len(isnc_dataset["NAMES"])
+        assert total == len(site_dataset["NAMES"])
 
         # Counts decrease (descending).
         counts = [c["count"] for c in cats]
@@ -239,8 +376,8 @@ def _find_record(dataset: dict, name: str) -> dict:
 class TestRecordShape:
     """A representative NAMES record carries all SPA-expected fields."""
 
-    def test_plasma_inductance_full_shape(self, isnc_dataset: dict) -> None:
-        record = _find_record(isnc_dataset, "plasma_inductance")
+    def test_plasma_inductance_full_shape(self, site_dataset: dict) -> None:
+        record = _find_record(site_dataset, "plasma_inductance")
 
         # Identity
         assert record["name"] == "plasma_inductance"
@@ -289,8 +426,8 @@ class TestRecordShape:
             for seg in record["parse"]
         )
 
-    def test_unit_present_for_physical_quantity(self, isnc_dataset: dict) -> None:
-        record = _find_record(isnc_dataset, "plasma_inductance")
+    def test_unit_present_for_physical_quantity(self, site_dataset: dict) -> None:
+        record = _find_record(site_dataset, "plasma_inductance")
         assert record["unit"] == "H"
 
 
@@ -298,16 +435,16 @@ class TestGrammarMetadata:
     """Structural cues (axis, locus) still surface on the record even
     though ``display_kind`` no longer does."""
 
-    def test_poloidal_magnetic_field_keeps_axis(self, isnc_dataset: dict) -> None:
-        record = _find_record(isnc_dataset, "poloidal_magnetic_field")
+    def test_poloidal_magnetic_field_keeps_axis(self, site_dataset: dict) -> None:
+        record = _find_record(site_dataset, "poloidal_magnetic_field")
         assert record["axis"] == "poloidal"
         # Vector components inherit vector algebra from their projection.
         assert record["algebra"] == "vector"
 
     def test_safety_factor_at_magnetic_axis_keeps_locus(
-        self, isnc_dataset: dict
+        self, site_dataset: dict
     ) -> None:
-        record = _find_record(isnc_dataset, "safety_factor_at_magnetic_axis")
+        record = _find_record(site_dataset, "safety_factor_at_magnetic_axis")
         assert record["locus"] == "magnetic_axis"
 
 
@@ -316,29 +453,29 @@ class TestAlgebraAxis:
     kind axis on each record. The retired synthetic ``display_kind`` is
     gone from the JSON output."""
 
-    def test_magnetic_field_is_vector(self, isnc_dataset: dict) -> None:
-        record = _find_record(isnc_dataset, "magnetic_field")
+    def test_magnetic_field_is_vector(self, site_dataset: dict) -> None:
+        record = _find_record(site_dataset, "magnetic_field")
         assert record["algebra"] == "vector"
 
-    def test_scalar_default(self, isnc_dataset: dict) -> None:
-        record = _find_record(isnc_dataset, "electron_temperature")
+    def test_scalar_default(self, site_dataset: dict) -> None:
+        record = _find_record(site_dataset, "electron_temperature")
         assert record["algebra"] == "scalar"
 
-    def test_every_record_has_algebra(self, isnc_dataset: dict) -> None:
+    def test_every_record_has_algebra(self, site_dataset: dict) -> None:
         valid = {"scalar", "vector", "tensor", "complex", "metadata"}
-        for record in isnc_dataset["NAMES"]:
+        for record in site_dataset["NAMES"]:
             assert record["algebra"] in valid, (
                 f"{record['name']}: bad algebra {record['algebra']!r}"
             )
 
-    def test_magnitude_is_scalar(self, isnc_dataset: dict) -> None:
+    def test_magnitude_is_scalar(self, site_dataset: dict) -> None:
         # magnitude_of_<vector> is a true scalar (rotation-invariant norm).
         import pytest
 
         rec = next(
             (
                 r
-                for r in isnc_dataset["NAMES"]
+                for r in site_dataset["NAMES"]
                 if r["name"] == "magnetic_field_magnitude"
             ),
             None,
@@ -351,8 +488,8 @@ class TestAlgebraAxis:
 class TestVectorReverseLinks:
     """Vectors carry ``components`` and (when present) ``magnitude``."""
 
-    def test_magnetic_field_components(self, isnc_dataset: dict) -> None:
-        record = _find_record(isnc_dataset, "magnetic_field")
+    def test_magnetic_field_components(self, site_dataset: dict) -> None:
+        record = _find_record(site_dataset, "magnetic_field")
         components = record["components"]
         assert len(components) >= 2, (
             f"magnetic_field should have ≥2 components, got {components}"
@@ -364,28 +501,28 @@ class TestVectorReverseLinks:
             assert isinstance(c["name"], str) and c["name"]
             assert isinstance(c["axis"], str) and c["axis"]
 
-    def test_scalar_has_empty_components(self, isnc_dataset: dict) -> None:
-        record = _find_record(isnc_dataset, "electron_temperature")
+    def test_scalar_has_empty_components(self, site_dataset: dict) -> None:
+        record = _find_record(site_dataset, "electron_temperature")
         assert record["components"] == []
         assert record["magnitude"] is None
 
-    def test_magnitude_only_when_catalog_has_it(self, isnc_dataset: dict) -> None:
+    def test_magnitude_only_when_catalog_has_it(self, site_dataset: dict) -> None:
         """``magnitude`` is set only when ``magnitude_of_<name>`` exists.
 
         Source-driven invariant: no speculative magnitude creation.
         Current catalog has no magnitudes of vectors, so all vectors'
         ``magnitude`` should be None.
         """
-        record = _find_record(isnc_dataset, "magnetic_field")
+        record = _find_record(site_dataset, "magnetic_field")
         # Either it exists in the catalog (string), or None — never auto-faked.
         magnitude = record["magnitude"]
         assert magnitude is None or isinstance(magnitude, str)
         if isinstance(magnitude, str):
             # If set, the referenced name must exist in the dataset.
-            assert any(n["name"] == magnitude for n in isnc_dataset["NAMES"])
+            assert any(n["name"] == magnitude for n in site_dataset["NAMES"])
 
-    def test_children_index(self, isnc_dataset: dict) -> None:
-        record = _find_record(isnc_dataset, "magnetic_field")
+    def test_children_index(self, site_dataset: dict) -> None:
+        record = _find_record(site_dataset, "magnetic_field")
         children = record["children"]
         # magnetic_field has projection + qualifier children.
         assert any(c["operator_kind"] == "projection" for c in children), (
@@ -396,17 +533,17 @@ class TestVectorReverseLinks:
 class TestSubject:
     """``subject`` is the first qualifier matching the closed Subject enum."""
 
-    def test_electron_subject(self, isnc_dataset: dict) -> None:
+    def test_electron_subject(self, site_dataset: dict) -> None:
         assert (
-            _find_record(isnc_dataset, "electron_temperature")["subject"] == "electron"
+            _find_record(site_dataset, "electron_temperature")["subject"] == "electron"
         )
 
-    def test_ion_subject(self, isnc_dataset: dict) -> None:
-        assert _find_record(isnc_dataset, "ion_temperature")["subject"] == "ion"
+    def test_ion_subject(self, site_dataset: dict) -> None:
+        assert _find_record(site_dataset, "ion_temperature")["subject"] == "ion"
 
-    def test_unqualified_has_no_subject(self, isnc_dataset: dict) -> None:
+    def test_unqualified_has_no_subject(self, site_dataset: dict) -> None:
         # ``magnetic_field`` is a bare base — no subject qualifier.
-        assert _find_record(isnc_dataset, "magnetic_field")["subject"] is None
+        assert _find_record(site_dataset, "magnetic_field")["subject"] is None
 
 
 class TestParseSegments:
@@ -423,13 +560,10 @@ class TestParseSegments:
             "minimum_safety_factor",
         ],
     )
-    def test_parse_segments_cover_name_tokens(
-        self, isnc_dataset: dict, name: str
-    ) -> None:
-        records = [r for r in isnc_dataset["NAMES"] if r["name"] == name]
-        if not records:
-            pytest.skip(f"{name} not present in current catalog")
-        segments = records[0]["parse"]
+    def test_parse_segments_cover_name_tokens(self, name: str) -> None:
+        # Parser-only: derive segments directly from the name (no dataset /
+        # catalog dependency) so every parametrised name is always exercised.
+        segments = _derive_grammar_facets(name).parse_segments
         # Every token segment carries a non-empty text. Joining with
         # underscores (after stripping any leading `_` artefacts) should
         # cover all underscore-separated tokens in the original name.
@@ -456,9 +590,7 @@ class TestParseSegments:
         assert len(facets.parse_segments) == 1
         assert facets.parse_segments[0]["role"] == "unparseable"
 
-    def test_unparseable_does_not_crash_dataset(
-        self, tmp_path: Path, isnc_dataset: dict
-    ) -> None:
+    def test_unparseable_does_not_crash_dataset(self, tmp_path: Path) -> None:
         # Construct a tiny standalone YAML with an unparseable name and
         # run the builder on it — the result should still produce a
         # record with an ``unparseable`` parse segment.
@@ -489,9 +621,9 @@ class TestParseSegments:
 class TestSeeAlsoNormalisation:
     """``links: [name:foo]`` flattens to ``seeAlso: ['foo']``."""
 
-    def test_name_prefix_stripped(self, isnc_dataset: dict) -> None:
+    def test_name_prefix_stripped(self, site_dataset: dict) -> None:
         # Find a record with at least one internal link.
-        for record in isnc_dataset["NAMES"]:
+        for record in site_dataset["NAMES"]:
             if record["seeAlso"]:
                 for ref in record["seeAlso"]:
                     assert not ref.startswith("name:"), (
@@ -504,8 +636,8 @@ class TestSeeAlsoNormalisation:
 class TestSourcesNormalisation:
     """Sources become ``[{path, status}]`` records."""
 
-    def test_sources_have_path_and_status(self, isnc_dataset: dict) -> None:
-        for record in isnc_dataset["NAMES"]:
+    def test_sources_have_path_and_status(self, site_dataset: dict) -> None:
+        for record in site_dataset["NAMES"]:
             if record["sources"]:
                 for src in record["sources"]:
                     assert "path" in src
@@ -523,9 +655,9 @@ class TestSourcesNormalisation:
 class TestWriteSiteDataset:
     """``write_site_dataset`` produces valid JSON on disk."""
 
-    def test_writes_to_disk(self, isnc_catalog_dir: Path, tmp_path: Path) -> None:
+    def test_writes_to_disk(self, catalog_dir: Path, tmp_path: Path) -> None:
         out = tmp_path / "dataset.json"
-        count = write_site_dataset(isnc_catalog_dir, out)
+        count = write_site_dataset(catalog_dir, out)
 
         assert out.exists()
         assert count > 0
@@ -682,14 +814,14 @@ class TestNormaliseStatus:
 class TestCanonicalKinds:
     """Output JSON exposes only the five schema kinds — no display_kind."""
 
-    def test_no_display_kind_in_records(self, isnc_dataset: dict) -> None:
-        for record in isnc_dataset["NAMES"]:
+    def test_no_display_kind_in_records(self, site_dataset: dict) -> None:
+        for record in site_dataset["NAMES"]:
             assert "display_kind" not in record
             assert "kind" not in record  # alias also dropped
 
-    def test_algebra_is_one_of_five_canonical(self, isnc_dataset: dict) -> None:
+    def test_algebra_is_one_of_five_canonical(self, site_dataset: dict) -> None:
         valid = {"scalar", "vector", "tensor", "complex", "metadata"}
-        for record in isnc_dataset["NAMES"]:
+        for record in site_dataset["NAMES"]:
             assert record["algebra"] in valid
 
 
@@ -860,8 +992,8 @@ class TestStatusFiltering:
 class TestSortKeys:
     """``sort_tier`` and ``sort_axis_index`` drive canonical grouping order."""
 
-    def test_every_record_has_sort_keys(self, isnc_dataset: dict) -> None:
-        for record in isnc_dataset["NAMES"]:
+    def test_every_record_has_sort_keys(self, site_dataset: dict) -> None:
+        for record in site_dataset["NAMES"]:
             assert isinstance(record.get("sort_tier"), int)
             assert isinstance(record.get("sort_axis_index"), int)
             assert 0 <= record["sort_tier"] <= 7
@@ -869,7 +1001,7 @@ class TestSortKeys:
                 0 <= record["sort_axis_index"] <= 5 or record["sort_axis_index"] == 99
             )
 
-    def test_magnetic_field_family_order(self, isnc_dataset: dict) -> None:
+    def test_magnetic_field_family_order(self, site_dataset: dict) -> None:
         """Snapshot the magnetic_field family ordering.
 
         Expected order per Design Review §8:
@@ -894,7 +1026,7 @@ class TestSortKeys:
             "flux_surface_averaged_magnetic_field",
         ]
         # Build a map name -> (tier, axis_idx) for fast assertion.
-        records = {r["name"]: r for r in isnc_dataset["NAMES"] if r["name"] in expected}
+        records = {r["name"]: r for r in site_dataset["NAMES"] if r["name"] in expected}
         if len(records) < 2:
             pytest.skip(
                 f"need at least 2 magnetic_field family entries in catalog, "
@@ -917,19 +1049,19 @@ class TestSortKeys:
             f"  got after sort:            {sorted_present}"
         )
 
-    def test_vector_base_is_tier_zero(self, isnc_dataset: dict) -> None:
-        record = _find_record(isnc_dataset, "magnetic_field")
+    def test_vector_base_is_tier_zero(self, site_dataset: dict) -> None:
+        record = _find_record(site_dataset, "magnetic_field")
         assert record["sort_tier"] == 0
         assert record["sort_axis_index"] == 99  # no axis projection
 
-    def test_component_carries_axis_index(self, isnc_dataset: dict) -> None:
-        record = _find_record(isnc_dataset, "poloidal_magnetic_field")
+    def test_component_carries_axis_index(self, site_dataset: dict) -> None:
+        record = _find_record(site_dataset, "poloidal_magnetic_field")
         assert record["sort_tier"] == 1
         assert record["sort_axis_index"] == 3  # poloidal
 
-    def test_magnitude_is_tier_two(self, isnc_dataset: dict) -> None:
+    def test_magnitude_is_tier_two(self, site_dataset: dict) -> None:
         records = [
-            r for r in isnc_dataset["NAMES"] if r["name"] == "magnetic_field_magnitude"
+            r for r in site_dataset["NAMES"] if r["name"] == "magnetic_field_magnitude"
         ]
         if not records:
             pytest.skip("magnetic_field_magnitude not present in current catalog")
