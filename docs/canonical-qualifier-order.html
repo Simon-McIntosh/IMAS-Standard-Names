@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"   content="imas-standard-names">
+  <meta name="reckon-type"    content="plan">
+  <meta name="plan-slug"      content="canonical-qualifier-order">
+  <meta name="plan-title"     content="Canonical Qualifier Order">
+  <meta name="plan-summary"   content="Define and enforce a single canonical order for qualifiers (including generics) at generate time, template it into the LLM name-generation prompts, and migrate the ~104 non-canonical catalogue names.">
+  <meta name="plan-status"    content="draft">
+  <meta name="plan-roi"       content="high">
+  <meta name="plan-effort"    content="L">
+  <meta name="plan-tier"      content="opus">
+  <meta name="plan-owner"     content="Simon McIntosh">
+  <meta name="plan-depends-on" content="qualifier-vocabulary-categorization">
+  <title>Canonical Qualifier Order | imas-standard-names</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h2 id="s1">§1 — The problem: qualifier order is not canonical</h2>
+    <p>
+      The ISN grammar specification (<code>imas_standard_names/grammar/specification.yml</code>,
+      <code>canonical_pattern</code>) fixes the order of the <em>named</em> qualifier sub-kinds:
+      <code>aggregation → orbit → population → subject</code>. It does <strong>not</strong> assign the
+      open <strong>generic</strong> qualifier class (the 161 tokens in <code>qualifiers.yml</code>:
+      <code>major</code>, <code>external</code>, <code>absorbed</code>, …) a position relative to the
+      named sub-kinds or to each other. The parser preserves whatever order a name was written in
+      (<code>render_qualifiers</code> emits qualifiers in parse order), so the catalogue has drifted into
+      <strong>inconsistent ordering</strong>.
+    </p>
+    <p>
+      Measured across the live catalogue (1364 names): <strong>1043</strong> carry ≥1 qualifier,
+      <strong>477</strong> carry ≥2. Under the natural rule "named sub-kinds in spec order, then
+      generics", <strong>104 names (7.6% of the catalogue) violate it</strong> — a generic qualifier
+      sits before a named sub-kind. The headline evidence: <code>subject → generic</code> occurs in 79
+      names, but <code>generic → subject</code> occurs in 70 — the same two roles in the opposite order,
+      so the ordering is genuinely not being maintained.
+    </p>
+
+    <figure>
+      <svg viewBox="0 0 720 132" width="100%" style="max-width:720px;font-family:system-ui,sans-serif" role="img"
+           aria-label="Canonical-order status across 1364 catalogue names">
+        <text x="20" y="20" font-size="13" font-weight="600" fill="#1c2030">1364 catalogue names · qualifier-order status</text>
+        <rect x="20"  y="34" width="160" height="34" fill="#f4f5f7" stroke="#9aa0ad" stroke-width="1"/>
+        <rect x="180" y="34" width="468" height="34" fill="#eafbf0" stroke="#1a9c52" stroke-width="1"/>
+        <rect x="648" y="34" width="52"  height="34" fill="#fdeeee" stroke="#c0392b" stroke-width="1"/>
+        <text x="100" y="56" text-anchor="middle" font-size="13" font-weight="600" fill="#1c2030">321</text>
+        <text x="414" y="56" text-anchor="middle" font-size="13" font-weight="600" fill="#13351f">939</text>
+        <text x="674" y="56" text-anchor="middle" font-size="13" font-weight="600" fill="#3d1714">104</text>
+        <text x="100" y="86" text-anchor="middle" font-size="12.5" fill="#1c2030">no qualifier</text>
+        <text x="414" y="86" text-anchor="middle" font-size="12.5" fill="#13351f">qualifier order canonical</text>
+        <text x="674" y="86" text-anchor="middle" font-size="12.5" fill="#3d1714">violates</text>
+        <text x="20" y="118" font-size="11.5" fill="#5b6072">Under "named sub-kinds (aggregation→orbit→population→subject) first, then generics"; 104 names place a generic before a named sub-kind.</text>
+      </svg>
+      <figcaption style="font-size:12.5px;color:#5b6072;margin-top:4px">
+        The 104 red names need renaming once a canonical order is locked. The 939 green already comply
+        with the named-then-generic rule (modulo generic-vs-generic order, which is currently undefined).
+      </figcaption>
+    </figure>
+
+    <p>
+      This surfaced in the catalog SPA's Grammar composer: when a user multi-selects qualifiers there is
+      no canonical order to render them in, and seeded names can only be shown in their (possibly
+      non-canonical) parsed order. The fix is upstream — a canonical order defined and <em>enforced at
+      generation time</em>, with the catalogue migrated to it.
+    </p>
+
+    <h2 id="s2">§2 — Define the canonical order</h2>
+    <p>
+      Extend the canonical pattern to give the generic qualifier class a defined position. The named
+      sub-kinds keep their order; the open question (see Decisions) is where generics sit relative to the
+      named sub-kinds and whether generics have an inter-order (e.g. by the 12 normalized categories from
+      <a href="qualifier-vocabulary-categorization.html">qualifier-vocabulary-categorization</a>:
+      transport → source → geometry → … ). The output of this section is a single, total order over every
+      qualifier token, written into <code>specification.yml</code>.
+    </p>
+
+    <h2 id="s3">§3 — Enforce at generate time</h2>
+    <p>
+      Make the renderer canonical: <code>compose</code>/<code>render_qualifiers</code>
+      (<code>imas_standard_names/grammar/render.py</code>) must emit qualifiers in the locked order
+      regardless of input order, and the validator must <strong>reject</strong> a name whose qualifiers
+      are out of canonical order (so a non-canonical name can never be (re)introduced). Round-trip then
+      means parse→canonical-compose, and any name that changes is a §5 migration target.
+    </p>
+
+    <h2 id="s4">§4 — Template the order into the LLM name-generation prompts</h2>
+    <p>
+      The name-generation prompts (imas-codex <code>sn</code> generation; ISN
+      <code>get_grammar_context</code> surfaces the canonical pattern + segment-order constraint to LLM
+      consumers) must template the qualifier order explicitly so generating agents emit canonical names
+      first time. Update <code>_build_canonical_pattern</code> / <code>_build_segment_order_constraint</code>
+      to include the generic-qualifier ordering, and verify the codex generation prompt renders it.
+    </p>
+
+    <h2 id="s5">§5 — Migrate the non-canonical catalogue names</h2>
+    <p>
+      Rename the ~104 violating names to canonical order. We are in the RC phase, so renames are
+      acceptable. The migration runs through imas-codex (<code>sn export</code>/<code>sn import</code> —
+      the catalogue YAML is generated, not hand-edited) with a deprecation/alias trail where consumers
+      may reference old names. Verify the whole catalogue round-trips canonically afterward
+      (<code>build_site_dataset</code>, full parse→canonical-compose).
+    </p>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+      <h2><span class="sec">§</span> Decisions</h2>
+
+      <div class="r-dec" data-key="generic-position" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">Where do generic qualifiers sit relative to the named sub-kinds?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="generics-after-named">After the named sub-kinds (aggregation→orbit→population→subject→generics→base) — fewest renames; matches the 79 subject→generic majority</button>
+          <button class="r-opt" data-value="generics-before-base-by-category">Generics ordered among themselves by category, placed immediately before base; named sub-kinds outermost</button>
+          <button class="r-opt" data-value="semantic-binding">Order by semantic binding (innermost modifier closest to base) — most faithful but needs per-token binding metadata</button>
+        </p>
+        <p class="r-dec-rat"></p>
+      </div>
+
+      <div class="r-dec" data-key="generic-inter-order" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">Do generic qualifiers need a defined order amongst themselves?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="by-category-rank">Yes — order by the 12 normalized categories (transport→source→geometry→…)</button>
+          <button class="r-opt" data-value="alphabetical">Yes — alphabetical within the generic block (simple, total, deterministic)</button>
+          <button class="r-opt" data-value="free">No — generics keep author/source order; only the named-vs-generic boundary is fixed</button>
+        </p>
+        <p class="r-dec-rat"></p>
+      </div>
+
+      <div class="r-dec" data-key="enforcement" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">How strictly is canonical order enforced?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="compose-canonicalizes-validator-rejects">compose() canonicalizes AND the validator rejects non-canonical input names</button>
+          <button class="r-opt" data-value="compose-only">compose() canonicalizes; validator only warns (softer migration)</button>
+        </p>
+        <p class="r-dec-rat"></p>
+      </div>
+
+      <div class="r-dec" data-key="migration-aliases" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">Do renamed names keep a deprecation alias?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="alias">Yes — old name → superseded_by/alias trail (safer for any external consumers)</button>
+          <button class="r-opt" data-value="hard-rename">No — hard rename; RC phase, no external consumers to protect</button>
+        </p>
+        <p class="r-dec-rat"></p>
+      </div>
+    </section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+      <h2><span class="sec">§</span> Followups</h2>
+      <article class="r-fu" data-id="f-cqo-001" data-status="open" data-tier="opus"
+               data-written-by="reckon-create" data-written-at="2026-06-25">
+        <h4 class="r-fu-title">§1–§2 — Full order audit + lock the canonical order</h4>
+        <div class="r-fu-body">
+          First shippable step: produce the complete per-name audit of qualifier-order violations
+          (beyond the 104 named-vs-generic cases, include generic-vs-generic order once a rule is chosen)
+          and lock the canonical-order decisions, writing the total order into specification.yml. This
+          gates the renderer/validator enforcement (§3) and the migration (§5).
+        </div>
+        <pre class="r-fu-prompt">Project: imas-standard-names
+Plan:    canonical-qualifier-order (http://localhost:8765/imas-standard-names/canonical-qualifier-order.html)
+Section: §1–§2
+Tier:    opus
+
+Context
+  Qualifier order is not canonical: 104/1364 names place a generic qualifier
+  before a named sub-kind, and generic-vs-generic order is undefined. Resolve
+  the Open decisions above (generic position, inter-order, enforcement,
+  aliases) before writing the order.
+
+State to read  (code/files, not the plan)
+  imas_standard_names/grammar/specification.yml  (canonical_pattern, segments)
+  imas_standard_names/grammar/context.py  (_build_canonical_pattern,
+    _build_segment_order_constraint, get_grammar_context)
+  imas_standard_names/grammar/render.py  (render_qualifiers, compose)
+  imas_standard_names/grammar/vocabularies/qualifier_categories.yml
+  build_site_dataset corpus for the per-name audit
+
+Scope locks / constraints  (non-decision)
+  - Named sub-kind order is fixed by spec: aggregation→orbit→population→subject.
+  - Do not regress non-qualifier parsing/round-trip while auditing.
+  - The catalogue YAML is generated via imas-codex sn export — migration (§5)
+    runs there, not by hand-editing standard_names/.
+
+Done-when
+  1. Per-name violation audit committed (full list, not just the 104 headline).
+  2. Canonical total order over qualifiers locked in the plan + written into
+     specification.yml (+ context.py pattern builders).
+  3. Followup written for §3 (renderer/validator enforcement) + this resolved.</pre>
+      </article>
+    </section>
+
+  </main>
+</body>
+</html>
