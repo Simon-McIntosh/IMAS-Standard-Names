@@ -117,68 +117,67 @@ describe('Grammar composer', () => {
     expect(container.querySelector('.gx-name.is-hit')?.textContent).toBe('major_radius_of_flux_loop');
   });
 
-  it('rail is select/deselect only — toggling a node adds an empty chip without opening a dropdown; the chip opens it', async () => {
+  const railLabels = (c) => [...c.querySelectorAll('.gx-chain .gx-node-label')].map((n) => n.textContent);
+  const pickInDropdown = (c, tok) => {
+    const row = [...c.querySelectorAll('.gx-dd .gx-dd-row')].find(
+      (r) => r.querySelector('.gx-dd-tok')?.textContent === tok,
+    );
+    return act(async () => { fireEvent.click(row); });
+  };
+
+  it('clicking a top-row segment button adds it and opens the picker below the STANDARD NAME row', async () => {
     const { container } = await renderGrammar();
     const processNode = [...container.querySelectorAll('.gx-chain .gx-node')].find(
       (n) => n.querySelector('.gx-node-label').textContent === 'process',
     );
     await act(async () => { fireEvent.click(processNode); });
-    // An empty process chip is now in the composed name; no dropdown opened.
-    const emptyChips = [...container.querySelectorAll('.gx-namebar .gx-tok.is-empty .gx-tok-ph')].map((e) => e.textContent);
-    expect(emptyChips).toContain('process');
-    expect(container.querySelector('.gx-dd')).toBeNull();
-    // Clicking the composed-name chip DOES open the dropdown.
-    const processChip = [...container.querySelectorAll('.gx-namebar .gx-tok')].find(
-      (c) => c.querySelector('.gx-tok-ph')?.textContent === 'process',
-    );
-    await act(async () => { fireEvent.click(processChip); });
+    // The segment chip is added in the STANDARD NAME row AND its picker opens.
+    expect([...container.querySelectorAll('.gx-namebar .gx-tok-ph')].map((e) => e.textContent)).toContain('process');
     expect(container.querySelector('.gx-dd')).not.toBeNull();
   });
 
-  it('opens ONE multi-select qualifier picker: named sub-kinds + generic categories', async () => {
+  it('qualifier + adds a placeholder instance and opens a grouped (single-select) picker', async () => {
     const { container } = await renderGrammar();
-    const qNode = [...container.querySelectorAll('.gx-chain .gx-node')].find(
+    const qAdd = [...container.querySelectorAll('.gx-chain .gx-node')].find(
       (n) => n.querySelector('.gx-node-label').textContent === 'qualifier',
     );
-    // The rail node opens the picker directly (no empty chip, no '+').
-    await act(async () => { fireEvent.click(qNode); });
+    await act(async () => { fireEvent.click(qAdd); });
+    // Placeholder qualifier chip appears in the lower row; grouped picker opens.
+    expect([...container.querySelectorAll('.gx-namebar .gx-tok-ph')].map((e) => e.textContent)).toContain('qualifier');
     const dd = container.querySelector('.gx-dd');
     expect(dd).not.toBeNull();
     const groupHeaders = [...dd.querySelectorAll('.gx-dd-grouph')].map((g) => g.firstChild.textContent.trim());
-    // Named sub-kinds AND generic categories are all groups in the one picker.
     expect(groupHeaders).toEqual(expect.arrayContaining(['aggregation', 'subject', 'geometry', 'state']));
-    // It is multi-select (rows carry the tick column).
-    expect(dd.querySelector('.gx-dd-check')).not.toBeNull();
+    // Single-select now (one instance per pick) — no multi tick column.
+    expect(dd.querySelector('.gx-dd-check')).toBeNull();
   });
 
-  it('multi-selects qualifiers into removable chips (no inline +)', async () => {
+  it('picking a qualifier relabels its top button to the group; clicking the top button removes it', async () => {
     const { container } = await renderGrammar();
-    const qNode = [...container.querySelectorAll('.gx-chain .gx-node')].find(
-      (n) => n.querySelector('.gx-node-label').textContent === 'qualifier',
-    );
-    await act(async () => { fireEvent.click(qNode); });
-    const pick = (tok) => {
-      const row = [...container.querySelectorAll('.gx-dd .gx-dd-row')].find(
-        (r) => r.querySelector('.gx-dd-tok')?.textContent === tok,
+    const addQual = async () => {
+      const qAdd = [...container.querySelectorAll('.gx-chain .gx-node')].find(
+        (n) => n.querySelector('.gx-node-label').textContent === 'qualifier',
       );
-      return act(async () => { fireEvent.click(row); });
+      await act(async () => { fireEvent.click(qAdd); });
     };
-    await pick('external');
-    await pick('major');
-    // Both selected, in selection order; the picker stays open (multi-select).
+    await addQual();
+    await pickInDropdown(container, 'external'); // category: state
+    await addQual();
+    await pickInDropdown(container, 'major'); // category: geometry
+
+    // Tokens land in the STANDARD NAME row in selection order…
     expect(filledTokens(container)).toEqual(['external', 'major']);
-    expect(container.querySelector('.gx-dd')).not.toBeNull();
+    // …and each qualifier's top-row button is labelled by its GROUP, not "qualifier".
+    expect(railLabels(container)).toEqual(expect.arrayContaining(['state', 'geometry']));
     expect(container.querySelector('.gx-add-q')).toBeNull(); // no inline '+'
-    // Each selected qualifier shows as a deselectable tab in the GRAMMAR rail.
-    const railTabs = [...container.querySelectorAll('.gx-rail .gx-qtab .gx-qtab-tok')].map((e) => e.textContent);
-    expect(railTabs).toEqual(['external', 'major']);
-    // Clicking a rail tab deselects that qualifier.
-    const extTab = [...container.querySelectorAll('.gx-rail .gx-qtab')].find(
-      (c) => c.querySelector('.gx-qtab-tok')?.textContent === 'external',
+
+    // Clicking the group button removes that qualifier.
+    const stateBtn = [...container.querySelectorAll('.gx-chain .gx-node')].find(
+      (n) => n.querySelector('.gx-node-label').textContent === 'state',
     );
-    await act(async () => { fireEvent.click(extTab); });
+    await act(async () => { fireEvent.click(stateBtn); });
     expect(filledTokens(container)).toEqual(['major']);
-    expect([...container.querySelectorAll('.gx-rail .gx-qtab .gx-qtab-tok')].map((e) => e.textContent)).toEqual(['major']);
+    expect(railLabels(container)).not.toContain('state');
   });
 
   it('narrows results to names matching the seeded composition', async () => {

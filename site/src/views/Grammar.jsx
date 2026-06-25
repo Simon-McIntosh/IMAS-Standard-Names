@@ -47,6 +47,18 @@ const QUAL_GROUPS = [
   { key: 'subjects', kind: 'subject', label: 'subject' },
 ];
 
+// The display GROUP for a qualifier token: a named sub-kind
+// (aggregation/orbit/population/subject) if it is one, otherwise the generic
+// qualifier's emitted category (transport/state/geometry/…). Drives the
+// top-row button label so a generic reads e.g. "state −", not "qualifier −".
+function qualifierGroup(token, vocab) {
+  if (!token) return null;
+  const k = qualifierKind(token, vocab);
+  if (k !== 'qualifier') return k;
+  const entry = (vocab.qualifiers || []).find((t) => t.token === token);
+  return entry?.category || 'qualifier';
+}
+
 function locusRelationsFor(vocab, token) {
   const reg = (vocab.locus_registry || []).find((x) => x.token === token);
   if (reg) return reg.relations?.length ? reg.relations : REL_BY_TYPE[reg.type] || ['of'];
@@ -161,7 +173,8 @@ export function Grammar({ onSelect, setView, query, seedName, seedNonce }) {
   const V = GRAMMAR_VOCAB || {};
 
   const [state, setState] = useState(emptyState);
-  const [open, setOpen] = useState(null); // { target, anchor }
+  const [open, setOpen] = useState(null); // { target }
+  const nameRef = useRef(null); // STANDARD NAME row — dropdowns anchor below it
   const update = (fn) => setState((s) => fn(structuredClone(s)));
 
   const nameStates = useMemo(() => {
@@ -213,11 +226,6 @@ export function Grammar({ onSelect, setView, query, seedName, seedNonce }) {
     ].filter((g) => g.items.length),
     [V, categoryGroups],
   );
-  const selectedQualTokens = useMemo(
-    () => new Set(state.qualifiers.map((qq) => qq.token)),
-    [state.qualifiers],
-  );
-
   const composed = composeName(state);
   const exists = composed && nameStates.has(composed);
 
@@ -236,57 +244,58 @@ export function Grammar({ onSelect, setView, query, seedName, seedNonce }) {
     !!(state.operator || state.axis || state.base || state.locus || state.mechanism) ||
     state.qualifiers.length > 0;
 
-  // ---- rail toggles (presence only) --------------------------------------
-  const toggleOperator = () => update((s) => { s.operator = s.operator ? null : { token: null, kind: null }; return s; });
-  const toggleProjection = (baseKind) =>
-    update((s) => {
-      if (s.axis) { s.axis = null; }
-      else { s.axis = { token: null }; if (s.base) s.base.kind = baseKind; }
-      return s;
-    });
-  const toggleBase = (baseKind) =>
-    update((s) => {
-      if (s.base && s.base.kind === baseKind) s.base = null;
-      else {
-        s.base = { token: s.base?.token ?? null, kind: baseKind };
-        // couple the projection: physical↔component, geometric↔coordinate
-        // (the projection token carries across; only its base-kind view flips)
-      }
-      return s;
-    });
-  const toggleLocus = () => update((s) => { s.locus = s.locus ? null : { token: null, relation: 'of' }; return s; });
-  const toggleProcess = () => update((s) => { s.mechanism = s.mechanism ? null : { token: null }; return s; });
-  // Qualifiers are added/removed through ONE multi-select picker. Toggling a
-  // token adds it (named sub-kinds — aggregation/orbit/population/subject — are
-  // single-occurrence, so a new one replaces the existing of that kind) or
-  // removes it if already present. New qualifiers append in selection order;
-  // seeded names keep their parsed order (generic qualifier order is
-  // meaning-bearing in the grammar, not a fixed rank, so we never reorder).
-  const NAMED_KINDS = new Set(['aggregation', 'orbit', 'population', 'subject']);
-  const toggleQualifierToken = (token) =>
-    update((s) => {
-      const i = s.qualifiers.findIndex((qq) => qq.token === token);
-      if (i >= 0) { s.qualifiers.splice(i, 1); return s; }
-      const kind = qualifierKind(token, V);
-      if (NAMED_KINDS.has(kind)) {
-        const j = s.qualifiers.findIndex((qq) => (qq.kind || qualifierKind(qq.token, V)) === kind);
-        if (j >= 0) s.qualifiers.splice(j, 1);
-      }
-      s.qualifiers.push({ token, kind });
-      return s;
-    });
-  const removeQualifier = (index) =>
+  // ---- rail segment buttons ----------------------------------------------
+  // Every segment is added from its top-row button and its token is picked in
+  // the dropdown that opens BELOW the STANDARD NAME row — symmetric for all
+  // segments, including the (repeatable) qualifier. A top button that is
+  // already present removes its segment; the lower-row chip re-opens the
+  // picker to change the token.
+  const openSeg = (target) => setOpen({ target });
+  const toggleOperator = () =>
+    state.operator
+      ? (update((s) => { s.operator = null; return s; }), setOpen(null))
+      : (update((s) => { s.operator = { token: null, kind: null }; return s; }), openSeg({ seg: 'operator' }));
+  const toggleProjection = (baseKind) => {
+    if (state.axis) { update((s) => { s.axis = null; return s; }); setOpen(null); }
+    else {
+      update((s) => { s.axis = { token: null }; if (s.base) s.base.kind = baseKind; return s; });
+      openSeg({ seg: 'projection' });
+    }
+  };
+  const toggleBase = (baseKind) => {
+    if (state.base && state.base.kind === baseKind) { update((s) => { s.base = null; return s; }); setOpen(null); }
+    else { update((s) => { s.base = { token: s.base?.token ?? null, kind: baseKind }; return s; }); openSeg({ seg: 'base' }); }
+  };
+  const toggleLocus = () =>
+    state.locus
+      ? (update((s) => { s.locus = null; return s; }), setOpen(null))
+      : (update((s) => { s.locus = { token: null, relation: 'of' }; return s; }), openSeg({ seg: 'locus' }));
+  const toggleProcess = () =>
+    state.mechanism
+      ? (update((s) => { s.mechanism = null; return s; }), setOpen(null))
+      : (update((s) => { s.mechanism = { token: null }; return s; }), openSeg({ seg: 'process' }));
+
+  // Qualifier is repeatable: "qualifier +" appends a placeholder instance and
+  // opens its picker; picking a token sets the instance's group (kind), which
+  // relabels its top-row button (e.g. "orbit −"). Order is currently insertion/
+  // parse order — canonical ordering of the qualifier buttons is wired by the
+  // canonical-qualifier-order plan. Clicking a qualifier's top button removes it.
+  const addQualifier = () => {
+    const index = state.qualifiers.length;
+    update((s) => { s.qualifiers.push({ token: null, kind: null }); return s; });
+    openSeg({ seg: 'qualifier', index });
+  };
+  const removeQualifier = (index) => {
     update((s) => { s.qualifiers.splice(index, 1); return s; });
+    setOpen(null);
+  };
 
   // ---- composed-name chip dropdowns --------------------------------------
-  const openDD = (target, el) => {
-    const r = el.getBoundingClientRect();
+  // Re-open the picker for an already-present segment (from its lower chip).
+  const openDD = (target) =>
     setOpen((o) =>
-      o && o.target.seg === target.seg && o.target.index === target.index
-        ? null
-        : { target, anchor: { x: r.left, y: r.bottom } },
+      o && o.target.seg === target.seg && o.target.index === target.index ? null : { target },
     );
-  };
 
   const choose = (token) => {
     const t = open.target;
@@ -305,6 +314,7 @@ export function Grammar({ onSelect, setView, query, seedName, seedNonce }) {
         }
         case 'locus': s.locus = { token, relation: locusRelationsFor(V, token)[0] }; break;
         case 'process': s.mechanism = { token }; break;
+        case 'qualifier': s.qualifiers[t.index] = { token, kind: qualifierGroup(token, V) }; break;
         default: break;
       }
       return s;
@@ -321,6 +331,7 @@ export function Grammar({ onSelect, setView, query, seedName, seedNonce }) {
         case 'base': s.base = null; break;
         case 'locus': s.locus = null; break;
         case 'process': s.mechanism = null; break;
+        case 'qualifier': s.qualifiers.splice(t.index, 1); break;
         default: break;
       }
       return s;
@@ -348,7 +359,7 @@ export function Grammar({ onSelect, setView, query, seedName, seedNonce }) {
       case 'base': probe.base = null; break;
       case 'locus': probe.locus = null; break;
       case 'process': probe.mechanism = null; break;
-      case 'qualifier-multi': probe.qualifiers = []; break;
+      case 'qualifier': probe.qualifiers.splice(open.target.index, 1); break;
       default: break;
     }
     return NAMES.filter((n) => matchesComposition(nameStates.get(n.name), probe));
@@ -361,26 +372,20 @@ export function Grammar({ onSelect, setView, query, seedName, seedNonce }) {
       base: (ns) => ns.base?.token === token,
       locus: (ns) => ns.locus?.token === token,
       process: (ns) => ns.mechanism?.token === token,
-      'qualifier-multi': (ns) => (ns.qualifiers || []).some((x) => x.token === token),
+      qualifier: (ns) => (ns.qualifiers || []).some((x) => x.token === token),
     }[target.seg];
     return residual.filter((n) => key(nameStates.get(n.name) || {})).length;
   };
 
   // ---- dropdown config for the open chip ---------------------------------
+  // The dropdown opens BELOW the STANDARD NAME row (anchored to the namebar),
+  // the same way for every segment — including each qualifier instance, whose
+  // picker is grouped by sub-kind + category.
   const dropdown = () => {
     if (!open) return null;
     const t = open.target;
-    // The qualifier picker is multi-select (one node → many qualifiers, grouped
-    // by named sub-kind + category). Every other segment is single-select.
-    if (t.seg === 'qualifier-multi') {
-      return (
-        <VocabDropdown
-          title="qualifier" hue={HUE.qualifier} options={qualifierPickerGroups} grouped multi
-          selected={selectedQualTokens} anchor={open.anchor} count={counter(t)}
-          onChoose={toggleQualifierToken} onClose={() => setOpen(null)}
-        />
-      );
-    }
+    const rect = nameRef.current?.getBoundingClientRect();
+    const anchor = rect ? { x: rect.left, y: rect.bottom } : { x: 40, y: 220 };
     const cfg = {
       operator: { title: 'operator', hue: HUE.operator, options: V.operators || [], current: state.operator?.token },
       projection: {
@@ -398,11 +403,15 @@ export function Grammar({ onSelect, setView, query, seedName, seedNonce }) {
         options: [...(V.locus_registry || []), ...(V.regions || [])], current: state.locus?.token,
       },
       process: { title: 'process', hue: HUE.process, options: V.processes || [], current: state.mechanism?.token },
+      qualifier: {
+        title: 'qualifier', hue: HUE.qualifier, grouped: true, options: qualifierPickerGroups,
+        current: state.qualifiers[t.index]?.token,
+      },
     }[t.seg];
     return (
       <VocabDropdown
         title={cfg.title} hue={cfg.hue} options={cfg.options} grouped={cfg.grouped}
-        anchor={open.anchor} count={counter(t)} current={cfg.current}
+        anchor={anchor} count={counter(t)} current={cfg.current}
         onChoose={choose} onClear={clearSlot} onClose={() => setOpen(null)}
       />
     );
@@ -417,7 +426,7 @@ export function Grammar({ onSelect, setView, query, seedName, seedNonce }) {
       key={key}
       className={`gx-tok ${token ? 'is-filled' : 'is-empty'} ${isOpen(target.seg, target.index) ? 'is-open' : ''}`}
       style={{ '--role-hue': hue }}
-      onClick={(e) => openDD(target, e.currentTarget)}
+      onClick={() => openDD(target)}
       title={token ? `${label} = ${token} — click to change` : `choose a ${label}`}
     >
       {token ? <span className="mono">{token}</span> : <span className="gx-tok-ph">{label}</span>}
@@ -426,27 +435,19 @@ export function Grammar({ onSelect, setView, query, seedName, seedNonce }) {
       </svg>
     </button>
   );
-  // A selected qualifier is controlled from the GRAMMAR rail: each one shows
-  // as a category-coloured tab (group name + token) that deselects on click.
-  const qtab = (kind, token, index) => (
-    <button
-      key={`qt${index}`}
-      className="gx-qtab"
-      style={{ '--role-hue': HUE[kind] ?? HUE.qualifier }}
-      onClick={() => removeQualifier(index)}
-      title={`${kind} qualifier “${token}” — click to remove`}
-    >
-      <span className="gx-qtab-cat">{kind}</span>
-      <span className="gx-qtab-tok mono">{token}</span>
-      <span className="gx-qtab-x" aria-hidden>×</span>
-    </button>
-  );
-  // In the STANDARD NAME row the qualifier just reads as part of the name
-  // (non-interactive); the deselect control lives on the rail tab above.
-  const qstatic = (kind, token, index) => (
-    <span key={`q${index}`} className="gx-tok is-filled gx-tok-static" style={{ '--role-hue': HUE[kind] ?? HUE.qualifier }}>
-      <span className="mono">{token}</span>
-    </span>
+  // Top-row button for a qualifier instance: labelled by its group (or the
+  // placeholder "qualifier" until a token is picked), with a "−" to remove —
+  // symmetric with the other segment buttons. Click removes the instance.
+  const qbtn = (kind, index) => (
+    <RailNode
+      key={`qb${index}`}
+      label={kind || 'qualifier'}
+      hue={HUE[kind] ?? HUE.qualifier}
+      on
+      filled={!!state.qualifiers[index]?.token}
+      onToggle={() => removeQualifier(index)}
+      title={kind ? `${kind} qualifier — click to remove` : 'qualifier (pick a token below) — click to remove'}
+    />
   );
   const sep = (key, text) => <span key={key} className="gx-sep mono">{text}</span>;
 
@@ -466,8 +467,8 @@ export function Grammar({ onSelect, setView, query, seedName, seedNonce }) {
   }
   state.qualifiers.forEach((qq, i) => {
     maybeSep('qs' + i);
-    const k = qq.kind || qualifierKind(qq.token, V);
-    bar.push(qstatic(k, qq.token, i));
+    const k = qualifierGroup(qq.token, V) || 'qualifier';
+    bar.push(chip('q' + i, k, qq.token, HUE[k] ?? HUE.qualifier, { seg: 'qualifier', index: i }));
     needSep = true;
   });
   maybeSep('bs');
@@ -505,7 +506,7 @@ export function Grammar({ onSelect, setView, query, seedName, seedNonce }) {
   if (state.operator && !isPostfix) { pSeg('po', 'operator', HUE.operator); pConn('poc', 'of_'); }
   if (state.axis) pSeg('pa', state.base?.kind === 'geometric' ? 'coordinate' : 'component', HUE.projection);
   state.qualifiers.forEach((qq, i) => {
-    const k = qq.kind || qualifierKind(qq.token, V);
+    const k = qualifierGroup(qq.token, V) || 'qualifier';
     pSeg('pq' + i, k, HUE[k] ?? HUE.qualifier);
   });
   pSeg('pb', state.base?.kind === 'geometric' ? 'geometric base' : 'base', state.base?.kind === 'geometric' ? HUE.base_geometric : HUE.base_physical);
@@ -531,11 +532,10 @@ export function Grammar({ onSelect, setView, query, seedName, seedNonce }) {
             on={!!state.axis && state.base?.kind === 'geometric'} filled={!!state.axis?.token}
             onToggle={() => toggleProjection('geometric')} title="Coordinate (projection of a geometric base)" />
           <span className="gx-rail-link" />
-          <RailNode label="qualifier" hue={HUE.qualifier} caret
-            on={state.qualifiers.length > 0} filled={false}
-            onToggle={(e) => openDD({ seg: 'qualifier-multi' }, e.currentTarget)}
-            title="Add qualifiers — aggregation · orbit · population · subject and generic qualifiers, grouped by category; pick any number" />
-          {state.qualifiers.map((qq, i) => qtab(qq.kind || qualifierKind(qq.token, V), qq.token, i))}
+          {state.qualifiers.map((qq, i) => qbtn(qualifierGroup(qq.token, V), i))}
+          <RailNode label="qualifier" hue={HUE.qualifier} caret on={false} filled={false}
+            onToggle={addQualifier}
+            title="Add a qualifier — opens the grouped picker below; the button relabels to its group (e.g. orbit) once chosen" />
           <span className="gx-rail-link" />
           <RailNode label="physical base" hue={HUE.base_physical}
             on={state.base?.kind === 'physical'} filled={state.base?.kind === 'physical' && !!state.base?.token}
@@ -565,8 +565,8 @@ export function Grammar({ onSelect, setView, query, seedName, seedNonce }) {
           )}
           {hasConstraints && <button className="gx-clear" onClick={clearAll}>clear</button>}
         </div>
-        <div className="gx-namebar">
-          {!anySegment ? <span className="gx-name-empty">toggle a segment above to begin</span> : bar}
+        <div className="gx-namebar" ref={nameRef}>
+          {!anySegment ? <span className="gx-name-empty">add a grammar segment above to begin</span> : bar}
         </div>
         {anySegment ? (
           <div className="gx-prod">

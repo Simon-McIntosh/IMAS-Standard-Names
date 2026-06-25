@@ -97,6 +97,21 @@
       to include the generic-qualifier ordering, and verify the codex generation prompt renders it.
     </p>
 
+    <h2 id="s4b">§4b — Wire the canonical order into the catalog SPA grammar bar</h2>
+    <p>
+      The catalog SPA's Grammar composer (<code>site/src/views/Grammar.jsx</code>) renders one top-row
+      button per qualifier instance. <strong>As of <code>v0.8.0rc53</code> these buttons are placed in
+      insertion / parse order — NOT canonical order</strong> (a deliberate placeholder, noted in the
+      code, pending this plan). Once §2 locks the total order and §3 exposes it, the SPA must consume it
+      so the qualifier buttons (and the composed name) render in canonical order. Concretely: emit the
+      canonical qualifier order (and per-category rank) in <code>GRAMMAR_VOCAB</code> from
+      <code>dataset.py::_build_grammar_vocab</code>, and have <code>Grammar.jsx</code> sort the
+      qualifier instances by that rank instead of insertion order. This is the "wire it through to the
+      site display so our grammar buttons are ordered correctly" requirement; it is gated on §2/§3 and
+      must not be hard-coded in the SPA ahead of the authoritative ISN order. Round-trip of seeded names
+      must still hold (a seeded non-canonical name, until migrated in §5, displays in its own order).
+    </p>
+
     <h2 id="s5">§5 — Migrate the non-canonical catalogue names</h2>
     <p>
       Rename the ~104 violating names to canonical order. We are in the RC phase, so renames are
