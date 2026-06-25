@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import json
 import os
+import shutil
 import subprocess
 from collections.abc import Iterator
 from pathlib import Path
@@ -223,6 +224,32 @@ def test_alias_latest_strips_from_others(
     # Redirect under /latest/ points at v0.2.0
     latest_index = (wt / "latest" / "index.html").read_text(encoding="utf-8")
     assert "../v0.2.0/" in latest_index
+
+
+def test_alias_latest_replaces_legacy_symlink(
+    repo: Path, site_v1: Path, site_v2: Path, gh_pages_files
+) -> None:
+    """A legacy ``latest`` symlink (from old mike deploys) must be replaced by
+    a real redirect directory — GitHub Pages does not serve symlinks."""
+    deploy(repo_root=repo, src_dir=site_v1, version="v0.1.0", alias_latest=True)
+
+    # Simulate the legacy state: latest/ is a symlink to the version dir.
+    inject = gh_pages_files()
+    latest = inject / "latest"
+    shutil.rmtree(latest)
+    latest.symlink_to("v0.1.0")
+    _run(["git", "add", "latest"], cwd=inject)
+    _run(["git", "commit", "-m", "legacy: latest as symlink"], cwd=inject)
+    assert latest.is_symlink()
+
+    # Next latest deploy must turn it back into a real redirect directory.
+    deploy(repo_root=repo, src_dir=site_v2, version="v0.2.0", alias_latest=True)
+
+    wt = gh_pages_files()
+    fixed = wt / "latest"
+    assert not fixed.is_symlink(), "latest must be a real dir, not a symlink"
+    assert fixed.is_dir()
+    assert "../v0.2.0/" in (fixed / "index.html").read_text(encoding="utf-8")
 
 
 def test_root_index_redirects_to_latest(

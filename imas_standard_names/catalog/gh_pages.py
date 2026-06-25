@@ -173,7 +173,17 @@ def deploy(
 
         # Write redirects when this is (or becomes) the latest.
         if alias_latest:
-            _write_redirect(worktree / "latest" / "index.html", f"../{version}/")
+            # A legacy mike-based deploy may have left ``latest`` as a SYMLINK
+            # to a version directory. GitHub Pages does not serve symlinks (it
+            # would show stale/no content), and writing ``latest/index.html``
+            # through the symlink would corrupt the target version's index.
+            # Replace any non-directory ``latest`` with a real redirect dir.
+            latest_path = worktree / "latest"
+            if latest_path.is_symlink() or (
+                latest_path.exists() and not latest_path.is_dir()
+            ):
+                latest_path.unlink()
+            _write_redirect(latest_path / "index.html", f"../{version}/")
             _write_redirect(worktree / "index.html", "latest/")
 
         # Stage changes: only the files we touched.
