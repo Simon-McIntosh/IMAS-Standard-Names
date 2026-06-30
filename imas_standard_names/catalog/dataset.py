@@ -102,6 +102,13 @@ _SUBJECT_TOKENS: frozenset[str] = frozenset(member.value for member in Subject)
 _ORBIT_TOKENS: frozenset[str] = frozenset(member.value for member in Orbit)
 _POPULATION_TOKENS: frozenset[str] = frozenset(member.value for member in Population)
 _AGGREGATION_TOKENS: frozenset[str] = frozenset(member.value for member in Aggregation)
+# Zone (ordered plasma-region / geometric sub-selector prefix, possibly
+# multiple per name) and channel (single transport-channel prefix) tokens.
+# Both peel through ``ir.qualifiers`` in the parser; the dataset classifies
+# them into dedicated ``zone`` / ``channel`` parse roles so the SPA renders
+# them as their own grammar segments in canonical position.
+_ZONE_TOKENS: frozenset[str] = frozenset(vocab_loaders.load_zones())
+_CHANNEL_TOKENS: frozenset[str] = frozenset(vocab_loaders.load_channels())
 
 
 # Coordinate-axis ordering for sort_axis_index emission.
@@ -413,6 +420,10 @@ def _derive_grammar_facets(name: str) -> _GrammarFacets:
             role, note = "population", "Species population (energy-state, …)"
         elif token in _SUBJECT_TOKENS:
             role, note = "subject", "Species the quantity applies to"
+        elif token in _ZONE_TOKENS:
+            role, note = "zone", "Plasma-region / geometric sub-selector"
+        elif token in _CHANNEL_TOKENS:
+            role, note = "channel", "Transport channel (what is transported)"
         else:
             role, note = "qualifier", "Qualifier"
         segments.append(
@@ -973,6 +984,12 @@ def _build_grammar_vocab() -> dict[str, list[dict[str, Any]]]:
     aggregations = _safe(vocab_loaders.load_aggregations, frozenset())
     orbits = _safe(vocab_loaders.load_orbits, frozenset())
     populations = _safe(vocab_loaders.load_populations, frozenset())
+    # Zone tokens preserve their canonical intra-order (the loader returns an
+    # ORDERED tuple — vertical → radial → region → face); channel tokens keep
+    # their locked file order (heat, particle, energy, momentum). Emit in that
+    # order so the SPA's segment + picker rows read in canonical sequence.
+    zones = _safe(vocab_loaders.load_zones, ())
+    channels = _safe(vocab_loaders.load_channels, ())
     # Genuine modifier qualifiers = qualifiers.yml, each carrying its normalized
     # category (qualifier_categories.yml). We deliberately do NOT publish the
     # parser's full acceptance union here: that union also contains operator,
@@ -995,6 +1012,11 @@ def _build_grammar_vocab() -> dict[str, list[dict[str, Any]]]:
     def _tok_list(tokens) -> list[dict[str, Any]]:
         return [{"token": str(token)} for token in sorted(tokens)]
 
+    def _ordered_tok_list(tokens) -> list[dict[str, Any]]:
+        # Preserve the loader's emission order (canonical intra-order for zones,
+        # locked file order for channels) — do NOT sort.
+        return [{"token": str(token)} for token in tokens]
+
     return {
         "operators": [
             {"token": token, "kind": entry.kind, "returns": entry.returns}
@@ -1011,6 +1033,11 @@ def _build_grammar_vocab() -> dict[str, list[dict[str, Any]]]:
         "orbits": _tok_list(orbits),
         "populations": _tok_list(populations),
         "subjects": [{"token": t} for t in _flat_vocab_tokens("subjects.yml")],
+        # Zone follows subject/device in canonical order; channel follows zone
+        # (and any residual qualifier) immediately before the base. Both keep
+        # their loader order (see _ordered_tok_list).
+        "zones": _ordered_tok_list(zones),
+        "channels": _ordered_tok_list(channels),
         "qualifiers": [
             {"token": t, "category": qualifier_cats.get(t, "other")}
             for t in sorted(qualifier_tokens - subject_tokens)

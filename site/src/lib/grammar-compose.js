@@ -47,6 +47,8 @@ export function qualifierKind(token, vocab) {
   if (has('orbits')) return 'orbit';
   if (has('populations')) return 'population';
   if (has('subjects')) return 'subject';
+  if (has('zones')) return 'zone';
+  if (has('channels')) return 'channel';
   return 'qualifier';
 }
 
@@ -74,6 +76,8 @@ export function seedFromParse(parse, vocab, name) {
       case 'orbit':
       case 'population':
       case 'subject':
+      case 'zone':
+      case 'channel':
       case 'qualifier':
       case 'modifier':
       case 'reduction':

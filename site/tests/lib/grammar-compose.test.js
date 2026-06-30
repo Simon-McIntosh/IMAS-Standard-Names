@@ -20,6 +20,9 @@ const VOCAB = {
     { token: 'temperature' },
     { token: 'radius' },
     { token: 'safety_factor' },
+    { token: 'density' },
+    { token: 'flux' },
+    { token: 'squareness' },
   ],
   geometry_carriers: [{ token: 'centroid' }],
   locus_registry: [
@@ -31,6 +34,9 @@ const VOCAB = {
   orbits: [{ token: 'trapped' }],
   populations: [{ token: 'fast' }],
   subjects: [{ token: 'electron' }, { token: 'ion' }],
+  // Zone: ordered multi-token prefix; channel: single-token prefix.
+  zones: [{ token: 'upper' }, { token: 'lower' }, { token: 'inner' }, { token: 'outer' }, { token: 'core' }, { token: 'scrape_off_layer' }],
+  channels: [{ token: 'heat' }, { token: 'particle' }, { token: 'energy' }, { token: 'momentum' }],
   qualifiers: [
     { token: 'total' },
     { token: 'external' },
@@ -71,6 +77,32 @@ const CASES = [
   ['electron_temperature', [
     { role: 'subject', text: 'electron' },
     { role: 'base', text: 'temperature' },
+  ]],
+  // Zone (single + ordered multi) and channel prefix segments round-trip via
+  // the ordered qualifier list — parse order IS canonical order.
+  ['core_electron_temperature', [
+    { role: 'zone', text: 'core' },
+    { role: 'subject', text: 'electron' },
+    { role: 'base', text: 'temperature' },
+  ]],
+  ['scrape_off_layer_density', [
+    { role: 'zone', text: 'scrape_off_layer' },
+    { role: 'base', text: 'density' },
+  ]],
+  ['upper_outer_squareness', [
+    { role: 'zone', text: 'upper' },
+    { role: 'zone', text: 'outer' },
+    { role: 'base', text: 'squareness' },
+  ]],
+  ['heat_flux', [
+    { role: 'channel', text: 'heat' },
+    { role: 'base', text: 'flux' },
+  ]],
+  ['radial_electron_energy_flux', [
+    { role: 'axis', text: 'radial' },
+    { role: 'subject', text: 'electron' },
+    { role: 'channel', text: 'energy' },
+    { role: 'base', text: 'flux' },
   ]],
 ];
 
@@ -113,6 +145,8 @@ describe('grammar-compose round-trip', () => {
     expect(qualifierKind('trapped', VOCAB)).toBe('orbit');
     expect(qualifierKind('fast', VOCAB)).toBe('population');
     expect(qualifierKind('electron', VOCAB)).toBe('subject');
+    expect(qualifierKind('core', VOCAB)).toBe('zone');
+    expect(qualifierKind('heat', VOCAB)).toBe('channel');
     expect(qualifierKind('external', VOCAB)).toBe('qualifier');
   });
 });

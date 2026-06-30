@@ -18,6 +18,8 @@ export const ROLE_META = {
   aggregation: { label: 'Aggregation', hue: 345, desc: 'Population/species/contribution reduction (total, net)' },
   orbit:       { label: 'Orbit',       hue: 5,   desc: 'Particle orbit / transit class (trapped, co-passing, …)' },
   population:  { label: 'Population',   hue: 25,  desc: 'Species population kind/state (fast, thermal, cold, …)' },
+  zone:        { label: 'Zone',         hue: 95,  desc: 'Plasma-region / geometric sub-selector (core, edge, upper, outer, …)' },
+  channel:     { label: 'Channel',      hue: 175, desc: 'Transport channel — what is transported (heat, particle, energy, momentum)' },
   base:        { label: 'Base',        hue: 260, desc: 'Root quantity from the canonical vocabulary' },
   locus:       { label: 'Locus',       hue: 145, desc: 'Geometric or topological location' },
   process:     { label: 'Process',     hue: 105, desc: 'Mechanism the quantity is due to' },

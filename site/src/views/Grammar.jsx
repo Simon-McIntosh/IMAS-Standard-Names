@@ -32,6 +32,8 @@ const HUE = {
   orbit: 5,
   population: 25,
   subject: 15,
+  zone: 95,
+  channel: 175,
   qualifier: 35,
 };
 
@@ -40,11 +42,19 @@ const REL_BY_TYPE = { entity: ['of'], position: ['at', 'of'], geometry: ['of'], 
 // Named qualifier sub-kinds get their own rail toggle; the generic 'qualifier'
 // node covers everything else. `key` = GRAMMAR_VOCAB section, `kind` =
 // qualifierKind label.
+// Order is the canonical segment order so the picker surfaces these groups
+// (and the relabelled top-row buttons read) aggregation → orbit → population →
+// subject → zone → channel, matching the ISN render order. zone is an ordered
+// MULTI-token segment (a name may carry several, e.g. lower_outer); channel is
+// SINGLE-token. Both peel through ir.qualifiers, so they live in the same
+// ordered qualifier list as the others — parse order IS canonical order.
 const QUAL_GROUPS = [
   { key: 'aggregations', kind: 'aggregation', label: 'aggregation' },
   { key: 'orbits', kind: 'orbit', label: 'orbit' },
   { key: 'populations', kind: 'population', label: 'population' },
   { key: 'subjects', kind: 'subject', label: 'subject' },
+  { key: 'zones', kind: 'zone', label: 'zone' },
+  { key: 'channels', kind: 'channel', label: 'channel' },
 ];
 
 // The display GROUP for a qualifier token: a named sub-kind

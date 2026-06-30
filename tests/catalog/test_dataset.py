@@ -1189,6 +1189,8 @@ class TestGrammarVocab:
         "orbits",
         "populations",
         "subjects",
+        "zones",
+        "channels",
         "physical_bases",
         "geometry_carriers",
         "locus_registry",
@@ -1237,6 +1239,27 @@ class TestGrammarVocab:
         assert "magnetic_field" in physical
         assert "centroid" in geometric
         assert physical.isdisjoint(geometric)
+
+    def test_zones_preserve_canonical_intra_order(self) -> None:
+        """Zone tokens are an ORDERED multi-token segment; the SPA renders
+        them in canonical intra-order (vertical → radial → region → face), so
+        emission must match the loader's ordered tuple, not be re-sorted."""
+        from imas_standard_names.grammar import vocab_loaders
+
+        vocab = _build_grammar_vocab()
+        tokens = [z["token"] for z in vocab["zones"]]
+        assert tokens == list(vocab_loaders.load_zones())
+        # Spot-check the documented vertical-precedes-radial rule.
+        assert tokens.index("upper") < tokens.index("inner")
+
+    def test_channels_preserve_locked_file_order(self) -> None:
+        """Channel is a single-token segment; tokens keep their locked file
+        order (heat, particle, energy, momentum)."""
+        from imas_standard_names.grammar import vocab_loaders
+
+        vocab = _build_grammar_vocab()
+        tokens = [c["token"] for c in vocab["channels"]]
+        assert tokens == list(vocab_loaders.load_channels())
 
     def test_physics_domains_match_category_field(self) -> None:
         """The domain segment matches a name's ``category`` against a
