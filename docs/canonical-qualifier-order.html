@@ -259,6 +259,19 @@
       <code>sn release</code>. The §6 radial-coordinate names and the regime/reduction/operator-stack backlog all
       re-derive correctly this way rather than via hand-built rename targets.
     </p>
+    <div style="border:1px solid #c9ced9;border-radius:8px;padding:12px 16px;margin:10px 0;background:#f8f9fb">
+      <p style="margin:0 0 6px;font-weight:600">§5′ runbook — run in the Neo4j-connected, ISN@main-synced environment</p>
+      <p style="margin:0 0 6px;font-size:13px">Scope: <strong>68 names</strong> (channel/zone-reorder 26 · gyroaveraged operator-stack 13 · regime→transport 9 · flux-surface-average reduction 8 · other-mechanism 6 · drive→current_drive 4 · radial-coord 2), clustered transport 20 · turbulence 16 · edge 9 · mhd 6 · tail 17.</p>
+      <p style="margin:0 0 4px;font-size:13px"><strong>Prerequisites (the blockers from a generic shell):</strong></p>
+      <ol style="margin:0 0 6px;font-size:13px">
+        <li><strong>imas-codex venv synced to ISN@main</strong> — the venv ships a stale ISN (no channel/zone/channel_qualifier, bare <code>anomalous</code>); the pipeline must load the new grammar (CI installs ISN@main; locally <code>uv sync</code> / reinstall).</li>
+        <li><strong>Neo4j graph reachable</strong> — the live 2194-name graph (active graph profile / SSH tunnel). Not reachable from a generic login shell.</li>
+        <li><strong>DSv4 endpoint</strong> — <code>http://98dci4-gpu-0003:18800/v1</code> (confirmed up; key lifted → empty).</li>
+      </ol>
+      <p style="margin:0 0 4px;font-size:13px"><strong>Repoint (env, non-committing):</strong> <code>IMAS_CODEX_SN_COMPOSE_MODEL=hosted_vllm/deepseek-v4-flash</code>, <code>IMAS_CODEX_SN_COMPOSE_API_BASE=http://98dci4-gpu-0003:18800/v1</code>, <code>AMBIX_API_KEY=</code> (empty).</p>
+      <p style="margin:0 0 4px;font-size:13px"><strong>Prompt update</strong> (<code>imas_codex/llm/prompts/sn/generate_name_system.md</code>, test against synced ISN): major_radius example → <code>radial_coordinate</code> (§6); <code>diamagnetic</code> → channel_qualifier (not <code>process_token=diamagnetic_drift</code>); add channel / channel_qualifier / zone segment guidance + the mechanism-noun <code>due_to_</code> rule (<code>anomalous_transport</code>, <code>ohmic_current_drive</code>, …). Keep general, not over-fit.</p>
+      <p style="margin:0;font-size:13px"><strong>Rotations</strong> (per cluster: transport → turbulence → edge → mhd → tail): re-derive grammar segments → <code>sn run --focus &lt;domain paths&gt;</code> (DSv4) → assert the domain's affected names round-trip canonical → before/after review-score sample → iterate prompt/vocab if scores low. <code>sn release</code> after all green.</p>
+    </div>
 
     <h2 id="s6">§6 — Radial-coordinate refactor (maintain curvature-vs-coordinate distinction)</h2>
     <p>
