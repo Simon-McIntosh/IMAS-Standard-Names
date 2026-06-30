@@ -332,6 +332,33 @@ def load_channels() -> tuple[str, ...]:
     return ()
 
 
+def load_channel_qualifiers() -> tuple[str, ...]:
+    """Load channel-qualifier tokens from ``channel_qualifiers.yml`` (file order).
+
+    Channel-qualifier tokens (kinetic, plasma) bind to the transport channel:
+    they refine WHICH channel quantity is meant and render immediately OUTER of
+    the channel (before it) and INNER of the zone. The segment is SINGLE-token:
+    a name carries at most one channel-qualifier. The parser unions these into
+    its qualifier acceptance set so they peel; the StandardName model retains
+    the single token in the ``channel_qualifier`` segment.
+
+    Returns an ORDERED tuple (file order) so the generated ``ChannelQualifier``
+    enum preserves the locked vocabulary order (kinetic, plasma).
+    """
+    path = _VOCAB_DIR / "channel_qualifiers.yml"
+    if not path.exists():
+        return ()
+    with path.open(encoding="utf-8") as fh:
+        data = yaml.safe_load(fh)
+    if not data:
+        return ()
+    if isinstance(data, list):
+        return tuple(str(token) for token in data)
+    if isinstance(data, dict) and "channel_qualifiers" in data:
+        return tuple(str(token) for token in (data["channel_qualifiers"] or []))
+    return ()
+
+
 def _load_flat_token_list(filename: str, dict_key: str) -> frozenset[str]:
     """Load a flat YAML token list (or ``{<dict_key>: [...]}``)."""
     path = _VOCAB_DIR / filename

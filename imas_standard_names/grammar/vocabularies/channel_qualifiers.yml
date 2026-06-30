@@ -1,0 +1,42 @@
+# Channel-qualifier vocabulary: qualifiers that bind to the transport CHANNEL.
+#
+# Usage: <channel_qualifier>_<channel>_<base>
+# Examples:
+#   - kinetic_energy_flux          (channel_qualifier=kinetic, channel=energy,
+#                                   base=flux)
+#   - plasma_momentum_flux         (channel_qualifier=plasma,  channel=momentum,
+#                                   base=flux)
+#   - ion_kinetic_energy_flux      (subject=ion, channel_qualifier=kinetic,
+#                                   channel=energy, base=flux)
+#   - diamagnetic_momentum_diffusivity  (channel_qualifier=diamagnetic,
+#                                   channel=momentum, base=diffusivity)
+#
+# A channel-qualifier refines WHICH channel quantity is meant — it stays glued
+# to the channel word, rendering immediately OUTER of the channel (before it)
+# and INNER of the zone:
+#   ... subject -> device -> zone -> CHANNEL_QUALIFIER -> channel -> [base
+#   qualifier] -> base
+#
+# This is distinct from the BASE-binding qualifiers in qualifiers.yml, which
+# bind to the BASE and render INNER of the channel (heat_decay_length =
+# channel=heat outer of base-qualifier=decay).
+#
+# SINGLE-TOKEN segment: a name carries AT MOST one channel-qualifier (like the
+# channel itself). Two channel-qualifier tokens in one name is a hard error.
+#
+# Dual-coexistence (kinetic): kinetic_energy / internal_energy are atomic BASES
+# (Class 4) AND kinetic is a channel-qualifier. The parser's longest-base match
+# disambiguates: electron_kinetic_energy parses as base=kinetic_energy, while
+# ion_kinetic_energy_flux strips channel_qualifier=kinetic + channel=energy +
+# base=flux.
+#
+# Dual-binding (diamagnetic): diamagnetic also appears as a BASE-binding word in
+# legacy catalogue names (diamagnetic_velocity, diamagnetic_current_density —
+# diamagnetic binds to the velocity/current base, no channel present). Both
+# coexist: as a channel-qualifier it renders OUTER of an explicit channel
+# (diamagnetic_momentum_diffusivity); with no channel it renders before the
+# base and still round-trips (diamagnetic_velocity_due_to_diamagnetic_drift).
+
+- kinetic
+- plasma
+- diamagnetic

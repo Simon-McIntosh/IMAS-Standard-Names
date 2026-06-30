@@ -195,9 +195,11 @@ def test_ambiguity_maximum_vs_amplitude(vocabs: Vocabularies) -> None:
     _assert_distinct_ir("maximum_of_pressure", "pressure_amplitude", vocabs)
 
 
-def test_ambiguity_maximum_vs_time_average(vocabs: Vocabularies) -> None:
-    """``maximum_of_X`` vs ``time_average_of_X``."""
-    _assert_distinct_ir("maximum_of_temperature", "time_average_of_temperature", vocabs)
+def test_ambiguity_maximum_vs_time_averaged(vocabs: Vocabularies) -> None:
+    """``maximum_of_X`` vs ``time_averaged_of_X``."""
+    _assert_distinct_ir(
+        "maximum_of_temperature", "time_averaged_of_temperature", vocabs
+    )
 
 
 def test_ambiguity_derivative_vs_gradient(vocabs: Vocabularies) -> None:
@@ -234,7 +236,7 @@ def test_ambiguity_nested_prefix_over_postfix_amplitude(vocabs: Vocabularies) ->
     """
     _assert_distinct_ir(
         "maximum_of_pressure_amplitude",
-        "time_average_of_pressure_amplitude",
+        "time_averaged_of_pressure_amplitude",
         vocabs,
     )
 
@@ -250,11 +252,11 @@ def test_ambiguity_nested_order_max_then_flux_surface_averaged(
     )
 
 
-def test_ambiguity_nested_order_time_average_then_max(vocabs: Vocabularies) -> None:
-    """``time_average_of_maximum_of_X`` vs reversed."""
+def test_ambiguity_nested_order_time_averaged_then_max(vocabs: Vocabularies) -> None:
+    """``time_averaged_of_maximum_of_X`` vs reversed."""
     _assert_distinct_ir(
-        "time_average_of_maximum_of_temperature",
-        "maximum_of_time_average_of_temperature",
+        "time_averaged_of_maximum_of_temperature",
+        "maximum_of_time_averaged_of_temperature",
         vocabs,
     )
 

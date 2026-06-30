@@ -29,6 +29,7 @@ from dataclasses import dataclass
 from .model_types import (
     Aggregation,
     Channel,
+    ChannelQualifier,
     Component,
     GeometricBase,
     Object,
@@ -61,6 +62,7 @@ SEGMENT_TOKEN_MAP: dict[str, tuple[str, ...]] = {
     "subject": tuple(member.value for member in Subject),
     "device": tuple(member.value for member in Object),
     "zone": tuple(member.value for member in Zone),
+    "channel_qualifier": tuple(member.value for member in ChannelQualifier),
     "channel": tuple(member.value for member in Channel),
     "geometric_base": tuple(member.value for member in GeometricBase),
     "physical_base": tuple(sorted(load_physical_bases().bases.keys())),
@@ -128,6 +130,13 @@ SEGMENT_RULES: tuple[SegmentRule, ...] = (
         template=None,
         exclusive_with=(),
         tokens=SEGMENT_TOKEN_MAP["zone"],
+    ),
+    SegmentRule(
+        identifier="channel_qualifier",
+        optional=True,
+        template=None,
+        exclusive_with=(),
+        tokens=SEGMENT_TOKEN_MAP["channel_qualifier"],
     ),
     SegmentRule(
         identifier="channel",
@@ -203,6 +212,7 @@ SEGMENT_ORDER: tuple[str, ...] = (
     "subject",
     "device",
     "zone",
+    "channel_qualifier",
     "channel",
     "geometric_base",
     "physical_base",
@@ -213,9 +223,9 @@ SEGMENT_ORDER: tuple[str, ...] = (
     "process",
 )
 
-# Base segments are at indices [9, 10] in SEGMENT_ORDER
+# Base segments are at indices [10, 11] in SEGMENT_ORDER
 # They mark the boundary between prefix (component, coordinate, subject) and suffix (object, geometry, position, process) segments
-BASE_SEGMENT_INDICES: tuple[int, ...] = (9, 10)
+BASE_SEGMENT_INDICES: tuple[int, ...] = (10, 11)
 BASE_SEGMENTS: tuple[str, ...] = ("geometric_base", "physical_base")
 PREFIX_SEGMENTS: tuple[str, ...] = SEGMENT_ORDER[: BASE_SEGMENT_INDICES[0]]
 SUFFIX_SEGMENTS: tuple[str, ...] = SEGMENT_ORDER[BASE_SEGMENT_INDICES[-1] + 1 :]
@@ -313,7 +323,7 @@ TRANSFORMATION_TOKENS: tuple[str, ...] = (
     "surface_integrated",
     "tendency",
     "change_in",
-    "time_average",
+    "time_averaged",
     "time_derivative",
     "variation",
     "volume_averaged",
@@ -369,7 +379,7 @@ DECOMPOSITION_TOKENS: tuple[str, ...] = (
     "surface_integrated",
     "tendency",
     "change_in",
-    "time_average",
+    "time_averaged",
     "time_derivative",
     "variation",
     "volume_averaged",

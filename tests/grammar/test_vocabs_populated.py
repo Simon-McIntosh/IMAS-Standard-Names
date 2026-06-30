@@ -130,7 +130,7 @@ class TestOperatorKeyEntries:
             "maximum",
             "minimum",
             "time_derivative",
-            "time_average",
+            "time_averaged",
             "root_mean_square",
             "magnitude",
             "real_part",

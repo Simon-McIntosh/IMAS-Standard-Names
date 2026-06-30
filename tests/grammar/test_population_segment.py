@@ -27,10 +27,11 @@ def _v(seg):
         # population only
         ("fast_ion_pressure", None, None, "fast", "ion", "pressure"),
         ("thermal_electron_density", None, None, "thermal", "electron", "density"),
-        # 'plasma' is not a subject; plasma_current is a lexicalised base.
+        # 'plasma' is a channel-qualifier (channel_qualifiers.yml): it peels
+        # into the channel_qualifier segment, leaving current as the base.
         # 'total' is an aggregation token (not population) as of the
         # aggregation-segment split.
-        ("total_plasma_current", "total", None, None, None, "plasma_current"),
+        ("total_plasma_current", "total", None, None, None, "current"),
         # orbit only
         ("trapped_electron_density", None, "trapped", None, "electron", "density"),
         ("co_passing_ion_density", None, "co_passing", None, "ion", "density"),

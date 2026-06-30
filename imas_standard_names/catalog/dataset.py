@@ -92,7 +92,7 @@ _REDUCTION_PREFIX_OPS: frozenset[str] = frozenset(
         "accumulated",
         "cumulative",
         "cumulative_inside_flux_surface",
-        "time_average",
+        "time_averaged",
         "root_mean_square",
     }
 )
@@ -109,6 +109,9 @@ _AGGREGATION_TOKENS: frozenset[str] = frozenset(member.value for member in Aggre
 # them as their own grammar segments in canonical position.
 _ZONE_TOKENS: frozenset[str] = frozenset(vocab_loaders.load_zones())
 _CHANNEL_TOKENS: frozenset[str] = frozenset(vocab_loaders.load_channels())
+_CHANNEL_QUALIFIER_TOKENS: frozenset[str] = frozenset(
+    vocab_loaders.load_channel_qualifiers()
+)
 
 
 # Coordinate-axis ordering for sort_axis_index emission.
@@ -422,6 +425,8 @@ def _derive_grammar_facets(name: str) -> _GrammarFacets:
             role, note = "subject", "Species the quantity applies to"
         elif token in _ZONE_TOKENS:
             role, note = "zone", "Plasma-region / geometric sub-selector"
+        elif token in _CHANNEL_QUALIFIER_TOKENS:
+            role, note = "channel_qualifier", "Channel qualifier (binds to channel)"
         elif token in _CHANNEL_TOKENS:
             role, note = "channel", "Transport channel (what is transported)"
         else:

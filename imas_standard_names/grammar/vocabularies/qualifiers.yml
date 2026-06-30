@@ -1,4 +1,11 @@
-# Qualifier vocabulary: prefix modifiers on physical bases
+# Qualifier vocabulary: BASE-binding prefix modifiers on physical bases.
+#
+# This file is the BASE-binding qualifier vocabulary: every token here binds to
+# the BASE and renders INNER of the transport channel (heat_decay_length =
+# channel=heat outer of base-qualifier=decay). The CHANNEL-binding qualifiers
+# (those that bind to the transport channel and render OUTER of it, e.g.
+# kinetic_energy_flux, plasma_momentum_flux) live in channel_qualifiers.yml —
+# do NOT add channel-binding qualifiers here.
 #
 # Usage: <qualifier>_<base>  (recursive: <qual1>_<qual2>_<base>)
 # Examples:
@@ -71,7 +78,10 @@
 # NOTE: 'center_of_mass' removed — center_of_mass_velocity is now an atomic
 # base (physical_bases.yml). It bound only to velocity.
 - cross_field                   # cross-field (perpendicular to B) direction
-- diamagnetic                   # diamagnetic drift/flux qualifier
+# NOTE: 'diamagnetic' moved to channel_qualifiers.yml (it binds to the transport
+# channel: diamagnetic_momentum_diffusivity). Legacy base-bound forms
+# (diamagnetic_velocity, diamagnetic_current_density) still peel it as a
+# qualifier via the unified acceptance set and round-trip unchanged.
 - e_cross_b                     # E×B drift qualifier
 - field_aligned                 # aligned with magnetic field
 - surface                       # surface (2D boundary) qualifier
@@ -98,7 +108,8 @@
 - atomic                        # atomic (single-particle) qualifier
 
 # --- Energy type ---
-- kinetic                       # kinetic energy component
+# NOTE: 'kinetic' moved to channel_qualifiers.yml (the channel-binding qualifier
+# vocab — kinetic_energy_flux = channel_qualifier=kinetic + channel=energy).
 - stored                        # stored energy
 - radiated                      # radiated (emitted) energy/power
 - absorbed                      # absorbed energy/power
@@ -121,8 +132,8 @@
 # --- Species-related (non-subject) ---
 - slow                          # slow (sub-thermal) population
 # NOTE: 'suprathermal' moved to populations.yml (energy-state population modifier).
-- plasma                        # plasma (ionized) qualifier; plasma_current etc.
-                                # are lexicalised bases (plasma folds into base)
+# NOTE: 'plasma' moved to channel_qualifiers.yml (the channel-binding qualifier
+# vocab — plasma_momentum_flux = channel_qualifier=plasma + channel=momentum).
 
 # --- Flow regime ---
 - sonic                         # sonic flow regime
@@ -144,7 +155,12 @@
 - initial                       # initial condition/value
 - final                         # final state/value
 - instantaneous                 # instantaneous (snapshot) value
-- time_averaged                 # time-averaged quantity
+# NOTE: 'time_averaged' removed — it is the participle form of the time_average
+# reduction operator (renamed time_average -> time_averaged for family
+# consistency with volume_averaged / line_averaged / flux_surface_averaged).
+# The bare-prefix operator form renders time_averaged_<base>; the duplicate
+# qualifier token is dropped (mirrors the volume_averaged / gyroaveraged
+# operator-dupe removals).
 
 # --- Engineering / subsystem ---
 - coolant                       # coolant fluid qualifier

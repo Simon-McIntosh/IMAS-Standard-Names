@@ -37,6 +37,7 @@ from imas_standard_names.grammar.model_types import (
     Aggregation,
     BinaryOperator,
     Channel,
+    ChannelQualifier,
     Component,
     Decomposition,
     GeometricBase,
@@ -114,6 +115,18 @@ _ZONE_ORDER: dict[str, int] = {z.value: i for i, z in enumerate(Zone)}
 # only the *_flux/*_diffusivity/* compounds strip the channel token.
 _CHANNEL_VALUES: frozenset[str] = frozenset(c.value for c in Channel)
 
+# ChannelQualifier: qualifier that binds to the transport CHANNEL (kinetic,
+# plasma). It refines WHICH channel quantity is meant and renders immediately
+# OUTER of the channel (before it) and INNER of the zone. SINGLE-token (at most
+# one channel-qualifier per name). Distinct from the BASE-binding qualifiers,
+# which render INNER of the channel. Note kinetic also forms the atomic base
+# kinetic_energy — the parser matches the longest base first, so a standalone
+# electron_kinetic_energy parses as base=kinetic_energy and only the
+# *_energy_flux / *_momentum_flux compounds strip the channel-qualifier token.
+_CHANNEL_QUALIFIER_VALUES: frozenset[str] = frozenset(
+    c.value for c in ChannelQualifier
+)
+
 # Map from LocusType to model field name
 _LOCUS_TYPE_TO_FIELD: dict[LocusType, str] = {
     LocusType.ENTITY: "object",
@@ -172,7 +185,7 @@ _BARE_PREFIX_TRANSFORMATIONS: frozenset[str] = frozenset(
         "per_toroidal_mode",
         "perturbed",
         "surface_integrated",
-        "time_average",
+        "time_averaged",
         "volume_averaged",
         "volume_integrated",
     }
@@ -385,6 +398,7 @@ def _ir_to_model_dict(ir: StandardNameIR) -> dict[str, str]:
             population = None
             orbit = None
             channel = None
+            channel_qualifier = None
             zone_tokens: list[str] = []
             base_qualifiers: list[str] = []
             for q in ir.qualifiers:
@@ -456,6 +470,20 @@ def _ir_to_model_dict(ir: StandardNameIR) -> dict[str, str]:
                         )
                         raise ValueError(msg)
                     channel = q.token
+                elif q.token in _CHANNEL_QUALIFIER_VALUES:
+                    # Channel-qualifier is single-token (binds to the transport
+                    # channel): a name carries at most one. A second token is a
+                    # hard error (never silent last-wins — that would drop a
+                    # token from the name).
+                    if channel_qualifier is not None:
+                        msg = (
+                            f"Two 'channel_qualifier' tokens "
+                            f"('{channel_qualifier}' and '{q.token}') cannot "
+                            f"stack in a single name; the channel_qualifier "
+                            f"segment admits at most one token."
+                        )
+                        raise ValueError(msg)
+                    channel_qualifier = q.token
                 elif (
                     q.token in _BARE_PREFIX_TRANSFORMATIONS
                     and transformation_token is None
@@ -477,6 +505,8 @@ def _ir_to_model_dict(ir: StandardNameIR) -> dict[str, str]:
                 d["zone"] = tuple(zone_tokens)
             if channel:
                 d["channel"] = channel
+            if channel_qualifier:
+                d["channel_qualifier"] = channel_qualifier
             if transformation_token:
                 d["transformation"] = transformation_token
             # Fold remaining qualifiers into physical_base as compound
@@ -678,6 +708,7 @@ def _model_to_ir(model: StandardName) -> StandardNameIR:
                 model.aggregation,
                 model.zone,
                 model.channel,
+                model.channel_qualifier,
             )
             # Insert bare-prefix transformation qualifier at the front
             # (transformation is outermost: <transform>_<subject>_<base>)
@@ -740,6 +771,7 @@ def _decompose_physical_base(
     aggregation: Aggregation | None = None,
     zone: tuple[Zone, ...] = (),
     channel: Channel | None = None,
+    channel_qualifier: ChannelQualifier | None = None,
 ) -> tuple[QuantityOrCarrier, list[Qualifier]]:
     """Decompose a physical_base string into IR base + qualifiers.
 
@@ -772,7 +804,16 @@ def _decompose_physical_base(
     ):
         qualifiers.append(Qualifier(token=zone_token))
 
-    channel_qualifier = (
+    # The channel-qualifier binds to the channel and renders immediately OUTER
+    # of it (kinetic_energy_flux = channel_qualifier=kinetic + channel=energy +
+    # base=flux); the channel itself renders OUTER of the residual base
+    # qualifiers but inner of subject/zone.
+    channel_qualifier_q = (
+        Qualifier(token=_value_of(channel_qualifier))
+        if channel_qualifier is not None
+        else None
+    )
+    channel_q = (
         Qualifier(token=_value_of(channel)) if channel is not None else None
     )
 
@@ -783,16 +824,20 @@ def _decompose_physical_base(
         # (but inner of subject/zone): the channel names WHAT is transported and
         # modifies the whole "[qualifier] base" concept — the convection velocity
         # OF momentum (momentum_convection_velocity), the decay length OF heat
-        # (heat_decay_length). So channel precedes the residual qualifiers.
-        if channel_qualifier is not None:
-            qualifiers.append(channel_qualifier)
+        # (heat_decay_length). The channel-qualifier renders OUTER of the channel.
+        if channel_qualifier_q is not None:
+            qualifiers.append(channel_qualifier_q)
+        if channel_q is not None:
+            qualifiers.append(channel_q)
         qualifiers.extend(result.ir.qualifiers)
         return result.ir.base, qualifiers
     except (ParseError, ValueError):
-        # Can't decompose: use the whole string as base. Channel renders just
-        # before the (compound) base.
-        if channel_qualifier is not None:
-            qualifiers.append(channel_qualifier)
+        # Can't decompose: use the whole string as base. The channel-qualifier
+        # and channel render just before the (compound) base.
+        if channel_qualifier_q is not None:
+            qualifiers.append(channel_qualifier_q)
+        if channel_q is not None:
+            qualifiers.append(channel_q)
         return QuantityOrCarrier(
             token=physical_base, kind=BaseKind.QUANTITY
         ), qualifiers
@@ -816,6 +861,11 @@ class StandardName(BaseModel):
     # intra-order (Zone enum order); compose() renders them between
     # subject/device and the refined qualifiers.
     zone: tuple[Zone, ...] = ()
+    # ChannelQualifier: qualifier that binds to the transport channel (kinetic,
+    # plasma). SINGLE-token; compose() renders it immediately OUTER of the
+    # channel (before it) and inner of the zone. kinetic also forms the atomic
+    # base kinetic_energy; the parser disambiguates by longest-base match.
+    channel_qualifier: ChannelQualifier | None = None
     # Channel: transport-channel PREFIX segment (heat/particle/energy/momentum —
     # WHAT is transported). SINGLE-token and INNERMOST: compose() renders it
     # immediately before the base, after any residual qualifier. energy/momentum
@@ -1050,6 +1100,7 @@ class StandardName(BaseModel):
                     self.subject,
                     self.device,
                     self.zone,
+                    self.channel_qualifier,
                     self.channel,
                     self.object,
                     self.position,

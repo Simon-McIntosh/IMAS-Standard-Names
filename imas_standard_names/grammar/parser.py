@@ -192,6 +192,14 @@ def load_default_vocabularies() -> Vocabularies:
     # *_flux/*_diffusivity/... compounds strip the channel.
     channel_quals = frozenset(vocab_loaders.load_channels())
 
+    # Channel-qualifier tokens (kinetic, plasma) bind to the transport channel.
+    # They peel like qualifiers (outer of the channel, inner of the zone); the
+    # model retains the single token in the ``channel_qualifier`` segment.
+    # kinetic also forms the atomic base kinetic_energy — the parser tries the
+    # longest base match first, so electron_kinetic_energy resolves as the base
+    # while ion_kinetic_energy_flux strips channel_qualifier=kinetic.
+    channel_qualifier_quals = frozenset(vocab_loaders.load_channel_qualifiers())
+
     qualifiers = (
         subject_quals
         | object_quals
@@ -202,6 +210,7 @@ def load_default_vocabularies() -> Vocabularies:
         | prefix_op_quals
         | zone_quals
         | channel_quals
+        | channel_qualifier_quals
     )
 
     return Vocabularies(

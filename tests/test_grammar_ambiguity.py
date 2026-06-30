@@ -39,11 +39,16 @@ class TestDiamagneticAmbiguity:
     """
 
     def test_radial_component_of_diamagnetic_velocity(self):
-        """When a real projection axis is used, diamagnetic stays in physical_base."""
+        """diamagnetic is a channel-qualifier (channel_qualifiers.yml); with a
+        real projection axis it peels into the channel_qualifier segment and the
+        base is velocity. The name round-trips unchanged."""
         parsed = parse_standard_name("radial_diamagnetic_velocity")
         assert parsed.component.value == "radial"
-        assert parsed.physical_base == "diamagnetic_velocity"
+        assert parsed.channel_qualifier is not None
+        assert parsed.channel_qualifier.value == "diamagnetic"
+        assert parsed.physical_base == "velocity"
         assert parsed.coordinate is None
+        assert compose_standard_name(parsed) == "radial_diamagnetic_velocity"
 
     @_XFAIL_VOCAB_GAP
     def test_diamagnetic_is_not_a_component(self):
@@ -58,13 +63,18 @@ class TestDiamagneticAmbiguity:
         assert parsed.component is None
 
     def test_round_trip_with_component_prefix(self):
-        """Compose -> parse round-trip for diamagnetic in physical_base."""
+        """Compose -> parse round-trip for radial_diamagnetic_velocity. The
+        compose form authored with diamagnetic in physical_base and the form
+        authored with the channel_qualifier segment both render to the same
+        name; parsing yields the channel_qualifier segment."""
         parts = {"component": "radial", "physical_base": "diamagnetic_velocity"}
         name = compose_standard_name(parts)
         assert name == "radial_diamagnetic_velocity"
         parsed = parse_standard_name(name)
         assert parsed.component.value == "radial"
-        assert parsed.physical_base == "diamagnetic_velocity"
+        assert parsed.channel_qualifier is not None
+        assert parsed.channel_qualifier.value == "diamagnetic"
+        assert parsed.physical_base == "velocity"
 
     @_XFAIL_VOCAB_GAP
     def test_bare_diamagnetic_drift_velocity(self):

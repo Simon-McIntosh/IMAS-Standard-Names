@@ -126,9 +126,12 @@ class TestProcessTokens:
         assert parsed.physical_base == "power"
 
     def test_non_inductive_current(self):
+        # plasma is a channel-qualifier (channel_qualifiers.yml): it peels into
+        # the channel_qualifier segment, leaving current as the base.
         parsed = parse_name("plasma_current_due_to_non_inductive")
         assert parsed.process.value == "non_inductive"
-        assert parsed.physical_base == "plasma_current"
+        assert parsed.channel_qualifier.value == "plasma"
+        assert parsed.physical_base == "current"
 
     def test_gas_injection_with_subject(self):
         # particle_flux decomposes as channel=particle + base=flux.

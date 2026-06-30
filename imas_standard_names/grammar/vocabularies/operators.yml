@@ -186,7 +186,7 @@ operators:
     precedence: 20
     returns: scalar_or_vector
 
-  time_average:
+  time_averaged:
     kind: unary_prefix
     precedence: 30
     returns: scalar_or_vector

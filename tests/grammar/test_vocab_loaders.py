@@ -127,7 +127,7 @@ def test_operators_has_seed_entries():
     expected = {
         "magnitude",
         "time_derivative",
-        "time_average",
+        "time_averaged",
         "root_mean_square",
         "fourier_coefficient",
         "ratio",

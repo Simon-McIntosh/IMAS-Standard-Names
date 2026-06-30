@@ -152,6 +152,12 @@ class Zone(StrEnum):
     WETTED = "wetted"
 
 
+class ChannelQualifier(StrEnum):
+    KINETIC = "kinetic"
+    PLASMA = "plasma"
+    DIAMAGNETIC = "diamagnetic"
+
+
 class Channel(StrEnum):
     HEAT = "heat"
     PARTICLE = "particle"
@@ -512,7 +518,7 @@ class Transformation(StrEnum):
     SURFACE_INTEGRATED = "surface_integrated"
     TENDENCY = "tendency"
     CHANGE_IN = "change_in"
-    TIME_AVERAGE = "time_average"
+    TIME_AVERAGED = "time_averaged"
     TIME_DERIVATIVE = "time_derivative"
     VARIATION = "variation"
     VOLUME_AVERAGED = "volume_averaged"
@@ -563,7 +569,7 @@ class Decomposition(StrEnum):
     SURFACE_INTEGRATED = "surface_integrated"
     TENDENCY = "tendency"
     CHANGE_IN = "change_in"
-    TIME_AVERAGE = "time_average"
+    TIME_AVERAGED = "time_averaged"
     TIME_DERIVATIVE = "time_derivative"
     VARIATION = "variation"
     VOLUME_AVERAGED = "volume_averaged"
@@ -592,6 +598,7 @@ __all__ = [
     "Aggregation",
     "Region",
     "Zone",
+    "ChannelQualifier",
     "Channel",
     "Process",
     "GenericPhysicalBase",

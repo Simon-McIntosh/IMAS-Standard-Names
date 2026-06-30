@@ -42,7 +42,8 @@ qualifier_categories:
     - contravariant
     - covariant
     - cross_field
-    - diamagnetic
+    # NOTE: 'diamagnetic' moved to channel_qualifiers.yml (binds to the
+    # transport channel: diamagnetic_momentum_diffusivity).
     - direction
     - e_cross_b
     - field_aligned
@@ -90,7 +91,8 @@ qualifier_categories:
     - deposited
     - forward
     - incident
-    - kinetic
+    # NOTE: 'kinetic' moved to channel_qualifiers.yml (binds to the transport
+    # channel: kinetic_energy_flux). It is no longer a base-binding qualifier.
     - launched
     - lost
     - radiated
@@ -136,7 +138,9 @@ qualifier_categories:
     - final
     - initial
     - instantaneous
-    - time_averaged
+    # NOTE: 'time_averaged' removed — it is the participle form of the
+    # time_average -> time_averaged reduction operator (operators.yml), not a
+    # base-binding qualifier.
 
   # Dimensionless / normalized forms
   normalized:
@@ -147,7 +151,8 @@ qualifier_categories:
 
   # Species-related (non-subject) qualifiers
   species:
-    - plasma
+    # NOTE: 'plasma' moved to channel_qualifiers.yml (binds to the transport
+    # channel: plasma_momentum_flux). It is no longer a base-binding qualifier.
     - slow
 
   # Engineering subsystem and numerical-split qualifiers

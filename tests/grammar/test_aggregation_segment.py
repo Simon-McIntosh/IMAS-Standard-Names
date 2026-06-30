@@ -76,7 +76,10 @@ def test_total_thermal_plasma_pressure_canonical():
     model = parse_standard_name(name)
     assert _v(model.aggregation) == "total"
     assert _v(model.population) == "thermal"
-    assert model.physical_base == "plasma_pressure"
+    # plasma is a channel-qualifier (channel_qualifiers.yml): it peels into the
+    # channel_qualifier segment, leaving pressure as the base. Round-trips.
+    assert _v(model.channel_qualifier) == "plasma"
+    assert model.physical_base == "pressure"
     assert compose_standard_name(model) == name
 
     with pytest.raises(NonCanonicalNameError) as excinfo:

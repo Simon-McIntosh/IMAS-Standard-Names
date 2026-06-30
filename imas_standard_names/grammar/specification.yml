@@ -89,6 +89,7 @@ canonical_pattern: >
   [<subject>]?
   [<device>]?
   [<zone>]?
+  [<channel_qualifier>]?
   [<channel>]?
   <geometric_base | physical_base>
   [of_<object>]?
@@ -218,6 +219,27 @@ segments:
       (vertical, radial, region, face — see zones.yml). The prefix form
       (scrape_off_layer_density) is distinct from the postfix region locus
       (over_scrape_off_layer); both coexist.
+  - id: channel_qualifier
+    optional: true
+    vocabulary: channel_qualifiers
+    description: >
+      Channel-qualifier — a qualifier that binds to the transport CHANNEL
+      (kinetic, plasma). It refines WHICH channel quantity is meant and stays
+      glued to the channel word, rendering immediately OUTER of the channel
+      (before it) and INNER of the zone:
+      <subject>_<device>_<zone>_<channel_qualifier>_<channel>_<base> (e.g.
+      kinetic_energy_flux = channel_qualifier=kinetic + channel=energy +
+      base=flux; plasma_momentum_flux = channel_qualifier=plasma +
+      channel=momentum + base=flux; ion_kinetic_energy_flux = subject=ion +
+      channel_qualifier=kinetic + channel=energy + base=flux). This is distinct
+      from the BASE-binding qualifiers (qualifiers.yml) which bind to the base
+      and render INNER of the channel. SINGLE-token (at most one
+      channel-qualifier per name; two is a hard error). Dual-coexistence:
+      kinetic_energy / internal_energy are atomic bases AND kinetic is a
+      channel-qualifier; the parser's longest-base match disambiguates
+      (electron_kinetic_energy -> base=kinetic_energy;
+      ion_kinetic_energy_flux -> channel_qualifier=kinetic + channel=energy +
+      base=flux).
   - id: channel
     optional: true
     vocabulary: channels
@@ -345,6 +367,9 @@ vocabularies:
   # zone: ordered plasma-region / geometric sub-selector PREFIX segment
   # (distinct from the postfix region locus). Multi-token, fixed intra-order.
   zones: !include vocabularies/zones.yml
+  # channel_qualifier: qualifier that binds to the transport channel (kinetic,
+  # plasma). Renders outer of the channel, inner of the zone. Single-token.
+  channel_qualifiers: !include vocabularies/channel_qualifiers.yml
   # channel: transport-channel PREFIX segment (what is transported:
   # heat/particle/energy/momentum). Innermost prefix, single-token.
   channels: !include vocabularies/channels.yml

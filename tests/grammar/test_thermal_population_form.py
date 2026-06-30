@@ -39,8 +39,10 @@ def _v(seg):
     [
         ("thermal_pressure", None, "thermal", None, "pressure"),
         ("thermal_energy", None, "thermal", None, "energy"),
-        ("thermal_plasma_pressure", None, "thermal", None, "plasma_pressure"),
-        ("total_thermal_plasma_pressure", "total", "thermal", None, "plasma_pressure"),
+        # plasma is a channel-qualifier (channel_qualifiers.yml): it peels into
+        # the channel_qualifier segment, leaving pressure as the base.
+        ("thermal_plasma_pressure", None, "thermal", None, "pressure"),
+        ("total_thermal_plasma_pressure", "total", "thermal", None, "pressure"),
         ("thermal_electron_pressure", None, "thermal", "electron", "pressure"),
         ("thermal_ion_pressure", None, "thermal", "ion", "pressure"),
         ("fast_ion_pressure", None, "fast", "ion", "pressure"),
