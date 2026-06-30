@@ -138,6 +138,8 @@ def _get_vocabulary_description(segment_id: str) -> str:
         "position": "Spatial location where field is evaluated (use with at_ template)",
         "geometry": "Intrinsic geometric property of the object (use with of_ template)",
         "process": "Physical process or mechanism (e.g., conduction, ohmic, radiation)",
+        "zone": "Plasma-region / geometric sub-selector prefix (e.g., core, edge, inner, outer, upper, lower)",
+        "channel": "Transport channel — WHAT is transported (heat, particle, energy, momentum)",
     }
     return descriptions.get(segment_id, "")
 
