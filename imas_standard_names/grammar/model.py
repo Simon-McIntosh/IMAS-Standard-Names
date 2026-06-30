@@ -779,15 +779,18 @@ def _decompose_physical_base(
     # Try to parse the physical_base to extract any embedded qualifiers
     try:
         result = _parse_ir(physical_base)
-        # Successfully parsed: merge the parsed (residual) qualifiers, then the
-        # channel renders innermost — immediately before the base.
-        qualifiers.extend(result.ir.qualifiers)
+        # The channel renders OUTER of the residual physical_base qualifiers
+        # (but inner of subject/zone): the channel names WHAT is transported and
+        # modifies the whole "[qualifier] base" concept — the convection velocity
+        # OF momentum (momentum_convection_velocity), the decay length OF heat
+        # (heat_decay_length). So channel precedes the residual qualifiers.
         if channel_qualifier is not None:
             qualifiers.append(channel_qualifier)
+        qualifiers.extend(result.ir.qualifiers)
         return result.ir.base, qualifiers
     except (ParseError, ValueError):
-        # Can't decompose: use the whole string as base. Channel still renders
-        # innermost (just before the base).
+        # Can't decompose: use the whole string as base. Channel renders just
+        # before the (compound) base.
         if channel_qualifier is not None:
             qualifiers.append(channel_qualifier)
         return QuantityOrCarrier(
