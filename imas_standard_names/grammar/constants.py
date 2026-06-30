@@ -37,6 +37,7 @@ from .model_types import (
     Process,
     Region,
     Subject,
+    Zone,
 )
 from .vocab_loaders import load_physical_bases, load_qualifiers
 
@@ -58,6 +59,7 @@ SEGMENT_TOKEN_MAP: dict[str, tuple[str, ...]] = {
     "population": tuple(member.value for member in Population),
     "subject": tuple(member.value for member in Subject),
     "device": tuple(member.value for member in Object),
+    "zone": tuple(member.value for member in Zone),
     "geometric_base": tuple(member.value for member in GeometricBase),
     "physical_base": tuple(sorted(load_physical_bases().bases.keys())),
     "object": tuple(member.value for member in Object),
@@ -117,6 +119,13 @@ SEGMENT_RULES: tuple[SegmentRule, ...] = (
         template=None,
         exclusive_with=("object",),
         tokens=SEGMENT_TOKEN_MAP["device"],
+    ),
+    SegmentRule(
+        identifier="zone",
+        optional=True,
+        template=None,
+        exclusive_with=(),
+        tokens=SEGMENT_TOKEN_MAP["zone"],
     ),
     SegmentRule(
         identifier="geometric_base",
@@ -184,6 +193,7 @@ SEGMENT_ORDER: tuple[str, ...] = (
     "population",
     "subject",
     "device",
+    "zone",
     "geometric_base",
     "physical_base",
     "object",
@@ -193,9 +203,9 @@ SEGMENT_ORDER: tuple[str, ...] = (
     "process",
 )
 
-# Base segments are at indices [7, 8] in SEGMENT_ORDER
+# Base segments are at indices [8, 9] in SEGMENT_ORDER
 # They mark the boundary between prefix (component, coordinate, subject) and suffix (object, geometry, position, process) segments
-BASE_SEGMENT_INDICES: tuple[int, ...] = (7, 8)
+BASE_SEGMENT_INDICES: tuple[int, ...] = (8, 9)
 BASE_SEGMENTS: tuple[str, ...] = ("geometric_base", "physical_base")
 PREFIX_SEGMENTS: tuple[str, ...] = SEGMENT_ORDER[: BASE_SEGMENT_INDICES[0]]
 SUFFIX_SEGMENTS: tuple[str, ...] = SEGMENT_ORDER[BASE_SEGMENT_INDICES[-1] + 1 :]

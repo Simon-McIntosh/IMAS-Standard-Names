@@ -179,6 +179,11 @@ def load_default_vocabularies() -> Vocabularies:
         if meta.get("kind") == OperatorKind.UNARY_PREFIX.value
     )
 
+    # Zone tokens (core, edge, inner, outer, lower, ...) are an ordered prefix
+    # segment; they peel like qualifiers and the model retains them in the
+    # ``zone`` segment.
+    zone_quals = frozenset(vocab_loaders.load_zones())
+
     qualifiers = (
         subject_quals
         | object_quals
@@ -187,6 +192,7 @@ def load_default_vocabularies() -> Vocabularies:
         | population_quals
         | orbit_quals
         | prefix_op_quals
+        | zone_quals
     )
 
     return Vocabularies(

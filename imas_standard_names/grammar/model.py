@@ -47,6 +47,7 @@ from imas_standard_names.grammar.model_types import (
     Region,
     Subject,
     Transformation,
+    Zone,
 )
 from imas_standard_names.grammar.parser import ParseError, parse as _parse_ir
 from imas_standard_names.grammar.render import compose as _compose_ir
@@ -92,6 +93,16 @@ _GEOMETRY_VALUES: frozenset[str] = frozenset(g.value for g in GeometricBase)
 _AGGREGATION_VALUES: frozenset[str] = frozenset(a.value for a in Aggregation)
 _POPULATION_VALUES: frozenset[str] = frozenset(p.value for p in Population)
 _ORBIT_VALUES: frozenset[str] = frozenset(o.value for o in Orbit)
+
+# Zone: ordered plasma-region / geometric sub-selector PREFIX segment. Unlike
+# the single-token aggregation/orbit/population segments, a name may carry
+# MULTIPLE zone tokens (lower_outer), which MUST appear in the FIXED canonical
+# intra-order declared in zones.yml (mirrored by the Zone enum member order:
+# vertical upper/lower, radial inner/outer, region core..scrape_off_layer, face
+# front_surface/back_surface/wetted). ``_ZONE_ORDER`` gives each token its rank
+# so compose() can canonicalize and the validator can reject out-of-order input.
+_ZONE_VALUES: frozenset[str] = frozenset(z.value for z in Zone)
+_ZONE_ORDER: dict[str, int] = {z.value: i for i, z in enumerate(Zone)}
 
 # Map from LocusType to model field name
 _LOCUS_TYPE_TO_FIELD: dict[LocusType, str] = {
@@ -363,6 +374,7 @@ def _ir_to_model_dict(ir: StandardNameIR) -> dict[str, str]:
             aggregation = None
             population = None
             orbit = None
+            zone_tokens: list[str] = []
             base_qualifiers: list[str] = []
             for q in ir.qualifiers:
                 # Aggregation, orbit, and population are orthogonal single-token
@@ -413,6 +425,12 @@ def _ir_to_model_dict(ir: StandardNameIR) -> dict[str, str]:
                     subject = q.token
                 elif q.token in _OBJECT_VALUES:
                     device = q.token
+                elif q.token in _ZONE_VALUES:
+                    # Zone is multi-token: collect every zone token in PARSE
+                    # order here; compose() reconstructs them in the fixed
+                    # canonical intra-order, and parse_standard_name rejects a
+                    # non-canonical authored order via NonCanonicalNameError.
+                    zone_tokens.append(q.token)
                 elif (
                     q.token in _BARE_PREFIX_TRANSFORMATIONS
                     and transformation_token is None
@@ -430,6 +448,8 @@ def _ir_to_model_dict(ir: StandardNameIR) -> dict[str, str]:
                 d["subject"] = subject
             if device:
                 d["device"] = device
+            if zone_tokens:
+                d["zone"] = tuple(zone_tokens)
             if transformation_token:
                 d["transformation"] = transformation_token
             # Fold remaining qualifiers into physical_base as compound
@@ -629,6 +649,7 @@ def _model_to_ir(model: StandardName) -> StandardNameIR:
                 model.population,
                 model.orbit,
                 model.aggregation,
+                model.zone,
             )
             # Insert bare-prefix transformation qualifier at the front
             # (transformation is outermost: <transform>_<subject>_<base>)
@@ -689,18 +710,22 @@ def _decompose_physical_base(
     population: Population | None = None,
     orbit: Orbit | None = None,
     aggregation: Aggregation | None = None,
+    zone: tuple[Zone, ...] = (),
 ) -> tuple[QuantityOrCarrier, list[Qualifier]]:
     """Decompose a physical_base string into IR base + qualifiers.
 
     The physical_base may be a compound like 'magnetic_field' or
     'diamagnetic_drift_velocity'. We use the parser to decompose it correctly,
-    then prepend aggregation/orbit/population/subject/device as qualifiers.
+    then prepend aggregation/orbit/population/subject/device/zone as qualifiers.
     """
     qualifiers: list[Qualifier] = []
 
-    # Render order outer-to-inner: aggregation, then orbit, then population,
-    # then the species subject, then the device —
-    # <aggregation>_<orbit>_<population>_<subject>_<base>.
+    # Render order outer-to-inner: aggregation, orbit, population, the species
+    # subject, the device, then the ordered zone tokens —
+    # <aggregation>_<orbit>_<population>_<subject>_<device>_<zone...>_<base>.
+    # Zone tokens are emitted in the FIXED canonical intra-order (Zone enum
+    # order) regardless of the order they were supplied in, so a non-canonical
+    # authored order canonicalizes here and is rejected by parse_standard_name.
     if aggregation:
         qualifiers.append(Qualifier(token=_value_of(aggregation)))
     if orbit:
@@ -711,6 +736,10 @@ def _decompose_physical_base(
         qualifiers.append(Qualifier(token=_value_of(subject)))
     if device:
         qualifiers.append(Qualifier(token=_value_of(device)))
+    for zone_token in sorted(
+        (_value_of(z) for z in zone), key=lambda t: _ZONE_ORDER.get(t, len(_ZONE_ORDER))
+    ):
+        qualifiers.append(Qualifier(token=zone_token))
 
     # Try to parse the physical_base to extract any embedded qualifiers
     try:
@@ -737,6 +766,12 @@ class StandardName(BaseModel):
     population: Population | None = None
     subject: Subject | None = None
     device: Object | None = None
+    # Zone: ordered plasma-region / geometric sub-selector PREFIX segment.
+    # MULTI-token (lower_outer) unlike the single-token modifier segments, so
+    # it is a tuple. Tokens are stored/validated in the FIXED canonical
+    # intra-order (Zone enum order); compose() renders them between
+    # subject/device and the refined qualifiers.
+    zone: tuple[Zone, ...] = ()
     geometric_base: GeometricBase | None = None
     physical_base: BaseToken | None = None
     object: Object | None = None
@@ -964,6 +999,7 @@ class StandardName(BaseModel):
                     self.population,
                     self.subject,
                     self.device,
+                    self.zone,
                     self.object,
                     self.position,
                     self.geometry,
@@ -992,11 +1028,25 @@ class StandardName(BaseModel):
         return _compose_ir(ir)
 
     def model_dump_compact(self) -> dict[str, str]:
-        return {
-            key: _value_of(value)
-            for key, value in self.model_dump().items()
-            if value is not None
-        }
+        out: dict[str, str] = {}
+        for key, value in self.model_dump().items():
+            if value is None:
+                continue
+            # The zone segment is a tuple (multi-token). Omit it when empty and
+            # render a non-empty zone as the canonically-ordered token run so
+            # the compact dump stays a flat ``dict[str, str]`` like every other
+            # segment.
+            if key == "zone":
+                if not value:
+                    continue
+                ordered = sorted(
+                    (_value_of(z) for z in value),
+                    key=lambda t: _ZONE_ORDER.get(t, len(_ZONE_ORDER)),
+                )
+                out[key] = "_".join(ordered)
+                continue
+            out[key] = _value_of(value)
+        return out
 
 
 def compose_standard_name(parts: Mapping[str, Any] | StandardName) -> str:

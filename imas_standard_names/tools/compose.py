@@ -61,6 +61,7 @@ class ComposeTool(Tool):
         population: grammar_types.Population | str | None = None,
         subject: grammar_types.Subject | str | None = None,
         device: grammar_types.Object | str | None = None,
+        zone: grammar_types.Zone | str | list[str] | tuple[str, ...] | None = None,
         object: grammar_types.Object | str | None = None,
         geometry: grammar_types.Position | str | None = None,
         position: grammar_types.Position | str | None = None,
@@ -86,6 +87,14 @@ class ComposeTool(Tool):
         pop = coerce_enum(grammar_types.Population, population)
         subj = coerce_enum(grammar_types.Subject, subject)
         dev = coerce_enum(grammar_types.Object, device)
+        # zone is a multi-token segment: accept a single token (str/enum) or a
+        # sequence of tokens, normalising to a tuple of Zone members.
+        if zone is None:
+            zone_tuple: tuple[grammar_types.Zone, ...] = ()
+        elif isinstance(zone, (list, tuple)):
+            zone_tuple = tuple(coerce_enum(grammar_types.Zone, z) for z in zone)
+        else:
+            zone_tuple = (coerce_enum(grammar_types.Zone, zone),)
         obj = coerce_enum(grammar_types.Object, object)
         geom = coerce_enum(grammar_types.Position, geometry)
         pos = coerce_enum(grammar_types.Position, position)
@@ -104,6 +113,7 @@ class ComposeTool(Tool):
             population=pop,
             subject=subj,
             device=dev,
+            zone=zone_tuple,
             object=obj,
             geometry=geom,
             position=pos,

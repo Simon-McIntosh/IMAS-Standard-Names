@@ -20,7 +20,7 @@ def test_overview_structure(sample_catalog):
     assert "canonical_pattern" in result
     expected_pattern = (
         "[<component> | <coordinate>]? [<aggregation>]? [<orbit>]? "
-        "[<population>]? [<subject>]? [<device> | of_<object>]? "
+        "[<population>]? [<subject>]? [<device> | of_<object>]? [<zone>]? "
         "[<geometric_base> | <physical_base>]? "
         "[of_<geometry> | at_<position> | over_<region>]? [due_to_<process>]? [<qualifier>]?"
     )

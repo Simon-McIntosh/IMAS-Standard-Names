@@ -137,6 +137,22 @@ class Region(StrEnum):
     VESSEL = "vessel"
 
 
+class Zone(StrEnum):
+    UPPER = "upper"
+    LOWER = "lower"
+    INNER = "inner"
+    OUTER = "outer"
+    CORE = "core"
+    EDGE = "edge"
+    PEDESTAL = "pedestal"
+    SEPARATRIX = "separatrix"
+    DIVERTOR = "divertor"
+    SCRAPE_OFF_LAYER = "scrape_off_layer"
+    FRONT_SURFACE = "front_surface"
+    BACK_SURFACE = "back_surface"
+    WETTED = "wetted"
+
+
 class Process(StrEnum):
     CONDUCTION = "conduction"
     CONVECTION = "convection"
@@ -569,6 +585,7 @@ __all__ = [
     "Orbit",
     "Aggregation",
     "Region",
+    "Zone",
     "Process",
     "GenericPhysicalBase",
     "BinaryOperator",

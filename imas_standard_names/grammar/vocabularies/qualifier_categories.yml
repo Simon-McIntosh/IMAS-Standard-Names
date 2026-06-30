@@ -67,27 +67,11 @@ qualifier_categories:
     - field_aligned
     - field_line
     - flux_surface
-    - line_integrated
     - major
     - minor
     - non_axisymmetric
     - surface
-    - volume_averaged
     - volumetric
-    - wetted
-
-  # Plasma region and position modifiers
-  region:
-    - core
-    - divertor
-    - edge
-    - inner
-    - lower
-    - outer
-    - pedestal
-    - scrape_off_layer
-    - separatrix
-    - upper
 
   # State, condition, mode, and named-physics qualifiers
   state:
@@ -102,16 +86,11 @@ qualifier_categories:
     - equilibrium
     - external
     - fluctuating
-    - gyroaveraged
     - ideal
     - lower_bound
-    - maximum
     - mean
-    - minimum
     - mode
-    - normalized
     - peak
-    - perturbed
     - quench
     - resistive
     - saturated
@@ -196,11 +175,8 @@ qualifier_categories:
 
   # Engineering subsystem and numerical-split qualifiers
   engineering:
-    - accumulated
-    - back_surface
     - coolant
     - explicit
-    - front_surface
     - heating
     - implicit
     - inlet

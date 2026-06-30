@@ -88,6 +88,7 @@ canonical_pattern: >
   [<population>]?
   [<subject>]?
   [<device>]?
+  [<zone>]?
   <geometric_base | physical_base>
   [of_<object>]?
   [of_<geometry> | at_<position>[_equal_to_<value>]? | over_<region>]?
@@ -201,6 +202,21 @@ segments:
       the form enforced by compose tooling and production review.
       Legacy pattern: <device>_<signal> where signal is the physical_base
       (flux_loop_voltage, passive_loop_current) — still parses.
+  - id: zone
+    optional: true
+    vocabulary: zones
+    description: >
+      Plasma-region / geometric sub-selector prefix (core, edge, pedestal,
+      separatrix, divertor, scrape_off_layer; vertical upper/lower; radial
+      inner/outer; PFC face front_surface/back_surface/wetted). Renders
+      between the subject/device and the refined qualifiers:
+      <subject>_<device>_<zone>_<qualifier>_<base> (e.g.
+      core_electron_temperature, lower_outer_squareness_of_flux_surface).
+      Unlike aggregation/orbit/population (single-token), the zone segment
+      admits MULTIPLE tokens (lower_outer) in a FIXED canonical intra-order
+      (vertical, radial, region, face — see zones.yml). The prefix form
+      (scrape_off_layer_density) is distinct from the postfix region locus
+      (over_scrape_off_layer); both coexist.
   - id: geometric_base
     optional: true
     vocabulary: geometric_bases
@@ -308,6 +324,9 @@ vocabularies:
   # outermost modifier segment, stacks orthogonally with population.
   aggregations: !include vocabularies/aggregations.yml
   regions: !include vocabularies/regions.yml
+  # zone: ordered plasma-region / geometric sub-selector PREFIX segment
+  # (distinct from the postfix region locus). Multi-token, fixed intra-order.
+  zones: !include vocabularies/zones.yml
   processes: !include vocabularies/processes.yml
   generic_physical_bases: !include vocabularies/generic_physical_bases.yml
   binary_operators: !include vocabularies/binary_operators.yml

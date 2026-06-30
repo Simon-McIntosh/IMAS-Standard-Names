@@ -124,6 +124,14 @@ def test_vocab_cross_segment_uniqueness():
         # intentionally appear in other segment vocabs (subjects, qualifiers)
         frozenset({"normalizing_qualifiers.yml", "subjects.yml"}),
         frozenset({"normalizing_qualifiers.yml", "qualifiers.yml"}),
+        # zones.yml is the ordered plasma-region / geometric sub-selector PREFIX
+        # segment. Its tokens legitimately serve dual roles:
+        #  - zones.yml ↔ regions.yml / locus_registry.yml: the same region word
+        #    is both a prefix zone (scrape_off_layer_density) and a postfix
+        #    locus (over_scrape_off_layer / at_pedestal). Both forms coexist by
+        #    design (see zones.yml header and the canonical-qualifier-order plan).
+        frozenset({"zones.yml", "regions.yml"}),
+        frozenset({"zones.yml", "locus_registry.yml"}),
     }
 
     # Filter out allowed overlaps

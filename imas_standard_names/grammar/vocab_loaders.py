@@ -276,6 +276,35 @@ def load_aggregations() -> frozenset[str]:
     return _load_flat_token_list("aggregations.yml", "aggregations")
 
 
+def load_zones() -> tuple[str, ...]:
+    """Load zone tokens from ``zones.yml`` in canonical intra-order.
+
+    Zone tokens (plasma-region / geometric sub-selectors: core, edge,
+    pedestal, separatrix, divertor, scrape_off_layer; vertical upper/lower;
+    radial inner/outer; PFC face front_surface/back_surface/wetted) compose as
+    an ordered PREFIX segment. Unlike the other modifier segments a name may
+    carry MULTIPLE zone tokens, which MUST appear in the order returned here
+    (the file order is the canonical intra-order). The parser unions these into
+    its qualifier vocabulary so they peel; the StandardName model retains them
+    (multiple) in the ``zone`` segment.
+
+    Returns an ORDERED tuple (not a frozenset) so the canonical intra-order is
+    preserved for both rendering and validation.
+    """
+    path = _VOCAB_DIR / "zones.yml"
+    if not path.exists():
+        return ()
+    with path.open(encoding="utf-8") as fh:
+        data = yaml.safe_load(fh)
+    if not data:
+        return ()
+    if isinstance(data, list):
+        return tuple(str(token) for token in data)
+    if isinstance(data, dict) and "zones" in data:
+        return tuple(str(token) for token in (data["zones"] or []))
+    return ()
+
+
 def _load_flat_token_list(filename: str, dict_key: str) -> frozenset[str]:
     """Load a flat YAML token list (or ``{<dict_key>: [...]}``)."""
     path = _VOCAB_DIR / filename
