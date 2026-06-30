@@ -7,10 +7,10 @@
   <meta name="reckon-type"    content="plan">
   <meta name="plan-slug"      content="canonical-qualifier-order">
   <meta name="plan-title"     content="Canonical Qualifier Order">
-  <meta name="plan-summary"   content="Define and enforce a single canonical order for qualifiers (including generics) at generate time, template it into the LLM name-generation prompts, and migrate the ~104 non-canonical catalogue names.">
-  <meta name="plan-status"    content="draft">
+  <meta name="plan-summary"   content="Decompose the catch-all 'generic qualifier' class into strictly-ordered grammar segments (operators · zone · refined qualifier · base), pull mis-filed tokens (operators, coordinates, lexical bases) out of qualifiers.yml, enforce one canonical order at generate time, and migrate the catalogue with re-review.">
+  <meta name="plan-status"    content="active">
   <meta name="plan-roi"       content="high">
-  <meta name="plan-effort"    content="L">
+  <meta name="plan-effort"    content="XL">
   <meta name="plan-tier"      content="opus">
   <meta name="plan-owner"     content="Simon McIntosh">
   <meta name="plan-depends-on" content="qualifier-vocabulary-categorization">
@@ -21,189 +21,350 @@
 <body>
   <main class="plan-doc">
 
-    <h2 id="s1">§1 — The problem: qualifier order is not canonical</h2>
+    <section class="landed-summary-card" style="border:1px solid #c9ced9;border-radius:8px;padding:14px 18px;margin-bottom:18px;background:#f8f9fb">
+      <p style="margin:0 0 6px"><strong>Direction locked (2026-06-30):</strong> Option B — full grammar decomposition.
+      A survey of the live catalogue (1364 names, 100% parse) proved the open <code>qualifiers.yml</code> "generic"
+      class is a catch-all conflating ≥4 grammatical roles with opposite positional behaviour. The fix is structural:
+      route every token to its true segment, add an ordered <strong>zone</strong> segment, pull the mis-filed
+      tokens (operators, coordinates, lexical bases) out of <code>qualifiers.yml</code>, and enforce one canonical
+      order at generate time (compose canonicalizes; validator rejects). Breaking renames are authorised (early RC);
+      renamed names re-pass review, with before/after semantic-quality sampling.</p>
+      <p style="margin:0;font-size:13px;color:#5b6072">Prereq <a href="qualifier-vocabulary-categorization.html">qualifier-vocabulary-categorization</a> shipped (12-category map). Migration runs through imas-codex (graph), not by hand-editing the catalogue YAML.</p>
+    </section>
+
+    <h2 id="s1">§1 — The problem: "generic qualifier" is a catch-all, not a grammar role</h2>
     <p>
-      The ISN grammar specification (<code>imas_standard_names/grammar/specification.yml</code>,
-      <code>canonical_pattern</code>) fixes the order of the <em>named</em> qualifier sub-kinds:
-      <code>aggregation → orbit → population → subject</code>. It does <strong>not</strong> assign the
-      open <strong>generic</strong> qualifier class (the 161 tokens in <code>qualifiers.yml</code>:
-      <code>major</code>, <code>external</code>, <code>absorbed</code>, …) a position relative to the
-      named sub-kinds or to each other. The parser preserves whatever order a name was written in
-      (<code>render_qualifiers</code> emits qualifiers in parse order), so the catalogue has drifted into
-      <strong>inconsistent ordering</strong>.
+      The ISN grammar (<code>specification.yml</code>) fixes the order of the <em>named</em> qualifier sub-kinds
+      (<code>aggregation → orbit → population → subject</code>) and the model (<code>grammar/model.py</code>) already
+      carries clean named segments for them. But the open <strong>generic</strong> qualifier class
+      (<code>qualifiers.yml</code>, 161 tokens) has <strong>no defined position</strong>: the parser collects every
+      generic token into a flat IR <code>qualifiers</code> list and <code>render_qualifiers</code> emits them in parse
+      order. Whatever order a name was authored in is preserved, so the catalogue has drifted.
     </p>
     <p>
-      Measured across the live catalogue (1364 names): <strong>1043</strong> carry ≥1 qualifier,
-      <strong>477</strong> carry ≥2. Under the natural rule "named sub-kinds in spec order, then
-      generics", <strong>104 names (7.6% of the catalogue) violate it</strong> — a generic qualifier
-      sits before a named sub-kind. The headline evidence: <code>subject → generic</code> occurs in 79
-      names, but <code>generic → subject</code> occurs in 70 — the same two roles in the opposite order,
-      so the ordering is genuinely not being maintained.
+      A full survey of the live catalogue (1364 names; <strong>all parse</strong>) shows the order problem lives
+      <em>entirely</em> inside this class, and that the class is not one role:
+    </p>
+    <ul>
+      <li><strong>459</strong> names carry ≥1 generic qualifier; <strong>134</strong> carry ≥2.</li>
+      <li><strong>0</strong> names violate the named sub-kind order — the named segments are clean.</li>
+      <li><strong>8 tokens are literally double-registered as operators</strong>
+        (<code>normalized, perturbed, volume_averaged, line_integrated, accumulated, gyroaveraged, maximum, minimum</code>):
+        they live in both <code>qualifiers.yml</code> and <code>operators.yml</code>, get parsed as flat qualifiers,
+        then heuristically folded back into the model's <code>transformation</code> slot via
+        <code>_BARE_PREFIX_TRANSFORMATIONS</code>. This is the smell, concretely.</li>
+      <li>The residual generics get glued into <code>physical_base</code> as an opaque compound
+        (<code>major_radius</code>, <code>anomalous_current_density</code>), hiding structure and leaving intra-compound
+        order undefined.</li>
+    </ul>
+    <p>
+      The class mixes at least four behaviours with opposite binding: <strong>base-bound</strong> lexical modifiers
+      (<code>major</code> 31/33 adjacent, <code>surface</code>, <code>vector</code>, <code>angular</code>) that glue to the base;
+      <strong>reductions/operators</strong> (always outermost); <strong>region/geometric sub-selectors</strong>
+      (<code>core/edge/inner/outer/upper/lower</code>); and <strong>genuine regime/source/diagnostic qualifiers</strong>
+      (<code>anomalous/ohmic/bootstrap/doppler</code>). A single flat "generic position" cannot be correct for all of them —
+      e.g. <code>normalized</code> wants to be outermost while <code>major</code> must hug the base. A binding-depth split
+      (<code>wrapper → zone → qualifier → base-bound</code>) already fits <strong>117/134</strong> multi-generic names with
+      no hand-tuning: the authors have been encoding binding depth by hand all along.
     </p>
 
     <figure>
-      <svg viewBox="0 0 720 132" width="100%" style="max-width:720px;font-family:system-ui,sans-serif" role="img"
-           aria-label="Canonical-order status across 1364 catalogue names">
-        <text x="20" y="20" font-size="13" font-weight="600" fill="#1c2030">1364 catalogue names · qualifier-order status</text>
-        <rect x="20"  y="34" width="160" height="34" fill="#f4f5f7" stroke="#9aa0ad" stroke-width="1"/>
-        <rect x="180" y="34" width="468" height="34" fill="#eafbf0" stroke="#1a9c52" stroke-width="1"/>
-        <rect x="648" y="34" width="52"  height="34" fill="#fdeeee" stroke="#c0392b" stroke-width="1"/>
-        <text x="100" y="56" text-anchor="middle" font-size="13" font-weight="600" fill="#1c2030">321</text>
-        <text x="414" y="56" text-anchor="middle" font-size="13" font-weight="600" fill="#13351f">939</text>
-        <text x="674" y="56" text-anchor="middle" font-size="13" font-weight="600" fill="#3d1714">104</text>
-        <text x="100" y="86" text-anchor="middle" font-size="12.5" fill="#1c2030">no qualifier</text>
-        <text x="414" y="86" text-anchor="middle" font-size="12.5" fill="#13351f">qualifier order canonical</text>
-        <text x="674" y="86" text-anchor="middle" font-size="12.5" fill="#3d1714">violates</text>
-        <text x="20" y="118" font-size="11.5" fill="#5b6072">Under "named sub-kinds (aggregation→orbit→population→subject) first, then generics"; 104 names place a generic before a named sub-kind.</text>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 520" width="100%" style="max-width:860px;font-family:system-ui,-apple-system,sans-serif" role="img" aria-label="Qualifier-class decomposition: canonical order and token disposition funnel">
+        <style>
+          .t{fill:#1c2030} .s{fill:#5b6072} .h{font-weight:700}
+        </style>
+        <text x="20" y="26" font-size="16" class="t h">Qualifier-class decomposition — one flat "generic" bucket → ordered segments</text>
+        <text x="20" y="56" font-size="13" class="t h">Canonical order (outer → inner → suffix)</text>
+        <text x="20" y="74" font-size="11.5" class="s">Each segment renders in a fixed slot; compose() sorts deterministically and the validator rejects any other order.</text>
+        <g font-size="11.5" text-anchor="middle">
+          <rect x="20"  y="86" width="92"  height="34" rx="4" stroke="#9aa0ad" fill="#eef2fb"/><text x="66"  y="107" class="t">operator(s)</text>
+          <rect x="116" y="86" width="74"  height="34" rx="4" stroke="#9aa0ad" fill="#eef7ee"/><text x="153" y="107" class="t">aggregation</text>
+          <rect x="194" y="86" width="52"  height="34" rx="4" stroke="#9aa0ad" fill="#eef7ee"/><text x="220" y="107" class="t">orbit</text>
+          <rect x="250" y="86" width="74"  height="34" rx="4" stroke="#9aa0ad" fill="#eef7ee"/><text x="287" y="107" class="t">population</text>
+          <rect x="328" y="86" width="62"  height="34" rx="4" stroke="#9aa0ad" fill="#eef7ee"/><text x="359" y="107" class="t">subject</text>
+          <rect x="394" y="86" width="58"  height="34" rx="4" stroke="#e08a1e" fill="#fff3e0"/><text x="423" y="103" class="t h">zone</text><text x="423" y="115" font-size="8.5" fill="#e08a1e">NEW</text>
+          <rect x="456" y="86" width="86"  height="34" rx="4" stroke="#c0392b" fill="#fdeeee"/><text x="499" y="103" class="t h">qualifier</text><text x="499" y="115" font-size="8.5" fill="#c0392b">refined</text>
+          <rect x="546" y="86" width="92"  height="34" rx="4" stroke="#3a3f4b" stroke-width="1.5" fill="#e7e9ee"/><text x="592" y="107" class="t h">BASE</text>
+          <rect x="642" y="86" width="100" height="34" rx="4" stroke="#9aa0ad" fill="#f4f5f7"/><text x="692" y="103" class="s">of_/at_/over_</text><text x="692" y="115" font-size="9" class="s">locus</text>
+          <rect x="746" y="86" width="94"  height="34" rx="4" stroke="#9aa0ad" fill="#f4f5f7"/><text x="793" y="103" class="s">due_to_</text><text x="793" y="115" font-size="9" class="s">process</text>
+        </g>
+        <text x="20"  y="138" font-size="10" class="s">normalized·∇·∫</text>
+        <text x="394" y="138" font-size="10" fill="#e08a1e">core·edge·inner·outer</text>
+        <text x="456" y="150" font-size="10" fill="#c0392b">anomalous·ohmic·doppler (category-ordered)</text>
+        <text x="546" y="138" font-size="10" class="s">major_radius·…</text>
+        <text x="20" y="196" font-size="13" class="t h">Where the 161 qualifiers.yml tokens go</text>
+        <g font-size="12">
+          <rect x="20" y="212" width="150" height="250" rx="6" fill="#fdeeee" stroke="#c0392b"/>
+          <text x="95" y="234" text-anchor="middle" class="t h" font-size="13">qualifiers.yml</text>
+          <text x="95" y="252" text-anchor="middle" class="s">161 tokens</text>
+          <text x="95" y="270" text-anchor="middle" class="s" font-size="10.5">(one flat bucket,</text>
+          <text x="95" y="284" text-anchor="middle" class="s" font-size="10.5">no defined order)</text>
+          <line x1="170" y1="250" x2="320" y2="250" stroke="#9aa0ad"/>
+          <rect x="320" y="232" width="290" height="36" rx="4" fill="#eef2fb" stroke="#9aa0ad"/>
+          <text x="332" y="248" class="t h">→ operators  (~8–13)</text>
+          <text x="332" y="262" class="s" font-size="10.5">normalized, volume_averaged, perturbed, maximum…  (dupes)</text>
+          <line x1="170" y1="300" x2="320" y2="300" stroke="#9aa0ad"/>
+          <rect x="320" y="282" width="290" height="36" rx="4" fill="#e7e9ee" stroke="#9aa0ad"/>
+          <text x="332" y="298" class="t h">→ BASE / coordinate  (~15–25)</text>
+          <text x="332" y="312" class="s" font-size="10.5">surface_area, vector_potential · major→radial_coordinate</text>
+          <line x1="170" y1="350" x2="320" y2="350" stroke="#9aa0ad"/>
+          <rect x="320" y="332" width="290" height="36" rx="4" fill="#fff3e0" stroke="#e08a1e"/>
+          <text x="332" y="348" class="t h">→ zone  (~13)</text>
+          <text x="332" y="362" class="s" font-size="10.5">core, edge, inner, outer, upper, lower, pedestal…</text>
+          <line x1="170" y1="412" x2="320" y2="412" stroke="#9aa0ad"/>
+          <rect x="320" y="390" width="290" height="48" rx="4" fill="#fdeeee" stroke="#c0392b"/>
+          <text x="332" y="408" class="t h">→ qualifier  (~95, kept &amp; ordered)</text>
+          <text x="332" y="422" class="s" font-size="10.5">anomalous, ohmic, bootstrap, doppler, faraday…</text>
+          <text x="332" y="434" class="s" font-size="10.5">ordered by 12 normalized categories; prune mis-files</text>
+        </g>
+        <text x="640" y="234" font-size="11.5" class="t h">Corpus evidence (1364 names)</text>
+        <g font-size="10.5" class="s">
+          <text x="640" y="254">• 459 names carry ≥1 generic; 134 ≥2</text>
+          <text x="640" y="270">• 0 violations among named sub-kinds</text>
+          <text x="640" y="286">• whole problem lives in "generic"</text>
+          <text x="640" y="308" class="t h" font-size="11">Binding-depth gradient</text>
+          <text x="640" y="326">117/134 multi-generic names already</text>
+          <text x="640" y="342">obey wrapper→zone→qualifier→base</text>
+          <text x="640" y="358">— authors encode it by hand today.</text>
+          <text x="640" y="382" class="t h" font-size="11">Enforcement</text>
+          <text x="640" y="400">compose() canonicalizes;</text>
+          <text x="640" y="416">validator rejects non-canonical.</text>
+        </g>
+        <text x="20" y="488" font-size="10.5" class="s">8 tokens are literally double-registered as operators (normalized, perturbed, volume_averaged, line_integrated, accumulated, gyroaveraged, maximum, minimum).</text>
+        <text x="20" y="504" font-size="10.5" class="s">Migration: land grammar → re-derive segments → dry-run rename_cascade → rename → null reviewer_score → re-review → before/after sample → export.</text>
       </svg>
       <figcaption style="font-size:12.5px;color:#5b6072;margin-top:4px">
-        The 104 red names need renaming once a canonical order is locked. The 939 green already comply
-        with the named-then-generic rule (modulo generic-vs-generic order, which is currently undefined).
+        The decomposition routes each <code>qualifiers.yml</code> token to its true segment. The named sub-kinds
+        already work; the new <strong>zone</strong> segment and the <strong>refined qualifier</strong> segment give
+        the remaining tokens a defined position, and operators/coordinates/lexical-bases leave the qualifier vocab entirely.
       </figcaption>
     </figure>
 
+    <h2 id="s2">§2 — The decomposition: route every token to its true segment</h2>
     <p>
-      This surfaced in the catalog SPA's Grammar composer: when a user multi-selects qualifiers there is
-      no canonical order to render them in, and seeded names can only be shown in their (possibly
-      non-canonical) parsed order. The fix is upstream — a canonical order defined and <em>enforced at
-      generation time</em>, with the catalogue migrated to it.
+      The output of this section is (a) the canonical segment order above written into <code>specification.yml</code>,
+      (b) a new <strong>zone</strong> segment, and (c) a per-token disposition for all 161 <code>qualifiers.yml</code>
+      tokens. Dispositions (corpus-derived, refined by physics in §3):
+    </p>
+    <ul>
+      <li><strong>→ operators (remove from <code>qualifiers.yml</code>):</strong> the 8 literal dupes, plus reconcile the
+        near-dupes (<code>time_averaged→time_average</code>, <code>flux_surface</code>, <code>average/mean</code>,
+        <code>current_weighted</code>). Parser already accepts operator tokens via its acceptance union, so removal is
+        round-trip-safe; they route to the <code>transformation</code>/<code>decomposition</code> slot. <em>Demonstrably
+        correct (user, 2026-06-30).</em></li>
+      <li><strong>→ BASE / coordinate (token-by-token, no blanket rule):</strong> lexicalised quantities that are distinct
+        physics (<code>surface_area</code>, <code>vector_potential</code>, <code>angular_momentum</code>,
+        <code>kinetic_energy</code>) become atomic bases; <strong>coordinate</strong> uses dissolve into the
+        <code>&lt;axis&gt;_coordinate_of_&lt;carrier&gt;</code> form — see §6.</li>
+      <li><strong>→ zone (new ordered segment):</strong> <code>core, edge, inner, outer, upper, lower, pedestal,
+        separatrix, divertor, scrape_off_layer, back/front_surface, wetted</code> — plasma region / geometric
+        sub-selectors used as prefixes, positioned between <code>subject</code> and <code>qualifier</code>, with a
+        defined intra-order (so <code>lower_outer_squareness</code> is deterministic).</li>
+      <li><strong>→ qualifier (keep, ordered):</strong> the genuine regime/source/diagnostic modifiers, ordered by the
+        12 normalized categories from <a href="qualifier-vocabulary-categorization.html">qualifier-vocabulary-categorization</a>.
+        Many tokens are unused in the live catalogue but physically real (<code>bootstrap, neoclassical, rf, nbi</code>) —
+        keep; prune only demonstrable mis-files.</li>
+    </ul>
+
+    <h2 id="s3">§3 — Deep per-token review &amp; recategorization (ISN)</h2>
+    <p>
+      Produce the authoritative per-token verdict table for all 161 tokens (operator / coordinate-carrier / atomic-base /
+      zone / qualifier), with physics rationale for each base-bound and edge case. This is the curation pass the user
+      asked for; it also covers the <strong>coverage review of every other segment</strong> (subjects, aggregations,
+      populations, orbits, regions, components, operators, loci) to widen coverage where the decomposition exposes a gap
+      (e.g. region-prefix tokens vs the <code>over_&lt;region&gt;</code> locus; missing coordinate carriers). Output: the
+      verdict table committed, the vocab files updated, codegen regenerated, tests green, full catalogue round-trips.
     </p>
 
-    <h2 id="s2">§2 — Define the canonical order</h2>
+    <h2 id="s3e">§3e — Enforce one canonical order at generate time (ISN)</h2>
     <p>
-      Extend the canonical pattern to give the generic qualifier class a defined position. The named
-      sub-kinds keep their order; the open question (see Decisions) is where generics sit relative to the
-      named sub-kinds and whether generics have an inter-order (e.g. by the 12 normalized categories from
-      <a href="qualifier-vocabulary-categorization.html">qualifier-vocabulary-categorization</a>:
-      transport → source → geometry → … ). The output of this section is a single, total order over every
-      qualifier token, written into <code>specification.yml</code>.
-    </p>
-
-    <h2 id="s3">§3 — Enforce at generate time</h2>
-    <p>
-      Make the renderer canonical: <code>compose</code>/<code>render_qualifiers</code>
-      (<code>imas_standard_names/grammar/render.py</code>) must emit qualifiers in the locked order
-      regardless of input order, and the validator must <strong>reject</strong> a name whose qualifiers
-      are out of canonical order (so a non-canonical name can never be (re)introduced). Round-trip then
-      means parse→canonical-compose, and any name that changes is a §5 migration target.
+      Make the renderer canonical: <code>compose</code>/<code>render_qualifiers</code> must emit every segment in the
+      locked order regardless of input order, and the validator must <strong>reject</strong> a name whose segments are
+      out of canonical order (<code>NonCanonicalNameError</code> already exists for this and attaches the canonical form).
+      Round-trip then means parse→canonical-compose; any name that changes is a §5 migration target.
     </p>
 
     <h2 id="s4">§4 — Template the order into the LLM name-generation prompts</h2>
     <p>
-      The name-generation prompts (imas-codex <code>sn</code> generation; ISN
-      <code>get_grammar_context</code> surfaces the canonical pattern + segment-order constraint to LLM
-      consumers) must template the qualifier order explicitly so generating agents emit canonical names
-      first time. Update <code>_build_canonical_pattern</code> / <code>_build_segment_order_constraint</code>
-      to include the generic-qualifier ordering, and verify the codex generation prompt renders it.
+      <code>get_grammar_context</code> / <code>_build_canonical_pattern</code> / <code>_build_segment_order_constraint</code>
+      (<code>grammar/context.py</code>) must surface the full segment order — including the new <code>zone</code> segment
+      and the refined qualifier ordering — so generating agents (imas-codex <code>sn</code>) emit canonical names first
+      time. Verify the codex compose prompt renders it. (The LLM has already been encoding binding depth via latent
+      knowledge — this formalizes it.)
     </p>
 
     <h2 id="s4b">§4b — Wire the canonical order into the catalog SPA grammar bar</h2>
     <p>
-      The catalog SPA's Grammar composer (<code>site/src/views/Grammar.jsx</code>) renders one top-row
-      button per qualifier instance. <strong>As of <code>v0.8.0rc53</code> these buttons are placed in
-      insertion / parse order — NOT canonical order</strong> (a deliberate placeholder, noted in the
-      code, pending this plan). Once §2 locks the total order and §3 exposes it, the SPA must consume it
-      so the qualifier buttons (and the composed name) render in canonical order. Concretely: emit the
-      canonical qualifier order (and per-category rank) in <code>GRAMMAR_VOCAB</code> from
-      <code>dataset.py::_build_grammar_vocab</code>, and have <code>Grammar.jsx</code> sort the
-      qualifier instances by that rank instead of insertion order. This is the "wire it through to the
-      site display so our grammar buttons are ordered correctly" requirement; it is gated on §2/§3 and
-      must not be hard-coded in the SPA ahead of the authoritative ISN order. Round-trip of seeded names
-      must still hold (a seeded non-canonical name, until migrated in §5, displays in its own order).
+      Emit the canonical segment order (and per-category rank) in <code>GRAMMAR_VOCAB</code> from
+      <code>dataset.py::_build_grammar_vocab</code>, and have <code>site/src/views/Grammar.jsx</code> render the
+      qualifier/zone instances in that order instead of insertion order. Gated on §2/§3e. Round-trip of seeded names must
+      still hold (a seeded non-canonical name, until migrated in §5, displays in its own order). This is the "ship a
+      stable grammar builder on the ISNC site" requirement.
     </p>
 
-    <h2 id="s5">§5 — Migrate the non-canonical catalogue names</h2>
+    <h2 id="s5">§5 — Migrate the catalogue (imas-codex) + re-review</h2>
     <p>
-      Rename the ~104 violating names to canonical order. We are in the RC phase, so renames are
-      acceptable. The migration runs through imas-codex (<code>sn export</code>/<code>sn import</code> —
-      the catalogue YAML is generated, not hand-edited) with a deprecation/alias trail where consumers
-      may reference old names. Verify the whole catalogue round-trips canonically afterward
-      (<code>build_site_dataset</code>, full parse→canonical-compose).
+      Migration runs through imas-codex (the catalogue YAML is generated, not hand-edited). Sequence dictated by the
+      graph machinery: land the ISN grammar → re-derive the 15 grammar-segment columns + 13 <code>HAS_*</code> edges per
+      node (parser-driven) → dry-run <code>rename_cascade</code> (it validates ISN round-trip on every candidate, so the
+      grammar must be stable first) → execute renames (<code>override_edits</code>/<code>include_accepted</code> as
+      needed) → null <code>reviewer_score_name</code> on renamed names to re-trigger review → run the review pools →
+      export. Moving reduction tokens (<code>volume_averaged…</code>) into <code>ReductionProvenance.domain</code> needs
+      new derivation logic in imas-codex (currently absent). <strong>Sample names before/after</strong> to confirm the
+      semantic-quality gain. Hard renames, no alias trail (early RC, no external consumers).
+    </p>
+
+    <h2 id="s6">§6 — Radial-coordinate refactor (maintain curvature-vs-coordinate distinction)</h2>
+    <p>
+      <code>major</code> currently does double duty as a coordinate marker, producing the clunky asymmetric pair
+      <code>major_radius_of_flux_surface</code> / <code>vertical_coordinate_of_flux_surface</code>. Both are coordinates of
+      the flux surface and should be symmetric: standardize on the <code>&lt;axis&gt;_coordinate_of_&lt;carrier&gt;</code>
+      form → <code>radial_coordinate_of_flux_surface</code> + <code>vertical_coordinate_of_flux_surface</code>. The vocab
+      is currently inconsistent (<code>radial_coordinate</code> exists as a standalone carrier, but <code>vertical</code>
+      uses axis+<code>coordinate</code> carrier). <strong>Maintain the decision</strong> that distinguishes the
+      radius-of-curvature / length scalar (keep <code>radius</code>, <code>minor_radius</code>, <code>larmor_radius</code>)
+      from the radial <em>coordinate</em> R. This is a wider refactor of radial-coordinate names; it is unblocked by the
+      grammar landing and shares the §5 migration machinery.
     </p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
       <h2><span class="sec">§</span> Decisions</h2>
 
-      <div class="r-dec" data-key="generic-position" data-choice="" data-by="" data-when="">
+      <div class="r-dec" data-key="generic-position" data-choice="semantic-binding" data-by="reckon-ship" data-when="2026-06-30T07:30:37+02:00">
         <p class="r-dec-q">Where do generic qualifiers sit relative to the named sub-kinds?</p>
         <p class="r-dec-opts">
-          <button class="r-opt" data-value="generics-after-named">After the named sub-kinds (aggregation→orbit→population→subject→generics→base) — fewest renames; matches the 79 subject→generic majority</button>
-          <button class="r-opt" data-value="generics-before-base-by-category">Generics ordered among themselves by category, placed immediately before base; named sub-kinds outermost</button>
-          <button class="r-opt" data-value="semantic-binding">Order by semantic binding (innermost modifier closest to base) — most faithful but needs per-token binding metadata</button>
+          <button class="r-opt" data-value="generics-after-named">After the named sub-kinds — fewest renames; matches the subject→generic majority</button>
+          <button class="r-opt" data-value="generics-before-base-by-category">Generics ordered by category, immediately before base; named sub-kinds outermost</button>
+          <button class="r-opt chosen" data-value="semantic-binding">Order by semantic binding (innermost modifier closest to base) — most faithful</button>
         </p>
-        <p class="r-dec-rat"></p>
+        <p class="r-dec-rat">Survey decided it: a flat position is provably wrong (normalized wants outermost, major must hug the base). The class is decomposed into ordered segments by binding depth (operator → zone → qualifier → base-bound); 117/134 multi-generic names already obey it. "semantic-binding" generalised to a segment decomposition, not per-token binding metadata.</p>
       </div>
 
-      <div class="r-dec" data-key="generic-inter-order" data-choice="" data-by="" data-when="">
+      <div class="r-dec" data-key="generic-inter-order" data-choice="by-category-rank" data-by="reckon-ship" data-when="2026-06-30T07:30:37+02:00">
         <p class="r-dec-q">Do generic qualifiers need a defined order amongst themselves?</p>
         <p class="r-dec-opts">
-          <button class="r-opt" data-value="by-category-rank">Yes — order by the 12 normalized categories (transport→source→geometry→…)</button>
-          <button class="r-opt" data-value="alphabetical">Yes — alphabetical within the generic block (simple, total, deterministic)</button>
-          <button class="r-opt" data-value="free">No — generics keep author/source order; only the named-vs-generic boundary is fixed</button>
+          <button class="r-opt chosen" data-value="by-category-rank">Yes — order by the 12 normalized categories (transport→source→geometry→…)</button>
+          <button class="r-opt" data-value="alphabetical">Yes — alphabetical within the generic block</button>
+          <button class="r-opt" data-value="free">No — generics keep author/source order</button>
         </p>
-        <p class="r-dec-rat"></p>
+        <p class="r-dec-rat">The refined qualifier segment orders by the 12 normalized categories already shipped in qualifier_categories.yml; gives a total, semantically-grouped order. Zone tokens get their own intra-order in the zone segment.</p>
       </div>
 
-      <div class="r-dec" data-key="enforcement" data-choice="" data-by="" data-when="">
+      <div class="r-dec" data-key="enforcement" data-choice="compose-canonicalizes-validator-rejects" data-by="reckon-ship" data-when="2026-06-30T07:30:37+02:00">
         <p class="r-dec-q">How strictly is canonical order enforced?</p>
         <p class="r-dec-opts">
-          <button class="r-opt" data-value="compose-canonicalizes-validator-rejects">compose() canonicalizes AND the validator rejects non-canonical input names</button>
-          <button class="r-opt" data-value="compose-only">compose() canonicalizes; validator only warns (softer migration)</button>
+          <button class="r-opt chosen" data-value="compose-canonicalizes-validator-rejects">compose() canonicalizes AND the validator rejects non-canonical input names</button>
+          <button class="r-opt" data-value="compose-only">compose() canonicalizes; validator only warns</button>
         </p>
-        <p class="r-dec-rat"></p>
+        <p class="r-dec-rat">Strict structure mandated by the user. NonCanonicalNameError already implements reject-with-canonical-form; extend it to the new segment order so a non-canonical name can never be (re)introduced.</p>
       </div>
 
-      <div class="r-dec" data-key="migration-aliases" data-choice="" data-by="" data-when="">
+      <div class="r-dec" data-key="migration-aliases" data-choice="hard-rename" data-by="reckon-ship" data-when="2026-06-30T07:30:37+02:00">
         <p class="r-dec-q">Do renamed names keep a deprecation alias?</p>
         <p class="r-dec-opts">
-          <button class="r-opt" data-value="alias">Yes — old name → superseded_by/alias trail (safer for any external consumers)</button>
-          <button class="r-opt" data-value="hard-rename">No — hard rename; RC phase, no external consumers to protect</button>
+          <button class="r-opt" data-value="alias">Yes — old name → superseded_by/alias trail</button>
+          <button class="r-opt chosen" data-value="hard-rename">No — hard rename; RC phase, no external consumers to protect</button>
         </p>
-        <p class="r-dec-rat"></p>
+        <p class="r-dec-rat">Early RC, breaking changes expected (user, 2026-06-30). Hard rename via rename_cascade; renamed names re-pass review (null reviewer_score_name) with before/after semantic-quality sampling.</p>
+      </div>
+
+      <div class="r-dec" data-key="zone-segment" data-choice="yes-new-segment" data-by="reckon-ship" data-when="2026-06-30T07:30:37+02:00">
+        <p class="r-dec-q">Introduce a new ordered 'zone' segment for region / geometric sub-selectors used as prefixes?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt chosen" data-value="yes-new-segment">Yes — new ordered zone segment between subject and qualifier</button>
+          <button class="r-opt" data-value="keep-as-qualifiers">No — keep region/geometric sub-selectors inside the qualifier segment</button>
+        </p>
+        <p class="r-dec-rat">User-selected (2026-06-30). core/edge/inner/outer/upper/lower are neither loci (postfix of_/over_) nor regime qualifiers; they select a plasma region or geometric quadrant in prefix position and need a defined intra-order (lower_outer_squareness).</p>
+      </div>
+
+      <div class="r-dec" data-key="base-bound-disposition" data-choice="token-by-token" data-by="reckon-ship" data-when="2026-06-30T07:30:37+02:00">
+        <p class="r-dec-q">How are base-bound lexical modifiers (major, surface, vector, angular, kinetic…) represented?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="promote-all-to-base">Blanket: promote every base-bound pair to an atomic base</button>
+          <button class="r-opt" data-value="innermost-qualifier-slot">Blanket: keep as an innermost qualifier slot pinned adjacent to base</button>
+          <button class="r-opt chosen" data-value="token-by-token">Token-by-token verdict: operator / coordinate-carrier / atomic-base / zone / qualifier</button>
+        </p>
+        <p class="r-dec-rat">User clarification (2026-06-30): no blanket rule. major as a coordinate must become radial_coordinate (§6), NOT an atomic base; genuine lexicalised quantities (surface_area, vector_potential) do become atomic bases; productive regime modifiers stay qualifiers. Resolved per token in §3 with physics rationale.</p>
+      </div>
+
+      <div class="r-dec" data-key="operator-dupe-removal" data-choice="remove-from-qualifiers" data-by="reckon-ship" data-when="2026-06-30T07:30:37+02:00">
+        <p class="r-dec-q">What about tokens double-registered in both qualifiers.yml and operators.yml?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt chosen" data-value="remove-from-qualifiers">Remove the dupes from qualifiers.yml — they are operators</button>
+          <button class="r-opt" data-value="keep-both">Keep in both vocabularies</button>
+        </p>
+        <p class="r-dec-rat">User: "the pull of the mis-filled tokens out of the qualifiers vocab is demonstrably correct." normalized/perturbed/volume_averaged/line_integrated/accumulated/gyroaveraged/maximum/minimum are operators; the parser still accepts them via its operator acceptance union, so removal is round-trip-safe and drops them from the qualifier_categories invariant.</p>
+      </div>
+
+      <div class="r-dec" data-key="radial-coordinate-refactor" data-choice="axis-coordinate-of-carrier" data-by="reckon-ship" data-when="2026-06-30T07:30:37+02:00">
+        <p class="r-dec-q">How are radial-coordinate names normalized (major_radius vs radial_coordinate)?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt chosen" data-value="axis-coordinate-of-carrier">Standardize on &lt;axis&gt;_coordinate_of_&lt;carrier&gt; for R and Z; reserve radius for length scalars</button>
+          <button class="r-opt" data-value="keep-major-radius">Keep major_radius as the coordinate form</button>
+        </p>
+        <p class="r-dec-rat">User (2026-06-30): major_radius_of_flux_surface / vertical_coordinate_of_flux_surface is a clunky asymmetric split; use radial_coordinate_of_… for both. Maintain the curvature-radius vs radial-coordinate distinction (radius stays a length scalar). Wider radial-coordinate refactor planned in §6.</p>
       </div>
     </section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
       <h2><span class="sec">§</span> Followups</h2>
-      <article class="r-fu" data-id="f-cqo-001" data-status="open" data-tier="opus"
-               data-written-by="reckon-create" data-written-at="2026-06-25">
+
+      <article class="r-fu" data-id="f-cqo-001" data-status="resolved" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-06-25" data-recommends-skill="" data-resolved-at="2026-06-30T07:30:37+02:00" data-resolved-by="reckon-ship">
         <h4 class="r-fu-title">§1–§2 — Full order audit + lock the canonical order</h4>
-        <div class="r-fu-body">
-          First shippable step: produce the complete per-name audit of qualifier-order violations
-          (beyond the 104 named-vs-generic cases, include generic-vs-generic order once a rule is chosen)
-          and lock the canonical-order decisions, writing the total order into specification.yml. This
-          gates the renderer/validator enforcement (§3) and the migration (§5).
-        </div>
+        <div class="r-fu-body">Produce the complete per-name audit and lock the canonical-order decisions.</div>
+        <pre class="r-fu-prompt">Superseded by the Option B redesign. The audit ran (1364 names, 100% parse); see §1 evidence and the disposition funnel figure.</pre>
+        <p class="r-fu-outcome">Audit + design landed. Survey proved the flat "generic" class is a catch-all (8 operator dupes; 0 named-sub-kind violations; 117/134 multi-generic names obey binding depth). Direction pivoted to Option B (decompose into ordered segments + zone segment + pull mis-filed tokens). 8 decisions locked: semantic-binding decomposition, by-category-rank intra-order, compose-canonicalizes+validator-rejects, hard-rename+re-review, new zone segment, token-by-token base-bound disposition, operator-dupe removal, radial-coordinate refactor (§6). Next: implement the ISN grammar core (§2/§3e).</p>
+      </article>
+
+      <article class="r-fu" data-id="f-cqo-002" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-06-30" data-recommends-skill="/reckon-ship canonical-qualifier-order §2" data-resolved-at="" data-resolved-by="">
+        <h4 class="r-fu-title">§2/§3e — Implement the ISN grammar core: zone segment, remove operator dupes, enforce canonical order</h4>
+        <div class="r-fu-body">Land the structural grammar change in ISN: add the ordered zone segment, remove the 8 operator-dupe tokens from qualifiers.yml (+ qualifier_categories.yml + the coverage test), wire compose() to emit canonical order and the validator to reject non-canonical order. Regenerate codegen types, keep the full suite + 1364/1364 round-trip green. Gates §3 (deep token review), §4/§4b (context + SPA), and §5 (migration).</div>
         <pre class="r-fu-prompt">Project: imas-standard-names
 Plan:    canonical-qualifier-order (http://localhost:8765/imas-standard-names/canonical-qualifier-order.html)
-Section: §1–§2
+Section: §2 + §3e
 Tier:    opus
 
 Context
-  Qualifier order is not canonical: 104/1364 names place a generic qualifier
-  before a named sub-kind, and generic-vs-generic order is undefined. Resolve
-  the Open decisions above (generic position, inter-order, enforcement,
-  aliases) before writing the order.
+  The "generic qualifier" class is being decomposed into ordered segments. This
+  section lands the grammar CORE: a new ordered `zone` segment, removal of the 8
+  operator-dupe tokens from qualifiers.yml, and canonical-order enforcement
+  (compose canonicalizes; validator rejects). Honour the locked decisions
+  (zone-segment, operator-dupe-removal, enforcement, generic-inter-order).
 
-State to read  (code/files, not the plan)
-  imas_standard_names/grammar/specification.yml  (canonical_pattern, segments)
-  imas_standard_names/grammar/context.py  (_build_canonical_pattern,
-    _build_segment_order_constraint, get_grammar_context)
+State to read (code/files, not the plan)
+  imas_standard_names/grammar/specification.yml  (segments, canonical_pattern)
+  imas_standard_names/grammar/parser.py  (_match_base_with_qualifiers, load_default_vocabularies)
+  imas_standard_names/grammar/model.py   (_ir_to_model_dict, StandardName, _BARE_PREFIX_TRANSFORMATIONS, NonCanonicalNameError)
   imas_standard_names/grammar/render.py  (render_qualifiers, compose)
-  imas_standard_names/grammar/vocabularies/qualifier_categories.yml
-  build_site_dataset corpus for the per-name audit
+  imas_standard_names/grammar/ir.py      (StandardNameIR, Qualifier)
+  imas_standard_names/grammar/context.py (canonical pattern builders)
+  imas_standard_names/grammar/vocabularies/{qualifiers,qualifier_categories,operators,regions}.yml
+  imas_standard_names/grammar_codegen/generate.py + tests/grammar/test_codegen_drift.py
+  tests/grammar/test_grammar_round_trip.py, tests/grammar/test_qualifier_categories.py
 
-Scope locks / constraints  (non-decision)
-  - Named sub-kind order is fixed by spec: aggregation→orbit→population→subject.
-  - Do not regress non-qualifier parsing/round-trip while auditing.
-  - The catalogue YAML is generated via imas-codex sn export — migration (§5)
-    runs there, not by hand-editing standard_names/.
+Scope locks / constraints
+  - Add a `zone` segment (new vocabulary zones.yml) positioned between subject and
+    qualifier; single-or-multi token with a defined intra-order. Model gets a
+    `zone` field; codegen emits the Zone enum.
+  - Remove from qualifiers.yml AND qualifier_categories.yml: normalized, perturbed,
+    volume_averaged, line_integrated, accumulated, gyroaveraged, maximum, minimum.
+    They remain operators (operators.yml) and still parse via the acceptance union.
+  - compose() must SORT segments into canonical order; validator (parse_standard_name)
+    rejects non-canonical via NonCanonicalNameError with the canonical form.
+  - Do NOT regress parse()/compose round-trip: build_site_dataset over the ISNC
+    catalog must stay 1364/1364 BEFORE migration (names not yet migrated must still
+    parse; canonical-order rejection applies at validate, round-trip at compose).
+    Re-run the round-trip harness before/after.
+  - Regenerate grammar/types.py via build-grammar; test_codegen_drift must pass.
+  - Defer the per-token base-bound/coordinate verdicts to §3 and the radial-coordinate
+    refactor to §6 — this section is the structural scaffold + the unambiguous dupe removal.
 
 Done-when
-  1. Per-name violation audit committed (full list, not just the 104 headline).
-  2. Canonical total order over qualifiers locked in the plan + written into
-     specification.yml (+ context.py pattern builders).
-  3. Followup written for §3 (renderer/validator enforcement) + this resolved.</pre>
+  1. zone segment + Zone enum landed; specification.yml canonical_pattern updated.
+  2. 8 operator dupes removed from qualifiers.yml + qualifier_categories.yml; coverage test green.
+  3. compose canonicalizes the new order; validator rejects non-canonical (tests added).
+  4. full suite green; round-trip 1364/1364; codegen drift clean.
+  5. Followups written for §3 (deep token review) and §4/§4b + this one resolved.</pre>
       </article>
     </section>
 
