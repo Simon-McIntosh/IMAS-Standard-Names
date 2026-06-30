@@ -32,12 +32,9 @@
 
 # --- Collision/transport regime ---
 # NOTE: 'thermal' moved to populations.yml (energy-state population modifier).
-- collisional                   # collisional regime (collisional_power_density)
 
 # --- Source/mechanism ---
-- ohmic                         # ohmic heating/current
 - inductive                     # inductively driven
-- non_inductive                 # non-inductively driven
 
 # --- Orbit class / energy-state ---
 # Moved to populations.yml (orthogonal population segment): trapped, co_passing,
@@ -57,21 +54,15 @@
 
 # --- Transport regime / mechanism ---
 - convection                    # convective transport qualifier (convection_velocity)
-- neoclassical                  # neoclassical transport regime
 - classical                     # classical (Braginskii) transport
-- turbulent                     # turbulent transport regime
-- anomalous                     # anomalous (non-classical) transport
 
 # --- Source / drive mechanism ---
-- bootstrap                     # bootstrap current mechanism
 - beam                          # neutral beam source/drive
 - rf                            # radio-frequency source/drive
 - nbi                           # neutral beam injection
 - alpha                         # alpha particle source
-- fusion                        # fusion reaction source
 - radiative                     # radiative process
 - bremsstrahlung                # bremsstrahlung radiation
-- wave_driven                   # wave-driven mechanism
 - gas                           # gas injection/puff source
 
 # --- Geometry / spatial ---
@@ -79,7 +70,6 @@
 - cross_field                   # cross-field (perpendicular to B) direction
 - diamagnetic                   # diamagnetic drift/flux qualifier
 - e_cross_b                     # E×B drift qualifier
-- e_cross_b_drift               # E×B drift velocity qualifier (plasma drift due to crossed E and B fields)
 - field_aligned                 # aligned with magnetic field
 - surface                       # surface (2D boundary) qualifier
 - volumetric                    # volumetric (per unit volume) qualifier
@@ -132,7 +122,6 @@
                                 # are lexicalised bases (plasma folds into base)
 
 # --- Flow regime ---
-- inertial                      # inertial flow regime
 - sonic                         # sonic flow regime
 
 # --- Wave polarization ---
@@ -160,7 +149,6 @@
 - heating                       # heating system qualifier
 
 # --- Mode / instability ---
-- resistive                     # resistive regime/mode
 - ideal                         # ideal (non-resistive) regime
 
 # --- Dimensionless / normalized forms ---

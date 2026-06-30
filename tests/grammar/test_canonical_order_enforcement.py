@@ -73,7 +73,9 @@ def test_two_subject_tokens_rejected_without_canonical_form():
     "name",
     [
         # Atomic multi-word subject tokens are SINGLE enum tokens: unaffected.
-        "deuterium_tritium_fusion_power_density",
+        # (was deuterium_tritium_fusion_power_density — 'fusion' moved to the
+        # process segment, so that name now migrates to a due_to_ form.)
+        "deuterium_tritium_density",
         "runaway_electron_density",
     ],
 )

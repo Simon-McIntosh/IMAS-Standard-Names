@@ -463,7 +463,10 @@ class TestSegmentTokenMapClosed:
 
         quals = SEGMENT_TOKEN_MAP["qualifier"]
         assert len(quals) >= 90, f"Expected >= 90 qualifiers, got {len(quals)}"
-        assert "collisional" in quals
+        # 'effective' is a representative genuine modifier qualifier. (Transport
+        # regimes like 'collisional'/'anomalous' moved to the process segment;
+        # transport channels to 'channel'; loci/operators/zones to their segments.)
+        assert "effective" in quals
         # Modifier qualifiers moved to dedicated single-token segments in the
         # rc32 decomposition: orbit class → 'orbit', energy-state → 'population'.
         assert "trapped" in SEGMENT_TOKEN_MAP["orbit"]

@@ -13,41 +13,31 @@
 qualifier_categories:
   # Transport channel, regime, and flow type
   transport:
-    - anomalous
     - classical
-    - collisional
     - convection
     - fast_wave
-    - inertial
     - internal
     - linear
     - mhd
-    - neoclassical
     - reynolds
     - slow_wave
     - sonic
-    - turbulent
     - wave
 
   # Source / drive mechanism and material
   source:
     - alpha
     - beam
-    - bootstrap
     - bremsstrahlung
     - ferritic
-    - fusion
     - gas
     - inductive
     - mutual
     - nbi
-    - non_inductive
     - nuclear
-    - ohmic
     - radiative
     - rf
     - waste
-    - wave_driven
 
   # Geometric, directional, and tensor qualifiers
   geometry:
@@ -59,7 +49,6 @@ qualifier_categories:
     - diamagnetic
     - direction
     - e_cross_b
-    - e_cross_b_drift
     - field_aligned
     - field_line
     - major
@@ -87,7 +76,6 @@ qualifier_categories:
     - mode
     - peak
     - quench
-    - resistive
     - saturated
     - sawtooth
     - steady_state
