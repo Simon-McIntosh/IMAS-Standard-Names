@@ -138,12 +138,14 @@ def test_vocab_cross_segment_uniqueness():
     #   (classification tag). Same benign dual use as the physics_domains↔tags
     #   whitelist — the grammar never confuses the qualifier vs domain context.
     #
-    # §3-review target (last one — resolved by Class 4):
-    # - qualifiers.yml ↔ processes.yml: only convection, heating remain. They are
-    #   compound-base words (convection_velocity, heating_power); when Class 4
-    #   promotes those to atomic bases they leave qualifiers and this empties.
+    # ELIMINATED (guard now active — do not re-add):
+    # - qualifiers.yml ↔ processes.yml: the only overlapping tokens were
+    #   convection and heating, compound-base words (convection_velocity,
+    #   heating_power). Those compounds are now atomic physical_bases, so the
+    #   tokens left qualifiers.yml and this intersection is empty. qualifiers is
+    #   now disjoint from every other segment vocabulary except the documented
+    #   physics_domains dual-role and the normalizing_qualifiers metadata subset.
     allowed_overlap_pairs = {
-        frozenset({"qualifiers.yml", "processes.yml"}),
         frozenset({"qualifiers.yml", "physics_domains.yml"}),
         frozenset({"components.yml", "coordinate_axes.yml"}),
         frozenset({"generic_physical_bases.yml", "physical_bases.yml"}),

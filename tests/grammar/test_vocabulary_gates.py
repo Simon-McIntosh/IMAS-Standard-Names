@@ -110,6 +110,15 @@ _KNOWN_IRREDUCIBLE_COMPOUNDS = frozenset(
         # extra spectral dimension, not merely [spectral] + [radiance].
         # Lexicalised; kept irreducible alongside the broadband 'radiance' base.
         "spectral_radiance",
+        # kinetic_energy and surface_area are base-bound lexical compounds
+        # promoted to atomic bases. Their leading words 'kinetic' / 'surface'
+        # remain qualifiers because they qualify OTHER bases
+        # (kinetic_energy_density / kinetic_energy_flux,
+        # surface_temperature / surface_roughness / surface_emissivity). The
+        # standalone X_kinetic_energy / surface_area forms are atomic via
+        # longest-base-match; the qualifier coexists for the suffixed forms.
+        "kinetic_energy",
+        "surface_area",
     }
 )
 

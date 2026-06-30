@@ -14,9 +14,7 @@ qualifier_categories:
   # Transport channel, regime, and flow type
   transport:
     - classical
-    - convection
     - fast_wave
-    - internal
     - linear
     - mhd
     - reynolds
@@ -41,8 +39,6 @@ qualifier_categories:
 
   # Geometric, directional, and tensor qualifiers
   geometry:
-    - angular
-    - center_of_mass
     - contravariant
     - covariant
     - cross_field
@@ -84,7 +80,6 @@ qualifier_categories:
     - transient
     - upper_bound
     - vacuum
-    - vector
 
   # Energy type and power/flux direction
   energy:
@@ -159,7 +154,6 @@ qualifier_categories:
   engineering:
     - coolant
     - explicit
-    - heating
     - implicit
     - prefill
     - requested

@@ -505,8 +505,10 @@ bases:
 
   magnetic_vector_potential:
     # magnetic vector potential A (B = curl A); SI unit m.T (= V.s.m^-1 = Wb.m^-1).
-    # DD: a_field (n=34). Vector base distinct from scalar magnetic_flux.
-    aliases: [vector_potential]
+    # DD: a_field (n=34). Vector base distinct from scalar magnetic_flux. The
+    # shorter lexical surface form `vector_potential` is its own base entry
+    # (used by the MHD perturbed_parallel_vector_potential names).
+    aliases: []
     kind: vector
     inherently_dimensional: true
   larmor_radius:
@@ -568,3 +570,84 @@ bases:
     # square_of_ion_charge_number (z_ion_square).
     aliases: []
     kind: scalar
+
+  # === base-bound lexical compounds promoted to atomic bases ===
+  # These tokens form a single lexicalised quantity in which the leading word
+  # is NOT a free prefix qualifier: it binds to exactly one base and never
+  # qualifies any other. Per the corpus analysis they are atomic bases, not
+  # qualifier+base compositions. The former prefix qualifiers (convection,
+  # heating, vector, center_of_mass, angular, internal) are removed from
+  # qualifiers.yml because they are fully subsumed by these bases. The parser
+  # matches the longest base first, so the standalone compound resolves
+  # atomically; longer compounds (e.g. ion_kinetic_energy_density) still strip
+  # their genuine prefix qualifiers leftward.
+
+  convection_velocity:
+    # convective transport velocity (the drift velocity of a convected flux);
+    # convection binds to velocity and never qualifies any other base.
+    aliases: []
+    kind: vector
+    inherently_dimensional: true
+  heating_power:
+    # auxiliary/nuclear heating power delivered to a system; heating binds to
+    # power as a single lexical quantity (total_external_heating_power,
+    # nuclear_heating_power_of_breeder_blanket_module).
+    aliases: []
+    kind: scalar
+    inherently_dimensional: true
+  vector_potential:
+    # magnetic vector potential A (B = curl A); SI unit m.T (= Wb.m^-1). The
+    # lexical surface form used in MHD perturbation names
+    # (perturbed_parallel_vector_potential). Vector base, like
+    # magnetic_vector_potential.
+    aliases: []
+    kind: vector
+    inherently_dimensional: true
+  center_of_mass_velocity:
+    # bulk velocity of the centre-of-mass frame; center_of_mass binds to
+    # velocity as a single lexical quantity.
+    aliases: []
+    kind: vector
+    inherently_dimensional: true
+  angular_momentum:
+    # angular momentum L (kg.m^2.s^-1); angular binds to momentum.
+    aliases: []
+    kind: scalar
+    inherently_dimensional: true
+  angular_frequency:
+    # angular frequency omega = 2*pi*f (rad.s^-1); angular binds to frequency.
+    aliases: []
+    kind: scalar
+    inherently_dimensional: true
+  angular_velocity:
+    # angular (rotational) velocity Omega (rad.s^-1); angular binds to velocity.
+    aliases: []
+    kind: vector
+    inherently_dimensional: true
+  internal_inductance:
+    # plasma internal inductance L_i (H); internal binds to inductance. The
+    # normalized form li is its own base.
+    aliases: []
+    kind: scalar
+    inherently_dimensional: true
+  internal_energy:
+    # thermodynamic internal energy U (J); internal binds to energy.
+    aliases: []
+    kind: scalar
+    inherently_dimensional: true
+  kinetic_energy:
+    # kinetic energy (J); kinetic binds to energy as a single lexical quantity
+    # for the standalone X_kinetic_energy forms. The `kinetic` qualifier is
+    # KEPT for kinetic_energy_density / kinetic_energy_flux, where it qualifies
+    # density/flux (longest-base-match: ion_kinetic_energy -> base=kinetic_energy,
+    # ion_kinetic_energy_density -> base=density + qualifier kinetic).
+    aliases: []
+    kind: scalar
+    inherently_dimensional: true
+  surface_area:
+    # area of a (2D) bounding surface (m^2); surface binds to area. The
+    # `surface` qualifier is KEPT for surface_temperature / surface_roughness /
+    # surface_emissivity, where it qualifies other bases.
+    aliases: []
+    kind: scalar
+    inherently_dimensional: true

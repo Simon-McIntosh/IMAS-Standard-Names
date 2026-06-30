@@ -53,7 +53,9 @@
 # standard name corpus analysis.
 
 # --- Transport regime / mechanism ---
-- convection                    # convective transport qualifier (convection_velocity)
+# NOTE: 'convection' removed — convection_velocity is now an atomic base
+# (physical_bases.yml). convection bound only to velocity and never qualified
+# any other base.
 - classical                     # classical (Braginskii) transport
 
 # --- Source / drive mechanism ---
@@ -66,7 +68,8 @@
 - gas                           # gas injection/puff source
 
 # --- Geometry / spatial ---
-- center_of_mass                # center-of-mass reference frame
+# NOTE: 'center_of_mass' removed — center_of_mass_velocity is now an atomic
+# base (physical_bases.yml). It bound only to velocity.
 - cross_field                   # cross-field (perpendicular to B) direction
 - diamagnetic                   # diamagnetic drift/flux qualifier
 - e_cross_b                     # E×B drift qualifier
@@ -146,7 +149,8 @@
 # --- Engineering / subsystem ---
 - coolant                       # coolant fluid qualifier
 - prefill                       # pre-fill injection qualifier
-- heating                       # heating system qualifier
+# NOTE: 'heating' removed — heating_power is now an atomic base
+# (physical_bases.yml). It bound only to power.
 
 # --- Mode / instability ---
 - ideal                         # ideal (non-resistive) regime
@@ -174,7 +178,8 @@
 # --- Physics / MHD ---
 - mode                          # mode (MHD/wave mode frequency, mode number)
 - quench                        # quench event (thermal quench, current quench)
-- vector                        # vector quantity qualifier (vector potential)
+# NOTE: 'vector' removed — vector_potential is now an atomic base
+# (physical_bases.yml). vector bound only to potential.
 - enhancement                   # enhancement (enhancement factor)
 
 # --- Control / engineering ---
@@ -188,7 +193,8 @@
 # MHD, and wave domains. All verified against ISN parse() round-trip.
 
 # --- Physics regime / type ---
-- internal                      # internal (thermodynamic/inductive): internal_inductance, internal_energy
+# NOTE: 'internal' removed — internal_inductance and internal_energy are now
+# atomic bases (physical_bases.yml). internal bound only to those two bases.
 - mhd                           # magnetohydrodynamic: mhd_mode_frequency, mhd_stored_energy
 - wave                          # wave (electromagnetic/acoustic): wave_absorbed_power, wave_number
 # fast_wave / slow_wave: ICRF wave-branch lexical terms (fast magnetosonic /
@@ -213,7 +219,9 @@
 # Verified via ISN parse() round-trip after addition.
 
 # --- Spatial / symmetry modifiers ---
-- angular                       # angular (angular_momentum, angular_frequency, angular_velocity)
+# NOTE: 'angular' removed — angular_momentum, angular_frequency, and
+# angular_velocity are now atomic bases (physical_bases.yml). angular bound
+# only to those three bases.
 - non_axisymmetric              # non-axisymmetric (non_axisymmetric_magnetic_field)
 
 # --- Measurement / signal qualifiers ---
