@@ -994,6 +994,7 @@ def _build_grammar_vocab() -> dict[str, list[dict[str, Any]]]:
     # their locked file order (heat, particle, energy, momentum). Emit in that
     # order so the SPA's segment + picker rows read in canonical sequence.
     zones = _safe(vocab_loaders.load_zones, ())
+    channel_qualifiers = _safe(vocab_loaders.load_channel_qualifiers, ())
     channels = _safe(vocab_loaders.load_channels, ())
     # Genuine modifier qualifiers = qualifiers.yml, each carrying its normalized
     # category (qualifier_categories.yml). We deliberately do NOT publish the
@@ -1042,6 +1043,7 @@ def _build_grammar_vocab() -> dict[str, list[dict[str, Any]]]:
         # (and any residual qualifier) immediately before the base. Both keep
         # their loader order (see _ordered_tok_list).
         "zones": _ordered_tok_list(zones),
+        "channel_qualifiers": _ordered_tok_list(channel_qualifiers),
         "channels": _ordered_tok_list(channels),
         "qualifiers": [
             {"token": t, "category": qualifier_cats.get(t, "other")}

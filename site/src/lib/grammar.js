@@ -19,6 +19,7 @@ export const ROLE_META = {
   orbit:       { label: 'Orbit',       hue: 5,   desc: 'Particle orbit / transit class (trapped, co-passing, …)' },
   population:  { label: 'Population',   hue: 25,  desc: 'Species population kind/state (fast, thermal, cold, …)' },
   zone:        { label: 'Zone',         hue: 95,  desc: 'Plasma-region / geometric sub-selector (core, edge, upper, outer, …)' },
+  channel_qualifier: { label: 'Channel qualifier', hue: 135, desc: 'Qualifier that binds to the transport channel (kinetic, plasma, diamagnetic)' },
   channel:     { label: 'Channel',      hue: 175, desc: 'Transport channel — what is transported (heat, particle, energy, momentum)' },
   base:        { label: 'Base',        hue: 260, desc: 'Root quantity from the canonical vocabulary' },
   locus:       { label: 'Locus',       hue: 145, desc: 'Geometric or topological location' },

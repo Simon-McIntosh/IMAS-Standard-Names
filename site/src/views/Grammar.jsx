@@ -33,6 +33,7 @@ const HUE = {
   population: 25,
   subject: 15,
   zone: 95,
+  channel_qualifier: 135,
   channel: 175,
   qualifier: 35,
 };
@@ -54,6 +55,7 @@ const QUAL_GROUPS = [
   { key: 'populations', kind: 'population', label: 'population' },
   { key: 'subjects', kind: 'subject', label: 'subject' },
   { key: 'zones', kind: 'zone', label: 'zone' },
+  { key: 'channel_qualifiers', kind: 'channel_qualifier', label: 'channel qualifier' },
   { key: 'channels', kind: 'channel', label: 'channel' },
 ];
 

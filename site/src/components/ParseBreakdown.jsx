@@ -14,7 +14,7 @@ import { ROLE_META } from '../lib/grammar.js';
 const FILTERABLE_ROLES = new Set([
   'base', 'operator', 'reduction', 'modifier',
   'axis', 'locus', 'subject', 'aggregation', 'orbit', 'population',
-  'zone', 'channel',
+  'zone', 'channel_qualifier', 'channel',
 ]);
 
 // Strip the grammar connector from a locus/mechanism token so the chip shows
