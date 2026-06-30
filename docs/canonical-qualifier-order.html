@@ -13,6 +13,8 @@
   <meta name="plan-effort"    content="XL">
   <meta name="plan-tier"      content="opus">
   <meta name="plan-owner"     content="Simon McIntosh">
+  <meta name="plan-impl"      content="0.25">
+  <meta name="plan-modified"  content="2026-06-30">
   <meta name="plan-depends-on" content="qualifier-vocabulary-categorization">
   <title>Canonical Qualifier Order | imas-standard-names</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
@@ -140,7 +142,12 @@
       </figcaption>
     </figure>
 
-    <h2 id="s2">§2 — The decomposition: route every token to its true segment</h2>
+    <section class="landed-summary-card" style="border:1px solid #1a9c52;border-radius:8px;padding:12px 16px;margin-bottom:18px;background:#f1faf3">
+      <p style="margin:0 0 6px"><span class="badge badge-shipped">✓ grammar core landed 2026-06-30</span> &nbsp;commit <code>ef4db62</code></p>
+      <p style="margin:0;font-size:13.5px">§2 + §3e structural scaffold shipped: ordered <strong>zone</strong> segment (13 tokens, generated <code>Zone</code> enum), 8 operator dupes removed from <code>qualifiers.yml</code>, <code>compose()</code> canonicalizes + validator rejects. <strong>Verified independently:</strong> engine self-consistency <strong>1357/1357</strong> accepted names round-trip (0 inverse bugs); suite 1572 passed; codegen in sync. <strong>Migration backlog (expected): 13 names</strong> — 7 parse-fail (all <code>gyroaveraged</code> mid-prefix, now postfix-only) + 6 reorder (zone-before-qualifier, e.g. <code>major_inner_radius_of_strike_point→inner_major_radius_of_strike_point</code>). §3v guard tightened: <code>qualifiers∩operators</code> now empty + enforced. Next: §3 deep per-token review.</p>
+    </section>
+
+    <h2 id="s2"><span class="badge badge-shipped">✓ scaffold</span> §2 — The decomposition: route every token to its true segment</h2>
     <p>
       The output of this section is (a) the canonical segment order above written into <code>specification.yml</code>,
       (b) a new <strong>zone</strong> segment, and (c) a per-token disposition for all 161 <code>qualifiers.yml</code>
@@ -336,7 +343,7 @@
         <p class="r-fu-outcome">Audit + design landed. Survey proved the flat "generic" class is a catch-all (8 operator dupes; 0 named-sub-kind violations; 117/134 multi-generic names obey binding depth). Direction pivoted to Option B (decompose into ordered segments + zone segment + pull mis-filed tokens). 8 decisions locked: semantic-binding decomposition, by-category-rank intra-order, compose-canonicalizes+validator-rejects, hard-rename+re-review, new zone segment, token-by-token base-bound disposition, operator-dupe removal, radial-coordinate refactor (§6). Next: implement the ISN grammar core (§2/§3e).</p>
       </article>
 
-      <article class="r-fu" data-id="f-cqo-002" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-06-30" data-recommends-skill="/reckon-ship canonical-qualifier-order §2" data-resolved-at="" data-resolved-by="">
+      <article class="r-fu" data-id="f-cqo-002" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-06-30" data-recommends-skill="/reckon-ship canonical-qualifier-order §2" data-resolved-at="2026-06-30T08:30:00+02:00" data-resolved-by="reckon-ship">
         <h4 class="r-fu-title">§2/§3e — Implement the ISN grammar core: zone segment, remove operator dupes, enforce canonical order</h4>
         <div class="r-fu-body">Land the structural grammar change in ISN: add the ordered zone segment, remove the 8 operator-dupe tokens from qualifiers.yml (+ qualifier_categories.yml + the coverage test), wire compose() to emit canonical order and the validator to reject non-canonical order. Regenerate codegen types, keep the full suite + 1364/1364 round-trip green. Gates §3 (deep token review), §4/§4b (context + SPA), and §5 (migration).</div>
         <pre class="r-fu-prompt">Project: imas-standard-names
@@ -389,11 +396,12 @@ Done-when
      codegen drift clean. REPORT (do not gate on) the migration backlog: names that no
      longer parse + names strict parse_standard_name() flags non-canonical, with examples.
   5. Followups written for §3 (deep token review) and §4/§4b + this one resolved.</pre>
+        <p class="r-fu-outcome">Landed commit ef4db62; verified independently. Ordered zone segment (13 tokens, generated Zone enum) between device and base; 8 operator dupes removed from qualifiers.yml + qualifier_categories.yml (gyroaveraged left postfix-only per the corrected gate, not hacked back as a prefix); compose() canonicalizes, parse_standard_name rejects non-canonical with the canonical form. Engine self-consistency 1357/1357 accepted names (0 inverse bugs); suite 1572 passed / 0 failed; codegen in sync. Migration backlog (expected, not gated): 7 parse-fail (gyroaveraged mid-prefix) + 6 reorder. Edge cases for §3: subject sorts before zone (core_electron_temperature→electron_core_temperature); major/minor remain base-bound qualifiers sorting after zone (feeds §6). Next: §3 deep per-token review.</p>
       </article>
 
       <article class="r-fu" data-id="f-cqo-003" data-status="open" data-tier="sonnet" data-written-by="reckon-ship" data-written-at="2026-06-30" data-recommends-skill="/reckon-ship canonical-qualifier-order §3v" data-resolved-at="" data-resolved-by="">
         <h4 class="r-fu-title">§3v — Add a vocabulary-disjointness guard test</h4>
-        <div class="r-fu-body">Add a regression test asserting the segment-role vocabularies are pairwise disjoint, so accidental double-registration (the operator/qualifier dupe class) can never recur. Small documented allowlist for intentional cross-listings; the allowlist is a ratchet that shrinks as §3 resolves remaining mis-files. Gated on Phase 2 (f-cqo-002) landing so the dupes/zone tokens are already cleaned.</div>
+        <div class="r-fu-body">PARTIALLY DONE: tests/grammar/test_vocab_uniqueness.py already lints cross-segment collisions; the <code>qualifiers∩operators</code> allowlist entry was REMOVED (that intersection is now empty post-Phase-2, so the guard actively prevents re-introduction). Remaining: ratchet out the other allowlist entries as §3 resolves each mis-file — <code>qualifiers∩{physical_bases (energy/momentum), subjects (particle/state), processes (anomalous/ohmic/…14), physics_domains (equilibrium/mhd/nbi), locus_registry (flux_surface/inlet/outlet), generic_physical_bases (energy)}</code>. Each removal = one mis-file fixed in §3. Intentional overlaps stay (components∩coordinate_axes; zones∩regions/locus; generic_bases⊂bases).</div>
         <pre class="r-fu-prompt">Project: imas-standard-names
 Plan:    canonical-qualifier-order
 Section: §3v
@@ -426,6 +434,47 @@ Done-when
      documented, plan-tracked exception if an intentional overlap remains).
   2. Any UNexpected intersection found is reported into the plan as a §3 mis-file finding.
   3. Full suite green; this followup resolved.</pre>
+      </article>
+
+      <article class="r-fu" data-id="f-cqo-004" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-06-30" data-recommends-skill="/reckon-ship canonical-qualifier-order §3" data-resolved-at="" data-resolved-by="">
+        <h4 class="r-fu-title">§3 — Deep per-token review + segment coverage widening</h4>
+        <div class="r-fu-body">The structural scaffold is in (zone segment, dupe removal, enforcement). Now the curation pass: an authoritative per-token verdict for the remaining qualifiers.yml tokens (and the cross-segment mis-files the disjointness scan surfaced), with physics rationale. Resolve base-bound tokens token-by-token (atomic-base vs coordinate-carrier vs qualifier), reconcile qualifier∩processes (regime qualifier vs due_to_ process), qualifier∩physical_bases (energy/momentum), qualifier∩subjects (particle/state). Each resolution ratchets a §3v allowlist entry out. Needs the lead's physics input on edge cases.</div>
+        <pre class="r-fu-prompt">Project: imas-standard-names
+Plan:    canonical-qualifier-order (http://localhost:8765/imas-standard-names/canonical-qualifier-order.html)
+Section: §3 (+ feeds §3v, §6)
+Tier:    opus
+
+Context
+  Phase 2 (ef4db62) landed the zone segment + operator-dupe removal + canonical-order
+  enforcement. This section is the deep per-token curation: route every remaining
+  qualifiers.yml token to its true role and widen other segments where the
+  decomposition exposed a gap. Honour the locked decisions (base-bound-disposition=
+  token-by-token; radial-coordinate-refactor=§6; current names are NOT the oracle —
+  breakage is acceptable migration backlog).
+
+Cross-segment mis-files to adjudicate token-by-token (from the disjointness scan)
+  - qualifiers ∩ processes (14): anomalous, bootstrap, collisional, convection,
+    e_cross_b_drift, fusion, heating, inertial, neoclassical, non_inductive, ohmic,
+    resistive, turbulent, wave_driven — regime qualifier (X_transport) vs due_to_ process?
+  - qualifiers ∩ physical_bases: energy, momentum (base vs transport-channel qualifier)
+  - qualifiers ∩ subjects: particle, state
+  - qualifiers ∩ physics_domains: equilibrium, mhd, nbi
+  - qualifiers ∩ locus_registry: flux_surface, inlet, outlet
+  - base-bound lexical tokens: which become atomic bases (surface_area, vector_potential,
+    angular_momentum, kinetic_energy) vs stay qualifiers; major/minor feed §6.
+
+Constraints
+  - Produce an authoritative per-token verdict table (committed) with physics rationale.
+  - For each mis-file resolved, REMOVE its allowlist entry in test_vocab_uniqueness.py
+    (ratchet) and keep the suite green.
+  - Do NOT preserve non-canonical names; record renames as §5 migration backlog.
+  - Surface edge cases needing the lead's physics judgement; do not guess on ambiguous ones.
+
+Done-when
+  1. Per-token verdict table committed; vocab files updated; codegen regenerated.
+  2. Disjointness allowlist ratcheted down (entries removed for each resolved mis-file).
+  3. Full suite green; engine self-consistency holds for accepted names.
+  4. Followups written for §4/§4b (context+SPA) and §5/§6 (migration) + this resolved.</pre>
       </article>
     </section>
 

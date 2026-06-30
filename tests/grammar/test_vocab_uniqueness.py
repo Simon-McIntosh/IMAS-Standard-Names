@@ -96,18 +96,30 @@ def test_vocab_cross_segment_uniqueness():
     vocab_tokens = load_vocab_tokens()
     collisions = compute_collisions(vocab_tokens)
 
-    # Allowed cross-segment overlaps (documented dual-role tokens)
-    # - qualifiers.yml ↔ subjects.yml: parser unions these by design
-    # - qualifiers.yml ↔ processes.yml: process tokens that also qualify bases
-    # - qualifiers.yml ↔ operators.yml: operator tokens that also qualify bases
-    # - qualifiers.yml ↔ regions.yml: region tokens used as qualifiers
-    # - qualifiers.yml ↔ locus_registry.yml: locus tokens used as qualifiers
-    # - components.yml ↔ coordinate_axes.yml: same spatial tokens
+    # Allowed cross-segment overlaps (documented dual-role tokens).
+    #
+    # RATCHET: this allowlist shrinks toward empty as the canonical-qualifier-order
+    # grammar redesign resolves mis-files. A token belongs to exactly one segment
+    # role; every entry here is either intentional (documented) or a tracked
+    # §3-review target to be eliminated. Do NOT add entries to silence a new
+    # mis-file — fix the vocab instead.
+    #
+    # ELIMINATED (guard now active — do not re-add):
+    # - qualifiers.yml ↔ operators.yml: the 8 double-registered operator tokens
+    #   (normalized, perturbed, volume_averaged, …) were removed from qualifiers.yml;
+    #   this intersection is now empty and the guard prevents its re-introduction.
+    #
+    # Intentional (keep):
+    # - components.yml ↔ coordinate_axes.yml: shared directional vocab by design
     # - generic_physical_bases.yml ↔ physical_bases.yml: subset relationship
+    # - zones.yml ↔ regions.yml / locus_registry.yml: zone PREFIX vs locus POSTFIX
+    #
+    # §3-review targets (still allowed, to be ratcheted out as each is resolved):
+    # - qualifiers.yml ↔ {physical_bases, subjects, processes, physics_domains,
+    #   locus_registry, generic_physical_bases}.yml
     allowed_overlap_pairs = {
         frozenset({"qualifiers.yml", "subjects.yml"}),
         frozenset({"qualifiers.yml", "processes.yml"}),
-        frozenset({"qualifiers.yml", "operators.yml"}),
         frozenset({"qualifiers.yml", "regions.yml"}),
         frozenset({"qualifiers.yml", "locus_registry.yml"}),
         frozenset({"qualifiers.yml", "physics_domains.yml"}),
