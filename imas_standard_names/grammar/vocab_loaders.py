@@ -305,6 +305,33 @@ def load_zones() -> tuple[str, ...]:
     return ()
 
 
+def load_channels() -> tuple[str, ...]:
+    """Load transport-channel tokens from ``channels.yml`` in file order.
+
+    Channel tokens (heat, particle, energy, momentum) name WHAT is transported.
+    They compose as the INNERMOST prefix segment (immediately before the base,
+    after any residual qualifier). The channel segment is SINGLE-token: a name
+    carries at most one transport channel. The parser unions these into its
+    qualifier acceptance set so they peel; the StandardName model retains the
+    single token in the ``channel`` segment.
+
+    Returns an ORDERED tuple (file order) so the generated ``Channel`` enum
+    preserves the locked vocabulary order (heat, particle, energy, momentum).
+    """
+    path = _VOCAB_DIR / "channels.yml"
+    if not path.exists():
+        return ()
+    with path.open(encoding="utf-8") as fh:
+        data = yaml.safe_load(fh)
+    if not data:
+        return ()
+    if isinstance(data, list):
+        return tuple(str(token) for token in data)
+    if isinstance(data, dict) and "channels" in data:
+        return tuple(str(token) for token in (data["channels"] or []))
+    return ()
+
+
 def _load_flat_token_list(filename: str, dict_key: str) -> frozenset[str]:
     """Load a flat YAML token list (or ``{<dict_key>: [...]}``)."""
     path = _VOCAB_DIR / filename

@@ -126,9 +126,10 @@ bases:
     aliases: []
     kind: scalar
     inherently_dimensional: true
-  energy_flux:
-    aliases: []
-    kind: vector
+  # NOTE: energy_flux / heat_flux / momentum_flux / particle_flux are NOT
+  # lexical bases. They decompose as channel + base: energy_flux = channel=energy
+  # + base=flux (see channels.yml). energy and momentum remain bases for their
+  # standalone / non-flux uses (kinetic_energy, angular_momentum).
   factor:
     aliases: []
     kind: scalar
@@ -160,9 +161,6 @@ bases:
     aliases: []
     kind: scalar
   growth_rate:
-    aliases: []
-    kind: scalar
-  heat_flux:
     aliases: []
     kind: scalar
   height:
@@ -226,9 +224,6 @@ bases:
     aliases: []
     kind: scalar
     inherently_dimensional: true
-  momentum_flux:
-    aliases: []
-    kind: vector
   multiplicity:
     aliases: []
     kind: scalar
@@ -241,9 +236,6 @@ bases:
   parameter:
     aliases: []
     kind: scalar
-  particle_flux:
-    aliases: []
-    kind: vector
   period:
     aliases: []
     kind: scalar

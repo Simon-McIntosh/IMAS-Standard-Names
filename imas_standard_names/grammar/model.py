@@ -36,6 +36,7 @@ from imas_standard_names.grammar.ir import (
 from imas_standard_names.grammar.model_types import (
     Aggregation,
     BinaryOperator,
+    Channel,
     Component,
     Decomposition,
     GeometricBase,
@@ -103,6 +104,15 @@ _ORBIT_VALUES: frozenset[str] = frozenset(o.value for o in Orbit)
 # so compose() can canonicalize and the validator can reject out-of-order input.
 _ZONE_VALUES: frozenset[str] = frozenset(z.value for z in Zone)
 _ZONE_ORDER: dict[str, int] = {z.value: i for i, z in enumerate(Zone)}
+
+# Channel: transport-channel PREFIX segment (heat, particle, energy, momentum —
+# WHAT is transported). A structural role, not a generic qualifier. SINGLE-token
+# (at most one channel per name, like subject/aggregation) and INNERMOST: it
+# renders immediately before the base, AFTER any residual qualifier(s). Note
+# energy/momentum are ALSO physical_bases — the parser matches the longest base
+# first, so a standalone energy/momentum never reaches the qualifier stage and
+# only the *_flux/*_diffusivity/* compounds strip the channel token.
+_CHANNEL_VALUES: frozenset[str] = frozenset(c.value for c in Channel)
 
 # Map from LocusType to model field name
 _LOCUS_TYPE_TO_FIELD: dict[LocusType, str] = {
@@ -374,6 +384,7 @@ def _ir_to_model_dict(ir: StandardNameIR) -> dict[str, str]:
             aggregation = None
             population = None
             orbit = None
+            channel = None
             zone_tokens: list[str] = []
             base_qualifiers: list[str] = []
             for q in ir.qualifiers:
@@ -431,6 +442,20 @@ def _ir_to_model_dict(ir: StandardNameIR) -> dict[str, str]:
                     # canonical intra-order, and parse_standard_name rejects a
                     # non-canonical authored order via NonCanonicalNameError.
                     zone_tokens.append(q.token)
+                elif q.token in _CHANNEL_VALUES:
+                    # Channel is single-token (what is transported): a name
+                    # carries at most one transport channel. A second channel
+                    # token is a hard error (never silent last-wins — that would
+                    # drop a token from the name).
+                    if channel is not None:
+                        msg = (
+                            f"Two 'channel' tokens ('{channel}' and "
+                            f"'{q.token}') cannot stack in a single name; the "
+                            f"channel segment admits at most one transport "
+                            f"channel token."
+                        )
+                        raise ValueError(msg)
+                    channel = q.token
                 elif (
                     q.token in _BARE_PREFIX_TRANSFORMATIONS
                     and transformation_token is None
@@ -450,6 +475,8 @@ def _ir_to_model_dict(ir: StandardNameIR) -> dict[str, str]:
                 d["device"] = device
             if zone_tokens:
                 d["zone"] = tuple(zone_tokens)
+            if channel:
+                d["channel"] = channel
             if transformation_token:
                 d["transformation"] = transformation_token
             # Fold remaining qualifiers into physical_base as compound
@@ -650,6 +677,7 @@ def _model_to_ir(model: StandardName) -> StandardNameIR:
                 model.orbit,
                 model.aggregation,
                 model.zone,
+                model.channel,
             )
             # Insert bare-prefix transformation qualifier at the front
             # (transformation is outermost: <transform>_<subject>_<base>)
@@ -711,12 +739,15 @@ def _decompose_physical_base(
     orbit: Orbit | None = None,
     aggregation: Aggregation | None = None,
     zone: tuple[Zone, ...] = (),
+    channel: Channel | None = None,
 ) -> tuple[QuantityOrCarrier, list[Qualifier]]:
     """Decompose a physical_base string into IR base + qualifiers.
 
     The physical_base may be a compound like 'magnetic_field' or
     'diamagnetic_drift_velocity'. We use the parser to decompose it correctly,
-    then prepend aggregation/orbit/population/subject/device/zone as qualifiers.
+    then prepend aggregation/orbit/population/subject/device/zone as qualifiers,
+    and append the transport channel as the INNERMOST qualifier (just before
+    the base, after the residual physical_base qualifiers).
     """
     qualifiers: list[Qualifier] = []
 
@@ -741,14 +772,24 @@ def _decompose_physical_base(
     ):
         qualifiers.append(Qualifier(token=zone_token))
 
+    channel_qualifier = (
+        Qualifier(token=_value_of(channel)) if channel is not None else None
+    )
+
     # Try to parse the physical_base to extract any embedded qualifiers
     try:
         result = _parse_ir(physical_base)
-        # Successfully parsed: merge the parsed qualifiers
+        # Successfully parsed: merge the parsed (residual) qualifiers, then the
+        # channel renders innermost — immediately before the base.
         qualifiers.extend(result.ir.qualifiers)
+        if channel_qualifier is not None:
+            qualifiers.append(channel_qualifier)
         return result.ir.base, qualifiers
     except (ParseError, ValueError):
-        # Can't decompose: use the whole string as base
+        # Can't decompose: use the whole string as base. Channel still renders
+        # innermost (just before the base).
+        if channel_qualifier is not None:
+            qualifiers.append(channel_qualifier)
         return QuantityOrCarrier(
             token=physical_base, kind=BaseKind.QUANTITY
         ), qualifiers
@@ -772,6 +813,12 @@ class StandardName(BaseModel):
     # intra-order (Zone enum order); compose() renders them between
     # subject/device and the refined qualifiers.
     zone: tuple[Zone, ...] = ()
+    # Channel: transport-channel PREFIX segment (heat/particle/energy/momentum —
+    # WHAT is transported). SINGLE-token and INNERMOST: compose() renders it
+    # immediately before the base, after any residual qualifier. energy/momentum
+    # are also valid bases (standalone electron_energy, kinetic_energy); the
+    # parser disambiguates by longest-base match.
+    channel: Channel | None = None
     geometric_base: GeometricBase | None = None
     physical_base: BaseToken | None = None
     object: Object | None = None
@@ -1000,6 +1047,7 @@ class StandardName(BaseModel):
                     self.subject,
                     self.device,
                     self.zone,
+                    self.channel,
                     self.object,
                     self.position,
                     self.geometry,

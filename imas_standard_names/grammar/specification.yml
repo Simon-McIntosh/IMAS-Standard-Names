@@ -89,6 +89,7 @@ canonical_pattern: >
   [<subject>]?
   [<device>]?
   [<zone>]?
+  [<channel>]?
   <geometric_base | physical_base>
   [of_<object>]?
   [of_<geometry> | at_<position>[_equal_to_<value>]? | over_<region>]?
@@ -217,6 +218,23 @@ segments:
       (vertical, radial, region, face — see zones.yml). The prefix form
       (scrape_off_layer_density) is distinct from the postfix region locus
       (over_scrape_off_layer); both coexist.
+  - id: channel
+    optional: true
+    vocabulary: channels
+    description: >
+      Transport channel — WHAT is transported (heat, particle, energy,
+      momentum). A structural role, not a generic qualifier: it is the
+      INNERMOST prefix segment, rendering immediately before the base and
+      AFTER any residual qualifier(s):
+      <subject>_<device>_<zone>_<qualifier>_<channel>_<base> (e.g.
+      heat_flux = channel=heat + base=flux; electron_energy_flux =
+      subject=electron + channel=energy + base=flux; momentum_diffusivity =
+      channel=momentum + base=diffusivity). SINGLE-token (at most one channel
+      per name; two channel tokens is a hard error). energy and momentum are
+      ALSO physical_bases (kinetic_energy, angular_momentum, standalone
+      electron_energy): the parser matches the longest base first, so the
+      standalone forms parse as base and the *_flux / *_diffusivity / *_source
+      forms strip the channel. Both coexist by design.
   - id: geometric_base
     optional: true
     vocabulary: geometric_bases
@@ -327,6 +345,9 @@ vocabularies:
   # zone: ordered plasma-region / geometric sub-selector PREFIX segment
   # (distinct from the postfix region locus). Multi-token, fixed intra-order.
   zones: !include vocabularies/zones.yml
+  # channel: transport-channel PREFIX segment (what is transported:
+  # heat/particle/energy/momentum). Innermost prefix, single-token.
+  channels: !include vocabularies/channels.yml
   processes: !include vocabularies/processes.yml
   generic_physical_bases: !include vocabularies/generic_physical_bases.yml
   binary_operators: !include vocabularies/binary_operators.yml

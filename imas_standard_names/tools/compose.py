@@ -62,6 +62,7 @@ class ComposeTool(Tool):
         subject: grammar_types.Subject | str | None = None,
         device: grammar_types.Object | str | None = None,
         zone: grammar_types.Zone | str | list[str] | tuple[str, ...] | None = None,
+        channel: grammar_types.Channel | str | None = None,
         object: grammar_types.Object | str | None = None,
         geometry: grammar_types.Position | str | None = None,
         position: grammar_types.Position | str | None = None,
@@ -95,6 +96,7 @@ class ComposeTool(Tool):
             zone_tuple = tuple(coerce_enum(grammar_types.Zone, z) for z in zone)
         else:
             zone_tuple = (coerce_enum(grammar_types.Zone, zone),)
+        chan = coerce_enum(grammar_types.Channel, channel)
         obj = coerce_enum(grammar_types.Object, object)
         geom = coerce_enum(grammar_types.Position, geometry)
         pos = coerce_enum(grammar_types.Position, position)
@@ -114,6 +116,7 @@ class ComposeTool(Tool):
             subject=subj,
             device=dev,
             zone=zone_tuple,
+            channel=chan,
             object=obj,
             geometry=geom,
             position=pos,

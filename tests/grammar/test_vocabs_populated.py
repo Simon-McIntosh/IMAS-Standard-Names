@@ -72,20 +72,21 @@ class TestPhysicalBasesCorpusCoverage:
             "current_density",
             "number_density",
             "magnetic_field",
-            "momentum_flux",
+            # NOTE: momentum_flux / particle_flux / energy_flux / heat_flux are
+            # no longer irreducible bases — they decompose as channel + flux
+            # (channel=momentum/particle/energy/heat + base=flux). See
+            # channels.yml. 'flux' is the irreducible base.
+            "flux",
             "temperature",
             "pressure",
-            "particle_flux",
             "velocity",
             "magnetic_flux",
             "angle",
             "current",
-            "energy_flux",
             "density",
             "energy",
             "power",
             "power_density",
-            "heat_flux",
             "electric_field",
             "emissivity",
             "diffusivity",

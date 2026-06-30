@@ -120,16 +120,19 @@ def test_vocab_cross_segment_uniqueness():
     #   and prefix-form names (coolant_outlet_temperature → coolant_temperature_at_outlet)
     #   migrate to the locus form. Intersection now empty.
     #
+    # ELIMINATED (guard now active — do not re-add):
+    # - qualifiers.yml ↔ physical_bases.yml AND qualifiers.yml ↔
+    #   generic_physical_bases.yml: the only overlapping tokens were energy and
+    #   momentum (the transport-channel words). They moved to channels.yml (the
+    #   dedicated `channel` segment), so both intersections are now empty.
+    #
     # §3-review targets (still allowed, to be ratcheted out as each is resolved):
-    # - qualifiers.yml ↔ {physical_bases, subjects, processes, physics_domains,
-    #   generic_physical_bases}.yml
+    # - qualifiers.yml ↔ {subjects, processes, physics_domains}.yml
     allowed_overlap_pairs = {
         frozenset({"qualifiers.yml", "subjects.yml"}),
         frozenset({"qualifiers.yml", "processes.yml"}),
         frozenset({"qualifiers.yml", "regions.yml"}),
         frozenset({"qualifiers.yml", "physics_domains.yml"}),
-        frozenset({"qualifiers.yml", "physical_bases.yml"}),
-        frozenset({"qualifiers.yml", "generic_physical_bases.yml"}),
         frozenset({"components.yml", "coordinate_axes.yml"}),
         frozenset({"generic_physical_bases.yml", "physical_bases.yml"}),
         frozenset({"processes.yml", "subjects.yml"}),
@@ -149,6 +152,17 @@ def test_vocab_cross_segment_uniqueness():
         #    design (see zones.yml header and the canonical-qualifier-order plan).
         frozenset({"zones.yml", "regions.yml"}),
         frozenset({"zones.yml", "locus_registry.yml"}),
+        # channels.yml is the transport-channel PREFIX segment (heat, particle,
+        # energy, momentum — WHAT is transported). energy and momentum serve a
+        # documented DUAL role: they are also physical_bases (kinetic_energy,
+        # internal_energy, angular_momentum, standalone electron_energy) and
+        # energy is additionally a generic_physical_base. The parser matches the
+        # longest base first, so a standalone energy/momentum resolves as the
+        # base while the *_flux / *_diffusivity / *_source compounds strip the
+        # channel. Both forms coexist by design (see channels.yml header and the
+        # canonical-qualifier-order plan).
+        frozenset({"channels.yml", "physical_bases.yml"}),
+        frozenset({"channels.yml", "generic_physical_bases.yml"}),
     }
 
     # Filter out allowed overlaps

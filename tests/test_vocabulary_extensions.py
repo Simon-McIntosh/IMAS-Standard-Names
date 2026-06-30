@@ -28,11 +28,16 @@ class TestPerpendicular:
         assert parsed.physical_base == "magnetic_field"
 
     def test_perpendicular_round_trip(self):
-        model = StandardName(component="perpendicular", physical_base="heat_flux")
+        # heat_flux decomposes as channel=heat + base=flux (see channels.yml).
+        model = StandardName(
+            component="perpendicular", channel="heat", physical_base="flux"
+        )
         name = model.compose()
+        assert name == "perpendicular_heat_flux"
         parsed = parse_name(name)
         assert parsed.component.value == "perpendicular"
-        assert parsed.physical_base == "heat_flux"
+        assert parsed.channel.value == "heat"
+        assert parsed.physical_base == "flux"
 
 
 class TestSubjectTokens:
@@ -126,10 +131,12 @@ class TestProcessTokens:
         assert parsed.physical_base == "plasma_current"
 
     def test_gas_injection_with_subject(self):
+        # particle_flux decomposes as channel=particle + base=flux.
         name = "deuterium_particle_flux_due_to_gas_injection"
         parsed = parse_name(name)
         assert parsed.subject.value == "deuterium"
-        assert parsed.physical_base == "particle_flux"
+        assert parsed.channel.value == "particle"
+        assert parsed.physical_base == "flux"
         assert parsed.process.value == "gas_injection"
 
 
@@ -137,8 +144,10 @@ class TestRecyclingProcess:
     """recycling process token (codex R4 VocabGap: divertor recycling)."""
 
     def test_particle_flux_due_to_recycling_round_trips(self):
+        # particle_flux decomposes as channel=particle + base=flux.
         name = "particle_flux_due_to_recycling"
         parsed = parse_name(name)
         assert parsed.process.value == "recycling"
-        assert parsed.physical_base == "particle_flux"
+        assert parsed.channel.value == "particle"
+        assert parsed.physical_base == "flux"
         assert compose_name(parsed) == name

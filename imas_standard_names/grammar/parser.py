@@ -184,6 +184,14 @@ def load_default_vocabularies() -> Vocabularies:
     # ``zone`` segment.
     zone_quals = frozenset(vocab_loaders.load_zones())
 
+    # Channel tokens (heat, particle, energy, momentum) name what is
+    # transported. They peel like qualifiers (innermost prefix, just before the
+    # base); the model retains the single token in the ``channel`` segment.
+    # energy/momentum are also bases — the parser tries the full base match
+    # first, so standalone energy/momentum resolve as base and only the
+    # *_flux/*_diffusivity/... compounds strip the channel.
+    channel_quals = frozenset(vocab_loaders.load_channels())
+
     qualifiers = (
         subject_quals
         | object_quals
@@ -193,6 +201,7 @@ def load_default_vocabularies() -> Vocabularies:
         | orbit_quals
         | prefix_op_quals
         | zone_quals
+        | channel_quals
     )
 
     return Vocabularies(

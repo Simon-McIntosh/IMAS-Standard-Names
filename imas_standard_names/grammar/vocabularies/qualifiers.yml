@@ -20,11 +20,11 @@
 # === Original modifier_quals (parser.py hardcoded set) ===
 # These 19 tokens MUST remain for backward compatibility.
 
-# --- Energy/transport type qualifiers ---
-- energy                        # energy transport channel (energy_flux, energy_diffusivity)
-- particle                      # particle transport channel [also-subject]
-- momentum                      # momentum transport channel (momentum_flux, momentum_source)
-- heat                          # heat transport channel (heat_flux, heat_viscosity)
+# --- Transport channel ---
+# NOTE: heat, particle, energy, momentum moved to channels.yml (the dedicated
+# `channel` segment — what is transported). They are a structural role, not a
+# generic qualifier, and render as the innermost prefix (immediately before the
+# base, after any residual qualifier).
 
 # --- Aggregate/net qualifiers ---
 # NOTE: 'total' and 'net' moved to aggregations.yml (the aggregation segment —

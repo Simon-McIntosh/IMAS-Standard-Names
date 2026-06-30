@@ -1,0 +1,36 @@
+# Channel vocabulary: transport-channel prefixes (what is transported)
+#
+# Usage: <channel>_<base>   e.g. heat_flux, energy_flux, momentum_diffusivity
+# Examples:
+#   - heat_flux                     (channel=heat,     base=flux)
+#   - energy_flux                   (channel=energy,   base=flux)
+#   - momentum_diffusivity          (channel=momentum, base=diffusivity)
+#   - electron_energy_flux          (subject=electron, channel=energy, base=flux)
+#   - radial_electron_energy_flux   (component=radial, subject=electron,
+#                                    channel=energy, base=flux)
+#
+# The channel segment names WHAT is transported (heat / particle / energy /
+# momentum). It is a STRUCTURAL role, not a generic qualifier: it is the
+# INNERMOST prefix segment, rendering immediately before the base and AFTER any
+# residual qualifier(s):
+#   component/coordinate -> aggregation -> orbit -> population -> subject ->
+#   device -> zone -> [residual qualifier(s)] -> CHANNEL -> base
+#
+# SINGLE-TOKEN segment: a name carries AT MOST one transport channel (like
+# aggregation/subject). Two channel tokens in one name is a hard error.
+#
+# Dual role (energy, momentum): energy and momentum are ALSO physical_bases
+# (kinetic_energy, internal_energy, angular_momentum, standalone electron_energy).
+# Both forms coexist: the parser matches the longest base first, so "energy"
+# standalone parses as base, while "energy_flux" strips channel=energy + base=flux.
+# energy and momentum therefore appear in BOTH this file and physical_bases.yml
+# by design (see the documented channels.yml <-> physical_bases.yml allowlist
+# entry in tests/grammar/test_vocab_uniqueness.py).
+#
+# The channel parser-acceptance union strips these as prefixes; the StandardName
+# model retains the single token in the ``channel`` field.
+
+- heat
+- particle
+- energy
+- momentum

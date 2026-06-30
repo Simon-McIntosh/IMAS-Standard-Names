@@ -21,13 +21,20 @@ def test_compose_and_parse_minimal_base():
 
 
 def test_with_component_subject_no_basis():
-    parts = {"component": "radial", "subject": "electron", "physical_base": "heat_flux"}
+    # heat_flux decomposes as channel=heat + base=flux (see channels.yml).
+    parts = {
+        "component": "radial",
+        "subject": "electron",
+        "channel": "heat",
+        "physical_base": "flux",
+    }
     name = compose_name(parts)
     assert name == "radial_electron_heat_flux"
     parsed = parse_name(name)
     assert parsed.component == Component.RADIAL
     assert parsed.subject == "electron"
-    assert parsed.physical_base == "heat_flux"
+    assert parsed.channel == "heat"
+    assert parsed.physical_base == "flux"
 
 
 def test_with_position_process():
@@ -60,7 +67,8 @@ def test_non_canonical_order_is_ungrammatical():
     parsed = parse_name("radial_electron_heat_flux")
     assert parsed.component == Component.RADIAL
     assert parsed.subject == "electron"
-    assert parsed.physical_base == "heat_flux"
+    assert parsed.channel == "heat"
+    assert parsed.physical_base == "flux"
 
 
 # --- D.3 senior review (2026-04) vocabulary additions ---

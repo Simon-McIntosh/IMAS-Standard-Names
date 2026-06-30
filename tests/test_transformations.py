@@ -94,7 +94,11 @@ class TestTransformationCompose:
         assert name == "line_averaged_electron_density"
 
     def test_surface_integrated(self):
-        parts = {"transformation": "surface_integrated", "physical_base": "heat_flux"}
+        parts = {
+            "transformation": "surface_integrated",
+            "channel": "heat",
+            "physical_base": "flux",
+        }
         name = compose_name(parts)
         assert name == "surface_integrated_heat_flux"
 
@@ -353,7 +357,11 @@ class TestTransformationRoundTrip:
                 "subject": "electron",
                 "physical_base": "density",
             },
-            {"transformation": "surface_integrated", "physical_base": "heat_flux"},
+            {
+                "transformation": "surface_integrated",
+                "channel": "heat",
+                "physical_base": "flux",
+            },
             {"transformation": "volume_integrated", "physical_base": "power"},
             pytest.param(
                 {

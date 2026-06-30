@@ -32,7 +32,9 @@
 - electron
 - ion
 - neutral
-- particle
+# NOTE: 'particle' moved to channels.yml (the transport-channel segment — what
+# is transported). 'particle' is not a species subject; particle_flux is
+# channel=particle + base=flux.
 - neutron
 
 # === Fusion fuel + isotopes ===

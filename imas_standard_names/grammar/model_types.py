@@ -47,7 +47,6 @@ class Subject(StrEnum):
     ELECTRON = "electron"
     ION = "ion"
     NEUTRAL = "neutral"
-    PARTICLE = "particle"
     NEUTRON = "neutron"
     HYDROGEN = "hydrogen"
     HYDROGENIC = "hydrogenic"
@@ -151,6 +150,13 @@ class Zone(StrEnum):
     FRONT_SURFACE = "front_surface"
     BACK_SURFACE = "back_surface"
     WETTED = "wetted"
+
+
+class Channel(StrEnum):
+    HEAT = "heat"
+    PARTICLE = "particle"
+    ENERGY = "energy"
+    MOMENTUM = "momentum"
 
 
 class Process(StrEnum):
@@ -586,6 +592,7 @@ __all__ = [
     "Aggregation",
     "Region",
     "Zone",
+    "Channel",
     "Process",
     "GenericPhysicalBase",
     "BinaryOperator",
