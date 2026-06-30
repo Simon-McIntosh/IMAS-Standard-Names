@@ -66,7 +66,6 @@ qualifier_categories:
     - e_cross_b_drift
     - field_aligned
     - field_line
-    - flux_surface
     - major
     - minor
     - non_axisymmetric
@@ -95,7 +94,6 @@ qualifier_categories:
     - resistive
     - saturated
     - sawtooth
-    - state
     - steady_state
     - stray
     - townsend
@@ -179,7 +177,5 @@ qualifier_categories:
     - explicit
     - heating
     - implicit
-    - inlet
-    - outlet
     - prefill
     - requested

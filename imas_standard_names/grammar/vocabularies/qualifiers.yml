@@ -83,7 +83,6 @@
 - field_aligned                 # aligned with magnetic field
 - surface                       # surface (2D boundary) qualifier
 - volumetric                    # volumetric (per unit volume) qualifier
-- flux_surface                  # flux-surface averaged/related
 - field_line                    # along a field line
 - major                         # major (outer) geometric qualifier
 - minor                         # minor (inner) geometric qualifier
@@ -103,7 +102,6 @@
 - saturated                     # saturated state
 - steady_state                  # steady-state condition
 - transient                     # transient / time-varying
-- state                         # charge state or quantum state qualifier
 - atomic                        # atomic (single-particle) qualifier
 
 # --- Energy type ---
@@ -158,8 +156,6 @@
 
 # --- Engineering / subsystem ---
 - coolant                       # coolant fluid qualifier
-- outlet                        # outlet (exit) point qualifier
-- inlet                         # inlet (entry) point qualifier
 - prefill                       # pre-fill injection qualifier
 - heating                       # heating system qualifier
 

@@ -114,14 +114,19 @@ def test_vocab_cross_segment_uniqueness():
     # - generic_physical_bases.yml ↔ physical_bases.yml: subset relationship
     # - zones.yml ↔ regions.yml / locus_registry.yml: zone PREFIX vs locus POSTFIX
     #
+    # ELIMINATED (guard now active — do not re-add):
+    # - qualifiers.yml ↔ locus_registry.yml: the mis-filed loci flux_surface, inlet,
+    #   outlet were removed from qualifiers.yml — they are loci (at_inlet / over_…),
+    #   and prefix-form names (coolant_outlet_temperature → coolant_temperature_at_outlet)
+    #   migrate to the locus form. Intersection now empty.
+    #
     # §3-review targets (still allowed, to be ratcheted out as each is resolved):
     # - qualifiers.yml ↔ {physical_bases, subjects, processes, physics_domains,
-    #   locus_registry, generic_physical_bases}.yml
+    #   generic_physical_bases}.yml
     allowed_overlap_pairs = {
         frozenset({"qualifiers.yml", "subjects.yml"}),
         frozenset({"qualifiers.yml", "processes.yml"}),
         frozenset({"qualifiers.yml", "regions.yml"}),
-        frozenset({"qualifiers.yml", "locus_registry.yml"}),
         frozenset({"qualifiers.yml", "physics_domains.yml"}),
         frozenset({"qualifiers.yml", "physical_bases.yml"}),
         frozenset({"qualifiers.yml", "generic_physical_bases.yml"}),

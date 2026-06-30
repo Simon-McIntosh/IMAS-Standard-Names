@@ -233,7 +233,10 @@ def _try_parse(name: str, vocabs: Vocabularies) -> bool:
         "minor_radius_of_plasma_boundary",
         "major_radius_of_x_point",
         "contravariant_metric_tensor",
-        "coolant_outlet_temperature_of_breeder_blanket_module",
+        # outlet is a locus (at_outlet), not a prefix qualifier — the old
+        # coolant_outlet_temperature_of_breeder_blanket_module form migrated to the
+        # canonical locus form (canonical-qualifier-order grammar redesign).
+        "coolant_temperature_at_outlet",
         "major_radius_of_plasma_boundary",
         "normalized_toroidal_flux_coordinate_at_sawtooth_inversion_radius",
         # Note: 'vertical_coordinate' and 'toroidal_angle' are not yet in
