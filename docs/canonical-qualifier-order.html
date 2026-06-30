@@ -183,6 +183,26 @@
       out of canonical order (<code>NonCanonicalNameError</code> already exists for this and attaches the canonical form).
       Round-trip then means parse→canonical-compose; any name that changes is a §5 migration target.
     </p>
+    <p>
+      <strong>Current catalogue names are not the oracle.</strong> This is a greenfield project: existing names are the
+      current <em>state</em>, not ground truth. We expect names to break under the stricter grammar — that is understood
+      collateral, and a name that fails to comply is, after review, a valid finding that the <em>name</em> is wrong and
+      must be fixed. The implementation gate is therefore <em>engine self-consistency</em> (for every name the parser
+      accepts, <code>compose(parse(name)) == name</code> — no parser/renderer-inverse bug), a green suite, and clean
+      codegen — <strong>not</strong> "all 1364 names keep working". Names that no longer parse, or that strict-validate
+      flags as non-canonical, are surfaced as the §5 migration/fix backlog, never papered over with parser hacks.
+    </p>
+    <h3 id="s3v">§3v — Guard: vocabularies must be disjoint (regression test)</h3>
+    <p>
+      The double-registration finding (8 tokens in both <code>qualifiers.yml</code> and <code>operators.yml</code>) is a
+      class of bug worth a permanent guard. Add a test asserting the segment-role vocabularies are pairwise <strong>disjoint</strong>
+      sets — a token belongs to exactly one role — with a small, explicitly-documented allowlist for genuinely-intentional
+      cross-listings (<code>components</code> ∩ <code>coordinate_axes</code>; the <code>objects</code>/<code>positions</code>
+      aliases that both resolve to <code>locus_registry.yml</code>). Every other intersection is a defect. The allowlist is a
+      ratchet: it shrinks toward empty as §3 resolves the remaining mis-files (<code>energy</code>/<code>momentum</code> as
+      base+qualifier, <code>particle</code>/<code>state</code> as subject+qualifier). Gated on Phase 2 (so the operator dupes
+      and zone tokens are already cleaned).
+    </p>
 
     <h2 id="s4">§4 — Template the order into the LLM name-generation prompts</h2>
     <p>
@@ -363,8 +383,49 @@ Done-when
   1. zone segment + Zone enum landed; specification.yml canonical_pattern updated.
   2. 8 operator dupes removed from qualifiers.yml + qualifier_categories.yml; coverage test green.
   3. compose canonicalizes the new order; validator rejects non-canonical (tests added).
-  4. full suite green; round-trip 1364/1364; codegen drift clean.
+  4. Engine self-consistency: for every catalogue name parse() ACCEPTS,
+     compose(parse(name).ir)==name (100% of accepted names; the accepted COUNT may
+     drop — that is expected). Full suite green (fix only regressions you introduce);
+     codegen drift clean. REPORT (do not gate on) the migration backlog: names that no
+     longer parse + names strict parse_standard_name() flags non-canonical, with examples.
   5. Followups written for §3 (deep token review) and §4/§4b + this one resolved.</pre>
+      </article>
+
+      <article class="r-fu" data-id="f-cqo-003" data-status="open" data-tier="sonnet" data-written-by="reckon-ship" data-written-at="2026-06-30" data-recommends-skill="/reckon-ship canonical-qualifier-order §3v" data-resolved-at="" data-resolved-by="">
+        <h4 class="r-fu-title">§3v — Add a vocabulary-disjointness guard test</h4>
+        <div class="r-fu-body">Add a regression test asserting the segment-role vocabularies are pairwise disjoint, so accidental double-registration (the operator/qualifier dupe class) can never recur. Small documented allowlist for intentional cross-listings; the allowlist is a ratchet that shrinks as §3 resolves remaining mis-files. Gated on Phase 2 (f-cqo-002) landing so the dupes/zone tokens are already cleaned.</div>
+        <pre class="r-fu-prompt">Project: imas-standard-names
+Plan:    canonical-qualifier-order
+Section: §3v
+Tier:    sonnet
+
+Context
+  A grammar redesign exposed 8 tokens double-registered in qualifiers.yml AND
+  operators.yml. Add a permanent guard so this class of bug can't recur. Run AFTER
+  Phase 2 (f-cqo-002) has removed the operator dupes and added zones.yml.
+
+State to read (code/files)
+  imas_standard_names/grammar/vocabularies/*.yml  (all segment vocab files)
+  imas_standard_names/grammar/vocab_loaders.py    (loaders; canonical token sets)
+  tests/grammar/test_qualifier_categories.py       (sibling invariant test, for style)
+
+Scope locks / constraints
+  - New test file only: tests/grammar/test_vocab_disjoint.py. Do not edit vocab files
+    to make it pass — if it finds an UNexpected intersection, that is a real finding:
+    report it (it may be a mis-file for the §3 review), do not silence it.
+  - Assert pairwise-disjointness of the SEGMENT-ROLE token sets: qualifiers, subjects,
+    aggregations, populations, orbits, zones, operators, components, coordinate_axes,
+    regions, processes, physical_bases, geometry_carriers, binary_operators.
+  - ALLOWLIST (intentional, documented in the test): components ∩ coordinate_axes
+    (shared directional vocab by design); objects/positions both alias locus_registry.
+    Every other intersection fails the test. Keep the allowlist minimal + commented with
+    rationale so it stays a ratchet.
+
+Done-when
+  1. test_vocab_disjoint.py added and GREEN against the post-Phase-2 vocab (or reporting a
+     documented, plan-tracked exception if an intentional overlap remains).
+  2. Any UNexpected intersection found is reported into the plan as a §3 mis-file finding.
+  3. Full suite green; this followup resolved.</pre>
       </article>
     </section>
 
