@@ -13,7 +13,7 @@
   <meta name="plan-effort"    content="XL">
   <meta name="plan-tier"      content="opus">
   <meta name="plan-owner"     content="Simon McIntosh">
-  <meta name="plan-impl"      content="0.5">
+  <meta name="plan-impl"      content="0.75">
   <meta name="plan-modified"  content="2026-06-30">
   <meta name="plan-depends-on" content="qualifier-vocabulary-categorization">
   <title>Canonical Qualifier Order | imas-standard-names</title>
@@ -151,6 +151,7 @@
       <p style="margin:6px 0 0;font-size:13.5px"><span class="badge badge-shipped">✓ Class 3: domain overlap 2026-06-30</span> equilibrium/mhd/nbi kept as documented dual-role qualifiers (genuine modifiers that also name a physics domain — benign, like physics_domains↔tags); no migration. Guard ratcheted: qualifiers∩{subjects, regions} now empty + enforced; only qualifiers∩processes={convection, heating} remains (→ Class 4). Next: Class 4 (base-bound → atomic bases).</p>
       <p style="margin:6px 0 0;font-size:13.5px"><span class="badge badge-shipped">✓ Class 4: base-bound → atomic bases 2026-06-30</span> commit <code>cba6f2e</code> — promoted 11 lexicalised compounds to atomic physical_bases (convection_velocity, heating_power, vector_potential, center_of_mass_velocity, angular_momentum/frequency/velocity, internal_inductance/energy, kinetic_energy, surface_area) and removed the 6 fully-subsumed tokens (convection, heating, vector, center_of_mass, angular, internal). surface/kinetic kept as qualifiers (coexist via longest-base-match). vector_potential promoted from alias to base. Suite green; engine 1344/1344; no new backlog.</p>
       <p style="margin:8px 0 0;font-size:13.5px;font-weight:600;color:#13351f">✓✓ Qualifier-class decomposition COMPLETE. <code>qualifiers.yml</code> is now disjoint from every segment vocabulary except the documented <code>physics_domains</code> dual-role — the flat catch-all is gone, replaced by strict ordered segments (operator · aggregation · orbit · population · subject · device · zone · channel · qualifier · base · loci · process). Consolidated §5 migration backlog: 38 names (20 parse-fail + 18 reorder). Remaining: §4/§4b (LLM context + SPA), §5 (graph migration + re-review), §6 (radial-coordinate refactor).</p>
+      <p style="margin:8px 0 0;font-size:13.5px"><span class="badge badge-shipped">✓ §4 + §4b 2026-06-30</span> commits <code>4c77091</code> + <code>490319b</code> — §4: the LLM grammar context (context.py) now templates the full ordered grammar including zone+channel (auto-derived from codegen SEGMENT_ORDER; descriptions added). §4b: zones+channels emitted in GRAMMAR_VOCAB (canonical intra-order) and rendered as their own segments in the SPA Grammar composer + ParseBreakdown. Fidelity held: SPA round-trip harness 19/19 (new core_electron_temperature, scrape_off_layer_density, heat_flux, radial_electron_energy_flux cases); Python tests/catalog 127 passed. Remaining: §5 (graph migration of the 38 backlog), §6 (radial-coordinate refactor — fixes the major_inner_radius nonsense).</p>
     </section>
 
     <h2 id="s2"><span class="badge badge-shipped">✓ scaffold</span> §2 — The decomposition: route every token to its true segment</h2>
