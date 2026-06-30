@@ -126,12 +126,24 @@ def test_vocab_cross_segment_uniqueness():
     #   momentum (the transport-channel words). They moved to channels.yml (the
     #   dedicated `channel` segment), so both intersections are now empty.
     #
-    # §3-review targets (still allowed, to be ratcheted out as each is resolved):
-    # - qualifiers.yml ↔ {subjects, processes, physics_domains}.yml
+    # ELIMINATED (guard now active — do not re-add):
+    # - qualifiers.yml ↔ subjects.yml: 'particle' moved to channels.yml, 'state'
+    #   to its subject-compound role — intersection now empty.
+    # - qualifiers.yml ↔ regions.yml: region words live in zones.yml (prefix) /
+    #   regions.yml (locus), not qualifiers — intersection now empty.
+    #
+    # INTENTIONAL dual-role (keep):
+    # - qualifiers.yml ↔ physics_domains.yml: equilibrium, mhd, nbi are genuine
+    #   modifier qualifiers (mhd_mode, nbi_power) that also name a physics domain
+    #   (classification tag). Same benign dual use as the physics_domains↔tags
+    #   whitelist — the grammar never confuses the qualifier vs domain context.
+    #
+    # §3-review target (last one — resolved by Class 4):
+    # - qualifiers.yml ↔ processes.yml: only convection, heating remain. They are
+    #   compound-base words (convection_velocity, heating_power); when Class 4
+    #   promotes those to atomic bases they leave qualifiers and this empties.
     allowed_overlap_pairs = {
-        frozenset({"qualifiers.yml", "subjects.yml"}),
         frozenset({"qualifiers.yml", "processes.yml"}),
-        frozenset({"qualifiers.yml", "regions.yml"}),
         frozenset({"qualifiers.yml", "physics_domains.yml"}),
         frozenset({"components.yml", "coordinate_axes.yml"}),
         frozenset({"generic_physical_bases.yml", "physical_bases.yml"}),
