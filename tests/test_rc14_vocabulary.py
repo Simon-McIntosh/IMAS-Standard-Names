@@ -356,7 +356,7 @@ class TestExistingRoundTripRegression:
             "area_of_flux_loop",
             "electron_temperature_at_magnetic_axis",
             "major_radius_of_plasma_boundary",
-            "power_due_to_ohmic",
+            "power_due_to_ohmic_heating",
             "flux_surface_averaged_density",
             # real_part is a postfix scalar-extraction operator: <base>_real_part
             "magnetic_field_real_part",

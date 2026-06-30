@@ -108,7 +108,7 @@ class TestProcessTokens:
     @pytest.mark.parametrize(
         "process",
         [
-            "non_inductive",
+            "non_inductive_current_drive",
             "gas_injection",
             "pellet_injection",
             "beam_beam_fusion",
@@ -128,8 +128,8 @@ class TestProcessTokens:
     def test_non_inductive_current(self):
         # plasma is a channel-qualifier (channel_qualifiers.yml): it peels into
         # the channel_qualifier segment, leaving current as the base.
-        parsed = parse_name("plasma_current_due_to_non_inductive")
-        assert parsed.process.value == "non_inductive"
+        parsed = parse_name("plasma_current_due_to_non_inductive_current_drive")
+        assert parsed.process.value == "non_inductive_current_drive"
         assert parsed.channel_qualifier.value == "plasma"
         assert parsed.physical_base == "current"
 

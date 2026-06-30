@@ -63,10 +63,10 @@ class TestBinaryOperatorCompose:
                 "binary_operator": "product_of",
                 "physical_base": "density",
                 "secondary_base": "velocity",
-                "process": "turbulent",
+                "process": "turbulent_transport",
             }
         )
-        assert name == "product_of_density_and_velocity_due_to_turbulent"
+        assert name == "product_of_density_and_velocity_due_to_turbulent_transport"
 
     def test_binary_operator_via_model(self):
         model = StandardName(
@@ -153,7 +153,7 @@ class TestBinaryOperatorRoundTrip:
                 "binary_operator": "product_of",
                 "physical_base": "density",
                 "secondary_base": "velocity",
-                "process": "turbulent",
+                "process": "turbulent_transport",
             },
         ],
     )

@@ -7,15 +7,27 @@
 #   - current_due_to_bootstrap
 
 # === Transport mechanisms ===
+# Transport-regime mechanisms are named as the full mechanism (`<regime>_transport`),
+# not the bare adjective — the due_to_ slot names a PROCESS, so the additive
+# decomposition reads e.g. particle_flux_due_to_anomalous_transport. General across
+# any transported quantity (flux, diffusivity, current density, …).
 - conduction
 - convection
 - diffusion
-- neoclassical
-- turbulent
-- anomalous
+- anomalous_transport
+- neoclassical_transport
+- classical_transport
+- turbulent_transport
+- collisional_transport
+- resistive_diffusion         # finite-resistivity flux/field diffusion (eta/mu0 grad^2 psi)
+- ion_inertia                 # inertial / polarization current (J_pol ~ (n m_i/B^2) dE/dt)
 
 # === Heating and current drive ===
-- ohmic
+# Current-drive mechanisms name the DRIVE (`<x>_current_drive`), not the resulting
+# current quantity — e.g. current_density_due_to_bootstrap_current_drive. Ohmic has
+# both a heating (dissipation) and a current-drive sense; both are provided.
+- ohmic_heating
+- ohmic_current_drive
 - electron_cyclotron_heating
 - ion_cyclotron_heating
 - ion_cyclotron_current_drive
@@ -33,14 +45,16 @@
 
 # === Current drive mechanisms ===
 - induction
-- bootstrap
-- non_inductive
+- bootstrap_current_drive
+- non_inductive_current_drive
+- wave_driven_current_drive
 
 # === Fueling ===
 - gas_injection
 - pellet_injection
 
 # === Fusion reactions ===
+- fusion_reactions            # generic fusion-reaction source (alpha/neutron/power)
 - beam_beam_fusion
 - beam_thermal_fusion
 
