@@ -237,16 +237,27 @@
       stable grammar builder on the ISNC site" requirement.
     </p>
 
-    <h2 id="s5">§5 — Migrate the catalogue (imas-codex) + re-review</h2>
+    <h2 id="s5">§5 — Re-generate the affected names through the pipeline (NOT a mechanical rename)</h2>
     <p>
-      Migration runs through imas-codex (the catalogue YAML is generated, not hand-edited). Sequence dictated by the
-      graph machinery: land the ISN grammar → re-derive the 15 grammar-segment columns + 13 <code>HAS_*</code> edges per
-      node (parser-driven) → dry-run <code>rename_cascade</code> (it validates ISN round-trip on every candidate, so the
-      grammar must be stable first) → execute renames (<code>override_edits</code>/<code>include_accepted</code> as
-      needed) → null <code>reviewer_score_name</code> on renamed names to re-trigger review → run the review pools →
-      export. Moving reduction tokens (<code>volume_averaged…</code>) into <code>ReductionProvenance.domain</code> needs
-      new derivation logic in imas-codex (currently absent). <strong>Sample names before/after</strong> to confirm the
-      semantic-quality gain. Hard renames, no alias trail (early RC, no external consumers).
+      <strong>Decision (2026-06-30): abandon the mechanical <code>rename_cascade</code> migration.</strong> A dry-run
+      showed string-transformed renames produce low-quality names (e.g. <code>current_density_due_to_anomalous</code> —
+      "due to anomalous <em>what</em>?"; the mechanism is <em>anomalous transport</em>). Names are guidance, and the
+      right way to lift quality is to <strong>re-pass the affected names through imas-codex's existing
+      generate→review→refine pipeline</strong>, which now consumes the finalized ISN grammar context (§4,
+      <code>get_grammar_context</code>, injected at runtime — zone/channel/channel_qualifier already included) and writes
+      real descriptions with review scoring.
+    </p>
+    <p>
+      Procedure: (a) <strong>ISN prep</strong> — lift the process vocabulary to proper mechanism nouns
+      (<code>anomalous</code> → <code>anomalous_transport</code>, etc.) and close any vocab gaps the regeneration needs
+      (ISN is the owner of all grammar/vocab); (b) <strong>repoint generation to the local DSv4 model</strong>
+      (<code>[tool.imas-codex.sn-compose] api-base</code> → local <code>/v1</code> endpoint; zero cost); (c)
+      <strong>validate the procedure</strong> with <code>sn bench --max-candidates N</code> (generates target names,
+      checks ISN round-trip + quality) before any graph write; (d) <strong>re-pass the affected names</strong> via
+      <code>sn run --focus &lt;paths&gt;</code> (resets to pending + nulls review scores → full generate→review→refine on
+      DSv4); (e) <strong>before/after sample</strong> the review scores to confirm the quality lift; (f)
+      <code>sn release</code>. The §6 radial-coordinate names and the regime/reduction/operator-stack backlog all
+      re-derive correctly this way rather than via hand-built rename targets.
     </p>
 
     <h2 id="s6">§6 — Radial-coordinate refactor (maintain curvature-vs-coordinate distinction)</h2>
