@@ -614,6 +614,13 @@ bases:
     aliases: []
     kind: scalar
     inherently_dimensional: true
+  angular_width:
+    # angular width / extent (rad); angular binds to width. Lexicalised
+    # alongside angular_momentum/frequency/velocity (the 'angular' qualifier
+    # retired in the base-bound promotion).
+    aliases: []
+    kind: scalar
+    inherently_dimensional: true
   angular_frequency:
     # angular frequency omega = 2*pi*f (rad.s^-1); angular binds to frequency.
     aliases: []
