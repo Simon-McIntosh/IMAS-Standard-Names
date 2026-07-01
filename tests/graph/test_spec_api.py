@@ -104,6 +104,26 @@ def test_segment_edge_specs_round_trip() -> None:
     assert by_segment["physical_base"].token == "temperature"
 
 
+def test_segment_edge_specs_multi_token_zone() -> None:
+    """Multi-token segments (zone) emit ONE joined edge; empty ones are skipped.
+
+    ``zone`` is a tuple-valued segment. An absent zone is an empty tuple
+    (not ``None``) and must not produce a spurious ``"()"`` edge; a present
+    multi-token zone (``lower_outer``) joins its tokens into the surface form.
+    """
+    # Empty zone must be skipped, not serialised as "()".
+    edges = segment_edge_specs(parse_standard_name("poloidal_electron_temperature"))
+    by_segment = {e.segment: e for e in edges}
+    assert "zone" not in by_segment
+    assert all(e.token and e.token != "()" for e in edges)
+
+    # Multi-token zone joins into the surface form, single edge, one position.
+    edges = segment_edge_specs(parse_standard_name("lower_outer_squareness"))
+    by_segment = {e.segment: e for e in edges}
+    assert by_segment["zone"].token == "lower_outer"
+    assert sum(1 for e in edges if e.segment == "zone") == 1
+
+
 def test_segment_edge_specs_template_attached_when_applicable() -> None:
     """Segments with compose templates propagate the pattern to edges."""
     parsed = parse_standard_name("electron_temperature_at_magnetic_axis")
