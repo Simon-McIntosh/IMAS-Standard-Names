@@ -173,7 +173,10 @@ class TestD3PositionTokens:
         ],
     )
     def test_position_of_geometry_round_trip(self, position):
-        name = f"major_radius_of_{position}"
+        # §6: a point's R coordinate is radial_coordinate_of_<X>, not
+        # major_radius_of_<X> (which is now rejected). This still exercises the
+        # position-locus round-trip via geometry.
+        name = f"radial_coordinate_of_{position}"
         parsed = parse_standard_name(name)
         assert parsed.geometry == Position(position)
         assert compose_standard_name(parsed) == name
@@ -355,7 +358,7 @@ class TestExistingRoundTripRegression:
             "flux_loop_voltage",
             "area_of_flux_loop",
             "electron_temperature_at_magnetic_axis",
-            "major_radius_of_plasma_boundary",
+            "radial_coordinate_of_plasma_boundary",
             "power_due_to_ohmic_heating",
             "flux_surface_averaged_density",
             # real_part is a postfix scalar-extraction operator: <base>_real_part

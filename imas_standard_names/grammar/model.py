@@ -964,6 +964,35 @@ class StandardName(BaseModel):
         return self
 
     @model_validator(mode="after")
+    def _check_major_radius_not_coordinate_of_locus(self) -> StandardName:
+        """§6: a point's radial (R) coordinate is ``radial_coordinate_of_<X>``.
+
+        ``major_radius`` is reserved for the bare R0 reference and length/
+        operator compounds; it must NOT carry a positional/geometry locus.
+        A named feature's R coordinate is the symmetric ``radial_coordinate_of_
+        <carrier>`` form (``geometric_base=radial_coordinate``), matching the
+        vertical (Z) coordinate form. Rejecting ``major_radius`` + locus keeps
+        one canonical spelling for the coordinate-of-a-point concept.
+        """
+        base = self.physical_base or ""
+        if (base == "major_radius" or base.endswith("_major_radius")) and (
+            self.object is not None
+            or self.geometry is not None
+            or self.position is not None
+        ):
+            carrier = self.object or self.geometry or self.position
+            carrier_val = getattr(carrier, "value", carrier)
+            msg = (
+                f"'{base}' cannot take a positional/geometry locus; a "
+                f"point's radial coordinate is 'radial_coordinate_of_{carrier_val}' "
+                "(§6: geometric_base=radial_coordinate, symmetric with "
+                "vertical_coordinate). Reserve major_radius for the bare R0 "
+                "reference and length/operator compounds."
+            )
+            raise ValueError(msg)
+        return self
+
+    @model_validator(mode="after")
     def _check_transformation_exclusivity(self) -> StandardName:
         """Transformation is exclusive with geometric_base only.
 

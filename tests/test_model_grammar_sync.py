@@ -272,12 +272,15 @@ def test_names_tool_compose_creates_valid_model():
     assert "parts" in result
     assert result["name"] == "radial_electron_heat_flux"
 
-    # Test with object parameter
+    # Test with object parameter (§6: a point's R coordinate is
+    # radial_coordinate_of_<X>; major_radius + locus is rejected)
     result = asyncio.run(
-        tool.compose_standard_name(physical_base="major_radius", object="flux_loop")
+        tool.compose_standard_name(
+            geometric_base="radial_coordinate", object="flux_loop"
+        )
     )
 
-    assert result["name"] == "major_radius_of_flux_loop"
+    assert result["name"] == "radial_coordinate_of_flux_loop"
 
 
 def test_names_tool_respects_exclusive_pairs():

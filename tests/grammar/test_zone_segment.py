@@ -67,11 +67,30 @@ def test_zone_out_of_intra_order_rejected() -> None:
 
 
 def test_zone_after_qualifier_rejected() -> None:
-    # a refined qualifier (major) authored before the zone (inner) is
+    # a refined qualifier (minor) authored before the zone (inner) is
     # non-canonical: the zone must render before the base-bound qualifier.
+    # (Uses minor_radius — a kept length scalar; major_radius + locus is now
+    # §6-rejected outright, see test_major_radius_locus_rejected.)
     with pytest.raises(NonCanonicalNameError) as excinfo:
-        parse_standard_name("major_inner_radius_of_strike_point")
-    assert excinfo.value.canonical_form == "inner_major_radius_of_strike_point"
+        parse_standard_name("minor_inner_radius_of_flux_surface")
+    assert excinfo.value.canonical_form == "inner_minor_radius_of_flux_surface"
+
+
+def test_major_radius_locus_rejected() -> None:
+    # §6: a point's radial (R) coordinate is radial_coordinate_of_<X>, not
+    # major_radius_of_<X>. major_radius carrying a positional/geometry locus
+    # is rejected (bare major_radius = R0 and length/operator compounds stay
+    # valid). Covers the compound-base form (beam_major_radius) too.
+    for name in (
+        "major_radius_of_strike_point",
+        "inner_major_radius_of_flux_surface",
+        "beam_major_radius_of_neutral_beam_injector",
+    ):
+        with pytest.raises(ValueError):
+            parse_standard_name(name)
+    # bare R0 reference and non-locus compounds remain valid
+    for name in ("major_radius", "reference_major_radius"):
+        parse_standard_name(name)
 
 
 def test_zone_multi_token_canonicalizes_at_compose() -> None:
