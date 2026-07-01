@@ -4,21 +4,22 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="docs-project"   content="imas-standard-names">
-  <meta name="reckon-type"    content="plan">
-  <meta name="plan-slug"      content="canonical-qualifier-order">
-  <meta name="plan-title"     content="Canonical Qualifier Order">
-  <meta name="plan-summary"   content="Decompose the catch-all 'generic qualifier' class into strictly-ordered grammar segments (operators · zone · refined qualifier · base), pull mis-filed tokens (operators, coordinates, lexical bases) out of qualifiers.yml, enforce one canonical order at generate time, and migrate the catalogue with re-review.">
-  <meta name="plan-status"    content="active">
-  <meta name="plan-roi"       content="high">
-  <meta name="plan-effort"    content="XL">
-  <meta name="plan-tier"      content="opus">
-  <meta name="plan-owner"     content="Simon McIntosh">
-  <meta name="plan-impl"      content="0.9">
-  <meta name="plan-modified"  content="2026-06-30">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="canonical-qualifier-order">
+  <meta name="plan-title" content="Canonical Qualifier Order">
+  <meta name="plan-summary" content="Decompose the catch-all &#x27;generic qualifier&#x27; class into strictly-ordered grammar segments (operators · zone · refined qualifier · base), pull mis-filed tokens (operators, coordinates, lexical bases) out of qualifiers.yml, enforce one canonical order at generate time, and migrate the catalogue with re-review.">
+  <meta name="plan-status" content="active">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort" content="XL">
+  <meta name="plan-tier" content="opus">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-impl" content="0.95">
+  <meta name="plan-modified" content="2026-07-01">
   <meta name="plan-depends-on" content="qualifier-vocabulary-categorization">
   <title>Canonical Qualifier Order | imas-standard-names</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-version" content="1">
 </head>
 <body>
   <main class="plan-doc">
@@ -154,6 +155,7 @@
       <p style="margin:8px 0 0;font-size:13.5px"><span class="badge badge-shipped">✓ §4 + §4b 2026-06-30</span> commits <code>4c77091</code> + <code>490319b</code> — §4: the LLM grammar context (context.py) now templates the full ordered grammar including zone+channel (auto-derived from codegen SEGMENT_ORDER; descriptions added). §4b: zones+channels emitted in GRAMMAR_VOCAB (canonical intra-order) and rendered as their own segments in the SPA Grammar composer + ParseBreakdown. Fidelity held: SPA round-trip harness 19/19 (new core_electron_temperature, scrape_off_layer_density, heat_flux, radial_electron_energy_flux cases); Python tests/catalog 127 passed. Remaining: §5 (graph migration of the 38 backlog), §6 (radial-coordinate refactor — fixes the major_inner_radius nonsense).</p>
       <p style="margin:8px 0 0;font-size:13.5px"><span class="badge badge-shipped">✓ channel/base qualifier split + operator consistency 2026-06-30</span> commit <code>35eb1f6</code> — new <code>channel_qualifier</code> segment (kinetic, plasma, diamagnetic — qualifiers that bind to the channel), positioned zone → channel_qualifier → channel → base. <code>kinetic_energy_flux</code>/<code>plasma_momentum_flux</code> now canonical (were bogus reorders). <code>qualifiers.yml</code> retained as the base-qualifier vocab. Operator form A locked: averaging reductions render as participle bare prefixes (<code>flux_surface_averaged</code>); <code>time_average</code>→<code>time_averaged</code> for family consistency. angular_width regression fixed (<code>b63e8ad</code>). <strong>ISN grammar is now FINALIZED.</strong> Catalogue grew to 2194 names; engine self-consistency 2151/2151; §5 migration backlog 68 (43 parse-fail + 25 reorder). §6 (radial) is a pure graph rename (major_radius_of_X→radial_coordinate_of_X; both already parse), folded into §5.</p>
       <p style="margin:8px 0 0;font-size:13.5px"><span class="badge badge-shipped">✓ process mech-nouns + prompt hardened + generation validated 2026-06-30</span> ISN: bare regime/drive process tokens lifted to mechanism nouns (anomalous→anomalous_transport, ohmic→ohmic_heating/ohmic_current_drive, bootstrap/non_inductive/wave_driven→*_current_drive, ion_inertia, resistive_diffusion, fusion_reactions; commit <code>cacb8ca</code>). imas-codex compose prompt hardened for the new grammar (channel/channel_qualifier/zone + mechanism-noun due_to_ rule + §6 radial + diamagnetic→channel_qualifier; imas-codex <code>42d7638e</code>). <strong>DSv4 generation validated: 14/14 (100%) canonical</strong> on a representative sample (Neo4j-free direct-LLM spot-check) — e.g. radial_current_density_due_to_anomalous_transport, parallel_current_density_due_to_bootstrap_current_drive, electron_particle_flux_due_to_turbulent_transport. ISNC grammar tab: channel_qualifier wired through the SPA (<code>dd4c846</code>). <strong>Remaining (env-gated):</strong> the --focus graph rotations + review-scores + sn release run in the Neo4j-connected env, with imas-codex bumped off the ISN rc48 pin to an RC/main containing the grammar.</p>
+      <p style="margin:8px 0 0;font-size:13.5px"><span class="badge badge-shipped">✓ §5 deploy (bulk) + grammar hardening 2026-07-01</span> ISN pin bumped off rc48 to the grammar commit (durable, no <code>--no-sync</code>). Landed this session: <strong>grammar_parse_fallback removed</strong> (parse_standard_name via validate_worker is the single grammar gate); <strong>process-vocab curated</strong> (97→89: dropped superseded bare regimes + 5 literal dupes + weak generics); <strong>segment_edge_specs</strong> empty/multi-token <code>'()'</code> bug fixed; <strong>§6 enforced</strong> (major_radius+locus rejected → <code>radial_coordinate_of_&lt;carrier&gt;</code>); <strong>compositional locus qualifiers</strong> (qualifiable feature + ordered inner/outer/upper/lower/primary/secondary replaces 11 flat tokens → <code>radial_coordinate_of_upper_outer_strike_point</code> composes for free, scales to snowflake/X/super-X). imas-codex: compose flags <em>vocab_gap</em> instead of substituting a wrong-but-registered locus; name-review <strong>hard-caps source-fidelity</strong> (strike_point↛divertor_target); the <code>--reset-to</code> connector fixed (was dead code after the pool-path early-return). ISN 1585 tests green; imas-codex green modulo 4 pre-existing. Deploy: bench 100% grammar-valid on DSv4; dd-sourced affected bulk recomposed canonical (<code>parallel_current_density_due_to_ohmic_current_drive</code>, <code>time_due_to_resistive_diffusion</code>, …); the strike_point→inner_divertor_target drift removed. <strong>Remaining (f-cqo-tail):</strong> ~67-name sourceless/derived non-canonical tail + strike_point recompose + source-fidelity re-review + <code>sn release</code> + ISNC grammar-tab confirm. imas-codex pinned ISN <code>047ec85</code>.</p>
     </section>
 
     <h2 id="s2"><span class="badge badge-shipped">✓ scaffold</span> §2 — The decomposition: route every token to its true segment</h2>
@@ -288,104 +290,94 @@
     </p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
-      <h2><span class="sec">§</span> Decisions</h2>
-
-      <div class="r-dec" data-key="generic-position" data-choice="semantic-binding" data-by="reckon-ship" data-when="2026-06-30T07:30:37+02:00">
-        <p class="r-dec-q">Where do generic qualifiers sit relative to the named sub-kinds?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="generics-after-named">After the named sub-kinds — fewest renames; matches the subject→generic majority</button>
-          <button class="r-opt" data-value="generics-before-base-by-category">Generics ordered by category, immediately before base; named sub-kinds outermost</button>
-          <button class="r-opt chosen" data-value="semantic-binding">Order by semantic binding (innermost modifier closest to base) — most faithful</button>
-        </p>
-        <p class="r-dec-rat">Survey decided it: a flat position is provably wrong (normalized wants outermost, major must hug the base). The class is decomposed into ordered segments by binding depth (operator → zone → qualifier → base-bound); 117/134 multi-generic names already obey it. "semantic-binding" generalised to a segment decomposition, not per-token binding metadata.</p>
-      </div>
-
-      <div class="r-dec" data-key="generic-inter-order" data-choice="by-category-rank" data-by="reckon-ship" data-when="2026-06-30T07:30:37+02:00">
-        <p class="r-dec-q">Do generic qualifiers need a defined order amongst themselves?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt chosen" data-value="by-category-rank">Yes — order by the 12 normalized categories (transport→source→geometry→…)</button>
-          <button class="r-opt" data-value="alphabetical">Yes — alphabetical within the generic block</button>
-          <button class="r-opt" data-value="free">No — generics keep author/source order</button>
-        </p>
-        <p class="r-dec-rat">The refined qualifier segment orders by the 12 normalized categories already shipped in qualifier_categories.yml; gives a total, semantically-grouped order. Zone tokens get their own intra-order in the zone segment.</p>
-      </div>
-
-      <div class="r-dec" data-key="enforcement" data-choice="compose-canonicalizes-validator-rejects" data-by="reckon-ship" data-when="2026-06-30T07:30:37+02:00">
-        <p class="r-dec-q">How strictly is canonical order enforced?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt chosen" data-value="compose-canonicalizes-validator-rejects">compose() canonicalizes AND the validator rejects non-canonical input names</button>
-          <button class="r-opt" data-value="compose-only">compose() canonicalizes; validator only warns</button>
-        </p>
-        <p class="r-dec-rat">Strict structure mandated by the user. NonCanonicalNameError already implements reject-with-canonical-form; extend it to the new segment order so a non-canonical name can never be (re)introduced.</p>
-      </div>
-
-      <div class="r-dec" data-key="migration-aliases" data-choice="hard-rename" data-by="reckon-ship" data-when="2026-06-30T07:30:37+02:00">
-        <p class="r-dec-q">Do renamed names keep a deprecation alias?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="alias">Yes — old name → superseded_by/alias trail</button>
-          <button class="r-opt chosen" data-value="hard-rename">No — hard rename; RC phase, no external consumers to protect</button>
-        </p>
-        <p class="r-dec-rat">Early RC, breaking changes expected (user, 2026-06-30). Hard rename via rename_cascade; renamed names re-pass review (null reviewer_score_name) with before/after semantic-quality sampling.</p>
-      </div>
-
-      <div class="r-dec" data-key="zone-segment" data-choice="yes-new-segment" data-by="reckon-ship" data-when="2026-06-30T07:30:37+02:00">
-        <p class="r-dec-q">Introduce a new ordered 'zone' segment for region / geometric sub-selectors used as prefixes?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt chosen" data-value="yes-new-segment">Yes — new ordered zone segment between subject and qualifier</button>
-          <button class="r-opt" data-value="keep-as-qualifiers">No — keep region/geometric sub-selectors inside the qualifier segment</button>
-        </p>
-        <p class="r-dec-rat">User-selected (2026-06-30). core/edge/inner/outer/upper/lower are neither loci (postfix of_/over_) nor regime qualifiers; they select a plasma region or geometric quadrant in prefix position and need a defined intra-order (lower_outer_squareness).</p>
-      </div>
-
-      <div class="r-dec" data-key="base-bound-disposition" data-choice="token-by-token" data-by="reckon-ship" data-when="2026-06-30T07:30:37+02:00">
-        <p class="r-dec-q">How are base-bound lexical modifiers (major, surface, vector, angular, kinetic…) represented?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="promote-all-to-base">Blanket: promote every base-bound pair to an atomic base</button>
-          <button class="r-opt" data-value="innermost-qualifier-slot">Blanket: keep as an innermost qualifier slot pinned adjacent to base</button>
-          <button class="r-opt chosen" data-value="token-by-token">Token-by-token verdict: operator / coordinate-carrier / atomic-base / zone / qualifier</button>
-        </p>
-        <p class="r-dec-rat">User clarification (2026-06-30): no blanket rule. major as a coordinate must become radial_coordinate (§6), NOT an atomic base; genuine lexicalised quantities (surface_area, vector_potential) do become atomic bases; productive regime modifiers stay qualifiers. Resolved per token in §3 with physics rationale.</p>
-      </div>
-
-      <div class="r-dec" data-key="operator-dupe-removal" data-choice="remove-from-qualifiers" data-by="reckon-ship" data-when="2026-06-30T07:30:37+02:00">
-        <p class="r-dec-q">What about tokens double-registered in both qualifiers.yml and operators.yml?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt chosen" data-value="remove-from-qualifiers">Remove the dupes from qualifiers.yml — they are operators</button>
-          <button class="r-opt" data-value="keep-both">Keep in both vocabularies</button>
-        </p>
-        <p class="r-dec-rat">User: "the pull of the mis-filled tokens out of the qualifiers vocab is demonstrably correct." normalized/perturbed/volume_averaged/line_integrated/accumulated/gyroaveraged/maximum/minimum are operators; the parser still accepts them via its operator acceptance union, so removal is round-trip-safe and drops them from the qualifier_categories invariant.</p>
-      </div>
-
-      <div class="r-dec" data-key="radial-coordinate-refactor" data-choice="axis-coordinate-of-carrier" data-by="reckon-ship" data-when="2026-06-30T07:30:37+02:00">
-        <p class="r-dec-q">How are radial-coordinate names normalized (major_radius vs radial_coordinate)?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt chosen" data-value="axis-coordinate-of-carrier">Standardize on &lt;axis&gt;_coordinate_of_&lt;carrier&gt; for R and Z; reserve radius for length scalars</button>
-          <button class="r-opt" data-value="keep-major-radius">Keep major_radius as the coordinate form</button>
-        </p>
-        <p class="r-dec-rat">User (2026-06-30): major_radius_of_flux_surface / vertical_coordinate_of_flux_surface is a clunky asymmetric split; use radial_coordinate_of_… for both. Maintain the curvature-radius vs radial-coordinate distinction (radius stays a length scalar). Wider radial-coordinate refactor planned in §6.</p>
-      </div>
-    </section>
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="generic-position" data-choice="semantic-binding" data-by="reckon-ship" data-when="2026-06-30T07:30:37+02:00">
+    <p class="r-dec-q">Where do generic qualifiers sit relative to the named sub-kinds?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="generics-after-named">After the named sub-kinds — fewest renames; matches the subject→generic majority</button>
+      <button class="r-opt" data-value="generics-before-base-by-category">Generics ordered by category, immediately before base; named sub-kinds outermost</button>
+      <button class="r-opt chosen" data-value="semantic-binding">Order by semantic binding (innermost modifier closest to base) — most faithful</button>
+      </p>
+    <p class="r-dec-rat">Survey decided it: a flat position is provably wrong (normalized wants outermost, major must hug the base). The class is decomposed into ordered segments by binding depth (operator → zone → qualifier → base-bound); 117/134 multi-generic names already obey it. &quot;semantic-binding&quot; generalised to a segment decomposition, not per-token binding metadata.</p>
+    </div>
+<div class="r-dec" data-key="generic-inter-order" data-choice="by-category-rank" data-by="reckon-ship" data-when="2026-06-30T07:30:37+02:00">
+    <p class="r-dec-q">Do generic qualifiers need a defined order amongst themselves?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="by-category-rank">Yes — order by the 12 normalized categories (transport→source→geometry→…)</button>
+      <button class="r-opt" data-value="alphabetical">Yes — alphabetical within the generic block</button>
+      <button class="r-opt" data-value="free">No — generics keep author/source order</button>
+      </p>
+    <p class="r-dec-rat">The refined qualifier segment orders by the 12 normalized categories already shipped in qualifier_categories.yml; gives a total, semantically-grouped order. Zone tokens get their own intra-order in the zone segment.</p>
+    </div>
+<div class="r-dec" data-key="enforcement" data-choice="compose-canonicalizes-validator-rejects" data-by="reckon-ship" data-when="2026-06-30T07:30:37+02:00">
+    <p class="r-dec-q">How strictly is canonical order enforced?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="compose-canonicalizes-validator-rejects">compose() canonicalizes AND the validator rejects non-canonical input names</button>
+      <button class="r-opt" data-value="compose-only">compose() canonicalizes; validator only warns</button>
+      </p>
+    <p class="r-dec-rat">Strict structure mandated by the user. NonCanonicalNameError already implements reject-with-canonical-form; extend it to the new segment order so a non-canonical name can never be (re)introduced.</p>
+    </div>
+<div class="r-dec" data-key="migration-aliases" data-choice="hard-rename" data-by="reckon-ship" data-when="2026-06-30T07:30:37+02:00">
+    <p class="r-dec-q">Do renamed names keep a deprecation alias?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="alias">Yes — old name → superseded_by/alias trail</button>
+      <button class="r-opt chosen" data-value="hard-rename">No — hard rename; RC phase, no external consumers to protect</button>
+      </p>
+    <p class="r-dec-rat">Early RC, breaking changes expected (user, 2026-06-30). Hard rename via rename_cascade; renamed names re-pass review (null reviewer_score_name) with before/after semantic-quality sampling.</p>
+    </div>
+<div class="r-dec" data-key="zone-segment" data-choice="yes-new-segment" data-by="reckon-ship" data-when="2026-06-30T07:30:37+02:00">
+    <p class="r-dec-q">Introduce a new ordered &#x27;zone&#x27; segment for region / geometric sub-selectors used as prefixes?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="yes-new-segment">Yes — new ordered zone segment between subject and qualifier</button>
+      <button class="r-opt" data-value="keep-as-qualifiers">No — keep region/geometric sub-selectors inside the qualifier segment</button>
+      </p>
+    <p class="r-dec-rat">User-selected (2026-06-30). core/edge/inner/outer/upper/lower are neither loci (postfix of_/over_) nor regime qualifiers; they select a plasma region or geometric quadrant in prefix position and need a defined intra-order (lower_outer_squareness).</p>
+    </div>
+<div class="r-dec" data-key="base-bound-disposition" data-choice="token-by-token" data-by="reckon-ship" data-when="2026-06-30T07:30:37+02:00">
+    <p class="r-dec-q">How are base-bound lexical modifiers (major, surface, vector, angular, kinetic…) represented?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="promote-all-to-base">Blanket: promote every base-bound pair to an atomic base</button>
+      <button class="r-opt" data-value="innermost-qualifier-slot">Blanket: keep as an innermost qualifier slot pinned adjacent to base</button>
+      <button class="r-opt chosen" data-value="token-by-token">Token-by-token verdict: operator / coordinate-carrier / atomic-base / zone / qualifier</button>
+      </p>
+    <p class="r-dec-rat">User clarification (2026-06-30): no blanket rule. major as a coordinate must become radial_coordinate (§6), NOT an atomic base; genuine lexicalised quantities (surface_area, vector_potential) do become atomic bases; productive regime modifiers stay qualifiers. Resolved per token in §3 with physics rationale.</p>
+    </div>
+<div class="r-dec" data-key="operator-dupe-removal" data-choice="remove-from-qualifiers" data-by="reckon-ship" data-when="2026-06-30T07:30:37+02:00">
+    <p class="r-dec-q">What about tokens double-registered in both qualifiers.yml and operators.yml?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="remove-from-qualifiers">Remove the dupes from qualifiers.yml — they are operators</button>
+      <button class="r-opt" data-value="keep-both">Keep in both vocabularies</button>
+      </p>
+    <p class="r-dec-rat">User: &quot;the pull of the mis-filled tokens out of the qualifiers vocab is demonstrably correct.&quot; normalized/perturbed/volume_averaged/line_integrated/accumulated/gyroaveraged/maximum/minimum are operators; the parser still accepts them via its operator acceptance union, so removal is round-trip-safe and drops them from the qualifier_categories invariant.</p>
+    </div>
+<div class="r-dec" data-key="radial-coordinate-refactor" data-choice="axis-coordinate-of-carrier" data-by="reckon-ship" data-when="2026-06-30T07:30:37+02:00">
+    <p class="r-dec-q">How are radial-coordinate names normalized (major_radius vs radial_coordinate)?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="axis-coordinate-of-carrier">Standardize on &lt;axis&gt;_coordinate_of_&lt;carrier&gt; for R and Z; reserve radius for length scalars</button>
+      <button class="r-opt" data-value="keep-major-radius">Keep major_radius as the coordinate form</button>
+      </p>
+    <p class="r-dec-rat">User (2026-06-30): major_radius_of_flux_surface / vertical_coordinate_of_flux_surface is a clunky asymmetric split; use radial_coordinate_of_… for both. Maintain the curvature-radius vs radial-coordinate distinction (radius stays a length scalar). Wider radial-coordinate refactor planned in §6.</p>
+    </div>
+</section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
-      <h2><span class="sec">§</span> Followups</h2>
-
-      <article class="r-fu" data-id="f-cqo-001" data-status="resolved" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-06-25" data-recommends-skill="" data-resolved-at="2026-06-30T07:30:37+02:00" data-resolved-by="reckon-ship">
-        <h4 class="r-fu-title">§1–§2 — Full order audit + lock the canonical order</h4>
-        <div class="r-fu-body">Produce the complete per-name audit and lock the canonical-order decisions.</div>
-        <pre class="r-fu-prompt">Superseded by the Option B redesign. The audit ran (1364 names, 100% parse); see §1 evidence and the disposition funnel figure.</pre>
-        <p class="r-fu-outcome">Audit + design landed. Survey proved the flat "generic" class is a catch-all (8 operator dupes; 0 named-sub-kind violations; 117/134 multi-generic names obey binding depth). Direction pivoted to Option B (decompose into ordered segments + zone segment + pull mis-filed tokens). 8 decisions locked: semantic-binding decomposition, by-category-rank intra-order, compose-canonicalizes+validator-rejects, hard-rename+re-review, new zone segment, token-by-token base-bound disposition, operator-dupe removal, radial-coordinate refactor (§6). Next: implement the ISN grammar core (§2/§3e).</p>
-      </article>
-
-      <article class="r-fu" data-id="f-cqo-002" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-06-30" data-recommends-skill="/reckon-ship canonical-qualifier-order §2" data-resolved-at="2026-06-30T08:30:00+02:00" data-resolved-by="reckon-ship">
-        <h4 class="r-fu-title">§2/§3e — Implement the ISN grammar core: zone segment, remove operator dupes, enforce canonical order</h4>
-        <div class="r-fu-body">Land the structural grammar change in ISN: add the ordered zone segment, remove the 8 operator-dupe tokens from qualifiers.yml (+ qualifier_categories.yml + the coverage test), wire compose() to emit canonical order and the validator to reject non-canonical order. Regenerate codegen types, keep the full suite + 1364/1364 round-trip green. Gates §3 (deep token review), §4/§4b (context + SPA), and §5 (migration).</div>
-        <pre class="r-fu-prompt">Project: imas-standard-names
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-cqo-001" data-status="resolved" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-06-25" data-recommends-skill="" data-resolved-at="2026-06-30T07:30:37+02:00" data-resolved-by="reckon-ship">
+    <h4 class="r-fu-title">§1–§2 — Full order audit + lock the canonical order</h4>
+    <div class="r-fu-body">Produce the complete per-name audit and lock the canonical-order decisions.</div>
+    <pre class="r-fu-prompt">Superseded by the Option B redesign. The audit ran (1364 names, 100% parse); see §1 evidence and the disposition funnel figure.</pre>
+    <p class="r-fu-outcome">Audit + design landed. Survey proved the flat "generic" class is a catch-all (8 operator dupes; 0 named-sub-kind violations; 117/134 multi-generic names obey binding depth). Direction pivoted to Option B (decompose into ordered segments + zone segment + pull mis-filed tokens). 8 decisions locked: semantic-binding decomposition, by-category-rank intra-order, compose-canonicalizes+validator-rejects, hard-rename+re-review, new zone segment, token-by-token base-bound disposition, operator-dupe removal, radial-coordinate refactor (§6). Next: implement the ISN grammar core (§2/§3e).</p>
+    </article>
+<article class="r-fu" data-id="f-cqo-002" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-06-30" data-recommends-skill="/reckon-ship canonical-qualifier-order §2" data-resolved-at="2026-06-30T08:30:00+02:00" data-resolved-by="reckon-ship">
+    <h4 class="r-fu-title">§2/§3e — Implement the ISN grammar core: zone segment, remove operator dupes, enforce canonical order</h4>
+    <div class="r-fu-body">Land the structural grammar change in ISN: add the ordered zone segment, remove the 8 operator-dupe tokens from qualifiers.yml (+ qualifier_categories.yml + the coverage test), wire compose() to emit canonical order and the validator to reject non-canonical order. Regenerate codegen types, keep the full suite + 1364/1364 round-trip green. Gates §3 (deep token review), §4/§4b (context + SPA), and §5 (migration).</div>
+    <pre class="r-fu-prompt">Project: imas-standard-names
 Plan:    canonical-qualifier-order (http://localhost:8765/imas-standard-names/canonical-qualifier-order.html)
 Section: §2 + §3e
 Tier:    opus
 
 Context
-  The "generic qualifier" class is being decomposed into ordered segments. This
+  The &quot;generic qualifier&quot; class is being decomposed into ordered segments. This
   section lands the grammar CORE: a new ordered `zone` segment, removal of the 8
   operator-dupe tokens from qualifiers.yml, and canonical-order enforcement
   (compose canonicalizes; validator rejects). Honour the locked decisions
@@ -429,20 +421,19 @@ Done-when
      codegen drift clean. REPORT (do not gate on) the migration backlog: names that no
      longer parse + names strict parse_standard_name() flags non-canonical, with examples.
   5. Followups written for §3 (deep token review) and §4/§4b + this one resolved.</pre>
-        <p class="r-fu-outcome">Landed commit ef4db62; verified independently. Ordered zone segment (13 tokens, generated Zone enum) between device and base; 8 operator dupes removed from qualifiers.yml + qualifier_categories.yml (gyroaveraged left postfix-only per the corrected gate, not hacked back as a prefix); compose() canonicalizes, parse_standard_name rejects non-canonical with the canonical form. Engine self-consistency 1357/1357 accepted names (0 inverse bugs); suite 1572 passed / 0 failed; codegen in sync. Migration backlog (expected, not gated): 7 parse-fail (gyroaveraged mid-prefix) + 6 reorder. Edge cases for §3: subject sorts before zone (core_electron_temperature→electron_core_temperature); major/minor remain base-bound qualifiers sorting after zone (feeds §6). Next: §3 deep per-token review.</p>
-      </article>
-
-      <article class="r-fu" data-id="f-cqo-003" data-status="open" data-tier="sonnet" data-written-by="reckon-ship" data-written-at="2026-06-30" data-recommends-skill="/reckon-ship canonical-qualifier-order §3v" data-resolved-at="" data-resolved-by="">
-        <h4 class="r-fu-title">§3v — Add a vocabulary-disjointness guard test</h4>
-        <div class="r-fu-body">PARTIALLY DONE: tests/grammar/test_vocab_uniqueness.py already lints cross-segment collisions; the <code>qualifiers∩operators</code> AND <code>qualifiers∩locus_registry</code> allowlist entries were REMOVED (both intersections now empty — operator dupes in Phase 2; flux_surface/inlet/outlet loci in the first §3 slice — so the guard actively prevents re-introduction). Remaining: ratchet out the rest as §3 resolves each mis-file — <code>qualifiers∩{physical_bases (energy/momentum), subjects (particle), processes (anomalous/ohmic/…14), physics_domains (equilibrium/mhd/nbi), generic_physical_bases (energy)}</code>. Each removal = one mis-file fixed in §3. Intentional overlaps stay (components∩coordinate_axes; zones∩regions/locus; generic_bases⊂bases).</div>
-        <pre class="r-fu-prompt">Project: imas-standard-names
+    <p class="r-fu-outcome">Landed commit ef4db62; verified independently. Ordered zone segment (13 tokens, generated Zone enum) between device and base; 8 operator dupes removed from qualifiers.yml + qualifier_categories.yml (gyroaveraged left postfix-only per the corrected gate, not hacked back as a prefix); compose() canonicalizes, parse_standard_name rejects non-canonical with the canonical form. Engine self-consistency 1357/1357 accepted names (0 inverse bugs); suite 1572 passed / 0 failed; codegen in sync. Migration backlog (expected, not gated): 7 parse-fail (gyroaveraged mid-prefix) + 6 reorder. Edge cases for §3: subject sorts before zone (core_electron_temperature→electron_core_temperature); major/minor remain base-bound qualifiers sorting after zone (feeds §6). Next: §3 deep per-token review.</p>
+    </article>
+<article class="r-fu" data-id="f-cqo-003" data-status="open" data-tier="sonnet" data-written-by="reckon-ship" data-written-at="2026-06-30" data-recommends-skill="/reckon-ship canonical-qualifier-order §3v" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">§3v — Add a vocabulary-disjointness guard test</h4>
+    <div class="r-fu-body">PARTIALLY DONE: tests/grammar/test_vocab_uniqueness.py already lints cross-segment collisions; the <code>qualifiers∩operators</code> AND <code>qualifiers∩locus_registry</code> allowlist entries were REMOVED (both intersections now empty — operator dupes in Phase 2; flux_surface/inlet/outlet loci in the first §3 slice — so the guard actively prevents re-introduction). Remaining: ratchet out the rest as §3 resolves each mis-file — <code>qualifiers∩{physical_bases (energy/momentum), subjects (particle), processes (anomalous/ohmic/…14), physics_domains (equilibrium/mhd/nbi), generic_physical_bases (energy)}</code>. Each removal = one mis-file fixed in §3. Intentional overlaps stay (components∩coordinate_axes; zones∩regions/locus; generic_bases⊂bases).</div>
+    <pre class="r-fu-prompt">Project: imas-standard-names
 Plan:    canonical-qualifier-order
 Section: §3v
 Tier:    sonnet
 
 Context
   A grammar redesign exposed 8 tokens double-registered in qualifiers.yml AND
-  operators.yml. Add a permanent guard so this class of bug can't recur. Run AFTER
+  operators.yml. Add a permanent guard so this class of bug can&#x27;t recur. Run AFTER
   Phase 2 (f-cqo-002) has removed the operator dupes and added zones.yml.
 
 State to read (code/files)
@@ -467,12 +458,11 @@ Done-when
      documented, plan-tracked exception if an intentional overlap remains).
   2. Any UNexpected intersection found is reported into the plan as a §3 mis-file finding.
   3. Full suite green; this followup resolved.</pre>
-      </article>
-
-      <article class="r-fu" data-id="f-cqo-004" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-06-30" data-recommends-skill="/reckon-ship canonical-qualifier-order §3" data-resolved-at="" data-resolved-by="">
-        <h4 class="r-fu-title">§3 — Deep per-token review + segment coverage widening</h4>
-        <div class="r-fu-body">The structural scaffold is in (zone segment, dupe removal, enforcement). Now the curation pass: an authoritative per-token verdict for the remaining qualifiers.yml tokens (and the cross-segment mis-files the disjointness scan surfaced), with physics rationale. Resolve base-bound tokens token-by-token (atomic-base vs coordinate-carrier vs qualifier), reconcile qualifier∩processes (regime qualifier vs due_to_ process), qualifier∩physical_bases (energy/momentum), qualifier∩subjects (particle/state). Each resolution ratchets a §3v allowlist entry out. Needs the lead's physics input on edge cases.</div>
-        <pre class="r-fu-prompt">Project: imas-standard-names
+    </article>
+<article class="r-fu" data-id="f-cqo-004" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-06-30" data-recommends-skill="/reckon-ship canonical-qualifier-order §3" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">§3 — Deep per-token review + segment coverage widening</h4>
+    <div class="r-fu-body">The structural scaffold is in (zone segment, dupe removal, enforcement). Now the curation pass: an authoritative per-token verdict for the remaining qualifiers.yml tokens (and the cross-segment mis-files the disjointness scan surfaced), with physics rationale. Resolve base-bound tokens token-by-token (atomic-base vs coordinate-carrier vs qualifier), reconcile qualifier∩processes (regime qualifier vs due_to_ process), qualifier∩physical_bases (energy/momentum), qualifier∩subjects (particle/state). Each resolution ratchets a §3v allowlist entry out. Needs the lead's physics input on edge cases.</div>
+    <pre class="r-fu-prompt">Project: imas-standard-names
 Plan:    canonical-qualifier-order (http://localhost:8765/imas-standard-names/canonical-qualifier-order.html)
 Section: §3 (+ feeds §3v, §6)
 Tier:    opus
@@ -501,19 +491,18 @@ Constraints
   - For each mis-file resolved, REMOVE its allowlist entry in test_vocab_uniqueness.py
     (ratchet) and keep the suite green.
   - Do NOT preserve non-canonical names; record renames as §5 migration backlog.
-  - Surface edge cases needing the lead's physics judgement; do not guess on ambiguous ones.
+  - Surface edge cases needing the lead&#x27;s physics judgement; do not guess on ambiguous ones.
 
 Done-when
   1. Per-token verdict table committed; vocab files updated; codegen regenerated.
   2. Disjointness allowlist ratcheted down (entries removed for each resolved mis-file).
   3. Full suite green; engine self-consistency holds for accepted names.
   4. Followups written for §4/§4b (context+SPA) and §5/§6 (migration) + this resolved.</pre>
-      </article>
-
-      <article class="r-fu" data-id="f-cqo-deploy" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-01" data-recommends-skill="/reckon-ship canonical-qualifier-order §5" data-resolved-at="" data-resolved-by="">
-        <h4 class="r-fu-title">§5 — Deploy the regeneration to the ISNC graph (blocked in-session by the auto-mode permission classifier)</h4>
-        <div class="r-fu-body">ALL upstream work is done + verified (grammar+vocab stable on main; generation 100% canonical on DSv4; prompt hardened imas-codex 42d7638e; SPA grammar tab wired dd4c846). The catalogue regeneration was NOT run: the auto-mode permission classifier repeatedly denied every production Neo4j write (rederive, mark-quarantined, sn run) — new this session, heightened after a scope-alarm. Needs a permission rule (or user-run) then executes turnkey. Affected set computed: 66 live names (7 parse-fail + 59 reorder) + 93 pre-existing quarantined (vocab-gaps the grammar update resolves — sweeping them via --retry-quarantined is intended). Chains verified INTACT (rederive touches only segment columns/edges).</div>
-        <pre class="r-fu-prompt">Project: imas-codex (+ imas-standard-names as the grammar source)
+    </article>
+<article class="r-fu" data-id="f-cqo-deploy" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-01" data-recommends-skill="/reckon-ship canonical-qualifier-order §5" data-resolved-at="2026-07-01T15:13:39+00:00" data-resolved-by="reckon-ship">
+    <h4 class="r-fu-title">§5 — Deploy the regeneration to the ISNC graph (blocked in-session by the auto-mode permission classifier)</h4>
+    <div class="r-fu-body">ALL upstream work is done + verified (grammar+vocab stable on main; generation 100% canonical on DSv4; prompt hardened imas-codex 42d7638e; SPA grammar tab wired dd4c846). The catalogue regeneration was NOT run: the auto-mode permission classifier repeatedly denied every production Neo4j write (rederive, mark-quarantined, sn run) — new this session, heightened after a scope-alarm. Needs a permission rule (or user-run) then executes turnkey. Affected set computed: 66 live names (7 parse-fail + 59 reorder) + 93 pre-existing quarantined (vocab-gaps the grammar update resolves — sweeping them via --retry-quarantined is intended). Chains verified INTACT (rederive touches only segment columns/edges).</div>
+    <pre class="r-fu-prompt">Project: imas-codex (+ imas-standard-names as the grammar source)
 Task: deploy the canonical-qualifier-order regeneration to the live ISNC Neo4j graph.
 
 PREREQUISITE — grant graph-write permission (the whole prior session was blocked here):
@@ -525,11 +514,11 @@ ENVIRONMENT (all confirmed reachable in the prior session):
   - DSv4: http://98dci4-gpu-0003:18800/v1 (model deepseek-v4-flash, empty API key). Up.
   - imas-codex venv ships a STALE ISN (rc48). Install the grammar-bearing ISN and use
     --no-sync for ALL commands (bare `uv run` reverts to rc48):
-      cd ~/Code/imas-codex && uv pip install ~/Code/imas-standard-names
+      cd ~/Code/imas-codex &amp;&amp; uv pip install ~/Code/imas-standard-names
     Durable fix: bump imas-codex pyproject+uv.lock off `v0.8.0rc48` to a grammar-bearing
     ISN RC/main (consider tagging a new ISN RC first).
   Verify grammar active:
-    uv run --no-sync python -c "from imas_standard_names.grammar.model_types import Process as P,Channel,Zone,ChannelQualifier; v=[x.value for x in P]; print('anomalous_transport' in v,'bootstrap_current_drive' in v)"
+    uv run --no-sync python -c &quot;from imas_standard_names.grammar.model_types import Process as P,Channel,Zone,ChannelQualifier; v=[x.value for x in P]; print(&#x27;anomalous_transport&#x27; in v,&#x27;bootstrap_current_drive&#x27; in v)&quot;
 
 REPOINT generation+refine to DSv4 (zero cost):
   export IMAS_CODEX_SN_COMPOSE_MODEL=hosted_vllm/deepseek-v4-flash IMAS_CODEX_SN_COMPOSE_API_BASE=http://98dci4-gpu-0003:18800/v1 AMBIX_API_KEY=
@@ -537,30 +526,50 @@ REPOINT generation+refine to DSv4 (zero cost):
 
 STEPS (all via `uv run --no-sync`):
   1. Re-derive grammar segments (idempotent; already run once; flags grammar_parse_fallback):
-       python -c "from imas_codex.standard_names.graph_ops import rederive_structural_edges as r; print(r())"
+       python -c &quot;from imas_codex.standard_names.graph_ops import rederive_structural_edges as r; print(r())&quot;
   2. Compute affected (read) + mark them quarantined so --retry-quarantined includes them.
      Affected = live (name_stage in accepted/reviewed/pending) names that are parse-fail
      (grammar_parse_fallback) OR non-canonical (parse_standard_name raises NonCanonicalNameError).
      (~66; recompute in-process — sn.id is the name; do NOT rely on scratchpad/affected_ids.json.)
-       SET sn.validation_status='quarantined' for those ids.
-  3. Regenerate (66 + 93 legacy quarantined) via generate->review->refine on DSv4, NON-DESTRUCTIVE:
+       SET sn.validation_status=&#x27;quarantined&#x27; for those ids.
+  3. Regenerate (66 + 93 legacy quarantined) via generate-&gt;review-&gt;refine on DSv4, NON-DESTRUCTIVE:
        imas-codex sn run --retry-quarantined --reset-to drafted -c 50 --min-score 0.80
      (--reset-to drafted keeps nodes+docs; --reset-to extracted deletes+recomposes from source —
       only for sourced names; 6 affected are derived/sourceless, keep them on drafted.)
-  4. VERIFY: re-derive; assert grammar_parse_fallback -> 0 and the affected ids round-trip
+  4. VERIFY: re-derive; assert grammar_parse_fallback -&gt; 0 and the affected ids round-trip
      canonical (compose(parse_standard_name(id))==id); sample before/after reviewer_score_name
-     for the quality lift. Iterate prompt/vocab in ISN if any score is low (regenerate, don't
+     for the quality lift. Iterate prompt/vocab in ISN if any score is low (regenerate, don&#x27;t
      hand-fix); keep changes general (wide application), not over-fit.
   5. RELEASE: imas-codex sn release.
 
-AFTER DEPLOY (the goal's "then continue with all pending tasks"):
+AFTER DEPLOY (the goal&#x27;s &quot;then continue with all pending tasks&quot;):
   - Confirm the ISNC published grammar tab reflects the new segments (SPA rebuilds from ISN@main).
   - Set this plan status=shipped, impl=1.0; resolve this followup with the before/after numbers.
 
 SAFETY: chains verified intact this session (rederive never writes reviewer_score/docs/chain/
-name_stage). Keep the regen scoped; don't mass-mutate beyond the affected+quarantined set.</pre>
-      </article>
-    </section>
+name_stage). Keep the regen scoped; don&#x27;t mass-mutate beyond the affected+quarantined set.</pre>
+    <p class="r-fu-outcome">§5 deploy substantially landed (this session), plus three grammar-hardening threads the deploy surfaced. GRAMMAR (ISN, all committed + 1585 tests green): (a) durable imas-codex ISN pin off rc48 → grammar commit (no more --no-sync fragility); (b) grammar_parse_fallback REMOVED — parse_standard_name via validate_worker is the single grammar gate; (c) process-vocab CURATED (97→89: dropped superseded bare regimes collisional/inertial/resistive/non_inductive_current/_drive/wave_driven + 5 literal dupes + weak generics drift/driven); (d) segment_edge_specs empty/multi-token '()' bug fixed; (e) §6 ENFORCED — major_radius+locus rejected → radial_coordinate_of_<carrier>; (f) COMPOSITIONAL LOCUS QUALIFIERS — qualifiable feature + ordered inner/outer/upper/lower/primary/secondary replaces 11 flat tokens, so radial_coordinate_of_upper_outer_strike_point composes for free (scales to snowflake/X/super-X). IMAS-CODEX (committed): compose hardened to flag vocab_gap not substitute a wrong-but-registered locus; name-review hard-caps source-fidelity (strike_point↛divertor_target); --reset-to connector FIXED (was dead code after the pool-path early-return → silent no-op); benchmark enum + all grammar-caused test fallout fixed; suite green except 4 pre-existing/orthogonal failures. DEPLOY: bench 100% grammar-valid on DSv4; the dd-sourced affected bulk recomposed correctly (parallel_current_density_due_to_ohmic_current_drive / _due_to_anomalous_transport, time_due_to_resistive_diffusion, radial_coordinate_of_… verified); the strike_point→inner_divertor_target drift removed. REMAINING (see f-cqo-tail): ~67-name long tail (mostly sourceless/derived non-canonical names that don't recompose from a DD source) + strike_point sources pending recompose to radial_coordinate_of_inner_strike_point + final source-fidelity re-review + sn release + ISNC grammar-tab confirm. Env: Neo4j bolt://98dci4-clu-3052:7687, DSv4 http://98dci4-gpu-0003:18800/v1; imas-codex pinned ISN 047ec85.</p>
+    </article>
+<article class="r-fu" data-id="f-cqo-tail" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-01" data-recommends-skill="/reckon-ship canonical-qualifier-order §5" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">§5 tail — regenerate the sourceless/derived non-canonical remainder, source-fidelity re-review, then sn release</h4>
+    <div class="r-fu-body">The dd-sourced affected bulk recomposed correctly; ~67 live names still fail parse — ~11 dd-sourced (recompose via another --reset-to extracted pass) and ~56 SOURCELESS/DERIVED (no DD source to recompose from: derived names, binary-op/magnitude names, and non-canonical reorderables like implicit_energy_source_rate→energy_implicit_source_rate, launched_neutral_beam_power→neutral_beam_launched_power). These need per-case handling (re-derivation or targeted rename), not a blanket clear. Also: the strike_point_inner_r/outer_r sources are pending recompose to radial_coordinate_of_inner/outer_strike_point (now grammar-expressible); run a source-fidelity re-review (hardened reviewer) over the recomposed set to catch any remaining locus/feature drift; then sn release + confirm the ISNC published grammar tab. Do NOT release until the tail is clean (the single-pipeline gate holds quarantined names back, but valid-but-wrong-feature names like the strike_point drift are not auto-flagged).</div>
+    <pre class="r-fu-prompt">Project: imas-codex (+ imas-standard-names grammar @ pinned 047ec85)
+Task: finish the canonical-qualifier-order §5 regeneration tail, then release.
+
+ENV: Neo4j bolt://98dci4-clu-3052:7687 (auto-tunnel); DSv4 http://98dci4-gpu-0003:18800/v1 (deepseek-v4-flash, empty key). imas-codex pins ISN 047ec85 (grammar final). Use `uv run --no-sync`; DSv4 repoint: IMAS_CODEX_SN_{COMPOSE,REFINE}_MODEL=hosted_vllm/deepseek-v4-flash, _API_BASE=http://98dci4-gpu-0003:18800/v1, AMBIX_API_KEY= .
+
+The --reset-to connector is FIXED and the grammar/prompts are hardened (compositional loci, §6, source-fidelity review, gap-flagging compose). The regime/channel/major_radius bulk is done.
+
+STEPS:
+ 1. Recompute the affected set in-process: live names (name_stage accepted/reviewed/pending/named/drafted) where compose(parse_standard_name(id))!=id OR parse raises. Split by whether an IMASNode-[:HAS_STANDARD_NAME]-&gt;sn dd source exists.
+ 2. DD-SOURCED remainder (~11): set validation_status=&#x27;quarantined&#x27;; run `imas-codex sn run --retry-quarantined --reset-to extracted --skip-clear-gate -c 50 --names-only` (clear re-seeds sources to &#x27;extracted&#x27; via Step E; generate recomposes with the hardened prompt). Verify each now round-trips canonical.
+ 3. SOURCELESS/DERIVED remainder (~56): these have no DD source to recompose from. For DERIVED names (magnitude_of_, binary-op, projection), re-run rederive_structural_edges + the derivation pool so they re-derive from their (now-canonical) parents. For genuine non-canonical reorderables with no source, either seed a source or record a targeted rename; do NOT leave them silently quarantined.
+ 4. SOURCE-FIDELITY re-review: run the (hardened) name reviewer over the session-recomposed names; the source-fidelity rule flags any name whose locus/feature disagrees with its DD source path (e.g. a *_divertor_target for a strike_point path). Quarantine + regenerate the flagged ones.
+ 5. Confirm 0 live names fail parse (or only documented, sourced vocab_gaps).
+ 6. RELEASE: `imas-codex sn release`. Confirm the ISNC published grammar tab reflects the new segments (SPA rebuilds from ISN@main).
+ 7. Set this plan status=shipped, impl=1.0; resolve this followup with final before/after round-trip + review-score numbers.</pre>
+    </article>
+</section>
 
   </main>
 </body>
