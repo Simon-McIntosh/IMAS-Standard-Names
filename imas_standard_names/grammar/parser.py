@@ -96,6 +96,11 @@ class Vocabularies:
     # (qualifiers.yml). Empty for tokens that only peel as qualifiers via the
     # acceptance union (operators, loci, subjects); IR metadata only.
     qualifier_categories: Mapping[str, str] = field(default_factory=dict)
+    # Ordered geometric qualifiers (canonical intra-order) that compose onto a
+    # ``qualifiable`` locus feature (inner_strike_point, upper_outer_strike_point).
+    locus_qualifiers: tuple[str, ...] = ()
+    # Locus feature tokens that admit ``locus_qualifiers`` prefixes.
+    qualifiable_loci: frozenset[str] = field(default_factory=frozenset)
 
     def base_universe(self) -> frozenset[str]:
         return self.bases | self.carriers
@@ -135,10 +140,13 @@ def load_default_vocabularies() -> Vocabularies:
     carriers_reg = vocab_loaders.load_geometry_carriers()
 
     loci: dict[str, tuple[LocusType, frozenset[LocusRelation]]] = {}
+    qualifiable_loci_set: set[str] = set()
     for token, entry in loci_reg.loci.items():
         locus_type = LocusType(entry.type)
         allowed = frozenset(LocusRelation(r) for r in entry.allowed_relations)
         loci[token] = (locus_type, allowed)
+        if entry.qualifiable:
+            qualifiable_loci_set.add(token)
 
     operators: dict[str, dict[str, Any]] = {}
     for token, entry in ops_reg.operators.items():
@@ -221,6 +229,8 @@ def load_default_vocabularies() -> Vocabularies:
         carriers=frozenset(carriers_reg.carriers),
         qualifiers=qualifiers,
         qualifier_categories=vocab_loaders.load_qualifier_categories(),
+        locus_qualifiers=tuple(loci_reg.locus_qualifiers),
+        qualifiable_loci=frozenset(qualifiable_loci_set),
     )
 
 
@@ -303,6 +313,40 @@ _LOCUS_VALUE_SUFFIX = re.compile(
 )
 
 
+def _match_locus_feature(
+    token: str, v: Vocabularies
+) -> tuple[str, tuple[str, ...], LocusType, frozenset[LocusRelation]] | None:
+    """Resolve a locus token to ``(feature, qualifiers, type, relations)``.
+
+    Direct registry hit first (bare feature or non-qualifiable flat token); then
+    the compositional form — strip leading geometric qualifiers off a
+    ``qualifiable`` feature (``inner_strike_point`` -> ``strike_point`` + ``inner``;
+    ``upper_outer_strike_point`` -> ``strike_point`` + ``upper``, ``outer``).
+    Qualifiers are returned in canonical intra-order; a non-canonically-authored
+    input therefore fails the compose round-trip and is rejected as non-canonical.
+    """
+    if token in v.loci:
+        lt, allowed = v.loci[token]
+        return token, (), lt, allowed
+    if not v.locus_qualifiers or not v.qualifiable_loci:
+        return None
+    qset = set(v.locus_qualifiers)
+    order = {q: i for i, q in enumerate(v.locus_qualifiers)}
+    quals: list[str] = []
+    rest = token
+    while "_" in rest:
+        head, _, tail = rest.partition("_")
+        if head not in qset:
+            break
+        quals.append(head)
+        rest = tail
+        if rest in v.qualifiable_loci:
+            lt, allowed = v.loci[rest]
+            canon = tuple(sorted(quals, key=lambda q: order[q]))
+            return rest, canon, lt, allowed
+    return None
+
+
 def _strip_locus(
     s: str, v: Vocabularies
 ) -> tuple[LocusRef | None, str, list[Diagnostic]]:
@@ -320,39 +364,40 @@ def _strip_locus(
 
     diagnostics: list[Diagnostic] = []
 
-    # 1. Registry-backed rightmost match.
-    best: tuple[str, int, str, str | None] | None = None
+    # 1. Registry-backed rightmost match (direct feature or composed
+    #    <qualifier>..._<feature>, e.g. inner_strike_point).
+    best: tuple[str, int, str, str | None, tuple[str, ...]] | None = None
     for rel in ("over", "at", "of"):
         marker = f"_{rel}_"
         idx = s.rfind(marker)
         while idx > 0:
             token = s[idx + len(marker) :]
-            if token and token in v.loci:
+            m = _match_locus_feature(token, v) if token else None
+            if m is not None:
                 if best is None or idx > best[1]:
-                    best = (rel, idx, token, None)
+                    best = (rel, idx, m[0], None, m[1])
                 break
             # Value-parameterized position: at_<token>_equal_to_<value>.
             # Split the value suffix BEFORE the registry lookup; only
             # position-typed tokens admit a value (relation 'at').
             if rel == "at" and token:
                 value_match = _LOCUS_VALUE_SUFFIX.match(token)
-                if (
-                    value_match
-                    and value_match.group("head") in v.loci
-                    and v.loci[value_match.group("head")][0] is LocusType.POSITION
-                ):
-                    if best is None or idx > best[1]:
-                        best = (
-                            rel,
-                            idx,
-                            value_match.group("head"),
-                            value_match.group("value"),
-                        )
-                    break
+                if value_match:
+                    hm = _match_locus_feature(value_match.group("head"), v)
+                    if hm is not None and hm[2] is LocusType.POSITION:
+                        if best is None or idx > best[1]:
+                            best = (
+                                rel,
+                                idx,
+                                hm[0],
+                                value_match.group("value"),
+                                hm[1],
+                            )
+                        break
             idx = s.rfind(marker, 0, idx)
 
     if best is not None:
-        rel_str, idx, token, value = best
+        rel_str, idx, token, value, quals = best
         locus_type, allowed = v.loci[token]
         relation = LocusRelation(rel_str)
         if relation not in allowed:
@@ -370,7 +415,13 @@ def _strip_locus(
                 )
             )
             return None, s, diagnostics
-        locus = LocusRef(relation=relation, token=token, type=locus_type, value=value)
+        locus = LocusRef(
+            relation=relation,
+            token=token,
+            qualifiers=quals,
+            type=locus_type,
+            value=value,
+        )
         return locus, s[:idx], diagnostics
 
     # 2. Unregistered-but-unambiguous fallback for _at_ only.

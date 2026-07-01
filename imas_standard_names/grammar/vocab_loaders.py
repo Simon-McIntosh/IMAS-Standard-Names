@@ -74,12 +74,21 @@ class LocusEntry(BaseModel, extra="forbid"):
 
     type: LocusType
     allowed_relations: list[LocusRelation]
+    qualifiable: bool = False
+    """When true, the feature composes with the registry's ``locus_qualifiers``
+    (e.g. ``strike_point`` -> ``inner_strike_point``, ``upper_outer_strike_point``)
+    instead of enumerating each geometric variant as its own flat token."""
 
 
 class LocusRegistry(BaseModel, extra="forbid"):
     """Top-level structure of ``locus_registry.yml``."""
 
     loci: dict[str, LocusEntry]
+    locus_qualifiers: list[str] = []
+    """Ordered geometric qualifiers (canonical intra-order) that compose onto a
+    ``qualifiable`` locus feature. Scales to advanced divertor topologies
+    (snowflake/X/super-X) without enumerating every strike-point/target
+    combination."""
 
 
 def load_locus_registry() -> LocusRegistry:

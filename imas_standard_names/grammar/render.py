@@ -80,16 +80,21 @@ def render_qualifiers(qualifiers: Iterable[Qualifier]) -> str:
 
 
 def render_locus(locus: LocusRef | None) -> str:
-    """Render a locus as ``_<relation>_<token>[_equal_to_<value>]``.
+    """Render a locus as ``_<relation>_[<qualifiers>_]<token>[_equal_to_<value>]``.
 
-    Returns an empty string when ``locus`` is ``None``. Relation/type
-    compatibility and value constraints are enforced by :class:`LocusRef`'s
-    own validators.
+    Ordered geometric ``qualifiers`` (e.g. ``('inner',)``, ``('upper','outer')``)
+    are rendered as a prefix on the feature token — ``_of_inner_strike_point``,
+    ``_of_upper_outer_strike_point``. Returns an empty string when ``locus`` is
+    ``None``. Relation/type compatibility and value constraints are enforced by
+    :class:`LocusRef`'s own validators.
     """
 
     if locus is None:
         return ""
-    rendered = f"_{locus.relation.value}_{locus.token}"
+    token = locus.token
+    if locus.qualifiers:
+        token = "_".join((*locus.qualifiers, token))
+    rendered = f"_{locus.relation.value}_{token}"
     if locus.value is not None:
         rendered += f"_equal_to_{locus.value}"
     return rendered

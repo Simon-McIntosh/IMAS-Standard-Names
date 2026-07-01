@@ -167,6 +167,20 @@ for _model_tok, _connector in BINARY_OPERATOR_CONNECTORS.items():
 # Determined by corpus analysis of canonical standard names.
 _TRANSFORMATION_VALUES: frozenset[str] = frozenset(t.value for t in Transformation)
 _DECOMPOSITION_VALUES: frozenset[str] = frozenset(d.value for d in Decomposition)
+
+# Canonical intra-order for locus geometric qualifiers — mirror of
+# ``locus_registry.yml`` ``locus_qualifiers``. Kept as a module constant so the
+# model layer needs no runtime YAML load; the parser enforces the closed
+# vocabulary (only registered qualifiers strip), this enforces canonical order
+# and the requires-a-feature rule for directly-constructed models.
+_LOCUS_QUALIFIER_ORDER: tuple[str, ...] = (
+    "primary",
+    "secondary",
+    "upper",
+    "lower",
+    "inner",
+    "outer",
+)
 _BARE_PREFIX_TRANSFORMATIONS: frozenset[str] = frozenset(
     {
         "accumulated",
@@ -612,6 +626,10 @@ def _apply_locus_and_mechanism(d: dict[str, str], ir: StandardNameIR) -> dict[st
                 raise ValueError(msg)
             d[field_name] = token
 
+        # Carry composed geometric qualifiers (inner/outer/upper/…) onto the model.
+        if ir.locus.qualifiers:
+            d["locus_qualifiers"] = ir.locus.qualifiers
+
     # Mechanism → process
     if ir.mechanism is not None:
         d["process"] = ir.mechanism.token
@@ -727,6 +745,7 @@ def _model_to_ir(model: StandardName) -> StandardNameIR:
             locus = LocusRef(
                 relation=default_relation,
                 token=_value_of(value),
+                qualifiers=tuple(model.locus_qualifiers),
                 type=locus_type,
                 value=model.position_value if field_name == "position" else None,
             )
@@ -887,6 +906,13 @@ class StandardName(BaseModel):
         examples=["0_95", "1_0", "2"],
     )
     region: Region | None = None
+    # Ordered geometric qualifiers composed onto the locus FEATURE
+    # (object/geometry/position), e.g. ('inner',) for
+    # radial_coordinate_of_inner_strike_point, ('upper','outer') for
+    # ...upper_outer_strike_point. Empty for a bare/non-qualifiable feature.
+    # render_locus prefixes them onto the feature token; the parser canonicalises
+    # order, so a non-canonically-authored name fails the compose round-trip.
+    locus_qualifiers: tuple[str, ...] = ()
     process: Process | None = None
     # transformation / decomposition accept the closed registered operator
     # tokens AND fused indexed-operator tokens (``<indexed_op>_<index>``, e.g.
@@ -961,6 +987,37 @@ class StandardName(BaseModel):
         if self.geometric_base is None and self.physical_base is None:
             msg = "Either geometric_base or physical_base must be set"
             raise ValueError(msg)
+        return self
+
+    @field_validator("locus_qualifiers", mode="before")
+    @classmethod
+    def _coerce_locus_qualifiers(cls, value: Any) -> tuple[str, ...]:
+        if value is None:
+            return ()
+        return tuple(value)
+
+    @model_validator(mode="after")
+    def _check_locus_qualifiers(self) -> StandardName:
+        if not self.locus_qualifiers:
+            return self
+        if not (self.object or self.geometry or self.position or self.region):
+            raise ValueError(
+                "locus_qualifiers require a locus feature "
+                "(object / geometry / position / region)"
+            )
+        order = {q: i for i, q in enumerate(_LOCUS_QUALIFIER_ORDER)}
+        for q in self.locus_qualifiers:
+            if q not in order:
+                raise ValueError(
+                    f"unknown locus qualifier {q!r}; allowed: "
+                    f"{_LOCUS_QUALIFIER_ORDER}"
+                )
+        idxs = [order[q] for q in self.locus_qualifiers]
+        if idxs != sorted(idxs):
+            raise ValueError(
+                "locus_qualifiers must be in canonical order "
+                f"{_LOCUS_QUALIFIER_ORDER}; got {self.locus_qualifiers}"
+            )
         return self
 
     @model_validator(mode="after")
@@ -1175,6 +1232,13 @@ class StandardName(BaseModel):
                     key=lambda t: _ZONE_ORDER.get(t, len(_ZONE_ORDER)),
                 )
                 out[key] = "_".join(ordered)
+                continue
+            # locus_qualifiers is a tuple (multi-token, already canonical). Omit
+            # when empty; render as a flat token run otherwise.
+            if key == "locus_qualifiers":
+                if not value:
+                    continue
+                out[key] = "_".join(_value_of(q) for q in value)
                 continue
             out[key] = _value_of(value)
         return out

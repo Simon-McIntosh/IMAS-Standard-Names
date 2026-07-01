@@ -17,6 +17,14 @@
 #   - Discretization framework tokens (ggd_*) are not physics positions
 #   - Prefer atomic tokens composable via qualifiers over long compounds
 
+# Geometric qualifiers that compose onto a `qualifiable` feature, in canonical
+# intra-order (topological selector first: primary/secondary, then vertical
+# upper/lower, then radial inner/outer). Renders as <qual>..._<feature>, e.g.
+# inner_strike_point, upper_outer_strike_point. Scales to advanced divertor
+# topologies (snowflake / X-divertor / super-X) without enumerating every
+# strike-point / target combination as its own flat token.
+locus_qualifiers: [primary, secondary, upper, lower, inner, outer]
+
 loci:
 
   # ====================================================================
@@ -382,9 +390,11 @@ loci:
   divertor_plate:
     type: position
     allowed_relations: [at, of]
+    qualifiable: true
   divertor_target:
     type: position
     allowed_relations: [at, of]
+    qualifiable: true
   ece_channel:
     type: position
     allowed_relations: [at, of]
@@ -415,17 +425,6 @@ loci:
   inlet:
     type: position
     allowed_relations: [at, of]
-  inner_divertor_target:
-    type: position
-    allowed_relations: [at, of]
-  inner_midplane:
-    type: position
-    allowed_relations: [at, of]
-  inner_strike_point:
-    # inner (high-field-side) strike point — separatrix/divertor intersection.
-    # Companion to inner_divertor_target; DD: summary/boundary/strike_point_inner_*
-    type: position
-    allowed_relations: [at, of]
   inside_flux_surface:
     type: position
     allowed_relations: [at, of]
@@ -450,6 +449,7 @@ loci:
   midplane:
     type: position
     allowed_relations: [at, of]
+    qualifiable: true
   minimum_safety_factor:
     type: position
     allowed_relations: [at, of]
@@ -472,17 +472,6 @@ loci:
     type: position
     allowed_relations: [at, of]
   outer:
-    type: position
-    allowed_relations: [at, of]
-  outer_divertor_target:
-    type: position
-    allowed_relations: [at, of]
-  outer_midplane:
-    type: position
-    allowed_relations: [at, of]
-  outer_strike_point:
-    # outer (low-field-side) strike point — separatrix/divertor intersection.
-    # Companion to outer_divertor_target; DD: summary/boundary/strike_point_outer_*
     type: position
     allowed_relations: [at, of]
   outlet:
@@ -521,12 +510,6 @@ loci:
   post_sawtooth_crash:
     type: position
     allowed_relations: [at, of]
-  primary_strike_point:
-    type: position
-    allowed_relations: [at, of]
-  primary_x_point:
-    type: position
-    allowed_relations: [at, of]
   sawtooth_inversion_radius:
     type: position
     allowed_relations: [at, of]
@@ -535,21 +518,13 @@ loci:
     # the sawtooth_inversion_radius); DD: sawteeth diagnostics
     type: position
     allowed_relations: [at, of]
-  secondary_separatrix:
-    type: position
-    allowed_relations: [at, of]
-  secondary_strike_point:
-    type: position
-    allowed_relations: [at, of]
-  secondary_x_point:
-    type: position
-    allowed_relations: [at, of]
   sensor_attachment_point:
     type: position
     allowed_relations: [at, of]
   separatrix:
     type: position
     allowed_relations: [at, of]
+    qualifiable: true
   shattering_position:
     type: position
     allowed_relations: [at, of]
@@ -559,6 +534,7 @@ loci:
   strike_point:
     type: position
     allowed_relations: [at, of]
+    qualifiable: true
   tearing_mode_center:
     type: position
     allowed_relations: [at, of]
@@ -568,6 +544,7 @@ loci:
   x_point:
     type: position
     allowed_relations: [at, of]
+    qualifiable: true
 
   # ── breadth-rotation gap closure (codex VocabGap analysis) ──────────
   # Genuine physics-meaningful boundary loci (DD-confirmed control /

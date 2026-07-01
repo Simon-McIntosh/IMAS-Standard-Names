@@ -213,7 +213,15 @@ class LocusRef(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid")
 
     relation: LocusRelation
-    token: str = Field(description="Locus registry token.")
+    token: str = Field(description="Locus registry FEATURE token (e.g. 'strike_point').")
+    qualifiers: tuple[str, ...] = Field(
+        default=(),
+        description=(
+            "Ordered geometric qualifiers composed onto a qualifiable feature "
+            "(e.g. ('inner',) for inner_strike_point, ('upper','outer') for "
+            "upper_outer_strike_point). Empty for a bare or non-qualifiable feature."
+        ),
+    )
     type: LocusType
     value: str | None = Field(
         default=None,
@@ -227,6 +235,13 @@ class LocusRef(BaseModel):
     @classmethod
     def _check_token(cls, value: str) -> str:
         return _validate_token(value, field_name="locus token")
+
+    @field_validator("qualifiers")
+    @classmethod
+    def _check_qualifiers(cls, value: tuple[str, ...]) -> tuple[str, ...]:
+        for q in value:
+            _validate_token(q, field_name="locus qualifier")
+        return value
 
     @field_validator("value")
     @classmethod
@@ -493,6 +508,8 @@ def assert_locus_is_trailing(rendered: str, ir: StandardNameIR) -> None:
         return
     relation = ir.locus.relation.value
     token = ir.locus.token
+    if ir.locus.qualifiers:
+        token = "_".join((*ir.locus.qualifiers, token))
     locus_segment = f"_{relation}_{token}"
     if ir.locus.value is not None:
         locus_segment += f"_equal_to_{ir.locus.value}"

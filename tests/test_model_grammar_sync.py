@@ -72,6 +72,7 @@ def test_model_has_all_grammar_segments():
         "binary_operator",
         "secondary_base",
         "position_value",
+        "locus_qualifiers",
     }
 
     assert grammar_segments <= model_fields, (
