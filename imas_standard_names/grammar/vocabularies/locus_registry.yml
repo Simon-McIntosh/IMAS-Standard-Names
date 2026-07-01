@@ -421,6 +421,11 @@ loci:
   inner_midplane:
     type: position
     allowed_relations: [at, of]
+  inner_strike_point:
+    # inner (high-field-side) strike point — separatrix/divertor intersection.
+    # Companion to inner_divertor_target; DD: summary/boundary/strike_point_inner_*
+    type: position
+    allowed_relations: [at, of]
   inside_flux_surface:
     type: position
     allowed_relations: [at, of]
@@ -473,6 +478,11 @@ loci:
     type: position
     allowed_relations: [at, of]
   outer_midplane:
+    type: position
+    allowed_relations: [at, of]
+  outer_strike_point:
+    # outer (low-field-side) strike point — separatrix/divertor intersection.
+    # Companion to outer_divertor_target; DD: summary/boundary/strike_point_outer_*
     type: position
     allowed_relations: [at, of]
   outlet:
