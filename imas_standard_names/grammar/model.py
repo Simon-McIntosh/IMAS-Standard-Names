@@ -123,9 +123,7 @@ _CHANNEL_VALUES: frozenset[str] = frozenset(c.value for c in Channel)
 # kinetic_energy — the parser matches the longest base first, so a standalone
 # electron_kinetic_energy parses as base=kinetic_energy and only the
 # *_energy_flux / *_momentum_flux compounds strip the channel-qualifier token.
-_CHANNEL_QUALIFIER_VALUES: frozenset[str] = frozenset(
-    c.value for c in ChannelQualifier
-)
+_CHANNEL_QUALIFIER_VALUES: frozenset[str] = frozenset(c.value for c in ChannelQualifier)
 
 # Map from LocusType to model field name
 _LOCUS_TYPE_TO_FIELD: dict[LocusType, str] = {
@@ -832,9 +830,7 @@ def _decompose_physical_base(
         if channel_qualifier is not None
         else None
     )
-    channel_q = (
-        Qualifier(token=_value_of(channel)) if channel is not None else None
-    )
+    channel_q = Qualifier(token=_value_of(channel)) if channel is not None else None
 
     # Try to parse the physical_base to extract any embedded qualifiers
     try:
@@ -1009,8 +1005,7 @@ class StandardName(BaseModel):
         for q in self.locus_qualifiers:
             if q not in order:
                 raise ValueError(
-                    f"unknown locus qualifier {q!r}; allowed: "
-                    f"{_LOCUS_QUALIFIER_ORDER}"
+                    f"unknown locus qualifier {q!r}; allowed: {_LOCUS_QUALIFIER_ORDER}"
                 )
         idxs = [order[q] for q in self.locus_qualifiers]
         if idxs != sorted(idxs):
@@ -1045,6 +1040,27 @@ class StandardName(BaseModel):
                 "(§6: geometric_base=radial_coordinate, symmetric with "
                 "vertical_coordinate). Reserve major_radius for the bare R0 "
                 "reference and length/operator compounds."
+            )
+            raise ValueError(msg)
+        return self
+
+    @model_validator(mode="after")
+    def _check_time_base_not_process(self) -> StandardName:
+        """The bare ``time`` base is the time coordinate / elapsed time.
+
+        ``time_due_to_<process>`` is ambiguous ("time" — delay? constant?
+        diffusion time?). A characteristic timescale is a named quantity and
+        gets its own atomic base (``resistive_diffusion_time``,
+        ``confinement_time``, ``dead_time`` …), so reject a bare ``time`` base
+        that carries a ``due_to_`` process and point at the timescale base.
+        """
+        if self.physical_base == "time" and self.process is not None:
+            proc = getattr(self.process, "value", self.process)
+            msg = (
+                f"bare 'time' base cannot take a due_to_{proc} process; a "
+                f"characteristic timescale is a named quantity — use the "
+                f"lexicalised base '{proc}_time' (e.g. resistive_diffusion_time). "
+                "Reserve 'time' for the time coordinate / elapsed time."
             )
             raise ValueError(msg)
         return self

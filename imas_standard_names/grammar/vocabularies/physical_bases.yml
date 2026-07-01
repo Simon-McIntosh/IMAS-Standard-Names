@@ -383,6 +383,22 @@ bases:
   dead_time:
     aliases: []
     kind: scalar
+  # Named characteristic timescales are atomic bases (like confinement_time,
+  # dead_time) — a timescale is a named quantity (has a symbol/definition), not
+  # "time, X-flavored". The bare `time` base is the time coordinate/elapsed time
+  # and must not take due_to_<process> (see the time-base guard in model.py).
+  exposure_time:
+    aliases: []
+    kind: scalar
+  fall_time:
+    aliases: []
+    kind: scalar
+  rise_time:
+    aliases: []
+    kind: scalar
+  resistive_diffusion_time:
+    aliases: []
+    kind: scalar
   etendue:
     aliases: [optical_throughput]
     kind: scalar
