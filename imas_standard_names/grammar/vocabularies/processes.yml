@@ -59,7 +59,6 @@
 - beam_thermal_fusion
 
 # === Other processes ===
-- resistive
 - viscous
 - magnetohydrodynamic
 - external_coil
@@ -71,10 +70,7 @@
 # === D.3 review §5 additions ===
 - neoclassical_tearing_mode   # neoclassical tearing mode (NTM) instability; replaces `ntm_`
 - ohmic_dissipation            # ohmic (resistive Joule) dissipation
-- resistive_diffusion          # resistive magnetic field diffusion
 - resistive_flux_consumption   # resistive consumption of magnetic flux
-- non_inductive_drive          # aggregate non-inductive current drive
-- wave_driven                  # wave-driven heating or current drive
 - parallel_viscosity           # parallel viscous stress or dissipation
 - perpendicular_viscosity      # perpendicular viscous stress or dissipation
 - heat_viscosity               # gyroviscous (heat) stress
@@ -83,7 +79,6 @@
 
 # === D.5 review §5 additions ===
 - viscous_heat_flux            # viscous contribution to heat flux
-- inertial                     # inertial (momentum) contribution
 
 # === rc13 codex-rotation additions ===
 # From plasma_wall_interactions, fast_particles, magnetic_field_systems,
@@ -91,14 +86,12 @@
 - collisions                   # Coulomb / particle collisions process
 - thermalization               # slowing-down of fast particles to thermal energy
 - fast_ion                     # fast-ion drive / source process (e.g. NBI fast-ion current)
-- non_inductive_current        # current driven by non-inductive means (preferred over non_inductive)
 
 # === rc14 vocabulary extensions (codex plan 31) ===
 - e_cross_b_drift              # E×B drift mechanism (plasma_control, edge)
 - thermal_fusion               # pure-thermal fusion (alongside beam_beam_, beam_thermal_)
 - thermalization_of_fast_particles  # distribution-source thermalisation
 - halo_current                 # halo current path (current through open field lines)
-- non_inductive_current_drive  # explicit synonym alongside non_inductive_drive
 
 # === rc15 vocabulary extensions (edge-plasma rotation) ===
 # Diamagnetic drift is a first-class transport mechanism: fluxes "due to
@@ -125,26 +118,20 @@
 - disruption_event                    # discrete disruption event (alongside ongoing `disruption`)
 - wave_particle_interaction           # resonant wave–particle interaction process
 - fast_particle_thermalization        # thermalisation of a fast-particle population
-- wave_driven_current_drive           # current drive driven by an RF wave (explicit form)
 - conductive_losses                   # conductive heat / particle losses (first_wall, blanket)
 - fast_particle_source                # distribution-source term from fast particles
-- distribution_function_driven        # driven by an explicit distribution-function source
+- distribution_function_driven        # driven by an explicit distribution-function source (a specific source term, not the bare `driven`)
 - radiation_emission                  # radiation emission process (generic)
 - recombination_emission              # photon emission from recombination events
 - fusion_born_alpha                   # alpha particles born from fusion reactions
 
 # === W2a corpus mining additions (plan 38 §A9) ===
 # From 41 process classifications in rc20 corpus mining.
-- collisional                  # collisional transport or dissipation process
-- drift                        # generic drift mechanism
-- driven                       # generic driven process qualifier
 - fusion                       # fusion reaction process
 - heating                      # generic heating mechanism
 - injection                    # generic injection process
 - sputtering                   # sputtering erosion process
 - viscosity                    # viscous transport process
-- e_cross_b_drift
-- heat_viscosity
 - ohmic_induction
 
 # === rc19 vocabulary extensions (plan 41 §A3 corpus gap closure) ===

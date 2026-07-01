@@ -47,8 +47,10 @@ class TestD5ProcessTokens:
     def test_viscous_heat_flux_in_process_enum(self):
         assert Process("viscous_heat_flux") == Process.VISCOUS_HEAT_FLUX
 
-    def test_inertial_in_process_enum(self):
-        assert Process("inertial") == Process.INERTIAL
+    def test_ion_inertia_in_process_enum(self):
+        # The bare `inertial` regime token was lifted to the mechanism noun
+        # `ion_inertia` (inertial / polarization current J_pol).
+        assert Process("ion_inertia") == Process.ION_INERTIA
 
     def test_power_due_to_viscous_heat_flux_round_trip(self):
         name = "power_due_to_viscous_heat_flux"
@@ -57,10 +59,10 @@ class TestD5ProcessTokens:
         assert parsed.physical_base == "power"
         assert compose_standard_name(parsed) == name
 
-    def test_energy_due_to_inertial_round_trip(self):
-        name = "energy_due_to_inertial"
+    def test_energy_due_to_ion_inertia_round_trip(self):
+        name = "energy_due_to_ion_inertia"
         parsed = parse_standard_name(name)
-        assert parsed.process == Process.INERTIAL
+        assert parsed.process == Process.ION_INERTIA
         assert parsed.physical_base == "energy"
         assert compose_standard_name(parsed) == name
 
