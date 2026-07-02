@@ -1,8 +1,9 @@
 # Qualifier vocabulary: BASE-binding prefix modifiers on physical bases.
 #
-# This file is the BASE-binding qualifier vocabulary: every token here binds to
-# the BASE and renders INNER of the transport channel (heat_decay_length =
-# channel=heat outer of base-qualifier=decay). The CHANNEL-binding qualifiers
+# This file is the refined-qualifier vocabulary: every token here scopes over
+# the whole channel phrase and renders OUTER of the transport channel
+# (implicit_energy_source_rate = qualifier=implicit outer of channel=energy
+# outer of base=source_rate). The CHANNEL-binding qualifiers
 # (those that bind to the transport channel and render OUTER of it, e.g.
 # kinetic_energy_flux, plasma_momentum_flux) live in channel_qualifiers.yml —
 # do NOT add channel-binding qualifiers here.
@@ -265,7 +266,6 @@
 - alfven                        # Alfven (alfven_velocity, alfven_frequency, alfven_mach_number)
 - townsend                      # Townsend (townsend_coefficient) — avalanche ionization in breakdown
 - sawtooth                      # sawtooth instability (sawtooth_period, sawtooth_amplitude)
-- decay                         # decay (decay_time, decay_rate, decay_length)
 
 # === wave-diagnostic, MSE, numerical-split, and PFC-face additions ===
 # Genuine atomic qualifiers from codex VocabGap analysis. DD-confirmed.

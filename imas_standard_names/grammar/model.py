@@ -46,6 +46,7 @@ from imas_standard_names.grammar.model_types import (
     Population,
     Position,
     Process,
+    Qualifier as QualifierToken,
     Region,
     Subject,
     Transformation,
@@ -114,6 +115,17 @@ _ZONE_ORDER: dict[str, int] = {z.value: i for i, z in enumerate(Zone)}
 # first, so a standalone energy/momentum never reaches the qualifier stage and
 # only the *_flux/*_diffusivity/* compounds strip the channel token.
 _CHANNEL_VALUES: frozenset[str] = frozenset(c.value for c in Channel)
+
+# Qualifier: refined base-phrase qualifier segment (implicit, incident,
+# effective, ...) from the open qualifiers.yml vocabulary. Scopes over the
+# WHOLE channel phrase — English adjective order: the qualifier modifies the
+# compound noun the channel forms with the base — so it renders OUTER of the
+# channel_qualifier/channel pair and INNER of the zone
+# (implicit_energy_source_rate, incident_kinetic_energy_flux_at_wall,
+# ion_state_implicit_energy_source_rate). Multi-token; stacked qualifiers keep
+# authored order (a canonical intra-order by category rank is planned but not
+# yet enforced).
+_QUALIFIER_VALUES: frozenset[str] = frozenset(q.value for q in QualifierToken)
 
 # ChannelQualifier: qualifier that binds to the transport CHANNEL (kinetic,
 # plasma). It refines WHICH channel quantity is meant and renders immediately
@@ -412,7 +424,16 @@ def _ir_to_model_dict(ir: StandardNameIR) -> dict[str, str]:
             channel = None
             channel_qualifier = None
             zone_tokens: list[str] = []
+            segment_qualifiers: list[str] = []
             base_qualifiers: list[str] = []
+            # Routing for refined qualifiers depends on whether a channel
+            # phrase exists ANYWHERE in the name, not on whether it has been
+            # seen yet in this left-to-right scan (the canonical order puts
+            # the qualifier BEFORE the channel).
+            has_channel_phrase = any(
+                q.token in _CHANNEL_VALUES or q.token in _CHANNEL_QUALIFIER_VALUES
+                for q in ir.qualifiers
+            )
             for q in ir.qualifiers:
                 # Aggregation, orbit, and population are orthogonal single-token
                 # modifier segments; they take priority over the subject branch
@@ -501,6 +522,17 @@ def _ir_to_model_dict(ir: StandardNameIR) -> dict[str, str]:
                     and transformation_token is None
                 ):
                     transformation_token = q.token
+                elif q.token in _QUALIFIER_VALUES and has_channel_phrase:
+                    # Refined qualifier alongside a channel phrase: a first-
+                    # class segment token, NOT part of the base compound. It
+                    # scopes over the whole channel phrase and renders OUTER
+                    # of channel_qualifier/channel
+                    # (implicit_energy_source_rate). Without a channel the
+                    # base-glue below keeps the historical compound form
+                    # (bootstrap_current_density) — same spelling either way;
+                    # the split only matters when a channel would otherwise
+                    # interpose.
+                    segment_qualifiers.append(q.token)
                 else:
                     base_qualifiers.append(q.token)
             if aggregation:
@@ -515,6 +547,8 @@ def _ir_to_model_dict(ir: StandardNameIR) -> dict[str, str]:
                 d["device"] = device
             if zone_tokens:
                 d["zone"] = tuple(zone_tokens)
+            if segment_qualifiers:
+                d["qualifier"] = tuple(segment_qualifiers)
             if channel:
                 d["channel"] = channel
             if channel_qualifier:
@@ -725,6 +759,7 @@ def _model_to_ir(model: StandardName) -> StandardNameIR:
                 model.zone,
                 model.channel,
                 model.channel_qualifier,
+                model.qualifier,
             )
             # Insert bare-prefix transformation qualifier at the front
             # (transformation is outermost: <transform>_<subject>_<base>)
@@ -789,14 +824,17 @@ def _decompose_physical_base(
     zone: tuple[Zone, ...] = (),
     channel: Channel | None = None,
     channel_qualifier: ChannelQualifier | None = None,
+    segment_qualifiers: tuple[QualifierToken, ...] = (),
 ) -> tuple[QuantityOrCarrier, list[Qualifier]]:
     """Decompose a physical_base string into IR base + qualifiers.
 
     The physical_base may be a compound like 'magnetic_field' or
     'diamagnetic_drift_velocity'. We use the parser to decompose it correctly,
-    then prepend aggregation/orbit/population/subject/device/zone as qualifiers,
-    and append the transport channel as the INNERMOST qualifier (just before
-    the base, after the residual physical_base qualifiers).
+    then prepend aggregation/orbit/population/subject/device/zone as
+    qualifiers, then the refined ``segment_qualifiers`` (which scope over the
+    whole channel phrase), then the channel-qualifier/channel pair as the
+    INNERMOST prefix tokens (just before the base, after any residual
+    physical_base qualifiers).
     """
     qualifiers: list[Qualifier] = []
 
@@ -821,10 +859,16 @@ def _decompose_physical_base(
     ):
         qualifiers.append(Qualifier(token=zone_token))
 
+    # Refined qualifiers scope over the WHOLE channel phrase (English
+    # adjective order: implicit_energy_source_rate = the implicit part of the
+    # energy source rate), so they render OUTER of the channel-qualifier/
+    # channel pair. Authored order is preserved.
+    for seg_q in segment_qualifiers:
+        qualifiers.append(Qualifier(token=_value_of(seg_q)))
+
     # The channel-qualifier binds to the channel and renders immediately OUTER
     # of it (kinetic_energy_flux = channel_qualifier=kinetic + channel=energy +
-    # base=flux); the channel itself renders OUTER of the residual base
-    # qualifiers but inner of subject/zone.
+    # base=flux); the channel itself renders immediately before the base.
     channel_qualifier_q = (
         Qualifier(token=_value_of(channel_qualifier))
         if channel_qualifier is not None
@@ -835,11 +879,12 @@ def _decompose_physical_base(
     # Try to parse the physical_base to extract any embedded qualifiers
     try:
         result = _parse_ir(physical_base)
-        # The channel renders OUTER of the residual physical_base qualifiers
-        # (but inner of subject/zone): the channel names WHAT is transported and
-        # modifies the whole "[qualifier] base" concept — the convection velocity
-        # OF momentum (momentum_convection_velocity), the decay length OF heat
-        # (heat_decay_length). The channel-qualifier renders OUTER of the channel.
+        # The channel renders OUTER of any residual physical_base-embedded
+        # qualifiers but INNER of the refined segment qualifiers: the channel
+        # names WHAT is transported and binds tightest to the base — the
+        # convection velocity OF momentum (momentum_convection_velocity), the
+        # decay length OF heat (heat_decay_length). The channel-qualifier
+        # renders OUTER of the channel.
         if channel_qualifier_q is not None:
             qualifiers.append(channel_qualifier_q)
         if channel_q is not None:
@@ -876,14 +921,26 @@ class StandardName(BaseModel):
     # intra-order (Zone enum order); compose() renders them between
     # subject/device and the refined qualifiers.
     zone: tuple[Zone, ...] = ()
+    # Qualifier: refined base-phrase qualifier segment (implicit, incident,
+    # effective, ...) from the open qualifiers.yml vocabulary. Scopes over the
+    # WHOLE channel phrase (English adjective order: the qualifier modifies
+    # the compound noun the channel forms with the base), so compose() renders
+    # it OUTER of channel_qualifier/channel and INNER of the zone
+    # (implicit_energy_source_rate, incident_kinetic_energy_flux_at_wall).
+    # MULTI-token like zone, so it is a tuple; stacked qualifiers keep the
+    # authored order (a canonical intra-order by category rank is planned but
+    # not yet enforced).
+    qualifier: tuple[QualifierToken, ...] = ()
     # ChannelQualifier: qualifier that binds to the transport channel (kinetic,
     # plasma). SINGLE-token; compose() renders it immediately OUTER of the
-    # channel (before it) and inner of the zone. kinetic also forms the atomic
-    # base kinetic_energy; the parser disambiguates by longest-base match.
+    # channel (before it) and inner of the refined qualifiers. kinetic also
+    # forms the atomic base kinetic_energy; the parser disambiguates by
+    # longest-base match.
     channel_qualifier: ChannelQualifier | None = None
     # Channel: transport-channel PREFIX segment (heat/particle/energy/momentum —
     # WHAT is transported). SINGLE-token and INNERMOST: compose() renders it
-    # immediately before the base, after any residual qualifier. energy/momentum
+    # immediately before the base, after the refined qualifier(s) — the
+    # qualifier scopes over the whole channel phrase. energy/momentum
     # are also valid bases (standalone electron_energy, kinetic_energy); the
     # parser disambiguates by longest-base match.
     channel: Channel | None = None
@@ -1248,6 +1305,13 @@ class StandardName(BaseModel):
                     key=lambda t: _ZONE_ORDER.get(t, len(_ZONE_ORDER)),
                 )
                 out[key] = "_".join(ordered)
+                continue
+            # The qualifier segment is a tuple (multi-token, authored order).
+            # Omit when empty; render as a flat token run otherwise.
+            if key == "qualifier":
+                if not value:
+                    continue
+                out[key] = "_".join(_value_of(q) for q in value)
                 continue
             # locus_qualifiers is a tuple (multi-token, already canonical). Omit
             # when empty; render as a flat token run otherwise.

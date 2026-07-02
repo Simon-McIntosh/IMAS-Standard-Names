@@ -62,6 +62,11 @@ class ComposeTool(Tool):
         subject: grammar_types.Subject | str | None = None,
         device: grammar_types.Object | str | None = None,
         zone: grammar_types.Zone | str | list[str] | tuple[str, ...] | None = None,
+        qualifier: grammar_types.Qualifier
+        | str
+        | list[str]
+        | tuple[str, ...]
+        | None = None,
         channel_qualifier: grammar_types.ChannelQualifier | str | None = None,
         channel: grammar_types.Channel | str | None = None,
         object: grammar_types.Object | str | None = None,
@@ -97,6 +102,16 @@ class ComposeTool(Tool):
             zone_tuple = tuple(coerce_enum(grammar_types.Zone, z) for z in zone)
         else:
             zone_tuple = (coerce_enum(grammar_types.Zone, zone),)
+        # qualifier is a multi-token segment (authored order preserved):
+        # accept a single token (str/enum) or a sequence of tokens.
+        if qualifier is None:
+            qualifier_tuple: tuple[grammar_types.Qualifier, ...] = ()
+        elif isinstance(qualifier, (list, tuple)):
+            qualifier_tuple = tuple(
+                coerce_enum(grammar_types.Qualifier, q) for q in qualifier
+            )
+        else:
+            qualifier_tuple = (coerce_enum(grammar_types.Qualifier, qualifier),)
         chan = coerce_enum(grammar_types.Channel, channel)
         chan_qual = coerce_enum(grammar_types.ChannelQualifier, channel_qualifier)
         obj = coerce_enum(grammar_types.Object, object)
@@ -118,6 +133,7 @@ class ComposeTool(Tool):
             subject=subj,
             device=dev,
             zone=zone_tuple,
+            qualifier=qualifier_tuple,
             channel_qualifier=chan_qual,
             channel=chan,
             object=obj,

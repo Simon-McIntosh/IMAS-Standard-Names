@@ -416,7 +416,7 @@ from dataclasses import dataclass
 from .model_types import (
     {enum_imports},
 )
-from .vocab_loaders import load_physical_bases, load_qualifiers
+from .vocab_loaders import load_physical_bases
 
         """
     ).strip()
@@ -548,8 +548,6 @@ def _render_segment_metadata(meta: Mapping[str, Any]) -> str:
             token_map_lines.append(f'    "{identifier}": {tuple_repr},')
         else:
             token_map_lines.append(f'    "{identifier}": (),')
-    # Always include qualifier segment populated from vocab_loaders
-    token_map_lines.append('    "qualifier": tuple(sorted(load_qualifiers())),')
     token_map_lines.append("}")
     token_map_repr = "\n".join(token_map_lines)
     order_repr = _format_tuple_literal(meta["segment_order"], indent=4, base_indent=0)
@@ -576,21 +574,6 @@ def _render_segment_metadata(meta: Mapping[str, Any]) -> str:
             """
         ).strip()
         rule_blocks.append(indent(block, "    "))
-
-    # Always append qualifier SegmentRule (populated from vocab_loaders)
-    qualifier_block = dedent(
-        """
-        SegmentRule(
-            identifier="qualifier",
-            optional=True,
-            template=None,
-            exclusive_with=(),
-            tokens=SEGMENT_TOKEN_MAP["qualifier"],
-        ),
-
-        """
-    ).strip()
-    rule_blocks.append(indent(qualifier_block, "    "))
 
     rules_section = "\n".join(rule_blocks)
 

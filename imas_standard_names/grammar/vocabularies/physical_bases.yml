@@ -396,6 +396,15 @@ bases:
   rise_time:
     aliases: []
     kind: scalar
+  decay_time:
+    aliases: []
+    kind: scalar
+  # SOL/divertor decay length (lambda_q etc.) — a named quantity with its own
+  # symbol and scaling laws, the spatial analogue of the named timescales
+  # above; not "length, decay-flavored".
+  decay_length:
+    aliases: []
+    kind: scalar
   resistive_diffusion_time:
     aliases: []
     kind: scalar

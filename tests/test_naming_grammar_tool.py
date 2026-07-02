@@ -17,9 +17,9 @@ def test_overview_structure(sample_catalog):
     expected_pattern = (
         "[<component> | <coordinate>]? [<aggregation>]? [<orbit>]? "
         "[<population>]? [<subject>]? [<device> | of_<object>]? [<zone>]? "
-        "[<channel_qualifier>]? [<channel>]? "
+        "[<qualifier>]? [<channel_qualifier>]? [<channel>]? "
         "[<geometric_base> | <physical_base>]? "
-        "[of_<geometry> | at_<position> | over_<region>]? [due_to_<process>]? [<qualifier>]?"
+        "[of_<geometry> | at_<position> | over_<region>]? [due_to_<process>]?"
     )
     assert result["canonical_pattern"] == expected_pattern
 
