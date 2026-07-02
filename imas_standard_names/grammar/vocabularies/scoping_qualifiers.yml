@@ -1,0 +1,51 @@
+# Phrase-scoping qualifiers: the subset of qualifiers.yml whose tokens
+# modify the WHOLE compound noun phrase rather than forming a lexical kind
+# with the base.
+#
+# English adjective order (Forsyth's "royal order": opinion-size-age-shape-
+# colour-origin-material-purpose-NOUN; Scontras et al. 2017: less subjective/
+# more intrinsic composes closer to the noun) splits our qualifier vocabulary
+# into two binding classes:
+#
+#   1. PHRASE-SCOPING (this file) — classifying adjectives/participles that
+#      scope over the full species+channel+base phrase and therefore render
+#      OUTERMOST among the refined qualifiers, before zone, orbit,
+#      population, subject, channel_qualifier, and channel:
+#        implicit_electron_energy_source_rate   (the implicit part OF the
+#                                                electron energy source rate)
+#        incident_neutron_fluence               (the fluence OF incident
+#                                                neutrons)
+#        effective_ion_momentum_convection_velocity
+#        fluctuating_ion_current_density
+#
+#   2. KIND-FORMING (every other qualifiers.yml token, the default) — tokens
+#      that form a named quantity with the base (Darling's "qualifier" slot,
+#      the position closest to the noun) and therefore stay glued to it,
+#      INNER of the species block:
+#        ion_atomic_mass          (atomic_mass is the compound, m_a)
+#        argon_prefill_count      (prefill_count — count of the prefill gas)
+#        ion_saturated_current    (ion saturation current, I_sat)
+#        electron_critical_temperature  (critical_temperature, a named
+#                                        threshold like the Greenwald limit)
+#        electron_deposited_power (deposited_power P_dep with the species as
+#                                  RECIPIENT-possessor — "the electron's
+#                                  deposited power"; 'deposited' does not
+#                                  modify the electrons)
+#
+# Membership test for adding a token here: does "<token> <species> <base>"
+# read as natural English with the token modifying the whole phrase, while
+# "<species> <token> <base>" reads as broken or DD-generated? If instead
+# "<token>_<base>" is a named quantity (has its own symbol/definition), the
+# token is kind-forming and does NOT belong here.
+#
+# Every token here MUST also be registered in qualifiers.yml (guard-tested).
+
+scoping_qualifiers:
+  - implicit # numerical-decomposition part: implicit_<X> = the implicit part of X
+  - explicit # numerical-decomposition part, companion to implicit
+  - effective # effective <X> — evaluative/opinion band, always leads
+  - incident # participle on the incident species/radiation (incident neutron fluence)
+  - fluctuating # the fluctuating part of <X> (fluctuating ion current density)
+  - linear # linear(-phase) <X> (linear plasma decay time)
+  - stray # stray <X> (stray magnetic field)
+  - breakdown # breakdown(-phase) <X>

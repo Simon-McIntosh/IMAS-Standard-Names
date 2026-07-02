@@ -58,6 +58,9 @@ from imas_standard_names.grammar.support import (
     TOKEN_PATTERN,
     value_of as _value_of,
 )
+from imas_standard_names.grammar.vocab_loaders import (
+    load_scoping_qualifiers as _load_scoping_qualifiers,
+)
 
 # BaseToken: pattern for physical_base segment (closed vocabulary since rc56)
 TOKEN_PATTERN_STR = r"^[a-z][a-z0-9_]*$"
@@ -116,16 +119,22 @@ _ZONE_ORDER: dict[str, int] = {z.value: i for i, z in enumerate(Zone)}
 # only the *_flux/*_diffusivity/* compounds strip the channel token.
 _CHANNEL_VALUES: frozenset[str] = frozenset(c.value for c in Channel)
 
-# Qualifier: refined base-phrase qualifier segment (implicit, incident,
-# effective, ...) from the open qualifiers.yml vocabulary. Scopes over the
-# WHOLE channel phrase — English adjective order: the qualifier modifies the
-# compound noun the channel forms with the base — so it renders OUTER of the
-# channel_qualifier/channel pair and INNER of the zone
-# (implicit_energy_source_rate, incident_kinetic_energy_flux_at_wall,
-# ion_state_implicit_energy_source_rate). Multi-token; stacked qualifiers keep
-# authored order (a canonical intra-order by category rank is planned but not
-# yet enforced).
+# Qualifier: refined PHRASE-SCOPING qualifier segment. Only the scoping
+# subset of qualifiers.yml routes here (scoping_qualifiers.yml: implicit,
+# effective, incident, fluctuating, ...): a scoping qualifier modifies the
+# WHOLE compound noun phrase — English adjective order (Forsyth's royal
+# order; Scontras et al.: less intrinsic composes further from the noun) —
+# so it renders OUTERMOST among the refined qualifiers, before zone, orbit,
+# population, subject, and the channel pair
+# (implicit_electron_energy_source_rate, incident_neutron_fluence,
+# effective_ion_momentum_convection_velocity). Every OTHER qualifier token
+# is kind-forming (atomic_mass, prefill_count, saturated_current,
+# deposited_power with the species as recipient-possessor) and stays glued
+# to the base, INNER of the species block. Multi-token; stacked scoping
+# qualifiers keep authored order (a canonical intra-order by category rank
+# is planned but not yet enforced).
 _QUALIFIER_VALUES: frozenset[str] = frozenset(q.value for q in QualifierToken)
+_SCOPING_QUALIFIER_VALUES: frozenset[str] = _load_scoping_qualifiers()
 
 # ChannelQualifier: qualifier that binds to the transport CHANNEL (kinetic,
 # plasma). It refines WHICH channel quantity is meant and renders immediately
@@ -426,14 +435,6 @@ def _ir_to_model_dict(ir: StandardNameIR) -> dict[str, str]:
             zone_tokens: list[str] = []
             segment_qualifiers: list[str] = []
             base_qualifiers: list[str] = []
-            # Routing for refined qualifiers depends on whether a channel
-            # phrase exists ANYWHERE in the name, not on whether it has been
-            # seen yet in this left-to-right scan (the canonical order puts
-            # the qualifier BEFORE the channel).
-            has_channel_phrase = any(
-                q.token in _CHANNEL_VALUES or q.token in _CHANNEL_QUALIFIER_VALUES
-                for q in ir.qualifiers
-            )
             for q in ir.qualifiers:
                 # Aggregation, orbit, and population are orthogonal single-token
                 # modifier segments; they take priority over the subject branch
@@ -522,16 +523,16 @@ def _ir_to_model_dict(ir: StandardNameIR) -> dict[str, str]:
                     and transformation_token is None
                 ):
                     transformation_token = q.token
-                elif q.token in _QUALIFIER_VALUES and has_channel_phrase:
-                    # Refined qualifier alongside a channel phrase: a first-
-                    # class segment token, NOT part of the base compound. It
-                    # scopes over the whole channel phrase and renders OUTER
-                    # of channel_qualifier/channel
-                    # (implicit_energy_source_rate). Without a channel the
-                    # base-glue below keeps the historical compound form
-                    # (bootstrap_current_density) — same spelling either way;
-                    # the split only matters when a channel would otherwise
-                    # interpose.
+                elif q.token in _SCOPING_QUALIFIER_VALUES:
+                    # Phrase-scoping qualifier: a first-class segment token,
+                    # NOT part of the base compound. It scopes over the whole
+                    # species+channel+base phrase and renders outermost among
+                    # the refined qualifiers
+                    # (implicit_electron_energy_source_rate,
+                    # incident_neutron_fluence). Kind-forming qualifiers fall
+                    # through to the base-glue below (ion_atomic_mass,
+                    # argon_prefill_count) — that split is the per-token
+                    # verdict in scoping_qualifiers.yml.
                     segment_qualifiers.append(q.token)
                 else:
                     base_qualifiers.append(q.token)
@@ -838,14 +839,32 @@ def _decompose_physical_base(
     """
     qualifiers: list[Qualifier] = []
 
-    # Render order outer-to-inner: aggregation, orbit, population, the species
-    # subject, the device, then the ordered zone tokens —
-    # <aggregation>_<orbit>_<population>_<subject>_<device>_<zone...>_<base>.
+    # Render order outer-to-inner follows English adjective order (Forsyth's
+    # royal order; Scontras et al. subjectivity hierarchy — less intrinsic
+    # composes further from the noun): aggregation (quantifier), the
+    # phrase-scoping qualifiers (classifying adjectives), zone (location/
+    # origin), then the species block (orbit, population, subject — the
+    # material/type noun adjuncts), the legacy device prefix —
+    # <aggregation>_<qualifier...>_<zone...>_<orbit>_<population>_<subject>_
+    # <device>_<channel_qualifier>_<channel>_<base>, e.g.
+    # total_implicit_core_trapped_fast_ion_energy_source_rate.
     # Zone tokens are emitted in the FIXED canonical intra-order (Zone enum
     # order) regardless of the order they were supplied in, so a non-canonical
     # authored order canonicalizes here and is rejected by parse_standard_name.
     if aggregation:
         qualifiers.append(Qualifier(token=_value_of(aggregation)))
+
+    # Phrase-scoping qualifiers modify the WHOLE species+channel+base phrase
+    # (implicit_electron_energy_source_rate = the implicit part of the
+    # electron energy source rate; incident_neutron_fluence), so they render
+    # before zone and the species block. Authored order is preserved.
+    for seg_q in segment_qualifiers:
+        qualifiers.append(Qualifier(token=_value_of(seg_q)))
+
+    for zone_token in sorted(
+        (_value_of(z) for z in zone), key=lambda t: _ZONE_ORDER.get(t, len(_ZONE_ORDER))
+    ):
+        qualifiers.append(Qualifier(token=zone_token))
     if orbit:
         qualifiers.append(Qualifier(token=_value_of(orbit)))
     if population:
@@ -854,17 +873,6 @@ def _decompose_physical_base(
         qualifiers.append(Qualifier(token=_value_of(subject)))
     if device:
         qualifiers.append(Qualifier(token=_value_of(device)))
-    for zone_token in sorted(
-        (_value_of(z) for z in zone), key=lambda t: _ZONE_ORDER.get(t, len(_ZONE_ORDER))
-    ):
-        qualifiers.append(Qualifier(token=zone_token))
-
-    # Refined qualifiers scope over the WHOLE channel phrase (English
-    # adjective order: implicit_energy_source_rate = the implicit part of the
-    # energy source rate), so they render OUTER of the channel-qualifier/
-    # channel pair. Authored order is preserved.
-    for seg_q in segment_qualifiers:
-        qualifiers.append(Qualifier(token=_value_of(seg_q)))
 
     # The channel-qualifier binds to the channel and renders immediately OUTER
     # of it (kinetic_energy_flux = channel_qualifier=kinetic + channel=energy +
@@ -1254,6 +1262,7 @@ class StandardName(BaseModel):
             has_qualification = any(
                 [
                     self.aggregation,
+                    self.qualifier,
                     self.orbit,
                     self.population,
                     self.subject,

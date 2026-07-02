@@ -15,9 +15,10 @@ def test_overview_structure(sample_catalog):
     # Should have canonical pattern in overview
     assert "canonical_pattern" in result
     expected_pattern = (
-        "[<component> | <coordinate>]? [<aggregation>]? [<orbit>]? "
-        "[<population>]? [<subject>]? [<device> | of_<object>]? [<zone>]? "
-        "[<qualifier>]? [<channel_qualifier>]? [<channel>]? "
+        "[<component> | <coordinate>]? [<aggregation>]? "
+        "[<qualifier>]? [<zone>]? [<orbit>]? "
+        "[<population>]? [<subject>]? [<device> | of_<object>]? "
+        "[<channel_qualifier>]? [<channel>]? "
         "[<geometric_base> | <physical_base>]? "
         "[of_<geometry> | at_<position> | over_<region>]? [due_to_<process>]?"
     )

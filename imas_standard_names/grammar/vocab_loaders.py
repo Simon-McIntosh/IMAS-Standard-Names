@@ -389,6 +389,28 @@ def _load_flat_token_list(filename: str, dict_key: str) -> frozenset[str]:
 # ---------------------------------------------------------------------------
 
 
+def load_scoping_qualifiers() -> frozenset[str]:
+    """Load the phrase-scoping subset of the qualifier vocabulary.
+
+    These are qualifier tokens (must also appear in ``qualifiers.yml``)
+    that modify the whole compound noun phrase rather than forming a
+    lexical kind with the base — they route to the model's ``qualifier``
+    segment and render outermost among the refined qualifiers (before
+    zone, orbit, population, subject, and the channel pair). Every other
+    qualifier token is kind-forming and stays glued to the base.
+    """
+    path = _VOCAB_DIR / "scoping_qualifiers.yml"
+    with path.open(encoding="utf-8") as fh:
+        data = yaml.safe_load(fh)
+    if not data:
+        return frozenset()
+    if isinstance(data, dict) and "scoping_qualifiers" in data:
+        return frozenset(str(t) for t in (data["scoping_qualifiers"] or []))
+    if isinstance(data, list):
+        return frozenset(str(token) for token in data)
+    return frozenset()
+
+
 def load_normalizing_qualifiers() -> frozenset[str]:
     """Load qualifier tokens that imply dimensionless output.
 

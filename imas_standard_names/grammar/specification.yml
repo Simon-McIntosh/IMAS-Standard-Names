@@ -84,12 +84,12 @@
 canonical_pattern: >
   [<component> | <coordinate>]?
   [<aggregation>]?
+  [<qualifier>]*
+  [<zone>]?
   [<orbit>]?
   [<population>]?
   [<subject>]?
   [<device>]?
-  [<zone>]?
-  [<qualifier>]*
   [<channel_qualifier>]?
   [<channel>]?
   <geometric_base | physical_base>
@@ -171,6 +171,49 @@ segments:
       <aggregation>_<orbit>_<population>_<subject>_<base> (e.g. total_fast_ion_energy).
       SPATIAL reductions (flux-surface average, volume integral) are NOT
       aggregation — they use over_<region> / reduction tags / reduction provenance.
+  - id: qualifier
+    optional: true
+    vocabulary: qualifiers
+    description: >
+      Refined PHRASE-SCOPING qualifier (implicit, effective, incident,
+      fluctuating, ...; membership = scoping_qualifiers.yml, a subset of
+      qualifiers.yml). A scoping qualifier modifies the WHOLE compound noun
+      phrase — English adjective order (Forsyth's royal order; Scontras et
+      al.: less intrinsic composes further from the noun) — so it renders
+      outermost among the refined qualifiers, immediately after aggregation
+      and before zone, orbit, population, subject, and the channel pair:
+      <aggregation>_<qualifier...>_<zone>_<orbit>_<population>_<subject>_
+      <channel_qualifier>_<channel>_<base>
+      (implicit_electron_energy_source_rate, incident_neutron_fluence,
+      effective_ion_momentum_convection_velocity,
+      total_implicit_ion_energy_source_rate). Kind-forming qualifier tokens
+      (the qualifiers.yml default: atomic, prefill, saturated, critical,
+      deposited, ...) form a named quantity with the base (atomic_mass,
+      prefill_count, saturated_current, deposited_power) and stay glued to
+      it, INNER of the species block (ion_atomic_mass, argon_prefill_count,
+      electron_deposited_power — recipient-possessive). The segment admits
+      MULTIPLE tokens; stacked scoping qualifiers keep their authored order
+      (a canonical intra-order by category rank is planned but not yet
+      enforced). Genuinely LEXICALISED compounds (decay_length, decay_time,
+      kinetic_energy) are atomic physical_bases, not qualifier+base pairs.
+  - id: zone
+    optional: true
+    vocabulary: zones
+    description: >
+      Plasma-region / geometric sub-selector prefix (core, edge, pedestal,
+      separatrix, divertor, scrape_off_layer; vertical upper/lower; radial
+      inner/outer; PFC face front_surface/back_surface/wetted). A zone is a
+      location/origin classifier, so it renders OUTER of the species block
+      (English adjective order: origin precedes the material/type noun
+      adjuncts) and INNER of the scoping qualifiers:
+      <qualifier>_<zone>_<orbit>_<population>_<subject>_<base> (e.g.
+      core_electron_temperature, edge_electron_density,
+      core_fast_ion_pressure, lower_outer_squareness_of_flux_surface).
+      Unlike aggregation/orbit/population (single-token), the zone segment
+      admits MULTIPLE tokens (lower_outer) in a FIXED canonical intra-order
+      (vertical, radial, region, face — see zones.yml). The prefix form
+      (scrape_off_layer_density) is distinct from the postfix region locus
+      (over_scrape_off_layer); both coexist.
   - id: orbit
     optional: true
     vocabulary: orbits
@@ -205,43 +248,6 @@ segments:
       the form enforced by compose tooling and production review.
       Legacy pattern: <device>_<signal> where signal is the physical_base
       (flux_loop_voltage, passive_loop_current) — still parses.
-  - id: zone
-    optional: true
-    vocabulary: zones
-    description: >
-      Plasma-region / geometric sub-selector prefix (core, edge, pedestal,
-      separatrix, divertor, scrape_off_layer; vertical upper/lower; radial
-      inner/outer; PFC face front_surface/back_surface/wetted). Renders
-      between the subject/device and the refined qualifiers:
-      <subject>_<device>_<zone>_<qualifier>_<base> (e.g.
-      core_electron_temperature, lower_outer_squareness_of_flux_surface).
-      Unlike aggregation/orbit/population (single-token), the zone segment
-      admits MULTIPLE tokens (lower_outer) in a FIXED canonical intra-order
-      (vertical, radial, region, face — see zones.yml). The prefix form
-      (scrape_off_layer_density) is distinct from the postfix region locus
-      (over_scrape_off_layer); both coexist.
-  - id: qualifier
-    optional: true
-    vocabulary: qualifiers
-    description: >
-      Refined qualifier — regime, state, source, or diagnostic modifier from
-      the open qualifiers.yml vocabulary (implicit, incident, effective,
-      absorbed, deposited, radiated, ...). Scopes over the WHOLE channel
-      phrase (English adjective order: the qualifier modifies the compound
-      noun the channel forms with the base), so it renders OUTER of the
-      channel_qualifier/channel pair and INNER of the zone:
-      <subject>_<zone>_<qualifier>_<channel_qualifier>_<channel>_<base>
-      (e.g. implicit_energy_source_rate = qualifier=implicit +
-      channel=energy + base=source_rate;
-      incident_kinetic_energy_flux_at_wall = qualifier=incident +
-      channel_qualifier=kinetic + channel=energy + base=flux;
-      ion_state_implicit_energy_source_rate = subject=ion_state +
-      qualifier=implicit + channel=energy + base=source_rate). The segment
-      admits MULTIPLE tokens; stacked qualifiers keep their authored order
-      (a canonical intra-order by category rank is planned but not yet
-      enforced). Genuinely LEXICALISED compounds (decay_length, decay_time,
-      kinetic_energy) are atomic physical_bases, not qualifier+base pairs —
-      promote to physical_bases.yml rather than fight the segment order.
   - id: channel_qualifier
     optional: true
     vocabulary: channel_qualifiers

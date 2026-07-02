@@ -45,8 +45,10 @@ def load_vocab_tokens() -> dict[str, set[str]]:
 
     # qualifier_categories.yml is a token→category MAP, not a token-defining
     # vocabulary: it intentionally re-lists qualifiers.yml tokens and its
-    # top-level keys are category names. Exclude it from the uniqueness scan.
-    skip = {"qualifier_categories.yml"}
+    # top-level keys are category names. scoping_qualifiers.yml is an
+    # intentional SUBSET of qualifiers.yml (the phrase-scoping binding class),
+    # not a segment vocabulary. Exclude both from the uniqueness scan.
+    skip = {"qualifier_categories.yml", "scoping_qualifiers.yml"}
 
     for yml_file in sorted(vocab_dir.glob("*.yml")):
         if yml_file.name in skip:
@@ -231,3 +233,25 @@ def test_no_empty_vocabularies():
             f"Check YAML structure or populate with seed entries.\n"
             f"Known stubs: {', '.join(sorted(expected_stubs))}"
         )
+
+
+def test_scoping_qualifiers_subset_of_qualifiers():
+    """scoping_qualifiers.yml is a binding-class SUBSET of qualifiers.yml.
+
+    A scoping token that is not a registered qualifier would never reach the
+    qualifier segment (the parser only strips registered qualifiers), so the
+    entry would be silently dead. Guard the subset relation.
+    """
+    from imas_standard_names.grammar.vocab_loaders import (
+        load_qualifiers,
+        load_scoping_qualifiers,
+    )
+
+    scoping = load_scoping_qualifiers()
+    qualifiers = load_qualifiers()
+    assert scoping, "scoping_qualifiers.yml must not be empty"
+    stray = scoping - qualifiers
+    assert not stray, (
+        f"scoping_qualifiers.yml lists tokens not registered in "
+        f"qualifiers.yml: {sorted(stray)}"
+    )
