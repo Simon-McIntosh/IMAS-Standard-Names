@@ -45,6 +45,7 @@ qualifier_categories:
     # NOTE: 'diamagnetic' moved to channel_qualifiers.yml (binds to the
     # transport channel: diamagnetic_momentum_diffusivity).
     - direction
+    - cross_sectional
     - e_cross_b
     - field_aligned
     - field_line

@@ -86,6 +86,7 @@
 - e_cross_b                     # E×B drift qualifier
 - field_aligned                 # aligned with magnetic field
 - surface                       # surface (2D boundary) qualifier
+- cross_sectional               # planar-section qualifier (cross_sectional_area)
 - volumetric                    # volumetric (per unit volume) qualifier
 - field_line                    # along a field line
 - major                         # major (outer) geometric qualifier

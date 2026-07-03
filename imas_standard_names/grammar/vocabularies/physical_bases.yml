@@ -62,17 +62,13 @@ bases:
   count:
     aliases: []
     kind: scalar
-  # The planar area of a section through a body — the quantity is the AREA,
-  # named explicitly (bare "cross_section" said nothing about what property
-  # of the section is meant: area? perimeter?). The section plane is named
-  # by an axis projection (poloidal_cross_sectional_area_…), mirroring
-  # poloidal_magnetic_flux. Compound binds like surface_area; bare
-  # "cross_section" remains available for a future nuclear
-  # reaction-cross-section concept.
-  cross_sectional_area:
-    aliases: []
-    kind: scalar
-    inherently_dimensional: true
+  # NOTE: cross_sectional_area is NOT a compound base — `cross_sectional` is a
+  # geometry qualifier of `area` (qualifiers.yml), parallel with wetted_area /
+  # effective_area / surface_area. Rule: a modifier that selects WHICH area
+  # (dimensions unchanged) is a qualifier; compounds are reserved for
+  # lexicalized quantities whose modifier changes what the quantity IS
+  # (angular_momentum, solid_angle, current_density). Bare "cross_section"
+  # remains available for a future nuclear reaction-cross-section concept.
   curvature:
     aliases: []
     kind: scalar
@@ -318,9 +314,9 @@ bases:
   speed:
     aliases: []
     kind: scalar
-  spectral_radiance:
-    aliases: []
-    kind: scalar
+  # NOTE: spectral_radiance is NOT a compound base — `spectral` is a
+  # registered qualifier (spectral_flux, spectral_absorptivity_of_filter, …)
+  # and qualifies `radiance` the same way.
   squareness:
     aliases: []
     kind: scalar
@@ -500,7 +496,8 @@ bases:
     inherently_dimensional: true
   radiance:
     # radiometric radiance: power per unit area per unit solid angle
-    # (W.m^-2.sr^-1); the broadband counterpart to spectral_radiance.
+    # (W.m^-2.sr^-1); the wavelength-resolved form is the `spectral`
+    # qualifier: spectral_radiance.
     # DD: spectrometer_*/processed_line/radiance, soft_x_rays/channel/intensity
     aliases: []
     kind: scalar
@@ -684,10 +681,7 @@ bases:
     aliases: []
     kind: scalar
     inherently_dimensional: true
-  surface_area:
-    # area of a (2D) bounding surface (m^2); surface binds to area. The
-    # `surface` qualifier is KEPT for surface_temperature / surface_roughness /
-    # surface_emissivity, where it qualifies other bases.
-    aliases: []
-    kind: scalar
-    inherently_dimensional: true
+  # NOTE: surface_area is NOT a compound base — `surface` is a registered
+  # qualifier (surface_temperature, surface_roughness) and qualifies `area`
+  # the same way, symmetric with wetted_area / effective_area /
+  # cross_sectional_area.

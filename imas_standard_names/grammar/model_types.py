@@ -170,6 +170,7 @@ class Qualifier(StrEnum):
     E_CROSS_B = "e_cross_b"
     FIELD_ALIGNED = "field_aligned"
     SURFACE = "surface"
+    CROSS_SECTIONAL = "cross_sectional"
     VOLUMETRIC = "volumetric"
     FIELD_LINE = "field_line"
     MAJOR = "major"
