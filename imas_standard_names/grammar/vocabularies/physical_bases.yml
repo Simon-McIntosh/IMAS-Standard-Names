@@ -62,9 +62,17 @@ bases:
   count:
     aliases: []
     kind: scalar
-  cross_section:
+  # The planar area of a section through a body — the quantity is the AREA,
+  # named explicitly (bare "cross_section" said nothing about what property
+  # of the section is meant: area? perimeter?). The section plane is named
+  # by an axis projection (poloidal_cross_sectional_area_…), mirroring
+  # poloidal_magnetic_flux. Compound binds like surface_area; bare
+  # "cross_section" remains available for a future nuclear
+  # reaction-cross-section concept.
+  cross_sectional_area:
     aliases: []
     kind: scalar
+    inherently_dimensional: true
   curvature:
     aliases: []
     kind: scalar
