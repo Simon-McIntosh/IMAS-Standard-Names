@@ -91,7 +91,7 @@ def test_locus_entry_types_are_valid():
 
 def test_locus_entry_relations_are_valid():
     reg = load_locus_registry()
-    valid_rels = {"of", "at", "over"}
+    valid_rels = {"of", "at", "over", "along"}
     for name, entry in reg.loci.items():
         bad = set(entry.allowed_relations) - valid_rels
         assert not bad, f"Invalid relations for '{name}': {bad}"

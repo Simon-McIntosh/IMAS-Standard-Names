@@ -160,6 +160,7 @@ _FIELD_TO_LOCUS: dict[str, tuple[LocusRelation, LocusType]] = {
     "geometry": (LocusRelation.OF, LocusType.POSITION),
     "position": (LocusRelation.AT, LocusType.POSITION),
     "region": (LocusRelation.OVER, LocusType.REGION),
+    "path": (LocusRelation.ALONG, LocusType.POSITION),
 }
 
 # Map between model BinaryOperator tokens (e.g. "ratio_of") and IR bare tokens
@@ -629,6 +630,16 @@ def _apply_locus_and_mechanism(d: dict[str, str], ir: StandardNameIR) -> dict[st
                         f"onto the model without dropping the locus"
                     )
                     raise ValueError(msg)
+            elif ir.locus.relation == LocusRelation.ALONG:
+                if token in _POSITION_VALUES:
+                    d["path"] = token
+                else:
+                    msg = (
+                        f"locus token '{token}' (relation 'along') is not a "
+                        f"registered 'position' segment token; cannot project "
+                        f"onto the model without dropping the locus"
+                    )
+                    raise ValueError(msg)
             else:
                 if token in _POSITION_VALUES or token in _GEOMETRY_VALUES:
                     d["geometry"] = token
@@ -769,10 +780,10 @@ def _model_to_ir(model: StandardName) -> StandardNameIR:
         else:
             raise ValueError("Either geometric_base or physical_base must be set")
 
-    # Locus — position field uses _at_, geometry field uses _of_ for
-    # POSITION-type loci. Other fields use their fixed defaults. The
-    # position field may carry a numeric parameterization (position_value),
-    # rendered as _at_<position>_equal_to_<value>.
+    # Locus — position field uses _at_, geometry field uses _of_, path field
+    # uses _along_ for POSITION-type loci. Other fields use their fixed
+    # defaults. The position field may carry a numeric parameterization
+    # (position_value), rendered as _at_<position>_equal_to_<value>.
     for field_name, (default_relation, locus_type) in _FIELD_TO_LOCUS.items():
         value = getattr(model, field_name, None)
         if value is not None:
@@ -967,8 +978,14 @@ class StandardName(BaseModel):
         examples=["0_95", "1_0", "2"],
     )
     region: Region | None = None
+    # Path-like position a quantity varies ALONG (a diagnostic chord or
+    # traced trajectory), rendered as along_<token> — distinct from position
+    # (a single point sampled AT) and geometry (an intrinsic property OF).
+    # Shares the Position enum: the underlying locus_registry token just
+    # also declares 'along' in its allowed_relations.
+    path: Position | None = None
     # Ordered geometric qualifiers composed onto the locus FEATURE
-    # (object/geometry/position), e.g. ('inner',) for
+    # (object/geometry/position/path), e.g. ('inner',) for
     # radial_coordinate_of_inner_strike_point, ('upper','outer') for
     # ...upper_outer_strike_point. Empty for a bare/non-qualifiable feature.
     # render_locus prefixes them onto the feature token; the parser canonicalises
@@ -1061,10 +1078,12 @@ class StandardName(BaseModel):
     def _check_locus_qualifiers(self) -> StandardName:
         if not self.locus_qualifiers:
             return self
-        if not (self.object or self.geometry or self.position or self.region):
+        if not (
+            self.object or self.geometry or self.position or self.region or self.path
+        ):
             raise ValueError(
                 "locus_qualifiers require a locus feature "
-                "(object / geometry / position / region)"
+                "(object / geometry / position / region / path)"
             )
         order = {q: i for i, q in enumerate(_LOCUS_QUALIFIER_ORDER)}
         for q in self.locus_qualifiers:
@@ -1096,8 +1115,9 @@ class StandardName(BaseModel):
             self.object is not None
             or self.geometry is not None
             or self.position is not None
+            or self.path is not None
         ):
-            carrier = self.object or self.geometry or self.position
+            carrier = self.object or self.geometry or self.position or self.path
             carrier_val = getattr(carrier, "value", carrier)
             msg = (
                 f"'{base}' cannot take a positional/geometry locus; a "
@@ -1274,6 +1294,7 @@ class StandardName(BaseModel):
                     self.position,
                     self.geometry,
                     self.region,
+                    self.path,
                     self.process,
                     self.transformation,
                     self.decomposition,
@@ -1287,7 +1308,8 @@ class StandardName(BaseModel):
                     f"Generic terms like '{self.physical_base}' are ambiguous without context. "
                     f"Add a qualifying segment: subject (e.g., electron_), device (e.g., flux_loop_), "
                     f"object (e.g., of_flux_loop), position (e.g., at_magnetic_axis), "
-                    f"geometry (e.g., of_plasma_boundary), or region (e.g., over_halo_region)."
+                    f"geometry (e.g., of_plasma_boundary), region (e.g., over_halo_region), "
+                    f"or path (e.g., along_line_of_sight)."
                 )
                 raise ValueError(msg)
 

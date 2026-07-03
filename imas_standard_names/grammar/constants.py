@@ -72,6 +72,7 @@ SEGMENT_TOKEN_MAP: dict[str, tuple[str, ...]] = {
     "geometry": tuple(member.value for member in Position),
     "position": tuple(member.value for member in Position),
     "region": tuple(member.value for member in Region),
+    "path": tuple(member.value for member in Position),
     "process": tuple(member.value for member in Process),
 }
 
@@ -178,22 +179,29 @@ SEGMENT_RULES: tuple[SegmentRule, ...] = (
         identifier="geometry",
         optional=True,
         template="of_{token}",
-        exclusive_with=("position", "region"),
+        exclusive_with=("position", "region", "path"),
         tokens=SEGMENT_TOKEN_MAP["geometry"],
     ),
     SegmentRule(
         identifier="position",
         optional=True,
         template="at_{token}",
-        exclusive_with=("geometry", "region"),
+        exclusive_with=("geometry", "region", "path"),
         tokens=SEGMENT_TOKEN_MAP["position"],
     ),
     SegmentRule(
         identifier="region",
         optional=True,
         template="over_{token}",
-        exclusive_with=("geometry", "position"),
+        exclusive_with=("geometry", "position", "path"),
         tokens=SEGMENT_TOKEN_MAP["region"],
+    ),
+    SegmentRule(
+        identifier="path",
+        optional=True,
+        template="along_{token}",
+        exclusive_with=("geometry", "position", "region"),
+        tokens=SEGMENT_TOKEN_MAP["path"],
     ),
     SegmentRule(
         identifier="process",
@@ -222,6 +230,7 @@ SEGMENT_ORDER: tuple[str, ...] = (
     "geometry",
     "position",
     "region",
+    "path",
     "process",
 )
 
@@ -238,6 +247,7 @@ SEGMENT_TEMPLATES: dict[str, str] = {
     "geometry": "of_{token}",
     "position": "at_{token}",
     "region": "over_{token}",
+    "path": "along_{token}",
     "process": "due_to_{token}",
 }
 
@@ -252,8 +262,11 @@ EXCLUSIVE_SEGMENT_PAIRS: tuple[tuple[str, str], ...] = (
     ("component", "coordinate"),
     ("device", "object"),
     ("geometric_base", "physical_base"),
+    ("geometry", "path"),
     ("geometry", "position"),
     ("geometry", "region"),
+    ("path", "position"),
+    ("path", "region"),
     ("position", "region"),
 )
 

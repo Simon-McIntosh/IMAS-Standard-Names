@@ -13,9 +13,10 @@ inject their own :class:`Vocabularies` bundle for testing.
 Algorithm (plan §A8)::
 
     1. Strip trailing _due_to_<process>                -> mechanism
-    2. Strip trailing _of_/_at_/_over_<locus>          -> locus
-       (longest registry-backed match; _at_ and _over_
-       may fall back with a vocab_gap diagnostic)
+    2. Strip trailing _of_/_at_/_over_/_along_<locus>  -> locus
+       (longest registry-backed match; only _at_ may
+       fall back with a vocab_gap diagnostic — _over_
+       and _along_ require a registered locus)
     3. Peel outer operators right-to-outermost         -> operators
        a) unary_postfix (longest match at end)
        b) unary_prefix  (longest match `<op>_of_...`)
@@ -355,11 +356,13 @@ def _strip_locus(
     Preference order: rightmost registry-backed ``_<rel>_<token>`` match,
     including the value-parameterized form ``_at_<token>_equal_to_<value>``
     (the ``_equal_to_<value>`` suffix is split off BEFORE registry lookup;
-    only position-typed registry tokens admit a value). ``_at_`` and
-    ``_over_`` have no operator collisions, so an unregistered token still
-    strips with a ``vocab_gap`` diagnostic. ``_of_`` without a registry hit
-    is LEFT alone so step-4 operator peeling can resolve it as a
-    binary-operator template.
+    only position-typed registry tokens admit a value). ``_at_`` has no
+    operator collisions, so an unregistered token still strips with a
+    ``vocab_gap`` diagnostic. ``_over_`` and ``_along_`` require a
+    registered locus — an unregistered token is left in the residue so the
+    unknown-base match rejects the name rather than fabricating a locus.
+    ``_of_`` without a registry hit is LEFT alone so step-4 operator peeling
+    can resolve it as a binary-operator template.
     """
 
     diagnostics: list[Diagnostic] = []
@@ -367,7 +370,7 @@ def _strip_locus(
     # 1. Registry-backed rightmost match (direct feature or composed
     #    <qualifier>..._<feature>, e.g. inner_strike_point).
     best: tuple[str, int, str, str | None, tuple[str, ...]] | None = None
-    for rel in ("over", "at", "of"):
+    for rel in ("over", "at", "along", "of"):
         marker = f"_{rel}_"
         idx = s.rfind(marker)
         while idx > 0:

@@ -3,13 +3,15 @@
 # Typed registry of physical objects, locations, and shapes.  Every locus
 # token carries:
 #   type            - entity | position | geometry | region
-#   allowed_relations - subset of [of, at, over]
+#   allowed_relations - subset of [of, at, over, along]
 #
 # Compatibility matrix enforced at validation time:
-#   entity   -> of          (intrinsic property of an entity)
-#   position -> at, of      (field at location, geometric property of location)
-#   geometry -> at, of, over (field over a geometric shape)
-#   region   -> over         (field averaged or integrated over a region)
+#   entity   -> of                (intrinsic property of an entity)
+#   position -> at, of, along     (field at location, geometric property of
+#                                  location, or field varying ALONG a
+#                                  path-like position such as a beam chord)
+#   geometry -> at, of, over      (field over a geometric shape)
+#   region   -> over              (field averaged or integrated over a region)
 #
 # Curation policy:
 #   - Tokens must describe physics-meaningful loci, not DD structural artifacts
@@ -342,18 +344,13 @@ loci:
   # Physics-meaningful spatial locations in tokamak geometry
   # ====================================================================
 
-  along_beam:
+  # line_of_sight: migrated from geometry_carriers.yml (was an unused bare
+  # carrier token; no name composed it standalone or via _of_). It names the
+  # coordinate running along a diagnostic chord, matching the ALONG semantics
+  # below (toroidal_angle_along_line_of_sight).
+  line_of_sight:
     type: position
-    allowed_relations: [at, of]
-  along_beam_path:
-    type: position
-    allowed_relations: [at, of]
-  along_line_of_sight:
-    type: position
-    allowed_relations: [at, of]
-  along_pellet_path:
-    type: position
-    allowed_relations: [at, of]
+    allowed_relations: [at, of, along]
   antenna_row:
     type: position
     allowed_relations: [at, of]
@@ -494,7 +491,7 @@ loci:
     allowed_relations: [at, of]
   pellet_path:
     type: position
-    allowed_relations: [at, of]
+    allowed_relations: [at, of, along]
   pellet_path_point:
     type: position
     allowed_relations: [at, of]

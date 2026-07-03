@@ -486,10 +486,7 @@ class Object(StrEnum):
 
 
 class Position(StrEnum):
-    ALONG_BEAM = "along_beam"
-    ALONG_BEAM_PATH = "along_beam_path"
-    ALONG_LINE_OF_SIGHT = "along_line_of_sight"
-    ALONG_PELLET_PATH = "along_pellet_path"
+    LINE_OF_SIGHT = "line_of_sight"
     ANTENNA_ROW = "antenna_row"
     BEAM_TRACING_POINT = "beam_tracing_point"
     CHARGE_STATE = "charge_state"
@@ -556,7 +553,6 @@ class Position(StrEnum):
 
 class GeometricBase(StrEnum):
     CENTROID = "centroid"
-    LINE_OF_SIGHT = "line_of_sight"
     NORMALIZED_MINOR_RADIUS = "normalized_minor_radius"
     NORMALIZED_TOROIDAL_FLUX_COORDINATE = "normalized_toroidal_flux_coordinate"
     OFFSET = "offset"

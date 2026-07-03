@@ -19,9 +19,11 @@
 carriers:
 
   # === From corpus mining (8 geometry_carrier tokens) ===
+  # line_of_sight moved to locus_registry.yml (position-typed locus, relation
+  # 'along': toroidal_angle_along_line_of_sight) — it named a diagnostic
+  # chord/path locus, not a standalone geometric-base noun, and no name used
+  # it bare or via _of_ composition.
   centroid:
-    aliases: []
-  line_of_sight:
     aliases: []
   normalized_minor_radius:
     aliases: []

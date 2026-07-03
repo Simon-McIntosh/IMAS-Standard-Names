@@ -137,6 +137,7 @@ def _get_vocabulary_description(segment_id: str) -> str:
         "object": "Physical object, diagnostic hardware, or equipment (e.g., flux_loop, bolometer)",
         "position": "Spatial location where field is evaluated (use with at_ template)",
         "geometry": "Intrinsic geometric property of the object (use with of_ template)",
+        "path": "Path-like position a quantity varies along, e.g. a diagnostic chord (use with along_ template)",
         "process": "Physical process or mechanism (e.g., conduction, ohmic, radiation)",
         "zone": "Plasma-region / geometric sub-selector prefix (e.g., core, edge, inner, outer, upper, lower)",
         "channel": "Transport channel — WHAT is transported (heat, particle, energy, momentum)",

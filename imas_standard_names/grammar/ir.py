@@ -112,6 +112,7 @@ class LocusRelation(StrEnum):
     OF = "of"
     AT = "at"
     OVER = "over"
+    ALONG = "along"
 
 
 class LocusType(StrEnum):
@@ -124,9 +125,15 @@ class LocusType(StrEnum):
 
 
 # Locus relation compatibility matrix (see grammar specification §5).
+# ``along`` is a third preposition on POSITION-typed loci, alongside ``of``
+# (intrinsic geometry) and ``at`` (field evaluated there): it names a
+# path-like locus (line_of_sight, pellet_path) that a quantity varies ALONG
+# rather than sits AT a single point of.
 LOCUS_RELATION_MATRIX: dict[LocusType, frozenset[LocusRelation]] = {
     LocusType.ENTITY: frozenset({LocusRelation.OF}),
-    LocusType.POSITION: frozenset({LocusRelation.OF, LocusRelation.AT}),
+    LocusType.POSITION: frozenset(
+        {LocusRelation.OF, LocusRelation.AT, LocusRelation.ALONG}
+    ),
     LocusType.REGION: frozenset({LocusRelation.OVER}),
     LocusType.GEOMETRY: frozenset({LocusRelation.OF}),
 }
@@ -213,7 +220,9 @@ class LocusRef(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid")
 
     relation: LocusRelation
-    token: str = Field(description="Locus registry FEATURE token (e.g. 'strike_point').")
+    token: str = Field(
+        description="Locus registry FEATURE token (e.g. 'strike_point')."
+    )
     qualifiers: tuple[str, ...] = Field(
         default=(),
         description=(

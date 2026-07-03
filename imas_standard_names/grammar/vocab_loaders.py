@@ -66,7 +66,7 @@ def load_coordinate_axes() -> CoordinateAxesRegistry:
 # ---------------------------------------------------------------------------
 
 LocusType = Literal["entity", "position", "geometry", "region"]
-LocusRelation = Literal["of", "at", "over"]
+LocusRelation = Literal["of", "at", "over", "along"]
 
 
 class LocusEntry(BaseModel, extra="forbid"):

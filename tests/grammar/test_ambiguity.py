@@ -106,11 +106,11 @@ def test_ambiguity_at_vs_of_active_limiter_point(vocabs: Vocabularies) -> None:
     )
 
 
-def test_ambiguity_at_vs_of_q_95(vocabs: Vocabularies) -> None:
-    """``_at_along_beam`` vs ``_of_along_beam`` — position locus with both relations."""
+def test_ambiguity_at_vs_of_line_of_sight(vocabs: Vocabularies) -> None:
+    """``_at_line_of_sight`` vs ``_of_line_of_sight`` — position locus with both relations."""
     _assert_distinct_ir(
-        "pressure_at_along_beam",
-        "pressure_of_along_beam",
+        "pressure_at_line_of_sight",
+        "pressure_of_line_of_sight",
         vocabs,
     )
 

@@ -334,8 +334,9 @@ segments:
     exclusive_with:
       - position
       - region
+      - path
     description: >
-      Intrinsic geometric property OF the object 
+      Intrinsic geometric property OF the object
       (coordinates, dimensions, shapes that define it)
   - id: position
     optional: true
@@ -344,6 +345,7 @@ segments:
     exclusive_with:
       - geometry
       - region
+      - path
     description: >
       Field quantity evaluated AT the spatial location
       (temperatures, densities, fluxes measured there).
@@ -359,12 +361,27 @@ segments:
     exclusive_with:
       - geometry
       - position
+      - path
     description: >
       Multi-dimensional plasma zone (volume, layer, or banded region)
       over which the quantity is integrated, averaged, or otherwise reduced.
       Regions are loci with extent (halo_region, core_region, divertor_region,
       scrape_off_layer, edge_region, halo_boundary); use "over_<region>" —
       not "at_<region>" — because a region is not a point/line/surface sample.
+  - id: path
+    optional: true
+    vocabulary: positions
+    template: "along_{token}"
+    exclusive_with:
+      - geometry
+      - position
+      - region
+    description: >
+      Path-like position along which the quantity varies, rather than a
+      single point it is evaluated at (position) or an intrinsic property
+      of (geometry). Use "along_<path>" for a diagnostic chord or traced
+      trajectory a quantity is sampled along (line_of_sight, pellet_path):
+      toroidal_angle_along_line_of_sight, electron_density_along_pellet_path.
   - id: process
     optional: true
     vocabulary: processes
