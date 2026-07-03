@@ -271,6 +271,23 @@ def _load_dimensionless_operators() -> frozenset[str]:
     )
 
 
+def _load_dimension_transforming_operators() -> frozenset[str]:
+    """Load operators marked ``dimension_transforming: true`` in the vocabulary.
+
+    These change the dimensions of their argument (integrals, derivatives,
+    inverse, square), so the base-implies-unit heuristic does not apply —
+    ``volume_integrated_<density>`` is a dimensionless count.
+    """
+    from ..grammar.vocab_loaders import load_operators  # noqa: PLC0415
+
+    registry = load_operators()
+    return frozenset(
+        token
+        for token, defn in registry.operators.items()
+        if defn.dimension_transforming
+    )
+
+
 def _load_normalizing_qualifiers() -> frozenset[str]:
     """Load qualifier tokens that imply dimensionless output from vocab."""
     from ..grammar.vocab_loaders import load_normalizing_qualifiers  # noqa: PLC0415
@@ -318,17 +335,24 @@ def _check_dimensionless_physical_quantity(
             return issues
 
         # Operators marked dimensionless in the vocabulary always produce
-        # dimensionless output (normalized, perturbed, logarithm, etc.).
+        # dimensionless output (normalized, perturbed, logarithm, etc.);
+        # dimension-transforming operators (integrals, derivatives, inverse)
+        # change the unit of the base, so the base-implies-unit inference is
+        # invalid for them (volume_integrated density is a count).
         dimensionless_ops = _load_dimensionless_operators()
+        transforming_ops = _load_dimension_transforming_operators()
+        exempt_ops = dimensionless_ops | transforming_ops
         tx_value = getattr(transformation, "value", transformation)
-        if tx_value in dimensionless_ops:
+        if tx_value in exempt_ops:
             return issues
 
         # Qualifiers that imply normalization (from normalizing_qualifiers.yml)
         # or that correspond to dimensionless operator tokens produce
         # dimensionless output even when parsed as qualifiers.
         normalizing_quals = _load_normalizing_qualifiers()
-        exempt_qualifiers = dimensionless_ops | normalizing_quals
+        # Operator tokens can surface in the IR qualifier list (the parser's
+        # acceptance union), so exempt the transforming set there too.
+        exempt_qualifiers = dimensionless_ops | normalizing_quals | transforming_ops
         try:
             from ..grammar.parser import parse as ir_parse  # noqa: PLC0415
 
@@ -336,6 +360,11 @@ def _check_dimensionless_physical_quantity(
             if ir is not None:
                 qualifier_tokens = {q.token for q in (ir.qualifiers or [])}
                 if qualifier_tokens & exempt_qualifiers:
+                    return issues
+                operator_tokens = {
+                    getattr(op, "token", op) for op in (ir.operators or [])
+                }
+                if operator_tokens & exempt_ops:
                     return issues
         except Exception:
             pass

@@ -32,21 +32,25 @@ operators:
     kind: unary_prefix
     precedence: 15
     returns: scalar
+    dimension_transforming: true
 
   cumulative:
     kind: unary_prefix
     precedence: 15
     returns: scalar
+    dimension_transforming: true
 
   cumulative_inside_flux_surface:
     kind: unary_prefix
     precedence: 15
     returns: scalar
+    dimension_transforming: true
 
   derivative:
     kind: unary_prefix
     precedence: 20
     returns: scalar_or_vector
+    dimension_transforming: true
 
   derivative_with_respect_to:
     kind: unary_prefix
@@ -54,6 +58,7 @@ operators:
     returns: scalar_or_vector
     indexed: true
     index_params: [coord]
+    dimension_transforming: true
 
   flux_surface_averaged:
     kind: unary_prefix
@@ -65,11 +70,13 @@ operators:
     precedence: 20
     returns: vector
     arg_types: [scalar]
+    dimension_transforming: true
 
   inverse:
     kind: unary_prefix
     precedence: 20
     returns: scalar_or_vector
+    dimension_transforming: true
 
   line_averaged:
     kind: unary_prefix
@@ -80,6 +87,7 @@ operators:
     kind: unary_prefix
     precedence: 30
     returns: scalar
+    dimension_transforming: true
 
   logarithm:
     kind: unary_prefix
@@ -144,6 +152,7 @@ operators:
     kind: unary_prefix
     precedence: 20
     returns: scalar_or_vector
+    dimension_transforming: true
 
   root_mean_square:
     kind: unary_prefix
@@ -154,26 +163,31 @@ operators:
     kind: unary_prefix
     precedence: 20
     returns: scalar_or_vector
+    dimension_transforming: true
 
   second_radial_derivative:
     kind: unary_prefix
     precedence: 20
     returns: scalar_or_vector
+    dimension_transforming: true
 
   square:
     kind: unary_prefix
     precedence: 20
     returns: scalar_or_vector
+    dimension_transforming: true
 
   surface_integrated:
     kind: unary_prefix
     precedence: 30
     returns: scalar
+    dimension_transforming: true
 
   tendency:
     kind: unary_prefix
     precedence: 20
     returns: rate
+    dimension_transforming: true
 
   # Finite/discrete increment (Delta) of the base over an event — NOT a rate.
   # Unlike tendency/time_derivative (which return a per-time rate and render
@@ -195,6 +209,7 @@ operators:
     kind: unary_prefix
     precedence: 20
     returns: rate
+    dimension_transforming: true
 
   variation:
     kind: unary_prefix
@@ -210,6 +225,7 @@ operators:
     kind: unary_prefix
     precedence: 30
     returns: scalar
+    dimension_transforming: true
 
   # --- Uncertainty modifier operators (rc23 — B9 error siblings) ---
   # Three deterministic operators for IMAS _error_upper / _error_lower /

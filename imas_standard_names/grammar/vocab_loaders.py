@@ -115,6 +115,11 @@ class OperatorDef(BaseModel, extra="forbid"):
     indexed: bool = False
     index_params: list[str] | None = None
     dimensionless: bool = False
+    # The operator changes the DIMENSIONS of its argument (integrals multiply
+    # by a length/area/volume/time, derivatives divide, inverse/square remap).
+    # The base-implies-unit heuristic in validation/semantic.py is invalid for
+    # names carrying such an operator (volume_integrated density is a count).
+    dimension_transforming: bool = False
 
 
 class OperatorRegistry(BaseModel, extra="forbid"):
