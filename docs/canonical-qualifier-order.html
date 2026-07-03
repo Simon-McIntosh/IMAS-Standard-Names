@@ -19,7 +19,7 @@
   <title>Canonical Qualifier Order | imas-standard-names</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="6">
+<meta name="plan-version" content="7">
 </head>
 <body>
   <main class="plan-doc">
@@ -627,6 +627,24 @@ Task: consolidate imas_codex/standard_names/audits.py::canonical_locus_check and
     <div class="r-fu-body">Lead review (2026-07-03, via the sn-edit plasma-boundary demo) rejected the asymmetry wetted_area (qualifier+area) vs surface_area (compound base): compound bases whose modifier already exists as a qualifier SHADOW the qualifier form via longest-base-match and hog vocabulary. Detailed 77-compound review performed; rule + verdicts below.</div>
     <pre class="r-fu-prompt">done — landed as ISN c3dd83e</pre>
     <p class="r-fu-outcome">LANDED ISN c3dd83e. RULE (recorded in physical_bases.yml): a modifier that selects WHICH quantity (dimensions/semantics of the head unchanged) is a QUALIFIER; compound bases are reserved for lexicalized quantities whose modifier changes what the quantity IS. Never mint a qualifier to split one compound unless it completes an existing family. VERDICTS from the 77-multi-word-base scan: SPLIT surface_area (surface already qualifiers.yml:88 — surface_temperature/surface_roughness), SPLIT spectral_radiance (spectral already qualifiers.yml — spectral_flux + 10 accepted names), SPLIT cross_sectional_area → NEW cross_sectional qualifier (geometry category) completing the area family wetted/effective/surface/cross_sectional. This PARTIALLY REVERSES the base-bound-disposition rationale's surface_area-as-atomic-base example — the token-by-token decision itself stands. KEEP compound: channels-dual energy/momentum + kinetic_energy/internal_energy/photon_energy/angular_momentum (documented channels.yml design, still open in f-cqo-004); dimension-changing/lexicalized current_density(79)/power_density(60)/torque_density(37)/magnetic_flux(24)/mass_density/number_density/solid_angle/safety_factor/larmor_radius/debye_length etc.; one-off descriptive compounds (decay_length, rise_time, tilt_angle…) whose modifiers are NOT qualifiers — splitting would ADD single-use tokens. Zero catalog strings changed (parse IR only); ISN 1618 py + 159 JS round-trip green; imas-codex pin b1f901b8; 10 graph names re-stamped physical_base (surface_area→area, spectral_radiance→radiance, cross_sectional_area→area).</p>
+    </article>
+<article class="r-fu" data-id="f-cqo-normdir-shadow" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-03" data-recommends-skill="/reckon-ship canonical-qualifier-order §3" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">§3 — normalized_&lt;direction&gt; components shadow the normalized operator (longest-match ambiguity)</h4>
+    <div class="r-fu-body">Found during the rc59 unit-integrity RCA: the components.yml 'normalized spatial directions' family (normalized_radial/vertical/parallel/perpendicular/toroidal/poloidal) SHADOWS operator normalized + component <direction> via longest-match — normalized_parallel_momentum_flux_due_to_X parses as component=normalized_parallel (a direction along the normalized-parallel axis), NOT operator normalized applied to the parallel component, silently changing the meaning of any GyroBohm-normalized projected quantity. Three freshly-accepted GK names (normalized_parallel/perpendicular_momentum_flux_due_to_perturbed_parallel_*) carry the fused parse today; the unit-suspicion validator was patched to exempt them (ISN 1cda724) but the AMBIGUITY itself is unresolved. Adjudicate in §3: either the parser prefers the operator split when the residue parses (breaking any genuine normalized-direction component names), or normalized-direction components get renamed tokens that don't collide with the operator (e.g. rho_radial), or the fused reading is declared canonical and the GK names need a different normalized marker.</div>
+    <pre class="r-fu-prompt">Project: imas-standard-names
+Plan: canonical-qualifier-order
+Section: §3 (vocabulary curation — components vs operators)
+Tier: opus
+
+Context
+  components.yml lines 39–45 define normalized_&lt;direction&gt; tokens (&#x27;component along normalized X direction&#x27;, D.3 review §5). Longest-match makes them shadow operator normalized + component &lt;direction&gt;. Live collisions: normalized_parallel_momentum_flux_due_to_perturbed_parallel_vector_potential, normalized_perpendicular_momentum_flux_due_to_perturbed_parallel_{magnetic_field,vector_potential}, normalized_perpendicular_momentum_flux (all accepted; all GyroBohm-normalized GK quantities whose INTENT is the operator reading).
+
+Work
+  1. Inventory genuine uses of normalized_&lt;direction&gt; AS components (flux-coordinate directions) in catalog + DD; if zero, consider renaming the tokens (e.g. flux-coordinate-specific spellings) to free the operator reading.
+  2. Decide the canonical parse for normalized_&lt;dir&gt;_&lt;base&gt; and enforce (parser preference or vocab rename); update the unit-suspicion exemption in validation/semantic.py accordingly (ISN 1cda724 added a component-prefix exemption as a stopgap).
+  3. Re-round-trip the catalog; migrate any affected names through the pipeline.
+
+Done-when: ambiguity resolved by design (not exemption); collisions re-parsed or renamed; suites green; followup resolved.</pre>
     </article>
 </section>
 
