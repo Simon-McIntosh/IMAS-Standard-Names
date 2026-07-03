@@ -150,6 +150,16 @@ class TestDimensionlessPhysicalQuantity:
         assert len(issues) == 1
         assert "density" in issues[0]
 
+    def test_no_warning_for_normalized_direction_component(self):
+        """normalized_<direction> components absorb the normalized token
+        (component=normalized_parallel), so unit inference is unreliable."""
+        name = (
+            "normalized_parallel_momentum_flux_due_to_"
+            "perturbed_parallel_vector_potential"
+        )
+        entry = _scalar(name, unit="1")
+        assert _check_dimensionless_physical_quantity(name, entry) == []
+
 
 class TestNoneUnitWithQuantitativeKind:
     """Test _check_none_unit_with_quantitative_kind semantic check."""
