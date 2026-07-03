@@ -72,6 +72,7 @@ class ComposeTool(Tool):
         object: grammar_types.Object | str | None = None,
         geometry: grammar_types.Position | str | None = None,
         position: grammar_types.Position | str | None = None,
+        path: grammar_types.Position | str | None = None,
         position_value: str | None = None,
         region: grammar_types.Region | str | None = None,
         process: grammar_types.Process | str | None = None,
@@ -117,6 +118,7 @@ class ComposeTool(Tool):
         obj = coerce_enum(grammar_types.Object, object)
         geom = coerce_enum(grammar_types.Position, geometry)
         pos = coerce_enum(grammar_types.Position, position)
+        pth = coerce_enum(grammar_types.Position, path)
         reg = coerce_enum(grammar_types.Region, region)
         proc = coerce_enum(grammar_types.Process, process)
         trans = coerce_enum(grammar_types.Transformation, transformation)
@@ -139,6 +141,7 @@ class ComposeTool(Tool):
             object=obj,
             geometry=geom,
             position=pos,
+            path=pth,
             position_value=position_value,
             region=reg,
             process=proc,
