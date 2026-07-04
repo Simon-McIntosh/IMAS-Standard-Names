@@ -16,6 +16,18 @@ ORIENTATION_BASES = {
     GeometricBase.TANGENT_VECTOR.value,
 }
 
+# Unit-vector carriers are device orientation properties and need the owning
+# object too (a locus-less direction unit vector cannot say WHOSE direction it
+# is, and lets distinct vectors of one device collapse onto one name).
+# WARNING severity while the catalog's legacy locus-less generics are still
+# being renamed; promote to ORIENTATION_BASES (error) once they are gone.
+UNIT_VECTOR_BASES = {
+    GeometricBase.UNIT_VECTOR.value,
+    GeometricBase.X1_UNIT_VECTOR.value,
+    GeometricBase.X2_UNIT_VECTOR.value,
+    GeometricBase.DIRECTION_UNIT_VECTOR.value,
+}
+
 # Geometric bases that describe paths/boundaries (require object qualification)
 PATH_BASES = {
     GeometricBase.TRAJECTORY.value,
@@ -25,6 +37,17 @@ PATH_BASES = {
 
 # Geometric base requiring dimension specification
 EXTENT_BASE = GeometricBase.EXTENT.value
+
+# Intrinsic plasma coordinate carriers: the coordinate IS the quantity and its
+# reference (the plasma equilibrium / machine frame) is universal, so a bare
+# name is complete — no object/geometry qualification required.
+INTRINSIC_COORDINATE_BASES = {
+    GeometricBase.NORMALIZED_POLOIDAL_FLUX_COORDINATE.value,
+    GeometricBase.NORMALIZED_TOROIDAL_FLUX_COORDINATE.value,
+    GeometricBase.TOROIDAL_FLUX_RADIUS.value,
+    GeometricBase.POLOIDAL_ANGLE.value,
+    GeometricBase.TOROIDAL_ANGLE.value,
+}
 
 
 def run_semantic_checks(entries: dict[str, StandardNameEntry]) -> list[str]:
@@ -59,25 +82,35 @@ def run_semantic_checks(entries: dict[str, StandardNameEntry]) -> list[str]:
 def _check_geometric_qualifier_requirement(
     name: str, entry: StandardNameEntry
 ) -> list[str]:
-    """Geometric bases MUST have object OR geometry qualification.
+    """Geometric bases MUST have object, geometry, OR position qualification.
 
-    Rule: Names with geometric_base require either object or geometry segment.
+    Rule: Names with geometric_base require an object, geometry, or position
+    segment. Intrinsic plasma coordinates are exempt (their reference is
+    universal); orientation/unit-vector/path bases are owned by their
+    dedicated checks below.
     Rationale: Geometric quantities describe spatial properties *of something*.
     Severity: Error
     """
     issues: list[str] = []
     try:
-        parsed = parse_standard_name(entry.standard_name)
+        parsed = parse_standard_name(name)
         geometric_base = getattr(parsed, "geometric_base", None)
 
-        if geometric_base:
+        if geometric_base and (
+            geometric_base not in INTRINSIC_COORDINATE_BASES
+            and geometric_base not in ORIENTATION_BASES
+            and geometric_base not in UNIT_VECTOR_BASES
+            and geometric_base not in PATH_BASES
+        ):
             obj = getattr(parsed, "object", None)
             geom = getattr(parsed, "geometry", None)
+            pos = getattr(parsed, "position", None)
 
-            if not obj and not geom:
+            if not obj and not geom and not pos:
                 issues.append(
                     f"{name}: ERROR - geometric quantity '{geometric_base}' requires "
-                    "object or geometry qualifier to specify what is being described. "
+                    "object, geometry, or position qualifier to specify what is "
+                    "being described. "
                     f"Example: {geometric_base}_of_flux_loop or {geometric_base}_at_midplane"
                 )
     except Exception:
@@ -96,7 +129,7 @@ def _check_component_with_base_type(name: str, entry: StandardNameEntry) -> list
     """
     issues: list[str] = []
     try:
-        parsed = parse_standard_name(entry.standard_name)
+        parsed = parse_standard_name(name)
         component = getattr(parsed, "component", None)
         geometric_base = getattr(parsed, "geometric_base", None)
 
@@ -120,7 +153,7 @@ def _check_coordinate_with_base_type(name: str, entry: StandardNameEntry) -> lis
     """
     issues: list[str] = []
     try:
-        parsed = parse_standard_name(entry.standard_name)
+        parsed = parse_standard_name(name)
         coordinate = getattr(parsed, "coordinate", None)
         physical_base = getattr(parsed, "physical_base", None)
 
@@ -146,7 +179,7 @@ def _check_orientation_vector_completeness(
     """
     issues: list[str] = []
     try:
-        parsed = parse_standard_name(entry.standard_name)
+        parsed = parse_standard_name(name)
         geometric_base = getattr(parsed, "geometric_base", None)
 
         if geometric_base in ORIENTATION_BASES:
@@ -156,6 +189,13 @@ def _check_orientation_vector_completeness(
                 issues.append(
                     f"{name}: ERROR - {base_type} vector '{geometric_base}' must specify "
                     f"the object/surface it belongs to. Example: {geometric_base}_of_divertor_tile"
+                )
+        elif geometric_base in UNIT_VECTOR_BASES:
+            obj = getattr(parsed, "object", None)
+            if not obj:
+                issues.append(
+                    f"{name}: WARNING - unit vector '{geometric_base}' should specify "
+                    f"the device/object it orients. Example: {geometric_base}_of_camera"
                 )
     except Exception:
         pass
@@ -173,7 +213,7 @@ def _check_trajectory_path_qualification(
     """
     issues: list[str] = []
     try:
-        parsed = parse_standard_name(entry.standard_name)
+        parsed = parse_standard_name(name)
         geometric_base = getattr(parsed, "geometric_base", None)
 
         if geometric_base in PATH_BASES:
@@ -200,7 +240,7 @@ def _check_extent_dimensionality(name: str, entry: StandardNameEntry) -> list[st
     """
     issues: list[str] = []
     try:
-        parsed = parse_standard_name(entry.standard_name)
+        parsed = parse_standard_name(name)
         geometric_base = getattr(parsed, "geometric_base", None)
         component = getattr(parsed, "component", None)
 
@@ -227,7 +267,7 @@ def _check_physical_base_with_object(name: str, entry: StandardNameEntry) -> lis
     """
     issues: list[str] = []
     try:
-        parsed = parse_standard_name(entry.standard_name)
+        parsed = parse_standard_name(name)
         physical_base = getattr(parsed, "physical_base", None)
         obj = getattr(parsed, "object", None)
 
