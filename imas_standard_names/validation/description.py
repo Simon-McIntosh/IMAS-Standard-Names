@@ -7,7 +7,23 @@ instead of being captured by structured metadata fields.
 
 from __future__ import annotations
 
+import re
 from typing import Any
+
+# A LaTeX backslash command such as \phi, \nabla, or \mathbf.
+_LATEX_COMMAND = re.compile(r"\\[a-zA-Z]+")
+
+# Greek and Coptic (U+0370–U+03FF) plus Greek Extended (U+1F00–U+1FFF) blocks —
+# Greek letters must be written as words (phi, theta, rho) in plain-text
+# descriptions.
+_GREEK = re.compile("[Ͱ-Ͽἀ-῿]")
+
+# Descriptions are plain text; math notation belongs in the documentation field.
+_NOTATION_SUGGESTION = (
+    "Descriptions are plain text; LaTeX and math markup belong in the "
+    "documentation field. Write Greek letters as words (phi, theta, rho) "
+    "and coordinate frames as (R, phi, Z)."
+)
 
 
 def validate_description(entry: dict[str, Any]) -> list[dict[str, Any]]:
@@ -30,7 +46,8 @@ def validate_description(entry: dict[str, Any]) -> list[dict[str, Any]]:
     """
     issues: list[dict[str, Any]] = []
 
-    description = entry.get("description", "").lower()
+    raw_description = entry.get("description", "")
+    description = raw_description.lower()
 
     if not description:
         return issues  # Empty description is valid
@@ -73,6 +90,45 @@ def validate_description(entry: dict[str, Any]) -> list[dict[str, Any]]:
                     "pattern": pattern,
                 }
             )
+
+    # Math-notation leakage: descriptions are plain text. LaTeX ($...$),
+    # backslash commands (\phi), and Unicode Greek belong in documentation.
+    if "$" in raw_description:
+        issues.append(
+            {
+                "severity": "warning",
+                "field": "description",
+                "message": "Description contains a '$' math delimiter",
+                "suggestion": _NOTATION_SUGGESTION,
+                "pattern": "$",
+            }
+        )
+
+    latex_match = _LATEX_COMMAND.search(raw_description)
+    if latex_match:
+        command = latex_match.group()
+        issues.append(
+            {
+                "severity": "warning",
+                "field": "description",
+                "message": f"Description contains a LaTeX command '{command}'",
+                "suggestion": _NOTATION_SUGGESTION,
+                "pattern": command,
+            }
+        )
+
+    greek_match = _GREEK.search(raw_description)
+    if greek_match:
+        character = greek_match.group()
+        issues.append(
+            {
+                "severity": "warning",
+                "field": "description",
+                "message": f"Description contains a Unicode Greek character '{character}'",
+                "suggestion": _NOTATION_SUGGESTION,
+                "pattern": character,
+            }
+        )
 
     return issues
 

@@ -115,7 +115,7 @@ DOCUMENTATION_GUIDANCE: dict[str, Any] = {
     "equations": {
         "inline_math": "Use $...$ for inline equations (e.g., $T_e$, $\\nabla p$, $\\mathbf{B}$)",
         "display_math": "Use $$...$$ on separate lines for display equations",
-        "symbols": "Use LaTeX commands ($\\phi$, $\\theta$, $\\rho$), not Unicode characters",
+        "symbols": "Use LaTeX for all math symbols, never Unicode Greek: $\\phi$ for the toroidal angle, $\\theta$, $\\rho$, and coordinate frames as $(R, \\phi, Z)$. Capital $\\Phi$ is reserved for flux, potential, or phase quantities and must never denote the toroidal angle.",
         "vectors": "Use $\\mathbf{B}$, $\\mathbf{r}$, $\\mathbf{J}$ notation for vectors",
         "requirements": [
             "All variables in equations must be defined either before first use, in a 'where' clause immediately after the equation, or inline when introduced",
@@ -261,6 +261,7 @@ FIELD_GUIDANCE: dict[str, dict[str, Any]] = {
     },
     "description": {
         "yaml_formatting": "Use plain unquoted style for simple text. Use single quotes if special characters needed.",
+        "notation": "Plain text only: no LaTeX or $ math markup, no Unicode Greek. Write Greek letters as words (phi, theta, rho) and coordinate frames as (R, phi, Z). LaTeX belongs in the documentation field, not the description.",
         "content_rules": [
             "Start with capital letter, end with period",
             "Be specific and precise",
@@ -270,6 +271,7 @@ FIELD_GUIDANCE: dict[str, dict[str, Any]] = {
         "avoid": [
             "Repeating the name verbatim",
             "Referencing IMAS Data Dictionary (DD), COCOS conventions, or implementation-specific paths",
+            "LaTeX or $ math markup, and Unicode Greek characters (write Greek letters as words: phi, theta, rho)",
         ],
     },
     "documentation": {
@@ -364,7 +366,7 @@ FIELD_GUIDANCE: dict[str, dict[str, Any]] = {
         "equations": {
             "inline_math": "Use $...$ for inline equations (e.g., $T_e$, $\\nabla p$, $\\mathbf{B}$)",
             "display_math": "Use $$...$$ on separate lines for display equations",
-            "symbols": "Use LaTeX commands ($\\phi$, $\\theta$, $\\rho$), not Unicode characters",
+            "symbols": "Use LaTeX for all math symbols, never Unicode Greek: $\\phi$ for the toroidal angle, $\\theta$, $\\rho$, and coordinate frames as $(R, \\phi, Z)$. Capital $\\Phi$ is reserved for flux, potential, or phase quantities and must never denote the toroidal angle.",
             "vectors": "Use $\\mathbf{B}$, $\\mathbf{r}$, $\\mathbf{J}$ notation for vectors",
             "requirements": [
                 "All variables in equations must be defined either before first use, in a 'where' clause immediately after the equation, or inline when introduced",
