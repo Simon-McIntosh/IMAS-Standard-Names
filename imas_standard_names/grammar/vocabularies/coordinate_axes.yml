@@ -32,9 +32,16 @@ axes:
     aliases: [r]
   toroidal:
     aliases: [phi, tor]
+  # Frame rule: Cartesian family triples are x, y, z; cylindrical triples are
+  # radial, toroidal, vertical. `vertical` is cylindrical Z and standalone
+  # machine-vertical quantities; `z` appears only as the third member of an
+  # x, y, z family. Per-family triple consistency is enforced by the
+  # imas-codex vector-node family audit.
   vertical:
-    aliases: [z]
+    aliases: []
   x:
     aliases: []
   y:
+    aliases: []
+  z:
     aliases: []
