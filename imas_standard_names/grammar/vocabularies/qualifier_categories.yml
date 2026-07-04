@@ -127,6 +127,12 @@ qualifier_categories:
     - viewing
 
   # Wave polarization and sign/polarity
+  # Handedness convention: rotation sense of the wave E-field about the
+  # background magnetic field B0 (exp(-i*omega*t) phasor). left_hand = E+,
+  # co-rotates with positive-ion gyromotion (ion-cyclotron coupling);
+  # right_hand = E-, electron-cyclotron / right-hand-cutoff physics. Mirrors
+  # DD e_field/plus vs e_field/minus; unrelated to coordinate-frame
+  # handedness — both tokens are mandatory, never collapse them.
   polarization:
     - left_hand_circularly_polarized
     - negative
