@@ -1,0 +1,411 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"   content="imas-standard-names">
+  <meta name="reckon-type"    content="plan">
+  <meta name="plan-slug"      content="independent-review-fixes">
+  <meta name="plan-title"     content="Independent Review Fixes">
+  <meta name="plan-summary"   content="Triage and fix the four findings from the independent ISN catalog review: qualifier filter chip, phi notation, polarization qualifier, direction-unit-vector family">
+  <meta name="plan-status"    content="active">
+  <meta name="plan-roi"       content="high">
+  <meta name="plan-effort"    content="L">
+  <meta name="plan-tier"      content="opus">
+  <meta name="plan-owner"     content="Simon McIntosh">
+  <title>Independent Review Fixes | imas-standard-names</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="s1">§1 — Triage verdicts</h2>
+    <p>An independent reviewer raised four observations against the ISN catalog and SPA.
+    Each was root-caused before treatment (three parallel investigations, 2026-07-04).
+    Fixes must persist at <strong>generation level</strong> (grammar spec, codex prompts,
+    validation) — not only as cosmetic edits to existing names.</p>
+    <table>
+      <thead><tr><th>#</th><th>Reviewer observation</th><th>Verdict</th><th>Root cause (one line)</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>Missing <code>+</code> to filter by the qualifier grammar category (other categories fine)</td>
+            <td><strong>Confirmed bug</strong>, plus a worse latent one</td>
+            <td>Two hand-maintained role lists in the SPA drifted from the dataset emitter's role set</td></tr>
+        <tr><td>2</td><td><code>phi</code> vs <code>$\phi$</code> vs <code>$\Phi$</code> inconsistency, sometimes within one SN</td>
+            <td><strong>Partly confirmed</strong> — an unwritten per-field convention, not random drift; <code>$\Phi$</code> is legitimate (flux/potential, never the angle)</td>
+            <td>No notation rule exists for the <code>description</code> field; the LaTeX rule is scoped to <code>documentation</code> only</td></tr>
+        <tr><td>3</td><td>Is <code>right_hand_circularly_polarized</code> redundant given right-handed coordinate frames?</td>
+            <td><strong>Reviewer mistaken</strong> — qualifier is physically mandatory</td>
+            <td>L/R = rotation sense of the wave E-field about B<sub>0</sub> (DD's own <code>e_field/plus</code> vs <code>minus</code>), unrelated to coordinate handedness</td></tr>
+        <tr><td>4</td><td>Unit-vector components a mess: <code>vertical</code> vs <code>z</code>, <code>of_camera</code> vs no locus, domain changes</td>
+            <td><strong>Confirmed</strong>, and worse than reported</td>
+            <td>Four independent gaps: a prompt rule that strips device loci, family batching that splits <code>direction</code>/<code>up</code>, an attach gate with no locus↔source check, and no family-consistency validation</td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="s2">§2 — Item 1: qualifier chips cannot filter (SPA)</h2>
+    <p><strong>Root cause.</strong> The dataset emitter
+    (<code>imas_standard_names/catalog/dataset.py</code>, <code>_derive_grammar_facets</code>) emits parse roles
+    <code>base, operator, axis, locus, subject, process, qualifier, aggregation, orbit, population,
+    zone, channel, channel_qualifier</code> (+<code>unparseable</code>). The SPA holds <em>three</em> independent
+    hand-copies of "which roles are filterable", all stale in different ways:</p>
+    <ul>
+      <li><code>site/src/components/ParseBreakdown.jsx:14</code> <code>FILTERABLE_ROLES</code> — omits
+        <code>qualifier</code> and <code>process</code>: qualifier chips never get the <code>+</code> glyph. This is
+        exactly what the reviewer saw.</li>
+      <li><code>site/src/App.jsx:73</code> <code>PARSE_FILTER_KEYS</code> — omits <code>qualifier</code>,
+        <code>aggregation</code>, <code>orbit</code>, <code>population</code>, <code>zone</code>, <code>channel</code>,
+        <code>channel_qualifier</code>. Consequence (latent, unreported): chips for those six roles DO show a
+        <code>+</code>, toggle visual state, but the filter is <strong>silently never applied</strong>.</li>
+      <li><code>site/tests/integration/filter-chain.test.js:6</code> — a third stale copy inside the test.</li>
+      <li>Both lists also carry <code>reduction</code>/<code>modifier</code>, which the emitter never produces.</li>
+    </ul>
+    <p><strong>Treatment.</strong> Single source of truth: mark filterability on <code>ROLE_META</code> in
+    <code>site/src/lib/grammar.js</code> and export a derived <code>FILTERABLE_PARSE_ROLES</code>. Consume it in
+    <code>App.jsx</code> (filter keys + state init), <code>ParseBreakdown.jsx</code>, <code>Filters.jsx</code>
+    (<code>EMPTY_FILTERS</code>), and <code>ActiveFilterStrip.jsx</code> (labels from <code>ROLE_META.label</code>).
+    Extend the filter-chain test to cover a qualifier-role filter end-to-end and to assert the SPA list matches the
+    emitter's role set. Persistence: any future emitter role added to <code>ROLE_META</code> is filterable by
+    default — no second list to forget.</p>
+
+    <h2 id="s3">§3 — Item 2: phi notation</h2>
+    <p><strong>Evidence</strong> (full-catalog YAML parse, 2117 entries): the reviewer's raw counts conflate three
+    populations. ~1116 bare <code>phi</code> are DD-path tokens (<code>k_phi</code>, <code>b_field_phi_probe</code>) —
+    untouchable. The prose split is systematic <em>by field</em>: <code>description</code> uses bare
+    <code>phi</code> 437× vs 6× LaTeX; <code>documentation</code> uses <code>$\phi$</code> 3876× vs 1× bare.
+    All 227 <code>$\Phi$</code> denote flux/potential/phase — zero mis-capitalised angles. The "within one SN" mixing
+    the reviewer saw is the cross-field seam (e.g. <code>count_of_toroidal_magnetic_field_probe</code>,
+    magnetic_field_diagnostics.yml:260 vs :265).</p>
+    <p><strong>Root cause.</strong> The only notation guidance lives in
+    <code>grammar/field_schemas.py:118,169</code> (generated from <code>grammar/specification.yml</code>) and is scoped
+    to the <code>documentation</code> field ("Use LaTeX commands ($\phi$…), not Unicode"). The
+    <code>description</code> field has <em>no</em> notation rule anywhere, and imas-codex copies this guidance
+    verbatim into its generation prompts via <code>get_grammar_context()</code>
+    (<code>imas_codex/standard_names/context.py:77,92</code>) — so the LLM improvises per field.</p>
+    <p><strong>Treatment</strong> (decision D1 below): codify the de-facto convention —
+    <code>description</code> is plain text (Greek letters written as words: <code>phi</code>, frames as
+    <code>(R, phi, Z)</code>); <code>documentation</code> uses LaTeX (<code>$\phi$</code>, <code>$(R, \phi, Z)$</code>;
+    capital <code>$\Phi$</code> reserved for flux/potential). Implement in <code>grammar/specification.yml</code>
+    (propagates to <code>field_schemas.py</code> via <code>grammar_codegen</code> and to codex prompts via
+    <code>get_grammar_context()</code>), add a <code>validate_description</code> check flagging LaTeX/<code>$</code>
+    markup in descriptions, and fix the ~8 true outliers via <code>sn edit</code> (6 LaTeX-in-description entries,
+    1 mixed documentation block in transport.yml <code>vertical_current_density_due_to_ion_inertia</code>, 1 bare
+    <code>Phi_tor</code> in equilibrium.yml <code>toroidal_flux_radius_at_plasma_boundary</code>).</p>
+
+    <h2 id="s4">§4 — Item 3: circular polarization qualifier (reviewer rebuttal)</h2>
+    <p><strong>The qualifier is physically mandatory.</strong> Left/right-hand circular polarization is the rotation
+    sense of the wave electric field about the background magnetic field B<sub>0</sub> — with the
+    <code>exp(-i&omega;t)</code> phasor convention, E<sub>+</sub> (left-hand) co-rotates with positive-ion gyromotion
+    and drives ion-cyclotron resonant coupling; E<sub>-</sub> (right-hand) governs electron-cyclotron and
+    right-hand-cutoff physics. This is the IMAS DD's own distinction
+    (<code>waves/coherent_wave/full_wave/e_field/plus</code> = "Left-hand circularly polarized component…" vs
+    <code>e_field/minus</code>) and is unrelated to coordinate-system handedness: in the same right-handed frame both
+    polarizations exist as physically distinct, separately stored fields, and the qualifier is the <em>only</em>
+    token distinguishing their ISN names. All 10 catalog entries document the B<sub>0</sub>-anchored convention.</p>
+    <p><strong>Real defects found while verifying:</strong> (a) the E<sub>-</sub> definition in
+    <code>right_hand_circularly_polarized_wave_electric_field</code>
+    (electromagnetic_wave_diagnostics.yml:2633) writes <code>E_- = E_x - iE_y</code> without the
+    <code>1/&radic;2</code> normalisation its siblings use — fix via <code>sn edit --hint</code>; (b) the
+    <code>polarization</code> category in <code>grammar/vocabularies/qualifier_categories.yml</code> carries no
+    convention note — add a one-line comment pointing at the B<sub>0</sub>-anchored definition so future generation
+    inherits it.</p>
+
+    <h2 id="s5">§5 — Item 4: direction-unit-vector family</h2>
+    <p><strong>What the catalog holds today</strong> for the machine-frame orientation vectors
+    (<code>camera_ir/channel/camera/{direction,up}/{x,y,z}</code> and seven sibling devices):</p>
+    <figure>
+      <svg viewBox="0 0 920 400" role="img" aria-label="Mapping from DD paths to current standard names, showing the inconsistencies" style="max-width:100%;height:auto;font-family:system-ui">
+        <style>
+          .lbl{font-size:13px;fill:currentColor}
+          .hd{font-size:14px;font-weight:600;fill:currentColor}
+          .mono{font-family:ui-monospace,monospace;font-size:13px;fill:currentColor}
+          .bad{fill:#c0392b}
+          .box{fill:none;stroke:currentColor;stroke-width:1}
+          .arrow{stroke:currentColor;stroke-width:1;fill:none;marker-end:url(#ah)}
+          .arrowbad{stroke:#c0392b;stroke-width:1.2;fill:none;marker-end:url(#ahb)}
+        </style>
+        <defs>
+          <marker id="ah" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0L8,4L0,8z" fill="currentColor"/></marker>
+          <marker id="ahb" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0L8,4L0,8z" fill="#c0392b"/></marker>
+        </defs>
+        <text x="10" y="24" class="hd">DD paths (camera_ir/channel/camera/…)</text>
+        <text x="530" y="24" class="hd">Current standard names</text>
+        <rect x="10" y="40" width="260" height="100" class="box"/>
+        <text x="20" y="62" class="lbl">line of sight</text>
+        <text x="20" y="84" class="mono">direction/x</text>
+        <text x="20" y="106" class="mono">direction/y</text>
+        <text x="20" y="128" class="mono">direction/z</text>
+        <rect x="10" y="160" width="260" height="100" class="box"/>
+        <text x="20" y="182" class="lbl">image-up (a different vector)</text>
+        <text x="20" y="204" class="mono">up/x</text>
+        <text x="20" y="226" class="mono">up/y</text>
+        <text x="20" y="248" class="mono">up/z</text>
+        <rect x="10" y="280" width="260" height="90" class="box"/>
+        <text x="20" y="302" class="lbl">7 other devices (spi, ec_launchers,</text>
+        <text x="20" y="320" class="lbl">neutron, operational sensors…)</text>
+        <text x="20" y="344" class="mono">…/direction/{x,y,z}</text>
+        <rect x="530" y="40" width="380" height="66" class="box"/>
+        <text x="540" y="62" class="mono">x_direction_unit_vector</text>
+        <text x="540" y="80" class="mono bad">y_direction_unit_vector_of_strain_gauge_sensor</text>
+        <text x="540" y="98" class="mono">vertical_direction_unit_vector</text>
+        <text x="540" y="126" class="lbl">generic, no locus · mechanical_measurement_diagnostics</text>
+        <rect x="530" y="160" width="380" height="52" class="box"/>
+        <text x="540" y="182" class="mono">x_direction_unit_vector_of_camera</text>
+        <text x="540" y="200" class="mono">y_direction_unit_vector_of_camera</text>
+        <text x="540" y="232" class="lbl bad">image-up named as "direction" · plasma_wall_interactions</text>
+        <path class="arrow" d="M270,84 C400,84 400,62 528,62"/>
+        <path class="arrow" d="M270,106 C400,106 400,80 528,80"/>
+        <path class="arrow" d="M270,128 C400,128 400,96 528,96"/>
+        <path class="arrowbad" d="M270,204 C400,204 400,178 528,178"/>
+        <path class="arrowbad" d="M270,226 C400,226 400,196 528,196"/>
+        <path class="arrowbad" d="M270,248 C420,248 430,100 528,100"/>
+        <path class="arrow" d="M270,325 C400,325 400,90 528,88"/>
+        <text x="300" y="270" class="lbl bad">up/z collapses into the</text>
+        <text x="300" y="286" class="lbl bad">line-of-sight z name</text>
+      </svg>
+      <figcaption>DD→SN mapping today. Red: the image-up vector's x,y got camera-locus names (in a different
+      physics domain) while its z was absorbed into the generic vertical name that also carries the line-of-sight z —
+      two different vectors of one device sharing one scalar name. The y generic carries a strain-gauge locus over
+      camera/EC/SPI sources.</figcaption>
+    </figure>
+    <p><strong>Four root-cause layers</strong> (each alone would have let this through):</p>
+    <ol>
+      <li><strong>Composition prompt strips loci and is self-inconsistent on the axis token.</strong>
+        <code>imas-codex/imas_codex/llm/prompts/sn/generate_name_system.md:232</code> (mirrored at
+        <code>generate_name_dd.md:85</code>) instructs: ✗ <code>z_coordinate_of_sensor_direction_unit_vector</code> →
+        ✓ <code>vertical_surface_normal</code> / <code>z_direction_unit_vector</code> — i.e. drop the device locus,
+        and it endorses both <code>vertical</code> and <code>z</code> in one breath.</li>
+      <li><strong>Family batching pre-normalises z→vertical but keeps x,y, and splits sibling vectors.</strong>
+        <code>imas_codex/standard_names/families.py:52-61</code> maps DD leaf <code>z→"vertical"</code> with identity
+        <code>x→x, y→y</code>; families are keyed per DD parent, so <code>camera/direction/*</code> and
+        <code>camera/up/*</code> are named in independent batches, never reconciled.</li>
+      <li><strong>Attach gate has no locus↔source or distinct-vector check.</strong>
+        <code>imas_codex/standard_names/workers.py:1643</code> <code>_is_attachment_consistent</code> checks tense,
+        state-resolution and shape surface only — nothing stops a camera path attaching to an
+        <code>of_strain_gauge_sensor</code> name, or <code>direction/z</code> and <code>up/z</code> collapsing onto one
+        name. Domain promotion (<code>domain_ranking.py:106</code>) then drifts family members apart by design.</li>
+      <li><strong>ISN validation exempts unit vectors from the locus rule.</strong>
+        <code>validation/semantic.py:13</code> <code>ORIENTATION_BASES</code> = {surface_normal, sensor_normal,
+        tangent_vector} — it omits <code>direction_unit_vector</code>, <code>unit_vector</code>,
+        <code>x1_unit_vector</code>, <code>x2_unit_vector</code>, so the locus-less generics validated clean.</li>
+    </ol>
+
+    <h3 id="s5a">§5a — vertical vs z (lead steer, researched)</h3>
+    <p>Steer: "I feel we use these labels to distinguish x,y,z and radius,phi,vertical coordinate systems — may be
+    historical, research and decide." Findings from the live grammar and catalog:</p>
+    <ul>
+      <li><code>grammar/vocabularies/coordinate_axes.yml</code>: canonical keys are <code>x</code>, <code>y</code>,
+        <code>radial</code> (alias r), <code>toroidal</code> (aliases phi, tor), <code>vertical</code> (alias z) —
+        there is <strong>no <code>z</code> key</strong>, and <code>grammar/parser.py:226</code> loads keys only
+        (aliases are never consumed), so <code>z</code> is unparseable as a coordinate token today.</li>
+      <li>Catalog usage is unanimous: 46 <code>vertical_coordinate_*</code>, 20 <code>radial_coordinate_*</code>,
+        8 Cartesian <code>x/y_coordinate_*</code> names — and <strong>zero</strong> names with a <code>z</code> token.
+        Every Cartesian x/y family already names its third member <code>vertical_…</code>
+        (e.g. <code>ferritic/object/centroid/{x,y,z}</code> →
+        <code>x/y/vertical_coordinate_of_ferritic_element_centroid</code>).</li>
+      <li>So the frame distinction the steer remembers is real but carried by the <em>horizontal</em> tokens:
+        <code>x/y</code> marks Cartesian, <code>radial/toroidal</code> marks cylindrical. The third axis is the
+        machine vertical in both frames — physically the <em>same</em> coordinate — and sharing
+        <code>vertical</code> is semantically exact, not drift. <code>components.yml</code> still lists a vestigial
+        <code>z</code> component token (zero uses); promoting <code>z</code> to canonical would create two tokens for
+        one physical axis and re-open exactly the family-splitting drift this plan fixes.</li>
+    </ul>
+    <p><strong>Decision D2</strong>: <code>vertical</code> stays the single canonical token for the machine vertical
+    axis in all frames; <code>z</code> remains an input alias (and the parser should honour aliases — today it
+    ignores them); the frame is marked by the horizontal tokens. The vestigial <code>components.yml</code>
+    <code>z</code> token is handed to the canonical-qualifier-order token review (§3 there) for disposition alongside
+    the normalized-direction shadowing item.</p>
+
+    <h3 id="s5b">§5b — Treatment</h3>
+    <ol>
+      <li><strong>Rule (D3): device orientation/direction unit vectors require an object locus</strong> — matching the
+        universal locus-qualified pattern for coordinates and the existing normals rule. Distinct vectors of one
+        device get distinct bases (line-of-sight <code>direction_unit_vector</code> vs image-up), and an attached
+        source must be device-compatible with the name's locus.</li>
+      <li><strong>imas-codex prompts</strong>: rewrite <code>generate_name_system.md:232</code> and
+        <code>generate_name_dd.md:85</code> — locus is kept for device orientation vectors; canonical Cartesian device
+        triple is <code>x, y, vertical</code>; never name a non-line-of-sight vector as bare "direction".</li>
+      <li><strong>imas-codex attach gate</strong>: extend <code>_is_attachment_consistent</code> with (a)
+        locus↔source-device compatibility, (b) reject attaching two different vector parents of one DD device node to
+        the same scalar name; add a family audit (one base+locus+domain triple per DD vector node).</li>
+      <li><strong>ISN validation</strong>: add the unit-vector carriers to the orientation-locus check
+        (warning severity until the catalog renames land, then promote to error, so ISNC CI does not break mid-flight).</li>
+      <li><strong>Catalog renames via <code>sn edit</code></strong> (graph is live): split the generic triple per
+        device with <code>--hint</code>/<code>--scope family</code>; rename the camera image-up pair to image-up-based
+        names; re-home <code>camera/up/z</code>; fix <code>y_…_of_strain_gauge_sensor</code>; harmonise
+        family domains; rename <code>x_angle_of_camera</code>/<code>vertical_angle_of_camera</code> to a consistent
+        horizontal/vertical field-of-view pair.</li>
+    </ol>
+
+    <h2 id="s6">§6 — Out-of-scope findings (queued, not shipped here)</h2>
+    <p>While auditing item 4: <strong>89 dd_paths map to more than one standard name</strong> (e.g.
+    <code>spectrometer_x_ray_crystal/camera/centre/z</code> → both <code>vertical_coordinate_of_camera</code> and
+    <code>vertical_coordinate_of_diagnostic_antenna</code>). Same class of attach-gate gap as item 4 but much wider;
+    queued as its own followup rather than folded into this plan's scope.</p>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+      <h2><span class="sec">§</span> Decisions</h2>
+      <div class="r-dec" data-key="description-notation" data-choice="plain-text-descriptions" data-by="agent (delegated)" data-when="2026-07-04">
+        <p class="r-dec-q">Notation convention for the description field: plain text or LaTeX?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="plain-text-descriptions">plain text (phi), LaTeX only in documentation</button>
+          <button class="r-opt" data-value="latex-everywhere">LaTeX in both fields</button>
+        </p>
+        <p class="r-dec-rat">99.4% of descriptions already use plain text and 99.97% of documentation already uses LaTeX — codifying the de-facto per-field convention costs ~8 edits vs ~437, keeps the ≤120-char descriptions markup-free for plain-text consumers (MCP tools, netCDF-style attributes), and both fields render correctly in the SPA either way.</p>
+      </div>
+      <div class="r-dec" data-key="vertical-vs-z" data-choice="vertical-canonical" data-by="agent (lead steer: research and decide)" data-when="2026-07-04">
+        <p class="r-dec-q">Canonical token for the machine vertical axis: vertical everywhere, or z in Cartesian triples?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="vertical-canonical">vertical everywhere; z stays an alias</button>
+          <button class="r-opt" data-value="z-cartesian">promote z for Cartesian frames</button>
+        </p>
+        <p class="r-dec-rat">The vertical axis is frame-invariant (Z_cyl ≡ z_cart in the machine frame); the frame is already marked by the horizontal tokens (x/y vs radial/toroidal); catalog is unanimous (46 vertical, 0 z) so zero churn; two canonical tokens for one axis would recreate the drift being fixed. See §5a.</p>
+      </div>
+      <div class="r-dec" data-key="orientation-locus" data-choice="locus-required" data-by="agent (delegated)" data-when="2026-07-04">
+        <p class="r-dec-q">Device orientation/direction unit vectors: generic multi-attach names or locus-required?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="locus-required">locus required (of_&lt;device&gt;), distinct bases per vector</button>
+          <button class="r-opt" data-value="generic-multi-attach">keep generic locus-less names</button>
+        </p>
+        <p class="r-dec-rat">Matches the catalog's universal pattern for geometry (every coordinate name is locus-qualified) and the existing ORIENTATION_BASES rule for normals/tangents; the generic pattern demonstrably conflates distinct vectors (camera direction/z + up/z on one name) and produced the strain-gauge mis-locus. See §5b.</p>
+      </div>
+      <div class="r-dec" data-key="polarization-names" data-choice="keep-as-is" data-by="agent (physics review)" data-when="2026-07-04">
+        <p class="r-dec-q">Keep left/right_hand_circularly_polarized qualifiers?</p>
+        <p class="r-dec-rat">Physically mandatory — mirrors DD e_field/plus vs minus; rotation sense about B0, not coordinate handedness. Rebuttal in §4; only the E- formula normalisation and a vocab comment change.</p>
+      </div>
+    </section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+      <h2><span class="sec">§</span> Followups</h2>
+      <article class="r-fu" data-id="f-irf-001" data-status="open" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-07-04" data-recommends-skill="/reckon-ship independent-review-fixes §2" data-resolved-at="" data-resolved-by="">
+        <h4 class="r-fu-title">§2 — SPA: single source of truth for filterable parse roles</h4>
+        <div class="r-fu-body">Derive <code>FILTERABLE_PARSE_ROLES</code> from <code>ROLE_META</code> in <code>site/src/lib/grammar.js</code>; consume in App.jsx, ParseBreakdown.jsx, Filters.jsx, ActiveFilterStrip.jsx; align filter-chain test with the emitter role set; qualifier chips gain the + and the six silent roles start filtering.</div>
+        <pre class="r-fu-prompt">Project: imas-standard-names
+Plan:    independent-review-fixes (http://localhost:8765/imas-standard-names/independent-review-fixes.html)
+Section: §2
+Tier:    opus
+
+Context
+  Reviewer found qualifier grammar chips lack the + filter affordance; investigation found
+  two drifted role lists and a stale test copy (§2 of the plan).
+
+State to read
+  site/src/lib/grammar.js (ROLE_META), site/src/App.jsx:73-95,148-160,
+  site/src/components/ParseBreakdown.jsx:14, site/src/components/Filters.jsx:45-60,
+  site/src/components/ActiveFilterStrip.jsx, site/tests/integration/filter-chain.test.js,
+  imas_standard_names/catalog/dataset.py (_derive_grammar_facets role strings)
+
+Scope locks / constraints
+  site/ only. Single derived list; no second hand-copy may remain.
+
+Done-when
+  1. Qualifier chips show + and filter; aggregation/orbit/population/zone/channel/channel_qualifier filters actually apply
+  2. site tests green (npx vitest run in site/)
+  3. Outcome recorded in plan, followup resolved</pre>
+      </article>
+      <article class="r-fu" data-id="f-irf-002" data-status="open" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-07-04" data-recommends-skill="/reckon-ship independent-review-fixes §3" data-resolved-at="" data-resolved-by="">
+        <h4 class="r-fu-title">§3 — Codify per-field notation rule + fix 8 outlier entries</h4>
+        <div class="r-fu-body">Add the description=plain-text / documentation=LaTeX rule to grammar/specification.yml, regenerate field_schemas.py, extend validate_description to flag LaTeX in descriptions, and sn-edit the ~8 outliers.</div>
+        <pre class="r-fu-prompt">Project: imas-standard-names
+Plan:    independent-review-fixes (http://localhost:8765/imas-standard-names/independent-review-fixes.html)
+Section: §3
+Tier:    opus
+
+Context
+  Per-field notation convention is de-facto but unwritten; codex prompts inherit ISN field
+  guidance via get_grammar_context(), so the fix lands once in specification.yml.
+
+State to read
+  imas_standard_names/grammar/specification.yml (entry_schema description/documentation guidance),
+  imas_standard_names/grammar_codegen/generate.py, imas_standard_names/validation/description.py,
+  outlier list in plan §3
+
+Scope locks / constraints
+  Honour decision description-notation (plain-text descriptions). DD-path phi tokens untouchable.
+  Catalog text changes only via imas-codex sn edit (graph is live), never hand-edited YAML.
+
+Done-when
+  1. specification.yml rule + regenerated field_schemas.py committed; validation check + tests green
+  2. sn edit proposals attached for the 8 outliers (dry-run first)
+  3. Outcome recorded in plan, followup resolved</pre>
+      </article>
+      <article class="r-fu" data-id="f-irf-003" data-status="open" data-tier="sonnet" data-written-by="reckon-create" data-written-at="2026-07-04" data-recommends-skill="/reckon-ship independent-review-fixes §4" data-resolved-at="" data-resolved-by="">
+        <h4 class="r-fu-title">§4 — Polarization: E- formula fix + vocab convention comment</h4>
+        <div class="r-fu-body">sn edit the E- normalisation at electromagnetic_wave_diagnostics right_hand_circularly_polarized_wave_electric_field (missing 1/sqrt2); add B0-anchored convention comment to the polarization category in qualifier_categories.yml. Reviewer rebuttal already recorded in §4.</div>
+        <pre class="r-fu-prompt">Project: imas-standard-names
+Plan:    independent-review-fixes (http://localhost:8765/imas-standard-names/independent-review-fixes.html)
+Section: §4
+Tier:    sonnet
+
+Context
+  Physics verified: qualifier stays. Two small defects remain (formula normalisation, missing
+  vocab convention note).
+
+State to read
+  imas-standard-names-catalog/standard_names/electromagnetic_wave_diagnostics.yml:2616-2660,
+  imas_standard_names/grammar/vocabularies/qualifier_categories.yml (polarization category)
+
+Scope locks / constraints
+  No name changes. Catalog docs fix via imas-codex sn edit --hint only.
+
+Done-when
+  1. sn edit attached for the E- formula (dry-run first)
+  2. Vocab comment committed in ISN
+  3. Outcome recorded in plan, followup resolved</pre>
+      </article>
+      <article class="r-fu" data-id="f-irf-004" data-status="open" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-07-04" data-recommends-skill="/reckon-ship independent-review-fixes §5" data-resolved-at="" data-resolved-by="">
+        <h4 class="r-fu-title">§5 — Direction-vector family: prompts, attach gate, validation, renames</h4>
+        <div class="r-fu-body">Implement the four-layer treatment of §5b: prompt rule rewrite (codex), attach-gate locus/device + distinct-vector checks and family audit (codex), orientation-locus validation extension (ISN, warning first), and the sn-edit rename cascade for the direction/up/angle families.</div>
+        <pre class="r-fu-prompt">Project: imas-standard-names
+Plan:    independent-review-fixes (http://localhost:8765/imas-standard-names/independent-review-fixes.html)
+Section: §5
+Tier:    opus
+
+Context
+  Four root-cause layers identified (§5); decisions vertical-vs-z and orientation-locus locked.
+
+State to read
+  imas-codex/imas_codex/llm/prompts/sn/generate_name_system.md:45,92,231-266,
+  generate_name_dd.md:85,328; imas_codex/standard_names/families.py:13-61;
+  workers.py:1643-1723; audits.py; domain_ranking.py:41-126;
+  ISN validation/semantic.py:13-17,139-165; grammar/vocabularies/coordinate_axes.yml, components.yml
+
+Scope locks / constraints
+  Honour decisions: vertical canonical (z = alias), locus required for orientation vectors,
+  distinct bases for distinct vectors. ISN validation lands warning-severity until renames land.
+  components.yml z disposition goes to canonical-qualifier-order §3, not here.
+  All catalog renames via sn edit with --dry-run preview; family/subtree scope as appropriate.
+
+Done-when
+  1. Codex prompt + attach gate + family audit changes committed with tests
+  2. ISN validation extension committed with tests (warning severity)
+  3. sn edit cascade attached for direction/up/angle families; dry-run outputs recorded in plan
+  4. Outcome recorded in plan, followup resolved</pre>
+      </article>
+      <article class="r-fu" data-id="f-irf-005" data-status="open" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-07-04" data-recommends-skill="/reckon-ship independent-review-fixes §6" data-resolved-at="" data-resolved-by="">
+        <h4 class="r-fu-title">§6 — Audit the 89 dd_paths mapped to multiple standard names</h4>
+        <div class="r-fu-body">Wider attach-hygiene sweep discovered during item-4 triage; needs its own classification pass (legitimate multi-name cases vs attach errors) and probably an attach-gate uniqueness rule.</div>
+        <pre class="r-fu-prompt">Project: imas-standard-names
+Plan:    independent-review-fixes (http://localhost:8765/imas-standard-names/independent-review-fixes.html)
+Section: §6
+Tier:    opus
+
+Context
+  Full-catalog source scan found 89 dd_paths carried by 2+ standard names (examples in §6).
+  Out of scope for the review fixes; queued for a dedicated pass.
+
+State to read
+  imas-standard-names-catalog/standard_names/*.yml (sources blocks);
+  imas_codex/standard_names/workers.py:1643 (_is_attachment_consistent)
+
+Scope locks / constraints
+  Classify before fixing: some duplicates may be legitimate (deprecation pairs, aliases).
+
+Done-when
+  1. Classification table (legit vs error) recorded
+  2. Attach-gate uniqueness rule proposed with evidence
+  3. Followup resolved or split into implementation followups</pre>
+      </article>
+    </section>
+  </main>
+</body>
+</html>
