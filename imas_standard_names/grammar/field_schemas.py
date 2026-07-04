@@ -261,7 +261,7 @@ FIELD_GUIDANCE: dict[str, dict[str, Any]] = {
     },
     "description": {
         "yaml_formatting": "Use plain unquoted style for simple text. Use single quotes if special characters needed.",
-        "notation": "Plain text only: no LaTeX or $ math markup, no Unicode Greek. Write Greek letters as words (phi, theta, rho) and coordinate frames as (R, phi, Z). LaTeX belongs in the documentation field, not the description.",
+        "notation": "Plain text with Unicode Greek symbols: no LaTeX or $ math markup. Write Greek letters as symbols (φ, θ, ρ) and coordinate frames as (R, φ, Z). Capital Φ is reserved for flux, potential, or phase quantities, never the toroidal angle. LaTeX belongs in the documentation field, not the description.",
         "content_rules": [
             "Start with capital letter, end with period",
             "Be specific and precise",
@@ -271,7 +271,7 @@ FIELD_GUIDANCE: dict[str, dict[str, Any]] = {
         "avoid": [
             "Repeating the name verbatim",
             "Referencing IMAS Data Dictionary (DD), COCOS conventions, or implementation-specific paths",
-            "LaTeX or $ math markup, and Unicode Greek characters (write Greek letters as words: phi, theta, rho)",
+            "LaTeX or $ math markup, and spelled-out Greek letter words (write the symbol: φ not phi, θ not theta, ρ not rho)",
         ],
     },
     "documentation": {

@@ -13,16 +13,22 @@ from typing import Any
 # A LaTeX backslash command such as \phi, \nabla, or \mathbf.
 _LATEX_COMMAND = re.compile(r"\\[a-zA-Z]+")
 
-# Greek and Coptic (U+0370–U+03FF) plus Greek Extended (U+1F00–U+1FFF) blocks —
-# Greek letters must be written as words (phi, theta, rho) in plain-text
-# descriptions.
-_GREEK = re.compile("[Ͱ-Ͽἀ-῿]")
+# Spelled-out Greek letter words that should be their Unicode symbols in
+# descriptions (word-bounded so e.g. "Doppler" or "phi_tor" DD tokens in
+# adjacent fields are untouched; descriptions carry prose only).
+_GREEK_WORDS = {
+    "phi": "φ",
+    "theta": "θ",
+    "rho": "ρ",
+}
+_GREEK_WORD = re.compile(r"\b(phi|theta|rho)\b")
 
-# Descriptions are plain text; math notation belongs in the documentation field.
+# Descriptions are plain text with Unicode Greek symbols; LaTeX markup belongs
+# in the documentation field.
 _NOTATION_SUGGESTION = (
     "Descriptions are plain text; LaTeX and math markup belong in the "
-    "documentation field. Write Greek letters as words (phi, theta, rho) "
-    "and coordinate frames as (R, phi, Z)."
+    "documentation field. Write Greek letters as Unicode symbols (φ, θ, ρ) "
+    "and coordinate frames as (R, φ, Z)."
 )
 
 
@@ -91,8 +97,9 @@ def validate_description(entry: dict[str, Any]) -> list[dict[str, Any]]:
                 }
             )
 
-    # Math-notation leakage: descriptions are plain text. LaTeX ($...$),
-    # backslash commands (\phi), and Unicode Greek belong in documentation.
+    # Math-notation leakage: descriptions are plain text with Unicode Greek
+    # symbols. LaTeX ($...$) and backslash commands (\phi) belong in
+    # documentation.
     if "$" in raw_description:
         issues.append(
             {
@@ -117,16 +124,16 @@ def validate_description(entry: dict[str, Any]) -> list[dict[str, Any]]:
             }
         )
 
-    greek_match = _GREEK.search(raw_description)
-    if greek_match:
-        character = greek_match.group()
+    word_match = _GREEK_WORD.search(description)
+    if word_match:
+        word = word_match.group()
         issues.append(
             {
-                "severity": "warning",
+                "severity": "info",
                 "field": "description",
-                "message": f"Description contains a Unicode Greek character '{character}'",
-                "suggestion": _NOTATION_SUGGESTION,
-                "pattern": character,
+                "message": f"Description spells out the Greek letter '{word}'",
+                "suggestion": f"Write the symbol '{_GREEK_WORDS[word]}' instead of the word '{word}'",
+                "pattern": word,
             }
         )
 

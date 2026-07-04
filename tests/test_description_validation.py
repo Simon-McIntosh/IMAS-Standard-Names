@@ -68,23 +68,24 @@ class TestDescriptionNotation:
             for issue in issues
         )
 
-    def test_unicode_greek_warns(self, test_entry):
-        """A Unicode Greek character is flagged."""
-        test_entry["description"] = "Toroidal angle φ of the field line."
-        issues = validate_description(test_entry)
-        assert any(
-            issue["severity"] == "warning" and issue["field"] == "description"
-            for issue in issues
-        )
-
-    def test_greek_word_no_warning(self, test_entry):
-        """Greek letters written as words (phi, theta, rho) are correct."""
+    def test_unicode_greek_symbol_clean(self, test_entry):
+        """Unicode Greek symbols are the canonical description notation."""
         test_entry["description"] = (
-            "Toroidal angle phi in the (R, phi, Z) coordinate frame; "
-            "poloidal angle theta and normalized radius rho."
+            "Toroidal angle φ in the (R, φ, Z) coordinate frame; "
+            "poloidal angle θ and normalized radius ρ."
         )
         issues = validate_description(test_entry)
         assert issues == []
+
+    def test_greek_word_nudges_info(self, test_entry):
+        """A spelled-out Greek letter word gets an info nudge toward the symbol."""
+        test_entry["description"] = "Toroidal angle phi in the (R, phi, Z) frame."
+        issues = validate_description(test_entry)
+        assert any(
+            issue["severity"] == "info" and issue.get("pattern") == "phi"
+            for issue in issues
+        )
+        assert not any(issue["severity"] == "warning" for issue in issues)
 
     def test_clean_plain_description_no_notation_warning(self, test_entry):
         """A clean plain-text description produces no notation warnings."""
