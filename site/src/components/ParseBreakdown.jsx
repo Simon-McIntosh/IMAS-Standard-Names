@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { ROLE_META } from '../lib/grammar.js';
+import { ROLE_META, FILTERABLE_PARSE_ROLES } from '../lib/grammar.js';
 
 // Grammar token chips + highlighted source string + production footer.
 //
@@ -11,11 +11,9 @@ import { ROLE_META } from '../lib/grammar.js';
 // (Named ParseBreakdown rather than GrammarTree because it's a flat
 // token list with a source overlay, not a tree.)
 
-const FILTERABLE_ROLES = new Set([
-  'base', 'operator', 'reduction', 'modifier',
-  'axis', 'locus', 'subject', 'aggregation', 'orbit', 'population',
-  'zone', 'channel_qualifier', 'channel',
-]);
+// Single source of truth in grammar.js — a chip is filterable iff its role
+// is an emitted, filterable parse role.
+const FILTERABLE_ROLES = new Set(FILTERABLE_PARSE_ROLES);
 
 // Strip the grammar connector from a locus/mechanism token so the chip shows
 // the TRUE in-vocabulary token (``wall``, ``recombination``) and the connector

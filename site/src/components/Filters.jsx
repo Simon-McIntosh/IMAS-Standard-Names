@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useData } from '../lib/data.js';
 import { KindBadge } from './KindBadge.jsx';
+import { FILTERABLE_PARSE_ROLES } from '../lib/grammar.js';
 
 function FilterGroup({ title, children, defaultOpen = true }) {
   const [open, setOpen] = useState(defaultOpen);
@@ -42,19 +43,15 @@ const LIFECYCLE_ROWS = [
   ['superseded', 'Superseded'],
 ];
 
+// The four structured facets + one Set per filterable parse role (the
+// parse-role keys are derived from grammar.js so this can't drift from the
+// chips or App's filter chain).
 export const EMPTY_FILTERS = {
   category:  new Set(),
   unit:      new Set(),
   kind:      new Set(),
   lifecycle: new Set(),
-  base:      new Set(),
-  operator:  new Set(),
-  reduction: new Set(),
-  modifier:  new Set(),
-  axis:      new Set(),
-  locus:     new Set(),
-  subject:   new Set(),
-  process:   new Set(),
+  ...Object.fromEntries(FILTERABLE_PARSE_ROLES.map((k) => [k, new Set()])),
 };
 
 export const DEFAULT_FILTERS = EMPTY_FILTERS;

@@ -5,6 +5,7 @@ import { useTweaks } from './hooks/useTweaks.js';
 import { useChildIndex, useGroupIndex } from './lib/indexes.js';
 import { setMermaidTheme } from './lib/mermaid.js';
 import { tokenize, searchNames } from './lib/search.js';
+import { FILTERABLE_PARSE_ROLES } from './lib/grammar.js';
 import { Header } from './components/Header.jsx';
 import { Browse } from './views/Browse.jsx';
 import { Grammar } from './views/Grammar.jsx';
@@ -70,29 +71,27 @@ function ErrorScreen({ error }) {
   );
 }
 
-const PARSE_FILTER_KEYS = [
-  'base', 'operator', 'reduction', 'modifier',
-  'axis', 'locus', 'subject', 'process',
-];
+// The four structured facets the emitter attaches directly to each name
+// (not grammar parse roles). Grammar parse-role keys come from the shared
+// FILTERABLE_PARSE_ROLES so App, Filters, and the chips can never drift.
+const NON_PARSE_FILTER_KEYS = ['category', 'unit', 'kind', 'lifecycle'];
+const PARSE_FILTER_KEYS = FILTERABLE_PARSE_ROLES;
+
+// Every filter Set the UI can hold: one per structured facet + one per
+// filterable parse role. Fresh Sets each call so the initial state isn't
+// shared.
+function emptyFilters() {
+  const f = {};
+  for (const k of NON_PARSE_FILTER_KEYS) f[k] = new Set();
+  for (const k of PARSE_FILTER_KEYS) f[k] = new Set();
+  return f;
+}
 
 function Shell() {
   const { NAMES, loading, error } = useData();
   const [urlState, setUrlState] = useUrlState();
   const [query, setQuery] = useState(urlState.query);
-  const [filters, setFilters] = useState({
-    category:  new Set(),
-    unit:      new Set(),
-    kind:      new Set(),
-    lifecycle: new Set(),
-    base:      new Set(),
-    operator:  new Set(),
-    reduction: new Set(),
-    modifier:  new Set(),
-    axis:      new Set(),
-    locus:     new Set(),
-    subject:   new Set(),
-    process:   new Set(),
-  });
+  const [filters, setFilters] = useState(emptyFilters);
   const [selected, setSelected] = useState(urlState.name);
   const [view, setView] = useState(urlState.view);
   const [tweaks, setTweak] = useTweaks();

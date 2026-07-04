@@ -1,18 +1,15 @@
 import React from 'react';
+import { ROLE_META, FILTERABLE_PARSE_ROLES } from '../lib/grammar.js';
 
+// Pill labels: the four structured facets are named here; parse-role labels
+// come from ROLE_META so they can't drift from the chips (grammar.js is the
+// single source of truth for both the role set and its human labels).
 const FILTER_LABEL = {
   category:  'Domain',
   unit:      'Unit',
   kind:      'Kind',
   lifecycle: 'Lifecycle',
-  base:      'Base',
-  operator:  'Operator',
-  reduction: 'Reduction',
-  modifier:  'Modifier',
-  axis:      'Axis',
-  locus:     'Locus',
-  subject:   'Subject',
-  process:   'Mechanism',
+  ...Object.fromEntries(FILTERABLE_PARSE_ROLES.map((k) => [k, ROLE_META[k].label])),
 };
 
 export function ActiveFilterStrip({ filters, setFilters }) {

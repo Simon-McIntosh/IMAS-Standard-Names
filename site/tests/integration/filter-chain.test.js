@@ -1,12 +1,11 @@
 import { describe, expect, it } from 'vitest';
+import { FILTERABLE_PARSE_ROLES } from '../../src/lib/grammar.js';
 
 // Re-implementation of the parse-driven filter chain that App.jsx applies.
-// Keep this in sync with the code in App.jsx — a regression in either
-// place is caught here.
-const PARSE_FILTER_KEYS = [
-  'base', 'operator', 'reduction', 'modifier',
-  'axis', 'locus', 'subject',
-];
+// The parse-role keys come from the shared FILTERABLE_PARSE_ROLES (same
+// source App consumes) so this test tracks the real filter set instead of a
+// third hand-copy that drifted from the emitter.
+const PARSE_FILTER_KEYS = FILTERABLE_PARSE_ROLES;
 
 function passesFilters(n, filters) {
   if (filters.category?.size && !filters.category.has(n.category)) return false;
@@ -20,7 +19,7 @@ function passesFilters(n, filters) {
     for (const k of PARSE_FILTER_KEYS) {
       if (!filters[k]?.size) continue;
       const matchesAll = [...filters[k]].every((text) =>
-        parse.some((tok) => tok.role === k && tok.text === text),
+        parse.some((tok) => tok.role === k && tok.text === text) || n[k] === text,
       );
       if (!matchesAll) return false;
     }
@@ -29,11 +28,8 @@ function passesFilters(n, filters) {
 }
 
 function f(overrides) {
-  const base = {
-    category: new Set(), kind: new Set(), lifecycle: new Set(), unit: new Set(),
-    base: new Set(), operator: new Set(), reduction: new Set(),
-    modifier: new Set(), axis: new Set(), locus: new Set(), subject: new Set(),
-  };
+  const base = { category: new Set(), kind: new Set(), lifecycle: new Set(), unit: new Set() };
+  for (const k of PARSE_FILTER_KEYS) base[k] = new Set();
   return { ...base, ...overrides };
 }
 
@@ -102,6 +98,39 @@ describe('parse-driven filter chain', () => {
       subject: new Set(['electron']),
       locus:   new Set(['magnetic_axis']),
     }))).toBe(false);
+  });
+
+  it('qualifier filter keeps a name with that qualifier token, drops one without', () => {
+    const kept = {
+      name: 'toroidal_plasma_current',
+      parse: [
+        { role: 'qualifier', text: 'toroidal' },
+        { role: 'subject', text: 'plasma' },
+        { role: 'base', text: 'current' },
+      ],
+    };
+    const dropped = {
+      name: 'plasma_current',
+      parse: [{ role: 'subject', text: 'plasma' }, { role: 'base', text: 'current' }],
+    };
+    expect(passesFilters(kept, f({ qualifier: new Set(['toroidal']) }))).toBe(true);
+    expect(passesFilters(dropped, f({ qualifier: new Set(['toroidal']) }))).toBe(false);
+  });
+
+  it('aggregation filter actually filters (was a silent no-op before)', () => {
+    const total = {
+      name: 'total_radiated_power',
+      parse: [
+        { role: 'aggregation', text: 'total' },
+        { role: 'base', text: 'radiated_power' },
+      ],
+    };
+    const partial = {
+      name: 'radiated_power',
+      parse: [{ role: 'base', text: 'radiated_power' }],
+    };
+    expect(passesFilters(total, f({ aggregation: new Set(['total']) }))).toBe(true);
+    expect(passesFilters(partial, f({ aggregation: new Set(['total']) }))).toBe(false);
   });
 
   it('non-parse filters still apply (unit)', () => {
