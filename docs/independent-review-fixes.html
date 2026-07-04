@@ -4,21 +4,35 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="docs-project"   content="imas-standard-names">
-  <meta name="reckon-type"    content="plan">
-  <meta name="plan-slug"      content="independent-review-fixes">
-  <meta name="plan-title"     content="Independent Review Fixes">
-  <meta name="plan-summary"   content="Triage and fix the four findings from the independent ISN catalog review: qualifier filter chip, phi notation, polarization qualifier, direction-unit-vector family">
-  <meta name="plan-status"    content="active">
-  <meta name="plan-roi"       content="high">
-  <meta name="plan-effort"    content="L">
-  <meta name="plan-tier"      content="opus">
-  <meta name="plan-owner"     content="Simon McIntosh">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="independent-review-fixes">
+  <meta name="plan-title" content="Independent Review Fixes">
+  <meta name="plan-summary" content="Triage and fix the four findings from the independent ISN catalog review: qualifier filter chip, phi notation, polarization qualifier, direction-unit-vector family">
+  <meta name="plan-status" content="active">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort" content="L">
+  <meta name="plan-tier" content="opus">
+  <meta name="plan-owner" content="Simon McIntosh">
   <title>Independent Review Fixes | imas-standard-names</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-07-04">
+<meta name="plan-version" content="2">
+<meta name="plan-impl" content="0.67">
 </head>
 <body>
   <main class="plan-doc">
+    <section style="border:1px solid currentColor;border-radius:6px;padding:10px 14px;margin-bottom:18px">
+      <p><strong>Landed 2026-07-04.</strong> Items 1–3 shipped; item 4's four generation-layer guards shipped, its
+      catalog re-mapping is queued in the pipeline. ISN: <code>538729d</code> (SPA filter roles),
+      <code>f4aee1a</code> (notation rule + description validator), <code>42dde36</code> (polarization convention
+      note), <code>ca4585c</code> (image_up_unit_vector carrier), <code>a6a91a5</code> (bonus: seven dead semantic
+      checks awakened — see §2a). imas-codex: <code>dbcc8359</code>/<code>3bbbfdd1</code> (prompt rules),
+      <code>9295d4ad</code>/<code>e6d59bf1</code> (attach-gate guards), <code>655e8cff</code> (family audit), ISN pin
+      → <code>ca4585c</code>. 15 sn edits attached (2 camera image-up renames, FOV-angle pair hint, E&minus; formula,
+      11 notation outliers); bounded review rotation launched. Residual work: §5c.</p>
+    </section>
+
     <h2 id="s1">§1 — Triage verdicts</h2>
     <p>An independent reviewer raised four observations against the ISN catalog and SPA.
     Each was root-caused before treatment (three parallel investigations, 2026-07-04).
@@ -66,6 +80,19 @@
     Extend the filter-chain test to cover a qualifier-role filter end-to-end and to assert the SPA list matches the
     emitter's role set. Persistence: any future emitter role added to <code>ROLE_META</code> is filterable by
     default — no second list to forget.</p>
+
+    <h3 id="s2a">§2a — Bonus discovery: seven semantic checks were dead code</h3>
+    <p>While extending the orientation-locus rule, the whole grammar-based semantic check family turned out to be
+    <strong>dead since birth</strong>: every check called <code>parse_standard_name(entry.standard_name)</code>, but
+    the model field is <code>.name</code> — the AttributeError was swallowed by <code>except: pass</code>, so none of
+    the seven checks (geometric qualification, component/coordinate base-type, orientation completeness, trajectory
+    qualification, extent dimensionality, physical-base-with-object, and the unit-vector rule being added) had ever
+    run. Landed in ISN <code>a6a91a5</code>: the attribute fixed, the newly-live checks calibrated against the
+    2117-entry catalog (accept <code>at_&lt;locus&gt;</code> position qualification; exempt intrinsic plasma
+    coordinate carriers like <code>normalized_toroidal_flux_coordinate</code>; delegate orientation/unit-vector/path
+    bases to their dedicated checks), and the validate CLI made severity-aware (ERROR blocks, WARNING blocks under
+    <code>--strict</code>, INFO never). Post-calibration catalog blast radius: 0 errors, 3 warnings (the item-4
+    locus-less generics — intended), 310 non-blocking INFO.</p>
 
     <h2 id="s3">§3 — Item 2: phi notation</h2>
     <p><strong>Evidence</strong> (full-catalog YAML parse, 2117 entries): the reviewer's raw counts conflate three
@@ -236,6 +263,24 @@
         horizontal/vertical field-of-view pair.</li>
     </ol>
 
+    <h3 id="s5c">§5c — Landed vs residual (2026-07-04)</h3>
+    <p><strong>Landed.</strong> All four generation layers now guard this family: (1) the prompt rules teach
+    locus-kept orientation vectors, the x,y,vertical triple, and distinct bases for distinct vectors
+    (imas-codex <code>dbcc8359</code>, <code>3bbbfdd1</code>); (2) the attach gate rejects device-vs-locus
+    contradictions and two-vectors-of-one-device collapses (<code>9295d4ad</code>, <code>e6d59bf1</code>);
+    (3) a family audit checks each DD vector node's components agree on base+locus+domain and the canonical axis
+    triple (<code>655e8cff</code>); (4) ISN warns on locus-less unit-vector carriers (<code>a6a91a5</code>, staged
+    warning) and gained the <code>image_up_unit_vector</code> carrier (<code>ca4585c</code>, catalog round-trip 2117/0).
+    sn edits attached: <code>x/y_direction_unit_vector_of_camera → x/y_image_up_unit_vector_of_camera</code> (renames)
+    and the FOV-angle pair hint on <code>x_angle_of_camera</code>.</p>
+    <p><strong>Residual (stays in f-irf-004… reopened as f-irf-006).</strong> The generic
+    <code>x/vertical_direction_unit_vector</code> + mis-locused <code>y_…_of_strain_gauge_sensor</code> triple needs a
+    per-device <em>split</em> (one SN per device per D3), and <code>camera/up/z</code> must be re-homed from
+    <code>vertical_direction_unit_vector</code> to the image-up family — a source detach/re-map that
+    <code>sn edit</code> cannot express; it needs a scoped regeneration pass (<code>sn run --focus</code> over the
+    affected DD paths) now that the prompts and attach gate are fixed. Afterwards, promote the ISN unit-vector locus
+    warning to error and harmonise the camera family's <code>physics_domain</code>.</p>
+
     <h2 id="s6">§6 — Out-of-scope findings (queued, not shipped here)</h2>
     <p>While auditing item 4: <strong>89 dd_paths map to more than one standard name</strong> (e.g.
     <code>spectrometer_x_ray_crystal/camera/centre/z</code> → both <code>vertical_coordinate_of_camera</code> and
@@ -243,43 +288,43 @@
     queued as its own followup rather than folded into this plan's scope.</p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
-      <h2><span class="sec">§</span> Decisions</h2>
-      <div class="r-dec" data-key="description-notation" data-choice="plain-text-descriptions" data-by="agent (delegated)" data-when="2026-07-04">
-        <p class="r-dec-q">Notation convention for the description field: plain text or LaTeX?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="plain-text-descriptions">plain text (phi), LaTeX only in documentation</button>
-          <button class="r-opt" data-value="latex-everywhere">LaTeX in both fields</button>
-        </p>
-        <p class="r-dec-rat">99.4% of descriptions already use plain text and 99.97% of documentation already uses LaTeX — codifying the de-facto per-field convention costs ~8 edits vs ~437, keeps the ≤120-char descriptions markup-free for plain-text consumers (MCP tools, netCDF-style attributes), and both fields render correctly in the SPA either way.</p>
-      </div>
-      <div class="r-dec" data-key="vertical-vs-z" data-choice="vertical-canonical" data-by="agent (lead steer: research and decide)" data-when="2026-07-04">
-        <p class="r-dec-q">Canonical token for the machine vertical axis: vertical everywhere, or z in Cartesian triples?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="vertical-canonical">vertical everywhere; z stays an alias</button>
-          <button class="r-opt" data-value="z-cartesian">promote z for Cartesian frames</button>
-        </p>
-        <p class="r-dec-rat">The vertical axis is frame-invariant (Z_cyl ≡ z_cart in the machine frame); the frame is already marked by the horizontal tokens (x/y vs radial/toroidal); catalog is unanimous (46 vertical, 0 z) so zero churn; two canonical tokens for one axis would recreate the drift being fixed. See §5a.</p>
-      </div>
-      <div class="r-dec" data-key="orientation-locus" data-choice="locus-required" data-by="agent (delegated)" data-when="2026-07-04">
-        <p class="r-dec-q">Device orientation/direction unit vectors: generic multi-attach names or locus-required?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="locus-required">locus required (of_&lt;device&gt;), distinct bases per vector</button>
-          <button class="r-opt" data-value="generic-multi-attach">keep generic locus-less names</button>
-        </p>
-        <p class="r-dec-rat">Matches the catalog's universal pattern for geometry (every coordinate name is locus-qualified) and the existing ORIENTATION_BASES rule for normals/tangents; the generic pattern demonstrably conflates distinct vectors (camera direction/z + up/z on one name) and produced the strain-gauge mis-locus. See §5b.</p>
-      </div>
-      <div class="r-dec" data-key="polarization-names" data-choice="keep-as-is" data-by="agent (physics review)" data-when="2026-07-04">
-        <p class="r-dec-q">Keep left/right_hand_circularly_polarized qualifiers?</p>
-        <p class="r-dec-rat">Physically mandatory — mirrors DD e_field/plus vs minus; rotation sense about B0, not coordinate handedness. Rebuttal in §4; only the E- formula normalisation and a vocab comment change.</p>
-      </div>
-    </section>
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="description-notation" data-choice="plain-text-descriptions" data-by="agent (delegated)" data-when="2026-07-04">
+    <p class="r-dec-q">Notation convention for the description field: plain text or LaTeX?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="plain-text-descriptions">plain text (phi), LaTeX only in documentation</button>
+      <button class="r-opt" data-value="latex-everywhere">LaTeX in both fields</button>
+      </p>
+    <p class="r-dec-rat">99.4% of descriptions already use plain text and 99.97% of documentation already uses LaTeX — codifying the de-facto per-field convention costs ~8 edits vs ~437, keeps the ≤120-char descriptions markup-free for plain-text consumers (MCP tools, netCDF-style attributes), and both fields render correctly in the SPA either way.</p>
+    </div>
+<div class="r-dec" data-key="vertical-vs-z" data-choice="vertical-canonical" data-by="agent (lead steer: research and decide)" data-when="2026-07-04">
+    <p class="r-dec-q">Canonical token for the machine vertical axis: vertical everywhere, or z in Cartesian triples?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="vertical-canonical">vertical everywhere; z stays an alias</button>
+      <button class="r-opt" data-value="z-cartesian">promote z for Cartesian frames</button>
+      </p>
+    <p class="r-dec-rat">The vertical axis is frame-invariant (Z_cyl ≡ z_cart in the machine frame); the frame is already marked by the horizontal tokens (x/y vs radial/toroidal); catalog is unanimous (46 vertical, 0 z) so zero churn; two canonical tokens for one axis would recreate the drift being fixed. See §5a.</p>
+    </div>
+<div class="r-dec" data-key="orientation-locus" data-choice="locus-required" data-by="agent (delegated)" data-when="2026-07-04">
+    <p class="r-dec-q">Device orientation/direction unit vectors: generic multi-attach names or locus-required?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="locus-required">locus required (of_&lt;device&gt;), distinct bases per vector</button>
+      <button class="r-opt" data-value="generic-multi-attach">keep generic locus-less names</button>
+      </p>
+    <p class="r-dec-rat">Matches the catalog&#x27;s universal pattern for geometry (every coordinate name is locus-qualified) and the existing ORIENTATION_BASES rule for normals/tangents; the generic pattern demonstrably conflates distinct vectors (camera direction/z + up/z on one name) and produced the strain-gauge mis-locus. See §5b.</p>
+    </div>
+<div class="r-dec" data-key="polarization-names" data-choice="keep-as-is" data-by="agent (physics review)" data-when="2026-07-04">
+    <p class="r-dec-q">Keep left/right_hand_circularly_polarized qualifiers?</p>
+    <p class="r-dec-rat">Physically mandatory — mirrors DD e_field/plus vs minus; rotation sense about B0, not coordinate handedness. Rebuttal in §4; only the E- formula normalisation and a vocab comment change.</p>
+    </div>
+</section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
-      <h2><span class="sec">§</span> Followups</h2>
-      <article class="r-fu" data-id="f-irf-001" data-status="open" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-07-04" data-recommends-skill="/reckon-ship independent-review-fixes §2" data-resolved-at="" data-resolved-by="">
-        <h4 class="r-fu-title">§2 — SPA: single source of truth for filterable parse roles</h4>
-        <div class="r-fu-body">Derive <code>FILTERABLE_PARSE_ROLES</code> from <code>ROLE_META</code> in <code>site/src/lib/grammar.js</code>; consume in App.jsx, ParseBreakdown.jsx, Filters.jsx, ActiveFilterStrip.jsx; align filter-chain test with the emitter role set; qualifier chips gain the + and the six silent roles start filtering.</div>
-        <pre class="r-fu-prompt">Project: imas-standard-names
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-irf-001" data-status="resolved" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-07-04" data-recommends-skill="/reckon-ship independent-review-fixes §2" data-resolved-at="2026-07-04T18:24:01+00:00" data-resolved-by="agent">
+    <h4 class="r-fu-title">§2 — SPA: single source of truth for filterable parse roles</h4>
+    <div class="r-fu-body">Derive <code>FILTERABLE_PARSE_ROLES</code> from <code>ROLE_META</code> in <code>site/src/lib/grammar.js</code>; consume in App.jsx, ParseBreakdown.jsx, Filters.jsx, ActiveFilterStrip.jsx; align filter-chain test with the emitter role set; qualifier chips gain the + and the six silent roles start filtering.</div>
+    <pre class="r-fu-prompt">Project: imas-standard-names
 Plan:    independent-review-fixes (http://localhost:8765/imas-standard-names/independent-review-fixes.html)
 Section: §2
 Tier:    opus
@@ -301,11 +346,12 @@ Done-when
   1. Qualifier chips show + and filter; aggregation/orbit/population/zone/channel/channel_qualifier filters actually apply
   2. site tests green (npx vitest run in site/)
   3. Outcome recorded in plan, followup resolved</pre>
-      </article>
-      <article class="r-fu" data-id="f-irf-002" data-status="open" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-07-04" data-recommends-skill="/reckon-ship independent-review-fixes §3" data-resolved-at="" data-resolved-by="">
-        <h4 class="r-fu-title">§3 — Codify per-field notation rule + fix 8 outlier entries</h4>
-        <div class="r-fu-body">Add the description=plain-text / documentation=LaTeX rule to grammar/specification.yml, regenerate field_schemas.py, extend validate_description to flag LaTeX in descriptions, and sn-edit the ~8 outliers.</div>
-        <pre class="r-fu-prompt">Project: imas-standard-names
+    <p class="r-fu-outcome">Landed ISN 538729d: <code>FILTERABLE_PARSE_ROLES</code> derived from ROLE_META feeds chips, filter chain, state init, and labels; qualifier + process chips gain the +, six silently-dead filters (aggregation/orbit/population/zone/channel/channel_qualifier) now apply; drift-guard test vs the emitter role set. 165 site tests green.</p>
+    </article>
+<article class="r-fu" data-id="f-irf-002" data-status="resolved" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-07-04" data-recommends-skill="/reckon-ship independent-review-fixes §3" data-resolved-at="2026-07-04T18:24:01+00:00" data-resolved-by="agent">
+    <h4 class="r-fu-title">§3 — Codify per-field notation rule + fix 8 outlier entries</h4>
+    <div class="r-fu-body">Add the description=plain-text / documentation=LaTeX rule to grammar/specification.yml, regenerate field_schemas.py, extend validate_description to flag LaTeX in descriptions, and sn-edit the ~8 outliers.</div>
+    <pre class="r-fu-prompt">Project: imas-standard-names
 Plan:    independent-review-fixes (http://localhost:8765/imas-standard-names/independent-review-fixes.html)
 Section: §3
 Tier:    opus
@@ -327,11 +373,12 @@ Done-when
   1. specification.yml rule + regenerated field_schemas.py committed; validation check + tests green
   2. sn edit proposals attached for the 8 outliers (dry-run first)
   3. Outcome recorded in plan, followup resolved</pre>
-      </article>
-      <article class="r-fu" data-id="f-irf-003" data-status="open" data-tier="sonnet" data-written-by="reckon-create" data-written-at="2026-07-04" data-recommends-skill="/reckon-ship independent-review-fixes §4" data-resolved-at="" data-resolved-by="">
-        <h4 class="r-fu-title">§4 — Polarization: E- formula fix + vocab convention comment</h4>
-        <div class="r-fu-body">sn edit the E- normalisation at electromagnetic_wave_diagnostics right_hand_circularly_polarized_wave_electric_field (missing 1/sqrt2); add B0-anchored convention comment to the polarization category in qualifier_categories.yml. Reviewer rebuttal already recorded in §4.</div>
-        <pre class="r-fu-prompt">Project: imas-standard-names
+    <p class="r-fu-outcome">Rule landed ISN f4aee1a (specification.yml notation guidance for both fields, regenerated field_schemas.py via build-grammar, validate_description warns on $/LaTeX/Unicode-Greek in descriptions; 9 new tests, full suite 1634 green). All 11 outlier sn edits attached (9 LaTeX-in-description hints, the transport.yml mixed-phi doc block, the equilibrium Phi_tor markup nit) — review rotation running; codex ISN pin bumped so generation prompts serve the new rule.</p>
+    </article>
+<article class="r-fu" data-id="f-irf-003" data-status="resolved" data-tier="sonnet" data-written-by="reckon-create" data-written-at="2026-07-04" data-recommends-skill="/reckon-ship independent-review-fixes §4" data-resolved-at="2026-07-04T18:24:01+00:00" data-resolved-by="agent">
+    <h4 class="r-fu-title">§4 — Polarization: E- formula fix + vocab convention comment</h4>
+    <div class="r-fu-body">sn edit the E- normalisation at electromagnetic_wave_diagnostics right_hand_circularly_polarized_wave_electric_field (missing 1/sqrt2); add B0-anchored convention comment to the polarization category in qualifier_categories.yml. Reviewer rebuttal already recorded in §4.</div>
+    <pre class="r-fu-prompt">Project: imas-standard-names
 Plan:    independent-review-fixes (http://localhost:8765/imas-standard-names/independent-review-fixes.html)
 Section: §4
 Tier:    sonnet
@@ -351,11 +398,12 @@ Done-when
   1. sn edit attached for the E- formula (dry-run first)
   2. Vocab comment committed in ISN
   3. Outcome recorded in plan, followup resolved</pre>
-      </article>
-      <article class="r-fu" data-id="f-irf-004" data-status="open" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-07-04" data-recommends-skill="/reckon-ship independent-review-fixes §5" data-resolved-at="" data-resolved-by="">
-        <h4 class="r-fu-title">§5 — Direction-vector family: prompts, attach gate, validation, renames</h4>
-        <div class="r-fu-body">Implement the four-layer treatment of §5b: prompt rule rewrite (codex), attach-gate locus/device + distinct-vector checks and family audit (codex), orientation-locus validation extension (ISN, warning first), and the sn-edit rename cascade for the direction/up/angle families.</div>
-        <pre class="r-fu-prompt">Project: imas-standard-names
+    <p class="r-fu-outcome">Vocab convention comment landed ISN 42dde36 (B0-anchored handedness note on the polarization category). E- normalisation sn edit (--axis docs hint: E_- = (E_x - i E_y)/sqrt2) attached, pending review rotation. Rebuttal stands in §4 — the qualifier is physically mandatory.</p>
+    </article>
+<article class="r-fu" data-id="f-irf-004" data-status="resolved" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-07-04" data-recommends-skill="/reckon-ship independent-review-fixes §5" data-resolved-at="2026-07-04T18:25:36+00:00" data-resolved-by="agent">
+    <h4 class="r-fu-title">§5 — Direction-vector family: prompts, attach gate, validation, renames</h4>
+    <div class="r-fu-body">Implement the four-layer treatment of §5b: prompt rule rewrite (codex), attach-gate locus/device + distinct-vector checks and family audit (codex), orientation-locus validation extension (ISN, warning first), and the sn-edit rename cascade for the direction/up/angle families.</div>
+    <pre class="r-fu-prompt">Project: imas-standard-names
 Plan:    independent-review-fixes (http://localhost:8765/imas-standard-names/independent-review-fixes.html)
 Section: §5
 Tier:    opus
@@ -380,11 +428,12 @@ Done-when
   2. ISN validation extension committed with tests (warning severity)
   3. sn edit cascade attached for direction/up/angle families; dry-run outputs recorded in plan
   4. Outcome recorded in plan, followup resolved</pre>
-      </article>
-      <article class="r-fu" data-id="f-irf-005" data-status="open" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-07-04" data-recommends-skill="/reckon-ship independent-review-fixes §6" data-resolved-at="" data-resolved-by="">
-        <h4 class="r-fu-title">§6 — Audit the 89 dd_paths mapped to multiple standard names</h4>
-        <div class="r-fu-body">Wider attach-hygiene sweep discovered during item-4 triage; needs its own classification pass (legitimate multi-name cases vs attach errors) and probably an attach-gate uniqueness rule.</div>
-        <pre class="r-fu-prompt">Project: imas-standard-names
+    <p class="r-fu-outcome">Four-layer guards landed: codex prompt rules dbcc8359/3bbbfdd1, attach-gate guards 9295d4ad/e6d59bf1, family audit 655e8cff; ISN staged unit-vector locus warning a6a91a5 + image_up_unit_vector carrier ca4585c (catalog round-trip 2117/0). Camera image-up renames + FOV-angle hint attached as sn edits. Residual split/re-home work re-queued as f-irf-006 (see §5c).</p>
+    </article>
+<article class="r-fu" data-id="f-irf-005" data-status="open" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-07-04" data-recommends-skill="/reckon-ship independent-review-fixes §6" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">§6 — Audit the 89 dd_paths mapped to multiple standard names</h4>
+    <div class="r-fu-body">Wider attach-hygiene sweep discovered during item-4 triage; needs its own classification pass (legitimate multi-name cases vs attach errors) and probably an attach-gate uniqueness rule.</div>
+    <pre class="r-fu-prompt">Project: imas-standard-names
 Plan:    independent-review-fixes (http://localhost:8765/imas-standard-names/independent-review-fixes.html)
 Section: §6
 Tier:    opus
@@ -404,8 +453,40 @@ Done-when
   1. Classification table (legit vs error) recorded
   2. Attach-gate uniqueness rule proposed with evidence
   3. Followup resolved or split into implementation followups</pre>
-      </article>
-    </section>
+    </article>
+<article class="r-fu" data-id="f-irf-006" data-status="open" data-tier="opus" data-written-by="agent" data-written-at="2026-07-04" data-recommends-skill="/reckon-ship independent-review-fixes §5c" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">§5c — Regenerate the direction-vector family: per-device split, up/z re-home, domain harmonisation, warning→error</h4>
+    <div class="r-fu-body">The generic <code>x/vertical_direction_unit_vector</code> + mis-locused <code>y_…_of_strain_gauge_sensor</code> triple needs a per-device split, and <code>camera/up/z</code> must move to the image-up family — source re-mapping that sn edit cannot express. Prompts and attach gate are now fixed, so a scoped regeneration produces the correct per-device names. Then promote the ISN unit-vector locus WARNING to ERROR and check family physics_domain agreement.</div>
+    <pre class="r-fu-prompt">Project: imas-standard-names
+Plan:    independent-review-fixes (http://localhost:8765/imas-standard-names/independent-review-fixes.html)
+Section: §5c
+Tier:    opus
+
+Context
+  Generation-layer guards landed (codex prompts, attach gate, family audit; ISN image_up carrier +
+  staged warning). The legacy generic direction-vector names still hold 8 devices&#x27; sources each and
+  camera/up/z sits on the line-of-sight name.
+
+State to read
+  Catalog: standard_names/mechanical_measurement_diagnostics.yml (direction_unit_vector family),
+  plasma_wall_interactions.yml (camera image-up pair post-rename). Codex: sn run --focus semantics,
+  edit/cascade + supersede machinery; families.py; workers.py attach gate.
+
+Scope locks / constraints
+  Honour locked decisions vertical-canonical and locus-required. Per-device split via the pipeline
+  (sn run --focus over camera_ir/channel/camera, spi/injector, ec_launchers/mirror,
+  neutron_diagnostic/detectors, operational_instrumentation/sensor direction paths), never hand-edited
+  YAML. Verify each family with the new vector-node audit. After the split lands: move
+  UNIT_VECTOR_BASES into ORIENTATION_BASES (error) in ISN semantic.py and drop the staged-warning
+  comment.
+
+Done-when
+  1. Each device direction vector has its own locus-qualified x/y/vertical triple; up/z on the
+     image-up family; family domains agree (vector-node audit clean)
+  2. ISN warning promoted to error; ISN + codex tests green; catalog validate passes
+  3. Outcome recorded in plan, this followup resolved</pre>
+    </article>
+</section>
   </main>
 </body>
 </html>
