@@ -444,6 +444,7 @@ class Object(StrEnum):
     PASSIVE_LOOP = "passive_loop"
     PASSIVE_STRUCTURE = "passive_structure"
     PELLET = "pellet"
+    PELLET_INJECTOR = "pellet_injector"
     PICKUP_COIL = "pickup_coil"
     PLANT_COMPONENT_PORT = "plant_component_port"
     PLANT_SUBSYSTEM = "plant_subsystem"
@@ -460,6 +461,8 @@ class Object(StrEnum):
     REFLECTOMETER_DETECTOR = "reflectometer_detector"
     ROGOWSKI_COIL = "rogowski_coil"
     SADDLE_LOOP = "saddle_loop"
+    SENSOR = "sensor"
+    SHATTER_CONE = "shatter_cone"
     SOFT_XRAY_DETECTOR = "soft_xray_detector"
     SPECTROMETER = "spectrometer"
     SPECTROMETER_CHANNEL = "spectrometer_channel"
@@ -583,6 +586,8 @@ class GeometricBase(StrEnum):
     DIRECTION_UNIT_VECTOR = "direction_unit_vector"
     TOROIDAL_FLUX_RADIUS = "toroidal_flux_radius"
     IMAGE_UP_UNIT_VECTOR = "image_up_unit_vector"
+    MAJOR_AXIS_UNIT_VECTOR = "major_axis_unit_vector"
+    MINOR_AXIS_UNIT_VECTOR = "minor_axis_unit_vector"
 
 
 class Transformation(StrEnum):

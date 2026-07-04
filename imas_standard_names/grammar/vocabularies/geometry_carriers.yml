@@ -91,3 +91,7 @@ carriers:
     aliases: []
   image_up_unit_vector:  # image-up orientation of an imaging device, distinct from its line-of-sight direction_unit_vector — N=3 (camera_ir camera/up/{x,y,z})
     aliases: []
+  major_axis_unit_vector:  # major principal axis of an elliptical cross-section — N=3 (spi shatter_cone/unit_vector_major/{x,y,z})
+    aliases: []
+  minor_axis_unit_vector:  # minor principal axis of an elliptical cross-section — N=3 (spi shatter_cone/unit_vector_minor/{x,y,z})
+    aliases: []

@@ -190,6 +190,11 @@ loci:
   pellet:
     type: entity
     allowed_relations: [of]
+  pellet_injector:
+    # shattered-pellet-injector unit (DD spi/injector) — orientation vectors,
+    # injection geometry
+    type: entity
+    allowed_relations: [of]
   pickup_coil:
     type: entity
     allowed_relations: [of]
@@ -236,6 +241,18 @@ loci:
     type: entity
     allowed_relations: [of]
   saddle_loop:
+    type: entity
+    allowed_relations: [of]
+  sensor:
+    # generic operational-instrumentation sensor (DD operational_instrumentation/
+    # sensor) — orientation vectors, attachment geometry; use the specific
+    # *_sensor tokens (strain_gauge_sensor, temperature_sensor) where the DD
+    # names the sensor kind
+    type: entity
+    allowed_relations: [of]
+  shatter_cone:
+    # shattered-pellet-injector shatter cone (DD spi/injector/shatter_cone) —
+    # cone axis and elliptical cross-section geometry
     type: entity
     allowed_relations: [of]
   soft_xray_detector:
