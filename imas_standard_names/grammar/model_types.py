@@ -582,6 +582,7 @@ class GeometricBase(StrEnum):
     BINORMAL_COORDINATE = "binormal_coordinate"
     DIRECTION_UNIT_VECTOR = "direction_unit_vector"
     TOROIDAL_FLUX_RADIUS = "toroidal_flux_radius"
+    IMAGE_UP_UNIT_VECTOR = "image_up_unit_vector"
 
 
 class Transformation(StrEnum):

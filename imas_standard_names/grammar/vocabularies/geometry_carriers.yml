@@ -89,3 +89,5 @@ carriers:
     aliases: []
   toroidal_flux_radius:  # toroidal flux radius coordinate (rho_tor)
     aliases: []
+  image_up_unit_vector:  # image-up orientation of an imaging device, distinct from its line-of-sight direction_unit_vector — N=3 (camera_ir camera/up/{x,y,z})
+    aliases: []
