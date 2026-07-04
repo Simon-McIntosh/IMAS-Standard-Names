@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-04">
-<meta name="plan-version" content="2">
+<meta name="plan-version" content="3">
 <meta name="plan-impl" content="0.67">
 </head>
 <body>
@@ -244,11 +244,23 @@
         <code>z</code> component token (zero uses); promoting <code>z</code> to canonical would create two tokens for
         one physical axis and re-open exactly the family-splitting drift this plan fixes.</li>
     </ul>
-    <p><strong>Decision D2</strong>: <code>vertical</code> stays the single canonical token for the machine vertical
-    axis in all frames; <code>z</code> remains an input alias (and the parser should honour aliases — today it
-    ignores them); the frame is marked by the horizontal tokens. The vestigial <code>components.yml</code>
-    <code>z</code> token is handed to the canonical-qualifier-order token review (§3 there) for disposition alongside
-    the normalized-direction shadowing item.</p>
+    <p><strong>Decision D2 (first lock, superseded same day)</strong>: <code>vertical</code> stays the single
+    canonical token for the machine vertical axis in all frames; <code>z</code> remains an input alias; the frame is
+    marked by the horizontal tokens.</p>
+    <p><strong>D2 reopened and re-locked (lead steer, 2026-07-04 evening)</strong>: the lead reviewed and steered —
+    "reassess the need for a vertical vs z convention when we have family groups; it seems odd to have x, y, and
+    vertical". Reassessment: the drift risk that motivated a single token (two tokens for one physical axis letting
+    sibling families diverge) is now covered by the codex vector-node family audit, which enforces one canonical
+    triple per DD vector family — a guard that did not exist at first lock. With family-level enforcement, the mixed
+    triple's readability cost dominates (the external reviewer and the lead both tripped over
+    <code>x, y, vertical</code>). <strong>New rule</strong>: Cartesian family triples are <code>x, y, z</code>;
+    cylindrical triples stay <code>radial, toroidal, vertical</code>; <code>vertical</code> remains for cylindrical Z
+    and standalone machine-vertical quantities; <code>z</code> appears only as the third member of an
+    <code>x, y, z</code> family. First lock archived at
+    <a href="/imas-standard-names/archive/independent-review-fixes-vertical-vs-z-locked.html">archive/…-vertical-vs-z-locked</a>.
+    Implementation: <code>z</code> promoted to a canonical coordinate-axis token (alias removed from
+    <code>vertical</code>), codex prompts + family audit updated to the per-frame triples, Cartesian
+    <code>vertical_…</code> siblings renamed via sn edit.</p>
 
     <h3 id="s5b">§5b — Treatment</h3>
     <ol>
@@ -305,13 +317,13 @@
       </p>
     <p class="r-dec-rat">99.4% of descriptions already use plain text and 99.97% of documentation already uses LaTeX — codifying the de-facto per-field convention costs ~8 edits vs ~437, keeps the ≤120-char descriptions markup-free for plain-text consumers (MCP tools, netCDF-style attributes), and both fields render correctly in the SPA either way.</p>
     </div>
-<div class="r-dec" data-key="vertical-vs-z" data-choice="vertical-canonical" data-by="agent (lead steer: research and decide)" data-when="2026-07-04">
+<div class="r-dec" data-key="vertical-vs-z" data-choice="z-in-cartesian-families" data-by="Simon McIntosh (steer) / agent" data-when="2026-07-04T20:16:17+00:00">
     <p class="r-dec-q">Canonical token for the machine vertical axis: vertical everywhere, or z in Cartesian triples?</p>
     <p class="r-dec-opts">
-      <button class="r-opt chosen" data-value="vertical-canonical">vertical everywhere; z stays an alias</button>
+      <button class="r-opt" data-value="vertical-canonical">vertical everywhere; z stays an alias</button>
       <button class="r-opt" data-value="z-cartesian">promote z for Cartesian frames</button>
       </p>
-    <p class="r-dec-rat">The vertical axis is frame-invariant (Z_cyl ≡ z_cart in the machine frame); the frame is already marked by the horizontal tokens (x/y vs radial/toroidal); catalog is unanimous (46 vertical, 0 z) so zero churn; two canonical tokens for one axis would recreate the drift being fixed. See §5a.</p>
+    <p class="r-dec-rat">REOPENED same-day on lead steer (first lock archived: docs/archive/independent-review-fixes-vertical-vs-z-locked.html). With the codex vector-node family audit enforcing one canonical triple per DD vector family, the drift risk that motivated a single vertical token is covered at the family level, and the mixed x,y,vertical triple&#x27;s readability cost dominates (both the external reviewer and the lead tripped over it). New rule: Cartesian family triples are x, y, z; cylindrical triples stay radial, toroidal, vertical; vertical remains for cylindrical Z and standalone machine-vertical quantities; z appears ONLY as the third member of an x,y,z family.</p>
     </div>
 <div class="r-dec" data-key="orientation-locus" data-choice="locus-required" data-by="agent (delegated)" data-when="2026-07-04">
     <p class="r-dec-q">Device orientation/direction unit vectors: generic multi-attach names or locus-required?</p>
