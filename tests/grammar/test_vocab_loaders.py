@@ -49,11 +49,13 @@ def test_coordinate_axes_has_seed_entries():
     )
 
 
-def test_coordinate_axes_aliases_parsed():
+def test_coordinate_axes_have_no_aliases():
+    # Axis naming is one canonical form, one way: physical directions use
+    # canonical words (radial/toroidal/vertical/...), arbitrary local axes
+    # use x/y/z. No axis carries an alternate spelling.
     reg = load_coordinate_axes()
-    assert reg.axes["radial"].aliases == ["r"]
-    assert set(reg.axes["toroidal"].aliases) == {"phi", "tor"}
-    assert reg.axes["parallel"].aliases == []
+    for token, entry in reg.axes.items():
+        assert entry.aliases == [], f"axis '{token}' has dead alias metadata"
 
 
 # ---------------------------------------------------------------------------

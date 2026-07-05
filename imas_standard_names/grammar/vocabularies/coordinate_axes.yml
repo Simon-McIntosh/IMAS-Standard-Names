@@ -27,11 +27,11 @@ axes:
   perpendicular:
     aliases: []
   poloidal:
-    aliases: [pol]
+    aliases: []
   radial:
-    aliases: [r]
+    aliases: []
   toroidal:
-    aliases: [phi, tor]
+    aliases: []
   # Frame rule: Cartesian family triples are x, y, z; cylindrical triples are
   # radial, toroidal, vertical. `vertical` is cylindrical Z and standalone
   # machine-vertical quantities; `z` appears only as the third member of an
