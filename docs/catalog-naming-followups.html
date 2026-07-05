@@ -18,8 +18,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-05">
-<meta name="plan-version" content="2">
-<meta name="plan-impl" content="0.2">
+<meta name="plan-version" content="3">
+<meta name="plan-impl" content="0.4">
 </head>
 <body>
   <main class="plan-doc">
@@ -42,7 +42,15 @@
       <p style="margin:6px 0 0;font-size:13px;color:#5b6072">Prerequisite <a href="canonical-qualifier-order.html">canonical-qualifier-order</a> is impl 0.99 (grammar finalized, rc57 released); its open followups gate none of §2/§3/§4/§6/§7, so this is NOT blocked. §5 (<code>direction_second</code> ordinal) stays deferred. Order: §2/§3 (code, parallel) &rarr; §6 &rarr; §7 &rarr; §4 (graph work, serialized on the shared live graph). Fixes land at the GENERATE level so new names benefit — not just live edits on existing names.</p>
     </section>
 
-    <h2 id="s2">§2 — DECISION: cylindrical axis-token naming (radial/toroidal/vertical vs r/phi/z)</h2>
+    <h2 id="s2"><span class="badge badge-shipped">✓ landed 2026-07-05</span> §2 — DECISION: cylindrical axis-token naming (radial/toroidal/vertical vs r/phi/z)</h2>
+    <p class="landed-summary" style="border-left:3px solid #1a9c52;padding-left:10px;margin:8px 0">Decision <strong>A</strong> implemented as strictly one way, at the GENERATE level. ISN <code>f57f2f0</code> emptied the dead
+    <code>poloidal/radial/toroidal</code> alias lists in <code>coordinate_axes.yml</code> (parser loads keys only — zero
+    consumers confirmed; full ISN suite 1634 green). imas-codex <code>de264aa1</code> added the sanctioned generation-time
+    catch-and-promote in <code>GrammarSegments._validate_projection_axis</code>: a stray <code>r→radial</code>,
+    <code>phi/tor→toroidal</code>, <code>pol→poloidal</code> is coerced to the canonical word before composition
+    (<code>z</code> excluded — a valid Cartesian axis; frame disambiguation is a DD-ingest concern). The ISN parser stays
+    strict and still rejects <code>r_…</code> names (test-proven), so there is no dual path — one canonical form.
+    Record: <a href="archive/catalog-naming-followups-s2-landed.html">§2 landed</a>.</p>
     <p>Lead question: given the Cartesian family is <code>x, y, z</code>, should the cylindrical machine axes be
     <code>r, phi, z</code> for symmetry, rather than the current words <code>radial, toroidal, vertical</code>?</p>
 
@@ -215,9 +223,9 @@ Scope locks / constraints
 Done-when
   1. Focused reset scopes to exactly the given dd paths; guarded combo errors; tests green
   2. Committed + pushed; outcome recorded; this followup resolved</pre>
-    <p class="r-fu-outcome">§3 landed — imas-codex ae585857. path_allowlist (exact-path src.id IN allowlist) added to reset_standard_names + clear_standard_names; sn run --reset-to {extracted,drafted} --focus <paths> now scopes reset to exactly those dd paths; clear uses relationship-first delete so names on other paths survive. Guard _reject_unscoped_accepted_reset hard-errors a bare --reset-to --include-accepted with no focus/narrowing-filter (the 1863-accepted-wipe footgun), dry-run exempt; a row-level filter (--retry-quarantined/--below-score/--since/--before/--tier) counts as scope so the documented quarantine migration still works. 89 tests green (13 new), all mocked GraphClient — production graph untouched. §4 rotations will use --reset-to drafted --focus.</p>
+    <p class="r-fu-outcome">§3 landed — imas-codex ae585857. path_allowlist (exact-path src.id IN allowlist) added to reset_standard_names + clear_standard_names; sn run --reset-to {extracted,drafted} --focus <paths> now scopes reset to exactly those dd paths; clear uses relationship-first delete so names on other paths survive. Guard _reject_unscoped_accepted_reset hard-errors a bare --reset-to --include-accepted with no focus/narrowing-filter (the 1863-accepted-wipe footgun), dry-run exempt; a row-level filter (--retry-quarantined/--below-score/--since/--before/--tier) counts as scope so the documented quarantine migration still works. 89 tests green (13 new), all mocked GraphClient — production graph untouched. §4 rotations will use --reset-to drafted --focus.</paths></p>
     </article>
-<article class="r-fu" data-id="f-cnf-005" data-status="open" data-tier="sonnet" data-written-by="agent" data-written-at="2026-07-05" data-recommends-skill="/reckon-ship catalog-naming-followups §2" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-cnf-005" data-status="resolved" data-tier="sonnet" data-written-by="agent" data-written-at="2026-07-05" data-recommends-skill="/reckon-ship catalog-naming-followups §2" data-resolved-at="2026-07-05T13:11:35+00:00" data-resolved-by="axis-aliases + orchestrator">
     <h4 class="r-fu-title">§2 — Delete the dead axis aliases; keep one way</h4>
     <div class="r-fu-body">Remove the unused radial:[r] / toroidal:[phi,tor] / poloidal:[pol] alias declarations from coordinate_axes.yml so the config stops implying a second vocabulary. Verify no consumer reads them first (parser loads keys only — confirmed; the SPA search ALIASES and codex _SUFFIX_TO_AXIS are separate). Optionally add a generation-time catch-and-promote (stray r/phi axis segment → canonical word before composition, like the projection_shape coercion) as an error-catcher; do NOT make the parser accept r_… as a valid name.</div>
     <pre class="r-fu-prompt">Project: imas-standard-names (+ imas-codex if adding the generation catcher)
@@ -244,6 +252,7 @@ Done-when
   1. Dead aliases removed; grammar regenerated; full ISN suite + catalog round-trip green
   2. (optional) generation catch-and-promote added with a test; committed + pinned
   3. Outcome recorded; this followup resolved</pre>
+    <p class="r-fu-outcome">§2 landed at the GENERATE level. ISN f57f2f0: emptied the dead poloidal/radial/toroidal alias lists in coordinate_axes.yml (parser loads keys only — zero consumers confirmed; loader test updated; full ISN suite 1634 green; codegen no-op). imas-codex de264aa1: sanctioned generation-time catch-and-promote in GrammarSegments._validate_projection_axis — stray r→radial, phi/tor→toroidal, pol→poloidal coerced to canonical before composition (z excluded as valid Cartesian axis); ISN parser stays strict, still rejects r_… names (test-proven). One canonical form, no dual path. Record: archive/catalog-naming-followups-s2-landed.html.</p>
     </article>
 <article class="r-fu" data-id="f-cnf-002" data-status="open" data-tier="opus" data-written-by="agent" data-written-at="2026-07-05" data-recommends-skill="/reckon-ship catalog-naming-followups §4" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">§4 — Complete the parked orientation-vector families (supervised)</h4>
