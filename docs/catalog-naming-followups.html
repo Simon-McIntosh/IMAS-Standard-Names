@@ -136,7 +136,21 @@
     touched). Full record: <a href="archive/catalog-naming-followups-s3-landed.html">§3 landed</a>. §4 rotations use
     <code>--reset-to drafted --focus</code>.</p>
 
-    <h2 id="s4">§4 — Orientation-vector family completion (~20 parked paths)</h2>
+    <h2 id="s4"><span class="badge" style="background:#e8eef7;color:#26467a">◑ unblocked + draining 2026-07-05</span> §4 — Orientation-vector family completion</h2>
+    <section class="landed-summary-card" style="border:1px solid #1a9c52;border-radius:8px;padding:12px 16px;margin:10px 0;background:#f1faf3">
+      <p style="margin:0 0 6px"><strong>GENERATE-LEVEL FIX LANDED — the composer now names device-orientation unit vectors correctly.</strong>
+      Root cause was a real defect: the cross-IDS semantic cluster ("Instrument Direction Component") instructed the
+      composer to emit ONE generic locus-less name across devices, which violates the grammar's unit-vector-locus rule
+      (error severity) — so these leaves composed an invalid <code>y_direction_unit_vector</code> (→ exhausted) or refine
+      over-specified to a wrong device. imas-codex <code>1b83fe04</code> adds a compose-prompt rule: a
+      <code>*_unit_vector</code> base ALWAYS takes a per-device <code>_of_&lt;device&gt;</code> locus and OVERRIDES any
+      cross-IDS cluster generic-name suggestion. <strong>Validated live:</strong> the ec-launcher family now composes
+      <code>{x,y,z}_direction_unit_vector_of_electron_cyclotron_launcher_mirror</code> — all accepted, correct per-device
+      locus, no cross-attach ($0.08). Remaining families drain via the same per-family rotation (reset sources to
+      <code>extracted</code>/<code>attempt_count=0</code> → <code>sn run --focus &lt;leaves&gt; --skip-clear-gate</code> with
+      the configured OpenRouter compose model). Also fixed the enabling blockers: attempt-exhaustion reset, and the stale
+      DSv4 401 (use configured OpenRouter compose, not the dead free endpoint).</p>
+    </section>
     <p>rc60 shipped the correct replacements and <em>parked</em> the rest as visible <code>vocab_gap</code>
     <code>StandardNameSource</code> nodes rather than shipping wrong names. The parked paths are all
     <strong>device-local Cartesian orientation vectors</strong>, so they take <code>x, y, z</code> triples with a
