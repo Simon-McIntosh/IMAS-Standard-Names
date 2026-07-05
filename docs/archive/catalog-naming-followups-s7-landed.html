@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-standard-names">
+  <meta name="reckon-type" content="doc">
+  <meta name="plan-slug" content="catalog-naming-followups-s7-landed">
+  <meta name="plan-title" content="§7 landed — LaTeX-description generate-level fix, E− formula, edit backlog drained">
+  <meta name="plan-summary" content="Generate-level normalizer + import-normalize + critical gate; 9 descriptions cleaned (description_notation_check=0); E− 1/√2 fixed; 13 edits cleared">
+  <meta name="plan-informs" content="catalog-naming-followups">
+  <title>§7 landed — doc edits | imas-standard-names</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="s1">§7 — open doc edits <span class="badge badge-shipped">✓ landed 2026-07-05</span></h2>
+    <p>Evergreen: <a href="/imas-standard-names/catalog-naming-followups.html">catalog-naming-followups</a> §7
+    (followup <code>f-cnf-004</code>). Done-when: all open doc edits applied &amp; re-accepted; no LaTeX in any accepted
+    description.</p>
+
+    <h3>Generate-level root-cause fix (the heart of §7)</h3>
+    <p>The predecessor claimed "all 9 LaTeX descriptions now plain text" — <strong>false; they had regressed on catalog
+    re-import.</strong> A live-graph trace found the causal chain: the Greek-symbol normalizer's
+    <code>_GREEK_WORD_RE = \b(phi|theta|rho)\b</code> matched <code>phi</code> <em>inside</em> <code>\phi</code> (the
+    <code>\b</code> sits between the backslash and <code>p</code>), rewriting it to <code>\φ</code> and leaving the
+    <code>$</code> delimiters; nothing stripped <code>$</code>, and no gate rejected LaTeX in the short
+    <code>description</code> field, so it re-entered on every <code>sn import</code> (which stored descriptions verbatim).</p>
+    <p><strong>imas-codex <code>27f4c037</code></strong> (26 new + 355 regression tests green) fixes it at the generator so
+    NEW names can never carry LaTeX descriptions:</p>
+    <ul>
+      <li><code>normalize_description_notation</code> now converts <code>\phi/\theta/\rho/\pi</code> (and the stranded
+        <code>\φ</code> corruption) to Unicode, strips <code>$…$</code>/<code>$$…$$</code> keeping inner content,
+        flattens <code>\mathbf{}</code> and braced sub/superscripts. Idempotent; DD tokens (<code>phi_tor</code>) and the
+        <code>documentation</code> field (legitimate LaTeX) untouched.</li>
+      <li><strong>Import normalizes</strong> descriptions at both boundaries (<code>catalog_import.py</code>), so a stale
+        YAML can't regress on <code>sn import</code>.</li>
+      <li>New <strong>critical <code>description_notation_check</code></strong> quarantines any <code>$</code>/backslash in
+        a description — a LaTeX description can never reach <code>accepted</code>.</li>
+    </ul>
+
+    <h3>Applied to the live graph</h3>
+    <div style="overflow-x:auto"><table>
+      <thead><tr><th>Item</th><th>Outcome</th></tr></thead>
+      <tbody>
+        <tr><td>9 LaTeX-in-description outliers</td><td>Normalized in-graph via the fixed normalizer (deterministic, wording preserved: <code>$(R,\φ,Z)$</code>→<code>(R, φ, Z)</code>, <code>$2\pi$</code>→<code>2π</code>, <code>W$^{1+}$</code>→<code>W1+</code>, <code>$|\mathbf{k}|$</code>→<code>|k|</code>). <strong><code>description_notation_check</code> = 0 over the full accepted corpus.</strong></td></tr>
+        <tr><td>E&minus; <code>1/&radic;2</code> formula</td><td>Real physics error found: <code>right_hand_circularly_polarized_wave_electric_field</code> documented <code>E_- = E_x - i E_y</code> with no normalization while its sibling E&plus; correctly carries <code>/√2</code>. Corrected to <code>E_- = \frac{E_x - i E_y}{\sqrt{2}}</code> via <code>sn edit --docs --scope self</code>; finalized accepted/applied (documentation LaTeX is legitimate).</td></tr>
+        <tr><td>13 open edits cleared</td><td>The 9 descriptions + 2 doc-math (<code>toroidal_flux_radius_at_plasma_boundary</code>, <code>vertical_current_density_due_to_ion_inertia</code> — verified clean) + 2 moot superseded (<code>normalized_internal_inductance</code>, <code>normalized_momentum_flux_…</code>) marked <code>edit_status=applied</code>.</td></tr>
+        <tr><td><code>x_image_up_unit_vector_of_camera</code></td><td>Reassigned to §4 (its orientation-vector family completion — it is name_stage=pending, mid-family, not an accepted doc to edit).</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3>Remaining → folded into §4</h3>
+    <p>The 3 drafted axis re-locks (<code>z_coordinate_of_{divertor_target,ferritic_element_centroid,sensor_attachment_point}</code>,
+    <code>edit_status=open</code>) promote the Cartesian <code>z</code> third axis and supersede the stranded
+    <code>vertical_</code> counterpart. They are device-local Cartesian family completions — the same class as §4's
+    orientation-vector work — and are tracked there (they also clear the 2 residual
+    <code>vector_family_consistency_check</code> flags on <code>sensor_attachment_point</code>).</p>
+  </main>
+</body>
+</html>

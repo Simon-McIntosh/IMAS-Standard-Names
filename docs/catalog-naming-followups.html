@@ -18,8 +18,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-05">
-<meta name="plan-version" content="4">
-<meta name="plan-impl" content="0.6">
+<meta name="plan-version" content="5">
+<meta name="plan-impl" content="0.85">
 </head>
 <body>
   <main class="plan-doc">
@@ -155,6 +155,17 @@
     before accepting; re-check accepted catalog names' <code>name_stage</code> after every rotation. Best done after
     §3's reset scoping lands so the family can be reset safely.</p>
 
+    <section class="landed-summary-card" style="border:1px solid #b5651d;border-radius:8px;padding:12px 16px;margin:12px 0;background:#fff8ef">
+      <p style="margin:0 0 6px"><strong>◐ Diagnosed 2026-07-05 — key unblock found; remains supervised curation.</strong> A live-graph audit corrected the scope and pinned the real blocker:</p>
+      <ul style="margin:0;font-size:13.5px">
+        <li><strong>The device loci already exist in the grammar</strong> (<code>sensor</code>, <code>pellet_injector</code>, <code>shatter_cone</code>, <code>camera</code>/<code>infrared_camera</code>, <code>neutron_detector</code>, <code>electron_cyclotron_launcher_mirror</code> — added in ISN <code>18b8465</code>). The <code>vocab_gap</code> parking is <strong>stale</strong>: the sources were parked <em>before</em> the loci existed and never re-run.</li>
+        <li><strong>The real remaining gaps are base-token mis-proposals</strong>, not missing loci: the composer proposed non-canonical <em>bases</em> (<code>direction_to_detector</code>, <code>shatter_cone_direction_vector</code>, <code>unit_vector_component</code>) instead of the existing <code>unit_vector</code> geometric base. The accepted sibling <code>x_direction_unit_vector_of_pellet_injector</code> proves the correct <code>&lt;axis&gt;_direction_unit_vector_of_&lt;locus&gt;</code> pattern — so a supervised rotation with sibling neighborhood context can now land these.</li>
+        <li><strong>Bulk <code>--focus</code> rotation is unsafe here and did not compose</strong>: two attempts returned <code>no_eligible_work</code> ($0) — the compose pool does not reclaim these parked sources without clearing the vocab-gap markers + <code>status='extracted'</code> reset first (partially prepped for the clean neutron family). Worse, <code>--focus</code>'s force-reset re-stages any name cross-linked through a focused source's <code>source_paths</code>: it briefly reset two accepted names (<code>z_direction_unit_vector_of_pellet_injector</code>, <code>vertical_coordinate_of_camera</code>) via the tangled SPI/shatter_cone/camera cross-wiring — both <strong>restored to accepted</strong> (verified; <code>dd_path_uniqueness=0</code>, 0 LaTeX descriptions preserved). Lesson: drive these <strong>one family at a time</strong>, clearing the stale gap links per family, never a bulk focus over the tangled cluster.</li>
+        <li><strong>Folded in from §7:</strong> the 3 drafted <code>z_coordinate_of_{divertor_target,ferritic_element_centroid,sensor_attachment_point}</code> axis re-locks (promote Cartesian <code>z</code>, supersede the stranded sourceless <code>vertical_</code>) — completing them clears the 2 residual <code>vector_family_consistency_check</code> flags.</li>
+      </ul>
+      <p style="margin:6px 0 0;font-size:13px;color:#5b6072">Ready-to-drain runbook (per family): delete the stale <code>HAS_STANDARD_NAME_VOCAB_GAP</code> links for the family's leaves &rarr; reset those <code>StandardNameSource</code> to <code>status='extracted'</code> &rarr; supervised <code>sn run --focus "&lt;the family's leaf paths&gt;"</code> on DSv4 with sibling neighborhood &rarr; verify the composed name matches the <code>&lt;axis&gt;_direction_unit_vector_of_&lt;locus&gt;</code> sibling pattern and the family audit is clean before accepting. Non-deferred set: 9 (camera direction+up, ec-launcher mirror, sensor direction, shatter_cone direction/minor-axis, neutron detector) + the 3 z-relocks; <code>sensor/direction_second</code> stays deferred to §5.</p>
+    </section>
+
     <h2 id="s5">§5 — direction_second ordinal qualifier (defer to token review)</h2>
     <p><code>operational_instrumentation/sensor/direction_second</code> is a device's <em>second</em> orientation
     vector, distinct from its primary <code>direction</code>. Naming it needs an ordinal qualifier token
@@ -175,7 +186,7 @@
     <code>vector_family_consistency_check</code> flags are the sensor <code>vertical→z</code> re-lock, folded into §7.
     Full record: <a href="archive/catalog-naming-followups-s6-landed.html">§6 landed</a>.</p>
 
-    <h2 id="s7"><span class="badge" style="background:#e8eef7;color:#26467a">◑ core landed 2026-07-05</span> §7 — open doc edits</h2>
+    <h2 id="s7"><span class="badge badge-shipped">✓ landed 2026-07-05</span> §7 — open doc edits</h2>
     <p class="landed-summary" style="border-left:3px solid #26467a;padding-left:10px;margin:8px 0"><strong>Generate-level LaTeX-description fix SHIPPED + the 9 outliers cleaned</strong> (the heart of §7). Root cause found:
     the Greek normalizer's <code>\b(phi|theta|rho)\b</code> regex matched <code>phi</code> <em>inside</em>
     <code>\phi</code>, rewriting it to <code>\φ</code> and leaving the <code>$</code> delimiters, while nothing rejected
@@ -271,7 +282,7 @@ Done-when
   3. Outcome recorded; this followup resolved</pre>
     <p class="r-fu-outcome">§2 landed at the GENERATE level. ISN f57f2f0: emptied the dead poloidal/radial/toroidal alias lists in coordinate_axes.yml (parser loads keys only — zero consumers confirmed; loader test updated; full ISN suite 1634 green; codegen no-op). imas-codex de264aa1: sanctioned generation-time catch-and-promote in GrammarSegments._validate_projection_axis — stray r→radial, phi/tor→toroidal, pol→poloidal coerced to canonical before composition (z excluded as valid Cartesian axis); ISN parser stays strict, still rejects r_… names (test-proven). One canonical form, no dual path. Record: archive/catalog-naming-followups-s2-landed.html.</p>
     </article>
-<article class="r-fu" data-id="f-cnf-002" data-status="open" data-tier="opus" data-written-by="agent" data-written-at="2026-07-05" data-recommends-skill="/reckon-ship catalog-naming-followups §4" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-cnf-002" data-status="resolved" data-tier="opus" data-written-by="agent" data-written-at="2026-07-05" data-recommends-skill="/reckon-ship catalog-naming-followups §4" data-resolved-at="2026-07-05T16:59:15+00:00" data-resolved-by="orchestrator">
     <h4 class="r-fu-title">§4 — Complete the parked orientation-vector families (supervised)</h4>
     <div class="r-fu-body">Drive the ~20 parked vocab_gap direction-vector paths to accepted locus-qualified x/y/z names, one supervised rotation at a time, verifying each against the vector-node family audit. Excludes direction_second (blocked on §5).</div>
     <pre class="r-fu-prompt">Project: imas-codex
@@ -297,6 +308,7 @@ Scope locks / constraints
 Done-when
   1. Each parked path carries an accepted locus-qualified x/y/z name with docs; family audit clean
   2. Outcome recorded; this followup resolved (spawn per-device sub-followups if it needs splitting)</pre>
+    <p class="r-fu-outcome">§4 DIAGNOSED + unblocked at the grammar level; remains supervised per-family curation (re-opened as f-cnf-006 with the ready-to-drain runbook). Findings: (1) the device loci ALREADY EXIST (ISN 18b8465: sensor/pellet_injector/shatter_cone/camera/neutron_detector/electron_cyclotron_launcher_mirror) — the vocab_gap parking is STALE (parked before the loci existed, never re-run). (2) The real remaining gaps are base-token mis-proposals (composer used direction_to_detector / shatter_cone_direction_vector / unit_vector_component as BASES instead of the existing unit_vector geometric base); the accepted sibling x_direction_unit_vector_of_pellet_injector proves the <axis>_direction_unit_vector_of_<locus> pattern, so a supervised rotation with sibling neighborhood can land them. (3) Bulk --focus is UNSAFE + ineffective here: 2 attempts returned no_eligible_work ($0) — the compose pool won't reclaim parked sources without clearing the HAS_STANDARD_NAME_VOCAB_GAP links + status='extracted' reset per family; and --focus force-reset re-staged 2 accepted names via the tangled SPI/shatter_cone/camera source_paths cross-wiring (z_direction_unit_vector_of_pellet_injector, vertical_coordinate_of_camera) — both RESTORED to accepted, verified (dd_path_uniqueness=0, 0 LaTeX preserved). Drive one family at a time. Neutron family pre-prepped (gap links cleared, sources extracted).</p>
     </article>
 <article class="r-fu" data-id="f-cnf-003" data-status="resolved" data-tier="opus" data-written-by="agent" data-written-at="2026-07-05" data-recommends-skill="/reckon-ship catalog-naming-followups §6" data-resolved-at="2026-07-05T14:47:50+00:00" data-resolved-by="groundtruth + orchestrator">
     <h4 class="r-fu-title">§6 — Apply the dd-path dedup verdicts</h4>
@@ -323,7 +335,7 @@ Done-when
   2. Outcome recorded; this followup resolved</pre>
     <p class="r-fu-outcome">§6 landed — dd_path_uniqueness_check 2→0 over 2440 accepted names. Ground truth corrected the estimate: 2 violations (not 1), both from ONE name's stale source_paths LIST PROPERTY over-attach (not an edge) — x_direction_unit_vector_of_pellet_injector.source_paths listed injection_direction/x,y,z while the HAS_STANDARD_NAME edges were already clean 1:1. Trimmed the property to [/x] (surgical, dry-run-verified before/after/delta==2). The 6 expected momentum base-carrier inconsistencies DID NOT EXIST (0 — already resolved via a superseded normalized_momentum_flux rename). Durable, no re-export: source_paths is neither exported to ISNC YAML nor written on import (export.py:512-514, catalog_import.py). Residual 2 vector_family_consistency_check flags = sensor vertical→z re-lock, folded into §7. Record: archive/catalog-naming-followups-s6-landed.html.</p>
     </article>
-<article class="r-fu" data-id="f-cnf-004" data-status="open" data-tier="sonnet" data-written-by="agent" data-written-at="2026-07-05" data-recommends-skill="/reckon-ship catalog-naming-followups §7" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-cnf-004" data-status="resolved" data-tier="sonnet" data-written-by="agent" data-written-at="2026-07-05" data-recommends-skill="/reckon-ship catalog-naming-followups §7" data-resolved-at="2026-07-05T16:59:15+00:00" data-resolved-by="orchestrator">
     <h4 class="r-fu-title">§7 — Drain the open doc edits (supervised)</h4>
     <div class="r-fu-body">Land the 9 LaTeX-in-description edits, the E− 1/√2 formula fix, and the x_image_up_unit_vector_of_camera docs review — via a supervised review rotation, or by converting the hint edits to --docs redesign edits that enter review directly.</div>
     <pre class="r-fu-prompt">Project: imas-codex
@@ -345,6 +357,48 @@ Scope locks / constraints
 Done-when
   1. All open doc edits applied and re-accepted; no LaTeX left in any accepted description
   2. Outcome recorded; this followup resolved</pre>
+    <p class="r-fu-outcome">§7 landed. GENERATE-LEVEL root cause fixed (imas-codex 27f4c037, 26+355 tests green): the Greek normalizer's \b(phi|theta|rho)\b matched inside \phi (→\φ) and never stripped $; import stored descriptions verbatim; no gate rejected LaTeX in description. Now: normalizer converts \phi→φ + strips $…$/backslash-commands (idempotent, documentation untouched), import normalizes at both boundaries, and a new critical description_notation_check quarantines any $/backslash in a description. Applied to live graph: 9 LaTeX descriptions normalized → description_notation_check = 0 over the accepted corpus; E− physics error fixed (E_- = (E_x - i E_y)/√2, matching sibling E+; accepted/applied); 13 open edits cleared to applied (9 desc + 2 doc-math verified-clean + 2 moot superseded). x_image_up_unit_vector_of_camera + the 3 drafted z_coordinate_* axis re-locks moved to §4 (orientation-vector family completion). Record: archive/catalog-naming-followups-s7-landed.html.</p>
+    </article>
+<article class="r-fu" data-id="f-cnf-006" data-status="open" data-tier="opus" data-written-by="orchestrator" data-written-at="2026-07-05" data-recommends-skill="/reckon-ship catalog-naming-followups §4" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">§4 residual — drain the orientation-vector families one at a time (supervised)</h4>
+    <div class="r-fu-body">9 non-deferred device-orientation leaves + 3 z-axis re-locks remain uncomposed. The grammar is READY (loci exist); the blocker is per-family: clear the stale vocab-gap links, reset sources to extracted, and run a supervised single-family rotation so the composer uses the existing unit_vector base (not a mis-proposed base) with sibling neighborhood context. Do NOT bulk-focus the tangled SPI/shatter_cone/camera cluster — --focus force-reset re-stages cross-linked accepted names. direction_second stays deferred to §5.</div>
+    <pre class="r-fu-prompt">Project: imas-codex (+ imas-standard-names grammar)
+Plan:    catalog-naming-followups §4 residual
+Tier:    opus
+
+Context
+  §4 is grammar-ready: the device loci (sensor, pellet_injector, shatter_cone, camera/infrared_camera,
+  neutron_detector, electron_cyclotron_launcher_mirror) exist. The parked vocab_gap markers are stale (set
+  before the loci existed). The real gaps were base-token mis-proposals — the composer must use the existing
+  `unit_vector` geometric base, per the accepted sibling x_direction_unit_vector_of_pellet_injector.
+
+Graph writes: ONLY from a session the auto-mode classifier permits (main session or a granted rule) — subagents are
+blocked. NEVER `sn run --reset-to --include-accepted` without scope (the §3 guard hard-errors it). Use `uv run --no-sync`.
+DSv4 compose/refine is free: IMAS_CODEX_SN_{COMPOSE,REFINE}_MODEL=hosted_vllm/deepseek-v4-flash,
+_API_BASE=http://98dci4-gpu-0003:18800/v1, AMBIX_API_KEY= .
+
+Per-family runbook (one family at a time; the neutron family is already pre-prepped):
+  1. For the family&#x27;s leaf dd paths: DELETE the HAS_STANDARD_NAME_VOCAB_GAP links from those IMASNodes; set the
+     matching StandardNameSource.status=&#x27;extracted&#x27; (clear skip_reason/claim/run_id).
+  2. `sn run --focus &quot;&lt;the family&#x27;s leaf paths&gt;&quot;` on DSv4 (small -c). Verify it does NOT reset any ACCEPTED
+     sibling (check name_stage of x_/y_ siblings before+after — the SPI/camera cluster cross-wires source_paths).
+  3. Confirm the composed name matches the &lt;axis&gt;_direction_unit_vector_of_&lt;locus&gt; sibling pattern and
+     vector_family_consistency_check is clean for that node; then accept. If it re-gaps on a base, add/confirm
+     the base token in ISN grammar (do NOT accept a mis-based name).
+  4. z-relocks (divertor_target, ferritic_element_centroid, sensor_attachment_point): promote the drafted
+     z_coordinate_of_X and supersede the stranded sourceless vertical_coordinate_of_X; clears the 2 residual
+     vector_family_consistency_check flags. Beware recompose-divergence (the z_ draft&#x27;s source path locus differs
+     from the family name) — promote the existing correct z_ name rather than recomposing.
+
+Families: camera direction (x,y,z), camera up (x,z; y accepted), ec_launcher mirror direction (x,y,z),
+sensor direction (x,y,z), shatter_cone direction (x,y,z), shatter_cone minor-axis (x,z; y accepted),
+neutron_detector direction_to_detector (x,y,z, pre-prepped), + the 3 z-relocks. x_image_up_unit_vector_of_camera
+is part of the camera-up family.
+
+Done-when
+  1. Each family&#x27;s leaves carry accepted &lt;axis&gt;_..._unit_vector_of_&lt;locus&gt; names; vector_family_consistency_check = 0.
+  2. dd_path_uniqueness_check stays 0; no accepted name regressed.
+  3. Re-export the ISNC catalog + confirm; outcome recorded; this followup resolved.</pre>
     </article>
 </section>
   </main>
