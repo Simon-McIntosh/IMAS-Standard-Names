@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-standard-names">
+  <meta name="reckon-type" content="doc">
+  <meta name="plan-slug" content="catalog-naming-followups-s3-landed">
+  <meta name="plan-title" content="§3 landed — reset/--focus path scoping + accepted-wipe guard">
+  <meta name="plan-summary" content="sn run --reset-to now scopes to --focus dd paths; a bare --reset-to --include-accepted hard-errors">
+  <meta name="plan-informs" content="catalog-naming-followups">
+  <title>§3 landed — reset path scoping | imas-standard-names</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="s1">§3 — Tooling: <code>sn run --reset-to</code> path scoping + guard <span class="badge badge-shipped">✓ landed 2026-07-05</span></h2>
+    <p>Evergreen: <a href="/imas-standard-names/catalog-naming-followups.html">catalog-naming-followups</a> §3
+    (decision <code>reset-focus-fix = scope-and-guard</code>, followup <code>f-cnf-001</code>).</p>
+
+    <h3>The bug</h3>
+    <p>The CLI <code>--reset-only</code>/<code>--reset-to</code> branch called <code>clear_standard_names</code>/
+    <code>reset_standard_names</code> with <code>ids_filter=None</code> hardcoded and never threaded the
+    <code>--focus</code> path list (<code>flat_focus</code>) into the reset. So <code>sn run --reset-to extracted
+    --focus &lt;paths&gt;</code> reset far more than the focused paths, and with <code>--include-accepted</code> it
+    cleared <strong>1863 accepted names graph-wide</strong> during the rc60 session (recovered via <code>sn import</code>).
+    Neither reset function accepted a dd-path allowlist.</p>
+
+    <h3>The fix (scope-and-guard)</h3>
+    <div style="overflow-x:auto"><table>
+      <thead><tr><th>Piece</th><th>What landed</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Scope</strong></td><td><code>path_allowlist: list[str] | None</code> added to both
+          <code>reset_standard_names</code> and <code>clear_standard_names</code>: selection joins through
+          <code>(src:IMASNode)-[:HAS_STANDARD_NAME]-&gt;(sn)</code> filtered by <code>src.id IN $path_allowlist</code>
+          — an exact-path membership test, distinct from and combinable with the <code>ids_filter</code> prefix
+          (<code>STARTS WITH</code>). <code>reset</code> scopes every field-clear/edge-delete to the matched
+          <code>sn.id</code> set; <code>clear</code> uses relationship-first delete (drop the listed paths' edges, then
+          <code>DETACH DELETE</code> only now-orphaned nodes) so names on any other path — accepted ones included —
+          keep their edges and survive.</td></tr>
+        <tr><td><strong>Wire</strong></td><td>cli/sn.py passes <code>path_allowlist=flat_focus or None</code> into BOTH
+          reset branches (the <code>--reset-only</code> branch and the default DD/signals <code>--reset-to</code> branch),
+          so <code>sn run --reset-to {extracted,drafted} --focus &lt;paths&gt;</code> resets exactly those paths. Empty
+          focus → <code>None</code> → unchanged behaviour.</td></tr>
+        <tr><td><strong>Guard</strong></td><td>new <code>_reject_unscoped_accepted_reset()</code> fires before either
+          reset branch and raises <code>click.UsageError</code> when <code>--reset-to … --include-accepted</code> has NO
+          scope — no <code>--focus</code> path list AND no row-level narrowing filter
+          (<code>--retry-quarantined</code>/<code>--below-score</code>/<code>--since</code>/<code>--before</code>/
+          <code>--tier</code>). A bare <code>sn run --reset-to extracted --include-accepted</code> now hard-errors (the
+          1863-wipe footgun); a dry-run is exempt (previewing touches nothing). Row-level filters count as scope so the
+          documented <code>--retry-quarantined --reset-to extracted --include-accepted</code> migration keeps working.</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3>Outcome</h3>
+    <div style="overflow-x:auto"><table>
+      <thead><tr><th>Item</th><th>Status</th><th>Evidence</th></tr></thead>
+      <tbody>
+        <tr><td>reset/clear path scoping + CLI wiring + guard</td><td><span class="badge badge-shipped">shipped</span></td><td>imas-codex <code>ae585857</code> (cli/sn.py +61, graph_ops.py +64, new test +255)</td></tr>
+        <tr><td>Tests</td><td><span class="badge badge-shipped">green</span></td><td>89 passed / 0 failed (13 new in <code>test_reset_focus_scoping.py</code>); test_sn_clear, test_graph_ops, test_sn_generate_cli all green — all mocked GraphClient, production <code>codex</code> graph never touched</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3>What's next</h3>
+    <p>§4 (orientation-vector completion) uses the new scoped reset: <code>sn run --reset-to drafted --focus
+    "&lt;path&gt; &lt;path&gt;"</code>. The accepted-wipe footgun is closed — <code>--reset-to … --include-accepted</code>
+    without a focus/filter now errors instead of destroying committed names.</p>
+  </main>
+</body>
+</html>
