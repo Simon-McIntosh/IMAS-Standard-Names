@@ -18,14 +18,16 @@ ORIENTATION_BASES = {
 
 # Unit-vector carriers are device orientation properties and need the owning
 # object too (a locus-less direction unit vector cannot say WHOSE direction it
-# is, and lets distinct vectors of one device collapse onto one name).
-# WARNING severity while the catalog's legacy locus-less generics are still
-# being renamed; promote to ORIENTATION_BASES (error) once they are gone.
+# is, and lets distinct vectors of one device collapse onto one name). Error
+# severity: the catalog's legacy locus-less generics are gone.
 UNIT_VECTOR_BASES = {
     GeometricBase.UNIT_VECTOR.value,
     GeometricBase.X1_UNIT_VECTOR.value,
     GeometricBase.X2_UNIT_VECTOR.value,
     GeometricBase.DIRECTION_UNIT_VECTOR.value,
+    GeometricBase.IMAGE_UP_UNIT_VECTOR.value,
+    GeometricBase.MAJOR_AXIS_UNIT_VECTOR.value,
+    GeometricBase.MINOR_AXIS_UNIT_VECTOR.value,
 }
 
 # Geometric bases that describe paths/boundaries (require object qualification)
@@ -194,7 +196,7 @@ def _check_orientation_vector_completeness(
             obj = getattr(parsed, "object", None)
             if not obj:
                 issues.append(
-                    f"{name}: WARNING - unit vector '{geometric_base}' should specify "
+                    f"{name}: ERROR - unit vector '{geometric_base}' must specify "
                     f"the device/object it orients. Example: {geometric_base}_of_camera"
                 )
     except Exception:

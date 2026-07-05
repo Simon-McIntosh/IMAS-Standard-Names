@@ -23,9 +23,9 @@ def _issues_for(name: str) -> list[str]:
     return [i for i in run_semantic_checks({name: entry}) if name in i]
 
 
-def test_locusless_direction_unit_vector_warns():
+def test_locusless_direction_unit_vector_errors():
     issues = _issues_for("x_direction_unit_vector")
-    assert any("WARNING" in i and "direction_unit_vector" in i for i in issues)
+    assert any("ERROR" in i and "direction_unit_vector" in i for i in issues)
 
 
 def test_locus_qualified_direction_unit_vector_clean():
