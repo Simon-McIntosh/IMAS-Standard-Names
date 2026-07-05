@@ -4,19 +4,21 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="docs-project"    content="imas-standard-names">
-  <meta name="reckon-type"     content="plan">
-  <meta name="plan-slug"       content="catalog-naming-followups">
-  <meta name="plan-title"      content="Catalog Naming Follow-ups">
-  <meta name="plan-summary"    content="Post-rc60 residual: the cylindrical axis-token naming decision (words vs symbols), the reset/--focus scoping bug, orientation-vector family completion, dd-path dedup, and open doc edits">
-  <meta name="plan-status"     content="active">
-  <meta name="plan-roi"        content="mid">
-  <meta name="plan-effort"     content="L">
-  <meta name="plan-tier"       content="opus">
-  <meta name="plan-owner"      content="Simon McIntosh">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="catalog-naming-followups">
+  <meta name="plan-title" content="Catalog Naming Follow-ups">
+  <meta name="plan-summary" content="Post-rc60 residual: the cylindrical axis-token naming decision (words vs symbols), the reset/--focus scoping bug, orientation-vector family completion, dd-path dedup, and open doc edits">
+  <meta name="plan-status" content="active">
+  <meta name="plan-roi" content="mid">
+  <meta name="plan-effort" content="L">
+  <meta name="plan-tier" content="opus">
+  <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-depends-on" content="canonical-qualifier-order">
   <title>Catalog Naming Follow-ups | imas-standard-names</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-07-05">
+<meta name="plan-version" content="1">
 </head>
 <body>
   <main class="plan-doc">
@@ -69,18 +71,37 @@
     <em>worse</em> mix than today; (3) reverses the D.3 senior ruling; (4) <code>phi</code> as a direction token
     collides conceptually with the toroidal <em>angle</em> φ we just standardized in descriptions; (5) ~81 catalog
     names churn plus prompt/grammar/doc changes.</p>
-    <p><strong>Option C — keep words canonical, but honor the input aliases (RECOMMENDED companion to A).</strong>
-    <code>coordinate_axes.yml</code> already <em>declares</em> aliases (<code>radial:[r]</code>,
-    <code>toroidal:[phi, tor]</code>, <code>poloidal:[pol]</code>), but <code>parser.py</code> loads only the vocab
-    keys (<code>axes=frozenset(axes_reg.axes)</code>) and never consumes the alias lists — verified — so the aliases
-    are dead metadata. Fixing the parser to honor them lets DD paths and source authors write <code>r</code>/
-    <code>phi</code> on <em>input</em> (the ergonomic symmetry itch) while the stored canonical name stays
-    word-based. No catalog churn, honors D.3, keeps frame-marking; the only work is a genuine parser bug fix
-    (the same class of latent bug found for the seven dead semantic checks).</p>
-    <p><strong>Recommendation: A + C.</strong> Keep the letters-for-local / words-for-physical principle, and make
-    the declared input aliases actually work. B trades a coherent, collapse-safe, precedent-backed scheme for
-    surface symmetry that it cannot even deliver (the flux directions have no letters). This is the lead's call —
-    recorded as the open decision below.</p>
+    <h3 id="s2-oneway">On "Option C" and the one-way principle</h3>
+    <p><strong>The catalog is already one way — there is no dual path today.</strong> Every stored name is emitted by
+    <code>compose_standard_name</code>, which always uses the canonical word; the ISN parser accepts only canonical
+    tokens (the round-trip invariant); and DD-sourced names are normalised at ingest by codex's
+    <code>_SUFFIX_TO_AXIS</code> map (DD leaf <code>r</code>→<code>radial</code>, <code>phi</code>→<code>toroidal</code>,
+    <code>z</code>→<code>vertical</code>/<code>z</code> by frame) — a required boundary translation, not a design
+    fallback. The only artefact is the <em>dead</em> alias metadata in <code>coordinate_axes.yml</code>
+    (<code>radial:[r]</code>, <code>toroidal:[phi, tor]</code>, <code>poloidal:[pol]</code>): the parser never consumes
+    it (verified — it loads <code>frozenset(axes_reg.axes)</code>, the keys only), so it is misleading config that
+    <em>implies</em> a second vocabulary that does not actually function.</p>
+    <p><strong>"Option C" hides two very different implementations — only one is acceptable.</strong></p>
+    <ul>
+      <li><strong>C-funnel — catch-and-promote at generation (a fallback for errors; ACCEPTABLE).</strong> If the
+        generator emits a stray <code>r</code>/<code>phi</code> in an axis segment, map it to canonical
+        <code>radial</code>/<code>toroidal</code> <em>before</em> composition and continue — exactly like the
+        <code>projection_shape</code> coercion already shipped, and exactly what the DD funnel already does for DD
+        leaves. The stored name is always the canonical word; <code>r</code> never reaches the catalog. One canonical
+        form, one way. This is the "fallback to catch generation errors" you sanctioned — a funnel, not a dual path.</li>
+      <li><strong>C-parser — make the ISN parser accept <code>r_coordinate_of_X</code> as a valid name (the LONG-LIVED
+        DUAL PATH; REJECTED).</strong> This blesses <code>r_…</code> as a permanently-valid spelling, lets two forms of
+        one name coexist in the catalog, and breaks the round-trip invariant
+        (<code>compose(parse("r_…")) → "radial_…" ≠ input</code>). This is the "second way" you ruled out. We do not
+        build this.</li>
+    </ul>
+    <p><strong>Recommendation: A, expressed as strictly one way.</strong> Keep words for physical directions,
+    <code>x/y/z</code> for arbitrary local axes. <strong>Delete</strong> the dead alias metadata so no second
+    vocabulary is even implied (f-cnf-005). Keep the DD-ingest funnel (a boundary normaliser, not a design fallback).
+    A stray axis token is then either hard-failed at generation (loudest signal, forces regeneration) or caught by an
+    optional C-funnel promotion — both keep exactly one canonical form. B is rejected: it cannot deliver symmetry
+    (poloidal/parallel/normal/… have no letters), re-collides <code>z</code> across frames, reverses the D.3 senior
+    ruling, and conflates the <code>phi</code> direction with the φ angle.</p>
 
     <h2 id="s3">§3 — Tooling: sn run --reset-to ignores --focus (confirmed unfixed)</h2>
     <p><strong>Confirmed 2026-07-05, still live.</strong> <code>reset_standard_names</code> /
@@ -139,33 +160,32 @@
     mechanical once driven.</p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
-      <h2><span class="sec">§</span> Decisions</h2>
-      <div class="r-dec" data-key="cylindrical-axis-naming" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">Cylindrical/physical axis tokens: keep words, switch to r/phi/z, or keep words + honor input aliases? (§2)</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="words-canonical">A — keep radial/toroidal/vertical (words for physical directions)</button>
-          <button class="r-opt" data-value="letters-symmetry">B — rename cylindrical to r/phi/z for symmetry</button>
-          <button class="r-opt" data-value="words-plus-input-aliases">A+C — keep words canonical, make the parser honor r/phi/tor input aliases</button>
-        </p>
-        <p class="r-dec-rat">Recommendation A+C: letters name arbitrary local axes, words name physical directions (CF convention, D.3 senior ruling, frame-marking / collapse-guard). B cannot deliver symmetry (poloidal/parallel/… have no letters), re-collides z across frames, reverses D.3, and conflates the phi direction with the φ angle. C fixes the dead alias metadata so r/phi are accepted on input without catalog churn.</p>
-      </div>
-      <div class="r-dec" data-key="reset-focus-fix" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">How to fix sn run --reset-to ignoring --focus? (§3)</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="scope-and-guard">Add dd-path scoping to reset/clear AND hard-error the --reset-to + --focus/--include-accepted combo</button>
-          <button class="r-opt" data-value="guard-only">Only hard-error the dangerous combo</button>
-          <button class="r-opt" data-value="document-only">Leave code; keep the documented surgical-DETACH workaround</button>
-        </p>
-        <p class="r-dec-rat">Recommendation scope-and-guard: path scoping makes focused resets actually work; the guard prevents the accepted-name-wipe footgun that cost a full recovery cycle.</p>
-      </div>
-    </section>
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="cylindrical-axis-naming" data-choice="words-canonical" data-by="Simon McIntosh (steer) / agent" data-when="2026-07-05T10:00:38+00:00">
+    <p class="r-dec-q">Cylindrical/physical axis tokens: keep canonical words, or switch to r/phi/z? (§2)</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="words-canonical">A — keep radial/toroidal/vertical (words for physical directions); one canonical form</button>
+      <button class="r-opt" data-value="letters-symmetry">B — rename cylindrical to r/phi/z for symmetry</button>
+      </p>
+    <p class="r-dec-rat">Locked A on lead steer (2026-07-05): keep radial/toroidal/vertical for physical directions, x/y/z for arbitrary local axes — one canonical form. Letters name arbitrary local axes; words name physical directions (CF convention, D.3 senior ruling, frame-marking/collapse-guard). B rejected: cannot deliver symmetry (poloidal/parallel/normal/… have no letters), re-collides z across frames, reverses D.3, conflates the phi direction with the φ angle. One way is preserved WITHOUT a dual path: compose emits canonical, the parser stays strict, the DD funnel normalises at ingest; the dead coordinate_axes.yml aliases are deleted (f-cnf-005). Any r/phi tolerance is a generation-time catch-and-promote error-catcher only, never a parser-level second spelling.</p>
+    </div>
+<div class="r-dec" data-key="reset-focus-fix" data-choice="scope-and-guard" data-by="agent (recommended default)" data-when="2026-07-05T10:00:38+00:00">
+    <p class="r-dec-q">How to fix sn run --reset-to ignoring --focus? (§3)</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="scope-and-guard">Add dd-path scoping to reset/clear AND hard-error the --reset-to + --focus/--include-accepted combo</button>
+      <button class="r-opt" data-value="guard-only">Only hard-error the dangerous combo</button>
+      <button class="r-opt" data-value="document-only">Leave code; keep the documented surgical-DETACH workaround</button>
+      </p>
+    <p class="r-dec-rat">Locked as the executable default (reversible): path scoping makes focused resets actually work, and hard-erroring the --reset-to + --focus/--include-accepted combo blocks the accepted-name-wipe footgun that cost a full recovery cycle. Reopen for guard-only if the path-scoping investment is not wanted; lead did not object.</p>
+    </div>
+</section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
-      <h2><span class="sec">§</span> Followups</h2>
-      <article class="r-fu" data-id="f-cnf-001" data-status="open" data-tier="opus" data-written-by="agent" data-written-at="2026-07-05" data-recommends-skill="/reckon-ship catalog-naming-followups §3" data-resolved-at="" data-resolved-by="">
-        <h4 class="r-fu-title">§3 — Fix sn run --reset-to path scoping + guard the dangerous combo</h4>
-        <div class="r-fu-body">Thread a dd-path allowlist into reset_standard_names/clear_standard_names and wire --focus so a focused reset scopes to exactly those paths; hard-error --reset-to combined with --focus/--include-accepted where scoping is not honoured. Independent of the axis decision — good first shippable.</div>
-        <pre class="r-fu-prompt">Project: imas-codex
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-cnf-001" data-status="open" data-tier="opus" data-written-by="agent" data-written-at="2026-07-05" data-recommends-skill="/reckon-ship catalog-naming-followups §3" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">§3 — Fix sn run --reset-to path scoping + guard the dangerous combo</h4>
+    <div class="r-fu-body">Thread a dd-path allowlist into reset_standard_names/clear_standard_names and wire --focus so a focused reset scopes to exactly those paths; hard-error --reset-to combined with --focus/--include-accepted where scoping is not honoured. Independent of the axis decision — good first shippable.</div>
+    <pre class="r-fu-prompt">Project: imas-codex
 Plan:    catalog-naming-followups (http://localhost:8765/imas-standard-names/catalog-naming-followups.html)
 Section: §3
 Tier:    opus
@@ -186,11 +206,39 @@ Scope locks / constraints
 Done-when
   1. Focused reset scopes to exactly the given dd paths; guarded combo errors; tests green
   2. Committed + pushed; outcome recorded; this followup resolved</pre>
-      </article>
-      <article class="r-fu" data-id="f-cnf-002" data-status="open" data-tier="opus" data-written-by="agent" data-written-at="2026-07-05" data-recommends-skill="/reckon-ship catalog-naming-followups §4" data-resolved-at="" data-resolved-by="">
-        <h4 class="r-fu-title">§4 — Complete the parked orientation-vector families (supervised)</h4>
-        <div class="r-fu-body">Drive the ~20 parked vocab_gap direction-vector paths to accepted locus-qualified x/y/z names, one supervised rotation at a time, verifying each against the vector-node family audit. Excludes direction_second (blocked on §5).</div>
-        <pre class="r-fu-prompt">Project: imas-codex
+    </article>
+<article class="r-fu" data-id="f-cnf-005" data-status="open" data-tier="sonnet" data-written-by="agent" data-written-at="2026-07-05" data-recommends-skill="/reckon-ship catalog-naming-followups §2" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">§2 — Delete the dead axis aliases; keep one way</h4>
+    <div class="r-fu-body">Remove the unused radial:[r] / toroidal:[phi,tor] / poloidal:[pol] alias declarations from coordinate_axes.yml so the config stops implying a second vocabulary. Verify no consumer reads them first (parser loads keys only — confirmed; the SPA search ALIASES and codex _SUFFIX_TO_AXIS are separate). Optionally add a generation-time catch-and-promote (stray r/phi axis segment → canonical word before composition, like the projection_shape coercion) as an error-catcher; do NOT make the parser accept r_… as a valid name.</div>
+    <pre class="r-fu-prompt">Project: imas-standard-names (+ imas-codex if adding the generation catcher)
+Plan:    catalog-naming-followups (http://localhost:8765/imas-standard-names/catalog-naming-followups.html)
+Section: §2
+Tier:    sonnet
+
+Context
+  Axis decision locked A (words canonical, one way). The coordinate_axes.yml aliases are dead metadata
+  (parser consumes keys only) that misleadingly imply a second spelling. Honour the one-way principle:
+  no parser-level dual path; a generation-time promotion is an acceptable error-catcher only.
+
+State to read
+  imas_standard_names/grammar/vocabularies/coordinate_axes.yml (alias lists);
+  imas_standard_names/grammar/parser.py (axes load); grep the repo for any .aliases consumer on axes.
+  For the optional catcher: imas-codex GrammarSegments._validate_projection_axis + the projection_shape
+  coercion precedent (models.py).
+
+Scope locks / constraints
+  Delete only after confirming zero consumers. Round-trip must stay green (2117+ names). If adding the
+  catcher, it maps a stray token to canonical BEFORE composition; the ISN parser stays strict.
+
+Done-when
+  1. Dead aliases removed; grammar regenerated; full ISN suite + catalog round-trip green
+  2. (optional) generation catch-and-promote added with a test; committed + pinned
+  3. Outcome recorded; this followup resolved</pre>
+    </article>
+<article class="r-fu" data-id="f-cnf-002" data-status="open" data-tier="opus" data-written-by="agent" data-written-at="2026-07-05" data-recommends-skill="/reckon-ship catalog-naming-followups §4" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">§4 — Complete the parked orientation-vector families (supervised)</h4>
+    <div class="r-fu-body">Drive the ~20 parked vocab_gap direction-vector paths to accepted locus-qualified x/y/z names, one supervised rotation at a time, verifying each against the vector-node family audit. Excludes direction_second (blocked on §5).</div>
+    <pre class="r-fu-prompt">Project: imas-codex
 Plan:    catalog-naming-followups (http://localhost:8765/imas-standard-names/catalog-naming-followups.html)
 Section: §4
 Tier:    opus
@@ -206,24 +254,24 @@ State to read
 
 Scope locks / constraints
   Honour locked decisions (z-in-cartesian-families, locus-required). SUPERVISED rotations only —
-  pooled runs re-draft accepted names and skip hint edits. Prefer §3's scoped reset once it lands;
-  otherwise surgical per-path. Verify the family audit is clean and re-check accepted names' name_stage
+  pooled runs re-draft accepted names and skip hint edits. Prefer §3&#x27;s scoped reset once it lands;
+  otherwise surgical per-path. Verify the family audit is clean and re-check accepted names&#x27; name_stage
   after each rotation. Never sn run --reset-to with --include-accepted.
 
 Done-when
   1. Each parked path carries an accepted locus-qualified x/y/z name with docs; family audit clean
   2. Outcome recorded; this followup resolved (spawn per-device sub-followups if it needs splitting)</pre>
-      </article>
-      <article class="r-fu" data-id="f-cnf-003" data-status="open" data-tier="opus" data-written-by="agent" data-written-at="2026-07-05" data-recommends-skill="/reckon-ship catalog-naming-followups §6" data-resolved-at="" data-resolved-by="">
-        <h4 class="r-fu-title">§6 — Apply the dd-path dedup verdicts</h4>
-        <div class="r-fu-body">Resolve the 1 remaining duplicate path + 6 momentum-family base-carrier inconsistencies per the archived classification; dd_path_uniqueness_check must return zero over accepted names.</div>
-        <pre class="r-fu-prompt">Project: imas-codex
+    </article>
+<article class="r-fu" data-id="f-cnf-003" data-status="open" data-tier="opus" data-written-by="agent" data-written-at="2026-07-05" data-recommends-skill="/reckon-ship catalog-naming-followups §6" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">§6 — Apply the dd-path dedup verdicts</h4>
+    <div class="r-fu-body">Resolve the 1 remaining duplicate path + 6 momentum-family base-carrier inconsistencies per the archived classification; dd_path_uniqueness_check must return zero over accepted names.</div>
+    <pre class="r-fu-prompt">Project: imas-codex
 Plan:    catalog-naming-followups (http://localhost:8765/imas-standard-names/catalog-naming-followups.html)
 Section: §6
 Tier:    opus
 
 Context
-  86/90 double-attached paths were classified as attach errors; most were fixed by rc60's restore.
+  86/90 double-attached paths were classified as attach errors; most were fixed by rc60&#x27;s restore.
   Residual: 1 dup + 6 edge_sources/plasma_sources momentum base-carrier disagreements.
 
 State to read
@@ -237,20 +285,20 @@ Scope locks / constraints
 Done-when
   1. dd_path_uniqueness_check and the momentum families in vector_family_consistency_check return clean
   2. Outcome recorded; this followup resolved</pre>
-      </article>
-      <article class="r-fu" data-id="f-cnf-004" data-status="open" data-tier="sonnet" data-written-by="agent" data-written-at="2026-07-05" data-recommends-skill="/reckon-ship catalog-naming-followups §7" data-resolved-at="" data-resolved-by="">
-        <h4 class="r-fu-title">§7 — Drain the open doc edits (supervised)</h4>
-        <div class="r-fu-body">Land the 9 LaTeX-in-description edits, the E− 1/√2 formula fix, and the x_image_up_unit_vector_of_camera docs review — via a supervised review rotation, or by converting the hint edits to --docs redesign edits that enter review directly.</div>
-        <pre class="r-fu-prompt">Project: imas-codex
+    </article>
+<article class="r-fu" data-id="f-cnf-004" data-status="open" data-tier="sonnet" data-written-by="agent" data-written-at="2026-07-05" data-recommends-skill="/reckon-ship catalog-naming-followups §7" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">§7 — Drain the open doc edits (supervised)</h4>
+    <div class="r-fu-body">Land the 9 LaTeX-in-description edits, the E− 1/√2 formula fix, and the x_image_up_unit_vector_of_camera docs review — via a supervised review rotation, or by converting the hint edits to --docs redesign edits that enter review directly.</div>
+    <pre class="r-fu-prompt">Project: imas-codex
 Plan:    catalog-naming-followups (http://localhost:8765/imas-standard-names/catalog-naming-followups.html)
 Section: §7
 Tier:    sonnet
 
 Context
-  These are open sn edit hint proposals pooled runs won't claim (hint edits on accepted names).
+  These are open sn edit hint proposals pooled runs won&#x27;t claim (hint edits on accepted names).
 
 State to read
-  Graph: sn.edit_status='open' entries; the 9 LaTeX-description names + right_hand_circularly_polarized_
+  Graph: sn.edit_status=&#x27;open&#x27; entries; the 9 LaTeX-description names + right_hand_circularly_polarized_
   wave_electric_field (E−) + x_image_up_unit_vector_of_camera (docs_stage). memory sn-pipeline-rotation-traps.
 
 Scope locks / constraints
@@ -260,8 +308,8 @@ Scope locks / constraints
 Done-when
   1. All open doc edits applied and re-accepted; no LaTeX left in any accepted description
   2. Outcome recorded; this followup resolved</pre>
-      </article>
-    </section>
+    </article>
+</section>
   </main>
 </body>
 </html>
