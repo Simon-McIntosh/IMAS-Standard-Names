@@ -175,12 +175,23 @@
     <code>vector_family_consistency_check</code> flags are the sensor <code>vertical→z</code> re-lock, folded into §7.
     Full record: <a href="archive/catalog-naming-followups-s6-landed.html">§6 landed</a>.</p>
 
-    <h2 id="s7">§7 — open doc edits</h2>
-    <p>Carried from rc60 as open <code>sn edit</code> hint proposals that pooled runs will not claim: the 9
-    LaTeX-in-description outliers, the E&minus; <code>1/&radic;2</code> formula fix, and the
-    <code>x_image_up_unit_vector_of_camera</code> docs review. These need a supervised review rotation (or
-    conversion to <code>--rename</code>/<code>--docs</code> redesign edits, which enter review directly). Low risk,
-    mechanical once driven.</p>
+    <h2 id="s7"><span class="badge" style="background:#e8eef7;color:#26467a">◑ core landed 2026-07-05</span> §7 — open doc edits</h2>
+    <p class="landed-summary" style="border-left:3px solid #26467a;padding-left:10px;margin:8px 0"><strong>Generate-level LaTeX-description fix SHIPPED + the 9 outliers cleaned</strong> (the heart of §7). Root cause found:
+    the Greek normalizer's <code>\b(phi|theta|rho)\b</code> regex matched <code>phi</code> <em>inside</em>
+    <code>\phi</code>, rewriting it to <code>\φ</code> and leaving the <code>$</code> delimiters, while nothing rejected
+    LaTeX in the short <code>description</code> field. imas-codex <code>27f4c037</code> (26 new + 355 regression tests
+    green): <code>normalize_description_notation</code> now converts <code>\phi/\theta/\rho/\pi</code> (+ the stranded
+    <code>\φ</code> corruption) to Unicode, strips <code>$…$</code>/<code>$$…$$</code> keeping inner content, flattens
+    <code>\mathbf{}</code>/braced sub-superscripts; <strong>import normalizes</strong> descriptions at both boundaries
+    (so a stale YAML can't regress on <code>sn import</code>); and a new <strong>critical
+    <code>description_notation_check</code></strong> quarantines any <code>$</code>/backslash in a description so LaTeX
+    can never reach <code>accepted</code>. All 9 accepted descriptions normalized in-graph &rarr;
+    <strong><code>description_notation_check</code> = 0 over 2440 names</strong>. <strong>Remaining (pipeline rotations, in
+    progress):</strong> the E&minus; <code>1/&radic;2</code> formula fix (documentation corrected in-graph via
+    <code>sn edit --docs</code>, awaiting a docs-review pass to promote) and the 3 drafted <code>z_coordinate_of_*</code>
+    axis re-locks (folded into §4's rotation — promote the drafted <code>z_</code>, supersede the stranded sourceless
+    <code>vertical_</code>). <code>x_image_up_unit_vector_of_camera</code> reassigned to §4 (its family completion). Full
+    record: <a href="archive/catalog-naming-followups-s7-landed.html">§7 landed</a>.</p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
