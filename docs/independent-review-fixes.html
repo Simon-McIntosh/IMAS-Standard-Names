@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="independent-review-fixes">
   <meta name="plan-title" content="Independent Review Fixes">
   <meta name="plan-summary" content="Triage and fix the four findings from the independent ISN catalog review: qualifier filter chip, phi notation, polarization qualifier, direction-unit-vector family">
-  <meta name="plan-status" content="active">
+  <meta name="plan-status" content="shipped">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="L">
   <meta name="plan-tier" content="opus">
@@ -16,9 +16,9 @@
   <title>Independent Review Fixes | imas-standard-names</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-07-04">
-<meta name="plan-version" content="3">
-<meta name="plan-impl" content="0.67">
+<meta name="plan-modified" content="2026-07-05">
+<meta name="plan-version" content="4">
+<meta name="plan-impl" content="0.95">
 </head>
 <body>
   <main class="plan-doc">
@@ -307,6 +307,33 @@
     <code>vertical_coordinate_of_diagnostic_antenna</code>). Same class of attach-gate gap as item 4 but much wider;
     queued as its own followup rather than folded into this plan's scope.</p>
 
+    <h2 id="s7">§7 — Follow-up session (2026-07-05): reversal, symbols, incident, rc60</h2>
+    <p><strong>Lead steers implemented.</strong> (1) vertical-vs-z re-locked: Cartesian family triples are
+    <code>x, y, z</code> (ISN <code>d4c8beb</code>; codex frame-aware families <code>8b9ecb54</code>, audit triples
+    <code>70543413</code>, prompts <code>2a051e3c</code>); three Cartesian <code>vertical_coordinate_*</code> renames
+    queued. (2) Descriptions use Unicode Greek symbols (φ, θ, ρ) instead of spelled-out words — rule in the grammar
+    spec (ISN <code>ed716c8</code>), deterministic normalizer at every codex description-persist site
+    (<code>aceef6cf</code>), one-shot graph pass over ~410 descriptions.</p>
+    <p><strong>Incident (recovered, memory recorded).</strong> <code>sn run --reset-to extracted --reset-only
+    --include-accepted --focus &lt;paths&gt;</code> ignores <code>--focus</code> for the reset and cleared
+    <strong>1863 accepted names graph-wide</strong>. Recovery: <code>sn import</code> from ISNC YAML (the released
+    catalog is the authoritative record), surgical re-supersession of resurrected predecessors, deterministic
+    re-application of the φ pass and re-attachment of the doc edits. Three export-blocking defects found and fixed in
+    the aftermath: the import never stamped <code>validation_status</code>/<code>docs_stage</code> on created nodes,
+    <code>advance_watermark</code> was called with the wrong signature (<code>64078660</code>/<code>69e622a9</code>),
+    and Gate C excluded catalog-lineage names as "unreviewed" — which would have shrunk a full-scope publish to 241
+    entries (<code>b815f3a8</code>).</p>
+    <p><strong>Composition unblocked.</strong> Every direction-vector compose failed ISN IR validation because the
+    LLM labels geometry projections 'component'; the shape is derivable from base kind, now coerced deterministically
+    (<code>2a8ac508</code>). New vocabulary: <code>sensor</code>, <code>pellet_injector</code>,
+    <code>shatter_cone</code> loci + <code>major/minor_axis_unit_vector</code> carriers (ISN <code>18b8465</code>).
+    The unit-vector locus rule is now a blocking ERROR (ISN <code>d7794de</code>).</p>
+    <p><strong>Released: ISNC <code>v0.2.0rc60</code></strong> (commit <code>f86883b3</code>, 2119 entries,
+    validation PASSED with the awakened checks). Dropped 8 (the retired generics/mis-named camera names), added 10
+    (per-device triples, image-up, angular-width pair, 3 pipeline names). ~20 direction-vector paths deliberately
+    parked as visible <code>vocab_gap</code> sources rather than shipped wrong — see f-irf-007. LLM spend ≈ $35
+    across nine bounded rotations.</p>
+
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
 <div class="r-dec" data-key="description-notation" data-choice="plain-text-descriptions" data-by="agent (delegated)" data-when="2026-07-04">
@@ -450,7 +477,7 @@ Done-when
   4. Outcome recorded in plan, followup resolved</pre>
     <p class="r-fu-outcome">Four-layer guards landed: codex prompt rules dbcc8359/3bbbfdd1, attach-gate guards 9295d4ad/e6d59bf1, family audit 655e8cff; ISN staged unit-vector locus warning a6a91a5 + image_up_unit_vector carrier ca4585c (catalog round-trip 2117/0). Camera image-up renames + FOV-angle hint attached as sn edits. Residual split/re-home work re-queued as f-irf-006 (see §5c).</p>
     </article>
-<article class="r-fu" data-id="f-irf-005" data-status="open" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-07-04" data-recommends-skill="/reckon-ship independent-review-fixes §6" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-irf-005" data-status="resolved" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-07-04" data-recommends-skill="/reckon-ship independent-review-fixes §6" data-resolved-at="2026-07-05T02:36:03+00:00" data-resolved-by="agent">
     <h4 class="r-fu-title">§6 — Audit the 89 dd_paths mapped to multiple standard names</h4>
     <div class="r-fu-body">Wider attach-hygiene sweep discovered during item-4 triage; needs its own classification pass (legitimate multi-name cases vs attach errors) and probably an attach-gate uniqueness rule.</div>
     <pre class="r-fu-prompt">Project: imas-standard-names
@@ -473,8 +500,9 @@ Done-when
   1. Classification table (legit vs error) recorded
   2. Attach-gate uniqueness rule proposed with evidence
   3. Followup resolved or split into implementation followups</pre>
+    <p class="r-fu-outcome">Classification of all 90 double-attached paths archived (60 generic-vs-specific / 17 locus mismatch / 9 both-wrong / 4 defensible — docs/archive/independent-review-fixes-dup-paths-classification.html); dd_path_uniqueness_check corpus audit landed (codex cafbb397). Post-restore the accepted set has 1 remaining dup + 6 momentum-family inconsistencies (pre-existing, in the classification); per-path fixes ride f-irf-007.</p>
     </article>
-<article class="r-fu" data-id="f-irf-006" data-status="open" data-tier="opus" data-written-by="agent" data-written-at="2026-07-04" data-recommends-skill="/reckon-ship independent-review-fixes §5c" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-irf-006" data-status="resolved" data-tier="opus" data-written-by="agent" data-written-at="2026-07-04" data-recommends-skill="/reckon-ship independent-review-fixes §5c" data-resolved-at="2026-07-05T02:36:03+00:00" data-resolved-by="agent">
     <h4 class="r-fu-title">§5c — Regenerate the direction-vector family: per-device split, up/z re-home, domain harmonisation, warning→error</h4>
     <div class="r-fu-body">The generic <code>x/vertical_direction_unit_vector</code> + mis-locused <code>y_…_of_strain_gauge_sensor</code> triple needs a per-device split, and <code>camera/up/z</code> must move to the image-up family — source re-mapping that sn edit cannot express. Prompts and attach gate are now fixed, so a scoped regeneration produces the correct per-device names. Then promote the ISN unit-vector locus WARNING to ERROR and check family physics_domain agreement.</div>
     <pre class="r-fu-prompt">Project: imas-standard-names
@@ -505,6 +533,37 @@ Done-when
      image-up family; family domains agree (vector-node audit clean)
   2. ISN warning promoted to error; ISN + codex tests green; catalog validate passes
   3. Outcome recorded in plan, this followup resolved</pre>
+    <p class="r-fu-outcome">Shipped in v0.2.0rc60: broken generics + strain-gauge mis-locus + inconsistent camera angle pair RETIRED (8 drops); per-device replacements ADDED (pellet_injector x/y/z triple, image-up y, shatter-cone minor-axis y, toroidal/vertical_angular_width_of_camera); ISN unit-vector locus rule promoted to ERROR (d7794de); z canonical in Cartesian triples end-to-end (families 8b9ecb54, audits 70543413, prompts 2a051e3c); projection-shape coercion unblocked composition (2a8ac508). Remaining direction-vector paths deliberately parked as visible vocab_gap sources — see f-irf-007.</p>
+    </article>
+<article class="r-fu" data-id="f-irf-007" data-status="open" data-tier="opus" data-written-by="agent" data-written-at="2026-07-05" data-recommends-skill="/reckon-ship independent-review-fixes §5c" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Post-rc60 residuals: parked direction-vector paths, momentum-family dups, direction_second qualifier, x_image_up docs</h4>
+    <div class="r-fu-body">Deliberately parked as vocab_gap in rc60 (visible, unexported): camera direction/{x,y,z} + up/{x,z}, ec mirror movement/direction triple, sensor direction triple, shatter_cone direction x/y + minor x/z, neutron direction_to_detector triple, sensor direction_second (needs an ordinal qualifier — token review). Also: 6 momentum-family base-carrier inconsistencies + 1 dup path (classification archive), x_image_up docs still pending, 9 LaTeX descriptions + E− formula edits still queued as open hint edits. Supervised pipeline session recommended — pooled runs re-drafted catalog names and burned budget without claiming hint edits tonight.</div>
+    <pre class="r-fu-prompt">Project: imas-standard-names
+Plan:    independent-review-fixes (http://localhost:8765/imas-standard-names/independent-review-fixes.html)
+Section: §5c residuals
+Tier:    opus
+
+Context
+  rc60 shipped the guard-rails and clean replacements; ~20 direction-vector DD paths are parked
+  as vocab_gap sources and several doc-fix hint edits remain open. Pooled runs proved unreliable
+  for claiming hint edits on accepted names and re-drafted catalog names — supervise each rotation.
+
+State to read
+  Graph: StandardNameSource status=vocab_gap for camera_ir/ec_launchers/spi/operational_instrumentation/
+  neutron_diagnostic direction paths; open edits (sn.edit_status=&#x27;open&#x27;).
+  Memory: sn-reset-ignores-focus-incident, sn-pipeline-rotation-traps.
+  Archive: docs/archive/independent-review-fixes-dup-paths-classification.html.
+
+Scope locks / constraints
+  Honour locked decisions (z-in-cartesian-families, locus-required, plain-text-symbol descriptions).
+  direction_second needs the ordinal-qualifier decision at the canonical-qualifier-order token review
+  FIRST. Never run sn run --reset-to with --include-accepted (incident). Verify every rotation&#x27;s
+  output against the vector-node family audit before accepting.
+
+Done-when
+  1. Each parked path carries a locus-qualified x/y/z name accepted with docs
+  2. Momentum-family dups + open doc edits drained; family + uniqueness audits clean
+  3. Outcome recorded, this followup resolved</pre>
     </article>
 </section>
   </main>
