@@ -18,8 +18,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-05">
-<meta name="plan-version" content="3">
-<meta name="plan-impl" content="0.4">
+<meta name="plan-version" content="4">
+<meta name="plan-impl" content="0.6">
 </head>
 <body>
   <main class="plan-doc">
@@ -162,12 +162,18 @@
     <a href="/imas-standard-names/canonical-qualifier-order.html">canonical-qualifier-order</a>'s token review — take
     it there first; §4's <code>direction_second</code> paths stay parked until the token is decided.</p>
 
-    <h2 id="s6">§6 — dd-path dedup residual</h2>
-    <p>The <a href="/imas-standard-names/archive/independent-review-fixes-dup-paths-classification.html">90-path
-    classification</a> is archived with per-path verdicts. Post-restore the accepted set has 1 remaining duplicate
-    path plus 6 momentum-family base-carrier inconsistencies (edge_sources / plasma_sources momentum nodes). Apply
-    the archived verdicts (detach the wrong holder / re-map) via the pipeline; the new <code>dd_path_uniqueness_check</code>
-    corpus audit (codex <code>cafbb397</code>) is the acceptance gate — it must return zero.</p>
+    <h2 id="s6"><span class="badge badge-shipped">✓ landed 2026-07-05</span> §6 — dd-path dedup residual</h2>
+    <p class="landed-summary"><strong>dd_path_uniqueness_check → 0</strong> over the 2440-name accepted corpus (was 2, not the
+    plan's estimated 1). Root cause was a single <em>source_paths list PROPERTY</em> over-attach — not an edge:
+    <code>x_direction_unit_vector_of_pellet_injector.source_paths</code> listed all three
+    <code>spi/injector/injection_direction/{x,y,z}</code> leaves while the <code>HAS_STANDARD_NAME</code> edges were
+    already clean 1:1. Trimmed the property to <code>[/x]</code> (surgical, reversible; dry-run-verified
+    before/after/delta==2). The <strong>6 expected momentum base-carrier inconsistencies DID NOT EXIST</strong> (0 in the
+    live corpus — already resolved via a superseded <code>normalized_momentum_flux</code> rename). Durable with no
+    re-export: <code>source_paths</code> is neither exported to the ISNC YAML nor written on import
+    (<code>export.py:512-514</code>, <code>catalog_import.py</code>). The 2 residual
+    <code>vector_family_consistency_check</code> flags are the sensor <code>vertical→z</code> re-lock, folded into §7.
+    Full record: <a href="archive/catalog-naming-followups-s6-landed.html">§6 landed</a>.</p>
 
     <h2 id="s7">§7 — open doc edits</h2>
     <p>Carried from rc60 as open <code>sn edit</code> hint proposals that pooled runs will not claim: the 9
@@ -281,7 +287,7 @@ Done-when
   1. Each parked path carries an accepted locus-qualified x/y/z name with docs; family audit clean
   2. Outcome recorded; this followup resolved (spawn per-device sub-followups if it needs splitting)</pre>
     </article>
-<article class="r-fu" data-id="f-cnf-003" data-status="open" data-tier="opus" data-written-by="agent" data-written-at="2026-07-05" data-recommends-skill="/reckon-ship catalog-naming-followups §6" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-cnf-003" data-status="resolved" data-tier="opus" data-written-by="agent" data-written-at="2026-07-05" data-recommends-skill="/reckon-ship catalog-naming-followups §6" data-resolved-at="2026-07-05T14:47:50+00:00" data-resolved-by="groundtruth + orchestrator">
     <h4 class="r-fu-title">§6 — Apply the dd-path dedup verdicts</h4>
     <div class="r-fu-body">Resolve the 1 remaining duplicate path + 6 momentum-family base-carrier inconsistencies per the archived classification; dd_path_uniqueness_check must return zero over accepted names.</div>
     <pre class="r-fu-prompt">Project: imas-codex
@@ -304,6 +310,7 @@ Scope locks / constraints
 Done-when
   1. dd_path_uniqueness_check and the momentum families in vector_family_consistency_check return clean
   2. Outcome recorded; this followup resolved</pre>
+    <p class="r-fu-outcome">§6 landed — dd_path_uniqueness_check 2→0 over 2440 accepted names. Ground truth corrected the estimate: 2 violations (not 1), both from ONE name's stale source_paths LIST PROPERTY over-attach (not an edge) — x_direction_unit_vector_of_pellet_injector.source_paths listed injection_direction/x,y,z while the HAS_STANDARD_NAME edges were already clean 1:1. Trimmed the property to [/x] (surgical, dry-run-verified before/after/delta==2). The 6 expected momentum base-carrier inconsistencies DID NOT EXIST (0 — already resolved via a superseded normalized_momentum_flux rename). Durable, no re-export: source_paths is neither exported to ISNC YAML nor written on import (export.py:512-514, catalog_import.py). Residual 2 vector_family_consistency_check flags = sensor vertical→z re-lock, folded into §7. Record: archive/catalog-naming-followups-s6-landed.html.</p>
     </article>
 <article class="r-fu" data-id="f-cnf-004" data-status="open" data-tier="sonnet" data-written-by="agent" data-written-at="2026-07-05" data-recommends-skill="/reckon-ship catalog-naming-followups §7" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">§7 — Drain the open doc edits (supervised)</h4>
