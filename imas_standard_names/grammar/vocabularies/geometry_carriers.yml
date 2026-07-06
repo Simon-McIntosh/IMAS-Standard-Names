@@ -95,3 +95,7 @@ carriers:
     aliases: []
   minor_axis_unit_vector:  # minor principal axis of an elliptical cross-section — N=3 (spi shatter_cone/unit_vector_minor/{x,y,z})
     aliases: []
+  first_measurement_direction_unit_vector:  # a strain-rosette gauge's first measurement-axis unit vector — N=3 (operational_instrumentation sensor/direction/{x,y,z})
+    aliases: []
+  second_measurement_direction_unit_vector:  # a strain-rosette gauge's second measurement-axis unit vector — N=3 (operational_instrumentation sensor/direction_second/{x,y,z})
+    aliases: []

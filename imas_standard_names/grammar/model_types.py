@@ -480,6 +480,7 @@ class Object(StrEnum):
     CRYOSTAT = "cryostat"
     GAUGE = "gauge"
     STRAIN_GAUGE_SENSOR = "strain_gauge_sensor"
+    STRAIN_GAUGE = "strain_gauge"
     CONDUCTOR = "conductor"
     COIL_CONDUCTOR = "coil_conductor"
     COIL_CONDUCTOR_ELEMENT = "coil_conductor_element"
@@ -588,6 +589,10 @@ class GeometricBase(StrEnum):
     IMAGE_UP_UNIT_VECTOR = "image_up_unit_vector"
     MAJOR_AXIS_UNIT_VECTOR = "major_axis_unit_vector"
     MINOR_AXIS_UNIT_VECTOR = "minor_axis_unit_vector"
+    FIRST_MEASUREMENT_DIRECTION_UNIT_VECTOR = "first_measurement_direction_unit_vector"
+    SECOND_MEASUREMENT_DIRECTION_UNIT_VECTOR = (
+        "second_measurement_direction_unit_vector"
+    )
 
 
 class Transformation(StrEnum):

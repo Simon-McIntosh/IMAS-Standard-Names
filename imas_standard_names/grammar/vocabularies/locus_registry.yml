@@ -313,6 +313,11 @@ loci:
     # mechanical strain-gauge sensor on structural components
     type: entity
     allowed_relations: [of]
+  strain_gauge:
+    # strain-gauge rosette (multi-axis strain measurement); carrier for its
+    # ordered measurement-direction unit vectors (first/second)
+    type: entity
+    allowed_relations: [of]
 
   # ── coil-conductor and diagnostic-optic entities (VocabGap analysis) ──
   # Genuine DD hardware objects (PF/TF/non-axisymmetric coil conductor
