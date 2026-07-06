@@ -458,7 +458,16 @@ loci:
     allowed_relations: [at, of]
   limiter:
     type: position
-    allowed_relations: [at, of]
+    allowed_relations: [at, of, along]
+    description: >-
+      Plasma-facing limiter. As a measurement locus, 'at_limiter' denotes the
+      scrape-off-layer plasma immediately adjacent to the limiter surface; the
+      DD provides only the limiter surface geometry
+      (wall/description_2d/limiter) and the precise plasma evaluation point is
+      not yet standardised (IMAS_3226). For the separatrix-limiter tangency
+      CONTACT point use active_limiter_point; for a quantity distributed OVER
+      the limiter surface (e.g. a peak power density) use the 'along' relation
+      (along_limiter).
   magnetic_axis:
     type: position
     allowed_relations: [at, of]
@@ -487,9 +496,21 @@ loci:
   outboard_midplane:
     type: position
     allowed_relations: [at, of]
+    description: >-
+      Low-field-side (outboard) equatorial midplane. The outer-midplane
+      reference follows the DD midplane_identifier (default option
+      'dr_dz_zero_sep': the outboard separatrix point where dr/dz = 0). For a
+      value at the separatrix intersection use outboard_midplane_separatrix.
   outboard_midplane_separatrix:
     type: position
     allowed_relations: [at, of]
+    description: >-
+      Intersection of the separatrix with the outboard (low-field-side)
+      midplane - the outboard separatrix point where dr/dz = 0 (the local
+      major-radius maximum of the separatrix). This is where a separatrix
+      POINT value is evaluated. DD:
+      equilibrium/time_slice/boundary_separatrix/dr_dz_zero_point; outer-midplane
+      reference per the midplane_identifier.
   outer:
     type: position
     allowed_relations: [at, of]
@@ -499,12 +520,26 @@ loci:
   pedestal:
     type: position
     allowed_relations: [at, of]
+    description: >-
+      H-mode edge transport-barrier (pedestal) region. Ambiguous as a single
+      point: for a profile VALUE use pedestal_top; for a maximum-gradient or
+      fit POSITION use pedestal_maximum. Prefer the more specific token over
+      this bare one. DD: summary/local/pedestal, summary/pedestal_fits/*.
   pedestal_maximum:
     type: position
     allowed_relations: [at, of]
+    description: >-
+      Location of the maximum pedestal gradient (the steep mid-pedestal), i.e.
+      the peak-gradient / fit position of the edge barrier. Distinct from the
+      pedestal top. DD: summary/pedestal_fits/*/d_dpsi_norm_max_position,
+      summary/local/pedestal/position/psi.
   pedestal_top:
     type: position
     allowed_relations: [at, of]
+    description: >-
+      Top of the H-mode edge pedestal (the barrier's inner shoulder), where
+      'the pedestal value' of a profile is conventionally reported. DD:
+      summary/pedestal_fits/* pedestal-top fit outputs.
   pedestal_top_high_field_side:
     type: position
     allowed_relations: [at, of]
@@ -544,6 +579,12 @@ loci:
     type: position
     allowed_relations: [at, of]
     qualifiable: true
+    description: >-
+      Last closed flux surface / separatrix. For a flux-surface-averaged
+      quantity apply the flux_surface_averaged operator (DD
+      summary/local/separatrix_average/*); for a bare point value at the
+      outboard midplane use outboard_midplane_separatrix. DD:
+      summary/local/separatrix/*, equilibrium/time_slice/boundary_separatrix.
   shattering_position:
     type: position
     allowed_relations: [at, of]
@@ -573,11 +614,21 @@ loci:
     # (real-time shape/position control reference)
     type: position
     allowed_relations: [at, of]
+    description: >-
+      The point where the last closed flux surface of a limited plasma is
+      tangent to (makes contact with) the limiter surface - the
+      separatrix-limiter tangency point. Distinct from the SOL-adjacent
+      'at_limiter' locus. DD: pulse_schedule/position_control/active_limiter_point.
   dr_dz_zero_point:
     # plasma boundary location where dr/dz = 0 — the outboard local
     # major-radius maximum (widest point of the separatrix)
     type: position
     allowed_relations: [at, of]
+    description: >-
+      Outboard point on the separatrix where dr/dz = 0 (the local maximum of
+      the separatrix major radius) - the geometric outer-midplane reference
+      selected by the DD midplane_identifier option 'dr_dz_zero_sep'. DD:
+      equilibrium/time_slice/boundary_separatrix/dr_dz_zero_point.
 
   # ====================================================================
   # Geometry-typed loci (shape/region boundary: _at_, _of_, _over_)

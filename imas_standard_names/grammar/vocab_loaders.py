@@ -78,6 +78,10 @@ class LocusEntry(BaseModel, extra="forbid"):
     """When true, the feature composes with the registry's ``locus_qualifiers``
     (e.g. ``strike_point`` -> ``inner_strike_point``, ``upper_outer_strike_point``)
     instead of enumerating each geometric variant as its own flat token."""
+    description: str = ""
+    """Optional DD-anchored gloss of what/where the locus is. Consumed by the
+    description-generation pipeline so a locus's meaning is anchored to its DD
+    definition rather than re-invented per name. Empty by default."""
 
 
 class LocusRegistry(BaseModel, extra="forbid"):
