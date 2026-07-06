@@ -150,6 +150,12 @@ bases:
     aliases: []
     kind: scalar
     inherently_dimensional: true
+  # Dimensionless flux-limiter coefficient (e.g. the factor alpha_m bounding a
+  # transport flux to a fraction of its free-streaming value). A specific,
+  # named base preferred over the generic 'coefficient' for these quantities.
+  flux_limiter_coefficient:
+    aliases: []
+    kind: scalar
   force:
     aliases: []
     kind: vector
