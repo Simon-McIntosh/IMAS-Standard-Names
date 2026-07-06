@@ -18,8 +18,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-06">
-<meta name="plan-version" content="6">
-<meta name="plan-impl" content="0.6">
+<meta name="plan-version" content="7">
+<meta name="plan-impl" content="0.72">
 </head>
 <body>
   <main class="plan-doc">
@@ -716,7 +716,7 @@ Done-when
     </article>
 <article class="r-fu" data-id="f-erf-pipeline-build" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-06" data-recommends-skill="reckon-ship" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Pipeline-fix build progress + remaining regen/RC (user chose: build pipeline fixes first)</h4>
-    <div class="r-fu-body">BUILT + LANDED this session (all $0 renames + code): C6 flux_limiter_coefficient base + 13 renames; C10 along_limiter + rename; C5 54 value->pedestal_top + 1 derivative->pedestal_maximum; C1 keep-underscore; imas-codex generation-standard prompts (data-driven, no hardcoded vocab); loci DD-anchored descriptions + defining_quantity. TWO of THREE pipeline fixes BUILT: (1) C12 reaction-channel qualifier grammar (ISN model.py + qualifiers/qualifier_categories vocab + guard-test allowlists; full grammar suite green 786; codex pin bumped to 7d514a4; 8 <pair>_neutron_flux renamed + semantic-parse/export clean) DONE end-to-end. (2) derived-name docs-regen: relaxed claim_generate_docs_batch to drop the name-score gate under a curative scope_run_id (graph_ops.py c95ad5b7) so derived-leaf families are docs-eligible; VALIDATED on density_at_limiter (20 members regenerated with the charge-state aggregation clause, ~$2.78/family; drtrain review->accept scoped). REMAINING: (3) per-species fsa from the DD species-array node (C4-fsa) still to BUILD; apply the docs regen across the other description families (density_at_plasma_boundary 18, density_at_pedestal_top 20, toroidal_<species>_velocity C2 families) ~ $3/family; C8 interim unit-flag on 3 names; then full flush + export + cut ISNC RC v0.2.0rc62. Budget used ~ $6 of $50. Note: --focus --dry-run is NOT dry (runs for real); the ISN pin bump trips the clear-gate (use --skip-clear-gate deliberately); the canonical density template improves consistency (aggregation clause now universal) but openings still vary somewhat (a stricter template could tighten further).</div>
+    <div class="r-fu-body">BUILT + LANDED this session (all $0 renames + code): C6 flux_limiter_coefficient base + 13 renames; C10 along_limiter + rename; C5 54 value-&gt;pedestal_top + 1 derivative-&gt;pedestal_maximum; C1 keep-underscore; imas-codex generation-standard prompts (data-driven, no hardcoded vocab); loci DD-anchored descriptions + defining_quantity. TWO of THREE pipeline fixes BUILT: (1) C12 reaction-channel qualifier grammar (ISN model.py + qualifiers/qualifier_categories vocab + guard-test allowlists; full grammar suite green 786; codex pin bumped to 7d514a4; 8 <pair>_neutron_flux renamed + semantic-parse/export clean) DONE end-to-end. (2) derived-name docs-regen: relaxed claim_generate_docs_batch to drop the name-score gate under a curative scope_run_id (graph_ops.py c95ad5b7) so derived-leaf families are docs-eligible; VALIDATED on density_at_limiter (20 members regenerated with the charge-state aggregation clause, ~$2.78/family; drtrain review-&gt;accept scoped). REMAINING: (3) per-species fsa from the DD species-array node (C4-fsa) still to BUILD; apply the docs regen across the other description families (density_at_plasma_boundary 18, density_at_pedestal_top 20, toroidal_<species>_velocity C2 families) ~ $3/family; C8 interim unit-flag on 3 names; then full flush + export + cut ISNC RC v0.2.0rc62. Budget used ~ $6 of $50. Note: --focus --dry-run is NOT dry (runs for real); the ISN pin bump trips the clear-gate (use --skip-clear-gate deliberately); the canonical density template improves consistency (aggregation clause now universal) but openings still vary somewhat (a stricter template could tighten further).</species></pair></div>
     <pre class="r-fu-prompt">Project: imas-codex (build #3 + regen) + imas-standard-names-catalog (RC)
 Plan: expert-review-fixes (http://localhost:8765/imas-standard-names/expert-review-fixes.html)
 Section: pipeline build (remaining)
@@ -741,6 +741,35 @@ Done-when
   2. Description regen applied across the density + velocity families; drafted docs drained to accepted.
   3. C8 interim flag on the 3 names; full flush; export clean; ISNC RC cut.
   4. This followup resolved; WS2/WS3/WS4 advanced/closed.</pre>
+    </article>
+<article class="r-fu" data-id="f-erf-c4-composer-locus" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-06" data-recommends-skill="reckon-ship" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">C4-fsa needs a composer locus-canonicalization (DD separatrix -&gt; plasma_boundary), not a focus</h4>
+    <div class="r-fu-body">DIAGNOSIS (why C4-fsa is a build, not a focus): the 8 accepted toroidal_flux_surface_averaged_<species>_velocity_at_plasma_boundary names are all origin=catalog_edit (hand-created at the plasma_boundary locus). The pipeline COMPOSER, given the DD summary/local/separatrix_average path, instead produces the at_separatrix locus (0 accepted names use at_separatrix) -> the fresh attempts (beryllium, lithium) went EXHAUSTED at review because plasma_boundary is the accepted convention (separatrix = LCFS = the plasma boundary). So generating the ~9 missing fsa velocity + ~16 missing fsa density names via --focus fails (wrong locus, sources exhausted). FIX REQUIRED: canonicalize DD separatrix/separatrix_average -> the plasma_boundary locus in the name composer (generate_name_dd.md ~L194 maps to position=separatrix + transformation; change to plasma_boundary, OR add a separatrix->plasma_boundary canonical-locus mapping in audits.canonical_locus_check), then --retry-quarantined/--reset the exhausted fsa sources and regenerate at default quality. Interacts with canonical-qualifier-order (secondary_separatrix vs plasma_boundary synonym). Also: fix the malformed toroidal_flux_surface_averaged_deuterium_tritium_velocity (missing _at_plasma_boundary locus) + the 2 dangling helium_3 fsa links + supersede the 3 generic ion_species drafts from the earlier mis-scoped focus.</div>
+    <pre class="r-fu-prompt">Project: imas-codex (composer locus fix) + imas-standard-names-catalog
+Plan: expert-review-fixes (http://localhost:8765/imas-standard-names/expert-review-fixes.html)
+Section: C4-fsa (deferred build)
+Tier: opus
+
+Context
+  C4-fsa (flux-surface-averaged vs local distinction for all separatrix species) needs a composer locus-canonicalization: the composer emits at_separatrix but the accepted convention is at_plasma_boundary, so fresh fsa names exhaust at review. This is a distinct build, deferred from the main regen.
+
+State to read (CODE / FILES / DATA)
+  imas-codex/imas_codex/llm/prompts/sn/generate_name_dd.md (separatrix position mapping ~L194)
+  imas-codex/imas_codex/standard_names/audits.py canonical_locus_check (separatrix/plasma_boundary/secondary_separatrix handling)
+  DD via imas-dd: summary/local/separatrix{,_average}/{velocity_phi,n_i}/&lt;species&gt; per-species leaves
+  Graph: exhausted toroidal_flux_surface_averaged_{beryllium,lithium}_velocity_at_separatrix; superseded helium_3 fsa; 3 drafted ion_species generics; malformed toroidal_flux_surface_averaged_deuterium_tritium_velocity.
+
+Scope locks / constraints
+  - Canonicalize DD separatrix/separatrix_average -&gt; plasma_boundary locus in the composer (or canonical_locus mapping); do NOT accept at_separatrix names.
+  - Reset/retry the exhausted fsa sources; regenerate at default reviewer + 0.85; only accept &gt;=0.85 (quality-first).
+  - Generate the ~9 missing fsa velocity + ~16 missing fsa density species; fix the DT malformation + 2 dangling links; supersede the 3 generic ion_species drafts.
+  - Add the local&lt;-&gt;separatrix_average pairing invariant (WS4) so the pipeline cannot ship half a pair.
+
+Done-when
+  1. Composer emits plasma_boundary for separatrix DD paths; at_separatrix names gone.
+  2. All 17 species have both local + fsa velocity + density at plasma_boundary, accepted at &gt;=0.85.
+  3. Generic drafts superseded; dangling links fixed; pairing invariant added.
+  4. This followup resolved; WS4 closed.</pre>
     </article>
 </section>
 
