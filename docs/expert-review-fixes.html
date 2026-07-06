@@ -18,8 +18,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-06">
-<meta name="plan-version" content="4">
-<meta name="plan-impl" content="0.15">
+<meta name="plan-version" content="5">
+<meta name="plan-impl" content="0.45">
 </head>
 <body>
   <main class="plan-doc">
@@ -688,6 +688,31 @@ Done-when
      published catalog; family-parallel + inline-unit lint clean.
   2. Pedestal/limiter renames applied via ISN grammar and re-review clean.
   3. WS1 and WS2 advanced/closed accordingly; this follow-on resolved.</pre>
+    </article>
+<article class="r-fu" data-id="f-erf-c5-residual" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-06" data-recommends-skill="reckon-ship" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">C5 residual — consolidate pre-existing pedestal duplicates + adjudicate 4 ambiguous flux/shear/q names</h4>
+    <div class="r-fu-body">RENAMES LANDED in the graph (free graph ops, $0): C10 peak_power_density_along_limiter; C6 13x *_flux_limiter_coefficient (0 old *_momentum_coefficient left); C12 8x reaction-pair *_neutron_flux (0 old *_flux left); C5 54x value quantities to _at_pedestal_top + 1 derivative (electron_density) to _at_pedestal_maximum. RESIDUAL not renamed: (a) DUPLICATES where _at_pedestal AND _at_pedestal_top both pre-exist (temperature_at_pedestal both placeholders; electron_temperature_at_pedestal both catalog_edit; electron_pressure_at_pedestal live-vs-superseded _top; pressure_at_pedestal + its electron_pressure derivative blocked by that collision) — renaming collides, needs a duplicate MERGE keeping the canonical _top. (b) AMBIGUOUS position/flux names left for lead physics call: magnetic_shear_at_pedestal, safety_factor_at_pedestal, poloidal_magnetic_flux_at_pedestal, normalized_poloidal_magnetic_flux_at_pedestal (top vs mid-pedestal-position).</div>
+    <pre class="r-fu-prompt">Project: imas-codex (graph) + imas-standard-names-catalog
+Plan: expert-review-fixes (http://localhost:8765/imas-standard-names/expert-review-fixes.html)
+Section: C5 residual
+Tier: opus
+
+Context
+  Bulk C5 pedestal renames landed. Two residual classes remain, both needing judgment.
+
+State to read (CODE / FILES / DATA)
+  Graph (read-only): the 9 remaining *_at_pedestal accepted names and their _at_pedestal_top counterparts (stage/origin).
+  imas-codex sn edit + consolidation mechanics (duplicate merge / supersede).
+  DD via imas-dd for the 4 ambiguous names (is the pedestal value at the top or the fit/max-gradient position?).
+
+Scope locks / constraints
+  - Duplicates: keep the canonical _at_pedestal_top, supersede the redundant _at_pedestal (do NOT hand-delete; use the sanctioned supersede/merge path). Where _top is already superseded (electron_pressure), decide which form is canonical first.
+  - Ambiguous 4: lead physics call (top vs pedestal_maximum) before any rename.
+
+Done-when
+  1. Pedestal duplicates consolidated to one locus each; 0 redundant _at_pedestal duplicates.
+  2. The 4 ambiguous names adjudicated + renamed or left per the lead.
+  3. This followup resolved.</pre>
     </article>
 </section>
 
