@@ -525,6 +525,7 @@ loci:
       point: for a profile VALUE use pedestal_top; for a maximum-gradient or
       fit POSITION use pedestal_maximum. Prefer the more specific token over
       this bare one. DD: summary/local/pedestal, summary/pedestal_fits/*.
+    defining_quantity: normalized_poloidal_flux_coordinate_of_pedestal
   pedestal_maximum:
     type: position
     allowed_relations: [at, of]
@@ -533,6 +534,7 @@ loci:
       the peak-gradient / fit position of the edge barrier. Distinct from the
       pedestal top. DD: summary/pedestal_fits/*/d_dpsi_norm_max_position,
       summary/local/pedestal/position/psi.
+    defining_quantity: normalized_poloidal_flux_coordinate_of_pedestal
   pedestal_top:
     type: position
     allowed_relations: [at, of]
@@ -540,6 +542,7 @@ loci:
       Top of the H-mode edge pedestal (the barrier's inner shoulder), where
       'the pedestal value' of a profile is conventionally reported. DD:
       summary/pedestal_fits/* pedestal-top fit outputs.
+    defining_quantity: normalized_poloidal_flux_coordinate_of_pedestal
   pedestal_top_high_field_side:
     type: position
     allowed_relations: [at, of]

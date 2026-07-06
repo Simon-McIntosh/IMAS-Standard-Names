@@ -82,6 +82,13 @@ class LocusEntry(BaseModel, extra="forbid"):
     """Optional DD-anchored gloss of what/where the locus is. Consumed by the
     description-generation pipeline so a locus's meaning is anchored to its DD
     definition rather than re-invented per name. Empty by default."""
+    defining_quantity: str = ""
+    """Optional standard name that DEFINES this locus's position (e.g. the
+    pedestal is located by ``normalized_poloidal_flux_coordinate_of_pedestal``).
+    The description pipeline cross-links this quantity so a name evaluated at the
+    locus points at the quantity that fixes the locus. Data-driven: the rule
+    lives in the prompt, the mapping lives here. Empty when the locus has no
+    single defining standard quantity."""
 
 
 class LocusRegistry(BaseModel, extra="forbid"):
