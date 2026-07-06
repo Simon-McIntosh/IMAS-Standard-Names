@@ -18,7 +18,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-06">
-<meta name="plan-version" content="3">
+<meta name="plan-version" content="4">
 <meta name="plan-impl" content="0.15">
 </head>
 <body>
@@ -652,6 +652,42 @@ Done-when
   1. DT prose clarified (single effective species vs D-T reaction channel reading).
   2. C9 render surface confirmed with the reviewer; optional mkdocs tweak applied.
   3. This followup resolved.</pre>
+    </article>
+<article class="r-fu" data-id="f-erf-codex-prompt-standards" data-status="open" data-tier="opus" data-written-by="fleet-worker" data-written-at="2026-07-06" data-recommends-skill="reckon-ship" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">LANDED (imas-codex prompt/harmonize standards) — WS1/WS2 generation-rule halves; regenerate sweep remains</h4>
+    <div class="r-fu-body">The imas-codex generation-STANDARD changes for WS1/WS2 landed on imas-codex@main (3 commits, prompt+harmonize only — no graph mutation, no catalog YAML, no ISN grammar). What landed: (T1/C11) canonical number-density opening template in generate_docs_system.md, with the short description field bound to the family-anchor rule; (T2/C2) charge-state aggregation clause — summed for extensive (density), density-weighted mean for intensive (velocity, temperature) — plus cross-link to the charge-state-resolved counterpart; (T3/C3-desc) PR-9 locus-defining cross-link rule (pedestal→flux coordinate, generalized to separatrix/axis/X-point); (T4/C7) strengthened no-inline-units to forbid restated ASCII/LaTeX unit strings, added to generate_docs_system.md and refine_docs_user.md; (T6/C1) deuterium_tritium wording distinguishes the effective 2.5-amu fuel species from the D-T fusion reaction channel, underscore kept; (T5/C5,C10) pedestal reconciled to a locus across generate_name_system.md + generate_name_dd_names.md + generate_name_dd.md (value→at_pedestal_top, gradient/flux-position→at_pedestal_maximum, bare pedestal + zone-prefix banned) and the three limiter loci distinguished (at_limiter point / along_limiter distribution / active_limiter_point tangency); (T7/C11) harmonize.select_anchor pinned to a canonical family opening instead of longest-description, with tests. Commits: ea0db110 (docs standards), a54e86c1 (name prompts; also repaired a pre-existing stale generate_name_dd golden from 1b83fe04), 6566ee08 (harmonize anchor + tests). All imas-codex prompt/harmonize/golden tests green. Refine_docs_user + generate_name_dd(_names) golden fixtures regenerated.</div>
+    <pre class="r-fu-prompt">Project: imas-codex (regenerate) + imas-standard-names-catalog
+Plan:    expert-review-fixes (http://localhost:8765/imas-standard-names/expert-review-fixes.html)
+Section: §4/§5 follow-on to WS1/WS2
+Tier:    opus
+
+Context
+  The generation STANDARDS for WS1 (pedestal/limiter prompt reconciliation + PR-9
+  locus cross-link) and WS2 (canonical number-density opening, charge-state
+  aggregation clause, DT wording, no-inline-units hardening, select_anchor pinned to
+  a canonical opening) have LANDED on imas-codex@main (commits ea0db110, a54e86c1,
+  6566ee08). They change prompt text + harmonize.py only — no accepted name has been
+  regenerated, so the published catalog does NOT yet reflect the new standards.
+
+Remaining work (orchestrator-driven, NOT done by the prompt-standards worker)
+  1. Run a harmonize + REGENERATE docs sweep over the *_density* family (~100+ names,
+     esp. the *_density_at_limiter siblings with the ~7 drifting openings) and the
+     toroidal_&lt;species&gt;_velocity_at_* family so the canonical opening + aggregation
+     clause take effect; confirm family-parallel-structure passes and 0 inline-unit
+     lint hits on regenerated names.
+  2. Pass the zone-&gt;defining-quantity map (pedestal-&gt;normalized_poloidal_flux_coordinate_of_pedestal,
+     separatrix/axis/X-point-&gt;their coordinates) into the docs prompt context so PR-9
+     can emit the locus cross-links; verify the target names exist before linking.
+  3. Apply the C5 per-name pedestal triage (value-&gt;pedestal_top, gradient/flux-position
+     -&gt;pedestal_maximum) and the along_limiter / active_limiter_point renames through
+     ISN grammar + grammar_sync + regen (the locus_registry vocab is the ISN half of WS1).
+  4. Regenerate deuterium_tritium_* descriptions against the new DT wording rule.
+
+Done-when
+  1. Density + species-velocity + DT families regenerated; new standards visible in the
+     published catalog; family-parallel + inline-unit lint clean.
+  2. Pedestal/limiter renames applied via ISN grammar and re-review clean.
+  3. WS1 and WS2 advanced/closed accordingly; this follow-on resolved.</pre>
     </article>
 </section>
 
