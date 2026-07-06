@@ -18,7 +18,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-06">
-<meta name="plan-version" content="1">
+<meta name="plan-version" content="2">
 </head>
 <body>
   <main class="plan-doc">
@@ -339,54 +339,54 @@
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
-<div class="r-dec" data-key="dt-species-spelling" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="dt-species-spelling" data-choice="keep-underscore" data-by="Simon McIntosh" data-when="2026-07-06T14:20:07+00:00">
     <p class="r-dec-q">C1 — Should compound species (deuterium-tritium, isotopes) use a hyphen, or keep the underscore?</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="keep-underscore">Keep underscore (reject hyphen)</button>
+      <button class="r-opt chosen" data-value="keep-underscore">Keep underscore (reject hyphen)</button>
       <button class="r-opt" data-value="adopt-hyphen">Adopt hyphen for compound species</button>
       </p>
-    <p class="r-dec-rat">Reassessed after review pushback. The parsing objection is RETRACTED: the pairs are enumerated vocab tokens (subjects.yml:65-67) and the parser splits only on &#x27;_&#x27; (parser.py:755), so a hyphenated &#x27;deuterium-tritium&#x27; is a single atomic token — not a new delimiter, and it would even remove the token-internal-join vs grammar-segment longest-match ambiguity that &#x27;_&#x27; creates (the same class of ambiguity behind canonical-qualifier-order&#x27;s shadowing followups). The real reasons to keep &#x27;_&#x27; are convention-level, not mechanical: (1) the published style guide (docs/guidelines.md:566, docs/development/style-guide.md:17) deliberately forbids hyphens (&#x27;flux-loop&#x27; rejected), CF-aligned; (2) &#x27;-&#x27; is already reserved for the machine/file-id namespace (docs/tokamak-parameters.md); (3) every other multi-word indivisible token (magnetic_axis, internal_transport_barrier, scrape_off_layer) uses &#x27;_&#x27;, so hyphenating only species pairs is a new orthographic inconsistency; (4) consistency would cascade to isotopes already in vocab (helium_3, helium_4, methane_carbon_13 -&gt; helium-3, carbon-13), touching accepted names; (5) CF/identifier portability. Net: keep underscore at MODERATE confidence. Flip only as a deliberate, DOCUMENTED convention change — hyphen = intra-token compound joiner applied consistently to compound species AND isotopes, guidelines/style-guide updated, machine-name namespace concern addressed — gated on a parse/compose/name-link/graph-key/SPA round-trip spike. Interacts with C12 (the D-T pair also becomes a reaction-channel qualifier there).</p>
+    <p class="r-dec-rat">LOCKED (Simon McIntosh, 2026-07-06): keep underscore. Parsing objection retracted (pairs are enumerated tokens; the parser splits on &#x27;_&#x27; only, so a hyphen would be a single atomic token, not a new delimiter). Kept on convention grounds: docs/guidelines.md + style-guide.md deliberately forbid hyphens (CF-aligned); &#x27;-&#x27; is reserved for the machine/file-id namespace; every other multi-word token uses &#x27;_&#x27;; consistency would cascade to isotopes (helium_3, carbon_13); identifier portability. C1 becomes a prose clarification, not a rename.</p>
     </div>
-<div class="r-dec" data-key="pedestal-locus-consolidation" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="pedestal-locus-consolidation" data-choice="top-plus-midpedestal" data-by="Simon McIntosh" data-when="2026-07-06T14:20:07+00:00">
     <p class="r-dec-q">C5 — How to consolidate the pedestal locus?</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="top-plus-midpedestal">Rename value-quantities to pedestal_top; keep a mid-pedestal locus for gradient/position names</button>
+      <button class="r-opt chosen" data-value="top-plus-midpedestal">Rename value-quantities to pedestal_top; keep a mid-pedestal locus for gradient/position names</button>
       <button class="r-opt" data-value="blanket-top">Blanket-rename all _at_pedestal → _at_pedestal_top</button>
       <button class="r-opt" data-value="leave">Leave both as-is</button>
       </p>
-    <p class="r-dec-rat">Recommended: the first. By edge convention &quot;the pedestal value&quot; is the pedestal-top value (safe to rename ~value quantities), but maximum-gradient and flux-position quantities legitimately sit at the mid-pedestal (DD pedestal_fits/*/d_dpsi_norm_max_position , summary/local/pedestal/position/psi ) and must not be relabelled &quot;top&quot;. A blanket rename would mislabel those.</p>
+    <p class="r-dec-rat">LOCKED (Simon McIntosh, 2026-07-06): rename value-quantities to pedestal_top; route gradient/flux-position quantities to the mid-pedestal locus (pedestal_maximum). A blanket rename would mislabel maximum-gradient/position quantities that legitimately sit mid-pedestal (DD pedestal_fits/*/d_dpsi_norm_max_position, summary/local/pedestal/position/psi).</p>
     </div>
-<div class="r-dec" data-key="coefficient-base-strategy" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="coefficient-base-strategy" data-choice="add-new" data-by="Simon McIntosh" data-when="2026-07-06T14:20:07+00:00">
     <p class="r-dec-q">C6 — Add a new base or rename the existing one?</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="add-new">Add a new flux_limiter_coefficient base</button>
+      <button class="r-opt chosen" data-value="add-new">Add a new flux_limiter_coefficient base</button>
       <button class="r-opt" data-value="rename-in-place">Rename coefficient → flux_limiter_coefficient in place</button>
       </p>
-    <p class="r-dec-rat">Recommended: add a new base. The family is the only current consumer, so an in-place rename is technically safe, but adding a specific base keeps the generic coefficient slot free for future non-limiter coefficients and is the cleaner grammar.</p>
+    <p class="r-dec-rat">LOCKED (Simon McIntosh, 2026-07-06): add a new flux_limiter_coefficient base; keep the generic &#x27;coefficient&#x27; slot free for future non-limiter coefficients.</p>
     </div>
-<div class="r-dec" data-key="neutron-flux-grammar" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="neutron-flux-grammar" data-choice="option-a" data-by="Simon McIntosh" data-when="2026-07-06T14:20:07+00:00">
     <p class="r-dec-q">C12 — How to make the fusion neutron-flux names precise?</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="option-a">Option A — neutron is the concept; reaction pair becomes a qualifier (&lt;pair&gt;_neutron_flux)</button>
+      <button class="r-opt chosen" data-value="option-a">Option A — neutron is the concept; reaction pair becomes a qualifier (&lt;pair&gt;_neutron_flux)</button>
       <button class="r-opt" data-value="option-b">Option B — keep pair as subject; add a neutron qualifier</button>
       </p>
-    <p class="r-dec-rat">Recommended: Option A. It mirrors the DD&#x27;s neutron_fluxes/&lt;pair&gt; hierarchy 1:1, unifies with the existing neutron_flux_due_to_* names, and disambiguates the two D-D branches. Cost: parser positional disambiguation so the pair can be subject (density) or qualifier (neutron flux). Option B duplicates the neutron token across segments and produces awkward order.</p>
+    <p class="r-dec-rat">LOCKED (Simon McIntosh, 2026-07-06): Option A — neutron is the concept, reaction pair becomes a reaction-channel qualifier (&lt;pair&gt;_neutron_flux); mirrors the DD neutron_fluxes/&lt;pair&gt; hierarchy and unifies with the existing neutron_flux_due_to_* names; needs parser positional subject-vs-qualifier disambiguation so the pair can still be a subject for fuel-species quantities.</p>
     </div>
-<div class="r-dec" data-key="unit-prettification-strategy" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="unit-prettification-strategy" data-choice="ban-inline" data-by="Simon McIntosh" data-when="2026-07-06T14:20:07+00:00">
     <p class="r-dec-q">C7 — How to make unit rendering consistent?</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="ban-inline">Enforce the no-inline-units rule + refine legacy prose</button>
+      <button class="r-opt chosen" data-value="ban-inline">Enforce the no-inline-units rule + refine legacy prose</button>
       <button class="r-opt" data-value="unicode-renderer">Add a Unicode-superscript renderer to the UnitPill</button>
       </p>
-    <p class="r-dec-rat">Recommended: ban-inline. The unit: field is already uniform and the prompt already forbids restating units in prose; the defect is purely legacy prose. A refine pass + a lint guard is simpler than a renderer and matches the existing rule. (A Unicode renderer could be added later purely for pill aesthetics, independent of this fix.)</p>
+    <p class="r-dec-rat">LOCKED (Simon McIntosh, 2026-07-06): enforce the existing no-inline-units rule, refine the legacy prose, and add a lint guard; the unit: field is already uniform so no renderer is needed.</p>
     </div>
-<div class="r-dec" data-key="fsa-completeness-scope" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="fsa-completeness-scope" data-choice="velocity-and-density" data-by="Simon McIntosh" data-when="2026-07-06T14:20:07+00:00">
     <p class="r-dec-q">C4·fsa — Scope of the separatrix pairing fix?</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="velocity-and-density">Fix velocity + density now, add the pairing invariant</button>
+      <button class="r-opt chosen" data-value="velocity-and-density">Fix velocity + density now, add the pairing invariant</button>
       <button class="r-opt" data-value="velocity-only">Velocity family only for now</button>
       </p>
-    <p class="r-dec-rat">Recommended: velocity + density with the invariant. The gap is identical for both families and the reviewer&#x27;s &quot;for all quantities at the separatrix&quot; is systematic; adding the invariant prevents the pipeline from shipping half a DD pair again.</p>
+    <p class="r-dec-rat">LOCKED (Simon McIntosh, 2026-07-06): fix the velocity and density families together and add the local&lt;-&gt;separatrix_average pairing invariant so the pipeline cannot ship half a DD-provided pair again.</p>
     </div>
 </section>
 
