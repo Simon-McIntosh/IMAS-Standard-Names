@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="catalog-naming-followups">
   <meta name="plan-title" content="Catalog Naming Follow-ups">
   <meta name="plan-summary" content="Post-rc60 residual: the cylindrical axis-token naming decision (words vs symbols), the reset/--focus scoping bug, orientation-vector family completion, dd-path dedup, and open doc edits">
-  <meta name="plan-status" content="active">
+  <meta name="plan-status" content="shipped">
   <meta name="plan-roi" content="mid">
   <meta name="plan-effort" content="L">
   <meta name="plan-tier" content="opus">
@@ -17,9 +17,9 @@
   <title>Catalog Naming Follow-ups | imas-standard-names</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-07-05">
-<meta name="plan-version" content="6">
-<meta name="plan-impl" content="0.95">
+<meta name="plan-modified" content="2026-07-06">
+<meta name="plan-version" content="7">
+<meta name="plan-impl" content="1.0">
 </head>
 <body>
   <main class="plan-doc">
@@ -30,6 +30,17 @@
     <code>x, y, z</code> Cartesian-triple axis decision, and the awakened semantic checks. This plan carries the
     <strong>residual</strong> from that work plus <strong>one design question the lead reopened</strong> (cylindrical
     axis naming). It exists as a separate plan so the shipped work can close and the next session starts clean.</p>
+
+    <section class="landed-summary-card" style="border:1px solid #1a9c52;border-radius:8px;padding:14px 18px;margin:16px 0;background:#f1faf3">
+      <p style="margin:0 0 6px"><span class="badge badge-shipped">✓✓ PLAN SHIPPED — v0.2.0rc61 (2026-07-06)</span></p>
+      <p style="margin:0;font-size:13.5px">All sections landed at the <strong>generate level</strong> (new names benefit, not just live edits) and released as
+      <strong>ISNC v0.2.0rc61</strong> (2124 names). <strong>§2</strong> dead axis aliases removed + compose catch-and-promote (ISN <code>f57f2f0</code>, imas-codex <code>de264aa1</code>);
+      <strong>§3</strong> reset path-scoping + accepted-wipe guard (<code>ae585857</code>, 89 tests);
+      <strong>§4</strong> all 9 orientation-vector families composed via the unit-vector-locus compose fix (<code>1b83fe04</code>);
+      <strong>§5</strong> strain-rosette measurement-axis grammar (<code>cec56a7</code>, first/second carriers + strain_gauge locus);
+      <strong>§6</strong> dd_path_uniqueness → 0; <strong>§7</strong> generate-level LaTeX-description normalizer + import-normalize + critical gate (<code>27f4c037</code>, 381 tests) + E&minus; 1/&radic;2 fix.
+      <strong>Final audits:</strong> dd_path_uniqueness_check=0, vector_family_consistency_check=0, 0 LaTeX descriptions, raw accepted 2425. imas-codex ISN pin bumped to <code>cec56a7</code> (<code>01ba7f68</code>).</p>
+    </section>
 
     <section class="landed-summary-card" style="border:1px solid #e08a1e;border-radius:8px;padding:12px 16px;margin:14px 0;background:#fff8ef">
       <p style="margin:0 0 6px"><strong>Ground-truth reconciliation (2026-07-05, live <code>codex</code> graph, read-only audit before implementation).</strong>
@@ -136,7 +147,13 @@
     touched). Full record: <a href="archive/catalog-naming-followups-s3-landed.html">§3 landed</a>. §4 rotations use
     <code>--reset-to drafted --focus</code>.</p>
 
-    <h2 id="s4"><span class="badge badge-shipped">✓ largely landed 2026-07-05</span> §4 — Orientation-vector family completion</h2>
+    <h2 id="s4"><span class="badge badge-shipped">✓ landed 2026-07-06</span> §4 — Orientation-vector family completion</h2>
+    <p class="landed-summary" style="border-left:3px solid #1a9c52;padding-left:10px;margin:8px 0"><strong>All 9 orientation families completed</strong> (x/y/z accepted + documented): direction unit vectors of
+    infrared_camera, electron_cyclotron_launcher_mirror, sensor→strain_gauge (first measurement axis), shatter_cone,
+    neutron_detector, pellet_injector; camera image-up; shatter-cone minor-axis; + the 3 z-axis re-locks. shatter_cone
+    direction ruled <em>distinct</em> from the injector per the DD ("central axis of the shatter cone" vs "velocity
+    direction of the pellet"). <code>vector_family_consistency_check = 0</code>, <code>dd_path_uniqueness_check = 0</code>.
+    The enabling generate-level fix (<code>1b83fe04</code>) is below; details in the card.</p>
     <section class="landed-summary-card" style="border:1px solid #1a9c52;border-radius:8px;padding:12px 16px;margin:10px 0;background:#f1faf3">
       <p style="margin:0 0 6px"><strong>GENERATE-LEVEL FIX + 6 families drained.</strong> Root cause was a real composer
       defect: the cross-IDS semantic cluster ("Instrument Direction Component") instructed the composer to emit ONE generic
@@ -200,12 +217,20 @@
       <p style="margin:6px 0 0;font-size:13px;color:#5b6072">Prerequisite before any further §4 rotations: HARDEN the imas-codex composer so device-orientation component leaves compose to the correct <code>&lt;axis&gt;_..._unit_vector_of_&lt;locus&gt;</code> name for THEIR device (no cross-attach to another device's existing name), then per family: reset the sources (<code>status='extracted'</code>, <code>attempt_count=0</code>) &rarr; <code>sn run --focus "&lt;family leaf paths&gt;"</code> with the CONFIGURED OpenRouter compose model (not the 401'ing DSv4) &rarr; verify the composed name's locus matches the source device + the family audit is clean BEFORE accepting. Non-deferred set: 9 leaves (camera direction+up, ec-launcher mirror, sensor direction, shatter_cone direction/minor-axis, neutron detector) + the 3 z-relocks; <code>sensor/direction_second</code> stays deferred to §5.</p>
     </section>
 
-    <h2 id="s5">§5 — direction_second ordinal qualifier (defer to token review)</h2>
-    <p><code>operational_instrumentation/sensor/direction_second</code> is a device's <em>second</em> orientation
-    vector, distinct from its primary <code>direction</code>. Naming it needs an ordinal qualifier token
-    (<code>secondary</code> / <code>second</code>) that does not yet exist. This is a grammar-token decision owned by
-    <a href="/imas-standard-names/canonical-qualifier-order.html">canonical-qualifier-order</a>'s token review — take
-    it there first; §4's <code>direction_second</code> paths stay parked until the token is decided.</p>
+    <h2 id="s5"><span class="badge badge-shipped">✓ landed 2026-07-06</span> §5 — direction_second ordinal (strain-rosette measurement axes)</h2>
+    <p class="landed-summary" style="border-left:3px solid #1a9c52;padding-left:10px;margin:8px 0">The DD resolved the semantics: <code>operational_instrumentation/sensor/direction</code> +
+    <code>direction_second</code> are a <strong>strain-rosette gauge's ordered measurement axes</strong> (multi-axial
+    strain decomposition) — NOT an orthonormal cross-product frame. Lead rejected a bare <code>secondary</code>
+    (meaningless) and required both axes encoded symmetrically as strain-rosette axes (decision
+    <code>direction-second-naming</code> = Option A). Landed ISN <code>cec56a7</code>: two atomic geometry carriers
+    <code>first_measurement_direction_unit_vector</code> / <code>second_measurement_direction_unit_vector</code> + a
+    <code>strain_gauge</code> locus, <strong>axis-leading</strong> per the canonical component-outermost order
+    (axis-inside was rejected as non-canonical — it would break that invariant catalog-wide; the ordinal is baked into
+    the carrier because the projection grammar has no qualifier slot). Applied: primary
+    <code>{x,y,z}_direction_unit_vector_of_sensor</code> renamed to
+    <code>{x,y,z}_first_measurement_direction_unit_vector_of_strain_gauge</code> (old superseded), and
+    <code>direction_second</code> → <code>{x,y,z}_second_measurement_direction_unit_vector_of_strain_gauge</code> — all
+    accepted with documentation. Released in <strong>v0.2.0rc61</strong>.</p>
 
     <h2 id="s6"><span class="badge badge-shipped">✓ landed 2026-07-05</span> §6 — dd-path dedup residual</h2>
     <p class="landed-summary"><strong>dd_path_uniqueness_check → 0</strong> over the 2440-name accepted corpus (was 2, not the
@@ -256,6 +281,10 @@
       <button class="r-opt" data-value="document-only">Leave code; keep the documented surgical-DETACH workaround</button>
       </p>
     <p class="r-dec-rat">Locked as the executable default (reversible): path scoping makes focused resets actually work, and hard-erroring the --reset-to + --focus/--include-accepted combo blocks the accepted-name-wipe footgun that cost a full recovery cycle. Reopen for guard-only if the path-scoping investment is not wanted; lead did not object.</p>
+    </div>
+<div class="r-dec" data-key="direction-second-naming" data-choice="ordinal-measurement-axis" data-by="Simon McIntosh (steer) / agent" data-when="2026-07-06T04:41:45+00:00">
+    <p class="r-dec-q">direction-second-naming</p>
+    <p class="r-dec-rat">§5 direction_second is a strain-rosette gauge&#x27;s ordered measurement axes (DD: &#x27;Second measurement direction... strain rosette gauge... decomposing multi-axial mechanical strain&#x27;), NOT an orthonormal cross-product frame. Lead rejected a bare &#x27;secondary&#x27; (meaningless) and required both axes encoded symmetrically as strain-rosette axes. Option A locked: atomic geometric carriers first_measurement_direction_unit_vector / second_measurement_direction_unit_vector + strain_gauge locus, axis-leading per the canonical component-outermost order (x_first_measurement_direction_unit_vector_of_strain_gauge). Axis-inside (first_measurement_direction_x_unit_vector) was rejected as non-canonical — it would break the component-outermost invariant catalog-wide. Ordinal baked into the carrier (projection grammar has no qualifier slot). ISN cec56a7.</p>
     </div>
 </section>
 
@@ -433,9 +462,9 @@ Done-when
   1. Each family&#x27;s leaves carry accepted &lt;axis&gt;_..._unit_vector_of_&lt;locus&gt; names; vector_family_consistency_check = 0.
   2. dd_path_uniqueness_check stays 0; no accepted name regressed.
   3. Re-export the ISNC catalog + confirm; outcome recorded; this followup resolved.</pre>
-    <p class="r-fu-outcome">§4 LARGELY LANDED via a generate-level composer fix. Root cause: the cross-IDS semantic cluster instructed a locus-less generic unit-vector name, violating the grammar's unit-vector-locus rule (error). imas-codex 1b83fe04 adds a compose-prompt rule: *_unit_vector bases ALWAYS take a per-device _of_<device> locus, overriding cluster generic-name suggestions. Enabling blockers also fixed: parked sources were attempt-exhausted (attempt_count 5-7 > max_attempts 3 → reset to extracted/0), and DSv4 now 401s (use configured OpenRouter compose, not the dead free endpoint). DRAINED (18 accepted per-device names, dd_path_uniqueness=0, raw accepted 2404→2415): {x,y,z}_direction_unit_vector_of_{electron_cyclotron_launcher_mirror,camera,sensor}; {x,y,z}_minor_axis_unit_vector_of_shatter_cone; and the 3 z-axis re-locks accepted + their sourceless vertical_ superseded (z_coordinate_of_{divertor_target,ferritic_element_centroid,sensor_attachment_point}) — clearing 2 of 3 vector_family flags. RESIDUAL → f-cnf-007 (per-name physics curation): neutron direction_to_detector is unit='m' (displacement, not a unit vector); camera/up/x (image-up, tangled); shatter_cone/direction (composer reuses _of_pellet_injector — needs a share-vs-distinct ruling); and 1 pre-existing vector_family flag (SPI injection_direction Cartesian-vs-cylindrical frame question, DD-docstring ruling). No accepted name regressed; all cross-attach corruption from exploratory runs cleaned + verified.</p>
+    <p class="r-fu-outcome">§4 LARGELY LANDED via a generate-level composer fix. Root cause: the cross-IDS semantic cluster instructed a locus-less generic unit-vector name, violating the grammar's unit-vector-locus rule (error). imas-codex 1b83fe04 adds a compose-prompt rule: *_unit_vector bases ALWAYS take a per-device _of_<device> locus, overriding cluster generic-name suggestions. Enabling blockers also fixed: parked sources were attempt-exhausted (attempt_count 5-7 &gt; max_attempts 3 → reset to extracted/0), and DSv4 now 401s (use configured OpenRouter compose, not the dead free endpoint). DRAINED (18 accepted per-device names, dd_path_uniqueness=0, raw accepted 2404→2415): {x,y,z}_direction_unit_vector_of_{electron_cyclotron_launcher_mirror,camera,sensor}; {x,y,z}_minor_axis_unit_vector_of_shatter_cone; and the 3 z-axis re-locks accepted + their sourceless vertical_ superseded (z_coordinate_of_{divertor_target,ferritic_element_centroid,sensor_attachment_point}) — clearing 2 of 3 vector_family flags. RESIDUAL → f-cnf-007 (per-name physics curation): neutron direction_to_detector is unit='m' (displacement, not a unit vector); camera/up/x (image-up, tangled); shatter_cone/direction (composer reuses _of_pellet_injector — needs a share-vs-distinct ruling); and 1 pre-existing vector_family flag (SPI injection_direction Cartesian-vs-cylindrical frame question, DD-docstring ruling). No accepted name regressed; all cross-attach corruption from exploratory runs cleaned + verified.</device></p>
     </article>
-<article class="r-fu" data-id="f-cnf-007" data-status="open" data-tier="opus" data-written-by="orchestrator" data-written-at="2026-07-05" data-recommends-skill="/reckon-ship catalog-naming-followups §4" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-cnf-007" data-status="resolved" data-tier="opus" data-written-by="orchestrator" data-written-at="2026-07-05" data-recommends-skill="/reckon-ship catalog-naming-followups §4" data-resolved-at="2026-07-06T04:41:45+00:00" data-resolved-by="orchestrator (user-steered)">
     <h4 class="r-fu-title">§4 tail — per-name physics curation for the 4 residual orientation cases + ISNC re-export</h4>
     <div class="r-fu-body">The generate-level composer fix (1b83fe04) drained 6 orientation families. Four residual cases need per-name physics judgment, not a mechanical rotation: (1) neutron direction_to_detector is unit='m' — a displacement/position vector, so it needs a position base, NOT direction_unit_vector; (2) camera/up/x image-up family (tangled: up/z carries the accepted z_direction_of_camera); (3) spi/injector/shatter_cone/direction — rule whether it shares the injector's direction (_of_pellet_injector) or needs a distinct _of_shatter_cone name; (4) the 1 remaining vector_family flag: the audit reads spi/injector/injection_direction as cylindrical (wants vertical) while the released-catalog names are Cartesian x/y/z — a DD-docstring frame ruling. Then generate docs for the newly-accepted §4 names (composed name-only) and re-export/release the ISNC catalog to publish §6/§7/§4 graph fixes.</div>
     <pre class="r-fu-prompt">Project: imas-codex (+ imas-standard-names grammar)
@@ -450,6 +479,7 @@ The compose-prompt fix (imas-codex 1b83fe04: *_unit_vector requires a per-device
 4. SPI injection_direction frame flag: vector_family_consistency_check flags injection_direction/z wanting &#x27;vertical&#x27; (cylindrical) while the accepted names are Cartesian x/y/z_direction_unit_vector_of_pellet_injector (released catalog). Read the DD docstring for spi/injector/injection_direction — if cylindrical, migrate to radial/toroidal/vertical; if Cartesian, adjust the audit&#x27;s frame classification for this node. Do not guess.
 
 Mechanics: graph writes from a session the classifier permits (main session; subagents are blocked). Reset parked sources to status=&#x27;extracted&#x27;/attempt_count=0 before a --focus rotation; use the CONFIGURED OpenRouter compose model (DSv4 401s); --skip-clear-gate (the prompt hash changed); verify no accepted sibling is re-staged (check PRODUCED_NAME + HAS_STANDARD_NAME cross-wiring in the SPI/camera cluster) and clean any spurious cross-device edges. THEN: docs pass for the name-only §4 names; sn release to publish §6/§7/§4. Done-when: all orientation leaves accepted with correct per-device names + docs; vector_family_consistency_check=0; dd_path_uniqueness=0; ISNC re-exported.</pre>
+    <p class="r-fu-outcome">§4 tail + §5 ordinal COMPLETE; released v0.2.0rc61 (2124 names). §5 direction_second: added ISN grammar (cec56a7) first/second_measurement_direction_unit_vector carriers + strain_gauge locus per the locked direction-second-naming decision (Option A, axis-leading); primary sensor/direction renamed to x/y/z_first_measurement_direction_unit_vector_of_strain_gauge (old _of_sensor superseded), direction_second → x/y/z_second_... — all accepted + documented. §4 residuals resolved: neutron direction_to_detector = direction unit vectors (unit='m' is a DD quirk on ALL these leaves; extract resolves dimensionless) → x/y/z_direction_unit_vector_of_neutron_detector accepted; camera up = x/y/z_image_up_unit_vector_of_camera (untangled from direction/z + vertical_ superseded); shatter_cone/direction ruled DISTINCT from the injector (DD: 'central axis of the shatter cone' vs 'velocity direction of the pellet') → x/y/z_direction_unit_vector_of_shatter_cone; SPI injection_direction frame flag cleared (source_paths corruption from an exploratory shatter run repaired — injection_direction is device-local Cartesian x/y/z, correct). All 9 orientation families x/y/z accepted WITH documentation (per-family docs authored deterministically after the docs pipeline's --focus force-reset proved destructive). Final: dd_path_uniqueness_check=0, vector_family_consistency_check=0, 0 LaTeX descriptions, E- 1/sqrt2 intact, raw accepted 2425. imas-codex ISN pin bumped to cec56a7 (01ba7f68). A footgun logged to memory: sn run --focus force-resets accepted names on focused paths even in --docs-only mode.</p>
     </article>
 </section>
   </main>
