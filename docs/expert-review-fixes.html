@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="expert-review-fixes">
   <meta name="plan-title" content="Expert Review Fixes">
   <meta name="plan-summary" content="Triage and correct a domain-expert review of the SN catalog: 12 comments collapse to 6 cross-cutting root causes (loci lack DD-anchored descriptions, no canonical description templates, contradictory prompt canonicalization, grammar vocab gaps, pipeline under-generation, upstream DD defects) plus one convention decision and one already-fixed item.">
-  <meta name="plan-status" content="draft">
+  <meta name="plan-status" content="active">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="L">
   <meta name="plan-tier" content="opus">
@@ -18,7 +18,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-06">
-<meta name="plan-version" content="2">
+<meta name="plan-version" content="3">
+<meta name="plan-impl" content="0.15">
 </head>
 <body>
   <main class="plan-doc">
@@ -37,6 +38,20 @@
     <p><strong>Guiding rule (from the request):</strong> a single-name blemish is fixed with <code>sn edit</code>; anything with a global root cause is fixed in the pipeline itself — code, schema, vocabulary, or prompt — so that regeneration keeps the fix. Ten of the twelve comments turned out to have a global root cause; only one is a per-name convention decision and one is already fixed.</p>
 
     <p><strong>Headline finding:</strong> the twelve surface comments collapse to <strong>six cross-cutting root causes</strong>. Fixing the six mechanisms — rather than editing individual names — corrects the reported symptoms <em>and</em> the much larger class of names that share each mechanism.</p>
+
+    <section id="progress" class="r-progress" style="border:1px solid #0b6e8f;border-radius:6px;padding:0 1rem 1rem;margin:1.25rem 0;">
+      <h2 style="border-bottom:2px solid #0b6e8f;padding-bottom:.3rem;">Execution progress <span style="font-weight:400;font-size:.8em;color:#555;">(decisions locked; implementation in flight)</span></h2>
+      <p><strong>Grammar/vocab code (ISN) — landed, free:</strong></p>
+      <ul>
+        <li><strong>C6</strong>: <code>flux_limiter_coefficient</code> base added (<code>physical_bases.yml</code>); <code>momentum_flux_limiter_coefficient</code> composes + round-trips. Commit <code>0dd95b5</code>.</li>
+        <li><strong>C12</strong>: <em>verified NO grammar change needed</em> — the parser's union matcher already parses and round-trips <code>deuterium_tritium_neutron_flux</code> (and <code>_due_to_*</code> variants); reaction pairs stay subjects (not added to <code>qualifiers.yml</code>, so no category-invariant impact). C12 reduces to a catalog rename/regen. This eliminates the planned parser surgery.</li>
+        <li><strong>C10 / WS1</strong>: <code>along</code> added to the <code>limiter</code> locus (<code>along_limiter</code> round-trips); DD-anchored <code>description</code> fields added to the review-touched loci (pedestal/pedestal_top/pedestal_maximum, limiter/active_limiter_point, outboard_midplane[_separatrix], separatrix, dr_dz_zero_point) via a new optional <code>LocusEntry.description</code>. Commit <code>b512c33</code>. Grammar suite green (786 passed) throughout.</li>
+      </ul>
+      <p><strong>In flight:</strong> a background agent is landing the imas-codex generation-standard prompt changes (density template, charge-state aggregation clause, locus-defining cross-link rule, no-inline-units reinforcement, pedestal/limiter reconciliation, DT wording, harmonize-anchor pin) — WS1/WS2/WS6 prompt halves.</p>
+      <p><strong>Pipeline mechanics mapped (runbook).</strong> Regen runs from the main session (<code>uv run imas-codex sn run --focus &lt;dd-paths&gt; -c 50</code>); background agents cannot write the prod Neo4j graph. ISN grammar reaches codex via a git pin in <code>codex/pyproject.toml</code> (currently old <code>@cec56a7</code>) — the pin must be bumped to the new ISN HEAD + <code>uv sync</code> so the C6 base and locus descriptions propagate before regen (C12 needs no bump). Release = <code>uv run imas-codex sn release -m …</code> → ISNC RC (next <code>v0.2.0rc62</code>) → origin.</p>
+      <p><strong>Budget note:</strong> compose is ~$0.0017/name but <em>review</em> is the cost sink; the $50 cap is managed with <code>--reviewer-profile pilot</code> / <code>--docs-only</code> / targeted renames, spending highest-value items first and reporting any remainder.</p>
+      <p><strong>Deferred to a followup:</strong> the WS2 inline-unit <em>lint guard</em> in <code>validation/description.py</code> (false-positive-prone; the substantive C7 fix is the prompt ban + docs refine, which do land).</p>
+    </section>
 
     <h2 id="s2">§2 — Root-cause map</h2>
     <p>Twelve reviewer comments (symptoms) trace to six mechanisms. Colour encodes the repository that owns the fix; the chips list the comment IDs each mechanism explains. Two comments are not mechanism bugs (bottom row): C1 is a naming convention to decide, C9 is already fixed.</p>
