@@ -179,6 +179,14 @@ def test_vocab_cross_segment_uniqueness():
         # canonical-qualifier-order plan).
         frozenset({"channels.yml", "physical_bases.yml"}),
         frozenset({"channels.yml", "generic_physical_bases.yml"}),
+        # qualifiers.yml ↔ subjects.yml: the fusion reactant pairs
+        # (deuterium_tritium, deuterium_deuterium, tritium_tritium) are a
+        # DOCUMENTED dual-role — subject as the effective fuel species
+        # (deuterium_tritium_density) and reaction-channel qualifier when a
+        # product subject follows (deuterium_tritium_neutron_flux). The
+        # token-level ratchet is enforced in test_vocabulary_gates.py
+        # (_DOCUMENTED_ALSO_SUBJECT) — only these three pairs are permitted.
+        frozenset({"qualifiers.yml", "subjects.yml"}),
     }
 
     # Filter out allowed overlaps

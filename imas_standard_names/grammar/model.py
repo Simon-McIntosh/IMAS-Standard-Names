@@ -59,6 +59,7 @@ from imas_standard_names.grammar.support import (
     value_of as _value_of,
 )
 from imas_standard_names.grammar.vocab_loaders import (
+    load_qualifier_categories as _load_qualifier_categories,
     load_scoping_qualifiers as _load_scoping_qualifiers,
 )
 
@@ -135,6 +136,17 @@ _CHANNEL_VALUES: frozenset[str] = frozenset(c.value for c in Channel)
 # is planned but not yet enforced).
 _QUALIFIER_VALUES: frozenset[str] = frozenset(q.value for q in QualifierToken)
 _SCOPING_QUALIFIER_VALUES: frozenset[str] = _load_scoping_qualifiers()
+# Reaction-channel qualifier tokens (reactant pairs). DUAL-ROLE: also subjects.
+# A pair is routed to the qualifier segment (rendered before the subject) ONLY
+# when another subject token follows it — e.g. deuterium_tritium_neutron_flux
+# (qualifier deuterium_tritium + subject neutron + base flux) — so the neutron
+# flux of a fusion reaction is expressible. As the sole species token the pair
+# stays the subject (deuterium_tritium_density).
+_REACTION_CHANNEL_VALUES: frozenset[str] = frozenset(
+    token
+    for token, category in _load_qualifier_categories().items()
+    if category == "reaction_channel"
+)
 
 # ChannelQualifier: qualifier that binds to the transport CHANNEL (kinetic,
 # plasma). It refines WHICH channel quantity is meant and renders immediately
@@ -436,7 +448,7 @@ def _ir_to_model_dict(ir: StandardNameIR) -> dict[str, str]:
             zone_tokens: list[str] = []
             segment_qualifiers: list[str] = []
             base_qualifiers: list[str] = []
-            for q in ir.qualifiers:
+            for qi, q in enumerate(ir.qualifiers):
                 # Aggregation, orbit, and population are orthogonal single-token
                 # modifier segments; they take priority over the subject branch
                 # and render before the species. Each contributes AT MOST one
@@ -471,6 +483,18 @@ def _ir_to_model_dict(ir: StandardNameIR) -> dict[str, str]:
                         )
                         raise ValueError(msg)
                     population = q.token
+                elif q.token in _REACTION_CHANNEL_VALUES and any(
+                    later.token in _SUBJECT_VALUES
+                    for later in ir.qualifiers[qi + 1 :]
+                ):
+                    # Reactant pair acting as a reaction-channel qualifier: a
+                    # product subject (e.g. neutron) follows, so the pair scopes
+                    # the reaction rather than being the species. Renders in the
+                    # qualifier segment, before the subject
+                    # (deuterium_tritium_neutron_flux). As the sole species token
+                    # (no following subject) it falls through to the subject
+                    # branch below (deuterium_tritium_density).
+                    segment_qualifiers.append(q.token)
                 elif q.token in _SUBJECT_VALUES:
                     if subject is not None:
                         msg = (

@@ -72,6 +72,12 @@ _DOCUMENTED_ALSO_SUBJECT = frozenset(
         "co_passing",
         "counter_passing",
         "state",  # charge state or quantum state — dual-role as qualifier and subject
+        # Fusion reactant pairs: subject as the effective fuel species
+        # (deuterium_tritium_density); reaction-channel qualifier when a product
+        # subject follows (deuterium_tritium_neutron_flux). Intentional dual-role.
+        "deuterium_tritium",
+        "deuterium_deuterium",
+        "tritium_tritium",
     }
 )
 

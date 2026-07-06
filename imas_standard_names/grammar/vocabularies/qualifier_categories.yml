@@ -168,3 +168,10 @@ qualifier_categories:
     - implicit
     - prefill
     - requested
+
+  # Fusion reaction channel (reactant pair; dual-role with subjects.yml).
+  # Routed to the qualifier segment only when a product subject follows.
+  reaction_channel:
+    - deuterium_tritium
+    - deuterium_deuterium
+    - tritium_tritium

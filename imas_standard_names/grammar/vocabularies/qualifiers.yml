@@ -302,3 +302,16 @@
 # --- FOCS fibre (spun fibre period) ---
 - spun                          # spun optical fibre (FOCS) qualifier: spun_period
 - twist                         # fibre twist period (FOCS): twist_period
+
+# --- Fusion reaction channel (DUAL-ROLE) ---
+# The reactant-pair tokens are primarily SUBJECTS (deuterium_tritium_density —
+# the effective fuel species). They ALSO act as a reaction-channel QUALIFIER
+# when a product subject follows, so the neutron flux from a given fusion
+# reaction reads deuterium_tritium_neutron_flux (qualifier + subject neutron +
+# base flux). The parser/model routes the pair to the qualifier segment only
+# when another subject follows; otherwise it stays the subject. Kept in
+# subjects.yml too — the subjects∩qualifiers overlap is intentional (allowlisted
+# in test_vocab_uniqueness).
+- deuterium_tritium
+- deuterium_deuterium
+- tritium_tritium

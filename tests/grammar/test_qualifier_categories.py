@@ -24,6 +24,7 @@ EXPECTED_CATEGORIES = {
     "normalized",
     "species",
     "engineering",
+    "reaction_channel",
 }
 
 
