@@ -1,0 +1,656 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"    content="imas-standard-names">
+  <meta name="reckon-type"     content="plan">
+  <meta name="plan-slug"       content="expert-review-fixes">
+  <meta name="plan-title"      content="Expert Review Fixes">
+  <meta name="plan-summary"    content="Triage and correct a domain-expert review of the SN catalog: 12 comments collapse to 6 cross-cutting root causes (loci lack DD-anchored descriptions, no canonical description templates, contradictory prompt canonicalization, grammar vocab gaps, pipeline under-generation, upstream DD defects) plus one convention decision and one already-fixed item.">
+  <meta name="plan-status"     content="draft">
+  <meta name="plan-roi"        content="high">
+  <meta name="plan-effort"     content="L">
+  <meta name="plan-tier"       content="opus">
+  <meta name="plan-owner"      content="Simon McIntosh">
+  <meta name="plan-depends-on" content="canonical-qualifier-order">
+  <title>Expert Review Fixes | imas-standard-names</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h2 id="s1">§1 — Overview &amp; method</h2>
+    <p>A domain expert reviewed the generated Standard-Names (SN) catalog and left twelve comments spanning species spelling, charge-state aggregation, locus definitions, base-name precision, unit rendering, a suspected upstream unit bug, and a broken-equation report. This plan is the <strong>root-cause triage</strong> of that review: each comment was traced to its true origin in code, prompt, grammar/vocabulary, the generated catalog, or the upstream IMAS Data Dictionary (DD) — <em>before</em> any correction was proposed. No catalog names or code were changed while producing this plan; it is a verification-and-planning artifact.</p>
+
+    <p>The work lives across four surfaces, and every proposed fix is routed to the narrowest one that owns the defect:</p>
+    <ul>
+      <li><strong>ISN</strong> — <code>imas-standard-names</code> (this repo): the grammar engine and vocabulary (<code>locus_registry.yml</code>, <code>physical_bases.yml</code>, <code>subjects.yml</code>, <code>qualifiers.yml</code>, the parser, the unit format).</li>
+      <li><strong>imas-codex</strong>: the <code>sn</code> generation pipeline — LLM compose/describe prompts (<code>imas_codex/llm/prompts/sn/*.md</code>), family harmonization, and the <code>sn edit</code>/<code>sn run</code> tooling.</li>
+      <li><strong>ISNC</strong> — <code>imas-standard-names-catalog</code>: the generated names + descriptions, where <code>sn edit</code> and regeneration land.</li>
+      <li><strong>DD</strong> — the upstream IMAS Data Dictionary: authoritative units and identifiers; defects here need an issue filed, not a local patch.</li>
+    </ul>
+
+    <p><strong>Guiding rule (from the request):</strong> a single-name blemish is fixed with <code>sn edit</code>; anything with a global root cause is fixed in the pipeline itself — code, schema, vocabulary, or prompt — so that regeneration keeps the fix. Ten of the twelve comments turned out to have a global root cause; only one is a per-name convention decision and one is already fixed.</p>
+
+    <p><strong>Headline finding:</strong> the twelve surface comments collapse to <strong>six cross-cutting root causes</strong>. Fixing the six mechanisms — rather than editing individual names — corrects the reported symptoms <em>and</em> the much larger class of names that share each mechanism.</p>
+
+    <h2 id="s2">§2 — Root-cause map</h2>
+    <p>Twelve reviewer comments (symptoms) trace to six mechanisms. Colour encodes the repository that owns the fix; the chips list the comment IDs each mechanism explains. Two comments are not mechanism bugs (bottom row): C1 is a naming convention to decide, C9 is already fixed.</p>
+
+    <figure style="margin:1.25rem 0;">
+      <svg viewBox="0 0 980 560" width="100%" role="img" aria-label="Map of twelve reviewer comments to six root-cause mechanisms, colour-coded by owning repository" style="font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;">
+        <style>
+          .rc-title{font-size:15px;font-weight:700;fill:#1a1a1a;}
+          .rc-body{font-size:13px;fill:#1a1a1a;}
+          .rc-chip{font-size:12px;font-weight:600;fill:#1a1a1a;}
+          .rc-repo{font-size:11.5px;font-weight:700;letter-spacing:.04em;}
+          .rc-cap{font-size:12.5px;fill:#3a3a3a;}
+        </style>
+        <!-- Legend -->
+        <text x="12" y="22" class="rc-title">Owning repository</text>
+        <rect x="200" y="10" width="14" height="14" fill="#ffffff" stroke="#0b6e8f" stroke-width="2"/>
+        <text x="220" y="22" class="rc-body">ISN grammar / vocab</text>
+        <rect x="370" y="10" width="14" height="14" fill="#ffffff" stroke="#b25f00" stroke-width="2"/>
+        <text x="390" y="22" class="rc-body">imas-codex prompt / pipeline</text>
+        <rect x="590" y="10" width="14" height="14" fill="#ffffff" stroke="#2e7d32" stroke-width="2"/>
+        <text x="610" y="22" class="rc-body">ISNC catalog</text>
+        <rect x="720" y="10" width="14" height="14" fill="#ffffff" stroke="#8e2f8e" stroke-width="2"/>
+        <text x="740" y="22" class="rc-body">DD (upstream)</text>
+
+        <!-- Row 1 -->
+        <!-- RC-A -->
+        <rect x="12" y="46" width="300" height="150" fill="#ffffff" stroke="#0b6e8f" stroke-width="1.5" rx="6"/>
+        <rect x="12" y="46" width="300" height="26" fill="#0b6e8f" rx="6"/>
+        <rect x="12" y="60" width="300" height="12" fill="#0b6e8f"/>
+        <text x="24" y="64" class="rc-repo" fill="#ffffff">RC-A · ISN + codex</text>
+        <text x="24" y="92" class="rc-title">Loci lack DD-anchored</text>
+        <text x="24" y="110" class="rc-title">descriptions</text>
+        <text x="24" y="132" class="rc-body">Bare tokens in locus_registry.yml;</text>
+        <text x="24" y="149" class="rc-body">the LLM re-invents each locus's</text>
+        <text x="24" y="166" class="rc-body">meaning at docs time.</text>
+        <text x="24" y="188" class="rc-chip">C3 · C4·point · C10</text>
+
+        <!-- RC-B -->
+        <rect x="340" y="46" width="300" height="150" fill="#ffffff" stroke="#b25f00" stroke-width="1.5" rx="6"/>
+        <rect x="340" y="46" width="300" height="26" fill="#b25f00" rx="6"/>
+        <rect x="340" y="60" width="300" height="12" fill="#b25f00"/>
+        <text x="352" y="64" class="rc-repo" fill="#ffffff">RC-B · codex + ISN lint</text>
+        <text x="352" y="92" class="rc-title">No canonical description</text>
+        <text x="352" y="110" class="rc-title">templates; drift persists</text>
+        <text x="352" y="132" class="rc-body">Family harmonization is soft &amp;</text>
+        <text x="352" y="149" class="rc-body">emergent; no retro-fix of</text>
+        <text x="352" y="166" class="rc-body">already-accepted names.</text>
+        <text x="352" y="188" class="rc-chip">C2 · C11 · C3·desc · C7</text>
+
+        <!-- RC-C -->
+        <rect x="668" y="46" width="300" height="150" fill="#ffffff" stroke="#b25f00" stroke-width="1.5" rx="6"/>
+        <rect x="668" y="46" width="300" height="26" fill="#b25f00" rx="6"/>
+        <rect x="668" y="60" width="300" height="12" fill="#b25f00"/>
+        <text x="680" y="64" class="rc-repo" fill="#ffffff">RC-C · codex</text>
+        <text x="680" y="92" class="rc-title">Contradictory prompt</text>
+        <text x="680" y="110" class="rc-title">canonicalization</text>
+        <text x="680" y="132" class="rc-body">Prompts disagree: pedestal as</text>
+        <text x="680" y="149" class="rc-body">zone-prefix vs _at_ locus;</text>
+        <text x="680" y="166" class="rc-body">at_pedestal vs at_pedestal_top.</text>
+        <text x="680" y="188" class="rc-chip">C5</text>
+
+        <!-- Row 2 -->
+        <!-- RC-D -->
+        <rect x="12" y="220" width="300" height="150" fill="#ffffff" stroke="#0b6e8f" stroke-width="1.5" rx="6"/>
+        <rect x="12" y="220" width="300" height="26" fill="#0b6e8f" rx="6"/>
+        <rect x="12" y="234" width="300" height="12" fill="#0b6e8f"/>
+        <text x="24" y="238" class="rc-repo" fill="#ffffff">RC-D · ISN</text>
+        <text x="24" y="266" class="rc-title">Grammar vocabulary gaps</text>
+        <text x="24" y="288" class="rc-body">A meaning-free `coefficient`</text>
+        <text x="24" y="305" class="rc-body">base; no reaction-channel</text>
+        <text x="24" y="322" class="rc-body">qualifier for fusion neutron</text>
+        <text x="24" y="339" class="rc-body">fluxes.</text>
+        <text x="24" y="362" class="rc-chip">C6 · C12</text>
+
+        <!-- RC-E -->
+        <rect x="340" y="220" width="300" height="150" fill="#ffffff" stroke="#2e7d32" stroke-width="1.5" rx="6"/>
+        <rect x="340" y="220" width="300" height="26" fill="#2e7d32" rx="6"/>
+        <rect x="340" y="234" width="300" height="12" fill="#2e7d32"/>
+        <text x="352" y="238" class="rc-repo" fill="#ffffff">RC-E · codex + ISNC</text>
+        <text x="352" y="266" class="rc-title">Pipeline under-generates</text>
+        <text x="352" y="284" class="rc-title">DD-provided pairs</text>
+        <text x="352" y="306" class="rc-body">DD has the full local +</text>
+        <text x="352" y="323" class="rc-body">separatrix_average matrix;</text>
+        <text x="352" y="340" class="rc-body">the catalog ships only half.</text>
+        <text x="352" y="362" class="rc-chip">C4·fsa</text>
+
+        <!-- RC-F -->
+        <rect x="668" y="220" width="300" height="150" fill="#ffffff" stroke="#8e2f8e" stroke-width="1.5" rx="6"/>
+        <rect x="668" y="220" width="300" height="26" fill="#8e2f8e" rx="6"/>
+        <rect x="668" y="234" width="300" height="12" fill="#8e2f8e"/>
+        <text x="680" y="238" class="rc-repo" fill="#ffffff">RC-F · DD (upstream)</text>
+        <text x="680" y="266" class="rc-title">Upstream DD defects</text>
+        <text x="680" y="288" class="rc-body">Neutral energy-flux paths</text>
+        <text x="680" y="305" class="rc-body">carry the particle-flux unit;</text>
+        <text x="680" y="322" class="rc-body">`at_limiter` is undefined</text>
+        <text x="680" y="339" class="rc-body">(IMAS_3226 open).</text>
+        <text x="680" y="362" class="rc-chip">C8 · C10·def</text>
+
+        <!-- Non-bug row -->
+        <line x1="12" y1="400" x2="968" y2="400" stroke="#cccccc" stroke-width="1"/>
+        <text x="12" y="424" class="rc-title">Not mechanism bugs</text>
+        <rect x="12" y="440" width="470" height="96" fill="#ffffff" stroke="#666666" stroke-width="1.2" rx="6"/>
+        <text x="24" y="464" class="rc-chip">C1 — deuterium-tritium hyphen</text>
+        <text x="24" y="486" class="rc-body">Hyphens are illegal in the grammar; DT is one subject</text>
+        <text x="24" y="503" class="rc-body">token; DD uses underscore in the path. Convention</text>
+        <text x="24" y="520" class="rc-body">decision → keep underscore, clarify prose.</text>
+        <rect x="498" y="440" width="470" height="96" fill="#ffffff" stroke="#666666" stroke-width="1.2" rx="6"/>
+        <text x="510" y="464" class="rc-chip">C9 — broken equation</text>
+        <text x="510" y="486" class="rc-body">Not reproducible: stored YAML clean, SPA + KaTeX</text>
+        <text x="510" y="503" class="rc-body">render it, catalog-wide scan finds 0 malformed. Already</text>
+        <text x="510" y="520" class="rc-body">fixed; verify surface with reviewer.</text>
+      </svg>
+      <figcaption class="rc-cap" style="margin-top:.5rem;">Six mechanisms explain ten of the twelve comments. Editing the mechanisms (vocab tokens, prompt rules, a completeness invariant, DD issues) fixes the reported names <em>and</em> the wider class each mechanism governs; per-name <code>sn edit</code> is reserved for genuinely local blemishes.</figcaption>
+    </figure>
+
+    <h2 id="s3">§3 — Full triage table</h2>
+    <p>Every comment, its verified root cause, the fix and where it lands, an effort estimate, and status flags (duplicate / already-fixed / upstream-DD). Effort scale: <strong>S</strong> &lt; 1 h · <strong>M</strong> a few h · <strong>L</strong> a day+ · <strong>XL</strong> multi-day. There are <em>no exact duplicate</em> comments; several share a root cause (noted "shares RC-x").</p>
+
+    <div style="overflow-x:auto;">
+    <table style="border-collapse:collapse;width:100%;font-size:13px;">
+      <thead>
+        <tr style="text-align:left;border-bottom:2px solid #333;">
+          <th style="padding:6px 8px;">ID</th>
+          <th style="padding:6px 8px;">Comment (abridged)</th>
+          <th style="padding:6px 8px;">Verified root cause</th>
+          <th style="padding:6px 8px;">Fix &amp; where it lands</th>
+          <th style="padding:6px 8px;">Scope</th>
+          <th style="padding:6px 8px;">Effort</th>
+          <th style="padding:6px 8px;">Flags</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="border-bottom:1px solid #ddd;">
+          <td style="padding:6px 8px;font-weight:700;">C1</td>
+          <td style="padding:6px 8px;">Spell the DT species with a hyphen (single species), not underscore.</td>
+          <td style="padding:6px 8px;">Grammar forbids hyphens (4 validators + the <code>_</code>-splitting tokenizer); <code>deuterium_tritium</code> is a single subject token; the DD path element itself uses underscore (hyphen only in prose).</td>
+          <td style="padding:6px 8px;"><strong>Decision:</strong> keep underscore; clarify prose that DT is one effective species (imas-codex docs).</td>
+          <td style="padding:6px 8px;">Convention / doc</td>
+          <td style="padding:6px 8px;">S</td>
+          <td style="padding:6px 8px;">Not a defect. Latent: DT token is overloaded (fuel species vs D-T reaction channel) — ties to C12.</td>
+        </tr>
+        <tr style="border-bottom:1px solid #ddd;background:#fafafa;">
+          <td style="padding:6px 8px;font-weight:700;">C2</td>
+          <td style="padding:6px 8px;">Unclear how <code>toroidal_&lt;species&gt;_velocity_at_*</code> sums/averages over ionization states.</td>
+          <td style="padding:6px 8px;">The name is correct (species-level per DD, no <code>/state/</code>). The docs prompt has <em>no rule</em> requiring the aggregation convention to be stated; it appears inconsistently.</td>
+          <td style="padding:6px 8px;">Add a charge-state aggregation clause rule to <code>generate_docs_system.md</code>; refine-pass the species velocity/density families (imas-codex).</td>
+          <td style="padding:6px 8px;">Global · prompt</td>
+          <td style="padding:6px 8px;">M</td>
+          <td style="padding:6px 8px;">Shares RC-B with C11, C3·desc.</td>
+        </tr>
+        <tr style="border-bottom:1px solid #ddd;">
+          <td style="padding:6px 8px;font-weight:700;">C3</td>
+          <td style="padding:6px 8px;">Add a pointer to the pedestal-location definition.</td>
+          <td style="padding:6px 8px;">Defining name <code>normalized_poloidal_flux_coordinate_of_pedestal</code> exists but <strong>0 of ~57</strong> pedestal names link to it; no prompt rule to cross-link a locus-defining quantity.</td>
+          <td style="padding:6px 8px;">Docs-prompt rule to cross-link locus-defining names + a zone→defining-quantity context map (imas-codex); short locus <code>description</code> (ISN).</td>
+          <td style="padding:6px 8px;">Global · prompt/enrich</td>
+          <td style="padding:6px 8px;">S–M</td>
+          <td style="padding:6px 8px;">Shares RC-A with C4·point, C10.</td>
+        </tr>
+        <tr style="border-bottom:1px solid #ddd;background:#fafafa;">
+          <td style="padding:6px 8px;font-weight:700;">C4·fsa</td>
+          <td style="padding:6px 8px;">The flux-surface-averaged vs local distinction should exist for <em>all</em> separatrix quantities, not some.</td>
+          <td style="padding:6px 8px;">Pipeline under-generation. DD provides the full local + <code>separatrix_average</code> matrix (17 species); ISN has 17 local / 9 fsa (1 malformed — DT), 8 missing, <strong>all 17 <code>separatrix_average</code> paths unmapped</strong>, 2 dangling links; density ~16 species short.</td>
+          <td style="padding:6px 8px;">Add a local↔separatrix_average pairing invariant; coverage re-run to generate the missing fsa names, attach DD sources, fix links (imas-codex + ISNC).</td>
+          <td style="padding:6px 8px;">Global · coverage</td>
+          <td style="padding:6px 8px;">M–L</td>
+          <td style="padding:6px 8px;">Grammar already supports it (<code>flux_surface_averaged</code> is a transformation).</td>
+        </tr>
+        <tr style="border-bottom:1px solid #ddd;">
+          <td style="padding:6px 8px;font-weight:700;">C4·point</td>
+          <td style="padding:6px 8px;">Specify the separatrix point value at the separatrix∩outer-midplane; the outer midplane comes from the <code>midplane_id</code> identifier.</td>
+          <td style="padding:6px 8px;">Loci exist (<code>outboard_midplane_separatrix</code>, <code>dr_dz_zero_point</code>) but are undocumented and the dedicated one is <em>unused</em>; the pipeline emitted generic <code>outboard_midplane</code>. The DD <code>midplane_identifier</code> <strong>exists</strong> (4 options).</td>
+          <td style="padding:6px 8px;">Document the loci with their DD anchor; prefer <code>outboard_midplane_separatrix</code>; add the point-definition sentence (ISN + a few ISNC names).</td>
+          <td style="padding:6px 8px;">Small / few names</td>
+          <td style="padding:6px 8px;">S</td>
+          <td style="padding:6px 8px;">No DD change (identifier already exists). Shares RC-A.</td>
+        </tr>
+        <tr style="border-bottom:1px solid #ddd;background:#fafafa;">
+          <td style="padding:6px 8px;font-weight:700;">C5</td>
+          <td style="padding:6px 8px;">Merge <code>at_pedestal</code> and <code>at_pedestal_top</code> into one locus; prefer <code>pedestal_top</code>.</td>
+          <td style="padding:6px 8px;">Contradictory prompt canonicalization across three prompts (pedestal as zone-prefix vs <code>_at_</code> locus; <code>at_pedestal</code> vs <code>at_pedestal_top</code>); registry carries both. 46 <code>_at_pedestal</code> vs 11 <code>_at_pedestal_top</code>.</td>
+          <td style="padding:6px 8px;">Reconcile the prompts to one rule; rename value-quantities to <code>pedestal_top</code>, but keep a mid-pedestal locus for gradient/position names (imas-codex + ISN + regen).</td>
+          <td style="padding:6px 8px;">Global · rename ≤46</td>
+          <td style="padding:6px 8px;">M</td>
+          <td style="padding:6px 8px;">Per-name triage needed (gradient/flux-position ≠ top).</td>
+        </tr>
+        <tr style="border-bottom:1px solid #ddd;">
+          <td style="padding:6px 8px;font-weight:700;">C6</td>
+          <td style="padding:6px 8px;">The <code>coefficient</code> base is vague; these are flux-limiter coefficients.</td>
+          <td style="padding:6px 8px;">The base is the meaning-free <code>coefficient</code> (<code>physical_bases.yml</code>); the 13-name <code>momentum_coefficient</code> family are flux limiters per their own descriptions (unit '1').</td>
+          <td style="padding:6px 8px;">Add a <code>flux_limiter_coefficient</code> base to <code>physical_bases.yml</code>; regenerate the 13 names → <code>momentum_flux_limiter_coefficient</code> etc. (ISN + regen).</td>
+          <td style="padding:6px 8px;">Global · vocab</td>
+          <td style="padding:6px 8px;">M</td>
+          <td style="padding:6px 8px;">No <code>flux_limiter</code> token exists yet.</td>
+        </tr>
+        <tr style="border-bottom:1px solid #ddd;background:#fafafa;">
+          <td style="padding:6px 8px;font-weight:700;">C7</td>
+          <td style="padding:6px 8px;">Unit exponents are "prettified" for one name but not most others.</td>
+          <td style="padding:6px 8px;">No prettifier exists; the <code>unit:</code> field is uniform (plain ASCII, always). The inconsistency is <em>legacy prose</em> that restates units — LaTeX (→ pretty via KaTeX) vs ASCII. The current prompt already <em>bans</em> inline units.</td>
+          <td style="padding:6px 8px;">Enforce the existing no-inline-units rule; refine-pass to strip legacy prose units (imas-codex); add a lint in <code>validation/description.py</code> (ISN).</td>
+          <td style="padding:6px 8px;">Global · prose hygiene</td>
+          <td style="padding:6px 8px;">M</td>
+          <td style="padding:6px 8px;">Rule already codified; corpus is mixed-epoch. Shares RC-B.</td>
+        </tr>
+        <tr style="border-bottom:1px solid #ddd;">
+          <td style="padding:6px 8px;font-weight:700;">C8</td>
+          <td style="padding:6px 8px;"><code>neutral_energy_flux_at_wall</code> shares the unit of <code>neutral_particle_flux_at_wall</code> — likely a DD unit mistake.</td>
+          <td style="padding:6px 8px;"><strong>Confirmed upstream DD bug</strong> (verified via imas-dd): <code>wall/…/energy_fluxes/{kinetic,recombination}/neutral/incident</code> carry <code>m^-2.0.s^-1</code> (particle-flux unit) — even the docs are copy-pasted ("neutral <em>particle</em> flux") — while ion/radiation energy-flux siblings correctly use <code>m^-2.W</code>.</td>
+          <td style="padding:6px 8px;">File a DD issue (unit <code>m^-2.s^-1</code>→<code>m^-2.W</code> + fix docs); interim: replace the LLM's rationalizing prose with a known-inconsistency flag on 3 names (DD + ISNC).</td>
+          <td style="padding:6px 8px;">Upstream + interim</td>
+          <td style="padding:6px 8px;">S + DD latency</td>
+          <td style="padding:6px 8px;"><strong>Upstream-DD.</strong> Blast radius 3 names.</td>
+        </tr>
+        <tr style="border-bottom:1px solid #ddd;background:#fafafa;">
+          <td style="padding:6px 8px;font-weight:700;">C9</td>
+          <td style="padding:6px 8px;">The equation in <code>neutral_state_energy_flux_at_wall</code> didn't render.</td>
+          <td style="padding:6px 8px;">Not reproducible in the current catalog + SPA: stored YAML has balanced <code>$$</code>, the SPA regex + KaTeX render it, and a catalog-wide scan finds <strong>0</strong> malformed equations. Likely regenerated after the review, or viewed on a non-SPA surface (raw YAML / mkdocs, where inline <code>$…$</code> is not configured).</td>
+          <td style="padding:6px 8px;">None required. Optional: register <code>$…$</code> inlineMath in the (catalog-unused) mkdocs mathjax config; confirm the surface with the reviewer.</td>
+          <td style="padding:6px 8px;">Verify-only</td>
+          <td style="padding:6px 8px;">S</td>
+          <td style="padding:6px 8px;"><strong>Already fixed.</strong></td>
+        </tr>
+        <tr style="border-bottom:1px solid #ddd;">
+          <td style="padding:6px 8px;font-weight:700;">C10</td>
+          <td style="padding:6px 8px;"><code>at_limiter</code> is under-defined in the DD; and <code>peak_power_density_at_limiter</code> should be <code>along_limiter</code>.</td>
+          <td style="padding:6px 8px;">DD defines <code>at_limiter</code> only as surface geometry (IMAS_3226 tangency semantics unresolved everywhere); the tangency concept already exists as the <code>active_limiter_point</code> locus; <code>along</code> is not in the <code>limiter</code> locus's <code>allowed_relations</code> (<code>[at, of]</code>).</td>
+          <td style="padding:6px 8px;">Add <code>along</code> + a DD-anchored description to the <code>limiter</code> locus and rename <code>peak_power_density_at_limiter</code> (ISN + sn edit); file a DD issue for the <code>at_limiter</code> definition (IMAS_3226).</td>
+          <td style="padding:6px 8px;">Mixed + upstream</td>
+          <td style="padding:6px 8px;">M</td>
+          <td style="padding:6px 8px;"><strong>Partly upstream-DD</strong> (definition). Shares RC-A (missing locus description).</td>
+        </tr>
+        <tr style="border-bottom:1px solid #ddd;background:#fafafa;">
+          <td style="padding:6px 8px;font-weight:700;">C11</td>
+          <td style="padding:6px 8px;"><code>&lt;species&gt;_density_at_limiter</code> descriptions vary ("Charge-state-summed" / "Total" / "Unweighted…"); want consistent nomenclature across siblings.</td>
+          <td style="padding:6px 8px;">Family harmonization is active but has no canonical density phrasing (anchor = "longest description", not canonical), no retro-fix of accepted siblings, and the short <code>description</code> field is under-governed. The <code>_at_limiter</code> family alone uses 7 openings.</td>
+          <td style="padding:6px 8px;">Add a canonical number-density template to the docs prompt; pin the anchor; harmonize-and-regenerate the density families (~100+ names) (imas-codex + ISNC).</td>
+          <td style="padding:6px 8px;">Global · prompt+regen</td>
+          <td style="padding:6px 8px;">M</td>
+          <td style="padding:6px 8px;">Partially present; shares RC-B with C2, C3·desc.</td>
+        </tr>
+        <tr style="border-bottom:1px solid #ddd;">
+          <td style="padding:6px 8px;font-weight:700;">C12</td>
+          <td style="padding:6px 8px;">Make <code>tritium_tritium_flux</code> precise: base <code>neutron_flux</code>, or split the grammar to add a <code>neutron</code> qualifier.</td>
+          <td style="padding:6px 8px;">Reactant pairs are single-token <em>subjects</em> and <code>neutron</code> is <em>also</em> a subject — two subjects can't co-occur, and there is no reaction-channel qualifier. The 8 names are neutron count-rates (unit Hz); the DD models them as <code>summary/fusion/neutron_fluxes/{tt,dt,dd}</code>. A rival <code>neutron_flux_due_to_*</code> convention already exists in the catalog.</td>
+          <td style="padding:6px 8px;">Introduce a reaction-channel qualifier + parser subject/qualifier disambiguation so <code>&lt;pair&gt;_neutron_flux</code> parses; regen the 8 names, fold in the 3 rival names, fix the dangling <code>neutron_flux</code> link (ISN + regen).</td>
+          <td style="padding:6px 8px;">Global · grammar</td>
+          <td style="padding:6px 8px;">M–L</td>
+          <td style="padding:6px 8px;">Two rival conventions to unify.</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+
+    <p style="margin-top:.75rem;"><strong>Answers to the review-request tick-boxes:</strong> <em>Duplicates?</em> — no two comments are the same defect; C2/C11/C3·desc/C7 share root cause RC-B and C3/C4·point/C10 share RC-A (so their fixes should be built together, not duplicated). <em>Already fixed in the current version?</em> — C9 (equation renders; not reproducible); C7's rule is already codified though the legacy corpus is not yet cleaned; C1 is already consistent (a decision, not a fix). <em>Require upstream (DD) intervention?</em> — C8 (a confirmed unit mistake, <code>m^-2.s^-1</code> should be <code>m^-2.W</code>) and the <em>definition</em> half of C10 (<code>at_limiter</code> semantics, IMAS_3226). Notably C4·point does <strong>not</strong> need a DD change — the <code>midplane_identifier</code> the reviewer refers to already exists.</p>
+
+    <h2 id="s4">§4 — WS1 · Locus vocabulary: DD-anchored descriptions + prompt reconciliation</h2>
+    <p><strong>Resolves C3, C4·point, C10 (registry/rename half), and C5.</strong> Root causes RC-A + RC-C. The recurring mechanism: loci in <code>locus_registry.yml</code> are bare <code>type</code>/<code>allowed_relations</code> records with no descriptive or DD-anchoring text, so the LLM invents per-name locus meaning at docs time; and the imas-codex prompts carry conflicting canonicalization rules for the pedestal.</p>
+    <p><strong>Fix:</strong></p>
+    <ul>
+      <li>Add a short <code>description</code> (and DD path/identifier anchor) to the position/region loci the review touches: <code>pedestal</code>, <code>pedestal_top</code>, <code>pedestal_maximum</code>, <code>limiter</code>, <code>active_limiter_point</code>, <code>outboard_midplane</code>, <code>outboard_midplane_separatrix</code>, <code>separatrix</code>, <code>dr_dz_zero_point</code> — in <code>imas_standard_names/grammar/vocabularies/locus_registry.yml</code>.</li>
+      <li>Surface those locus descriptions into the docs-generation prompt context so descriptions are anchored, not invented; and add a rule to cross-link the locus-defining standard name (pedestal → <code>normalized_poloidal_flux_coordinate_of_pedestal</code>) — this is the C3 fix, and generalizes to separatrix / magnetic-axis / X-point.</li>
+      <li>Reconcile the contradictory pedestal guidance across <code>generate_name_system.md</code>, <code>generate_name_dd_names.md</code>, and <code>review_names.md</code> to one canonical rule (C5), then rename value-quantities <code>_at_pedestal</code>→<code>_at_pedestal_top</code> while routing gradient/position quantities (derivatives, <code>poloidal_magnetic_flux_at_pedestal</code>) to <code>pedestal_maximum</code>/mid-pedestal — per the locked policy in the decision below.</li>
+      <li>Add <code>along</code> to the <code>limiter</code> locus's <code>allowed_relations</code> and rename <code>peak_power_density_at_limiter</code>→<code>peak_power_density_along_limiter</code> (a surface distribution/peak), with the same treatment considered for the <code>_at_divertor_target</code>/<code>_at_first_wall</code> siblings (C10 registry half).</li>
+      <li>For C4·point: document that the outer midplane follows the DD <code>midplane_identifier</code> (default <code>dr_dz_zero_sep</code> → <code>equilibrium/…/boundary_separatrix/dr_dz_zero_point</code>) and prefer the existing <code>outboard_midplane_separatrix</code> locus for separatrix point values.</li>
+    </ul>
+    <p><strong>Verification:</strong> full grammar suite green; catalog round-trips; the renamed/relocated names re-review clean; a spot check that pedestal-family docs now carry the cross-link. <strong>Effort:</strong> M (registry descriptions + prompt reconciliation are quick; the C5 value/gradient rename triage is the bulk).</p>
+
+    <h2 id="s5">§5 — WS2 · Description generation standards + harmonize-and-regenerate</h2>
+    <p><strong>Resolves C2, C11, C3·desc, and the prose half of C7.</strong> Root cause RC-B: descriptions are generated per-name with only soft, emergent family harmonization and no retro-fix of already-accepted names, so sibling phrasing drifts and legacy conventions (inline units, ad-hoc aggregation wording) linger.</p>
+    <p><strong>Fix (imas-codex prompts + a regeneration sweep):</strong></p>
+    <ul>
+      <li>Add a <strong>canonical number-density template</strong> to <code>generate_docs_system.md</code> / <code>refine_docs_user.md</code> (e.g. "&lt;Species&gt; ion number density, summed over all charge states, at &lt;locus&gt;.") and make the short <code>description</code> field subject to the family anchor rule (C11).</li>
+      <li>Add an <strong>aggregation-over-charge-states rule</strong>: any species-level quantity must state whether it is charge-state-summed (extensive, e.g. density) or density-weighted-averaged (intensive, e.g. velocity/temperature), and cross-link its charge-state-resolved counterpart (C2).</li>
+      <li>Add a <strong>locus-defining cross-link rule</strong> and pass a zone→defining-quantity map into the docs context (C3·desc; complements WS1).</li>
+      <li>Pin the harmonization anchor to a canonical opening rather than "longest description" (<code>harmonize.py:select_anchor</code>), and run <strong>harmonize + regenerate</strong> across the density and species-velocity families (~100+ names) so already-accepted drift is rewritten — drift detection alone does not touch the published catalog.</li>
+      <li>Add ISN lint guards in <code>validation/description.py</code>: (a) flag prose restating the entry's own unit outside equation contexts (C7); (b) optionally flag missing charge-state clause on multi-charge-state species names.</li>
+    </ul>
+    <p><strong>Verification:</strong> re-run the family-parallel-structure check; sample each density family for the canonical opening; confirm 0 inline-unit lint hits on regenerated names. <strong>Effort:</strong> L (prompt edits are small; the regeneration + re-review across 100+ accepted names is the cost).</p>
+
+    <h2 id="s6">§6 — WS3 · Grammar vocabulary additions</h2>
+    <p><strong>Resolves C6 and C12.</strong> Root cause RC-D: the grammar is missing precise tokens — a meaning-free <code>coefficient</code> base, and no way to say "neutron flux from the D-T reaction" because both the reactant pair and <code>neutron</code> are single-token subjects.</p>
+    <p><strong>C6 fix:</strong> add a <code>flux_limiter_coefficient</code> base to <code>physical_bases.yml</code> and regenerate the 13-name family to <code>momentum_flux_limiter_coefficient</code>, <code>toroidal_neutral_momentum_flux_limiter_coefficient</code>, etc. (keeping the generic <code>coefficient</code> free — or renaming in place; see decision).</p>
+    <p><strong>C12 fix (recommended Option A):</strong> make <code>neutron</code> the concept and introduce a <strong>reaction-channel qualifier</strong> so <code>&lt;pair&gt;_neutron_flux</code> parses (<code>deuterium_tritium_neutron_flux</code>, <code>deuterium_deuterium_neutron_flux</code>, <code>tritium_tritium_neutron_flux</code>, + <code>_due_to_*_fusion</code>). This mirrors the DD's <code>neutron_fluxes/&lt;pair&gt;</code> hierarchy and unifies with the existing <code>neutron_flux_due_to_*</code> names. The reactant pairs must remain subjects for genuine fuel-species quantities (<code>deuterium_tritium_density</code>), so the parser needs positional subject-vs-qualifier disambiguation (pair directly before the base ⇒ subject; pair before a following subject ⇒ qualifier). Regenerate the 8 reactant-pair names, fold in the 3 rival neutron-subject names, and fix the dangling <code>neutron_flux</code> link.</p>
+    <p><strong>Verification:</strong> parser round-trips both readings (<code>deuterium_tritium_density</code> as subject; <code>deuterium_tritium_neutron_flux</code> as qualifier+subject); vocab disjointness guard stays green; the 13 + 8 + 3 names re-review clean. <strong>Effort:</strong> C6 M; C12 M–L (parser disambiguation is the risk).</p>
+
+    <h2 id="s7">§7 — WS4 · Separatrix pair completeness invariant</h2>
+    <p><strong>Resolves C4·fsa.</strong> Root cause RC-E: the DD ships a complete, symmetric <code>local/separatrix</code> (point) + <code>local/separatrix_average</code> (flux-surface-averaged) matrix for all 17 species, but the pipeline generated only part of it — 17 local velocities but 9 fsa (one malformed, DT, missing its <code>_at_plasma_boundary</code> locus), 8 species missing entirely, all 17 <code>separatrix_average/velocity_phi</code> DD paths unmapped and even the existing fsa names source-orphaned; the same gap exists for density (~16 species). Two dangling links point at fsa names that were never created.</p>
+    <p><strong>Fix:</strong> add a completeness invariant so the pipeline cannot ship half a DD-provided pair — any name sourced from <code>local/separatrix/&lt;q&gt;/&lt;species&gt;</code> requires a <code>flux_surface_averaged</code> sibling from <code>local/separatrix_average/&lt;q&gt;/&lt;species&gt;</code> and vice versa. Then a coverage re-run: generate the 8 missing fsa velocities, fix the DT malformation, attach the <code>separatrix_average</code> DD sources to all fsa names, apply the same pairing to the density family (~16 species), and repair the 2 dangling links. Grammar already composes <code>flux_surface_averaged</code> (a registered transformation), so this is coverage, not grammar.</p>
+    <p><strong>Verification:</strong> the invariant check passes over the full separatrix subtree; the previously-orphaned <code>separatrix_average</code> paths are all mapped; dangling-link count 0. <strong>Effort:</strong> M–L (mechanically the composer already produces the form; the work is the paired re-run over velocity + density and attaching sources).</p>
+
+    <h2 id="s8">§8 — WS5 · Upstream DD corrections</h2>
+    <p><strong>Resolves C8 and the definition half of C10.</strong> Root cause RC-F: defects in the upstream DD that a local patch would only mask.</p>
+    <p><strong>C8 (confirmed unit bug):</strong> file a DD issue to change the wall <code>energy_fluxes</code> <em>neutral</em> branch paths (<code>kinetic/neutral/{incident,emitted}</code>, <code>…/state/*</code>, <code>recombination/neutral/*</code>) from <code>m^-2.s^-1</code> to <code>m^-2.W</code> to match the ion/radiation branches, and fix the copy-pasted documentation ("Incident neutral particle flux" on an energy-flux node). Interim in the catalog: replace the LLM's rationalizing prose on the 3 affected names (<code>neutral_energy_flux_at_wall</code>, <code>…_due_to_recombination</code>, <code>neutral_state_energy_flux_at_wall</code>) with the pipeline's own known-inconsistency flag and mark them for regeneration once the DD is corrected. (The <code>unit:</code> field is DD-authoritative; do not silently override it ahead of the DD unless the project chooses to lead the DD, in which case note the deliberate desync.)</p>
+    <p><strong>C10 (definition):</strong> the <code>at_limiter</code> measurement locus is not defined in the DD; the SOLPS interpretation (tangency point of separatrix and limiter) is not yet generally accepted (IMAS_3226). File/track the upstream item so a defensible definition can be adopted; in the interim, WS1 documents the locus with the DD anchor and cross-references <code>active_limiter_point</code> (which already carries the tangency-contact meaning).</p>
+    <p><strong>Verification:</strong> DD issue(s) filed with the exact paths + proposed units; interim catalog flags in place; regeneration queued behind the DD fix. <strong>Effort:</strong> S to author the issues + interim flags; external resolution latency is out of our control.</p>
+
+    <h2 id="s9">§9 — WS6 · Convention decision &amp; verify-only</h2>
+    <p><strong>C1 (deuterium-tritium hyphen):</strong> recommended <strong>reject</strong> — keep the underscore. Hyphens are categorically illegal in the grammar (four validators + the underscore-splitting tokenizer), <code>deuterium_tritium</code> is already a single subject token, and the DD path element itself uses the underscore (the hyphen appears only in DD prose). The clarity the reviewer wants is a <em>prose</em> matter and largely already present ("treated as a single effective species, 2.5 amu"). Action: a documentation clarification, plus a note distinguishing the two readings of the DT token (fuel species vs D-T reaction channel — the latter is what WS3/C12 addresses).</p>
+    <p><strong>C9 (broken equation):</strong> verify-only — the equation is well-formed in the stored YAML and renders correctly under the SPA's KaTeX path; a catalog-wide scan found no malformed equations. Confirm with the reviewer which surface they viewed (raw GitHub YAML and the mkdocs site do not render inline <code>$…$</code> the way the catalog SPA does); optionally register <code>$…$</code> inlineMath in the mkdocs mathjax config as belt-and-suspenders (the catalog itself is served by the SPA, not mkdocs).</p>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+      <h2><span class="sec">§</span> Decisions</h2>
+
+      <div class="r-dec" data-key="dt-species-spelling" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">C1 — Should the deuterium-tritium species use a hyphen, or keep the underscore?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="keep-underscore">Keep underscore (reject hyphen)</button>
+          <button class="r-opt" data-value="adopt-hyphen">Adopt hyphen for compound species</button>
+        </p>
+        <p class="r-dec-rat">Recommended: keep underscore. Hyphens fail all four name validators and the tokenizer splits on <code>_</code> only; DT is already one subject token; the DD path uses underscore. A one-species hyphen exception would break uniform tokenization and diverge from the DD. Address the reviewer's clarity concern in prose instead.</p>
+      </div>
+
+      <div class="r-dec" data-key="pedestal-locus-consolidation" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">C5 — How to consolidate the pedestal locus?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="top-plus-midpedestal">Rename value-quantities to pedestal_top; keep a mid-pedestal locus for gradient/position names</button>
+          <button class="r-opt" data-value="blanket-top">Blanket-rename all _at_pedestal → _at_pedestal_top</button>
+          <button class="r-opt" data-value="leave">Leave both as-is</button>
+        </p>
+        <p class="r-dec-rat">Recommended: the first. By edge convention "the pedestal value" is the pedestal-top value (safe to rename ~value quantities), but maximum-gradient and flux-position quantities legitimately sit at the mid-pedestal (DD <code>pedestal_fits/*/d_dpsi_norm_max_position</code>, <code>summary/local/pedestal/position/psi</code>) and must not be relabelled "top". A blanket rename would mislabel those.</p>
+      </div>
+
+      <div class="r-dec" data-key="coefficient-base-strategy" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">C6 — Add a new base or rename the existing one?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="add-new">Add a new flux_limiter_coefficient base</button>
+          <button class="r-opt" data-value="rename-in-place">Rename coefficient → flux_limiter_coefficient in place</button>
+        </p>
+        <p class="r-dec-rat">Recommended: add a new base. The family is the only current consumer, so an in-place rename is technically safe, but adding a specific base keeps the generic <code>coefficient</code> slot free for future non-limiter coefficients and is the cleaner grammar.</p>
+      </div>
+
+      <div class="r-dec" data-key="neutron-flux-grammar" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">C12 — How to make the fusion neutron-flux names precise?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="option-a">Option A — neutron is the concept; reaction pair becomes a qualifier (&lt;pair&gt;_neutron_flux)</button>
+          <button class="r-opt" data-value="option-b">Option B — keep pair as subject; add a neutron qualifier</button>
+        </p>
+        <p class="r-dec-rat">Recommended: Option A. It mirrors the DD's <code>neutron_fluxes/&lt;pair&gt;</code> hierarchy 1:1, unifies with the existing <code>neutron_flux_due_to_*</code> names, and disambiguates the two D-D branches. Cost: parser positional disambiguation so the pair can be subject (density) or qualifier (neutron flux). Option B duplicates the <code>neutron</code> token across segments and produces awkward order.</p>
+      </div>
+
+      <div class="r-dec" data-key="unit-prettification-strategy" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">C7 — How to make unit rendering consistent?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="ban-inline">Enforce the no-inline-units rule + refine legacy prose</button>
+          <button class="r-opt" data-value="unicode-renderer">Add a Unicode-superscript renderer to the UnitPill</button>
+        </p>
+        <p class="r-dec-rat">Recommended: ban-inline. The <code>unit:</code> field is already uniform and the prompt already forbids restating units in prose; the defect is purely legacy prose. A refine pass + a lint guard is simpler than a renderer and matches the existing rule. (A Unicode renderer could be added later purely for pill aesthetics, independent of this fix.)</p>
+      </div>
+
+      <div class="r-dec" data-key="fsa-completeness-scope" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">C4·fsa — Scope of the separatrix pairing fix?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="velocity-and-density">Fix velocity + density now, add the pairing invariant</button>
+          <button class="r-opt" data-value="velocity-only">Velocity family only for now</button>
+        </p>
+        <p class="r-dec-rat">Recommended: velocity + density with the invariant. The gap is identical for both families and the reviewer's "for all quantities at the separatrix" is systematic; adding the invariant prevents the pipeline from shipping half a DD pair again.</p>
+      </div>
+    </section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+      <h2><span class="sec">§</span> Followups</h2>
+
+      <article class="r-fu" data-id="f-erf-ws1" data-status="open" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-07-06">
+        <h4 class="r-fu-title">WS1 — Locus DD-anchored descriptions + pedestal/limiter prompt reconciliation (C3, C4·point, C5, C10 registry half)</h4>
+        <div class="r-fu-body">Add DD-anchored <code>description</code> fields to the review-touched loci, surface them into the docs prompt context, reconcile the contradictory pedestal canonicalization, and do the C5 value/gradient rename triage plus the <code>along_limiter</code> mechanics. Honour the locked pedestal-consolidation policy.</div>
+        <pre class="r-fu-prompt">Project: imas-standard-names (+ imas-codex prompts, imas-standard-names-catalog)
+Plan:    expert-review-fixes (http://localhost:8765/imas-standard-names/expert-review-fixes.html)
+Section: §4 (WS1)
+Tier:    opus
+
+Context
+  Loci in locus_registry.yml are bare type/allowed_relations records with no
+  descriptive/DD-anchoring text, so the docs LLM invents per-name locus meaning;
+  and the imas-codex prompts carry contradictory pedestal canonicalization. This
+  is the shared fix for C3, C4-point, C5, and the registry half of C10. Honour the
+  locked decisions shown live above.
+
+State to read (CODE / FILES / DATA)
+  imas-standard-names/imas_standard_names/grammar/vocabularies/locus_registry.yml
+    (pedestal:499, pedestal_maximum:502, pedestal_top:505, limiter:459,
+     active_limiter_point:571, outboard_midplane:487, outboard_midplane_separatrix:490,
+     separatrix:543, dr_dz_zero_point:576)
+  imas-codex/imas_codex/llm/prompts/sn/{generate_name_system.md, generate_name_dd_names.md,
+     review_names.md, generate_docs_system.md} (pedestal + limiter + cross-link rules)
+  imas-standard-names-catalog/standard_names/{edge_plasma_physics.yml, magnetohydrodynamics.yml,
+     plasma_wall_interactions.yml, turbulence.yml}
+  DD via imas-dd: summary/local/pedestal/position/psi, summary/pedestal_fits/*,
+     equilibrium/.../boundary_separatrix/dr_dz_zero_point, midplane_identifier options.
+
+Scope locks / constraints
+  - Read-first: this plan is verification-stage; do not start edits until decisions
+    pedestal-locus-consolidation and (for C10) the along_limiter approach are locked.
+  - Grammar/vocab changes go through ISN + grammar_sync + regen, not hand-edits of the catalog.
+  - Do NOT blanket-rename _at_pedestal: value-quantities → pedestal_top; gradient/flux-position
+    quantities → mid-pedestal (pedestal_maximum). Per-name triage required.
+  - C4-point needs NO DD change (midplane_identifier already exists); prefer the existing
+    outboard_midplane_separatrix locus for separatrix point values.
+
+Done-when
+  1. Loci carry DD-anchored description fields; docs prompt consumes them; pedestal cross-link
+     rule added; the three prompts agree on one pedestal rule.
+  2. C5 renames applied per policy; along added to limiter allowed_relations;
+     peak_power_density_at_limiter renamed; affected names re-review clean.
+  3. Grammar + catalog round-trip suites green; followup written + this one resolved.</pre>
+      </article>
+
+      <article class="r-fu" data-id="f-erf-ws2" data-status="open" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-07-06">
+        <h4 class="r-fu-title">WS2 — Description standards + harmonize-and-regenerate (C2, C11, C3·desc, C7 prose)</h4>
+        <div class="r-fu-body">Add canonical density/aggregation/cross-link rules to the docs prompts, pin the harmonization anchor, run a harmonize+regenerate sweep over the density and species-velocity families, and add the inline-unit lint guard.</div>
+        <pre class="r-fu-prompt">Project: imas-codex (+ imas-standard-names lint, imas-standard-names-catalog)
+Plan:    expert-review-fixes (http://localhost:8765/imas-standard-names/expert-review-fixes.html)
+Section: §5 (WS2)
+Tier:    opus
+
+Context
+  Descriptions are generated per-name with soft, emergent family harmonization and
+  no retro-fix of accepted names, so sibling phrasing drifts (C11), aggregation
+  wording is inconsistent (C2), locus-defining cross-links are absent (C3-desc), and
+  legacy prose restates units (C7). One mechanism fix addresses all four.
+
+State to read (CODE / FILES / DATA)
+  imas-codex/imas_codex/llm/prompts/sn/{generate_docs_system.md, generate_docs_user.md,
+     refine_docs_user.md, review_docs_user.md}
+  imas-codex/imas_codex/standard_names/{harmonize.py (select_anchor, drift), context.py
+     (fetch_sibling_family, max_siblings)}
+  imas-standard-names/imas_standard_names/validation/description.py (add lint)
+  imas-standard-names-catalog/standard_names/{plasma_wall_interactions.yml,
+     edge_plasma_physics.yml} (density + species-velocity families)
+
+Scope locks / constraints
+  - Canonical number-density opening template + charge-state aggregation clause
+    (summed for extensive, density-weighted mean for intensive) + locus-defining
+    cross-link rule. Make the short description field subject to the family anchor.
+  - Pin select_anchor to a canonical opening, not "longest description".
+  - Retro-fix requires a harmonize + REGENERATE pass (drift detection alone does not
+    touch the published catalog); ~100+ density descriptions.
+  - Honour the "No-inline-units" rule; the lint flags prose restating the entry's own
+    unit outside equation contexts.
+
+Done-when
+  1. Prompt rules added; anchor pinned; lint guard added and green.
+  2. Density + species-velocity families regenerated; family-parallel-structure check
+     passes; 0 inline-unit lint hits on regenerated names.
+  3. Followup written + this one resolved.</pre>
+      </article>
+
+      <article class="r-fu" data-id="f-erf-ws3" data-status="open" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-07-06">
+        <h4 class="r-fu-title">WS3 — Grammar vocabulary: flux_limiter_coefficient base + neutron-flux reaction-channel qualifier (C6, C12)</h4>
+        <div class="r-fu-body">Add the specific base for the flux-limiter family and the reaction-channel qualifier + parser disambiguation for fusion neutron fluxes; regenerate the affected families and unify the rival neutron-subject names.</div>
+        <pre class="r-fu-prompt">Project: imas-standard-names (grammar/vocab + parser) + imas-codex regen
+Plan:    expert-review-fixes (http://localhost:8765/imas-standard-names/expert-review-fixes.html)
+Section: §6 (WS3)
+Tier:    opus
+
+Context
+  The grammar lacks precise tokens: a meaning-free `coefficient` base (C6) and no way
+  to express "neutron flux from the D-T reaction" because both the reactant pair and
+  neutron are single-token subjects (C12). Honour the locked coefficient-base-strategy
+  and neutron-flux-grammar decisions above.
+
+State to read (CODE / FILES / DATA)
+  imas-standard-names/imas_standard_names/grammar/vocabularies/{physical_bases.yml
+     (coefficient:49), subjects.yml (neutron:38, reaction channels:65-67), qualifiers.yml,
+     qualifier_categories.yml}
+  imas-standard-names/imas_standard_names/grammar/{parser.py, model.py, field_schemas.py}
+  imas-standard-names-catalog/standard_names/{edge_plasma_physics.yml, transport.yml,
+     radiation_measurement_diagnostics.yml}
+  DD via imas-dd: summary/fusion/neutron_fluxes/{tt,dt,dd}/*, summary/fusion/neutron_rates/*.
+
+Scope locks / constraints
+  - C6: add flux_limiter_coefficient base; regen the 13-name momentum-coefficient family.
+  - C12 (Option A): neutron is the concept; add a reaction-channel qualifier so
+    &lt;pair&gt;_neutron_flux parses. Pairs MUST remain subjects for fuel-species quantities
+    (deuterium_tritium_density) — parser needs positional subject-vs-qualifier
+    disambiguation. Regen 8 reactant-pair names, fold in the 3 rival neutron_flux_due_to_*
+    names, fix the dangling neutron_flux link.
+  - Keep the vocab disjointness guard green.
+
+Done-when
+  1. New base + reaction-channel qualifier added; parser disambiguation implemented.
+  2. Parser round-trips both readings; 13 + 8 + 3 names regenerated + re-review clean.
+  3. Full grammar suite green; followup written + this one resolved.</pre>
+      </article>
+
+      <article class="r-fu" data-id="f-erf-ws4" data-status="open" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-07-06">
+        <h4 class="r-fu-title">WS4 — Separatrix local↔flux-surface-averaged pairing invariant + coverage re-run (C4·fsa)</h4>
+        <div class="r-fu-body">Add a completeness invariant so the pipeline cannot ship half a DD-provided local/separatrix_average pair, then re-run coverage to generate the missing fsa names, fix the DT malformation, attach sources, and repair dangling links — for velocity and density.</div>
+        <pre class="r-fu-prompt">Project: imas-codex (pipeline + invariant) + imas-standard-names-catalog
+Plan:    expert-review-fixes (http://localhost:8765/imas-standard-names/expert-review-fixes.html)
+Section: §7 (WS4)
+Tier:    opus
+
+Context
+  The DD ships the full local/separatrix + local/separatrix_average matrix for 17 species,
+  but the pipeline generated only part of it (C4-fsa): 17 local velocities / 9 fsa (DT
+  malformed, missing its _at_plasma_boundary locus), 8 species missing, all 17
+  separatrix_average/velocity_phi paths unmapped and existing fsa names source-orphaned;
+  density is ~16 species short; 2 dangling links. Honour the locked fsa-completeness-scope.
+
+State to read (CODE / FILES / DATA)
+  imas-codex/imas_codex/standard_names/{audits.py, coverage.py, families.py}
+  imas-standard-names/imas_standard_names/grammar/constants.py (flux_surface_averaged is a
+     registered transformation — grammar already composes it)
+  imas-standard-names-catalog/standard_names/edge_plasma_physics.yml (velocity + density
+     families; dangling links at 5397, 5818; malformed DT fsa at 5309)
+  DD via imas-dd: summary/local/separatrix/velocity_phi/&lt;species&gt;/value and
+     summary/local/separatrix_average/velocity_phi/&lt;species&gt;/value (+ n_i analogues).
+
+Scope locks / constraints
+  - Add a pairing invariant: a name from local/separatrix/&lt;q&gt;/&lt;species&gt; requires a
+    flux_surface_averaged sibling from local/separatrix_average/&lt;q&gt;/&lt;species&gt;, and vice versa.
+  - Coverage re-run: 8 missing fsa velocities + DT fix + attach separatrix_average sources +
+    density family (~16 species) + fix the 2 dangling links.
+  - This is coverage, not grammar — do not change the grammar.
+
+Done-when
+  1. Invariant added and passing over the full separatrix subtree.
+  2. Missing fsa names generated + sourced; DT fixed; dangling-link count 0.
+  3. Suites green; followup written + this one resolved.</pre>
+      </article>
+
+      <article class="r-fu" data-id="f-erf-ws5-c8" data-status="open" data-tier="sonnet" data-written-by="reckon-create" data-written-at="2026-07-06">
+        <h4 class="r-fu-title">WS5a — Upstream DD issue: neutral energy-flux unit at wall (C8) + interim catalog flag</h4>
+        <div class="r-fu-body">File the DD issue for the wall neutral energy-flux unit mistake (confirmed via imas-dd), and replace the LLM's rationalizing prose on the 3 affected catalog names with a known-inconsistency flag pending the DD fix.</div>
+        <pre class="r-fu-prompt">Project: DD (upstream issue) + imas-standard-names-catalog (interim)
+Plan:    expert-review-fixes (http://localhost:8765/imas-standard-names/expert-review-fixes.html)
+Section: §8 (WS5a)
+Tier:    sonnet
+
+Context
+  Confirmed via imas-dd: the wall energy_fluxes NEUTRAL branches carry the particle-flux
+  unit m^-2.s^-1 (serialized m^-2.0.s^-1) with copy-pasted "neutral particle flux" docs,
+  while ion/radiation energy-flux siblings correctly use m^-2.W. This is an upstream DD bug;
+  the LLM's rationalizing prose also violates imas-codex's own don't-rationalise-bad-units rule.
+
+State to read (CODE / FILES / DATA)
+  DD via imas-dd (dd_version 3): wall/description_ggd/ggd/energy_fluxes/kinetic/neutral/{incident,emitted},
+     .../kinetic/neutral/state/*, .../recombination/neutral/*  (all currently m^-2.0.s^-1)
+     vs .../kinetic/ion/incident and .../radiation/incident (m^-2.W, correct).
+  imas-standard-names-catalog/standard_names/plasma_wall_interactions.yml
+     (neutral_energy_flux_at_wall:1852, ..._due_to_recombination:1892, neutral_state_energy_flux_at_wall:1979)
+
+Scope locks / constraints
+  - Author a DD issue: change the neutral energy_flux branch units m^-2.s^-1 → m^-2.W and fix
+    the copy-pasted documentation; list the exact paths.
+  - Interim: replace the rationalizing prose on the 3 names with the pipeline's known-inconsistency
+    flag; do NOT silently override the DD-authoritative unit field unless the project decides to
+    lead the DD (then note the deliberate desync). Mark the 3 names for regen after the DD fix.
+
+Done-when
+  1. DD issue filed with paths + proposed units + doc fix.
+  2. Interim flag applied to the 3 catalog names; regen queued behind the DD fix.
+  3. This followup resolved (external DD resolution tracked separately).</pre>
+      </article>
+
+      <article class="r-fu" data-id="f-erf-ws5-c10" data-status="open" data-tier="sonnet" data-written-by="reckon-create" data-written-at="2026-07-06">
+        <h4 class="r-fu-title">WS5b — Upstream DD: at_limiter measurement-locus definition (C10, IMAS_3226)</h4>
+        <div class="r-fu-body">Track/advance the upstream definition of the <code>at_limiter</code> measurement locus (the SOLPS separatrix–limiter tangency interpretation is not yet generally accepted; IMAS_3226). The interim in-catalog documentation is handled by WS1.</div>
+        <pre class="r-fu-prompt">Project: DD / IMAS community (upstream)
+Plan:    expert-review-fixes (http://localhost:8765/imas-standard-names/expert-review-fixes.html)
+Section: §8 (WS5b)
+Tier:    sonnet
+
+Context
+  The DD defines at_limiter only as surface geometry (wall/description_2d/limiter); the
+  measurement-locus meaning is unresolved (IMAS_3226 proposes the separatrix-limiter tangency
+  point, not yet generally accepted). The tangency-contact concept already exists in the catalog
+  as active_limiter_point (DD pulse_schedule/position_control/active_limiter_point).
+
+State to read (CODE / FILES / DATA)
+  DD via imas-dd: wall/description_2d/limiter; pulse_schedule/position_control/active_limiter_point
+  imas-standard-names/imas_standard_names/grammar/vocabularies/locus_registry.yml
+     (limiter:459, active_limiter_point:571)
+  IMAS issue tracker: IMAS_3226.
+
+Scope locks / constraints
+  - This is an upstream/community definition item, not a local code change; the interim locus
+    documentation + cross-reference to active_limiter_point is done in WS1.
+  - Do not adopt the tangency definition in the catalog until it is accepted upstream.
+
+Done-when
+  1. IMAS_3226 status confirmed and the desired at_limiter definition articulated upstream.
+  2. Once accepted, the limiter locus description + affected names updated (follow-on).
+  3. This followup resolved or re-scoped to track the upstream item.</pre>
+      </article>
+
+      <article class="r-fu" data-id="f-erf-ws6" data-status="open" data-tier="sonnet" data-written-by="reckon-create" data-written-at="2026-07-06">
+        <h4 class="r-fu-title">WS6 — C1 convention clarification + C9 verify-only</h4>
+        <div class="r-fu-body">Apply the C1 decision (keep underscore) as a prose clarification distinguishing the two readings of the DT token, and close C9 by confirming the render surface with the reviewer (optionally hardening mkdocs mathjax).</div>
+        <pre class="r-fu-prompt">Project: imas-codex (docs prose) + imas-standard-names (mkdocs, optional)
+Plan:    expert-review-fixes (http://localhost:8765/imas-standard-names/expert-review-fixes.html)
+Section: §9 (WS6)
+Tier:    sonnet
+
+Context
+  C1 is a convention decision (keep underscore — see the locked decision above); the fix is a
+  prose clarification, not a rename. C9 is not reproducible (the equation renders under the SPA);
+  close it by confirming which surface the reviewer saw.
+
+State to read (CODE / FILES / DATA)
+  imas-codex/imas_codex/llm/prompts/sn/generate_docs_system.md (species/DT wording)
+  imas-standard-names-catalog/standard_names/ (deuterium_tritium_* descriptions;
+     neutral_state_energy_flux_at_wall:1979 documentation)
+  imas-standard-names/{mkdocs.yml, docs/javascripts/mathjax.js} (inline $...$ not configured)
+
+Scope locks / constraints
+  - Do NOT introduce a hyphen anywhere in a name (decision locked to keep underscore).
+  - C9: no catalog/SPA change required; optional one-line mkdocs mathjax inlineMath registration.
+
+Done-when
+  1. DT prose clarified (single effective species vs D-T reaction channel reading).
+  2. C9 render surface confirmed with the reviewer; optional mkdocs tweak applied.
+  3. This followup resolved.</pre>
+      </article>
+    </section>
+
+  </main>
+</body>
+</html>
