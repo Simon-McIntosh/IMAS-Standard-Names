@@ -18,8 +18,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-06">
-<meta name="plan-version" content="5">
-<meta name="plan-impl" content="0.45">
+<meta name="plan-version" content="6">
+<meta name="plan-impl" content="0.6">
 </head>
 <body>
   <main class="plan-doc">
@@ -713,6 +713,34 @@ Done-when
   1. Pedestal duplicates consolidated to one locus each; 0 redundant _at_pedestal duplicates.
   2. The 4 ambiguous names adjudicated + renamed or left per the lead.
   3. This followup resolved.</pre>
+    </article>
+<article class="r-fu" data-id="f-erf-pipeline-build" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-06" data-recommends-skill="reckon-ship" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Pipeline-fix build progress + remaining regen/RC (user chose: build pipeline fixes first)</h4>
+    <div class="r-fu-body">BUILT + LANDED this session (all $0 renames + code): C6 flux_limiter_coefficient base + 13 renames; C10 along_limiter + rename; C5 54 value->pedestal_top + 1 derivative->pedestal_maximum; C1 keep-underscore; imas-codex generation-standard prompts (data-driven, no hardcoded vocab); loci DD-anchored descriptions + defining_quantity. TWO of THREE pipeline fixes BUILT: (1) C12 reaction-channel qualifier grammar (ISN model.py + qualifiers/qualifier_categories vocab + guard-test allowlists; full grammar suite green 786; codex pin bumped to 7d514a4; 8 <pair>_neutron_flux renamed + semantic-parse/export clean) DONE end-to-end. (2) derived-name docs-regen: relaxed claim_generate_docs_batch to drop the name-score gate under a curative scope_run_id (graph_ops.py c95ad5b7) so derived-leaf families are docs-eligible; VALIDATED on density_at_limiter (20 members regenerated with the charge-state aggregation clause, ~$2.78/family; drtrain review->accept scoped). REMAINING: (3) per-species fsa from the DD species-array node (C4-fsa) still to BUILD; apply the docs regen across the other description families (density_at_plasma_boundary 18, density_at_pedestal_top 20, toroidal_<species>_velocity C2 families) ~ $3/family; C8 interim unit-flag on 3 names; then full flush + export + cut ISNC RC v0.2.0rc62. Budget used ~ $6 of $50. Note: --focus --dry-run is NOT dry (runs for real); the ISN pin bump trips the clear-gate (use --skip-clear-gate deliberately); the canonical density template improves consistency (aggregation clause now universal) but openings still vary somewhat (a stricter template could tighten further).</div>
+    <pre class="r-fu-prompt">Project: imas-codex (build #3 + regen) + imas-standard-names-catalog (RC)
+Plan: expert-review-fixes (http://localhost:8765/imas-standard-names/expert-review-fixes.html)
+Section: pipeline build (remaining)
+Tier: opus
+
+Context
+  Two of three pipeline fixes are built + landed (C12 grammar; derived-name docs claim-gate). The machinery for the description regen works (validated on density_at_limiter, ~$3/family). Remaining: build per-species fsa (C4-fsa) from the DD species-array node; run the docs regen across the remaining description families; C8 interim flag; flush + export + cut the RC.
+
+State to read (CODE / FILES / DATA)
+  imas-codex graph_ops.py claim_generate_docs_batch (curative-scope relaxation, landed c95ad5b7); harmonize.mark_families_for_regen; loop/pools docs pacing.
+  imas-codex compose/extract path for species-array (n_i, velocity_phi) DD nodes -&gt; per-species names (C4-fsa build).
+  DD via imas-dd: summary/local/separatrix_average/{velocity_phi,n_i} per-species leaves.
+  imas-standard-names-catalog/standard_names/plasma_wall_interactions.yml (C8 3 names).
+
+Scope locks / constraints
+  - Regen families with: sn run --families &lt;parent&gt; --docs-only --include-accepted --skip-clear-gate --reviewer-profile pilot -c &lt;cap&gt;; then a scoped review drain (--flush --scope-run-id &lt;id&gt;) to accept the drafted docs. Budget-cap each; stay within the $50 authorization.
+  - Build #3 (per-species fsa) needs the pipeline to expand a species-array DD node into per-species names (matching the existing per-species convention), NOT a generic ion_species name.
+  - Cut the RC only from an export-clean graph (all target names name_stage=accepted + docs_stage=accepted + semantic-parse OK).
+
+Done-when
+  1. #3 built; C4-fsa per-species names generated + accepted.
+  2. Description regen applied across the density + velocity families; drafted docs drained to accepted.
+  3. C8 interim flag on the 3 names; full flush; export clean; ISNC RC cut.
+  4. This followup resolved; WS2/WS3/WS4 advanced/closed.</pre>
     </article>
 </section>
 
