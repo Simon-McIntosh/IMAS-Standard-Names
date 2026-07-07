@@ -1,0 +1,24 @@
+# Check-only hooks: they never modify files (run `uv run ruff check --fix`
+# and `uv run ruff format` yourself before staging). The grammar drift gate
+# blocks commits that change grammar sources without regenerating the
+# generated modules (model_types.py, constants.py, tag_types.py,
+# field_schemas.py).
+repos:
+  - repo: local
+    hooks:
+      - id: ruff-check
+        name: ruff check
+        entry: uv run ruff check
+        language: system
+        types: [python]
+      - id: ruff-format-check
+        name: ruff format --check
+        entry: uv run ruff format --check
+        language: system
+        types: [python]
+      - id: grammar-codegen-drift
+        name: grammar codegen drift gate
+        entry: uv run build-grammar --check
+        language: system
+        pass_filenames: false
+        files: ^imas_standard_names/(grammar/(specification\.yml|vocabularies/.*\.ya?ml)|grammar_codegen/.*)$

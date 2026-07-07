@@ -26,7 +26,8 @@ IMAS Standard Names (ISN) is a **grammar library** and **read-only catalog serve
 
 Critical distinctions for naming:
 
-- `component` + `physical_base`: `radial_component_of_magnetic_field`
+- `component` + `physical_base`: `radial_magnetic_field` (short form only;
+  the `{axis}_component_of_{base}` long form is retired and does not parse)
 - `coordinate` + `geometric_base`: `radial_position_of_flux_loop`
 - `of_object` vs `from_source`: intrinsic properties vs measurements
 - `at_position` vs `of_geometry`: evaluated at location vs property of object
@@ -209,7 +210,15 @@ cd /home/ITER/mcintos/Code/imas-standard-names && uv run pytest
 - **Entry points**: Configure in `[project.scripts]` section of `pyproject.toml`
 
 ### Code Quality
-- **Pre-commit hooks**: Enabled for all commits (ISN-specific: hooks run `ruff --fix` in modifying mode; this is safe here as ISN is a single-developer repo with no concurrent agent sessions writing the same files)
+- **Pre-commit hooks**: check-only (`.pre-commit-config.yaml`) — `ruff check`,
+  `ruff format --check`, and the grammar codegen drift gate
+  (`build-grammar --check`, fires when grammar sources change). Hooks never
+  modify files; run `uv run ruff check --fix` and `uv run ruff format`
+  yourself before staging. Install once per clone: `uv run pre-commit install`.
+- **Grammar sources and generated modules commit together**: any change to
+  `grammar/specification.yml` or `grammar/vocabularies/*.yml` requires
+  `uv run python -m imas_standard_names.grammar_codegen.generate` in the
+  same commit — CI and the pre-commit gate both enforce this.
 - **Linting & formatting**: `ruff` (configuration in `pyproject.toml`)
 
 ### Security
@@ -580,7 +589,7 @@ Write code as if it's always been this way.
 
 ### Physical Base Vocabulary (Closed, Irreducible)
 
-`physical_bases.yml` contains ~78 irreducible dimensional base quantities. A base is valid ONLY if:
+`physical_bases.yml` contains the closed set of irreducible dimensional base quantities (~150; count it, don't trust this figure). A base is valid ONLY if:
 
 1. It represents a fundamental dimensional quantity (velocity, density, pressure, temperature, flux, etc.)
 2. It CANNOT be decomposed into `qualifier + existing_base`
@@ -592,21 +601,41 @@ Write code as if it's always been this way.
 
 ### Qualifier Vocabulary (Closed, Prefix Modifiers)
 
-`qualifiers.yml` contains ~92 prefix modifier tokens. These strip recursively:
+`qualifiers.yml` contains the closed set of prefix modifier tokens (~110; count it, don't trust this figure). These strip recursively:
 - `collisional_power_density` → qualifier=`collisional`, base=`power_density`
 - `fast_collisional_power_density` → qualifiers=`[fast, collisional]`, base=`power_density`
 
-Multi-word tokens are supported: `center_of_mass`, `non_inductive`, `cross_field`.
+Multi-word tokens are supported (e.g. `cross_field`).
 
 **Adding a new qualifier:** Add the token to `qualifiers.yml`, run tests. The parser automatically uses it.
 
 ### Disambiguation Rules
 
-1. **D2: Subjects win** — Compound subject tokens (`trapped_fast_particle`) remain atomic subjects. The parser strips subjects FIRST (Stage 3). Qualifiers operate only on the residue after subject removal.
+How the parser resolves token-role ambiguity (see `grammar/parser.py`):
 
-2. **D3: Process via template only** — Process tokens (`bootstrap`, `sawtooth`) appear ONLY via `_due_to_{token}` suffix. If a process token appears as a prefix (`bootstrap_current_density`), it is a qualifier, not a process.
+1. **Peel order** — the parser peels trailing postfix operators, then the
+   `_due_to_` mechanism, then the locus (`_of_`/`_at_`/`_over_`/`_along_`),
+   then outer prefix/binary operators; only the residue is matched greedily
+   with priority geometry carrier > physical base > axis projection >
+   qualifier recursion. Multi-word tokens are atomic within their segment
+   because separator matching happens at the peel stages, not inside
+   registered tokens.
 
-3. **D4: Multi-word qualifier atoms** — `center_of_mass` is an atomic qualifier token. The `_of_` in it is NOT an operator match because operator matching (Stage 4) runs before qualifier extraction (Stage 5).
+2. **Longest base match wins** — a registered multi-word base beats a
+   qualifier + shorter-base split: `electron_kinetic_energy` keeps base
+   `kinetic_energy`; in `ion_kinetic_energy_flux` the residue after `flux`
+   resolves `kinetic` as a channel qualifier and `energy` as the channel.
+
+3. **Process via template only** — process tokens appear ONLY via the
+   `_due_to_{token}` suffix. A prefix that looks like a mechanism
+   (`collisional_power_density`) is a qualifier, not a process.
+
+4. **Reactant-pair dual role** — `deuterium_tritium`,
+   `deuterium_deuterium`, and `tritium_tritium` are subjects when they are
+   the final species token (`deuterium_tritium_density`) and
+   reaction-channel qualifiers when a product subject follows
+   (`deuterium_tritium_neutron_flux`). This is the only allowlisted
+   subjects∩qualifiers overlap.
 
 ### Qualifier Ordering
 
