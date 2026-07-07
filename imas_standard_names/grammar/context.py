@@ -220,16 +220,19 @@ def _build_anti_patterns() -> list[dict[str, str]]:
             "example_right": "radial_position_of_flux_loop",
         },
         {
-            "mistake": "Using coordinate with physical_base",
-            "correction": "Use component with physical_base instead",
-            "example_wrong": "radial_magnetic_field",
-            "example_right": "radial_component_of_magnetic_field",
+            "mistake": "Using the retired long component form with physical_base",
+            "correction": (
+                "Use the short form <axis>_<physical_base>; "
+                "the <axis>_component_of_<base> spelling does not parse"
+            ),
+            "example_wrong": "radial_component_of_magnetic_field",
+            "example_right": "radial_magnetic_field",
         },
         {
             "mistake": "Including units in the name",
-            "correction": "Use the unit field in the YAML entry",
+            "correction": "Use the unit field in the YAML entry (e.g. unit: eV)",
             "example_wrong": "temperature_in_eV",
-            "example_right": "electron_temperature (unit: eV)",
+            "example_right": "electron_temperature",
         },
         {
             "mistake": "Using camelCase or spaces",
@@ -238,10 +241,13 @@ def _build_anti_patterns() -> list[dict[str, str]]:
             "example_right": "electron_temperature",
         },
         {
-            "mistake": "Mixing device and object segments",
-            "correction": "Use device for dynamic signals, object for static properties",
-            "example_wrong": "area_of_flux_loop (with device segment)",
-            "example_right": "flux_loop_voltage (device) vs area_of_flux_loop (object)",
+            "mistake": "Using the device prefix when authoring new instrument names",
+            "correction": (
+                "Attach the instrument as the of_<entity> postfix locus; "
+                "the device-prefix form is retained for parse compatibility only"
+            ),
+            "example_wrong": "flux_loop_voltage",
+            "example_right": "voltage_of_flux_loop",
         },
         {
             "mistake": "Mixing geometry and position segments",
@@ -269,7 +275,7 @@ def _build_quick_start() -> str:
         "coordinate with geometric_base only; "
         "device for dynamic signals, object for static properties.\n"
         "4. Apply templates: templates transform tokens "
-        "(e.g., radial + component template -> radial_component_of).\n"
+        "(e.g., radial + magnetic_field -> radial_magnetic_field).\n"
         "5. Compose: use compose_standard_name tool to validate composition."
     )
 
@@ -280,7 +286,7 @@ def _build_common_patterns() -> list[dict[str, str]]:
         {
             "pattern": "bare_quantity",
             "formula": "physical_base",
-            "example": "temperature",
+            "example": "safety_factor",
         },
         {
             "pattern": "vector_quantity",
@@ -290,7 +296,7 @@ def _build_common_patterns() -> list[dict[str, str]]:
         {
             "pattern": "vector_component",
             "formula": "component + physical_base",
-            "example": "radial_component_of_magnetic_field",
+            "example": "radial_magnetic_field",
         },
         {
             "pattern": "species_quantity",
@@ -300,7 +306,7 @@ def _build_common_patterns() -> list[dict[str, str]]:
         {
             "pattern": "species_vector",
             "formula": "component + subject + physical_base",
-            "example": "radial_component_of_electron_heat_flux",
+            "example": "radial_electron_heat_flux",
         },
         {
             "pattern": "spatial_coordinate",
@@ -309,8 +315,8 @@ def _build_common_patterns() -> list[dict[str, str]]:
         },
         {
             "pattern": "device_signal",
-            "formula": "device + physical_base",
-            "example": "flux_loop_voltage",
+            "formula": "physical_base + of_<entity> locus",
+            "example": "voltage_of_flux_loop",
         },
         {
             "pattern": "object_property",
@@ -325,12 +331,12 @@ def _build_common_patterns() -> list[dict[str, str]]:
         {
             "pattern": "property_of_geometry",
             "formula": "physical_base + geometry",
-            "example": "major_radius_of_plasma_boundary",
+            "example": "elongation_of_plasma_boundary",
         },
         {
             "pattern": "with_process",
             "formula": "physical_base + process",
-            "example": "power_due_to_ohmic",
+            "example": "power_due_to_ohmic_heating",
         },
     ]
 
@@ -397,7 +403,7 @@ def _build_base_requirements() -> dict[str, Any]:
             ),
             "vector_prefix": "Use component (not coordinate) for vector components",
             "units": "Must have standardizable physical units",
-            "example": "radial_component_of_magnetic_field",
+            "example": "radial_magnetic_field",
         },
         "choice": "Exactly one base (geometric_base or physical_base) is required.",
     }
@@ -525,8 +531,7 @@ def get_grammar_context() -> dict[str, Any]:
         "base_requirements": _build_base_requirements(),
         # Vocabulary usage statistics
         "vocabulary_usage_stats": _build_vocabulary_usage_stats(),
-        # Grammar 5-group IR context (plan 38 W2b). Single ISN → codex
-        # contract point for the rc21 transition.
+        # Grammar 5-group IR context — the single ISN → codex contract point.
         "grammar": _build_grammar_context(),
     }
 
@@ -604,8 +609,8 @@ def _build_grammar_context() -> dict[str, Any]:
             "unary_prefix": "<op>_of_<inner>",
             "unary_postfix": "<inner>_<op>",
             "binary": "<op>_of_<A>_<separator>_<B>",
-            "projection_component": "<axis>_component_of_<base>",
-            "projection_coordinate": "<axis>_coordinate_of_<carrier>",
+            "projection_component": "<axis>_<base>",
+            "projection_coordinate": "<axis>_<carrier>",
             "locus": "<core>_<relation>_<locus_token>",
             "mechanism": "<core>_due_to_<process>",
         },
