@@ -5,8 +5,9 @@
 # suppress false-positive warnings when unit='1' is combined with an
 # inherently-dimensional physical base.
 #
-# These tokens are a SUBSET of qualifiers.yml — they must also appear
-# there to be valid in the grammar. This file only adds the semantic
-# annotation that they produce dimensionless output.
+# These tokens are a metadata subset of the segment vocabularies — each
+# token must also appear in some segment vocabulary to be valid in the
+# grammar (gyrocenter lives in subjects.yml). This file only adds the
+# semantic annotation that they produce dimensionless output.
 
 - gyrocenter       # gyrokinetic-normalized quantities (ρ*, β normalization)

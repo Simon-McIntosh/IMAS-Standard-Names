@@ -155,11 +155,9 @@ def test_vocab_cross_segment_uniqueness():
         frozenset({"locus_registry.yml", "regions.yml"}),
         frozenset({"locus_registry.yml", "subjects.yml"}),
         frozenset({"locus_registry.yml", "processes.yml"}),
-        frozenset({"physics_domains.yml", "processes.yml"}),
         # normalizing_qualifiers.yml is a metadata subset — tokens there
-        # intentionally appear in other segment vocabs (subjects, qualifiers)
+        # intentionally appear in other segment vocabs (currently subjects)
         frozenset({"normalizing_qualifiers.yml", "subjects.yml"}),
-        frozenset({"normalizing_qualifiers.yml", "qualifiers.yml"}),
         # zones.yml is the ordered plasma-region / geometric sub-selector PREFIX
         # segment. Its tokens legitimately serve dual roles:
         #  - zones.yml ↔ regions.yml / locus_registry.yml: the same region word
