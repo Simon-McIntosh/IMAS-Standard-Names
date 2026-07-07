@@ -137,7 +137,68 @@ def validate_description(entry: dict[str, Any]) -> list[dict[str, Any]]:
             }
         )
 
+    issues.extend(_check_inline_unit_restatement(entry))
+
     return issues
+
+
+# Regions of documentation where units MAY legitimately appear: display math
+# ($$...$$) and inline math ($...$) — equation variable definitions and
+# unit-conversion statements. Everything else is prose.
+_DISPLAY_MATH = re.compile(r"\$\$.*?\$\$", re.DOTALL)
+_INLINE_MATH = re.compile(r"\$.*?\$", re.DOTALL)
+
+# Characters that can extend a unit token (SI symbols, exponents, signs).
+# A unit match is only a restatement when NOT flanked by these — otherwise
+# single-letter units (m, s, T, A) would match inside ordinary words
+# ("m" in "magnetic") or inside larger compound units (m^-3 in kg.m^-3).
+# The product separator `.` is special: it extends a unit token only when
+# alphanumerics sit on its far side (kg.m^-3, m.s^-1); a `.` followed by
+# whitespace or end-of-text is sentence punctuation.
+_UNIT_BOUNDARY_CHAR = r"[A-Za-z0-9^+-]"
+
+
+def _unit_restatement_pattern(unit: str) -> re.Pattern[str]:
+    return re.compile(
+        rf"(?<!{_UNIT_BOUNDARY_CHAR})(?<![A-Za-z0-9]\.)"
+        rf"{re.escape(unit)}"
+        rf"(?!{_UNIT_BOUNDARY_CHAR}|\.[A-Za-z0-9])"
+    )
+
+
+def _check_inline_unit_restatement(entry: dict[str, Any]) -> list[dict[str, Any]]:
+    """Flag documentation prose that restates the entry's own canonical unit.
+
+    Conservative guard for the "no-inline-units" rule (the unit belongs in the
+    ``unit`` field; the SPA renders it in the unit pill). Only fires when the
+    entry's EXACT canonical ``unit`` string (e.g. ``m^-3``, ``kg.m^-1.s^-2``)
+    appears as a standalone token in the ``documentation`` OUTSIDE math
+    regions — a clear restatement, low false-positive. Dimensionless (``1``)
+    is ignored. Warning, not error.
+    """
+    unit = (entry.get("unit") or "").strip()
+    documentation = entry.get("documentation", "") or ""
+    if not unit or unit == "1" or not documentation:
+        return []
+    prose = _INLINE_MATH.sub(" ", _DISPLAY_MATH.sub(" ", documentation))
+    if _unit_restatement_pattern(unit).search(prose):
+        return [
+            {
+                "severity": "warning",
+                "field": "documentation",
+                "message": (
+                    f"Documentation prose restates the unit '{unit}' outside a "
+                    "math region"
+                ),
+                "suggestion": (
+                    "Units live in the unit field (rendered by the unit pill); "
+                    "do not restate them in prose except inside equation, "
+                    "typical-value-range, or unit-conversion statements."
+                ),
+                "pattern": unit,
+            }
+        ]
+    return []
 
 
 __all__ = ["validate_description"]

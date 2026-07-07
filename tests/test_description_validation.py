@@ -92,3 +92,60 @@ class TestDescriptionNotation:
         test_entry["description"] = "Electron temperature at the magnetic axis."
         issues = validate_description(test_entry)
         assert issues == []
+
+
+class TestUnitRestatement:
+    """Documentation prose must not restate the entry's canonical unit."""
+
+    def test_unit_in_prose_warns(self, test_entry):
+        test_entry["unit"] = "m^-3"
+        test_entry["documentation"] = "Number of particles per unit volume, in m^-3."
+        issues = validate_description(test_entry)
+        assert any(
+            issue["severity"] == "warning"
+            and issue["field"] == "documentation"
+            and issue["pattern"] == "m^-3"
+            for issue in issues
+        )
+
+    def test_unit_inside_math_region_clean(self, test_entry):
+        test_entry["unit"] = "m^-3"
+        test_entry["documentation"] = (
+            "Electron number density $n_e$ with $n_e [m^-3]$ defined as "
+            "$$n_e = N / V, \\quad [m^-3]$$ over the plasma volume."
+        )
+        issues = validate_description(test_entry)
+        assert issues == []
+
+    def test_single_letter_unit_inside_word_clean(self, test_entry):
+        test_entry["unit"] = "m"
+        test_entry["documentation"] = "Magnetic measurements of the plasma column."
+        issues = validate_description(test_entry)
+        assert issues == []
+
+    def test_single_letter_unit_standalone_warns(self, test_entry):
+        test_entry["unit"] = "m"
+        test_entry["documentation"] = "Distance of 3 m from the magnetic axis."
+        issues = validate_description(test_entry)
+        assert any(
+            issue["field"] == "documentation" and issue["pattern"] == "m"
+            for issue in issues
+        )
+
+    def test_unit_embedded_in_compound_unit_clean(self, test_entry):
+        test_entry["unit"] = "m^-3"
+        test_entry["documentation"] = "Mass density is reported separately in kg.m^-3."
+        issues = validate_description(test_entry)
+        assert issues == []
+
+    def test_dimensionless_unit_ignored(self, test_entry):
+        test_entry["unit"] = "1"
+        test_entry["documentation"] = "Ratio near 1 across the profile."
+        issues = validate_description(test_entry)
+        assert issues == []
+
+    def test_missing_documentation_clean(self, test_entry):
+        test_entry["unit"] = "m^-3"
+        test_entry["documentation"] = ""
+        issues = validate_description(test_entry)
+        assert issues == []
