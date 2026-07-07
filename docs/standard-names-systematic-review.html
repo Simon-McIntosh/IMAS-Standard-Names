@@ -8,6 +8,7 @@
   <meta name="plan-slug"     content="standard-names-systematic-review">
   <meta name="plan-title"    content="Standard Names Systematic Review">
   <meta name="plan-summary"  content="Wide-ranging review of grammar, vocabularies, codex LLM pipelines, catalog quality, and lifecycle across the three standard-names repositories">
+  <meta name="plan-informs"  content="systematic-review-remediation">
   <title>Standard Names Systematic Review | imas-standard-names</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
@@ -329,7 +330,14 @@
     </table>
 
     <h2 id="s10">§10 — Ranked recommendations</h2>
-    <p>Ordered by leverage per unit effort; items 1–5 close whole fault clusters.</p>
+    <p>
+      <strong>These recommendations are now planned and decision-locked in
+      <a href="/imas-standard-names/systematic-review-remediation.html">Systematic Review Remediation</a></strong>
+      — a six-phase plan (deprecation architecture for accepted names only, sn edit validation parity,
+      referential integrity, unit-family repairs, vocabulary curation, pipeline hardening) with the governing
+      decisions recorded there. The list below is retained as the review's original ranking by leverage per
+      unit effort; items 1–5 close whole fault clusters.
+    </p>
     <ol>
       <li><strong>Referential-integrity validation on both sides of the boundary.</strong> Export prunes and counts dangling links (in flight); add an ISN semantic check that resolves every structured <em>and inline</em> name reference, failing the ISNC build on misses. Closes the 14.8%-of-entries defect surface permanently.</li>
       <li><strong>Deprecation trail at export.</strong> Emit deprecated stubs with <code>superseded_by</code> for renamed/superseded accepted names, activating ISN's dormant governance model. Without it every rename is a silent breaking change for consumers.</li>
