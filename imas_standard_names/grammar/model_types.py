@@ -263,6 +263,9 @@ class Qualifier(StrEnum):
     FORWARD = "forward"
     SPUN = "spun"
     TWIST = "twist"
+    DEUTERIUM_TRITIUM = "deuterium_tritium"
+    DEUTERIUM_DEUTERIUM = "deuterium_deuterium"
+    TRITIUM_TRITIUM = "tritium_tritium"
 
 
 class ChannelQualifier(StrEnum):
