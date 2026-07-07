@@ -1,10 +1,10 @@
-# Physical bases vocabulary (plan 38 §A6, reduced plan 41 §A2)
+# Physical bases vocabulary
 #
 # Closed vocabulary of irreducible dimensional base quantities.
 # Compound tokens (qualifier + base) have been factored out —
 # qualifiers live in qualifiers.yml.
 #
-# Reduction criteria (plan 41):
+# Reduction criteria:
 #   KEEP if the token represents a fundamental dimensional quantity
 #   that cannot be further decomposed into qualifier + base.
 #   KEEP dimensionless atomic quantities (beta, elongation, …).

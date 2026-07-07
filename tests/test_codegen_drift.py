@@ -47,8 +47,8 @@ def test_build_grammar_check_returns_cleanly_when_in_sync():
 @pytest.mark.xfail(
     strict=True,
     reason=(
-        "rc20 token forms (magnitude_of, real_part_of, imaginary_part_of, phase_of)"
-        " replaced by bare tokens in current grammar (plan 38 §A7)"
+        "legacy operator-of token forms (magnitude_of, real_part_of,"
+        " imaginary_part_of, phase_of) replaced by bare tokens"
     ),
 )
 def test_transformation_enum_includes_complex_tokens():
@@ -60,7 +60,7 @@ def test_transformation_enum_includes_complex_tokens():
 
 @pytest.mark.xfail(
     strict=True,
-    reason="rc20 token form 'magnitude_of' replaced by bare 'magnitude' in current grammar (plan 38 §A7)",
+    reason="legacy 'magnitude_of' replaced by bare 'magnitude' in the current grammar",
 )
 def test_magnitude_of_magnetic_field_parses():
     """R1 F1: magnitude_of_magnetic_field must parse with transformation slot set."""
@@ -72,7 +72,7 @@ def test_magnitude_of_magnetic_field_parses():
 
 @pytest.mark.xfail(
     strict=True,
-    reason="rc20 token forms (real_part_of, imaginary_part_of, phase_of) replaced by bare tokens in current grammar (plan 38 §A7)",
+    reason="legacy operator-of forms replaced by bare tokens in the current grammar",
 )
 @pytest.mark.parametrize(
     "name,token",

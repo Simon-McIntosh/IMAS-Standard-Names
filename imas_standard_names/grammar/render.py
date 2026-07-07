@@ -6,7 +6,7 @@ There are no fallbacks: malformed IR raises :class:`RenderError`.
 
 The renderer is deliberately isolated from vocabulary resolution. It
 consumes validated IR structures (see :mod:`imas_standard_names.grammar.ir`)
-and emits token strings; vocabulary lookups happen at parse time in W2b.
+and emits token strings; vocabulary lookups happen at parse time.
 
 See the grammar specification §4 for the template spec.
 """

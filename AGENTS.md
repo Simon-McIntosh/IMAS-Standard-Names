@@ -121,7 +121,7 @@ imas_standard_names/
 ├── tools/           # MCP read-only tool implementations
 ├── grammar/         # Grammar parsing, composition, and validation
 ├── catalog/         # SQLite catalog management
-├── graph/           # NetworkX local graph builder (plan 41, optional)
+├── graph/           # NetworkX local graph builder (optional)
 ├── rendering/       # MkDocs catalog renderer
 ├── repository.py    # Main repository facade (read-only)
 ├── models.py        # Pydantic data models
@@ -139,7 +139,7 @@ tests/               # Test suite
 - Group related functionality in focused modules
 - Keep modules cohesive and loosely coupled
 
-### Local Graph (plan 41)
+### Local Graph
 
 The `graph/local_graph.py` module builds a NetworkX `DiGraph` over the
 per-domain catalog YAML (`<domain>.yml`). Five edge types are emitted:

@@ -6,7 +6,7 @@ mirrors the shipped imas-codex Neo4j edge schema so downstream consumers
 (MCP tools, catalog-site renderer, external tooling) can answer
 graph-shaped questions without a Neo4j instance.
 
-Edge semantics (see plan 41 §1):
+Edge semantics:
 
 - ``HAS_ARGUMENT`` points from the *wrapped* entry to the argument name
   carried in ``arguments[].name``.  Unary operators emit one edge;
@@ -314,7 +314,7 @@ def get_neighbours(
 
 
 def _ordering_parents(g: Any, name: str) -> list[tuple[str, str]]:
-    """Return (parent, edge_type) pairs per the plan 41 ancestor rule.
+    """Return (parent, edge_type) pairs per the ancestor rule.
 
     Ordering parents := HAS_ARGUMENT-outgoing (my args) ∪
     HAS_ERROR-incoming (the base I'm an uncertainty variant of).

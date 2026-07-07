@@ -44,7 +44,7 @@ class YamlStore:
                 if not self.permissive:
                     raise CatalogMigrationError(
                         f"Legacy per-file YAML detected at {f}; catalog has migrated "
-                        "to per-domain list format (plan 40). Re-run `sn publish` "
+                        "to per-domain list format. Re-run `sn publish` "
                         "from imas-codex to regenerate."
                     )
                 # In permissive mode, fall through and process as single-entry dict
@@ -61,7 +61,7 @@ class YamlStore:
                 elif not self.permissive:
                     raise CatalogMigrationError(
                         f"Legacy per-file YAML detected at {f}; catalog has migrated "
-                        "to per-domain list format (plan 40). Re-run `sn publish` "
+                        "to per-domain list format. Re-run `sn publish` "
                         "from imas-codex to regenerate."
                     )
                 else:

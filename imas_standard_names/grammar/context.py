@@ -501,8 +501,7 @@ def get_grammar_context() -> dict[str, Any]:
 
     Aggregates grammar mechanics, naming conventions, and LLM orientation
     context into a single dictionary suitable for external consumers.
-    Includes the 5-group IR context alongside the rc20 surface
-    for the duration of the rc21 transition (plan 38 W2b).
+    Includes the 5-group IR context alongside the flat segment surface.
     """
     return {
         # Grammar mechanics
@@ -537,7 +536,7 @@ def get_grammar_context() -> dict[str, Any]:
 
 
 # ---------------------------------------------------------------------------
-# Grammar 5-group IR context builder (plan 38 W2b)
+# Grammar 5-group IR context builder
 # ---------------------------------------------------------------------------
 
 
@@ -549,7 +548,7 @@ def _build_grammar_context() -> dict[str, Any]:
     ``canonical_templates``, and ``parse_api`` (callable names).
 
     Any loader failure yields an empty field but never raises — consumers
-    must tolerate partial population during the W2a vocabulary roll-out.
+    must tolerate partially populated vocabularies.
     """
 
     from imas_standard_names.grammar import vocab_loaders

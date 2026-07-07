@@ -662,7 +662,7 @@ def _render_scope_metadata(spec: Any) -> str:
         sections.append(generic_section)
 
     # Add transformation tokens (empty tuple when vocabulary is absent — operators.yml
-    # is the unified registry; legacy transformations.yml was deleted in W2a)
+    # is the unified registry; legacy transformations.yml was deleted)
     if "transformations" in spec.vocabularies:
         tokens = spec.vocabularies["transformations"]
     else:
@@ -677,7 +677,7 @@ def _render_scope_metadata(spec: Any) -> str:
     sections.append(transformation_section)
 
     # Add decomposition tokens (empty tuple when vocabulary is absent — operators.yml
-    # is the unified registry; legacy decomposition.yml was deleted in W2a)
+    # is the unified registry; legacy decomposition.yml was deleted)
     if "decomposition" in spec.vocabularies:
         tokens = spec.vocabularies["decomposition"]
     else:

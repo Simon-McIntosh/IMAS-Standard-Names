@@ -1,4 +1,4 @@
-"""MCP tools for local catalog graph traversal (plan 41)."""
+"""MCP tools for local catalog graph traversal."""
 
 from __future__ import annotations
 

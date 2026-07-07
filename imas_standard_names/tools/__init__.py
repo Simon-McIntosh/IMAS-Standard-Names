@@ -15,7 +15,7 @@ from imas_standard_names.tools.tokens import VocabularyTokensTool
 from imas_standard_names.tools.validate import ValidateCatalogTool
 from imas_standard_names.tools.vocabulary import VocabularyTool
 
-try:  # Optional: local graph tools require networkx (plan 41)
+try:  # Optional: local graph tools require networkx
     import networkx as _networkx  # noqa: F401
 
     from imas_standard_names.tools.graph import LocalGraphTool as _LocalGraphTool
@@ -80,7 +80,7 @@ class Tools:
             except ImportError:
                 pass
 
-        # Local graph tools (plan 41) - gated on networkx extra
+        # Local graph tools - gated on networkx extra
         if _LocalGraphTool is not None:
             self.local_graph_tool = _LocalGraphTool(catalog_root=catalog_root)
 
@@ -124,7 +124,7 @@ class Tools:
             if hasattr(self, "vocabulary_tool"):
                 catalog_tools.append(self.vocabulary_tool)
 
-        # Local graph tool (plan 41) - catalog-root-scoped, no catalog object required
+        # Local graph tool - catalog-root-scoped, no catalog object required
         if hasattr(self, "local_graph_tool"):
             catalog_tools.append(self.local_graph_tool)
 

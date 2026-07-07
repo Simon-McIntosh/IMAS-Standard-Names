@@ -1,16 +1,16 @@
-"""Standard name grammar parser (plan 38 / W2b deliverable).
+"""Standard name grammar parser.
 
 Implements a *staged, liberal* parser that turns a standard-name string
 into a :class:`~imas_standard_names.grammar.ir.StandardNameIR` plus a
 list of :class:`Diagnostic` records. The parser is the inverse of
 :func:`imas_standard_names.grammar.render.compose`; together they form
-the round-trip pair required by plan 38.
+the required round-trip pair.
 
 Parsing is driven by closed vocabularies loaded from
 ``grammar/vocabularies/*.yml`` via :mod:`vocab_loaders`. Callers may
 inject their own :class:`Vocabularies` bundle for testing.
 
-Algorithm (plan §A8)::
+Algorithm::
 
     1. Strip trailing _due_to_<process>                -> mechanism
     2. Strip trailing _of_/_at_/_over_/_along_<locus>  -> locus
@@ -30,7 +30,7 @@ Algorithm (plan §A8)::
 
 Liberal acceptance: the parser accepts grammatically valid forms
 only. Unknown base residues raise :class:`ParseError` with top-3
-edit-distance suggestions. No rc20 open-fallback behaviour is retained.
+edit-distance suggestions. No legacy open-fallback behaviour is retained.
 """
 
 from __future__ import annotations
@@ -127,7 +127,7 @@ def load_default_vocabularies() -> Vocabularies:
     """Load all five grammar vocabularies from YAML into a :class:`Vocabularies`.
 
     Falls back to an empty set for any registry whose YAML stub is empty
-    (physical_bases.yml, geometry_carriers.yml are populated by W2a).
+    (physical_bases.yml, geometry_carriers.yml).
 
     Qualifiers are populated from:
     - ``Subject`` enum tokens (electron, ion, deuterium, …)

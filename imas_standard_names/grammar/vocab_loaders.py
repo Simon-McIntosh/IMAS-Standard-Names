@@ -1,4 +1,4 @@
-"""Pydantic v2 loaders for vocabulary files (plan 38 W1c).
+"""Pydantic v2 loaders for vocabulary files.
 
 Each loader reads the corresponding YAML under
 ``imas_standard_names/grammar/vocabularies/`` and validates it with

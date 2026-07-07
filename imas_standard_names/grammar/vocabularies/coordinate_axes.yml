@@ -1,4 +1,4 @@
-# Coordinate axes vocabulary (plan 38 §A4)
+# Coordinate axes vocabulary
 #
 # Used with GeometryCarrier (shape=coordinate) to form projections like
 # "radial_coordinate_of_flux_loop".  Distinct from components.yml which

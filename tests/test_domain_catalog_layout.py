@@ -1,6 +1,6 @@
-"""Tests for plan 40: per-domain catalog layout, ArgumentRef, and error_variants.
+"""Tests for the per-domain catalog layout, ArgumentRef, and error_variants.
 
-Covers §8–§12 of plan 40:
+Covers:
 - Round-trip: load domain-file fixture, re-serialise, byte-identical.
 - Missing cross-reference warning fires but does not fail validation.
 - Topological load handles arguments[].name edges.

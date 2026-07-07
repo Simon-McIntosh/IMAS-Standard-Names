@@ -232,7 +232,7 @@ def _extract_vocab_tokens(value: Any, vocab_name: str = "") -> tuple[str, ...]:
     - Bare dict with string keys (legacy flat dict vocabs)
 
     When ``vocab_name`` is ``"objects"`` or ``"positions"``, loci tokens are
-    filtered by ``type`` to preserve rc20 semantics:
+    filtered by ``type``:
     - ``objects``   → only ``entity``-typed loci (used as device/object prefixes)
     - ``positions`` → only ``position``-typed loci (used as *at* suffixes)
 

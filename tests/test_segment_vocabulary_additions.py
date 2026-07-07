@@ -1,4 +1,4 @@
-"""Tests for D5 senior-review vocabulary additions and grammar changes."""
+"""Tests for senior-review vocabulary additions and grammar changes."""
 
 import pytest
 
@@ -24,7 +24,7 @@ from imas_standard_names.grammar.support import (
 # ---------------------------------------------------------------------------
 
 
-class TestD5SubjectTokens:
+class TestSubjectTokenAdditions:
     """Verify D5 subject vocabulary additions."""
 
     def test_pfirsch_schlueter_in_subject_enum(self):
@@ -41,7 +41,7 @@ class TestD5SubjectTokens:
         assert compose_standard_name(parsed) == name
 
 
-class TestD5ProcessTokens:
+class TestProcessTokenAdditions:
     """Verify D5 process vocabulary additions."""
 
     def test_viscous_heat_flux_in_process_enum(self):
@@ -67,7 +67,7 @@ class TestD5ProcessTokens:
         assert compose_standard_name(parsed) == name
 
 
-class TestD5ObjectTokens:
+class TestObjectTokenAdditions:
     """Verify D5 object vocabulary additions."""
 
     @pytest.mark.parametrize(
@@ -145,7 +145,7 @@ class TestD5TransformationTokens:
                 "amplitude_of",
                 getattr(Transformation, "AMPLITUDE_OF", None),
                 marks=pytest.mark.xfail(
-                    reason="rc20 grammar: AMPLITUDE_OF renamed to AMPLITUDE in current grammar (plan 38 §A7)",
+                    reason="AMPLITUDE_OF renamed to AMPLITUDE in the current grammar",
                     strict=True,
                 ),
             ),
@@ -169,7 +169,7 @@ class TestD5TransformationTokens:
         assert compose_standard_name(parsed) == name
 
     @pytest.mark.xfail(
-        reason="rc20 grammar: AMPLITUDE_OF renamed to AMPLITUDE in current grammar (plan 38 §A7)",
+        reason="AMPLITUDE_OF renamed to AMPLITUDE in the current grammar",
         strict=True,
     )
     def test_amplitude_of_magnetic_field_round_trip(self):

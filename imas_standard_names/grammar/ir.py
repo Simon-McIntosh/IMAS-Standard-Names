@@ -12,7 +12,7 @@ Plan 38 / W1a deliverable. Pydantic v2 models for the 5-group IR:
     }
 
 This module defines *shape only*. It does not resolve tokens against
-vocabulary YAMLs — that wiring happens in W1c/W2a (vocabularies) and W2b
+vocabulary YAMLs — that wiring happens in the vocabulary loaders and parser
 (parser). Validators here enforce structural invariants (non-empty tokens,
 consistent projection/base pairing, legal locus-relation type matrix, no
 empty operator arg lists) and the §A3 `_of_` disambiguation assertions.
@@ -153,7 +153,7 @@ class Qualifier(BaseModel):
 
     Qualifiers are plain prefix tokens drawn from closed vocabularies. The
     actual vocabulary binding (species vs source_entity) is resolved in
-    W1c/W2a; at the IR level we record only the raw token string. A
+    the loaders; at the IR level we record only the raw token string. A
     ``category`` field is provided for forward-compatibility so parsers may
     tag the token with its vocabulary.
     """
@@ -321,7 +321,7 @@ class OperatorApplication(BaseModel):
         ),
     )
     # Forward-compat: binary operators resolve their separator through the
-    # registry in W2a; at the IR level callers may pin it explicitly.
+    # registry; at the IR level callers may pin it explicitly.
     separator: Literal["and", "to"] | None = Field(
         default=None,
         description="Binary-operator separator; required for kind=binary.",

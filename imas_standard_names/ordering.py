@@ -48,7 +48,7 @@ def _extract_dependencies(model: StandardNameEntry, available: set[str]) -> set[
                     deps.add(dep)
         # Reduction provenance already covered by base; other modes implicitly only depend on base.
 
-    # Structural argument dependencies (plan 40).
+    # Structural argument dependencies.
     arguments = getattr(model, "arguments", None)
     if arguments:
         for arg in arguments:

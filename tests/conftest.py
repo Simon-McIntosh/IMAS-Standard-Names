@@ -15,7 +15,7 @@ from imas_standard_names.tools.fetch import FetchTool
 def _write_entry_yaml(root: Path, entry):
     """Write a standard name entry as a YAML file to disk.
 
-    Uses the per-domain list format (plan 40): entries are appended
+    Uses the per-domain list format: entries are appended
     to ``root/<domain>.yml`` as a YAML sequence.
     """
     domain = getattr(entry, "physics_domain", "general") or "general"

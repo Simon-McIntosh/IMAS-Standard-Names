@@ -1,6 +1,6 @@
 """Write-side API for mirroring the ISN grammar spec into a Neo4j graph.
 
-Phase E.3 of plan 29 ADR-8. This module is the *only* place where write
+This module is the *only* place where write
 Cypher for grammar nodes lives. imas-codex's ``sync-isn-grammar`` CLI
 (Phase E.6) injects its own :class:`GraphClient` into :func:`sync_grammar`.
 

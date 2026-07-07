@@ -75,8 +75,8 @@ from imas_standard_names.field_types import (
 from imas_standard_names.grammar import vocab_loaders as _vocab_loaders
 from imas_standard_names.grammar.field_schemas import FIELD_DESCRIPTIONS
 
-# rc22: Component, Position, Process are retained in model_types for the rc23
-# deprecation cycle but are NO LONGER used in the validators below.
+# Component, Position, Process remain importable from model_types for
+# downstream compatibility but are NO LONGER used in the validators below.
 from imas_standard_names.grammar.model_types import (  # noqa: F401
     Component,
     Position,
@@ -95,7 +95,7 @@ from imas_standard_names.provenance import (
 Status = Literal["draft", "active", "deprecated", "superseded"]
 
 # ---------------------------------------------------------------------------
-# rc22: vocabulary caches (lazy-loaded once per process)
+# vocabulary caches (lazy-loaded once per process)
 # ---------------------------------------------------------------------------
 
 _COMPONENT_VOCAB_CACHE: frozenset[str] | None = None
@@ -141,9 +141,9 @@ def _check_grammar_vocabulary_consistency(name: str) -> list[str]:
     Only flags cases where clear template patterns indicate missing vocabulary tokens.
     Does NOT flag compound base names like 'electron_temperature' or 'plasma_velocity'.
 
-    rc22: validators now check against vocabulary loaders
-    (``grammar/vocab_loaders.py``) rather than the rc20 Component/Position/Process
-    enums in ``grammar/model_types``.  Those enums are retained for rc23 removal.
+    Validators check against the vocabulary loaders
+    (``grammar/vocab_loaders.py``) rather than the legacy Component/Position/
+    Process enums in ``grammar/model_types``.
     """
     errors = []
 
@@ -219,7 +219,7 @@ def _check_grammar_vocabulary_consistency(name: str) -> list[str]:
         # no ValidationError raised here.
 
     # ------------------------------------------------------------------
-    # 4. 'due_to_' pattern check INTENTIONALLY OMITTED in rc22.
+    # 4. 'due_to_' pattern check INTENTIONALLY OMITTED.
     #
     # The parser's _strip_mechanism stage (grammar/parser.py) accepts
     # any token after '_due_to_' without vocabulary enforcement.  Unknown

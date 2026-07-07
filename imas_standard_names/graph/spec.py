@@ -3,7 +3,7 @@
 This module exports a pure-Python, deterministic representation of the ISN
 grammar (segment order, tokens, templates) suitable for mirroring into an
 external graph store. It is the sole boundary between ISN and imas-codex
-for the LinkML schema and graph-sync workflow described in plan 29 ADR-8
+for the LinkML schema and graph-sync workflow
 (Phase E.2).
 
 Design rules:

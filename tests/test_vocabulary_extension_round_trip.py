@@ -1,7 +1,8 @@
-"""Tests for rc14 vocabulary extensions (codex plan 31, workstream D).
+"""Round-trip tests for extended segment vocabulary tokens.
 
-Validates parse + compose round-trip for tokens added in D.1–D.5,
-forbidden-pattern error hints (D.7), and D.6 deferral acknowledgement.
+Validates parse + compose round-trip for extension tokens across the
+process, subject, position, component, and transformation segments, plus
+forbidden-pattern error hints and the deferred coordinate-prefix split.
 """
 
 from __future__ import annotations
@@ -22,12 +23,12 @@ from imas_standard_names.grammar.model_types import (
 from imas_standard_names.grammar.support import validate_forbidden_patterns
 
 # ---------------------------------------------------------------------------
-# D.1 — Process tokens
+# Process tokens
 # ---------------------------------------------------------------------------
 
 
-class TestD1ProcessTokens:
-    """Verify rc14 process vocabulary additions."""
+class TestProcessTokens:
+    """Verify process vocabulary additions."""
 
     @pytest.mark.parametrize(
         "token,enum_member",
@@ -71,12 +72,12 @@ class TestD1ProcessTokens:
 
 
 # ---------------------------------------------------------------------------
-# D.2 — Subject tokens
+# Subject tokens
 # ---------------------------------------------------------------------------
 
 
-class TestD2SubjectTokens:
-    """rc14 modifier-subjects were decomposed into population + species (rc32).
+class TestSubjectTokens:
+    """Modifier-subjects are decomposed into population + species.
 
     thermal_electron / thermal_ion / suprathermal_electrons are no longer
     compound Subject tokens; the modifier is the orthogonal ``population``
@@ -110,12 +111,12 @@ class TestD2SubjectTokens:
 
 
 # ---------------------------------------------------------------------------
-# D.3 — Position tokens
+# Position tokens
 # ---------------------------------------------------------------------------
 
 
-class TestD3PositionTokens:
-    """Verify rc14 position vocabulary additions."""
+class TestPositionTokens:
+    """Verify position vocabulary additions."""
 
     @pytest.mark.parametrize(
         "token,enum_member",
@@ -126,7 +127,7 @@ class TestD3PositionTokens:
                 "neutron_detector",
                 getattr(Position, "NEUTRON_DETECTOR", None),
                 marks=pytest.mark.xfail(
-                    reason="rc20 grammar: neutron_detector reclassified as entity (Object) in current grammar (plan 38 §A5)",
+                    reason="neutron_detector reclassified as entity (Object) in the current grammar",
                     strict=True,
                 ),
             ),
@@ -143,7 +144,7 @@ class TestD3PositionTokens:
             pytest.param(
                 "neutron_detector",
                 marks=pytest.mark.xfail(
-                    reason="rc20 grammar: neutron_detector reclassified as entity (Object) in current grammar (plan 38 §A5)",
+                    reason="neutron_detector reclassified as entity (Object) in the current grammar",
                     strict=True,
                 ),
             ),
@@ -165,7 +166,7 @@ class TestD3PositionTokens:
             pytest.param(
                 "neutron_detector",
                 marks=pytest.mark.xfail(
-                    reason="rc20 grammar: neutron_detector reclassified as entity (Object) in current grammar (plan 38 §A5)",
+                    reason="neutron_detector reclassified as entity (Object) in the current grammar",
                     strict=True,
                 ),
             ),
@@ -183,11 +184,11 @@ class TestD3PositionTokens:
 
 
 # ---------------------------------------------------------------------------
-# D.4 — Component tokens
+# Component tokens
 # ---------------------------------------------------------------------------
 
 
-class TestD4ComponentTokens:
+class TestComponentTokens:
     """Verify rc14 component vocabulary additions."""
 
     @pytest.mark.parametrize(
@@ -216,11 +217,11 @@ class TestD4ComponentTokens:
 
 
 # ---------------------------------------------------------------------------
-# D.5 — Transformation tokens
+# Transformation tokens
 # ---------------------------------------------------------------------------
 
 
-class TestD5TransformationTokens:
+class TestTransformationTokens:
     """Verify rc14 transformation vocabulary additions."""
 
     @pytest.mark.parametrize(
@@ -285,19 +286,19 @@ class TestD5TransformationTokens:
 
 
 # ---------------------------------------------------------------------------
-# D.6 — Coordinate-prefix split (deferred to rc15)
+# Coordinate-prefix split (deferred)
 # ---------------------------------------------------------------------------
 
 
-class TestD6Deferral:
-    """Acknowledge that D.6 coordinate-prefix split is deferred to rc15.
+class TestCoordinatePrefixDeferral:
+    """Acknowledge that the coordinate-prefix split is deferred.
 
     AUD-04 in imas-codex handles the interim for coordinate-prefix names
     such as major_radius_of_*, vertical_coordinate_of_*, toroidal_angle_of_*.
     """
 
     def test_d6_deferred_placeholder(self):
-        """Placeholder confirming D.6 is intentionally out of scope for rc14."""
+        """Placeholder confirming the split is intentionally out of scope."""
         # rc15 will add a coordinate_prefix grammar segment with vocabulary:
         #   major_radius_of, minor_radius_of, vertical_coordinate_of,
         #   toroidal_angle_of, poloidal_angle_of,
