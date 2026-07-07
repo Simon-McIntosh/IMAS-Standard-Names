@@ -98,3 +98,37 @@ def test_out_of_scope_nested_names_still_reject(name: str):
     """
     with pytest.raises(ValueError):
         parse_standard_name(name)
+
+
+class TestUnaryOverBinary:
+    """A unary operator wrapping a binary expression round-trips at the IR
+    layer and raises an explicit (not token-drop) error at the model layer.
+
+    Guards the parser path that terminates operator peeling at a binary:
+    prefix operators peeled before the binary terminator must stay on the
+    IR operator stack instead of being silently discarded.
+    """
+
+    NAME = "gradient_of_ratio_of_electron_pressure_to_magnetic_pressure"
+
+    def test_ir_round_trip_preserves_outer_operator(self):
+        from imas_standard_names.grammar.parser import parse
+        from imas_standard_names.grammar.render import compose
+
+        assert compose(parse(self.NAME).ir) == self.NAME
+
+    def test_validate_round_trip(self):
+        from imas_standard_names.grammar.parser import validate_round_trip
+
+        assert validate_round_trip(self.NAME)
+
+    def test_postfix_over_binary_ir_round_trip(self):
+        from imas_standard_names.grammar.parser import parse
+        from imas_standard_names.grammar.render import compose
+
+        name = "ratio_of_electron_pressure_to_magnetic_pressure_magnitude"
+        assert compose(parse(name).ir) == name
+
+    def test_flat_model_raises_explicit_error(self):
+        with pytest.raises(ValueError, match="not representable"):
+            parse_standard_name(self.NAME)

@@ -381,6 +381,15 @@ def _ir_to_model_dict(ir: StandardNameIR) -> dict[str, str]:
             unary_ops.append(op)
 
     if binary_op is not None:
+        if unary_ops:
+            raise ValueError(
+                "operator(s) "
+                f"{', '.join(repr(op.op) for op in unary_ops)} wrapping the "
+                f"binary operator {binary_op.op!r} are not representable in "
+                "the flat StandardName model; the IR layer "
+                "(grammar.parser.parse / grammar.render.compose) round-trips "
+                "nested operator expressions"
+            )
         # Binary operator: extract operands from args
         model_op = _BINARY_IR_TO_MODEL.get(binary_op.op, f"{binary_op.op}_of")
         d["binary_operator"] = model_op

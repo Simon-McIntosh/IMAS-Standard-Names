@@ -883,10 +883,11 @@ def parse(name: str, vocabs: Vocabularies | None = None) -> ParseResult:
         # Synthesise a placeholder base so the outer IR validates. The
         # binary operator lives on the outer IR's operators stack and its
         # args carry the real structure. The placeholder is never rendered.
-        # Trailing postfix operators (stage 0) wrap the binary result and stay
-        # outermost.
+        # The full operator stack — trailing postfix (stage 0) plus any
+        # prefix operators peeled before the binary terminator — wraps the
+        # binary result, outermost first.
         ir = StandardNameIR(
-            operators=[*trailing_postfix, binary_terminator],
+            operators=[*operator_stack, binary_terminator],
             base=QuantityOrCarrier(token="placeholder", kind=BaseKind.QUANTITY),
             locus=locus,
             mechanism=mechanism,
