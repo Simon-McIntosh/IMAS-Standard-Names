@@ -8,7 +8,8 @@
 #
 # Generation details:
 # - The generator lives at: imas_standard_names/grammar_codegen/generate.py
-# - It writes: imas_standard_names/grammar/types.py
+# - It writes: imas_standard_names/grammar/model_types.py, constants.py,
+#   tag_types.py, and field_schemas.py
 # - It runs automatically during package build via Hatch (see hatch_build_hooks.py)
 # - A console entrypoint also exists in pyproject.toml: `build-grammar`
 # - You can regenerate locally without building by running:
