@@ -17,9 +17,9 @@
   <title>Expert Review Fixes | imas-standard-names</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-07-06">
-<meta name="plan-version" content="7">
-<meta name="plan-impl" content="0.72">
+<meta name="plan-modified" content="2026-07-08">
+<meta name="plan-version" content="8">
+<meta name="plan-impl" content="0.85">
 </head>
 <body>
   <main class="plan-doc">
@@ -407,7 +407,7 @@
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-erf-ws1" data-status="open" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-07-06" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-erf-ws1" data-status="resolved" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-07-06" data-recommends-skill="" data-resolved-at="2026-07-08T05:58:16+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">WS1 — Locus DD-anchored descriptions + pedestal/limiter prompt reconciliation (C3, C4·point, C5, C10 registry half)</h4>
     <div class="r-fu-body">Add DD-anchored <code>description</code> fields to the review-touched loci, surface them into the docs prompt context, reconcile the contradictory pedestal canonicalization, and do the C5 value/gradient rename triage plus the <code>along_limiter</code> mechanics. Honour the locked pedestal-consolidation policy.</div>
     <pre class="r-fu-prompt">Project: imas-standard-names (+ imas-codex prompts, imas-standard-names-catalog)
@@ -449,6 +449,7 @@ Done-when
   2. C5 renames applied per policy; along added to limiter allowed_relations;
      peak_power_density_at_limiter renamed; affected names re-review clean.
   3. Grammar + catalog round-trip suites green; followup written + this one resolved.</pre>
+    <p class="r-fu-outcome">DONE. ISN loci carry DD-anchored description + defining_quantity fields (b512c33, 4057442); C5 value quantities renamed to _at_pedestal_top (54) + 1 derivative to _at_pedestal_maximum; along added to the limiter locus + peak_power_density_along_limiter; imas-codex name prompts reconciled to one pedestal rule. All in graph, export-clean.</p>
     </article>
 <article class="r-fu" data-id="f-erf-ws2" data-status="open" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-07-06" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">WS2 — Description standards + harmonize-and-regenerate (C2, C11, C3·desc, C7 prose)</h4>
@@ -489,7 +490,7 @@ Done-when
      passes; 0 inline-unit lint hits on regenerated names.
   3. Followup written + this one resolved.</pre>
     </article>
-<article class="r-fu" data-id="f-erf-ws3" data-status="open" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-07-06" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-erf-ws3" data-status="resolved" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-07-06" data-recommends-skill="" data-resolved-at="2026-07-08T05:58:16+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">WS3 — Grammar vocabulary: flux_limiter_coefficient base + neutron-flux reaction-channel qualifier (C6, C12)</h4>
     <div class="r-fu-body">Add the specific base for the flux-limiter family and the reaction-channel qualifier + parser disambiguation for fusion neutron fluxes; regenerate the affected families and unify the rival neutron-subject names.</div>
     <pre class="r-fu-prompt">Project: imas-standard-names (grammar/vocab + parser) + imas-codex regen
@@ -525,6 +526,7 @@ Done-when
   1. New base + reaction-channel qualifier added; parser disambiguation implemented.
   2. Parser round-trips both readings; 13 + 8 + 3 names regenerated + re-review clean.
   3. Full grammar suite green; followup written + this one resolved.</pre>
+    <p class="r-fu-outcome">DONE. C6: flux_limiter_coefficient base (0dd95b5) + 13 renames. C12: reaction-channel qualifier grammar (7d514a4, dual-role subjects-qualifiers overlap allowlisted) + 8 <pair>_neutron_flux renames; full grammar suite green (786); all semantic-parse + export clean.</p>
     </article>
 <article class="r-fu" data-id="f-erf-ws4" data-status="open" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-07-06" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">WS4 — Separatrix local↔flux-surface-averaged pairing invariant + coverage re-run (C4·fsa)</h4>
@@ -595,7 +597,7 @@ Done-when
   2. Interim flag applied to the 3 catalog names; regen queued behind the DD fix.
   3. This followup resolved (external DD resolution tracked separately).</pre>
     </article>
-<article class="r-fu" data-id="f-erf-ws5-c10" data-status="open" data-tier="sonnet" data-written-by="reckon-create" data-written-at="2026-07-06" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-erf-ws5-c10" data-status="resolved" data-tier="sonnet" data-written-by="reckon-create" data-written-at="2026-07-06" data-recommends-skill="" data-resolved-at="2026-07-08T05:58:16+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">WS5b — Upstream DD: at_limiter measurement-locus definition (C10, IMAS_3226)</h4>
     <div class="r-fu-body">Track/advance the upstream definition of the <code>at_limiter</code> measurement locus (the SOLPS separatrix–limiter tangency interpretation is not yet generally accepted; IMAS_3226). The interim in-catalog documentation is handled by WS1.</div>
     <pre class="r-fu-prompt">Project: DD / IMAS community (upstream)
@@ -624,8 +626,9 @@ Done-when
   1. IMAS_3226 status confirmed and the desired at_limiter definition articulated upstream.
   2. Once accepted, the limiter locus description + affected names updated (follow-on).
   3. This followup resolved or re-scoped to track the upstream item.</pre>
+    <p class="r-fu-outcome">IN-REPO DONE; DD-definition UPSTREAM. The limiter locus now carries a DD-anchored description cross-referencing active_limiter_point (separatrix-limiter tangency) and along_limiter for surface distributions (WS1). The at_limiter measurement-point DEFINITION itself is unresolved upstream (IMAS_3226) — tracked for the follow-on review-remediation session; not adoptable in-catalog until accepted upstream.</p>
     </article>
-<article class="r-fu" data-id="f-erf-ws6" data-status="open" data-tier="sonnet" data-written-by="reckon-create" data-written-at="2026-07-06" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-erf-ws6" data-status="resolved" data-tier="sonnet" data-written-by="reckon-create" data-written-at="2026-07-06" data-recommends-skill="" data-resolved-at="2026-07-08T05:58:16+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">WS6 — C1 convention clarification + C9 verify-only</h4>
     <div class="r-fu-body">Apply the C1 decision (keep underscore) as a prose clarification distinguishing the two readings of the DT token, and close C9 by confirming the render surface with the reviewer (optionally hardening mkdocs mathjax).</div>
     <pre class="r-fu-prompt">Project: imas-codex (docs prose) + imas-standard-names (mkdocs, optional)
@@ -652,8 +655,9 @@ Done-when
   1. DT prose clarified (single effective species vs D-T reaction channel reading).
   2. C9 render surface confirmed with the reviewer; optional mkdocs tweak applied.
   3. This followup resolved.</pre>
+    <p class="r-fu-outcome">DONE. C1: keep-underscore locked + DT single-species-vs-reaction-channel wording in the docs prompt. C9: verified not reproducible (stored YAML clean, SPA+KaTeX render it, 0 malformed catalog-wide).</p>
     </article>
-<article class="r-fu" data-id="f-erf-codex-prompt-standards" data-status="open" data-tier="opus" data-written-by="fleet-worker" data-written-at="2026-07-06" data-recommends-skill="reckon-ship" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-erf-codex-prompt-standards" data-status="resolved" data-tier="opus" data-written-by="fleet-worker" data-written-at="2026-07-06" data-recommends-skill="reckon-ship" data-resolved-at="2026-07-08T05:58:16+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">LANDED (imas-codex prompt/harmonize standards) — WS1/WS2 generation-rule halves; regenerate sweep remains</h4>
     <div class="r-fu-body">The imas-codex generation-STANDARD changes for WS1/WS2 landed on imas-codex@main (3 commits, prompt+harmonize only — no graph mutation, no catalog YAML, no ISN grammar). What landed: (T1/C11) canonical number-density opening template in generate_docs_system.md, with the short description field bound to the family-anchor rule; (T2/C2) charge-state aggregation clause — summed for extensive (density), density-weighted mean for intensive (velocity, temperature) — plus cross-link to the charge-state-resolved counterpart; (T3/C3-desc) PR-9 locus-defining cross-link rule (pedestal→flux coordinate, generalized to separatrix/axis/X-point); (T4/C7) strengthened no-inline-units to forbid restated ASCII/LaTeX unit strings, added to generate_docs_system.md and refine_docs_user.md; (T6/C1) deuterium_tritium wording distinguishes the effective 2.5-amu fuel species from the D-T fusion reaction channel, underscore kept; (T5/C5,C10) pedestal reconciled to a locus across generate_name_system.md + generate_name_dd_names.md + generate_name_dd.md (value→at_pedestal_top, gradient/flux-position→at_pedestal_maximum, bare pedestal + zone-prefix banned) and the three limiter loci distinguished (at_limiter point / along_limiter distribution / active_limiter_point tangency); (T7/C11) harmonize.select_anchor pinned to a canonical family opening instead of longest-description, with tests. Commits: ea0db110 (docs standards), a54e86c1 (name prompts; also repaired a pre-existing stale generate_name_dd golden from 1b83fe04), 6566ee08 (harmonize anchor + tests). All imas-codex prompt/harmonize/golden tests green. Refine_docs_user + generate_name_dd(_names) golden fixtures regenerated.</div>
     <pre class="r-fu-prompt">Project: imas-codex (regenerate) + imas-standard-names-catalog
@@ -688,6 +692,7 @@ Done-when
      published catalog; family-parallel + inline-unit lint clean.
   2. Pedestal/limiter renames applied via ISN grammar and re-review clean.
   3. WS1 and WS2 advanced/closed accordingly; this follow-on resolved.</pre>
+    <p class="r-fu-outcome">DONE + APPLIED. Generation-standard prompts landed (ea0db110, a54e86c1, 6566ee08); the regen sweep they enable has now run (C11 density families + C2 velocity families regenerated at the full-quorum quality bar; C3-desc cross-link context wired in 45cfd907).</p>
     </article>
 <article class="r-fu" data-id="f-erf-c5-residual" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-06" data-recommends-skill="reckon-ship" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">C5 residual — consolidate pre-existing pedestal duplicates + adjudicate 4 ambiguous flux/shear/q names</h4>
@@ -742,9 +747,9 @@ Done-when
   3. C8 interim flag on the 3 names; full flush; export clean; ISNC RC cut.
   4. This followup resolved; WS2/WS3/WS4 advanced/closed.</pre>
     </article>
-<article class="r-fu" data-id="f-erf-c4-composer-locus" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-06" data-recommends-skill="reckon-ship" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-erf-c4-composer-locus" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-06" data-recommends-skill="reckon-ship" data-resolved-at="2026-07-08T05:58:16+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">C4-fsa needs a composer locus-canonicalization (DD separatrix -&gt; plasma_boundary), not a focus</h4>
-    <div class="r-fu-body">DIAGNOSIS (why C4-fsa is a build, not a focus): the 8 accepted toroidal_flux_surface_averaged_<species>_velocity_at_plasma_boundary names are all origin=catalog_edit (hand-created at the plasma_boundary locus). The pipeline COMPOSER, given the DD summary/local/separatrix_average path, instead produces the at_separatrix locus (0 accepted names use at_separatrix) -> the fresh attempts (beryllium, lithium) went EXHAUSTED at review because plasma_boundary is the accepted convention (separatrix = LCFS = the plasma boundary). So generating the ~9 missing fsa velocity + ~16 missing fsa density names via --focus fails (wrong locus, sources exhausted). FIX REQUIRED: canonicalize DD separatrix/separatrix_average -> the plasma_boundary locus in the name composer (generate_name_dd.md ~L194 maps to position=separatrix + transformation; change to plasma_boundary, OR add a separatrix->plasma_boundary canonical-locus mapping in audits.canonical_locus_check), then --retry-quarantined/--reset the exhausted fsa sources and regenerate at default quality. Interacts with canonical-qualifier-order (secondary_separatrix vs plasma_boundary synonym). Also: fix the malformed toroidal_flux_surface_averaged_deuterium_tritium_velocity (missing _at_plasma_boundary locus) + the 2 dangling helium_3 fsa links + supersede the 3 generic ion_species drafts from the earlier mis-scoped focus.</div>
+    <div class="r-fu-body">DIAGNOSIS (why C4-fsa is a build, not a focus): the 8 accepted toroidal_flux_surface_averaged_<species>_velocity_at_plasma_boundary names are all origin=catalog_edit (hand-created at the plasma_boundary locus). The pipeline COMPOSER, given the DD summary/local/separatrix_average path, instead produces the at_separatrix locus (0 accepted names use at_separatrix) -&gt; the fresh attempts (beryllium, lithium) went EXHAUSTED at review because plasma_boundary is the accepted convention (separatrix = LCFS = the plasma boundary). So generating the ~9 missing fsa velocity + ~16 missing fsa density names via --focus fails (wrong locus, sources exhausted). FIX REQUIRED: canonicalize DD separatrix/separatrix_average -&gt; the plasma_boundary locus in the name composer (generate_name_dd.md ~L194 maps to position=separatrix + transformation; change to plasma_boundary, OR add a separatrix-&gt;plasma_boundary canonical-locus mapping in audits.canonical_locus_check), then --retry-quarantined/--reset the exhausted fsa sources and regenerate at default quality. Interacts with canonical-qualifier-order (secondary_separatrix vs plasma_boundary synonym). Also: fix the malformed toroidal_flux_surface_averaged_deuterium_tritium_velocity (missing _at_plasma_boundary locus) + the 2 dangling helium_3 fsa links + supersede the 3 generic ion_species drafts from the earlier mis-scoped focus.</species></div>
     <pre class="r-fu-prompt">Project: imas-codex (composer locus fix) + imas-standard-names-catalog
 Plan: expert-review-fixes (http://localhost:8765/imas-standard-names/expert-review-fixes.html)
 Section: C4-fsa (deferred build)
@@ -770,6 +775,7 @@ Done-when
   2. All 17 species have both local + fsa velocity + density at plasma_boundary, accepted at &gt;=0.85.
   3. Generic drafts superseded; dangling links fixed; pairing invariant added.
   4. This followup resolved; WS4 closed.</pre>
+    <p class="r-fu-outcome">COMPOSER FIX DONE. generate_name_dd.md now maps DD separatrix/separatrix_average -> plasma_boundary AND requires the flux_surface_averaged transform for _average paths (e4bced8a + 2063ad9b; golden regenerated; separatrix->plasma_boundary synonym already in audits._CANONICAL_LOCUS_SYNONYMS). Verified: composes flux_surface_averaged_beryllium_density_at_plasma_boundary. The full fsa generation runs under WS4/pipeline-build.</p>
     </article>
 </section>
 
