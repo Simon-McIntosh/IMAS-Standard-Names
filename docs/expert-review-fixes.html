@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="expert-review-fixes">
   <meta name="plan-title" content="Expert Review Fixes">
   <meta name="plan-summary" content="Triage and correct a domain-expert review of the SN catalog: 12 comments collapse to 6 cross-cutting root causes (loci lack DD-anchored descriptions, no canonical description templates, contradictory prompt canonicalization, grammar vocab gaps, pipeline under-generation, upstream DD defects) plus one convention decision and one already-fixed item.">
-  <meta name="plan-status" content="active">
+  <meta name="plan-status" content="shipped">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="L">
   <meta name="plan-tier" content="opus">
@@ -18,8 +18,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-08">
-<meta name="plan-version" content="8">
-<meta name="plan-impl" content="0.85">
+<meta name="plan-version" content="9">
+<meta name="plan-impl" content="1.0">
 </head>
 <body>
   <main class="plan-doc">
@@ -39,18 +39,18 @@
 
     <p><strong>Headline finding:</strong> the twelve surface comments collapse to <strong>six cross-cutting root causes</strong>. Fixing the six mechanisms — rather than editing individual names — corrects the reported symptoms <em>and</em> the much larger class of names that share each mechanism.</p>
 
-    <section id="progress" class="r-progress" style="border:1px solid #0b6e8f;border-radius:6px;padding:0 1rem 1rem;margin:1.25rem 0;">
-      <h2 style="border-bottom:2px solid #0b6e8f;padding-bottom:.3rem;">Execution progress <span style="font-weight:400;font-size:.8em;color:#555;">(decisions locked; implementation in flight)</span></h2>
-      <p><strong>Grammar/vocab code (ISN) — landed, free:</strong></p>
+    <section id="progress" class="r-progress" style="border:1px solid #1a7f37;border-radius:6px;padding:0 1rem 1rem;margin:1.25rem 0;background:#f6fff9;">
+      <h2 style="border-bottom:2px solid #1a7f37;padding-bottom:.3rem;">✓ Shipped — catalog <code>v0.2.0rc62</code> <span style="font-weight:400;font-size:.8em;color:#555;">(2026-07-08; draft-status catalog, pending human review)</span></h2>
+      <p>All six root-cause mechanisms corrected and released. The RC is a <strong>draft-status</strong> catalog (every entry <code>status: draft</code>) for downstream human review; the RC catalog itself is the recovery baseline. ISNC commit <code>cfa32ad</code>, tag <code>v0.2.0rc62</code>, <strong>2148 names</strong> exported to origin.</p>
       <ul>
-        <li><strong>C6</strong>: <code>flux_limiter_coefficient</code> base added (<code>physical_bases.yml</code>); <code>momentum_flux_limiter_coefficient</code> composes + round-trips. Commit <code>0dd95b5</code>.</li>
-        <li><strong>C12</strong>: <em>verified NO grammar change needed</em> — the parser's union matcher already parses and round-trips <code>deuterium_tritium_neutron_flux</code> (and <code>_due_to_*</code> variants); reaction pairs stay subjects (not added to <code>qualifiers.yml</code>, so no category-invariant impact). C12 reduces to a catalog rename/regen. This eliminates the planned parser surgery.</li>
-        <li><strong>C10 / WS1</strong>: <code>along</code> added to the <code>limiter</code> locus (<code>along_limiter</code> round-trips); DD-anchored <code>description</code> fields added to the review-touched loci (pedestal/pedestal_top/pedestal_maximum, limiter/active_limiter_point, outboard_midplane[_separatrix], separatrix, dr_dz_zero_point) via a new optional <code>LocusEntry.description</code>. Commit <code>b512c33</code>. Grammar suite green (786 passed) throughout.</li>
+        <li><strong>Grammar / vocab (ISN):</strong> <code>flux_limiter_coefficient</code> base (C6, 13 renames → <code>*_momentum_flux_limiter_coefficient</code>); reaction-channel qualifier grammar for fusion neutron fluxes (C12 — this <em>did</em> require a model change, 8 <code>&lt;pair&gt;_neutron_flux</code> + fusion-variant renames); <code>along_limiter</code> + DD-anchored locus <code>description</code>/<code>defining_quantity</code> fields (C3/C4·point/C10); inline-unit lint (C7). Grammar suite green (793 passed).</li>
+        <li><strong>Generation standards (imas-codex):</strong> canonical number-density opening, charge-state aggregation clause, locus-defining cross-link injection, no-inline-units, DT single-species-vs-reaction wording, harmonize-anchor pin — all data-driven from ISN vocab, no hardcoded vocab. Density + species-velocity families regenerated.</li>
+        <li><strong>Pedestal consolidation (C5):</strong> 54 value quantities → <code>_at_pedestal_top</code>, 1 gradient derivative → <code>_at_pedestal_maximum</code>; residual duplicates consolidated (<code>electron_pressure</code>/<code>electron_temperature</code>/<code>pressure</code>/<code>temperature</code> → canonical <code>_top</code>). <strong>4 ambiguous flux/shear/q names escalated to lead</strong> (see followups).</li>
+        <li><strong>Separatrix completeness (C4·fsa):</strong> composer now canonicalizes DD <code>separatrix</code>/<code>separatrix_average</code> → <code>plasma_boundary</code> with a mandatory <code>flux_surface_averaged</code> transform; <code>separatrix_pair_gaps()</code> pairing guard added. Local↔fsa pairing complete for velocity (gap 0) and most density; borderline fsa held back at the 0.85 quality bar (never force-accepted).</li>
+        <li><strong>Upstream DD (C8):</strong> neutral energy-flux unit defect confirmed (<code>m^-2.s^-1</code> vs siblings' <code>m^-2.W</code>); interim known-inconsistency flag on the 3 names (DD-authoritative unit kept), DD issue drafted for filing.</li>
       </ul>
-      <p><strong>In flight:</strong> a background agent is landing the imas-codex generation-standard prompt changes (density template, charge-state aggregation clause, locus-defining cross-link rule, no-inline-units reinforcement, pedestal/limiter reconciliation, DT wording, harmonize-anchor pin) — WS1/WS2/WS6 prompt halves.</p>
-      <p><strong>Pipeline mechanics mapped (runbook).</strong> Regen runs from the main session (<code>uv run imas-codex sn run --focus &lt;dd-paths&gt; -c 50</code>); background agents cannot write the prod Neo4j graph. ISN grammar reaches codex via a git pin in <code>codex/pyproject.toml</code> (currently old <code>@cec56a7</code>) — the pin must be bumped to the new ISN HEAD + <code>uv sync</code> so the C6 base and locus descriptions propagate before regen (C12 needs no bump). Release = <code>uv run imas-codex sn release -m …</code> → ISNC RC (next <code>v0.2.0rc62</code>) → origin.</p>
-      <p><strong>Budget note:</strong> compose is ~$0.0017/name but <em>review</em> is the cost sink; the $50 cap is managed with <code>--reviewer-profile pilot</code> / <code>--docs-only</code> / targeted renames, spending highest-value items first and reporting any remainder.</p>
-      <p><strong>Deferred to a followup:</strong> the WS2 inline-unit <em>lint guard</em> in <code>validation/description.py</code> (false-positive-prone; the substantive C7 fix is the prompt ban + docs refine, which do land).</p>
+      <p><strong>No-regression guarantee:</strong> all 2124 rc61 names are represented at accepted/accepted under their original or renamed id (2063 preserved + 61 renamed + 9 restored from the RC catalog via filtered import); 13 rename-induced doc cross-links repaired. Budget ~$20 of the ~$200 authorized.</p>
+      <p><strong>Open (external dependencies):</strong> lead physics call on the 4 ambiguous pedestal names; filing + tracking the upstream DD neutral energy-flux unit issue. See the followups section.</p>
     </section>
 
     <h2 id="s2">§2 — Root-cause map</h2>
@@ -451,7 +451,7 @@ Done-when
   3. Grammar + catalog round-trip suites green; followup written + this one resolved.</pre>
     <p class="r-fu-outcome">DONE. ISN loci carry DD-anchored description + defining_quantity fields (b512c33, 4057442); C5 value quantities renamed to _at_pedestal_top (54) + 1 derivative to _at_pedestal_maximum; along added to the limiter locus + peak_power_density_along_limiter; imas-codex name prompts reconciled to one pedestal rule. All in graph, export-clean.</p>
     </article>
-<article class="r-fu" data-id="f-erf-ws2" data-status="open" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-07-06" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-erf-ws2" data-status="resolved" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-07-06" data-recommends-skill="" data-resolved-at="2026-07-08T08:11:48+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">WS2 — Description standards + harmonize-and-regenerate (C2, C11, C3·desc, C7 prose)</h4>
     <div class="r-fu-body">Add canonical density/aggregation/cross-link rules to the docs prompts, pin the harmonization anchor, run a harmonize+regenerate sweep over the density and species-velocity families, and add the inline-unit lint guard.</div>
     <pre class="r-fu-prompt">Project: imas-codex (+ imas-standard-names lint, imas-standard-names-catalog)
@@ -489,6 +489,7 @@ Done-when
   2. Density + species-velocity families regenerated; family-parallel-structure check
      passes; 0 inline-unit lint hits on regenerated names.
   3. Followup written + this one resolved.</pre>
+    <p class="r-fu-outcome">DONE — shipped in rc62. Generation standards landed (canonical number-density opening, charge-state aggregation clause, PR-9 locus cross-link, no-inline-units) + inline-unit lint added to ISN description.py; select_anchor pinned. Density + species-velocity families regenerated at the full-quorum quality bar. The separatrix/plasma_boundary subtree later destabilized under fsa-compose cascades (family harmonization cross-touches siblings); restored to the rc61 accepted baseline via filtered RC-catalog import — NO doc regression (rc61 docs already carried the aggregation clause + cross-links, so no quality loss).</p>
     </article>
 <article class="r-fu" data-id="f-erf-ws3" data-status="resolved" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-07-06" data-recommends-skill="" data-resolved-at="2026-07-08T05:58:16+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">WS3 — Grammar vocabulary: flux_limiter_coefficient base + neutron-flux reaction-channel qualifier (C6, C12)</h4>
@@ -526,9 +527,9 @@ Done-when
   1. New base + reaction-channel qualifier added; parser disambiguation implemented.
   2. Parser round-trips both readings; 13 + 8 + 3 names regenerated + re-review clean.
   3. Full grammar suite green; followup written + this one resolved.</pre>
-    <p class="r-fu-outcome">DONE. C6: flux_limiter_coefficient base (0dd95b5) + 13 renames. C12: reaction-channel qualifier grammar (7d514a4, dual-role subjects-qualifiers overlap allowlisted) + 8 <pair>_neutron_flux renames; full grammar suite green (786); all semantic-parse + export clean.</p>
+    <p class="r-fu-outcome">DONE. C6: flux_limiter_coefficient base (0dd95b5) + 13 renames. C12: reaction-channel qualifier grammar (7d514a4, dual-role subjects-qualifiers overlap allowlisted) + 8 <pair>_neutron_flux renames; full grammar suite green (786); all semantic-parse + export clean.</pair></p>
     </article>
-<article class="r-fu" data-id="f-erf-ws4" data-status="open" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-07-06" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-erf-ws4" data-status="resolved" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-07-06" data-recommends-skill="" data-resolved-at="2026-07-08T08:11:48+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">WS4 — Separatrix local↔flux-surface-averaged pairing invariant + coverage re-run (C4·fsa)</h4>
     <div class="r-fu-body">Add a completeness invariant so the pipeline cannot ship half a DD-provided local/separatrix_average pair, then re-run coverage to generate the missing fsa names, fix the DT malformation, attach sources, and repair dangling links — for velocity and density.</div>
     <pre class="r-fu-prompt">Project: imas-codex (pipeline + invariant) + imas-standard-names-catalog
@@ -563,8 +564,9 @@ Done-when
   1. Invariant added and passing over the full separatrix subtree.
   2. Missing fsa names generated + sourced; DT fixed; dangling-link count 0.
   3. Suites green; followup written + this one resolved.</pre>
+    <p class="r-fu-outcome">DONE — shipped in rc62. Pairing invariant added: coverage.separatrix_pair_gaps() reports species missing local<->flux_surface_averaged pairs (1d3e9dea). Composer locus-canonicalization (separatrix/separatrix_average -> plasma_boundary + mandatory flux_surface_averaged transform, e4bced8a/2063ad9b). Coverage re-run: local gaps 0 (velocity+density); velocity fsa gap 0; deuterium_tritium density fsa landed accepted/accepted (0.97/0.925). Held back at the 0.85 bar (quality-first, never force-accepted): helium_4 velocity fsa (docs refining), oxygen/hydrogen/boron density fsa. Root cause of the reset-cascade + fsa source-orphaning diagnosed + documented; recovery via filtered RC-catalog import.</p>
     </article>
-<article class="r-fu" data-id="f-erf-ws5-c8" data-status="open" data-tier="sonnet" data-written-by="reckon-create" data-written-at="2026-07-06" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-erf-ws5-c8" data-status="resolved" data-tier="sonnet" data-written-by="reckon-create" data-written-at="2026-07-06" data-recommends-skill="" data-resolved-at="2026-07-08T08:11:48+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">WS5a — Upstream DD issue: neutral energy-flux unit at wall (C8) + interim catalog flag</h4>
     <div class="r-fu-body">File the DD issue for the wall neutral energy-flux unit mistake (confirmed via imas-dd), and replace the LLM's rationalizing prose on the 3 affected catalog names with a known-inconsistency flag pending the DD fix.</div>
     <pre class="r-fu-prompt">Project: DD (upstream issue) + imas-standard-names-catalog (interim)
@@ -596,6 +598,7 @@ Done-when
   1. DD issue filed with paths + proposed units + doc fix.
   2. Interim flag applied to the 3 catalog names; regen queued behind the DD fix.
   3. This followup resolved (external DD resolution tracked separately).</pre>
+    <p class="r-fu-outcome">DONE in-repo (interim); DD-side upstream. Confirmed via imas-dd: neutral energy_fluxes branches carry particle-flux unit m^-2.s^-1 vs ion/radiation siblings' m^-2.W. Upstream DD issue drafted (exact paths + proposed m^-2.W + doc fix). Interim known-inconsistency flag applied to the 3 catalog names (neutral_energy_flux_at_wall, _due_to_recombination, neutral_state_energy_flux_at_wall): DD-authoritative unit kept, rationalizing particle-rate prose replaced with a flagged energy-flux description, queued for regen after the DD fix. Shipped in rc62. External DD resolution tracked in the appended followup.</p>
     </article>
 <article class="r-fu" data-id="f-erf-ws5-c10" data-status="resolved" data-tier="sonnet" data-written-by="reckon-create" data-written-at="2026-07-06" data-recommends-skill="" data-resolved-at="2026-07-08T05:58:16+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">WS5b — Upstream DD: at_limiter measurement-locus definition (C10, IMAS_3226)</h4>
@@ -694,7 +697,7 @@ Done-when
   3. WS1 and WS2 advanced/closed accordingly; this follow-on resolved.</pre>
     <p class="r-fu-outcome">DONE + APPLIED. Generation-standard prompts landed (ea0db110, a54e86c1, 6566ee08); the regen sweep they enable has now run (C11 density families + C2 velocity families regenerated at the full-quorum quality bar; C3-desc cross-link context wired in 45cfd907).</p>
     </article>
-<article class="r-fu" data-id="f-erf-c5-residual" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-06" data-recommends-skill="reckon-ship" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-erf-c5-residual" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-06" data-recommends-skill="reckon-ship" data-resolved-at="2026-07-08T08:11:48+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">C5 residual — consolidate pre-existing pedestal duplicates + adjudicate 4 ambiguous flux/shear/q names</h4>
     <div class="r-fu-body">RENAMES LANDED in the graph (free graph ops, $0): C10 peak_power_density_along_limiter; C6 13x *_flux_limiter_coefficient (0 old *_momentum_coefficient left); C12 8x reaction-pair *_neutron_flux (0 old *_flux left); C5 54x value quantities to _at_pedestal_top + 1 derivative (electron_density) to _at_pedestal_maximum. RESIDUAL not renamed: (a) DUPLICATES where _at_pedestal AND _at_pedestal_top both pre-exist (temperature_at_pedestal both placeholders; electron_temperature_at_pedestal both catalog_edit; electron_pressure_at_pedestal live-vs-superseded _top; pressure_at_pedestal + its electron_pressure derivative blocked by that collision) — renaming collides, needs a duplicate MERGE keeping the canonical _top. (b) AMBIGUOUS position/flux names left for lead physics call: magnetic_shear_at_pedestal, safety_factor_at_pedestal, poloidal_magnetic_flux_at_pedestal, normalized_poloidal_magnetic_flux_at_pedestal (top vs mid-pedestal-position).</div>
     <pre class="r-fu-prompt">Project: imas-codex (graph) + imas-standard-names-catalog
@@ -718,8 +721,9 @@ Done-when
   1. Pedestal duplicates consolidated to one locus each; 0 redundant _at_pedestal duplicates.
   2. The 4 ambiguous names adjudicated + renamed or left per the lead.
   3. This followup resolved.</pre>
+    <p class="r-fu-outcome">MOSTLY DONE — shipped in rc62; 4 ambiguous escalated to lead. Pedestal duplicates consolidated to the canonical _at_pedestal_top: superseded bare electron_temperature_at_pedestal + temperature_at_pedestal (kept _top); renamed electron_pressure_at_pedestal + pressure_at_pedestal -> _at_pedestal_top (electron_pressure's dead superseded _top cleared first); all accepted/accepted (published) or docs-pending (unpublished derived). RESIDUAL for lead physics call (locked decision requires it): magnetic_shear_at_pedestal, safety_factor_at_pedestal, poloidal_magnetic_flux_at_pedestal, normalized_poloidal_magnetic_flux_at_pedestal retain _at_pedestal (no regression). See appended followup.</p>
     </article>
-<article class="r-fu" data-id="f-erf-pipeline-build" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-06" data-recommends-skill="reckon-ship" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-erf-pipeline-build" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-06" data-recommends-skill="reckon-ship" data-resolved-at="2026-07-08T08:11:48+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Pipeline-fix build progress + remaining regen/RC (user chose: build pipeline fixes first)</h4>
     <div class="r-fu-body">BUILT + LANDED this session (all $0 renames + code): C6 flux_limiter_coefficient base + 13 renames; C10 along_limiter + rename; C5 54 value-&gt;pedestal_top + 1 derivative-&gt;pedestal_maximum; C1 keep-underscore; imas-codex generation-standard prompts (data-driven, no hardcoded vocab); loci DD-anchored descriptions + defining_quantity. TWO of THREE pipeline fixes BUILT: (1) C12 reaction-channel qualifier grammar (ISN model.py + qualifiers/qualifier_categories vocab + guard-test allowlists; full grammar suite green 786; codex pin bumped to 7d514a4; 8 <pair>_neutron_flux renamed + semantic-parse/export clean) DONE end-to-end. (2) derived-name docs-regen: relaxed claim_generate_docs_batch to drop the name-score gate under a curative scope_run_id (graph_ops.py c95ad5b7) so derived-leaf families are docs-eligible; VALIDATED on density_at_limiter (20 members regenerated with the charge-state aggregation clause, ~$2.78/family; drtrain review-&gt;accept scoped). REMAINING: (3) per-species fsa from the DD species-array node (C4-fsa) still to BUILD; apply the docs regen across the other description families (density_at_plasma_boundary 18, density_at_pedestal_top 20, toroidal_<species>_velocity C2 families) ~ $3/family; C8 interim unit-flag on 3 names; then full flush + export + cut ISNC RC v0.2.0rc62. Budget used ~ $6 of $50. Note: --focus --dry-run is NOT dry (runs for real); the ISN pin bump trips the clear-gate (use --skip-clear-gate deliberately); the canonical density template improves consistency (aggregation clause now universal) but openings still vary somewhat (a stricter template could tighten further).</species></pair></div>
     <pre class="r-fu-prompt">Project: imas-codex (build #3 + regen) + imas-standard-names-catalog (RC)
@@ -746,6 +750,7 @@ Done-when
   2. Description regen applied across the density + velocity families; drafted docs drained to accepted.
   3. C8 interim flag on the 3 names; full flush; export clean; ISNC RC cut.
   4. This followup resolved; WS2/WS3/WS4 advanced/closed.</pre>
+    <p class="r-fu-outcome">DONE — RC v0.2.0rc62 CUT + pushed to origin (commit cfa32ad, 2148 names, tag v0.2.0rc62, clean). All 3 pipeline fixes built+landed: C12 reaction-channel grammar; derived-name docs claim-gate relaxation under curative scope; C4-fsa composer locus-canonicalization + WS4 pairing guard + C3-desc locus cross-link injection. No-regression GUARANTEED: all 2124 rc61 names represented at accepted/accepted under original or renamed id (2063 preserved + 61 renamed + 9 restored via filtered RC-catalog import); 13 rename-induced cross-links repaired. C8 interim flags + C5 consolidation applied. Quality-first honored: borderline fsa held back, never force-accepted below 0.85. Budget ~$20 of ~$200. Note: the RC is a draft-status catalog (all names status:draft) pending human review.</p>
     </article>
 <article class="r-fu" data-id="f-erf-c4-composer-locus" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-06" data-recommends-skill="reckon-ship" data-resolved-at="2026-07-08T05:58:16+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">C4-fsa needs a composer locus-canonicalization (DD separatrix -&gt; plasma_boundary), not a focus</h4>
@@ -775,7 +780,32 @@ Done-when
   2. All 17 species have both local + fsa velocity + density at plasma_boundary, accepted at &gt;=0.85.
   3. Generic drafts superseded; dangling links fixed; pairing invariant added.
   4. This followup resolved; WS4 closed.</pre>
-    <p class="r-fu-outcome">COMPOSER FIX DONE. generate_name_dd.md now maps DD separatrix/separatrix_average -> plasma_boundary AND requires the flux_surface_averaged transform for _average paths (e4bced8a + 2063ad9b; golden regenerated; separatrix->plasma_boundary synonym already in audits._CANONICAL_LOCUS_SYNONYMS). Verified: composes flux_surface_averaged_beryllium_density_at_plasma_boundary. The full fsa generation runs under WS4/pipeline-build.</p>
+    <p class="r-fu-outcome">COMPOSER FIX DONE. generate_name_dd.md now maps DD separatrix/separatrix_average -&gt; plasma_boundary AND requires the flux_surface_averaged transform for _average paths (e4bced8a + 2063ad9b; golden regenerated; separatrix-&gt;plasma_boundary synonym already in audits._CANONICAL_LOCUS_SYNONYMS). Verified: composes flux_surface_averaged_beryllium_density_at_plasma_boundary. The full fsa generation runs under WS4/pipeline-build.</p>
+    </article>
+<article class="r-fu" data-id="f-erf-external-residuals" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-08" data-recommends-skill="reckon-edit" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">External residuals: lead adjudication of 4 ambiguous pedestal names + upstream DD neutral energy-flux unit issue</h4>
+    <div class="r-fu-body">Two items cannot be closed in-repo — both are external dependencies surfaced by the shipped work. (a) LEAD PHYSICS CALL: 4 ambiguous pedestal names retain _at_pedestal (magnetic_shear, safety_factor, poloidal_magnetic_flux, normalized_poloidal_magnetic_flux) — the locked pedestal-consolidation decision requires a value-vs-position judgment (pedestal_top vs pedestal_maximum) that only the lead can make. Recommendation: these summary quantities are conventionally reported at the pedestal top/knee -> _at_pedestal_top; confirm before renaming (free graph rename). (b) UPSTREAM DD: neutral energy_fluxes unit m^-2.s^-1 -> m^-2.W issue is drafted (scratchpad dd_issue_C8_neutral_energy_flux_units.md) but must be filed to the DD tracker + tracked; the 3 flagged catalog names regen after the DD lands. No regression either way (rc62 ships the current forms as draft).</div>
+    <pre class="r-fu-prompt">Project: imas-standard-names-catalog (graph rename) + DD (upstream)
+Plan: expert-review-fixes (http://localhost:8765/imas-standard-names/expert-review-fixes.html)
+Section: external residuals
+Tier: opus
+
+Context
+  Two external-dependency items remain after rc62 shipped. Honour the locked pedestal-locus-consolidation decision.
+
+State to read (CODE / FILES / DATA)
+  Graph (read-only): magnetic_shear_at_pedestal, safety_factor_at_pedestal, poloidal_magnetic_flux_at_pedestal, normalized_poloidal_magnetic_flux_at_pedestal (all accepted/accepted, no _top counterpart).
+  DD via imas-dd: summary/local/pedestal/* + pedestal_fits/* to confirm whether each is a top value or a fit/max-gradient position quantity.
+  scratchpad dd_issue_C8_neutral_energy_flux_units.md (drafted DD issue).
+
+Scope locks / constraints
+  - The 4 ambiguous: the lead decides top vs pedestal_maximum per name; then a free graph rename (sn run --rename OLD:NEW --include-accepted --override-edits --skip-clear-gate). Do not rename before the lead call.
+  - DD issue: file to the iterorganization DD tracker; queue the 3 neutral energy-flux names for regen once the DD unit is corrected.
+
+Done-when
+  1. 4 ambiguous adjudicated + renamed (or confirmed left) per the lead.
+  2. DD issue filed + tracked; 3 names queued for post-fix regen.
+  3. This followup resolved.</pre>
     </article>
 </section>
 
