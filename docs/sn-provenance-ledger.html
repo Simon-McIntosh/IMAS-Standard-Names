@@ -17,13 +17,14 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-09">
-<meta name="plan-version" content="1">
+<meta name="plan-version" content="2">
 </head>
 <body>
   <main class="plan-doc">
     <h2 id="s1">§1 — Problem &amp; method</h2>
     <p><strong>Invariant we want:</strong> the graph is the ledger — every non-superseded <code>StandardName</code> traces to one, or a group of, <code>StandardNameSource</code>(s). Sources need not be DD leaves: a source may be a DD path, a derived-from-parent group, a signal, or a hand-authored/manual origin.</p>
     <p><strong>Observed reality:</strong> of <strong>2753</strong> live names, only <strong>595</strong> carry a direct DD source; <strong>572</strong> are fully orphaned (no source, no parent) and <strong>1404</strong> are only structurally linked (<code>HAS_PARENT</code>) with no leaf-source. Every SN was ultimately DD-driven at first generation, so this is provenance <em>loss</em>, not names that were never sourced. Root-caused by systematic debugging (evidence → mechanism → code confirmation).</p>
+    <p><strong>Goal (locked):</strong> a <em>rebuild</em> that recovers <strong>100% provenance</strong> — the final graph's <em>link topology</em> (<code>StandardNameSource</code> nodes + <code>PRODUCED_NAME</code> + <code>FROM_DD_PATH</code> + <code>HAS_PARENT</code>) must be <strong>identical to a fresh, from-scratch rebuild</strong> — <em>without</em> regenerating names or docs (that content is preserved and its cost saved). This is possible because the link topology is <strong>deterministic</strong>: dd-sources come from the DD graph and derived/parent structure from the ISN grammar decomposition — both re-derivable with no LLM. The recovery must <strong>not lose the latest edits</strong> (this session's renames, docs, stages): it rebuilds <em>links</em>, preserves <em>content</em>.</p>
 
     <section id="fig" style="border:1px solid #c9ccd1;border-radius:6px;padding:.5rem 1rem 1rem;margin:1rem 0;">
       <svg viewBox="0 0 860 300" width="100%" style="max-width:860px;font-family:system-ui,sans-serif" role="img" aria-label="Provenance-loss lifecycle">
@@ -101,39 +102,127 @@
       <li><strong>signal</strong> — a facility/diagnostic signal.</li>
       <li><strong>manual</strong> — hand-authored with no upstream anchor (explicit, auditable, not an accident).</li>
     </ul>
-    <p>The graph is authoritative; the published catalog is a <em>derived, provenance-free view</em> of it — never the graph's restore source without a provenance channel.</p>
+    <p>The graph is authoritative; the published catalog is a <em>complete, restorable projection</em> of it (full <code>sources</code>), consumed by a reconciler — never a recreating import.</p>
 
-    <h2 id="s5">§5 — Repair workstreams</h2>
-    <p><strong>WS1 · Persist provenance across the round-trip.</strong> Either (a) emit a provenance sidecar in ISNC (<code>name → source_ids/source_types</code>) that import consumes, or (b) make the graph the durable ledger (snapshot/restore the graph with provenance; publish the clean catalog as output only). Decision below.</p>
-    <p><strong>WS2 · Import reconstructs sources.</strong> On import, rebuild a <code>StandardNameSource</code> per name: dd where the grammar anchors to a DD leaf; derived from <code>HAS_PARENT</code>; manual otherwise — so a round-trip is lossless going forward.</p>
-    <p><strong>WS3 · Reattach edge/scalar desyncs.</strong> Extend <code>reconcile_provenance</code>: where a source's <code>produced_sn_id</code> names a live SN but the <code>PRODUCED_NAME</code> edge is missing, recreate the edge (41 now).</p>
-    <p><strong>WS4 · Ledger invariant + gate.</strong> Add an audit + export gate: every live SN has ≥1 source; report/track orphan count; wire into <code>sn run</code>'s reconcile block and <code>audit-doc</code>-style checks.</p>
-    <p><strong>WS5 · One-time backfill.</strong> Reconstruct provenance for the current 572 orphans + 1404 parent-only: dd-source where a DD anchor is derivable, derived-source from the parent chain, manual for the residue — each auditable, none silently invented.</p>
+    <section id="arch" style="border:1px solid #c9ccd1;border-radius:6px;padding:.5rem 1rem 1rem;margin:1rem 0;">
+      <svg viewBox="0 0 880 250" width="100%" style="max-width:880px;font-family:system-ui,sans-serif" role="img" aria-label="Target architecture — graph as ledger">
+        <style>
+          .n{fill:#fff;stroke:#333;stroke-width:1} .hub{fill:#f6fff9;stroke:#1a7f37;stroke-width:1.5}
+          .t{font-size:12px;fill:#1a1a1a} .h{font-size:12.5px;font-weight:600;fill:#1a1a1a} .s{font-size:10.5px;fill:#555}
+          .e{stroke:#333;stroke-width:1.4;fill:none;marker-end:url(#m)}
+          .e2{stroke:#888;stroke-width:1.2;fill:none;stroke-dasharray:4 3;marker-end:url(#m)}
+          .el{font-size:10px;fill:#444}
+        </style>
+        <defs><marker id="m" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 z" fill="#333"/></marker></defs>
+        <!-- hub -->
+        <rect class="hub" x="330" y="95" width="220" height="66" rx="5"/>
+        <text class="h" x="345" y="122">GRAPH — the ledger</text>
+        <text class="s" x="345" y="140">names + StandardNameSource</text>
+        <text class="s" x="345" y="153">+ PRODUCED_NAME + HAS_PARENT</text>
+        <!-- DD graph feed -->
+        <rect class="n" x="30" y="30" width="180" height="48" rx="4"/>
+        <text class="t" x="42" y="50">DD graph (IMASNode)</text>
+        <text class="s" x="42" y="66">+ ISN grammar</text>
+        <path class="e" d="M210,58 C280,70 300,100 330,112"/>
+        <text class="el" x="214" y="86">extract + derive (deterministic)</text>
+        <!-- recovery -->
+        <rect class="n" x="30" y="150" width="180" height="48" rx="4"/>
+        <text class="t" x="42" y="170">a2f8831 sources</text>
+        <text class="s" x="42" y="186">(1941 / ~92%, 07-03)</text>
+        <path class="e2" d="M210,172 C280,160 300,150 330,142"/>
+        <text class="el" x="214" y="150">WS1 rebuild links (one-time, no LLM)</text>
+        <!-- export -->
+        <rect class="n" x="660" y="40" width="190" height="48" rx="4"/>
+        <text class="t" x="672" y="60">Catalog PR (ISNC)</text>
+        <text class="s" x="672" y="76">export + full sources</text>
+        <path class="e" d="M550,112 C610,90 630,80 660,70"/>
+        <text class="el" x="556" y="96">export (projection)</text>
+        <!-- sn merge back -->
+        <path class="e" d="M660,78 C610,120 600,135 552,140"/>
+        <text class="el" x="556" y="132">sn merge: attach like sn edit →</text>
+        <text class="el" x="556" y="146">review-only → ≥θ accept / quarantine</text>
+        <!-- reconcile backstop -->
+        <rect class="n" x="660" y="160" width="190" height="42" rx="4"/>
+        <text class="t" x="672" y="180">reconciler (restore)</text>
+        <text class="s" x="672" y="195">diff-by-id, no recreate</text>
+        <path class="e2" d="M660,181 C610,175 590,168 552,152"/>
+      </svg>
+      <p style="font-size:12px;color:#555;margin:.2rem 0 0">The graph is the single authoritative ledger. Deterministic extract/derive (top-left) is what a fresh build runs; the one-time WS1 rebuild replays it against existing names, binding provenance from <code>a2f8831</code> + grammar (no LLM). The catalog is a complete projection: a PR is the review surface, <code>sn merge</code> folds reviewed edits back (review-only, no refine), and a reconciler — never a recreating import — can restore from it.</p>
+    </section>
+
+    <h2 id="s5">§5 — Recovery base</h2>
+    <p>The exported artifact <em>did</em> carry near-complete provenance until three days ago. ISNC commit <strong><code>a2f8831</code> (2026-07-03)</strong> holds <strong>1941 <code>sources</code> blocks + 5030 <code>dd_path</code> refs for 2117 names (~92%)</strong>; by rc61 (<code>8fba45f</code>, 07-06) it had collapsed to 292, and rc62 to 338 — the erosion tracks the import/export round-trips run since. <code>a2f8831</code> is therefore the authoritative recovery map for the bulk; the DD graph and the ISN grammar close the remaining gap deterministically.</p>
+
+    <h2 id="s6">§6 — Workstreams</h2>
+    <p><strong>WS1 · Provenance rebuild to fresh-parity (recover 100%, content-preserving).</strong> Replay the <em>deterministic</em> half of a fresh build against the <em>existing</em> names, skipping all LLM generation:</p>
+    <ul>
+      <li><em>DD sources</em> — (re)extract a <code>StandardNameSource(dd)</code> + <code>FROM_DD_PATH</code> for every DD leaf from the DD graph (identical to a fresh extract).</li>
+      <li><em>Bind <code>PRODUCED_NAME</code></em> — for each existing name, attach its dd-source using <code>a2f8831</code>'s <code>sources</code>/<code>dd_path</code> as the authoritative map (1941); for names absent there (added since), use the current-graph source or re-derive the dd-anchor from the name's grammar + DD vocab.</li>
+      <li><em>Derived / parent structure</em> — reconstruct <code>HAS_PARENT</code> + derived <code>StandardNameSource</code> by replaying the grammar derivation logic (deterministic — the same routine a fresh build runs).</li>
+      <li><em>Residue</em> — any name with no derivable dd/derived anchor gets an explicit <code>source_type='manual'</code> source (auditable; never a silently-invented DD path).</li>
+      <li><em>Preserve content</em> — the rebuild touches <em>only</em> provenance nodes/edges; name, description, docs and stages are untouched, so the latest edits survive.</li>
+      <li><em>Fresh-parity proof</em> — build a reference graph in a scratch DB by running the deterministic extract+derive over the same name set, and diff the edge topology (<code>StandardNameSource</code>, <code>PRODUCED_NAME</code>, <code>FROM_DD_PATH</code>, <code>HAS_PARENT</code>). The rebuild is accepted only when the diff is empty.</li>
+    </ul>
+    <p><strong>WS2 · <code>sn merge</code> — PR-based acceptance, provenance-preserving, review-only.</strong> The catalog PR is the human review surface; en-masse edits to description / docs / (occasionally) name are expected. On merge, <code>sn merge</code>:</p>
+    <ul>
+      <li>Reads the PR diff and matches each entry to its graph node <strong>by id</strong>.</li>
+      <li>Attaches each human edit as a <strong>steered proposal exactly like <code>sn edit</code></strong> (the change is the candidate + a reason), preserving <code>PRODUCED_NAME</code>. Name edits go through the <strong>rename cascade</strong> (carries <code>pn_sources</code>) — never delete-and-recreate.</li>
+      <li>Runs the proposal through the <strong>full review pipeline</strong> — but with <strong>NO refine step for human edits</strong>: a human-reviewed wording must not be silently mutated afterwards. Review scores it as-is.</li>
+      <li>If review <strong>≥ threshold</strong> → accept (edit lands; name reaches <code>human_approved</code>). If <strong>&lt; threshold</strong> → <strong>quarantine + flag</strong> (not accepted, not refined, not mutated; surfaced for human attention).</li>
+    </ul>
+    <p><strong>WS3 · Retire bulk import.</strong> Deprecate the node-recreating, provenance-dropping <code>sn import</code> as the graph's restore path. Nothing rebuilds graph nodes from the catalog again.</p>
+    <p><strong>WS4 · Provenance-complete, restorable catalog (Option C backstop).</strong> Release <em>always</em> emits the full <code>sources</code> field (complete ledger projection). A <em>reconciler</em> (diff-by-id, apply field deltas, rebuild <code>StandardNameSource</code> from <code>sources</code>) can restore the graph losslessly if ever needed — never a recreating import.</p>
+    <p><strong>WS5 · Ledger invariant + gate.</strong> Assert every non-superseded SN has ≥1 source (+ reattach live <code>produced_sn_id</code> scalars whose edge is missing — the 41 desyncs). Wire into <code>sn run</code>'s reconcile block and the release/audit gates; report the orphan count; block any release/merge that would orphan a name.</p>
+    <p><strong>Future (out of scope, flagged):</strong> the website's per-entry "sources" display is noisy (it conflates the grammar decomposition with true sources); a later session should group <em>true</em> sources (dd / signal) apart from <em>derived</em> (composed-from). Not tackled here.</p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
-<div class="r-dec" data-key="provenance-persistence" data-choice="" data-by="" data-when="">
-    <p class="r-dec-q">How do we persist ledger provenance across publish/restore (WS1)?</p>
+<div class="r-dec" data-key="provenance-persistence" data-choice="both" data-by="Simon McIntosh" data-when="2026-07-09">
+    <p class="r-dec-q">How do we persist ledger provenance across publish/restore (WS1/WS4)?</p>
     <p class="r-dec-opts">
       <button class="r-opt" data-value="sidecar">Provenance sidecar in ISNC that import consumes</button>
-      <button class="r-opt" data-value="graph-ledger">Graph is the durable ledger; catalog is output-only (graph snapshot/restore)</button>
-      <button class="r-opt" data-value="both">Sidecar now + move toward graph-as-ledger</button>
+      <button class="r-opt" data-value="graph-ledger">Graph is the durable ledger; catalog is output-only</button>
+      <button class="r-opt chosen" data-value="both">Option C — graph-authoritative live loop + provenance-complete restorable catalog backstop</button>
       </p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">LOCKED (Simon McIntosh, 2026-07-09): Option C. The graph is the authoritative ledger for the live workflow; every release still emits the full sources field so the catalog is a complete, restorable snapshot — but restore uses a reconciler (diff-by-id, no node recreation), never the recreating import.</p>
     </div>
-<div class="r-dec" data-key="orphan-reconstruction" data-choice="" data-by="" data-when="">
-    <p class="r-dec-q">How aggressive should the WS5 backfill be about inferring a dd-source vs marking a name manual?</p>
+<div class="r-dec" data-key="recovery-scope" data-choice="rebuild-fresh-parity" data-by="Simon McIntosh" data-when="2026-07-09">
+    <p class="r-dec-q">What is the recovery target?</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="conservative">Conservative — only attach dd/derived where provably derivable; everything else explicit manual</button>
-      <button class="r-opt" data-value="grammar-infer">Grammar-infer — re-run the extractor/grammar to re-anchor names to DD leaves where the mapping is unambiguous</button>
+      <button class="r-opt" data-value="best-effort">Best-effort backfill of orphans</button>
+      <button class="r-opt chosen" data-value="rebuild-fresh-parity">Rebuild to 100% provenance, link-topology identical to a fresh from-scratch rebuild, content preserved</button>
       </p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">LOCKED (Simon McIntosh, 2026-07-09): a rebuild recovering 100% provenance whose final link set (StandardNameSource + PRODUCED_NAME + FROM_DD_PATH + HAS_PARENT) is identical to a costly fresh rebuild — but WITHOUT regenerating names/docs (content preserved, cost saved) and WITHOUT losing the latest edits. Achievable because the link topology is deterministic (DD graph + grammar), proven by diffing against a reference deterministic build.</p>
+    </div>
+<div class="r-dec" data-key="acceptance-command" data-choice="sn-merge" data-by="Simon McIntosh" data-when="2026-07-09">
+    <p class="r-dec-q">What is the PR-acceptance command?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="sn-merge">sn merge</button>
+      <button class="r-opt" data-value="sn-accept-pr">sn accept-pr</button>
+      </p>
+    <p class="r-dec-rat">LOCKED (Simon McIntosh, 2026-07-09): sn merge . It merges a reviewed catalog PR back into the graph-ledger, id-matched, provenance-preserving.</p>
+    </div>
+<div class="r-dec" data-key="human-edit-handling" data-choice="review-only-quarantine" data-by="Simon McIntosh" data-when="2026-07-09">
+    <p class="r-dec-q">How are human PR edits processed on merge?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="review-only-quarantine">Attach like sn edit → full review, NO refine → accept ≥θ else quarantine+flag</button>
+      <button class="r-opt" data-value="review-and-refine">Attach + review + refine (as normal sn edit )</button>
+      </p>
+    <p class="r-dec-rat">LOCKED (Simon McIntosh, 2026-07-09): human edits attach exactly like the sn edit tool and pass through the FULL review pipeline, but with NO refine step — a human-reviewed name must not be silently mutated afterwards (we don&#x27;t want externally-reviewed names looking reviewed and then drifting). Below-threshold edits are quarantined + flagged for human attention, never auto-refined.</p>
+    </div>
+<div class="r-dec" data-key="orphan-reconstruction" data-choice="conservative" data-by="Simon McIntosh" data-when="2026-07-09">
+    <p class="r-dec-q">How is a source inferred when reconstructing (WS1 residue)?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="conservative">Conservative — attach dd/derived only where deterministically derivable; residue explicit manual</button>
+      <button class="r-opt" data-value="grammar-infer">Grammar-infer — heuristically re-anchor to DD leaves</button>
+      </p>
+    <p class="r-dec-rat">LOCKED (Simon McIntosh, 2026-07-09): conservative — the rebuild replays the deterministic extract/derive (DD graph + grammar), so dd/derived sources are recovered wherever a fresh build would create them; anything with no deterministic anchor becomes an explicit source_type=&#x27;manual&#x27; source. Never invent a DD path.</p>
     </div>
 </section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-spl-001" data-status="open" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-07-09" data-recommends-skill="reckon-ship" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-spl-001" data-status="resolved" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-07-09" data-recommends-skill="reckon-ship" data-resolved-at="2026-07-09T06:27:16+00:00" data-resolved-by="reckon-edit">
     <h4 class="r-fu-title">Lock WS1/WS5 decisions, then repair the ledger (reattach → invariant → backfill → round-trip fix)</h4>
     <div class="r-fu-body">RCA landed (§3): the export→import round-trip severs provenance (RC-1), 41 names have edge/scalar desync (RC-2), and no invariant guards it (RC-3). Two decisions are open and gate the durable fix: provenance-persistence (sidecar vs graph-as-ledger) and orphan-reconstruction (conservative vs grammar-infer). Immediate, decision-free steps: WS3 (reattach the 41 produced_sn_id→missing-edge desyncs via reconcile_provenance) and WS4 (add the ledger invariant + audit/export gate: every live SN has ≥1 source). WS1/WS2/WS5 (round-trip persistence, import reconstruction, the 572+1404 backfill) follow the locked decisions.</div>
     <pre class="r-fu-prompt">Project: imas-codex (graph_ops / catalog_import / export / loop) + imas-standard-names-catalog
@@ -159,6 +248,57 @@ Done-when
   2. WS4: invariant added; orphan count reported by sn run reconcile + a doc/audit gate; regression-guarded.
   3. WS1/WS2/WS5 implemented per the locked decisions; every live SN traces to &gt;=1 source; round-trip is lossless.
   4. This followup resolved.</pre>
+    <p class="r-fu-outcome">Superseded — all decisions now locked (provenance-persistence=Option C, recovery-scope=rebuild-fresh-parity, acceptance-command=sn merge, human-edit-handling=review-only+quarantine, orphan-reconstruction=conservative) and the workstreams detailed (§6). See f-spl-002.</p>
+    </article>
+<article class="r-fu" data-id="f-spl-002" data-status="open" data-tier="opus" data-written-by="reckon-edit" data-written-at="2026-07-09" data-recommends-skill="reckon-ship" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Build: provenance rebuild to fresh-parity (WS1) → invariant (WS5) → retire import + reconciler backstop (WS3/WS4) → sn merge (WS2)</h4>
+    <div class="r-fu-body">All decisions locked. Recommended order: (1) WS1 — the one-time provenance rebuild that recovers 100% and reaches link-parity with a fresh build, content-preserving (biggest single win); (2) WS5 — add the ledger invariant + reattach the 41 edge/scalar desyncs so loss can't recur; (3) WS3+WS4 — retire the recreating bulk import and make release emit full sources consumed by a diff-by-id reconciler; (4) WS2 — the sn merge acceptance workflow (attach human PR edits like sn edit → full review, NO refine → accept ≥θ else quarantine+flag). WS1 must prove fresh-parity by diffing its link topology against a reference deterministic build in a scratch DB before it is accepted.</div>
+    <pre class="r-fu-prompt">Project: imas-codex (graph_ops / build_dd / catalog_import / export / loop / a new sn merge) + imas-standard-names-catalog
+Plan: sn-provenance-ledger (http://localhost:8765/imas-standard-names/sn-provenance-ledger.html)
+Section: WS1 → WS5 → WS3/WS4 → WS2
+Tier: opus
+
+Context
+  Make the graph a robust ledger: every non-superseded SN traces to &gt;=1 StandardNameSource (dd / derived / signal / manual). Honour the live locked decisions above. The recovery target is a rebuild whose link topology equals a fresh from-scratch build, WITHOUT regenerating names/docs and WITHOUT losing the latest edits.
+
+State to read (CODE / FILES / DATA)
+  ISNC commit a2f8831 (2026-07-03): standard_names/*.yml `sources` blocks (1941) + dd_path (5030) — the recovery map. Compare to rc62 (cfa32ad) for what eroded.
+  imas_codex/graph/build_dd.py (deterministic DD extract), standard_names/graph_ops.py (PRODUCED_NAME/HAS_PARENT MERGEs 2188/3940/5751/9238; reconcile_provenance), workers.py (derive), export.py (_fetch_sources_for_entry ~682; include_sources ~1097/1321; _PROVENANCE_FIELDS 48), catalog_import.py (413/31/473), edit.py (apply_edit; the review-only path), loop.py (B2c reconcile).
+
+Scope locks / constraints
+  - WS1 is provenance-ONLY: rebuild StandardNameSource + PRODUCED_NAME + FROM_DD_PATH + HAS_PARENT by replaying the deterministic extract/derive against EXISTING names (bind by id from a2f8831 + grammar + DD); never touch name/description/docs/stage. Residue with no deterministic anchor -&gt; explicit source_type=&#x27;manual&#x27;. Prove fresh-parity by diffing the link set against a reference deterministic build in a scratch DB (empty diff to accept).
+  - WS2 sn merge: human PR edits attach exactly like sn edit (change as candidate + reason), FULL review, NO refine; &gt;=threshold accept (-&gt; human_approved), else quarantine+flag. Name edits via the rename cascade (carries pn_sources), never delete/recreate.
+  - WS3: retire the recreating bulk import as the restore path. WS4: release always emits full sources; restore via a diff-by-id reconciler (no node recreation).
+  - WS5: assert every live SN has &gt;=1 source; reattach the 41 live-scalar/missing-edge desyncs; wire into sn run reconcile + release/audit gates.
+  - Do NOT tackle the website true-vs-derived source de-noising (future, f-spl-003).
+
+Done-when
+  1. WS1: 100% of live names carry &gt;=1 source; link topology diff vs a fresh deterministic build is empty; content unchanged; latest edits intact.
+  2. WS5: 0 orphans, 0 edge/scalar desyncs; invariant gate live.
+  3. WS3/WS4: bulk import retired; release carries full sources; reconciler restore is lossless.
+  4. WS2: sn merge implemented + tested (accept path + quarantine path; no-refine verified).
+  5. Followups resolved.</pre>
+    </article>
+<article class="r-fu" data-id="f-spl-003" data-status="open" data-tier="sonnet" data-written-by="reckon-edit" data-written-at="2026-07-09" data-recommends-skill="reckon-edit" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Future: de-noise the website per-entry source display (true sources vs derived)</h4>
+    <div class="r-fu-body">The ISNC website shows a per-entry source list that conflates the ISN grammar decomposition (always derivable, noisy) with true pipeline sources. Group TRUE sources (dd / signal) apart from DERIVED (composed-from / grammatical), so the display is meaningful. Flagged by the lead for a future session; not in scope of the rebuild/merge work.</div>
+    <pre class="r-fu-prompt">Project: imas-standard-names (SPA / entry rendering) + imas-codex (export sources field)
+Plan: sn-provenance-ledger
+Section: website source display
+Tier: sonnet
+
+Context
+  Per-entry &#x27;sources&#x27; on the ISNC website mix grammatical decomposition with true pipeline provenance, creating noise. Separate true sources (dd / signal) from derived (composed-from).
+
+State to read (CODE / FILES / DATA)
+  The SPA entry renderer; export.py _fetch_sources_for_entry (source_type on each source); the grammar decomposition path.
+
+Scope locks / constraints
+  - Presentation/grouping only; do not change the ledger model.
+
+Done-when
+  1. Website groups true vs derived sources clearly.
+  2. This followup resolved.</pre>
     </article>
 </section>
   </main>
