@@ -18,7 +18,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-09">
-<meta name="plan-version" content="4">
+<meta name="plan-version" content="5">
 <meta name="plan-impl" content="1.0">
 </head>
 <body>
@@ -51,10 +51,13 @@
         (velocity_phi + velocity_tor + momentum, carbon fresh-parity topology) to the 16 existing accepted
         names, dropping the 16 redundant manual sources — <strong>content byte-identical, 0 orphans / 0
         desyncs</strong>; <strong>WS-4</strong> exclude-pending guard in the provenance rebuild + genuine-desync
-        refinement in the ledger, with tests. <strong>6 genuinely-anchorless names</strong> remain honest
-        <code>manual</code> (no clean DD leaf) and are surfaced as naming questions (f-psr-004); never
-        fabricated. Full record + figure: <a href="archive/sn-pedestal-source-recovery-landed.html">landed
-        archive</a>.
+        refinement in the ledger, with tests. The <strong>6 anchorless names were then resolved</strong>
+        (f-psr-004): 3 anchored to real DD leaves found via imas-dd research (iron-core-segment length,
+        poloidal flux, diamagnetic flux), 2 superseded as redundant duplicates of existing proper
+        dd-sourced names (thermal-fusion rate, neutron-detector lower energy), 1 kept as honest
+        <code>manual</code> (normalized poloidal flux — no <code>psi_norm</code> leaf). <strong>Live
+        manual-bound names: 22 → 1.</strong> Full record + figure:
+        <a href="archive/sn-pedestal-source-recovery-landed.html">landed archive</a>.
       </p>
     </section>
 
@@ -178,7 +181,7 @@ Done-when
   5. Followups resolved.</pre>
     <p class="r-fu-outcome">SHIPPED. WS-1 a34b7fc (compose grounding, name+docs, +graph test; durability canary green); WS-2 reconcile_grammar_segments in graph_ops+loop (+test, 176 names realigned, idempotent); WS-3 targeted-attach on the live graph (16 recovered, carbon fresh-parity, manual dropped, content byte-identical); WS-4 exclude-pending in provenance_rebuild + genuine-desync refinement in ledger (+regression test). All on imas-codex main; ISN grammar unchanged (it was already correct).</p>
     </article>
-<article class="r-fu" data-id="f-psr-004" data-status="open" data-tier="sonnet" data-written-by="reckon-ship" data-written-at="2026-07-09" data-recommends-skill="/reckon-edit sn-pedestal-source-recovery" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-psr-004" data-status="resolved" data-tier="sonnet" data-written-by="reckon-ship" data-written-at="2026-07-09" data-recommends-skill="/reckon-edit sn-pedestal-source-recovery" data-resolved-at="2026-07-09T13:52:28+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Resolve the 6 anchorless &#x27;manual&#x27; pedestal/edge names (naming decisions)</h4>
     <div class="r-fu-body">Six names have no clean pedestal-top/DD leaf and remain honest source_type='manual' (never fabricated): poloidal_magnetic_flux_at_pedestal_top [Wb], normalized_poloidal_magnetic_flux_at_pedestal_top [1] (likely the pedestal position coordinate summary/local/pedestal/position/psi), toroidal_diamagnetic_magnetic_flux_at_inside_flux_surface [Wb] (candidate equilibrium/time_slice/constraints/diamagnetic_flux), flux_due_to_thermal_fusion [Hz] (a rate misnamed 'flux'), length_of_iron_core_segment [m] (no DD quantity leaf), lower_energy [eV] (too generic). Each needs a lead naming decision: rename/relocate to a real DD anchor, or accept as manual. Separately, 2 flux_surface_average_at_pedestal_top names fail the ISN parser (grammar edge case) and were skipped by the segment reconcile.</div>
     <pre class="r-fu-prompt">Project: imas-codex (standard_names) + imas graph + ISN grammar
@@ -201,10 +204,11 @@ Done-when
   1. Each of the 6 either gains a lead-approved dd/derived anchor or is confirmed manual.
   2. The 2 parser-reject names have a grammar decision (fix the grammar or rename).
   3. This followup resolved.</pre>
+    <p class="r-fu-outcome">RESOLVED (2026-07-09), per lead review. (1) ANCHORED 3 to real DD leaves (imas-dd research found them): length_of_iron_core_segment -> iron_core/segment/geometry/oblique/length_beta [m]; poloidal_magnetic_flux_at_pedestal_top -> summary/local/pedestal/position/psi [Wb]; toroidal_diamagnetic_magnetic_flux_at_inside_flux_surface -> equilibrium/time_slice/constraints/diamagnetic_flux [Wb] — content untouched, now dd-sourced (FROM_DD_PATH linked). (2) SUPERSEDED 2 redundant manual duplicates in favour of existing proper dd-sourced names: flux_due_to_thermal_fusion -> total_neutron_source_rate_due_to_thermal_fusion; lower_energy -> lower_bound_energy_of_neutron_detector; inbound links repointed/removed. (3) KEPT 1 as honest manual: normalized_poloidal_magnetic_flux_at_pedestal_top [1] (no psi_norm leaf under summary/local/pedestal/position — only rho_tor_norm, the wrong coordinate; genuinely anchorless). LIVE manual-bound names: 22 -> 1. 0 orphans / 0 desyncs. Residue -> f-psr-006 (fusion flux->rate family) + f-psr-005 (separatrix); the 2 flux_surface_average parser-reject names remain a grammar edge case.</p>
     </article>
 <article class="r-fu" data-id="f-psr-005" data-status="open" data-tier="sonnet" data-written-by="reckon-ship" data-written-at="2026-07-09" data-recommends-skill="/reckon-ship sn-pedestal-source-recovery" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Targeted remediation of the separatrix_average locus inconsistency (+composition family)</h4>
-    <div class="r-fu-body">Blast-radius assessment (f-psr-002) found the grounding gap's verified damage is concentrated, not widespread (667 potential, mostly correct). Fix the two inconsistent families only: (1) summary/local/separatrix_average/n_i — a few species names dropped the _at_plasma_boundary locus their siblings carry (near-duplicate pattern), plus a long-form (flux_surface_averaged_<species>_density_at_plasma_boundary) vs short-form (<species>_density_at_plasma_boundary) split — pick one canonical form and align; (2) summary/composition density-ratio names — normalise the naming (volume_averaged prefix / number_density variance). Prefer the deterministic rename cascade over a --focus recompose to preserve accepted content; a scoped --focus recompose is acceptable (grounding is now correct under WS-1) if the lead accepts re-review. No mass reset.</div>
+    <div class="r-fu-body">Blast-radius assessment (f-psr-002) found the grounding gap's verified damage is concentrated, not widespread (667 potential, mostly correct). Fix the two inconsistent families only: (1) summary/local/separatrix_average/n_i — a few species names dropped the _at_plasma_boundary locus their siblings carry (near-duplicate pattern), plus a long-form (flux_surface_averaged_<species>_density_at_plasma_boundary) vs short-form (<species>_density_at_plasma_boundary) split — pick one canonical form and align; (2) summary/composition density-ratio names — normalise the naming (volume_averaged prefix / number_density variance). Prefer the deterministic rename cascade over a --focus recompose to preserve accepted content; a scoped --focus recompose is acceptable (grounding is now correct under WS-1) if the lead accepts re-review. No mass reset.</species></species></div>
     <pre class="r-fu-prompt">Project: imas-codex (standard_names) + imas graph
 Plan: sn-pedestal-source-recovery
 Section: targeted remediation of grounding-gap residue
@@ -223,6 +227,29 @@ Scope locks / constraints
 Done-when
   1. separatrix_average/n_i names share one canonical form with the correct _at_plasma_boundary locus.
   2. summary/composition density-ratio names normalised.
+  3. This followup resolved.</pre>
+    </article>
+<article class="r-fu" data-id="f-psr-006" data-status="open" data-tier="sonnet" data-written-by="reckon-ship" data-written-at="2026-07-09" data-recommends-skill="/reckon-ship sn-pedestal-source-recovery" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Fusion neutron-rate family: rename derived flux-&gt;rate for consistency with the canonical source_rate name</h4>
+    <div class="r-fu-body">The thermal-fusion neutron-rate names are inconsistent. total_neutron_source_rate_due_to_thermal_fusion [dd, base=source_rate, Hz] is the canonical name (the manual duplicate flux_due_to_thermal_fusion was superseded onto it). But the species-specific DERIVED children deuterium_deuterium_neutron_flux_due_to_thermal_fusion and tritium_tritium_neutron_flux_due_to_thermal_fusion still carry base=flux [Hz] — a rate misnamed 'flux' — and their structural parent neutron_flux_due_to_thermal_fusion is superseded (orphaning the derivation). Rename the flux->rate family (rename cascade) to align with the source_rate canonical, or supersede the derived flux children in favour of source_rate equivalents. Same naming-consistency class as the separatrix multiplicity (f-psr-005).</div>
+    <pre class="r-fu-prompt">Project: imas-codex (standard_names) + imas graph
+Plan: sn-pedestal-source-recovery
+Section: fusion neutron-rate naming consistency
+Tier: sonnet
+
+Context
+  Canonical: total_neutron_source_rate_due_to_thermal_fusion (dd, base=source_rate, Hz). Inconsistent siblings: deuterium_deuterium_neutron_flux_due_to_thermal_fusion + tritium_tritium_neutron_flux_due_to_thermal_fusion (derived, base=flux, Hz) with a superseded parent neutron_flux_due_to_thermal_fusion. &#x27;flux&#x27; is wrong for a Hz rate.
+
+State to read (CODE / FILES / DATA)
+  Graph: MATCH (n:StandardName) WHERE n.id CONTAINS &#x27;due_to_thermal_fusion&#x27; RETURN n.id,n.name_stage,n.physical_base,n.unit. graph_ops rename cascade (_execute_rename_cascade); HAS_PARENT/HAS_SUCCESSOR structure.
+
+Scope locks / constraints
+  - Pick one canonical base (source_rate) and align the family via the rename cascade (preserves provenance) or supersede the flux children onto source_rate equivalents. Grammar-valid, round-tripping names only. No fabricated DD paths.
+  - Verify 0 orphans / 0 desyncs; the derived children keep a live parent.
+
+Done-when
+  1. The fusion neutron-rate family shares a consistent base (no stray base=flux [Hz]).
+  2. Derived children have a live structural parent.
   3. This followup resolved.</pre>
     </article>
 </section>

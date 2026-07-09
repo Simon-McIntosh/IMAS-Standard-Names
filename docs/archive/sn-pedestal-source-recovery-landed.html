@@ -135,20 +135,23 @@
     </section>
 
     <section class="card">
-      <h2>Open naming questions — the 6 anchorless <code>manual</code> names</h2>
-      <p>No clean pedestal-top / DD leaf; each needs a naming decision (never a fabricated DD path):</p>
+      <h2>The 6 anchorless <code>manual</code> names — RESOLVED (2026-07-09)</h2>
+      <p>Reviewed per-name with the lead; live manual-bound names <strong>22 → 1</strong>. Never a
+        fabricated DD path.</p>
       <ul>
-        <li><code>poloidal_magnetic_flux_at_pedestal_top</code> [Wb] — no <code>psi</code>/flux leaf under
-          <code>summary/local/pedestal</code> (only <code>position/psi</code>, dimensionless).</li>
-        <li><code>normalized_poloidal_magnetic_flux_at_pedestal_top</code> [1] — likely the pedestal
-          <em>position</em> coordinate (<code>summary/local/pedestal/position/psi</code>); a naming call.</li>
-        <li><code>toroidal_diamagnetic_magnetic_flux_at_inside_flux_surface</code> [Wb] — candidate
-          <code>equilibrium/time_slice/constraints/diamagnetic_flux</code>; needs sign-off.</li>
-        <li><code>flux_due_to_thermal_fusion</code> [Hz] — a rate named "flux"; the name itself is
-          questionable.</li>
-        <li><code>length_of_iron_core_segment</code> [m] — no DD quantity leaf (only
-          <code>iron_core_segment</code> magnetisation constraints).</li>
-        <li><code>lower_energy</code> [eV] — too generic (a detector energy-band lower bound).</li>
+        <li><strong>Anchored</strong> <code>poloidal_magnetic_flux_at_pedestal_top</code> [Wb] →
+          <code>summary/local/pedestal/position/psi</code> [Wb].</li>
+        <li><strong>Anchored</strong> <code>toroidal_diamagnetic_magnetic_flux_at_inside_flux_surface</code> [Wb] →
+          <code>equilibrium/time_slice/constraints/diamagnetic_flux</code> [Wb].</li>
+        <li><strong>Anchored</strong> <code>length_of_iron_core_segment</code> [m] →
+          <code>iron_core/segment/geometry/oblique/length_beta</code> [m] — found via imas-dd search
+          (in the <code>iron_core</code> IDS, not the equilibrium constraint subtree).</li>
+        <li><strong>Superseded</strong> <code>flux_due_to_thermal_fusion</code> [Hz] → existing proper
+          <code>total_neutron_source_rate_due_to_thermal_fusion</code> (redundant duplicate; "flux" mis-named a Hz rate).</li>
+        <li><strong>Superseded</strong> <code>lower_energy</code> [eV] → existing proper
+          <code>lower_bound_energy_of_neutron_detector</code> (redundant generic duplicate).</li>
+        <li><strong>Kept manual</strong> <code>normalized_poloidal_magnetic_flux_at_pedestal_top</code> [1] —
+          genuinely anchorless (no <code>psi_norm</code> leaf; only <code>rho_tor_norm</code>, the wrong coordinate).</li>
       </ul>
       <p>Also: <code>electron_flux_surface_average_beta_at_pedestal_top</code> and
         <code>poloidal_flux_surface_average_magnetic_field_at_pedestal_top</code> fail the ISN parser
@@ -165,7 +168,9 @@
           under the WS-1 fix. Assessment first; remediation separately.</li>
         <li><strong>DD value-leaf enrichment</strong> — per-species value leaves get <em>template</em>
           descriptions, not LLM enrichment; a broader DD-enrichment quality item (out of scope here).</li>
-        <li><strong>6 anchorless names</strong> — resolve the naming questions above.</li>
+        <li><strong>Naming-consistency families</strong> — the separatrix_average multiplicity (f-psr-005)
+          and the fusion neutron flux→rate family (f-psr-006) share the same class: a canonical-form
+          decision + dedup/rename cascade. Deferred (broader than this plan).</li>
       </ul>
     </section>
   </main>
