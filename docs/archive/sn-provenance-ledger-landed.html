@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-standard-names">
+  <meta name="reckon-type" content="archive">
+  <title>SN Provenance Ledger — landed</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>SN Provenance Ledger — landed record</h1>
+    <p class="lede">The graph is now a robust provenance ledger: every non-superseded
+    <code>StandardName</code> traces to ≥1 <code>StandardNameSource</code>. Built and
+    executed 2026-07-09 in <strong>imas-codex</strong> (the plan lives in ISN; the code is in
+    imas-codex). All work landed on <code>main</code>.</p>
+
+    <section class="card">
+      <h2>Result on the live graph (production)</h2>
+      <ul>
+        <li><strong>Orphans (live names with no source): 1818 → 0.</strong></li>
+        <li><strong>Edge/scalar desyncs: 254 → 0.</strong></li>
+        <li><strong>Content preserved</strong> — live names 2753 and accepted 2446 unchanged; the
+          rebuild touched only provenance nodes/edges, never name/description/docs/stage.</li>
+        <li>Source composition after rebuild: <code>dd</code> 8740, <code>derived</code> 541,
+          <code>signals</code> 12, <code>manual</code> 22.</li>
+      </ul>
+    </section>
+
+    <section id="fig" style="border:1px solid #c9ccd1;border-radius:6px;padding:.5rem 1rem 1rem;margin:1rem 0;">
+      <svg viewBox="0 0 720 240" width="100%" style="max-width:720px;font-family:system-ui,sans-serif" role="img" aria-label="Provenance recovery before/after">
+        <style>
+          .b{fill:#d1242f} .a{fill:#1a7f37} .lbl{font-size:12px;fill:#1a1a1a}
+          .hd{font-size:13px;font-weight:600;fill:#1a1a1a} .ax{font-size:11px;fill:#555}
+        </style>
+        <text class="hd" x="20" y="24">Live names with no PRODUCED_NAME source</text>
+        <!-- before bar -->
+        <text class="ax" x="20" y="66">before</text>
+        <rect class="b" x="90" y="52" width="520" height="22" rx="3"/>
+        <text class="lbl" x="618" y="68">1818</text>
+        <!-- after bar -->
+        <text class="ax" x="20" y="104">after</text>
+        <rect class="a" x="90" y="90" width="2" height="22" rx="3"/>
+        <text class="lbl" x="98" y="106">0</text>
+        <text class="hd" x="20" y="150">Anchorless residue routed to source_type='manual'</text>
+        <text class="ax" x="20" y="182">first rebuild</text>
+        <rect class="b" x="130" y="168" width="190" height="20" rx="3"/>
+        <text class="lbl" x="326" y="183">95</text>
+        <text class="ax" x="20" y="212">corrected</text>
+        <rect class="a" x="130" y="198" width="44" height="20" rx="3"/>
+        <text class="lbl" x="180" y="213">22</text>
+      </svg>
+      <p style="font-size:12px;color:#555;margin:.2rem 0 0">The first rebuild fell back to
+      <code>manual</code> for 95 names because it skipped derived-parent source materialisation and
+      the surviving <code>source_paths</code> anchor. The corrected rebuild runs the full fresh-build
+      fixpoint sequence (incl. <code>seed_parent_sources</code>): 67 derived parents gained a
+      composed-from-children <code>derived</code> source, 6 recovered real <code>dd</code> sources from
+      their <code>source_paths</code> scalar, leaving 22 genuinely anchorless composed leaves as
+      auditable <code>manual</code> residue.</p>
+    </section>
+
+    <h2>Outcomes by workstream</h2>
+    <table>
+      <thead><tr><th>Workstream</th><th>Status</th><th>Result</th><th>Commits</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>WS1</strong> — provenance rebuild to fresh-parity</td>
+          <td><span class="badge badge-shipped">✓ landed</span></td>
+          <td>New <code>provenance_rebuild.py</code>: replays the deterministic fresh-build
+            (reattach → rederive structure → <code>seed_parent_sources</code> → relink FROM_DD_PATH)
+            then binds remaining orphans by anchor authority (a2f8831 map → surviving
+            <code>source_paths</code> → derived parent → manual). Ran on production: 1818→0 orphans,
+            content preserved.</td>
+          <td><code>013849db</code>, <code>91e83a1a</code></td>
+        </tr>
+        <tr>
+          <td><strong>WS5</strong> — ledger invariant + reattach + gate</td>
+          <td><span class="badge badge-shipped">✓ landed</span></td>
+          <td><code>ledger.py</code> invariant queries; <code>reconcile_provenance</code> gains a
+            reattach pass (heals live scalar/missing-edge desyncs); <code>persist_refined_name</code>
+            repoints the migrated source's scalar; <code>sn run</code> reports the orphan count every
+            cycle; graph-marked read-only invariant tests assert 0 orphans / 0 desyncs. Wired to
+            release Gate A via a graph-marked test under tests/standard_names/.</td>
+          <td><code>f3edb899</code>, <code>718471f4</code></td>
+        </tr>
+        <tr>
+          <td><strong>WS3/WS4</strong> — full-sources export + diff-by-id reconciler</td>
+          <td><span class="badge badge-shipped">✓ landed</span></td>
+          <td><code>export.py</code> now emits the full <code>sources</code> projection
+            (<code>source_type</code> + <code>provenance</code>) — a lossless ledger snapshot. New
+            <code>catalog_reconcile.py</code> restores the graph by id (scalar deltas + rebuild
+            StandardNameSource from <code>sources</code>), never recreating nodes.</td>
+          <td><code>2255b7ff</code>, <code>67a0a93a</code></td>
+        </tr>
+        <tr>
+          <td><strong>WS2</strong> — <code>sn merge</code> PR acceptance</td>
+          <td><span class="badge badge-shipped">✓ landed</span></td>
+          <td>New <code>merge.py</code> <code>run_merge</code>: reads the catalog-PR diff, matches by
+            id, attaches each edit like <code>sn edit</code> (<code>apply_edit(refine=False)</code>,
+            rename via the cascade carrying <code>pn_sources</code>), full review with NO refine
+            (structural — transitions synchronously to accepted/quarantined), ≥θ accept else
+            <code>validation_status='quarantined'</code>. Refine pools proven never called.</td>
+          <td><code>c344e4c2</code></td>
+        </tr>
+        <tr>
+          <td>Schema — <code>manual</code> source type</td>
+          <td><span class="badge badge-shipped">✓ landed</span></td>
+          <td>Added <code>manual</code> to <code>StandardNameSourceType</code> for anchorless residue
+            (explicit, auditable; never a fabricated DD path).</td>
+          <td><code>b3d541dc</code></td>
+        </tr>
+        <tr>
+          <td>CLI hygiene — drop one-shot recovery verbs</td>
+          <td><span class="badge badge-shipped">✓ landed</span></td>
+          <td>Removed the <code>sn rebuild-provenance</code> / <code>sn reconcile-catalog</code>
+            verbs (one-shot/restore-only). The tested modules remain scriptable; ongoing healing
+            (reattach + orphan report) fires automatically in <code>sn run</code>.</td>
+          <td><code>bf79f091</code></td>
+        </tr>
+        <tr>
+          <td>Bulk import removed completely (no backwards compat)</td>
+          <td><span class="badge badge-shipped">✓ landed</span></td>
+          <td>Deleted the node-recreating, provenance-dropping <code>run_import</code> +
+            <code>_write_import_entries</code> + the <code>sn import</code> CLI verb + all
+            import/round-trip tests; superseded by <code>sn merge</code> (acceptance) and
+            <code>catalog_reconcile</code> (restore). Kept <code>check_catalog</code> (publish) +
+            shared helpers. <code>test_no_bulk_import.py</code> locks the removal.</td>
+          <td><code>4b949931</code></td>
+        </tr>
+        <tr>
+          <td><code>sn merge</code> CLI verb wired</td>
+          <td><span class="badge badge-shipped">✓ landed</span></td>
+          <td>Exposes <code>run_merge</code> as <code>sn merge --isnc &lt;dir&gt; --base &lt;ref&gt;
+            [--threshold F] [--dry-run]</code>; exits non-zero on any edit that could not be
+            attached.</td>
+          <td>(this session)</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <section class="card">
+      <h2>What's next</h2>
+      <ul>
+        <li><strong>22 anchorless <code>manual</code> names</strong> — deeply-composed leaves (mostly
+          <code>toroidal_&lt;species&gt;_velocity_at_pedestal_top</code>) whose grammatical parent
+          is not a live SN and whose dd anchor is lost from every deterministic source. Optional
+          authoritative recovery: a prior full-graph RC snapshot. Currently honest
+          <code>manual</code> residue (0.8% of the ledger).</li>
+        <li><strong>Website source de-noising</strong> (f-spl-003) — group true (dd/signal) vs
+          derived (composed-from) sources in the per-entry display. Future session.</li>
+      </ul>
+    </section>
+  </main>
+</body>
+</html>
