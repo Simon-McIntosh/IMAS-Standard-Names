@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"   content="imas-standard-names">
+  <meta name="reckon-type"    content="plan">
+  <meta name="plan-slug"      content="sn-boundary-averaged-name-multiplicity">
+  <meta name="plan-title"     content="SN Boundary-Averaged Name Multiplicity — canonical form + dedup">
+  <meta name="plan-summary"   content="The summary/local/separatrix_average/* family carries 2-3 live StandardNames per DD leaf (24 of 54 leaves): a long form flux_surface_averaged_<q>_at_plasma_boundary, a short form <q>_at_plasma_boundary, and a few locus-stripped names with no _at_plasma_boundary. Pick a canonical form (the redundant flux_surface_averaged_ prefix vs the locus alone, since the plasma boundary IS a flux surface), collapse the duplicates via the rename/supersede cascade, and add the missing locus to the stripped names. Plus the summary/composition density-ratio family (18 names) with ratio/fraction/volume_averaged naming variance. Spun out of sn-pedestal-source-recovery (f-psr-005).">
+  <meta name="plan-status"    content="draft">
+  <meta name="plan-roi"       content="mid">
+  <meta name="plan-effort"    content="L">
+  <meta name="plan-tier"      content="opus">
+  <meta name="plan-owner"     content="Simon McIntosh">
+  <title>SN Boundary-Averaged Name Multiplicity | imas-standard-names</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="s1">§1 — Problem (fully defined)</h2>
+    <p>The DD subtree <code>summary/local/separatrix_average/*</code> stores flux-surface-averaged
+      quantities evaluated at the separatrix (the plasma boundary). Its StandardNames are a
+      <strong>multiplicity mess</strong>: of <strong>54 dd-sourced leaves, 24 carry more than one live
+      name</strong>. Three coexisting forms were composed for the same physical quantity, and all are
+      <code>name_stage='accepted'</code>:</p>
+    <ul>
+      <li><strong>Long form</strong> — <code>flux_surface_averaged_&lt;q&gt;_at_plasma_boundary</code>
+        (e.g. <code>flux_surface_averaged_carbon_density_at_plasma_boundary</code>).</li>
+      <li><strong>Short form</strong> — <code>&lt;q&gt;_at_plasma_boundary</code>
+        (e.g. <code>carbon_density_at_plasma_boundary</code>). <strong>14 leaves carry BOTH the long and
+        short form</strong> — a straight duplicate pair.</li>
+      <li><strong>Locus-stripped</strong> — no <code>_at_plasma_boundary</code> at all
+        (e.g. <code>flux_surface_averaged_carbon_density</code>, <code>lithium_density</code>).
+        <strong>6 leaves carry a locus-stripped name.</strong> Some are strict duplicates of a with-locus
+        sibling; others (e.g. <code>flux_surface_averaged_boron_density</code>,
+        <code>flux_surface_averaged_total_ion_density</code>, <code>flux_surface_averaged_electron_temperature</code>,
+        <code>flux_surface_averaged_magnetic_shear</code>) are the <em>only</em> name for that leaf and
+        simply lack the locus. One degenerate exhausted name (<code>flux_surface_averaged_velocity</code>,
+        no species) also exists.</li>
+    </ul>
+    <p>The core redundancy: the <strong>plasma boundary IS a flux surface</strong>, so
+      <code>flux_surface_averaged_&lt;q&gt;_at_plasma_boundary</code> double-encodes the averaging locus —
+      the <code>flux_surface_averaged_</code> prefix is redundant with <code>_at_plasma_boundary</code>.
+      A single canonical form is needed.</p>
+    <p>A sibling instance: <code>summary/composition/*</code> yields <strong>18 density-ratio names</strong>
+      with inconsistent naming — <code>ratio_of_&lt;species&gt;_density_to_electron_density</code> vs
+      <code>&lt;species&gt;_fraction</code> vs <code>volume_averaged_&lt;species&gt;_..._to_..._electron_density</code>.
+      Same class (one quantity, many name shapes), lower priority.</p>
+
+    <section id="fig-mult" style="border:1px solid #c9ccd1;border-radius:6px;padding:.6rem 1rem 1rem;margin:1rem 0;">
+      <svg viewBox="0 0 820 210" width="100%" style="max-width:820px;font-family:system-ui,sans-serif" role="img" aria-label="One DD leaf mapped to three coexisting accepted names, collapsing to one canonical name">
+        <style>
+          .lf{fill:#ffffff;stroke:#333;stroke-width:1}
+          .dup{fill:#ffffff;stroke:#d1242f;stroke-width:1.3}
+          .can{fill:#ffffff;stroke:#1a7f37;stroke-width:1.6}
+          .h{font-size:12px;font-weight:600;fill:#1a1a1a} .t{font-size:11px;fill:#333}
+          .e{stroke:#666;stroke-width:1.2;fill:none;marker-end:url(#am)}
+          .cap{font-size:11px;fill:#444}
+        </style>
+        <defs><marker id="am" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 z" fill="#666"/></marker></defs>
+        <rect class="lf" x="14" y="80" width="240" height="46" rx="4"/>
+        <text class="h" x="24" y="100">DD leaf (one quantity)</text>
+        <text class="t" x="24" y="116">summary/local/separatrix_average/n_i/carbon/value</text>
+        <rect class="dup" x="330" y="14" width="330" height="34" rx="4"/>
+        <text class="t" x="340" y="35">flux_surface_averaged_carbon_density_at_plasma_boundary</text>
+        <rect class="dup" x="330" y="56" width="330" height="34" rx="4"/>
+        <text class="t" x="340" y="77">carbon_density_at_plasma_boundary</text>
+        <rect class="dup" x="330" y="98" width="330" height="34" rx="4"/>
+        <text class="t" x="340" y="119">flux_surface_averaged_carbon_density  (no locus)</text>
+        <path class="e" d="M254,96 L330,31"/>
+        <path class="e" d="M254,100 L330,73"/>
+        <path class="e" d="M254,104 L330,115"/>
+        <text class="h" x="330" y="150" fill="#d1242f">3 live accepted names for 1 quantity</text>
+        <rect class="can" x="330" y="162" width="330" height="34" rx="4"/>
+        <text class="t" x="340" y="183">canonical: &lt;q&gt;_at_plasma_boundary  (1 name)</text>
+        <path class="e" d="M660,132 C700,132 700,179 668,179" />
+        <text class="cap" x="14" y="180">Decision: is the flux_surface_averaged_ prefix redundant with _at_plasma_boundary?</text>
+        <text class="cap" x="14" y="196">(the plasma boundary is a flux surface). Pick one form; collapse the rest.</text>
+      </svg>
+    </section>
+
+    <h2 id="s2">§2 — Why it matters (motivation)</h2>
+    <p>Multiple accepted names for one physical quantity is a first-order catalog defect: consumers cannot
+      tell which name is authoritative, cross-references fork, and the same DD leaf appears under two or
+      three ISN identifiers. It also breaks the ledger's implicit "one live name per quantity" expectation
+      and inflates the catalog. The locus-stripped names are additionally <em>wrong</em> — a
+      separatrix-averaged quantity that drops <code>_at_plasma_boundary</code> reads as a global quantity.
+      This surfaced during <a href="sn-pedestal-source-recovery.html">sn-pedestal-source-recovery</a>'s
+      blast-radius assessment (f-psr-002): the compose-grounding gap fixed there (WS-1) explains the
+      locus-stripped variants, but the long/short multiplicity is a pre-existing naming-convention gap that
+      the grounding fix does not resolve on its own.</p>
+
+    <h2 id="s3">§3 — The decision + approach</h2>
+    <p>The load-bearing decision is the <strong>canonical form</strong> (below). Once locked:</p>
+    <ul>
+      <li><strong>Collapse duplicates</strong> — for each leaf with a long+short pair, supersede the
+        non-canonical form onto the canonical one (<code>superseded_by</code> + <code>HAS_SUCCESSOR</code>),
+        preserving provenance; never a raw delete of an accepted name.</li>
+      <li><strong>Add the missing locus</strong> — for the ~6 locus-stripped names, rename to the canonical
+        <code>…_at_plasma_boundary</code> via the rename cascade (grammar-valid, round-tripping targets
+        only). Where a canonical sibling already exists, supersede the stripped name onto it instead.</li>
+      <li><strong>Generalise</strong> — check whether the <code>flux_surface_averaged_</code>-vs-locus
+        redundancy and the long/short split recur in other <code>*_average</code> DD subtrees (e.g.
+        <code>summary/volume_average/*</code>, pedestal fits); fix the class, not just separatrix.</li>
+      <li><strong>Composition family</strong> — normalise the 18 <code>summary/composition/*</code>
+        density-ratio names to one shape (lower priority; a second decision if the forms genuinely differ
+        in meaning).</li>
+    </ul>
+    <p>Mechanism: the deterministic rename/supersede cascade
+      (<code>graph_ops._execute_rename_cascade</code> / <code>sn run --rename OLD:NEW --include-accepted</code>),
+      NOT a <code>--focus</code> recompose — a recompose mints a fresh drafted variant and leaves the
+      accepted duplicates, worsening the multiplicity (demonstrated in sn-pedestal-source-recovery).
+      Verify 0 orphans / 0 desyncs and that no quantity is left with &gt;1 live name.</p>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+      <h2><span class="sec">§</span> Decisions</h2>
+      <div class="r-dec" data-key="canonical-boundary-form" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">What is the canonical form for a flux-surface-averaged quantity evaluated at the plasma boundary (separatrix)?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="locus-only">Short: <code>&lt;q&gt;_at_plasma_boundary</code> — the locus alone (the plasma boundary IS a flux surface, so the averaging is implied; drop the redundant prefix)</button>
+          <button class="r-opt" data-value="explicit-average">Long: <code>flux_surface_averaged_&lt;q&gt;_at_plasma_boundary</code> — keep the explicit averaging operator</button>
+          <button class="r-opt" data-value="operator-token">A dedicated aggregation token (e.g. a grammar <code>flux_surface_averaged</code> operator) applied consistently, distinct from the locus</button>
+        </p>
+        <p class="r-dec-rat"></p>
+      </div>
+      <div class="r-dec" data-key="composition-ratio-form" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">Canonical shape for the summary/composition density-ratio names (ratio_of_X_density_to_electron_density vs X_fraction vs volume_averaged_…)?</p>
+        <p class="r-dec-rat"></p>
+      </div>
+    </section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+      <h2><span class="sec">§</span> Followups</h2>
+      <article class="r-fu" data-id="f-bam-001" data-status="open" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-07-09">
+        <h4 class="r-fu-title">Lock the canonical boundary form, then collapse the separatrix_average multiplicity</h4>
+        <div class="r-fu-body">Decide the canonical form (§3 decision), then collapse the 24 multiplicity leaves and add the
+          missing locus to the ~6 stripped names via the rename/supersede cascade. Start with the
+          separatrix_average family; generalise to other <code>*_average</code> subtrees; the composition
+          density-ratio family is a lower-priority second pass. This work was spun out of
+          <a href="sn-pedestal-source-recovery.html">sn-pedestal-source-recovery</a> f-psr-005.</div>
+        <pre class="r-fu-prompt">Project: imas-standard-names (naming/grammar) + imas-codex (standard_names) + imas graph
+Plan: sn-boundary-averaged-name-multiplicity (http://localhost:8765/imas-standard-names/sn-boundary-averaged-name-multiplicity.html)
+Section: separatrix_average multiplicity + locus-stripped names
+Tier: opus
+
+Context
+  summary/local/separatrix_average/* has 24 of 54 dd-sourced leaves carrying 2-3 live accepted names
+  (long flux_surface_averaged_<q>_at_plasma_boundary, short <q>_at_plasma_boundary, and locus-stripped).
+  The plasma boundary is a flux surface, so the flux_surface_averaged_ prefix is redundant with the
+  _at_plasma_boundary locus. Honour the canonical-boundary-form decision shown live above before acting.
+
+State to read (CODE / FILES / DATA)
+  imas-codex graph_ops.py: _execute_rename_cascade, HAS_SUCCESSOR/superseded_by handling, the
+  supersede convention (name_stage='superseded' + superseded_by). CLI: sn run --rename OLD:NEW
+  --include-accepted (--dry-run first). ISN grammar: parse_standard_name / render.compose must accept
+  and round-trip every target name. Graph enumerate the family:
+    MATCH (s:StandardNameSource {source_type:'dd'})-[:PRODUCED_NAME]->(n:StandardName)
+    MATCH (s)-[:FROM_DD_PATH]->(l:IMASNode)
+    WHERE l.id STARTS WITH 'summary/local/separatrix_average/'
+      AND NOT coalesce(n.name_stage,'') IN ['superseded','exhausted']
+    RETURN l.id, collect(n.id)
+
+Scope locks / constraints (non-decision)
+  - Use the deterministic rename/supersede cascade, NEVER a --focus recompose (a recompose mints a new
+    drafted variant and leaves the accepted duplicates — it worsens the multiplicity; proven in
+    sn-pedestal-source-recovery).
+  - Supersede non-canonical accepted names (superseded_by the canonical), never raw-delete; preserve
+    provenance; repoint inbound links to the successor.
+  - Every target name must be ISN-grammar-valid and round-trip (compose(parse(name))==name).
+  - Preserve content of the surviving canonical names; keep 0 orphans / 0 desyncs.
+
+Done-when
+  1. Every separatrix_average leaf resolves to exactly ONE live name in the canonical form; the ~6
+     locus-stripped names either gained _at_plasma_boundary or were superseded onto a canonical sibling.
+  2. A generalisation check reported for other *_average subtrees (fix or explicitly scope out).
+  3. 0 orphans / 0 desyncs; provenance + content preserved; a follow-up written for the composition
+     density-ratio family if not done.
+  4. This followup resolved.</pre>
+      </article>
+    </section>
+  </main>
+</body>
+</html>

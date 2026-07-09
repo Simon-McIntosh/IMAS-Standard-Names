@@ -18,7 +18,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-09">
-<meta name="plan-version" content="5">
+<meta name="plan-version" content="6">
 <meta name="plan-impl" content="1.0">
 </head>
 <body>
@@ -204,9 +204,9 @@ Done-when
   1. Each of the 6 either gains a lead-approved dd/derived anchor or is confirmed manual.
   2. The 2 parser-reject names have a grammar decision (fix the grammar or rename).
   3. This followup resolved.</pre>
-    <p class="r-fu-outcome">RESOLVED (2026-07-09), per lead review. (1) ANCHORED 3 to real DD leaves (imas-dd research found them): length_of_iron_core_segment -> iron_core/segment/geometry/oblique/length_beta [m]; poloidal_magnetic_flux_at_pedestal_top -> summary/local/pedestal/position/psi [Wb]; toroidal_diamagnetic_magnetic_flux_at_inside_flux_surface -> equilibrium/time_slice/constraints/diamagnetic_flux [Wb] — content untouched, now dd-sourced (FROM_DD_PATH linked). (2) SUPERSEDED 2 redundant manual duplicates in favour of existing proper dd-sourced names: flux_due_to_thermal_fusion -> total_neutron_source_rate_due_to_thermal_fusion; lower_energy -> lower_bound_energy_of_neutron_detector; inbound links repointed/removed. (3) KEPT 1 as honest manual: normalized_poloidal_magnetic_flux_at_pedestal_top [1] (no psi_norm leaf under summary/local/pedestal/position — only rho_tor_norm, the wrong coordinate; genuinely anchorless). LIVE manual-bound names: 22 -> 1. 0 orphans / 0 desyncs. Residue -> f-psr-006 (fusion flux->rate family) + f-psr-005 (separatrix); the 2 flux_surface_average parser-reject names remain a grammar edge case.</p>
+    <p class="r-fu-outcome">RESOLVED (2026-07-09), per lead review. (1) ANCHORED 3 to real DD leaves (imas-dd research found them): length_of_iron_core_segment -&gt; iron_core/segment/geometry/oblique/length_beta [m]; poloidal_magnetic_flux_at_pedestal_top -&gt; summary/local/pedestal/position/psi [Wb]; toroidal_diamagnetic_magnetic_flux_at_inside_flux_surface -&gt; equilibrium/time_slice/constraints/diamagnetic_flux [Wb] — content untouched, now dd-sourced (FROM_DD_PATH linked). (2) SUPERSEDED 2 redundant manual duplicates in favour of existing proper dd-sourced names: flux_due_to_thermal_fusion -&gt; total_neutron_source_rate_due_to_thermal_fusion; lower_energy -&gt; lower_bound_energy_of_neutron_detector; inbound links repointed/removed. (3) KEPT 1 as honest manual: normalized_poloidal_magnetic_flux_at_pedestal_top [1] (no psi_norm leaf under summary/local/pedestal/position — only rho_tor_norm, the wrong coordinate; genuinely anchorless). LIVE manual-bound names: 22 -&gt; 1. 0 orphans / 0 desyncs. Residue -&gt; f-psr-006 (fusion flux-&gt;rate family) + f-psr-005 (separatrix); the 2 flux_surface_average parser-reject names remain a grammar edge case.</p>
     </article>
-<article class="r-fu" data-id="f-psr-005" data-status="open" data-tier="sonnet" data-written-by="reckon-ship" data-written-at="2026-07-09" data-recommends-skill="/reckon-ship sn-pedestal-source-recovery" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-psr-005" data-status="resolved" data-tier="sonnet" data-written-by="reckon-ship" data-written-at="2026-07-09" data-recommends-skill="/reckon-ship sn-pedestal-source-recovery" data-resolved-at="2026-07-09T14:01:34+00:00" data-resolved-by="reckon-create">
     <h4 class="r-fu-title">Targeted remediation of the separatrix_average locus inconsistency (+composition family)</h4>
     <div class="r-fu-body">Blast-radius assessment (f-psr-002) found the grounding gap's verified damage is concentrated, not widespread (667 potential, mostly correct). Fix the two inconsistent families only: (1) summary/local/separatrix_average/n_i — a few species names dropped the _at_plasma_boundary locus their siblings carry (near-duplicate pattern), plus a long-form (flux_surface_averaged_<species>_density_at_plasma_boundary) vs short-form (<species>_density_at_plasma_boundary) split — pick one canonical form and align; (2) summary/composition density-ratio names — normalise the naming (volume_averaged prefix / number_density variance). Prefer the deterministic rename cascade over a --focus recompose to preserve accepted content; a scoped --focus recompose is acceptable (grounding is now correct under WS-1) if the lead accepts re-review. No mass reset.</species></species></div>
     <pre class="r-fu-prompt">Project: imas-codex (standard_names) + imas graph
@@ -228,10 +228,11 @@ Done-when
   1. separatrix_average/n_i names share one canonical form with the correct _at_plasma_boundary locus.
   2. summary/composition density-ratio names normalised.
   3. This followup resolved.</pre>
+    <p class="r-fu-outcome">SPUN OUT (2026-07-09) into a dedicated plan: sn-boundary-averaged-name-multiplicity (docs/sn-boundary-averaged-name-multiplicity.html). That plan fully defines the separatrix_average multiplicity (24/54 leaves with 2-3 live names; 14 long+short duplicate pairs; 6 locus-stripped) + the summary/composition density-ratio family, with the canonical-form decision and a §05 followup. Continue there.</p>
     </article>
-<article class="r-fu" data-id="f-psr-006" data-status="open" data-tier="sonnet" data-written-by="reckon-ship" data-written-at="2026-07-09" data-recommends-skill="/reckon-ship sn-pedestal-source-recovery" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-psr-006" data-status="resolved" data-tier="sonnet" data-written-by="reckon-ship" data-written-at="2026-07-09" data-recommends-skill="/reckon-ship sn-pedestal-source-recovery" data-resolved-at="2026-07-09T14:01:34+00:00" data-resolved-by="reckon-create">
     <h4 class="r-fu-title">Fusion neutron-rate family: rename derived flux-&gt;rate for consistency with the canonical source_rate name</h4>
-    <div class="r-fu-body">The thermal-fusion neutron-rate names are inconsistent. total_neutron_source_rate_due_to_thermal_fusion [dd, base=source_rate, Hz] is the canonical name (the manual duplicate flux_due_to_thermal_fusion was superseded onto it). But the species-specific DERIVED children deuterium_deuterium_neutron_flux_due_to_thermal_fusion and tritium_tritium_neutron_flux_due_to_thermal_fusion still carry base=flux [Hz] — a rate misnamed 'flux' — and their structural parent neutron_flux_due_to_thermal_fusion is superseded (orphaning the derivation). Rename the flux->rate family (rename cascade) to align with the source_rate canonical, or supersede the derived flux children in favour of source_rate equivalents. Same naming-consistency class as the separatrix multiplicity (f-psr-005).</div>
+    <div class="r-fu-body">The thermal-fusion neutron-rate names are inconsistent. total_neutron_source_rate_due_to_thermal_fusion [dd, base=source_rate, Hz] is the canonical name (the manual duplicate flux_due_to_thermal_fusion was superseded onto it). But the species-specific DERIVED children deuterium_deuterium_neutron_flux_due_to_thermal_fusion and tritium_tritium_neutron_flux_due_to_thermal_fusion still carry base=flux [Hz] — a rate misnamed 'flux' — and their structural parent neutron_flux_due_to_thermal_fusion is superseded (orphaning the derivation). Rename the flux-&gt;rate family (rename cascade) to align with the source_rate canonical, or supersede the derived flux children in favour of source_rate equivalents. Same naming-consistency class as the separatrix multiplicity (f-psr-005).</div>
     <pre class="r-fu-prompt">Project: imas-codex (standard_names) + imas graph
 Plan: sn-pedestal-source-recovery
 Section: fusion neutron-rate naming consistency
@@ -251,6 +252,7 @@ Done-when
   1. The fusion neutron-rate family shares a consistent base (no stray base=flux [Hz]).
   2. Derived children have a live structural parent.
   3. This followup resolved.</pre>
+    <p class="r-fu-outcome">SPUN OUT (2026-07-09) into a dedicated plan: sn-fusion-neutron-rate-naming (docs/sn-fusion-neutron-rate-naming.html). That plan fully defines the fusion neutron-rate family (canonical total_neutron_source_rate base=source_rate vs the two derived base=flux children on a superseded parent), with the parent decision and a §05 followup. Continue there.</p>
     </article>
 </section>
   </main>

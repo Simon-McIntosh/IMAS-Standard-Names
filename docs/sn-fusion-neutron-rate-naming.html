@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"   content="imas-standard-names">
+  <meta name="reckon-type"    content="plan">
+  <meta name="plan-slug"      content="sn-fusion-neutron-rate-naming">
+  <meta name="plan-title"     content="SN Fusion Neutron-Rate Naming Consistency (flux to rate)">
+  <meta name="plan-summary"   content="The thermal-fusion neutron-rate family is inconsistent. The canonical name total_neutron_source_rate_due_to_thermal_fusion uses base=source_rate [Hz], but two accepted DERIVED children (deuterium_deuterium / tritium_tritium _neutron_flux_due_to_thermal_fusion) still use base=flux [Hz] — 'flux' is the wrong physical_base for a Hz rate — and their structural parent neutron_flux_due_to_thermal_fusion is SUPERSEDED, orphaning the derivation (a live child pointing at a dead parent). Align the family onto the source_rate base with a live parent, via the rename cascade. Spun out of sn-pedestal-source-recovery (f-psr-006).">
+  <meta name="plan-status"    content="draft">
+  <meta name="plan-roi"       content="low">
+  <meta name="plan-effort"    content="S">
+  <meta name="plan-tier"      content="sonnet">
+  <meta name="plan-owner"     content="Simon McIntosh">
+  <title>SN Fusion Neutron-Rate Naming Consistency | imas-standard-names</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="s1">§1 — Problem (fully defined)</h2>
+    <p>The thermal-fusion neutron-rate StandardName family is internally inconsistent. All members carry
+      unit <strong>Hz</strong> (a count rate, s⁻¹), but they disagree on <code>physical_base</code> and the
+      structural tree is broken. Current live/superseded members:</p>
+    <ul>
+      <li><code>total_neutron_source_rate_due_to_thermal_fusion</code> — <strong>base=source_rate</strong>,
+        <code>dd</code>-sourced, <strong>accepted</strong>. This is the <strong>canonical</strong> name
+        (the correct base for a Hz neutron rate).</li>
+      <li><code>deuterium_deuterium_neutron_flux_due_to_thermal_fusion</code> — <strong>base=flux</strong>,
+        <code>derived</code>, accepted; structural parent =
+        <code>neutron_flux_due_to_thermal_fusion</code>.</li>
+      <li><code>tritium_tritium_neutron_flux_due_to_thermal_fusion</code> — <strong>base=flux</strong>,
+        <code>derived</code>, accepted; structural parent =
+        <code>neutron_flux_due_to_thermal_fusion</code>.</li>
+      <li><code>neutron_flux_due_to_thermal_fusion</code> — base=flux, <strong>superseded</strong>. This is
+        the structural PARENT of the two derived children above — but it is <em>dead</em>.</li>
+      <li><code>flux_due_to_thermal_fusion</code> — base=flux, manual, <strong>superseded</strong> onto the
+        canonical during sn-pedestal-source-recovery (a redundant duplicate; already retired).</li>
+    </ul>
+    <p>Two defects: <strong>(a)</strong> the two per-reaction children use <code>base=flux</code>, but "flux"
+      denotes an areal density (m⁻²·s⁻¹); a <em>total count rate</em> in Hz is a <code>source_rate</code>,
+      as the canonical name correctly uses. <strong>(b)</strong> Their structural parent
+      <code>neutron_flux_due_to_thermal_fusion</code> is <code>superseded</code>, so two <em>live</em>
+      derived names hang off a <em>dead</em> parent — an orphaned derivation the structural fixpoints
+      cannot re-anchor.</p>
+
+    <section id="fig-fam" style="border:1px solid #c9ccd1;border-radius:6px;padding:.6rem 1rem 1rem;margin:1rem 0;">
+      <svg viewBox="0 0 820 200" width="100%" style="max-width:820px;font-family:system-ui,sans-serif" role="img" aria-label="Fusion neutron-rate family: canonical source_rate vs flux children on a dead parent">
+        <style>
+          .can{fill:#ffffff;stroke:#1a7f37;stroke-width:1.6}
+          .dead{fill:#ffffff;stroke:#8a8a8a;stroke-width:1.2;stroke-dasharray:4 3}
+          .bad{fill:#ffffff;stroke:#d1242f;stroke-width:1.3}
+          .h{font-size:12px;font-weight:600;fill:#1a1a1a} .t{font-size:11px;fill:#333} .m{font-size:10.5px;fill:#666}
+          .e{stroke:#666;stroke-width:1.2;fill:none;marker-end:url(#af)}
+        </style>
+        <defs><marker id="af" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 z" fill="#666"/></marker></defs>
+        <rect class="can" x="14" y="20" width="360" height="40" rx="4"/>
+        <text class="h" x="24" y="38">CANONICAL (accepted, dd)</text>
+        <text class="t" x="24" y="53">total_neutron_source_rate_due_to_thermal_fusion — base=source_rate</text>
+        <rect class="dead" x="14" y="130" width="300" height="40" rx="4"/>
+        <text class="h" x="24" y="148" fill="#666">parent — SUPERSEDED (dead)</text>
+        <text class="m" x="24" y="163">neutron_flux_due_to_thermal_fusion — base=flux</text>
+        <rect class="bad" x="430" y="96" width="376" height="36" rx="4"/>
+        <text class="t" x="440" y="118">deuterium_deuterium_neutron_flux_due_to_thermal_fusion</text>
+        <rect class="bad" x="430" y="142" width="376" height="36" rx="4"/>
+        <text class="t" x="440" y="164">tritium_tritium_neutron_flux_due_to_thermal_fusion</text>
+        <text class="h" x="430" y="88" fill="#d1242f">live children, base=flux [Hz] — wrong base, dead parent</text>
+        <path class="e" d="M314,150 L430,120"/>
+        <path class="e" d="M314,155 L430,158"/>
+        <text class="m" x="14" y="192">Target: align children to base=source_rate under a LIVE parent (the canonical total, or a re-derived neutron_source_rate parent).</text>
+      </svg>
+    </section>
+
+    <h2 id="s2">§2 — Why it matters (motivation)</h2>
+    <p>Mixed <code>physical_base</code> for one physical concept (a neutron count rate) means the same
+      quantity is named two different ways depending on whether it is the total or a per-reaction channel —
+      the catalog reads as if "flux" and "source_rate" are different physics when they are the same
+      dimension. The dead structural parent is a latent ledger/graph inconsistency: a live derived name
+      whose <code>HAS_PARENT</code> target is superseded cannot be regenerated or validated cleanly, and
+      breaks the "derived child ⇒ live parent" expectation. It is small (2 live names) but a clear
+      correctness/consistency fix. Surfaced by
+      <a href="sn-pedestal-source-recovery.html">sn-pedestal-source-recovery</a> (f-psr-006) while retiring
+      the redundant manual <code>flux_due_to_thermal_fusion</code>.</p>
+
+    <h2 id="s3">§3 — The decision + approach</h2>
+    <p>The concept and correct base already exist (<code>source_rate</code>, on the canonical total). The
+      fix aligns the per-reaction children to it and restores a live parent:</p>
+    <ul>
+      <li><strong>Rename flux→source_rate</strong> for the two children via the rename cascade:
+        <code>deuterium_deuterium_neutron_flux_due_to_thermal_fusion</code> →
+        <code>deuterium_deuterium_neutron_source_rate_due_to_thermal_fusion</code> (and the T-T analogue),
+        validating that each target is ISN-grammar-valid and round-trips.</li>
+      <li><strong>Restore a live parent</strong> — the renamed children strip to a
+        <code>neutron_source_rate_due_to_thermal_fusion</code> parent; ensure that parent is live (re-derived
+        by the structural fixpoint, or the canonical <code>total_neutron_source_rate_due_to_thermal_fusion</code>
+        serves as the group parent). Decide the exact parent below.</li>
+      <li>Leave the already-superseded <code>flux_due_to_thermal_fusion</code> and
+        <code>neutron_flux_due_to_thermal_fusion</code> as-is (retired).</li>
+    </ul>
+    <p>Mechanism: the deterministic rename cascade (<code>sn run --rename OLD:NEW --include-accepted</code>,
+      <code>--dry-run</code> first), never a <code>--focus</code> recompose. Verify 0 orphans / 0 desyncs
+      and that the live children point at a live parent.</p>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+      <h2><span class="sec">§</span> Decisions</h2>
+      <div class="r-dec" data-key="fusion-child-parent" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">After renaming the per-reaction children to base=source_rate, what is their live structural parent?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="rederive-parent">Re-derive a <code>neutron_source_rate_due_to_thermal_fusion</code> parent (structural fixpoint) and let the total remain a separate summary quantity</button>
+          <button class="r-opt" data-value="total-as-parent">Use the existing <code>total_neutron_source_rate_due_to_thermal_fusion</code> as the group parent</button>
+        </p>
+        <p class="r-dec-rat"></p>
+      </div>
+    </section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+      <h2><span class="sec">§</span> Followups</h2>
+      <article class="r-fu" data-id="f-fnr-001" data-status="open" data-tier="sonnet" data-written-by="reckon-create" data-written-at="2026-07-09">
+        <h4 class="r-fu-title">Rename the fusion neutron-flux children to source_rate and restore a live parent</h4>
+        <div class="r-fu-body">Align the two accepted per-reaction children (D-D, T-T) from base=flux to base=source_rate to match
+          the canonical <code>total_neutron_source_rate_due_to_thermal_fusion</code>, and ensure they hang
+          off a live parent (their current parent <code>neutron_flux_due_to_thermal_fusion</code> is
+          superseded). Use the rename cascade; validate grammar round-trip. Spun out of
+          <a href="sn-pedestal-source-recovery.html">sn-pedestal-source-recovery</a> f-psr-006.</div>
+        <pre class="r-fu-prompt">Project: imas-standard-names (grammar) + imas-codex (standard_names) + imas graph
+Plan: sn-fusion-neutron-rate-naming (http://localhost:8765/imas-standard-names/sn-fusion-neutron-rate-naming.html)
+Section: rename flux children to source_rate + restore live parent
+Tier: sonnet
+
+Context
+  total_neutron_source_rate_due_to_thermal_fusion (base=source_rate, dd, accepted) is canonical. Two
+  accepted DERIVED children — deuterium_deuterium_neutron_flux_due_to_thermal_fusion and
+  tritium_tritium_neutron_flux_due_to_thermal_fusion — still use base=flux [Hz] and hang off the
+  SUPERSEDED parent neutron_flux_due_to_thermal_fusion. Honour the fusion-child-parent decision shown
+  live above before acting.
+
+State to read (CODE / FILES / DATA)
+  imas-codex graph_ops.py: _execute_rename_cascade, HAS_PARENT/HAS_SUCCESSOR, structural rederive
+  (seed_parent_sources / rederive_structural_edges). CLI: sn run --rename OLD:NEW --include-accepted
+  (--dry-run first). ISN grammar: parse_standard_name / render.compose must accept + round-trip the
+  targets (verified: deuterium_deuterium_neutron_rate_due_to_thermal_fusion parses, base=rate). Graph:
+    MATCH (n:StandardName) WHERE n.id CONTAINS 'due_to_thermal_fusion'
+    OPTIONAL MATCH (n)-[:HAS_PARENT]->(p) RETURN n.id,n.physical_base,n.unit,n.name_stage,p.id
+
+Scope locks / constraints (non-decision)
+  - Rename cascade only, NEVER --focus recompose. Every target ISN-grammar-valid + round-tripping.
+  - Preserve provenance (derived sources) and content; keep 0 orphans / 0 desyncs.
+  - Do not resurrect the superseded flux_due_to_thermal_fusion / neutron_flux_due_to_thermal_fusion;
+    the children must end up under a LIVE source_rate parent.
+  - Note: 'source_rate' is the valid base; 'rate' also parses — pick the base consistent with the
+    canonical total_neutron_source_rate_due_to_thermal_fusion.
+
+Done-when
+  1. The two per-reaction children carry base=source_rate (name aligned to the canonical), grammar-valid.
+  2. They hang off a LIVE structural parent (per the decision).
+  3. 0 orphans / 0 desyncs; provenance preserved.
+  4. This followup resolved.</pre>
+      </article>
+    </section>
+  </main>
+</body>
+</html>
