@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-standard-names">
+  <meta name="reckon-type" content="archive">
+  <title>SN Pedestal Source Recovery — landed</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>SN Pedestal Source Recovery — landed record</h1>
+    <p class="lede">The 22 <code>manual</code> pedestal names are resolved. The original
+      "sources pending in the GENERATE_NAME queue, drain to recover" premise was
+      <strong>disproven</strong> on inspection; the real fault was a
+      <strong>compose-grounding gap plus stale grammar segments</strong>. All code landed on
+      <strong>imas-codex</strong> <code>main</code> (2026-07-09); the graph mutation ran on the live
+      facility graph. The plan lives in ISN; the code is in imas-codex.</p>
+
+    <section class="card">
+      <h2>Root cause (confirmed)</h2>
+      <ul>
+        <li>The ISN grammar is <strong>correct</strong>: <code>pedestal_top</code> is a first-class
+          atomic locus that round-trips <code>compose(parse(name)) == name</code> byte-for-byte.</li>
+        <li><strong>Compose grounding gap:</strong> a per-species DD value leaf
+          (<code>…/velocity_phi/&lt;species&gt;/value</code>) carries only a terse <em>template</em>
+          stub ("Deuterium (D)."); the rich LLM-enriched description that names the evaluation
+          locus — "Ion toroidal rotation velocity … <em>at the pedestal top</em>" — lives on the
+          parent quantity node, which compose never saw. So compose took the bare DD path segment
+          <code>pedestal</code> as the locus → minted <code>…_at_pedestal</code> near-duplicates.</li>
+        <li><strong>Stale structured segments:</strong> 49 catalog names had id
+          <code>…_at_pedestal_top</code> but a stored <code>position='pedestal'</code> written by the
+          since-removed bulk import and never re-derived through the grammar.</li>
+      </ul>
+    </section>
+
+    <section id="fig" style="border:1px solid #c9ccd1;border-radius:6px;padding:.6rem 1rem 1rem;margin:1rem 0;">
+      <svg viewBox="0 0 860 250" width="100%" style="max-width:860px;font-family:system-ui,sans-serif" role="img" aria-label="Compose grounding gap and fix">
+        <style>
+          .box{fill:#fff;stroke:#333;stroke-width:1} .bad{fill:#fff;stroke:#d1242f;stroke-width:1.6}
+          .good{fill:#fff;stroke:#1a7f37;stroke-width:1.6}
+          .h{font-size:12px;font-weight:600;fill:#1a1a1a} .t{font-size:10.5px;fill:#444}
+          .e{stroke:#333;stroke-width:1.3;fill:none;marker-end:url(#a)}
+          .er{stroke:#d1242f;stroke-width:1.4;fill:none;marker-end:url(#ar)}
+          .eg{stroke:#1a7f37;stroke-width:1.4;fill:none;marker-end:url(#ag)}
+        </style>
+        <defs>
+          <marker id="a" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 z" fill="#333"/></marker>
+          <marker id="ar" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 z" fill="#d1242f"/></marker>
+          <marker id="ag" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 z" fill="#1a7f37"/></marker>
+        </defs>
+        <!-- DD lineage -->
+        <rect class="box" x="14" y="18" width="250" height="40" rx="4"/>
+        <text class="h" x="24" y="36">summary/local/pedestal</text>
+        <text class="t" x="24" y="51">doc: "Parameters at pedestal top"</text>
+        <rect class="good" x="14" y="70" width="250" height="44" rx="4"/>
+        <text class="h" x="24" y="88">…/velocity_phi  (LLM-enriched)</text>
+        <text class="t" x="24" y="103">"…rotation velocity at the pedestal top"</text>
+        <rect class="bad" x="14" y="126" width="250" height="44" rx="4"/>
+        <text class="h" x="24" y="144">…/velocity_phi/deuterium/value</text>
+        <text class="t" x="24" y="159">template stub: "Deuterium (D)."</text>
+        <!-- old path -->
+        <path class="er" d="M264,148 L410,148"/>
+        <rect class="bad" x="410" y="126" width="200" height="44" rx="4"/>
+        <text class="h" x="420" y="144">compose (grounds on stub)</text>
+        <text class="t" x="420" y="159">locus = pedestal → _at_pedestal ✗</text>
+        <!-- new path: ancestor surfaced -->
+        <path class="eg" d="M264,92 C330,92 340,60 410,60"/>
+        <path class="eg" d="M264,36 C340,36 350,60 410,60"/>
+        <rect class="good" x="410" y="40" width="200" height="44" rx="4"/>
+        <text class="h" x="420" y="58">compose (WS-1: + ancestor)</text>
+        <text class="t" x="420" y="73">locus = pedestal_top → _at_pedestal_top ✓</text>
+        <!-- outcome -->
+        <path class="eg" d="M610,62 L680,62"/>
+        <rect class="good" x="680" y="40" width="166" height="44" rx="4"/>
+        <text class="h" x="690" y="58">durable</text>
+        <text class="t" x="690" y="73">--focus reproduces name</text>
+        <text class="t" x="14" y="200">WS-1 surfaces the ancestor lineage into compose grounding (name + docs). WS-2 re-derives the</text>
+        <text class="t" x="14" y="216">stored segments from the canonical id (49 pedestal + 176 catalog-wide). WS-3 attaches the real</text>
+        <text class="t" x="14" y="232">dd sources to the 16 existing names (carbon topology). WS-4 stops the rebuild pinning a fallback over a pending source.</text>
+      </svg>
+    </section>
+
+    <section class="card">
+      <h2>Result on the live graph (production)</h2>
+      <ul>
+        <li><strong>16 pedestal names recovered</strong> — 15 <code>toroidal_&lt;species&gt;_velocity_at_pedestal_top</code>
+          + <code>toroidal_plasma_momentum_at_pedestal_top</code> now own real
+          <code>StandardNameSource(dd)</code> (velocity_phi + velocity_tor per species where the leaf
+          exists; momentum_phi + momentum_tor), matching the carbon fresh-parity exemplar
+          (<code>source_id=null</code>, <code>FROM_DD_PATH</code> linked). The 16 redundant
+          <code>manual</code> sources were dropped.</li>
+        <li><strong>Content untouched</strong> — all 16 remain <code>accepted/accepted</code>;
+          name/description/documentation byte-identical to the pre-run snapshot (0/16 changed).</li>
+        <li><strong>Ledger invariant preserved</strong> — orphans 0, edge/scalar desyncs 0
+          throughout.</li>
+        <li><strong>Grammar segments realigned:</strong> <code>reconcile_grammar_segments</code>
+          corrected <strong>176 names</strong> catalog-wide (position/component/… now match the
+          canonical id); idempotent thereafter.</li>
+        <li><strong>6 names remain <code>manual</code></strong> (genuinely anchorless — no clean
+          pedestal-top DD leaf): surfaced as open naming questions (see below), never fabricated.</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2>Workstreams (all on imas-codex <code>main</code>)</h2>
+      <table>
+        <thead><tr><th>WS</th><th>What landed</th><th>Commit</th></tr></thead>
+        <tbody>
+          <tr><td><strong>WS-1</strong> compose grounding</td>
+            <td>Walk <code>HAS_PARENT</code> and surface the nearest description-bearing ancestors into
+              both <code>generate_name</code> and <code>generate_docs</code> context. Durability proven:
+              <code>sn run --focus …/velocity_phi/deuterium/value</code> now composes
+              <code>toroidal_deuterium_velocity_at_pedestal_top</code> with <code>position=pedestal_top</code>.
+              +graph-marked test.</td>
+            <td><code>a34b7fc</code></td></tr>
+          <tr><td><strong>WS-2</strong> segment self-heal</td>
+            <td><code>reconcile_grammar_segments</code>: idempotent per-rotation sweep re-deriving every
+              live name's segment columns from its canonical id via the ISN parser; wired into the loop
+              reconcile. Rejected names untouched. +test.</td>
+            <td><code>(WS-2)</code></td></tr>
+          <tr><td><strong>WS-3</strong> recovery</td>
+            <td>Deterministic targeted-attach of the real dd sources to the 16 existing accepted names
+              (graph mutation); redundant manual sources dropped. No LLM, no recompose, content preserved.</td>
+            <td>graph</td></tr>
+          <tr><td><strong>WS-4</strong> exclude-pending</td>
+            <td>Rebuild cascade skips an orphan with a claimable pending (extracted/drafted) dd source
+              rather than synthesizing a derived/manual fallback; desync reattach refined to genuine
+              (composed/attached) sources only. +regression test.</td>
+            <td><code>(WS-4)</code></td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="card">
+      <h2>Open naming questions — the 6 anchorless <code>manual</code> names</h2>
+      <p>No clean pedestal-top / DD leaf; each needs a naming decision (never a fabricated DD path):</p>
+      <ul>
+        <li><code>poloidal_magnetic_flux_at_pedestal_top</code> [Wb] — no <code>psi</code>/flux leaf under
+          <code>summary/local/pedestal</code> (only <code>position/psi</code>, dimensionless).</li>
+        <li><code>normalized_poloidal_magnetic_flux_at_pedestal_top</code> [1] — likely the pedestal
+          <em>position</em> coordinate (<code>summary/local/pedestal/position/psi</code>); a naming call.</li>
+        <li><code>toroidal_diamagnetic_magnetic_flux_at_inside_flux_surface</code> [Wb] — candidate
+          <code>equilibrium/time_slice/constraints/diamagnetic_flux</code>; needs sign-off.</li>
+        <li><code>flux_due_to_thermal_fusion</code> [Hz] — a rate named "flux"; the name itself is
+          questionable.</li>
+        <li><code>length_of_iron_core_segment</code> [m] — no DD quantity leaf (only
+          <code>iron_core_segment</code> magnetisation constraints).</li>
+        <li><code>lower_energy</code> [eV] — too generic (a detector energy-band lower bound).</li>
+      </ul>
+      <p>Also: <code>electron_flux_surface_average_beta_at_pedestal_top</code> and
+        <code>poloidal_flux_surface_average_magnetic_field_at_pedestal_top</code> fail the ISN parser
+        (a <code>flux_surface_average</code> grammar edge case) and were left untouched by WS-2 — a
+        separate grammar item.</p>
+    </section>
+
+    <section class="card">
+      <h2>Follow-ons</h2>
+      <ul>
+        <li><strong>Blast-radius assessment</strong> — the compose-grounding gap affected more than the
+          pedestal names (176 segment realignments hint at breadth). Assess which already-composed names
+          were built on template-stub grounding and decide whether to <code>--reset-to</code> recompose
+          under the WS-1 fix. Assessment first; remediation separately.</li>
+        <li><strong>DD value-leaf enrichment</strong> — per-species value leaves get <em>template</em>
+          descriptions, not LLM enrichment; a broader DD-enrichment quality item (out of scope here).</li>
+        <li><strong>6 anchorless names</strong> — resolve the naming questions above.</li>
+      </ul>
+    </section>
+  </main>
+</body>
+</html>
