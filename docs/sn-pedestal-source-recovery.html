@@ -7,7 +7,7 @@
   <meta name="reckon-type"   content="plan">
   <meta name="plan-slug"     content="sn-pedestal-source-recovery">
   <meta name="plan-title"    content="SN Source Recovery for Catalog-Added Names">
-  <meta name="plan-summary"  content="Give the 22 sourceless 'manual' names a real StandardNameSource(dd). They are catalog-added quantities (mostly pedestal-top per-species velocities) whose DD leaves exist but were never extracted, because the removed bulk import created them with no source. Extract the leaves, bind real sources, and ensure no creation path leaves a name sourceless.">
+  <meta name="plan-summary"  content="The 22 'manual' names were bound prematurely: their real dd sources are extracted-but-not-yet-composed in the GENERATE_NAME backlog (the SN pipeline is only half-run). Drain the pipeline so those sources compose+attach, drop the premature manual sources, and stop the rebuild from manual-binding a name whose source is still pending.">
   <meta name="plan-status"   content="draft">
   <meta name="plan-roi"      content="mid">
   <meta name="plan-effort"   content="M">
@@ -20,128 +20,102 @@
 </head>
 <body>
   <main class="plan-doc">
-    <h2 id="s1">§1 — Problem</h2>
-    <p>The <a href="sn-provenance-ledger.html">provenance-ledger rebuild</a> drove orphans to zero,
-      but <strong>22 live names</strong> (0.8% of 2753) landed on <code>source_type='manual'</code> —
-      the conservative "no deterministic anchor" fallback. That label is <strong>wrong</strong>:
-      these names have a real DD origin, so each <strong>must carry a proper
-      <code>StandardNameSource(dd)</code></strong> — a first-class source node with
-      <code>FROM_DD_PATH</code> to its <code>IMASNode</code> and <code>PRODUCED_NAME</code> to the
-      name, exactly like every pipeline-generated name. They only became sourceless because of how
-      they were created (§3), not because their DD leaf is missing (§2).</p>
+    <h2 id="s1">§1 — Problem (and what it is NOT)</h2>
+    <p>After the <a href="sn-provenance-ledger.html">provenance-ledger rebuild</a>, <strong>22 live
+      names</strong> carry <code>source_type='manual'</code>. Investigation shows this is
+      <strong>not</strong> a lost-provenance problem and <strong>not</strong> a fabrication problem —
+      it is a <strong>timing / premature-binding problem</strong>. Their real dd sources exist and are
+      simply <strong>not composed yet</strong>: the SN pipeline is only half-run, and those sources sit
+      in the GENERATE_NAME backlog. The rebuild, run on that half-composed graph, mistook
+      "not-composed-yet" for "no anchor" and applied the conservative <code>manual</code> fallback.</p>
 
-    <h2 id="s2">§2 — The DD leaves exist; the names must own a source</h2>
-    <p>The 16 <code>toroidal_&lt;species&gt;_velocity_at_pedestal_top</code> names correspond to real
-      DD leaves — the φ (toroidal) velocity of each species at the H-mode pedestal top. The recovery
-      is to <strong>extract that leaf as a <code>StandardNameSource(dd)</code> and attach it</strong>,
-      not to record a display-time "lookup":</p>
+    <h2 id="s2">§2 — Evidence: the sources are extracted, pending composition</h2>
+    <p>The graph holds <strong>996 <code>extracted</code>, unlinked dd <code>StandardNameSource</code>
+      nodes</strong> (1013 in <code>extracted</code> status overall) — the live GENERATE_NAME queue. A
+      source in this state has been extracted from a DD leaf but not yet composed into a name; it is
+      claimable by the next <code>sn run</code>. All 16
+      <code>summary/local/pedestal/velocity_phi/&lt;species&gt;/value</code> sources are in this queue
+      (<code>status='extracted'</code>, no <code>PRODUCED_NAME</code>, <code>produced_sn_id=null</code>),
+      and each is <code>node_category=quantity</code> with docs — they pass the extract gate cleanly.
+      So the DD-extract is working; the pipeline just hasn't reached these yet.</p>
 
     <section id="fig" style="border:1px solid #c9ccd1;border-radius:6px;padding:.6rem 1rem 1rem;margin:1rem 0;">
-      <svg viewBox="0 0 840 132" width="100%" style="max-width:840px;font-family:system-ui,sans-serif" role="img" aria-label="Ledger shape: DD leaf produces a source node that produced the name">
+      <svg viewBox="0 0 860 150" width="100%" style="max-width:860px;font-family:system-ui,sans-serif" role="img" aria-label="Source lifecycle: the pedestal sources are stuck at extracted">
         <style>
-          .box{fill:#fff;stroke:#333;stroke-width:1}
-          .src{fill:#fff;stroke:#1a7f37;stroke-width:1.5}
-          .t{font-size:12px;fill:#1a1a1a} .m{font-size:10.5px;fill:#444;font-family:ui-monospace,monospace}
-          .h{font-size:12px;font-weight:600;fill:#1a1a1a}
-          .e{stroke:#333;stroke-width:1.4;fill:none;marker-end:url(#a)} .el{font-size:10px;fill:#444}
+          .box{fill:#fff;stroke:#333;stroke-width:1} .now{fill:#fff;stroke:#d1242f;stroke-width:1.6}
+          .done{fill:#fff;stroke:#1a7f37;stroke-width:1.4}
+          .h{font-size:12px;font-weight:600;fill:#1a1a1a} .t{font-size:11px;fill:#444}
+          .e{stroke:#333;stroke-width:1.4;fill:none;marker-end:url(#a)} .el{font-size:10.5px;fill:#444}
         </style>
         <defs><marker id="a" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 z" fill="#333"/></marker></defs>
-        <rect class="box" x="12" y="46" width="250" height="46" rx="4"/>
-        <text class="h" x="22" y="64">IMASNode (DD leaf)</text>
-        <text class="m" x="22" y="82">summary/local/pedestal/velocity_phi/argon/value</text>
-        <rect class="src" x="316" y="46" width="200" height="46" rx="4"/>
-        <text class="h" x="326" y="64">StandardNameSource</text>
-        <text class="m" x="326" y="82">dd:summary/.../argon/value</text>
-        <rect class="box" x="576" y="46" width="252" height="46" rx="4"/>
-        <text class="h" x="586" y="64">StandardName</text>
-        <text class="m" x="586" y="82">toroidal_argon_velocity_at_pedestal_top</text>
-        <path class="e" d="M262,69 L316,69"/>
-        <text class="el" x="264" y="42">FROM_DD_PATH←</text>
-        <path class="e" d="M516,69 L576,69"/>
-        <text class="el" x="520" y="42">PRODUCED_NAME→</text>
-        <text class="t" x="12" y="118">Every dd-sourced name has this shape. The 22 are missing the middle node + its two edges — the fix creates them.</text>
+        <rect class="done" x="14" y="52" width="180" height="44" rx="4"/>
+        <text class="h" x="24" y="72">DD leaf extracted</text>
+        <text class="t" x="24" y="88">StandardNameSource(dd)</text>
+        <rect class="now" x="300" y="52" width="200" height="44" rx="4"/>
+        <text class="h" x="310" y="72">status='extracted'</text>
+        <text class="t" x="310" y="88">the 16 are stuck HERE (queue)</text>
+        <rect class="box" x="606" y="52" width="240" height="44" rx="4"/>
+        <text class="h" x="616" y="72">composed → PRODUCED_NAME</text>
+        <text class="t" x="616" y="88">attaches to the existing name</text>
+        <path class="e" d="M194,74 L300,74"/>
+        <path class="e" d="M500,74 L606,74"/>
+        <text class="el" x="512" y="46">GENERATE_NAME (not run yet)</text>
+        <text class="t" x="14" y="126">996 dd sources are stuck at 'extracted' (pipeline half-run). The rebuild bound 'manual' instead of waiting for this step.</text>
       </svg>
-      <p style="font-size:12px;color:#555;margin:.2rem 0 0">φ = toroidal · <code>summary/local/pedestal</code>
-        = pedestal top · one DD leaf per species (argon … tungsten, xenon). Extracting the leaf gives a
-        real source node — the name <em>owns</em> its provenance, it is not "mapped" at read time.</p>
+      <p style="font-size:12px;color:#555;margin:.2rem 0 0">The names already exist (imported from the
+        catalog); once GENERATE_NAME composes the pending sources, consolidation attaches them to those
+        names — giving each its real dd source with no manual step.</p>
     </section>
 
-    <p>The remaining ~6 need a per-name DD lookup:
-      <code>toroidal_plasma_momentum_at_pedestal_top</code>,
-      <code>poloidal_magnetic_flux_at_pedestal_top</code>,
-      <code>normalized_poloidal_magnetic_flux_at_pedestal_top</code>,
-      <code>toroidal_diamagnetic_magnetic_flux_at_inside_flux_surface</code>,
-      <code>flux_due_to_thermal_fusion</code>, <code>length_of_iron_core_segment</code>,
-      <code>lower_energy</code>. Each gets a real <code>StandardNameSource</code> from its DD leaf;
-      any with genuinely no DD leaf is a naming question, not a provenance one, and is surfaced for
-      review — never left silently sourceless.</p>
-
-    <h2 id="s3">§3 — How were these names created? (root cause)</h2>
-    <p>Traced conclusively. The 22 carry <code>origin='catalog_edit'</code>,
-      <code>catalog_commit_sha=a2f8831</code>, <code>model=None</code>, imported in one batch
-      (2026-07-04) into <code>edge_plasma_physics.yml</code> (+ a couple of other domains). They were
-      <strong>hand-added to the catalog YAML</strong> (to satisfy a review request for per-species
-      pedestal velocities) and then brought into the graph by the <strong>bulk import
-      (<code>run_import</code>), which created the <code>StandardName</code> node but never created a
-      <code>StandardNameSource</code></strong>. That was the fault.</p>
-    <p>Confirmed this is the <em>only</em> path that could produce a sourceless name — and it is now
-      closed:</p>
-    <ul>
-      <li><strong><code>sn edit</code> cannot create names.</strong> <code>apply_edit</code> fetches
-        the target and returns <code>blocked</code> if it does not already exist — it only edits
-        existing names. Not the fault.</li>
-      <li><strong><code>sn merge</code> cannot create names.</strong> An unmatched catalog entry
-        (no graph node by id) is reported as <code>unmatched</code>, never created.</li>
-      <li><strong>The pipeline always sources.</strong> <code>GENERATE_NAME</code> composes a name
-        from a <code>StandardNameSource(dd)</code> — a name cannot be born without one.</li>
-      <li><strong>The bulk import — the one path that created sourceless nodes — was removed</strong>
-        (<a href="sn-provenance-ledger.html">provenance-ledger</a>, commit 4b949931). Restore is now
-        the diff-by-id reconciler (matches by id, no node creation); acceptance is <code>sn merge</code>.</li>
-    </ul>
-    <p>So the fault is <strong>already closed</strong>: no remaining path can create a name without a
-      source. The 22 are the residue left behind. The one systemic gap: the DD-extract evidently does
-      not surface <code>summary/local/pedestal/velocity_phi/&lt;species&gt;/value</code> as extractable
-      sources — else the pipeline would have composed and sourced these names instead of a human
-      hand-adding them to the catalog. Closing that gap (WS-B) is how a future review request for such
-      quantities is satisfied the right way.</p>
+    <h2 id="s3">§3 — How the names were created, and why 'manual' was premature</h2>
+    <p>The 22 are <code>origin='catalog_edit'</code> (21) + one <code>origin='pipeline'</code>, imported
+      2026-07-04. They entered the graph as catalog entries; their DD sources were extracted separately
+      and are still in the GENERATE_NAME queue. No creation path leaves a name permanently sourceless:
+      <code>sn edit</code> only edits existing names (<code>apply_edit</code> blocks a missing target),
+      <code>sn merge</code> reports unmatched entries rather than creating them, and the pipeline always
+      sources. The one historical path that created sourceless nodes — the bulk import — is removed.</p>
+    <p>The rebuild's fault was <strong>ordering</strong>: it ran while ~1000 dd sources were still
+      uncomposed, and its orphan definition ("live name with no <code>PRODUCED_NAME</code>") counted
+      names whose source is merely <em>pending</em>. For those, the conservative tree found no recovery
+      map entry and no HAS_PARENT, so it minted a <code>manual</code> source — pre-empting the pipeline.</p>
 
     <h2 id="s4">§4 — Work</h2>
     <ul>
-      <li><strong>WS-A · Extract + attach real sources.</strong> For each of the 22, extract its DD
-        leaf as a <code>StandardNameSource(dd)</code> (via the normal extract path /
-        <code>merge_standard_name_sources</code>) and attach <code>PRODUCED_NAME</code> +
-        <code>FROM_DD_PATH</code> (reuse <code>provenance_rebuild.bind_recovery_sources</code>, which
-        MERGEs the source + both edges, gated on the name existing). Replace the placeholder
-        <code>manual</code> source. The 16 pedestal velocities map cleanly; the ~6 need a per-name DD
-        lookup. Deterministic only — a real DD leaf, never a fabricated path.</li>
-      <li><strong>WS-B · Close the extract gap.</strong> Determine why
-        <code>summary/local/pedestal/velocity_phi/*</code> (and the ~6 others' leaves) are not
-        surfaced by the DD-extract (<code>sources/dd.py</code> query + <code>SN_SOURCE_CATEGORIES</code>
-        + node classification). If they are legitimate SN sources, admit them so future runs source
-        such names at generation — no more hand-added, sourceless catalog entries.</li>
-      <li><strong>WS-C · Guardrail.</strong> The ledger invariant already reports orphans every
-        <code>sn run</code> and gates release (Gate A). Confirm that if any name ever lands without a
-        source again, it is surfaced for review rather than silently accepted.</li>
-      <li><strong>Verify:</strong> the 22 carry real <code>StandardNameSource(dd)</code> nodes;
-        <code>manual</code> count drops to only names with genuinely no DD leaf (surfaced as a naming
-        question); 0 orphans / 0 desyncs preserved; name/description/docs/stage untouched.</li>
+      <li><strong>WS-A · Drain, then drop the premature manual sources.</strong> Run the SN pipeline to
+        compose the GENERATE_NAME backlog (or a <code>--focus</code> run over the pedestal sources) so
+        the 16 <code>velocity_phi/&lt;species&gt;/value</code> sources compose and attach to the existing
+        <code>toroidal_&lt;species&gt;_velocity_at_pedestal_top</code> names. Then delete the redundant
+        <code>manual</code> sources those names picked up from the rebuild. Confirm each now owns a real
+        <code>StandardNameSource(dd)</code>. Handle the ~6 non-velocity names case-by-case (compose if a
+        pending source exists; otherwise it is a naming question, surfaced — never a fabricated path).</li>
+      <li><strong>WS-B · Fix the rebuild's ordering assumption.</strong> The provenance rebuild must not
+        manual-bind a name whose dd source is still <code>extracted</code> (pending) — either run it only
+        after the pipeline has drained the backlog, or exclude names with a claimable pending source from
+        the manual fallback (let the pipeline source them). This prevents a half-run from inflating the
+        <code>manual</code> residue again.</li>
+      <li><strong>WS-C · Reconcile the invariant with mid-pipeline state.</strong> The 0-orphan ledger
+        invariant assumes a fully-composed graph; a half-run legitimately has names (catalog-imported)
+        whose pipeline source is pending. Decide whether the invariant/gate should treat "source pending
+        in the GENERATE_NAME queue" as satisfied-in-progress rather than a violation.</li>
+      <li><strong>Verify:</strong> the 16 pedestal velocities own real dd sources; the redundant manual
+        sources are gone; 0 desyncs preserved; name/description/docs/stage untouched.</li>
     </ul>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
       <h2><span class="sec">§</span> Decisions</h2>
-      <div class="r-dec" data-key="attach-approach" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">How to attach the real sources — a targeted extract+bind for the 22, or a general grammar→DD-leaf resolver in the extract?</p>
+      <div class="r-dec" data-key="drain-vs-attach" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">Recover by draining the pipeline (compose the pending sources), or by a targeted deterministic attach of the known source→name pairs?</p>
         <p class="r-dec-opts">
-          <button class="r-opt" data-value="targeted">Targeted extract+bind for the 22 (fast, low-risk, explicit)</button>
-          <button class="r-opt" data-value="general-resolver">General locus/species→DD-leaf resolver in the extract (reusable, wider blast radius)</button>
+          <button class="r-opt" data-value="drain">Drain the GENERATE_NAME backlog — the pipeline composes + attaches (canonical, uses real compose/consolidation)</button>
+          <button class="r-opt" data-value="targeted-attach">Targeted attach of the 16 known velocity_phi/&lt;species&gt; → name pairs (fast, deterministic, no LLM)</button>
         </p>
         <p class="r-dec-rat"></p>
       </div>
-      <div class="r-dec" data-key="systemic-scope" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">Fix the systemic DD-extract gap (WS-B) in this plan, or recover the 22 here and file WS-B separately?</p>
+      <div class="r-dec" data-key="rebuild-ordering" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">How to stop the rebuild manual-binding pending-source names (WS-B)?</p>
         <p class="r-dec-opts">
-          <button class="r-opt" data-value="both">Both — recover the 22 + close the extract gap</button>
-          <button class="r-opt" data-value="recover-only">Recover the 22 now; WS-B as a follow-on</button>
+          <button class="r-opt" data-value="gate-on-drain">Only run the source-rebuild after the pipeline has drained the extracted backlog</button>
+          <button class="r-opt" data-value="exclude-pending">Rebuild excludes names with a claimable pending extracted source from the manual fallback</button>
         </p>
         <p class="r-dec-rat"></p>
       </div>
@@ -150,50 +124,48 @@
     <section data-reckon="followups" id="followups" class="r-followups">
       <h2><span class="sec">§</span> Followups</h2>
       <article class="r-fu" data-id="f-psr-001" data-status="open" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-07-09">
-        <h4 class="r-fu-title">Extract the DD leaves and attach real StandardNameSource(dd) to the 22 sourceless names</h4>
-        <div class="r-fu-body">The 22 <code>manual</code> names must own a real <code>StandardNameSource(dd)</code>
-          (their DD leaves exist, e.g. the 16 pedestal velocities →
-          <code>summary/local/pedestal/velocity_phi/&lt;species&gt;/value</code>). Extract each leaf as a
-          source and attach <code>PRODUCED_NAME</code> + <code>FROM_DD_PATH</code>, replacing the
-          placeholder manual source. Then close the systemic extract gap (WS-B) so future runs source
-          such names at generation. Deterministic only — never fabricate a DD path.</div>
+        <h4 class="r-fu-title">Compose the pending pedestal sources; drop the premature manual sources; fix the rebuild ordering</h4>
+        <div class="r-fu-body">The 22 <code>manual</code> names were bound prematurely — their real dd sources are
+          <code>extracted</code>-pending in the ~1000-source GENERATE_NAME backlog (pipeline half-run).
+          Drain the backlog (or targeted-compose the 16 pedestal velocities) so the sources attach to the
+          existing names, drop the redundant manual sources, and stop the rebuild from manual-binding a
+          name whose source is still pending.</div>
         <pre class="r-fu-prompt">Project: imas-codex (standard_names) + imas graph
 Plan: sn-pedestal-source-recovery (http://localhost:8765/imas-standard-names/sn-pedestal-source-recovery.html)
-Section: WS-A (extract+attach) then WS-B (extract gap)
+Section: WS-A (drain + drop manual) then WS-B (rebuild ordering)
 Tier: opus
 
 Context
-  22 live names carry a placeholder source_type='manual' after the ledger rebuild. They were
-  hand-added to the catalog to satisfy a review and brought in by the (now-removed) bulk import,
-  which created the StandardName but no StandardNameSource. Their DD leaves EXIST; each must own a
-  real StandardNameSource(dd), not a manual placeholder.
+  22 live names carry a PREMATURE source_type='manual' from the ledger rebuild. Their real dd sources
+  are extracted-but-not-yet-composed: the graph has ~1000 extracted, unlinked dd StandardNameSource
+  nodes (GENERATE_NAME backlog) — the pipeline is half-run. All 16
+  summary/local/pedestal/velocity_phi/<species>/value sources are in that queue. This is a timing
+  problem, not lost provenance.
 
 State to read (CODE / FILES / DATA)
-  imas_codex/standard_names/sources/dd.py (DD-leaf extract query), graph_ops.py
-  (merge_standard_name_sources), provenance_rebuild.py (bind_recovery_sources), ledger.py
-  (find_provenance_orphans). Graph: the 22 —
+  imas_codex/standard_names/loop.py (GENERATE_NAME pool, --focus), workers.py (compose/attach:
+  mark_sources_attached matches an existing name), consolidation.py (dedup/attach). ledger.py
+  (find_provenance_orphans), provenance_rebuild.py (the manual fallback in rebuild_provenance —
+  _synth_spec/_classify path). Graph: pending sources —
+  MATCH (s:StandardNameSource {source_type:'dd', status:'extracted'}) WHERE NOT (s)-[:PRODUCED_NAME]->()
+  RETURN s.source_id. The 22 manual names —
   MATCH (s:StandardNameSource {source_type:'manual'})-[:PRODUCED_NAME]->(n:StandardName) RETURN n.id.
-  DD leaves for the pedestal velocities —
-  MATCH (n:IMASNode) WHERE n.id STARTS WITH 'summary/local/pedestal/velocity_phi/' AND n.id ENDS WITH '/value'.
-  core/node_categories.py (SN_SOURCE_CATEGORIES) + core/node_classifier.py for WS-B (why the leaf
-  is not extracted).
 
 Scope locks / constraints
-  - Every recovered name must own a real StandardNameSource(dd) with FROM_DD_PATH to its IMASNode and
-    PRODUCED_NAME to the name (extract the leaf; do NOT model a display-time 'maps-to'). Replace the
-    manual placeholder (DETACH DELETE it, MERGE the dd source + edges). Preserve name/description/docs/stage.
-  - Deterministic only: attach a dd source ONLY where the DD leaf exists and the mapping is
-    unambiguous. Never fabricate a DD path. A name with genuinely no DD leaf is a naming question —
-    surface it, don't invent a source.
-  - Production graph mutation needs the lead's authorisation (as with the ledger rebuild).
-  - Greenfield: no legacy carry-around.
+  - Prefer the pipeline: compose the pending sources (GENERATE_NAME) so they attach to the existing
+    names via the normal consolidation/attach path; then DETACH DELETE the redundant manual sources.
+    A targeted deterministic attach (velocity_phi/<species> -> name) is acceptable if the lead picks it.
+  - Never fabricate a DD path. A name with genuinely no pending source and no DD leaf is a naming
+    question — surface it.
+  - WS-B: make the provenance rebuild NOT manual-bind a name whose dd source is still 'extracted'
+    (pending) — gate the rebuild on a drained backlog, or exclude pending-source names from the
+    manual fallback. Add a regression test.
+  - Production graph mutation / a pipeline run needs the lead's authorisation. Greenfield — no legacy.
 
 Done-when
-  1. WS-A: the 16 pedestal velocities (and any of the ~6 with a real DD leaf) own a StandardNameSource(dd);
-     manual count drops to only names with genuinely no DD leaf, each surfaced for a naming decision.
-  2. WS-B: the DD-extract gap is identified and, if the leaves are legitimate SN sources, closed so
-     future runs source such names at generation.
-  3. 0 orphans / 0 desyncs preserved; content untouched.
+  1. The 16 pedestal velocities own real StandardNameSource(dd); redundant manual sources removed.
+  2. The rebuild no longer manual-binds pending-source names (WS-B) + regression test.
+  3. 0 desyncs preserved; content untouched.
   4. This followup resolved.</pre>
       </article>
     </section>
