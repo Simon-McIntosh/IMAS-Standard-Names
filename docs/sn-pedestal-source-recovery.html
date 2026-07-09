@@ -18,7 +18,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-09">
-<meta name="plan-version" content="3">
+<meta name="plan-version" content="4">
 <meta name="plan-impl" content="1.0">
 </head>
 <body>
@@ -126,7 +126,7 @@ Done-when
   4. This followup resolved.</pre>
     <p class="r-fu-outcome">SHIPPED (2026-07-09) but NOT via drain. The 'sources pending in queue' premise was disproven; --focus provably mints _at_pedestal near-duplicates. Real fix delivered: WS-1 (a34b7fc) surface DD ancestor lineage into compose grounding (name+docs) so --focus durably reproduces ..._at_pedestal_top; WS-2 reconcile_grammar_segments re-derives stored segments from the canonical id (49 pedestal + 176 catalog-wide, self-heals in the loop); WS-3 deterministic targeted-attach of real dd sources (velocity_phi+velocity_tor+momentum, carbon topology) to the 16 existing names + dropped the 16 manual sources (content untouched, 0 orphans/0 desyncs); WS-4 exclude-pending guard + desync refinement + tests. 6 genuinely-anchorless names remain manual (see f-psr-004). Full record: archive/sn-pedestal-source-recovery-landed.html.</p>
     </article>
-<article class="r-fu" data-id="f-psr-002" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-09" data-recommends-skill="/reckon-ship sn-pedestal-source-recovery" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-psr-002" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-09" data-recommends-skill="/reckon-ship sn-pedestal-source-recovery" data-resolved-at="2026-07-09T13:07:48+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Assess blast radius of impoverished compose grounding; decide reset-to</h4>
     <div class="r-fu-body">The compose-grounding gap (rich LLM ancestor description on a parent quantity node never reaching the template-stub value leaves it grounds on) is not specific to pedestal velocities — it may have caused MANY already-composed StandardNames to be built on thin grounding (wrong/ambiguous loci, thin descriptions). Assess how many composed SNs ground on template-stub leaves with a richer un-surfaced ancestor description, quantify likely damage, and decide whether to `--reset-to` (recompose) them under the WS-1 fixed grounding. Assessment first; remediation separately.</div>
     <pre class="r-fu-prompt">Project: imas-codex (standard_names)
@@ -148,6 +148,7 @@ Done-when
   1. Count + characterisation of already-composed SNs affected by the grounding gap.
   2. A recommendation on whether/which to --reset-to recompose under the fixed grounding.
   3. This followup resolved (remediation tracked separately if approved).</pre>
+    <p class="r-fu-outcome">ASSESSED (2026-07-09). Broad potential reach: 667 live dd-sourced names ground on a template-stub leaf that HAS a richer un-surfaced LLM ancestor (upper bound). But sampling shows MOST are correctly composed — the LLM still resolved the locus (e.g. flux_surface_averaged_nitrogen_density_at_plasma_boundary is correct). VERIFIED, sibling-detectable damage is SMALL and concentrated: only 2 species-indexed quantity families show locus inconsistency — (1) summary/local/separatrix_average/n_i: a few species dropped the _at_plasma_boundary locus their siblings carry (e.g. flux_surface_averaged_iron_density / flux_surface_averaged_deuterium_tritium_density / lithium_density) — the same near-duplicate pattern as the pedestal case; plus a long/short naming-length variance in the family; (2) summary/composition: density-ratio naming variance (a separate naming-consistency issue, not locus stripping). RECOMMENDATION: do NOT mass reset-to (667 are mostly correct; high LLM cost; content churn on accepted names). Targeted remediation only, tracked in f-psr-005. WS-1/WS-2 are now in place so NO new grounding damage accrues; single-quantity (non-sibling) residual damage is undetectable by comparison but expected small.</p>
     </article>
 <article class="r-fu" data-id="f-psr-003" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-09" data-recommends-skill="/reckon-ship sn-pedestal-source-recovery" data-resolved-at="2026-07-09T12:57:20+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Durable fix workstreams: compose grounding + segment re-derivation + targeted-attach + exclude-pending</h4>
@@ -199,6 +200,29 @@ Scope locks / constraints
 Done-when
   1. Each of the 6 either gains a lead-approved dd/derived anchor or is confirmed manual.
   2. The 2 parser-reject names have a grammar decision (fix the grammar or rename).
+  3. This followup resolved.</pre>
+    </article>
+<article class="r-fu" data-id="f-psr-005" data-status="open" data-tier="sonnet" data-written-by="reckon-ship" data-written-at="2026-07-09" data-recommends-skill="/reckon-ship sn-pedestal-source-recovery" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Targeted remediation of the separatrix_average locus inconsistency (+composition family)</h4>
+    <div class="r-fu-body">Blast-radius assessment (f-psr-002) found the grounding gap's verified damage is concentrated, not widespread (667 potential, mostly correct). Fix the two inconsistent families only: (1) summary/local/separatrix_average/n_i — a few species names dropped the _at_plasma_boundary locus their siblings carry (near-duplicate pattern), plus a long-form (flux_surface_averaged_<species>_density_at_plasma_boundary) vs short-form (<species>_density_at_plasma_boundary) split — pick one canonical form and align; (2) summary/composition density-ratio names — normalise the naming (volume_averaged prefix / number_density variance). Prefer the deterministic rename cascade over a --focus recompose to preserve accepted content; a scoped --focus recompose is acceptable (grounding is now correct under WS-1) if the lead accepts re-review. No mass reset.</div>
+    <pre class="r-fu-prompt">Project: imas-codex (standard_names) + imas graph
+Plan: sn-pedestal-source-recovery
+Section: targeted remediation of grounding-gap residue
+Tier: sonnet
+
+Context
+  f-psr-002 assessed the WS-1 compose-grounding gap: 667 names had impoverished grounding but most composed correctly. Verified damage is 2 families: summary/local/separatrix_average/n_i (locus-stripped near-duplicates + long/short naming split) and summary/composition (density-ratio naming variance).
+
+State to read (CODE / FILES / DATA)
+  Graph: MATCH (s:StandardNameSource{source_type:&#x27;dd&#x27;})-[:PRODUCED_NAME]-&gt;(n) MATCH (s)-[:FROM_DD_PATH]-&gt;(l:IMASNode) WHERE l.id STARTS WITH &#x27;summary/local/separatrix_average/n_i/&#x27; RETURN n.id,l.id — inspect locus + form consistency. Same for summary/composition/*. graph_ops rename cascade (_execute_rename_cascade / sn run --rename OLD:NEW). loop.py --focus.
+
+Scope locks / constraints
+  - Pick ONE canonical form per family; align the odd ones via the rename cascade (carries pn_sources, preserves accepted content) or a scoped --focus recompose (WS-1 grounding now correct). No mass reset. No fabricated DD paths.
+  - Verify 0 orphans / 0 desyncs after; content of unaffected names untouched.
+
+Done-when
+  1. separatrix_average/n_i names share one canonical form with the correct _at_plasma_boundary locus.
+  2. summary/composition density-ratio names normalised.
   3. This followup resolved.</pre>
     </article>
 </section>
