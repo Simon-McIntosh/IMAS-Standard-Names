@@ -4,19 +4,21 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="docs-project"  content="imas-standard-names">
-  <meta name="reckon-type"   content="plan">
-  <meta name="plan-slug"     content="sn-pedestal-source-recovery">
-  <meta name="plan-title"    content="SN Source Recovery for Catalog-Added Names">
-  <meta name="plan-summary"  content="The 22 'manual' names were bound prematurely: their real dd sources are extracted-but-not-yet-composed in the GENERATE_NAME backlog (the SN pipeline is only half-run). Drain the pipeline so those sources compose+attach, drop the premature manual sources, and stop the rebuild from manual-binding a name whose source is still pending.">
-  <meta name="plan-status"   content="draft">
-  <meta name="plan-roi"      content="mid">
-  <meta name="plan-effort"   content="M">
-  <meta name="plan-tier"     content="opus">
-  <meta name="plan-owner"    content="Simon McIntosh">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="sn-pedestal-source-recovery">
+  <meta name="plan-title" content="SN Source Recovery for Catalog-Added Names">
+  <meta name="plan-summary" content="PIVOT (original &#x27;sources pending in queue&#x27; premise disproven). Root cause confirmed: the ISN grammar is correct and round-trips locus pedestal_top; the faults are (a) 49 names carry a STALE structured position=&#x27;pedestal&#x27; never re-derived through the grammar (written by the removed bulk import), and (b) compose grounds on template-stub DD value leaves and never sees the rich LLM ancestor description (&#x27;at the pedestal top&#x27;) on the parent quantity node, so `--focus` recomposes to `_at_pedestal` near-duplicates. Durable fix: WS-1 surface rich ancestor lineage into compose grounding (so --focus reproduces the canonical name); WS-2 re-derive stale segments via the ISN parser + self-heal in reconcile; WS-3 deterministic targeted-attach of the real dd sources to the 16; WS-4 exclude-pending guard + ledger invariant. Plus a follow-on to assess the blast radius of impoverished grounding across already-composed names.">
+  <meta name="plan-status" content="in-progress">
+  <meta name="plan-roi" content="mid">
+  <meta name="plan-effort" content="M">
+  <meta name="plan-tier" content="opus">
+  <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-depends-on" content="sn-provenance-ledger">
   <title>SN Source Recovery for Catalog-Added Names | imas-standard-names</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-07-09">
+<meta name="plan-version" content="2">
 </head>
 <body>
   <main class="plan-doc">
@@ -102,44 +104,44 @@
     </ul>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
-      <h2><span class="sec">§</span> Decisions</h2>
-      <div class="r-dec" data-key="drain-vs-attach" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">Recover by draining the pipeline (compose the pending sources), or by a targeted deterministic attach of the known source→name pairs?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="drain">Drain the GENERATE_NAME backlog — the pipeline composes + attaches (canonical, uses real compose/consolidation)</button>
-          <button class="r-opt" data-value="targeted-attach">Targeted attach of the 16 known velocity_phi/&lt;species&gt; → name pairs (fast, deterministic, no LLM)</button>
-        </p>
-        <p class="r-dec-rat"></p>
-      </div>
-      <div class="r-dec" data-key="rebuild-ordering" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">How to stop the rebuild manual-binding pending-source names (WS-B)?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="gate-on-drain">Only run the source-rebuild after the pipeline has drained the extracted backlog</button>
-          <button class="r-opt" data-value="exclude-pending">Rebuild excludes names with a claimable pending extracted source from the manual fallback</button>
-        </p>
-        <p class="r-dec-rat"></p>
-      </div>
-    </section>
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="drain-vs-attach" data-choice="drain" data-by="Simon McIntosh" data-when="2026-07-09T11:36:36+00:00">
+    <p class="r-dec-q">Recover by draining the pipeline (compose the pending sources), or by a targeted deterministic attach of the known source→name pairs?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="drain">Drain the GENERATE_NAME backlog — the pipeline composes + attaches (canonical, uses real compose/consolidation)</button>
+      <button class="r-opt" data-value="targeted-attach">Targeted attach of the 16 known velocity_phi/&lt;species&gt; → name pairs (fast, deterministic, no LLM)</button>
+      </p>
+    <p class="r-dec-rat">LOCKED (Simon McIntosh, 2026-07-09): drain via a SCOPED `sn run --focus` over the confirmed DD leaves (15 summary/local/pedestal/velocity_phi/&lt;species&gt;/value + summary/local/pedestal/momentum_phi/value) — the canonical compose/consolidation path attaches the real dd StandardNameSource to each existing accepted name. Explicitly scoped with --focus, NOT a full ~1000-source backlog drain (out of scope for now, per lead), and NOT the deterministic targeted-attach.</p>
+    </div>
+<div class="r-dec" data-key="rebuild-ordering" data-choice="exclude-pending" data-by="Simon McIntosh" data-when="2026-07-09T11:36:36+00:00">
+    <p class="r-dec-q">How to stop the rebuild manual-binding pending-source names (WS-B)?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="gate-on-drain">Only run the source-rebuild after the pipeline has drained the extracted backlog</button>
+      <button class="r-opt chosen" data-value="exclude-pending">Rebuild excludes names with a claimable pending extracted source from the manual fallback</button>
+      </p>
+    <p class="r-dec-rat">LOCKED (Simon McIntosh, 2026-07-09): exclude-pending. The rebuild cascade gains a guard before the manual fallback: an orphan with a claimable pending/extractable DD source is NOT manual-bound (left for the pipeline to source). Correct regardless of pipeline state; regression-tested. Preferred over the operational gate-on-drain ordering rule which leaves no code guard against a future half-run.</p>
+    </div>
+</section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
-      <h2><span class="sec">§</span> Followups</h2>
-      <article class="r-fu" data-id="f-psr-001" data-status="open" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-07-09">
-        <h4 class="r-fu-title">Compose the pending pedestal sources; drop the premature manual sources; fix the rebuild ordering</h4>
-        <div class="r-fu-body">The 22 <code>manual</code> names were bound prematurely — their real dd sources are
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-psr-001" data-status="open" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-07-09" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Compose the pending pedestal sources; drop the premature manual sources; fix the rebuild ordering</h4>
+    <div class="r-fu-body">The 22 <code>manual</code> names were bound prematurely — their real dd sources are
           <code>extracted</code>-pending in the ~1000-source GENERATE_NAME backlog (pipeline half-run).
           Drain the backlog (or targeted-compose the 16 pedestal velocities) so the sources attach to the
           existing names, drop the redundant manual sources, and stop the rebuild from manual-binding a
           name whose source is still pending.</div>
-        <pre class="r-fu-prompt">Project: imas-codex (standard_names) + imas graph
+    <pre class="r-fu-prompt">Project: imas-codex (standard_names) + imas graph
 Plan: sn-pedestal-source-recovery (http://localhost:8765/imas-standard-names/sn-pedestal-source-recovery.html)
 Section: WS-A (drain + drop manual) then WS-B (rebuild ordering)
 Tier: opus
 
 Context
-  22 live names carry a PREMATURE source_type='manual' from the ledger rebuild. Their real dd sources
+  22 live names carry a PREMATURE source_type=&#x27;manual&#x27; from the ledger rebuild. Their real dd sources
   are extracted-but-not-yet-composed: the graph has ~1000 extracted, unlinked dd StandardNameSource
   nodes (GENERATE_NAME backlog) — the pipeline is half-run. All 16
-  summary/local/pedestal/velocity_phi/<species>/value sources are in that queue. This is a timing
+  summary/local/pedestal/velocity_phi//value sources are in that queue. This is a timing
   problem, not lost provenance.
 
 State to read (CODE / FILES / DATA)
@@ -147,28 +149,78 @@ State to read (CODE / FILES / DATA)
   mark_sources_attached matches an existing name), consolidation.py (dedup/attach). ledger.py
   (find_provenance_orphans), provenance_rebuild.py (the manual fallback in rebuild_provenance —
   _synth_spec/_classify path). Graph: pending sources —
-  MATCH (s:StandardNameSource {source_type:'dd', status:'extracted'}) WHERE NOT (s)-[:PRODUCED_NAME]->()
+  MATCH (s:StandardNameSource {source_type:&#x27;dd&#x27;, status:&#x27;extracted&#x27;}) WHERE NOT (s)-[:PRODUCED_NAME]-&gt;()
   RETURN s.source_id. The 22 manual names —
-  MATCH (s:StandardNameSource {source_type:'manual'})-[:PRODUCED_NAME]->(n:StandardName) RETURN n.id.
+  MATCH (s:StandardNameSource {source_type:&#x27;manual&#x27;})-[:PRODUCED_NAME]-&gt;(n:StandardName) RETURN n.id.
 
 Scope locks / constraints
   - Prefer the pipeline: compose the pending sources (GENERATE_NAME) so they attach to the existing
     names via the normal consolidation/attach path; then DETACH DELETE the redundant manual sources.
-    A targeted deterministic attach (velocity_phi/<species> -> name) is acceptable if the lead picks it.
+    A targeted deterministic attach (velocity_phi/ -&gt; name) is acceptable if the lead picks it.
   - Never fabricate a DD path. A name with genuinely no pending source and no DD leaf is a naming
     question — surface it.
-  - WS-B: make the provenance rebuild NOT manual-bind a name whose dd source is still 'extracted'
+  - WS-B: make the provenance rebuild NOT manual-bind a name whose dd source is still &#x27;extracted&#x27;
     (pending) — gate the rebuild on a drained backlog, or exclude pending-source names from the
     manual fallback. Add a regression test.
-  - Production graph mutation / a pipeline run needs the lead's authorisation. Greenfield — no legacy.
+  - Production graph mutation / a pipeline run needs the lead&#x27;s authorisation. Greenfield — no legacy.
 
 Done-when
   1. The 16 pedestal velocities own real StandardNameSource(dd); redundant manual sources removed.
   2. The rebuild no longer manual-binds pending-source names (WS-B) + regression test.
   3. 0 desyncs preserved; content untouched.
   4. This followup resolved.</pre>
-      </article>
-    </section>
+    </article>
+<article class="r-fu" data-id="f-psr-002" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-09" data-recommends-skill="/reckon-ship sn-pedestal-source-recovery" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Assess blast radius of impoverished compose grounding; decide reset-to</h4>
+    <div class="r-fu-body">The compose-grounding gap (rich LLM ancestor description on a parent quantity node never reaching the template-stub value leaves it grounds on) is not specific to pedestal velocities — it may have caused MANY already-composed StandardNames to be built on thin grounding (wrong/ambiguous loci, thin descriptions). Assess how many composed SNs ground on template-stub leaves with a richer un-surfaced ancestor description, quantify likely damage, and decide whether to `--reset-to` (recompose) them under the WS-1 fixed grounding. Assessment first; remediation separately.</div>
+    <pre class="r-fu-prompt">Project: imas-codex (standard_names)
+Plan: sn-pedestal-source-recovery
+Section: follow-on — compose-grounding blast radius
+Tier: opus
+
+Context
+  WS-1 fixed compose grounding so the nearest LLM-enriched ancestor description reaches the composer (previously it grounded on template-stub value leaves like &#x27;Deuterium (D).&#x27;, missing the parent quantity node&#x27;s rich &#x27;at the pedestal top&#x27; description). This gap likely affected many already-composed names, not just pedestal velocities.
+
+State to read (CODE / FILES / DATA)
+  workers.py DD-context enrichment (_DD_CONTEXT_QUERY + _ANCESTOR_RICH_QUERY after WS-1). Graph: composed StandardNames whose grounding IMASNode has enrichment_source=&#x27;template&#x27; (or a short description) AND a HAS_PARENT* ancestor with enrichment_source=&#x27;llm&#x27; and a substantially richer description. Compare the SN&#x27;s stored description/locus against what the fixed grounding would yield.
+
+Scope locks / constraints
+  - Assessment only first: quantify the affected set and the likely error modes (locus drift, thin docs). Do NOT mass-reset without the lead&#x27;s sign-off.
+  - Any --reset-to recompose is an LLM cost + content change — needs lead authorisation and a scoped batch.
+
+Done-when
+  1. Count + characterisation of already-composed SNs affected by the grounding gap.
+  2. A recommendation on whether/which to --reset-to recompose under the fixed grounding.
+  3. This followup resolved (remediation tracked separately if approved).</pre>
+    </article>
+<article class="r-fu" data-id="f-psr-003" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-09" data-recommends-skill="/reckon-ship sn-pedestal-source-recovery" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Durable fix workstreams: compose grounding + segment re-derivation + targeted-attach + exclude-pending</h4>
+    <div class="r-fu-body">Supersedes the drain-based f-psr-001 approach (--focus provably mints `_at_pedestal` near-duplicates rather than attaching). WS-1: surface the nearest rich LLM-enriched ancestor description into compose grounding (workers.py) so a --focus on the pedestal leaf durably reproduces `toroidal_<species>_velocity_at_pedestal_top`; +test. WS-2: re-derive grammar segments from each canonical id via the ISN parser for the ~49 stale pedestal_top names (position->pedestal_top) and wire it into the reconcile pass so drift self-heals; +test. WS-3: deterministic targeted-attach of the real dd sources (velocity_phi + velocity_tor per species, momentum_phi) to the 16 existing names, matching carbon's fresh-parity topology; drop the redundant manual sources. WS-4: exclude-pending guard in provenance_rebuild + ledger invariant reconcile; +test.</div>
+    <pre class="r-fu-prompt">Project: imas-codex (standard_names) + imas graph + imas-standard-names (plan)
+Plan: sn-pedestal-source-recovery
+Section: WS-1 grounding -&gt; WS-2 re-derive/self-heal -&gt; WS-3 targeted-attach -&gt; WS-4 exclude-pending
+Tier: opus
+
+Context
+  Root cause (confirmed): grammar is correct (round-trips pedestal_top); the faulty deterministic bit is stale structured position on 49 names + compose grounding on template-stub value leaves that miss the parent quantity node&#x27;s rich &#x27;at the pedestal top&#x27; description. --focus therefore mints `_at_pedestal` near-duplicates. Carbon (toroidal_carbon_velocity_at_pedestal_top) already owns velocity_phi+velocity_tor dd sources = the fresh-parity target.
+
+State to read (CODE / FILES / DATA)
+  workers.py (_DD_CONTEXT_QUERY ~998, DD-context enrichment ~1458, compose template &#x27;sn/generate_name_dd&#x27; ~4506). graph_ops.py (_segments_from_model ~106; reconcile; persist ~2576). ledger.py (find_provenance_orphans). provenance_rebuild.py (bind_recovery_sources; the manual fallback cascade ~386). Graph: 49 names id~pedestal_top with position!=&#x27;pedestal_top&#x27;; the 16 recovery targets; carbon&#x27;s source topology.
+
+Scope locks / constraints
+  - Deterministic, no fabrication: attach only dd leaves that exist; re-derive segments only from the canonical id via the authoritative ISN parser.
+  - Durability bar: `sn run --focus summary/local/pedestal/velocity_phi/deuterium/value` must recompose `toroidal_deuterium_velocity_at_pedestal_top`.
+  - Content untouched for the 16 (name/description/docs/stage); 0 orphans / 0 desyncs preserved.
+  - Two flux_surface_average_at_pedestal_top names fail the ISN parser — out of scope; surface.
+
+Done-when
+  1. WS-1 landed + durability canary green + test.
+  2. WS-2: 49 names position=pedestal_top; reconcile self-heals segment drift; +test.
+  3. WS-3: the 16 own real dd sources (carbon topology); manual sources dropped; verified.
+  4. WS-4: exclude-pending guard + invariant + tests.
+  5. Followups resolved.</pre>
+    </article>
+</section>
   </main>
 </body>
 </html>
