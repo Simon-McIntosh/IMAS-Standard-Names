@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-09">
-<meta name="plan-version" content="3">
+<meta name="plan-version" content="4">
 <meta name="plan-impl" content="1.0">
 </head>
 <body>
@@ -34,9 +34,11 @@
         <code>catalog_reconcile</code> replace it; a per-run reattach + orphan-count invariant keeps
         the ledger from drifting again.</p>
       <p style="margin:.4rem 0 0">Full landed record + outcomes table + figure:
-        <a href="archive/sn-provenance-ledger-landed.html">§ landed</a>. Residual (open):
-        <strong>22 anchorless <code>manual</code> names</strong> (optional RC-snapshot recovery,
-        f-spl-004) and the website source de-noising (f-spl-003).</p>
+        <a href="archive/sn-provenance-ledger-landed.html">§ landed</a>. Follow-ons: the 22
+        <code>manual</code> names are NOT anchorless — they were hand-added to the catalog and brought
+        in by the (removed) bulk import with no source; their DD leaves exist, so recovery is
+        deterministic — tracked in <a href="sn-pedestal-source-recovery.html">sn-pedestal-source-recovery</a>
+        (f-spl-004 resolved). Website source de-noising remains (f-spl-003).</p>
     </section>
     <h2 id="s1">§1 — Problem &amp; method</h2>
     <p><strong>Invariant we want:</strong> the graph is the ledger — every non-superseded <code>StandardName</code> traces to one, or a group of, <code>StandardNameSource</code>(s). Sources need not be DD leaves: a source may be a DD path, a derived-from-parent group, a signal, or a hand-authored/manual origin.</p>
@@ -304,7 +306,7 @@ Done-when
   3. WS3/WS4: bulk import retired; release carries full sources; reconciler restore is lossless.
   4. WS2: sn merge implemented + tested (accept path + quarantine path; no-refine verified).
   5. Followups resolved.</pre>
-    <p class="r-fu-outcome">SHIPPED (2026-07-09). All workstreams landed in imas-codex on main. WS1 (013849db, 91e83a1a): provenance_rebuild.py replays the deterministic fresh-build (reattach -> rederive structure -> seed_parent_sources -> relink FROM_DD_PATH) then binds residue by anchor authority (a2f8831 map -> source_paths scalar -> derived parent -> manual). Ran on production: orphans 1818->0, edge/scalar desyncs 254->0, content preserved (live 2753 / accepted 2446 unchanged). 95 initial 'manual' corrected to 67 derived + 6 dd + 22 genuine residue. WS5 (f3edb899): ledger.py invariants + reattach pass in reconcile_provenance + persist_refined_name scalar-sync + per-run orphan report + graph-marked invariant tests (Gate A). WS3/WS4 (2255b7ff, 67a0a93a): export emits full sources projection; catalog_reconcile diff-by-id restore. Bulk import removed completely (4b949931). WS2 (c344e4c2): sn merge — id-matched PR acceptance, attach like sn edit, full review NO refine, accept>=theta else quarantine; CLI verb wired. 'manual' StandardNameSource type declared (b3d541dc). Full record: archive/sn-provenance-ledger-landed.html. Residual: f-spl-004 (22 anchorless names), f-spl-003 (website de-noise).</p>
+    <p class="r-fu-outcome">SHIPPED (2026-07-09). All workstreams landed in imas-codex on main. WS1 (013849db, 91e83a1a): provenance_rebuild.py replays the deterministic fresh-build (reattach -&gt; rederive structure -&gt; seed_parent_sources -&gt; relink FROM_DD_PATH) then binds residue by anchor authority (a2f8831 map -&gt; source_paths scalar -&gt; derived parent -&gt; manual). Ran on production: orphans 1818-&gt;0, edge/scalar desyncs 254-&gt;0, content preserved (live 2753 / accepted 2446 unchanged). 95 initial 'manual' corrected to 67 derived + 6 dd + 22 genuine residue. WS5 (f3edb899): ledger.py invariants + reattach pass in reconcile_provenance + persist_refined_name scalar-sync + per-run orphan report + graph-marked invariant tests (Gate A). WS3/WS4 (2255b7ff, 67a0a93a): export emits full sources projection; catalog_reconcile diff-by-id restore. Bulk import removed completely (4b949931). WS2 (c344e4c2): sn merge — id-matched PR acceptance, attach like sn edit, full review NO refine, accept&gt;=theta else quarantine; CLI verb wired. 'manual' StandardNameSource type declared (b3d541dc). Full record: archive/sn-provenance-ledger-landed.html. Residual: f-spl-004 (22 anchorless names), f-spl-003 (website de-noise).</p>
     </article>
 <article class="r-fu" data-id="f-spl-003" data-status="open" data-tier="sonnet" data-written-by="reckon-edit" data-written-at="2026-07-09" data-recommends-skill="reckon-edit" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Future: de-noise the website per-entry source display (true sources vs derived)</h4>
@@ -327,9 +329,9 @@ Done-when
   1. Website groups true vs derived sources clearly.
   2. This followup resolved.</pre>
     </article>
-<article class="r-fu" data-id="f-spl-004" data-status="open" data-tier="sonnet" data-written-by="reckon-ship" data-written-at="2026-07-09" data-recommends-skill="reckon-ship" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-spl-004" data-status="resolved" data-tier="sonnet" data-written-by="reckon-ship" data-written-at="2026-07-09" data-recommends-skill="reckon-ship" data-resolved-at="2026-07-09T10:03:08+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Optional: recover the 22 anchorless &#x27;manual&#x27; names from a prior RC graph snapshot</h4>
-    <div class="r-fu-body">After the WS1 rebuild, 22 live names (0.8%) carry source_type='manual' — deeply-composed leaves (mostly toroidal_<species>_velocity_at_pedestal_top, plus a few flux/energy leaves) whose grammatical parent is not a live SN and whose dd anchor is lost from every deterministic source (absent from all ISNC commits incl. the a2f8831 high-water mark, no surviving graph anchor, grammar->DD matching unreliable). 'manual' is the honest, auditable classification. Optional authoritative recovery: a prior full-graph RC release snapshot (on the fork) where their PRODUCED_NAME + dd source were intact — load into a second Neo4j, diff by id, rebind. Alternatively regenerate via the pipeline (LLM; changes content). Decide per-name value vs cost.</div>
+    <div class="r-fu-body">After the WS1 rebuild, 22 live names (0.8%) carry source_type='manual' — deeply-composed leaves (mostly toroidal_<species>_velocity_at_pedestal_top, plus a few flux/energy leaves) whose grammatical parent is not a live SN and whose dd anchor is lost from every deterministic source (absent from all ISNC commits incl. the a2f8831 high-water mark, no surviving graph anchor, grammar-&gt;DD matching unreliable). 'manual' is the honest, auditable classification. Optional authoritative recovery: a prior full-graph RC release snapshot (on the fork) where their PRODUCED_NAME + dd source were intact — load into a second Neo4j, diff by id, rebind. Alternatively regenerate via the pipeline (LLM; changes content). Decide per-name value vs cost.</species></div>
     <pre class="r-fu-prompt">Project: imas-codex (standard_names) + a prior RC graph snapshot
 Plan: sn-provenance-ledger
 Section: 22 anchorless manual names
@@ -348,6 +350,7 @@ Scope locks / constraints
 Done-when
   1. The 22 names either carry a recovered dd source (from snapshot) or are confirmed genuinely anchorless and left as manual with the lead&#x27;s sign-off.
   2. This followup resolved.</pre>
+    <p class="r-fu-outcome">Superseded by the sn-pedestal-source-recovery plan. Investigation found the 22 are NOT anchorless: they were hand-added to the catalog and brought in by the (now-removed) bulk import with no StandardNameSource; their DD leaves EXIST (the 16 pedestal velocities → summary/local/pedestal/velocity_phi/<species>/value). Recovery is deterministic — extract the leaf as a real StandardNameSource(dd) and attach it — no RC-snapshot needed. sn edit/merge/pipeline cannot create sourceless names, so the fault is already closed by the import removal. Tracked in docs/sn-pedestal-source-recovery.html.</p>
     </article>
 </section>
   </main>
