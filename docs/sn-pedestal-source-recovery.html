@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"  content="imas-standard-names">
+  <meta name="reckon-type"   content="plan">
+  <meta name="plan-slug"     content="sn-pedestal-source-recovery">
+  <meta name="plan-title"    content="SN Source Recovery for Catalog-Added Names">
+  <meta name="plan-summary"  content="Recover real dd sources for the 22 'manual' names — catalog-added quantities (mostly pedestal-top per-species velocities) whose DD leaves DO exist but were never extracted. Bind them to their DD paths and close the catalog-bypasses-DD-extract gap.">
+  <meta name="plan-status"   content="draft">
+  <meta name="plan-roi"      content="mid">
+  <meta name="plan-effort"   content="M">
+  <meta name="plan-tier"     content="opus">
+  <meta name="plan-owner"    content="Simon McIntosh">
+  <meta name="plan-depends-on" content="sn-provenance-ledger">
+  <title>SN Source Recovery for Catalog-Added Names | imas-standard-names</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="s1">§1 — Problem</h2>
+    <p>The <a href="sn-provenance-ledger.html">provenance-ledger rebuild</a> drove orphans to zero,
+      but <strong>22 live names</strong> (0.8% of 2753) landed on <code>source_type='manual'</code> —
+      the conservative "no deterministic anchor" fallback. Investigation shows this label is
+      <strong>wrong for most of them</strong>: their DD leaves <em>exist</em>, so a real
+      <code>dd</code> source is derivable. They only became anchorless because they were
+      <strong>added directly to the catalog, bypassing the DD-extract pipeline</strong>.</p>
+    <p>Graph evidence: 21 of the 22 carry <code>origin='catalog_edit'</code>,
+      <code>catalog_commit_sha=a2f8831</code>, <code>model=None</code>, all imported in one batch
+      (2026-07-04) into <code>edge_plasma_physics.yml</code> (+ a couple of other domains). They were
+      never in any ISNC <code>sources:</code> block (not even the 1941-source high-water mark), and
+      carry no surviving graph anchor — so the rebuild correctly refused to invent a path. But the
+      real DD paths <em>are</em> in the graph.</p>
+
+    <h2 id="s2">§2 — Key finding: the sources ARE derivable</h2>
+    <p>The 16 <code>toroidal_&lt;species&gt;_velocity_at_pedestal_top</code> names map
+      <strong>deterministically</strong> to real DD leaves — the φ (toroidal) velocity of each
+      species at the H-mode pedestal top:</p>
+
+    <section id="fig" style="border:1px solid #c9ccd1;border-radius:6px;padding:.6rem 1rem 1rem;margin:1rem 0;">
+      <svg viewBox="0 0 820 150" width="100%" style="max-width:820px;font-family:system-ui,sans-serif" role="img" aria-label="Name to DD-path mapping">
+        <style>
+          .box{fill:#fff;stroke:#333;stroke-width:1}
+          .t{font-size:12.5px;fill:#1a1a1a} .m{font-size:11px;fill:#444;font-family:ui-monospace,monospace}
+          .h{font-size:12.5px;font-weight:600;fill:#1a1a1a}
+          .e{stroke:#1a7f37;stroke-width:1.5;fill:none;marker-end:url(#a)}
+        </style>
+        <defs><marker id="a" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 z" fill="#1a7f37"/></marker></defs>
+        <rect class="box" x="14" y="40" width="330" height="52" rx="4"/>
+        <text class="h" x="26" y="62">standard name</text>
+        <text class="m" x="26" y="80">toroidal_argon_velocity_at_pedestal_top</text>
+        <path class="e" d="M348,66 L470,66"/>
+        <text class="t" x="360" y="56">maps to</text>
+        <rect class="box" x="474" y="40" width="332" height="52" rx="4"/>
+        <text class="h" x="486" y="62">DD leaf (exists)</text>
+        <text class="m" x="486" y="80">summary/local/pedestal/velocity_phi/argon/value</text>
+        <text class="t" x="14" y="120">φ = toroidal · <tspan font-family="ui-monospace,monospace">summary/local/pedestal</tspan> = pedestal top · one leaf per species (argon, beryllium, …, tungsten, xenon)</text>
+      </svg>
+      <p style="font-size:12px;color:#555;margin:.2rem 0 0">This is a real, existing DD leaf — binding
+        it is recovery, not the fabrication the ledger plan's conservative rule forbids.</p>
+    </section>
+
+    <p>The remaining ~6 are individual cases needing a per-name DD lookup:
+      <code>toroidal_plasma_momentum_at_pedestal_top</code>,
+      <code>poloidal_magnetic_flux_at_pedestal_top</code>,
+      <code>normalized_poloidal_magnetic_flux_at_pedestal_top</code>,
+      <code>toroidal_diamagnetic_magnetic_flux_at_inside_flux_surface</code> (origin=pipeline),
+      <code>flux_due_to_thermal_fusion</code>, <code>length_of_iron_core_segment</code>,
+      <code>lower_energy</code>. Some may map to a DD leaf; any with genuinely no DD leaf stay an
+      explicit, auditable <code>manual</code> source.</p>
+
+    <h2 id="s3">§3 — Root cause</h2>
+    <p>Two layers:</p>
+    <ul>
+      <li><strong>Immediate:</strong> these names were hand-added to the catalog to satisfy (likely) an
+        expert review, then imported — so they never received a <code>StandardNameSource</code> from
+        the DD-extract → compose pipeline that would have anchored them to
+        <code>summary/local/pedestal/velocity_phi/*</code>.</li>
+      <li><strong>Systemic:</strong> the DD-extract evidently does not surface
+        <code>summary/local/pedestal/velocity_phi/&lt;species&gt;/value</code> as extractable
+        <code>StandardNameSource(dd)</code> leaves (else the pipeline would have composed and anchored
+        them). Needs checking: is <code>summary/local/pedestal/velocity_phi/*</code> classified as a
+        <code>quantity</code> node in <code>SN_SOURCE_CATEGORIES</code>, or filtered out (e.g. the
+        per-species STRUCT_ARRAY leaf-invariant)?</li>
+    </ul>
+    <p><em>Expert-review comments:</em> the lead indicated these names came from a session addressing
+      expert-review comments; the actual comment text was not captured here — worth attaching to this
+      plan (Review nodes / the PR) to confirm intent, but the DD leaves are the authoritative source
+      regardless.</p>
+
+    <h2 id="s4">§4 — Work</h2>
+    <ul>
+      <li><strong>WS-A · Map + bind.</strong> Enumerate <code>summary/local/pedestal/velocity_phi/*/value</code>
+        leaves; bind each <code>toroidal_&lt;species&gt;_velocity_at_pedestal_top</code> to its
+        <code>dd:</code> leaf via <code>provenance_rebuild.bind_recovery_sources</code> (deterministic,
+        MERGE, gated on the name existing). For the ~6 residue, per-name DD lookup; bind where a leaf
+        exists, else leave an explicit <code>manual</code> source.</li>
+      <li><strong>WS-B · Close the systemic gap.</strong> Determine why the DD-extract skipped these
+        pedestal leaves; if they are legitimate SN sources, admit them to the extract so future runs
+        anchor such names at generation (no more catalog-added orphans).</li>
+      <li><strong>WS-C · Guardrail.</strong> Ensure the release/merge invariant flags any catalog-added
+        name that lands without a source (it already reports orphans; confirm a hand-added catalog
+        entry with no derivable DD leaf is surfaced for review rather than silently accepted).</li>
+      <li><strong>Verify:</strong> <code>manual</code> source count drops to only genuinely-anchorless
+        names (target ≪ 22); 0 orphans / 0 desyncs preserved; content untouched.</li>
+    </ul>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+      <h2><span class="sec">§</span> Decisions</h2>
+      <div class="r-dec" data-key="mapping-approach" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">How to map catalog-added names to their DD leaves — targeted table, or a general grammar→DD resolver in the rebuild?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="targeted">Targeted mapping for the 22 (fast, low-risk, explicit)</button>
+          <button class="r-opt" data-value="general-resolver">General locus/species→DD resolver in the rebuild (reusable, higher risk of mis-mapping)</button>
+        </p>
+        <p class="r-dec-rat"></p>
+      </div>
+      <div class="r-dec" data-key="systemic-scope" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">Fix the systemic DD-extract gap (WS-B) in this plan, or only recover the 22 here and file WS-B separately?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="both">Both — recover + close the gap</button>
+          <button class="r-opt" data-value="recover-only">Recover the 22 now; WS-B as a follow-on</button>
+        </p>
+        <p class="r-dec-rat"></p>
+      </div>
+    </section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+      <h2><span class="sec">§</span> Followups</h2>
+      <article class="r-fu" data-id="f-psr-001" data-status="open" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-07-09">
+        <h4 class="r-fu-title">Map the 22 catalog-added names to their DD leaves and bind real dd sources</h4>
+        <div class="r-fu-body">The 22 <code>manual</code> names from the ledger rebuild have derivable DD sources
+          (confirmed for the 16 pedestal velocities → <code>summary/local/pedestal/velocity_phi/&lt;species&gt;/value</code>).
+          Build the name→DD-leaf map, bind via <code>bind_recovery_sources</code>, and investigate why the
+          DD-extract skipped these leaves (WS-B). Recover deterministically; never fabricate a path.</div>
+        <pre class="r-fu-prompt">Project: imas-codex (standard_names) + imas graph
+Plan: sn-pedestal-source-recovery (http://localhost:8765/imas-standard-names/sn-pedestal-source-recovery.html)
+Section: WS-A (map+bind) then WS-B (extract gap)
+Tier: opus
+
+Context
+  22 live names carry source_type='manual' after the provenance-ledger rebuild. They were added
+  directly to the catalog (edge_plasma_physics.yml, catalog_commit a2f8831, origin=catalog_edit),
+  bypassing DD-extract, so no dd source was recorded. But the DD leaves EXIST — the sources are
+  recoverable, not manual.
+
+State to read (CODE / FILES / DATA)
+  imas_codex/standard_names/provenance_rebuild.py (bind_recovery_sources, recovery_sources_from_entries),
+  ledger.py (find_provenance_orphans). Graph: the 22 names —
+  MATCH (s:StandardNameSource {source_type:'manual'})-[:PRODUCED_NAME]->(n:StandardName) RETURN n.id.
+  DD leaves — MATCH (n:IMASNode) WHERE n.id STARTS WITH 'summary/local/pedestal/velocity_phi/'
+  AND n.id ENDS WITH '/value'. For WS-B: sources/dd.py extract query + core/node_categories.py
+  (SN_SOURCE_CATEGORIES) + core/node_classifier.py — why summary/local/pedestal/velocity_phi/* is
+  not extracted as a StandardNameSource(dd).
+
+Scope locks / constraints
+  - Deterministic recovery only: bind a name to a dd leaf ONLY where the leaf exists and the mapping
+    is unambiguous (toroidal->velocity_phi, species->species, at_pedestal_top->summary/local/pedestal,
+    leaf ->/value). Never fabricate a DD path. Genuinely anchorless names stay explicit manual.
+  - Replace the manual source (DETACH DELETE the manual StandardNameSource, MERGE the dd source +
+    PRODUCED_NAME + FROM_DD_PATH). Preserve name/description/docs/stage.
+  - Production graph mutation needs the lead's authorisation (as with the ledger rebuild).
+  - Do NOT touch the website source de-noising (separate follow-on).
+
+Done-when
+  1. WS-A: the 16 pedestal velocities (and any of the ~6 with a real DD leaf) carry a dd source;
+     manual count drops to only genuinely-anchorless names.
+  2. WS-B: root cause of the extract gap identified; if the leaves are legitimate SN sources, admit
+     them so future runs anchor such names at generation.
+  3. 0 orphans / 0 desyncs preserved; content untouched.
+  4. This followup resolved.</pre>
+      </article>
+    </section>
+  </main>
+</body>
+</html>
