@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"  content="imas-standard-names">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="sn-provenance-ledger">
+  <meta name="plan-title" content="SN Provenance Ledger — source-linkage RCA + repair">
+  <meta name="plan-summary" content="RCA of SN source-linkage drift: 2106 of 2753 live names carry no pipeline provenance because the export→import round-trip strips it and import never rebuilds a StandardNameSource. Make the graph a robust ledger where every SN traces to a single or a group of sn-source(s).">
+  <meta name="plan-status" content="active">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort" content="L">
+  <meta name="plan-tier" content="opus">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <title>SN Provenance Ledger | imas-standard-names</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-07-09">
+<meta name="plan-version" content="1">
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="s1">§1 — Problem &amp; method</h2>
+    <p><strong>Invariant we want:</strong> the graph is the ledger — every non-superseded <code>StandardName</code> traces to one, or a group of, <code>StandardNameSource</code>(s). Sources need not be DD leaves: a source may be a DD path, a derived-from-parent group, a signal, or a hand-authored/manual origin.</p>
+    <p><strong>Observed reality:</strong> of <strong>2753</strong> live names, only <strong>595</strong> carry a direct DD source; <strong>572</strong> are fully orphaned (no source, no parent) and <strong>1404</strong> are only structurally linked (<code>HAS_PARENT</code>) with no leaf-source. Every SN was ultimately DD-driven at first generation, so this is provenance <em>loss</em>, not names that were never sourced. Root-caused by systematic debugging (evidence → mechanism → code confirmation).</p>
+
+    <section id="fig" style="border:1px solid #c9ccd1;border-radius:6px;padding:.5rem 1rem 1rem;margin:1rem 0;">
+      <svg viewBox="0 0 860 300" width="100%" style="max-width:860px;font-family:system-ui,sans-serif" role="img" aria-label="Provenance-loss lifecycle">
+        <style>
+          .box{fill:#fff;stroke:#333;stroke-width:1}
+          .ok{stroke:#1a7f37} .bad{stroke:#d1242f}
+          .lbl{font-size:13px;fill:#1a1a1a} .sub{font-size:11px;fill:#555}
+          .hd{font-size:13px;font-weight:600;fill:#1a1a1a}
+          .arrow{stroke:#333;stroke-width:1.5;fill:none;marker-end:url(#a)}
+          .drop{fill:#d1242f;font-size:12px;font-weight:600}
+          .keep{fill:#1a7f37;font-size:12px;font-weight:600}
+        </style>
+        <defs><marker id="a" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 z" fill="#333"/></marker></defs>
+        <path class="arrow" d="M224,103 L326,103"/>
+        <path class="arrow" d="M534,103 L636,103"/>
+        <text class="sub" x="238" y="46">export</text>
+        <text class="sub" x="548" y="46">restore</text>
+        <!-- 1 generate -->
+        <rect class="box ok" x="20" y="60" width="200" height="86" rx="4"/>
+        <text class="hd" x="32" y="82">1 · sn run (generate)</text>
+        <text class="sub" x="32" y="102">DD leaf → StandardNameSource</text>
+        <text class="sub" x="32" y="118">→[:PRODUCED_NAME]→ SN</text>
+        <text class="keep" x="32" y="138">✓ provenance present</text>
+        <!-- 2 export -->
+        <rect class="box bad" x="330" y="60" width="200" height="86" rx="4"/>
+        <text class="hd" x="342" y="82">2 · sn release (export)</text>
+        <text class="sub" x="342" y="102">emits name + grammar + docs</text>
+        <text class="sub" x="342" y="118">strips source_paths / dd_paths</text>
+        <text class="drop" x="342" y="138">✗ provenance dropped</text>
+        <!-- 3 import -->
+        <rect class="box bad" x="640" y="60" width="200" height="86" rx="4"/>
+        <text class="hd" x="652" y="82">3 · sn import (rebuild)</text>
+        <text class="sub" x="652" y="102">MERGE SN + HAS_PARENT</text>
+        <text class="sub" x="652" y="118">forbids provenance keys;</text>
+        <text class="sub" x="652" y="132">creates NO StandardNameSource</text>
+      </svg>
+      <p style="font-size:12px;color:#555;margin:.2rem 0 0">The catalog YAML is a clean public artifact (no pipeline internals). Bootstrapping / restoring the <em>graph</em> from it (step 3) is what makes the ledger lossy — names re-enter as <code>origin=catalog_edit</code> with no <code>StandardNameSource</code>. Provenance survives only for names generated fresh in the current graph's lifetime.</p>
+    </section>
+
+    <h2 id="s2">§2 — Evidence</h2>
+    <p><strong>Linkage of 2753 live names</strong> (a name may hold more than one relation; buckets are exclusive by precedence dd&gt;derived-source&gt;parent&gt;none):</p>
+    <table>
+      <thead><tr><th>bucket</th><th>count</th><th>meaning</th></tr></thead>
+      <tbody>
+        <tr><td>directly DD-linked</td><td>595</td><td><code>StandardNameSource(dd)</code> → <code>IMASNode</code></td></tr>
+        <tr><td>derived (HAS_PARENT only)</td><td>1404</td><td>only 118 trace to a DD-linked ancestor; 1286 root at conceptual parents</td></tr>
+        <tr><td>other-sourced</td><td>182</td><td>derived-source / non-dd, no parent</td></tr>
+        <tr><td>orphaned (no edge at all)</td><td>572</td><td>no source, no parent — the acute failure</td></tr>
+      </tbody>
+    </table>
+    <p><strong>Origin × linkage</strong> — the loss concentrates in <code>catalog_edit</code> (imported):</p>
+    <table>
+      <thead><tr><th>origin</th><th>n</th><th>dd-src</th><th>other-src</th><th>HAS_PARENT</th><th>NO edge</th><th>source_paths scalar</th></tr></thead>
+      <tbody>
+        <tr><td>catalog_edit</td><td>2106</td><td>232</td><td>78</td><td>1343</td><td><strong>559</strong></td><td>55</td></tr>
+        <tr><td>(null)</td><td>198</td><td>192</td><td>0</td><td>14</td><td>6</td><td>190</td></tr>
+        <tr><td>pipeline</td><td>172</td><td>168</td><td>0</td><td>35</td><td>3</td><td>14</td></tr>
+        <tr><td>derived</td><td>277</td><td>3</td><td>270</td><td>137</td><td>4</td><td>2</td></tr>
+      </tbody>
+    </table>
+    <p>Freshly-generated names (<code>null</code>/<code>pipeline</code>) are ~98% DD-sourced. Imported names (<code>catalog_edit</code>) are the loss: 559 orphaned, 1343 parent-only.</p>
+    <p><strong>Source-side health:</strong> 9102 <code>StandardNameSource</code> nodes, <strong>6549 dangling</strong> (no <code>PRODUCED_NAME</code>) — mostly un-composed DD leaves, but the ledger cannot distinguish "never composed" from "produced a name whose edge was lost." <strong>41 orphans carry a source whose <code>produced_sn_id</code> scalar names them but the <code>PRODUCED_NAME</code> edge is missing</strong> (edge/scalar desync). Only 15 orphan ids match a DD leaf by name (most orphans are grammar-composed/aggregate, not 1:1 DD names).</p>
+
+    <h2 id="s3">§3 — Root causes (code-confirmed)</h2>
+    <p><strong>RC-1 — Export→import round-trip severs provenance (primary).</strong>
+      <code>export.py:48,551</code> defines <code>_PROVENANCE_FIELDS = {source_paths, dd_paths}</code> and deliberately does <em>not</em> emit them ("we don't emit pipeline provenance"). <code>catalog_import.py:31</code> forbids those keys and the importer (<code>:413</code>) MERGEs <code>StandardName</code> + <code>HAS_UNIT</code> + structural edges (<code>HAS_PARENT</code>/<code>HAS_ERROR</code>/<code>HAS_PREDECESSOR</code>) but <strong>never a <code>StandardNameSource</code>/<code>PRODUCED_NAME</code></strong>. So the public catalog YAML is provenance-free by design, and rebuilding the graph from it strands every imported name (<code>origin=catalog_edit</code>) without a source. Rename is <em>not</em> a cause — its cascade carries <code>pn_sources</code> (<code>graph_ops.py:9238</code>); reset only flips source <code>status='extracted'</code>, never deletes edges.</p>
+    <p><strong>RC-2 — Edge/scalar provenance desync.</strong> Some name-creating/mutating ops set (or leave) a source's <code>produced_sn_id</code> scalar while the <code>PRODUCED_NAME</code> edge is absent — 41 currently-reattachable orphans. The graph stores provenance in two places (edge + scalar) that can diverge; <code>reconcile_provenance</code> (loop B2c) clears <em>stale</em> scalars but does not <em>reattach</em> a live scalar's missing edge.</p>
+    <p><strong>RC-3 — No ledger invariant / integrity gate.</strong> Nothing asserts "every non-superseded SN has ≥1 <code>PRODUCED_NAME</code> source." Provenance loss is silent and accumulates across import/reset/merge cycles; the audit and export gates do not flag orphaned names.</p>
+
+    <h2 id="s4">§4 — The ledger model we will enforce</h2>
+    <p>Every non-superseded <code>StandardName</code> MUST resolve to ≥1 <code>StandardNameSource</code>. Source kinds (none privileged; a name may cite a group):</p>
+    <ul>
+      <li><strong>dd</strong> — a DD leaf (the extract anchor). Directly-extracted names.</li>
+      <li><strong>derived</strong> — a parent/group of SNs (aggregation, charge-state roll-up, transform). The "source" is the composed-from set, not a DD leaf.</li>
+      <li><strong>signal</strong> — a facility/diagnostic signal.</li>
+      <li><strong>manual</strong> — hand-authored with no upstream anchor (explicit, auditable, not an accident).</li>
+    </ul>
+    <p>The graph is authoritative; the published catalog is a <em>derived, provenance-free view</em> of it — never the graph's restore source without a provenance channel.</p>
+
+    <h2 id="s5">§5 — Repair workstreams</h2>
+    <p><strong>WS1 · Persist provenance across the round-trip.</strong> Either (a) emit a provenance sidecar in ISNC (<code>name → source_ids/source_types</code>) that import consumes, or (b) make the graph the durable ledger (snapshot/restore the graph with provenance; publish the clean catalog as output only). Decision below.</p>
+    <p><strong>WS2 · Import reconstructs sources.</strong> On import, rebuild a <code>StandardNameSource</code> per name: dd where the grammar anchors to a DD leaf; derived from <code>HAS_PARENT</code>; manual otherwise — so a round-trip is lossless going forward.</p>
+    <p><strong>WS3 · Reattach edge/scalar desyncs.</strong> Extend <code>reconcile_provenance</code>: where a source's <code>produced_sn_id</code> names a live SN but the <code>PRODUCED_NAME</code> edge is missing, recreate the edge (41 now).</p>
+    <p><strong>WS4 · Ledger invariant + gate.</strong> Add an audit + export gate: every live SN has ≥1 source; report/track orphan count; wire into <code>sn run</code>'s reconcile block and <code>audit-doc</code>-style checks.</p>
+    <p><strong>WS5 · One-time backfill.</strong> Reconstruct provenance for the current 572 orphans + 1404 parent-only: dd-source where a DD anchor is derivable, derived-source from the parent chain, manual for the residue — each auditable, none silently invented.</p>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="provenance-persistence" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">How do we persist ledger provenance across publish/restore (WS1)?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="sidecar">Provenance sidecar in ISNC that import consumes</button>
+      <button class="r-opt" data-value="graph-ledger">Graph is the durable ledger; catalog is output-only (graph snapshot/restore)</button>
+      <button class="r-opt" data-value="both">Sidecar now + move toward graph-as-ledger</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+<div class="r-dec" data-key="orphan-reconstruction" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">How aggressive should the WS5 backfill be about inferring a dd-source vs marking a name manual?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="conservative">Conservative — only attach dd/derived where provably derivable; everything else explicit manual</button>
+      <button class="r-opt" data-value="grammar-infer">Grammar-infer — re-run the extractor/grammar to re-anchor names to DD leaves where the mapping is unambiguous</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+</section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-spl-001" data-status="open" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-07-09" data-recommends-skill="reckon-ship" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Lock WS1/WS5 decisions, then repair the ledger (reattach → invariant → backfill → round-trip fix)</h4>
+    <div class="r-fu-body">RCA landed (§3): the export→import round-trip severs provenance (RC-1), 41 names have edge/scalar desync (RC-2), and no invariant guards it (RC-3). Two decisions are open and gate the durable fix: provenance-persistence (sidecar vs graph-as-ledger) and orphan-reconstruction (conservative vs grammar-infer). Immediate, decision-free steps: WS3 (reattach the 41 produced_sn_id→missing-edge desyncs via reconcile_provenance) and WS4 (add the ledger invariant + audit/export gate: every live SN has ≥1 source). WS1/WS2/WS5 (round-trip persistence, import reconstruction, the 572+1404 backfill) follow the locked decisions.</div>
+    <pre class="r-fu-prompt">Project: imas-codex (graph_ops / catalog_import / export / loop) + imas-standard-names-catalog
+Plan: sn-provenance-ledger (http://localhost:8765/imas-standard-names/sn-provenance-ledger.html)
+Section: WS3/WS4 first (decision-free), then WS1/WS2/WS5
+Tier: opus
+
+Context
+  The graph must be a robust ledger: every non-superseded StandardName resolves to &gt;=1 StandardNameSource (dd / derived / signal / manual — sources need not be DD leaves). RCA §3: export strips source_paths/dd_paths (export.py:48,551); import forbids them + creates no source (catalog_import.py:31,413); 41 names have a produced_sn_id scalar but no PRODUCED_NAME edge; no invariant guards any of this.
+
+State to read (CODE / FILES / DATA)
+  imas_codex/standard_names/export.py (_PROVENANCE_FIELDS, ~549); catalog_import.py (MERGE at 413, forbidden keys at 31, structural edges at 473); graph_ops.py reconcile_provenance + PRODUCED_NAME MERGEs (2188/3940/5751/9238); loop.py B2c reconcile block.
+  Graph: the 41 reattachable desyncs (source.produced_sn_id names a live SN, no PRODUCED_NAME edge); 572 orphans + 1404 parent-only.
+
+Scope locks / constraints
+  - Honour the locked provenance-persistence + orphan-reconstruction decisions before WS1/WS5.
+  - Reattach (WS3) and invariant (WS4) need no decision — do them first.
+  - Never silently invent a dd-source: attach dd/derived only where derivable; residue is explicit source_type=&#x27;manual&#x27;.
+  - The published catalog stays provenance-free (public artifact); provenance lives in the graph (+ the WS1 channel).
+
+Done-when
+  1. WS3: 0 edge/scalar desyncs (reconcile reattaches them).
+  2. WS4: invariant added; orphan count reported by sn run reconcile + a doc/audit gate; regression-guarded.
+  3. WS1/WS2/WS5 implemented per the locked decisions; every live SN traces to &gt;=1 source; round-trip is lossless.
+  4. This followup resolved.</pre>
+    </article>
+</section>
+  </main>
+</body>
+</html>
