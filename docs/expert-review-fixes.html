@@ -17,8 +17,8 @@
   <title>Expert Review Fixes | imas-standard-names</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-07-08">
-<meta name="plan-version" content="9">
+<meta name="plan-modified" content="2026-07-09">
+<meta name="plan-version" content="10">
 <meta name="plan-impl" content="1.0">
 </head>
 <body>
@@ -564,7 +564,7 @@ Done-when
   1. Invariant added and passing over the full separatrix subtree.
   2. Missing fsa names generated + sourced; DT fixed; dangling-link count 0.
   3. Suites green; followup written + this one resolved.</pre>
-    <p class="r-fu-outcome">DONE — shipped in rc62. Pairing invariant added: coverage.separatrix_pair_gaps() reports species missing local<->flux_surface_averaged pairs (1d3e9dea). Composer locus-canonicalization (separatrix/separatrix_average -> plasma_boundary + mandatory flux_surface_averaged transform, e4bced8a/2063ad9b). Coverage re-run: local gaps 0 (velocity+density); velocity fsa gap 0; deuterium_tritium density fsa landed accepted/accepted (0.97/0.925). Held back at the 0.85 bar (quality-first, never force-accepted): helium_4 velocity fsa (docs refining), oxygen/hydrogen/boron density fsa. Root cause of the reset-cascade + fsa source-orphaning diagnosed + documented; recovery via filtered RC-catalog import.</p>
+    <p class="r-fu-outcome">DONE — shipped in rc62. Pairing invariant added: coverage.separatrix_pair_gaps() reports species missing local&lt;-&gt;flux_surface_averaged pairs (1d3e9dea). Composer locus-canonicalization (separatrix/separatrix_average -&gt; plasma_boundary + mandatory flux_surface_averaged transform, e4bced8a/2063ad9b). Coverage re-run: local gaps 0 (velocity+density); velocity fsa gap 0; deuterium_tritium density fsa landed accepted/accepted (0.97/0.925). Held back at the 0.85 bar (quality-first, never force-accepted): helium_4 velocity fsa (docs refining), oxygen/hydrogen/boron density fsa. Root cause of the reset-cascade + fsa source-orphaning diagnosed + documented; recovery via filtered RC-catalog import.</p>
     </article>
 <article class="r-fu" data-id="f-erf-ws5-c8" data-status="resolved" data-tier="sonnet" data-written-by="reckon-create" data-written-at="2026-07-06" data-recommends-skill="" data-resolved-at="2026-07-08T08:11:48+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">WS5a — Upstream DD issue: neutral energy-flux unit at wall (C8) + interim catalog flag</h4>
@@ -721,7 +721,7 @@ Done-when
   1. Pedestal duplicates consolidated to one locus each; 0 redundant _at_pedestal duplicates.
   2. The 4 ambiguous names adjudicated + renamed or left per the lead.
   3. This followup resolved.</pre>
-    <p class="r-fu-outcome">MOSTLY DONE — shipped in rc62; 4 ambiguous escalated to lead. Pedestal duplicates consolidated to the canonical _at_pedestal_top: superseded bare electron_temperature_at_pedestal + temperature_at_pedestal (kept _top); renamed electron_pressure_at_pedestal + pressure_at_pedestal -> _at_pedestal_top (electron_pressure's dead superseded _top cleared first); all accepted/accepted (published) or docs-pending (unpublished derived). RESIDUAL for lead physics call (locked decision requires it): magnetic_shear_at_pedestal, safety_factor_at_pedestal, poloidal_magnetic_flux_at_pedestal, normalized_poloidal_magnetic_flux_at_pedestal retain _at_pedestal (no regression). See appended followup.</p>
+    <p class="r-fu-outcome">MOSTLY DONE — shipped in rc62; 4 ambiguous escalated to lead. Pedestal duplicates consolidated to the canonical _at_pedestal_top: superseded bare electron_temperature_at_pedestal + temperature_at_pedestal (kept _top); renamed electron_pressure_at_pedestal + pressure_at_pedestal -&gt; _at_pedestal_top (electron_pressure's dead superseded _top cleared first); all accepted/accepted (published) or docs-pending (unpublished derived). RESIDUAL for lead physics call (locked decision requires it): magnetic_shear_at_pedestal, safety_factor_at_pedestal, poloidal_magnetic_flux_at_pedestal, normalized_poloidal_magnetic_flux_at_pedestal retain _at_pedestal (no regression). See appended followup.</p>
     </article>
 <article class="r-fu" data-id="f-erf-pipeline-build" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-06" data-recommends-skill="reckon-ship" data-resolved-at="2026-07-08T08:11:48+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Pipeline-fix build progress + remaining regen/RC (user chose: build pipeline fixes first)</h4>
@@ -782,9 +782,9 @@ Done-when
   4. This followup resolved; WS4 closed.</pre>
     <p class="r-fu-outcome">COMPOSER FIX DONE. generate_name_dd.md now maps DD separatrix/separatrix_average -&gt; plasma_boundary AND requires the flux_surface_averaged transform for _average paths (e4bced8a + 2063ad9b; golden regenerated; separatrix-&gt;plasma_boundary synonym already in audits._CANONICAL_LOCUS_SYNONYMS). Verified: composes flux_surface_averaged_beryllium_density_at_plasma_boundary. The full fsa generation runs under WS4/pipeline-build.</p>
     </article>
-<article class="r-fu" data-id="f-erf-external-residuals" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-08" data-recommends-skill="reckon-edit" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-erf-external-residuals" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-08" data-recommends-skill="reckon-edit" data-resolved-at="2026-07-09T05:22:07+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">External residuals: lead adjudication of 4 ambiguous pedestal names + upstream DD neutral energy-flux unit issue</h4>
-    <div class="r-fu-body">Two items cannot be closed in-repo — both are external dependencies surfaced by the shipped work. (a) LEAD PHYSICS CALL: 4 ambiguous pedestal names retain _at_pedestal (magnetic_shear, safety_factor, poloidal_magnetic_flux, normalized_poloidal_magnetic_flux) — the locked pedestal-consolidation decision requires a value-vs-position judgment (pedestal_top vs pedestal_maximum) that only the lead can make. Recommendation: these summary quantities are conventionally reported at the pedestal top/knee -> _at_pedestal_top; confirm before renaming (free graph rename). (b) UPSTREAM DD: neutral energy_fluxes unit m^-2.s^-1 -> m^-2.W issue is drafted (scratchpad dd_issue_C8_neutral_energy_flux_units.md) but must be filed to the DD tracker + tracked; the 3 flagged catalog names regen after the DD lands. No regression either way (rc62 ships the current forms as draft).</div>
+    <div class="r-fu-body">Two items cannot be closed in-repo — both are external dependencies surfaced by the shipped work. (a) LEAD PHYSICS CALL: 4 ambiguous pedestal names retain _at_pedestal (magnetic_shear, safety_factor, poloidal_magnetic_flux, normalized_poloidal_magnetic_flux) — the locked pedestal-consolidation decision requires a value-vs-position judgment (pedestal_top vs pedestal_maximum) that only the lead can make. Recommendation: these summary quantities are conventionally reported at the pedestal top/knee -&gt; _at_pedestal_top; confirm before renaming (free graph rename). (b) UPSTREAM DD: neutral energy_fluxes unit m^-2.s^-1 -&gt; m^-2.W issue is drafted (scratchpad dd_issue_C8_neutral_energy_flux_units.md) but must be filed to the DD tracker + tracked; the 3 flagged catalog names regen after the DD lands. No regression either way (rc62 ships the current forms as draft).</div>
     <pre class="r-fu-prompt">Project: imas-standard-names-catalog (graph rename) + DD (upstream)
 Plan: expert-review-fixes (http://localhost:8765/imas-standard-names/expert-review-fixes.html)
 Section: external residuals
@@ -806,6 +806,35 @@ Done-when
   1. 4 ambiguous adjudicated + renamed (or confirmed left) per the lead.
   2. DD issue filed + tracked; 3 names queued for post-fix regen.
   3. This followup resolved.</pre>
+    <p class="r-fu-outcome">DONE. (a) The 4 ambiguous pedestal names renamed to _at_pedestal_top (lead-approved 2026-07-09): magnetic_shear/safety_factor/poloidal_magnetic_flux/normalized_poloidal_magnetic_flux — accepted/accepted, old ids gone, 8 cross-links repaired. (b) DD root cause traced to a type-wiring bug — energy_fluxes kinetic/recombination `neutral` reference wall_description_ggd_particle_neutral (m^-2.s^-1) instead of the dead-but-correct wall_description_ggd_energy_neutral (W.m^-2); introduced DD 3.38.0, wrong ever since (verified via imas-dd version history across every release 3.38.0→4.1.1 + develop). Filed issue iterorganization/IMAS-Data-Dictionary#272 + fix PR #273 (2-line retarget off upstream/develop). Interim W.m^-2 applied to 56 wall energy-neutral IMASNodes + the 3 catalog names (clean energy-flux descriptions, flag removed). PLUS: built the always-on idempotent DD source-drift refresh into sn run (codex 3ce8881a) — names snapshot their DD source (unit/doc), and any drift (e.g. a future DD release) is steered through a docs refine carrying the exact delta; 595 source-linked names baselined.</p>
+    </article>
+<article class="r-fu" data-id="f-erf-dd-refresh-followon" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-09" data-recommends-skill="reckon-edit" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Post-DD-fix follow-on: PR #273 merge tracking, rc63 publish, wall-name source re-link, derived-drift cascade</h4>
+    <div class="r-fu-body">After the DD investigation + interim fix, four items remain. (1) Track iterorganization/IMAS-Data-Dictionary PR #273 (retarget wall energy-neutral to the energy type) through review/merge/release; once the corrected DD ships in imas-data-dictionaries, `imas-codex imas dd build` refreshes the 8 IMASNode units and the source-drift refresh reconciles the 3 catalog names automatically. (2) Cut ISNC rc63 to PUBLISH the graph changes made after rc62 — the 4 ambiguous + electron_pressure/pressure pedestal renames and the 3 wall names at W.m^-2 (rc62 predates them). (3) Re-attach DD sources for the 2 source-orphaned wall names (neutral_energy_flux_at_wall, neutral_state_energy_flux_at_wall) so the source-drift refresh covers them (only _due_to_recombination is currently source-linked). (4) Optionally extend the source-drift refresh to cascade through derived-name parents — it currently covers the 595 directly-DD-source-linked names only.</div>
+    <pre class="r-fu-prompt">Project: imas-codex + imas-standard-names-catalog + DD (upstream)
+Plan: expert-review-fixes (http://localhost:8765/imas-standard-names/expert-review-fixes.html)
+Section: post-DD-fix follow-on
+Tier: opus
+
+Context
+  The wall neutral energy-flux unit bug is filed (DD issue #272 / PR #273) with an interim W.m^-2 graph fix; the idempotent source-drift refresh is wired into sn run (codex 3ce8881a). Remaining work is publish + tracking + two coverage gaps.
+
+State to read (CODE / FILES / DATA)
+  gh pr view 273 -R iterorganization/IMAS-Data-Dictionary (merge/release status).
+  imas_codex/standard_names/source_refresh.py + the B2d hook in loop.py (source-drift refresh).
+  Graph: the 2 source-orphaned wall names (no PRODUCED_NAME StandardNameSource); derived-name HAS_PARENT chains.
+  ISNC release state (sn release status) — rc62 is the latest tag.
+
+Scope locks / constraints
+  - rc63: cut only from an export-clean graph; it publishes the post-rc62 renames + wall W.m^-2. Confirm no regression vs rc62 first.
+  - Do not adopt the DD fix in-catalog beyond the interim W.m^-2 until PR #273 releases; the source-drift refresh will reconcile on the next dd build + sn run.
+  - Source re-link + derived-drift cascade are enhancements — keep the always-on, idempotent, refine-not-regenerate contract.
+
+Done-when
+  1. PR #273 tracked to merge/release; corrected DD picked up by dd build.
+  2. rc63 cut + pushed (post-rc62 graph changes published).
+  3. 2 orphaned wall names source-linked; source-drift refresh covers them.
+  4. This followup resolved.</pre>
     </article>
 </section>
 
