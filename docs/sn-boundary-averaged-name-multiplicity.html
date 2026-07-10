@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-10">
-<meta name="plan-version" content="5">
+<meta name="plan-version" content="6">
 <meta name="plan-impl" content="1.0">
 </head>
 <body>
@@ -402,7 +402,7 @@ Done-when
   1. One canonical shape enumerated and locked for all 18 names; renames/supersedes applied via the deterministic cascade with full source-set checks.
   2. 0 orphans/desyncs; every target round-trips.
   3. Plan updated; this followup resolved.</pre>
-    <p class="r-fu-outcome">Landed — DD defines composition as ratio of volume-averaged species density to volume-averaged n_e; canonical shape ratio_of_volume_averaged_<sp>_density_to_volume_averaged_electron_density. 14 cascade renames + 3 already canonical + hydrogen collision resolved (its old name correctly serves the isotope_fraction leaves; composition leaf got a fresh drafted canonical name). All 18 leaves single-name canonical; 0 orphans/desyncs.</p>
+    <p class="r-fu-outcome">Landed — DD defines composition as ratio of volume-averaged species density to volume-averaged n_e; canonical shape ratio_of_volume_averaged_<sp>_density_to_volume_averaged_electron_density. 14 cascade renames + 3 already canonical + hydrogen collision resolved (its old name correctly serves the isotope_fraction leaves; composition leaf got a fresh drafted canonical name). All 18 leaves single-name canonical; 0 orphans/desyncs.</sp></p>
     </article>
 <article class="r-fu" data-id="f-bam-004" data-status="resolved" data-tier="sonnet" data-written-by="reckon-ship" data-written-at="2026-07-10" data-recommends-skill="" data-resolved-at="2026-07-10T13:16:36+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Verify the separatrix q → q95 locus mapping (psi_N=0.95 vs 1.0)</h4>
@@ -421,7 +421,7 @@ Done-when
   3. This followup resolved.</pre>
     <p class="r-fu-outcome">Landed — DD defines summary/local/separatrix*/q as q AT the LCFS, not q95. Revived the dangling-superseded safety_factor_at_plasma_boundary (accepted) and moved both separatrix q sources onto it; the q95 name keeps only the two genuine q_95 sources. Finding escalated into the DD-version gate (§5).</p>
     </article>
-<article class="r-fu" data-id="f-bam-005" data-status="open" data-tier="sonnet" data-written-by="reckon-ship" data-written-at="2026-07-10" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-bam-005" data-status="resolved" data-tier="sonnet" data-written-by="reckon-ship" data-written-at="2026-07-10" data-recommends-skill="" data-resolved-at="2026-07-10T13:57:31+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Review-rotation pickup: 3 drafted names from the deterministic collapses</h4>
     <div class="r-fu-body">flux_surface_averaged_effective_charge_at_plasma_boundary, flux_surface_averaged_ion_density_at_plasma_boundary and ratio_of_volume_averaged_hydrogen_density_to_volume_averaged_electron_density were persisted deterministically as name_stage='drafted'; the next routine sn run review rotation scores them. Also observed (low priority): ratio_of_hydrogen_density_to_total_hydrogenic_density serves BOTH the line_average and volume_average isotope_fraction leaves — an averaging-domain collision of the same class.</div>
     <pre class="r-fu-prompt">Project: imas-codex graph
@@ -436,6 +436,22 @@ Done-when
   1. The 3 drafted names reviewed (accepted or refined) by a routine rotation.
   2. Isotope-fraction collision resolved or explicitly declined.
   3. This followup resolved.</pre>
+    <p class="r-fu-outcome">Landed — flush-mode sn run reviewed the drafted queue: all collapse names accepted (fsa effective_charge/ion_density/hydrogen_density at plasma boundary, toroidal fsa ion velocity, volume-averaged hydrogen ratio). Isotope-fraction collision SPLIT: line/volume averaged ratio_of_*_hydrogen_density_to_*_total_hydrogenic_density minted per leaf; old domain-less name superseded onto the volume form. Line twin was exhausted by a refine-worker structuring failure (line_averaged mis-routed as qualifier), not review — restored to accepted; defect noted in f-bam-006.</p>
+    </article>
+<article class="r-fu" data-id="f-bam-006" data-status="open" data-tier="sonnet" data-written-by="reckon-ship" data-written-at="2026-07-10" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">refine_name structuring failure must not exhaust a reviewed name (line_averaged mis-segmenting)</h4>
+    <div class="r-fu-body">During the f-bam-005 flush, the refine worker emitted line_averaged as a qualifier segment (it is a transformation operator), the RefinedName validation correctly rejected it, and the deterministic-failure branch marked the REVIEWED name exhausted — an infrastructure failure retiring a semantically fine name (score 0.812; its volume twin accepted). Fix the worker segment routing for averaging operators and/or make structuring failures release the claim back to reviewed instead of exhausting.</div>
+    <pre class="r-fu-prompt">Project: imas-codex
+Plan: sn-boundary-averaged-name-multiplicity
+Section: refine exhaustion defect (f-bam-006)
+Tier: sonnet
+
+Context
+  workers.py refine_name path: on a deterministic RefinedName validation error the name is marked exhausted. Seen with qualifier &#x27;line_averaged&#x27; is not a registered grammar token — the LLM structured an averaging TRANSFORMATION as a qualifier. Reproduce with ratio_of_line_averaged_hydrogen_density_to_line_averaged_total_hydrogenic_density.
+
+Done-when
+  1. Averaging operators route to the transformation slot in refine structuring (prompt or post-fix), OR structuring failures leave the name reviewed (retryable), with a unit test.
+  2. This followup resolved.</pre>
     </article>
 </section>
   <section data-reckon="research" id="research" class="r-research-list">
