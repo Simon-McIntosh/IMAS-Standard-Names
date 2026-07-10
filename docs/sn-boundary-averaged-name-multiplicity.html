@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="sn-boundary-averaged-name-multiplicity">
   <meta name="plan-title" content="SN Boundary-Averaged Name Multiplicity — canonical form + dedup">
   <meta name="plan-summary" content="summary/local/separatrix_average/* carries 2-3 live StandardNames per DD leaf (24 of 54), and 15 names are live on BOTH the separatrix_average and the sibling separatrix (local-value) subtree — a cross-subtree collision, not just duplication. Canonical rule (conditional, locked): the _at_plasma_boundary locus is ALWAYS required (the boundary is one of a continuum of flux surfaces); the flux_surface_averaged_ prefix applies IFF the base is not constant on a flux surface (for flux-function bases — safety factor, magnetic shear, flux labels, pressure — FSA is a no-op and one name serves both leaves). Fixes land at vocab (constant_on_flux_surface flag) / grammar (no-op FSA gate) / prompt (conditional path rule) / grouper level so they persist beyond per-name edits, then the collapse runs via the rename/supersede cascade. Plus the summary/composition density-ratio family (18 names). Spun out of sn-pedestal-source-recovery (f-psr-005).">
-  <meta name="plan-status" content="draft">
+  <meta name="plan-status" content="shipped">
   <meta name="plan-roi" content="mid">
   <meta name="plan-effort" content="L">
   <meta name="plan-tier" content="opus">
@@ -17,7 +17,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-10">
-<meta name="plan-version" content="1">
+<meta name="plan-version" content="4">
+<meta name="plan-impl" content="1.0">
 </head>
 <body>
   <main class="plan-doc">
@@ -141,7 +142,24 @@
       no-op; that classification must live in the vocabulary, not in per-name judgement calls, or the
       generation pipeline will keep re-minting the wrong forms (§4).</p>
 
-    <h2 id="s3">§3 — The rule + approach</h2>
+    <section id="s3-landed" class="section-landed">
+      <header>
+        <span class="badge badge-shipped">✓ landed 2026-07-10</span>
+        <h2>§3 — Collapse executed</h2>
+      </header>
+      <p class="landed-summary">
+        46 deterministic graph actions (6 rename cascades, 27 supersede-merges, 11 targeted
+        source moves, 2 detach+create) — no LLM recompose, $0 spent. Result: 84 leaves all
+        single-name (was 24 multi), 0 cross-subtree collisions (was 15), 0 locus-stripped
+        names, 4 correct flux-function shares, 0 orphans/desyncs, gate audit clean. Momentum
+        phi/tor resolved as a DD v3/v4 alias pair sharing one name per subtree. Two new FSA
+        names (<code>effective_charge</code>, <code>ion_density</code>) sit drafted for the next
+        review rotation. Full record:
+        <a href="archive/sn-boundary-averaged-name-multiplicity-s3-landed.html">§3 landed</a>.
+      </p>
+    </section>
+
+    <h2 id="s3">§3 — The rule + approach (reference)</h2>
     <p>The canonical form is a <strong>conditional rule</strong> (locked below), applied per base:</p>
     <ul>
       <li><strong>Locus always.</strong> Every name in the family carries <code>_at_plasma_boundary</code>.
@@ -188,41 +206,24 @@
       accepted duplicates, worsening the multiplicity (demonstrated in sn-pedestal-source-recovery).
       Verify 0 orphans / 0 desyncs and that every leaf resolves per the conditional rule.</p>
 
-    <h2 id="s4">§4 — Persistent fixes: vocab / grammar / prompt / grouper (land BEFORE the collapse)</h2>
-    <p>Per-name renames alone do not survive regeneration — the pipeline would re-mint the wrong forms.
-      The rule is encoded at four levels (work item f-bam-002, prerequisite for f-bam-001):</p>
-    <ul>
-      <li><strong>Vocab (ISN)</strong> — add a per-base flag
-        <code>constant_on_flux_surface: true</code> to
-        <code>imas_standard_names/grammar/vocabularies/physical_bases.yml</code> (schema comment + entries
-        per the <code>flux-function-base-list</code> decision). This makes "FSA is a no-op for this base"
-        machine-readable instead of a per-name judgement call.</li>
-      <li><strong>Grammar (ISN)</strong> — a validation gate rejecting the flux-surface reduction
-        operators (<code>flux_surface_averaged</code>, <code>maximum_over_flux_surface</code>,
-        <code>minimum_over_flux_surface</code>) applied to a base flagged
-        <code>constant_on_flux_surface</code> — the FSA-of-an-FSA class. Wire it where
-        <code>inherently_dimensional</code> is already enforced (vocabulary validator / model audit), with
-        tests. Names violating the gate fail composition, so the composer can never mint them again.</li>
-      <li><strong>Prompts (imas-codex)</strong> — <code>llm/prompts/sn/generate_name_dd.md</code>'s
-        path-rule row for <code>separatrix_average</code> currently mandates the prefix
-        <em>unconditionally</em> ("The name MUST carry the flux_surface_averaged transformation prefix …
-        NEVER drop it") — replace with the conditional rule (prefix iff the base is not flagged
-        <code>constant_on_flux_surface</code>; flux-function leaves share the local leaf's name).
-        <code>generate_name_system.md</code>'s averaging-operator bullet gains the no-op guard.
-        <code>review.md</code> gets the matching review check.</li>
-      <li><strong>Groupers / automatic parents (imas-codex)</strong> — reviewed 2026-07-10.
-        <code>standard_names/derivation.py::derive_edges</code> already emits the right automatic parent:
-        <code>flux_surface_averaged_X_at_plasma_boundary</code> → <code>HAS_PARENT</code>
-        (<code>operator_kind='unary_prefix'</code>) → <code>X_at_plasma_boundary</code>, and the
-        <code>parents.py</code> admission gate (Clause A: structural specificity) correctly admits the
-        locus-bearing parent. <strong>Gap:</strong> <code>standard_names/harmonize.py::_FAMILY_OPERATOR_KINDS
-        = (projection, qualifier, coordinate, locus)</code> excludes <code>unary_prefix</code>, so the
-        local/averaged pair never assembles into one docs family and their descriptions drift
-        independently. Extend family eligibility to the averaging reduction operators (or record why
-        not); <code>standard_names/families.py</code> (vector-component families for generation) is
-        unaffected. A graph-side audit in <code>standard_names/audits.py</code> flags any live name
-        violating the gate so regressions surface in <code>sn run</code>.</li>
-    </ul>
+    <section id="s4" class="section-landed">
+      <header>
+        <span class="badge badge-shipped">✓ landed 2026-07-10</span>
+        <h2>§4 — Persistent fixes: vocab / grammar / prompt / grouper</h2>
+      </header>
+      <p class="landed-summary">
+        Encoded at all four levels: <code>constant_on_flux_surface</code> flag in ISN vocab
+        (definitional set + flux-label carriers), an IR-level gate failing parse AND compose for
+        flux-surface reductions of flagged bases (19 new tests; ISN suite 1665 passed), the
+        conditional rule in <code>generate_name_dd.md</code>/<code>generate_name_system.md</code>/<code>review.md</code>
+        (new check I2.8), a live-catalog gate-violation probe in <code>sn run</code> (pre-collapse: exactly
+        1 offender, <code>flux_surface_averaged_magnetic_shear</code>), and harmonize family eligibility
+        extended to the three reduction operators via the edge <code>operator</code> token.
+        <code>derive_edges</code>/<code>parents.py</code> confirmed correct, untouched.
+        Full record: <a href="archive/sn-boundary-averaged-name-multiplicity-s4-landed.html">§4 landed</a>
+        (ISN <code>b8a2024</code>, imas-codex <code>8d6cb77b</code>; ISN pin bumped).
+      </p>
+    </section>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
@@ -236,15 +237,15 @@
       </p>
     <p class="r-dec-rat">The locus and the averaging operator are orthogonal: _at_plasma_boundary pins WHICH flux surface (the boundary is one of a continuum, so the locus always carries weight), while flux_surface_averaged_ states a reduction that is only meaningful when the base varies over the surface. The DD encodes this with parallel separatrix/ (local) and separatrix_average/ subtrees, and the graph shows 15 live cross-subtree collisions from locus-only naming. For flux-function bases (safety factor — already a flux-surface quantity, so averaging it is an FSA of an FSA; magnetic shear; flux labels; pressure) FSA is a no-op and one shared name serves both leaves. Prefix iff non-no-op.</p>
     </div>
-<div class="r-dec" data-key="flux-function-base-list" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="flux-function-base-list" data-choice="definitional-only" data-by="user" data-when="2026-07-10 08:26">
     <p class="r-dec-q">Which bases are flagged constant_on_flux_surface (FSA is a no-op → no averaging prefix, one shared name for the local and averaged leaves)?</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="definitional-only">Definitional flux functions only: safety_factor , magnetic_shear , flux labels ( poloidal_magnetic_flux , toroidal_flux_radius , normalized variants), pressure (static ideal MHD). Kinetic profiles (n, T, Zeff, velocities, E∥) keep the prefix — poloidal asymmetries (centrifugal impurity accumulation, midplane vs FSA) make FSA physically meaningful for them.</button>
+      <button class="r-opt chosen" data-value="definitional-only">Definitional flux functions only: safety_factor , magnetic_shear , flux labels ( poloidal_magnetic_flux , toroidal_flux_radius , normalized variants), pressure (static ideal MHD). Kinetic profiles (n, T, Zeff, velocities, E∥) keep the prefix — poloidal asymmetries (centrifugal impurity accumulation, midplane vs FSA) make FSA physically meaningful for them.</button>
       <button class="r-opt" data-value="transport-ordering">Also treat transport-ordering flux functions as no-op: add n_e , T_e , n_i , zeff . Fewer names, but erases the local-vs-averaged distinction the DD deliberately encodes and is wrong for heavy impurities.</button>
       </p>
     <p class="r-dec-rat"></p>
     </div>
-<div class="r-dec" data-key="composition-ratio-form" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="composition-ratio-form" data-choice="prefer explicit, look at other areas and follow a consistent style for averages and ratios" data-by="user" data-when="2026-07-10 08:27">
     <p class="r-dec-q">Canonical shape for the summary/composition density-ratio names (ratio_of_X_density_to_electron_density vs X_fraction vs volume_averaged_…)?</p>
     <p class="r-dec-rat"></p>
     </div>
@@ -252,7 +253,7 @@
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-bam-001" data-status="open" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-07-09" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-bam-001" data-status="resolved" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-07-09" data-recommends-skill="" data-resolved-at="2026-07-10T11:48:43+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Collapse the separatrix/separatrix_average multiplicity under the conditional rule (AFTER f-bam-002)</h4>
     <div class="r-fu-body">Apply the locked conditional rule (§3) across BOTH sibling subtrees: flux-function
           leaves converge on one shared <code>&lt;q&gt;_at_plasma_boundary</code> name; surface-varying averaged
@@ -311,8 +312,9 @@ Done-when
   3. 0 orphans / 0 desyncs; provenance + content preserved; composition density-ratio followup written
      if not already done.
   4. This followup resolved.</pre>
+    <p class="r-fu-outcome">§3 landed — 46 deterministic graph actions: 84 leaves single-name (was 24 multi), 0 cross-subtree collisions (was 15), 0 locus-stripped, 4 flux-function shares, 0 orphans/desyncs, gate audit clean. Momentum phi/tor = DD v3/v4 alias pair, one name per subtree. $0 LLM spend. Archive: docs/archive/sn-boundary-averaged-name-multiplicity-s3-landed.html</p>
     </article>
-<article class="r-fu" data-id="f-bam-002" data-status="open" data-tier="opus" data-written-by="smc" data-written-at="2026-07-10" data-recommends-skill="/reckon-ship sn-boundary-averaged-name-multiplicity §4" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-bam-002" data-status="resolved" data-tier="opus" data-written-by="smc" data-written-at="2026-07-10" data-recommends-skill="/reckon-ship sn-boundary-averaged-name-multiplicity §4" data-resolved-at="2026-07-10T11:48:43+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Encode the conditional rule at vocab/grammar/prompt/grouper level (prerequisite for f-bam-001)</h4>
     <div class="r-fu-body">Per-name renames do not survive regeneration. Land the §4 persistent fixes first: a <code>constant_on_flux_surface</code> flag in ISN <code>physical_bases.yml</code>, a grammar gate rejecting flux-surface reduction operators on flagged bases (the FSA-of-an-FSA class), the conditional path rule in the imas-codex generation/review prompts (replacing the unconditional "NEVER drop the prefix" row in <code>generate_name_dd.md</code>), a graph audit, and averaging-operator family eligibility in <code>harmonize.py</code> so the local/averaged pair docs-harmonize together.</div>
     <pre class="r-fu-prompt">Project: imas-standard-names (grammar/vocab) + imas-codex (prompts, audits, harmonize)
@@ -359,6 +361,42 @@ Done-when
   3. Gate-violation audit runs in sn run; harmonize family eligibility extended or explicitly declined
      in the plan.
   4. Both repos&#x27; tests green; plan §4 updated with outcomes; f-bam-001 unblocked; this followup resolved.</pre>
+    <p class="r-fu-outcome">§4 landed — ISN b8a2024 (constant_on_flux_surface flag + IR-level gate, 19 tests, suite 1665 passed) + imas-codex 8d6cb77b (conditional prompt rule, review check I2.8, sn-run gate probe, harmonize reduction-operator family eligibility, pin bump).</p>
+    </article>
+<article class="r-fu" data-id="f-bam-003" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-10" data-recommends-skill="/reckon-ship sn-boundary-averaged-name-multiplicity" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Normalise the summary/composition density-ratio family (18 names) per the explicit-ratio style</h4>
+    <div class="r-fu-body">Decision composition-ratio-form: prefer explicit ratio form; survey other catalog areas and follow one consistent style for averages and ratios. Lower priority; deterministic cascade once the target shapes are enumerated.</div>
+    <pre class="r-fu-prompt">Project: imas-standard-names + imas-codex graph
+Plan: sn-boundary-averaged-name-multiplicity
+Section: composition density-ratio family
+Tier: opus
+
+Context
+  summary/composition/* yields 18 density-ratio names in three shapes (ratio_of_X_density_to_electron_density vs X_fraction vs volume_averaged_...). Decision locked: prefer explicit ratio form; survey other catalog ratio/average families first and apply ONE consistent style.
+
+State to read
+  Graph enumeration of summary/composition/* sources and their live names; ISN grammar binary ratio operator; the §3 collapse driver pattern (supersede-merge onto canonical, deterministic only).
+
+Done-when
+  1. One canonical shape enumerated and locked for all 18 names; renames/supersedes applied via the deterministic cascade with full source-set checks.
+  2. 0 orphans/desyncs; every target round-trips.
+  3. Plan updated; this followup resolved.</pre>
+    </article>
+<article class="r-fu" data-id="f-bam-004" data-status="open" data-tier="sonnet" data-written-by="reckon-ship" data-written-at="2026-07-10" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Verify the separatrix q → q95 locus mapping (psi_N=0.95 vs 1.0)</h4>
+    <div class="r-fu-body">Both summary/local/separatrix*/q leaves map to safety_factor_at_normalized_poloidal_magnetic_flux_equal_to_0_95 (q95), but the separatrix is psi_N=1.0. The flux-function sharing is correct; the locus value looks wrong (q diverges at the separatrix in diverted plasmas, so q95 may be a deliberate convention — check the DD documentation before renaming).</div>
+    <pre class="r-fu-prompt">Project: imas-codex graph + imas-standard-names
+Plan: sn-boundary-averaged-name-multiplicity
+Section: q95 locus anomaly (f-bam-004)
+Tier: sonnet
+
+Context
+  summary/local/separatrix/q and separatrix_average/q both attach to safety_factor_at_normalized_poloidal_magnetic_flux_equal_to_0_95. The separatrix is psi_N=1.0; q95 is the standard proxy because q diverges at the X-point. Check the DD leaf documentation: if the DD defines these leaves AS q95, the name is right and this closes with a note; if the DD means q at the boundary, rename via the deterministic cascade to a psi_N=1.0 or boundary form that round-trips.
+
+Done-when
+  1. DD semantics established and recorded in the plan.
+  2. Name kept or renamed accordingly (deterministic cascade, full source-set check).
+  3. This followup resolved.</pre>
     </article>
 </section>
   <section data-reckon="research" id="research" class="r-research-list">

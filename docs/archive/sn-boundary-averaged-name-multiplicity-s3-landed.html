@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-standard-names">
+  <meta name="reckon-type" content="archive">
+  <meta name="plan-slug" content="sn-boundary-averaged-name-multiplicity-s3-landed">
+  <meta name="plan-status" content="done">
+  <title>§3 landed — multiplicity collapse | sn-boundary-averaged-name-multiplicity</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+  <h1>§3 landed — separatrix / separatrix_average multiplicity collapse</h1>
+  <p>Evergreen: <a href="/imas-standard-names/sn-boundary-averaged-name-multiplicity.html">sn-boundary-averaged-name-multiplicity</a> · landed 2026-07-10 · deterministic graph ops only (no LLM recompose; $0 of the authorised budget spent)</p>
+
+  <h2>Before → after</h2>
+  <table>
+    <thead><tr><th>Metric</th><th>Before</th><th>After</th></tr></thead>
+    <tbody>
+      <tr><td>Averaged leaves with 2–3 live names</td><td>24</td><td><strong>0</strong> (84 leaves total, all single-name)</td></tr>
+      <tr><td>Cross-subtree collisions (surface-varying bases)</td><td>15</td><td><strong>0</strong></td></tr>
+      <tr><td>Locus-stripped names</td><td>6</td><td><strong>0</strong></td></tr>
+      <tr><td>Shared flux-function names (correct, by design)</td><td>3</td><td><strong>4</strong> (+ <code>magnetic_shear_at_plasma_boundary</code>, now two DD sources)</td></tr>
+      <tr><td>Live grammar-gate violations</td><td>1</td><td><strong>0</strong></td></tr>
+      <tr><td>Provenance orphans / edge-scalar desyncs</td><td>0 / 0</td><td>0 / 0</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Actions applied (46, all verified against full source sets first)</h2>
+  <ul>
+    <li><strong>6 rename cascades</strong> (target absent): 3 locus-stripped FSA names gained <code>_at_plasma_boundary</code>; <code>oxygen_density_at_plasma_boundary</code> and the drafted <code>toroidal_ion_velocity_at_plasma_boundary</code> structure name gained the FSA prefix; post-move, <code>toroidal_plasma_momentum_at_plasma_boundary</code> → <code>toroidal_flux_surface_averaged_total_plasma_momentum_at_plasma_boundary</code>.</li>
+    <li><strong>27 supersede-merges</strong>: short/stripped duplicates onto the canonical FSA name (<code>name_stage='superseded'</code>, <code>superseded_by</code>, <code>HAS_SUCCESSOR</code> + <code>REFINED_FROM</code> edges, sources re-pointed). Includes <code>flux_surface_averaged_magnetic_shear</code> onto the shared <code>magnetic_shear_at_plasma_boundary</code>.</li>
+    <li><strong>11 targeted source moves</strong> (collisions — the short name STAYS as the local leaf's): iron/nitrogen densities, dt/iron velocities, five velocity_tor species, and the momentum pair.</li>
+    <li><strong>2 detach + deterministic create</strong> (collided leaves with no donor name): <code>flux_surface_averaged_effective_charge_at_plasma_boundary</code> and <code>flux_surface_averaged_ion_density_at_plasma_boundary</code> persisted through the pipeline write path as <code>name_stage='drafted'</code> — the next routine <code>sn run</code> review rotation scores them.</li>
+  </ul>
+
+  <h2>Momentum "swap" resolution</h2>
+  <p><code>momentum_phi</code>/<code>momentum_tor</code> are a DD v3/v4 alias pair (tor obsolescent 3.42, removed 4.0) — both leaves denote the SAME total toroidal momentum, so each subtree's two leaves now share one name: local → <code>toroidal_total_plasma_momentum_at_plasma_boundary</code> (2 sources), averaged → <code>toroidal_flux_surface_averaged_total_plasma_momentum_at_plasma_boundary</code> (2 sources). Same alias treatment already held for <code>velocity_phi</code>/<code>velocity_tor</code> species pairs.</p>
+
+  <h2>Generalisation check</h2>
+  <ul>
+    <li>No live <code>maximum_over_flux_surface</code>/<code>minimum_over_flux_surface</code> names exist; the §4 gate bans them on flux-function bases at composition.</li>
+    <li><code>summary/volume_average/*</code>: 26 leaves / 27 names, near 1:1 — explicitly scoped OUT (a volume average of a flux function is not a no-op).</li>
+    <li>Post-collapse reconcile: <code>rederive_structural_edges</code> (18 dead edges cleared, 2 migrated), <code>resolve_doc_links</code> (54 links repointed, 11 removed), 0 orphans / 0 desyncs, gate audit clean.</li>
+  </ul>
+
+  <h2>Anomaly noted (out of scope)</h2>
+  <p>Both <code>separatrix*/q</code> leaves map to <code>safety_factor_at_normalized_poloidal_magnetic_flux_equal_to_0_95</code> — q95, but the separatrix is ψ<sub>N</sub>=1.0. The flux-function <em>sharing</em> is correct; the locus value looks wrong. Queued as followup f-bam-004.</p>
+</main>
+</body>
+</html>
