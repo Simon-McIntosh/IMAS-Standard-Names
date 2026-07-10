@@ -35,10 +35,9 @@ class TestProcessTokens:
         [
             ("e_cross_b_drift", Process.E_CROSS_B_DRIFT),
             ("thermal_fusion", Process.THERMAL_FUSION),
-            (
-                "thermalization_of_fast_particles",
-                Process.THERMALIZATION_OF_FAST_PARTICLES,
-            ),
+            # thermalization is the canonical fast-particle thermalisation token;
+            # its reworded synonyms are gated (test_process_synonym_gate.py).
+            ("thermalization", Process.THERMALIZATION),
             ("halo_current", Process.HALO_CURRENT),
             ("non_inductive_current_drive", Process.NON_INDUCTIVE_CURRENT_DRIVE),
         ],
@@ -51,7 +50,7 @@ class TestProcessTokens:
         [
             "e_cross_b_drift",
             "thermal_fusion",
-            "thermalization_of_fast_particles",
+            "thermalization",
             "halo_current",
             "non_inductive_current_drive",
         ],

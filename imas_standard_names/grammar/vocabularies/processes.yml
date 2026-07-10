@@ -5,6 +5,14 @@
 #   - heat_flux_due_to_conduction
 #   - particle_flux_due_to_diffusion
 #   - current_due_to_bootstrap
+#
+# Canonical-token policy (one token per mechanism): a mechanism has exactly
+# ONE process token. Reworded synonyms of an existing mechanism are NOT added
+# — the retired synonym -> canonical map is enforced by the curation gate in
+# tests/test_process_synonym_gate.py so a rotation harvest cannot reintroduce
+# a merged synonym. Physically DISTINCT mechanisms keep distinct tokens
+# (e.g. line_radiation, synchrotron_radiation, impurity_radiation and
+# surface_emission are separate radiation/emission mechanisms, not synonyms).
 
 # === Transport mechanisms ===
 # Transport-regime mechanisms are named as the full mechanism (`<regime>_transport`),
@@ -58,17 +66,15 @@
 - beam_beam_fusion
 - beam_thermal_fusion
 
-# === Other processes ===
-- viscous
+# === Electromagnetic and structural mechanisms ===
 - magnetohydrodynamic
 - external_coil
 - eddy_current
 - passive_structure
 - disruption
-- halo
 
-# === D.3 review §5 additions ===
-- neoclassical_tearing_mode   # neoclassical tearing mode (NTM) instability; replaces `ntm_`
+# === Dissipation, viscous stress, and body forces ===
+- neoclassical_tearing_mode   # neoclassical tearing mode (NTM) instability
 - ohmic_dissipation            # ohmic (resistive Joule) dissipation
 - resistive_flux_consumption   # resistive consumption of magnetic flux
 - parallel_viscosity           # parallel viscous stress or dissipation
@@ -76,24 +82,16 @@
 - heat_viscosity               # gyroviscous (heat) stress
 - j_cross_b_force              # J×B electromagnetic body force
 - poloidal_current             # poloidal current generation
-
-# === D.5 review §5 additions ===
 - viscous_heat_flux            # viscous contribution to heat flux
 
-# === rc13 codex-rotation additions ===
-# From plasma_wall_interactions, fast_particles, magnetic_field_systems,
-# diagnostic and control rotation in imas-codex (gap export 2026-04-19).
+# === Collisions, drifts, and fast-particle mechanisms ===
 - collisions                   # Coulomb / particle collisions process
 - thermalization               # slowing-down of fast particles to thermal energy
 - fast_ion                     # fast-ion drive / source process (e.g. NBI fast-ion current)
-
-# === rc14 vocabulary extensions (codex plan 31) ===
 - e_cross_b_drift              # E×B drift mechanism (plasma_control, edge)
 - thermal_fusion               # pure-thermal fusion (alongside beam_beam_, beam_thermal_)
-- thermalization_of_fast_particles  # distribution-source thermalisation
 - halo_current                 # halo current path (current through open field lines)
 
-# === rc15 vocabulary extensions (edge-plasma rotation) ===
 # Diamagnetic drift is a first-class transport mechanism: fluxes "due to
 # diamagnetic drift" arise from the ∇p × B / (nqB²) drift in the
 # fluid momentum equation. Distinct from the diamagnetic component of a
@@ -101,54 +99,41 @@
 # components.yml guidance). DD sources: edge_profiles/*, transport/*.
 - diamagnetic_drift
 
-# === rc16 vocabulary extensions (VocabGap closure) ===
-# From codex VocabGap graph analysis (2026-04-20).
+# === Runaway-electron generation and dissipation ===
 - resistive_dissipation        # resistive (Joule) dissipation process
 - dreicer                      # Dreicer mechanism for runaway electron generation
-- coulomb_collisions           # Coulomb collisions between charged particles
 - neutral_beam_shinethrough    # neutral beam shine-through (uncaptured beam fraction)
 - surface_emission             # surface (wall/divertor) particle or photon emission
 
-# === rc17 vocabulary extensions (regen cycle 34 VocabGap closure) ===
-# From codex quarantined-name analysis (2025-07-28).
+# === Charge-state-resolved Coulomb collisions ===
+# coulomb_collisions_with_electrons/ion/ion_state are species-resolved
+# collision channels — distinct mechanisms, NOT synonyms of the generic
+# `collisions` token above.
 - coulomb_collisions_with_electrons  # Coulomb collisions specifically with electrons
+- coulomb_collisions_with_ion        # Coulomb collisions specifically with bulk ions
+- coulomb_collisions_with_ion_state  # Coulomb collisions with a specific ion charge state
 
-# === rc18 vocabulary extensions (VocabGap closure, codex plan 40) ===
-# From codex VocabGap graph analysis (2026-04-21).
-- disruption_event                    # discrete disruption event (alongside ongoing `disruption`)
+# === Wave–particle, loss, and distribution-source mechanisms ===
 - wave_particle_interaction           # resonant wave–particle interaction process
-- fast_particle_thermalization        # thermalisation of a fast-particle population
 - conductive_losses                   # conductive heat / particle losses (first_wall, blanket)
 - fast_particle_source                # distribution-source term from fast particles
 - distribution_function_driven        # driven by an explicit distribution-function source (a specific source term, not the bare `driven`)
-- radiation_emission                  # radiation emission process (generic)
-- recombination_emission              # photon emission from recombination events
 - fusion_born_alpha                   # alpha particles born from fusion reactions
 
-# === W2a corpus mining additions (plan 38 §A9) ===
-# From 41 process classifications in rc20 corpus mining.
+# === Generic reaction / heating / injection / erosion mechanisms ===
 - fusion                       # fusion reaction process
 - heating                      # generic heating mechanism
 - injection                    # generic injection process
 - sputtering                   # sputtering erosion process
 - viscosity                    # viscous transport process
 - ohmic_induction
-
-# === rc19 vocabulary extensions (plan 41 §A3 corpus gap closure) ===
-# Tokens confirmed missing from corpus analysis against imas-standard-names-catalog.
-- coulomb_collisions_with_ion        # Coulomb collisions specifically with bulk ions (ion-channel analog of coulomb_collisions_with_electrons)
-- coulomb_collisions_with_ion_state  # Coulomb collisions with a specific ion charge state (charge-state-resolved variant)
 - ion_neutral_friction               # ion–neutral friction process (momentum exchange between ions and neutrals)
 
-# === rc20 vocabulary extensions (plan 41 §A4 corpus gap closure) ===
+# === Runaway generation and scattering interactions ===
 - hot_tail                     # hot-tail runaway generation mechanism
 - compton_scattering           # Compton scattering interaction
 - perturbed_parallel_magnetic_field     # perturbed parallel magnetic field process
 - perturbed_parallel_vector_potential   # perturbed parallel vector potential process
-
-# === radiation and fast-particle-loss mechanism additions ===
-# Genuine mechanism gaps from codex VocabGap analysis (runaway, fast-ion,
-# radiometry DD paths). Each distinct from existing process tokens.
 - avalanche                    # runaway-electron avalanche generation (secondary RE multiplication; distinct from dreicer/hot_tail)
 - first_orbit_loss             # prompt fast-ion first-orbit loss (unconfined fast ions lost on their first orbit)
 - line_radiation               # bound-bound atomic line radiation (distinct from impurity_radiation / radiation)
