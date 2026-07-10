@@ -6,6 +6,8 @@ external tools such as imas-codex. The main entry point is
 conventions, and LLM orientation data into a single dictionary.
 """
 
+import copy
+import functools
 from importlib import resources
 from typing import Any
 
@@ -549,7 +551,17 @@ def get_grammar_context() -> dict[str, Any]:
     Aggregates grammar mechanics, naming conventions, and LLM orientation
     context into a single dictionary suitable for external consumers.
     Includes the 5-group IR context alongside the flat segment surface.
+
+    The payload is derived from static vocabulary data plus a full catalog
+    scan (usage statistics), which is expensive — the aggregate is built
+    once per process and a deep copy is returned so callers may freely
+    mutate their view without corrupting the cache.
     """
+    return copy.deepcopy(_build_full_context())
+
+
+@functools.lru_cache(maxsize=1)
+def _build_full_context() -> dict[str, Any]:
     return {
         # Grammar mechanics
         "canonical_pattern": _build_canonical_pattern(),
