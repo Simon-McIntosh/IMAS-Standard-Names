@@ -2,12 +2,27 @@
 
 from __future__ import annotations
 
+import re
+
 from ..grammar.model import parse_standard_name
 from ..grammar.model_types import GeometricBase
 from ..models import StandardNameEntry, StandardNameMetadataEntry
 from ..provenance import OperatorProvenance
 
 __all__ = ["run_semantic_checks"]
+
+# Severity applied to unresolvable *inline* documentation references (the
+# markdown "[label](name:target)" form). Locked decision: ships as a
+# warning now; promote to "ERROR" here when the catalog is ready to fail
+# the build on dangling prose references. Structured references (links,
+# deprecates, superseded_by, arguments, error_variants) always error —
+# export already prunes those, so a dangling structured ref means a broken
+# export, not an editorial slip.
+INLINE_REFERENCE_SEVERITY = "WARNING"
+
+# Matches the markdown-link form used for inline standard-name references in
+# documentation prose, e.g. "[current at target](name:current_at_divertor_target)".
+_INLINE_NAME_REF_RE = re.compile(r"\]\(name:([A-Za-z][A-Za-z0-9_]*)\)")
 
 # Geometric bases that describe orientations (require object qualification)
 ORIENTATION_BASES = {
@@ -54,6 +69,7 @@ INTRINSIC_COORDINATE_BASES = {
 
 def run_semantic_checks(entries: dict[str, StandardNameEntry]) -> list[str]:
     issues: list[str] = []
+    known_names = set(entries)
     for name, entry in entries.items():
         # Existing provenance checks
         prov = getattr(entry, "provenance", None)
@@ -77,6 +93,84 @@ def run_semantic_checks(entries: dict[str, StandardNameEntry]) -> list[str]:
         issues.extend(_check_physical_base_with_object(name, entry))
         issues.extend(_check_dimensionless_physical_quantity(name, entry))
         issues.extend(_check_none_unit_with_quantitative_kind(name, entry))
+        issues.extend(_check_referential_integrity(name, entry, known_names))
+
+    return issues
+
+
+def _check_referential_integrity(
+    name: str, entry: StandardNameEntry, known_names: set[str]
+) -> list[str]:
+    """Resolve every structured and inline name reference an entry carries.
+
+    ``links`` (internal ``name:`` entries), ``deprecates``, and
+    ``superseded_by`` are governance/documentation edges — a dangling
+    reference here means export produced or preserved a broken edge, so
+    these are reported at error severity.
+
+    ``arguments`` (operator decomposition edges) and ``error_variants``
+    (upper/lower/index siblings) are computed fields re-derived on export
+    (see :class:`StandardNameEntryBase`); ``yaml_store.YamlStore.load``
+    already carries a dedicated warning for these two (they may legitimately
+    reference a sibling not yet composed), so this check reports them at
+    warning severity too rather than duplicating that mechanism at a
+    stricter level.
+
+    Inline references embedded in documentation prose as markdown links
+    (``[label](name:target)``) are authored free text and drift more
+    easily; they are reported at :data:`INLINE_REFERENCE_SEVERITY`
+    (warning by default — see the module docstring for promotion).
+
+    A resolvable ``superseded_by``/``deprecates`` target is valid regardless
+    of the target's own status — deprecated stub entries pointing forward to
+    an active successor are exactly what this check must accept, not flag.
+    Severity: Error (links / deprecates / superseded_by) / Warning
+    (arguments, error_variants, inline — the last promotable to error).
+    """
+    issues: list[str] = []
+
+    for link in getattr(entry, "links", None) or []:
+        if isinstance(link, str) and link.startswith("name:"):
+            target = link[len("name:") :].strip()
+            if target and target not in known_names:
+                issues.append(
+                    f"{name}: ERROR - links references non-existent standard "
+                    f"name '{target}'"
+                )
+
+    for field in ("deprecates", "superseded_by"):
+        target = getattr(entry, field, None)
+        if target and target not in known_names:
+            issues.append(
+                f"{name}: ERROR - {field} references non-existent standard "
+                f"name '{target}'"
+            )
+
+    for arg in getattr(entry, "arguments", None) or []:
+        target = getattr(arg, "name", None)
+        if target and target not in known_names:
+            issues.append(
+                f"{name}: WARNING - arguments references non-existent standard "
+                f"name '{target}'"
+            )
+
+    error_variants = getattr(entry, "error_variants", None) or {}
+    for role, target in error_variants.items():
+        if target and target not in known_names:
+            issues.append(
+                f"{name}: WARNING - error_variants[{role}] references "
+                f"non-existent standard name '{target}'"
+            )
+
+    documentation = getattr(entry, "documentation", None)
+    if documentation:
+        for match in _INLINE_NAME_REF_RE.finditer(documentation):
+            target = match.group(1)
+            if target not in known_names:
+                issues.append(
+                    f"{name}: {INLINE_REFERENCE_SEVERITY} - documentation "
+                    f"references non-existent standard name '{target}'"
+                )
 
     return issues
 
