@@ -4,18 +4,21 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="docs-project"   content="imas-standard-names">
-  <meta name="reckon-type"    content="plan">
-  <meta name="plan-slug"      content="sn-fusion-neutron-rate-naming">
-  <meta name="plan-title"     content="SN Fusion Neutron-Rate Naming Consistency (flux to rate)">
-  <meta name="plan-summary"   content="The thermal-fusion neutron-rate family is inconsistent. The canonical name total_neutron_source_rate_due_to_thermal_fusion uses base=source_rate [Hz], but two accepted DERIVED children (deuterium_deuterium / tritium_tritium _neutron_flux_due_to_thermal_fusion) still use base=flux [Hz] — 'flux' is the wrong physical_base for a Hz rate — and their structural parent neutron_flux_due_to_thermal_fusion is SUPERSEDED, orphaning the derivation (a live child pointing at a dead parent). Align the family onto the source_rate base with a live parent, via the rename cascade. Spun out of sn-pedestal-source-recovery (f-psr-006).">
-  <meta name="plan-status"    content="draft">
-  <meta name="plan-roi"       content="low">
-  <meta name="plan-effort"    content="S">
-  <meta name="plan-tier"      content="sonnet">
-  <meta name="plan-owner"     content="Simon McIntosh">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="sn-fusion-neutron-rate-naming">
+  <meta name="plan-title" content="SN Fusion Neutron-Rate Naming Consistency (flux to rate)">
+  <meta name="plan-summary" content="The thermal-fusion neutron-rate family is inconsistent. The canonical name total_neutron_source_rate_due_to_thermal_fusion uses base=source_rate [Hz], but two accepted DERIVED children (deuterium_deuterium / tritium_tritium _neutron_flux_due_to_thermal_fusion) still use base=flux [Hz] — &#x27;flux&#x27; is the wrong physical_base for a Hz rate — and their structural parent neutron_flux_due_to_thermal_fusion is SUPERSEDED, orphaning the derivation (a live child pointing at a dead parent). Align the family onto the source_rate base with a live parent, via the rename cascade. Spun out of sn-pedestal-source-recovery (f-psr-006).">
+  <meta name="plan-status" content="shipped">
+  <meta name="plan-roi" content="low">
+  <meta name="plan-effort" content="S">
+  <meta name="plan-tier" content="sonnet">
+  <meta name="plan-owner" content="Simon McIntosh">
   <title>SN Fusion Neutron-Rate Naming Consistency | imas-standard-names</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-07-10">
+<meta name="plan-impl" content="1.0">
+<meta name="plan-version" content="1">
 </head>
 <body>
   <main class="plan-doc">
@@ -83,7 +86,22 @@
       <a href="sn-pedestal-source-recovery.html">sn-pedestal-source-recovery</a> (f-psr-006) while retiring
       the redundant manual <code>flux_due_to_thermal_fusion</code>.</p>
 
-    <h2 id="s3">§3 — The decision + approach</h2>
+    <section id="s3-landed" class="section-landed">
+      <header>
+        <span class="badge badge-shipped">✓ landed 2026-07-10</span>
+        <h2>§3 — Executed</h2>
+      </header>
+      <p class="landed-summary">
+        Both per-reaction children renamed flux→source_rate via the cascade (0 conflicts); the
+        structural fixpoint re-derived a LIVE <code>neutron_source_rate_due_to_thermal_fusion</code>
+        parent (structurally accepted), with <code>total_neutron_source_rate_due_to_thermal_fusion</code>
+        correctly its child (total_ is an aggregation prefix — decision locked: rederive-parent);
+        grammar segments realigned (physical_base=source_rate on all four); 0 orphans / 0 desyncs.
+        The superseded flux names stay retired.
+      </p>
+    </section>
+
+    <h2 id="s3">§3 — The decision + approach (reference)</h2>
     <p>The concept and correct base already exist (<code>source_rate</code>, on the canonical total). The
       fix aligns the per-reaction children to it and restores a live parent:</p>
     <ul>
@@ -103,27 +121,27 @@
       and that the live children point at a live parent.</p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
-      <h2><span class="sec">§</span> Decisions</h2>
-      <div class="r-dec" data-key="fusion-child-parent" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">After renaming the per-reaction children to base=source_rate, what is their live structural parent?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="rederive-parent">Re-derive a <code>neutron_source_rate_due_to_thermal_fusion</code> parent (structural fixpoint) and let the total remain a separate summary quantity</button>
-          <button class="r-opt" data-value="total-as-parent">Use the existing <code>total_neutron_source_rate_due_to_thermal_fusion</code> as the group parent</button>
-        </p>
-        <p class="r-dec-rat"></p>
-      </div>
-    </section>
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="fusion-child-parent" data-choice="rederive-parent" data-by="reckon-ship" data-when="2026-07-10T13:37:10+00:00">
+    <p class="r-dec-q">After renaming the per-reaction children to base=source_rate, what is their live structural parent?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="rederive-parent">Re-derive a neutron_source_rate_due_to_thermal_fusion parent (structural fixpoint) and let the total remain a separate summary quantity</button>
+      <button class="r-opt" data-value="total-as-parent">Use the existing total_neutron_source_rate_due_to_thermal_fusion as the group parent</button>
+      </p>
+    <p class="r-dec-rat">derive_edges derives structural parents from the grammar: the renamed children strip their reaction-channel qualifier to neutron_source_rate_due_to_thermal_fusion, and total_ is itself an aggregation prefix — so the canonical total is a SIBLING-level derived child of the same parent, not a valid group parent. The structural fixpoint re-derived the parent automatically and it was structurally accepted.</p>
+    </div>
+</section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
-      <h2><span class="sec">§</span> Followups</h2>
-      <article class="r-fu" data-id="f-fnr-001" data-status="open" data-tier="sonnet" data-written-by="reckon-create" data-written-at="2026-07-09">
-        <h4 class="r-fu-title">Rename the fusion neutron-flux children to source_rate and restore a live parent</h4>
-        <div class="r-fu-body">Align the two accepted per-reaction children (D-D, T-T) from base=flux to base=source_rate to match
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-fnr-001" data-status="resolved" data-tier="sonnet" data-written-by="reckon-create" data-written-at="2026-07-09" data-recommends-skill="" data-resolved-at="2026-07-10T13:37:10+00:00" data-resolved-by="reckon-ship">
+    <h4 class="r-fu-title">Rename the fusion neutron-flux children to source_rate and restore a live parent</h4>
+    <div class="r-fu-body">Align the two accepted per-reaction children (D-D, T-T) from base=flux to base=source_rate to match
           the canonical <code>total_neutron_source_rate_due_to_thermal_fusion</code>, and ensure they hang
           off a live parent (their current parent <code>neutron_flux_due_to_thermal_fusion</code> is
           superseded). Use the rename cascade; validate grammar round-trip. Spun out of
           <a href="sn-pedestal-source-recovery.html">sn-pedestal-source-recovery</a> f-psr-006.</div>
-        <pre class="r-fu-prompt">Project: imas-standard-names (grammar) + imas-codex (standard_names) + imas graph
+    <pre class="r-fu-prompt">Project: imas-standard-names (grammar) + imas-codex (standard_names) + imas graph
 Plan: sn-fusion-neutron-rate-naming (http://localhost:8765/imas-standard-names/sn-fusion-neutron-rate-naming.html)
 Section: rename flux children to source_rate + restore live parent
 Tier: sonnet
@@ -140,15 +158,15 @@ State to read (CODE / FILES / DATA)
   (seed_parent_sources / rederive_structural_edges). CLI: sn run --rename OLD:NEW --include-accepted
   (--dry-run first). ISN grammar: parse_standard_name / render.compose must accept + round-trip the
   targets (verified: deuterium_deuterium_neutron_rate_due_to_thermal_fusion parses, base=rate). Graph:
-    MATCH (n:StandardName) WHERE n.id CONTAINS 'due_to_thermal_fusion'
-    OPTIONAL MATCH (n)-[:HAS_PARENT]->(p) RETURN n.id,n.physical_base,n.unit,n.name_stage,p.id
+    MATCH (n:StandardName) WHERE n.id CONTAINS &#x27;due_to_thermal_fusion&#x27;
+    OPTIONAL MATCH (n)-[:HAS_PARENT]-&gt;(p) RETURN n.id,n.physical_base,n.unit,n.name_stage,p.id
 
 Scope locks / constraints (non-decision)
   - Rename cascade only, NEVER --focus recompose. Every target ISN-grammar-valid + round-tripping.
   - Preserve provenance (derived sources) and content; keep 0 orphans / 0 desyncs.
   - Do not resurrect the superseded flux_due_to_thermal_fusion / neutron_flux_due_to_thermal_fusion;
     the children must end up under a LIVE source_rate parent.
-  - Note: 'source_rate' is the valid base; 'rate' also parses — pick the base consistent with the
+  - Note: &#x27;source_rate&#x27; is the valid base; &#x27;rate&#x27; also parses — pick the base consistent with the
     canonical total_neutron_source_rate_due_to_thermal_fusion.
 
 Done-when
@@ -156,8 +174,9 @@ Done-when
   2. They hang off a LIVE structural parent (per the decision).
   3. 0 orphans / 0 desyncs; provenance preserved.
   4. This followup resolved.</pre>
-      </article>
-    </section>
+    <p class="r-fu-outcome">Landed — both children renamed flux→source_rate via the cascade (0 conflicts); structural fixpoint re-derived a LIVE neutron_source_rate_due_to_thermal_fusion parent (accepted); total_neutron_source_rate_due_to_thermal_fusion now correctly its child; grammar segments realigned (physical_base=source_rate on all 4); 0 orphans/desyncs. Superseded flux names left retired.</p>
+    </article>
+</section>
   </main>
 </body>
 </html>
