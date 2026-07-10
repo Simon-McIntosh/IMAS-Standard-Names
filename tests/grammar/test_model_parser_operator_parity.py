@@ -62,6 +62,10 @@ def _candidate_names(op: str, meta: dict) -> list[str]:
         base = _VECTOR_BASE if op in _VECTOR_ONLY_POSTFIX else _SCALAR_BASE
         return [f"{base}_{op}"]
     if kind == OperatorKind.UNARY_PREFIX.value:
+        if meta.get("flux_surface_reduction"):
+            # pressure is a flux function (constant_on_flux_surface), so the
+            # flux-surface reductions gate it out — use a surface-varying base.
+            return [f"{op}_of_temperature", f"{op}_temperature"]
         if meta.get("indexed") and list(meta.get("index_params") or []) == ["coord"]:
             # Fused indexed prefix: <op>_<coord>_of_<base>.
             return [f"{op}_radial_coordinate_of_{_SCALAR_BASE}"]

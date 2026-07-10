@@ -137,12 +137,14 @@ class TestTransformationCompose:
         assert name == "maximum_over_flux_surface_electron_temperature"
 
     def test_minimum_over_flux_surface(self):
+        # safety_factor is constant_on_flux_surface (the reduction gate
+        # rejects it), so exercise the operator on a surface-varying base.
         parts = {
             "transformation": "minimum_over_flux_surface",
-            "physical_base": "safety_factor",
+            "physical_base": "magnetic_field",
         }
         name = compose_name(parts)
-        assert name == "minimum_over_flux_surface_safety_factor"
+        assert name == "minimum_over_flux_surface_magnetic_field"
 
     @_XFAIL_RC20
     def test_derivative_of(self):
@@ -397,7 +399,7 @@ class TestTransformationRoundTrip:
             },
             {
                 "transformation": "minimum_over_flux_surface",
-                "physical_base": "safety_factor",
+                "physical_base": "magnetic_field",
             },
             pytest.param(
                 {

@@ -12,6 +12,9 @@
 #
 # Structure per entry:
 #   aliases  - list of alternate tokens (empty default)
+#   constant_on_flux_surface - true for flux-label carriers (rho_tor and
+#              friends): constant on any flux surface, so a flux-surface
+#              reduction operator on them is a no-op and is rejected.
 #
 # Populated by W2a from corpus mining (plan 38 §A9) and migration from
 # geometric_bases.yml.
@@ -29,6 +32,7 @@ carriers:
     aliases: []
   normalized_toroidal_flux_coordinate:
     aliases: []
+    constant_on_flux_surface: true
   offset:
     aliases: []
   position:
@@ -37,6 +41,7 @@ carriers:
     aliases: []
   toroidal_flux_coordinate:
     aliases: []
+    constant_on_flux_surface: true
 
   # === Migrated from geometric_bases.yml (carrier-type entries) ===
   contour:
@@ -49,6 +54,7 @@ carriers:
     aliases: []
   normalized_poloidal_flux_coordinate:
     aliases: []
+    constant_on_flux_surface: true
   outline:
     aliases: []
   sensor_normal:
@@ -89,6 +95,7 @@ carriers:
     aliases: []
   toroidal_flux_radius:  # toroidal flux radius coordinate (rho_tor)
     aliases: []
+    constant_on_flux_surface: true
   image_up_unit_vector:  # image-up orientation of an imaging device, distinct from its line-of-sight direction_unit_vector — N=3 (camera_ir camera/up/{x,y,z})
     aliases: []
   major_axis_unit_vector:  # major principal axis of an elliptical cross-section — N=3 (spi shatter_cone/unit_vector_major/{x,y,z})

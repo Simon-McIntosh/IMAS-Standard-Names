@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from collections import Counter
 from collections.abc import Mapping
+from functools import cache
 from typing import Annotated, Any
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
@@ -493,8 +494,7 @@ def _ir_to_model_dict(ir: StandardNameIR) -> dict[str, str]:
                         raise ValueError(msg)
                     population = q.token
                 elif q.token in _REACTION_CHANNEL_VALUES and any(
-                    later.token in _SUBJECT_VALUES
-                    for later in ir.qualifiers[qi + 1 :]
+                    later.token in _SUBJECT_VALUES for later in ir.qualifiers[qi + 1 :]
                 ):
                     # Reactant pair acting as a reaction-channel qualifier: a
                     # product subject (e.g. neutron) follows, so the pair scopes
@@ -1388,12 +1388,72 @@ class StandardName(BaseModel):
         return out
 
 
+@cache
+def _flux_surface_reduction_vocab() -> tuple[frozenset[str], frozenset[str]]:
+    """(reduction operator tokens, bases/carriers constant on a flux surface)."""
+    from imas_standard_names.grammar.vocab_loaders import (  # noqa: PLC0415
+        load_geometry_carriers,
+        load_operators,
+        load_physical_bases,
+    )
+
+    ops = frozenset(
+        token
+        for token, defn in load_operators().operators.items()
+        if defn.flux_surface_reduction
+    )
+    flagged = frozenset(
+        token
+        for token, defn in load_physical_bases().bases.items()
+        if defn.constant_on_flux_surface
+    ) | frozenset(
+        token
+        for token, defn in load_geometry_carriers().carriers.items()
+        if defn.constant_on_flux_surface
+    )
+    return ops, flagged
+
+
+def _check_flux_surface_reduction_gate(ir: StandardNameIR) -> None:
+    """Reject flux-surface reduction operators applied to flux functions.
+
+    A base flagged ``constant_on_flux_surface`` is constant on any flux
+    surface, so flux-surface reductions of it are no-ops (FSA of an FSA);
+    the local and flux-surface-averaged DD leaves share one name instead.
+    Reduction tokens surface either on the IR operator stack or, in the
+    bare-prefix qualifier spelling, in the qualifier list; binary operator
+    arguments nest full IRs, so recurse into them.
+    """
+    reduction_ops, flagged_bases = _flux_surface_reduction_vocab()
+    if not reduction_ops or not flagged_bases:
+        return
+    applied = {getattr(op, "op", None) for op in (ir.operators or [])} | {
+        q.token for q in (ir.qualifiers or [])
+    }
+    hit = applied & reduction_ops
+    base_token = getattr(ir.base, "token", None)
+    if hit and base_token in flagged_bases:
+        op = sorted(hit)[0]
+        raise ValueError(
+            f"operator '{op}' cannot apply to '{base_token}': the base is "
+            "constant on a flux surface (a flux function), so a flux-surface "
+            "reduction of it is a no-op — use the unreduced name "
+            f"(e.g. '{base_token}_at_plasma_boundary') for both the local "
+            "and flux-surface-averaged quantities"
+        )
+    for op_app in ir.operators or []:
+        for arg in getattr(op_app, "args", None) or []:
+            if isinstance(arg, StandardNameIR):
+                _check_flux_surface_reduction_gate(arg)
+
+
 def compose_standard_name(parts: Mapping[str, Any] | StandardName) -> str:
     if isinstance(parts, StandardName):
         model = parts
     else:
         model = StandardName.model_validate(parts)
     ir = _model_to_ir(model)
+    _check_flux_surface_reduction_gate(ir)
     return _compose_ir(ir)
 
 
@@ -1413,6 +1473,7 @@ def parse_standard_name(name: str) -> StandardName:
             known = tuple(sorted(vocabs.bases | vocabs.carriers))
             raise UnknownBaseTokenError(exc.residue, known) from exc
         raise
+    _check_flux_surface_reduction_gate(result.ir)
     model = StandardName.model_validate(_ir_to_model_dict(result.ir))
     # Strict canonical-form parsing: the grammar admits exactly ONE spelling
     # per name. A name whose tokens parse but sit in non-canonical order

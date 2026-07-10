@@ -64,6 +64,7 @@ operators:
     kind: unary_prefix
     precedence: 30
     returns: scalar_or_vector
+    flux_surface_reduction: true
 
   gradient:
     kind: unary_prefix
@@ -110,6 +111,7 @@ operators:
     kind: unary_prefix
     precedence: 30
     returns: scalar_or_vector
+    flux_surface_reduction: true
 
   minimum:
     kind: unary_prefix
@@ -120,6 +122,7 @@ operators:
     kind: unary_prefix
     precedence: 30
     returns: scalar_or_vector
+    flux_surface_reduction: true
 
   normalized:
     kind: unary_prefix

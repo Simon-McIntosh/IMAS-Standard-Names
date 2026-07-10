@@ -159,6 +159,7 @@ def load_default_vocabularies() -> Vocabularies:
             "index_params": entry.index_params,
             "returns": entry.returns,
             "arg_types": entry.arg_types,
+            "flux_surface_reduction": entry.flux_surface_reduction,
         }
 
     # Build qualifier set: Subject tokens + Object tokens + YAML-loaded

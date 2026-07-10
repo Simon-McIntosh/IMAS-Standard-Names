@@ -131,6 +131,11 @@ class OperatorDef(BaseModel, extra="forbid"):
     # The base-implies-unit heuristic in validation/semantic.py is invalid for
     # names carrying such an operator (volume_integrated density is a count).
     dimension_transforming: bool = False
+    # The operator reduces over a flux surface (flux_surface_averaged,
+    # maximum/minimum_over_flux_surface). Applied to a base flagged
+    # constant_on_flux_surface it is a no-op (the reduction of a flux
+    # function is the value itself) and composition rejects the name.
+    flux_surface_reduction: bool = False
 
 
 class OperatorRegistry(BaseModel, extra="forbid"):
@@ -161,11 +166,16 @@ class PhysicalBaseDef(BaseModel, extra="forbid"):
         kind: Physical kind — scalar, vector, tensor, or complex.
         inherently_dimensional: If true, this base normally carries SI units
             and marking it dimensionless (unit='1') is flagged by the validator.
+        constant_on_flux_surface: If true, this base is a flux function —
+            constant on any flux surface — so a flux-surface reduction
+            operator (flux_surface_averaged, maximum/minimum_over_flux_surface)
+            applied to it is a no-op and the composition gate rejects it.
     """
 
     aliases: list[str] = []
     kind: BaseKind
     inherently_dimensional: bool = False
+    constant_on_flux_surface: bool = False
 
 
 class PhysicalBasesRegistry(BaseModel, extra="forbid"):
@@ -193,9 +203,14 @@ class GeometryCarrierDef(BaseModel, extra="forbid"):
 
     Attributes:
         aliases: Alternate tokens that map to this carrier.
+        constant_on_flux_surface: If true, this carrier is a flux label
+            (rho_tor and friends) — constant on any flux surface — so a
+            flux-surface reduction operator applied to it is a no-op and
+            the composition gate rejects it.
     """
 
     aliases: list[str] = []
+    constant_on_flux_surface: bool = False
 
 
 class GeometryCarriersRegistry(BaseModel, extra="forbid"):

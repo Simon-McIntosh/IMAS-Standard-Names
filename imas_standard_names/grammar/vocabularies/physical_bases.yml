@@ -18,6 +18,13 @@
 #                            unit='1' on these is flagged by the validator
 #                            unless an operator (normalized, perturbed, …)
 #                            explicitly produces dimensionless output.
+#   constant_on_flux_surface - true if this base is a flux function (constant
+#                            on any flux surface: safety factor, magnetic
+#                            shear, flux labels, ideal-MHD pressure). A
+#                            flux-surface reduction operator applied to such
+#                            a base is a no-op (FSA of an FSA) and the
+#                            composition gate rejects the name; the local and
+#                            flux-surface-averaged DD leaves share one name.
 
 bases:
   absorptivity:
@@ -204,12 +211,14 @@ bases:
   magnetic_flux:
     aliases: []
     kind: scalar
+    constant_on_flux_surface: true
   magnetic_moment:
     aliases: []
     kind: vector
   magnetic_shear:
     aliases: []
     kind: scalar
+    constant_on_flux_surface: true
   magnetization:
     aliases: []
     kind: scalar
@@ -269,6 +278,7 @@ bases:
     aliases: []
     kind: scalar
     inherently_dimensional: true
+    constant_on_flux_surface: true
   q_profile:
     aliases:
     - safety_factor_profile
@@ -302,6 +312,7 @@ bases:
   safety_factor:
     aliases: []
     kind: scalar
+    constant_on_flux_surface: true
   shearing_rate:
     aliases: []
     kind: scalar

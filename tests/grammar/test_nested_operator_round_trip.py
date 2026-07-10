@@ -44,7 +44,7 @@ from imas_standard_names.grammar.model import (
 IN_SCOPE = [
     # of-prefix outer operator + inner bare-transformation + species subject
     "time_derivative_of_volume_averaged_electron_density",
-    "time_derivative_of_flux_surface_averaged_pressure",
+    "time_derivative_of_flux_surface_averaged_electron_density",
     "gradient_of_normalized_electron_temperature",
     # postfix outer operator + inner bare-transformation
     "volume_averaged_electron_density_magnitude",
