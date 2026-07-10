@@ -1,4 +1,4 @@
-# Operator registry vocabulary (plan 38 §A7)
+# Operator registry vocabulary
 #
 # Unified replacement for transformations.yml + decomposition.yml +
 # reductions.py patterns.  All operator tokens are stored as BARE tokens
@@ -19,8 +19,8 @@
 #   unary_postfix  ->  <inner>_<token>
 #   binary         ->  <token>_of_<A><separator><B>
 #
-# Populated by W2a from corpus mining (25 prefix + 15 postfix + 3 binary)
-# and migration from transformations.yml + decomposition.yml (plan 38 §A9).
+# Unified registry of prefix, postfix, and binary operators (superseded the
+# separate transformations.yml and decomposition.yml vocabularies).
 
 operators:
 
@@ -230,7 +230,7 @@ operators:
     returns: scalar
     dimension_transforming: true
 
-  # --- Uncertainty modifier operators (rc23 — B9 error siblings) ---
+  # --- Uncertainty modifier operators (error siblings) ---
   # Three deterministic operators for IMAS _error_upper / _error_lower /
   # _error_index companion fields.  Applied as outer wrappers of the
   # parent standard name: upper_uncertainty_of_<P>, etc.

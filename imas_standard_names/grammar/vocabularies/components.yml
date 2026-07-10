@@ -11,7 +11,7 @@
 #     (R, Z, φ) coordinates. `velocity_phi` is forbidden; `velocity_tor` is
 #     deprecated.
 #   - `diamagnetic`, `e_cross_b`, and `pfirsch_schlueter` are deferred as
-#     component tokens. The D.3 review ruled them as component qualifiers
+#     component tokens. They are component qualifiers
 #     (e.g. `diamagnetic_component_of_drift_velocity`), but the current
 #     parser shares this vocabulary with the `coordinate` segment (bare
 #     prefix match), which breaks existing names like
@@ -36,7 +36,7 @@
 - y
 - z
 
-# === Normalized spatial directions (D.3 review §5) ===
+# === Normalized spatial directions ===
 - normalized_radial          # component along normalized radial (ρ) direction
 - normalized_vertical        # component along normalized vertical direction
 - normalized_parallel        # component along normalized parallel direction

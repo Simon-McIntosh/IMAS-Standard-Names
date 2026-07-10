@@ -1,4 +1,4 @@
-# Geometry carriers vocabulary (plan 38 §A1)
+# Geometry carriers vocabulary
 #
 # Closed vocabulary of geometric shape tokens that can carry a coordinate
 # projection (shape=coordinate).  Distinct from physical_bases.yml which
@@ -16,12 +16,11 @@
 #              friends): constant on any flux surface, so a flux-surface
 #              reduction operator on them is a no-op and is rejected.
 #
-# Populated by W2a from corpus mining (plan 38 §A9) and migration from
-# geometric_bases.yml.
+# Migrated from geometric_bases.yml.
 
 carriers:
 
-  # === From corpus mining (8 geometry_carrier tokens) ===
+  # === Core geometry carriers ===
   # line_of_sight moved to locus_registry.yml (position-typed locus, relation
   # 'along': toroidal_angle_along_line_of_sight) — it named a diagnostic
   # chord/path locus, not a standalone geometric-base noun, and no name used
@@ -70,26 +69,25 @@ carriers:
   vertex:
     aliases: []
 
-  # === EMW pilot rc27 additions (evidence N>=3) ===
-  x1_coordinate:  # Added rc27: EMW pilot evidence N=3
+  # === Local coordinate-triad carriers ===
+  x1_coordinate:  # local coordinate axis
     aliases: []
-  x2_coordinate:  # Added rc27: EMW pilot evidence N=3
-    aliases: []
-
-  # === W38 vocab gap closure (evidence N>=3) ===
-  x1_unit_vector:  # W38: local coordinate axis unit vector, neutron_diagnostic detector/aperture geometry — evidence N=4
-    aliases: []
-  x2_unit_vector:  # W38: companion to x1_unit_vector, local coordinate triad symmetry — evidence N=0 (symmetric addition)
+  x2_coordinate:  # local coordinate axis
     aliases: []
 
-  # === rc36 vocab gap closure (W38 wave-3 rotation) ===
-  poloidal_angle:  # rc36: poloidal angle coordinate (sensor orientation, equilibrium grids) — N=2
+  x1_unit_vector:  # local coordinate axis unit vector (neutron_diagnostic detector/aperture geometry)
     aliases: []
-  toroidal_angle:  # rc36: toroidal angle coordinate (sensor orientation, probe geometry) — N=1
+  x2_unit_vector:  # companion to x1_unit_vector, local coordinate triad symmetry
     aliases: []
-  normal_coordinate:  # rc36: Frenet-Serret normal-axis coordinate (conductor cross-section outlines) — N=1
+
+  # === Angular and normal-axis carriers ===
+  poloidal_angle:  # poloidal angle coordinate (sensor orientation, equilibrium grids)
     aliases: []
-  binormal_coordinate:  # rc36: Frenet-Serret binormal-axis coordinate (conductor cross-section outlines) — N=1
+  toroidal_angle:  # toroidal angle coordinate (sensor orientation, probe geometry)
+    aliases: []
+  normal_coordinate:  # Frenet-Serret normal-axis coordinate (conductor cross-section outlines)
+    aliases: []
+  binormal_coordinate:  # Frenet-Serret binormal-axis coordinate (conductor cross-section outlines)
     aliases: []
   direction_unit_vector:  # unit vector along a specified direction
     aliases: []

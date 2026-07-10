@@ -5,7 +5,7 @@
 # is used with QuantityBase (shape=component, e.g.
 # "radial_component_of_magnetic_field").
 #
-# Populated by W2a from corpus mining (10 coordinate_axis tokens):
+# Coordinate-axis tokens (10):
 #   normalized_parallel, normalized_poloidal, normalized_toroidal,
 #   parallel, perpendicular, poloidal, radial, toroidal, vertical, x
 

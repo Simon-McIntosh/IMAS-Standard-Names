@@ -397,9 +397,7 @@ bases:
     aliases: []
     kind: scalar
 
-  # === rc9 vocabulary extensions (codex R6-R7 gap analysis) ===
-  # Verified true gaps from FOCS, neutron diagnostics, and optical
-  # diagnostic DD paths.
+  # === FOCS, neutron, and optical diagnostic bases ===
 
   dead_time:
     aliases: []

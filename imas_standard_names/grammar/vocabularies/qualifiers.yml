@@ -178,8 +178,6 @@
 - bohm                          # Bohm normalized
 - greenwald                     # Greenwald-normalized (density)
 
-# === rc21 vocabulary extensions (codex vocab gap analysis) ===
-# From comprehensive VocabGap graph analysis after 10-rotation bootstrap.
 # Only atomic tokens — compound gaps (lower_inner, upper_outer, etc.)
 # must compose from these atomic qualifiers.
 
@@ -206,10 +204,6 @@
 # --- Named parameters ---
 - ejima                         # Ejima (volt-second consumption coefficient)
 
-# === rc5 vocabulary extensions (codex R1-R4 bootstrap gap analysis) ===
-# Genuine gaps surfaced by focus rotations across equilibrium, transport,
-# MHD, and wave domains. All verified against ISN parse() round-trip.
-
 # --- Physics regime / type ---
 # NOTE: 'internal' removed — internal_inductance and internal_energy are now
 # atomic bases (physical_bases.yml). internal bound only to those two bases.
@@ -224,17 +218,11 @@
 - slow_wave                     # slow wave branch: slow_wave_power
 - linear                        # linear (perturbative regime): linear_growth_rate, linear_frequency
 
-# === rc8 vocabulary extensions (codex R5 gap analysis) ===
-# Verified via ISN parse() round-trip after addition.
-
 # --- Position modifiers ---
 # NOTE: outer moved to zones.yml (radial position, counterpart to inner).
 
 # --- Coupling / interaction ---
 - mutual                        # mutual interaction (mutual inductance, mutual coupling)
-
-# === rc9 vocabulary extensions (codex R6-R7 gap analysis) ===
-# Verified via ISN parse() round-trip after addition.
 
 # --- Spatial / symmetry modifiers ---
 # NOTE: 'angular' removed — angular_momentum, angular_frequency, and

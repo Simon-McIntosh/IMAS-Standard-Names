@@ -9,7 +9,7 @@
 #   - deuterium_pressure
 #
 # SUBJECTS ARE SPECIES / ENTITIES ONLY. Modifier qualifiers live in dedicated
-# orthogonal segments as of the rc32 vocab decomposition — they are NOT subject
+# orthogonal segments — they are NOT subject
 # tokens:
 #   - energy-state fast/thermal/cold/hot/suprathermal, molecularity, bulk →
 #     `population` segment (populations.yml)

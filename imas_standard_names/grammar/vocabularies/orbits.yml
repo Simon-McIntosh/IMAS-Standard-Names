@@ -9,8 +9,7 @@
 #   - counter_current_fast_ion_pressure (orbit=counter_current, population=fast, subject=ion)
 #
 # Single-token closed segment (at most one orbit class per name). Kept separate
-# from population so each dimension is independently validated and queryable
-# (rc32 decomposition).
+# from population so each dimension is independently validated and queryable.
 
 - trapped            # trapped (banana) orbit class
 - co_passing         # co-passing orbit class
