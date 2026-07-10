@@ -133,10 +133,30 @@ _CHANNEL_VALUES: frozenset[str] = frozenset(c.value for c in Channel)
 # is kind-forming (atomic_mass, prefill_count, saturated_current,
 # deposited_power with the species as recipient-possessor) and stays glued
 # to the base, INNER of the species block. Multi-token; stacked scoping
-# qualifiers keep authored order (a canonical intra-order by category rank
-# is planned but not yet enforced).
+# qualifiers are canonically ordered by qualifier-category rank (see
+# ``_QUALIFIER_CATEGORY_RANK`` below), mirroring the zone-order mechanism.
 _QUALIFIER_VALUES: frozenset[str] = frozenset(q.value for q in QualifierToken)
 _SCOPING_QUALIFIER_VALUES: frozenset[str] = _load_scoping_qualifiers()
+
+# Canonical intra-order for a MULTI-token refined qualifier segment: rank each
+# scoping qualifier by its qualifier_categories.yml category (file order),
+# mirroring ``_ZONE_ORDER``. compose() sorts the segment by this rank so a
+# non-canonical authored order canonicalizes and is rejected by
+# parse_standard_name via the round-trip. The sort is stable, so tokens sharing
+# a category keep their authored order.
+_QUALIFIER_CATEGORY_OF: dict[str, str] = _load_qualifier_categories()
+_QUALIFIER_CATEGORY_RANK: dict[str, int] = {
+    category: i
+    for i, category in enumerate(dict.fromkeys(_QUALIFIER_CATEGORY_OF.values()))
+}
+
+
+def _qualifier_order(token: str) -> int:
+    """Category rank of a qualifier token (unknown tokens sort last)."""
+    category = _QUALIFIER_CATEGORY_OF.get(token)
+    return _QUALIFIER_CATEGORY_RANK.get(category, len(_QUALIFIER_CATEGORY_RANK))
+
+
 # Reaction-channel qualifier tokens (reactant pairs). DUAL-ROLE: also subjects.
 # A pair is routed to the qualifier segment (rendered before the subject) ONLY
 # when another subject token follows it — e.g. deuterium_tritium_neutron_flux
@@ -901,9 +921,14 @@ def _decompose_physical_base(
     # Phrase-scoping qualifiers modify the WHOLE species+channel+base phrase
     # (implicit_electron_energy_source_rate = the implicit part of the
     # electron energy source rate; incident_neutron_fluence), so they render
-    # before zone and the species block. Authored order is preserved.
-    for seg_q in segment_qualifiers:
-        qualifiers.append(Qualifier(token=_value_of(seg_q)))
+    # before zone and the species block. A multi-token segment is emitted in
+    # the canonical qualifier-category intra-order (stable within a category),
+    # so a non-canonical authored order canonicalizes here and is rejected by
+    # parse_standard_name via the round-trip.
+    for seg_q in sorted(
+        (_value_of(sq) for sq in segment_qualifiers), key=_qualifier_order
+    ):
+        qualifiers.append(Qualifier(token=seg_q))
 
     for zone_token in sorted(
         (_value_of(z) for z in zone), key=lambda t: _ZONE_ORDER.get(t, len(_ZONE_ORDER))
@@ -979,9 +1004,9 @@ class StandardName(BaseModel):
     # the compound noun the channel forms with the base), so compose() renders
     # it OUTER of channel_qualifier/channel and INNER of the zone
     # (implicit_energy_source_rate, incident_kinetic_energy_flux_at_wall).
-    # MULTI-token like zone, so it is a tuple; stacked qualifiers keep the
-    # authored order (a canonical intra-order by category rank is planned but
-    # not yet enforced).
+    # MULTI-token like zone, so it is a tuple; compose() emits a stacked
+    # segment in canonical qualifier-category order (stable within a category),
+    # so a non-canonical authored order canonicalizes and round-trips.
     qualifier: tuple[QualifierToken, ...] = ()
     # ChannelQualifier: qualifier that binds to the transport channel (kinetic,
     # plasma). SINGLE-token; compose() renders it immediately OUTER of the
