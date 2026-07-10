@@ -49,6 +49,20 @@ print(parsed.component)  # "radial"
 name = compose_standard_name({"component": "radial", "physical_base": "magnetic_field"})
 ```
 
+**Parse contract — `parse_standard_name` is the single validity oracle.** A
+name is valid if and only if `parse_standard_name` returns without raising. It
+enforces the full contract: known tokens, segment compatibility, the
+generic-base qualification gate, the flux-surface reduction gate, and strict
+canonical spelling (exactly one admissible spelling per name; a non-canonical
+token order raises `NonCanonicalNameError` carrying the canonical form).
+
+`grammar.parser.validate_round_trip` is **not** the oracle. It runs on the
+lenient IR parser and only answers "does this name render back to itself?",
+which is strictly weaker than validity — it skips the segment-compatibility and
+gating checks. Treat it as an IR-diagnostics tool for locating parse/compose
+drift, never as a validity check. Callers deciding whether a name is acceptable
+must use `parse_standard_name`.
+
 ### Models
 
 | Symbol | Module | Purpose |

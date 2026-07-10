@@ -1483,6 +1483,19 @@ def compose_standard_name(parts: Mapping[str, Any] | StandardName) -> str:
 
 
 def parse_standard_name(name: str) -> StandardName:
+    """Parse a name into a validated :class:`StandardName`, or raise.
+
+    This is the single validity oracle for the grammar: a name is valid iff
+    this function returns without raising. It enforces the full contract —
+    known tokens, segment compatibility, generic-base qualification, the
+    flux-surface reduction gate, and strict canonical spelling (exactly one
+    admissible spelling per name; a non-canonical token order raises
+    :class:`NonCanonicalNameError` with the canonical form attached).
+
+    Do NOT use :func:`imas_standard_names.grammar.parser.validate_round_trip`
+    as a validity check: it operates on the lenient IR parser and is an
+    IR-diagnostics tool, not the oracle (see docs/architecture/boundary.md).
+    """
     try:
         result = _parse_ir(name)
     except ParseError as exc:

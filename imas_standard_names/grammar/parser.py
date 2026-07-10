@@ -918,6 +918,14 @@ def validate_round_trip(name: str, vocabs: Vocabularies | None = None) -> bool:
 
     Raises :class:`ParseError` when the name fails to parse. Otherwise
     compares the rendered form against the input byte-for-byte.
+
+    IR-diagnostics tool only — NOT the validity oracle. It runs on the lenient
+    IR parser and answers "does this name render back to itself?", which is
+    weaker than validity: it does not enforce segment compatibility, the
+    generic-base gate, or the flux-surface reduction gate. Use
+    :func:`imas_standard_names.grammar.model.parse_standard_name` (strict) to
+    decide whether a name is valid; use this helper to locate IR
+    parse/compose round-trip drift (see docs/architecture/boundary.md).
     """
 
     result = parse(name, vocabs=vocabs)
