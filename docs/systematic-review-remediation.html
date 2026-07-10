@@ -16,8 +16,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-10">
-<meta name="plan-impl" content="0.17">
-<meta name="plan-version" content="1">
+<meta name="plan-impl" content="0.33">
+<meta name="plan-version" content="2">
 </head>
 <body>
   <main class="plan-doc">
@@ -83,35 +83,22 @@
       <figcaption>Phase order. P1 and P2 are the architectural phases; P4 must not start before P2 (repairs are edits and must be steered through the validated pipeline) and benefits from P1 (renames of accepted names then leave stubs). P3 can run in parallel. P5 and P6 close the tail.</figcaption>
     </figure>
 
-    <h2 id="s2">§2 — P1: Deprecation architecture (accepted names only)</h2>
-    <p>
-      Today the governance half of the lifecycle is vestigial: every published entry is <code>status: draft</code>,
-      no entry uses <code>deprecates</code>/<code>superseded_by</code>, and a rename of an accepted name simply
-      makes the old name vanish from the next export — a silent breaking change for any consumer that pinned it.
-      The codex graph already maintains the supersession chain internally (supersede edges written at acceptance);
-      the information is dropped at the export boundary.
-    </p>
-    <p><strong>Scope.</strong> All in imas-codex export plus ISN rendering/validation:</p>
-    <ul>
-      <li>At export, for every name whose graph node is <code>superseded</code> AND whose stage at supersession
-        was <code>accepted</code> (the supersession event must record this — add it if absent), emit a
-        <em>deprecation stub</em>: the old name with <code>status: deprecated</code>,
-        <code>superseded_by: &lt;successor&gt;</code>, unit/kind copied from the predecessor, and a one-line
-        documentation pointer. Draft-stage supersessions emit nothing.</li>
-      <li>Chains collapse: if A→B→C within the accepted lineage, the A stub points at C (the live name), not B.</li>
-      <li>Exported accepted names get <code>status: active</code> (see decision d-status-mapping); stubs are the
-        only <code>deprecated</code> entries. Stubs are retained across releases until a curator prunes them.</li>
-      <li>ISN: the build, SQLite catalog, SPA, and MCP tools render deprecated stubs distinctly (successor link
-        front and centre); the validator requires every <code>superseded_by</code> to resolve within the
-        published set (ties into P3).</li>
-      <li>Manifest/export-report accounting: <code>deprecated_stub_count</code> in
-        <code>.export_report.json</code> (the manifest model is closed — same rule as the review fix wave).</li>
-    </ul>
-    <p><strong>Done-when.</strong> (1) Renaming an accepted name through <code>sn edit --rename</code> and
-      re-exporting yields a catalog containing the successor as <code>active</code> and the predecessor as a
-      <code>deprecated</code> stub pointing at it; (2) renaming a draft name yields no stub; (3) chain collapse
-      verified by test; (4) ISN validate passes on a catalog containing stubs; (5) ISNC round-trip
-      (import→export) preserves stubs unchanged.</p>
+    <section id="s2" class="section-landed">
+      <header>
+        <span class="badge badge-shipped">✓ landed 2026-07-10</span>
+        <h2>§2 — P1: Deprecation architecture (accepted names only)</h2>
+      </header>
+      <p class="landed-summary">
+        Export emits <code>status: deprecated</code> stubs for superseded published names with chain collapse
+        (A→B→C ⇒ one A→C stub) and <code>superseded_by</code> pointing at the live successor; accepted exports
+        publish <code>status: active</code>; <code>superseded_from_stage</code> recorded at both supersede sites
+        (published-bar proxy where edit.py destroys the name-axis stage); <code>deprecated_stub_count</code> in
+        <code>.export_report.json</code>; ISN structural rule + successor-forward rendering; <code>sn merge</code>
+        preserves stubs. 17+5 new tests green; ISN suite 1683 passed.
+        Full record: <a href="archive/systematic-review-remediation-s2-landed.html">§2 landed</a>
+        (codex <code>bb76411e</code>, ISN <code>d5d3687</code>).
+      </p>
+    </section>
 
     <h2 id="s3">§3 — P2: sn edit validation parity</h2>
     <p>
@@ -357,7 +344,7 @@
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-srr-001" data-status="open" data-tier="opus" data-written-by="team-lead" data-written-at="2026-07-07" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-srr-001" data-status="resolved" data-tier="opus" data-written-by="team-lead" data-written-at="2026-07-07" data-recommends-skill="" data-resolved-at="2026-07-10T14:59:28+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Ship P1 — deprecation architecture for accepted names</h4>
     <div class="r-fu-body"><p>Build the accepted-only deprecation trail end to end: supersession stubs at export, status mapping, chain collapse, ISN rendering/validation of stubs, round-trip preservation. Honour decisions dep-scope and status-mapping.</p></div>
     <pre class="r-fu-prompt">Project: imas-standard-names
@@ -390,6 +377,7 @@ Done-when
   2. chain-collapse and round-trip (import-&gt;export) tests green
   3. ISN validate passes on a stub-bearing catalog; SPA/MCP render stubs
   4. followup outcome recorded in plan + this followup resolved</pre>
+    <p class="r-fu-outcome">§2 landed — codex bb76411e (export deprecation stubs with chain collapse, superseded_from_stage at both supersede sites, active status mapping, stub count in .export_report.json, sn merge preserves stubs; 17 tests) + ISN d5d3687 (structural rule deprecated⇒superseded_by, successor-forward fetch fields, round-trip test; 5 tests). Drift adaptation: persist_refined_name records the published-bar proxy docs_stage='accepted' since edit.py destroys the name-axis stage pre-persist — stubs only for names that reached consumers.</p>
     </article>
 <article class="r-fu" data-id="f-srr-002" data-status="open" data-tier="opus" data-written-by="team-lead" data-written-at="2026-07-07" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Ship P2 — sn edit validation parity</h4>
