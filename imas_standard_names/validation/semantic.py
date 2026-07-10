@@ -96,6 +96,53 @@ def run_semantic_checks(entries: dict[str, StandardNameEntry]) -> list[str]:
         issues.extend(_check_none_unit_with_quantitative_kind(name, entry))
         issues.extend(_check_referential_integrity(name, entry, known_names))
 
+    issues.extend(_check_source_flux_unit_collision(entries))
+
+    return issues
+
+
+# Tokens whose presence in a name asserts a dimensional derivative of the
+# bare quantity: a flux is quantity per area per time, a source is quantity
+# created per volume (or area) per time. If the derived name and the bare
+# name carry the SAME unit, one of the pair is dimensionally misnamed —
+# the defect class where bare "*_momentum" entries were momentum source
+# densities sharing units with the differently-defined "*_momentum_flux"
+# family.
+_DIMENSIONAL_DERIVATIVE_TOKENS = ("flux", "source")
+
+
+def _check_source_flux_unit_collision(
+    entries: dict[str, StandardNameEntry],
+) -> list[str]:
+    """Flag ``X`` / ``X_flux`` (or ``X_source``) pairs sharing identical units.
+
+    Rule: for every entry whose name contains a ``flux`` or ``source`` token,
+    look up the sibling name with that token removed. If the sibling is also
+    published and both carry the same non-empty unit, the pair collides
+    dimensionally under near-identical names — a flux/source of a quantity
+    cannot share the quantity's own unit, so one of the two is misnamed.
+    Severity: Warning
+    """
+    issues: list[str] = []
+    for name, entry in entries.items():
+        unit = getattr(entry, "unit", None)
+        if not unit:
+            continue
+        tokens = name.split("_")
+        for index, token in enumerate(tokens):
+            if token not in _DIMENSIONAL_DERIVATIVE_TOKENS:
+                continue
+            sibling = "_".join(tokens[:index] + tokens[index + 1 :])
+            sibling_entry = entries.get(sibling)
+            if sibling_entry is None:
+                continue
+            if getattr(sibling_entry, "unit", None) == unit:
+                issues.append(
+                    f"{name}: WARNING - '{name}' and '{sibling}' differ only "
+                    f"by '{token}' but share unit '{unit}'. A {token} of a "
+                    "quantity has different dimensions from the quantity "
+                    "itself, so one of the pair is likely misnamed."
+                )
     return issues
 
 
