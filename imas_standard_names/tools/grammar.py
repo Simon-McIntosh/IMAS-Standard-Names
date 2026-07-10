@@ -14,10 +14,12 @@ from imas_standard_names.grammar.constants import (
 )
 from imas_standard_names.grammar.context import (
     _build_canonical_pattern,
+    _build_quick_start_steps,
     _build_segment_order_constraint,
     _build_template_application_rule,
     _get_segment_descriptions,
     _get_vocabulary_description,
+    get_grammar_context,
 )
 from imas_standard_names.grammar.model import parse_standard_name
 from imas_standard_names.grammar.support import enum_values
@@ -367,18 +369,29 @@ class NamingGrammarTool(Tool):
         }
 
     def _get_grammar_overview(self) -> dict:
-        """Return concise overview of grammar structure with critical semantic information."""
+        """Return concise overview of grammar structure with critical semantic information.
+
+        The guidance payloads (applicability, canonical_pattern,
+        base_requirements, quick_start, common_patterns, critical_distinctions)
+        are DERIVED from ``get_grammar_context()`` — the single authored source
+        — rather than hand-maintained here, so the MCP overview cannot drift
+        from the LLM-context knowledge base. This overview projects the shared
+        content into its presentation shapes (e.g. the pattern list becomes a
+        formula->example map).
+        """
         template_mapping = _build_template_mapping()
         token_counts = _build_vocabulary_token_counts()
         segment_guidance = _build_segment_usage_guidance()
+        ctx = get_grammar_context()
+
+        def _pattern_line(item: dict) -> str:
+            line = f"{item['formula']} -> '{item['example']}'"
+            description = item.get("description")
+            return f"{line} ({description})" if description else line
 
         return {
-            "applicability": {
-                "include": list(APPLICABILITY_INCLUDE),
-                "exclude": list(APPLICABILITY_EXCLUDE),
-                "rationale": APPLICABILITY_RATIONALE,
-            },
-            "canonical_pattern": _build_canonical_pattern(),
+            "applicability": ctx["applicability"],
+            "canonical_pattern": ctx["canonical_pattern"],
             "segment_order": list(SEGMENT_ORDER),
             "templates": template_mapping,
             "exclusive_pairs": [
@@ -396,48 +409,14 @@ class NamingGrammarTool(Tool):
                 }
                 for seg_id in SEGMENT_ORDER
             },
-            "base_requirements": {
-                "geometric_base": {
-                    "type": "Controlled vocabulary",
-                    "qualification": "Must be qualified with object OR geometry segment",
-                    "vector_prefix": "Use coordinate (not component) for vector components",
-                    "categories": "position, vertex/centroid, outline/contour/trajectory, displacement/offset, extent, surface_normal/sensor_normal/tangent_vector",
-                    "example": "radial_position_of_flux_loop",
-                },
-                "physical_base": {
-                    "type": "Open vocabulary",
-                    "guidance": "Use standard physics terminology (temperature, density, pressure, magnetic_field, etc.)",
-                    "qualification": "Typically qualified with subject (electron_temperature) rather than object",
-                    "vector_prefix": "Use component (not coordinate) for vector components",
-                    "units": "Must have standardizable physical units",
-                    "example": "radial_magnetic_field",
-                },
-                "choice": "Exactly one base (geometric_base OR physical_base) is required.",
-            },
-            "quick_start": {
-                "1_choose_base": "Either physical_base (for physics quantities) OR geometric_base (for geometric/spatial quantities)",
-                "2_add_modifiers": "Add optional segments: component/coordinate (vectors), subject (species), object/device (equipment), position/geometry (location), process (mechanism)",
-                "3_check_exclusivity": "Critical: component with physical_base ONLY; coordinate with geometric_base ONLY; device for dynamic signals, object for static properties",
-                "4_apply_templates": "Templates transform tokens (see 'templates' field): radial + magnetic_field -> radial_magnetic_field",
-                "5_compose": "Use compose_standard_name tool to validate composition",
-            },
+            "base_requirements": ctx["base_requirements"],
+            "quick_start": _build_quick_start_steps(),
             "common_patterns": {
-                "bare_quantity": "physical_base -> 'safety_factor' (simple unqualified quantity)",
-                "vector_quantity": "physical_base -> 'magnetic_field' (vector without component decomposition)",
-                "vector_component": "component + physical_base -> 'radial_magnetic_field'",
-                "species_quantity": "subject + physical_base -> 'electron_temperature'",
-                "species_vector": "component + subject + physical_base -> 'radial_electron_heat_flux'",
-                "spatial_coordinate": "coordinate + geometric_base + object -> 'radial_position_of_flux_loop'",
-                "device_signal": "physical_base + of_<entity> locus -> 'voltage_of_flux_loop' (signal from instrument; the device-prefix form 'flux_loop_voltage' is parse-compatible but not for authoring)",
-                "object_property": "physical_base + object -> 'area_of_flux_loop' (static property OF object)",
-                "field_at_location": "physical_base + position -> 'electron_temperature_at_magnetic_axis'",
-                "property_of_geometry": "physical_base + geometry -> 'elongation_of_plasma_boundary'",
-                "with_process": "physical_base + process -> 'power_due_to_ohmic_heating' (attributed to mechanism)",
+                item["pattern"]: _pattern_line(item) for item in ctx["common_patterns"]
             },
             "critical_distinctions": {
-                "component_vs_coordinate": "component: vector components of PHYSICAL fields (magnetic_field, heat_flux); coordinate: spatial directions for GEOMETRIC quantities (position, vertex)",
-                "device_vs_object": "device: dynamic signals FROM device (flux_loop_voltage); object: static properties OF object (area_of_flux_loop)",
-                "geometry_vs_position": "geometry: intrinsic property OF location (radius_of_plasma_boundary); position: field evaluated AT location (temperature_at_magnetic_axis)",
+                item["pair"].replace(" vs ", "_vs_"): item["rule"]
+                for item in ctx["critical_distinctions"]
             },
             "composition_rules": {
                 "base_required": "Exactly one base (physical_base XOR geometric_base) must be present",

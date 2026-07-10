@@ -263,17 +263,45 @@ def _build_anti_patterns() -> list[dict[str, str]]:
 # ---------------------------------------------------------------------------
 
 
+def _build_quick_start_steps() -> dict[str, str]:
+    """Ordered quick-start steps for composing names (single source).
+
+    Consumed both by :func:`_build_quick_start` (the newline-joined string in
+    the LLM context) and by the MCP grammar tool's overview payload, so the
+    step text is authored exactly once.
+    """
+    return {
+        "1_choose_base": (
+            "Either physical_base (for physics quantities) OR geometric_base "
+            "(for geometric/spatial quantities)"
+        ),
+        "2_add_modifiers": (
+            "Add optional segments: component/coordinate (vectors), subject "
+            "(species), object/device (equipment), position/geometry "
+            "(location), process (mechanism)"
+        ),
+        "3_check_exclusivity": (
+            "Critical: component with physical_base ONLY; coordinate with "
+            "geometric_base ONLY; device for dynamic signals, object for "
+            "static properties"
+        ),
+        "4_apply_templates": (
+            "Templates transform tokens (see 'templates' field): radial + "
+            "magnetic_field -> radial_magnetic_field"
+        ),
+        "5_compose": ("Use compose_standard_name tool to validate composition"),
+    }
+
+
 def _build_quick_start() -> str:
     """Build the quick-start guide for composing names."""
+    steps = _build_quick_start_steps()
     return (
-        "1. Choose a base: physical_base (for physics quantities) "
-        "or geometric_base (for geometric/spatial quantities).\n"
-        "2. Add optional modifiers: component/coordinate (vectors), "
-        "subject (species), object/device (equipment), "
-        "position/geometry (location), process (mechanism).\n"
-        "3. Check exclusivity: component with physical_base only; "
-        "coordinate with geometric_base only; "
-        "device for dynamic signals, object for static properties.\n"
+        f"1. Choose a base: {steps['1_choose_base']}.\n"
+        f"2. Add optional modifiers: "
+        f"{steps['2_add_modifiers'].split(': ', 1)[-1]}.\n"
+        f"3. Check exclusivity: "
+        f"{steps['3_check_exclusivity'].split(': ', 1)[-1]}.\n"
         "4. Apply templates: templates transform tokens "
         "(e.g., radial + magnetic_field -> radial_magnetic_field).\n"
         "5. Compose: use compose_standard_name tool to validate composition."
@@ -281,62 +309,81 @@ def _build_quick_start() -> str:
 
 
 def _build_common_patterns() -> list[dict[str, str]]:
-    """Build common naming pattern examples."""
+    """Build common naming pattern examples.
+
+    Each entry carries a ``description`` (a short mechanism gloss, empty when
+    the formula speaks for itself). This is the single source consumed both by
+    the LLM context and by the MCP grammar tool's overview payload.
+    """
     return [
         {
             "pattern": "bare_quantity",
             "formula": "physical_base",
             "example": "safety_factor",
+            "description": "simple unqualified quantity",
         },
         {
             "pattern": "vector_quantity",
             "formula": "physical_base",
             "example": "magnetic_field",
+            "description": "vector without component decomposition",
         },
         {
             "pattern": "vector_component",
             "formula": "component + physical_base",
             "example": "radial_magnetic_field",
+            "description": "",
         },
         {
             "pattern": "species_quantity",
             "formula": "subject + physical_base",
             "example": "electron_temperature",
+            "description": "",
         },
         {
             "pattern": "species_vector",
             "formula": "component + subject + physical_base",
             "example": "radial_electron_heat_flux",
+            "description": "",
         },
         {
             "pattern": "spatial_coordinate",
             "formula": "coordinate + geometric_base + object",
             "example": "radial_position_of_flux_loop",
+            "description": "",
         },
         {
             "pattern": "device_signal",
             "formula": "physical_base + of_<entity> locus",
             "example": "voltage_of_flux_loop",
+            "description": (
+                "signal from instrument; the device-prefix form "
+                "'flux_loop_voltage' is parse-compatible but not for authoring"
+            ),
         },
         {
             "pattern": "object_property",
             "formula": "physical_base + object",
             "example": "area_of_flux_loop",
+            "description": "static property OF object",
         },
         {
             "pattern": "field_at_location",
             "formula": "physical_base + position",
             "example": "electron_temperature_at_magnetic_axis",
+            "description": "",
         },
         {
             "pattern": "property_of_geometry",
             "formula": "physical_base + geometry",
             "example": "elongation_of_plasma_boundary",
+            "description": "",
         },
         {
             "pattern": "with_process",
             "formula": "physical_base + process",
             "example": "power_due_to_ohmic_heating",
+            "description": "attributed to mechanism",
         },
     ]
 
