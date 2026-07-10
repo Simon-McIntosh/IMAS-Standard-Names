@@ -102,6 +102,15 @@ class FetchTool(CatalogTool):
                 if entry.kind != "metadata":
                     entry_dict["unit"] = str(entry.unit)
 
+                # Surface deprecation prominently: a deprecated stub is a
+                # renamed-away name whose successor consumers should adopt.
+                # A top-level ``deprecated`` flag and ``successor`` field put
+                # the live name front and centre rather than buried in
+                # provenance.
+                if entry.status == "deprecated":
+                    entry_dict["deprecated"] = True
+                    entry_dict["successor"] = entry.superseded_by
+
                 entries.append(entry_dict)
             else:
                 not_found.append(name)
