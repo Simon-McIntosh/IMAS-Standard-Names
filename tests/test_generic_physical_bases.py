@@ -169,3 +169,44 @@ class TestGenericPhysicalBaseValidation:
                 match=f"Generic physical_base '{generic_base}' requires qualification",
             ):
                 StandardName(physical_base=generic_base)
+
+
+class TestSemanticallyEmptyCatchAlls:
+    """Semantically-empty catch-all bases are gated as generic.
+
+    Role-only bases (coefficient, factor, rate, flag, …) name a role rather
+    than a physical quantity, so they are gated exactly like current / power /
+    temperature: bare use is rejected, qualified use is accepted.
+    """
+
+    CATCH_ALLS = (
+        "coefficient",
+        "factor",
+        "parameter",
+        "index",
+        "residual",
+        "weight",
+        "flag",
+        "count",
+        "size",
+        "source",
+        "rate",
+        "multiplicity",
+        "distribution",
+        "potential",
+        "flow",
+        "field_strength",
+    )
+
+    @pytest.mark.parametrize("base", CATCH_ALLS)
+    def test_catch_all_is_gated(self, base):
+        assert base in GENERIC_PHYSICAL_BASES
+        with pytest.raises(
+            ValidationError,
+            match=f"Generic physical_base '{base}' requires qualification",
+        ):
+            StandardName(physical_base=base)
+
+    def test_qualified_catch_all_valid(self):
+        model = StandardName(subject=Subject.ELECTRON, physical_base="count")
+        assert model.compose() == "electron_count"

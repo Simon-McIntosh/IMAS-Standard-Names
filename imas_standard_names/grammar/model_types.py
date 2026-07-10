@@ -366,6 +366,22 @@ class GenericPhysicalBase(StrEnum):
     VELOCITY = "velocity"
     VOLTAGE = "voltage"
     VOLUME = "volume"
+    COEFFICIENT = "coefficient"
+    COUNT = "count"
+    DISTRIBUTION = "distribution"
+    FACTOR = "factor"
+    FIELD_STRENGTH = "field_strength"
+    FLAG = "flag"
+    FLOW = "flow"
+    INDEX = "index"
+    MULTIPLICITY = "multiplicity"
+    PARAMETER = "parameter"
+    POTENTIAL = "potential"
+    RATE = "rate"
+    RESIDUAL = "residual"
+    SIZE = "size"
+    SOURCE = "source"
+    WEIGHT = "weight"
 
 
 class BinaryOperator(StrEnum):

@@ -290,6 +290,22 @@ GENERIC_PHYSICAL_BASES: tuple[str, ...] = (
     "velocity",
     "voltage",
     "volume",
+    "coefficient",
+    "count",
+    "distribution",
+    "factor",
+    "field_strength",
+    "flag",
+    "flow",
+    "index",
+    "multiplicity",
+    "parameter",
+    "potential",
+    "rate",
+    "residual",
+    "size",
+    "source",
+    "weight",
 )
 
 
