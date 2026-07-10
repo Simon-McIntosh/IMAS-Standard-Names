@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-standard-names">
+  <title>§3 (P2) landed — sn edit validation parity | systematic-review-remediation</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+  <p><a href="/imas-standard-names/systematic-review-remediation.html">&larr; back to the evergreen plan</a></p>
+  <h1>§3 — P2: sn edit validation parity <span class="badge badge-shipped">✓ landed 2026-07-10</span></h1>
+
+  <h2>Quick status</h2>
+  <table>
+    <thead><tr><th>Item</th><th>Status</th><th>Commit</th></tr></thead>
+    <tbody>
+      <tr><td>Gate parity — edit artifacts through the pipeline validation stack</td><td>✓ shipped</td><td><code>5777ae32</code> (codex)</td></tr>
+      <tr><td>Cascade atomicity — validate descendants before commit, full rollback</td><td>✓ shipped</td><td><code>5777ae32</code></td></tr>
+      <tr><td>Docs-edit preconditions + filter_protected + override flag</td><td>✓ shipped</td><td><code>5777ae32</code></td></tr>
+      <tr><td>--scope family semantics reconciled</td><td>✓ shipped (verdict documented in module)</td><td><code>5777ae32</code></td></tr>
+      <tr><td>Parity test suite (per edit mode × per violation class)</td><td>✓ shipped</td><td><code>5777ae32</code></td></tr>
+    </tbody>
+  </table>
+
+  <h2>What shipped</h2>
+  <ul>
+    <li><strong>Gate parity</strong> (decision d-edit-validation = full-pipeline-parity): edit-origin artifacts
+      route through <code>validate_name_candidate</code> — the same validation stack pooled pipeline candidates
+      pass (ISN Pydantic layer, grammar round-trip, semantic/description checks, quarantine) — with successor
+      validation stamped via <code>_stamp_successor_validation</code>. No privileged edit path to
+      <code>accepted</code> remains; the call-graph audit is embedded as maintenance documentation in the
+      touched modules.</li>
+    <li><strong>Cascade atomicity</strong>: every descendant id produced by a rename cascade is round-trip
+      validated and uniqueness-checked in a preflight inside <code>persist_reviewed_name</code> before the
+      cascade commits; a constraint collision rolls back the whole cascade with the acceptance
+      (<code>tests/standard_names/test_cascade_atomicity.py</code>, 127 lines).</li>
+    <li><strong>Docs edits</strong>: persist paths run <code>filter_protected</code>; the docs-edit claim
+      requires <code>docs_stage IN [accepted, exhausted]</code>; catalog-edit-origin docs need the explicit
+      override flag (findings 9/10 closed).</li>
+    <li><strong>Family scope</strong> (finding 11): flag and docs reconciled — verdict documented in the
+      module.</li>
+    <li><strong>Parity suite</strong>: <code>test_edit_parity.py</code> (312 lines) proves grammar-invalid,
+      semantically-invalid, and protected-field-violating edits are stopped by the same gates that stop the
+      equivalent pipeline candidate, for each edit mode (hint/rename/docs).</li>
+  </ul>
+
+  <h2>Verification</h2>
+  <ul>
+    <li>Orchestrator re-ran the four edit test files independently: 78 passed, exit 0.</li>
+    <li>Deprecation-stub recording (<code>superseded_from_stage</code>, commit <code>bb76411e</code>) preserved
+      through the graph_ops changes.</li>
+    <li>Scope audit: single commit touches exactly the allocated files (792 insertions); no AI trailers;
+      pushed to main.</li>
+    <li>Continuity note: the work survived two worker session-limit deaths; gen-3 completed verification,
+      isolating mid-suite failures as pre-existing before committing workers.py.</li>
+  </ul>
+</main>
+</body>
+</html>

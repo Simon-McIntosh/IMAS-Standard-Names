@@ -16,8 +16,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-10">
-<meta name="plan-impl" content="0.5">
-<meta name="plan-version" content="3">
+<meta name="plan-impl" content="0.67">
+<meta name="plan-version" content="4">
 </head>
 <body>
   <main class="plan-doc">
@@ -100,38 +100,22 @@
       </p>
     </section>
 
-    <h2 id="s3">§3 — P2: sn edit validation parity</h2>
-    <p>
-      The review found the edit tool bypassing the machinery it was meant to steer: rename cascades hardcoded
-      past catalog-edit/accepted protections (fixed — now default-closed), docs-mode persists skip
-      <code>filter_protected</code>, cascaded descendants receive new ids without re-validation, the
-      docs-edit claim has no <code>docs_stage</code> precondition, and <code>--scope family</code> silently
-      operates on a whole parent subtree. This phase restores the tool's original contract: <em>an edit
-      injects external pressure; the pipeline's own gates decide what survives</em>.
-    </p>
-    <p><strong>Scope</strong> (all imas-codex):</p>
-    <ul>
-      <li>Route every edit-origin artifact through the same validation stack as pipeline-generated names:
-        ISN Pydantic layer, grammar round-trip, semantic/description checks, and the quarantine machinery.
-        A quarantined edit result must be unable to reach <code>accepted</code> — identical to pipeline names
-        (the review verified the pipeline gate is fail-closed; edits must have no privileged path).</li>
-      <li>Rename cascades: every descendant id produced by the cascade is round-trip-validated and
-        uniqueness-checked <em>before</em> the cascade commits; any failure rolls back the whole cascade in
-        the same transaction as the acceptance (closes debug finding 9, cascade atomicity).</li>
-      <li>Docs edits: persist paths run <code>filter_protected</code>; the docs-edit claim requires
-        <code>docs_stage IN [accepted, exhausted]</code>; editing a catalog-edit-origin name's documentation
-        requires the explicit override flag (closes debug finding 10).</li>
-      <li><code>--scope family</code> means direct siblings sharing the edited segment — implement it, or if
-        subtree behaviour is genuinely wanted, rename the scope value; the flag and the docs must agree
-        (closes debug finding 11).</li>
-      <li>Parity test suite: for each edit mode (hint/rename/docs), a test that a grammar-invalid,
-        a semantically-invalid, and a protected-field-violating edit are each stopped by the same gate that
-        stops the equivalent pipeline candidate.</li>
-    </ul>
-    <p><strong>Done-when.</strong> (1) The parity suite passes; (2) no code path from <code>apply_edit</code>
-      to <code>accepted</code>/persisted docs skips a gate the pooled pipeline runs — demonstrated by a
-      call-graph audit note in the PR description; (3) cascade failure rolls back atomically with acceptance;
-      (4) family scope operates on siblings only.</p>
+    <section id="s3" class="section-landed">
+      <header>
+        <span class="badge badge-shipped">✓ landed 2026-07-10</span>
+        <h2>§3 — P2: sn edit validation parity</h2>
+      </header>
+      <p class="landed-summary">
+        Edit-origin artifacts now route through the same validation stack as pooled pipeline candidates
+        (validate_name_candidate + successor validation stamping — no privileged path to accepted); rename
+        cascades preflight-validate every descendant id and roll back atomically on collision; docs-edit claims
+        require docs_stage∈[accepted,exhausted] with filter_protected on persists and an explicit override for
+        catalog-edit-origin docs; family-scope flag and docs reconciled. Parity suite proves grammar-/semantic-/
+        protection-violating edits stopped per mode. 78 tests green.
+        Full record: <a href="archive/systematic-review-remediation-s3-landed.html">§3 landed</a>
+        (codex <code>5777ae32</code>, 792 insertions).
+      </p>
+    </section>
 
     <section id="s4" class="section-landed">
       <header>
@@ -357,7 +341,7 @@ Done-when
   4. followup outcome recorded in plan + this followup resolved</pre>
     <p class="r-fu-outcome">§2 landed — codex bb76411e (export deprecation stubs with chain collapse, superseded_from_stage at both supersede sites, active status mapping, stub count in .export_report.json, sn merge preserves stubs; 17 tests) + ISN d5d3687 (structural rule deprecated⇒superseded_by, successor-forward fetch fields, round-trip test; 5 tests). Drift adaptation: persist_refined_name records the published-bar proxy docs_stage='accepted' since edit.py destroys the name-axis stage pre-persist — stubs only for names that reached consumers.</p>
     </article>
-<article class="r-fu" data-id="f-srr-002" data-status="open" data-tier="opus" data-written-by="team-lead" data-written-at="2026-07-07" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-srr-002" data-status="resolved" data-tier="opus" data-written-by="team-lead" data-written-at="2026-07-07" data-recommends-skill="" data-resolved-at="2026-07-10T19:30:00+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Ship P2 — sn edit validation parity</h4>
     <div class="r-fu-body"><p>Route every edit path through the full pipeline gate stack; atomic validated cascades; docs-edit protection and claim preconditions; sibling family scope. Honour decision edit-validation.</p></div>
     <pre class="r-fu-prompt">Project: imas-standard-names
@@ -390,7 +374,8 @@ Done-when
   2. cascade atomicity test (constraint collision -&gt; full rollback)
   3. docs-edit claim preconditions + filter_protected on persists
   4. followup outcome recorded + resolved</pre>
-    </article>
+        <p class="r-fu-outcome">§3 landed — codex 5777ae32: gate parity (edit artifacts through validate_name_candidate, no privileged path), cascade-atomicity preflight with full rollback, docs-edit stage preconditions + filter_protected + override flag, family-scope reconciled; parity suite (test_edit_parity.py 312 lines) + cascade-atomicity tests; 78 tests verified green by orchestrator.</p>
+</article>
 <article class="r-fu" data-id="f-srr-003" data-status="resolved" data-tier="sonnet" data-written-by="team-lead" data-written-at="2026-07-07" data-recommends-skill="" data-resolved-at="2026-07-10T14:53:05+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Ship P3 — referential integrity + z-axis repair</h4>
     <div class="r-fu-body"><p>ISN reference-resolution check (structured + inline, warn-then-error), inline-ref docs repair, z-axis generator fix and the six missing/empty z-names. Honour decision inline-ref-severity.</p></div>
