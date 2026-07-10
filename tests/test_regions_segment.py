@@ -39,16 +39,9 @@ from imas_standard_names.grammar.model_types import Position, Region
             "density",
         ),
         ("temperature_over_edge_region", Region.EDGE_REGION, "temperature"),
-        pytest.param(
-            "magnetic_field_over_halo_boundary",
-            Region.HALO_BOUNDARY,
-            "magnetic_field",
-            marks=pytest.mark.xfail(
-                reason="halo_boundary is typed POSITION in locus registry; "
-                "_over_ not allowed (vocab inconsistency)",
-                strict=True,
-            ),
-        ),
+        # halo_boundary is typed POSITION in the locus registry (sampled as
+        # at_halo_boundary), so it is intentionally NOT a region token — see
+        # tests/test_regions_locus_parity.py.
     ],
 )
 def test_region_round_trip(

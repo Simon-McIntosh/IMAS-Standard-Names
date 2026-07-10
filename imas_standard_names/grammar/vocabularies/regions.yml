@@ -15,16 +15,16 @@
 # that would conflate an intrinsic property of a thing with a spatial
 # reduction over a zone).
 #
-# Spec reference: plan 29 / ADR-4 grammar findings F4.
+# This list mirrors the ``type: region`` loci in locus_registry.yml, which is
+# the authoritative typing source (parity enforced by
+# tests/test_regions_locus_parity.py). A locus typed ``position`` there — e.g.
+# halo_boundary, sampled as at_halo_boundary — is NOT a region and must not
+# appear here.
 
 - core_region
 - divertor_region
 - edge_region
-- halo_boundary
 - halo_region
 - scrape_off_layer
-
-# === W2a corpus mining additions (plan 38 §A9) ===
-# From 4 region classifications in rc20 corpus mining.
 - pedestal_region              # pedestal region (steep-gradient zone)
 - vessel                       # vacuum vessel volume region

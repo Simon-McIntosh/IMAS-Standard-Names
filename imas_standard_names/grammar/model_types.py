@@ -117,7 +117,6 @@ class Region(StrEnum):
     CORE_REGION = "core_region"
     DIVERTOR_REGION = "divertor_region"
     EDGE_REGION = "edge_region"
-    HALO_BOUNDARY = "halo_boundary"
     HALO_REGION = "halo_region"
     SCRAPE_OFF_LAYER = "scrape_off_layer"
     PEDESTAL_REGION = "pedestal_region"
