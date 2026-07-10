@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+from functools import lru_cache
 
 from ..grammar.model import parse_standard_name
 from ..grammar.model_types import GeometricBase
@@ -353,12 +354,34 @@ def _check_extent_dimensionality(name: str, entry: StandardNameEntry) -> list[st
     return issues
 
 
+@lru_cache(maxsize=1)
+def _entity_typed_loci() -> frozenset[str]:
+    """Locus tokens typed ``entity`` in the registry (hardware/geometry carriers).
+
+    For an entity locus the ``_of_<entity>`` relation names an intrinsic
+    property of the entity (the locus matrix maps ``entity -> of``), so
+    ``<base>_of_<entity>`` is the canonical authoring form, not a
+    measurement-location smell.
+    """
+    from ..grammar.vocab_loaders import load_locus_registry  # noqa: PLC0415
+
+    registry = load_locus_registry()
+    return frozenset(
+        token for token, entry in registry.loci.items() if entry.type == "entity"
+    )
+
+
 def _check_physical_base_with_object(name: str, entry: StandardNameEntry) -> list[str]:
     """Physical bases with object qualification may indicate confusion.
 
     Rule: Physical quantities (temperature, density) are properties of subjects,
     not objects. Object qualification suggests measuring location rather than
     intrinsic property.
+
+    Suppressed for entity-typed loci: ``<base>_of_<entity>`` is the canonical
+    intrinsic-property form for a hardware/geometry carrier (the locus matrix
+    maps ``entity -> of``), so flagging it contradicts the authoring
+    convention and is pure noise.
     Severity: Info
     """
     issues: list[str] = []
@@ -370,7 +393,8 @@ def _check_physical_base_with_object(name: str, entry: StandardNameEntry) -> lis
         if physical_base and obj:
             # Check if subject is also present (which would be more appropriate)
             subject = getattr(parsed, "subject", None)
-            if not subject:
+            obj_token = getattr(obj, "value", obj)
+            if not subject and obj_token not in _entity_typed_loci():
                 issues.append(
                     f"{name}: INFO - physical quantity '{physical_base}' with object '{obj}' "
                     "may indicate measurement location. Consider using subject (electron, ion) "
