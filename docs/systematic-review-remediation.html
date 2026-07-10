@@ -16,8 +16,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-10">
-<meta name="plan-impl" content="0.33">
-<meta name="plan-version" content="2">
+<meta name="plan-impl" content="0.5">
+<meta name="plan-version" content="3">
 </head>
 <body>
   <main class="plan-doc">
@@ -181,46 +181,24 @@
       sweep drop from 20 to the principled set); (3) accepted-name renames produced stubs; (4) the
       source/flux validator rule is live with tests.</p>
 
-    <h2 id="s6">§6 — P5: Vocabulary curation and grammar closes</h2>
-    <ul>
-      <li><strong>processes.yml dedup</strong>: merge the synonym families (three thermalization tokens;
-        <code>collisions</code>/<code>coulomb_collisions</code>; the seven-token radiation family;
-        <code>disruption</code>/<code>disruption_event</code>; <code>viscous</code>/<code>viscosity</code>)
-        onto canonical tokens (decision d-processes-dedup); migrate affected catalog names via P2-parity
-        edits; add a curation gate test so rotation harvests cannot reintroduce a merged synonym.</li>
-      <li><strong>physical_bases catch-alls</strong>: gate the ~16 semantically-empty tokens
-        (<code>coefficient</code>, <code>factor</code>, <code>parameter</code>, <code>index</code>,
-        <code>residual</code>, <code>weight</code>, <code>flag</code>, <code>count</code>, <code>size</code>,
-        <code>source</code>, <code>rate</code>, <code>multiplicity</code>, <code>distribution</code>,
-        <code>potential</code>, <code>flow</code>, <code>field_strength</code>) as generic bases requiring
-        qualification, consistent with the existing gates on <code>current</code>/<code>power</code>/<code>temperature</code>
-        (decision d-base-catchalls). Verify no published bare-token name breaks; where one does, it is a P4-style
-        repair.</li>
-      <li><strong>Qualifier intra-order enforcement</strong> (review F4): canonical order by
-        <code>qualifier_categories</code> rank, mirroring the zone mechanism; the review verified exactly one
-        published name carries a multi-token qualifier segment, so the migration is one rename at most
-        (decision d-qualifier-order).</li>
-      <li><strong>Parse-contract reconciliation</strong> (review F5): <code>parse_standard_name</code> is the
-        single validity oracle; <code>validate_round_trip</code> is documented and typed as an IR-diagnostics
-        tool, with its docstring and the boundary doc saying so (decision d-parse-contract).</li>
-      <li><strong>Hygiene tail</strong>: resolve the <code>halo</code> triple-role; fix the
-        <code>halo_boundary</code> region-vs-position typing conflict and derive <code>regions.yml</code> from
-        the region-typed loci; retire <code>binary_operators.yml</code> if confirmed superseded; dedupe the
-        byte-identical <code>Transformation</code>/<code>Decomposition</code> enums; sweep the remaining
-        RC-tagged provenance banners out of vocabulary YAML comments.</li>
-      <li><strong>Validator noise</strong>: suppress the "measurement location" advisory for hardware/geometry
-        property bases (it contradicts the <code>of_&lt;entity&gt;</code> authoring convention and produces a
-        600-line noise floor); schedule the periodic reconciliation of naming-consistency <em>rule prose</em>
-        against the live parser (the example guard landed in the review; prose drift produced the 37-example
-        hole).</li>
-      <li><strong>MCP payload derivation</strong>: <code>tools/grammar.py</code> derives its guidance payloads
-        from <code>get_grammar_context()</code> instead of hand-maintaining a parallel copy (the two surfaces
-        had already half-drifted when found).</li>
-    </ul>
-    <p><strong>Done-when.</strong> (1) Vocabulary changes land with regenerated modules in the same commits
-      (the drift gate enforces this now); (2) every affected catalog name migrated through P2-parity edits;
-      (3) full ISN suite green including the new curation gate; (4) <code>validate_catalog</code> on the
-      current catalog emits no measurement-location advisories for hardware bases.</p>
+    <section id="s6" class="section-landed">
+      <header>
+        <span class="badge badge-shipped">✓ landed 2026-07-10</span>
+        <h2>§6 — P5: Vocabulary curation and grammar closes</h2>
+      </header>
+      <p class="landed-summary">
+        Five process synonym families merged to canonical tokens with a re-entry curation gate; 16 catch-all
+        bases gated as generic (0 published casualties); qualifier intra-order enforced by category rank (the 1
+        affected name already canonical); parse-contract documented (parse_standard_name is the oracle);
+        measurement-location advisory 310→0 on the live catalog; tools/grammar.py derives from
+        get_grammar_context(); halo triple-role resolved; regions≡region-typed-loci and binary-operator
+        source-parity gates added. Migration backlog EMPTY — no supervised graph pass needed. Catalog sweep
+        2148 names / 2147 round-trip (1 intentional FSA-gate rejection); suite 1726 passed.
+        Full record: <a href="archive/systematic-review-remediation-s6-landed.html">§6 landed</a>
+        (commits <code>fb98228</code>…<code>fe1968a</code>). Deferred with reasons: binary_operators.yml
+        retirement, Transformation/Decomposition enum dedup (codegen refactors).
+      </p>
+    </section>
 
     <h2 id="s7">§7 — P6: Pipeline operational hardening and migration debt</h2>
     <ul>
@@ -475,7 +453,7 @@ Done-when
   3. source/flux near-name validator rule live with tests
   4. followup outcome recorded + resolved</pre>
     </article>
-<article class="r-fu" data-id="f-srr-005" data-status="open" data-tier="opus" data-written-by="team-lead" data-written-at="2026-07-07" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-srr-005" data-status="resolved" data-tier="opus" data-written-by="team-lead" data-written-at="2026-07-07" data-recommends-skill="" data-resolved-at="2026-07-10T19:05:00+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Ship P5 — vocabulary curation and grammar closes</h4>
     <div class="r-fu-body"><p>processes dedup + curation gate, physical_bases gating, qualifier intra-order, parse-contract documentation, hygiene tail, advisory suppression, MCP payload derivation. Honour decisions processes-dedup, base-catchalls, qualifier-order, parse-contract.</p></div>
     <pre class="r-fu-prompt">Project: imas-standard-names
@@ -505,7 +483,8 @@ Done-when
   3. advisory suppressed for hardware bases; tools/grammar.py derives from
      get_grammar_context(); hygiene tail closed
   4. full ISN suite green; followup outcome recorded + resolved</pre>
-    </article>
+        <p class="r-fu-outcome">§6 landed — commits fb98228/ac196d5/b566f9b/919a988/d912daa/8f0e3d5/49eee70/b2221b3/fe1968a: five synonym families merged + curation gate; 16 catch-alls gated (0 casualties); qualifier order canonical (no rename needed); parse-contract documented; advisory 310→0; MCP payloads derived; halo/regions/binary-operator gates. Migration backlog empty. Suite 1726 passed; catalog 2147/2148 round-trip (1 intentional FSA rejection). Deferred: binary_operators.yml retirement + Transformation/Decomposition dedup (codegen refactors, drift hazards closed).</p>
+</article>
 <article class="r-fu" data-id="f-srr-006" data-status="open" data-tier="opus" data-written-by="team-lead" data-written-at="2026-07-07" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Ship P6 — pipeline hardening and migration debt</h4>
     <div class="r-fu-body"><p>Stranded-reviewed repair, claim-lease robustness, signals regen accounting, single-tx reset/clear, LinkML flag declaration, export tail, along-locus migration, ISNC CI validate detail.</p></div>
