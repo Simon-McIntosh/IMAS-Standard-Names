@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-standard-names">
+  <title>§4 (P3) landed — referential integrity + z-axis gap | systematic-review-remediation</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+  <p><a href="/imas-standard-names/systematic-review-remediation.html">&larr; back to the evergreen plan</a></p>
+  <h1>§4 — P3: Referential integrity and the z-axis gap <span class="badge badge-shipped">✓ landed 2026-07-10</span></h1>
+
+  <h2>Quick status</h2>
+  <table>
+    <thead><tr><th>Item</th><th>Status</th><th>Commit</th></tr></thead>
+    <tbody>
+      <tr><td>ISN reference-resolution semantic check (structured + inline)</td><td>✓ shipped</td><td><code>af41d50</code> (ISN)</td></tr>
+      <tr><td>z-axis triple root cause + completeness gate</td><td>✓ shipped</td><td><code>d9d069ec</code> (imas-codex)</td></tr>
+      <tr><td>Docs repair of dangling inline refs (prod graph)</td><td>⏳ queued — supervised write window</td><td>—</td></tr>
+      <tr><td>Mint missing z-names (camera, diagnostic aperture)</td><td>⏳ queued — supervised write window</td><td>—</td></tr>
+    </tbody>
+  </table>
+
+  <h2>What shipped</h2>
+  <ul>
+    <li><strong>Referential-integrity check</strong> in <code>imas_standard_names/validation/semantic.py</code>
+      (<code>_check_referential_integrity()</code>, wired into <code>run_semantic_checks()</code> — runs in both
+      <code>validate_catalog</code> and <code>YamlStore.load</code>). Severities:
+      <code>links</code>/<code>deprecates</code>/<code>superseded_by</code> → <em>error</em> (export prunes these, a
+      miss means a broken export); <code>arguments</code>/<code>error_variants</code> → <em>warning</em> (computed,
+      re-derived on export — matches the existing yaml_store convention);
+      inline <code>[label](name:target)</code> refs in documentation prose → <em>warning</em> with a one-line
+      promotion knob <code>INLINE_REFERENCE_SEVERITY</code> (decision d-inline-ref-severity: warn-then-error).
+      A resolvable <code>superseded_by</code> is valid regardless of target status — compatible with P1's
+      deprecation stubs. 12 new tests in <code>tests/test_reference_resolution.py</code>.</li>
+    <li><strong>Live-catalog measurement</strong>: 0 dangling structured refs (the review's 388 is stale —
+      export pruning already landed); <strong>153 dangling inline warnings across 70 entries, 44 unique missing
+      targets</strong> (the review's ≈74 was a sample estimate). Camera x/y entries reference the non-existent
+      <code>z_direction_unit_vector_of_camera</code> — direct corroboration of the z-axis casualty list.</li>
+    <li><strong>z-axis root cause</strong> (verified against live data, not guessed): x/y/z siblings are minted
+      independently, one LLM candidate per DD leaf; when the z candidate resolves as <em>attach</em> rather than
+      <em>compose</em>, the merge never touches <code>documentation</code>, so a target that ever existed with an
+      empty doc stays empty; nothing in the pipeline checked completeness after the fact.
+      <code>families.py</code>/<code>derivation.py</code> axis handling was exonerated by standalone repro.
+      Fix: <code>vector_family_consistency_check()</code> in <code>imas_codex/standard_names/audits.py</code>
+      gained a documentation-completeness check across each DD node's minted siblings (catches the defect on any
+      axis, not just z). 4 new tests in <code>tests/standard_names/test_triple_generation_completeness.py</code>.</li>
+  </ul>
+
+  <h2>Verification</h2>
+  <ul>
+    <li>ISN full suite: 1683 passed, 28 skipped, 84 xfailed, 0 failed. Codex targeted modules
+      (audits/families/triple-completeness): green. Orchestrator re-ran both new test files independently: green.</li>
+    <li>Scope audit: commits touch exactly the allocated files (2 per repo); no AI trailers.</li>
+  </ul>
+
+  <h2>Queued / flagged</h2>
+  <ul>
+    <li>Supervised prod-graph pass (with the P4 window): regenerate docs for the 70 entries with dangling inline
+      refs; mint <code>z_direction_unit_vector_of_camera</code> + the diagnostic-aperture z sibling; regenerate the
+      empty z docs. The new completeness check then verifies the repair.</li>
+    <li>P6 pickup: <code>vector_family_consistency_check</code>/<code>dd_path_uniqueness_check</code> are test-only
+      today — wire them into a production audit run.</li>
+    <li>Naming-convention question for the lead: <code>z_coordinate_of_*</code> vs the prompt's canonical
+      <code>vertical_coordinate_of_*</code> for point Z coordinates.</li>
+  </ul>
+</main>
+</body>
+</html>

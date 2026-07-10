@@ -4,17 +4,20 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="docs-project"   content="imas-standard-names">
-  <meta name="reckon-type"    content="plan">
-  <meta name="plan-slug"      content="systematic-review-remediation">
-  <meta name="plan-title"     content="Systematic Review Remediation">
-  <meta name="plan-summary"   content="Six-phase remediation of the systematic-review findings: deprecation architecture for accepted names, sn edit validation parity, referential integrity, catalog unit-family repairs, vocabulary curation, and pipeline hardening">
-  <meta name="plan-status"    content="active">
-  <meta name="plan-roi"       content="high">
-  <meta name="plan-effort"    content="XL">
-  <meta name="plan-tier"      content="opus">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="systematic-review-remediation">
+  <meta name="plan-title" content="Systematic Review Remediation">
+  <meta name="plan-summary" content="Six-phase remediation of the systematic-review findings: deprecation architecture for accepted names, sn edit validation parity, referential integrity, catalog unit-family repairs, vocabulary curation, and pipeline hardening">
+  <meta name="plan-status" content="active">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort" content="XL">
+  <meta name="plan-tier" content="opus">
   <title>Systematic Review Remediation | imas-standard-names</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-07-10">
+<meta name="plan-impl" content="0.17">
+<meta name="plan-version" content="1">
 </head>
 <body>
   <main class="plan-doc">
@@ -143,30 +146,22 @@
       call-graph audit note in the PR description; (3) cascade failure rolls back atomically with acceptance;
       (4) family scope operates on siblings only.</p>
 
-    <h2 id="s4">§4 — P3: Referential integrity and the z-axis gap</h2>
-    <p><strong>Scope.</strong></p>
-    <ul>
-      <li>ISN semantic check resolving every structured reference (<code>links</code>,
-        <code>superseded_by</code>, <code>deprecates</code>, <code>arguments</code>,
-        <code>error_variants</code>) and every inline <code>name:</code>-style reference in documentation
-        prose against the published set. Severity: warning on first release, promoted to error once the
-        catalog is clean (decision d-inline-ref-severity). The export-side pruning gate for structured links
-        landed in the review fix wave; this closes the loop on the consumer side and covers the 74 inline
-        references pruning cannot fix.</li>
-      <li>Repair the 74 dangling inline references at the source: regenerate or edit the affected
-        documentation in the codex graph (via <code>sn edit --docs</code>, post-P2) so the next export is
-        clean.</li>
-      <li>Find and fix the z-axis batch-generator bug: 6 of 6 missing/empty documentation cases sit on the
-        third member of x/y/z coordinate and unit-vector triples; then regenerate docs for
-        <code>z_coordinate_of_ferritic_element_centroid</code>, <code>z_coordinate_of_sensor_attachment_point</code>,
-        <code>z_direction_unit_vector_of_neutron_detector</code>, <code>z_coordinate_of_divertor_target</code>,
-        mint the missing <code>z_direction_unit_vector_of_camera</code> and the missing diagnostic-aperture
-        z-sibling.</li>
-      <li>Fix the one self-referential documentation link (<code>height_of_optical_element</code>).</li>
-    </ul>
-    <p><strong>Done-when.</strong> (1) New ISN check exists with tests and runs in <code>validate_catalog</code>;
-      (2) a full export → validate cycle reports zero dangling structured or inline references;
-      (3) all six z-axis names exist with real documentation; (4) the generator bug has a regression test.</p>
+    <section id="s4" class="section-landed">
+      <header>
+        <span class="badge badge-shipped">✓ landed 2026-07-10</span>
+        <h2>§4 — P3: Referential integrity and the z-axis gap</h2>
+      </header>
+      <p class="landed-summary">
+        Referential-integrity check live in <code>validation/semantic.py</code> (structured refs error, inline
+        <code>name:</code> refs warning with promotion knob — d-inline-ref-severity); live catalog measures
+        0 dangling structured, 153 dangling inline across 70 entries (44 unique targets). z-axis root cause:
+        attach-path merges never write documentation; completeness gate added to
+        <code>vector_family_consistency_check</code>. ISN suite 1683 passed.
+        Full record: <a href="archive/systematic-review-remediation-s4-landed.html">§4 landed</a>
+        (ISN <code>af41d50</code>, codex <code>d9d069ec</code>). Prod-graph docs repair + z-name minting queued
+        for the supervised P4 window.
+      </p>
+    </section>
 
     <h2 id="s5">§5 — P4: Catalog unit-family repairs (via sn edit, post-parity)</h2>
     <p>
@@ -267,105 +262,105 @@
       spend from claim races (spot-check LLMCost per node); (3) the LinkML schema declares the edit flags.</p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
-      <h2><span class="sec">§</span> Decisions</h2>
-      <div class="r-dec" data-key="dep-scope" data-choice="accepted-only" data-by="Simon McIntosh" data-when="2026-07-07">
-        <p class="r-dec-q">Which names leave a deprecation trail when renamed or superseded?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="accepted-only">accepted-only</button>
-          <button class="r-opt" data-value="all-names">all-names</button>
-        </p>
-        <p class="r-dec-rat">Lead directive: draft names have no consumers, so rename chains among drafts carry no governance value and would bloat the catalog with stubs nobody needs. Only accepted names emit stubs; stubs are retained until a curator prunes them.</p>
-      </div>
-      <div class="r-dec" data-key="edit-validation" data-choice="full-pipeline-parity" data-by="Simon McIntosh" data-when="2026-07-07">
-        <p class="r-dec-q">What validation does sn edit run on its results?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="full-pipeline-parity">full-pipeline-parity</button>
-          <button class="r-opt" data-value="edit-specific-checks">edit-specific-checks</button>
-        </p>
-        <p class="r-dec-rat">Lead directive restoring the tool's original intent: an edit is additional external pressure steering the existing pipeline. Every edit-origin artifact passes exactly the gates a pipeline-generated name passes (ISN layer, round-trip, semantic/description, quarantine); no privileged path to accepted.</p>
-      </div>
-      <div class="r-dec" data-key="status-mapping" data-choice="active-for-exported-accepted" data-by="review recommendation" data-when="2026-07-07">
-        <p class="r-dec-q">What does the catalog status field mean?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="active-for-exported-accepted">active-for-exported-accepted</button>
-          <button class="r-opt" data-value="keep-all-draft">keep-all-draft</button>
-          <button class="r-opt" data-value="delete-the-field">delete-the-field</button>
-        </p>
-        <p class="r-dec-rat">Exported accepted names publish as status=active; deprecation stubs are the only deprecated entries; draft disappears from the published catalog. A status field that never varies (2124/2124 draft today) carries no information — this mapping activates ISN's designed governance semantics.</p>
-      </div>
-      <div class="r-dec" data-key="momentum-rename" data-choice="momentum-source-family" data-by="review recommendation" data-when="2026-07-07">
-        <p class="r-dec-q">How to resolve the bare-momentum vs momentum-flux collision?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="momentum-source-family">momentum-source-family</button>
-          <button class="r-opt" data-value="docs-only-clarification">docs-only-clarification</button>
-        </p>
-        <p class="r-dec-rat">The ~30 bare *_momentum entries define momentum source densities and share units with the differently-defined *_momentum_flux family — a naming defect, not a docs defect. Rename to *_momentum_source; add the source/flux validator rule.</p>
-      </div>
-      <div class="r-dec" data-key="energy-flux-reserve" data-choice="fold-into-particle-flux" data-by="review recommendation" data-when="2026-07-07">
-        <p class="r-dec-q">How to fix the four energy_flux entries carrying particle-flux units?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="fold-into-particle-flux">fold-into-particle-flux</button>
-          <button class="r-opt" data-value="change-units-to-W.m^-2">change-units-to-W.m^-2</button>
-        </p>
-        <p class="r-dec-rat">Their documentation already admits they are particle arrival fluxes; the honest fix is the name, not the unit. energy_flux is reserved for W·m⁻².</p>
-      </div>
-      <div class="r-dec" data-key="power-density" data-choice="rename-to-power-flux" data-by="review recommendation" data-when="2026-07-07">
-        <p class="r-dec-q">How to fix the six W·m⁻² power_density entries?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="rename-to-power-flux">rename-to-power-flux</button>
-          <button class="r-opt" data-value="keep-dual-dimension">keep-dual-dimension</button>
-        </p>
-        <p class="r-dec-rat">power_density means W·m⁻³ in 63 of 69 entries; the six surface-flux outliers rename to *_power_flux_*, and one of the power_density_at_wall / energy_flux_at_wall duplicate pair is deprecated in favour of the other.</p>
-      </div>
-      <div class="r-dec" data-key="qualifier-order" data-choice="enforce-category-rank" data-by="review recommendation" data-when="2026-07-07">
-        <p class="r-dec-q">Enforce canonical intra-order on multi-token qualifier segments?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="enforce-category-rank">enforce-category-rank</button>
-          <button class="r-opt" data-value="leave-unordered">leave-unordered</button>
-        </p>
-        <p class="r-dec-rat">Two spellings for one concept violates the grammar's core one-name invariant; the zone mechanism already exists; exactly one published name is affected, so the cost only grows with delay.</p>
-      </div>
-      <div class="r-dec" data-key="base-catchalls" data-choice="gate-as-generic" data-by="review recommendation" data-when="2026-07-07">
-        <p class="r-dec-q">What to do with the ~16 catch-all physical_bases tokens?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="gate-as-generic">gate-as-generic</button>
-          <button class="r-opt" data-value="delete-tokens">delete-tokens</button>
-          <button class="r-opt" data-value="leave-ungated">leave-ungated</button>
-        </p>
-        <p class="r-dec-rat">Gating (require qualification) matches the existing treatment of current/power/temperature and keeps legitimate compounds composable; deletion would break real names. Consistency of the gating policy is the point.</p>
-      </div>
-      <div class="r-dec" data-key="processes-dedup" data-choice="merge-to-canonical" data-by="review recommendation" data-when="2026-07-07">
-        <p class="r-dec-q">How to deduplicate the processes.yml synonym families?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="merge-to-canonical">merge-to-canonical</button>
-          <button class="r-opt" data-value="freeze-as-is">freeze-as-is</button>
-        </p>
-        <p class="r-dec-rat">One canonical token per mechanism; affected names migrate via P2-parity edits; a curation gate stops rotation harvests reintroducing merged synonyms. Freezing would preserve three spellings of thermalization forever.</p>
-      </div>
-      <div class="r-dec" data-key="parse-contract" data-choice="parse-standard-name-is-oracle" data-by="review recommendation" data-when="2026-07-07">
-        <p class="r-dec-q">Which parse entry point defines validity?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="parse-standard-name-is-oracle">parse-standard-name-is-oracle</button>
-          <button class="r-opt" data-value="align-ir-parser-strict">align-ir-parser-strict</button>
-        </p>
-        <p class="r-dec-rat">parse_standard_name (strict, canonical-spelling) is the validity oracle; validate_round_trip stays liberal for diagnostics and is documented as IR-only. Tightening the IR parser would cost the vocab-gap diagnostics the pipeline uses.</p>
-      </div>
-      <div class="r-dec" data-key="inline-ref-severity" data-choice="warn-then-error" data-by="review recommendation" data-when="2026-07-07">
-        <p class="r-dec-q">Severity for unresolvable inline documentation references?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="warn-then-error">warn-then-error</button>
-          <button class="r-opt" data-value="error-immediately">error-immediately</button>
-        </p>
-        <p class="r-dec-rat">74 dangling inline references exist today; erroring immediately would block every release until the docs-regen pass lands. Warning first, promoted to error in the release after the catalog is clean.</p>
-      </div>
-    </section>
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="dep-scope" data-choice="accepted-only" data-by="Simon McIntosh" data-when="2026-07-07">
+    <p class="r-dec-q">Which names leave a deprecation trail when renamed or superseded?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="accepted-only">accepted-only</button>
+      <button class="r-opt" data-value="all-names">all-names</button>
+      </p>
+    <p class="r-dec-rat">Lead directive: draft names have no consumers, so rename chains among drafts carry no governance value and would bloat the catalog with stubs nobody needs. Only accepted names emit stubs; stubs are retained until a curator prunes them.</p>
+    </div>
+<div class="r-dec" data-key="edit-validation" data-choice="full-pipeline-parity" data-by="Simon McIntosh" data-when="2026-07-07">
+    <p class="r-dec-q">What validation does sn edit run on its results?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="full-pipeline-parity">full-pipeline-parity</button>
+      <button class="r-opt" data-value="edit-specific-checks">edit-specific-checks</button>
+      </p>
+    <p class="r-dec-rat">Lead directive restoring the tool&#x27;s original intent: an edit is additional external pressure steering the existing pipeline. Every edit-origin artifact passes exactly the gates a pipeline-generated name passes (ISN layer, round-trip, semantic/description, quarantine); no privileged path to accepted.</p>
+    </div>
+<div class="r-dec" data-key="status-mapping" data-choice="active-for-exported-accepted" data-by="review recommendation" data-when="2026-07-07">
+    <p class="r-dec-q">What does the catalog status field mean?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="active-for-exported-accepted">active-for-exported-accepted</button>
+      <button class="r-opt" data-value="keep-all-draft">keep-all-draft</button>
+      <button class="r-opt" data-value="delete-the-field">delete-the-field</button>
+      </p>
+    <p class="r-dec-rat">Exported accepted names publish as status=active; deprecation stubs are the only deprecated entries; draft disappears from the published catalog. A status field that never varies (2124/2124 draft today) carries no information — this mapping activates ISN&#x27;s designed governance semantics.</p>
+    </div>
+<div class="r-dec" data-key="momentum-rename" data-choice="momentum-source-family" data-by="review recommendation" data-when="2026-07-07">
+    <p class="r-dec-q">How to resolve the bare-momentum vs momentum-flux collision?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="momentum-source-family">momentum-source-family</button>
+      <button class="r-opt" data-value="docs-only-clarification">docs-only-clarification</button>
+      </p>
+    <p class="r-dec-rat">The ~30 bare *_momentum entries define momentum source densities and share units with the differently-defined *_momentum_flux family — a naming defect, not a docs defect. Rename to *_momentum_source; add the source/flux validator rule.</p>
+    </div>
+<div class="r-dec" data-key="energy-flux-reserve" data-choice="fold-into-particle-flux" data-by="review recommendation" data-when="2026-07-07">
+    <p class="r-dec-q">How to fix the four energy_flux entries carrying particle-flux units?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="fold-into-particle-flux">fold-into-particle-flux</button>
+      <button class="r-opt" data-value="change-units-to-W.m^-2">change-units-to-W.m^-2</button>
+      </p>
+    <p class="r-dec-rat">Their documentation already admits they are particle arrival fluxes; the honest fix is the name, not the unit. energy_flux is reserved for W·m⁻².</p>
+    </div>
+<div class="r-dec" data-key="power-density" data-choice="rename-to-power-flux" data-by="review recommendation" data-when="2026-07-07">
+    <p class="r-dec-q">How to fix the six W·m⁻² power_density entries?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="rename-to-power-flux">rename-to-power-flux</button>
+      <button class="r-opt" data-value="keep-dual-dimension">keep-dual-dimension</button>
+      </p>
+    <p class="r-dec-rat">power_density means W·m⁻³ in 63 of 69 entries; the six surface-flux outliers rename to *_power_flux_*, and one of the power_density_at_wall / energy_flux_at_wall duplicate pair is deprecated in favour of the other.</p>
+    </div>
+<div class="r-dec" data-key="qualifier-order" data-choice="enforce-category-rank" data-by="review recommendation" data-when="2026-07-07">
+    <p class="r-dec-q">Enforce canonical intra-order on multi-token qualifier segments?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="enforce-category-rank">enforce-category-rank</button>
+      <button class="r-opt" data-value="leave-unordered">leave-unordered</button>
+      </p>
+    <p class="r-dec-rat">Two spellings for one concept violates the grammar&#x27;s core one-name invariant; the zone mechanism already exists; exactly one published name is affected, so the cost only grows with delay.</p>
+    </div>
+<div class="r-dec" data-key="base-catchalls" data-choice="gate-as-generic" data-by="review recommendation" data-when="2026-07-07">
+    <p class="r-dec-q">What to do with the ~16 catch-all physical_bases tokens?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="gate-as-generic">gate-as-generic</button>
+      <button class="r-opt" data-value="delete-tokens">delete-tokens</button>
+      <button class="r-opt" data-value="leave-ungated">leave-ungated</button>
+      </p>
+    <p class="r-dec-rat">Gating (require qualification) matches the existing treatment of current/power/temperature and keeps legitimate compounds composable; deletion would break real names. Consistency of the gating policy is the point.</p>
+    </div>
+<div class="r-dec" data-key="processes-dedup" data-choice="merge-to-canonical" data-by="review recommendation" data-when="2026-07-07">
+    <p class="r-dec-q">How to deduplicate the processes.yml synonym families?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="merge-to-canonical">merge-to-canonical</button>
+      <button class="r-opt" data-value="freeze-as-is">freeze-as-is</button>
+      </p>
+    <p class="r-dec-rat">One canonical token per mechanism; affected names migrate via P2-parity edits; a curation gate stops rotation harvests reintroducing merged synonyms. Freezing would preserve three spellings of thermalization forever.</p>
+    </div>
+<div class="r-dec" data-key="parse-contract" data-choice="parse-standard-name-is-oracle" data-by="review recommendation" data-when="2026-07-07">
+    <p class="r-dec-q">Which parse entry point defines validity?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="parse-standard-name-is-oracle">parse-standard-name-is-oracle</button>
+      <button class="r-opt" data-value="align-ir-parser-strict">align-ir-parser-strict</button>
+      </p>
+    <p class="r-dec-rat">parse_standard_name (strict, canonical-spelling) is the validity oracle; validate_round_trip stays liberal for diagnostics and is documented as IR-only. Tightening the IR parser would cost the vocab-gap diagnostics the pipeline uses.</p>
+    </div>
+<div class="r-dec" data-key="inline-ref-severity" data-choice="warn-then-error" data-by="review recommendation" data-when="2026-07-07">
+    <p class="r-dec-q">Severity for unresolvable inline documentation references?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="warn-then-error">warn-then-error</button>
+      <button class="r-opt" data-value="error-immediately">error-immediately</button>
+      </p>
+    <p class="r-dec-rat">74 dangling inline references exist today; erroring immediately would block every release until the docs-regen pass lands. Warning first, promoted to error in the release after the catalog is clean.</p>
+    </div>
+</section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
-      <h2><span class="sec">§</span> Followups</h2>
-      <article class="r-fu" data-id="f-srr-001" data-status="open" data-tier="opus" data-written-by="team-lead" data-written-at="2026-07-07">
-        <h4 class="r-fu-title">Ship P1 — deprecation architecture for accepted names</h4>
-        <div class="r-fu-body"><p>Build the accepted-only deprecation trail end to end: supersession stubs at export, status mapping, chain collapse, ISN rendering/validation of stubs, round-trip preservation. Honour decisions dep-scope and status-mapping.</p></div>
-        <pre class="r-fu-prompt">Project: imas-standard-names
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-srr-001" data-status="open" data-tier="opus" data-written-by="team-lead" data-written-at="2026-07-07" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Ship P1 — deprecation architecture for accepted names</h4>
+    <div class="r-fu-body"><p>Build the accepted-only deprecation trail end to end: supersession stubs at export, status mapping, chain collapse, ISN rendering/validation of stubs, round-trip preservation. Honour decisions dep-scope and status-mapping.</p></div>
+    <pre class="r-fu-prompt">Project: imas-standard-names
 Plan:    systematic-review-remediation (http://localhost:8765/imas-standard-names/systematic-review-remediation.html)
 Section: §2 (P1)
 Tier:    opus
@@ -390,16 +385,16 @@ Scope locks / constraints
   change on main in each repo; no stash; explicit path staging.
 
 Done-when
-  1. sn edit --rename on an accepted name + export -> successor active,
-     predecessor deprecated stub with superseded_by; draft rename -> no stub
-  2. chain-collapse and round-trip (import->export) tests green
+  1. sn edit --rename on an accepted name + export -&gt; successor active,
+     predecessor deprecated stub with superseded_by; draft rename -&gt; no stub
+  2. chain-collapse and round-trip (import-&gt;export) tests green
   3. ISN validate passes on a stub-bearing catalog; SPA/MCP render stubs
   4. followup outcome recorded in plan + this followup resolved</pre>
-      </article>
-      <article class="r-fu" data-id="f-srr-002" data-status="open" data-tier="opus" data-written-by="team-lead" data-written-at="2026-07-07">
-        <h4 class="r-fu-title">Ship P2 — sn edit validation parity</h4>
-        <div class="r-fu-body"><p>Route every edit path through the full pipeline gate stack; atomic validated cascades; docs-edit protection and claim preconditions; sibling family scope. Honour decision edit-validation.</p></div>
-        <pre class="r-fu-prompt">Project: imas-standard-names
+    </article>
+<article class="r-fu" data-id="f-srr-002" data-status="open" data-tier="opus" data-written-by="team-lead" data-written-at="2026-07-07" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Ship P2 — sn edit validation parity</h4>
+    <div class="r-fu-body"><p>Route every edit path through the full pipeline gate stack; atomic validated cascades; docs-edit protection and claim preconditions; sibling family scope. Honour decision edit-validation.</p></div>
+    <pre class="r-fu-prompt">Project: imas-standard-names
 Plan:    systematic-review-remediation (http://localhost:8765/imas-standard-names/systematic-review-remediation.html)
 Section: §3 (P2)
 Tier:    opus
@@ -426,20 +421,20 @@ Scope locks / constraints
 Done-when
   1. parity suite: grammar-invalid / semantic-invalid / protected-violating
      edits stopped by the same gates as pipeline candidates, per edit mode
-  2. cascade atomicity test (constraint collision -> full rollback)
+  2. cascade atomicity test (constraint collision -&gt; full rollback)
   3. docs-edit claim preconditions + filter_protected on persists
   4. followup outcome recorded + resolved</pre>
-      </article>
-      <article class="r-fu" data-id="f-srr-003" data-status="open" data-tier="sonnet" data-written-by="team-lead" data-written-at="2026-07-07">
-        <h4 class="r-fu-title">Ship P3 — referential integrity + z-axis repair</h4>
-        <div class="r-fu-body"><p>ISN reference-resolution check (structured + inline, warn-then-error), inline-ref docs repair, z-axis generator fix and the six missing/empty z-names. Honour decision inline-ref-severity.</p></div>
-        <pre class="r-fu-prompt">Project: imas-standard-names
+    </article>
+<article class="r-fu" data-id="f-srr-003" data-status="resolved" data-tier="sonnet" data-written-by="team-lead" data-written-at="2026-07-07" data-recommends-skill="" data-resolved-at="2026-07-10T14:53:05+00:00" data-resolved-by="reckon-ship">
+    <h4 class="r-fu-title">Ship P3 — referential integrity + z-axis repair</h4>
+    <div class="r-fu-body"><p>ISN reference-resolution check (structured + inline, warn-then-error), inline-ref docs repair, z-axis generator fix and the six missing/empty z-names. Honour decision inline-ref-severity.</p></div>
+    <pre class="r-fu-prompt">Project: imas-standard-names
 Plan:    systematic-review-remediation (http://localhost:8765/imas-standard-names/systematic-review-remediation.html)
 Section: §4 (P3)
 Tier:    sonnet
 
 Context
-  Referential integrity was the catalog's weakest axis (388 structured links —
+  Referential integrity was the catalog&#x27;s weakest axis (388 structured links —
   now pruned at export — plus 74 dangling inline refs). Separately, a batch
   generator drops the z-member of x/y/z triples (6/6 cases on z).
 
@@ -461,11 +456,12 @@ Done-when
   2. docs-regen pass clears them; next export validates clean
   3. six z-names exist with real documentation; generator regression test
   4. followup outcome recorded + resolved</pre>
-      </article>
-      <article class="r-fu" data-id="f-srr-004" data-status="open" data-tier="opus" data-written-by="team-lead" data-written-at="2026-07-07">
-        <h4 class="r-fu-title">Ship P4 — unit-family repairs through the validated edit path</h4>
-        <div class="r-fu-body"><p>Momentum-source renames, energy-flux folds, power-flux renames, one-line contradiction fixes — all as sn edit operations after P1+P2 land. Honour decisions momentum-rename, energy-flux-reserve, power-density.</p></div>
-        <pre class="r-fu-prompt">Project: imas-standard-names
+    <p class="r-fu-outcome">§4 landed — ISN af41d50 (referential-integrity check: structured=error, inline=warning w/ promotion knob; live catalog: 0 structured, 153 inline across 70 entries) + codex d9d069ec (z-axis root cause = attach-path merges never write documentation; completeness gate in vector_family_consistency_check, 4 tests). Prod-graph docs repair + z-name minting queued for the supervised P4 window.</p>
+    </article>
+<article class="r-fu" data-id="f-srr-004" data-status="open" data-tier="opus" data-written-by="team-lead" data-written-at="2026-07-07" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Ship P4 — unit-family repairs through the validated edit path</h4>
+    <div class="r-fu-body"><p>Momentum-source renames, energy-flux folds, power-flux renames, one-line contradiction fixes — all as sn edit operations after P1+P2 land. Honour decisions momentum-rename, energy-flux-reserve, power-density.</p></div>
+    <pre class="r-fu-prompt">Project: imas-standard-names
 Plan:    systematic-review-remediation (http://localhost:8765/imas-standard-names/systematic-review-remediation.html)
 Section: §5 (P4)
 Tier:    opus
@@ -490,11 +486,11 @@ Done-when
   2. accepted renames produced deprecation stubs in the next export
   3. source/flux near-name validator rule live with tests
   4. followup outcome recorded + resolved</pre>
-      </article>
-      <article class="r-fu" data-id="f-srr-005" data-status="open" data-tier="opus" data-written-by="team-lead" data-written-at="2026-07-07">
-        <h4 class="r-fu-title">Ship P5 — vocabulary curation and grammar closes</h4>
-        <div class="r-fu-body"><p>processes dedup + curation gate, physical_bases gating, qualifier intra-order, parse-contract documentation, hygiene tail, advisory suppression, MCP payload derivation. Honour decisions processes-dedup, base-catchalls, qualifier-order, parse-contract.</p></div>
-        <pre class="r-fu-prompt">Project: imas-standard-names
+    </article>
+<article class="r-fu" data-id="f-srr-005" data-status="open" data-tier="opus" data-written-by="team-lead" data-written-at="2026-07-07" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Ship P5 — vocabulary curation and grammar closes</h4>
+    <div class="r-fu-body"><p>processes dedup + curation gate, physical_bases gating, qualifier intra-order, parse-contract documentation, hygiene tail, advisory suppression, MCP payload derivation. Honour decisions processes-dedup, base-catchalls, qualifier-order, parse-contract.</p></div>
+    <pre class="r-fu-prompt">Project: imas-standard-names
 Plan:    systematic-review-remediation (http://localhost:8765/imas-standard-names/systematic-review-remediation.html)
 Section: §6 (P5)
 Tier:    opus
@@ -502,7 +498,7 @@ Tier:    opus
 Context
   The vocab audit found perfect structure but curation decay in the LLM-fed
   sets, plus a set of small grammar/validator closes the review deferred as
-  design decisions — now locked in this plan's Decisions section.
+  design decisions — now locked in this plan&#x27;s Decisions section.
 
 State to read
   ISN: grammar/vocabularies/{processes,physical_bases,generic_physical_bases,
@@ -521,11 +517,11 @@ Done-when
   3. advisory suppressed for hardware bases; tools/grammar.py derives from
      get_grammar_context(); hygiene tail closed
   4. full ISN suite green; followup outcome recorded + resolved</pre>
-      </article>
-      <article class="r-fu" data-id="f-srr-006" data-status="open" data-tier="opus" data-written-by="team-lead" data-written-at="2026-07-07">
-        <h4 class="r-fu-title">Ship P6 — pipeline hardening and migration debt</h4>
-        <div class="r-fu-body"><p>Stranded-reviewed repair, claim-lease robustness, signals regen accounting, single-tx reset/clear, LinkML flag declaration, export tail, along-locus migration, ISNC CI validate detail.</p></div>
-        <pre class="r-fu-prompt">Project: imas-standard-names
+    </article>
+<article class="r-fu" data-id="f-srr-006" data-status="open" data-tier="opus" data-written-by="team-lead" data-written-at="2026-07-07" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Ship P6 — pipeline hardening and migration debt</h4>
+    <div class="r-fu-body"><p>Stranded-reviewed repair, claim-lease robustness, signals regen accounting, single-tx reset/clear, LinkML flag declaration, export tail, along-locus migration, ISNC CI validate detail.</p></div>
+    <pre class="r-fu-prompt">Project: imas-standard-names
 Plan:    systematic-review-remediation (http://localhost:8765/imas-standard-names/systematic-review-remediation.html)
 Section: §7 (P6)
 Tier:    opus
@@ -553,8 +549,26 @@ Done-when
      qualifying names on startup
   3. LinkML declares the edit flags; ISNC validate surfaces error detail
   4. followup outcome recorded + resolved</pre>
-      </article>
-    </section>
+    </article>
+<article class="r-fu" data-id="f-srr-007" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-10" data-recommends-skill="/reckon-ship systematic-review-remediation §5" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Supervised prod-graph repair pass — inline-ref docs regen + z-name minting (with P4 window)</h4>
+    <div class="r-fu-body">P3 shipped the check and the generator gate; the data repair needs supervised production-graph writes: regenerate documentation for the 70 entries carrying 153 dangling inline refs, mint z_direction_unit_vector_of_camera and the diagnostic-aperture z sibling, and regenerate the empty z docs. Batch with the P4 unit-family edit window (same operator supervision).</div>
+    <pre class="r-fu-prompt">Project: imas-standard-names + imas-codex (production graph)
+Plan: systematic-review-remediation §4 tail + §5 (P4 window)
+Tier: opus
+
+Context
+  P3 landed the referential-integrity check (ISN af41d50) and the triple-completeness gate (codex d9d069ec). The remaining §4 items are prod-graph writes: 70 entries with dangling inline refs (list reproducible via validate_catalog on the live catalog), missing z_direction_unit_vector_of_camera + diagnostic-aperture z sibling, empty z docs on 4 names.
+
+Scope locks / constraints
+  Production writes ONLY in a lead-supervised run window, batched with the P4 unit-family edits. Use sn edit --docs / the pipeline compose path; never hand-edit ISNC YAML. Dry-run previews first.
+
+Done-when
+  1. validate_catalog on the next export reports 0 dangling inline refs
+  2. all six z-axis names exist with real documentation (completeness gate green)
+  3. this followup resolved</pre>
+    </article>
+</section>
 
   </main>
 </body>
