@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-standard-names">
+  <title>§7 (P6) landed — pipeline hardening and migration debt | systematic-review-remediation</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+  <p><a href="/imas-standard-names/systematic-review-remediation.html">&larr; back to the evergreen plan</a></p>
+  <h1>§7 — P6: Pipeline operational hardening and migration debt <span class="badge badge-shipped">✓ landed 2026-07-10</span></h1>
+
+  <h2>Per-finding verdicts</h2>
+  <table>
+    <thead><tr><th>Finding / item</th><th>Verdict</th><th>Commit</th></tr></thead>
+    <tbody>
+      <tr><td>Export tail: validate entries in final written shape (L4) + drop unused codex_sha</td><td>✓ fixed — validates the exact emitted dict, stripping graph-only rendered fields</td><td><code>f98a5d41</code></td></tr>
+      <tr><td>Finding 8 — regen derived from always-set --min-score default</td><td>✓ fixed — gated on ctx.get_parameter_source (explicit provision only)</td><td><code>e54fb812</code></td></tr>
+      <tr><td>--scope family docs (help + EditScope schema docstring)</td><td>✓ fixed to the real behaviour (promotes to parent, cascades full subtree)</td><td><code>e54fb812</code></td></tr>
+      <tr><td>Finding 13 — atomic reset_standard_names</td><td>✓ fixed — 4 auto-commit txns → 1 statement; <em>clear_standard_names deferred</em> (delicate orphan-guard model needs live-graph proof)</td><td><code>2626ec92</code></td></tr>
+      <tr><td>Finding 6 — verify-winners re-read in enrich_parents</td><td>✓ fixed — claim path had no winner verification → N× LLM spend on multi-replica; +3 tests</td><td><code>0f631c40</code></td></tr>
+      <tr><td>Finding 19 — claim seed compare-and-set</td><td>◐ already mitigated — verify-winners now covers cost/correctness on all claim paths; CAS is an optimisation, deprioritised</td><td>—</td></tr>
+      <tr><td>L5 — RC dirty-tree policy release vs publish</td><td>✓ fixed — allow_dirty=is_rc threaded through publish; dirty downgrades to warning under RC; +2 tests</td><td><code>e9c03cf6</code></td></tr>
+      <tr><td>Finding 16 — shutdown stage-revert alignment with orphan sweep</td><td>✓ fixed — claim release now applies the refining→reviewed revert (both axes)</td><td><code>f30b19da</code></td></tr>
+      <tr><td>LinkML: declare edit_override_edits / edit_include_accepted</td><td>✓ fixed — slots declared, models regenerated via build hook</td><td><code>fff9acd3</code></td></tr>
+      <tr><td>Item 7 — along-locus migration debt (6 "pre-existing failures")</td><td>✓ already fixed at HEAD (<code>8f1a85b3</code>/<code>017dc167</code>/<code>a9aa9a82</code>) — the review-era failures were timeout artifacts of the uncached grammar-context perf bug, not assertion faults</td><td>—</td></tr>
+      <tr><td>Escalation-refine fixture (RefinedName requires segments)</td><td>✓ fixed by inspection (graph-marked)</td><td><code>4c01d3c1</code></td></tr>
+      <tr><td>Full-suite import-order pollution (source-drift refresh GraphClient binding)</td><td>✓ fixed — mocked refresh_drifted_sources directly in 3 tests</td><td><code>20772766</code></td></tr>
+      <tr><td>ISNC CI: validation surfaces per-issue detail</td><td>✓ fixed — dropped --summary, failures list every issue, still exits non-zero</td><td>ISNC <code>f063f2c</code></td></tr>
+      <tr><td>Grammar-context perf (63 s/call, killed the suite via pytest-timeout)</td><td>✓ fixed — ISN-side lru_cache + deepcopy (orchestrator) + session memoize fixture (worker)</td><td>ISN <code>b724bbe</code>, codex <code>daf12308</code></td></tr>
+    </tbody>
+  </table>
+
+  <h2>Verification</h2>
+  <ul>
+    <li>Full codex <code>tests/standard_names</code> suite: RC=0, 4292 passed, 7 skipped (graph-marked auto-skips),
+      0 failed — <strong>no carve-outs</strong> (done-when #1 met; the review-era six-failure carve-out is gone).</li>
+    <li>All 10 commits audited: codex files + schema only, no AI trailers; bb76411e (stubs) and 5777ae32
+      (gate parity) not regressed.</li>
+  </ul>
+
+  <h2>Deferred to a supervised soak window (live Neo4j required)</h2>
+  <ul>
+    <li><strong>Finding 4</strong> — stranded-reviewed promotion pass: a new stage-machine feature with promotion-criteria
+      implications; needs live-graph TDD (pattern: source-drift refresh <code>3ce8881a</code>). Note: P4 found 21
+      stage-reviewed names referenced by 31 inline doc links — the concrete backlog this pass drains.</li>
+    <li><strong>Finding 7</strong> — claim-lease heartbeat under long quorum batches (high double-processing risk without
+      live verification).</li>
+    <li><strong>Finding 13 (clear)</strong> — single-tx clear_standard_names (survivor-review + orphan-guard protections
+      must be proven no-loss against a live graph).</li>
+    <li>ISN pin bump to ≥ <code>b724bbe</code> (maintenance; extras-preserving) in a window with no CLI worker active.</li>
+    <li>Soak checks: atomic-reset cypher + refining→reviewed revert against real Neo4j; pooled-run LLMCost
+      spot-check confirming no duplicate spend from claim races.</li>
+  </ul>
+
+  <h2>Out-of-scope findings flagged</h2>
+  <ul>
+    <li><code>test_e2e_rotation.py::_do_refine_name</code>: same RefinedName-segments break plus a deeper model
+      mismatch (callers assert by new_id; worker composes from segments) — needs live-graph rework.</li>
+    <li>edit.py module docstring carries a now-stale "should be corrected" note about the EditScope.family doc
+      (it has been corrected) — trivial deletion, outside P6's writable region.</li>
+  </ul>
+</main>
+</body>
+</html>

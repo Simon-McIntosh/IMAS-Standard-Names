@@ -16,8 +16,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-10">
-<meta name="plan-impl" content="0.67">
-<meta name="plan-version" content="4">
+<meta name="plan-impl" content="0.83">
+<meta name="plan-version" content="5">
 </head>
 <body>
   <main class="plan-doc">
@@ -184,31 +184,23 @@
       </p>
     </section>
 
-    <h2 id="s7">§7 — P6: Pipeline operational hardening and migration debt</h2>
-    <ul>
-      <li>Stranded-<code>reviewed</code> repair pass: startup/idle job promoting names whose stored review
-        score meets the current threshold (debug finding 4, both name and docs axes).</li>
-      <li>Claim-lease robustness: heartbeat or per-item refresh so the 300 s TTL cannot expire under a
-        long quorum batch (finding 7); make the claim seed a true compare-and-set (finding 19); add the
-        missing verify-winners re-read to <code>enrich_parents</code> (finding 6).</li>
-      <li>Signals-path accounting: <code>regen</code> only when explicitly requested — stop deriving it from
-        the always-set <code>--min-score</code> default (finding 8, the residue of a prior incident).</li>
-      <li>Single-transaction <code>reset_standard_names</code>/<code>clear_standard_names</code> (finding 13)
-        and shutdown stage-revert alignment with the orphan sweep (finding 16).</li>
-      <li>Declare <code>edit_override_edits</code>/<code>edit_include_accepted</code> in the LinkML graph
-        schema and regenerate models (they are safe-but-undeclared raw properties today).</li>
-      <li>Export tail: validate the final entry dict post-augmentation (scan finding L4); reconcile the RC
-        dirty-tree policy between release and publish (L5); drop the now-unused <code>codex_sha</code>
-        parameter from <code>_write_domain_yaml</code> together with its test.</li>
-      <li>Finish the along-locus migration: update the geometry-enumeration-collapse feature, the
-        shape-parameter test, and the benchmark fixtures off the retired bare <code>line_of_sight</code>
-        carrier and non-parsing fixture names (the six pre-existing failures documented in the review §5).</li>
-      <li>ISNC CI: replace bare <code>--summary text</code> validation with a mode that surfaces error detail
-        (known trap).</li>
-    </ul>
-    <p><strong>Done-when.</strong> (1) The full codex <code>tests/standard_names</code> suite is green with no
-      pre-existing-failure carve-outs; (2) a soak run of pooled <code>sn run</code> shows no duplicate LLM
-      spend from claim races (spot-check LLMCost per node); (3) the LinkML schema declares the edit flags.</p>
+    <section id="s7" class="section-landed">
+      <header>
+        <span class="badge badge-shipped">✓ landed 2026-07-10</span>
+        <h2>§7 — P6: Pipeline operational hardening and migration debt</h2>
+      </header>
+      <p class="landed-summary">
+        All debug-scan findings closed or verified already-fixed: regen gated on explicit --min-score,
+        atomic reset, enrich_parents verify-winners (+3 tests), RC dirty-tree policy reconciled, shutdown
+        stage-revert aligned, LinkML edit flags declared, export final-shape validation, escalation fixture
+        repaired, ISNC CI per-issue detail; the review's six "pre-existing failures" were timeout artifacts of
+        an uncached 63 s grammar-context call — fixed ISN-side (b724bbe: lru_cache + deepcopy). Full codex
+        suite 4292 passed / 0 failed, NO carve-outs. Deferred to a supervised soak window: stranded-reviewed
+        promotion (finding 4), claim heartbeat (7), atomic clear (13-clear), ISN pin bump.
+        Full record: <a href="archive/systematic-review-remediation-s7-landed.html">§7 landed</a>
+        (codex f98a5d41…f30b19da, ISNC f063f2c, ISN b724bbe).
+      </p>
+    </section>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
@@ -470,7 +462,7 @@ Done-when
   4. full ISN suite green; followup outcome recorded + resolved</pre>
         <p class="r-fu-outcome">§6 landed — commits fb98228/ac196d5/b566f9b/919a988/d912daa/8f0e3d5/49eee70/b2221b3/fe1968a: five synonym families merged + curation gate; 16 catch-alls gated (0 casualties); qualifier order canonical (no rename needed); parse-contract documented; advisory 310→0; MCP payloads derived; halo/regions/binary-operator gates. Migration backlog empty. Suite 1726 passed; catalog 2147/2148 round-trip (1 intentional FSA rejection). Deferred: binary_operators.yml retirement + Transformation/Decomposition dedup (codegen refactors, drift hazards closed).</p>
 </article>
-<article class="r-fu" data-id="f-srr-006" data-status="open" data-tier="opus" data-written-by="team-lead" data-written-at="2026-07-07" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-srr-006" data-status="resolved" data-tier="opus" data-written-by="team-lead" data-written-at="2026-07-07" data-recommends-skill="" data-resolved-at="2026-07-10T21:45:00+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Ship P6 — pipeline hardening and migration debt</h4>
     <div class="r-fu-body"><p>Stranded-reviewed repair, claim-lease robustness, signals regen accounting, single-tx reset/clear, LinkML flag declaration, export tail, along-locus migration, ISNC CI validate detail.</p></div>
     <pre class="r-fu-prompt">Project: imas-standard-names
@@ -501,7 +493,8 @@ Done-when
      qualifying names on startup
   3. LinkML declares the edit flags; ISNC validate surfaces error detail
   4. followup outcome recorded + resolved</pre>
-    </article>
+        <p class="r-fu-outcome">§7 landed — 10 codex commits (f98a5d41, 20772766, 4c01d3c1, e54fb812, 2626ec92, 0f631c40, e9c03cf6, f30b19da, daf12308, fff9acd3) + ISNC f063f2c + ISN b724bbe (grammar-context lru_cache, root cause of the review-era "six pre-existing failures"). Suite 4292 passed / 0 failed, no carve-outs. Soak-window items queued separately: finding 4 (stranded-reviewed promotion), 7 (claim heartbeat), 13-clear (atomic clear), ISN pin bump.</p>
+</article>
 <article class="r-fu" data-id="f-srr-007" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-10" data-recommends-skill="/reckon-ship systematic-review-remediation §5" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Supervised prod-graph repair pass — inline-ref docs regen + z-name minting (with P4 window)</h4>
     <div class="r-fu-body">P3 shipped the check and the generator gate; the data repair needs supervised production-graph writes: regenerate documentation for the 70 entries carrying 153 dangling inline refs, mint z_direction_unit_vector_of_camera and the diagnostic-aperture z sibling, and regenerate the empty z docs. Batch with the P4 unit-family edit window (same operator supervision).</div>
