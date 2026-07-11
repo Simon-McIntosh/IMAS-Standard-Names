@@ -15,9 +15,9 @@
   <title>Systematic Review Remediation | imas-standard-names</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-07-10">
+<meta name="plan-modified" content="2026-07-11">
 <meta name="plan-impl" content="0.83">
-<meta name="plan-version" content="5">
+<meta name="plan-version" content="6">
 </head>
 <body>
   <main class="plan-doc">
@@ -366,8 +366,8 @@ Done-when
   2. cascade atomicity test (constraint collision -&gt; full rollback)
   3. docs-edit claim preconditions + filter_protected on persists
   4. followup outcome recorded + resolved</pre>
-        <p class="r-fu-outcome">§3 landed — codex 5777ae32: gate parity (edit artifacts through validate_name_candidate, no privileged path), cascade-atomicity preflight with full rollback, docs-edit stage preconditions + filter_protected + override flag, family-scope reconciled; parity suite (test_edit_parity.py 312 lines) + cascade-atomicity tests; 78 tests verified green by orchestrator.</p>
-</article>
+    <p class="r-fu-outcome">§3 landed — codex 5777ae32: gate parity (edit artifacts through validate_name_candidate, no privileged path), cascade-atomicity preflight with full rollback, docs-edit stage preconditions + filter_protected + override flag, family-scope reconciled; parity suite (test_edit_parity.py 312 lines) + cascade-atomicity tests; 78 tests verified green by orchestrator.</p>
+    </article>
 <article class="r-fu" data-id="f-srr-003" data-status="resolved" data-tier="sonnet" data-written-by="team-lead" data-written-at="2026-07-07" data-recommends-skill="" data-resolved-at="2026-07-10T14:53:05+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Ship P3 — referential integrity + z-axis repair</h4>
     <div class="r-fu-body"><p>ISN reference-resolution check (structured + inline, warn-then-error), inline-ref docs repair, z-axis generator fix and the six missing/empty z-names. Honour decision inline-ref-severity.</p></div>
@@ -460,8 +460,8 @@ Done-when
   3. advisory suppressed for hardware bases; tools/grammar.py derives from
      get_grammar_context(); hygiene tail closed
   4. full ISN suite green; followup outcome recorded + resolved</pre>
-        <p class="r-fu-outcome">§6 landed — commits fb98228/ac196d5/b566f9b/919a988/d912daa/8f0e3d5/49eee70/b2221b3/fe1968a: five synonym families merged + curation gate; 16 catch-alls gated (0 casualties); qualifier order canonical (no rename needed); parse-contract documented; advisory 310→0; MCP payloads derived; halo/regions/binary-operator gates. Migration backlog empty. Suite 1726 passed; catalog 2147/2148 round-trip (1 intentional FSA rejection). Deferred: binary_operators.yml retirement + Transformation/Decomposition dedup (codegen refactors, drift hazards closed).</p>
-</article>
+    <p class="r-fu-outcome">§6 landed — commits fb98228/ac196d5/b566f9b/919a988/d912daa/8f0e3d5/49eee70/b2221b3/fe1968a: five synonym families merged + curation gate; 16 catch-alls gated (0 casualties); qualifier order canonical (no rename needed); parse-contract documented; advisory 310→0; MCP payloads derived; halo/regions/binary-operator gates. Migration backlog empty. Suite 1726 passed; catalog 2147/2148 round-trip (1 intentional FSA rejection). Deferred: binary_operators.yml retirement + Transformation/Decomposition dedup (codegen refactors, drift hazards closed).</p>
+    </article>
 <article class="r-fu" data-id="f-srr-006" data-status="resolved" data-tier="opus" data-written-by="team-lead" data-written-at="2026-07-07" data-recommends-skill="" data-resolved-at="2026-07-10T21:45:00+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Ship P6 — pipeline hardening and migration debt</h4>
     <div class="r-fu-body"><p>Stranded-reviewed repair, claim-lease robustness, signals regen accounting, single-tx reset/clear, LinkML flag declaration, export tail, along-locus migration, ISNC CI validate detail.</p></div>
@@ -493,8 +493,8 @@ Done-when
      qualifying names on startup
   3. LinkML declares the edit flags; ISNC validate surfaces error detail
   4. followup outcome recorded + resolved</pre>
-        <p class="r-fu-outcome">§7 landed — 10 codex commits (f98a5d41, 20772766, 4c01d3c1, e54fb812, 2626ec92, 0f631c40, e9c03cf6, f30b19da, daf12308, fff9acd3) + ISNC f063f2c + ISN b724bbe (grammar-context lru_cache, root cause of the review-era "six pre-existing failures"). Suite 4292 passed / 0 failed, no carve-outs. Soak-window items queued separately: finding 4 (stranded-reviewed promotion), 7 (claim heartbeat), 13-clear (atomic clear), ISN pin bump.</p>
-</article>
+    <p class="r-fu-outcome">§7 landed — 10 codex commits (f98a5d41, 20772766, 4c01d3c1, e54fb812, 2626ec92, 0f631c40, e9c03cf6, f30b19da, daf12308, fff9acd3) + ISNC f063f2c + ISN b724bbe (grammar-context lru_cache, root cause of the review-era "six pre-existing failures"). Suite 4292 passed / 0 failed, no carve-outs. Soak-window items queued separately: finding 4 (stranded-reviewed promotion), 7 (claim heartbeat), 13-clear (atomic clear), ISN pin bump.</p>
+    </article>
 <article class="r-fu" data-id="f-srr-007" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-10" data-recommends-skill="/reckon-ship systematic-review-remediation §5" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Supervised prod-graph repair pass — inline-ref docs regen + z-name minting (with P4 window)</h4>
     <div class="r-fu-body">P3 shipped the check and the generator gate; the data repair needs supervised production-graph writes: regenerate documentation for the 70 entries carrying 153 dangling inline refs, mint z_direction_unit_vector_of_camera and the diagnostic-aperture z sibling, and regenerate the empty z docs. Batch with the P4 unit-family edit window (same operator supervision).</div>
@@ -512,6 +512,27 @@ Done-when
   1. validate_catalog on the next export reports 0 dangling inline refs
   2. all six z-axis names exist with real documentation (completeness gate green)
   3. this followup resolved</pre>
+    </article>
+<article class="r-fu" data-id="f-srr-008" data-status="open" data-tier="sonnet" data-written-by="reckon-ship" data-written-at="2026-07-11" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Reject peak/maximum-as-infix compositions on flux bases (grammar close)</h4>
+    <div class="r-fu-body">The P4 window surfaced that the grammar currently ACCEPTS both energy_peak_flux_* and energy_maximum_flux_* infix compositions; the lead rejected these spellings — the canonical form is the transformation maximum_of_<base>_.... Add a compose-side rejection (or canonicalization) so peak/maximum cannot embed as an infix qualifier inside flux-family bases, mirroring the FSA no-op gate pattern.</div>
+    <pre class="r-fu-prompt">Project: imas-standard-names
+Plan: systematic-review-remediation (grammar close follow-on)
+Tier: sonnet
+
+Context
+  During the P4 unit-family repairs the lead rejected the energy_peak_flux_* spelling; the executed names use maximum_of_energy_flux_at_&lt;locus&gt; (transformation form). The grammar still parses the infix forms (energy_peak_flux_*, energy_maximum_flux_*), so the pipeline could mint the rejected spelling again.
+
+State to read
+  ISN grammar/model.py compose/parse paths; the FSA reduction gate (tests/grammar/test_flux_surface_reduction_gate.py, commit b8a2024) as the pattern for a composition-rejection rule; qualifier vocab entries for peak/maximum.
+
+Scope locks / constraints
+  Vocabulary/grammar edits + regenerated modules in the same commit (drift gate). Verify no published name currently uses the infix form before rejecting it (sweep the live catalog read-only).
+
+Done-when
+  1. Infix peak/maximum on flux bases rejected (or auto-canonicalized to maximum_of_) with tests
+  2. Full ISN suite green; catalog round-trip sweep unchanged
+  3. This followup resolved</pre>
     </article>
 </section>
 
