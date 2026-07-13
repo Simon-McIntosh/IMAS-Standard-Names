@@ -157,6 +157,12 @@ bases:
     aliases: []
     kind: scalar
     inherently_dimensional: true
+    # The transport-flux family (energy_flux, heat_flux, particle_flux,
+    # momentum_flux — all channel + base=flux). An extremum of a flux over a
+    # spatial domain is a reduction TRANSFORMATION and must be spelled
+    # maximum_of_<channel>_flux_at_<locus> / minimum_of_..., never as an infix
+    # extremum qualifier inside the base (energy_peak_flux, energy_maximum_flux).
+    extremum_is_transformation: true
   # Dimensionless flux-limiter coefficient (e.g. the factor alpha_m bounding a
   # transport flux to a fraction of its free-streaming value). A specific,
   # named base preferred over the generic 'coefficient' for these quantities.

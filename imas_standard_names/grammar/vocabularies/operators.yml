@@ -106,6 +106,7 @@ operators:
     kind: unary_prefix
     precedence: 30
     returns: scalar_or_vector
+    extremum_reduction: true
 
   maximum_over_flux_surface:
     kind: unary_prefix
@@ -117,6 +118,7 @@ operators:
     kind: unary_prefix
     precedence: 30
     returns: scalar_or_vector
+    extremum_reduction: true
 
   minimum_over_flux_surface:
     kind: unary_prefix

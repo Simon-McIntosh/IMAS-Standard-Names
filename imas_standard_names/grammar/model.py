@@ -1472,6 +1472,69 @@ def _check_flux_surface_reduction_gate(ir: StandardNameIR) -> None:
                 _check_flux_surface_reduction_gate(arg)
 
 
+# The adjective spelling of the maximum reduction lives in qualifiers.yml as a
+# flat token (peak = "peak / maximum value"), which has no per-token flags, so
+# it is named here alongside the flag-driven operator tokens it is synonymous
+# with. peak is treated as an infix extremum exactly like maximum.
+_EXTREMUM_INFIX_QUALIFIER_SYNONYMS = frozenset({"peak"})
+
+
+@cache
+def _extremum_infix_vocab() -> tuple[frozenset[str], frozenset[str]]:
+    """(infix extremum tokens, bases whose extremum must be a transformation)."""
+    from imas_standard_names.grammar.vocab_loaders import (  # noqa: PLC0415
+        load_operators,
+        load_physical_bases,
+    )
+
+    extremum = (
+        frozenset(
+            token
+            for token, defn in load_operators().operators.items()
+            if defn.extremum_reduction
+        )
+        | _EXTREMUM_INFIX_QUALIFIER_SYNONYMS
+    )
+    flagged = frozenset(
+        token
+        for token, defn in load_physical_bases().bases.items()
+        if defn.extremum_is_transformation
+    )
+    return extremum, flagged
+
+
+def _check_extremum_infix_gate(ir: StandardNameIR) -> None:
+    """Reject an extremum qualifier embedded as an infix inside a flux base.
+
+    An extremum of a transport flux over a spatial domain (peak/maximum value
+    on a wall, target, …) is a reduction TRANSFORMATION and must be spelled
+    ``maximum_of_<channel>_flux_at_<locus>`` / ``minimum_of_...`` — the token
+    belongs in transformation (prefix) position, not as an infix qualifier
+    inside the base (``energy_peak_flux``, ``energy_maximum_flux``). Only the
+    qualifier list is inspected: the same token in operator position is the
+    canonical ``maximum_of_`` transformation and stays legal. Binary operator
+    arguments nest full IRs, so recurse into them.
+    """
+    extremum, flagged_bases = _extremum_infix_vocab()
+    if not extremum or not flagged_bases:
+        return
+    infix = {q.token for q in (ir.qualifiers or [])} & extremum
+    base_token = getattr(ir.base, "token", None)
+    if infix and base_token in flagged_bases:
+        tok = sorted(infix)[0]
+        raise ValueError(
+            f"qualifier '{tok}' cannot be an infix inside '{base_token}': an "
+            "extremum of a flux over a spatial domain is a reduction "
+            "transformation — spell it 'maximum_of_<channel>_flux_at_<locus>' "
+            "(e.g. 'maximum_of_energy_flux_at_first_wall'), not as an infix "
+            "extremum qualifier"
+        )
+    for op_app in ir.operators or []:
+        for arg in getattr(op_app, "args", None) or []:
+            if isinstance(arg, StandardNameIR):
+                _check_extremum_infix_gate(arg)
+
+
 def compose_standard_name(parts: Mapping[str, Any] | StandardName) -> str:
     if isinstance(parts, StandardName):
         model = parts
@@ -1479,6 +1542,7 @@ def compose_standard_name(parts: Mapping[str, Any] | StandardName) -> str:
         model = StandardName.model_validate(parts)
     ir = _model_to_ir(model)
     _check_flux_surface_reduction_gate(ir)
+    _check_extremum_infix_gate(ir)
     return _compose_ir(ir)
 
 
@@ -1488,7 +1552,8 @@ def parse_standard_name(name: str) -> StandardName:
     This is the single validity oracle for the grammar: a name is valid iff
     this function returns without raising. It enforces the full contract —
     known tokens, segment compatibility, generic-base qualification, the
-    flux-surface reduction gate, and strict canonical spelling (exactly one
+    flux-surface reduction gate, the extremum-infix gate, and strict
+    canonical spelling (exactly one
     admissible spelling per name; a non-canonical token order raises
     :class:`NonCanonicalNameError` with the canonical form attached).
 
@@ -1512,6 +1577,7 @@ def parse_standard_name(name: str) -> StandardName:
             raise UnknownBaseTokenError(exc.residue, known) from exc
         raise
     _check_flux_surface_reduction_gate(result.ir)
+    _check_extremum_infix_gate(result.ir)
     model = StandardName.model_validate(_ir_to_model_dict(result.ir))
     # Strict canonical-form parsing: the grammar admits exactly ONE spelling
     # per name. A name whose tokens parse but sit in non-canonical order

@@ -136,6 +136,11 @@ class OperatorDef(BaseModel, extra="forbid"):
     # constant_on_flux_surface it is a no-op (the reduction of a flux
     # function is the value itself) and composition rejects the name.
     flux_surface_reduction: bool = False
+    # The operator reduces to an extremum over a spatial domain (maximum,
+    # minimum). On a base flagged extremum_is_transformation this reduction
+    # is only legal in transformation (prefix) position — maximum_of_<base> —
+    # so the same token appearing as an INFIX qualifier is rejected.
+    extremum_reduction: bool = False
 
 
 class OperatorRegistry(BaseModel, extra="forbid"):
@@ -170,12 +175,17 @@ class PhysicalBaseDef(BaseModel, extra="forbid"):
             constant on any flux surface — so a flux-surface reduction
             operator (flux_surface_averaged, maximum/minimum_over_flux_surface)
             applied to it is a no-op and the composition gate rejects it.
+        extremum_is_transformation: If true, an extremum of this base over a
+            spatial domain (peak/maximum/minimum) is a reduction transformation
+            and must be spelled maximum_of_<base>_... / minimum_of_<base>_...;
+            an infix extremum qualifier inside the base is rejected.
     """
 
     aliases: list[str] = []
     kind: BaseKind
     inherently_dimensional: bool = False
     constant_on_flux_surface: bool = False
+    extremum_is_transformation: bool = False
 
 
 class PhysicalBasesRegistry(BaseModel, extra="forbid"):
