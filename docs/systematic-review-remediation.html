@@ -15,9 +15,9 @@
   <title>Systematic Review Remediation | imas-standard-names</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-07-11">
+<meta name="plan-modified" content="2026-07-14">
 <meta name="plan-impl" content="1.0">
-<meta name="plan-version" content="7">
+<meta name="plan-version" content="8">
 </head>
 <body>
   <main class="plan-doc">
@@ -418,7 +418,7 @@ Done-when
   2. accepted renames produced deprecation stubs in the next export
   3. source/flux near-name validator rule live with tests
   4. followup outcome recorded + resolved</pre>
-    <p class="r-fu-outcome">§5 landed — supervised production sn-edit repairs (chunks 1-5, lead-authorized window). Momentum→momentum_source: 17 edits, residual 0 accepted bare *_momentum. Energy-flux: 2 recombination entries folded to particle-flux; family uniformly W·m⁻². Power-density (lead-refined — no power_flux base, a flux of power is nonsensical): 6 W·m⁻² entries fold into energy_flux, peaks as maximum_of_energy_flux_at_<locus>; power_density family uniformly W·m⁻³. Source/flux validator live (ISN 4d43923). superseded_from_stage=accepted stamped on renamed accepteds for P1 stubs. Residuals tracked in f-srr-009 (3 near-threshold neutral_state exhausted — safe via P1 skip-logic; one refine-reworded successor draining; pair supersede staged as p4_pair_supersede.py; Hz→s⁻¹ + electron_source_rate cross-scope). Full record: docs/archive/systematic-review-remediation-s5-landed.html.</p>
+    <p class="r-fu-outcome">§5 landed — supervised production sn-edit repairs (chunks 1-5, lead-authorized window). Momentum→momentum_source: 17 edits, residual 0 accepted bare *_momentum. Energy-flux: 2 recombination entries folded to particle-flux; family uniformly W·m⁻². Power-density (lead-refined — no power_flux base, a flux of power is nonsensical): 6 W·m⁻² entries fold into energy_flux, peaks as maximum_of_energy_flux_at_<locus>; power_density family uniformly W·m⁻³. Source/flux validator live (ISN 4d43923). superseded_from_stage=accepted stamped on renamed accepteds for P1 stubs. Residuals tracked in f-srr-009 (3 near-threshold neutral_state exhausted — safe via P1 skip-logic; one refine-reworded successor draining; pair supersede staged as p4_pair_supersede.py; Hz→s⁻¹ + electron_source_rate cross-scope). Full record: docs/archive/systematic-review-remediation-s5-landed.html.</locus></p>
     </article>
 <article class="r-fu" data-id="f-srr-005" data-status="resolved" data-tier="opus" data-written-by="team-lead" data-written-at="2026-07-07" data-recommends-skill="" data-resolved-at="2026-07-10T19:05:00+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Ship P5 — vocabulary curation and grammar closes</h4>
@@ -503,7 +503,7 @@ Done-when
   2. all six z-axis names exist with real documentation (completeness gate green)
   3. this followup resolved</pre>
     </article>
-<article class="r-fu" data-id="f-srr-008" data-status="open" data-tier="sonnet" data-written-by="reckon-ship" data-written-at="2026-07-11" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-srr-008" data-status="resolved" data-tier="sonnet" data-written-by="reckon-ship" data-written-at="2026-07-11" data-recommends-skill="" data-resolved-at="2026-07-14T06:31:38+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Reject peak/maximum-as-infix compositions on flux bases (grammar close)</h4>
     <div class="r-fu-body">The P4 window surfaced that the grammar currently ACCEPTS both energy_peak_flux_* and energy_maximum_flux_* infix compositions; the lead rejected these spellings — the canonical form is the transformation maximum_of_<base/>_.... Add a compose-side rejection (or canonicalization) so peak/maximum cannot embed as an infix qualifier inside flux-family bases, mirroring the FSA no-op gate pattern.</div>
     <pre class="r-fu-prompt">Project: imas-standard-names
@@ -523,8 +523,9 @@ Done-when
   1. Infix peak/maximum on flux bases rejected (or auto-canonicalized to maximum_of_) with tests
   2. Full ISN suite green; catalog round-trip sweep unchanged
   3. This followup resolved</pre>
+    <p class="r-fu-outcome">Shipped ISN 63e8d4e: compose+parse gate rejects extremum-as-infix on flux bases (energy_peak_flux/energy_maximum_flux) via an extremum_is_transformation flag; peak(qualifier)+maximum/minimum(operators) covered, recurses into binary args, leaves non-flux extremums (electron_peak_temperature) + the maximum_of_ transformation untouched. 19-case gate test; ISN suite 1753 passed. Pinned into codex (pin bump to 63e8d4e, codex suite green).</p>
     </article>
-<article class="r-fu" data-id="f-srr-009" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-11" data-recommends-skill="/reckon-ship systematic-review-remediation §7" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-srr-009" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-11" data-recommends-skill="/reckon-ship systematic-review-remediation §7" data-resolved-at="2026-07-14T06:31:38+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">P4/P6 residual tail — pair supersede, exhausted neutral_state, tombstone-id mechanism, soak window</h4>
     <div class="r-fu-body">Tracked residuals after the six phases landed. (1) Run the staged pair supersede p4_pair_supersede.py (power_density_at_wall→energy_flux_at_wall) — classifier-gated, needs a user-run command. (2) 3 near-threshold neutral_state momentum successors exhausted (safe: P1 skip-logic ⇒ no dangling stub) — escalated-review or lead physics call. (3) tombstone-id supersede mechanism (blocks parallel_net_ion re-rename and the pair clean-rename). (4) P6 soak window (live Neo4j): stranded-reviewed promotion (finding 4) — also drains the 31 stage-reviewed inline-ref targets behind f-srr-007; claim heartbeat (7); atomic clear_standard_names (13-clear); ISN pin bump to ≥ b724bbe; verify atomic-reset + refining→reviewed cypher against live DB + LLMCost no-duplicate-spend check.</div>
     <pre class="r-fu-prompt">Project: imas-codex + imas-standard-names (production graph + live Neo4j)
@@ -544,6 +545,27 @@ Done-when
   1. Pair supersede applied; 3 neutral_state resolved or lead-signed-off as residual
   2. Soak items implemented + verified against live Neo4j; ISN pin bumped
   3. f-srr-007 (inline-ref drain) closable; this followup resolved</pre>
+    <p class="r-fu-outcome">Tail landed except the neutral_state naming call (carried to f-srr-010). DONE: (1) pair supersede applied — power_density_at_wall superseded into energy_flux_at_wall (0 accepted W·m⁻² power_density remain); (2) tombstone-id supersede verb shipped (codex 76f179a7: sn supersede <old> --into <accepted>, refuses non-accepted, idempotent, soaked via dry-run+refusal); (3) P6 findings 4/7/13 shipped (codex b80aca37/e8995a59/6c15c4e5) + LIVE-GRAPH SOAKED: finding-4 promotion correct (0 eligible — 98 reviewed below 0.85, 1 excluded for open-edit), heartbeat wiring confirmed, finding-13 atomic clear graph-verified (test_clear_atomicity_graph.py) which caught a return-count over-count bug fixed in 4f74b1e3 (count now = actual deletions, not in-scope matches); (4) ISN pin bumped to 63e8d4e, codex suite green. NOTE finding-4 does NOT drain the 31 inline-ref targets — they are genuinely below-threshold, so f-srr-007 inline drain stays coupled to the docs-generation backlog (deferred to release-prep per lead). Heartbeat >5min duplicate-spend observation deferred to the next natural long production run (mechanism unit-proven + wired).</p>
+    </article>
+<article class="r-fu" data-id="f-srr-010" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-14" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">neutral_state momentum successors + the _state_ subject-convention clarity review</h4>
+    <div class="r-fu-body">The 3 published rc62 names parallel/poloidal/toroidal_neutral_state_momentum were P4-renamed to *_neutral_state_momentum_source, whose successors twice EXHAUSTED at near-threshold quorum (0.756-0.825 vs 0.85). Their old names are superseded with no live successor → P1 skips the stub → they retire silently (breaking 3 published names). Investigation found neutral_state is an INTENTIONAL atomic subject (subjects.yml: ion_state/ion_charge_state/neutral_state kept atomic) used by ~40 accepted published names (fast_neutral_state_density, ion_state_energy_flux, ion_charge_state_temperature, ...), so the name is structurally consistent with an accepted family — the exhaustion was reviewer inconsistency, not a grammar defect. The lead finds the _state_ convention opaque/not self-describing. DECISION PENDING: (a) lead-accept the 3 for family consistency (curated override of a near-threshold miss — legitimate, distinct from an automated gate bypass; preserves granularity, emits proper stubs); (b) tombstone-redirect the 3 to the accepted state-summed siblings (loses per-state granularity); OR (c) open a family-wide _state_ naming-clarity migration (~40 names, needs a replacement token). Not force-accepted (P2-gate-respecting).</div>
+    <pre class="r-fu-prompt">Project: imas-standard-names + imas-codex (production graph)
+Plan: systematic-review-remediation — neutral_state resolution (f-srr-010)
+Tier: opus
+
+Context
+  3 published (rc62) names parallel/poloidal/toroidal_neutral_state_momentum were P4-renamed; the *_source successors exhausted at near-threshold quorum (0.756-0.825). neutral_state is an intentional atomic subject (subjects.yml) shared by ~40 accepted names (fast_neutral_state_density, ion_state_energy_flux, ...), so the structure is consistent with an accepted family; exhaustion was reviewer inconsistency. Old names superseded with no live successor → silent retirement of 3 published names unless resolved.
+
+Options (lead decides)
+  (a) Curated-accept the 3 successors (human override of a near-threshold quorum miss; NOT an automated gate bypass). Preserves per-state granularity; proper deprecation stubs. RECOMMENDED.
+  (b) sn supersede &lt;old&gt; --into &lt;state-summed sibling&gt; (parallel/poloidal/toroidal_neutral_momentum_source, accepted) — live redirect but loses per-state granularity.
+  (c) Family-wide _state_ naming-clarity review (~40 accepted names) — larger, needs a self-describing replacement token + migration; separate from the immediate 3.
+
+Done-when
+  1. The 3 published names no longer silently retire (accepted successors OR redirected)
+  2. If (c) chosen, a scoped plan for the _state_-convention migration
+  3. This followup resolved</pre>
     </article>
 </section>
 
