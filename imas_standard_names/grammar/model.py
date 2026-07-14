@@ -1563,11 +1563,84 @@ def _check_extremum_infix_gate(ir: StandardNameIR) -> None:
                 _check_extremum_infix_gate(arg)
 
 
+# Species that carry a charge (ionization) state: the bare ion tokens plus
+# every element/isotope species (an element resolved by charge state is the
+# impurity-transport customer — argon_charge_state_density, …). Sourced from
+# the "Fusion fuel + isotopes" and "Impurity elements" sections of
+# subjects.yml; the state-vocab-disjoint test guards these stay valid subjects.
+_ION_LIKE_SUBJECTS: frozenset[str] = frozenset(
+    {
+        "ion",
+        "impurity_ion",
+        "ion_species",
+        "impurity_species",
+        # elements + isotopes
+        "hydrogen",
+        "hydrogenic",
+        "deuterium",
+        "tritium",
+        "helium",
+        "helium_3",
+        "helium_4",
+        "alpha_particle",
+        "carbon",
+        "nitrogen",
+        "neon",
+        "argon",
+        "boron",
+        "beryllium",
+        "tungsten",
+        "iron",
+        "lithium",
+        "oxygen",
+        "krypton",
+        "xenon",
+    }
+)
+_NEUTRAL_LIKE_SUBJECTS: frozenset[str] = frozenset({"neutral", "neutral_species"})
+# Which subjects each state token may resolve. internal_state also permits
+# ion-like subjects (molecular ions carry internal states — a future-legal
+# pairing with no catalog names yet).
+_STATE_SUBJECT_COMPAT: dict[str, frozenset[str]] = {
+    "charge_state": _ION_LIKE_SUBJECTS,
+    "internal_state": _NEUTRAL_LIKE_SUBJECTS | _ION_LIKE_SUBJECTS,
+}
+
+
+def _check_state_gate(model: StandardName) -> None:
+    """The state segment requires a compatible species subject.
+
+    A state token resolves a specific state OF a species, so it is meaningless
+    without a species subject (reject bare ``charge_state_density``), and the
+    token must match the species: ``charge_state`` on ion-like subjects,
+    ``internal_state`` on neutral-like (or, as a future pairing, ion-like)
+    subjects.
+    """
+    if model.state is None:
+        return
+    state_tok = model.state.value
+    subject_tok = model.subject.value if model.subject is not None else None
+    if subject_tok is None:
+        raise ValueError(
+            f"state '{state_tok}' requires a species subject — state resolves "
+            "a specific state OF a species (e.g. ion_charge_state_density); a "
+            "bare state token has no referent"
+        )
+    allowed = _STATE_SUBJECT_COMPAT.get(state_tok, frozenset())
+    if subject_tok not in allowed:
+        raise ValueError(
+            f"state '{state_tok}' is not valid on subject '{subject_tok}': "
+            "charge_state applies to ions/elements, internal_state to neutrals "
+            "(and, for molecular ions, to ions)"
+        )
+
+
 def compose_standard_name(parts: Mapping[str, Any] | StandardName) -> str:
     if isinstance(parts, StandardName):
         model = parts
     else:
         model = StandardName.model_validate(parts)
+    _check_state_gate(model)
     ir = _model_to_ir(model)
     _check_flux_surface_reduction_gate(ir)
     _check_extremum_infix_gate(ir)
@@ -1607,6 +1680,7 @@ def parse_standard_name(name: str) -> StandardName:
     _check_flux_surface_reduction_gate(result.ir)
     _check_extremum_infix_gate(result.ir)
     model = StandardName.model_validate(_ir_to_model_dict(result.ir))
+    _check_state_gate(model)
     # Strict canonical-form parsing: the grammar admits exactly ONE spelling
     # per name. A name whose tokens parse but sit in non-canonical order
     # (e.g. fast_trapped_ion_density vs trapped_fast_ion_density) is
