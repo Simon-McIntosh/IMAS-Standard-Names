@@ -60,6 +60,7 @@ class ComposeTool(Tool):
         orbit: grammar_types.Orbit | str | None = None,
         population: grammar_types.Population | str | None = None,
         subject: grammar_types.Subject | str | None = None,
+        state: grammar_types.State | str | None = None,
         device: grammar_types.Object | str | None = None,
         zone: grammar_types.Zone | str | list[str] | tuple[str, ...] | None = None,
         qualifier: grammar_types.Qualifier
@@ -94,6 +95,7 @@ class ComposeTool(Tool):
         orb = coerce_enum(grammar_types.Orbit, orbit)
         pop = coerce_enum(grammar_types.Population, population)
         subj = coerce_enum(grammar_types.Subject, subject)
+        st = coerce_enum(grammar_types.State, state)
         dev = coerce_enum(grammar_types.Object, device)
         # zone is a multi-token segment: accept a single token (str/enum) or a
         # sequence of tokens, normalising to a tuple of Zone members.
@@ -133,6 +135,7 @@ class ComposeTool(Tool):
             orbit=orb,
             population=pop,
             subject=subj,
+            state=st,
             device=dev,
             zone=zone_tuple,
             qualifier=qualifier_tuple,

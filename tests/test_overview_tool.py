@@ -21,7 +21,7 @@ def test_overview_structure(sample_catalog):
     expected_pattern = (
         "[<component> | <coordinate>]? [<aggregation>]? "
         "[<qualifier>]? [<zone>]? [<orbit>]? "
-        "[<population>]? [<subject>]? [<device> | of_<object>]? "
+        "[<population>]? [<subject>]? [<state>]? [<device> | of_<object>]? "
         "[<channel_qualifier>]? [<channel>]? "
         "[<geometric_base> | <physical_base>]? "
         "[of_<geometry> | at_<position> | over_<region> | along_<path>]? [due_to_<process>]?"
