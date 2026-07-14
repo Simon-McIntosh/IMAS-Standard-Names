@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"   content="imas-standard-names">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="sn-compound-species-naming">
+  <meta name="plan-title" content="SN Compound / Molecular Species Naming">
+  <meta name="plan-summary" content="Design a grammar construction for molecular / compound species (D2, CD4 hydrocarbons) driven by SOLPS edge/divertor modelling — the DD element[]+multiplicity axis — distinct from reaction-channel pairs and from charge/internal-state resolution.">
+  <meta name="plan-status" content="draft">
+  <meta name="plan-roi" content="mid">
+  <meta name="plan-effort" content="L">
+  <meta name="plan-tier" content="opus">
+  <meta name="plan-informs" content="systematic-review-remediation">
+  <title>SN Compound / Molecular Species Naming | imas-standard-names</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-07-14">
+<meta name="plan-version" content="1">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h2 id="s1">§1 — Problem and origin</h2>
+    <p>
+      Edge and divertor codes — <strong>SOLPS</strong> above all — track
+      <em>molecular and compound species</em>: molecular deuterium D<sub>2</sub>, and the
+      hydrocarbon families (CD<sub>4</sub>, C<sub>2</sub>D<sub>6</sub>, …) produced by chemical erosion of
+      carbon plasma-facing components. The ITER Data Dictionary models these as an
+      <code>ion[]/element[]</code> and <code>neutral[]/element[]</code> array in which each element
+      carries nuclear charge Z, mass number A, and a <strong><code>multiplicity</code></strong> field —
+      the number of atoms of that element in the species (the DD cluster
+      <em>"Species Multiplicity Atomic Data"</em>: <code>edge_profiles/…/neutral/element/multiplicity</code>,
+      <code>…/ion/element/multiplicity</code>). D<sub>2</sub> is a neutral species with one element (D)
+      at multiplicity 2; CD<sub>4</sub> is two elements (C×1, D×4).
+    </p>
+    <p>
+      The ISN grammar cannot express this today. It has <code>molecular</code> as a
+      <em>population</em> token (energy/molecularity class) but no way to name <em>which</em>
+      molecule — D<sub>2</sub> vs CD<sub>4</sub> are indistinguishable. A handful of specific molecular
+      subject tokens have already crept into <code>subjects.yml</code> ad-hoc
+      (<code>methane</code>, <code>deuterated_methane</code>, <code>ethane</code>, <code>ethylene</code>,
+      <code>propane</code>, <code>silane</code>, <code>ammonia</code>, <code>ammonia_deuterated</code>,
+      <code>methane_carbon_13</code>) — a combinatorial anti-pattern (one subject token per molecule,
+      no compositional structure), which is exactly the mistake this plan should replace with a
+      principled construction. This surfaced while shipping the <code>state</code> segment
+      (see <a href="/imas-standard-names/systematic-review-remediation.html">systematic-review-remediation</a>,
+      f-srr-010); the lead asked to scope compound species as its own design task.
+    </p>
+
+    <h2 id="s2">§2 — Three distinct species-grouping constructions (do not conflate)</h2>
+    <p>
+      The imas-dd investigation showed the intuitive "paired group" actually splits three ways.
+      Only the third is this plan's subject; the figure fixes the boundaries.
+    </p>
+    <figure>
+      <svg viewBox="0 0 900 300" role="img"
+           aria-label="Three species-grouping constructions: reaction channel, state resolution, compound species"
+           style="max-width:100%;height:auto;font-family:system-ui">
+        <g font-size="13" fill="#111827">
+          <!-- Construction 1 -->
+          <rect x="12" y="40" width="280" height="220" fill="#ffffff" stroke="#9ca3af" stroke-width="1"/>
+          <rect x="12" y="40" width="280" height="26" fill="#ffffff" stroke="#2563eb" stroke-width="1.5"/>
+          <text x="152" y="58" text-anchor="middle" font-weight="600">1 · Reaction channel</text>
+          <text x="28" y="92" font-size="12" fill="#374151">Reactant PAIR in a fusion reaction</text>
+          <text x="28" y="118" font-family="ui-monospace,monospace">deuterium_tritium</text>
+          <text x="28" y="140" font-family="ui-monospace,monospace">deuterium_deuterium</text>
+          <text x="28" y="162" font-size="12" fill="#374151">DD: distribution_source_identifier</text>
+          <text x="28" y="180" font-size="12" fill="#374151">(D_T_to_4He_n, …)</text>
+          <text x="28" y="216" font-size="12" font-weight="600" fill="#15803d">STATUS: already supported</text>
+          <text x="28" y="236" font-size="12" fill="#374151">atomic subject tokens · core fusion</text>
+
+          <!-- Construction 2 -->
+          <rect x="310" y="40" width="280" height="220" fill="#ffffff" stroke="#9ca3af" stroke-width="1"/>
+          <rect x="310" y="40" width="280" height="26" fill="#ffffff" stroke="#2563eb" stroke-width="1.5"/>
+          <text x="450" y="58" text-anchor="middle" font-weight="600">2 · State resolution</text>
+          <text x="326" y="92" font-size="12" fill="#374151">A specific STATE of one species</text>
+          <text x="326" y="118" font-family="ui-monospace,monospace">ion_charge_state</text>
+          <text x="326" y="140" font-family="ui-monospace,monospace">neutral_internal_state</text>
+          <text x="326" y="162" font-size="12" fill="#374151">DD: species_reference_identifier</text>
+          <text x="326" y="180" font-size="12" fill="#374151">(ion_state, neutral_state)</text>
+          <text x="326" y="216" font-size="12" font-weight="600" fill="#15803d">STATUS: shipped (state segment)</text>
+          <text x="326" y="236" font-size="12" fill="#374151">orthogonal grammar segment</text>
+
+          <!-- Construction 3 -->
+          <rect x="608" y="40" width="280" height="220" fill="#ffffff" stroke="#9ca3af" stroke-width="1"/>
+          <rect x="608" y="40" width="280" height="26" fill="#fff7ed" stroke="#ea580c" stroke-width="1.5"/>
+          <text x="748" y="58" text-anchor="middle" font-weight="600">3 · Compound species</text>
+          <text x="624" y="92" font-size="12" fill="#374151">A MOLECULE: elements × count</text>
+          <text x="624" y="118" font-family="ui-monospace,monospace">D₂  (D ×2)</text>
+          <text x="624" y="140" font-family="ui-monospace,monospace">CD₄ (C ×1, D ×4)</text>
+          <text x="624" y="162" font-size="12" fill="#374151">DD: element[] + multiplicity</text>
+          <text x="624" y="180" font-size="12" fill="#374151">("Species Multiplicity" cluster)</text>
+          <text x="624" y="216" font-size="12" font-weight="600" fill="#ea580c">STATUS: this plan (gap)</text>
+          <text x="624" y="236" font-size="12" fill="#374151">SOLPS edge/divertor · erosion</text>
+        </g>
+        <text x="12" y="286" font-size="12" fill="#6b7280">Constructions 1 and 2 are settled; only construction 3 (molecular composition) is open.</text>
+      </svg>
+      <figcaption>
+        The three species-grouping constructions in the DD. This plan addresses only #3
+        (compound/molecular species). #1 (reaction-channel pairs) is already atomic subjects;
+        #2 (charge/internal state) shipped as the <code>state</code> segment.
+      </figcaption>
+    </figure>
+
+    <h2 id="s3">§3 — Scope and requirements</h2>
+    <ul>
+      <li><strong>Self-describing composition.</strong> A name must convey which molecule is
+        resolved (D<sub>2</sub> vs CD<sub>4</sub>) without external lookup — mirroring the
+        self-describing goal of the state rework.</li>
+      <li><strong>Compositional, not combinatorial.</strong> Replace the ad-hoc per-molecule
+        subject tokens with a construction that composes from elements + counts, so a new
+        molecule needs no new hand-added subject token.</li>
+      <li><strong>DD-anchored.</strong> The construction must map cleanly to
+        <code>element[]</code>+<code>multiplicity</code> so codex can generate compound-species
+        names directly from the DD path (SOLPS-provided data).</li>
+      <li><strong>Orthogonal to the shipped axes.</strong> Compound identity must compose with
+        population (<code>molecular</code>), the <code>state</code> segment (a molecular ion has a
+        charge state), component/aggregation, and the channel/base — without re-introducing a
+        compound-subject anti-pattern.</li>
+      <li><strong>Retire the ad-hoc molecular subjects</strong> (methane/ethane/… listed in §1)
+        by migrating them onto the new construction, if the design supports it.</li>
+    </ul>
+
+    <h2 id="s4">§4 — Candidate directions (for the brainstorm — not yet decided)</h2>
+    <p>
+      This plan is a <strong>design task</strong>: the construction is undecided and needs a
+      brainstorm (and likely a Fable design critique, as the state rework had) before any
+      implementation plan. Directions to weigh:
+    </p>
+    <ul>
+      <li><strong>A — Composition qualifier / molecule vocabulary.</strong> A closed
+        <code>molecule</code> vocabulary (<code>d2</code>, <code>cd4</code>, …) as a first-class
+        segment or subject-adjacent token. Simple, but still enumerative (a token per molecule)
+        unless the tokens encode composition.</li>
+      <li><strong>B — Structured formula construction.</strong> A compositional spelling built
+        from element + multiplicity (e.g. an <code>&lt;element&gt;&lt;count&gt;</code> pattern), so
+        arbitrary molecules compose without new tokens. Most faithful to the DD; hardest to fit
+        the greedy-longest-prefix grammar and canonical-one-spelling contract.</li>
+      <li><strong>C — Element + multiplicity as grammar sub-structure.</strong> Model the DD
+        <code>element[]</code>/<code>multiplicity</code> directly as a repeatable segment group.
+        Most general; largest grammar change; must not break round-trip.</li>
+    </ul>
+    <p>
+      Open questions the brainstorm must answer: does composition belong in the subject axis or a
+      new axis? how does a <em>molecular ion</em> (compound identity + charge_state) render? is
+      isotopic labelling (D vs H, <sup>13</sup>C in <code>methane_carbon_13</code>) part of this
+      axis or separate? how many real SOLPS species must be expressible (bounded set vs open
+      formula)?
+    </p>
+
+    <h2 id="s5">§5 — Relationship to other work</h2>
+    <ul>
+      <li><strong>Informs / follows</strong>
+        <a href="/imas-standard-names/systematic-review-remediation.html">systematic-review-remediation</a>
+        — spun out of the <code>state</code>-segment work (f-srr-010); shares the self-describing,
+        DD-anchored, anti-compound-subject principles.</li>
+      <li><strong>Distinct from the <code>state</code> segment</strong> (shipped): state resolves a
+        state <em>of</em> a species; this resolves the species <em>identity</em> as a molecule.
+        A molecular ion could carry both.</li>
+      <li><strong>Distinct from reaction channels</strong> (<code>deuterium_tritium</code>, already
+        atomic subjects): those are reactant pairs, not bound compounds.</li>
+    </ul>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="construction" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">Which construction expresses molecular/compound species?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="molecule-vocabulary">molecule-vocabulary (A)</button>
+      <button class="r-opt" data-value="structured-formula">structured-formula (B)</button>
+      <button class="r-opt" data-value="element-multiplicity-substructure">element-multiplicity-substructure (C)</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+<div class="r-dec" data-key="scope-bound" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">Bounded molecule set (enumerated SOLPS species) or open formula grammar?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="bounded-set">bounded-set</button>
+      <button class="r-opt" data-value="open-formula">open-formula</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+</section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-scs-001" data-status="open" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-07-14" data-recommends-skill="superpowers:brainstorming" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Brainstorm the compound-species construction (A/B/C) + Fable design critique</h4>
+    <div class="r-fu-body">Design-stage plan authored. Next: run the brainstorm to choose the construction (molecule-vocabulary / structured-formula / element-multiplicity-substructure) and scope (bounded set vs open formula), grounded in the DD element[]+multiplicity model and the real SOLPS species set; get a Fable design critique as the state rework did; then write an implementation plan. No grammar/graph changes until the design is approved.</div>
+    <pre class="r-fu-prompt">Project: imas-standard-names
+Plan:    sn-compound-species-naming (http://localhost:8765/imas-standard-names/sn-compound-species-naming.html)
+Section: design
+Tier:    opus
+
+Context
+  SOLPS tracks molecular/compound species (D2, CD4 hydrocarbons from carbon erosion); the DD models them as element[]+multiplicity. ISN has no compositional construction — only ad-hoc per-molecule subject tokens (methane, ethane, ...). Spun out of the state-segment work (systematic-review-remediation f-srr-010). Honour the live decisions shown above; do not re-list them.
+
+State to read  (CODE / FILES / DATA)
+  docs/sn-compound-species-naming.html (this plan) for the three-construction framing.
+  imas_standard_names/grammar/vocabularies/subjects.yml — the ad-hoc molecular tokens to retire (methane, deuterated_methane, ethane, ethylene, propane, silane, ammonia, ammonia_deuterated, methane_carbon_13).
+  imas-dd tools: edge_profiles ion/element + neutral/element + multiplicity; species_reference_identifier; the &#x27;Species Multiplicity Atomic Data&#x27; cluster. Enumerate the real SOLPS species set.
+  The shipped state segment (grammar/vocabularies/states.yml, model.py _check_state_gate) as the precedent for adding a subject-refinement construction.
+
+Scope locks / constraints  (non-decision)
+  Self-describing + compositional (not one-token-per-molecule) + DD-anchored to element[]/multiplicity. Must compose orthogonally with population(molecular), the state segment, component/aggregation. Greedy longest-prefix + canonical-one-spelling contract must hold; full-catalog round-trip must stay green. ISN owns all vocabulary (no codex hardcoding).
+
+Done-when
+  1. Construction + scope decisions locked (the two decisions in this plan)
+  2. Fable design critique captured; before/after examples across molecular ion / neutral / isotopic cases
+  3. Implementation plan written (writing-plans); this followup resolved</pre>
+    </article>
+</section>
+
+  </main>
+</body>
+</html>
