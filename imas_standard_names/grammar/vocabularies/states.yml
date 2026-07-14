@@ -1,0 +1,20 @@
+# State-resolution vocabulary
+#
+# The `state` segment resolves a quantity for a specific state of a species,
+# rather than the species aggregate. It refines the subject (the DD nests
+# ion[]/state[]/... and neutral[]/state[]/... inside the species) and is a
+# single-token closed segment rendered immediately AFTER the subject:
+#   <population>_<subject>_<state>_<channel>_<base>
+#
+# Tokens name the resolved axis (self-describing):
+#   - charge_state:   ionization (charge) state of an ion; may be a bundled
+#                     z-range (DD z_min/z_max "Ion Charge State Bundles").
+#                     Valid on ion-like subjects only.
+#   - internal_state: internal degrees of freedom of a neutral (electronic,
+#                     vibrational, rotational) — covers ground, excited,
+#                     metastable. NOT "excited_state" (ground is a state too).
+#                     Valid on neutral-like subjects only.
+#
+# Metastable/excited are VALUES on the internal-state axis, not tokens here.
+- charge_state
+- internal_state

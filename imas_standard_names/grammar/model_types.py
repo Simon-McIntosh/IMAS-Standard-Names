@@ -90,6 +90,11 @@ class Subject(StrEnum):
     DEUTERATED_METHANE = "deuterated_methane"
 
 
+class State(StrEnum):
+    CHARGE_STATE = "charge_state"
+    INTERNAL_STATE = "internal_state"
+
+
 class Population(StrEnum):
     FAST = "fast"
     THERMAL = "thermal"
@@ -698,6 +703,7 @@ class Decomposition(StrEnum):
 __all__ = [
     "Component",
     "Subject",
+    "State",
     "Population",
     "Orbit",
     "Aggregation",

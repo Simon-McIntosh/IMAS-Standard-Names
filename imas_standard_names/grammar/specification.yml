@@ -235,6 +235,19 @@ segments:
     optional: true
     vocabulary: subjects
     description: "Particle species or plasma entity"
+  - id: state
+    optional: true
+    vocabulary: states
+    description: >
+      State resolution: a quantity resolved for a specific state of the
+      species rather than the species aggregate. Single-token closed segment,
+      an orthogonal subject-refinement axis (like population), but rendered
+      IMMEDIATELY AFTER the subject because it binds tighter — the DD nests
+      ion[]/state[]/... and neutral[]/state[]/... inside the species:
+      <population>_<subject>_<state>_<channel>_<base>
+      (e.g. fast_ion_charge_state_pressure, neutral_internal_state_density).
+      charge_state is valid on ion-like subjects, internal_state on
+      neutral-like subjects (see the compatibility gate).
   - id: device
     optional: true
     vocabulary: objects
@@ -404,6 +417,7 @@ segments:
 vocabularies:
   components: !include vocabularies/components.yml
   subjects: !include vocabularies/subjects.yml
+  states: !include vocabularies/states.yml
   # rc32 subject-vocabulary decomposition: orthogonal single-token modifier
   # segments split out of the old compound subjects.
   populations: !include vocabularies/populations.yml
