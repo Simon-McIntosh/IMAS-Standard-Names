@@ -497,7 +497,6 @@ class Position(StrEnum):
     LINE_OF_SIGHT = "line_of_sight"
     ANTENNA_ROW = "antenna_row"
     BEAM_TRACING_POINT = "beam_tracing_point"
-    CHARGE_STATE = "charge_state"
     CLOSEST_WALL_POINT = "closest_wall_point"
     CONSTANT_TOROIDAL_FLUX = "constant_toroidal_flux"
     CONSTRAINT_POSITION = "constraint_position"

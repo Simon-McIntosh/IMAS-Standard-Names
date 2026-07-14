@@ -379,9 +379,6 @@ loci:
   beam_tracing_point:
     type: position
     allowed_relations: [at, of]
-  charge_state:
-    type: position
-    allowed_relations: [at, of]
   closest_wall_point:
     type: position
     allowed_relations: [at, of]

@@ -49,6 +49,7 @@ from imas_standard_names.grammar.model_types import (
     Process,
     Qualifier as QualifierToken,
     Region,
+    State,
     Subject,
     Transformation,
     Zone,
@@ -100,6 +101,7 @@ _GEOMETRY_VALUES: frozenset[str] = frozenset(g.value for g in GeometricBase)
 # population=fast, subject=ion.
 _AGGREGATION_VALUES: frozenset[str] = frozenset(a.value for a in Aggregation)
 _POPULATION_VALUES: frozenset[str] = frozenset(p.value for p in Population)
+_STATE_VALUES: frozenset[str] = frozenset(s.value for s in State)
 _ORBIT_VALUES: frozenset[str] = frozenset(o.value for o in Orbit)
 
 # Zone: ordered plasma-region / geometric sub-selector PREFIX segment. Unlike
@@ -472,6 +474,7 @@ def _ir_to_model_dict(ir: StandardNameIR) -> dict[str, str]:
             transformation_token = None
             aggregation = None
             population = None
+            state = None
             orbit = None
             channel = None
             channel_qualifier = None
@@ -536,6 +539,18 @@ def _ir_to_model_dict(ir: StandardNameIR) -> dict[str, str]:
                         )
                         raise ValueError(msg)
                     subject = q.token
+                elif q.token in _STATE_VALUES:
+                    # State is a single-token subject-refinement segment; a
+                    # second state token is a hard error (never silent
+                    # last-wins).
+                    if state is not None:
+                        msg = (
+                            f"Two 'state' tokens ('{state}' and "
+                            f"'{q.token}') cannot stack in a single name; the "
+                            f"state segment admits at most one token."
+                        )
+                        raise ValueError(msg)
+                    state = q.token
                 elif q.token in _OBJECT_VALUES:
                     device = q.token
                 elif q.token in _ZONE_VALUES:
@@ -598,6 +613,8 @@ def _ir_to_model_dict(ir: StandardNameIR) -> dict[str, str]:
                 d["population"] = population
             if subject:
                 d["subject"] = subject
+            if state:
+                d["state"] = state
             if device:
                 d["device"] = device
             if zone_tokens:
@@ -825,6 +842,7 @@ def _model_to_ir(model: StandardName) -> StandardNameIR:
                 model.channel,
                 model.channel_qualifier,
                 model.qualifier,
+                model.state,
             )
             # Insert bare-prefix transformation qualifier at the front
             # (transformation is outermost: <transform>_<subject>_<base>)
@@ -890,6 +908,7 @@ def _decompose_physical_base(
     channel: Channel | None = None,
     channel_qualifier: ChannelQualifier | None = None,
     segment_qualifiers: tuple[QualifierToken, ...] = (),
+    state: State | None = None,
 ) -> tuple[QuantityOrCarrier, list[Qualifier]]:
     """Decompose a physical_base string into IR base + qualifiers.
 
@@ -940,6 +959,11 @@ def _decompose_physical_base(
         qualifiers.append(Qualifier(token=_value_of(population)))
     if subject:
         qualifiers.append(Qualifier(token=_value_of(subject)))
+    if state:
+        # State binds tighter than the species block — rendered immediately
+        # after the subject, before the legacy device prefix and the
+        # channel/base: <population>_<subject>_<state>_<channel>_<base>.
+        qualifiers.append(Qualifier(token=_value_of(state)))
     if device:
         qualifiers.append(Qualifier(token=_value_of(device)))
 
@@ -991,6 +1015,10 @@ class StandardName(BaseModel):
     orbit: Orbit | None = None
     population: Population | None = None
     subject: Subject | None = None
+    # State: single-token subject-refinement segment (charge_state on ions,
+    # internal_state on neutrals). Binds tighter than population — renders
+    # immediately AFTER the subject: <population>_<subject>_<state>_<base>.
+    state: State | None = None
     device: Object | None = None
     # Zone: ordered plasma-region / geometric sub-selector PREFIX segment.
     # MULTI-token (lower_outer) unlike the single-token modifier segments, so

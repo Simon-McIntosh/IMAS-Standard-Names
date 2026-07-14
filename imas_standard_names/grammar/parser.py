@@ -177,6 +177,9 @@ def load_default_vocabularies() -> Vocabularies:
     aggregation_quals = vocab_loaders.load_aggregations()
     population_quals = vocab_loaders.load_populations()
     orbit_quals = vocab_loaders.load_orbits()
+    # State-resolution tokens (charge_state, internal_state) peel like
+    # qualifiers; the model retains the single token in the ``state`` segment.
+    state_quals = vocab_loaders.load_states()
 
     # Add unary_prefix operator tokens as qualifiers so that "bare" prefix
     # operators (those that attach without _of_, like volume_averaged,
@@ -217,6 +220,7 @@ def load_default_vocabularies() -> Vocabularies:
         | aggregation_quals
         | population_quals
         | orbit_quals
+        | state_quals
         | prefix_op_quals
         | zone_quals
         | channel_quals

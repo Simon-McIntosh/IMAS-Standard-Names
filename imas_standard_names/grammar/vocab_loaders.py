@@ -303,6 +303,18 @@ def load_populations() -> frozenset[str]:
     return _load_flat_token_list("populations.yml", "populations")
 
 
+def load_states() -> frozenset[str]:
+    """Load state-resolution tokens from ``states.yml``.
+
+    State tokens (charge_state on ions, internal_state on neutrals) form a
+    single-token closed segment that refines the subject to a specific
+    charge/internal state. The parser unions these into its qualifier
+    vocabulary so they peel; the StandardName model retains them in the scalar
+    ``state`` segment. Flat YAML list of string tokens.
+    """
+    return _load_flat_token_list("states.yml", "states")
+
+
 def load_orbits() -> frozenset[str]:
     """Load orbit/transit-class tokens from ``orbits.yml``.
 
