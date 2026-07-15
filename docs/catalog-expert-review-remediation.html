@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-15">
-<meta name="plan-version" content="19">
+<meta name="plan-version" content="20">
 <meta name="plan-impl" content="0.6">
 </head>
 <body>
@@ -610,6 +610,8 @@ Done-when: editorial edits accepted; zero COCOS mentions in accepted description
     <span class="r-research-title">Human doc edits below review threshold stay &#x27;reviewed&#x27;, not &#x27;accepted&#x27;</span></div>
 <div class="r-research" data-id="r-domain-moves-landed" data-type="live-graph-evidence" data-source="Applied via guarded Cypher SET (physics_domain + source_domains), all 29 verified (0 skipped): mechanical_measurement_diagnostics 52-&gt;24 accepted (camera angular widths x2 -&gt; radiation; mass-spec + langmuir hardware x9 -&gt; particle; cooling/calorimetry/plant-port x8 -&gt; plant_systems; midplane/wall/SOL plasma temps+potentials x8 -&gt; edge_plasma_physics; temperature_at_wall -&gt; plasma_wall_interactions); pressure_of_lower_hybrid_antenna plant_systems -&gt; auxiliary_heating. All follow the locked semantic-subject principle with confident manifest targets. GYROCENTER family (computational_workflow) NOT moved — target awaiting user confirmation (see gyrocenter-domain decision). Needs-human moves (~11: Langmuir current-density/saturation cluster, neutral_pressure/barometry, gap-reference-point unification, toroidal_angle_of_line_of_sight) still queued in f-domain-execution." data-added-by="reckon-ship" data-when="2026-07-15">
     <span class="r-research-title">29 confident domain reclassifications landed on live graph</span></div>
+<div class="r-research" data-id="r-legacy-dd-dryrun" data-type="live-graph-evidence" data-source="Read-only dry-run for f-legacy-dd-backfill. ALL 8742 DD StandardNameSource nodes resolve via FROM_DD_PATH to a current IMASNode WITH documentation (0 absent, 0 missing docs); 3953 feed accepted names. Current DDVersion id = 4.1.0 (is_current=true) — the exact version the producer snapshot query (MATCH DDVersion{id,is_current:true} + IMASNode{id:path} + HAS_PARENT/HAS_UNIT/HAS_COORDINATE, graph_ops._pin_dd_source_snapshots L5588-5609) would stamp. Extraction (composed_at ~2026-06-18) is in the 4.1 line (imas_data_dictionaries 4.1.1 shipped 2026-01-15), so current-DD docs == extraction docs. CONSTRAINT: the producer DELIBERATELY refuses to backfill existing sources (&#x27;their original snapshot cannot be reconstructed safely after the fact&#x27;) and raises on an unpinned existing source. So the apply must be a bounded reviewed one-off migration replicating the snapshot query for existing sources (set dd_version=4.1.0, dd_documentation, dd_parent_path/documentation, dd_data_type, dd_unit, dd_coordinates, dd_lifecycle_*, dd_snapshot_pinned=true), then removed. Given the producer&#x27;s anti-backfill stance + export-gate stakes, this apply needs explicit user confirmation of the backfill-from-current-DD approach before execution." data-added-by="reckon-ship" data-when="2026-07-15">
+    <span class="r-research-title">§7.3 backfill dry-run: all 8742 DD sources snapshot-able at DD 4.1.0</span></div>
 </section>
 </main>
 </body>
