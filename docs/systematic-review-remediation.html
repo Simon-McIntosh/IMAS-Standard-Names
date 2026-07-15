@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-15">
 <meta name="plan-impl" content="1.0">
-<meta name="plan-version" content="9">
+<meta name="plan-version" content="10">
 </head>
 <body>
   <main class="plan-doc">
@@ -589,6 +589,29 @@ Done-when
   1. Brainstorm + design an impact-based gate (compatible bump = no-op; breaking change = surgical re-validate/re-review of only affected names, never a blanket clear)
   2. Implementation plan; tests proving a compatible ISN bump does not trip a clear and a breaking token change flags exactly the affected names
   3. --skip-clear-gate footgun removed or reduced to a narrow, documented escape; this followup resolved</pre>
+    </article>
+<article class="r-fu" data-id="f-srr-012" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-15" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">P1 stub gate should key on FORMAL-release status, not graph-accepted (no stubs for RC-only names)</h4>
+    <div class="r-fu-body">Lead insight (2026-07-15): P1 emits deprecation stubs for every superseded name whose superseded_from_stage='accepted' — but 'accepted' is a graph pipeline stage (passed LLM/RD review), NOT 'passed a formal PR review / shipped in a stable release'. The ISNC catalog is RC-ONLY (every tag v0.2.0rcNN; no formal release has ever been cut), so NO published name has real pinned consumers, and the stubs P1 creates are premature noise. A name that has only ever been in release candidates can simply be deleted on rename — deprecation tracking is only warranted once a name ships in a formal (non-RC) release, where breaking a consumer matters. Refine the P1 export stub gate to require a formal-release marker; until then it should emit zero stubs (superseded RC-only names delete/vanish, not stub). Directly affects the in-flight state-convention migration, which is creating ~130+ superseded ion nodes that would otherwise stub into rc63.</div>
+    <pre class="r-fu-prompt">Project: imas-codex
+Plan: systematic-review-remediation — P1 stub-gate refinement (f-srr-012)
+Tier: opus
+
+Context
+  P1 (export.py _fetch_deprecation_stubs) emits a status:deprecated stub for every superseded name with superseded_from_stage=&#x27;accepted&#x27;. &#x27;accepted&#x27; = graph pipeline stage, not formal-release. ISNC is RC-only (no formal release ever), so no name has pinned consumers and the stubs are premature. Lead: RC-only names delete on rename; stubs only for formally-released names.
+
+State to read
+  imas_codex/standard_names/export.py (_fetch_deprecation_stubs / _build_stub_entry, ~line 589 region; the superseded_from_stage=&#x27;accepted&#x27; gate).
+  The release/publish flow (catalog_release.py, publish.py) + ISNC tags (all rcNN) to define the &#x27;formally released&#x27; marker — e.g. a name is release-tracked once it appears in a non-RC release, recorded on the node or derivable from release history.
+  P1 landed doc: docs/archive/systematic-review-remediation-s2-landed.html.
+
+Scope locks / constraints
+  Preserve P1&#x27;s chain-collapse + accepted-only intent, but re-base &#x27;accepted&#x27; on FORMAL release, not graph name_stage. Until a formal release exists the gate emits zero stubs. Do not delete REFINED_FROM lineage (keep provenance); just don&#x27;t publish stubs for non-formally-released names. Add a test: an RC-only superseded name emits NO stub; a formally-released superseded name emits one.
+
+Done-when
+  1. Stub gate keys on formal-release status; RC-only superseded names emit no stub
+  2. Test proving RC-only vs formally-released stub behaviour
+  3. Migration&#x27;s superseded ion/neutral nodes do not pollute the next RC; this followup resolved</pre>
     </article>
 </section>
 
