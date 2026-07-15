@@ -16,6 +16,8 @@
   <title>Catalog Expert Review Remediation | imas-standard-names</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-07-15">
+<meta name="plan-version" content="1">
 </head>
 <body>
 <main class="plan-doc">
@@ -125,38 +127,77 @@
   </ul>
 
   <section data-reckon="decisions" id="decisions" class="r-decisions">
-    <h2><span class="sec">§</span> Decisions</h2>
-    <div class="r-dec" data-key="radial-semantics" data-choice="" data-by="" data-when="">
-      <p class="r-dec-q">How should names distinguish cylindrical major-radius components from flux-surface-normal or flux-label quantities?</p>
-      <p class="r-dec-opts"><button class="r-opt" data-value="explicit-frames">Introduce explicit frame-specific tokens</button><button class="r-opt" data-value="contextual-radial">Retain radial with mandatory contextual segments</button></p>
-      <p class="r-dec-rat">Recommendation: explicit frame-specific semantics, with migration rules derived from source coordinates.</p>
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="radial-semantics" data-choice="explicit-frames" data-by="Simon McIntosh" data-when="2026-07-15T13:34:07+00:00">
+    <p class="r-dec-q">How should names distinguish cylindrical major-radius components from flux-surface-normal or flux-label quantities?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="explicit-frames">Introduce explicit frame-specific tokens</button>
+      <button class="r-opt" data-value="contextual-radial">Retain radial with mandatory contextual segments</button>
+      </p>
+    <p class="r-dec-rat">Define radial exclusively as the cylindrical R component in the right-handed (R, phi, Z) frame. Introduce flux_surface_normal for signed vector projections normal to magnetic flux surfaces, positive toward increasing flux label. Retain perpendicular for magnetic-field-relative semantics; it is not a synonym for flux-surface normal. Keep radial_coordinate_of_* as cylindrical major-radius coordinates and distinguish flux-coordinate derivatives from physical unit-normal projections.</p>
     </div>
-    <div class="r-dec" data-key="context-model" data-choice="" data-by="" data-when="">
-      <p class="r-dec-q">Must component identity such as reflector be encoded in the standard name, or may structured source-context metadata carry it?</p>
-      <p class="r-dec-opts"><button class="r-opt" data-value="programmatic-name">Encode identity in grammar/name</button><button class="r-opt" data-value="structured-context">Use required structured context metadata</button><button class="r-opt" data-value="hybrid">Use a hybrid based on semantic necessity</button></p>
-      <p class="r-dec-rat">Recommendation: hybrid—encode distinctions that change quantity identity; retain diagnostic-instance context as structured provenance.</p>
+<div class="r-dec" data-key="context-model" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">Must component identity such as reflector be encoded in the standard name, or may structured source-context metadata carry it?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="programmatic-name">Encode identity in grammar/name</button>
+      <button class="r-opt" data-value="structured-context">Use required structured context metadata</button>
+      <button class="r-opt" data-value="hybrid">Use a hybrid based on semantic necessity</button>
+      </p>
+    <p class="r-dec-rat">Recommendation: hybrid—encode distinctions that change quantity identity; retain diagnostic-instance context as structured provenance.</p>
     </div>
-    <div class="r-dec" data-key="domain-principle" data-choice="" data-by="" data-when="">
-      <p class="r-dec-q">What is the primary rule for physics-domain assignment when source subsystem, diagnostic method, and measured physics disagree?</p>
-      <p class="r-dec-opts"><button class="r-opt" data-value="measured-physics">Measured physical quantity</button><button class="r-opt" data-value="source-subsystem">Owning source subsystem</button><button class="r-opt" data-value="diagnostic-method">Measurement method</button></p>
-      <p class="r-dec-rat">Recommendation: measured physics as primary domain, with source subsystem and diagnostic method retained as secondary metadata.</p>
+<div class="r-dec" data-key="domain-principle" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">What is the primary rule for physics-domain assignment when source subsystem, diagnostic method, and measured physics disagree?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="measured-physics">Measured physical quantity</button>
+      <button class="r-opt" data-value="source-subsystem">Owning source subsystem</button>
+      <button class="r-opt" data-value="diagnostic-method">Measurement method</button>
+      </p>
+    <p class="r-dec-rat">Recommendation: measured physics as primary domain, with source subsystem and diagnostic method retained as secondary metadata.</p>
     </div>
-    <div class="r-dec" data-key="q-minimum" data-choice="" data-by="" data-when="">
-      <p class="r-dec-q">Should the minimum-safety-factor locus minimize signed <code>q</code> or <code>abs(q)</code>, and should resolution wait for an upstream DD clarification?</p>
-      <p class="r-dec-opts"><button class="r-opt" data-value="absolute-q">Use minimum abs(q)</button><button class="r-opt" data-value="signed-q">Retain minimum signed q</button><button class="r-opt" data-value="upstream-first">Escalate upstream before changing</button></p>
-      <p class="r-dec-rat"></p>
+<div class="r-dec" data-key="q-minimum" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">Should the minimum-safety-factor locus minimize signed q or abs(q) , and should resolution wait for an upstream DD clarification?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="absolute-q">Use minimum abs(q)</button>
+      <button class="r-opt" data-value="signed-q">Retain minimum signed q</button>
+      <button class="r-opt" data-value="upstream-first">Escalate upstream before changing</button>
+      </p>
+    <p class="r-dec-rat"></p>
     </div>
-    <div class="r-dec" data-key="rename-policy" data-choice="" data-by="" data-when="">
-      <p class="r-dec-q">For accepted ambiguous names, should this programme favour immediate canonical renames or documentation-first correction followed by staged lineage migration?</p>
-      <p class="r-dec-opts"><button class="r-opt" data-value="staged-lineage">Documentation first, then staged lineage migration</button><button class="r-opt" data-value="immediate-rename">Immediate canonical rename</button></p>
-      <p class="r-dec-rat">Recommendation: staged lineage migration except where the current name denotes the wrong quantity.</p>
+<div class="r-dec" data-key="rename-policy" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">For accepted ambiguous names, should this programme favour immediate canonical renames or documentation-first correction followed by staged lineage migration?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="staged-lineage">Documentation first, then staged lineage migration</button>
+      <button class="r-opt" data-value="immediate-rename">Immediate canonical rename</button>
+      </p>
+    <p class="r-dec-rat">Recommendation: staged lineage migration except where the current name denotes the wrong quantity.</p>
     </div>
-  </section>
+</section>
 
   <section data-reckon="followups" id="followups" class="r-followups">
-    <h2><span class="sec">§</span> Followups</h2>
-    <!-- Implementation followups will be added only after the open physics and design decisions are resolved. -->
-  </section>
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-radial-semantics" data-status="open" data-tier="opus" data-written-by="Codex" data-written-at="2026-07-15" data-recommends-skill="/reckon-ship catalog-expert-review-remediation §4.4" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Implement explicit radial and flux-surface-normal semantics</h4>
+    <div class="r-fu-body">The radial-frame decision is locked. Implement the grammar, catalog migration, and pipeline regression slice without broad string replacement, while preserving source-backed meaning and lineage.</div>
+    <pre class="r-fu-prompt">Project: imas-standard-names
+Plan:    catalog-expert-review-remediation (http://localhost:8765/imas-standard-names/catalog-expert-review-remediation.html)
+Section: §4.4
+Tier:    opus
+
+Context
+  The lead has fixed the coordinate semantics: radial means the cylindrical R component; flux_surface_normal means the signed component normal to magnetic flux surfaces toward increasing flux label; perpendicular remains magnetic-field-relative and must not substitute for flux-surface normal. Implement this bounded grammar and migration slice while the broader expert review continues.
+
+State to read  (CODE / FILES / DATA — the builder already injects the plan URL)
+  imas_standard_names/grammar/, tests/ grammar and round-trip suites, sibling imas-standard-names-catalog standard_names/, and sibling imas-codex standard-name prompts/review gates. Query imas-cx for the current radial family before deciding the exact affected inventory.
+
+Scope locks / constraints  (non-decision)
+  Preserve the ISN/imas-codex/ISNC project boundary. Do not bulk-replace radial strings. Keep radial_coordinate_of_* as cylindrical R. Treat flux-coordinate derivatives and scalar flux labels separately from vector projections. Update grammar sources and generated modules together. Preserve lineage for catalog renames and do not bypass the read-only live graph.
+
+Done-when
+  1. Vocabulary definitions and validation encode radial, perpendicular, and flux_surface_normal unambiguously; affected source-backed catalog names are migrated with lineage and pipeline guards
+  2. full relevant parse/compose, grouping, catalog, prompt, and renderer tests are green in every changed repository
+  3. followup written into plan + this followup marked resolved</pre>
+    </article>
+</section>
 </main>
 </body>
 </html>
