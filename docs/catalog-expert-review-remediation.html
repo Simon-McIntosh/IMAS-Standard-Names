@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-15">
-<meta name="plan-version" content="5">
+<meta name="plan-version" content="6">
 </head>
 <body>
 <main class="plan-doc">
@@ -181,6 +181,14 @@
       </p>
     <p class="r-dec-rat">Recommendation: evidence-specific. Generate ion_charge_state only when the DD leaf or identifier explicitly resolves ionization charge; otherwise preserve ion_state or name the actual internal-state axis.</p>
     </div>
+<div class="r-dec" data-key="catalog-approval-lifecycle" data-choice="approved-stage" data-by="Simon McIntosh" data-when="2026-07-15">
+    <p class="r-dec-q">How is catalog PR acceptance represented independently from LLM review acceptance?</p>
+    <p class="r-dec-ctx">The project is still in its first RC cycle and no standard name has yet been accepted through a catalog PR. RC presence and catalog_edit origin do not imply governance approval.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="approved-stage">Add approved after accepted</button>
+      </p>
+    <p class="r-dec-rat">Retain accepted as the LLM name-review threshold and add approved as the subsequent lifecycle state set only by a merged catalog acceptance PR. RC export/import must never set approved. Persist PR number/URL, merge commit, and approved_at; superseded names are retained as governed deprecations only when superseded_from_stage was approved.</p>
+    </div>
 </section>
 
   <section data-reckon="followups" id="followups" class="r-followups">
@@ -258,6 +266,8 @@ Done-when
     <span class="r-research-title">Reflector local-axis semantics</span></div>
 <div class="r-research" data-id="r-ion-state-live" data-type="live-graph-evidence" data-source="imas-cx standard-name family, DD path search, and state identifiers" data-added-by="Codex" data-when="2026-07-15">
     <span class="r-research-title">Ion-state versus charge-state current inventory</span></div>
+<div class="r-research" data-id="r-provenance-live-graph" data-type="live-graph-evidence" data-source="Live imas-cx graph queried through the configured imas-codex GraphClient: 1,091 superseded names; 555 StandardNameSource nodes still point to them; 549 retain FROM_DD_PATH edges; 452 have no live PRODUCED_NAME target. Normal persist_refined_name migrates sources atomically and records REFINED_FROM, while supersede-into-existing and some regeneration/import paths intentionally retain historical edges." data-added-by="Codex" data-when="2026-07-15">
+    <span class="r-research-title">Superseded-name DD-source ownership audit</span></div>
 </section>
 </main>
 </body>
