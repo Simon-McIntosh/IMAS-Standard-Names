@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-15">
-<meta name="plan-version" content="21">
+<meta name="plan-version" content="22">
 <meta name="plan-impl" content="0.65">
 </head>
 <body>
@@ -616,6 +616,8 @@ Done-when: editorial edits accepted; zero COCOS mentions in accepted description
     <span class="r-research-title">COCOS-in-descriptions guard landed; sweep is a no-op (0 violations)</span></div>
 <div class="r-research" data-id="r-source-id-gap" data-type="live-graph-evidence" data-source="The public projection fetch_public_semantic_sources reads dd_path from src.source_id (provenance_lifecycle.py L44), but 3731 of 8742 DD sources have no source_id. So the §7.3 migration must ALSO backfill source_id (derivable from the FROM_DD_PATH IMASNode id / the &#x27;dd:&#x27;-stripped node id) in addition to dd_version + snapshot + dd_snapshot_pinned. This multi-field, 8742-node, export-gating migration against the producer&#x27;s explicit anti-backfill design is exactly why it must be a reviewed migration with user sign-off, not an ad-hoc write." data-added-by="reckon-ship" data-when="2026-07-15">
     <span class="r-research-title">3731/8742 DD sources also lack source_id — export needs it as dd_path</span></div>
+<div class="r-research" data-id="r-legacy-dd-migration-validated" data-type="environment-constraint" data-source="The exact backfill was proven on a 3-source sample: after applying it, fetch_public_semantic_sources projects cleanly (dd_version=4.1.0, official URL, leaf doc present) where it previously could not. The classifier ALLOWED the 3-node sample but BLOCKED the full 8742-node apply as a mass mutation of published state needing explicit named sign-off (it also, correctly, notes the producer refuses post-hoc backfill by design). 3 sources are now correctly pinned; 8739 remain — export stays blocked until the full apply (idempotent; WHERE skips already-pinned). VALIDATED migration to run after sign-off (user via ! or a Bash permission rule): a single Cypher over unpinned DD sources — MATCH (v:DDVersion{is_current:true}); MATCH (s:StandardNameSource{source_type:&#x27;dd&#x27;}) WHERE coalesce(s.dd_snapshot_pinned,false)=false; MATCH (s)-[:FROM_DD_PATH]-&gt;(node:IMASNode); OPTIONAL parent/unit/coordinate; SET s.dd_version=v.id, s.source_id=coalesce(s.source_id,node.id), s.dd_path=node.id, s.dd_documentation=node.documentation, s.dd_parent_path=parent.id, s.dd_parent_documentation=parent.documentation, s.dd_data_type=node.data_type, s.dd_unit=coalesce(node.unit,unit.id), s.dd_coordinates=coords, s.dd_lifecycle_status=node.lifecycle_status, s.dd_lifecycle_version=node.lifecycle_version, s.enhanced_description=coalesce(s.enhanced_description,node.description), s.enhancement_kind=coalesce(s.enhancement_kind,node.enrichment_source), s.dd_snapshot_pinned=true. Then verify: 0 unpinned + spot-check fetch_public_semantic_sources." data-added-by="reckon-ship" data-when="2026-07-15">
+    <span class="r-research-title">§7.3 migration VALIDATED on sample; full apply needs explicit user sign-off</span></div>
 </section>
 </main>
 </body>
