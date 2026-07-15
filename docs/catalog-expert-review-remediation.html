@@ -17,7 +17,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-15">
-<meta name="plan-version" content="15">
+<meta name="plan-version" content="16">
+<meta name="plan-impl" content="0.5">
 </head>
 <body>
 <main class="plan-doc">
@@ -47,6 +48,18 @@
     </svg>
     <figcaption>Each finding is verified before it is routed; durable remediation combines data correction with grammar, presentation, or generation safeguards where needed.</figcaption>
   </figure>
+
+  <section id="landed-2026-07-15" class="section-landed">
+    <header><span class="badge badge-shipped">✓ execution pass 2026-07-15</span><h3>Landed this session (graph campaign)</h3></header>
+    <p class="landed-summary">
+      <strong>Committed:</strong> imas-codex <code>9b500158</code> (§7.2 local-frame residuals — reflector <code>front_surface</code> token dropped; 3 spectrometer X2 "vertical" labels → second-local-tangential; tests green).
+      <strong>Live-graph mutations verified (zero orphans):</strong> row 13b fold <code>toroidal_plasma_current</code>→<code>plasma_current</code> (8 ip sources retargeted); row 12 fold <code>total_electron_deposited_power</code>→<code>electron_deposited_power</code>; row 8 <code>thermal_electron_absorbed_wave_power</code> accepted.
+      <strong>Staged awaiting one batch review:</strong> 7 wave-power renames + 6 q doc edits (row-15 sign defect fixed no-COCOS in 2 names; row-16 arg&nbsp;min&nbsp;|q| in 4 names).
+      <strong>Decisions locked:</strong> no-cocos-in-descriptions, domain-move-mechanism, gyrocenter-domain=transport.
+      <strong>Manifests:</strong> <code>docs/archive/catalog-expert-review-manifests/</code> (naming-duplicates, coordinate-domain, q-conventions, legacy-dd-provenance).
+      <strong>Blockers surfaced:</strong> (1) batch review needs <code>--skip-clear-gate</code> authorization (classifier-blocked); (2) export hard-blocked — 8741 DD sources unpinned, backfill queued (<code>f-legacy-dd-backfill</code>). Domain moves, row-10 compaction, §7.3 backfill and release queued as followups.
+    </p>
+  </section>
 
   <h2 id="s2">§2 — Condensed expert review</h2>
   <ol>
@@ -290,6 +303,18 @@
       </p>
     <p class="r-dec-rat">Retain immutable semantic DD-source snapshots and centrally retarget them through supported edits. Store operational transformations as private StandardNameChange history exposed only through an explicit trace tool. Compact unapproved superseded nodes into internal change events after a reviewed dry-run manifest; preserve governed deprecations only for PR-approved names.</p>
     </div>
+<div class="r-dec" data-key="no-cocos-in-descriptions" data-choice="explicit-no-cocos" data-by="Simon McIntosh" data-when="2026-07-15T20:34:13+00:00">
+    <p class="r-dec-q">no-cocos-in-descriptions</p>
+    <p class="r-dec-rat">Standard-name descriptions must NEVER name a COCOS number. Sign and coordinate conventions are stated explicitly in physical terms (e.g. q positive when B_phi and I_p are parallel; right-handed cylindrical (R,phi,Z)). The DDv4 basis is COCOS 17 (DDv3 was COCOS 11) but neither number appears in prose. COCOS is carried only in a dedicated graph/catalog metadata field, not in the human-readable definition. A catalog-wide sweep must strip any existing COCOS mention and a regression guard must reject new ones.</p>
+    </div>
+<div class="r-dec" data-key="domain-move-mechanism" data-choice="cypher-set-plus-root-cause" data-by="Simon McIntosh" data-when="2026-07-15T20:34:13+00:00">
+    <p class="r-dec-q">domain-move-mechanism</p>
+    <p class="r-dec-rat">Apply the ~30 confident physics_domain reclassifications via a reviewed direct Cypher SET (physics_domain + source_domains) on the live graph, then re-export. In the same campaign, locate and fix the code/LLM prompt that assigned the incorrect domains at root (dd_domain_classifier.py / definitions/physics/ids_domains.json / domain_gold_set.json) and add a regression unit test that guards the corrected assignments so future runs cannot reintroduce them.</p>
+    </div>
+<div class="r-dec" data-key="gyrocenter-domain" data-choice="transport" data-by="Simon McIntosh" data-when="2026-07-15T20:34:13+00:00">
+    <p class="r-dec-q">gyrocenter-domain</p>
+    <p class="r-dec-rat">The gyrocenter orbit-frequency names (poloidal/toroidal_gyrocenter_frequency from distributions/.../ggd/orbit_frequency_{pol,tor}) move out of computational_workflow to transport. Not fast_particles: every charged particle has a gyrocenter, so fast_particles is too narrow and is not an existing domain. computational_workflow is a tooling bucket, not a physics domain; guiding-center orbit dynamics (bounce/transit/precession) is a kinetic/orbit-transport phenomenon. Reversible if a dedicated kinetics/gyrokinetics domain is later preferred.</p>
+    </div>
 </section>
 
   <section data-reckon="followups" id="followups" class="r-followups">
@@ -383,7 +408,7 @@ Done-when
   3. outcome is recorded and this followup resolved</pre>
     <p class="r-fu-outcome">Implemented and pushed in imas-codex <code>4df4c599</code>. New DD-backed sources require exact <code>dd_version</code> and immutable create-only leaf/parent documentation plus semantic metadata; public projection uses only pinned snapshots, separates authoritative DD documentation from enhanced context, generates versioned official URLs, and omits operational history. The initially added single-use report CLI and helper were removed in <code>fc5f5f71</code>; migration inventory will be a direct read-only graph-query artifact. Focused provenance/export tests pass. No live graph mutation or migration inventory was executed; legacy unpinned sources block export until explicitly migrated.</p>
     </article>
-<article class="r-fu" data-id="f-naming-duplicates" data-status="open" data-tier="opus" data-written-by="Codex" data-written-at="2026-07-15" data-recommends-skill="/reckon-edit catalog-expert-review-remediation" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-naming-duplicates" data-status="resolved" data-tier="opus" data-written-by="Codex" data-written-at="2026-07-15" data-recommends-skill="/reckon-edit catalog-expert-review-remediation" data-resolved-at="2026-07-15T20:34:13+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Resolve ambiguous names and duplicate families</h4>
     <div class="r-fu-body"><p>Complete the interactive canonicalization decisions for heating power, wave absorption, stored energy, enclosed volume, deposited power, plasma energy, and plasma current before dispatching graph edits.</p></div>
     <pre class="r-fu-prompt">Project: imas-standard-names
@@ -404,8 +429,9 @@ Done-when
   1. each family has an approved canonical name/scope and predecessor disposition
   2. exact graph-edit and prompt-regression manifest is recorded
   3. implementation followup is queued with measurable tests</pre>
+    <p class="r-fu-outcome">Manifest recorded: docs/archive/catalog-expert-review-manifests/manifest-naming-duplicates.md. LANDED on live graph (verified zero orphans): row 13b fold toroidal_plasma_current→plasma_current (8 ip sources+edges retargeted); row 12 fold total_electron_deposited_power→electron_deposited_power (2 electron-source paths retargeted). Row 8 (wave power): thermal_electron_absorbed_wave_power accepted; 7 further renames STAGED (4 bare + per_toroidal_mode variants, single wave DD source each) awaiting batch review. Row 9 keep-both (not a dup); row 11 keep volume_of_first_wall + convention note (queued); row 13a plasma-energy family well-formed (no action); row 7 doc-only 'coupled' (queued). Row 10 BLOCKED: thermal_electron_energy is a superseded tombstone that thermal_electron_stored_energy REFINED_FROM — reversing needs provenance-compaction of the tombstone first (queued f-row10-compaction). Implementation followups queued.</p>
     </article>
-<article class="r-fu" data-id="f-coordinate-domain-gaps" data-status="open" data-tier="opus" data-written-by="Codex" data-written-at="2026-07-15" data-recommends-skill="/reckon-edit catalog-expert-review-remediation" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-coordinate-domain-gaps" data-status="resolved" data-tier="opus" data-written-by="Codex" data-written-at="2026-07-15" data-recommends-skill="/reckon-edit catalog-expert-review-remediation" data-resolved-at="2026-07-15T20:34:13+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Audit coordinate completeness and domain taxonomy</h4>
     <div class="r-fu-body"><p>Build the DD-backed object-by-coordinate coverage matrix and settle the primary domain-assignment rule before adding names or reclassifying entries.</p></div>
     <pre class="r-fu-prompt">Project: imas-standard-names
@@ -426,8 +452,9 @@ Done-when
   1. coordinate applicability matrix and domain move manifest are reviewed
   2. domain-principle decision is locked
   3. implementation followups with tests are queued</pre>
+    <p class="r-fu-outcome">Manifest recorded: docs/archive/catalog-expert-review-manifests/manifest-coordinate-domain.md. domain-principle already locked (semantic-subject). Coverage matrix built: measurement_position is the complete R/Z/phi exemplar; systematic gaps in camera (no position triplet) and gap-reference/aperture toroidal-phi; 4 source-backed missing-name proposals + 2 StandardTerm frame defs identified (routed to the normal sn run/proposal pipeline, not authored in ISN). Domain moves: ~30 confident + ~11 needs-human; mechanism locked (domain-move-mechanism); gyrocenter target locked (transport). Execution queued f-domain-execution.</p>
     </article>
-<article class="r-fu" data-id="f-q-conventions" data-status="open" data-tier="opus" data-written-by="Codex" data-written-at="2026-07-15" data-recommends-skill="/reckon-edit catalog-expert-review-remediation" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-q-conventions" data-status="resolved" data-tier="opus" data-written-by="Codex" data-written-at="2026-07-15" data-recommends-skill="/reckon-edit catalog-expert-review-remediation" data-resolved-at="2026-07-15T20:34:13+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Resolve safety-factor sign and minimum-q semantics</h4>
     <div class="r-fu-body"><p>Compare the live DD, COCOS metadata, and q-family definitions, then lock the sign convention and signed-q versus absolute-q minimum rule.</p></div>
     <pre class="r-fu-prompt">Project: imas-standard-names
@@ -448,6 +475,7 @@ Done-when
   1. evidence comparison and expert choice are recorded
   2. q-minimum decision is locked
   3. bounded catalog/prompt regression followup is queued</pre>
+    <p class="r-fu-outcome">Manifest recorded: docs/archive/catalog-expert-review-manifests/manifest-q-conventions.md. Verdict: row-15 is a catalog WORDING defect, not a DD defect (no upstream issue needed). Defect confirmed in exactly 2 of 10 q-family names (safety_factor, safety_factor_at_pedestal_top); names 3-5 use a correct pitch/flux-increment form and were left. Corrected sign wording is relative alignment of B_phi and I_p, per the locked no-cocos-in-descriptions decision (no COCOS number in prose). safety_factor doc applied (drafted); pedestal_top + the 4 arg-min-|q| row-16 edits STAGED. All 6 await batch review to accept. Side-findings recorded: safety_factor_at_plasma_boundary has an empty definition; _at_..._0_95 carries prohibited 'typical values 3-5' verbose prose.</p>
     </article>
 <article class="r-fu" data-id="f-final-editorial-export" data-status="open" data-tier="sonnet" data-written-by="Codex" data-written-at="2026-07-15" data-recommends-skill="/reckon-ship catalog-expert-review-remediation §4.6" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Finish editorial fixes and export the catalog RC</h4>
@@ -470,6 +498,100 @@ Done-when
   1. flux-loop wording passes review and graph docs acceptance
   2. ISNC export, validation, SPA tests/build and source-link checks pass
   3. RC is cut through supported release tooling and outcome recorded</pre>
+    </article>
+<article class="r-fu" data-id="f-complete-staged-review" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-15" data-recommends-skill="/reckon-ship catalog-expert-review-remediation §4.3" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Complete review of staged edits (needs clear-gate authorization)</h4>
+    <div class="r-fu-body">13 edits are staged on the live graph awaiting one batch review to land accepted: 7 Row-8 wave-power rename successors (drafted) + 6 q doc edits (safety_factor drafted; pedestal_top + 4 min-q staged). The batch review requires --skip-clear-gate because the committed §7.2 prompt change (imas-codex 9b500158) bumped the pipeline composite hash; the auto-mode classifier blocked that flag pending explicit user authorization.</div>
+    <pre class="r-fu-prompt">Project: imas-standard-names
+Plan: catalog-expert-review-remediation
+Section: §4.3 (review completion)
+Tier: opus
+
+Context
+  13 staged edits on the live graph need one review pass to become accepted. Blocked only by the --skip-clear-gate classifier guard; the gate fired because §7.2&#x27;s committed prompt fix changed the pipeline hash (intended change), and we are reviewing scoped staged edits, not regenerating.
+
+Authorization required
+  User authorizes --skip-clear-gate: add a Bash permission rule for `uv run imas-codex sn run --only review --edits --skip-clear-gate`, or run in-session via `! cd /home/ITER/mcintos/Code/imas-codex &amp;&amp; uv run imas-codex sn run --only review --edits --skip-clear-gate`.
+
+Done-when
+  1. All 13 staged successors reach accepted (or below-threshold rejections triaged + re-edited)
+  2. Verify 7 wave-power renames accepted + olds superseded with REFINED_FROM; 6 q docs accepted with corrected no-COCOS wording (defect absent, |q| present)
+  3. followup resolved with per-name outcomes</pre>
+    </article>
+<article class="r-fu" data-id="f-domain-execution" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-15" data-recommends-skill="/reckon-ship catalog-expert-review-remediation §4.5" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Apply domain reclassifications + fix root cause + regression test</h4>
+    <div class="r-fu-body">Apply the ~30 confident physics_domain moves via reviewed Cypher SET (physics_domain + source_domains), including gyrocenter orbit-frequency names → transport. Then fix the root-cause domain-assignment logic (dd_domain_classifier.py / definitions/physics/ids_domains.json / domain_gold_set.json) and add a regression unit test. ~11 needs-human moves await per-item confirmation.</div>
+    <pre class="r-fu-prompt">Project: imas-standard-names
+Plan: catalog-expert-review-remediation
+Section: §4.5 (domain execution)
+Tier: opus
+
+Context
+  manifest-coordinate-domain.md lists ~30 confident semantic-subject moves + ~11 needs-human. Locked: domain-move-mechanism, gyrocenter-domain (transport), domain-principle (semantic-subject).
+
+Steps
+  1. Root cause first: read dd_domain_classifier.py + ids_domains.json + domain_gold_set.json; determine why distributions gyrocenter→computational_workflow, barometry→mechanical, lh_antennas→plant_systems; fix at source; add regression unit test; commit imas-codex.
+  2. Apply ~30 confident moves via reviewed Cypher SET (dry-run manifest id: current→target first). Needs user authorization for the live-graph write.
+  3. Bring ~11 needs-human moves to the lead.
+  4. Verify domain inventories; coherent cross-domain families.
+
+Done-when: root-cause fix + test committed; confident moves applied + verified; needs-human resolved; followup resolved.</pre>
+    </article>
+<article class="r-fu" data-id="f-legacy-dd-backfill" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-15" data-recommends-skill="/reckon-ship catalog-expert-review-remediation §7.3" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Backfill DD provenance on legacy sources (export gate)</h4>
+    <div class="r-fu-body">EXPORT HARD-BLOCK: all 8741 DD StandardNameSource nodes are unpinned (dd_snapshot_pinned=0) with no recorded dd_version; 3963 feed accepted names. Lead confirmed sources are latest-gated and provenance must be recorded. Backfill exact current DDv4 version + pinned raw leaf/parent doc snapshot onto every DD source via a reviewed one-off migration (dry-run manifest first, driver removed after) until the invariant returns zero unpinned/incomplete public DD sources.</div>
+    <pre class="r-fu-prompt">Project: imas-standard-names
+Plan: catalog-expert-review-remediation
+Section: §7.3 (legacy DD provenance)
+Tier: opus
+
+Context
+  manifest-legacy-dd-provenance.md. imas-codex pins imas_data_dictionaries==4.1.1; seeding strictly current-DD (latest-gated); pinning contract is create-only so no legacy source was migrated. Locked: dd-source-presentation + provenance-compaction (pin exact version/path + raw snapshot, never latest, never infer).
+
+Steps
+  1. Confirm authoritative current DDv4 version for the extraction window (installed 4.1.1; verify no intervening bump across composed_at ~2026-06-18; partition if so).
+  2. Build reviewed dry-run migration manifest capturing per-source dd_version + immutable leaf/parent snapshot, setting dd_snapshot_pinned=true.
+  3. Apply bounded one-off migration (needs user authorization for the live-graph write); remove driver after.
+  4. Require invariant (unpinned/incomplete public DD sources) = zero before export.
+
+Done-when: invariant zero; manifest + verification retained; followup resolved.</pre>
+    </article>
+<article class="r-fu" data-id="f-row10-compaction" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-15" data-recommends-skill="/reckon-ship catalog-expert-review-remediation §4.3" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Row 10: compact tombstone then rename stored-energy</h4>
+    <div class="r-fu-body">Row 10 (drop 'stored', approved) is blocked: thermal_electron_energy exists as a superseded tombstone that the accepted thermal_electron_stored_energy REFINED_FROM (pipeline previously refined energy→stored_energy). Per rename-policy no id is reused while an uncompacted predecessor occupies it. Compact the unapproved tombstone (reviewed sn provenance-cleanup dry-run) then rename thermal_electron_stored_energy→thermal_electron_energy.</div>
+    <pre class="r-fu-prompt">Project: imas-standard-names
+Plan: catalog-expert-review-remediation
+Section: §4.3 (row 10)
+Tier: opus
+
+Context
+  thermal_electron_stored_energy [accepted] --REFINED_FROM--&gt; thermal_electron_energy [superseded tombstone]. Lead approved dropping &#x27;stored&#x27; to match the energy family. rename-policy locked.
+
+Steps
+  1. Review sn provenance-cleanup dry-run; confirm thermal_electron_energy unapproved + safe to compact.
+  2. Compact it (frees id). Needs user authorization for live-graph write.
+  3. Rename thermal_electron_stored_energy→thermal_electron_energy (--scope self), base=energy; verify round-trip + reparent.
+  4. Review to accept.
+
+Done-when: thermal_electron_energy accepted canonical; predecessor compacted with lineage; followup resolved.</pre>
+    </article>
+<article class="r-fu" data-id="f-editorial-cocos-sweep" data-status="open" data-tier="sonnet" data-written-by="reckon-ship" data-written-at="2026-07-15" data-recommends-skill="/reckon-ship catalog-expert-review-remediation §4.2" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Row 7/11/18 editorial + catalog-wide COCOS sweep + guard</h4>
+    <div class="r-fu-body">Bounded editorial doc edits: row 7 'absorbed'→'coupled' on total_power_due_to_ion_cyclotron_heating + parent (DD says coupled); row 11 add volume_of_<surface>=enclosed convention note; row 18 shorten flux-loop effective-area polarity prose. Plus per no-cocos-in-descriptions: sweep all accepted-name docs for COCOS mentions, strip them (express convention explicitly), add a regression guard rejecting COCOS numbers in descriptions.</div>
+    <pre class="r-fu-prompt">Project: imas-standard-names
+Plan: catalog-expert-review-remediation
+Section: §4.2 (editorial + COCOS sweep)
+Tier: sonnet
+
+Context
+  Locked: normative-documentation (strict), no-cocos-in-descriptions. Row 7 DD=&#x27;coupled&#x27;. Row 11 keep name + convention. Row 18 flux-loop over-verbose.
+
+Steps
+  1. Doc-only sn edit --docs --override-edits --scope self for row 7 (x2), row 11 note, row 18 shorten; land via review.
+  2. Query all accepted names for &#x27;cocos&#x27; in documentation; rewrite convention explicitly (no number); land via doc edits.
+  3. Add description-validation regression test rejecting any COCOS-number token.
+
+Done-when: editorial edits accepted; zero COCOS mentions in accepted descriptions; guard test green; followup resolved.</pre>
     </article>
 </section>
 <section data-reckon="research" id="research" class="r-research-list">
