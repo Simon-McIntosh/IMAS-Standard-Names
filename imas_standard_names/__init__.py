@@ -38,6 +38,12 @@ try:
         validate_round_trip,
     )
     from imas_standard_names.grammar.render import compose
+    from imas_standard_names.grammar.terms import (
+        StandardTerm,
+        fetch_standard_terms,
+        search_standard_terms,
+        standard_terms,
+    )
 
     try:
         from imas_standard_names.grammar.context import get_grammar_context
@@ -50,10 +56,14 @@ try:
         "ParseError",
         "ParseResult",
         "StandardNameIR",
+        "StandardTerm",
         "compose",
         "get_grammar_context",
         "parse",
         "validate_round_trip",
+        "fetch_standard_terms",
+        "search_standard_terms",
+        "standard_terms",
     ]
 except Exception:  # pragma: no cover - defensive for code-generation stages
     pass

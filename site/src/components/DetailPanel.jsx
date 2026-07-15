@@ -190,7 +190,7 @@ export function DetailPanel({
         />
       </section>
 
-      <section className="detail-section">
+      {n.sources.length > 0 && <section className="detail-section">
         <h3 className="detail-h">
           Sources
           <span className="detail-h-sub">
@@ -202,7 +202,7 @@ export function DetailPanel({
             <SourceGroup key={ids} ids={ids} items={items} />
           ))}
         </div>
-      </section>
+      </section>}
     </div>
   );
 }

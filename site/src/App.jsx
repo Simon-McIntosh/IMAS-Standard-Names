@@ -109,7 +109,7 @@ function Shell() {
 
   // Sync state → URL.
   useEffect(() => {
-    setUrlState({ view, name: selected, query });
+    setUrlState({ view, name: selected, query, term: urlState.term });
   }, [view, selected, query, setUrlState]);
 
   // Dev-only height guard: if the active view ever paints with zero
@@ -262,6 +262,8 @@ function Shell() {
           query={query}
           seedName={grammarSeed.name}
           seedNonce={grammarSeed.nonce}
+          term={urlState.term}
+          setTerm={(term) => setUrlState((state) => ({ ...state, term, view: 'grammar' }))}
         />
       ) : (
         <VocabularyMatrix

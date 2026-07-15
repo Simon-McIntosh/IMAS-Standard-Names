@@ -7,6 +7,7 @@ SPA loads:
 * ``CATALOG_VERSION`` — human-readable catalog identifier
 * ``CATEGORIES`` — list of ``{id, label, count}`` per physics_domain
 * ``GRAMMAR_VOCAB`` — token lists per UI vocabulary section
+* ``STANDARD_TERMS`` — governed compositional terms and definitions
 * ``NAMES`` — flat array of records with the grammar-derived ``parse``
   decomposition pre-computed by the ISN Python parser (no JS
   heuristic).
@@ -21,8 +22,9 @@ record carries:
 * prose: ``short`` (description), ``long`` (documentation minus the
   ``Sign convention:`` paragraph), ``sign`` (the extracted paragraph)
 * navigation: ``seeAlso`` (links normalised, ``name:`` prefix stripped),
-  ``arguments`` (just the argument names), ``sources``
-  (``{path, status}``), ``superseded_by`` (name of replacement or
+  ``arguments`` (just the argument names), ``sources`` (public semantic DD
+  metadata with a pinned version and no operational ledger fields),
+  ``superseded_by`` (name of replacement or
   ``null``), ``deprecates`` (name being deprecated or ``null``)
 * ``parse`` — a list of role/text/note segments (operators, qualifiers,
   axis, base, locus, process) for the UI to render as chips.
@@ -61,6 +63,7 @@ from imas_standard_names.grammar.parser import (
     compose,
     parse,
 )
+from imas_standard_names.grammar.terms import standard_terms
 from imas_standard_names.models import StandardNameCatalogManifest
 
 _log = logging.getLogger(__name__)
@@ -272,15 +275,15 @@ def _normalise_see_also(links: list[str] | None) -> list[str]:
     return result
 
 
-def _normalise_sources(sources: list[dict[str, Any]] | None) -> list[dict[str, str]]:
-    """Reduce source records to ``{path, status}`` pairs.
+def _normalise_sources(sources: list[dict[str, Any]] | None) -> list[dict[str, Any]]:
+    """Project public DD source semantics and strip operational ledger fields.
 
     ``path`` falls back to ``id`` (minus its ``dd:`` prefix) when the
     entry has no explicit ``dd_path``.
     """
     if not sources:
         return []
-    normalised: list[dict[str, str]] = []
+    normalised: list[dict[str, Any]] = []
     for raw in sources:
         if not isinstance(raw, dict):
             continue
@@ -291,8 +294,58 @@ def _normalise_sources(sources: list[dict[str, Any]] | None) -> list[dict[str, s
                 path = ident[len("dd:") :]
         if not path:
             continue
-        status = raw.get("status") or ""
-        normalised.append({"path": str(path), "status": str(status)})
+        # The producer owns these immutable DD fields. Legacy source records
+        # remain visible as plain text but are deliberately not linked to
+        # ``latest`` when their pinned version is absent.
+        projected: dict[str, Any] = {"path": str(path)}
+        authoritative = raw.get("dd_documentation")
+        if not isinstance(authoritative, dict):
+            authoritative = {}
+        enhanced = raw.get("enhanced_context")
+        if not isinstance(enhanced, dict):
+            enhanced = {}
+        aliases = {
+            "dd_version": ("dd_version", "version"),
+            "leaf_definition": ("leaf_definition", "documentation"),
+            "parent_path": ("parent_path",),
+            "parent_definition": ("parent_definition", "parent_documentation"),
+            "data_type": ("data_type",),
+            "unit": ("unit",),
+            "coordinates": ("coordinates",),
+            "lifecycle": ("lifecycle", "dd_lifecycle"),
+            "semantic_facet": ("semantic_facet", "facet"),
+            "enhanced_context": ("enhanced_context",),
+            "enhancement_kind": ("enhancement_kind",),
+        }
+        for public_key, candidate_keys in aliases.items():
+            value = next(
+                (
+                    raw.get(key)
+                    for key in candidate_keys
+                    if raw.get(key) not in (None, "")
+                ),
+                None,
+            )
+            if value is not None:
+                projected[public_key] = value
+        nested_authoritative = {
+            "leaf_definition": authoritative.get("leaf"),
+            "parent_path": authoritative.get("parent_path"),
+            "parent_definition": authoritative.get("parent"),
+            "data_type": authoritative.get("data_type"),
+            "unit": authoritative.get("unit"),
+            "coordinates": authoritative.get("coordinates"),
+            "lifecycle": authoritative.get("lifecycle_status"),
+            "lifecycle_version": authoritative.get("lifecycle_version"),
+        }
+        for key, value in nested_authoritative.items():
+            if value not in (None, "", []):
+                projected[key] = value
+        if enhanced.get("description"):
+            projected["enhanced_context"] = enhanced["description"]
+        if enhanced.get("kind"):
+            projected["enhancement_kind"] = enhanced["kind"]
+        normalised.append(projected)
     return normalised
 
 
@@ -1067,6 +1120,8 @@ def _build_grammar_vocab() -> dict[str, list[dict[str, Any]]]:
                 "token": token,
                 "type": entry.type,
                 "relations": list(entry.allowed_relations),
+                "definition": entry.definition,
+                "abbreviations": list(entry.abbreviations),
             }
             for token, entry in (sorted(loci.loci.items()) if loci else ())
         ],
@@ -1229,6 +1284,7 @@ def build_site_dataset(
         "CATALOG_VERSION": version,
         "CATEGORIES": _build_categories(names),
         "GRAMMAR_VOCAB": _build_grammar_vocab(),
+        "STANDARD_TERMS": [term.model_dump(mode="json") for term in standard_terms()],
         "NAMES": names,
     }
 

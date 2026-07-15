@@ -270,7 +270,7 @@ class TestNormaliseSeeAlso:
 
 
 class TestNormaliseSources:
-    """``_normalise_sources`` reduces to ``{path, status}`` records."""
+    """``_normalise_sources`` emits semantic DD data, not ledger fields."""
 
     def test_extracts_dd_path_and_status(self) -> None:
         sources = [
@@ -280,18 +280,47 @@ class TestNormaliseSources:
                 "status": "composed",
             }
         ]
-        assert _normalise_sources(sources) == [
-            {"path": "equilibrium/time_slice/ip", "status": "composed"}
-        ]
+        assert _normalise_sources(sources) == [{"path": "equilibrium/time_slice/ip"}]
 
     def test_falls_back_to_id_minus_prefix(self) -> None:
         sources = [{"id": "dd:foo/bar", "status": "attached"}]
-        assert _normalise_sources(sources) == [
-            {"path": "foo/bar", "status": "attached"}
-        ]
+        assert _normalise_sources(sources) == [{"path": "foo/bar"}]
 
     def test_handles_none(self) -> None:
         assert _normalise_sources(None) == []
+
+    def test_pinned_documentation_projection_strips_operational_fields(self) -> None:
+        source = {
+            "dd_path": "summary/global_quantities/energy_thermal/value",
+            "dd_version": "4.0.0",
+            "dd_documentation": {
+                "leaf": "Value",
+                "parent_path": "summary/global_quantities/energy_thermal",
+                "parent": "Thermal plasma energy.",
+                "data_type": "FLT_0D",
+                "lifecycle_status": "active",
+            },
+            "enhanced_context": {
+                "description": "Context inferred from the parent hierarchy.",
+                "kind": "generated",
+            },
+            "model": "must-not-leak",
+            "status": "composed",
+            "source_id": "must-not-leak",
+        }
+        assert _normalise_sources([source]) == [
+            {
+                "path": "summary/global_quantities/energy_thermal/value",
+                "dd_version": "4.0.0",
+                "leaf_definition": "Value",
+                "parent_path": "summary/global_quantities/energy_thermal",
+                "parent_definition": "Thermal plasma energy.",
+                "data_type": "FLT_0D",
+                "lifecycle": "active",
+                "enhanced_context": "Context inferred from the parent hierarchy.",
+                "enhancement_kind": "generated",
+            }
+        ]
 
 
 class TestGrammarFacets:
@@ -333,6 +362,7 @@ class TestDatasetShape:
         assert "NAMES" in site_dataset
         assert "CATEGORIES" in site_dataset
         assert "GRAMMAR_VOCAB" in site_dataset
+        assert "STANDARD_TERMS" in site_dataset
         assert "CATALOG_VERSION" in site_dataset
 
         names = site_dataset["NAMES"]
@@ -636,12 +666,15 @@ class TestSeeAlsoNormalisation:
 class TestSourcesNormalisation:
     """Sources become ``[{path, status}]`` records."""
 
-    def test_sources_have_path_and_status(self, site_dataset: dict) -> None:
+    def test_sources_expose_path_without_operational_status(
+        self, site_dataset: dict
+    ) -> None:
         for record in site_dataset["NAMES"]:
             if record["sources"]:
                 for src in record["sources"]:
                     assert "path" in src
-                    assert "status" in src
+                    assert "status" not in src
+                    assert "id" not in src
                     assert src["path"]  # non-empty
                 return
         pytest.skip("no records with sources in current catalog")

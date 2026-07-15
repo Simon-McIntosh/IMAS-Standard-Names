@@ -2,6 +2,12 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { parseHash, writeHash } from '../../src/lib/url-state.js';
 
 describe('parseHash', () => {
+  it('reads a shareable standard-term detail', () => {
+    location.hash = '#/grammar?term=last_closed_flux_surface';
+    expect(parseHash()).toEqual({
+      view: 'grammar', name: null, query: '', term: 'last_closed_flux_surface',
+    });
+  });
   beforeEach(() => {
     history.replaceState(null, '', '/');
   });

@@ -1,5 +1,7 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { ROLE_META, FILTERABLE_PARSE_ROLES } from '../lib/grammar.js';
+import { useData } from '../lib/data.js';
+import { StandardTermCard } from './StandardTermCard.jsx';
 
 // Grammar token chips + highlighted source string + production footer.
 //
@@ -32,6 +34,9 @@ function displayToken(t) {
 }
 
 export function ParseBreakdown({ name, parse, filters, setFilters }) {
+  const { STANDARD_TERMS, NAMES } = useData();
+  const [openTerm, setOpenTerm] = useState(null);
+  const terms = useMemo(() => new Map((STANDARD_TERMS || []).map((term) => [term.token, term])), [STANDARD_TERMS]);
   const spans = useMemo(() => {
     if (!parse || parse.length === 0) return [];
     const out = [];
@@ -114,14 +119,17 @@ export function ParseBreakdown({ name, parse, filters, setFilters }) {
           // Filter on the emitter's original text; display the bare token.
           const active = isActiveFilter(t.role, t.text);
           const shown = displayToken(t);
+          const term = terms.get(shown);
           return (
             <div
               key={i}
               className={`gtoken gtoken-${t.role} ${filterable ? 'clickable' : ''} ${active ? 'is-filter-active' : ''}`}
               style={{ '--role-hue': meta.hue }}
-              onClick={() => filterable && toggleFilter(t.role, t.text)}
+              onClick={() => term ? setOpenTerm(openTerm === term.token ? null : term.token) : filterable && toggleFilter(t.role, t.text)}
               title={
-                filterable
+                term
+                  ? term.definition
+                  : filterable
                   ? (active ? `Remove ${t.role} filter` : `Filter to names with ${t.role} = ${shown}`)
                   : meta.desc
               }
@@ -136,6 +144,14 @@ export function ParseBreakdown({ name, parse, filters, setFilters }) {
           );
         })}
       </div>
+
+      {openTerm && (
+        <StandardTermCard
+          term={terms.get(openTerm)}
+          examples={(NAMES || []).filter((entry) => entry.parse?.some((part) => displayToken(part) === openTerm)).map((entry) => entry.name)}
+          onClose={() => setOpenTerm(null)}
+        />
+      )}
 
       <div className="grammar-foot">
         <span className="grammar-foot-label">Production:</span>

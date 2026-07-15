@@ -12,6 +12,7 @@ const EMPTY = {
   CATALOG_VERSION: '',
   CATEGORIES: [],
   GRAMMAR_VOCAB: {},
+  STANDARD_TERMS: [],
   NAMES: [],
 };
 
@@ -71,6 +72,7 @@ export function DataProvider({ children }) {
           CATALOG_VERSION: data.CATALOG_VERSION ?? '',
           CATEGORIES: Array.isArray(data.CATEGORIES) ? data.CATEGORIES : [],
           GRAMMAR_VOCAB: data.GRAMMAR_VOCAB ?? {},
+          STANDARD_TERMS: Array.isArray(data.STANDARD_TERMS) ? data.STANDARD_TERMS : [],
           NAMES: Array.isArray(data.NAMES) ? data.NAMES : [],
           loading: false,
           error: null,

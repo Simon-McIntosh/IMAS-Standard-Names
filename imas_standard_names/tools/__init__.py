@@ -10,6 +10,7 @@ from imas_standard_names.tools.grammar import NamingGrammarTool
 from imas_standard_names.tools.list import ListTool
 from imas_standard_names.tools.schema import SchemaTool
 from imas_standard_names.tools.search import SearchTool
+from imas_standard_names.tools.terms import StandardTermsTool
 from imas_standard_names.tools.tokamak import TokamakParametersTool
 from imas_standard_names.tools.tokens import VocabularyTokensTool
 from imas_standard_names.tools.validate import ValidateCatalogTool
@@ -63,6 +64,7 @@ class Tools:
         self.compose_tool = ComposeTool()
         self.vocabulary_tokens_tool = VocabularyTokensTool(self.examples_catalog)
         self.tokamak_parameters_tool = TokamakParametersTool()
+        self.standard_terms_tool = StandardTermsTool()
 
         # Catalog-dependent tools (only if catalog available)
         if self._catalog_available:
@@ -107,6 +109,7 @@ class Tools:
             self.compose_tool,
             self.vocabulary_tokens_tool,
             self.tokamak_parameters_tool,
+            self.standard_terms_tool,
         ]
 
         # Catalog-dependent tools

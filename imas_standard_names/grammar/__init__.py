@@ -43,6 +43,12 @@ from .parser import (
     validate_round_trip,
 )
 from .render import RenderError, compose
+from .terms import (
+    StandardTerm,
+    fetch_standard_terms,
+    search_standard_terms,
+    standard_terms,
+)
 
 try:
     from .context import get_grammar_context
@@ -83,6 +89,7 @@ __all__ = [
     "Process",
     "Subject",
     "StandardName",
+    "StandardTerm",
     "TAG_TO_PHYSICS_DOMAIN",
     "Transformation",
     # Grammar API
@@ -96,4 +103,7 @@ __all__ = [
     "load_default_vocabularies",
     "parse",
     "validate_round_trip",
+    "fetch_standard_terms",
+    "search_standard_terms",
+    "standard_terms",
 ]

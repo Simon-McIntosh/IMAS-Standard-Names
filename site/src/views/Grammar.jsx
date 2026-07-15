@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useData } from '../lib/data.js';
+import { StandardTermCard } from '../components/StandardTermCard.jsx';
 import {
   composeName,
   emptyState,
@@ -107,7 +108,7 @@ function VocabDropdown({ title, hue, options, grouped, anchor, count, current, m
   }, [onClose]);
 
   const q = term.trim().toLowerCase();
-  const matches = (t) => !q || t.token.includes(q) || (t.note && t.note.toLowerCase().includes(q));
+  const matches = (t) => !q || t.token.includes(q) || (t.note && t.note.toLowerCase().includes(q)) || (t.definition && t.definition.toLowerCase().includes(q)) || (t.abbreviations || []).some((a) => a.toLowerCase().includes(q));
   const score = (items) =>
     items
       .filter(matches)
@@ -180,8 +181,8 @@ function RailNode({ label, hue, on, filled, onToggle, title, caret }) {
 }
 
 // ---- main ----------------------------------------------------------------
-export function Grammar({ onSelect, setView, query, seedName, seedNonce }) {
-  const { NAMES, GRAMMAR_VOCAB } = useData();
+export function Grammar({ onSelect, setView, query, seedName, seedNonce, term = '', setTerm }) {
+  const { NAMES, GRAMMAR_VOCAB, STANDARD_TERMS } = useData();
   const V = GRAMMAR_VOCAB || {};
 
   const [state, setState] = useState(emptyState);
@@ -242,6 +243,16 @@ export function Grammar({ onSelect, setView, query, seedName, seedNonce }) {
   const exists = composed && nameStates.has(composed);
 
   const q = (query || '').trim().toLowerCase();
+  const [selectedTerm, setSelectedTerm] = useState(term);
+  useEffect(() => setSelectedTerm(term), [term]);
+  const chooseTerm = (token) => { setSelectedTerm(token); setTerm?.(token); };
+  const visibleTerms = useMemo(() => {
+    const needle = q;
+    return (STANDARD_TERMS || []).filter((term) => {
+      const haystack = [term.token, term.definition, ...(term.abbreviations || [])].join(' ').toLowerCase();
+      return !needle || needle.split(/\s+/).every((word) => haystack.includes(word));
+    });
+  }, [STANDARD_TERMS, q]);
   const results = useMemo(
     () =>
       NAMES.filter(
@@ -611,6 +622,24 @@ export function Grammar({ onSelect, setView, query, seedName, seedNonce }) {
           </ul>
         )}
       </div>
+
+      <section className="standard-terms" aria-labelledby="standard-terms-heading">
+        <div className="standard-terms-head">
+          <h2 id="standard-terms-heading">Standard terms</h2>
+          <span>{visibleTerms.length} governed compositional terms</span>
+        </div>
+        <div className="standard-terms-list">
+          {visibleTerms.slice(0, 100).map((term) => (
+            <button key={term.token} className="standard-term-row" onClick={() => chooseTerm(term.token)} title={term.definition}>
+              <code>{term.token}</code><span>{term.segment}</span>
+              {term.abbreviations?.length > 0 && <small>{term.abbreviations.join(', ')}</small>}
+            </button>
+          ))}
+        </div>
+        {selectedTerm && <StandardTermCard term={(STANDARD_TERMS || []).find((term) => term.token === selectedTerm)}
+          examples={NAMES.filter((entry) => entry.parse?.some((part) => part.text.endsWith(selectedTerm))).map((entry) => entry.name)}
+          onClose={() => { setSelectedTerm(''); setTerm?.(''); }} />}
+      </section>
 
       {dropdown()}
     </div>

@@ -568,6 +568,8 @@ def get_grammar_context() -> dict[str, Any]:
 
 @functools.lru_cache(maxsize=1)
 def _build_full_context() -> dict[str, Any]:
+    from imas_standard_names.grammar.terms import standard_terms
+
     return {
         # Grammar mechanics
         "canonical_pattern": _build_canonical_pattern(),
@@ -597,6 +599,7 @@ def _build_full_context() -> dict[str, Any]:
         "vocabulary_usage_stats": _build_vocabulary_usage_stats(),
         # Grammar 5-group IR context — the single ISN → codex contract point.
         "grammar": _build_grammar_context(),
+        "standard_terms": [term.model_dump(mode="json") for term in standard_terms()],
     }
 
 
@@ -649,6 +652,9 @@ def _build_grammar_context() -> dict[str, Any]:
                 token: {
                     "type": entry.type,
                     "allowed_relations": list(entry.allowed_relations),
+                    "definition": entry.definition,
+                    "abbreviations": list(entry.abbreviations),
+                    "references": list(entry.references),
                 }
                 for token, entry in (loci.loci.items() if loci else ())
             },

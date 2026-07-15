@@ -19,7 +19,7 @@ from pathlib import Path
 from typing import Literal
 
 import yaml
-from pydantic import BaseModel, model_validator
+from pydantic import BaseModel, Field, model_validator
 
 # ---------------------------------------------------------------------------
 # Paths
@@ -78,10 +78,12 @@ class LocusEntry(BaseModel, extra="forbid"):
     """When true, the feature composes with the registry's ``locus_qualifiers``
     (e.g. ``strike_point`` -> ``inner_strike_point``, ``upper_outer_strike_point``)
     instead of enumerating each geometric variant as its own flat token."""
-    description: str = ""
-    """Optional DD-anchored gloss of what/where the locus is. Consumed by the
-    description-generation pipeline so a locus's meaning is anchored to its DD
-    definition rather than re-invented per name. Empty by default."""
+    definition: str = Field(min_length=20)
+    """Normative definition of the governed locus term."""
+    abbreviations: list[str] = []
+    """Display and search abbreviations; never accepted as parser aliases."""
+    references: list[str] = []
+    """Optional authoritative references supporting the definition."""
     defining_quantity: str = ""
     """Optional standard name that DEFINES this locus's position (e.g. the
     pedestal is located by ``normalized_poloidal_flux_coordinate_of_pedestal``).

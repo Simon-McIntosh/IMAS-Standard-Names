@@ -23,6 +23,7 @@ from imas_standard_names.grammar.context import (
 )
 from imas_standard_names.grammar.model import parse_standard_name
 from imas_standard_names.grammar.support import enum_values
+from imas_standard_names.grammar.terms import standard_terms
 from imas_standard_names.repository import StandardNameCatalog
 from imas_standard_names.tools.base import Tool
 
@@ -363,6 +364,9 @@ class NamingGrammarTool(Tool):
             },
             "grammar_structure": grammar_structure,
             "vocabulary": vocabulary,
+            "standard_terms": [
+                term.model_dump(mode="json") for term in standard_terms()
+            ],
             "validation_rules": validation_rules,
             "examples": self._get_grammar_section_examples("all"),
             "version": package_version,
@@ -493,6 +497,9 @@ class NamingGrammarTool(Tool):
         return {
             "section": section,
             "vocabulary": vocabulary,
+            "standard_terms": [
+                term.model_dump(mode="json") for term in standard_terms()
+            ],
             "usage": "Select tokens from controlled vocabularies (component, subject, etc.) or create physical_base following snake_case pattern",
         }
 

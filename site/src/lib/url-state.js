@@ -10,17 +10,23 @@ export function parseHash() {
   const [path, q = ''] = h.split('?');
   const [view = 'browse', name = ''] = path.split('/');
   const params = new URLSearchParams(q);
-  return {
+  const state = {
     view: view === 'matrix' || view === 'grammar' ? view : 'browse',
     name: name ? decodeURIComponent(name) : null,
     query: params.get('q') || '',
   };
+  if (params.has('term')) state.term = params.get('term') || '';
+  return state;
 }
 
-export function writeHash({ view, name, query }) {
+export function writeHash({ view, name, query, term }) {
   let h = `#/${view}`;
   if (name) h += `/${encodeURIComponent(name)}`;
-  if (query) h += `?q=${encodeURIComponent(query)}`;
+  const parts = [];
+  if (query) parts.push(`q=${encodeURIComponent(query)}`);
+  if (term) parts.push(`term=${encodeURIComponent(term)}`);
+  const suffix = parts.join('&');
+  if (suffix) h += `?${suffix}`;
   if (h !== window.location.hash) {
     history.replaceState(null, '', h);
   }
