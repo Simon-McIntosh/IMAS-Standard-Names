@@ -62,7 +62,9 @@ class TestProcessSynonymGate:
             for canonical in RETIRED_PROCESS_SYNONYMS.values()
             if canonical not in tokens
         }
-        assert not missing, f"canonical process tokens missing from vocabulary: {missing}"
+        assert not missing, (
+            f"canonical process tokens missing from vocabulary: {missing}"
+        )
 
     @pytest.mark.parametrize("synonym", sorted(RETIRED_PROCESS_SYNONYMS))
     def test_retired_synonym_absent_from_vocabulary(self, synonym):

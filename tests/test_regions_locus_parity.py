@@ -28,9 +28,7 @@ def _regions() -> set[str]:
 def _region_typed_loci() -> set[str]:
     data = yaml.safe_load((_VOCAB / "locus_registry.yml").read_text(encoding="utf-8"))
     return {
-        token
-        for token, entry in data["loci"].items()
-        if entry.get("type") == "region"
+        token for token, entry in data["loci"].items() if entry.get("type") == "region"
     }
 
 
