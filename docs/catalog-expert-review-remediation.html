@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="catalog-expert-review-remediation">
   <meta name="plan-title" content="Catalog Expert Review Remediation">
   <meta name="plan-summary" content="Classify and resolve expert findings across catalog data, grammar, rendering, and the generation pipeline">
-  <meta name="plan-status" content="draft">
+  <meta name="plan-status" content="in-progress">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="XL">
   <meta name="plan-tier" content="opus">
@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-15">
-<meta name="plan-version" content="3">
+<meta name="plan-version" content="4">
 </head>
 <body>
 <main class="plan-doc">
@@ -219,6 +219,28 @@ Done-when
   1. ISN vocabulary, generated types, parser/composer, definitions, and tests contain no registered x1/x2 geometry carriers and support descriptive local-tangent forms
   2. affected catalog/prompt inventory is audited; writable changes are tested and committed, and read-only residual work is recorded precisely
   3. followup outcome is written into the plan; resolve only if catalog and pipeline safeguards also land</pre>
+    </article>
+<article class="r-fu" data-id="f-release-coordinate-semantics" data-status="open" data-tier="opus" data-written-by="Codex" data-written-at="2026-07-15" data-recommends-skill="/reckon-ship catalog-expert-review-remediation §4.6" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Release ISN coordinate semantics and bump imas-codex</h4>
+    <div class="r-fu-body">After the grammar and catalog/pipeline fixes land, publish the next ISN release candidate through the release CLI and make imas-codex consume that exact package. This is a gated handoff, not a manual tag or editable source-version change.</div>
+    <pre class="r-fu-prompt">Project: imas-standard-names
+Plan:    catalog-expert-review-remediation (http://localhost:8765/imas-standard-names/catalog-expert-review-remediation.html)
+Section: §4.6
+Tier:    opus
+
+Context
+  Grammar changes are consumed by imas-codex through released ISN packages, not by source-tree assumptions. After the coordinate and local-axis slices land and cross-repository tests pass, cut the next ISN release candidate and update imas-codex to consume it.
+
+State to read  (CODE / FILES / DATA — the builder already injects the plan URL)
+  ISN release CLI status and tests; pyproject.toml and uv.lock in imas-codex; current ISN dependency constraints and dependency-bump conventions; CI state for ISN HEAD.
+
+Scope locks / constraints  (non-decision)
+  Use uv run standard-names release and its automatic preflight; do not manually create tags or source versions. Release only from clean main synced with upstream/main after CI passes. Use the next valid RC transition reported by the CLI. In imas-codex, pin/bump to the exact published RC and update the lockfile through uv. Do not claim completion until the package is available and imas-codex tests run against it.
+
+Done-when
+  1. annotated ISN RC tag is created/pushed by the release CLI and publish workflow succeeds
+  2. imas-codex dependency and lockfile consume that exact RC, with grammar/pipeline tests green and changes committed/pushed
+  3. followup outcome is written into the plan + this followup marked resolved</pre>
     </article>
 </section>
 <section data-reckon="research" id="research" class="r-research-list">
