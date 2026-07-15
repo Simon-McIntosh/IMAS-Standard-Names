@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-15">
-<meta name="plan-version" content="4">
+<meta name="plan-version" content="5">
 </head>
 <body>
 <main class="plan-doc">
@@ -172,6 +172,15 @@
       </p>
     <p class="r-dec-rat">Recommendation: staged lineage migration except where the current name denotes the wrong quantity.</p>
     </div>
+<div class="r-dec" data-key="ion-state-semantics" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">When should a DD ion/state source become ion_charge_state rather than generic ion_state in a standard name?</p>
+    <p class="r-dec-ctx">The reviewed fast_ion_state_power is superseded and fast_ion_charge_state_power exists, but accepted ion_state families still often define state as ionization charge. DD ion/state is a generic resolved-state container that may include charge number, vibrational level, or electron configuration. The generator must use the leaf quantity and identifier context, not infer charge solely from the parent path.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="evidence-specific">Use charge_state only with explicit charge evidence</button>
+      <button class="r-opt" data-value="always-generic">Keep ion_state for all state-container sources</button>
+      </p>
+    <p class="r-dec-rat">Recommendation: evidence-specific. Generate ion_charge_state only when the DD leaf or identifier explicitly resolves ionization charge; otherwise preserve ion_state or name the actual internal-state axis.</p>
+    </div>
 </section>
 
   <section data-reckon="followups" id="followups" class="r-followups">
@@ -247,6 +256,8 @@ Done-when
 <h2><span class="sec">§</span> Research</h2>
 <div class="r-research" data-id="r-reflector-x2" data-type="live-dd-evidence" data-source="imas-cx DD parent and leaf documentation" data-added-by="Codex" data-when="2026-07-15">
     <span class="r-research-title">Reflector local-axis semantics</span></div>
+<div class="r-research" data-id="r-ion-state-live" data-type="live-graph-evidence" data-source="imas-cx standard-name family, DD path search, and state identifiers" data-added-by="Codex" data-when="2026-07-15">
+    <span class="r-research-title">Ion-state versus charge-state current inventory</span></div>
 </section>
 </main>
 </body>
