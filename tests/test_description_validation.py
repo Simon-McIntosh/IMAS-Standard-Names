@@ -77,6 +77,36 @@ class TestDescriptionNotation:
         issues = validate_description(test_entry)
         assert issues == []
 
+
+class TestCocosMention:
+    """Sign/coordinate conventions are stated explicitly, never by COCOS number."""
+
+    def test_cocos_in_documentation_warns(self, test_entry):
+        """A COCOS mention in documentation is flagged."""
+        test_entry["documentation"] = (
+            "Safety factor. Sign convention (COCOS=11): positive when ..."
+        )
+        issues = validate_description(test_entry)
+        assert any(
+            issue["pattern"] == "cocos" and issue["field"] == "documentation"
+            for issue in issues
+        )
+
+    def test_cocos_in_description_warns(self, test_entry):
+        """A COCOS mention in the description is flagged."""
+        test_entry["description"] = "Poloidal flux in the COCOS 17 convention."
+        issues = validate_description(test_entry)
+        assert any(issue["pattern"] == "cocos" for issue in issues)
+
+    def test_explicit_convention_no_cocos_clean(self, test_entry):
+        """Stating the convention explicitly, without a COCOS number, is clean."""
+        test_entry["documentation"] = (
+            "Positive when the toroidal magnetic field and plasma current are "
+            "parallel; reverses if either alone is reversed."
+        )
+        issues = validate_description(test_entry)
+        assert not any(issue["pattern"] == "cocos" for issue in issues)
+
     def test_greek_word_nudges_info(self, test_entry):
         """A spelled-out Greek letter word gets an info nudge toward the symbol."""
         test_entry["description"] = "Toroidal angle phi in the (R, phi, Z) frame."

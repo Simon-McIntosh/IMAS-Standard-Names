@@ -31,6 +31,18 @@ _NOTATION_SUGGESTION = (
     "and coordinate frames as (R, φ, Z)."
 )
 
+# COCOS conventions are never named by number in human-readable text: sign and
+# coordinate conventions must be stated explicitly in physical terms (e.g. "q is
+# positive when the toroidal field and plasma current are parallel"). The COCOS
+# integer belongs only in structured metadata, not in the description or
+# documentation prose.
+_COCOS_MENTION = re.compile(r"\bcocos\b", re.IGNORECASE)
+_COCOS_SUGGESTION = (
+    "Do not name a COCOS number in prose; state the sign and coordinate "
+    "conventions explicitly in physical terms. The COCOS integer belongs in "
+    "structured metadata only."
+)
+
 
 def validate_description(entry: dict[str, Any]) -> list[dict[str, Any]]:
     """Validate description to detect structural metadata leakage.
@@ -136,6 +148,20 @@ def validate_description(entry: dict[str, Any]) -> list[dict[str, Any]]:
                 "pattern": word,
             }
         )
+
+    # COCOS conventions must be stated explicitly, never named by number.
+    for field in ("description", "documentation"):
+        text = entry.get(field, "") or ""
+        if _COCOS_MENTION.search(text):
+            issues.append(
+                {
+                    "severity": "warning",
+                    "field": field,
+                    "message": f"{field.capitalize()} names a COCOS convention",
+                    "suggestion": _COCOS_SUGGESTION,
+                    "pattern": "cocos",
+                }
+            )
 
     issues.extend(_check_inline_unit_restatement(entry))
 
