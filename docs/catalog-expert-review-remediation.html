@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-15">
-<meta name="plan-version" content="10">
+<meta name="plan-version" content="15">
 </head>
 <body>
 <main class="plan-doc">
@@ -70,9 +70,9 @@
     <thead><tr><th>#</th><th>Review item</th><th>Current evidence (15 July 2026)</th><th>Label</th><th>Address through</th><th>Proposed resolution and acceptance evidence</th></tr></thead>
     <tbody>
       <tr><td>1</td><td>Verbose or tangential documentation</td><td>Strict normative prompt, schema, review and exemplar policy landed in imas-codex <code>4b36befa</code>. Both cited graph entries passed the supported edit/review loop with the criticized practical paragraphs removed; ISNC export is pending.</td><td>implemented; export pending</td><td>imas-codex + ISNC</td><td>Export through the supported CLI after provenance validation, then verify the rendered definitions and regression fixtures.</td></tr>
-      <tr><td>2</td><td>DD source paths missing and not clickable</td><td>ISN <code>701d0f1</code> implements accessible pinned-version source links, meaningful-parent fallback, separately labelled derived context, and no <code>latest</code> fallback. The immutable imas-codex producer and legacy backfill report remain active.</td><td>consumer implemented; producer active</td><td>ISN site + imas-codex graph export</td><td>Finish immutable source snapshots, review the legacy manifest, export, and confirm deployed exact-version links.</td></tr>
+      <tr><td>2</td><td>DD source paths missing and not clickable</td><td>ISN <code>701d0f1</code> implements accessible pinned-version source links, meaningful-parent fallback, separately labelled derived context, and no <code>latest</code> fallback. imas-codex <code>4df4c599</code> requires immutable exact-version source snapshots and fails closed on incomplete public provenance.</td><td>implemented; legacy migration blocks export</td><td>ISN site + imas-codex graph export</td><td>Produce and review a one-off migration manifest from a direct graph query, explicitly migrate provable sources without guessing versions, then export and confirm deployed exact-version links.</td></tr>
       <tr><td>3</td><td>Loci have no definitions</td><td>ISN <code>701d0f1</code> defines all 168 loci, exposes typed StandardTerm list/fetch/search APIs, and adds searchable/shareable Grammar-tab and parsed-chip definition surfaces. LCFS/ITB are display/search abbreviations only.</td><td>implemented</td><td>ISN + site</td><td>Retain full vocabulary coverage, parser-disjoint abbreviation tests, SPA tests and grammar codegen checks as release gates.</td></tr>
-      <tr><td>4</td><td>Reflector context and X2-axis meaning lost</td><td>The hybrid design is locked. X1/X2 labels are removed in favour of DD-backed first/second local tangential semantics and a reflector locus; prompt guards landed in imas-codex <code>0eb23bf3</code>/<code>0c5bfa94</code>. Definition hardening and the exact catalog rename remain active.</td><td>partially implemented</td><td>ISN grammar + imas-codex + ISNC</td><td>Finish the DD-wide frame audit, reject vertical/principal-curvature claims, then migrate the source-backed name with lineage after the ISN release.</td></tr>
+      <tr><td>4</td><td>Reflector context and X2-axis meaning lost</td><td>The hybrid design is locked. ISN <code>1eaf14e</code> defines the DD-backed ordered local frame across components, coordinates, unit vectors and StandardTerms; 47 DD frame families were audited. The exact catalog rename and imas-codex fixture cleanup remain.</td><td>grammar implemented; pipeline/catalog cleanup pending</td><td>ISN grammar + imas-codex + ISNC</td><td>Replace the unsupported <code>front_surface</code> prompt example with <code>second_local_tangential_radius_of_reflector</code>, rebuild stale X2-vertical cluster labels, then migrate the source-backed graph name after the ISN release.</td></tr>
       <tr><td>5</td><td>Two meanings of radial</td><td>ISN <code>ff23d3f</code>/<code>a6ceee1</code> defines radial as cylindrical R, adds flux-surface-normal, and keeps perpendicular magnetic-field-relative. imas-codex prompt and fixture guards landed; catalog migration waits for the ISN RC.</td><td>grammar and pipeline implemented; migration pending</td><td>ISN grammar + ISNC + pipeline</td><td>Release ISN, pin imas-codex, apply a reviewed source-backed rename manifest, and verify family round trips and lineage.</td></tr>
       <tr><td>6</td><td>Ion state forced to charge state</td><td>The evidence-specific rule is locked: charge-state wording requires explicit leaf or identifier evidence. The redesign has landed for the cited family, while inventory-wide coverage and cleanup remain pending.</td><td>design fixed; coverage pending</td><td>imas-codex + ISNC; ISN if vocabulary changes</td><td>Audit every remaining state-container source, correct unsupported specialisations, and preserve source provenance through the cleanup.</td></tr>
       <tr><td>7</td><td>ICRH absorbed power omits plasma</td><td>Name and plasma-centric wording remain unchanged.</td><td>needs physics decision</td><td>ISNC + ISN/pipeline guard</td><td>Decide whether the quantity is launched, coupled, or plasma-absorbed power. Rename only if the source definition supports absorption; otherwise correct documentation. Add a power-boundary checklist.</td></tr>
@@ -96,9 +96,9 @@
     <tbody>
       <tr><td>Coordinate semantics</td><td>Implemented in grammar and pipeline</td><td>ISN <code>ff23d3f</code>, <code>a6ceee1</code>; imas-codex <code>0eb23bf3</code>, <code>0c5bfa94</code></td><td>Release ISN, pin dependency, migrate catalog names</td></tr>
       <tr><td>Normative documentation</td><td>Implemented; graph examples accepted</td><td>imas-codex <code>4b36befa</code></td><td>Supported ISNC export and rendered verification</td></tr>
-      <tr><td>Approval lifecycle and provenance separation</td><td>Foundation implemented</td><td>imas-codex <code>1f95b756</code></td><td>Finish immutable DD snapshots and legacy report</td></tr>
+      <tr><td>Approval lifecycle and provenance separation</td><td>Implemented</td><td>imas-codex <code>1f95b756</code>, <code>4df4c599</code>, <code>fc5f5f71</code></td><td>Produce a one-off reviewed migration manifest; export remains fail-closed</td></tr>
       <tr><td>Standard terms, loci and SPA source UI</td><td>Implemented</td><td>ISN <code>701d0f1</code>; 168 loci; SPA tests and production build green</td><td>Consume populated producer snapshots and verify deployment</td></tr>
-      <tr><td>Local diagnostic frame definitions</td><td>Active</td><td>DD-wide X1/X2/X3 documentation audit in progress</td><td>Tests, commit, exact catalog migration manifest</td></tr>
+      <tr><td>Local diagnostic frame definitions</td><td>Implemented in ISN</td><td>ISN <code>1eaf14e</code>; 47 DD families audited; targeted and focused suites green</td><td>Correct imas-codex example/labels and prepare exact catalog migration</td></tr>
       <tr><td>Naming, duplicates, q, domains and gaps</td><td>Pending interactive resolution</td><td>Live evidence captured in rows 7–18 and structured followups</td><td>Lock remaining expert decisions before graph edits</td></tr>
     </tbody>
   </table>
@@ -139,6 +139,62 @@
     <li>Release-site verification must use the rendered deployment artifact in addition to the graph, because source hyperlink failures are presentation/export defects.</li>
   </ul>
 
+  <h2 id="s7">§7 — Future-session execution handoff</h2>
+  <p>This is the authoritative restart point. No background work needs to be rediscovered. Begin by reading this plan and the commits in the delivery ledger; query the live graph again only for state that may have changed. All programme-level decisions are locked. Family-specific canonical names in rows 7–13 still require the interactive followup before mutation.</p>
+
+  <h3>7.1 Establish a clean, reproducible baseline</h3>
+  <ol>
+    <li>Inspect all three repositories with <code>git status --short</code> and recent logs. Preserve unrelated changes.</li>
+    <li>Confirm ISN commits <code>701d0f1</code> and <code>1eaf14e</code>, and imas-codex commits <code>1f95b756</code>, <code>4b36befa</code>, and <code>4df4c599</code>.</li>
+    <li>Run focused tests before making further edits. Treat the known <code>/run/user/.../.git</code> failure as an environment issue only if the isolated git-root test reproduces it.</li>
+  </ol>
+
+  <h3>7.2 Close the local-frame pipeline residuals</h3>
+  <ol>
+    <li>In <code>imas_codex/llm/prompts/sn/generate_name_dd.md</code>, its golden fixture, and the anti-pattern test, replace <code>second_local_tangential_front_surface_radius_of_reflector</code> with <code>second_local_tangential_radius_of_reflector</code>.</li>
+    <li>Correct the three generated labels that call X2 vertical in <code>imas_codex/definitions/clusters/labels.json</code>, then rebuild the corresponding packaged DD cluster resource rather than leaving source/resource drift.</li>
+    <li>Run prompt goldens, standard-name anti-pattern tests, cluster resource checks and Ruff. Commit this as a bounded imas-codex correction.</li>
+  </ol>
+
+  <h3>7.3 Resolve legacy DD snapshots before export</h3>
+  <ol>
+    <li>Use the project-scoped imas-cx Python REPL or a direct read-only GraphClient query to inventory <code>StandardNameSource</code> nodes where <code>source_type = 'dd'</code> and <code>dd_snapshot_pinned</code> is false. Save the result as the migration review artifact; do not add a product CLI command or permanent single-use library API.</li>
+    <li>Review counts and identities. Recover an exact DD version only from authoritative run/release evidence. Never infer from the current graph node and never substitute <code>latest</code>.</li>
+    <li>If an original version cannot be proven, prepare a separate explicit regeneration proposal against a named DD snapshot for user approval. Do not mutate the live graph during investigation.</li>
+    <li>After approval, implement the bounded one-off migration in its migration change, retain its reviewed manifest and verification evidence, and remove the migration driver after execution. Require a direct invariant query to return zero unpinned or incomplete public DD sources before export.</li>
+  </ol>
+
+  <h3>7.4 Publish grammar and pin the consumer</h3>
+  <ol>
+    <li>Merge the ISN commits to <code>upstream/main</code>, wait for required CI, and ensure the working tree is clean and synchronized.</li>
+    <li>Run <code>uv run standard-names release status</code>, then use the next valid RC command reported by the release CLI. Do not create tags manually.</li>
+    <li>Wait for publication, then update imas-codex to the exact ISN RC with <code>uv</code>, refresh <code>uv.lock</code>, and run grammar, prompt and standard-name tests against the released package.</li>
+  </ol>
+
+  <h3>7.5 Finish the review interactively, then mutate once</h3>
+  <ol>
+    <li>Complete <code>f-naming-duplicates</code> for rows 7–13 and record an exact canonical-name/source-retarget manifest.</li>
+    <li>Apply the locked lifecycle rule: unapproved predecessors are compacted into private history after dry-run review; PR-approved names use public staged deprecation. No current name is PR-approved.</li>
+    <li>Apply radial, reflector/local-frame and ion-state corrections through supported graph edit/refine operations. Correct q semantics, the safety-factor sign text, domain assignments, coordinate gaps and flux-loop wording in the same reviewed campaign only after their manifests are explicit.</li>
+    <li>Rerun source, lineage, duplicate, grammar-family, documentation and domain checks. Require no orphaned DD source and no public operational provenance.</li>
+  </ol>
+
+  <h3>7.6 Export and release gate</h3>
+  <ol>
+    <li>Export via the imas-codex release/export CLI; never edit ISNC YAML manually.</li>
+    <li>Validate ISNC, run SPA tests and production build, verify StandardTerm cards, pinned DD links, parent fallback and derived-context labels, and check that zero-source sections are hidden.</li>
+    <li>Cut the catalog RC only when every review row is fixed or explicitly deferred with a named external blocker. Record release versions and resolve the corresponding followups in this plan.</li>
+  </ol>
+
+  <h3>7.7 Hard stops</h3>
+  <ul>
+    <li>Do not export while the direct source invariant query finds any unpinned or incomplete legacy DD source.</li>
+    <li>Do not cut an ISN release from a dirty, unsynchronized or failing main branch.</li>
+    <li>Do not run live provenance cleanup or semantic compaction without reviewing its dry-run manifest.</li>
+    <li>Do not dispatch graph renames until rows 7–13 have exact approved canonical outcomes.</li>
+    <li>Do not treat RC inclusion or LLM <code>accepted</code> status as PR approval.</li>
+  </ul>
+
   <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
 <div class="r-dec" data-key="radial-semantics" data-choice="explicit-frames" data-by="Simon McIntosh" data-when="2026-07-15T13:34:07+00:00">
@@ -159,31 +215,31 @@
       </p>
     <p class="r-dec-rat">Use descriptive local-axis terminology rather than DD labels. Retain first and second local tangential directions because the DD defines a physical ordered frame: the third direction is normal to the object surface or plane and points toward the plasma; the first tangent is horizontal or more horizontal than the second and points in the positive toroidal direction; and the second tangent satisfies e2 = e3 × e1 . Encode the intrinsic object class and local tangent direction when they change quantity meaning; retain diagnostic, channel, and storage hierarchy only as structured provenance. Remove registered X1/X2 labels. Never reinterpret the second local tangent direction as global vertical or either tangent as a principal-curvature direction without evidence.</p>
     </div>
-<div class="r-dec" data-key="domain-principle" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="domain-principle" data-choice="semantic-subject" data-by="Simon McIntosh" data-when="2026-07-15T15:07:52+00:00">
     <p class="r-dec-q">What is the primary rule for physics-domain assignment when source subsystem, diagnostic method, and measured physics disagree?</p>
     <p class="r-dec-opts">
       <button class="r-opt" data-value="measured-physics">Measured physical quantity</button>
       <button class="r-opt" data-value="source-subsystem">Owning source subsystem</button>
       <button class="r-opt" data-value="diagnostic-method">Measurement method</button>
       </p>
-    <p class="r-dec-rat">Recommendation: measured physics as primary domain, with source subsystem and diagnostic method retained as secondary metadata.</p>
+    <p class="r-dec-rat">Assign the primary domain from the semantic subject and function of the standard name. Plasma quantities follow the physical phenomenon they describe; intrinsic plant or diagnostic component quantities follow the component&#x27;s functional subsystem. Source IDS, producing workflow, and diagnostic method remain secondary facets and must not override the named quantity&#x27;s meaning.</p>
     </div>
-<div class="r-dec" data-key="q-minimum" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="q-minimum" data-choice="absolute-q" data-by="Simon McIntosh" data-when="2026-07-15T15:09:23+00:00">
     <p class="r-dec-q">Should the minimum-safety-factor locus minimize signed q or abs(q) , and should resolution wait for an upstream DD clarification?</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="absolute-q">Use minimum abs(q)</button>
+      <button class="r-opt chosen" data-value="absolute-q">Use minimum abs(q)</button>
       <button class="r-opt" data-value="signed-q">Retain minimum signed q</button>
       <button class="r-opt" data-value="upstream-first">Escalate upstream before changing</button>
       </p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">Define the minimum-q locus as arg min |q|. The associated q_min value is signed q evaluated at that locus, not the non-negative magnitude |q|. This preserves the DD q_like COCOS transformation: a q sign reversal leaves the locus unchanged and reverses the stored value. Poloidal flux at minimum safety factor therefore means flux at arg min |q|.</p>
     </div>
-<div class="r-dec" data-key="rename-policy" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="rename-policy" data-choice="lifecycle-dependent" data-by="Simon McIntosh" data-when="2026-07-15T15:10:33+00:00">
     <p class="r-dec-q">For accepted ambiguous names, should this programme favour immediate canonical renames or documentation-first correction followed by staged lineage migration?</p>
     <p class="r-dec-opts">
       <button class="r-opt" data-value="staged-lineage">Documentation first, then staged lineage migration</button>
       <button class="r-opt" data-value="immediate-rename">Immediate canonical rename</button>
       </p>
-    <p class="r-dec-rat">Recommendation: staged lineage migration except where the current name denotes the wrong quantity.</p>
+    <p class="r-dec-rat">For names that have not been accepted through a merged catalog PR, apply the canonical rename immediately through supported graph operations, atomically retarget semantic DD sources, and compact the superseded node into private StandardNameChange history after a reviewed dry-run manifest; do not publish a deprecated alias. For PR-approved names, use a staged successor and governed public deprecation through catalog PR review. RC presence does not confer approval, and an identifier is not reused while an uncompacted predecessor still occupies it.</p>
     </div>
 <div class="r-dec" data-key="ion-state-semantics" data-choice="evidence-specific" data-by="Simon McIntosh" data-when="2026-07-15T15:00:39+00:00">
     <p class="r-dec-q">When should a DD ion/state source become ion_charge_state rather than generic ion_state in a standard name?</p>
@@ -304,9 +360,9 @@ Done-when
   2. imas-codex dependency and lockfile consume that exact RC, with grammar/pipeline tests green and changes committed/pushed
   3. followup outcome is written into the plan + this followup marked resolved</pre>
     </article>
-<article class="r-fu" data-id="f-pinned-dd-provenance" data-status="open" data-tier="opus" data-written-by="Codex" data-written-at="2026-07-15" data-recommends-skill="/reckon-ship catalog-expert-review-remediation §4.2" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-pinned-dd-provenance" data-status="resolved" data-tier="opus" data-written-by="Codex" data-written-at="2026-07-15" data-recommends-skill="/reckon-ship catalog-expert-review-remediation §4.2" data-resolved-at="2026-07-15T15:10:33+00:00" data-resolved-by="Codex">
     <h4 class="r-fu-title">Finish immutable pinned DD provenance</h4>
-    <div class="r-fu-body"><p>Complete the active imas-codex source-snapshot contract, fail-closed public projection, and read-only legacy backfill report. No live backfill or cleanup runs until its manifest is reviewed.</p></div>
+    <div class="r-fu-body"><p>Complete the imas-codex source-snapshot contract and fail-closed public projection. Legacy migration inventory is a one-off reviewed graph-query artifact, not a product CLI or permanent single-use API. No live backfill or cleanup runs until its manifest is reviewed.</p></div>
     <pre class="r-fu-prompt">Project: imas-standard-names
 Plan:    catalog-expert-review-remediation (http://localhost:8765/imas-standard-names/catalog-expert-review-remediation.html)
 Section: §4.2
@@ -322,9 +378,10 @@ Scope locks / constraints  (non-decision)
   Store exact dd_version/path and pinned raw leaf/parent documentation plus semantic metadata. Keep enhanced context separately labelled. Never infer a legacy version, link to latest, expose operational fields, or mutate the live graph without reviewed manifests.
 
 Done-when
-  1. producer, public projection, URL derivation, tests, and read-only backfill report are committed and pushed
+  1. producer, public projection, URL derivation, tests, and fail-closed source invariants are committed and pushed
   2. focused and standard-name suites pass
   3. outcome is recorded and this followup resolved</pre>
+    <p class="r-fu-outcome">Implemented and pushed in imas-codex <code>4df4c599</code>. New DD-backed sources require exact <code>dd_version</code> and immutable create-only leaf/parent documentation plus semantic metadata; public projection uses only pinned snapshots, separates authoritative DD documentation from enhanced context, generates versioned official URLs, and omits operational history. The initially added single-use report CLI and helper were removed in <code>fc5f5f71</code>; migration inventory will be a direct read-only graph-query artifact. Focused provenance/export tests pass. No live graph mutation or migration inventory was executed; legacy unpinned sources block export until explicitly migrated.</p>
     </article>
 <article class="r-fu" data-id="f-naming-duplicates" data-status="open" data-tier="opus" data-written-by="Codex" data-written-at="2026-07-15" data-recommends-skill="/reckon-edit catalog-expert-review-remediation" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Resolve ambiguous names and duplicate families</h4>
