@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-15">
 <meta name="plan-impl" content="1.0">
-<meta name="plan-version" content="10">
+<meta name="plan-version" content="11">
 </head>
 <body>
   <main class="plan-doc">
@@ -612,6 +612,27 @@ Done-when
   1. Stub gate keys on formal-release status; RC-only superseded names emit no stub
   2. Test proving RC-only vs formally-released stub behaviour
   3. Migration&#x27;s superseded ion/neutral nodes do not pollute the next RC; this followup resolved</pre>
+    </article>
+<article class="r-fu" data-id="f-srr-013" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-15" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">State-convention migration residuals — momentum_diffusivity kind, near-threshold stragglers, C1 token deletion</h4>
+    <div class="r-fu-body">The state-segment catalog migration (ion_state→ion_charge_state, neutral_state→neutral_internal_state) ran via scoped sn edit + --edits review (budget ~$47/$100). Ion: 130 ion_charge_state accepted, 18 old names folded to stubs (16 clean + 2 physics divergences: diffusivity→scalar, particle_flux→vector per lead physics reading). Neutral: all 80 old neutral_state swept, 70 neutral_internal_state accepted. RESIDUALS: (1) ion_charge_state_momentum_diffusivity is accepted as VECTOR but diffusivity should be SCALAR (the correct-kind scalar sits under the non-canonical ion_state_momentum_diffusivity) — needs a kind correction (no clean CLI; correct the canonical's kind to scalar, fold the ion_state one in). (2) ~45 near-threshold stragglers (ion ~11 + neutral ~45 counting churn) scored 0.49-0.83 — NOT mis-founded (legitimately internal_state/charge_state), just sub-0.85 quorum near-misses + refine reword churn; either accept as reviewed-near-threshold or spend refine budget to push over 0.85. (3) C1 (delete fused ion_state/neutral_state/bare-state subject tokens from ISN subjects.yml) DEFERRED — blocked on (a) concurrent peer grammar work uncommitted in the ISN checkout, and (b) the momentum_diffusivity straggler keeping one ion_state name accepted. Per f-srr-012, RC-only superseded names should not stub — the migration's stubs are inert until that gate lands.</div>
+    <pre class="r-fu-prompt">Project: imas-standard-names + imas-codex (production graph)
+Plan: systematic-review-remediation — state migration residuals (f-srr-013)
+Tier: opus
+
+Context
+  The state-segment migration bulk is done (ion + neutral families swept; 200 successors accepted). Remaining polish + the grammar-token deletion.
+
+Items
+  1. Fix ion_charge_state_momentum_diffusivity kind: diffusivity is a scalar transport coefficient; the accepted canonical is wrongly VECTOR while the correct SCALAR is under ion_state_momentum_diffusivity. Correct the canonical to scalar and fold the ion_state one in (no clean CLI — may need a targeted kind edit or the tombstone re-rename).
+  2. Near-threshold stragglers (~45, score 0.49-0.83): decide accept-as-reviewed vs refine-to-threshold. They are legitimately internal_state/charge_state (not mis-founded); the refine churn produced some odd token-order variants (effective_..._momentum_velocity) worth pruning.
+  3. C1 token deletion: once no accepted name uses ion_state/neutral_state/bare state (resolve item 1 first) AND the concurrent ISN grammar peer work is committed, delete those subject tokens from subjects.yml + regenerate + full-catalog round-trip; makes the state segment the sole canonical parse.
+  4. Coordinate with f-srr-012 (RC-only stubs) so the migration&#x27;s superseded nodes don&#x27;t pollute the next release.
+
+Done-when
+  1. momentum_diffusivity is scalar canonical; stragglers dispositioned
+  2. C1 landed (fused tokens gone; round-trip green) after peer grammar work commits
+  3. This followup resolved</pre>
     </article>
 </section>
 
