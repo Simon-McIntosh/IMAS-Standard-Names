@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-15">
-<meta name="plan-version" content="2">
+<meta name="plan-version" content="3">
 </head>
 <body>
 <main class="plan-doc">
@@ -136,15 +136,15 @@
       </p>
     <p class="r-dec-rat">Define radial exclusively as the cylindrical R component in the right-handed (R, phi, Z) frame. Introduce flux_surface_normal for signed vector projections normal to magnetic flux surfaces, positive toward increasing flux label. Retain perpendicular for magnetic-field-relative semantics; it is not a synonym for flux-surface normal. Keep radial_coordinate_of_* as cylindrical major-radius coordinates and distinguish flux-coordinate derivatives from physical unit-normal projections.</p>
     </div>
-<div class="r-dec" data-key="context-model" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="context-model" data-choice="hybrid" data-by="Simon McIntosh" data-when="2026-07-15T13:42:35+00:00">
     <p class="r-dec-q">Must component identity such as reflector be encoded in the standard name, or may structured source-context metadata carry it?</p>
     <p class="r-dec-ctx">Live DD evidence: channel/reflector is an optional set of reflectors directing plasma light toward the crystal. X3 is the reflector-surface normal oriented toward the plasma; X1 is the local tangent direction chosen to be more horizontal than X2; X2 is the orthonormal local tangent direction uX2 = uX3 × uX1. Therefore X2 is not the machine vertical direction, and vertical_front_surface_radius_of_optical_element asserts unsupported semantics. The DD source inspires the quantity but does not dictate its canonical SN wording.</p>
     <p class="r-dec-opts">
       <button class="r-opt" data-value="programmatic-name">Encode identity in grammar/name</button>
       <button class="r-opt" data-value="structured-context">Use required structured context metadata</button>
-      <button class="r-opt" data-value="hybrid">Use a hybrid based on semantic necessity</button>
+      <button class="r-opt chosen" data-value="hybrid">Use a hybrid based on semantic necessity</button>
       </p>
-    <p class="r-dec-rat">Recommendation: hybrid—encode distinctions that change quantity identity; retain diagnostic-instance context as structured provenance.</p>
+    <p class="r-dec-rat">Use descriptive local-axis terminology rather than DD labels. Encode the intrinsic object class and local tangent direction when they change quantity meaning; retain diagnostic, channel, and storage hierarchy only as structured provenance. Remove registered X1/X2 labels. Do not interpret the second local tangent direction as global vertical or as a principal-curvature direction without evidence.</p>
     </div>
 <div class="r-dec" data-key="domain-principle" data-choice="" data-by="" data-when="">
     <p class="r-dec-q">What is the primary rule for physics-domain assignment when source subsystem, diagnostic method, and measured physics disagree?</p>
@@ -197,6 +197,28 @@ Done-when
   1. Vocabulary definitions and validation encode radial, perpendicular, and flux_surface_normal unambiguously; affected source-backed catalog names are migrated with lineage and pipeline guards
   2. full relevant parse/compose, grouping, catalog, prompt, and renderer tests are green in every changed repository
   3. followup written into plan + this followup marked resolved</pre>
+    </article>
+<article class="r-fu" data-id="f-local-axis-semantics" data-status="open" data-tier="opus" data-written-by="Codex" data-written-at="2026-07-15" data-recommends-skill="/reckon-ship catalog-expert-review-remediation §4.4" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Replace DD-shaped local-axis labels with descriptive semantics</h4>
+    <div class="r-fu-body">The context-model decision is locked. Replace registered X1/X2 carriers with descriptive local tangent directions, correct the reflector-curvature family, and add generation/review safeguards so reruns cannot restore DD-shaped or verticalised names.</div>
+    <pre class="r-fu-prompt">Project: imas-standard-names
+Plan:    catalog-expert-review-remediation (http://localhost:8765/imas-standard-names/catalog-expert-review-remediation.html)
+Section: §4.4
+Tier:    opus
+
+Context
+  The lead chose descriptive local-axis terminology. Replace registered DD-shaped x1/x2 coordinate labels with semantic first/second local tangent directions, and correct the current unsupported vertical interpretation of reflector x2 curvature. The source DD is inspiration, not a naming template.
+
+State to read  (CODE / FILES / DATA — the builder already injects the plan URL)
+  imas_standard_names/grammar/vocabularies/geometry_carriers.yml, locus/object vocabularies, generated grammar types, parser/composer, all x1_coordinate/x2_coordinate tests, current catalog examples in the sibling ISNC checkout, and imas-codex generate_name prompts that mandate x1/x2 carriers. Use the recorded imas-cx DD parent evidence.
+
+Scope locks / constraints  (non-decision)
+  X3 is the surface normal toward the plasma; X1 and X2 are local tangent axes, with X2 = X3 cross X1. Do not call X2 vertical or assume principal curvature. Use descriptive first_local_tangential / second_local_tangential semantics (choose grammar-compatible spelling without weakening meaning). Preserve reflector as the intrinsic object; omit spectrometer/channel instance context. Remove x1/x2 labels wherever they are defined in ISN. The sibling checkouts may be read-only: if so, land and test the ISN slice and write exact residual patches/acceptance criteria into the plan without resolving the cross-repository followup.
+
+Done-when
+  1. ISN vocabulary, generated types, parser/composer, definitions, and tests contain no registered x1/x2 geometry carriers and support descriptive local-tangent forms
+  2. affected catalog/prompt inventory is audited; writable changes are tested and committed, and read-only residual work is recorded precisely
+  3. followup outcome is written into the plan; resolve only if catalog and pipeline safeguards also land</pre>
     </article>
 </section>
 <section data-reckon="research" id="research" class="r-research-list">
