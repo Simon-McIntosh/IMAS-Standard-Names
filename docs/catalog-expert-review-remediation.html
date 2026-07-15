@@ -17,8 +17,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-15">
-<meta name="plan-version" content="20">
-<meta name="plan-impl" content="0.6">
+<meta name="plan-version" content="21">
+<meta name="plan-impl" content="0.65">
 </head>
 <body>
 <main class="plan-doc">
@@ -612,6 +612,10 @@ Done-when: editorial edits accepted; zero COCOS mentions in accepted description
     <span class="r-research-title">29 confident domain reclassifications landed on live graph</span></div>
 <div class="r-research" data-id="r-legacy-dd-dryrun" data-type="live-graph-evidence" data-source="Read-only dry-run for f-legacy-dd-backfill. ALL 8742 DD StandardNameSource nodes resolve via FROM_DD_PATH to a current IMASNode WITH documentation (0 absent, 0 missing docs); 3953 feed accepted names. Current DDVersion id = 4.1.0 (is_current=true) — the exact version the producer snapshot query (MATCH DDVersion{id,is_current:true} + IMASNode{id:path} + HAS_PARENT/HAS_UNIT/HAS_COORDINATE, graph_ops._pin_dd_source_snapshots L5588-5609) would stamp. Extraction (composed_at ~2026-06-18) is in the 4.1 line (imas_data_dictionaries 4.1.1 shipped 2026-01-15), so current-DD docs == extraction docs. CONSTRAINT: the producer DELIBERATELY refuses to backfill existing sources (&#x27;their original snapshot cannot be reconstructed safely after the fact&#x27;) and raises on an unpinned existing source. So the apply must be a bounded reviewed one-off migration replicating the snapshot query for existing sources (set dd_version=4.1.0, dd_documentation, dd_parent_path/documentation, dd_data_type, dd_unit, dd_coordinates, dd_lifecycle_*, dd_snapshot_pinned=true), then removed. Given the producer&#x27;s anti-backfill stance + export-gate stakes, this apply needs explicit user confirmation of the backfill-from-current-DD approach before execution." data-added-by="reckon-ship" data-when="2026-07-15">
     <span class="r-research-title">§7.3 backfill dry-run: all 8742 DD sources snapshot-able at DD 4.1.0</span></div>
+<div class="r-research" data-id="r-cocos-guard-landed" data-type="code-fix" data-source="Catalog-wide scan: 0 accepted names contain &#x27;cocos&#x27; in documentation — the catalog is already clean (the corrective sweep in f-editorial-cocos-sweep has nothing to fix). Added the preventive guard in ISN 52d7bd0: imas_standard_names/validation/description.py now flags any COCOS mention in description OR documentation (regression tests in test_description_validation.py; 19 pass). Remaining in f-editorial-cocos-sweep: only the row-7 (&#x27;absorbed&#x27;-&gt;&#x27;coupled&#x27;) / row-11 (enclosure convention) / row-18 (flux-loop wording) editorial doc edits, which face the same review-acceptance threshold wall as the q docs (apply inline but land at &#x27;reviewed&#x27;, not &#x27;accepted&#x27;, without review authorization)." data-added-by="reckon-ship" data-when="2026-07-15">
+    <span class="r-research-title">COCOS-in-descriptions guard landed; sweep is a no-op (0 violations)</span></div>
+<div class="r-research" data-id="r-source-id-gap" data-type="live-graph-evidence" data-source="The public projection fetch_public_semantic_sources reads dd_path from src.source_id (provenance_lifecycle.py L44), but 3731 of 8742 DD sources have no source_id. So the §7.3 migration must ALSO backfill source_id (derivable from the FROM_DD_PATH IMASNode id / the &#x27;dd:&#x27;-stripped node id) in addition to dd_version + snapshot + dd_snapshot_pinned. This multi-field, 8742-node, export-gating migration against the producer&#x27;s explicit anti-backfill design is exactly why it must be a reviewed migration with user sign-off, not an ad-hoc write." data-added-by="reckon-ship" data-when="2026-07-15">
+    <span class="r-research-title">3731/8742 DD sources also lack source_id — export needs it as dd_path</span></div>
 </section>
 </main>
 </body>
