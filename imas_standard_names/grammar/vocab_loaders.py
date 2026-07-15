@@ -219,10 +219,12 @@ class GeometryCarrierDef(BaseModel, extra="forbid"):
             (rho_tor and friends) — constant on any flux surface — so a
             flux-surface reduction operator applied to it is a no-op and
             the composition gate rejects it.
+        definition: Normative term definition exposed to grammar consumers.
     """
 
     aliases: list[str] = []
     constant_on_flux_surface: bool = False
+    definition: str = ""
 
 
 class GeometryCarriersRegistry(BaseModel, extra="forbid"):

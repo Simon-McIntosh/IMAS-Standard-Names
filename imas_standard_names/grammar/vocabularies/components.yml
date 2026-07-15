@@ -26,8 +26,14 @@
 - tangential
 - perpendicular                # perpendicular to the magnetic-field direction
 - flux_surface_normal          # outward unit normal, toward increasing flux label
-- first_local_tangential       # first direction in an object-local tangent plane
-- second_local_tangential      # second direction in an object-local tangent plane
+# Object-local right-handed frame: e3 is the surface/plane normal oriented
+# toward the plasma.  e1 is oriented in positive toroidal phi and is either
+# explicitly horizontal or, for the more general DD convention, has a smaller
+# absolute global-Z component than e2.  e2 = e3 x e1.  As component tokens,
+# these identify a vector projection or a direction-dependent scalar value;
+# they do not identify coordinate values or the basis vectors themselves.
+- first_local_tangential
+- second_local_tangential
 - binormal
 - x
 - y

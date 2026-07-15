@@ -121,13 +121,45 @@ class TestD3ComponentAdditions:
             )
 
     def test_local_tangent_curvature_radius_preserves_object_context(self):
-        name = "second_local_tangential_front_surface_radius_of_reflector"
+        name = "second_local_tangential_radius_of_reflector"
         parsed = parse_name(name)
 
         assert parsed.component == Component.SECOND_LOCAL_TANGENTIAL
-        assert parsed.zone == ("front_surface",)
+        assert parsed.zone == ()
         assert parsed.physical_base == "radius"
         assert parsed.object == "reflector"
+        assert compose_name(parsed) == name
+
+    @pytest.mark.parametrize(
+        ("name", "component", "geometric_base"),
+        [
+            (
+                "first_local_tangential_radius_of_reflector",
+                Component.FIRST_LOCAL_TANGENTIAL,
+                None,
+            ),
+            (
+                "x_first_local_tangential_unit_vector_of_reflector",
+                None,
+                "first_local_tangential_unit_vector",
+            ),
+            (
+                "second_local_tangential_coordinate_of_reflector",
+                None,
+                "second_local_tangential_coordinate",
+            ),
+        ],
+    )
+    def test_local_frame_component_coordinate_and_vector_roles_are_distinct(
+        self,
+        name: str,
+        component: Component | None,
+        geometric_base: str | None,
+    ) -> None:
+        parsed = parse_name(name)
+
+        assert parsed.component == component
+        assert parsed.geometric_base == geometric_base
         assert compose_name(parsed) == name
 
 

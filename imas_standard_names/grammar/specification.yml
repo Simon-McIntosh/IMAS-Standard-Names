@@ -158,16 +158,26 @@ segments:
       projections use flux_surface_normal, oriented toward increasing flux
       label. Perpendicular is relative to the magnetic-field direction and is
       not a synonym for flux_surface_normal. First/second local tangential
-      identify ordered directions in an object-local tangent plane without
-      implying a machine-frame or principal-curvature direction.
+      refer to the ordered tangents e1 and e2 of an object-local right-handed
+      orthonormal frame: e3 is the surface or plane normal oriented toward the
+      plasma; e1 is oriented in positive toroidal phi and is either explicitly
+      horizontal or has a smaller absolute global-Z component than e2; and
+      e2 = e3 x e1. As components they select a vector projection or a
+      direction-dependent scalar value. They do not denote coordinate values
+      or basis vectors, and neither implies a global-vertical or
+      principal-curvature direction.
   - id: coordinate
     optional: true
     vocabulary: coordinate_axes
     exclusive_with:
       - component
     description: >
-      Coordinate axis for geometric/spatial vector decomposition 
-      (position, vertex, centroid, trajectory, displacement)
+      Coordinate axis for geometric/spatial vector decomposition
+      (position, vertex, centroid, trajectory, displacement). Local-frame
+      coordinate carriers identify signed coordinates along e1 or e2; local
+      unit-vector carriers identify e1 or e2 themselves. Coordinate projection
+      tokens such as x, y, and z may then select their machine-Cartesian
+      components.
   - id: aggregation
     optional: true
     vocabulary: aggregations

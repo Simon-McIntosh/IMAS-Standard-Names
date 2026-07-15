@@ -139,7 +139,9 @@ def _get_vocabulary_description(segment_id: str) -> str:
             "radial is cylindrical R; "
             "flux_surface_normal is outward toward increasing flux label; "
             "perpendicular is magnetic-field-relative; local tangential "
-            "directions do not imply machine-frame alignment"
+            "directions are the e1/e2 tangents of the DD-defined object-local "
+            "right-handed frame, with plasma-facing normal e3, positive-phi e1, "
+            "and e2 = e3 x e1; e2 is not global vertical"
         ),
         "subject": "Particle species or plasma component (e.g., electron, ion, deuterium)",
         "object": "Physical object, diagnostic hardware, or equipment (e.g., flux_loop, bolometer)",

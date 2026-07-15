@@ -70,18 +70,42 @@ carriers:
     aliases: []
 
   # === Local tangent-frame carriers ===
-  # These tokens describe ordered directions in an object-local tangent plane.
-  # They deliberately do not imply alignment with a machine-frame axis or a
-  # principal-curvature direction.
+  # These tokens describe an object-local right-handed orthonormal frame.  Its
+  # third direction e3 is normal to the relevant surface or plane and oriented
+  # toward the plasma.  The first tangent e1 is oriented in positive toroidal
+  # phi and is either explicitly horizontal or, under the more general DD
+  # convention, has a smaller absolute global-Z component than e2.  The second
+  # tangent is fixed by e2 = e3 x e1.  Neither tangent is thereby a global
+  # vertical direction or a principal-curvature direction.
   first_local_tangential_coordinate:
     aliases: []
+    definition: >
+      Signed coordinate along the first tangent e1 of an object-local
+      right-handed orthonormal frame. The plasma-facing surface or plane normal
+      is e3; e1 is oriented in positive toroidal phi and is either explicitly
+      horizontal or has a smaller absolute global-Z component than e2.
   second_local_tangential_coordinate:
     aliases: []
+    definition: >
+      Signed coordinate along the second tangent e2 of an object-local
+      right-handed orthonormal frame, where e2 = e3 x e1 and e3 is the
+      plasma-facing surface or plane normal. This coordinate is not the global
+      vertical coordinate.
 
   first_local_tangential_unit_vector:
     aliases: []
+    definition: >
+      First tangent unit vector e1 of an object-local right-handed orthonormal
+      frame. It is oriented in positive toroidal phi and is either explicitly
+      horizontal or has a smaller absolute global-Z component than e2; e3 is
+      the plasma-facing surface or plane normal.
   second_local_tangential_unit_vector:
     aliases: []
+    definition: >
+      Second tangent unit vector e2 of an object-local right-handed orthonormal
+      frame, fixed by e2 = e3 x e1 with e3 the plasma-facing surface or plane
+      normal. It is not necessarily vertical and is not necessarily a
+      principal-curvature direction.
 
   # === Angular and normal-axis carriers ===
   poloidal_angle:  # poloidal angle coordinate (sensor orientation, equilibrium grids)

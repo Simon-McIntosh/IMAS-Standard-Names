@@ -234,7 +234,11 @@ def test_cross_registry_detects_duplicate(monkeypatch):
         # Inject a name that also exists in coordinate_axes
         from imas_standard_names.grammar.vocab_loaders import LocusEntry
 
-        reg.loci["radial"] = LocusEntry(type="entity", allowed_relations=["of"])
+        reg.loci["radial"] = LocusEntry(
+            type="entity",
+            allowed_relations=["of"],
+            definition="Synthetic duplicate locus used only by this registry test.",
+        )
         return reg
 
     monkeypatch.setattr(_m, "load_locus_registry", _patched_locus)

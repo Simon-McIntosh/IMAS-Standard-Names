@@ -2,7 +2,10 @@
 
 from pydantic import BaseModel, Field
 
-from imas_standard_names.grammar.vocab_loaders import load_locus_registry
+from imas_standard_names.grammar.vocab_loaders import (
+    load_geometry_carriers,
+    load_locus_registry,
+)
 
 
 class StandardTerm(BaseModel, frozen=True):
@@ -19,7 +22,7 @@ class StandardTerm(BaseModel, frozen=True):
 def standard_terms() -> tuple[StandardTerm, ...]:
     """Return the governed term collection in deterministic token order."""
     registry = load_locus_registry()
-    return tuple(
+    terms = [
         StandardTerm(
             token=token,
             segment="locus",
@@ -29,7 +32,18 @@ def standard_terms() -> tuple[StandardTerm, ...]:
             references=tuple(entry.references),
         )
         for token, entry in sorted(registry.loci.items())
+    ]
+    carriers = load_geometry_carriers()
+    terms.extend(
+        StandardTerm(
+            token=token,
+            segment="geometric_base",
+            definition=entry.definition,
+        )
+        for token, entry in sorted(carriers.carriers.items())
+        if entry.definition
     )
+    return tuple(sorted(terms, key=lambda term: (term.token, term.segment)))
 
 
 def fetch_standard_terms(

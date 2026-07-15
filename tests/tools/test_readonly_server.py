@@ -29,6 +29,8 @@ READONLY_TOOLS = {
     "validate_catalog",
     "get_vocabulary",
     "get_tokamak_parameters",
+    "fetch_standard_terms",
+    "search_standard_terms",
 }
 
 # Vocabulary audit tool is optional (requires spacy)
