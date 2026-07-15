@@ -15,9 +15,9 @@
   <title>Systematic Review Remediation | imas-standard-names</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-07-14">
+<meta name="plan-modified" content="2026-07-15">
 <meta name="plan-impl" content="1.0">
-<meta name="plan-version" content="8">
+<meta name="plan-version" content="9">
 </head>
 <body>
   <main class="plan-doc">
@@ -545,7 +545,7 @@ Done-when
   1. Pair supersede applied; 3 neutral_state resolved or lead-signed-off as residual
   2. Soak items implemented + verified against live Neo4j; ISN pin bumped
   3. f-srr-007 (inline-ref drain) closable; this followup resolved</pre>
-    <p class="r-fu-outcome">Tail landed except the neutral_state naming call (carried to f-srr-010). DONE: (1) pair supersede applied — power_density_at_wall superseded into energy_flux_at_wall (0 accepted W·m⁻² power_density remain); (2) tombstone-id supersede verb shipped (codex 76f179a7: sn supersede <old> --into <accepted>, refuses non-accepted, idempotent, soaked via dry-run+refusal); (3) P6 findings 4/7/13 shipped (codex b80aca37/e8995a59/6c15c4e5) + LIVE-GRAPH SOAKED: finding-4 promotion correct (0 eligible — 98 reviewed below 0.85, 1 excluded for open-edit), heartbeat wiring confirmed, finding-13 atomic clear graph-verified (test_clear_atomicity_graph.py) which caught a return-count over-count bug fixed in 4f74b1e3 (count now = actual deletions, not in-scope matches); (4) ISN pin bumped to 63e8d4e, codex suite green. NOTE finding-4 does NOT drain the 31 inline-ref targets — they are genuinely below-threshold, so f-srr-007 inline drain stays coupled to the docs-generation backlog (deferred to release-prep per lead). Heartbeat >5min duplicate-spend observation deferred to the next natural long production run (mechanism unit-proven + wired).</p>
+    <p class="r-fu-outcome">Tail landed except the neutral_state naming call (carried to f-srr-010). DONE: (1) pair supersede applied — power_density_at_wall superseded into energy_flux_at_wall (0 accepted W·m⁻² power_density remain); (2) tombstone-id supersede verb shipped (codex 76f179a7: sn supersede <old> --into <accepted>, refuses non-accepted, idempotent, soaked via dry-run+refusal); (3) P6 findings 4/7/13 shipped (codex b80aca37/e8995a59/6c15c4e5) + LIVE-GRAPH SOAKED: finding-4 promotion correct (0 eligible — 98 reviewed below 0.85, 1 excluded for open-edit), heartbeat wiring confirmed, finding-13 atomic clear graph-verified (test_clear_atomicity_graph.py) which caught a return-count over-count bug fixed in 4f74b1e3 (count now = actual deletions, not in-scope matches); (4) ISN pin bumped to 63e8d4e, codex suite green. NOTE finding-4 does NOT drain the 31 inline-ref targets — they are genuinely below-threshold, so f-srr-007 inline drain stays coupled to the docs-generation backlog (deferred to release-prep per lead). Heartbeat &gt;5min duplicate-spend observation deferred to the next natural long production run (mechanism unit-proven + wired).</accepted></old></p>
     </article>
 <article class="r-fu" data-id="f-srr-010" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-14" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">neutral_state momentum successors + the _state_ subject-convention clarity review</h4>
@@ -566,6 +566,29 @@ Done-when
   1. The 3 published names no longer silently retire (accepted successors OR redirected)
   2. If (c) chosen, a scoped plan for the _state_-convention migration
   3. This followup resolved</pre>
+    </article>
+<article class="r-fu" data-id="f-srr-011" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-15" data-recommends-skill="superpowers:brainstorming" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Redesign the ISN-version clear-gate — impact-based, not version-string; drop the graph-wide-clear footgun</h4>
+    <div class="r-fu-body">Lead-flagged footgun (2026-07-15): imas_codex pipeline_version.compute_pipeline_hash folds the installed imas-standard-names version string into a composite hash; loop.py trips a clear-gate whenever it changes and prints `sn clear --all --force --include-sources` (the wiped-catalog shape) as the remedy, escapable only via --skip-clear-gate. The gate cannot distinguish a BACKWARD-COMPATIBLE ISN bump (e.g. the added state segment — every existing name still parses and round-trips) from a BREAKING one (renamed/removed token). So every ISN bump trips it and the advertised fix is destructive. Intent (prevent silent name-quality drift when name-producing prompts/grammar change) is legitimate; the implementation is the problem.</div>
+    <pre class="r-fu-prompt">Project: imas-codex
+Plan: systematic-review-remediation — clear-gate redesign (f-srr-011)
+Tier: opus
+
+Context
+  The clear-gate (pipeline_version.py + loop.py, tripped in run_sn_pools startup) fires on any change to the pipeline composite hash — which includes the ISN version string — and recommends a graph-wide `sn clear`. A compatible ISN bump (added segment/token; existing names still round-trip) trips it identically to a breaking one; the only escape is --skip-clear-gate. This is a footgun: the default remedy wipes the catalog, and the escape flag is easy to over-use.
+
+State to read
+  imas_codex/standard_names/pipeline_version.py (compute_pipeline_hash; the PIPELINE_PROMPTS/PIPELINE_CODE/isn_version composite).
+  imas_codex/standard_names/loop.py (the gate enforcement + the printed clear recommendation ~line 1590 region; the --skip-clear-gate path).
+  The ISN drift gate + round-trip machinery (parse_standard_name/compose_standard_name) as the compatible-vs-breaking oracle.
+
+Scope locks / constraints
+  Preserve the real intent (block silent name-quality drift when name-PRODUCING inputs change). Never make a graph-wide clear the default remedy. Prefer measuring ACTUAL impact: re-validate existing accepted names against the new grammar (parse + round-trip) and flag only the ones that now FAIL; distinguish additive (compatible) from breaking changes; a compatible bump should require no action. Retire or narrow --skip-clear-gate.
+
+Done-when
+  1. Brainstorm + design an impact-based gate (compatible bump = no-op; breaking change = surgical re-validate/re-review of only affected names, never a blanket clear)
+  2. Implementation plan; tests proving a compatible ISN bump does not trip a clear and a breaking token change flags exactly the affected names
+  3. --skip-clear-gate footgun removed or reduced to a narrow, documented escape; this followup resolved</pre>
     </article>
 </section>
 
