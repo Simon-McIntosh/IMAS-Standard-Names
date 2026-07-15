@@ -17,8 +17,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-15">
-<meta name="plan-version" content="18">
-<meta name="plan-impl" content="0.55">
+<meta name="plan-version" content="19">
+<meta name="plan-impl" content="0.6">
 </head>
 <body>
 <main class="plan-doc">
@@ -311,9 +311,9 @@
     <p class="r-dec-q">domain-move-mechanism</p>
     <p class="r-dec-rat">Apply the ~30 confident physics_domain reclassifications via a reviewed direct Cypher SET (physics_domain + source_domains) on the live graph, then re-export. In the same campaign, locate and fix the code/LLM prompt that assigned the incorrect domains at root (dd_domain_classifier.py / definitions/physics/ids_domains.json / domain_gold_set.json) and add a regression unit test that guards the corrected assignments so future runs cannot reintroduce them.</p>
     </div>
-<div class="r-dec" data-key="gyrocenter-domain" data-choice="transport" data-by="Simon McIntosh" data-when="2026-07-15T20:34:13+00:00">
+<div class="r-dec" data-key="gyrocenter-domain" data-choice="" data-by="reckon-ship (recommendation, awaiting confirmation)" data-when="2026-07-15T20:34:13+00:00">
     <p class="r-dec-q">gyrocenter-domain</p>
-    <p class="r-dec-rat">The gyrocenter orbit-frequency names (poloidal/toroidal_gyrocenter_frequency from distributions/.../ggd/orbit_frequency_{pol,tor}) move out of computational_workflow to transport. Not fast_particles: every charged particle has a gyrocenter, so fast_particles is too narrow and is not an existing domain. computational_workflow is a tooling bucket, not a physics domain; guiding-center orbit dynamics (bounce/transit/precession) is a kinetic/orbit-transport phenomenon. Reversible if a dedicated kinetics/gyrokinetics domain is later preferred.</p>
+    <p class="r-dec-rat">OPEN — awaiting user confirmation. The lead confirmed the move OUT of computational_workflow is confident (it is a tooling bucket, not a physics domain) but INVITED a recommendation on the target (&#x27;what do you suggest, I hesitate over fast_particles as all charged particles have gyrocenters, not just the fast ones&#x27;). Recommendation: transport (guiding-center orbit dynamics = kinetic/orbit-transport; distributions IDS default is transport; fast_particles is both too narrow and not an existing domain). Alternative: turbulence (family coherence with perturbed_gyrocenter_* names). Two gyrocenter names were provisionally moved to transport then REVERTED to computational_workflow pending this confirmation. The code override (path_domain_overrides.json) encodes transport as the recommended default and is trivially changed if another target is chosen. Applies to gyrocenter_frequency, poloidal_/toroidal_gyrocenter_frequency (and possibly gyrocenter_density, gyrocenter_current_density).</p>
     </div>
 </section>
 
@@ -608,6 +608,8 @@ Done-when: editorial edits accepted; zero COCOS mentions in accepted description
     <span class="r-research-title">Domain classifier root-cause fix landed (imas-codex 0b96eb9b)</span></div>
 <div class="r-research" data-id="r-doc-acceptance-constraint" data-type="environment-constraint" data-source="The q sign-fix doc for safety_factor applied (defect removed, no COCOS) and was reviewed inline at score 0.7125 -&gt; docs_stage=&#x27;reviewed&#x27; (below the acceptance threshold), NOT accepted; re-issuing is then blocked (&#x27;docs axis must have settled&#x27;). Implication: sn edit --docs runs the scoring/refine pipeline, which does not rubber-stamp exact human wording. Landing precise no-COCOS wording to &#x27;accepted&#x27; needs either a threshold-clearing pass, pipeline refinement (which rewrites the wording, risking COCOS/verbosity reintroduction), or a direct accept (authorization-gated). For exact human catalog wording, the catalog-PR -&gt; sn merge flow is the designed path. Decide per-name: accept-as-refined vs merge-flow-exact." data-added-by="reckon-ship" data-when="2026-07-15">
     <span class="r-research-title">Human doc edits below review threshold stay &#x27;reviewed&#x27;, not &#x27;accepted&#x27;</span></div>
+<div class="r-research" data-id="r-domain-moves-landed" data-type="live-graph-evidence" data-source="Applied via guarded Cypher SET (physics_domain + source_domains), all 29 verified (0 skipped): mechanical_measurement_diagnostics 52-&gt;24 accepted (camera angular widths x2 -&gt; radiation; mass-spec + langmuir hardware x9 -&gt; particle; cooling/calorimetry/plant-port x8 -&gt; plant_systems; midplane/wall/SOL plasma temps+potentials x8 -&gt; edge_plasma_physics; temperature_at_wall -&gt; plasma_wall_interactions); pressure_of_lower_hybrid_antenna plant_systems -&gt; auxiliary_heating. All follow the locked semantic-subject principle with confident manifest targets. GYROCENTER family (computational_workflow) NOT moved — target awaiting user confirmation (see gyrocenter-domain decision). Needs-human moves (~11: Langmuir current-density/saturation cluster, neutral_pressure/barometry, gap-reference-point unification, toroidal_angle_of_line_of_sight) still queued in f-domain-execution." data-added-by="reckon-ship" data-when="2026-07-15">
+    <span class="r-research-title">29 confident domain reclassifications landed on live graph</span></div>
 </section>
 </main>
 </body>
