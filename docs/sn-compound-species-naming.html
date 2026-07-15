@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="sn-compound-species-naming">
   <meta name="plan-title" content="SN Compound / Molecular Species Naming">
   <meta name="plan-summary" content="Design a grammar construction for molecular / compound species (D2, CD4 hydrocarbons) driven by SOLPS edge/divertor modelling — the DD element[]+multiplicity axis — distinct from reaction-channel pairs and from charge/internal-state resolution.">
-  <meta name="plan-status" content="draft">
+  <meta name="plan-status" content="archived">
   <meta name="plan-roi" content="mid">
   <meta name="plan-effort" content="L">
   <meta name="plan-tier" content="opus">
@@ -16,11 +16,29 @@
   <title>SN Compound / Molecular Species Naming | imas-standard-names</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-07-14">
-<meta name="plan-version" content="1">
+<meta name="plan-modified" content="2026-07-15">
+<meta name="plan-version" content="2">
 </head>
 <body>
   <main class="plan-doc">
+
+    <section class="section-landed">
+      <header>
+        <span class="badge">⏸ parked 2026-07-15</span>
+        <h2>Parked — molecular species are not DD-path-sourceable</h2>
+      </header>
+      <p class="landed-summary">
+        <strong>Lead decision (2026-07-15): park this plan.</strong> Molecular/compound species
+        (D<sub>2</sub>, CD<sub>4</sub>) only ever resolve in <em>solver data</em> — a SOLPS solution array —
+        not at a fixed <em>DD path</em>. There is no DD path that always maps to "CD<sub>4</sub>"
+        (the species present is a run-time property of the model's <code>element[]</code>/<code>multiplicity</code>
+        arrays, not a static leaf). ISN standard names are minted by tagging DD paths with a fixed name;
+        a quantity that has no fixed DD-path anchor is therefore <strong>not a candidate for a
+        DD-path-sourced standard name</strong> — we could never attach the name to a path. So compound-species
+        naming is out of scope for the catalog pipeline as it stands. Retained as reference; revisit only if
+        a data-addressable naming need (not DD-path-sourced) arises.
+      </p>
+    </section>
 
     <h2 id="s1">§1 — Problem and origin</h2>
     <p>
@@ -186,7 +204,7 @@
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-scs-001" data-status="open" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-07-14" data-recommends-skill="superpowers:brainstorming" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-scs-001" data-status="resolved" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-07-14" data-recommends-skill="superpowers:brainstorming" data-resolved-at="2026-07-15T08:30:25+00:00" data-resolved-by="Simon McIntosh">
     <h4 class="r-fu-title">Brainstorm the compound-species construction (A/B/C) + Fable design critique</h4>
     <div class="r-fu-body">Design-stage plan authored. Next: run the brainstorm to choose the construction (molecule-vocabulary / structured-formula / element-multiplicity-substructure) and scope (bounded set vs open formula), grounded in the DD element[]+multiplicity model and the real SOLPS species set; get a Fable design critique as the state rework did; then write an implementation plan. No grammar/graph changes until the design is approved.</div>
     <pre class="r-fu-prompt">Project: imas-standard-names
@@ -210,6 +228,7 @@ Done-when
   1. Construction + scope decisions locked (the two decisions in this plan)
   2. Fable design critique captured; before/after examples across molecular ion / neutral / isotopic cases
   3. Implementation plan written (writing-plans); this followup resolved</pre>
+    <p class="r-fu-outcome">PARKED (lead decision 2026-07-15). Molecular/compound species resolve only in solver data (SOLPS solution arrays), never at a fixed DD path — the species present is a run-time property of element[]/multiplicity, not a static leaf. ISN names are minted by tagging DD paths; a quantity with no fixed DD-path anchor cannot be tagged, so compound species are not candidates for DD-path-sourced standard names. Out of scope for the catalog pipeline; plan archived as reference.</p>
     </article>
 </section>
 
