@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-15">
-<meta name="plan-version" content="1">
+<meta name="plan-version" content="2">
 </head>
 <body>
 <main class="plan-doc">
@@ -138,6 +138,7 @@
     </div>
 <div class="r-dec" data-key="context-model" data-choice="" data-by="" data-when="">
     <p class="r-dec-q">Must component identity such as reflector be encoded in the standard name, or may structured source-context metadata carry it?</p>
+    <p class="r-dec-ctx">Live DD evidence: channel/reflector is an optional set of reflectors directing plasma light toward the crystal. X3 is the reflector-surface normal oriented toward the plasma; X1 is the local tangent direction chosen to be more horizontal than X2; X2 is the orthonormal local tangent direction uX2 = uX3 × uX1. Therefore X2 is not the machine vertical direction, and vertical_front_surface_radius_of_optical_element asserts unsupported semantics. The DD source inspires the quantity but does not dictate its canonical SN wording.</p>
     <p class="r-dec-opts">
       <button class="r-opt" data-value="programmatic-name">Encode identity in grammar/name</button>
       <button class="r-opt" data-value="structured-context">Use required structured context metadata</button>
@@ -197,6 +198,11 @@ Done-when
   2. full relevant parse/compose, grouping, catalog, prompt, and renderer tests are green in every changed repository
   3. followup written into plan + this followup marked resolved</pre>
     </article>
+</section>
+<section data-reckon="research" id="research" class="r-research-list">
+<h2><span class="sec">§</span> Research</h2>
+<div class="r-research" data-id="r-reflector-x2" data-type="live-dd-evidence" data-source="imas-cx DD parent and leaf documentation" data-added-by="Codex" data-when="2026-07-15">
+    <span class="r-research-title">Reflector local-axis semantics</span></div>
 </section>
 </main>
 </body>
