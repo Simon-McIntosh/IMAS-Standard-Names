@@ -1,0 +1,9 @@
+[mcp_servers.imas-cx]
+command = "uv"
+args = ["run", "imas-codex", "serve", "--read-only"]
+cwd = "/home/ITER/mcintos/Code/imas-codex"
+startup_timeout_sec = 30
+tool_timeout_sec = 120
+
+[mcp_servers.imas-cx.env]
+UV_CACHE_DIR = "/tmp/uv-cache"

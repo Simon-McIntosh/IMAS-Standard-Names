@@ -12,6 +12,31 @@ IMAS Standard Names (ISN) is a **grammar library** and **read-only catalog serve
 > commands, stash rules), parallel agent rules, model selection, and commit
 > conventions. This file contains only repo-specific instructions.
 
+## Live Standard Name Graph
+
+Use the project-scoped `imas-cx` MCP server for current standard-name and IMAS
+Data Dictionary graph data. It runs the sibling `imas-codex` checkout through
+`uv run imas-codex serve --read-only`; do not substitute catalog YAML, SQLite,
+or remembered graph state when the task depends on live pipeline data.
+
+- Use `get_standard_name_summary` with a `physical_base` such as `temperature`
+  for family membership, segment diversity, units, domains, and lineage counts.
+- Use `search_standard_names` for semantic discovery and grammar-segment
+  filters, then `fetch_standard_names` for exact names.
+- Use `find_related_standard_names` to inspect grammar families, companions,
+  and graph relationships around a name.
+- Use `list_standard_names` for filtered inventories,
+  `list_promotion_candidates` for live promotion state, and
+  `check_standard_names` for exact-name existence or validation checks.
+- Use `list_grammar_vocabulary` to discover valid filter tokens before issuing
+  segment-filtered searches.
+- Prefer `imas-cx` DD tools when a question combines DD paths with live
+  standard-name relationships. The external `imas-dd` server remains suitable
+  for DD-only reference queries.
+
+The configured server is read-only. Do not bypass that restriction or modify
+the live graph from this repository.
+
 ## Fusion Physics and Geometry Context
 
 **Essential concepts for agents working with standard names:**
