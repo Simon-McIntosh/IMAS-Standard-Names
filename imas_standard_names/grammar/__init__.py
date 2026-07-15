@@ -13,6 +13,7 @@ from .model import (
 from .model_types import (
     BinaryOperator,
     Component,
+    Coordinate,
     GenericPhysicalBase,
     GeometricBase,
     Object,
@@ -73,6 +74,7 @@ __all__ = [
     "coerce_enum",
     "BinaryOperator",
     "Component",
+    "Coordinate",
     "GenericPhysicalBase",
     "GeometricBase",
     "Object",

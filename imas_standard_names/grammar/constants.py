@@ -19,6 +19,7 @@ from .model_types import (
     Channel,
     ChannelQualifier,
     Component,
+    Coordinate,
     GeometricBase,
     Object,
     Orbit,
@@ -45,7 +46,7 @@ class SegmentRule:
 
 SEGMENT_TOKEN_MAP: dict[str, tuple[str, ...]] = {
     "component": tuple(member.value for member in Component),
-    "coordinate": tuple(member.value for member in Component),
+    "coordinate": tuple(member.value for member in Coordinate),
     "aggregation": tuple(member.value for member in Aggregation),
     "qualifier": tuple(member.value for member in Qualifier),
     "zone": tuple(member.value for member in Zone),

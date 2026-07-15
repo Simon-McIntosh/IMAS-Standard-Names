@@ -69,15 +69,18 @@ carriers:
   vertex:
     aliases: []
 
-  # === Local coordinate-triad carriers ===
-  x1_coordinate:  # local coordinate axis
+  # === Local tangent-frame carriers ===
+  # These tokens describe ordered directions in an object-local tangent plane.
+  # They deliberately do not imply alignment with a machine-frame axis or a
+  # principal-curvature direction.
+  first_local_tangential_coordinate:
     aliases: []
-  x2_coordinate:  # local coordinate axis
+  second_local_tangential_coordinate:
     aliases: []
 
-  x1_unit_vector:  # local coordinate axis unit vector (neutron_diagnostic detector/aperture geometry)
+  first_local_tangential_unit_vector:
     aliases: []
-  x2_unit_vector:  # companion to x1_unit_vector, local coordinate triad symmetry
+  second_local_tangential_unit_vector:
     aliases: []
 
   # === Angular and normal-axis carriers ===

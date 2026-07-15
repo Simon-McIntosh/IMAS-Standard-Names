@@ -59,6 +59,7 @@ FIELD_SCHEMAS_OUTPUT_MODULE = _GRAMMAR_DIR / "field_schemas.py"
 
 ENUM_NAME_OVERRIDES = {
     "components": "Component",
+    "coordinate_axes": "Coordinate",
     "subjects": "Subject",
     "basis": "Basis",
     "geometric_bases": "GeometricBase",

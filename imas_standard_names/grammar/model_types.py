@@ -19,6 +19,9 @@ class Component(StrEnum):
     NORMAL = "normal"
     TANGENTIAL = "tangential"
     PERPENDICULAR = "perpendicular"
+    FLUX_SURFACE_NORMAL = "flux_surface_normal"
+    FIRST_LOCAL_TANGENTIAL = "first_local_tangential"
+    SECOND_LOCAL_TANGENTIAL = "second_local_tangential"
     BINORMAL = "binormal"
     X = "x"
     Y = "y"
@@ -29,6 +32,24 @@ class Component(StrEnum):
     NORMALIZED_PERPENDICULAR = "normalized_perpendicular"
     NORMALIZED_TOROIDAL = "normalized_toroidal"
     NORMALIZED_POLOIDAL = "normalized_poloidal"
+
+
+class Coordinate(StrEnum):
+    NORMALIZED_PARALLEL = "normalized_parallel"
+    NORMALIZED_PERPENDICULAR = "normalized_perpendicular"
+    NORMALIZED_POLOIDAL = "normalized_poloidal"
+    NORMALIZED_RADIAL = "normalized_radial"
+    NORMALIZED_TOROIDAL = "normalized_toroidal"
+    NORMALIZED_VERTICAL = "normalized_vertical"
+    PARALLEL = "parallel"
+    PERPENDICULAR = "perpendicular"
+    POLOIDAL = "poloidal"
+    RADIAL = "radial"
+    TOROIDAL = "toroidal"
+    VERTICAL = "vertical"
+    X = "x"
+    Y = "y"
+    Z = "z"
 
 
 class Subject(StrEnum):
@@ -444,6 +465,7 @@ class Object(StrEnum):
     NEUTRON_DETECTOR = "neutron_detector"
     NEUTRON_DETECTOR_CONVERTER = "neutron_detector_converter"
     OPTICAL_ELEMENT = "optical_element"
+    REFLECTOR = "reflector"
     PASSIVE_LOOP = "passive_loop"
     PASSIVE_STRUCTURE = "passive_structure"
     PELLET = "pellet"
@@ -578,10 +600,10 @@ class GeometricBase(StrEnum):
     TRAJECTORY = "trajectory"
     UNIT_VECTOR = "unit_vector"
     VERTEX = "vertex"
-    X1_COORDINATE = "x1_coordinate"
-    X2_COORDINATE = "x2_coordinate"
-    X1_UNIT_VECTOR = "x1_unit_vector"
-    X2_UNIT_VECTOR = "x2_unit_vector"
+    FIRST_LOCAL_TANGENTIAL_COORDINATE = "first_local_tangential_coordinate"
+    SECOND_LOCAL_TANGENTIAL_COORDINATE = "second_local_tangential_coordinate"
+    FIRST_LOCAL_TANGENTIAL_UNIT_VECTOR = "first_local_tangential_unit_vector"
+    SECOND_LOCAL_TANGENTIAL_UNIT_VECTOR = "second_local_tangential_unit_vector"
     POLOIDAL_ANGLE = "poloidal_angle"
     TOROIDAL_ANGLE = "toroidal_angle"
     NORMAL_COORDINATE = "normal_coordinate"
@@ -701,6 +723,7 @@ class Decomposition(StrEnum):
 
 __all__ = [
     "Component",
+    "Coordinate",
     "Subject",
     "State",
     "Population",

@@ -150,12 +150,19 @@ segments:
     exclusive_with:
       - coordinate
     description: >
-      Directional component of a physical vector quantity
-      (fields, fluxes, velocities). Renders as the first (outermost) prefix:
+      Directional projection or direction-dependent physical quantity
+      (fields, fluxes, velocities, curvature radii). Renders as the first
+      (outermost) prefix:
       <component>_<aggregation>_<orbit>_<population>_<subject>_<base>.
+      Radial is exclusively the cylindrical R component. Flux-surface-normal
+      projections use flux_surface_normal, oriented toward increasing flux
+      label. Perpendicular is relative to the magnetic-field direction and is
+      not a synonym for flux_surface_normal. First/second local tangential
+      identify ordered directions in an object-local tangent plane without
+      implying a machine-frame or principal-curvature direction.
   - id: coordinate
     optional: true
-    vocabulary: components
+    vocabulary: coordinate_axes
     exclusive_with:
       - component
     description: >
@@ -416,6 +423,7 @@ segments:
 
 vocabularies:
   components: !include vocabularies/components.yml
+  coordinate_axes: !include vocabularies/coordinate_axes.yml
   subjects: !include vocabularies/subjects.yml
   states: !include vocabularies/states.yml
   # rc32 subject-vocabulary decomposition: orthogonal single-token modifier

@@ -40,6 +40,7 @@ from imas_standard_names.grammar.model_types import (
     Channel,
     ChannelQualifier,
     Component,
+    Coordinate,
     Decomposition,
     GeometricBase,
     Object,
@@ -1010,7 +1011,7 @@ class StandardName(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     component: Component | None = None
-    coordinate: Component | None = None
+    coordinate: Coordinate | None = None
     aggregation: Aggregation | None = None
     orbit: Orbit | None = None
     population: Population | None = None

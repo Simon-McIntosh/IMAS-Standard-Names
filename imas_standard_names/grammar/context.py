@@ -134,7 +134,13 @@ def _get_segment_descriptions() -> dict[str, str]:
 def _get_vocabulary_description(segment_id: str) -> str:
     """Generate a human-readable vocabulary description."""
     descriptions = {
-        "component": "Spatial or field-aligned direction (e.g., radial, toroidal, parallel)",
+        "component": (
+            "Directional projection or direction-dependent quantity. "
+            "radial is cylindrical R; "
+            "flux_surface_normal is outward toward increasing flux label; "
+            "perpendicular is magnetic-field-relative; local tangential "
+            "directions do not imply machine-frame alignment"
+        ),
         "subject": "Particle species or plasma component (e.g., electron, ion, deuterium)",
         "object": "Physical object, diagnostic hardware, or equipment (e.g., flux_loop, bolometer)",
         "position": "Spatial location where field is evaluated (use with at_ template)",

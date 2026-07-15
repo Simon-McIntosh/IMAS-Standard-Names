@@ -2,8 +2,7 @@
 #
 # Used with GeometryCarrier (shape=coordinate) to form projections like
 # "radial_coordinate_of_flux_loop".  Distinct from components.yml which
-# is used with QuantityBase (shape=component, e.g.
-# "radial_component_of_magnetic_field").
+# is used with QuantityBase (shape=component, e.g. "radial_magnetic_field").
 #
 # Coordinate-axis tokens (10):
 #   normalized_parallel, normalized_poloidal, normalized_toroidal,

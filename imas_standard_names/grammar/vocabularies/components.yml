@@ -1,36 +1,33 @@
-# Component vocabulary: directional components of vector quantities
+# Component vocabulary: directional projections and direction-dependent quantities
 #
-# Usage: <component>_component_of_<base>
+# Usage: <component>_<base>
 # Examples:
-#   - radial_component_of_magnetic_field
-#   - toroidal_component_of_plasma_velocity
-#   - vertical_component_of_heat_flux
+#   - radial_magnetic_field
+#   - toroidal_plasma_velocity
+#   - flux_surface_normal_heat_flux
 #
-# Rulings (D.3 senior review 2026-04):
-#   - `toroidal_component` is the canonical directional form in cylindrical
-#     (R, Z, φ) coordinates. `velocity_phi` is forbidden; `velocity_tor` is
-#     deprecated.
-#   - `diamagnetic`, `e_cross_b`, and `pfirsch_schlueter` are deferred as
-#     component tokens. They are component qualifiers
-#     (e.g. `diamagnetic_component_of_drift_velocity`), but the current
-#     parser shares this vocabulary with the `coordinate` segment (bare
-#     prefix match), which breaks existing names like
-#     `electron_diamagnetic_drift_velocity`. Pending parser refactoring
-#     to separate component and coordinate vocabularies.
+# Rulings:
+#   - Components use the short prefix form. The retired
+#     `{axis}_component_of_{base}` long form does not parse.
+#   - `diamagnetic`, `e_cross_b`, and `pfirsch_schlueter` are qualifiers,
+#     not component tokens.
 #   - `diamagnetic` is a qualifier on drifts and fluxes (in physical_base,
-#     e.g. `diamagnetic_drift_velocity`, `diamagnetic_flux`). It is NEVER
+#     e.g. `diamagnetic_drift_velocity`, `diamagnetic_flux`). It is never
 #     a subject. Composers must not emit `diamagnetic_X` as a standalone
 #     base name.
 
 # === Cardinal / cylindrical directions ===
-- radial
+- radial                       # cylindrical R component in (R, phi, Z)
 - toroidal
 - vertical
 - poloidal
 - parallel
 - normal
 - tangential
-- perpendicular
+- perpendicular                # perpendicular to the magnetic-field direction
+- flux_surface_normal          # outward unit normal, toward increasing flux label
+- first_local_tangential       # first direction in an object-local tangent plane
+- second_local_tangential      # second direction in an object-local tangent plane
 - binormal
 - x
 - y
@@ -43,4 +40,3 @@
 - normalized_perpendicular   # component along normalized perpendicular direction
 - normalized_toroidal        # component along normalized toroidal (φ) direction
 - normalized_poloidal        # component along normalized poloidal (θ) direction
-

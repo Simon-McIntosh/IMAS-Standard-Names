@@ -99,6 +99,37 @@ class TestD3ComponentAdditions:
         assert parsed.component == Component.NORMALIZED_VERTICAL
         assert parsed.physical_base == "magnetic_field"
 
+    def test_flux_surface_normal_component(self):
+        parts = {
+            "component": "flux_surface_normal",
+            "physical_base": "energy_flux",
+        }
+        name = compose_name(parts)
+        assert name == "flux_surface_normal_energy_flux"
+        parsed = parse_name(name)
+        assert parsed.component == Component.FLUX_SURFACE_NORMAL
+
+    def test_flux_surface_normal_is_not_a_geometry_coordinate(self):
+        with pytest.raises(ValueError):
+            parse_name("flux_surface_normal_coordinate_of_flux_loop")
+
+        with pytest.raises(ValueError):
+            StandardName(
+                coordinate="flux_surface_normal",
+                geometric_base="coordinate",
+                object="flux_loop",
+            )
+
+    def test_local_tangent_curvature_radius_preserves_object_context(self):
+        name = "second_local_tangential_front_surface_radius_of_reflector"
+        parsed = parse_name(name)
+
+        assert parsed.component == Component.SECOND_LOCAL_TANGENTIAL
+        assert parsed.zone == ("front_surface",)
+        assert parsed.physical_base == "radius"
+        assert parsed.object == "reflector"
+        assert compose_name(parsed) == name
+
 
 class TestD3ProcessAdditions:
     """Round-trip tests for D.3 process tokens."""

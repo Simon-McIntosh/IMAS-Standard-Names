@@ -181,6 +181,9 @@ loci:
   optical_element:
     type: entity
     allowed_relations: [of]
+  reflector:
+    type: entity
+    allowed_relations: [of]
   passive_loop:
     type: entity
     allowed_relations: [of]

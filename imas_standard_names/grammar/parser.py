@@ -57,7 +57,7 @@ from imas_standard_names.grammar.ir import (
     QuantityOrCarrier,
     StandardNameIR,
 )
-from imas_standard_names.grammar.model_types import Object, Subject
+from imas_standard_names.grammar.model_types import Component, Object, Subject
 from imas_standard_names.grammar.render import compose
 
 __all__ = [
@@ -86,6 +86,7 @@ class Vocabularies:
     """
 
     axes: frozenset[str] = field(default_factory=frozenset)
+    component_axes: frozenset[str] = field(default_factory=frozenset)
     loci: Mapping[str, tuple[LocusType, frozenset[LocusRelation]]] = field(
         default_factory=dict
     )
@@ -112,6 +113,7 @@ class Vocabularies:
             | self.carriers
             | self.qualifiers
             | frozenset(self.axes)
+            | self.component_axes
             | frozenset(self.operators)
             | frozenset(self.loci)
         )
@@ -229,6 +231,7 @@ def load_default_vocabularies() -> Vocabularies:
 
     return Vocabularies(
         axes=frozenset(axes_reg.axes),
+        component_axes=frozenset(member.value for member in Component),
         loci=loci,
         operators=operators,
         bases=frozenset(bases_reg.bases),
@@ -761,10 +764,11 @@ def _match_base_with_qualifiers(
 
     # --- Priority 3: axis prefix → projection ---
     if _allow_projection:
+        projection_axes = v.axes | v.component_axes
         for split in range(len(parts) - 1, 0, -1):
             prefix = "_".join(parts[:split])
             rest = "_".join(parts[split:])
-            if prefix not in v.axes or not rest:
+            if prefix not in projection_axes or not rest:
                 continue
             try:
                 base, quals, inner_proj = _match_base_with_qualifiers(
@@ -779,6 +783,13 @@ def _match_base_with_qualifiers(
                 if base.kind is BaseKind.GEOMETRY
                 else ProjectionShape.COMPONENT
             )
+            allowed_axes = (
+                v.axes
+                if shape is ProjectionShape.COORDINATE
+                else (v.component_axes or v.axes)
+            )
+            if prefix not in allowed_axes:
+                continue
             return base, quals, AxisProjection(axis=prefix, shape=shape)
 
     # --- Priority 4: qualifier prefix ---

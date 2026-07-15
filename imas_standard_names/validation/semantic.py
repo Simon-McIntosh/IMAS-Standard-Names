@@ -38,8 +38,8 @@ ORIENTATION_BASES = {
 # severity: the catalog's legacy locus-less generics are gone.
 UNIT_VECTOR_BASES = {
     GeometricBase.UNIT_VECTOR.value,
-    GeometricBase.X1_UNIT_VECTOR.value,
-    GeometricBase.X2_UNIT_VECTOR.value,
+    GeometricBase.FIRST_LOCAL_TANGENTIAL_UNIT_VECTOR.value,
+    GeometricBase.SECOND_LOCAL_TANGENTIAL_UNIT_VECTOR.value,
     GeometricBase.DIRECTION_UNIT_VECTOR.value,
     GeometricBase.IMAGE_UP_UNIT_VECTOR.value,
     GeometricBase.MAJOR_AXIS_UNIT_VECTOR.value,

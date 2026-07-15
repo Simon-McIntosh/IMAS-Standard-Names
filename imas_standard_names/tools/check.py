@@ -31,7 +31,7 @@ class CheckTool(CatalogTool):
     # Vocabulary mapping for error reporting
     VOCABULARY_MAP = {
         "component": grammar_types.Component,
-        "coordinate": grammar_types.Component,  # Uses same vocabulary
+        "coordinate": grammar_types.Coordinate,
         "subject": grammar_types.Subject,
         "object": grammar_types.Object,
         "geometry": grammar_types.Position,
