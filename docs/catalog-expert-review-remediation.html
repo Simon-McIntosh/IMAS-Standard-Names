@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-standard-names">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="catalog-expert-review-remediation">
+  <meta name="plan-title" content="Catalog Expert Review Remediation">
+  <meta name="plan-summary" content="Classify and resolve expert findings across catalog data, grammar, rendering, and the generation pipeline">
+  <meta name="plan-status" content="draft">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort" content="XL">
+  <meta name="plan-tier" content="opus">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <title>Catalog Expert Review Remediation | imas-standard-names</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+  <h2 id="s1">§1 — Outcome and scope</h2>
+  <p>This plan converts F. Imbeaux’s 7–10 July 2026 review of catalog release candidates into a current-state remediation programme. It does not assume that release-candidate observations remain true: every item is first checked against the live <code>imas-cx</code> graph, then assigned to the repository that owns the durable fix. Planning and decision capture are in scope; implementation is deliberately deferred.</p>
+  <p>The desired outcome is a catalog whose names preserve the necessary physics and engineering context, whose definitions are concise and accurate, whose domains are coherent, and whose generator cannot recreate the reviewed defect classes. Renames and duplicate consolidation must preserve lineage and source-path relationships rather than merely deleting conflicting entries.</p>
+
+  <figure>
+    <svg viewBox="0 0 920 210" role="img" aria-labelledby="pipeline-title pipeline-desc" style="width:100%;max-width:920px;font-family:system-ui,sans-serif">
+      <title id="pipeline-title">Ownership and verification flow</title>
+      <desc id="pipeline-desc">Review findings are verified against the live graph, resolved in one of three repositories, and then checked end to end.</desc>
+      <defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#555"/></marker></defs>
+      <g fill="#fff" stroke="#555" stroke-width="1">
+        <rect x="15" y="55" width="180" height="92" rx="4"/><rect x="255" y="55" width="180" height="92" rx="4"/>
+        <rect x="495" y="15" width="190" height="55" rx="4"/><rect x="495" y="82" width="190" height="55" rx="4"/><rect x="495" y="149" width="190" height="55" rx="4"/>
+        <rect x="745" y="55" width="160" height="92" rx="4"/>
+      </g>
+      <g fill="#202124" font-size="14">
+        <text x="105" y="84" text-anchor="middle" font-weight="600">Expert review</text><text x="105" y="107" text-anchor="middle">historical claims</text><text x="105" y="128" text-anchor="middle">and examples</text>
+        <text x="345" y="84" text-anchor="middle" font-weight="600">imas-cx</text><text x="345" y="107" text-anchor="middle">live existence, metadata,</text><text x="345" y="128" text-anchor="middle">families and sources</text>
+        <text x="590" y="39" text-anchor="middle" font-weight="600">ISNC catalog</text><text x="590" y="59" text-anchor="middle">entries, lineage, domains</text>
+        <text x="590" y="106" text-anchor="middle" font-weight="600">ISN grammar and site</text><text x="590" y="126" text-anchor="middle">vocabulary, schema, rendering</text>
+        <text x="590" y="173" text-anchor="middle" font-weight="600">imas-codex pipeline</text><text x="590" y="193" text-anchor="middle">prompts, reviewers, regressions</text>
+        <text x="825" y="84" text-anchor="middle" font-weight="600">End-to-end gate</text><text x="825" y="107" text-anchor="middle">regenerate, render,</text><text x="825" y="128" text-anchor="middle">query and audit</text>
+      </g>
+      <g stroke="#555" stroke-width="1.2" marker-end="url(#arrow)"><line x1="195" y1="101" x2="250" y2="101"/><line x1="435" y1="101" x2="490" y2="43"/><line x1="435" y1="101" x2="490" y2="109"/><line x1="435" y1="101" x2="490" y2="176"/><line x1="685" y1="43" x2="740" y2="82"/><line x1="685" y1="109" x2="740" y2="101"/><line x1="685" y1="176" x2="740" y2="128"/></g>
+    </svg>
+    <figcaption>Each finding is verified before it is routed; durable remediation combines data correction with grammar, presentation, or generation safeguards where needed.</figcaption>
+  </figure>
+
+  <h2 id="s2">§2 — Condensed expert review</h2>
+  <ol>
+    <li><strong>Documentation discipline:</strong> definitions are strong, but additional prose is often verbose, method-specific, speculative, or tangential; examples include <code>thermal_plasma_energy</code> and <code>total_power_due_to_ion_cyclotron_heating</code>.</li>
+    <li><strong>Provenance presentation:</strong> DD source paths should link to DD documentation and were absent in one reviewed release candidate.</li>
+    <li><strong>Grammar semantics:</strong> loci such as LCFS and ITB are usable tokens but have no first-class definitions discoverable in the catalog.</li>
+    <li><strong>Context preservation:</strong> generalising a DD path can erase the owning diagnostic component or local coordinate meaning, as for the X-ray crystal reflector’s <code>x2_curvature</code>.</li>
+    <li><strong>Coordinate ambiguity:</strong> “radial” denotes both cylindrical major-radius direction and a flux-surface-normal or flux label.</li>
+    <li><strong>State semantics:</strong> DD ion state may describe charge, vibrational level, or electron configuration; generated names and definitions over-specialised it to charge state.</li>
+    <li><strong>Name precision:</strong> several names omit plasma, wave-absorption, population, enclosure, or integration semantics, including ICRH power, thermal-electron power, bare power density, stored energy, and first-wall volume.</li>
+    <li><strong>Duplicate concepts:</strong> deposited electron power, plasma energy, and plasma current appear in overlapping bare/total/toroidal forms.</li>
+    <li><strong>Coordinate completeness:</strong> plasma-control and camera objects lack consistent cylindrical coordinate triplets; locus definitions are only indirectly visible through quantity documentation.</li>
+    <li><strong>Physics correctness:</strong> the safety-factor sign text differs from the DD convention, and the minimum-q locus should be based on minimum <code>abs(q)</code> if that is the intended DD concept.</li>
+    <li><strong>Domain taxonomy:</strong> lower-hybrid antenna pressure, computational-workflow gyrocenter quantities, and the broad mechanical-diagnostics bucket appear misplaced or reveal weak domain definitions.</li>
+    <li><strong>Editorial simplicity:</strong> definitions such as flux-loop effective area use needlessly complicated polarity language where a short positive/non-negative constraint would suffice.</li>
+  </ol>
+
+  <h2 id="s3">§3 — Current-state labels and evidence</h2>
+  <p>Labels are operational: <strong>already fixed</strong> needs only a regression guard; <strong>partially fixed</strong> retains a live defect; <strong>confirmed current</strong> is reproducible now; <strong>needs physics decision</strong> cannot be changed safely without an expert choice; <strong>needs design decision</strong> spans the project boundary; and <strong>inventory gap</strong> requires source-path coverage analysis before proposing names.</p>
+  <table>
+    <thead><tr><th>#</th><th>Review item</th><th>Current evidence (15 July 2026)</th><th>Label</th><th>Address through</th><th>Proposed resolution and acceptance evidence</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>Verbose or tangential documentation</td><td>The reviewed diagnostic-specific paragraphs remain verbatim in both example entries. The generation prompt still requests measurement methods and typical values.</td><td>confirmed current</td><td>imas-codex + ISNC</td><td>Define a “definition-first, proportional evidence” style; prohibit unjustified diagnostic enumerations and tangents; edit affected entries; add prompt fixtures and a catalog audit for padding patterns. Expert spot-check passes.</td></tr>
+      <tr><td>2</td><td>DD source paths missing and not clickable</td><td>Live fetches again expose source nodes for several entries, so the release rendering loss is not present in the graph. Link behaviour is a site concern and is not established by MCP output.</td><td>partially fixed</td><td>ISN site + imas-codex graph export</td><td>Render every <code>dd:</code> source as an external, new-tab DD-documentation link; add export/render integration tests and a broken-link check. Confirm the deployed catalog, not just graph payloads.</td></tr>
+      <tr><td>3</td><td>Loci have no definitions</td><td><code>position</code> contains 62 closed tokens including <code>internal_transport_barrier</code> and <code>last_closed_flux_surface</code>; no vocabulary-definition surface was found.</td><td>confirmed current</td><td>ISN + site</td><td>Add typed vocabulary metadata (definition and optional aliases/references), expose it through grammar MCP/site UI, and link locus chips from entries. Validate every closed token has concise documentation.</td></tr>
+      <tr><td>4</td><td>Reflector context and X2-axis meaning lost</td><td><code>vertical_front_surface_radius_of_optical_element</code> still maps to <code>spectrometer_x_ray_crystal/channel/reflector/x2_curvature</code> and asserts X2 is vertical.</td><td>needs design decision</td><td>ISN grammar + imas-codex + ISNC</td><td>Choose between a reflector/object token, a local-axis vocabulary, or structured source-context metadata. Re-map only after round-trip and programmatic-discrimination tests show no context loss.</td></tr>
+      <tr><td>5</td><td>Two meanings of radial</td><td>Live results mix major-radius components (<code>radial_wave_vector_of_beam_tracing_beam</code>) and flux-surface-normal transport (<code>radial_neutral_energy_flux</code>) under the same token.</td><td>needs design decision</td><td>ISN grammar + ISNC + pipeline</td><td>Adopt explicit cylindrical-major-radius versus flux-surface-normal semantics, define migration rules, parse/compose round trips, and a linter that rejects context-free radial use where the frame is indeterminate.</td></tr>
+      <tr><td>6</td><td>Ion state forced to charge state</td><td><code>fast_ion_state_power</code> is now superseded, indicating progress; related state names remain and require inventory-wide semantic checks.</td><td>partially fixed</td><td>imas-codex + ISNC; ISN if vocabulary changes</td><td>Trace DD identifier schemas for every <code>ion_state</code> source; split charge-state-specific and generic internal-state concepts; preserve supersession lineage; add identifier-aware generation context and tests.</td></tr>
+      <tr><td>7</td><td>ICRH absorbed power omits plasma</td><td>Name and plasma-centric wording remain unchanged.</td><td>needs physics decision</td><td>ISNC + ISN/pipeline guard</td><td>Decide whether the quantity is launched, coupled, or plasma-absorbed power. Rename only if the source definition supports absorption; otherwise correct documentation. Add a power-boundary checklist.</td></tr>
+      <tr><td>8</td><td>Thermal-electron power omits wave mechanism</td><td>Name remains broad while definition says coherent-wave absorption.</td><td>needs physics decision</td><td>ISNC + imas-codex</td><td>Confirm source scope, then either rename with wave/absorption semantics or generalise the definition. Test sibling consistency across electron, ion, fast, and thermal power channels.</td></tr>
+      <tr><td>9</td><td>Bare <code>power_density</code> versus <code>electron_power_density</code></td><td>Both remain accepted; bare entry is now described as a generic channel parent, so the historical electron-only claim is partly corrected.</td><td>partially fixed</td><td>ISNC</td><td>Verify graph/source separation. Keep the bare name only as a true parent with distinct provenance, or merge/supersede it if it shares an electron DD source. Add duplicate-semantic review evidence.</td></tr>
+      <tr><td>10</td><td><code>thermal_electron_stored_energy</code> naming consistency</td><td>Name remains and explicitly maps to summary stored-energy data; <code>thermal_plasma_energy</code> lacks “stored”.</td><td>needs physics decision</td><td>ISNC + ISN vocabulary if renamed</td><td>Set a family-wide rule for “energy” versus “stored energy”; migrate the minority form with lineage and ensure common <code>physical_base</code> grouping.</td></tr>
+      <tr><td>11</td><td><code>volume_of_first_wall</code> means enclosed volume</td><td>Description now explicitly says “volume enclosed by the first wall,” but the ambiguous name remains.</td><td>partially fixed</td><td>ISNC + ISN grammar</td><td>Prefer an enclosure-bearing canonical form if grammar supports it; otherwise document a consistent geometric-base convention. Preserve predecessor/successor links and add geometry-family tests.</td></tr>
+      <tr><td>12</td><td>Deposited-power duplicates</td><td><code>electron_deposited_power</code>, <code>electron_power</code>, and <code>total_electron_deposited_power</code> all remain. The first entry’s prose itself says the first and third both represent a specified source or sink.</td><td>confirmed current</td><td>ISNC + imas-codex duplicate gate</td><td>Build a source-path/definition comparison, choose one canonical meaning per scope, merge or specialise entries, and require lineage plus zero orphaned references.</td></tr>
+      <tr><td>13</td><td>Plasma-energy and plasma-current duplicates</td><td>All four energy names and both current names remain accepted; <code>plasma_current</code> has four authoritative <code>ip</code> source paths.</td><td>confirmed current</td><td>ISNC + imas-codex duplicate gate</td><td>Compare sources, units, grammar, and definitions; treat “total” or “toroidal” as redundant only where no distinct aggregation/frame exists. Consolidate with explicit lineage and reference rewrites.</td></tr>
+      <tr><td>14</td><td>Missing plasma-control and camera coordinates</td><td>The gap-reference radial coordinate now exists, while camera radial and toroidal names are still absent. Live plasma-control classification has only four entries, including unrelated-looking <code>atomic_mass</code>.</td><td>partially fixed / inventory gap</td><td>imas-codex discovery + ISNC</td><td>Derive an object-by-coordinate coverage matrix from live DD paths; propose only source-backed missing names; expose the locus definition; add completeness checks for coordinate families.</td></tr>
+      <tr><td>15</td><td>Safety-factor sign convention</td><td>The disputed “both directed in increasing toroidal angle” sentence remains.</td><td>confirmed current</td><td>ISNC + imas-codex convention prompt</td><td>Align to the authoritative DD/COCOS physical relation after expert confirmation; add a canonical convention fixture shared across the q family and an exact regression test.</td></tr>
+      <tr><td>16</td><td>Minimum q versus minimum absolute q</td><td>Current entry still uses <code>arg min q</code>, not <code>arg min abs(q)</code>.</td><td>needs physics decision</td><td>ISNC; upstream DD if necessary</td><td>Confirm intended DD semantics and sign domain. If upstream is wrong or ambiguous, file and track a DD issue; update all minimum-q locus entries together after resolution.</td></tr>
+      <tr><td>17</td><td>Domain taxonomy</td><td>Computational workflow still contains exactly three gyrocenter-frequency names; mechanical diagnostics contains 61 heterogeneous entries. Lower-hybrid antenna pressure exists but its live fetch did not expose domain.</td><td>confirmed current / needs design decision</td><td>ISN domain vocabulary + ISNC + pipeline</td><td>Write inclusion/exclusion rules, remap sources and entries, and add domain-family coherence checks. Decide whether domain follows owning subsystem, measurement method, or measured physics.</td></tr>
+      <tr><td>18</td><td>Flux-loop area wording</td><td>“Non-negative effective sensing area” remains, with a long polarity explanation.</td><td>confirmed current</td><td>ISNC + editorial prompt</td><td>Shorten the primary definition while retaining the mathematically correct non-negative constraint; ensure the prompt treats concise constraint statements as preferable to explanatory padding.</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="s4">§4 — Implementation programme</h2>
+  <h3>4.1 Freeze evidence and define policy</h3>
+  <p>Create a machine-readable review ledger keyed by canonical name and finding class. Capture live existence, stage, source paths, grammar decomposition, domain, related names, and the reviewer claim. Lock the decisions below before any rename. Done when each of the 18 rows has an owner, current-state snapshot, decision state, and measurable acceptance test.</p>
+  <h3>4.2 Land low-risk editorial and presentation fixes</h3>
+  <p>Repair DD source hyperlinks, simplify flux-loop wording, and remove unsupported or tangential documentation from confirmed examples. Update the documentation prompt and exemplars at the same time so regeneration does not reverse curated edits. Done when renderer integration tests pass, generated prose meets the proportionality rubric, and the reviewed examples pass expert re-read.</p>
+  <h3>4.3 Resolve semantic duplicates and naming families</h3>
+  <p>For deposited power, plasma energy/current, stored energy, wave power, and enclosed volume, compare source paths and quantity scopes before selecting canonical names. Use predecessor/successor/refined-from relationships for every consolidation. Done when no two accepted entries claim the same source and semantics, all inbound links resolve, and family summaries retain consistent physical bases.</p>
+  <h3>4.4 Clarify grammar-level context</h3>
+  <p>Add vocabulary definitions for loci and settle the radial-frame and reflector/local-axis designs. Any vocabulary change must update YAML and generated enums together, pass full catalog parse/compose round trips, preserve qualifier ordering, and keep related quantities grouped. Done when every relevant token has discoverable semantics and ambiguous source paths can be distinguished programmatically.</p>
+  <h3>4.5 Reclassify domains and close inventory gaps</h3>
+  <p>Define domain assignment policy, audit the three challenged domains, and generate DD-backed coordinate coverage matrices for plasma-control and diagnostic objects. Missing names enter the normal imas-codex proposal/review pipeline; they are not authored directly in ISN. Done when every move has a stated rule, coordinate gaps are either filled or explicitly non-applicable, and cross-domain searches return coherent families.</p>
+  <h3>4.6 End-to-end release gate</h3>
+  <p>Regenerate documentation in a controlled sample, validate the catalog, build the site, query the live graph, and compare the review ledger. Add regression checks for source-link presence, ambiguous radial terms, generic-state over-specialisation, semantic duplicates, domain outliers, and verbosity. Done when every ledger item is fixed, intentionally deferred with a named decision, or documented as already fixed with a passing guard.</p>
+
+  <h2 id="s5">§5 — Verification matrix</h2>
+  <table>
+    <thead><tr><th>Layer</th><th>Required checks</th><th>Failure prevented</th></tr></thead>
+    <tbody>
+      <tr><td>Live graph</td><td><code>check_standard_names</code>, exact fetch, family summary, related names, domain inventories, source-path presence</td><td>Acting on stale release-candidate state; hidden duplicate or lineage damage</td></tr>
+      <tr><td>ISN</td><td>Parser/composer round trip; grouping invariant; grammar codegen drift; schema validation; catalog renderer tests</td><td>Ambiguous vocabulary, broken public API, missing source UI</td></tr>
+      <tr><td>ISNC</td><td>Catalog validation; link integrity; unique canonical semantics; physics-domain validity; description length and provenance checks</td><td>Bad data, orphaned links, duplicate accepted concepts</td></tr>
+      <tr><td>imas-codex</td><td>Prompt fixture evaluation; identifier-aware state tests; sibling-family consistency; duplicate/domain review gates; deterministic regeneration sample</td><td>Reintroduction of verbosity, context loss, charge-state assumptions, bad domains</td></tr>
+      <tr><td>Expert acceptance</td><td>Focused review of radial semantics, q conventions, power boundaries, and domain policy</td><td>Automating an unresolved physics choice</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="s6">§6 — Risks and sequencing constraints</h2>
+  <ul>
+    <li>Do not treat similar wording as proof of duplication; source scope, aggregation, integration domain, and physical mechanism must be compared first.</li>
+    <li>Do not introduce catalog names directly from this repository. ISN defines grammar; imas-codex proposes names; ISNC stores approved catalog entries.</li>
+    <li>Do not resolve “radial” with a bulk string replacement. Cylindrical components and flux-surface-normal transport require different migrations.</li>
+    <li>Do not rewrite documentation without changing the generator policy and regression corpus, or the next regeneration can recreate the defect.</li>
+    <li>Changes to DD-derived semantics may need upstream DD resolution; quarantine rather than rationalise an authoritative inconsistency.</li>
+    <li>Release-site verification must use the rendered deployment artifact in addition to the graph, because source hyperlink failures are presentation/export defects.</li>
+  </ul>
+
+  <section data-reckon="decisions" id="decisions" class="r-decisions">
+    <h2><span class="sec">§</span> Decisions</h2>
+    <div class="r-dec" data-key="radial-semantics" data-choice="" data-by="" data-when="">
+      <p class="r-dec-q">How should names distinguish cylindrical major-radius components from flux-surface-normal or flux-label quantities?</p>
+      <p class="r-dec-opts"><button class="r-opt" data-value="explicit-frames">Introduce explicit frame-specific tokens</button><button class="r-opt" data-value="contextual-radial">Retain radial with mandatory contextual segments</button></p>
+      <p class="r-dec-rat">Recommendation: explicit frame-specific semantics, with migration rules derived from source coordinates.</p>
+    </div>
+    <div class="r-dec" data-key="context-model" data-choice="" data-by="" data-when="">
+      <p class="r-dec-q">Must component identity such as reflector be encoded in the standard name, or may structured source-context metadata carry it?</p>
+      <p class="r-dec-opts"><button class="r-opt" data-value="programmatic-name">Encode identity in grammar/name</button><button class="r-opt" data-value="structured-context">Use required structured context metadata</button><button class="r-opt" data-value="hybrid">Use a hybrid based on semantic necessity</button></p>
+      <p class="r-dec-rat">Recommendation: hybrid—encode distinctions that change quantity identity; retain diagnostic-instance context as structured provenance.</p>
+    </div>
+    <div class="r-dec" data-key="domain-principle" data-choice="" data-by="" data-when="">
+      <p class="r-dec-q">What is the primary rule for physics-domain assignment when source subsystem, diagnostic method, and measured physics disagree?</p>
+      <p class="r-dec-opts"><button class="r-opt" data-value="measured-physics">Measured physical quantity</button><button class="r-opt" data-value="source-subsystem">Owning source subsystem</button><button class="r-opt" data-value="diagnostic-method">Measurement method</button></p>
+      <p class="r-dec-rat">Recommendation: measured physics as primary domain, with source subsystem and diagnostic method retained as secondary metadata.</p>
+    </div>
+    <div class="r-dec" data-key="q-minimum" data-choice="" data-by="" data-when="">
+      <p class="r-dec-q">Should the minimum-safety-factor locus minimize signed <code>q</code> or <code>abs(q)</code>, and should resolution wait for an upstream DD clarification?</p>
+      <p class="r-dec-opts"><button class="r-opt" data-value="absolute-q">Use minimum abs(q)</button><button class="r-opt" data-value="signed-q">Retain minimum signed q</button><button class="r-opt" data-value="upstream-first">Escalate upstream before changing</button></p>
+      <p class="r-dec-rat"></p>
+    </div>
+    <div class="r-dec" data-key="rename-policy" data-choice="" data-by="" data-when="">
+      <p class="r-dec-q">For accepted ambiguous names, should this programme favour immediate canonical renames or documentation-first correction followed by staged lineage migration?</p>
+      <p class="r-dec-opts"><button class="r-opt" data-value="staged-lineage">Documentation first, then staged lineage migration</button><button class="r-opt" data-value="immediate-rename">Immediate canonical rename</button></p>
+      <p class="r-dec-rat">Recommendation: staged lineage migration except where the current name denotes the wrong quantity.</p>
+    </div>
+  </section>
+
+  <section data-reckon="followups" id="followups" class="r-followups">
+    <h2><span class="sec">§</span> Followups</h2>
+    <!-- Implementation followups will be added only after the open physics and design decisions are resolved. -->
+  </section>
+</main>
+</body>
+</html>
