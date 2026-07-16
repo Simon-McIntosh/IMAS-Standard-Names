@@ -16,9 +16,9 @@
   <title>Catalog Expert Review Remediation | imas-standard-names</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-07-15">
-<meta name="plan-version" content="22">
-<meta name="plan-impl" content="0.65">
+<meta name="plan-modified" content="2026-07-16">
+<meta name="plan-version" content="23">
+<meta name="plan-impl" content="0.75">
 </head>
 <body>
 <main class="plan-doc">
@@ -58,6 +58,17 @@
       <strong>Decisions locked:</strong> no-cocos-in-descriptions, domain-move-mechanism, gyrocenter-domain=transport.
       <strong>Manifests:</strong> <code>docs/archive/catalog-expert-review-manifests/</code> (naming-duplicates, coordinate-domain, q-conventions, legacy-dd-provenance).
       <strong>Blockers surfaced:</strong> (1) batch review needs <code>--skip-clear-gate</code> authorization (classifier-blocked); (2) export hard-blocked — 8741 DD sources unpinned, backfill queued (<code>f-legacy-dd-backfill</code>). Domain moves, row-10 compaction, §7.3 backfill and release queued as followups.
+    </p>
+  </section>
+
+  <section id="landed-2026-07-16" class="section-landed">
+    <header><span class="badge badge-shipped">✓ recovery pass 2026-07-16</span><h3>Recovery session (post-review remediation)</h3></header>
+    <p class="landed-summary">
+      <strong>Review verdict:</strong> five-way adversarial audit of all commits since plan authoring — nothing reverted; defects fixed.
+      <strong>Committed:</strong> ISN <code>dabbbae</code> (COCOS guard reachability/regex/error severity), <code>8ea0c2e</code> (SPA enhanced-context crash, chip-filter regression, exact-match attribution); imas-codex <code>2b67a2b5</code> (override scoping + provisional gyrocenter + integration test), <code>d5188d94</code> (ISN pin → <code>8ea0c2e</code>, restoring regen==targeted-edit composability), <code>b2dd899c</code>/<code>ddd13fe0</code> (prompt/test exception-count drift, label scrub).
+      <strong>Live-graph (sn edit/sn run only):</strong> x1/x2 → first/second_local_tangential migration — 19/22 successors accepted at 0.96+ ($1.77), predecessors superseded with lineage; 3 exhausted at 0.80–0.84 (quorum variance) await lead accept. q/height docs edits converging through scoped curative rotations; <code>poloidal_magnetic_flux_at_minimum_safety_factor</code> accepted 0.95 (one typical-values residue queued for re-edit).
+      <strong>Key discoveries:</strong> clear-gate no longer fires (hash recorded 2026-07-15T20:06); staged docs edits are unclaimable via <code>--edits</code> (score-gate bug — fix drafted, awaits sign-off); wave-power renames were already applied, not staged.
+      <strong>Blocked on lead (6):</strong> see followup <code>f-user-authorizations-20260716</code> — RC cut, --override-edits editorial batch, 3 exhausted successors, provenance-cleanup/row-10, §7.3 backfill, gyrocenter target.
     </p>
   </section>
 
@@ -593,6 +604,27 @@ Steps
 
 Done-when: editorial edits accepted; zero COCOS mentions in accepted descriptions; guard test green; followup resolved.</pre>
     </article>
+<article class="r-fu" data-id="f-user-authorizations-20260716" data-status="open" data-tier="opus" data-written-by="recovery-session" data-written-at="2026-07-16" data-recommends-skill="/reckon-ship catalog-expert-review-remediation" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Lead authorizations needed to finish the recovery (6 items)</h4>
+    <div class="r-fu-body">Everything classifier-gated in one batch: (1) cut ISN v0.8.0rc54 (preflight green); (2) run the 5 editorial sn edit --docs with --override-edits (rows 7/11/18 + poloidal typical-values residue; bodies in scratchpad/qdocs/*.clean); (3) accept-or-decide the 3 exhausted local-tangential successors (quorum variance at 0.80-0.84); (4) sn provenance-cleanup dry-run + row-10 compaction; (5) §7.3 DD backfill mechanism + sign-off (export hard-gate; sample-validated); (6) confirm gyrocenter target (transport recommended). Optional: approve the 3-line edits_only score-gate exemption so future sn run --edits can claim staged docs edits.</div>
+    <pre class="r-fu-prompt">Project: imas-standard-names
+Plan: catalog-expert-review-remediation
+Section: §7.5-7.6 (authorization batch)
+Tier: opus
+
+Context
+  Recovery session 2026-07-16 landed code fixes, the pin bump, 19/22 x1/x2 renames and the q-docs rotations. Six actions remain that the auto-mode classifier reserves for the lead.
+
+Steps (each unblocks the next stage of §7.5-7.6)
+  1. ISN RC: cd ~/Code/imas-standard-names &amp;&amp; uv run standard-names release -m &#x27;Coordinate frame semantics, local tangential carriers, standard terms, validation hardening&#x27;  (then optionally re-pin imas-codex to the rc54 tag)
+  2. Editorial docs: rerun the five sn edit --docs commands with --override-edits (bodies in scratchpad/qdocs/: total_power_due_to_ion_cyclotron_heating, power_due_to_ion_cyclotron_heating, volume_of_first_wall, area_of_flux_loop, poloidal_magnetic_flux_at_minimum_safety_factor)
+  3. Triage 3 exhausted tangential successors (aperture x2, bragg x2): direct accept or threshold/quorum decision
+  4. uv run imas-codex sn provenance-cleanup (read-only manifest), review, then --apply for row-10 tombstone; afterwards rename thermal_electron_stored_energy -&gt; thermal_electron_energy via sn edit
+  5. §7.3 backfill: confirm mechanism (validated one-off vs supported migration command) and sign off the 8739-source apply; export stays hard-blocked until invariant zero
+  6. Lock gyrocenter-domain (transport recommended; override JSON marked provisional)
+
+Done-when: all six executed or explicitly deferred; export + ISNC RC can proceed; followup resolved with outcomes.</pre>
+    </article>
 </section>
 <section data-reckon="research" id="research" class="r-research-list">
 <h2><span class="sec">§</span> Research</h2>
@@ -618,6 +650,14 @@ Done-when: editorial edits accepted; zero COCOS mentions in accepted description
     <span class="r-research-title">3731/8742 DD sources also lack source_id — export needs it as dd_path</span></div>
 <div class="r-research" data-id="r-legacy-dd-migration-validated" data-type="environment-constraint" data-source="The exact backfill was proven on a 3-source sample: after applying it, fetch_public_semantic_sources projects cleanly (dd_version=4.1.0, official URL, leaf doc present) where it previously could not. The classifier ALLOWED the 3-node sample but BLOCKED the full 8742-node apply as a mass mutation of published state needing explicit named sign-off (it also, correctly, notes the producer refuses post-hoc backfill by design). 3 sources are now correctly pinned; 8739 remain — export stays blocked until the full apply (idempotent; WHERE skips already-pinned). VALIDATED migration to run after sign-off (user via ! or a Bash permission rule): a single Cypher over unpinned DD sources — MATCH (v:DDVersion{is_current:true}); MATCH (s:StandardNameSource{source_type:&#x27;dd&#x27;}) WHERE coalesce(s.dd_snapshot_pinned,false)=false; MATCH (s)-[:FROM_DD_PATH]-&gt;(node:IMASNode); OPTIONAL parent/unit/coordinate; SET s.dd_version=v.id, s.source_id=coalesce(s.source_id,node.id), s.dd_path=node.id, s.dd_documentation=node.documentation, s.dd_parent_path=parent.id, s.dd_parent_documentation=parent.documentation, s.dd_data_type=node.data_type, s.dd_unit=coalesce(node.unit,unit.id), s.dd_coordinates=coords, s.dd_lifecycle_status=node.lifecycle_status, s.dd_lifecycle_version=node.lifecycle_version, s.enhanced_description=coalesce(s.enhanced_description,node.description), s.enhancement_kind=coalesce(s.enhancement_kind,node.enrichment_source), s.dd_snapshot_pinned=true. Then verify: 0 unpinned + spot-check fetch_public_semantic_sources." data-added-by="reckon-ship" data-when="2026-07-15">
     <span class="r-research-title">§7.3 migration VALIDATED on sample; full apply needs explicit user sign-off</span></div>
+<div class="r-research" data-id="r-recovery-fleet-findings" data-type="code-fix" data-source="Five-way adversarial review of every commit since plan authoring found no revert-worthy work but real defects, all fixed: ISN dabbbae (COCOS guard unreachable for documentation-only entries, missed COCOS11 forms, warning-only -&gt; error) + 8ea0c2e (enhanced_context dict crash in SPA source panel, chip-click filter regression, Grammar-tab suffix-match attribution); imas-codex 2b67a2b5 (lh override narrowed to pressure_tank, gyrocenter target marked provisional, _classify_batch integration test), d5188d94 (ISN pin bumped 0d741da-&gt;8ea0c2e restoring regen==targeted-edit composability of first/second_local_tangential and flux_surface_normal; stale x1/x2 carrier tests flipped), b2dd899c+ddd13fe0 (three-vs-two inline-unit exception drift between prompt and test; plan-label test filename scrubbed). Non-issues: clusters.json &#x27;drift&#x27; is a gitignored generated cache already correct; full-catalog parse sweep found only the 22 x1/x2 names + 1 pre-existing draft (flux_surface_averaged_magnetic_shear) broken." data-added-by="recovery-session" data-when="2026-07-16">
+    <span class="r-research-title">Recovery review pass: all suspect commits sound, defects fixed and pushed</span></div>
+<div class="r-research" data-id="r-x1x2-migration" data-type="live-graph-evidence" data-source="ISN main&#x27;s x1/x2 carrier removal orphaned exactly 22 catalog names (all x[12]_coordinate_of_&lt;object&gt;; graph-side inventory matches; no unit-vector/width forms exist). Validated rename manifest scratchpad/x1x2-rename-manifest.tsv (all targets parse+round-trip, zero collisions; DD x1/x2 orientation == locked e1/e2 convention). Executed via sn edit --rename --scope self (--stage-only bulk) + sn run --only review --edits --names-only: 19 successors ACCEPTED at 0.96+ (cost $1.77), predecessors superseded with lineage. 3 EXHAUSTED at 0.80-0.84 on quorum variance (first/second_local_tangential_coordinate_of_aperture, second_..._of_bragg_crystal) — structurally identical to the 19 accepted; hint re-steer did not reclaim exhausted names; need direct accept or threshold decision. Their predecessors are already superseded, so export before triage would drop these three quantities." data-added-by="recovery-session" data-when="2026-07-16">
+    <span class="r-research-title">x1/x2 -&gt; local-tangential migration: 19/22 accepted, 3 exhausted await direct accept</span></div>
+<div class="r-research" data-id="r-edits-claim-gate-bug" data-type="code-fix" data-source="claim_review_docs_batch/claim_generate_docs_batch/claim_refine_docs_batch keep the name-form-vetted score gate under --edits, but catalog-imported names (origin=catalog_edit) carry no reviewer_score_name, so staged docs edits on accepted names are UNCLAIMABLE by sn run --edits (the wedged 2026-07-16 run claimed 0 of 7 eligible docs edits). The curative exemption exists for scope_run_id only. Three-line fix (extend to scope_run_id OR edits_only) was drafted and reverted pending explicit lead sign-off (classifier flagged it as gate weakening). WORKAROUND used instead: per-edit sn run --docs-only --scope-run-id &lt;sn-edit run stamp&gt; rotations (gate drops by design under scope). Also confirmed: the pipeline clear-gate no longer fires (yesterday&#x27;s 20:06 SNRuns recorded the post-9b500158 hash), so --skip-clear-gate is NOT needed for review passes anymore." data-added-by="recovery-session" data-when="2026-07-16">
+    <span class="r-research-title">--edits docs claims permanently gated: score-gate lacks edits_only exemption (fix awaits sign-off)</span></div>
+<div class="r-research" data-id="r-qdocs-rotation-state" data-type="live-graph-evidence" data-source="The 7 staged docs edits (6 q-family + height_of_optical_element) are landing through scoped curative rotations. poloidal_magnetic_flux_at_minimum_safety_factor ACCEPTED at 0.95 but its accepted text still contains a &#x27;Typical magnitudes scale...&#x27; paragraph (review scores do not hard-fail typical-values; needs a follow-up sn edit --docs, which requires --override-edits since origin=catalog_edit). safety_factor/pedestal_top rewritten by refine (banned prose stripped) pending re-review; remainder mid-rotation. height_of_optical_element staged text also had DD X1/X2 frame wording (contradicting the locked context-model) — cleaned descriptive-frame body prepared in scratchpad/qdocs/. Wave-power renames from yesterday were found already APPLIED accepted (not staged as the f-complete-staged-review body says); residue: fast_ion_charge_state_absorbed_wave_power hint/id mismatch with no change record, per_toroidal_mode_wave_absorbed_power stranded at reviewed with no successor, stuck SNRun cf44b10a, ~35 open edits on already-superseded predecessors never closed." data-added-by="recovery-session" data-when="2026-07-16">
+    <span class="r-research-title">q/height docs edits: rotations converging; one accepted doc still carries typical-values</span></div>
 </section>
 </main>
 </body>
