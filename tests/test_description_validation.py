@@ -107,6 +107,28 @@ class TestCocosMention:
         issues = validate_description(test_entry)
         assert not any(issue["pattern"] == "cocos" for issue in issues)
 
+    def test_cocos_in_documentation_flagged_when_description_empty(self):
+        """A documentation-only entry (no description) is still checked."""
+        entry = {"description": "", "documentation": "Sign convention (COCOS=11)."}
+        issues = validate_description(entry)
+        assert any(
+            issue["pattern"] == "cocos" and issue["field"] == "documentation"
+            for issue in issues
+        )
+
+    def test_cocos_without_separator_flagged(self, test_entry):
+        """A COCOS number with no separator (COCOS11, cocos17) is flagged."""
+        test_entry["description"] = "Poloidal flux in the COCOS11 convention."
+        issues = validate_description(test_entry)
+        assert any(issue["pattern"] == "cocos" for issue in issues)
+
+    def test_cocos_severity_is_error(self, test_entry):
+        """The COCOS rule is a hard rule: the issue is an error, not a warning."""
+        test_entry["documentation"] = "Sign convention (COCOS=11)."
+        issues = validate_description(test_entry)
+        cocos = [issue for issue in issues if issue["pattern"] == "cocos"]
+        assert cocos and all(issue["severity"] == "error" for issue in cocos)
+
     def test_greek_word_nudges_info(self, test_entry):
         """A spelled-out Greek letter word gets an info nudge toward the symbol."""
         test_entry["description"] = "Toroidal angle phi in the (R, phi, Z) frame."

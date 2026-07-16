@@ -36,7 +36,11 @@ _NOTATION_SUGGESTION = (
 # positive when the toroidal field and plasma current are parallel"). The COCOS
 # integer belongs only in structured metadata, not in the description or
 # documentation prose.
-_COCOS_MENTION = re.compile(r"\bcocos\b", re.IGNORECASE)
+# Match the COCOS token whether or not a number is attached directly
+# (``COCOS``, ``COCOS11``, ``cocos17``) as well as the separated forms
+# (``COCOS 11``, ``COCOS-17``, ``COCOS=11``) where the trailing ``\d*`` matches
+# nothing and the word boundary falls before the separator.
+_COCOS_MENTION = re.compile(r"\bcocos\d*\b", re.IGNORECASE)
 _COCOS_SUGGESTION = (
     "Do not name a COCOS number in prose; state the sign and coordinate "
     "conventions explicitly in physical terms. The COCOS integer belongs in "
@@ -67,8 +71,10 @@ def validate_description(entry: dict[str, Any]) -> list[dict[str, Any]]:
     raw_description = entry.get("description", "")
     description = raw_description.lower()
 
-    if not description:
-        return issues  # Empty description is valid
+    # An empty description is valid; the description-specific checks below are
+    # no-ops on empty text. The COCOS and unit-restatement checks near the end
+    # inspect the documentation field too, so they must run even when the
+    # description is absent (documentation-only entries).
 
     # General structural (not semantic) patterns
     structural_patterns = [
@@ -155,7 +161,7 @@ def validate_description(entry: dict[str, Any]) -> list[dict[str, Any]]:
         if _COCOS_MENTION.search(text):
             issues.append(
                 {
-                    "severity": "warning",
+                    "severity": "error",
                     "field": field,
                     "message": f"{field.capitalize()} names a COCOS convention",
                     "suggestion": _COCOS_SUGGESTION,

@@ -154,11 +154,17 @@ class ValidateCatalogTool(CatalogTool):
                 ref_issues = self._validate_references(name, entry)
                 issues.extend(ref_issues)
 
-            # Description validation
+            # Description validation. Error-severity findings (e.g. a COCOS
+            # number named in prose — a hard rule) count as validation
+            # failures; the softer info/warning nudges only surface when
+            # warnings are requested.
             if "descriptions" in enabled_checks:
-                desc_warnings = self._validate_description(name, entry)
-                if include_warnings:
-                    warnings.extend(desc_warnings)
+                desc_results = self._validate_description(name, entry)
+                for result in desc_results:
+                    if result.get("severity") == "error":
+                        issues.append(result)
+                    elif include_warnings:
+                        warnings.append(result)
 
             # Documentation validation
             if "documentation" in enabled_checks:
@@ -587,11 +593,13 @@ class ValidateCatalogTool(CatalogTool):
         return issues
 
     def _validate_description(self, name: str, entry: Any) -> list[dict[str, Any]]:
-        """Validate description for structural metadata leakage."""
-        warnings = []
+        """Validate description for structural metadata leakage.
 
-        if not hasattr(entry, "description") or not entry.description:
-            return warnings
+        Runs even when the entry has no description: the underlying checks also
+        inspect the ``documentation`` field (COCOS conventions, inline unit
+        restatement), so a documentation-only entry must still be examined.
+        """
+        warnings = []
 
         # Serialize entry to dict for validation function
         entry_dict = entry.model_dump() if hasattr(entry, "model_dump") else {}
