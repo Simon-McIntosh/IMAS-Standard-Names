@@ -17,8 +17,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-16">
-<meta name="plan-version" content="24">
-<meta name="plan-impl" content="0.75">
+<meta name="plan-version" content="25">
+<meta name="plan-impl" content="0.9">
 </head>
 <body>
 <main class="plan-doc">
@@ -330,7 +330,7 @@
 
   <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-radial-semantics" data-status="open" data-tier="opus" data-written-by="Codex" data-written-at="2026-07-15" data-recommends-skill="/reckon-ship catalog-expert-review-remediation §4.4" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-radial-semantics" data-status="resolved" data-tier="opus" data-written-by="Codex" data-written-at="2026-07-15" data-recommends-skill="/reckon-ship catalog-expert-review-remediation §4.4" data-resolved-at="2026-07-16T14:22:13+00:00" data-resolved-by="recovery-session">
     <h4 class="r-fu-title">Implement explicit radial and flux-surface-normal semantics</h4>
     <div class="r-fu-body">The radial-frame decision is locked. Implement the grammar, catalog migration, and pipeline regression slice without broad string replacement, while preserving source-backed meaning and lineage.</div>
     <pre class="r-fu-prompt">Project: imas-standard-names
@@ -351,8 +351,9 @@ Done-when
   1. Vocabulary definitions and validation encode radial, perpendicular, and flux_surface_normal unambiguously; affected source-backed catalog names are migrated with lineage and pipeline guards
   2. full relevant parse/compose, grouping, catalog, prompt, and renderer tests are green in every changed repository
   3. followup written into plan + this followup marked resolved</pre>
+    <p class="r-fu-outcome">Grammar (ISN ff23d3f/a6ceee1) and pipeline guards (imas-codex 0eb23bf3/0c5bfa94) reviewed sound and consistent with the locked decision; full-catalog parse sweep against ISN main found zero radial-family breakage and no source-backed radial names requiring migration (only the x1/x2 set, handled separately). Definitions verified: radial=cylindrical R, flux_surface_normal signed toward increasing flux label, perpendicular magnetic-field-relative.</p>
     </article>
-<article class="r-fu" data-id="f-local-axis-semantics" data-status="open" data-tier="opus" data-written-by="Codex" data-written-at="2026-07-15" data-recommends-skill="/reckon-ship catalog-expert-review-remediation §4.4" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-local-axis-semantics" data-status="resolved" data-tier="opus" data-written-by="Codex" data-written-at="2026-07-15" data-recommends-skill="/reckon-ship catalog-expert-review-remediation §4.4" data-resolved-at="2026-07-16T14:22:13+00:00" data-resolved-by="recovery-session">
     <h4 class="r-fu-title">Replace DD-shaped local-axis labels with descriptive semantics</h4>
     <div class="r-fu-body">The context-model decision is locked. Replace registered X1/X2 carriers with descriptive local tangent directions, correct the reflector-curvature family, and add generation/review safeguards so reruns cannot restore DD-shaped or verticalised names.</div>
     <pre class="r-fu-prompt">Project: imas-standard-names
@@ -373,8 +374,9 @@ Done-when
   1. ISN vocabulary, generated types, parser/composer, definitions, and tests contain no registered x1/x2 geometry carriers and support descriptive local-tangent forms
   2. affected catalog/prompt inventory is audited; writable changes are tested and committed, and read-only residual work is recorded precisely
   3. followup outcome is written into the plan; resolve only if catalog and pipeline safeguards also land</pre>
+    <p class="r-fu-outcome">ISN slice landed 1eaf14e (reviewed sound); pipeline safeguards in 0eb23bf3/0c5bfa94/9b500158 (reviewed; prompt+review criteria mandate descriptive forms). Catalog migration executed: 19/22 x1/x2 names renamed to first/second_local_tangential_coordinate_of_* accepted 0.96+ with lineage; 3 successors (aperture x2, bragg x2-side) EXHAUSTED at 0.80-0.84 quorum variance — predecessors already superseded, so these three quantities drop from export until the lead direct-accepts them (no supported pool reclaims an exhausted name). height_of_optical_element doc rewritten to descriptive frame wording (accepted 0.91).</p>
     </article>
-<article class="r-fu" data-id="f-release-coordinate-semantics" data-status="open" data-tier="opus" data-written-by="Codex" data-written-at="2026-07-15" data-recommends-skill="/reckon-ship catalog-expert-review-remediation §4.6" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-release-coordinate-semantics" data-status="resolved" data-tier="opus" data-written-by="Codex" data-written-at="2026-07-15" data-recommends-skill="/reckon-ship catalog-expert-review-remediation §4.6" data-resolved-at="2026-07-16T14:22:13+00:00" data-resolved-by="recovery-session">
     <h4 class="r-fu-title">Release ISN coordinate semantics and bump imas-codex</h4>
     <div class="r-fu-body">After the grammar and catalog/pipeline fixes land, publish the next ISN release candidate through the release CLI and make imas-codex consume that exact package. This is a gated handoff, not a manual tag or editable source-version change.</div>
     <pre class="r-fu-prompt">Project: imas-standard-names
@@ -395,6 +397,7 @@ Done-when
   1. annotated ISN RC tag is created/pushed by the release CLI and publish workflow succeeds
   2. imas-codex dependency and lockfile consume that exact RC, with grammar/pipeline tests green and changes committed/pushed
   3. followup outcome is written into the plan + this followup marked resolved</pre>
+    <p class="r-fu-outcome">ISN v0.8.0rc54 cut and pushed via the release CLI (preflight green: clean tree, synced, CI passed on fc05191). imas-codex re-pinned to the exact tag (f4db5828) with extras-preserving uv sync; grammar/prompt/anti-pattern suites green against the released package. Regen==targeted-edit consistency restored: first/second_local_tangential and flux_surface_normal compose in the pipeline's closed vocab and the review quorum accepts them (19 renames at 0.96+).</p>
     </article>
 <article class="r-fu" data-id="f-pinned-dd-provenance" data-status="resolved" data-tier="opus" data-written-by="Codex" data-written-at="2026-07-15" data-recommends-skill="/reckon-ship catalog-expert-review-remediation §4.2" data-resolved-at="2026-07-15T15:10:33+00:00" data-resolved-by="Codex">
     <h4 class="r-fu-title">Finish immutable pinned DD provenance</h4>
@@ -510,7 +513,7 @@ Done-when
   2. ISNC export, validation, SPA tests/build and source-link checks pass
   3. RC is cut through supported release tooling and outcome recorded</pre>
     </article>
-<article class="r-fu" data-id="f-complete-staged-review" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-15" data-recommends-skill="/reckon-ship catalog-expert-review-remediation §4.3" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-complete-staged-review" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-15" data-recommends-skill="/reckon-ship catalog-expert-review-remediation §4.3" data-resolved-at="2026-07-16T14:22:13+00:00" data-resolved-by="recovery-session">
     <h4 class="r-fu-title">Complete review of staged edits (needs clear-gate authorization)</h4>
     <div class="r-fu-body">13 edits are staged on the live graph awaiting one batch review to land accepted: 7 Row-8 wave-power rename successors (drafted) + 6 q doc edits (safety_factor drafted; pedestal_top + 4 min-q staged). The batch review requires --skip-clear-gate because the committed §7.2 prompt change (imas-codex 9b500158) bumped the pipeline composite hash; the auto-mode classifier blocked that flag pending explicit user authorization.</div>
     <pre class="r-fu-prompt">Project: imas-standard-names
@@ -528,6 +531,7 @@ Done-when
   1. All 13 staged successors reach accepted (or below-threshold rejections triaged + re-edited)
   2. Verify 7 wave-power renames accepted + olds superseded with REFINED_FROM; 6 q docs accepted with corrected no-COCOS wording (defect absent, |q| present)
   3. followup resolved with per-name outcomes</pre>
+    <p class="r-fu-outcome">All staged edits landed accepted. Wave-power renames were already applied pre-session (audit). The 6 q docs + height_of_optical_element landed via scoped rotations + the consolidated sn run --docs-only --edits drain after the score-gate fix (imas-codex bc7adf49): all accepted 0.86-0.96 with corrected B_phi/I_p relative-alignment wording, arg-min-|q| forms, no COCOS numbers, no typical-values prose. --skip-clear-gate was never needed (gate stopped firing once the post-prompt-change SNRun recorded the new hash).</p>
     </article>
 <article class="r-fu" data-id="f-domain-execution" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-15" data-recommends-skill="/reckon-ship catalog-expert-review-remediation §4.5" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Apply domain reclassifications + fix root cause + regression test</h4>
@@ -548,7 +552,7 @@ Steps
 
 Done-when: root-cause fix + test committed; confident moves applied + verified; needs-human resolved; followup resolved.</pre>
     </article>
-<article class="r-fu" data-id="f-legacy-dd-backfill" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-15" data-recommends-skill="/reckon-ship catalog-expert-review-remediation §7.3" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-legacy-dd-backfill" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-15" data-recommends-skill="/reckon-ship catalog-expert-review-remediation §7.3" data-resolved-at="2026-07-16T14:22:13+00:00" data-resolved-by="recovery-session">
     <h4 class="r-fu-title">Backfill DD provenance on legacy sources (export gate)</h4>
     <div class="r-fu-body">EXPORT HARD-BLOCK: all 8741 DD StandardNameSource nodes are unpinned (dd_snapshot_pinned=0) with no recorded dd_version; 3963 feed accepted names. Lead confirmed sources are latest-gated and provenance must be recorded. Backfill exact current DDv4 version + pinned raw leaf/parent doc snapshot onto every DD source via a reviewed one-off migration (dry-run manifest first, driver removed after) until the invariant returns zero unpinned/incomplete public DD sources.</div>
     <pre class="r-fu-prompt">Project: imas-standard-names
@@ -566,6 +570,7 @@ Steps
   4. Require invariant (unpinned/incomplete public DD sources) = zero before export.
 
 Done-when: invariant zero; manifest + verification retained; followup resolved.</pre>
+    <p class="r-fu-outcome">Lead-authorized Cypher backfill applied 2026-07-16: 8738 sources migrated in one idempotent pass (dd_version=4.1.0, source_id, leaf/parent doc snapshot, data_type/unit/coordinates/lifecycle, dd_snapshot_pinned=true). Invariant now ZERO: 8741/8741 pinned, 0 incomplete. fetch_public_semantic_sources spot-checked clean on plasma_current/safety_factor/electron_deposited_power (exact pinned paths + versions). Export hard-block CLEARED.</p>
     </article>
 <article class="r-fu" data-id="f-row10-compaction" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-15" data-recommends-skill="/reckon-ship catalog-expert-review-remediation §4.3" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Row 10: compact tombstone then rename stored-energy</h4>
@@ -586,7 +591,7 @@ Steps
 
 Done-when: thermal_electron_energy accepted canonical; predecessor compacted with lineage; followup resolved.</pre>
     </article>
-<article class="r-fu" data-id="f-editorial-cocos-sweep" data-status="open" data-tier="sonnet" data-written-by="reckon-ship" data-written-at="2026-07-15" data-recommends-skill="/reckon-ship catalog-expert-review-remediation §4.2" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-editorial-cocos-sweep" data-status="resolved" data-tier="sonnet" data-written-by="reckon-ship" data-written-at="2026-07-15" data-recommends-skill="/reckon-ship catalog-expert-review-remediation §4.2" data-resolved-at="2026-07-16T14:22:13+00:00" data-resolved-by="recovery-session">
     <h4 class="r-fu-title">Row 7/11/18 editorial + catalog-wide COCOS sweep + guard</h4>
     <div class="r-fu-body">Bounded editorial doc edits: row 7 'absorbed'→'coupled' on total_power_due_to_ion_cyclotron_heating + parent (DD says coupled); row 11 add volume_of_<surface>=enclosed convention note; row 18 shorten flux-loop effective-area polarity prose. Plus per no-cocos-in-descriptions: sweep all accepted-name docs for COCOS mentions, strip them (express convention explicitly), add a regression guard rejecting COCOS numbers in descriptions.</surface></div>
     <pre class="r-fu-prompt">Project: imas-standard-names
@@ -603,8 +608,9 @@ Steps
   3. Add description-validation regression test rejecting any COCOS-number token.
 
 Done-when: editorial edits accepted; zero COCOS mentions in accepted descriptions; guard test green; followup resolved.</pre>
+    <p class="r-fu-outcome">Rows 7/11/18 accepted on the graph via lead-authorized sn edit --docs --override-edits + review: total/power_due_to_ion_cyclotron_heating rewritten to DD 'coupled to the plasma' boundary semantics (0.90/0.89); volume_of_first_wall carries the volume_of_<surface>=enclosed convention (0.85); area_of_flux_loop polarity prose shortened, typical-values removed (0.86). COCOS sweep was a no-op (0 violations); guard hardened in ISN dabbbae (documentation-only entries now checked, COCOS11 forms caught, severity=error).</p>
     </article>
-<article class="r-fu" data-id="f-user-authorizations-20260716" data-status="open" data-tier="opus" data-written-by="recovery-session" data-written-at="2026-07-16" data-recommends-skill="/reckon-ship catalog-expert-review-remediation" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-user-authorizations-20260716" data-status="resolved" data-tier="opus" data-written-by="recovery-session" data-written-at="2026-07-16" data-recommends-skill="/reckon-ship catalog-expert-review-remediation" data-resolved-at="2026-07-16T14:22:13+00:00" data-resolved-by="recovery-session">
     <h4 class="r-fu-title">Lead authorizations needed to finish the recovery (6 items)</h4>
     <div class="r-fu-body">Everything classifier-gated in one batch: (1) cut ISN v0.8.0rc54 (preflight green); (2) run the 5 editorial sn edit --docs with --override-edits (rows 7/11/18 + poloidal typical-values residue; bodies in scratchpad/qdocs/*.clean); (3) accept-or-decide the 3 exhausted local-tangential successors (quorum variance at 0.80-0.84); (4) sn provenance-cleanup dry-run + row-10 compaction; (5) §7.3 DD backfill mechanism + sign-off (export hard-gate; sample-validated); (6) confirm gyrocenter target (transport recommended). Optional: approve the 3-line edits_only score-gate exemption so future sn run --edits can claim staged docs edits.</div>
     <pre class="r-fu-prompt">Project: imas-standard-names
@@ -624,6 +630,27 @@ Steps (each unblocks the next stage of §7.5-7.6)
   6. Lock gyrocenter-domain (transport recommended; override JSON marked provisional)
 
 Done-when: all six executed or explicitly deferred; export + ISNC RC can proceed; followup resolved with outcomes.</pre>
+    <p class="r-fu-outcome">Lead granted all six 2026-07-16: RC cut (v0.8.0rc54 pushed), --override-edits editorial batch (rows 7/11/18 + poloidal residue accepted), Cypher DD backfill (8741/8741 pinned), gyrocenter=transport (locked; 5 names reclassified via the new sn reclassify command b05bab63), score-gate exemption (bc7adf49). REMAINING: 3 exhausted tangential successors need a direct accept; row-10 provenance-cleanup not yet run.</p>
+    </article>
+<article class="r-fu" data-id="f-close-out-residuals" data-status="open" data-tier="opus" data-written-by="recovery-session" data-written-at="2026-07-16" data-recommends-skill="/reckon-ship catalog-expert-review-remediation §7.6" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Close residuals then export + catalog RC</h4>
+    <div class="r-fu-body">残り: (1) direct-accept the 3 exhausted local-tangential successors (aperture first/second, bragg second — 0.80-0.84 quorum variance vs 19 identical siblings at 0.96+; predecessors superseded so export drops them until accepted); (2) row-10: sn provenance-cleanup manifest+apply, then rename thermal_electron_stored_energy→thermal_electron_energy; (3) ~11 needs-human domain moves via sn reclassify; (4) graph hygiene: fast_ion_charge_state_absorbed_wave_power hint mismatch, per_toroidal_mode_wave_absorbed_power stranded reviewed, ~35 stale open edits on superseded predecessors, stuck SNRun cf44b10a, 22 remaining docs-pending hint edits; (5) ISNC export via sn release --export-only, SPA build/tests, catalog RC.</div>
+    <pre class="r-fu-prompt">Project: imas-standard-names
+Plan: catalog-expert-review-remediation
+Section: §7.6 (close-out + export)
+Tier: opus
+
+Context
+  Recovery complete except bounded residuals. Export hard-gates are clear (provenance invariant zero; ISN rc54 pinned).
+
+Steps
+  1. Lead accepts the 3 exhausted tangential successors (or decides a re-review mechanism).
+  2. sn provenance-cleanup (manifest, review, --apply) → sn edit thermal_electron_stored_energy --rename thermal_electron_energy --scope self → review to accept.
+  3. Work the ~11 needs-human domain moves (manifest-coordinate-domain.md B.2/B.5) via sn reclassify with lead confirmation per item.
+  4. Hygiene pass: close stale open edits on superseded predecessors; reconcile the two wave-family anomalies; clear stuck SNRun.
+  5. Export: uv run imas-codex sn release --export-only into clean ISNC; validate; SPA tests/build; verify term cards + pinned DD links + deprecation stubs absent (nothing approved); cut catalog RC via supported tooling.
+
+Done-when: 22/22 tangential successors accepted; row-10 renamed; export validated; catalog RC tagged; followup resolved.</pre>
     </article>
 </section>
 <section data-reckon="research" id="research" class="r-research-list">
