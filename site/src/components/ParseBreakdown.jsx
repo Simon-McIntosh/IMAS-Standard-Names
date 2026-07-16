@@ -22,7 +22,7 @@ const FILTERABLE_ROLES = new Set(FILTERABLE_PARSE_ROLES);
 // (``at_``, ``due_to_``) falls into the grey separator gap — matching the
 // Grammar tab. ``filterText`` keeps the emitter's original text so the facet
 // filter still matches ``n.parse`` (which carries the connector-bearing form).
-function displayToken(t) {
+export function displayToken(t) {
   if (t.role === 'locus') {
     const m = t.text.match(/^(of|at|over)_(.+)$/);
     if (m) return m[2];
@@ -125,17 +125,31 @@ export function ParseBreakdown({ name, parse, filters, setFilters }) {
               key={i}
               className={`gtoken gtoken-${t.role} ${filterable ? 'clickable' : ''} ${active ? 'is-filter-active' : ''}`}
               style={{ '--role-hue': meta.hue }}
-              onClick={() => term ? setOpenTerm(openTerm === term.token ? null : term.token) : filterable && toggleFilter(t.role, t.text)}
+              onClick={() => filterable ? toggleFilter(t.role, t.text) : term && setOpenTerm(openTerm === term.token ? null : term.token)}
               title={
-                term
-                  ? term.definition
-                  : filterable
+                filterable
                   ? (active ? `Remove ${t.role} filter` : `Filter to names with ${t.role} = ${shown}`)
+                  : term
+                  ? term.definition
                   : meta.desc
               }
             >
               <div className="gtoken-role">
                 {meta.label}
+                {term && (
+                  <button
+                    type="button"
+                    className="gtoken-term-info"
+                    aria-label={`Definition of ${term.token}`}
+                    title={term.definition}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      setOpenTerm(openTerm === term.token ? null : term.token);
+                    }}
+                  >
+                    i
+                  </button>
+                )}
                 {filterable && <span className="gtoken-filter-glyph" aria-hidden>{active ? '×' : '+'}</span>}
               </div>
               <div className="gtoken-text mono">{shown}</div>

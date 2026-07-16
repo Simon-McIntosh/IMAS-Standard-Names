@@ -328,6 +328,16 @@ def _normalise_sources(sources: list[dict[str, Any]] | None) -> list[dict[str, A
             )
             if value is not None:
                 projected[public_key] = value
+        # The producer may emit enhanced_context as a structured object; the
+        # public projection is always plain text, so keep only its description
+        # (the dict form would otherwise reach the renderer verbatim).
+        context = projected.get("enhanced_context")
+        if isinstance(context, dict):
+            description = context.get("description")
+            if isinstance(description, str) and description:
+                projected["enhanced_context"] = description
+            else:
+                projected.pop("enhanced_context")
         nested_authoritative = {
             "leaf_definition": authoritative.get("leaf"),
             "parent_path": authoritative.get("parent_path"),

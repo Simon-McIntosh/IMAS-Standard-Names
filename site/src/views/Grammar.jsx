@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useData } from '../lib/data.js';
 import { StandardTermCard } from '../components/StandardTermCard.jsx';
+import { displayToken } from '../components/ParseBreakdown.jsx';
 import {
   composeName,
   emptyState,
@@ -637,7 +638,7 @@ export function Grammar({ onSelect, setView, query, seedName, seedNonce, term = 
           ))}
         </div>
         {selectedTerm && <StandardTermCard term={(STANDARD_TERMS || []).find((term) => term.token === selectedTerm)}
-          examples={NAMES.filter((entry) => entry.parse?.some((part) => part.text.endsWith(selectedTerm))).map((entry) => entry.name)}
+          examples={NAMES.filter((entry) => entry.parse?.some((part) => displayToken(part) === selectedTerm)).map((entry) => entry.name)}
           onClose={() => { setSelectedTerm(''); setTerm?.(''); }} />}
       </section>
 

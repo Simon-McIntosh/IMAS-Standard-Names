@@ -1695,6 +1695,32 @@ body {
   background: oklch(0.55 0.13 var(--role-hue));
   color: white;
 }
+.gtoken-term-info {
+  display: inline-grid;
+  place-items: center;
+  width: 14px;
+  height: 14px;
+  margin-left: 6px;
+  padding: 0;
+  border: 1px solid oklch(0.55 0.13 var(--role-hue));
+  border-radius: 50%;
+  background: transparent;
+  color: oklch(0.45 0.13 var(--role-hue));
+  font-size: 10px;
+  font-style: italic;
+  font-weight: 700;
+  font-family: Georgia, serif;
+  line-height: 1;
+  vertical-align: -2px;
+  cursor: help;
+}
+.gtoken-term-info:hover {
+  background: oklch(0.92 0.04 var(--role-hue));
+}
+:root[data-theme="dark"] .gtoken-term-info {
+  color: oklch(0.72 0.12 var(--role-hue));
+  border-color: oklch(0.5 0.1 var(--role-hue));
+}
 
 /* ---------- grammar view (display + interactive builder) ---- */
 /* ============================================================ */

@@ -322,6 +322,22 @@ class TestNormaliseSources:
             }
         ]
 
+    def test_enhanced_context_without_description_never_leaks_dict(self) -> None:
+        source = {
+            "dd_path": "summary/global_quantities/energy_thermal/value",
+            "enhanced_context": {"kind": "generated"},
+        }
+        projected = _normalise_sources([source])
+        assert "enhanced_context" not in projected[0]
+
+    def test_enhanced_context_empty_description_dropped(self) -> None:
+        source = {
+            "dd_path": "summary/global_quantities/energy_thermal/value",
+            "enhanced_context": {"description": "", "kind": "generated"},
+        }
+        projected = _normalise_sources([source])
+        assert "enhanced_context" not in projected[0]
+
 
 class TestGrammarFacets:
     """``_derive_grammar_facets`` extracts the IR signals the emitter needs."""
