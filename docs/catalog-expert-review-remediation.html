@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-16">
-<meta name="plan-version" content="23">
+<meta name="plan-version" content="24">
 <meta name="plan-impl" content="0.75">
 </head>
 <body>
@@ -322,9 +322,9 @@
     <p class="r-dec-q">domain-move-mechanism</p>
     <p class="r-dec-rat">Apply the ~30 confident physics_domain reclassifications via a reviewed direct Cypher SET (physics_domain + source_domains) on the live graph, then re-export. In the same campaign, locate and fix the code/LLM prompt that assigned the incorrect domains at root (dd_domain_classifier.py / definitions/physics/ids_domains.json / domain_gold_set.json) and add a regression unit test that guards the corrected assignments so future runs cannot reintroduce them.</p>
     </div>
-<div class="r-dec" data-key="gyrocenter-domain" data-choice="" data-by="reckon-ship (recommendation, awaiting confirmation)" data-when="2026-07-15T20:34:13+00:00">
+<div class="r-dec" data-key="gyrocenter-domain" data-choice="transport" data-by="Simon McIntosh" data-when="2026-07-16T12:50:16+00:00">
     <p class="r-dec-q">gyrocenter-domain</p>
-    <p class="r-dec-rat">OPEN — awaiting user confirmation. The lead confirmed the move OUT of computational_workflow is confident (it is a tooling bucket, not a physics domain) but INVITED a recommendation on the target (&#x27;what do you suggest, I hesitate over fast_particles as all charged particles have gyrocenters, not just the fast ones&#x27;). Recommendation: transport (guiding-center orbit dynamics = kinetic/orbit-transport; distributions IDS default is transport; fast_particles is both too narrow and not an existing domain). Alternative: turbulence (family coherence with perturbed_gyrocenter_* names). Two gyrocenter names were provisionally moved to transport then REVERTED to computational_workflow pending this confirmation. The code override (path_domain_overrides.json) encodes transport as the recommended default and is trivially changed if another target is chosen. Applies to gyrocenter_frequency, poloidal_/toroidal_gyrocenter_frequency (and possibly gyrocenter_density, gyrocenter_current_density).</p>
+    <p class="r-dec-rat">Lead confirmed transport (2026-07-16): guiding-center orbit dynamics is kinetic/orbit-transport physics; the distributions IDS default is transport; fast_particles is too narrow (all charged particles have gyrocenters) and not an existing domain. Applies to gyrocenter_frequency, poloidal_gyrocenter_frequency, toroidal_gyrocenter_frequency (computational_workflow -&gt; transport) and, for family coherence, gyrocenter_density + gyrocenter_current_density (null -&gt; transport). The code override (path_domain_overrides.json) already encodes transport; its provisional marker can be retired.</p>
     </div>
 </section>
 
