@@ -4,19 +4,21 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="docs-project"   content="imas-standard-names">
-  <meta name="reckon-type"    content="plan">
-  <meta name="plan-slug"      content="model-selection-and-global-refine">
-  <meta name="plan-title"     content="Model Selection and Global Refine">
-  <meta name="plan-summary"   content="Benchmark the GPT-5.6 family across every pipeline role, then build a cautious global-refine capability for catalog-wide quality campaigns">
-  <meta name="plan-status"    content="active">
-  <meta name="plan-roi"       content="high">
-  <meta name="plan-effort"    content="L">
-  <meta name="plan-tier"      content="opus">
-  <meta name="plan-owner"     content="Simon McIntosh">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="model-selection-and-global-refine">
+  <meta name="plan-title" content="Model Selection and Global Refine">
+  <meta name="plan-summary" content="Benchmark the GPT-5.6 family across every pipeline role, then build a cautious global-refine capability for catalog-wide quality campaigns">
+  <meta name="plan-status" content="active">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort" content="L">
+  <meta name="plan-tier" content="opus">
+  <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-depends-on" content="catalog-expert-review-remediation">
   <title>Model Selection and Global Refine | imas-standard-names</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-07-17">
+<meta name="plan-version" content="2">
 </head>
 <body>
 <main class="plan-doc">
@@ -89,35 +91,35 @@
   </ul>
 
   <section data-reckon="decisions" id="decisions" class="r-decisions">
-    <h2><span class="sec">§</span> Decisions</h2>
-    <div class="r-dec" data-key="refine-surface" data-choice="" data-by="" data-when="">
-      <p class="r-dec-q">Should the global-refine capability be a new top-level CLI command or an extension of the existing sn run campaign scopes?</p>
-      <p class="r-dec-opts">
-        <button class="r-opt" data-value="extend-sn-run">Extend sn run (--campaign selector riding --families/DocsRevision machinery)</button>
-        <button class="r-opt" data-value="new-cli">New dedicated command (e.g. sn refine) wrapping the same pools</button>
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="refine-surface" data-choice="extend-sn-run" data-by="user" data-when="2026-07-17 07:12">
+    <p class="r-dec-q">Should the global-refine capability be a new top-level CLI command or an extension of the existing sn run campaign scopes?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="extend-sn-run">Extend sn run (--campaign selector riding --families/DocsRevision machinery)</button>
+      <button class="r-opt" data-value="new-cli">New dedicated command (e.g. sn refine) wrapping the same pools</button>
       </p>
-      <p class="r-dec-rat"></p>
+    <p class="r-dec-rat"></p>
     </div>
-    <div class="r-dec" data-key="derived-parent-parse-gate" data-choice="" data-by="" data-when="">
-      <p class="r-dec-q">Should the full-name parse gate apply to origin='derived' family parents (currently quarantines 48 accepted grammar peels as partial names)?</p>
-      <p class="r-dec-opts">
-        <button class="r-opt" data-value="exempt-derived">Exempt derived parents from the full-name parse (keep their structural admission gate)</button>
-        <button class="r-opt" data-value="keep-and-triage">Keep the gate; triage the 48 individually</button>
+<div class="r-dec" data-key="derived-parent-parse-gate" data-choice="I lean towards the exempt, but would prefer a robust pipeline / prompt edit that ingects the parent / child relasionship so that review models can take informed decisions. missed acceptance gates are an important signal that should be considered and corrected and not simply papered over" data-by="user" data-when="2026-07-17 07:14">
+    <p class="r-dec-q">Should the full-name parse gate apply to origin=&#x27;derived&#x27; family parents (currently quarantines 48 accepted grammar peels as partial names)?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="exempt-derived">Exempt derived parents from the full-name parse (keep their structural admission gate)</button>
+      <button class="r-opt" data-value="keep-and-triage">Keep the gate; triage the 48 individually</button>
       </p>
-      <p class="r-dec-rat"></p>
+    <p class="r-dec-rat"></p>
     </div>
-    <div class="r-dec" data-key="seat-switches" data-choice="" data-by="" data-when="">
-      <p class="r-dec-q">Which pipeline seats move to a GPT-5.6 model? (Locked after §2 evidence lands — one batch decision across refine / name-breaker / docs-breaker / docs-gen / classifier.)</p>
-      <p class="r-dec-rat"></p>
+<div class="r-dec" data-key="seat-switches" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">Which pipeline seats move to a GPT-5.6 model? (Locked after §2 evidence lands — one batch decision across refine / name-breaker / docs-breaker / docs-gen / classifier.)</p>
+    <p class="r-dec-rat"></p>
     </div>
-  </section>
+</section>
 
   <section data-reckon="followups" id="followups" class="r-followups">
-    <h2><span class="sec">§</span> Followups</h2>
-    <article class="r-fu" data-id="f-role-benchmarks" data-status="open" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-07-17" data-recommends-skill="/reckon-ship model-selection-and-global-refine §2" data-resolved-at="" data-resolved-by="">
-      <h4 class="r-fu-title">Run the full GPT-5.6 role benchmarks</h4>
-      <div class="r-fu-body">Priority work: extend sn bench with per-role modes (refine-from-critique, breaker independence, docs generation, classifier gold set) and measure Luna/Terra (+Sol for docs only) against each incumbent with production prompts and reasoning-effort settings. ≤ $40 total.</div>
-      <pre class="r-fu-prompt">Project: imas-standard-names
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-role-benchmarks" data-status="open" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-07-17" data-recommends-skill="/reckon-ship model-selection-and-global-refine §2" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Run the full GPT-5.6 role benchmarks</h4>
+    <div class="r-fu-body">Priority work: extend sn bench with per-role modes (refine-from-critique, breaker independence, docs generation, classifier gold set) and measure Luna/Terra (+Sol for docs only) against each incumbent with production prompts and reasoning-effort settings. ≤ $40 total.</div>
+    <pre class="r-fu-prompt">Project: imas-standard-names
 Plan:    model-selection-and-global-refine (http://localhost:8765/imas-standard-names/model-selection-and-global-refine.html)
 Section: §2
 Tier:    opus
@@ -136,10 +138,10 @@ Done-when
   2. switch/hold/needs-more-data recommendation per seat recorded in the plan
   3. followup written into plan + this one resolved</pre>
     </article>
-    <article class="r-fu" data-id="f-refine-design" data-status="open" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-07-17" data-recommends-skill="/reckon-edit model-selection-and-global-refine" data-resolved-at="" data-resolved-by="">
-      <h4 class="r-fu-title">Design review: global-refine selector, gates, and surface decision</h4>
-      <div class="r-fu-body">Bring the §4 design to the lead with the refine-surface and derived-parent-parse-gate decisions; include the reviewed dry-run manifest shape and the convergence-gate thresholds. No implementation before the decisions lock.</div>
-      <pre class="r-fu-prompt">Project: imas-standard-names
+<article class="r-fu" data-id="f-refine-design" data-status="open" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-07-17" data-recommends-skill="/reckon-edit model-selection-and-global-refine" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Design review: global-refine selector, gates, and surface decision</h4>
+    <div class="r-fu-body">Bring the §4 design to the lead with the refine-surface and derived-parent-parse-gate decisions; include the reviewed dry-run manifest shape and the convergence-gate thresholds. No implementation before the decisions lock.</div>
+    <pre class="r-fu-prompt">Project: imas-standard-names
 Plan:    model-selection-and-global-refine (http://localhost:8765/imas-standard-names/model-selection-and-global-refine.html)
 Section: §4
 Tier:    opus
@@ -158,7 +160,7 @@ Done-when
   2. selector/gate design recorded with thresholds and manifest shape
   3. implementation followup queued</pre>
     </article>
-  </section>
+</section>
 </main>
 </body>
 </html>
