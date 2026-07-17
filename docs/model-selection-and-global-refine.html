@@ -18,7 +18,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-17">
-<meta name="plan-version" content="6">
+<meta name="plan-version" content="7">
 <meta name="plan-blocks" content="catalog-expert-review-remediation">
 <meta name="plan-impl" content="0.25">
 </head>
@@ -245,7 +245,7 @@ Done-when
   2. every change in the log carries a SHA or graph-event reference
   3. remediation plan followup resolved; RC release unblocked</pre>
     </article>
-<article class="r-fu" data-id="f-refine-kind-hardening" data-status="open" data-tier="sonnet" data-written-by="reckon-ship" data-written-at="2026-07-17" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-refine-kind-hardening" data-status="resolved" data-tier="sonnet" data-written-by="reckon-ship" data-written-at="2026-07-17" data-recommends-skill="" data-resolved-at="2026-07-17T10:16:51+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Harden RefinedName.kind: enum the schema field, enumerate kinds in the refine prompt</h4>
     <div class="r-fu-body">Bench diagnosis exposed a latent production fragility: RefinedName.kind is a free string with no schema enum, and the refine prompt never enumerates scalar/vector/metadata — the only in-prompt kind signal is the scored-examples include. If examples ever fail to load, production refine degrades to mass kind-validation failures exactly as the bench did (60/60 dropped).</div>
     <pre class="r-fu-prompt">Project: imas-standard-names / code: imas-codex (branch main)
@@ -263,6 +263,7 @@ Work
 Done-when
   1. enum + prompt change + test committed and pushed
   2. bench refine mode re-run smoke (3 cases) confirms no regression</pre>
+    <p class="r-fu-outcome">Implemented at source, wider than scoped (lead directive: never rely on examples for format — they are complementary): imas-codex 6ef0ab2c unifies the kind vocabulary on the ISN catalog Kind enum {scalar, vector, tensor, complex, metadata}. LinkML StandardNameKind trimmed to mirror ISN exactly (eigenfunction/spectrum retired — semantic categories, structurally scalar, zero live names); RefinedName.kind + StandardNameCandidate.kind are non-nullable Literals so the JSON schema carries a flat enum and structured output cannot emit an invalid kind; compose + refine prompts enumerate the kinds explicitly; derive_kind/recompute_parent_kind aligned; legacy graph values still collapse to scalar at export; three-way consistency test pins Literal == LinkML-generated enum == ISN Kind. Note: live compose already injected kind_definitions from ISN — the generate/import pattern was present; the LLM response models and refine prompt were the gaps.</p>
     </article>
 </section>
 </main>
