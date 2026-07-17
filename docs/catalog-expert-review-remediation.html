@@ -16,9 +16,9 @@
   <title>Catalog Expert Review Remediation | imas-standard-names</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-07-16">
-<meta name="plan-version" content="25">
-<meta name="plan-impl" content="0.9">
+<meta name="plan-modified" content="2026-07-17">
+<meta name="plan-version" content="26">
+<meta name="plan-impl" content="0.95">
 </head>
 <body>
 <main class="plan-doc">
@@ -533,7 +533,7 @@ Done-when
   3. followup resolved with per-name outcomes</pre>
     <p class="r-fu-outcome">All staged edits landed accepted. Wave-power renames were already applied pre-session (audit). The 6 q docs + height_of_optical_element landed via scoped rotations + the consolidated sn run --docs-only --edits drain after the score-gate fix (imas-codex bc7adf49): all accepted 0.86-0.96 with corrected B_phi/I_p relative-alignment wording, arg-min-|q| forms, no COCOS numbers, no typical-values prose. --skip-clear-gate was never needed (gate stopped firing once the post-prompt-change SNRun recorded the new hash).</p>
     </article>
-<article class="r-fu" data-id="f-domain-execution" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-15" data-recommends-skill="/reckon-ship catalog-expert-review-remediation §4.5" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-domain-execution" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-15" data-recommends-skill="/reckon-ship catalog-expert-review-remediation §4.5" data-resolved-at="2026-07-17T06:06:49+00:00" data-resolved-by="recovery-session">
     <h4 class="r-fu-title">Apply domain reclassifications + fix root cause + regression test</h4>
     <div class="r-fu-body">Apply the ~30 confident physics_domain moves via reviewed Cypher SET (physics_domain + source_domains), including gyrocenter orbit-frequency names → transport. Then fix the root-cause domain-assignment logic (dd_domain_classifier.py / definitions/physics/ids_domains.json / domain_gold_set.json) and add a regression unit test. ~11 needs-human moves await per-item confirmation.</div>
     <pre class="r-fu-prompt">Project: imas-standard-names
@@ -551,6 +551,7 @@ Steps
   4. Verify domain inventories; coherent cross-domain families.
 
 Done-when: root-cause fix + test committed; confident moves applied + verified; needs-human resolved; followup resolved.</pre>
+    <p class="r-fu-outcome">COMPLETE. 29 confident moves landed 2026-07-15; root-cause classifier fix + overrides landed (0b96eb9b, tightened 2b67a2b5); remaining ~15 needs-human moves all resolved interactively with the lead 2026-07-17 and applied via the new provenance-tracked sn reclassify command: gyrocenter family(5)→transport, Langmuir current-density cluster(7)→edge_plasma_physics, probe I-V(3)→particle_measurement_diagnostics, heat_flux+parallel(2)→edge_plasma_physics, gap-reference poloidal_angle→equilibrium, toroidal_angle_of_line_of_sight→general, neutral_pressure retained in mechanical (deliberate). mechanical_measurement_diagnostics reduced to its coherent 12-name instrumentation core.</p>
     </article>
 <article class="r-fu" data-id="f-legacy-dd-backfill" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-15" data-recommends-skill="/reckon-ship catalog-expert-review-remediation §7.3" data-resolved-at="2026-07-16T14:22:13+00:00" data-resolved-by="recovery-session">
     <h4 class="r-fu-title">Backfill DD provenance on legacy sources (export gate)</h4>
@@ -572,7 +573,7 @@ Steps
 Done-when: invariant zero; manifest + verification retained; followup resolved.</pre>
     <p class="r-fu-outcome">Lead-authorized Cypher backfill applied 2026-07-16: 8738 sources migrated in one idempotent pass (dd_version=4.1.0, source_id, leaf/parent doc snapshot, data_type/unit/coordinates/lifecycle, dd_snapshot_pinned=true). Invariant now ZERO: 8741/8741 pinned, 0 incomplete. fetch_public_semantic_sources spot-checked clean on plasma_current/safety_factor/electron_deposited_power (exact pinned paths + versions). Export hard-block CLEARED.</p>
     </article>
-<article class="r-fu" data-id="f-row10-compaction" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-15" data-recommends-skill="/reckon-ship catalog-expert-review-remediation §4.3" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-row10-compaction" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-15" data-recommends-skill="/reckon-ship catalog-expert-review-remediation §4.3" data-resolved-at="2026-07-17T06:06:49+00:00" data-resolved-by="recovery-session">
     <h4 class="r-fu-title">Row 10: compact tombstone then rename stored-energy</h4>
     <div class="r-fu-body">Row 10 (drop 'stored', approved) is blocked: thermal_electron_energy exists as a superseded tombstone that the accepted thermal_electron_stored_energy REFINED_FROM (pipeline previously refined energy→stored_energy). Per rename-policy no id is reused while an uncompacted predecessor occupies it. Compact the unapproved tombstone (reviewed sn provenance-cleanup dry-run) then rename thermal_electron_stored_energy→thermal_electron_energy.</div>
     <pre class="r-fu-prompt">Project: imas-standard-names
@@ -590,6 +591,7 @@ Steps
   4. Review to accept.
 
 Done-when: thermal_electron_energy accepted canonical; predecessor compacted with lineage; followup resolved.</pre>
+    <p class="r-fu-outcome">COMPLETE. Tombstone compacted via lead-authorized targeted Cypher mirroring compact_unapproved_superseded (change event sn-change:fd5dd873, reviews removed, id freed); thermal_electron_stored_energy renamed via sn edit and ACCEPTED at 0.925 — thermal_electron_energy is now the canonical family-consistent name.</p>
     </article>
 <article class="r-fu" data-id="f-editorial-cocos-sweep" data-status="resolved" data-tier="sonnet" data-written-by="reckon-ship" data-written-at="2026-07-15" data-recommends-skill="/reckon-ship catalog-expert-review-remediation §4.2" data-resolved-at="2026-07-16T14:22:13+00:00" data-resolved-by="recovery-session">
     <h4 class="r-fu-title">Row 7/11/18 editorial + catalog-wide COCOS sweep + guard</h4>
@@ -608,7 +610,7 @@ Steps
   3. Add description-validation regression test rejecting any COCOS-number token.
 
 Done-when: editorial edits accepted; zero COCOS mentions in accepted descriptions; guard test green; followup resolved.</pre>
-    <p class="r-fu-outcome">Rows 7/11/18 accepted on the graph via lead-authorized sn edit --docs --override-edits + review: total/power_due_to_ion_cyclotron_heating rewritten to DD 'coupled to the plasma' boundary semantics (0.90/0.89); volume_of_first_wall carries the volume_of_<surface>=enclosed convention (0.85); area_of_flux_loop polarity prose shortened, typical-values removed (0.86). COCOS sweep was a no-op (0 violations); guard hardened in ISN dabbbae (documentation-only entries now checked, COCOS11 forms caught, severity=error).</p>
+    <p class="r-fu-outcome">Rows 7/11/18 accepted on the graph via lead-authorized sn edit --docs --override-edits + review: total/power_due_to_ion_cyclotron_heating rewritten to DD 'coupled to the plasma' boundary semantics (0.90/0.89); volume_of_first_wall carries the volume_of_<surface>=enclosed convention (0.85); area_of_flux_loop polarity prose shortened, typical-values removed (0.86). COCOS sweep was a no-op (0 violations); guard hardened in ISN dabbbae (documentation-only entries now checked, COCOS11 forms caught, severity=error).</surface></p>
     </article>
 <article class="r-fu" data-id="f-user-authorizations-20260716" data-status="resolved" data-tier="opus" data-written-by="recovery-session" data-written-at="2026-07-16" data-recommends-skill="/reckon-ship catalog-expert-review-remediation" data-resolved-at="2026-07-16T14:22:13+00:00" data-resolved-by="recovery-session">
     <h4 class="r-fu-title">Lead authorizations needed to finish the recovery (6 items)</h4>
@@ -685,6 +687,10 @@ Done-when: 22/22 tangential successors accepted; row-10 renamed; export validate
     <span class="r-research-title">--edits docs claims permanently gated: score-gate lacks edits_only exemption (fix awaits sign-off)</span></div>
 <div class="r-research" data-id="r-qdocs-rotation-state" data-type="live-graph-evidence" data-source="The 7 staged docs edits (6 q-family + height_of_optical_element) are landing through scoped curative rotations. poloidal_magnetic_flux_at_minimum_safety_factor ACCEPTED at 0.95 but its accepted text still contains a &#x27;Typical magnitudes scale...&#x27; paragraph (review scores do not hard-fail typical-values; needs a follow-up sn edit --docs, which requires --override-edits since origin=catalog_edit). safety_factor/pedestal_top rewritten by refine (banned prose stripped) pending re-review; remainder mid-rotation. height_of_optical_element staged text also had DD X1/X2 frame wording (contradicting the locked context-model) — cleaned descriptive-frame body prepared in scratchpad/qdocs/. Wave-power renames from yesterday were found already APPLIED accepted (not staged as the f-complete-staged-review body says); residue: fast_ion_charge_state_absorbed_wave_power hint/id mismatch with no change record, per_toroidal_mode_wave_absorbed_power stranded at reviewed with no successor, stuck SNRun cf44b10a, ~35 open edits on already-superseded predecessors never closed." data-added-by="recovery-session" data-when="2026-07-16">
     <span class="r-research-title">q/height docs edits: rotations converging; one accepted doc still carries typical-values</span></div>
+<div class="r-research" data-id="r-hygiene-rca-landed" data-type="code-fix" data-source="imas-codex 8e869633/86b14b21/7046606d/83f7afd5/1be07b98. (A) persist_refined_name + tombstone_supersede_into now close the predecessor&#x27;s edit_status on terminal transitions; (B) accept-time descendant cascades record StandardNameChange events + refresh source mirrors; (D) startup sweep marks hard-killed SNRuns stale (orphaned_no_finalize); (E) refine_name never rewrites a pinned rename — resubmits to a fresh quorum, rests at reviewed at cap, never exhausts; refiner prompt treats lexicalised geometry bases as atomic; rescore resets stale quarantines so validation re-runs under the current grammar. (C) per_toroidal_mode_wave_absorbed_power verified NOT campaign damage — ordinary below-threshold (0.78) name awaiting refine. New operator command sn rescore &lt;name&gt; (stage + inline scoped re-review; --stage-only escape hatch). Lead-authorized residue cleanup applied: 36 superseded+open edits closed, 4 orphaned exhausted hint edits closed, 503 missing StandardNameChange provenance events backfilled (operation=backfill_refine), 10 stuck SNRuns cleared by the sweep." data-added-by="recovery-session" data-when="2026-07-17">
+    <span class="r-research-title">Five graph-hygiene defect classes root-caused and fixed; residue cleaned; rescore command added</span></div>
+<div class="r-research" data-id="r-final-landings-20260717" data-type="live-graph-evidence" data-source="Fresh-quorum re-review (mechanism fixed first, no blind accepts): first_local_tangential_coordinate_of_aperture 0.975, second_..._of_aperture 0.9625, second_..._of_bragg_crystal 0.9625 — all 22/22 local-tangential migrations now accepted. Row-10: thermal_electron_energy accepted 0.925 (tombstone compacted with recorded change event). Qualifier grammar: state qualifiers now bind outside the subject (ISN 3cd15f5, saturated routed to scoping segment; impact sweep = exactly 3 names); renames staged for saturated_ion_current_density / saturated_ion_current / fluctuating_saturated_ion_current_density (review in flight; stale-quarantine defect found and fixed en route, 1be07b98). Domain taxonomy COMPLETE: all needs-human moves resolved interactively — Langmuir j-cluster(7)→edge_plasma_physics, probe I-V(3)→particle_measurement_diagnostics, heat_flux(2)→edge_plasma_physics, gap-reference→equilibrium, line_of_sight→general, neutral_pressure stays, gyrocenter(5)→transport; mechanical bucket now its coherent 12-name core. New sn reclassify command records per-move provenance. Embed server interim on H200 (reservation-gated partition support, e1b1bd1c; P100 node drained). GPT-5.6 folded into benchmarks (80c1935): Luna quality-tied at 41% lower cost = leading refine/breaker candidate pending role-specific bench; Sol not worth adopting." data-added-by="recovery-session" data-when="2026-07-17">
+    <span class="r-research-title">3 stranded renames re-accepted 0.96+; row-10 accepted; state-outside-subject rule + saturated renames; domain taxonomy complete</span></div>
 </section>
 </main>
 </body>
