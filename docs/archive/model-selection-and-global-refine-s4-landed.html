@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-standard-names">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="model-selection-and-global-refine-s4-landed">
+  <meta name="plan-title" content="Global-refine capability — landed">
+  <meta name="plan-status" content="reference">
+  <title>Global-refine capability — landed | imas-standard-names</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+  <h1>§4 — Global-refine capability: landed record (2026-07-17)</h1>
+  <p>Everything below shipped to imas-codex <code>main</code> on 2026-07-17. The surface decision
+  (<em>extend <code>sn run</code></em>, locked by the lead) and the derived-parent guidance
+  (<em>fix the gate's scoping and inject the parent/child relationship — don't paper over signals</em>)
+  were honoured as written.</p>
+
+  <h2>Campaign engine — <code>sn run --campaign</code> (imas-codex <code>a1c8ca1e</code>)</h2>
+  <table>
+    <thead><tr><th>Piece</th><th>What landed</th></tr></thead>
+    <tbody>
+      <tr><td>Defect-predicate selector</td><td><code>CampaignSpec</code>: <code>prose[:class]</code> / <code>audit[:substr]</code> / <code>quarantined</code> / <code>all</code>. Banned-prose classes share one vocabulary with the docs benchmark; audit predicates match <code>validation_issues</code> tags. The audit-quarantined accepted names are selectable, so the docs pass clears their findings.</td></tr>
+      <tr><td>Reviewed manifest</td><td><code>sn run --campaign &lt;spec&gt; --dry-run --campaign-manifest &lt;path&gt;.json</code> — zero-mutation; total, per-predicate breakdown, batch plan, deterministic 20-name evidence sample. The lead approves the manifest, not a regex.</td></tr>
+      <tr><td>Budgeted batching</td><td><code>CampaignBudget</code>: 100 names/batch default, per-batch cost cap (= drain cost limit), campaign ceiling halting between batches, <code>--campaign-resume-from</code>, abort check between batches.</td></tr>
+      <tr><td>Convergence gate</td><td>Per batch: acceptance ≥ 0.90 within rotation cap, zero banned-prose reintroduction (grep-audit), zero name-axis drift. First miss halts the campaign with reasons + resume point.</td></tr>
+      <tr><td>Provenance</td><td>DocsRevision snapshots (existing machinery) + per-name <code>StandardNameChange</code> (operation <code>campaign_docs_refine</code>).</td></tr>
+      <tr><td>Quarantine interaction</td><td>Quarantine lifted before drain (pools skip quarantined names), re-validated after each batch — the plan's "invisible fixes" risk is closed mechanically.</td></tr>
+    </tbody>
+  </table>
+  <p>44 new tests green; guardrails held: accepts drain through the normal pools only, no name-identity
+  changes in docs campaigns, no full-catalog regeneration mode. <strong>Live dry-run manifest</strong>
+  (read-only, campaign <code>all</code>): <strong>2,332 accepted names → 24 batches of 100</strong>;
+  per-predicate: typical-values prose 1,263 · estimator recipes 780 · procedural padding 676 ·
+  any audit finding 2,257 · audit-quarantined 179 (the plan's 129 was the sweep-day count).</p>
+
+  <h2>Root-fix (a) — derived-parent parse gate (imas-codex <code>93276ebf</code>)</h2>
+  <p><strong>Root cause:</strong> the full-name parse gate is <code>validate_name_candidate</code>
+  (workers.py), which round-tripped every claimed name and quarantined on any parse failure
+  <em>before</em> audits ran. The claim query returned neither <code>origin</code> nor child topology,
+  so a derived family parent — a deliberately partial grammar peel — was indistinguishable from a
+  broken standalone name.</p>
+  <ul>
+    <li><strong>Gate scoping:</strong> <code>origin='derived'</code> parents are now validated structurally (children exist; parent tokens ⊆ some child's token set), with critical findings for orphans and inconsistent peels — the missed-gate signal is preserved, not papered over.</li>
+    <li><strong>Review-context injection:</strong> the names and docs review prompts now render a "derived family parent — score as an abstraction" block listing the children and naming the peeled axis, so review models judge partial names informed.</li>
+    <li><strong>Verification (read-only):</strong> of 62 quarantined derived parents live (population grew from the sweep-day 48), all 52 parse-related quarantines clear under the fixed gate; the 4 residual quarantines are genuine unit defects correctly retained. 13 new tests + full regression suite green.</li>
+  </ul>
+
+  <h2>Root-fix (b) — the 3 genuine pipeline-origin parse errors</h2>
+  <table>
+    <thead><tr><th>Name</th><th>Action</th><th>Outcome</th></tr></thead>
+    <tbody>
+      <tr><td><code>poloidal_neutral_internal_state_linear_momentum_flux</code></td><td>Canonical-order rename via <code>sn edit</code> → <code>poloidal_linear_neutral_internal_state_momentum_flux</code></td><td><strong>accepted 0.91</strong></td></tr>
+      <tr><td><code>upper_bound_ion_charge_number</code></td><td>Canonical-order rename → <code>ion_upper_bound_charge_number</code>; inline review exhausted at 0.8375 (borderline; grammar confirmed clean) → <code>sn rescore</code> fresh quorum</td><td><strong>accepted 0.96</strong></td></tr>
+      <tr><td><code>normal_extent_of_magnetic_field_probe</code></td><td>Hint-steered recompose via <code>sn edit</code> (vocab-gap token <code>normal_extent</code> + DD source drift)</td><td>review in flight</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Root-fix (c) — audit-quarantined accepted names fold into the selector</h2>
+  <p>Covered by the <code>quarantined</code> campaign predicate (179 names selectable at dry-run time).</p>
+
+  <h2>Curative revalidation — pending one command</h2>
+  <p><code>sn run --revalidate</code> claimed to clear legacy quarantines but its sweep matched only
+  <code>validation_status='pending'</code>; fixed to include <code>quarantined</code>
+  (imas-codex <code>68f8fa65</code>). The graph-wide re-stamp under the fixed gate (436 quarantined
+  names, of which 58 derived parents clear) is a pooled run the session's permission classifier
+  blocks — it needs the lead to run:
+  <code>imas-codex sn run --source dd --revalidate --only validate</code>.</p>
+
+  <h2>Follow-up queued</h2>
+  <p><code>campaign.py</code> imports the banned-prose vocabulary from <code>benchmark_roles.py</code> —
+  a benchmark module owns production selection vocab. Relocate to a neutral <code>prose_policy</code>
+  module so the two consumers share it without the inverted dependency.</p>
+</main>
+</body>
+</html>

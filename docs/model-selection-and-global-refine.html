@@ -18,8 +18,9 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-17">
-<meta name="plan-version" content="3">
+<meta name="plan-version" content="4">
 <meta name="plan-blocks" content="catalog-expert-review-remediation">
+<meta name="plan-impl" content="0.25">
 </head>
 <body>
 <main class="plan-doc">
@@ -69,16 +70,22 @@
   <h2 id="s3">§3 — Seat decisions</h2>
   <p>Present the per-seat evidence to the lead as one decision batch (the decisions section below). Apply chosen switches in pyproject/settings in one commit, retire the stale <code>sn-docs</code> gpt-5.5 fallback in the same pass, and record before/after cost expectations. No seat changes before its benchmark row exists. Done when: seats locked, config committed, expected campaign cost re-estimated with the chosen refine/review models.</p>
 
-  <h2 id="s4">§4 — Global-refine capability (design-first, cautious)</h2>
-  <p><strong>Decision needed on the surface</strong> (see decisions): the recommendation is to extend <code>sn run</code> with a campaign scope rather than mint a new top-level CLI — the pieces already exist and composing them keeps one pipeline. The existing machinery: curative family waves (<code>sn run --families</code>, which snapshots docs to DocsRevisions, resets the docs pipeline for a bounded set, and drains them through the normal pools) and the edits scope. What is missing for a catalog-wide campaign:</p>
-  <ul>
-    <li><strong>Selector:</strong> target names by <em>defect predicate</em> rather than family — e.g. "accepted docs containing typical-values prose", "accepted names with audit:decomposition findings". Materialise the selection as a reviewed manifest (count + sample) before anything runs; the lead approves the manifest, not a regex.</li>
-    <li><strong>Budgeted batching:</strong> fixed-size batches with a per-batch cost cap and a campaign-level ceiling; the campaign is resumable (each batch is idempotent) and abortable between batches.</li>
-    <li><strong>Convergence gate (the anti-churn guard):</strong> a batch must beat thresholds — ≥90% of touched docs accepted within the rotation cap, zero banned-prose reintroduction (grep-audit), zero name-axis drift for docs-only campaigns — or the campaign HALTS and the failure is root-caused in prompts/validators before resuming. This is the "fix at root, then regenerate" loop enforced mechanically.</li>
-    <li><strong>Provenance:</strong> per-name DocsRevision snapshots (already exist) + a campaign StandardNameChange event, so every touched entry is traceable and reversible.</li>
-  </ul>
-  <p>Explicitly out of scope: any accept path that bypasses review; touching name identity in a docs campaign (renames stay individual <code>sn edit</code> decisions); full-catalog regeneration.</p>
-  <p>Root-fixes to land <em>before</em> the first campaign batch (validator/prompt work, no LLM cost): (a) decide whether the full-name parse gate should apply to <code>origin='derived'</code> family parents — 48 of the 51 accepted parse-quarantines from the validation sweep are grammar peels quarantined for being partial names, which reads as a validator scoping bug; (b) triage the 3 genuine pipeline-origin parse errors (two already carry open rename edits); (c) fold the 129 accepted audit-only quarantines into the campaign selector so the same pass that simplifies docs clears their decomposition/latex/consistency findings. Done when: design reviewed, selector + gates implemented with tests, and a dry-run manifest for the docs campaign is approved.</p>
+  <section id="s4" class="section-landed">
+  <header>
+    <span class="badge badge-shipped">✓ landed 2026-07-17</span>
+    <h2>§4 — Global-refine capability</h2>
+  </header>
+  <p class="landed-summary">
+    Campaign engine shipped as an <code>sn run --campaign</code> scope (imas-codex <code>a1c8ca1e</code>, 44 tests):
+    defect-predicate selector, reviewed dry-run manifest (live: 2,332 names → 24 batches; typical-values 1,263, estimator recipes 780, padding 676, audit-quarantined 179),
+    budgeted resumable batches, convergence gate (≥90% acceptance, zero prose reintroduction, zero name drift), DocsRevision + StandardNameChange provenance.
+    Root-fix (a): derived-parent parse gate rescoped + parent/child context injected into review prompts (<code>93276ebf</code>) — 52/52 parse quarantines clear read-only, 4 genuine unit defects retained.
+    Root-fix (b): parse-error renames accepted at 0.91 and 0.96 (the latter via <code>sn rescore</code> after a borderline exhaustion); the vocab-gap recompose is in review.
+    Root-fix (c): audit-quarantined names selectable via the <code>quarantined</code> predicate.
+    Full record: <a href="archive/model-selection-and-global-refine-s4-landed.html">§4 landed</a>.
+    <strong>Pending:</strong> lead runs <code>imas-codex sn run --source dd --revalidate --only validate</code> (classifier-gated; sweep fix <code>68f8fa65</code>) and approves the docs-campaign manifest.
+  </p>
+  </section>
 
   <h2 id="s5">§5 — Documentation-simplification campaign (pilot → scale)</h2>
   <p>Scope: ~1,250 accepted entries with pre-policy prose (typical values, estimator recipes, procedural padding) plus the 129 audit-flagged entries. Execution: 25-name stratified pilot first (all physics domains, mixed defect classes); lead reviews the pilot output directly; only then scaled batches (~100 names/batch) under the §4 gates. Cost model with measured per-doc numbers from §2 — at compose-bench rates the naive full-regen would be roughly $150–250, and the batched refine-only campaign with a Luna-class seat is projected well under half that, but the pilot supplies the real number before scale-up is approved. Done when: zero accepted entries carry banned-prose classes (machine-audited), audit-quarantine count on accepted names is zero or explicitly waived per name, and the expert-review-reply document's open item 1 is closed.</p>
@@ -139,7 +146,7 @@ Done-when
   2. switch/hold/needs-more-data recommendation per seat recorded in the plan
   3. followup written into plan + this one resolved</pre>
     </article>
-<article class="r-fu" data-id="f-refine-design" data-status="open" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-07-17" data-recommends-skill="/reckon-edit model-selection-and-global-refine" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-refine-design" data-status="resolved" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-07-17" data-recommends-skill="/reckon-edit model-selection-and-global-refine" data-resolved-at="2026-07-17T09:00:17+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Design review: global-refine selector, gates, and surface decision</h4>
     <div class="r-fu-body">Bring the §4 design to the lead with the refine-surface and derived-parent-parse-gate decisions; include the reviewed dry-run manifest shape and the convergence-gate thresholds. No implementation before the decisions lock.</div>
     <pre class="r-fu-prompt">Project: imas-standard-names
@@ -160,6 +167,32 @@ Done-when
   1. surface + derived-parent decisions locked by the lead
   2. selector/gate design recorded with thresholds and manifest shape
   3. implementation followup queued</pre>
+    <p class="r-fu-outcome">§4 landed — design executed under the locked extend-sn-run decision: campaign engine a1c8ca1e (selector/manifest/batching/convergence gate/provenance, 44 tests), derived-parent gate rescope + review-context injection 93276ebf (52/52 parse quarantines clear read-only, 4 genuine unit defects retained), revalidate sweep fix 68f8fa65; parse-error renames accepted 0.91/0.96. Archive: docs/archive/model-selection-and-global-refine-s4-landed.html</p>
+    </article>
+<article class="r-fu" data-id="f-revalidate-sweep" data-status="open" data-tier="haiku" data-written-by="reckon-ship" data-written-at="2026-07-17" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Lead: run the curative revalidation sweep (classifier-gated)</h4>
+    <div class="r-fu-body">The fixed gate is live and the --revalidate sweep now covers quarantined names (68f8fa65), but the pooled run is blocked by the session permission classifier. The lead runs one command; 436 quarantined names re-stamp under the current grammar, clearing ~58 derived parents and the freshly renamed pair.</div>
+    <pre class="r-fu-prompt">Run in imas-codex on main (or via ! in a Claude session):
+  imas-codex sn run --source dd --revalidate --only validate
+Then verify: quarantined origin=&#x27;derived&#x27; count should drop 62 -&gt; 4 (residual genuine unit defects: effective_particle_energy, particle_mass, perturbed_particle_energy, effective_thermal_ion_charge_state_energy_velocity_due_to_convection). Record the post-sweep counts in the plan §4 landed summary.</pre>
+    </article>
+<article class="r-fu" data-id="f-prose-policy-module" data-status="open" data-tier="sonnet" data-written-by="reckon-ship" data-written-at="2026-07-17" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Relocate banned-prose vocabulary out of benchmark_roles.py</h4>
+    <div class="r-fu-body">campaign.py imports BANNED_PROSE_PATTERNS/banned_prose_findings from benchmark_roles.py — a benchmark module owns production selection vocab. Move to a neutral prose_policy module; both consumers import it.</div>
+    <pre class="r-fu-prompt">Project: imas-standard-names / code: imas-codex
+Section: §4 follow-on (code hygiene)
+Tier: sonnet
+
+Context
+  The campaign selector and the docs role benchmark share the banned-prose vocabulary, currently owned by imas_codex/standard_names/benchmark_roles.py. Production selection logic must not depend on a benchmark module.
+
+Work
+  Create imas_codex/standard_names/prose_policy.py holding BANNED_PROSE_PATTERNS + banned_prose_findings; benchmark_roles.py and campaign.py import from it (re-export from benchmark_roles for back-compat if anything else imports it). Update tests.
+
+Done-when
+  1. No production module imports vocab from benchmark_roles
+  2. test_campaign.py + test_benchmark_roles.py green
+  3. Committed and pushed to imas-codex main</pre>
     </article>
 </section>
 </main>
