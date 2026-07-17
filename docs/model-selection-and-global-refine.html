@@ -18,7 +18,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-17">
-<meta name="plan-version" content="9">
+<meta name="plan-version" content="10">
 <meta name="plan-blocks" content="catalog-expert-review-remediation">
 <meta name="plan-impl" content="0.75">
 </head>
@@ -228,12 +228,13 @@ Done-when
   3. this followup resolved; §3 seat-decision batch queued for the lead</pre>
     <p class="r-fu-outcome">All six seats measured (~$36): refine HOLD, names-breaker SWITCH luna, docs-breaker HOLD, docs-gen SWITCH luna, compose HOLD DSv4-local (free; tie with luna at n=17), classifier HOLD gpt-5.4 (82.3% vs luna 79.4%). Seat switches applied ce0144e1; decision locked. K3 unavailable launch-day (upstream 429s). Results doc: imas-codex docs/sn-role-benchmarks.md (final compose/classifier rows folding in). Archive: docs/archive/model-selection-and-global-refine-s2-s3-landed.html</p>
     </article>
-<article class="r-fu" data-id="f-revalidate-rerun" data-status="open" data-tier="haiku" data-written-by="reckon-ship" data-written-at="2026-07-17" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-revalidate-rerun" data-status="resolved" data-tier="haiku" data-written-by="reckon-ship" data-written-at="2026-07-17" data-recommends-skill="" data-resolved-at="2026-07-17T20:29:27+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Lead: re-run the revalidation sweep (now reaches the full backlog)</h4>
     <div class="r-fu-body">All four revalidation-surface fixes are on imas-codex main (68f8fa65, 3a562921, 363a6ee1, b68b1e52). One command re-stamps ~436 quarantined names under the fixed derived-parent gate; classifier-gated, so the lead runs it.</div>
     <pre class="r-fu-prompt">Run (or via ! in a Claude session):
   cd ~/Code/imas-codex &amp;&amp; uv run imas-codex sn run --source dd --revalidate --only validate
 Expect: ~436 cleared; drain re-stamps all; quarantined origin=&#x27;derived&#x27; drops 62 -&gt; 4 (genuine unit defects: effective_particle_energy, particle_mass, perturbed_particle_energy, effective_thermal_ion_charge_state_energy_velocity_due_to_convection). Verify with a quarantined-by-origin count and record post-sweep numbers in the §4 landed archive.</pre>
+    <p class="r-fu-outcome">Sweep executed 2026-07-17 (classifier allowed the LLM-free drain): 436 pending/quarantined re-stamped. Quarantined origin='derived' dropped 62 → 10 — the 4 expected unit defects plus 6 names whose latex_def_check/decomposition_audit findings are genuine (correct quarantines; they are docs-campaign targets, e.g. angle_of_iron_core_segment, ion_current_density). Accepted-stage quarantines now 125 total (109 catalog_edit + 10 derived + 4 pipeline + 2 none); remainder of the 384 re-quarantined are superseded/exhausted terminal-stage residue outside campaign scope. Campaign selection shrank 2,332 → 2,288.</p>
     </article>
 <article class="r-fu" data-id="f-expert-review-reply-doc" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-17" data-recommends-skill="/reckon-edit catalog-expert-review-remediation" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Produce the expert-review reply document logging ALL changes</h4>
