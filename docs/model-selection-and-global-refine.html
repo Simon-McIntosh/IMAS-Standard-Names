@@ -80,10 +80,11 @@
     defect-predicate selector, reviewed dry-run manifest (live: 2,332 names → 24 batches; typical-values 1,263, estimator recipes 780, padding 676, audit-quarantined 179),
     budgeted resumable batches, convergence gate (≥90% acceptance, zero prose reintroduction, zero name drift), DocsRevision + StandardNameChange provenance.
     Root-fix (a): derived-parent parse gate rescoped + parent/child context injected into review prompts (<code>93276ebf</code>) — 52/52 parse quarantines clear read-only, 4 genuine unit defects retained.
-    Root-fix (b): parse-error renames accepted at 0.91 and 0.96 (the latter via <code>sn rescore</code> after a borderline exhaustion); the vocab-gap recompose is in review.
+    Root-fix (b): all 3 parse-error names resolved — renames accepted at 0.91 / 0.96 (the latter via <code>sn rescore</code>), and the vocab-gap probe name recomposed into two accepted per-array siblings after a lead-authorized provenance-split repair.
     Root-fix (c): audit-quarantined names selectable via the <code>quarantined</code> predicate.
+    Revalidation surface repaired end-to-end (<code>68f8fa65</code>, <code>3a562921</code>, <code>363a6ee1</code>, <code>b68b1e52</code>: sweep covers quarantined names, runs before scope routing, drains without composing, no legacy source scoping).
     Full record: <a href="archive/model-selection-and-global-refine-s4-landed.html">§4 landed</a>.
-    <strong>Pending:</strong> lead runs <code>imas-codex sn run --source dd --revalidate --only validate</code> (classifier-gated; sweep fix <code>68f8fa65</code>) and approves the docs-campaign manifest.
+    <strong>Pending:</strong> lead re-runs <code>imas-codex sn run --source dd --revalidate --only validate</code> (expect derived quarantines 62 → 4) and approves the docs-campaign manifest.
   </p>
   </section>
 
