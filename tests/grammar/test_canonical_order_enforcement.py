@@ -149,6 +149,48 @@ def test_population_form_is_grammatical():
 
 
 # ---------------------------------------------------------------------------
+# State/condition qualifiers bind OUTSIDE the subject
+# ---------------------------------------------------------------------------
+# A state qualifier (saturated, fluctuating, ...) names a regime OF the whole
+# species quantity, not a lexical kind glued to the base, so it renders BEFORE
+# the subject. State-after-subject (ion_saturated_current) parses but is
+# non-canonical — the round-trip surfaces the canonical state-outside form.
+
+
+@pytest.mark.parametrize(
+    "name",
+    [
+        "saturated_ion_current_density",
+        "saturated_ion_current",
+        # Stacked state qualifiers nest by binding depth:
+        # fluctuating(saturated(ion current density)).
+        "fluctuating_saturated_ion_current_density",
+    ],
+)
+def test_state_outside_subject_is_grammatical(name):
+    assert compose_standard_name(parse_standard_name(name)) == name
+
+
+@pytest.mark.parametrize(
+    ("name", "canonical"),
+    [
+        ("ion_saturated_current_density", "saturated_ion_current_density"),
+        ("ion_saturated_current", "saturated_ion_current"),
+        (
+            "fluctuating_ion_saturated_current_density",
+            "fluctuating_saturated_ion_current_density",
+        ),
+    ],
+)
+def test_state_after_subject_rejected_with_canonical(name, canonical):
+    with pytest.raises(NonCanonicalNameError) as excinfo:
+        parse_standard_name(name)
+    assert excinfo.value.canonical_form == canonical
+    # The rule is named in the error via the canonical state-outside spelling.
+    assert canonical in str(excinfo.value)
+
+
+# ---------------------------------------------------------------------------
 # Component/coordinate is the FIRST (outermost) prefix segment
 # ---------------------------------------------------------------------------
 

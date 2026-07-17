@@ -17,6 +17,15 @@
 #                                                neutrons)
 #        effective_ion_momentum_convection_velocity
 #        fluctuating_ion_current_density
+#        saturated_ion_current_density           (the saturation value OF the
+#                                                ion current density, I_sat)
+#
+#   State/condition qualifiers (saturated, fluctuating, ...) are phrase-scoping:
+#   a saturation/fluctuation regime is a state OF the whole species quantity,
+#   not a lexical kind glued to the base, so it binds OUTSIDE the subject and
+#   renders BEFORE it. Stacked state qualifiers nest by binding depth,
+#   fluctuating(saturated(ion current density)) =>
+#   fluctuating_saturated_ion_current_density.
 #
 #   2. KIND-FORMING (every other qualifiers.yml token, the default) — tokens
 #      that form a named quantity with the base (Darling's "qualifier" slot,
@@ -24,7 +33,6 @@
 #      INNER of the species block:
 #        ion_atomic_mass          (atomic_mass is the compound, m_a)
 #        argon_prefill_count      (prefill_count — count of the prefill gas)
-#        ion_saturated_current    (ion saturation current, I_sat)
 #        electron_critical_temperature  (critical_temperature, a named
 #                                        threshold like the Greenwald limit)
 #        electron_deposited_power (deposited_power P_dep with the species as
@@ -46,6 +54,11 @@ scoping_qualifiers:
   - effective # effective <X> — evaluative/opinion band, always leads
   - incident # participle on the incident species/radiation (incident neutron fluence)
   - fluctuating # the fluctuating part of <X> (fluctuating ion current density)
+  - saturated # the saturation regime of <X> — a state/condition that binds
+    # OUTSIDE the species (saturated_ion_current_density = the saturation value
+    # of the ion current density, I_sat). See the state-outside-subject note in
+    # the header: a state qualifier renders before the subject, never glued to
+    # the base after it.
   - linear # linear(-phase) <X> (linear plasma decay time)
   - stray # stray <X> (stray magnetic field)
   - breakdown # breakdown(-phase) <X>
