@@ -18,7 +18,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-17">
-<meta name="plan-version" content="10">
+<meta name="plan-version" content="11">
 <meta name="plan-blocks" content="catalog-expert-review-remediation">
 <meta name="plan-impl" content="0.75">
 </head>
@@ -186,7 +186,7 @@ Done-when
 Then verify: quarantined origin=&#x27;derived&#x27; count should drop 62 -&gt; 4 (residual genuine unit defects: effective_particle_energy, particle_mass, perturbed_particle_energy, effective_thermal_ion_charge_state_energy_velocity_due_to_convection). Record the post-sweep counts in the plan §4 landed summary.</pre>
     <p class="r-fu-outcome">Partially executed and superseded: first run exposed two more surface bugs (sweep dead code below pool routing — fixed 3a562921; pools have no validate worker — --only validate now routes to a dedicated LLM-free drain, 363a6ee1; legacy IMASNode source-scoping excluded 330/436 including all 62 derived parents — dropped in b68b1e52). Two interim runs re-confirmed 106 genuine quarantines idempotently. Final re-run still pending — superseded by f-revalidate-rerun.</p>
     </article>
-<article class="r-fu" data-id="f-prose-policy-module" data-status="open" data-tier="sonnet" data-written-by="reckon-ship" data-written-at="2026-07-17" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-prose-policy-module" data-status="resolved" data-tier="sonnet" data-written-by="reckon-ship" data-written-at="2026-07-17" data-recommends-skill="" data-resolved-at="2026-07-17T20:35:15+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Relocate banned-prose vocabulary out of benchmark_roles.py</h4>
     <div class="r-fu-body">campaign.py imports BANNED_PROSE_PATTERNS/banned_prose_findings from benchmark_roles.py — a benchmark module owns production selection vocab. Move to a neutral prose_policy module; both consumers import it.</div>
     <pre class="r-fu-prompt">Project: imas-standard-names / code: imas-codex
@@ -203,6 +203,7 @@ Done-when
   1. No production module imports vocab from benchmark_roles
   2. test_campaign.py + test_benchmark_roles.py green
   3. Committed and pushed to imas-codex main</pre>
+    <p class="r-fu-outcome">Landed — imas-codex a469501d: imas_codex/standard_names/prose_policy.py now owns BANNED_PROSE_PATTERNS + banned_prose_findings; campaign.py and benchmark_roles.py import from it (back-compat re-exports retained in benchmark_roles). test_campaign + test_benchmark_roles 85/85 green.</p>
     </article>
 <article class="r-fu" data-id="f-role-benchmarks-2" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-17" data-recommends-skill="/reckon-ship model-selection-and-global-refine §2" data-resolved-at="2026-07-17T19:34:06+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Diagnose the empty refine bench report, then run all five role benches</h4>
