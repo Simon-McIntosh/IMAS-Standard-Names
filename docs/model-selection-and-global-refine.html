@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"   content="imas-standard-names">
+  <meta name="reckon-type"    content="plan">
+  <meta name="plan-slug"      content="model-selection-and-global-refine">
+  <meta name="plan-title"     content="Model Selection and Global Refine">
+  <meta name="plan-summary"   content="Benchmark the GPT-5.6 family across every pipeline role, then build a cautious global-refine capability for catalog-wide quality campaigns">
+  <meta name="plan-status"    content="active">
+  <meta name="plan-roi"       content="high">
+  <meta name="plan-effort"    content="L">
+  <meta name="plan-tier"      content="opus">
+  <meta name="plan-owner"     content="Simon McIntosh">
+  <meta name="plan-depends-on" content="catalog-expert-review-remediation">
+  <title>Model Selection and Global Refine | imas-standard-names</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+  <h2 id="s1">§1 — Outcome and motivation</h2>
+  <p>Two coupled deliverables. First, a <strong>complete role-by-role benchmark of the GPT-5.6 family</strong> (Sol, Terra, Luna) against the models currently holding each pipeline seat, so model selection is an evidence-based decision rather than a compose-only extrapolation. Second, a <strong>global-refine capability</strong>: a supported, budgeted way to run bounded quality campaigns over the accepted catalog (the immediate driver is the documentation-simplification backlog — ~1,250 accepted entries predating the strict-normative policy — plus the 129 accepted names carrying audit findings from the first full validation sweep). The two are sequenced deliberately: the refine campaign is the largest planned LLM spend, so the model seats it uses should be settled first — a cheaper, quality-equivalent refine model directly reduces the campaign's cost.</p>
+  <p>Guardrails locked by the lead: <em>no naive full regeneration</em> (cost-prohibitive and provenance-destructive); campaigns must ride the same generate→review→score pipeline as normal work (no privileged accept path); root causes are fixed in prompts/validators before any bulk pass so regeneration converges rather than churns.</p>
+
+  <figure>
+    <svg viewBox="0 0 880 150" role="img" aria-label="Plan pipeline" style="width:100%;max-width:880px;font-family:system-ui,sans-serif">
+      <defs><marker id="a" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#555"/></marker></defs>
+      <g fill="#fff" stroke="#555" stroke-width="1">
+        <rect x="4" y="40" width="196" height="66" rx="4"/>
+        <rect x="240" y="40" width="180" height="66" rx="4"/>
+        <rect x="460" y="40" width="180" height="66" rx="4"/>
+        <rect x="680" y="40" width="196" height="66" rx="4"/>
+      </g>
+      <g fill="#202124" font-size="13">
+        <text x="102" y="66" text-anchor="middle" font-weight="600">§2 Role benchmarks</text>
+        <text x="102" y="86" text-anchor="middle">refine · review · docs · classify</text>
+        <text x="330" y="66" text-anchor="middle" font-weight="600">§3 Seat decisions</text>
+        <text x="330" y="86" text-anchor="middle">lead locks per-role models</text>
+        <text x="550" y="66" text-anchor="middle" font-weight="600">§4 Global refine</text>
+        <text x="550" y="86" text-anchor="middle">campaign engine + gates</text>
+        <text x="778" y="66" text-anchor="middle" font-weight="600">§5 Docs campaign</text>
+        <text x="778" y="86" text-anchor="middle">pilot → batches → verify</text>
+      </g>
+      <g stroke="#555" stroke-width="1.2" marker-end="url(#a)"><line x1="200" y1="73" x2="235" y2="73"/><line x1="420" y1="73" x2="455" y2="73"/><line x1="640" y1="73" x2="675" y2="73"/></g>
+      <text x="4" y="136" font-size="12" fill="#555">Sequencing is load-bearing: seat decisions before the campaign; prompt/validator root-fixes before any bulk pass; pilot before scale.</text>
+    </svg>
+    <figcaption>Benchmarks feed seat decisions; the campaign engine runs only with settled seats and piloted convergence.</figcaption>
+  </figure>
+
+  <h2 id="s2">§2 — Full GPT-5.6 role benchmarks (priority)</h2>
+  <p>The existing compose benchmark (2026-07-17) covered one role: Luna quality-tied with GPT-5.5 at 41% lower per-name cost; Terra and Sol cost 45%/190% more per task despite lower or equal list prices (reasoning-token burn); Sol scored lowest on quality. That result must not be extrapolated — each seat exercises a different capability. Benchmark each role with its real prompts, real fixtures, and the seat's production reasoning-effort setting:</p>
+  <table>
+    <thead><tr><th>Seat</th><th>Incumbent</th><th>Candidates</th><th>Benchmark design</th><th>Metric</th></tr></thead>
+    <tbody>
+      <tr><td><code>sn-refine</code> (names + docs rewrites)</td><td>gpt-5.5</td><td>Luna, Terra</td><td>Refine-from-critique: replay a corpus of real reviewer-critique → refined-output pairs from graph history (StandardNameReview records); judge whether the refinement resolves the named defects without collateral rewording. This is the campaign's workhorse seat.</td><td>defect-resolution rate, collateral-change rate, cost/refine</td></tr>
+      <tr><td><code>sn-review</code> names breaker</td><td>gpt-5.5</td><td>Luna, Terra</td><td>Breaker independence: re-score a stratified sample of already-quorum-scored names; measure rank correlation (Spearman ρ) against the blind qwen/minimax pair and against final outcomes. A breaker that just mirrors the pair adds cost without information.</td><td>independence ρ, verdict-flip quality, cost/review</td></tr>
+      <tr><td><code>sn-review</code> docs breaker</td><td>gpt-5.5</td><td>Luna, Terra</td><td>Same design over docs reviews; include normative-policy violations (typical values, estimator recipes) seeded into the sample to measure policy-defect detection.</td><td>policy-defect recall, independence ρ, cost/review</td></tr>
+      <tr><td><code>sn-docs</code> generation</td><td>sonnet-4.6 (active); gpt-5.5 stale fallback</td><td>Luna, Terra, Sol</td><td>Generate docs for a fixed 20-name stratified sample under the strict-normative prompt; score with the production review rubric; grep-audit for banned prose classes.</td><td>rubric score, banned-prose rate, cost/doc</td></tr>
+      <tr><td>domain classifier tier-1</td><td>(language model seat)</td><td>Luna</td><td>Re-run the domain gold set (209 paths) — cheap, fully automated, exact-match scoring.</td><td>gold-set accuracy, cost</td></tr>
+    </tbody>
+  </table>
+  <p>Mechanics: extend <code>sn bench</code> with per-role benchmark modes rather than one-off scripts, so re-benchmarking on the next model generation is a command, not a project. Budget: ≤ $40 total across all role benches. Sol is included only where §2's table lists it (docs generation) — the compose result argues against Sol for structured tasks, but docs prose is the one seat where frontier reasoning could pay; test it there and nowhere else. All benchmark identifiers stay model-id-based per naming hygiene. Done when: every row has a measured table (quality metrics + cost) committed to the benchmark reference, and the report distinguishes "switch", "hold", and "needs deeper data" per seat.</p>
+
+  <h2 id="s3">§3 — Seat decisions</h2>
+  <p>Present the per-seat evidence to the lead as one decision batch (the decisions section below). Apply chosen switches in pyproject/settings in one commit, retire the stale <code>sn-docs</code> gpt-5.5 fallback in the same pass, and record before/after cost expectations. No seat changes before its benchmark row exists. Done when: seats locked, config committed, expected campaign cost re-estimated with the chosen refine/review models.</p>
+
+  <h2 id="s4">§4 — Global-refine capability (design-first, cautious)</h2>
+  <p><strong>Decision needed on the surface</strong> (see decisions): the recommendation is to extend <code>sn run</code> with a campaign scope rather than mint a new top-level CLI — the pieces already exist and composing them keeps one pipeline. The existing machinery: curative family waves (<code>sn run --families</code>, which snapshots docs to DocsRevisions, resets the docs pipeline for a bounded set, and drains them through the normal pools) and the edits scope. What is missing for a catalog-wide campaign:</p>
+  <ul>
+    <li><strong>Selector:</strong> target names by <em>defect predicate</em> rather than family — e.g. "accepted docs containing typical-values prose", "accepted names with audit:decomposition findings". Materialise the selection as a reviewed manifest (count + sample) before anything runs; the lead approves the manifest, not a regex.</li>
+    <li><strong>Budgeted batching:</strong> fixed-size batches with a per-batch cost cap and a campaign-level ceiling; the campaign is resumable (each batch is idempotent) and abortable between batches.</li>
+    <li><strong>Convergence gate (the anti-churn guard):</strong> a batch must beat thresholds — ≥90% of touched docs accepted within the rotation cap, zero banned-prose reintroduction (grep-audit), zero name-axis drift for docs-only campaigns — or the campaign HALTS and the failure is root-caused in prompts/validators before resuming. This is the "fix at root, then regenerate" loop enforced mechanically.</li>
+    <li><strong>Provenance:</strong> per-name DocsRevision snapshots (already exist) + a campaign StandardNameChange event, so every touched entry is traceable and reversible.</li>
+  </ul>
+  <p>Explicitly out of scope: any accept path that bypasses review; touching name identity in a docs campaign (renames stay individual <code>sn edit</code> decisions); full-catalog regeneration.</p>
+  <p>Root-fixes to land <em>before</em> the first campaign batch (validator/prompt work, no LLM cost): (a) decide whether the full-name parse gate should apply to <code>origin='derived'</code> family parents — 48 of the 51 accepted parse-quarantines from the validation sweep are grammar peels quarantined for being partial names, which reads as a validator scoping bug; (b) triage the 3 genuine pipeline-origin parse errors (two already carry open rename edits); (c) fold the 129 accepted audit-only quarantines into the campaign selector so the same pass that simplifies docs clears their decomposition/latex/consistency findings. Done when: design reviewed, selector + gates implemented with tests, and a dry-run manifest for the docs campaign is approved.</p>
+
+  <h2 id="s5">§5 — Documentation-simplification campaign (pilot → scale)</h2>
+  <p>Scope: ~1,250 accepted entries with pre-policy prose (typical values, estimator recipes, procedural padding) plus the 129 audit-flagged entries. Execution: 25-name stratified pilot first (all physics domains, mixed defect classes); lead reviews the pilot output directly; only then scaled batches (~100 names/batch) under the §4 gates. Cost model with measured per-doc numbers from §2 — at compose-bench rates the naive full-regen would be roughly $150–250, and the batched refine-only campaign with a Luna-class seat is projected well under half that, but the pilot supplies the real number before scale-up is approved. Done when: zero accepted entries carry banned-prose classes (machine-audited), audit-quarantine count on accepted names is zero or explicitly waived per name, and the expert-review-reply document's open item 1 is closed.</p>
+
+  <h2 id="s6">§6 — Risks</h2>
+  <ul>
+    <li><strong>Refine churn:</strong> a below-par refine model rewrites correct physics. Mitigated by the convergence gate + pilot-first + review quorum unchanged.</li>
+    <li><strong>Benchmark overfit:</strong> role benches on historical fixtures can flatter a model that memorised similar text; keep held-out samples and judge with the production rubric, not the training critique.</li>
+    <li><strong>Cost surprise:</strong> 5.6 reasoning-token burn made list price misleading once already; every seat decision uses measured per-task cost.</li>
+    <li><strong>Quarantine interactions:</strong> review pools skip quarantined names — campaign batches must re-validate after refinement or accepted fixes stay invisible.</li>
+  </ul>
+
+  <section data-reckon="decisions" id="decisions" class="r-decisions">
+    <h2><span class="sec">§</span> Decisions</h2>
+    <div class="r-dec" data-key="refine-surface" data-choice="" data-by="" data-when="">
+      <p class="r-dec-q">Should the global-refine capability be a new top-level CLI command or an extension of the existing sn run campaign scopes?</p>
+      <p class="r-dec-opts">
+        <button class="r-opt" data-value="extend-sn-run">Extend sn run (--campaign selector riding --families/DocsRevision machinery)</button>
+        <button class="r-opt" data-value="new-cli">New dedicated command (e.g. sn refine) wrapping the same pools</button>
+      </p>
+      <p class="r-dec-rat"></p>
+    </div>
+    <div class="r-dec" data-key="derived-parent-parse-gate" data-choice="" data-by="" data-when="">
+      <p class="r-dec-q">Should the full-name parse gate apply to origin='derived' family parents (currently quarantines 48 accepted grammar peels as partial names)?</p>
+      <p class="r-dec-opts">
+        <button class="r-opt" data-value="exempt-derived">Exempt derived parents from the full-name parse (keep their structural admission gate)</button>
+        <button class="r-opt" data-value="keep-and-triage">Keep the gate; triage the 48 individually</button>
+      </p>
+      <p class="r-dec-rat"></p>
+    </div>
+    <div class="r-dec" data-key="seat-switches" data-choice="" data-by="" data-when="">
+      <p class="r-dec-q">Which pipeline seats move to a GPT-5.6 model? (Locked after §2 evidence lands — one batch decision across refine / name-breaker / docs-breaker / docs-gen / classifier.)</p>
+      <p class="r-dec-rat"></p>
+    </div>
+  </section>
+
+  <section data-reckon="followups" id="followups" class="r-followups">
+    <h2><span class="sec">§</span> Followups</h2>
+    <article class="r-fu" data-id="f-role-benchmarks" data-status="open" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-07-17" data-recommends-skill="/reckon-ship model-selection-and-global-refine §2" data-resolved-at="" data-resolved-by="">
+      <h4 class="r-fu-title">Run the full GPT-5.6 role benchmarks</h4>
+      <div class="r-fu-body">Priority work: extend sn bench with per-role modes (refine-from-critique, breaker independence, docs generation, classifier gold set) and measure Luna/Terra (+Sol for docs only) against each incumbent with production prompts and reasoning-effort settings. ≤ $40 total.</div>
+      <pre class="r-fu-prompt">Project: imas-standard-names
+Plan:    model-selection-and-global-refine (http://localhost:8765/imas-standard-names/model-selection-and-global-refine.html)
+Section: §2
+Tier:    opus
+
+Context
+  Compose-only benchmarking (2026-07-17, imas-codex 80c1935) showed Luna quality-tied at 41% lower cost and Sol overpriced for structured tasks. Each remaining pipeline seat needs its own measured row before any switch.
+
+State to read  (CODE / FILES / DATA)
+  imas-codex: imas_codex/standard_names/benchmark*.py, sn bench CLI, pyproject [sn-refine]/[sn-review]/[sn-docs] model config, StandardNameReview records on the live graph (read-only) for the refine-from-critique corpus, definitions/physics/domain_gold_set.json.
+
+Scope locks / constraints  (non-decision)
+  Extend sn bench (no one-off scripts); model-id-based identifiers; production prompts + per-seat reasoning-effort; held-out samples for judging; budget ceiling $40 across all roles; no pipeline seat/config switches in this followup — evidence only. Live graph reads OK, no writes.
+
+Done-when
+  1. per-role benchmark modes committed with tests; measured table (quality + cost) per §2 row in the benchmark reference
+  2. switch/hold/needs-more-data recommendation per seat recorded in the plan
+  3. followup written into plan + this one resolved</pre>
+    </article>
+    <article class="r-fu" data-id="f-refine-design" data-status="open" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-07-17" data-recommends-skill="/reckon-edit model-selection-and-global-refine" data-resolved-at="" data-resolved-by="">
+      <h4 class="r-fu-title">Design review: global-refine selector, gates, and surface decision</h4>
+      <div class="r-fu-body">Bring the §4 design to the lead with the refine-surface and derived-parent-parse-gate decisions; include the reviewed dry-run manifest shape and the convergence-gate thresholds. No implementation before the decisions lock.</div>
+      <pre class="r-fu-prompt">Project: imas-standard-names
+Plan:    model-selection-and-global-refine (http://localhost:8765/imas-standard-names/model-selection-and-global-refine.html)
+Section: §4
+Tier:    opus
+
+Context
+  The docs-simplification backlog (~1,250 entries) plus 129 audit-flagged accepted names need a bounded campaign engine. Guardrails: same pipeline, no naive regeneration, root-fix before bulk, pilot before scale.
+
+State to read  (CODE / FILES / DATA)
+  imas-codex sn run --families / DocsRevision machinery, edits scope, validation sweep results (plan research r-validation-backlog-swept in catalog-expert-review-remediation), review-pool quarantine skip behaviour.
+
+Scope locks / constraints  (non-decision)
+  No accept path bypassing review; docs campaigns never touch name identity; campaign manifest reviewed before execution; batches idempotent + abortable; convergence gate halts on threshold miss.
+
+Done-when
+  1. surface + derived-parent decisions locked by the lead
+  2. selector/gate design recorded with thresholds and manifest shape
+  3. implementation followup queued</pre>
+    </article>
+  </section>
+</main>
+</body>
+</html>
