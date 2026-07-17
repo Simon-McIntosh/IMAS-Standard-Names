@@ -18,7 +18,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-17">
-<meta name="plan-version" content="5">
+<meta name="plan-version" content="6">
 <meta name="plan-blocks" content="catalog-expert-review-remediation">
 <meta name="plan-impl" content="0.25">
 </head>
@@ -244,6 +244,25 @@ Done-when
   1. reply document authored + audit-doc clean + pushed
   2. every change in the log carries a SHA or graph-event reference
   3. remediation plan followup resolved; RC release unblocked</pre>
+    </article>
+<article class="r-fu" data-id="f-refine-kind-hardening" data-status="open" data-tier="sonnet" data-written-by="reckon-ship" data-written-at="2026-07-17" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Harden RefinedName.kind: enum the schema field, enumerate kinds in the refine prompt</h4>
+    <div class="r-fu-body">Bench diagnosis exposed a latent production fragility: RefinedName.kind is a free string with no schema enum, and the refine prompt never enumerates scalar/vector/metadata — the only in-prompt kind signal is the scored-examples include. If examples ever fail to load, production refine degrades to mass kind-validation failures exactly as the bench did (60/60 dropped).</div>
+    <pre class="r-fu-prompt">Project: imas-standard-names / code: imas-codex (branch main)
+Section: §2 follow-on (production hardening)
+Tier: sonnet
+
+Context
+  See docs/sn-role-benchmarks.md methods section (bench-runner flag, 2026-07-17): RefinedName.kind free string, refine prompt omits kind vocabulary; production conveys kind only via the _compose_scored_examples.md include populated by load_compose_examples.
+
+Work
+  1. Constrain RefinedName.kind to the valid kind literals (scalar/vector/metadata — confirm the authoritative set from the ISN schema) so invalid kinds fail at parse with a clear message.
+  2. Enumerate the valid kinds explicitly in the refine prompt template so the signal does not depend on the examples include.
+  3. Regression test: refine context WITHOUT scored examples still yields schema-valid kind on a fixture case.
+
+Done-when
+  1. enum + prompt change + test committed and pushed
+  2. bench refine mode re-run smoke (3 cases) confirms no regression</pre>
     </article>
 </section>
 </main>
