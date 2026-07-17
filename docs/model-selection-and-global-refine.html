@@ -18,9 +18,9 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-17">
-<meta name="plan-version" content="7">
+<meta name="plan-version" content="9">
 <meta name="plan-blocks" content="catalog-expert-review-remediation">
-<meta name="plan-impl" content="0.25">
+<meta name="plan-impl" content="0.75">
 </head>
 <body>
 <main class="plan-doc">
@@ -53,22 +53,29 @@
     <figcaption>Benchmarks feed seat decisions; the campaign engine runs only with settled seats and piloted convergence.</figcaption>
   </figure>
 
-  <h2 id="s2">§2 — Full GPT-5.6 role benchmarks (priority)</h2>
-  <p>The existing compose benchmark (2026-07-17) covered one role: Luna quality-tied with GPT-5.5 at 41% lower per-name cost; Terra and Sol cost 45%/190% more per task despite lower or equal list prices (reasoning-token burn); Sol scored lowest on quality. That result must not be extrapolated — each seat exercises a different capability. Benchmark each role with its real prompts, real fixtures, and the seat's production reasoning-effort setting:</p>
-  <table>
-    <thead><tr><th>Seat</th><th>Incumbent</th><th>Candidates</th><th>Benchmark design</th><th>Metric</th></tr></thead>
-    <tbody>
-      <tr><td><code>sn-refine</code> (names + docs rewrites)</td><td>gpt-5.5</td><td>Luna, Terra</td><td>Refine-from-critique: replay a corpus of real reviewer-critique → refined-output pairs from graph history (StandardNameReview records); judge whether the refinement resolves the named defects without collateral rewording. This is the campaign's workhorse seat.</td><td>defect-resolution rate, collateral-change rate, cost/refine</td></tr>
-      <tr><td><code>sn-review</code> names breaker</td><td>gpt-5.5</td><td>Luna, Terra</td><td>Breaker independence: re-score a stratified sample of already-quorum-scored names; measure rank correlation (Spearman ρ) against the blind qwen/minimax pair and against final outcomes. A breaker that just mirrors the pair adds cost without information.</td><td>independence ρ, verdict-flip quality, cost/review</td></tr>
-      <tr><td><code>sn-review</code> docs breaker</td><td>gpt-5.5</td><td>Luna, Terra</td><td>Same design over docs reviews; include normative-policy violations (typical values, estimator recipes) seeded into the sample to measure policy-defect detection.</td><td>policy-defect recall, independence ρ, cost/review</td></tr>
-      <tr><td><code>sn-docs</code> generation</td><td>sonnet-4.6 (active); gpt-5.5 stale fallback</td><td>Luna, Terra, Sol</td><td>Generate docs for a fixed 20-name stratified sample under the strict-normative prompt; score with the production review rubric; grep-audit for banned prose classes.</td><td>rubric score, banned-prose rate, cost/doc</td></tr>
-      <tr><td>domain classifier tier-1</td><td>(language model seat)</td><td>Luna</td><td>Re-run the domain gold set (209 paths) — cheap, fully automated, exact-match scoring.</td><td>gold-set accuracy, cost</td></tr>
-    </tbody>
-  </table>
-  <p>Mechanics: extend <code>sn bench</code> with per-role benchmark modes rather than one-off scripts, so re-benchmarking on the next model generation is a command, not a project. Budget: ≤ $40 total across all role benches. Sol is included only where §2's table lists it (docs generation) — the compose result argues against Sol for structured tasks, but docs prose is the one seat where frontier reasoning could pay; test it there and nowhere else. All benchmark identifiers stay model-id-based per naming hygiene. Done when: every row has a measured table (quality metrics + cost) committed to the benchmark reference, and the report distinguishes "switch", "hold", and "needs deeper data" per seat.</p>
+  <section id="s2" class="section-landed">
+  <header>
+    <span class="badge badge-shipped">✓ landed 2026-07-17</span>
+    <h2>§2 — Full GPT-5.6 role benchmarks</h2>
+  </header>
+  <p class="landed-summary">
+    Six seats measured for ≈$36 via <code>sn bench --role</code> (harness now permanent: refine / breaker-names / breaker-docs / docs / classifier + compose re-run with the local DSv4 route).
+    Refine: incumbent gpt-5.5 best (0.874 resolution, 0.147 collateral). Names breaker: Luna more independent (ρ 0.252 vs 0.319) with better flips (0.714 vs 0.545) at ¼ cost. Docs breaker: gpt-5.5 best on both axes. Docs generation: Luna zero banned prose vs 15%, rubric parity, 23% cheaper; Sol not worth 2.6×. Compose: free local DSv4 ties Luna at n=17. Classifier: Luna 77.5%, incumbent baseline running.
+    Two bench-fidelity root-fixes en route (grammar-vocab context <code>0a05c173</code>, scored-examples/kind <code>0baa04ee</code>) plus the kind-enum unification (<code>6ef0ab2c</code>).
+    Measured tables: imas-codex <code>docs/sn-role-benchmarks.md</code>. Full record: <a href="archive/model-selection-and-global-refine-s2-s3-landed.html">§2–§3 landed</a>.
+  </p>
+  </section>
 
-  <h2 id="s3">§3 — Seat decisions</h2>
-  <p>Present the per-seat evidence to the lead as one decision batch (the decisions section below). Apply chosen switches in pyproject/settings in one commit, retire the stale <code>sn-docs</code> gpt-5.5 fallback in the same pass, and record before/after cost expectations. No seat changes before its benchmark row exists. Done when: seats locked, config committed, expected campaign cost re-estimated with the chosen refine/review models.</p>
+  <section id="s3" class="section-landed">
+  <header>
+    <span class="badge badge-shipped">✓ landed 2026-07-17</span>
+    <h2>§3 — Seat decisions</h2>
+  </header>
+  <p class="landed-summary">
+    Lead locked the batch (<code>seat-switches</code> decision): SWITCH docs generation and names breaker to gpt-5.6-luna; HOLD refine + docs breaker on gpt-5.5, compose on local deepseek-v4-flash, and classifier tier-1 on gpt-5.4 (rebaseline: 82.3% vs Luna 79.4% vs haiku 75.1% on the 209-path gold set). Applied in one commit (imas-codex <code>ce0144e1</code>) with evidence recorded in the section comments; stale sn-docs gpt-5.5 fallback retired.
+    Campaign cost inputs: docs-gen ≈$0.09/doc (Luna, 0% banned prose), refine ≈$0.08 (gpt-5.5). Full record: <a href="archive/model-selection-and-global-refine-s2-s3-landed.html">§2–§3 landed</a>.
+  </p>
+  </section>
 
   <section id="s4" class="section-landed">
   <header>
@@ -117,9 +124,9 @@
       </p>
     <p class="r-dec-rat"></p>
     </div>
-<div class="r-dec" data-key="seat-switches" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="seat-switches" data-choice="luna-docs-and-names-breaker" data-by="user" data-when="2026-07-17T19:32:06+00:00">
     <p class="r-dec-q">Which pipeline seats move to a GPT-5.6 model? (Locked after §2 evidence lands — one batch decision across refine / name-breaker / docs-breaker / docs-gen / classifier.)</p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">One batch decision from the six 2026-07-17 role benches ($36 of $40): SWITCH docs generation sonnet-4.6→gpt-5.6-luna (rubric parity 0.813/0.806, zero banned prose vs 15%, 23% cheaper) and names breaker gpt-5.5→luna (independence rho 0.252 vs 0.319, flip quality 0.714 vs 0.545, quarter cost); HOLD refine gpt-5.5 (best resolution 0.874, lowest collateral), docs breaker gpt-5.5 (most independent AND best flips on the docs axis), compose deepseek-v4-flash local (free; luna gap 1.2pts = tie at n=17), classifier tier-1 gpt-5.4 (rebaseline 82.3% vs luna 79.4% vs haiku 75.1% on the 209-path gold set). Applied in imas-codex ce0144e1; stale sn-docs gpt-5.5 fallback retired.</p>
     </div>
 </section>
 
@@ -197,7 +204,7 @@ Done-when
   2. test_campaign.py + test_benchmark_roles.py green
   3. Committed and pushed to imas-codex main</pre>
     </article>
-<article class="r-fu" data-id="f-role-benchmarks-2" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-17" data-recommends-skill="/reckon-ship model-selection-and-global-refine §2" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-role-benchmarks-2" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-17" data-recommends-skill="/reckon-ship model-selection-and-global-refine §2" data-resolved-at="2026-07-17T19:34:06+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Diagnose the empty refine bench report, then run all five role benches</h4>
     <div class="r-fu-body">GATES THE DOCS-REFINE CAMPAIGN (expert-review response). The sn bench --role harness is committed but the refine run judges zero cases and saves a hollow report; the other four roles are unrun. Diagnose, make n=0 fail loudly, re-run all five, write docs/sn-role-benchmarks.md with per-seat verdicts.</div>
     <pre class="r-fu-prompt">Project: imas-standard-names / code: imas-codex (branch main)
@@ -219,6 +226,7 @@ Done-when
   1. five non-empty JSON reports on disk; docs/sn-role-benchmarks.md pushed
   2. verdicts recorded in the plan (§2 collapse + seat-switches decision context)
   3. this followup resolved; §3 seat-decision batch queued for the lead</pre>
+    <p class="r-fu-outcome">All six seats measured (~$36): refine HOLD, names-breaker SWITCH luna, docs-breaker HOLD, docs-gen SWITCH luna, compose HOLD DSv4-local (free; tie with luna at n=17), classifier HOLD gpt-5.4 (82.3% vs luna 79.4%). Seat switches applied ce0144e1; decision locked. K3 unavailable launch-day (upstream 429s). Results doc: imas-codex docs/sn-role-benchmarks.md (final compose/classifier rows folding in). Archive: docs/archive/model-selection-and-global-refine-s2-s3-landed.html</p>
     </article>
 <article class="r-fu" data-id="f-revalidate-rerun" data-status="open" data-tier="haiku" data-written-by="reckon-ship" data-written-at="2026-07-17" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Lead: re-run the revalidation sweep (now reaches the full backlog)</h4>
