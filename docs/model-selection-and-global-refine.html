@@ -18,7 +18,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-17">
-<meta name="plan-version" content="4">
+<meta name="plan-version" content="5">
 <meta name="plan-blocks" content="catalog-expert-review-remediation">
 <meta name="plan-impl" content="0.25">
 </head>
@@ -125,7 +125,7 @@
 
   <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-role-benchmarks" data-status="open" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-07-17" data-recommends-skill="/reckon-ship model-selection-and-global-refine §2" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-role-benchmarks" data-status="resolved" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-07-17" data-recommends-skill="/reckon-ship model-selection-and-global-refine §2" data-resolved-at="2026-07-17T09:47:05+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Run the full GPT-5.6 role benchmarks</h4>
     <div class="r-fu-body">Priority work: extend sn bench with per-role modes (refine-from-critique, breaker independence, docs generation, classifier gold set) and measure Luna/Terra (+Sol for docs only) against each incumbent with production prompts and reasoning-effort settings. ≤ $40 total.</div>
     <pre class="r-fu-prompt">Project: imas-standard-names
@@ -146,6 +146,7 @@ Done-when
   1. per-role benchmark modes committed with tests; measured table (quality + cost) per §2 row in the benchmark reference
   2. switch/hold/needs-more-data recommendation per seat recorded in the plan
   3. followup written into plan + this one resolved</pre>
+    <p class="r-fu-outcome">Harness landed (imas-codex 23e6f99d, d4994f97) + refine-context fidelity fix 0a05c173 (bench was starving the refine prompt of the closed-vocabulary listing production injects). Execution NOT complete: the post-fix refine run saved an EMPTY report (n=0 all models, sn_rolebench_refine_20260717T090827.json) and the remaining 4 roles are unrun. Superseded by f-role-benchmarks-2 which carries the diagnosis brief.</p>
     </article>
 <article class="r-fu" data-id="f-refine-design" data-status="resolved" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-07-17" data-recommends-skill="/reckon-edit model-selection-and-global-refine" data-resolved-at="2026-07-17T09:00:17+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Design review: global-refine selector, gates, and surface decision</h4>
@@ -170,12 +171,13 @@ Done-when
   3. implementation followup queued</pre>
     <p class="r-fu-outcome">§4 landed — design executed under the locked extend-sn-run decision: campaign engine a1c8ca1e (selector/manifest/batching/convergence gate/provenance, 44 tests), derived-parent gate rescope + review-context injection 93276ebf (52/52 parse quarantines clear read-only, 4 genuine unit defects retained), revalidate sweep fix 68f8fa65; parse-error renames accepted 0.91/0.96. Archive: docs/archive/model-selection-and-global-refine-s4-landed.html</p>
     </article>
-<article class="r-fu" data-id="f-revalidate-sweep" data-status="open" data-tier="haiku" data-written-by="reckon-ship" data-written-at="2026-07-17" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-revalidate-sweep" data-status="resolved" data-tier="haiku" data-written-by="reckon-ship" data-written-at="2026-07-17" data-recommends-skill="" data-resolved-at="2026-07-17T09:47:05+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Lead: run the curative revalidation sweep (classifier-gated)</h4>
     <div class="r-fu-body">The fixed gate is live and the --revalidate sweep now covers quarantined names (68f8fa65), but the pooled run is blocked by the session permission classifier. The lead runs one command; 436 quarantined names re-stamp under the current grammar, clearing ~58 derived parents and the freshly renamed pair.</div>
     <pre class="r-fu-prompt">Run in imas-codex on main (or via ! in a Claude session):
   imas-codex sn run --source dd --revalidate --only validate
 Then verify: quarantined origin=&#x27;derived&#x27; count should drop 62 -&gt; 4 (residual genuine unit defects: effective_particle_energy, particle_mass, perturbed_particle_energy, effective_thermal_ion_charge_state_energy_velocity_due_to_convection). Record the post-sweep counts in the plan §4 landed summary.</pre>
+    <p class="r-fu-outcome">Partially executed and superseded: first run exposed two more surface bugs (sweep dead code below pool routing — fixed 3a562921; pools have no validate worker — --only validate now routes to a dedicated LLM-free drain, 363a6ee1; legacy IMASNode source-scoping excluded 330/436 including all 62 derived parents — dropped in b68b1e52). Two interim runs re-confirmed 106 genuine quarantines idempotently. Final re-run still pending — superseded by f-revalidate-rerun.</p>
     </article>
 <article class="r-fu" data-id="f-prose-policy-module" data-status="open" data-tier="sonnet" data-written-by="reckon-ship" data-written-at="2026-07-17" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Relocate banned-prose vocabulary out of benchmark_roles.py</h4>
@@ -194,6 +196,54 @@ Done-when
   1. No production module imports vocab from benchmark_roles
   2. test_campaign.py + test_benchmark_roles.py green
   3. Committed and pushed to imas-codex main</pre>
+    </article>
+<article class="r-fu" data-id="f-role-benchmarks-2" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-17" data-recommends-skill="/reckon-ship model-selection-and-global-refine §2" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Diagnose the empty refine bench report, then run all five role benches</h4>
+    <div class="r-fu-body">GATES THE DOCS-REFINE CAMPAIGN (expert-review response). The sn bench --role harness is committed but the refine run judges zero cases and saves a hollow report; the other four roles are unrun. Diagnose, make n=0 fail loudly, re-run all five, write docs/sn-role-benchmarks.md with per-seat verdicts.</div>
+    <pre class="r-fu-prompt">Project: imas-standard-names / code: imas-codex (branch main)
+Plan:    model-selection-and-global-refine §2
+Tier:    opus
+
+Context
+  Role-bench harness committed: 23e6f99d (modes) + d4994f97 (corpus keys) + 0a05c173 (refine context now merges build_compose_context — without it the grammar-reference include rendered empty and every candidate invented unregistered tokens). Post-fix refine run STILL produced an empty report: ~/.local/share/imas-codex/benchmarks/sn_rolebench_refine_20260717T090827.json has n=0, cost=0, metrics={} for gpt-5.5/luna/terra despite 20 sample_ids. Suspects: (a) key mismatch between load_refine_corpus output and run_refine_bench after the 0a05c173 seam change; (b) every candidate failing RefinedName validation and being dropped uncounted; (c) judge-stage errors swallowed per-case.
+
+Work
+  1. In imas_codex/standard_names/benchmark_roles.py: find why every model uniformly judged 0 cases; fix; make run_*_bench RAISE (or set report.error) when a model ends with n=0 — an empty report must never render as a clean table. Test the tripwire.
+  2. Run sequentially with log capture + exit sentinels, $40 total ceiling (cost telemetry from OpenRouter response_cost):
+     uv run imas-codex sn bench --role refine   (verify n&gt;0, cost&gt;0 BEFORE proceeding)
+     then --role breaker-names, breaker-docs, docs, classifier
+  3. Write /home/ITER/mcintos/Code/imas-codex/docs/sn-role-benchmarks.md: summary table + per-seat measured tables (quality metrics, cost/item, incumbent marked) + verdict per seat: SWITCH(to X) / HOLD / NEEDS-MORE-DATA. Note the two harness fidelity fixes in a methods section.
+  4. Commit+push (explicit paths; no AI trailers; no plan refs in messages).
+
+Done-when
+  1. five non-empty JSON reports on disk; docs/sn-role-benchmarks.md pushed
+  2. verdicts recorded in the plan (§2 collapse + seat-switches decision context)
+  3. this followup resolved; §3 seat-decision batch queued for the lead</pre>
+    </article>
+<article class="r-fu" data-id="f-revalidate-rerun" data-status="open" data-tier="haiku" data-written-by="reckon-ship" data-written-at="2026-07-17" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Lead: re-run the revalidation sweep (now reaches the full backlog)</h4>
+    <div class="r-fu-body">All four revalidation-surface fixes are on imas-codex main (68f8fa65, 3a562921, 363a6ee1, b68b1e52). One command re-stamps ~436 quarantined names under the fixed derived-parent gate; classifier-gated, so the lead runs it.</div>
+    <pre class="r-fu-prompt">Run (or via ! in a Claude session):
+  cd ~/Code/imas-codex &amp;&amp; uv run imas-codex sn run --source dd --revalidate --only validate
+Expect: ~436 cleared; drain re-stamps all; quarantined origin=&#x27;derived&#x27; drops 62 -&gt; 4 (genuine unit defects: effective_particle_energy, particle_mass, perturbed_particle_energy, effective_thermal_ion_charge_state_energy_velocity_due_to_convection). Verify with a quarantined-by-origin count and record post-sweep numbers in the §4 landed archive.</pre>
+    </article>
+<article class="r-fu" data-id="f-expert-review-reply-doc" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-17" data-recommends-skill="/reckon-edit catalog-expert-review-remediation" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Produce the expert-review reply document logging ALL changes</h4>
+    <div class="r-fu-body">Lead mandate (2026-07-17): the expert catalog review needs a reply document that logs every change made in response — the §4/§5 campaign work here, the derived-parent gate rescope, the parse-error triages, the provenance repairs, and the docs-refine campaign results once run. Gated by the §2 bench verdicts → §3 seats → §5 campaign chain; draft structure can start now from the §4 landed archive.</div>
+    <pre class="r-fu-prompt">Project: imas-standard-names
+Plans:   catalog-expert-review-remediation (reply doc home) + model-selection-and-global-refine (change log source)
+Tier:    opus
+
+Context
+  The expert-review reply must enumerate every remediation change with evidence. Sources to fold in: docs/archive/model-selection-and-global-refine-s4-landed.html (campaign engine, gate rescope, parse-error triage, provenance-split repair, revalidation fixes with imas-codex SHAs a1c8ca1e/93276ebf/68f8fa65/3a562921/363a6ee1/b68b1e52 + repair change events), the docs-campaign pilot+batch results once §5 runs, post-sweep quarantine counts, and the existing reply-thread docs in the remediation plan (open item 1 = docs simplification).
+
+Work
+  Author the reply as HTML in docs/ per reckon conventions (graphics where they communicate: before/after quarantine counts, campaign convergence per batch). Cross-link both plans. Close open item 1 of the prior reply thread when the campaign lands.
+
+Done-when
+  1. reply document authored + audit-doc clean + pushed
+  2. every change in the log carries a SHA or graph-event reference
+  3. remediation plan followup resolved; RC release unblocked</pre>
     </article>
 </section>
 </main>
