@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-standard-names">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="model-selection-and-global-refine-s5-pilot-landed">
+  <meta name="plan-title" content="§5 pilot landed — 25-name stratified docs campaign">
+  <meta name="plan-summary" content="Stratified 25-name docs-refinement pilot converged at 96% acceptance with zero banned prose and zero name drift; measured cost $0.37–0.42/name sets the scale-up decision">
+  <meta name="plan-status" content="historical">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <title>§5 pilot landed | model-selection-and-global-refine</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+  <h1>§5 — Documentation campaign: 25-name stratified pilot (landed 2026-07-17)</h1>
+  <p>Evergreen: <a href="/imas-standard-names/model-selection-and-global-refine.html">model-selection-and-global-refine</a> §5.
+  The pilot is the first live use of the §4 campaign engine. Scaled batches are <strong>gated on lead approval</strong> of the manifest and the measured cost below.</p>
+
+  <h2>Quick status</h2>
+  <table>
+    <tr><th>Item</th><th>Status</th><th>Evidence</th></tr>
+    <tr><td>Revalidation sweep (pre-campaign)</td><td>✓ shipped</td><td>436 re-stamped; derived quarantines 62 → 10 (4 unit defects + 6 genuine audit findings); accepted-stage quarantines 125</td></tr>
+    <tr><td>Stratified pilot selection (<code>--campaign-pilot N</code>)</td><td>✓ shipped</td><td>imas-codex <code>0882e417</code> — domain round-robin, defect-class rotation, deterministic seed; 7 tests</td></tr>
+    <tr><td>Full-campaign manifest (dry-run)</td><td>✓ generated</td><td>2,288 names → 23 batches of 100; per-predicate audit 2,260 / typical-values 1,257 / estimator 779 / padding 676 / quarantined 125</td></tr>
+    <tr><td>25-name pilot (live)</td><td>✓ converged</td><td>1 batch: 24/25 docs accepted (96% ≥ 90% gate), 0 banned-prose reintroductions, 0 name drift</td></tr>
+    <tr><td>Campaign cost telemetry fix</td><td>✓ shipped</td><td>imas-codex <code>763a5a14</code> — drain returns pool-session spend; ceiling now accounts real dollars (pilot had logged $0.00)</td></tr>
+    <tr><td>Banned-prose vocab relocation</td><td>✓ shipped</td><td>imas-codex <code>a469501d</code> — neutral <code>prose_policy</code> module; production no longer imports from the benchmark module</td></tr>
+    <tr><td>Scaled batches (23 × 100)</td><td>⏸ awaiting lead approval</td><td>decision inputs below</td></tr>
+  </table>
+
+  <h2>Pilot composition</h2>
+  <p>Deterministic stratified sample (seed 0) drawn from the 2,288-name selection: all 18 physics domains represented (2 names from the larger domains, 1 from the smaller), defect classes rotated within each domain. Predicate mix: audit 21, typical-values 13, estimator-recipe 9, procedural-padding 5, quarantined 3. The same seed reproduces the identical member set in the live run — the manifest the lead reviews is exactly what runs.</p>
+
+  <h2>Pilot outcome</h2>
+  <table>
+    <tr><th>Gate axis</th><th>Threshold</th><th>Measured</th><th>Verdict</th></tr>
+    <tr><td>Docs acceptance</td><td>≥ 90%</td><td>24/25 = 96%</td><td>PASS</td></tr>
+    <tr><td>Banned prose reintroduced</td><td>0</td><td>0 (grep-audit on all 25 refreshed docs)</td><td>PASS</td></tr>
+    <tr><td>Name-identity drift</td><td>0</td><td>0 (all 25 still accepted under the same id)</td><td>PASS</td></tr>
+    <tr><td>Provenance</td><td>full</td><td>25/25 <code>campaign_docs_refine</code> change events; 23/25 DocsRevision snapshots (2 members had no prior documentation — nothing to snapshot, benign)</td><td>PASS</td></tr>
+  </table>
+  <p>The single unaccepted name, <code>minimum_magnetic_field</code>, sits at <code>docs_stage='drafted'</code> — the $10 pilot budget cap stopped the pools before its final review cycle. Any subsequent docs drain (including the first scaled batch) completes it; no defect.</p>
+
+  <figure>
+    <svg viewBox="0 0 880 210" role="img" aria-label="Pilot cost by phase and acceptance" style="width:100%;max-width:880px;font-family:system-ui,sans-serif">
+      <g font-size="13" fill="#202124">
+        <text x="4" y="18" font-weight="600">Pilot spend by phase (graph-billed, $9.18 total)</text>
+      </g>
+      <g>
+        <rect x="150" y="34"  width="416" height="20" fill="#4a7dbd"/><text x="4" y="49" font-size="12" fill="#202124">generate_docs</text><text x="572" y="49" font-size="12" fill="#202124">$4.16</text>
+        <rect x="150" y="60"  width="216" height="20" fill="#4a7dbd"/><text x="4" y="75" font-size="12" fill="#202124">refine_docs</text><text x="372" y="75" font-size="12" fill="#202124">$2.16</text>
+        <rect x="150" y="86"  width="167" height="20" fill="#4a7dbd"/><text x="4" y="101" font-size="12" fill="#202124">review_docs</text><text x="323" y="101" font-size="12" fill="#202124">$1.67</text>
+        <rect x="150" y="112" width="119" height="20" fill="#9db7d6"/><text x="4" y="127" font-size="12" fill="#202124">name-axis residual</text><text x="275" y="127" font-size="12" fill="#202124">$1.19</text>
+      </g>
+      <g font-size="12" fill="#555">
+        <text x="4" y="163">Pool completions: generate_docs 25 · review_docs 39 · refine_docs 59 (≈2.4 refine cycles/name — the anti-churn rotation working).</text>
+        <text x="4" y="181">Per-name measured: $0.37–0.42. Acceptance 24/25 (96%); the last name stopped mid-cycle at the $10 budget cap.</text>
+        <text x="4" y="199">Log-reported pool sums ($10.4) exceed graph-billed ($9.18) — retry sub-charges double-count in the log figures; the graph ledger is authoritative.</text>
+      </g>
+    </svg>
+    <figcaption>Docs generation dominates spend; refine cycles are the convergence cost. Graph-billed LLMCost is the authoritative ledger.</figcaption>
+  </figure>
+
+  <h2>Refinement quality (samples the lead can spot-check)</h2>
+  <p>Three before/after pairs from the pilot (full text in the graph; prior text preserved in DocsRevisions):</p>
+  <ul>
+    <li><code>alfven_time</code> — recipe prose ("Using the magnetic-axis major radius … the Alfvén time is defined by") replaced by a direct definition with every symbol defined; typical-value padding gone.</li>
+    <li><code>electron_temperature_at_plasma_boundary</code> — boundary definition kept, coordinate frame now explicit, procedural padding removed.</li>
+    <li><code>oxygen_source_rate</code> — equivalent-electron convention stated normatively; estimator framing dropped.</li>
+  </ul>
+
+  <h2>Scale-up decision inputs (for the lead)</h2>
+  <table>
+    <tr><th>Input</th><th>Value</th></tr>
+    <tr><td>Selection</td><td>2,288 accepted names (post-sweep), 23 batches of 100</td></tr>
+    <tr><td>Measured unit cost</td><td>$0.37–0.42/name (pilot, seats: docs-gen luna, refine gpt-5.5, review quorum unchanged)</td></tr>
+    <tr><td>Full-campaign projection</td><td><strong>≈ $850–960</strong> — materially above the pre-pilot guess (&lt;$75–125); docs generation is the dominant phase, and audit-flagged docs average ~2.4 refine cycles</td></tr>
+    <tr><td>Suggested caps if approved</td><td>per-batch <code>--campaign-batch-cost-cap 50</code>, campaign <code>--campaign-cost-ceiling 1000</code>, gate 0.90 unchanged</td></tr>
+    <tr><td>Cheaper alternatives</td><td>(a) narrow the spec to <code>prose</code> only (1,384 names ≈ $520–580), deferring pure-audit fixes; (b) run domain-by-domain tranches with review between tranches; (c) accept as-is — quality evidence at 96%/0/0 is strong</td></tr>
+    <tr><td>Command (full, as piloted)</td><td><code>imas-codex sn run --source dd --campaign all --include-accepted --campaign-batch-cost-cap 50 --campaign-cost-ceiling 1000</code></td></tr>
+  </table>
+
+  <h2>Commits</h2>
+  <table>
+    <tr><th>Repo</th><th>SHA</th><th>What</th></tr>
+    <tr><td>imas-codex</td><td><code>0882e417</code></td><td>stratified campaign pilot selection (physics-domain round-robin, defect-class rotation, manifest per-domain + pilot marker)</td></tr>
+    <tr><td>imas-codex</td><td><code>763a5a14</code></td><td>campaign batches account real pool-session spend; drift note moved after embed preflight; stale clear-gate test patches removed</td></tr>
+    <tr><td>imas-codex</td><td><code>a469501d</code></td><td>banned-prose policy vocabulary moved to neutral <code>prose_policy</code> module</td></tr>
+  </table>
+</main>
+</body>
+</html>

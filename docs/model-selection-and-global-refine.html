@@ -18,9 +18,9 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-17">
-<meta name="plan-version" content="11">
+<meta name="plan-version" content="12">
 <meta name="plan-blocks" content="catalog-expert-review-remediation">
-<meta name="plan-impl" content="0.75">
+<meta name="plan-impl" content="0.9">
 </head>
 <body>
 <main class="plan-doc">
@@ -95,8 +95,18 @@
   </p>
   </section>
 
-  <h2 id="s5">§5 — Documentation-simplification campaign (pilot → scale)</h2>
-  <p>Scope: ~1,250 accepted entries with pre-policy prose (typical values, estimator recipes, procedural padding) plus the 129 audit-flagged entries. Execution: 25-name stratified pilot first (all physics domains, mixed defect classes); lead reviews the pilot output directly; only then scaled batches (~100 names/batch) under the §4 gates. Cost model with measured per-doc numbers from §2 — at compose-bench rates the naive full-regen would be roughly $150–250, and the batched refine-only campaign with a Luna-class seat is projected well under half that, but the pilot supplies the real number before scale-up is approved. Done when: zero accepted entries carry banned-prose classes (machine-audited), audit-quarantine count on accepted names is zero or explicitly waived per name, and the expert-review-reply document's open item 1 is closed.</p>
+  <section id="s5" class="section-landed">
+  <header>
+    <span class="badge badge-shipped">✓ pilot landed 2026-07-17 — batches await lead approval</span>
+    <h2>§5 — Documentation-simplification campaign (pilot → scale)</h2>
+  </header>
+  <p class="landed-summary">
+    Pre-campaign revalidation sweep run (436 re-stamped; derived quarantines 62 → 10, residual all genuine). Stratified pilot selection added (<code>--campaign-pilot N</code>, imas-codex <code>0882e417</code>); 25-name pilot covering all 18 physics domains ran live and <strong>converged: 24/25 accepted (96% ≥ 90% gate), zero banned-prose reintroduction, zero name drift</strong>, provenance intact (25/25 change events, 23/25 snapshots — 2 had no prior docs). Campaign cost telemetry fixed en route (<code>763a5a14</code>: drain returns real pool-session spend; pilot had logged $0.00); prose vocab moved to neutral <code>prose_policy</code> (<code>a469501d</code>).
+    Measured cost $0.37–0.42/name → <strong>full 2,288-name / 23-batch campaign projects ≈ $850–960</strong>, well above the pre-pilot guess — the scale-up decision (full spec vs prose-only ≈ $520–580 vs tranches) is with the lead.
+    Full record + manifest + before/after samples: <a href="archive/model-selection-and-global-refine-s5-pilot-landed.html">§5 pilot landed</a>.
+  </p>
+  <p><strong>Remaining (post-approval):</strong> run the 23 scaled batches under the gate (suggested <code>--campaign-batch-cost-cap 50 --campaign-cost-ceiling 1000</code>); <code>minimum_magnetic_field</code> completes in the first batch drain. Done when: zero accepted entries carry banned-prose classes (machine-audited), audit-quarantine count on accepted names is zero or explicitly waived per name, and the expert-review-reply document's open item 1 is closed.</p>
+  </section>
 
   <h2 id="s6">§6 — Risks</h2>
   <ul>
@@ -274,6 +284,16 @@ Done-when
   1. enum + prompt change + test committed and pushed
   2. bench refine mode re-run smoke (3 cases) confirms no regression</pre>
     <p class="r-fu-outcome">Implemented at source, wider than scoped (lead directive: never rely on examples for format — they are complementary): imas-codex 6ef0ab2c unifies the kind vocabulary on the ISN catalog Kind enum {scalar, vector, tensor, complex, metadata}. LinkML StandardNameKind trimmed to mirror ISN exactly (eigenfunction/spectrum retired — semantic categories, structurally scalar, zero live names); RefinedName.kind + StandardNameCandidate.kind are non-nullable Literals so the JSON schema carries a flat enum and structured output cannot emit an invalid kind; compose + refine prompts enumerate the kinds explicitly; derive_kind/recompute_parent_kind aligned; legacy graph values still collapse to scalar at export; three-way consistency test pins Literal == LinkML-generated enum == ISN Kind. Note: live compose already injected kind_definitions from ISN — the generate/import pattern was present; the LLM response models and refine prompt were the gaps.</p>
+    </article>
+<article class="r-fu" data-id="f-docs-campaign-batches" data-status="open" data-tier="haiku" data-written-by="reckon-ship" data-written-at="2026-07-17" data-recommends-skill="/reckon-ship model-selection-and-global-refine §5" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Lead: approve the docs-campaign scale-up, then run the 23 batches</h4>
+    <div class="r-fu-body">Pilot converged (96% acceptance, zero prose reintroduction, zero drift) but measured cost is $0.37–0.42/name → ≈$850–960 for the full 2,288-name selection, well above the pre-pilot guess. The lead picks: full spec (~$900), prose-only spec (1,384 names ≈ $520–580, defers pure-audit fixes), or domain tranches. Then one command runs the batches under the convergence gate.</div>
+    <pre class="r-fu-prompt">Decision inputs: docs/archive/model-selection-and-global-refine-s5-pilot-landed.html (pilot metrics, per-phase cost, before/after samples, alternatives table).
+
+If approved as piloted, run (or via ! in a Claude session):
+  cd ~/Code/imas-codex &amp;&amp; uv run imas-codex sn run --source dd --campaign all --include-accepted --campaign-batch-cost-cap 50 --campaign-cost-ceiling 1000
+Prose-only alternative: replace --campaign all with --campaign prose (1,384 names).
+The campaign halts between batches on any gate miss (≥90% acceptance, zero banned-prose reintroduction, zero name drift) and prints --campaign-resume-from for the restart. After completion: verify zero accepted names match the prose predicates (sn run --campaign prose --dry-run → total 0), record final counts + spend in the §5 archive, then close expert-review reply open item 1 via f-expert-review-reply-doc.</pre>
     </article>
 </section>
 </main>
