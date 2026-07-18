@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-standard-names">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="model-selection-and-global-refine-s5-launch-gates-landed">
+  <meta name="plan-title" content="§5 launch gates landed — claim-race livelock fix + deterministic audit re-stamp">
+  <meta name="plan-summary" content="Both docs-campaign launch gates fixed and validated live: refine claim-race contained (claim_seq verify + replica cap + waste tripwire), deterministic audit re-stamped per batch; the 4 unit-defect names resolved at root">
+  <meta name="plan-status" content="historical">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <title>§5 launch gates landed | model-selection-and-global-refine</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+  <h1>§5 — Launch gates landed (2026-07-18)</h1>
+  <p>Evergreen: <a href="/imas-standard-names/model-selection-and-global-refine.html">model-selection-and-global-refine</a> §5.
+  The two defects the pilot forensics exposed are fixed at root, validated live, and the four unit-defect quarantines are resolved. The stratified rotations are now unblocked pending the rotation-1 command.</p>
+
+  <h2>Quick status</h2>
+  <table>
+    <tr><th>Item</th><th>Status</th><th>Evidence</th></tr>
+    <tr><td>Gate (a): refine claim-race livelock</td><td>✓ shipped</td><td>imas-codex <code>af69e3e2</code> — per-node <code>claim_seq</code> + settle re-read in both winner verifiers; docs-pool replicas capped at ceil(scope/2) for scoped drains; paid-call-without-persist tripwire (warn &gt; 2%); 17 new race tests</td></tr>
+    <tr><td>Gate (b): deterministic audit re-stamp</td><td>✓ shipped</td><td>imas-codex <code>fa503f83</code> — id-scoped LLM-free validation drain (<code>drain_validation_for_ids</code>) wired into every campaign batch; <code>BatchOutcome</code> carries audit re-quarantine/clear deltas; 95 tests</td></tr>
+    <tr><td>Pilot re-stamp (gate b live validation)</td><td>✓ done</td><td>25 pilot names re-stamped: 24 valid, <code>perturbed_particle_energy</code> correctly re-quarantined on its then-live unit defect — the stale-<code>validated_at</code> wash-through is closed</td></tr>
+    <tr><td>Unit defect 1–3 (root cause)</td><td>✓ fixed</td><td>Derived parents inherited unit <code>'1'</code> from <code>normalized_*</code> children across the normalization peel — seeder exclusion <code>e73331a9</code>, scoped repair helper <code>db261bca</code>/<code>fab5af85</code>; <code>particle_mass</code>, <code>effective_particle_energy</code>, <code>perturbed_particle_energy</code> now unit-less, docs re-aligned via <code>sn edit</code> (all accepted), all three <code>valid</code></td></tr>
+    <tr><td>Unit defect 4 (audit false positive)</td><td>✓ fixed</td><td><code>name_unit_consistency_check</code> lacked the grammar-canonical transport-velocity form: <code>*_energy_velocity_due_to_convection</code> at m·s⁻¹ is correct (the whole sibling family is valid). Exemption + guard tests <code>b4e38135</code>; name re-stamped <code>valid</code></td></tr>
+    <tr><td>Pilot-scope smoke (both gates live)</td><td>✓ converged</td><td>Fresh stratified 25-name rotation (run <code>9aa921c3</code>): 24/25 accepted, 0 prose reintroduction, 0 drift, refine waste 0.0%, re-audit 25 cleared / 0 re-quarantined, $4.59 total = <strong>$0.18/name</strong></td></tr>
+  </table>
+
+  <h2>Gate (a) — the claim-race mechanism and its containment</h2>
+  <p>Pilot forensics (LLMCost run 02313084): 39 of 59 refine calls ($5.55 of $7.55, 53% of pilot spend) were paid gpt-5.5 calls whose <code>persist_refined_docs</code> no-oped on token/stage mismatch, concentrated on two names racing 20 replicas. Each racer re-read the claim token immediately after its own commit and saw itself as the holder — every momentary holder paid, only the last persist landed, and the sub-threshold score kept the name eligible so the storm repeated.</p>
+  <ul>
+    <li><strong>Deterministic close for small scopes:</strong> scoped drains size docs-pool replicas to min(configured, ceil(eligible/2)) — a 1–2-name set collapses to a single replica, zero concurrency.</li>
+    <li><strong>Verify-race close:</strong> <code>_claim_sn_atomic</code> stamps a strictly-increasing per-node <code>claim_seq</code>; both docs- and names-axis winner verifiers re-read committed state after a short settle (default 0.5&nbsp;s) and keep an item only if token AND sequence still match — a superseded racer sees a strictly higher committed seq and stands down before paying. Falls back to token-only verification when <code>claim_seq</code> is absent (legacy data / mocks).</li>
+    <li><strong>Honest accounting:</strong> per-(run, pool) persist-outcome ledger surfaces paid-calls / wasted-persists / waste ratio in the run summary, warning past 2%; the per-pool "completed" log line was relabelled "processed" (it counts attempts, not persisted work).</li>
+    <li><strong>Residual risk:</strong> the settle reduces rather than provably eliminates the race for large unscoped runs under adversarial commit spacing; the deterministic elimination for campaign batches is the replica cap. A seed-level compare-and-set under the write lock is the full close if the tripwire ever fires in production.</li>
+  </ul>
+
+  <h2>Gate (b) — deterministic audit re-stamp per batch</h2>
+  <p>The campaign's revalidation confirmed lifted quarantines "valid" on the banned-prose grep alone; the deterministic ISN audit (latex, spelling, length, unit checks) never re-ran on refreshed docs, so all 25 pilot names kept <code>validated_at</code> stamps predating the drain and a genuine unit defect washed to valid. Now <code>CampaignRunner.run</code> step 5 clears <code>validated_at</code> on every touched batch id and routes the batch through the id-scoped LLM-free validation drain before the prose re-quarantine lands on top; audit deltas (re-quarantined / cleared) ride <code>BatchOutcome</code> into the run summary and the archive rows. The convergence gate still reads the fast prose grep.</p>
+
+  <h2>The four unit-defect names — root causes, not paper-over</h2>
+  <table>
+    <tr><th>Name</th><th>Defect</th><th>Mechanism</th><th>Fix</th><th>End state</th></tr>
+    <tr><td><code>particle_mass</code></td><td>unit <code>'1'</code> on a mass</td><td rowspan="3">Derived family parents inherit units from children; a <code>normalized_*</code> child (correctly dimensionless) stamped <code>'1'</code> onto the physical parent it peels from. Docs described the child concept.</td><td rowspan="3">Seeder now excludes normalization-peel children from unit/cocos inheritance (<code>e73331a9</code>); tested repair helper cleared the mis-inherited unit on exactly the finding-bearing parents (<code>db261bca</code>, <code>fab5af85</code>) — genuinely dimensionless parents (e.g. <code>electron_collisionality</code>) untouched; docs re-aligned to the physical concepts via <code>sn edit --axis docs</code>, all accepted (~$0.4/edit)</td><td>unit-less, docs accepted, <code>valid</code></td></tr>
+    <tr><td><code>effective_particle_energy</code></td><td>unit <code>'1'</code> on an energy</td><td>unit-less, docs accepted, <code>valid</code></td></tr>
+    <tr><td><code>perturbed_particle_energy</code></td><td>unit <code>'1'</code> on an energy</td><td>unit-less, docs accepted, <code>valid</code></td></tr>
+    <tr><td><code>effective_thermal_ion_charge_state_energy_velocity_due_to_convection</code></td><td>audit flags m·s⁻¹ against 'energy'</td><td>False positive: the audit exempted <code>_convection_velocity</code> but not the grammar-canonical <code>velocity … due_to_&lt;process&gt;</code> ordering; the sibling family (<code>energy_velocity_due_to_convection</code> etc.) is accepted and valid at the same unit</td><td>Transport-velocity head-noun exemption mirroring the flux exemption, with an over-breadth guard test (<code>b4e38135</code>); re-stamped through the scoped drain</td><td>m·s⁻¹ kept, <code>valid</code></td></tr>
+  </table>
+  <p>Residual observation (queued to the decomposition triage): 10 further derived parents share the normalized-child <code>'1'</code>-inheritance pattern without a name-unit finding (e.g. <code>particle_charge</code>, <code>perturbed_gyrocenter_density</code>) — some are genuinely dimensionless (collisionality), some deserve the same repair once judged per name.</p>
+
+  <h2>Pilot-scope smoke (both gates, live)</h2>
+  <p>A fresh stratified 25-name rotation of the docs-fixable spec (<code>--campaign "prose,audit:latex,audit:spelling,audit:length" --campaign-pilot 25</code>, run <code>9aa921c3</code>, 34&nbsp;min) exercised both fixes end-to-end on the live graph:</p>
+  <table>
+    <tr><th>Gate axis</th><th>Threshold</th><th>Measured</th><th>Verdict</th></tr>
+    <tr><td>Docs acceptance</td><td>≥ 90%</td><td>24/25 = 96% (the 1 remaining sits at <code>drafted</code> — drain budget ended before its last review cycle; the next drain completes it, same benign pattern as the pilot)</td><td>PASS</td></tr>
+    <tr><td>Banned prose reintroduced</td><td>0</td><td>0</td><td>PASS</td></tr>
+    <tr><td>Name-identity drift</td><td>0</td><td>0 (25/25 <code>campaign_docs_refine</code> events on unchanged ids)</td><td>PASS</td></tr>
+    <tr><td>Refine claim-race waste (gate a)</td><td>&lt; 5%</td><td><strong>0.0%</strong> — 15 paid refine calls, 0 wasted persists; tripwire line now in every run summary</td><td>PASS</td></tr>
+    <tr><td>Deterministic audit re-stamp (gate b)</td><td>no stale <code>validated_at</code></td><td>25 cleared + re-stamped in the batch loop, 0 re-quarantined; deltas on the batch outcome</td><td>PASS</td></tr>
+    <tr><td>Cost</td><td>≈ $0.20/name projected</td><td>$4.59 / 25 = <strong>$0.18/name</strong> (generate $1.04, review $1.16, refine $2.39 — all persisted)</td><td>PASS</td></tr>
+  </table>
+  <p>Compared with the first pilot at the same scope size: spend $10.43 → $4.59 (−56%), refine calls 59 → 15, wasted refine spend $5.55 → $0.00. The healthy-path cost basis for the rotations ($0.20/name → ≈$300–380 for the 1,540-name docs-fixable spec) is confirmed by measurement.</p>
+  <p>Incidental fix while the smoke ran: docs prompts had silently lost the locus cross-link gloss (ISN registry field renamed <code>description</code>→<code>definition</code>; the context builder's lookup raised inside its catch-all) — repaired with a seam-pinning regression test, imas-codex <code>e1bc6cb0</code>.</p>
+
+  <h2>What's next</h2>
+  <p>Rotation 1 of the stratified docs campaign (200 names ≈ $40 at the healthy-path $0.20/name), orchestrator checkpoint, then ~450-name rotations until the selection empties — tracked as <code>f-docs-campaign-rotations</code> on the evergreen.</p>
+</main>
+</body>
+</html>
