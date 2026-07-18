@@ -18,7 +18,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-18">
-<meta name="plan-version" content="18">
+<meta name="plan-version" content="19">
 <meta name="plan-blocks" content="catalog-expert-review-remediation">
 <meta name="plan-impl" content="0.95">
 </head>
@@ -108,6 +108,10 @@
     <strong>Smoke (fresh stratified 25, run <code>9aa921c3</code>): 24/25 accepted, 0 reintroduction, 0 drift, refine waste 0.0%, re-audit 25 cleared/0 re-quarantined, $0.18/name</strong> — confirms the ≈$300–380 basis for the 1,540-name docs-fixable spec.
   </p>
   <p><strong>Remaining:</strong> stratified rotations with orchestrator checkpoints (<code>f-docs-campaign-rotations</code>: 200 names ≈ $40, then ~450-name rotations). Done when: zero accepted entries carry banned-prose classes (machine-audited), audit-quarantine count on accepted names is zero or explicitly waived per name, and the expert-review-reply document's open item 1 is closed.</p>
+  <p><strong>Rotation 1 — attempted 2026-07-18, halted on a reviewer-quorum outage</strong> (<a href="archive/model-selection-and-global-refine-s5-rotation1-halted.html">rotation 1 halted</a>). Launched over stratified 200 (of 1,437 docs-fixable); ~6 min in, 2 of the 3 RD-quorum reviewer models (<code>qwen3.7-max</code>, <code>minimax-m3</code>) entered an upstream empty-response outage and 67% of reviews degraded to single-reviewer — violating the §6 "review quorum unchanged" invariant. The orchestrator halted (campaign is abortable by design), bounding degraded-quorum accepts to ~27 (vs ~200) at ≈$6.17 spend (~$1.43 wasted on the two dead models). Selection 1,437 → 1,409. The miss is external, not a campaign defect; the re-run is unchanged. <code>f-docs-campaign-rotations</code> stays open.</p>
+  <aside class="next-card">
+    <strong>NEXT:</strong> re-run rotation 1 once OpenRouter reviewer availability recovers. Smoke first: <code>uv run imas-codex sn run --source dd --campaign "prose,audit:latex,audit:spelling,audit:length" --campaign-pilot 3 --include-accepted --campaign-cost-ceiling 5</code> — confirm 3-model <code>quorum_consensus</code> reviews land, then run the full rotation (<code>--campaign-pilot 200 … --campaign-cost-ceiling 120</code>). If the outage persists, the lead may elect <code>--reviewer-profile opus-only</code> (accepts a different quality baseline).
+  </aside>
   </section>
 
   <h2 id="s6">§6 — Risks</h2>
@@ -395,6 +399,11 @@ Done-when
   3. this followup resolved</pre>
     <p class="r-fu-outcome">RESOLVED differently than scoped — the whole premise collapsed under the lead's controlled-base insight. The decomposition_audit was RETIRED (imas-codex 5a08c744), not made parse-aware, because it is OBSOLETE now that physical/geometric bases are a controlled vocabulary. Root cause: it compared a name's surface base PHRASE (model.physical_base, e.g. reference_magnetic_field, absorbed_power, nuclear_heating_power) against the registered base-TOKEN set — but the actual base token (ir.base.token: magnetic_field, power, heating_power) is ALWAYS registered (the parser raises UnknownBaseTokenError for a made-up base). The surface phrase legitimately carries glued kind-forming qualifiers (royal-order: ion_atomic_mass, wave_electric_field). So a composer cannot hide structure in the base slot — the failure mode the audit was built for cannot occur. Every one of its ~2252 findings was a historic false positive. There is NO rename rotation: the '270 rename queue' was itself false positives (kind-forming glue + binary-op nested args + upper_bound substring artifacts; verified 0 genuine after excluding the qualifier segment, skipping binary-ops, and exempting base-head tokens). Steps actually taken: (1) parse-aware audit landed as a stepping stone (c6191e61), free drain applied (1982 cleared, 2252→270), single-shot `sn decomp-triage` CLI+module DELETED per lead directive; (2) then the controlled-base realization → decomposition_audit_check + find_absorbed_closed_tokens primitive + tests removed, reviewer prompt reframed to 'base registry is grammar-enforced; emit vocab_gap when no base fits', all remaining decomposition_audit findings drained graph-wide (1641 cleared, 0 remain). Net: the decomposition audit and its scaffolding are gone; the base grammar itself is the guarantee. imas-codex commits e3d20e11 (superseded) → c6191e61 → 5a08c744.</p>
     </article>
+</section>
+<section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s5" data-id="c-rotation1-halted" data-who="reckon-ship" data-when="2026-07-18T21:20:00+00:00">
+    <div class="r-comment-body">Rotation 1 (stratified 200) launched 2026-07-18 and HALTED by the orchestrator ~6 min in: 2 of the 3 RD-quorum reviewer models (qwen3.7-max, minimax-m3) entered an upstream empty-response outage, degrading 67% of reviews to single-reviewer and violating the §6 'review quorum unchanged' invariant. Halt bounded degraded-quorum accepts to ~27 (vs ~200) at ≈$6.17 (~$1.43 wasted on the two dead models); selection 1,437→1,409. External blocker, not a campaign defect — re-run unchanged once reviewer availability recovers. f-docs-campaign-rotations stays open. Record: archive/model-selection-and-global-refine-s5-rotation1-halted.html</div>
+</div>
 </section>
 </main>
 </body>
