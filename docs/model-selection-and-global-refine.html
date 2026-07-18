@@ -17,8 +17,8 @@
   <title>Model Selection and Global Refine | imas-standard-names</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-07-17">
-<meta name="plan-version" content="12">
+<meta name="plan-modified" content="2026-07-18">
+<meta name="plan-version" content="13">
 <meta name="plan-blocks" content="catalog-expert-review-remediation">
 <meta name="plan-impl" content="0.9">
 </head>
@@ -285,7 +285,7 @@ Done-when
   2. bench refine mode re-run smoke (3 cases) confirms no regression</pre>
     <p class="r-fu-outcome">Implemented at source, wider than scoped (lead directive: never rely on examples for format — they are complementary): imas-codex 6ef0ab2c unifies the kind vocabulary on the ISN catalog Kind enum {scalar, vector, tensor, complex, metadata}. LinkML StandardNameKind trimmed to mirror ISN exactly (eigenfunction/spectrum retired — semantic categories, structurally scalar, zero live names); RefinedName.kind + StandardNameCandidate.kind are non-nullable Literals so the JSON schema carries a flat enum and structured output cannot emit an invalid kind; compose + refine prompts enumerate the kinds explicitly; derive_kind/recompute_parent_kind aligned; legacy graph values still collapse to scalar at export; three-way consistency test pins Literal == LinkML-generated enum == ISN Kind. Note: live compose already injected kind_definitions from ISN — the generate/import pattern was present; the LLM response models and refine prompt were the gaps.</p>
     </article>
-<article class="r-fu" data-id="f-docs-campaign-batches" data-status="open" data-tier="haiku" data-written-by="reckon-ship" data-written-at="2026-07-17" data-recommends-skill="/reckon-ship model-selection-and-global-refine §5" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-docs-campaign-batches" data-status="resolved" data-tier="haiku" data-written-by="reckon-ship" data-written-at="2026-07-17" data-recommends-skill="/reckon-ship model-selection-and-global-refine §5" data-resolved-at="2026-07-18T05:41:11+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Lead: approve the docs-campaign scale-up, then run the 23 batches</h4>
     <div class="r-fu-body">Pilot converged (96% acceptance, zero prose reintroduction, zero drift) but measured cost is $0.37–0.42/name → ≈$850–960 for the full 2,288-name selection, well above the pre-pilot guess. The lead picks: full spec (~$900), prose-only spec (1,384 names ≈ $520–580, defers pure-audit fixes), or domain tranches. Then one command runs the batches under the convergence gate.</div>
     <pre class="r-fu-prompt">Decision inputs: docs/archive/model-selection-and-global-refine-s5-pilot-landed.html (pilot metrics, per-phase cost, before/after samples, alternatives table).
@@ -294,6 +294,17 @@ If approved as piloted, run (or via ! in a Claude session):
   cd ~/Code/imas-codex &amp;&amp; uv run imas-codex sn run --source dd --campaign all --include-accepted --campaign-batch-cost-cap 50 --campaign-cost-ceiling 1000
 Prose-only alternative: replace --campaign all with --campaign prose (1,384 names).
 The campaign halts between batches on any gate miss (≥90% acceptance, zero banned-prose reintroduction, zero name drift) and prints --campaign-resume-from for the restart. After completion: verify zero accepted names match the prose predicates (sn run --campaign prose --dry-run → total 0), record final counts + spend in the §5 archive, then close expert-review reply open item 1 via f-expert-review-reply-doc.</pre>
+    <p class="r-fu-outcome">Superseded by f-docs-campaign-batches-2: the audit-class breakdown (2,125 of 2,288 matched names carry ONLY name-axis decomposition findings a docs pass cannot clear) sharpened the recommendation to the docs-fixable spec — prose,audit:latex,audit:spelling,audit:length = 1,540 names / 16 batches ≈ $570–650. Full before/after evidence doc authored: docs/docs-campaign-before-after.html.</p>
+    </article>
+<article class="r-fu" data-id="f-docs-campaign-batches-2" data-status="open" data-tier="haiku" data-written-by="reckon-ship" data-written-at="2026-07-18" data-recommends-skill="/reckon-ship model-selection-and-global-refine §5" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Lead: approve the docs-campaign scale-up (recommended spec: docs-fixable defects, 1,540 names ≈ $570–650)</h4>
+    <div class="r-fu-body">Pilot converged (96% acceptance, zero prose reintroduction, zero drift; $0.37–0.42/name). Audit-class analysis shows the 'all' spec would spend ~$350 on ~750 names whose only defect is a name-axis decomposition finding a docs campaign cannot clear — recommended spec is prose + docs-axis audit checks: 1,540 names, 16 batches, ≈$570–650. Evidence: docs/docs-campaign-before-after.html (weakness taxonomy, before/after pairs, mechanism mapping).</div>
+    <pre class="r-fu-prompt">Decision inputs: docs/docs-campaign-before-after.html (weaknesses, before/after evidence, spec comparison) + docs/archive/model-selection-and-global-refine-s5-pilot-landed.html (pilot metrics, per-phase cost).
+
+Recommended (docs-fixable defects only), run (or via ! in a Claude session):
+  cd ~/Code/imas-codex &amp;&amp; uv run imas-codex sn run --source dd --campaign &quot;prose,audit:latex,audit:spelling,audit:length&quot; --include-accepted --campaign-batch-cost-cap 50 --campaign-cost-ceiling 700
+Alternatives: --campaign prose (1,504 names, leaves 36 docs-axis audit names for hand edits); --campaign all (2,288 names ≈ $850–960, adds ~750 name-axis-only names whose finding cannot clear).
+The campaign halts between batches on any gate miss (≥90% acceptance, zero banned-prose reintroduction, zero name drift) and prints --campaign-resume-from. After completion: verify sn run --campaign prose --dry-run → total 0; record final counts + spend in the §5 archive; re-scope decomposition findings to the name-axis workstream explicitly; then close expert-review reply open item 1 via f-expert-review-reply-doc.</pre>
     </article>
 </section>
 </main>

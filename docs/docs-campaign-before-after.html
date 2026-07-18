@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-standard-names">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="docs-campaign-before-after">
+  <meta name="plan-title" content="Docs weaknesses and refinement: before/after evidence">
+  <meta name="plan-summary" content="What is wrong with pre-policy accepted-name documentation, how the campaign fixes it, real before/after pairs from the 25-name pilot, and the efficient scale-up spec">
+  <meta name="plan-status" content="reference">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <title>Docs weaknesses &amp; refinement evidence | imas-standard-names</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+  <h1>Documentation weaknesses and how the refinement campaign addresses them</h1>
+  <p>Decision-support for <a href="/imas-standard-names/model-selection-and-global-refine.html">model-selection-and-global-refine</a> §5.
+  All before/after pairs below are real output from the 25-name stratified pilot (2026-07-17): "before" is the DocsRevision snapshot taken at campaign mark time (the pre-campaign accepted text), "after" is the current accepted text that passed the blind-pair review quorum. Pilot metrics: <a href="archive/model-selection-and-global-refine-s5-pilot-landed.html">§5 pilot landed</a>.</p>
+
+  <h2>§1 — What is wrong with the current docs</h2>
+  <p>About 1,250 accepted entries predate the strict-normative documentation policy. Their docs were written to be <em>helpful narratives</em>; the catalog needs <em>semantic contracts</em>. Four weakness classes, with catalog-wide prevalence (2,288 accepted names currently match at least one defect predicate):</p>
+
+  <table>
+    <tr><th>Weakness</th><th>Prevalence</th><th>What it looks like</th><th>Why it is a defect</th></tr>
+    <tr>
+      <td><strong>Typical values</strong></td><td>1,244 names</td>
+      <td>"Typical single-turn cross-sectional areas … range from $10^{-5}$ to $10^{-3}$ m²"; "representative values are typically of order $10^{-7}$–$10^{-6}$ s"</td>
+      <td>Magnitudes are device-dependent and rot: numbers quoted for one machine class mislead on another (the same doc claimed ±2 m for "compact devices" and ±15 m for "large devices"). A definition must hold for every facility writing the quantity; ranges belong in facility documentation, not the semantic contract. Stale ranges also leak into downstream validation heuristics.</td>
+    </tr>
+    <tr>
+      <td><strong>Estimator recipes</strong></td><td>770 names</td>
+      <td>"In practice, $\tau_A$ is computed from an equilibrium magnetic-axis position…"; "it is obtained from engineering design geometry or from alignment surveys using laser trackers, photogrammetry…"</td>
+      <td>Procedure is not meaning. How a facility estimates a quantity varies by machine, diagnostic, and era; baking one workflow into the definition makes conforming data from a different workflow look non-conforming. The name defines <em>what</em> the quantity is — any estimator that produces that quantity is valid.</td>
+    </tr>
+    <tr>
+      <td><strong>Procedural padding</strong></td><td>671 names</td>
+      <td>"It should be noted…", "Note that…", "In practice…", "For example, …"</td>
+      <td>Filler dilutes normative content. Every non-definitional sentence is a sentence a reviewer, a code generator, or an LLM seat must decide whether to trust — padding raises reading cost without adding a single semantic constraint.</td>
+    </tr>
+    <tr>
+      <td><strong>Deterministic audit findings (docs-axis)</strong></td><td>~135 names</td>
+      <td><code>latex_def_check</code>: symbol $\phi$ (or $R_0$, $(R,\phi,Z)$) used in a formula with no definition sentence; plus spelling and length-cap findings</td>
+      <td>An undefined symbol makes a formula ambiguous — the reader cannot ground it without guessing conventions. These are mechanically detectable and mechanically verifiable once fixed.</td>
+    </tr>
+  </table>
+
+  <p><strong>Out of docs scope (important):</strong> the largest audit class, <code>decomposition_audit</code> (2,255 accepted names), flags closed-vocabulary tokens absorbed into the <em>name body</em> (e.g. <code>ion</code> in <code>ion_current_density</code> should live in its subject segment). That is a <em>name-axis</em> finding: docs campaigns never touch name identity, so refreshing documentation cannot and should not clear it. 2,125 of the 2,288 matched names carry <em>only</em> name-axis findings — see §4 for what this does to the scale-up choice.</p>
+
+  <figure>
+    <svg viewBox="0 0 880 240" role="img" aria-label="Defect prevalence and pilot clearance" style="width:100%;max-width:880px;font-family:system-ui,sans-serif">
+      <g font-size="13" fill="#202124"><text x="4" y="16" font-weight="600">Catalog prevalence (accepted names, 2026-07-17)</text></g>
+      <g font-size="12">
+        <rect x="215" y="28"  width="498" height="18" fill="#c96a4a"/><text x="4" y="42" fill="#202124">typical values (1,244)</text><text x="719" y="42" fill="#555">docs-fixable</text>
+        <rect x="215" y="52"  width="308" height="18" fill="#c96a4a"/><text x="4" y="66" fill="#202124">estimator recipes (770)</text><text x="529" y="66" fill="#555">docs-fixable</text>
+        <rect x="215" y="76"  width="268" height="18" fill="#c96a4a"/><text x="4" y="90" fill="#202124">procedural padding (671)</text><text x="489" y="90" fill="#555">docs-fixable</text>
+        <rect x="215" y="100" width="56"  height="18" fill="#c96a4a"/><text x="4" y="114" fill="#202124">docs-axis audit (~139)</text><text x="277" y="114" fill="#555">latex 79 · length 52 · spelling 8</text>
+        <rect x="215" y="124" width="662" height="18" fill="#8a8f98"/><text x="4" y="138" fill="#202124">decomposition_audit (2,255)</text><text x="700" y="138" fill="#fff">name-axis — NOT docs</text>
+      </g>
+      <g font-size="13" fill="#202124"><text x="4" y="176" font-weight="600">Pilot clearance (25 names, one gated batch)</text></g>
+      <g font-size="12" fill="#202124">
+        <text x="4" y="196">banned-prose findings: 13 names before → 0 after · docs-axis latex findings: cleared on refresh (2 residual, re-flagged for the next drain)</text>
+        <text x="4" y="214">acceptance 24/25 (96%) · zero prose reintroduction · zero name drift · mean doc length 1,873 → 1,357 chars (−28%)</text>
+      </g>
+    </svg>
+    <figcaption>Prose defects dominate the docs-fixable backlog; the decomposition class is a name-structure problem the docs campaign deliberately does not touch.</figcaption>
+  </figure>
+
+  <h2>§2 — Before / after evidence from the pilot</h2>
+
+  <h3>Example 1 — <code>alfven_time</code> (all three prose classes; 2,458 → 978 chars)</h3>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;align-items:start">
+    <div style="border:1px solid #c9a; border-radius:6px;padding:.75rem 1rem;overflow-x:auto;background:rgba(200,80,60,.06);font-size:.93em;line-height:1.45">
+      <h4 style="margin-top:0">Before (pre-policy)</h4>
+      <p>…Using the magnetic-axis major radius as the characteristic length…, <mark style="background:rgba(220,90,60,.28);padding:0 .15em;border-radius:2px">the Alfvén time is defined by</mark>: $$\tau_A(\rho_f) = R_0/v_A(\rho_f) = R_0\sqrt{\mu_0\,m_i\,n_i(\rho_f)}/B_0$$ …</p>
+      <p><mark style="background:rgba(220,90,60,.28);padding:0 .15em;border-radius:2px">In practice, $\tau_A$ is computed from</mark> an equilibrium magnetic-axis position, an on-axis toroidal-field magnitude, and ion density and composition at the flux surface of interest. For multi-ion plasmas, the product $m_i n_i$ is commonly replaced by the total ion mass density…</p>
+      <p>For tokamak parameters $R_0 \sim 1$–$6$ m, $B_0 \sim 1$–$8$ T, and deuterium ion density $n_i \sim 10^{19}$–$10^{20}$ m⁻³, <mark style="background:rgba(220,90,60,.28);padding:0 .15em;border-radius:2px">representative values are typically of order $10^{-7}$–$10^{-6}$ s</mark>. The timescale increases with major radius…</p>
+    </div>
+    <div style="border:1px solid #9c9; border-radius:6px;padding:.75rem 1rem;overflow-x:auto;background:rgba(60,160,90,.07);font-size:.93em;line-height:1.45">
+      <h4 style="margin-top:0">After (campaign-refined, review score ≥ 0.85)</h4>
+      <p>The Alfvén time is the shear-Alfvén transit time across the magnetic-axis major-radius scale. It is a nonnegative reference timescale for ideal-magnetohydrodynamic dynamics, <em>distinct from the oscillation period or damping time of a particular mode</em>.</p>
+      <p>$$\tau_A = \frac{R_{\rm axis}}{v_A} = \frac{R_{\rm axis}\sqrt{\mu_0\rho_i}}{|B_{\phi,\rm axis}|}$$</p>
+      <p>where $R_{\rm axis}$ is the magnetic-axis major radius, $v_A$ is the reference shear-Alfvén speed, $\mu_0$ is the vacuum permeability, $\rho_i$ is the ion mass density at the specified reference location, and $B_{\phi,\rm axis}$ is the toroidal magnetic-field component on the magnetic axis. The magnitude makes the timescale independent of magnetic-field orientation. …distinct from the local complex Alfvén frequency (cross-linked).</p>
+    </div>
+  </div>
+  <p style="font-size:.9em;color:#666">The recipe paragraph and the tokamak-parameter range are gone; every symbol in the formula is defined in the where-clause; a disambiguation sentence (reference timescale vs mode period) and a cross-link to <code>alfven_frequency</code> were added. Definition-first, facility-neutral, 60% shorter.</p>
+
+  <h3>Example 2 — <code>area_of_toroidal_magnetic_field_probe</code> (typical values; 1,491 → 1,066 chars)</h3>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;align-items:start">
+    <div style="border:1px solid #c9a; border-radius:6px;padding:.75rem 1rem;overflow-x:auto;background:rgba(200,80,60,.06);font-size:.93em;line-height:1.45">
+      <h4 style="margin-top:0">Before</h4>
+      <p>…The area is determined from the coil's physical dimensions during fabrication or verified by laboratory calibration; time-integrating the measured voltage and dividing by $NA$ recovers the absolute field $B_\phi$…</p>
+      <p><mark style="background:rgba(220,90,60,.28);padding:0 .15em;border-radius:2px">Typical single-turn cross-sectional areas in tokamak magnetics diagnostics range from $10^{-5}$ to $10^{-3}$ m², depending on</mark> probe dimensions and required sensitivity.</p>
+    </div>
+    <div style="border:1px solid #9c9; border-radius:6px;padding:.75rem 1rem;overflow-x:auto;background:rgba(60,160,90,.07);font-size:.93em;line-height:1.45">
+      <h4 style="margin-top:0">After</h4>
+      <p>The per-turn cross-sectional area of a toroidal magnetic-field probe is the geometric area enclosed by one sensing turn and threaded by the local toroidal magnetic-field component. It is a non-negative geometric parameter, <em>distinct from the total effective area of the complete winding</em>.</p>
+      <p>$$A_{\mathrm{eff}} = N A_{\mathrm{turn}}$$ where $A_{\mathrm{turn}}$ is the area enclosed by one turn, $N$ is the dimensionless number of turns… The induced voltage of the probe is proportional to the time derivative of the flux coupled through this effective area (cross-linked); analogous to the per-turn area of a poloidal probe (cross-linked).</p>
+    </div>
+  </div>
+  <p style="font-size:.9em;color:#666">The calibration workflow and the magnitude range are removed; the ambiguity that actually matters for data consumers — per-turn area vs total winding area — is now the second sentence.</p>
+
+  <h3>Example 3 — <code>x_coordinate_of_sensor_attachment_point</code> (all three classes; 2,081 → 970 chars)</h3>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;align-items:start">
+    <div style="border:1px solid #c9a; border-radius:6px;padding:.75rem 1rem;overflow-x:auto;background:rgba(200,80,60,.06);font-size:.93em;line-height:1.45">
+      <h4 style="margin-top:0">Before</h4>
+      <p>…<mark style="background:rgba(220,90,60,.28);padding:0 .15em;border-radius:2px">In practice it is obtained from</mark> engineering design geometry or from alignment surveys using coordinate-measuring equipment, laser trackers, photogrammetry, or optical metrology of the installed sensor and mount…</p>
+      <p><mark style="background:rgba(220,90,60,.28);padding:0 .15em;border-radius:2px">Typical values are set by device size</mark>… Compact devices often fall within ±2 m, medium-sized devices within ±5 m, and large devices or external diagnostic supports can reach ±15 m.</p>
+    </div>
+    <div style="border:1px solid #9c9; border-radius:6px;padding:.75rem 1rem;overflow-x:auto;background:rgba(60,160,90,.07);font-size:.93em;line-height:1.45">
+      <h4 style="margin-top:0">After</h4>
+      <p>This quantity gives the x-coordinate of a sensor's mechanical attachment point relative to the origin of the right-handed Cartesian $(x, y, z)$ frame. $$x_{\rm att} = \mathbf{r}_{\rm att} \cdot \hat{x}$$ where $\mathbf{r}_{\rm att}$ is the position vector of the attachment point and $\hat{x}$ the unit vector along the positive x-axis. Together with the y and z coordinates (cross-linked), it specifies the attachment location. A displacement sensor may have two mechanical attachment points; other sensor types have one.</p>
+      <p>Sign convention: positive when the attachment point lies in the positive x direction from the Cartesian origin.</p>
+    </div>
+  </div>
+  <p style="font-size:.9em;color:#666">Survey-equipment inventory and per-device-size ranges deleted; replaced by a projection definition, an explicit multiplicity statement (a genuinely useful semantic fact the old text lacked), and the sign convention retained.</p>
+
+  <h3>Example 4 — <code>current_of_rogowski_coil</code> (audit-only member; 1,100 → 1,186 chars — docs can also <em>grow</em>)</h3>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;align-items:start">
+    <div style="border:1px solid #c9a; border-radius:6px;padding:.75rem 1rem;overflow-x:auto;background:rgba(200,80,60,.06);font-size:.93em;line-height:1.45">
+      <h4 style="margin-top:0">Before</h4>
+      <p>This quantity is the algebraic net conventional electric current threading the surface bounded by a Rogowski-coil winding contour… $$I_{\mathrm{enc}} = \int_S \mathbf{J} \cdot \hat{\mathbf{n}}\,dS$$ …The effective cross-sectional area of the Rogowski coil characterizes magnetic coupling but is not part of the current definition.</p>
+    </div>
+    <div style="border:1px solid #9c9; border-radius:6px;padding:.75rem 1rem;overflow-x:auto;background:rgba(60,160,90,.07);font-size:.93em;line-height:1.45">
+      <h4 style="margin-top:0">After</h4>
+      <p>…The surface orientation is specified by the coil's assigned normal and the associated right-hand rule for the contour… where $S$ is <em>any surface whose boundary is the coil contour</em>… This is an enclosed-current quantity, not the electrical current carried by the sensor winding. In the Rogowski-coil principle, the induced winding voltage is proportional to $dI_{\mathrm{enc}}/dt$; $I_{\mathrm{enc}}$ is the current whose time variation drives that signal.</p>
+    </div>
+  </div>
+  <p style="font-size:.9em;color:#666">Not a compression case: the refinement made the surface-independence of the integral explicit and sharpened the sensor-current vs enclosed-current disambiguation. The campaign target is normativity, not brevity — clean-but-thin docs gain substance (two pilot members with <em>no</em> prior documentation got full docs written).</p>
+
+  <h2>§3 — How each mechanism addresses each weakness</h2>
+  <table>
+    <tr><th>Weakness</th><th>Mechanism that removes it</th><th>Mechanism that keeps it out</th></tr>
+    <tr><td>Typical values</td><td rowspan="3">Regeneration under the strict-normative docs prompt (state <em>what</em> the quantity is; no magnitudes, no workflows, no filler) by the gpt-5.6-luna docs seat — benchmarked at <strong>0% banned prose</strong> vs 15% for the previous seat (§2 role bench), at rubric parity and 23% lower cost.</td><td rowspan="3">The same grep-audit vocabulary (<code>prose_policy</code>) is used for campaign <em>selection</em> and the post-batch <em>gate</em>: any refreshed doc still matching a banned pattern counts as reintroduction, and one reintroduction halts the campaign (threshold: zero). A halted batch is root-caused in prompts before resuming — churn is structurally impossible to ignore.</td></tr>
+    <tr><td>Estimator recipes</td></tr>
+    <tr><td>Procedural padding</td></tr>
+    <tr><td>Undefined symbols (latex)</td><td>The docs rubric requires every symbol in every formula to be defined in a where-sentence; blind-pair review scores this dimension explicitly, and rejected docs loop through refine (observed: ~2.4 refine cycles per name).</td><td>The deterministic <code>latex_def_check</code> re-runs at post-batch revalidation; a doc that still carries undefined symbols is re-flagged (2 pilot residuals were caught exactly this way).</td></tr>
+    <tr><td>Physics drift risk (the rewrite damaging correct content)</td><td colspan="2">Same accept path as all catalog work — no privileged campaign accept; blind-pair quorum unchanged; every prior text snapshotted to a DocsRevision (reversible); zero-name-drift gate (a campaign can never rename); per-name <code>StandardNameChange</code> events for traceability. Pilot: 0 drift, 96% acceptance.</td></tr>
+  </table>
+
+  <h2>§4 — What this changes about the scale-up decision</h2>
+  <p>The audit-class breakdown reframes the options presented in the pilot archive. The <code>all</code> spec (2,288 names ≈ $850–960) would spend roughly $350 regenerating docs on ~750 names whose <em>only</em> defect is a name-axis decomposition finding — those docs get freshened, but the flagged defect cannot clear, and that name-structure backlog is already owned by the qualifier-order grammar redesign and individual <code>sn edit</code> renames.</p>
+  <table>
+    <tr><th>Spec</th><th>Names</th><th>Batches</th><th>Projected cost</th><th>Coverage</th></tr>
+    <tr><td><code>prose,audit:latex,audit:spelling,audit:length</code> <strong>(recommended)</strong></td><td>1,540</td><td>16</td><td><strong>≈ $570–650</strong></td><td>every docs-fixable defect: all three prose classes + all docs-axis audit findings</td></tr>
+    <tr><td><code>prose</code></td><td>1,504</td><td>16</td><td>≈ $560–630</td><td>prose only; leaves 36 docs-axis audit names for hand edits</td></tr>
+    <tr><td><code>all</code> (as piloted)</td><td>2,288</td><td>23</td><td>≈ $850–960</td><td>adds ~750 name-axis-only names whose finding a docs pass cannot clear</td></tr>
+  </table>
+  <p>Under the recommended spec, "done" for §5 becomes: zero accepted names match any banned-prose pattern (machine-audited), zero docs-axis audit findings on accepted names, and decomposition findings explicitly re-scoped to the name-axis workstream (grammar redesign + per-name renames) rather than waived silently.</p>
+
+  <h2>§5 — Honest limits</h2>
+  <ul>
+    <li><strong>Deliberately discarded content.</strong> The old docs' measurement-practice notes (calibration workflows, survey equipment, multi-ion substitutions) are removed, not relocated. The policy position is that this content belongs in facility/diagnostic documentation; if the lead wants it preserved, a harvest pass over DocsRevisions is possible at any time — nothing is lost, every prior text is snapshotted.</li>
+    <li><strong>Docs cannot fix names.</strong> 2,125 of 2,288 matched names carry only name-axis findings; after any docs campaign the decomposition backlog remains and must be handled by the grammar/rename track.</li>
+    <li><strong>Pilot is n=25.</strong> Convergence at 96% with zero reintroduction is strong but one batch; the per-batch gate exists precisely because batch 7 may behave differently from batch 1.</li>
+  </ul>
+
+  <p>Sources: pilot corpus <code>scratchpad/pilot_before_after.json</code> (session artifact), manifests regenerated 2026-07-18, per-check audit counts from the live graph. Campaign engine: imas-codex <code>a1c8ca1e</code> · pilot machinery <code>0882e417</code> · cost telemetry <code>763a5a14</code>.</p>
+</main>
+</body>
+</html>
