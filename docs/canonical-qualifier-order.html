@@ -227,15 +227,15 @@
         passed; codegen in sync.
       </p>
       <p class="landed-summary">
-        Follow-on: a <strong>$0 deterministic decomposition re-parse triage</strong> (imas-codex
-        <code>e3d20e11</code>, <code>sn decomp-triage</code>) buckets the 2252 stale
-        <code>decomposition_audit</code> findings on accepted names —
-        <strong>1809 drain / 173 suppress (1982 free) / 270 rename queue</strong> (~$21.60 review),
-        0 parse-fail. Full record + manifest:
+        Follow-on (imas-codex <code>5a08c744</code>): the <code>decomposition_audit</code> that had
+        flagged 2252 accepted names was <strong>retired as obsolete</strong> — the base slot is a
+        controlled vocabulary, so a composer cannot hide structure in <code>physical_base</code>;
+        the audit was comparing the surface base <em>phrase</em> (with legitimately-glued
+        kind-forming qualifiers) against the base-<em>token</em> set. Every finding, including the
+        interim "270 rename queue", was a historic false positive; all were drained (0 remain), no
+        name renamed. Full record:
         <a href="archive/canonical-qualifier-order-s3-landed.html">§3 landed</a>
-        (closes <code>f-cqo-normdir-shadow</code>, <code>f-cqo-003</code>, <code>f-cqo-004</code>;
-        the drain + rename rotation are staged for lead review in
-        <code>model-selection-and-global-refine · f-decomp-reparse-triage</code>).
+        (closes <code>f-cqo-normdir-shadow</code>, <code>f-cqo-003</code>, <code>f-cqo-004</code>).
       </p>
     </section>
 

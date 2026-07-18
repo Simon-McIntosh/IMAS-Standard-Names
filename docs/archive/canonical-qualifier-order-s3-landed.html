@@ -92,56 +92,50 @@
     cross-segment mis-file remains (the guard proves it), and the remaining dual-roles are documented
     design, not debt.</p>
 
-    <h3>4 — deterministic decomposition re-parse triage (imas-codex <code>e3d20e11</code>)</h3>
-    <p>The <code>decomposition_audit</code> substring-scans a name's <em>raw id</em>, so it flags a
-    closed-vocab token even when the grammar correctly slots it
-    (<code>ion_current_density</code> → subject=ion). Most stored findings on accepted names are
-    therefore <strong>stale, not real</strong>. A new <code>$0</code>, LLM-free triage re-parses every
-    flagged accepted name under the (now final) grammar and buckets it deterministically:</p>
+    <h3>4 — the decomposition audit was obsolete under controlled bases — retired (imas-codex <code>5a08c744</code>)</h3>
+    <div class="next-card" style="border-left:4px solid #d97706">
+      <p><strong>Correction (2026-07-18):</strong> an initial re-parse triage bucketed the 2252
+      <code>decomposition_audit</code> findings as drain 1809 / suppress 173 / rename 270 and shipped
+      a <code>sn decomp-triage</code> tool + dry-run manifest. The lead's controlled-base point then
+      revealed the deeper truth: <strong>every one of those findings — including the "270 rename
+      queue" — was a historic false positive.</strong> The audit was retired, not refined.</p>
+    </div>
+    <p>The physical/geometric base slot is a <strong>controlled vocabulary</strong>: the parser
+    rejects an unregistered base token (<code>flibbertigibbet_field</code> →
+    <code>UnknownBaseTokenError</code>), so a composer <em>cannot</em> hide structure in an open
+    <code>physical_base</code> — the failure mode the audit was built to catch. The audit read a
+    name's surface base <em>phrase</em> (<code>model.physical_base</code>, e.g.
+    <code>reference_magnetic_field</code>, <code>absorbed_power</code>,
+    <code>nuclear_heating_power</code>) and compared it against the registered base-<em>token</em>
+    set — but the actual base token (<code>ir.base.token</code>: <code>magnetic_field</code>,
+    <code>power</code>, <code>heating_power</code>) is <strong>always registered</strong>. The
+    surface phrase legitimately carries glued <strong>kind-forming qualifiers</strong> (royal-order:
+    <code>ion_atomic_mass</code>, <code>wave_electric_field</code>). So there is no genuine
+    "absorbed token" this audit could ever detect on a name that parses; names that don't parse are
+    caught by the grammar gate.</p>
     <div style="overflow-x:auto"><table>
-      <thead><tr><th>Bucket</th><th>Rule</th><th>Count</th><th>Action</th></tr></thead>
+      <thead><tr><th>Apparent "rename" class</th><th>Reality</th></tr></thead>
       <tbody>
-        <tr><td><strong>drain</strong></td>
-            <td>parse slots the token; parsed <code>physical_base</code> is clean</td>
-            <td>1809</td><td>clear finding + re-stamp segments (free)</td></tr>
-        <tr><td><strong>suppress</strong></td>
-            <td>token embedded in a grammar-registered lexicalised base
-              (<code>convection_velocity</code>, <code>diffusion_coefficient</code>)</td>
-            <td>173</td><td>clear finding — legitimate (free)</td></tr>
-        <tr><td><strong>rename</strong></td>
-            <td>token absorbed into a non-registered compound
-              (<code>reference_magnetic_field</code>, <code>vacuum_magnetic_vector_potential</code>)</td>
-            <td>270</td><td>rename rotation (compose free on DSv4, review-only cost)</td></tr>
-        <tr><td>parse_fail / non_canonical</td><td>grammar rejects the name</td><td>0 / 0</td>
-            <td>none — §5 tail is clean</td></tr>
+        <tr><td><code>absorbed_power</code>, <code>wave_electric_field</code>, <code>alfven_frequency</code> (262)</td>
+            <td>kind-forming qualifier glued to a registered base — correct per royal-order</td></tr>
+        <tr><td><code>ratio_of_A_to_B</code> (~20)</td>
+            <td>binary-operator names; <code>physical_base</code> is one nested argument, not a flat base</td></tr>
+        <tr><td><code>upper_bound_charge_number</code> (~8)</td>
+            <td>zone token <code>upper</code> matched inside the <code>upper_bound</code> qualifier — substring artifact</td></tr>
+        <tr><td><code>lower_bound_energy</code>, <code>critical_momentum</code> (~10)</td>
+            <td><code>energy</code>/<code>momentum</code> is the registered base head, not an absorption</td></tr>
       </tbody>
     </table></div>
-    <p>Total flagged: <strong>2252</strong>. <strong>1982 (88%) clear for free</strong> (drain +
-    suppress); the <strong>270-name rename queue</strong> is sized at a projected
-    <strong>$21.60</strong> review cost (270 × $0.08; compose is free on local DSv4). Zero parse
-    failures confirms the grammar handles every flagged name — the §5 tail stayed closed through the
-    normdir change. Full manifest (incl. per-name suggestions):
-    <a href="canonical-qualifier-order-manifests/decomp-triage-dry-run.json">decomp-triage-dry-run.json</a>.</p>
-    <p>Delivered as <code>imas_codex/standard_names/decomposition_triage.py</code> (pure bucketing,
-    unit-tested against real catalog names) + the <code>imas-codex sn decomp-triage</code> subcommand
-    (read-only dry-run default; <code>--apply</code> clears the drain/suppress findings and re-stamps
-    segment edges).</p>
-
-    <h3>What's next</h3>
-    <div class="next-card">
-      <p>The manifest is a <strong>dry run — no writes</strong>, deliberately staged for lead review
-      before the drain and rename rotation (both gated in
-      <code>model-selection-and-global-refine · f-decomp-reparse-triage</code>):</p>
-      <ol>
-        <li><strong>Apply the free drain</strong> — <code>sn decomp-triage --apply</code> clears the
-          1982 drain/suppress findings and re-stamps segments once the bucket split is signed off.</li>
-        <li><strong>Rename rotation</strong> — the 270-name queue composes on DSv4 + blind-pair review
-          (~$21.60), batched with checkpoints like the docs rotations.</li>
-        <li><strong>Durable audit fix</strong> — make <code>decomposition_audit_check</code>
-          parse-aware (scan the parsed <code>physical_base</code>, exempt registered bases) so the
-          drain sticks and buckets a/b never recur.</li>
-      </ol>
-    </div>
+    <p><strong>Retired.</strong> <code>decomposition_audit_check</code>, the
+    <code>find_absorbed_closed_tokens</code> primitive, and their tests are removed; the reviewer
+    prompt's hand-scan-and-dock bullet is replaced with "the base registry is grammar-enforced; emit
+    a <code>vocab_gap</code> when no registered base fits." All stored findings were drained
+    graph-wide (2252 accepted-name findings via the interim tool, then the remaining 1641 across all
+    stages — <strong>0 remain</strong>). No name was renamed; none needed it. The base grammar itself
+    is now the guarantee. The interim <code>sn decomp-triage</code> tool was deleted (single-shot).
+    The original dry-run manifest is retained as a historical artifact:
+    <a href="canonical-qualifier-order-manifests/decomp-triage-dry-run.json">decomp-triage-dry-run.json</a>
+    (its "rename" bucket is now understood as false positives).</p>
   </main>
 </body>
 </html>
