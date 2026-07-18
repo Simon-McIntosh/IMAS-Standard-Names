@@ -28,15 +28,11 @@ class Component(StrEnum):
     Z = "z"
     NORMALIZED_RADIAL = "normalized_radial"
     NORMALIZED_VERTICAL = "normalized_vertical"
-    NORMALIZED_PARALLEL = "normalized_parallel"
-    NORMALIZED_PERPENDICULAR = "normalized_perpendicular"
     NORMALIZED_TOROIDAL = "normalized_toroidal"
     NORMALIZED_POLOIDAL = "normalized_poloidal"
 
 
 class Coordinate(StrEnum):
-    NORMALIZED_PARALLEL = "normalized_parallel"
-    NORMALIZED_PERPENDICULAR = "normalized_perpendicular"
     NORMALIZED_POLOIDAL = "normalized_poloidal"
     NORMALIZED_RADIAL = "normalized_radial"
     NORMALIZED_TOROIDAL = "normalized_toroidal"

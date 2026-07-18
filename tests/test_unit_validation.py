@@ -150,9 +150,12 @@ class TestDimensionlessPhysicalQuantity:
         assert len(issues) == 1
         assert "density" in issues[0]
 
-    def test_no_warning_for_normalized_direction_component(self):
-        """normalized_<direction> components absorb the normalized token
-        (component=normalized_parallel), so unit inference is unreliable."""
+    def test_no_warning_for_normalized_operator_on_projection(self):
+        """A GyroBohm-normalized projected flux is legitimately dimensionless.
+
+        ``normalized`` peels as the dimensionless operator (the projection
+        resolves to ``parallel``), so it is exempted via the dimensionless-
+        operator/qualifier path — no unit-suspicion warning."""
         name = (
             "normalized_parallel_momentum_flux_due_to_"
             "perturbed_parallel_vector_potential"

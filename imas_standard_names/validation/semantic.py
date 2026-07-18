@@ -541,18 +541,6 @@ def _check_dimensionless_physical_quantity(
         if binary_operator:
             return issues
 
-        # normalized_<direction> components (components.yml "normalized
-        # spatial directions") absorb the normalized token into the component
-        # (normalized_parallel_momentum_flux parses component=
-        # normalized_parallel), so the SI-unit inference from the base is
-        # unreliable for them.
-        component = getattr(parsed, "component", None)
-        component_value = getattr(component, "value", component)
-        if isinstance(component_value, str) and component_value.startswith(
-            "normalized_"
-        ):
-            return issues
-
         # Operators marked dimensionless in the vocabulary always produce
         # dimensionless output (normalized, perturbed, logarithm, etc.);
         # dimension-transforming operators (integrals, derivatives, inverse)

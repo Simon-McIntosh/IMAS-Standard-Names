@@ -188,13 +188,24 @@ class TestPositionTokens:
 
 
 class TestComponentTokens:
-    """Verify rc14 component vocabulary additions."""
+    """Verify the normalized coordinate-frame component tokens.
+
+    ``normalized_parallel`` / ``normalized_perpendicular`` were removed
+    (canonical-qualifier-order §3): parallel/perpendicular are field-relative
+    directions with no distinct normalized variant, so a ``normalized_<dir>``
+    prefix on them could only ever encode the GyroBohm-normalization OPERATOR,
+    which was being shadowed by the component token via longest-match. Only the
+    normalized COORDINATE-frame directions (radial→ρ, vertical, toroidal→φ,
+    poloidal→θ) survive as genuine component tokens.
+    """
 
     @pytest.mark.parametrize(
         "token,enum_member",
         [
-            ("normalized_parallel", Component.NORMALIZED_PARALLEL),
-            ("normalized_perpendicular", Component.NORMALIZED_PERPENDICULAR),
+            ("normalized_radial", Component.NORMALIZED_RADIAL),
+            ("normalized_vertical", Component.NORMALIZED_VERTICAL),
+            ("normalized_toroidal", Component.NORMALIZED_TOROIDAL),
+            ("normalized_poloidal", Component.NORMALIZED_POLOIDAL),
         ],
     )
     def test_component_enum_membership(self, token, enum_member):
@@ -203,16 +214,36 @@ class TestComponentTokens:
     @pytest.mark.parametrize(
         "component",
         [
-            "normalized_parallel",
-            "normalized_perpendicular",
+            "normalized_radial",
+            "normalized_vertical",
+            "normalized_toroidal",
+            "normalized_poloidal",
         ],
     )
     def test_component_round_trip(self, component):
-        name = f"{component}_refractive_index"
+        name = f"{component}_magnetic_field"
         parsed = parse_standard_name(name)
         assert parsed.component == Component(component)
-        assert parsed.physical_base == "refractive_index"
+        assert parsed.physical_base == "magnetic_field"
         assert compose_standard_name(parsed) == name
+
+    @pytest.mark.parametrize(
+        "removed_token",
+        ["normalized_parallel", "normalized_perpendicular"],
+    )
+    def test_removed_normalized_field_relative_directions(self, removed_token):
+        """The field-relative normalized directions are no longer components.
+
+        ``normalized`` peels as the operator and the projection resolves to the
+        bare field-relative direction (``parallel`` / ``perpendicular``). The
+        ``normalized_<dir>`` spelling is now non-canonical — it canonicalizes to
+        ``<dir>_normalized_...`` (component leads the normalization qualifier).
+        """
+        assert not hasattr(Component, removed_token.upper())
+        direction = removed_token.removeprefix("normalized_")
+        canonical = f"{direction}_normalized_momentum_flux"
+        parsed = parse_standard_name(canonical)
+        assert parsed.component == Component(direction)
 
 
 # ---------------------------------------------------------------------------

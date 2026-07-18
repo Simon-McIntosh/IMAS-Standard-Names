@@ -4,15 +4,15 @@
 # "radial_coordinate_of_flux_loop".  Distinct from components.yml which
 # is used with QuantityBase (shape=component, e.g. "radial_magnetic_field").
 #
-# Coordinate-axis tokens (10):
-#   normalized_parallel, normalized_poloidal, normalized_toroidal,
-#   parallel, perpendicular, poloidal, radial, toroidal, vertical, x
+# The normalized coordinate directions are flux/normalized-machine axes:
+#   normalized_radial → ρ, normalized_toroidal → φ, normalized_poloidal → θ,
+#   normalized_vertical → normalized Z.  `normalized_parallel` /
+#   `normalized_perpendicular` are deliberately ABSENT: parallel/perpendicular
+#   are field-relative directions with no distinct normalized-coordinate
+#   variant — a leading `normalized` on them is the GyroBohm/reference
+#   normalization operator, not a coordinate (canonical-qualifier-order §3).
 
 axes:
-  normalized_parallel:
-    aliases: []
-  normalized_perpendicular:
-    aliases: []
   normalized_poloidal:
     aliases: []
   normalized_radial:
