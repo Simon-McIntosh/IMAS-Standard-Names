@@ -18,7 +18,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-18">
-<meta name="plan-version" content="13">
+<meta name="plan-version" content="14">
 <meta name="plan-blocks" content="catalog-expert-review-remediation">
 <meta name="plan-impl" content="0.9">
 </head>
@@ -102,10 +102,10 @@
   </header>
   <p class="landed-summary">
     Pre-campaign revalidation sweep run (436 re-stamped; derived quarantines 62 → 10, residual all genuine). Stratified pilot selection added (<code>--campaign-pilot N</code>, imas-codex <code>0882e417</code>); 25-name pilot covering all 18 physics domains ran live and <strong>converged: 24/25 accepted (96% ≥ 90% gate), zero banned-prose reintroduction, zero name drift</strong>, provenance intact (25/25 change events, 23/25 snapshots — 2 had no prior docs). Campaign cost telemetry fixed en route (<code>763a5a14</code>: drain returns real pool-session spend; pilot had logged $0.00); prose vocab moved to neutral <code>prose_policy</code> (<code>a469501d</code>).
-    Measured cost $0.37–0.42/name → <strong>full 2,288-name / 23-batch campaign projects ≈ $850–960</strong>, well above the pre-pilot guess — the scale-up decision (full spec vs prose-only ≈ $520–580 vs tranches) is with the lead.
-    Full record + manifest + before/after samples: <a href="archive/model-selection-and-global-refine-s5-pilot-landed.html">§5 pilot landed</a>.
+    Measured cost $0.42/name as run — but the 2026-07-18 investigation found <strong>53% of pilot spend was a refine claim-race livelock</strong> (39 paid gpt-5.5 calls persist-no-oped on 2 names; 20 replicas racing a 1–2-name eligible set); healthy-path cost ≈ $0.20/name → recommended docs-fixable spec (1,540 names, 16 batches) ≈ <strong>$300–380 post-fix</strong>. Refine feedback verified end-to-end: critique is injected into the refine prompt and one cycle fixes nearly every case. Second gap: the deterministic audit is not re-stamped after refinement (revalidate greps prose only).
+    Full record + manifest + before/after samples: <a href="archive/model-selection-and-global-refine-s5-pilot-landed.html">§5 pilot landed</a> · weaknesses + evidence: <a href="docs-campaign-before-after.html">before/after doc</a>.
   </p>
-  <p><strong>Remaining (post-approval):</strong> run the 23 scaled batches under the gate (suggested <code>--campaign-batch-cost-cap 50 --campaign-cost-ceiling 1000</code>); <code>minimum_magnetic_field</code> completes in the first batch drain. Done when: zero accepted entries carry banned-prose classes (machine-audited), audit-quarantine count on accepted names is zero or explicitly waived per name, and the expert-review-reply document's open item 1 is closed.</p>
+  <p><strong>Remaining (launch-gated):</strong> fix the refine claim-race livelock and the post-batch audit re-stamp (followups queued), then lead approval, then the scaled batches; <code>minimum_magnetic_field</code> completes in the first batch drain. Done when: zero accepted entries carry banned-prose classes (machine-audited), audit-quarantine count on accepted names is zero or explicitly waived per name, and the expert-review-reply document's open item 1 is closed.</p>
   </section>
 
   <h2 id="s6">§6 — Risks</h2>
@@ -305,6 +305,47 @@ Recommended (docs-fixable defects only), run (or via ! in a Claude session):
   cd ~/Code/imas-codex &amp;&amp; uv run imas-codex sn run --source dd --campaign &quot;prose,audit:latex,audit:spelling,audit:length&quot; --include-accepted --campaign-batch-cost-cap 50 --campaign-cost-ceiling 700
 Alternatives: --campaign prose (1,504 names, leaves 36 docs-axis audit names for hand edits); --campaign all (2,288 names ≈ $850–960, adds ~750 name-axis-only names whose finding cannot clear).
 The campaign halts between batches on any gate miss (≥90% acceptance, zero banned-prose reintroduction, zero name drift) and prints --campaign-resume-from. After completion: verify sn run --campaign prose --dry-run → total 0; record final counts + spend in the §5 archive; re-scope decomposition findings to the name-axis workstream explicitly; then close expert-review reply open item 1 via f-expert-review-reply-doc.</pre>
+    </article>
+<article class="r-fu" data-id="f-refine-claim-livelock" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-18" data-recommends-skill="/reckon-ship model-selection-and-global-refine §5" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">LAUNCH GATE: fix the refine_docs claim-race livelock (53% of pilot spend wasted)</h4>
+    <div class="r-fu-body">Pilot forensics (LLMCost run 02313084): 39 of 59 refine calls ($5.55 of $7.55) were paid gpt-5.5 calls whose persist_refined_docs no-oped with token/stage mismatch, concentrated on perturbed_particle_energy (27 calls) and vertical_coordinate_of_constraint_position (12). 20 refine replicas racing a 1–2-name eligible set defeat the _verify_docs_claim_winners window — each racer is momentarily the token holder at its own verify instant, all pay, only the last persist lands, and the sub-threshold score keeps the name eligible so the storm repeats.</div>
+    <pre class="r-fu-prompt">Project: imas-standard-names / code: imas-codex (branch main)
+Section: §5 launch gate (a)
+Tier: opus
+
+Evidence
+  Pilot log (persist_refined_docs: no-op … token/stage mismatch loops at 22:42–22:43) + LLMCost run 02313084 per-name refine call counts. Claim path: graph_ops.claim_refine_docs_batch → _claim_sn_atomic → _verify_docs_claim_winners; persist: persist_refined_docs (token+stage guarded — the guard is correct, the waste is upstream).
+
+Work (in order of leverage)
+  1. Scale docs-pool replicas to scope size for scoped drains (scope_run_id set): replicas = min(configured, max(1, ceil(eligible/2))) — 20 replicas on a 25-name batch is the amplifier.
+  2. Close the verify race: after claim + verify, re-read the token once more after a short settle (or verify with a strictly-increasing claim sequence number) so at most one racer proceeds to the paid call.
+  3. Tripwire: count paid-call-with-failed-persist per pool per run; surface in the run summary and warn when &gt;2%. Also rename/clarify the pool &#x27;completed&#x27; counter semantics (it counts processed attempts, not persisted work).
+  4. Regression test with a mock pool: N concurrent claimers, 1 eligible item → exactly 1 paid call proceeds.
+
+Done-when
+  1. re-run the 25-name pilot scope as a smoke (idempotent; names already accepted → tiny drain) with refine waste &lt;5%
+  2. tests green, committed+pushed
+  3. this followup resolved; launch gate (b) f-campaign-audit-restamp still open or resolved before approval</pre>
+    </article>
+<article class="r-fu" data-id="f-campaign-audit-restamp" data-status="open" data-tier="sonnet" data-written-by="reckon-ship" data-written-at="2026-07-18" data-recommends-skill="/reckon-ship model-selection-and-global-refine §5" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">LAUNCH GATE: re-stamp the deterministic audit after each campaign batch</h4>
+    <div class="r-fu-body">The campaign's default_revalidate confirms lifted quarantines 'valid' on the banned-prose grep alone — the deterministic audit (latex_def_check, spelling, length, unit checks) is never re-run on refreshed docs. Pilot proof: all 25 pilot names carry validated_at timestamps predating the drain, and perturbed_particle_energy (genuine name_unit_consistency defect) is now stamped 'valid'.</div>
+    <pre class="r-fu-prompt">Project: imas-standard-names / code: imas-codex (branch main)
+Section: §5 launch gate (b)
+Tier: sonnet
+
+Context
+  campaign.py default_revalidate only re-quarantines on prose-grep reintroduction and confirms the rest valid. The LLM-free validation drain (sn run --revalidate --only validate machinery, 363a6ee1) already re-runs the full ISN audit and re-stamps validation_issues/validated_at — route each campaign batch through it.
+
+Work
+  1. In CampaignRunner step 5, replace/extend default_revalidate: clear validated_at on the batch ids and invoke the validation drain scoped to them (injectable fn, mock-tested), so every refreshed doc gets a fresh deterministic audit stamp and genuine defects (e.g. unit inconsistencies) re-quarantine instead of washing to &#x27;valid&#x27;.
+  2. Re-stamp the 25 pilot names the same way; verify perturbed_particle_energy re-quarantines on its unit defect and record post-stamp counts.
+  3. Keep the convergence gate reading the prose grep (fast) but add re-stamped audit deltas to the batch outcome for the archive.
+
+Done-when
+  1. campaign batches leave no stale validated_at; test with a mock validate fn
+  2. pilot names re-stamped, counts recorded in the §5 archive
+  3. committed+pushed; this followup resolved</pre>
     </article>
 </section>
 </main>

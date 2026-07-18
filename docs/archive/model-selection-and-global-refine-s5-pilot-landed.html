@@ -46,23 +46,24 @@
   <p>The single unaccepted name, <code>minimum_magnetic_field</code>, sits at <code>docs_stage='drafted'</code> — the $10 pilot budget cap stopped the pools before its final review cycle. Any subsequent docs drain (including the first scaled batch) completes it; no defect.</p>
 
   <figure>
-    <svg viewBox="0 0 880 210" role="img" aria-label="Pilot cost by phase and acceptance" style="width:100%;max-width:880px;font-family:system-ui,sans-serif">
+    <svg viewBox="0 0 880 230" role="img" aria-label="Pilot cost by phase and acceptance" style="width:100%;max-width:880px;font-family:system-ui,sans-serif">
       <g font-size="13" fill="#202124">
-        <text x="4" y="18" font-weight="600">Pilot spend by phase (graph-billed, $9.18 total)</text>
+        <text x="4" y="18" font-weight="600">Pilot spend by phase (graph-billed run 02313084, $10.43 total) — CORRECTED 2026-07-18</text>
       </g>
       <g>
-        <rect x="150" y="34"  width="416" height="20" fill="#4a7dbd"/><text x="4" y="49" font-size="12" fill="#202124">generate_docs</text><text x="572" y="49" font-size="12" fill="#202124">$4.16</text>
-        <rect x="150" y="60"  width="216" height="20" fill="#4a7dbd"/><text x="4" y="75" font-size="12" fill="#202124">refine_docs</text><text x="372" y="75" font-size="12" fill="#202124">$2.16</text>
-        <rect x="150" y="86"  width="167" height="20" fill="#4a7dbd"/><text x="4" y="101" font-size="12" fill="#202124">review_docs</text><text x="323" y="101" font-size="12" fill="#202124">$1.67</text>
-        <rect x="150" y="112" width="119" height="20" fill="#9db7d6"/><text x="4" y="127" font-size="12" fill="#202124">name-axis residual</text><text x="275" y="127" font-size="12" fill="#202124">$1.19</text>
+        <rect x="150" y="34"  width="200" height="20" fill="#c96a4a"/><text x="4" y="49" font-size="12" fill="#202124">refine_docs (healthy)</text><text x="356" y="49" font-size="12" fill="#202124">$2.00 · ~20 calls</text>
+        <rect x="150" y="60"  width="555" height="20" fill="#8a4a3a"/><text x="4" y="75" font-size="12" fill="#202124">refine_docs (livelock waste)</text><text x="711" y="75" font-size="12" fill="#fff2ee">$5.55 · 39 calls on 2 names</text>
+        <rect x="150" y="86"  width="182" height="20" fill="#4a7dbd"/><text x="4" y="101" font-size="12" fill="#202124">review_docs</text><text x="338" y="101" font-size="12" fill="#202124">$1.82 · 81 calls</text>
+        <rect x="150" y="112" width="106" height="20" fill="#4a7dbd"/><text x="4" y="127" font-size="12" fill="#202124">generate_docs</text><text x="262" y="127" font-size="12" fill="#202124">$1.06 · 30 calls</text>
       </g>
       <g font-size="12" fill="#555">
-        <text x="4" y="163">Pool completions: generate_docs 25 · review_docs 39 · refine_docs 59 (≈2.4 refine cycles/name — the anti-churn rotation working).</text>
-        <text x="4" y="181">Per-name measured: $0.37–0.42. Acceptance 24/25 (96%); the last name stopped mid-cycle at the $10 budget cap.</text>
-        <text x="4" y="199">Log-reported pool sums ($10.4) exceed graph-billed ($9.18) — retry sub-charges double-count in the log figures; the graph ledger is authoritative.</text>
+        <text x="4" y="163">Refine convergence is healthy where persist succeeds: ~30% of names needed refinement, almost all fixed in ONE cycle (scores 0.637 → 0.762 → 1.000).</text>
+        <text x="4" y="181">53% of pilot spend was a claim-race livelock: paid refine calls whose persist no-oped (token/stage mismatch), concentrated on 2 quarantined members</text>
+        <text x="4" y="199">(perturbed_particle_energy 27 calls $4.35; vertical_coordinate_of_constraint_position 12 calls $1.20). 20 refine replicas racing a 1–2-name eligible set.</text>
+        <text x="4" y="217">As-run $0.42/name; healthy-path ≈ $0.20/name. Fix gates the scale-up — see the hardening followups in the evergreen plan.</text>
       </g>
     </svg>
-    <figcaption>Docs generation dominates spend; refine cycles are the convergence cost. Graph-billed LLMCost is the authoritative ledger.</figcaption>
+    <figcaption>Corrected cost attribution (the original figure mis-attributed a July-8 session's phases). Refine dominance is a concurrency defect, not a convergence cost.</figcaption>
   </figure>
 
   <h2>Refinement quality (samples the lead can spot-check)</h2>
@@ -77,8 +78,8 @@
   <table>
     <tr><th>Input</th><th>Value</th></tr>
     <tr><td>Selection</td><td>2,288 accepted names (post-sweep), 23 batches of 100</td></tr>
-    <tr><td>Measured unit cost</td><td>$0.37–0.42/name (pilot, seats: docs-gen luna, refine gpt-5.5, review quorum unchanged)</td></tr>
-    <tr><td>Full-campaign projection</td><td><strong>≈ $850–960</strong> — materially above the pre-pilot guess (&lt;$75–125); docs generation is the dominant phase, and audit-flagged docs average ~2.4 refine cycles</td></tr>
+    <tr><td>Measured unit cost</td><td>$0.42/name as run, but 53% of spend was the refine claim-race livelock (see corrected figure) — healthy-path cost ≈ $0.20/name (seats: docs-gen luna, refine gpt-5.5, review quorum unchanged)</td></tr>
+    <tr><td>Full-campaign projection</td><td>as-run rate ≈ $850–960; <strong>post-livelock-fix ≈ $400–500</strong> for the full spec, ≈ $300–380 for the docs-fixable spec — the fix gates the launch</td></tr>
     <tr><td>Suggested caps if approved</td><td>per-batch <code>--campaign-batch-cost-cap 50</code>, campaign <code>--campaign-cost-ceiling 1000</code>, gate 0.90 unchanged</td></tr>
     <tr><td>Cheaper alternatives</td><td>(a) narrow the spec to <code>prose</code> only (1,384 names ≈ $520–580), deferring pure-audit fixes; (b) run domain-by-domain tranches with review between tranches; (c) accept as-is — quality evidence at 96%/0/0 is strong</td></tr>
     <tr><td>Command (full, as piloted)</td><td><code>imas-codex sn run --source dd --campaign all --include-accepted --campaign-batch-cost-cap 50 --campaign-cost-ceiling 1000</code></td></tr>

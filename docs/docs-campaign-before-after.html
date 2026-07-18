@@ -61,7 +61,7 @@
       </g>
       <g font-size="13" fill="#202124"><text x="4" y="176" font-weight="600">Pilot clearance (25 names, one gated batch)</text></g>
       <g font-size="12" fill="#202124">
-        <text x="4" y="196">banned-prose findings: 13 names before → 0 after · docs-axis latex findings: cleared on refresh (2 residual, re-flagged for the next drain)</text>
+        <text x="4" y="196">banned-prose findings: 13 names before → 0 after (grep re-run on refreshed text) · deterministic audit NOT yet re-stamped post-refresh — pre-launch fix queued</text>
         <text x="4" y="214">acceptance 24/25 (96%) · zero prose reintroduction · zero name drift · mean doc length 1,873 → 1,357 chars (−28%)</text>
       </g>
     </svg>
@@ -136,7 +136,7 @@
     <tr><td>Typical values</td><td rowspan="3">Regeneration under the strict-normative docs prompt (state <em>what</em> the quantity is; no magnitudes, no workflows, no filler) by the gpt-5.6-luna docs seat — benchmarked at <strong>0% banned prose</strong> vs 15% for the previous seat (§2 role bench), at rubric parity and 23% lower cost.</td><td rowspan="3">The same grep-audit vocabulary (<code>prose_policy</code>) is used for campaign <em>selection</em> and the post-batch <em>gate</em>: any refreshed doc still matching a banned pattern counts as reintroduction, and one reintroduction halts the campaign (threshold: zero). A halted batch is root-caused in prompts before resuming — churn is structurally impossible to ignore.</td></tr>
     <tr><td>Estimator recipes</td></tr>
     <tr><td>Procedural padding</td></tr>
-    <tr><td>Undefined symbols (latex)</td><td>The docs rubric requires every symbol in every formula to be defined in a where-sentence; blind-pair review scores this dimension explicitly, and rejected docs loop through refine (observed: ~2.4 refine cycles per name).</td><td>The deterministic <code>latex_def_check</code> re-runs at post-batch revalidation; a doc that still carries undefined symbols is re-flagged (2 pilot residuals were caught exactly this way).</td></tr>
+    <tr><td>Undefined symbols (latex)</td><td>The docs rubric requires every symbol in every formula to be defined in a where-sentence; blind-pair review scores this dimension explicitly, and rejected docs loop through refine — one cycle sufficed for nearly every pilot name that needed it (scores rose 0.637 → 0.762 → 1.000 on the worst case).</td><td><strong>Gap found 2026-07-18:</strong> the campaign’s post-batch revalidate currently greps banned prose only — the deterministic audit (latex/spelling/length) is NOT re-run on refreshed docs, and lifted quarantines are confirmed valid on the grep alone. A pre-launch fix routes each batch through the LLM-free validation drain so every refreshed doc is re-stamped and genuine defects re-quarantine.</td></tr>
     <tr><td>Physics drift risk (the rewrite damaging correct content)</td><td colspan="2">Same accept path as all catalog work — no privileged campaign accept; blind-pair quorum unchanged; every prior text snapshotted to a DocsRevision (reversible); zero-name-drift gate (a campaign can never rename); per-name <code>StandardNameChange</code> events for traceability. Pilot: 0 drift, 96% acceptance.</td></tr>
   </table>
 
@@ -144,7 +144,7 @@
   <p>The audit-class breakdown reframes the options presented in the pilot archive. The <code>all</code> spec (2,288 names ≈ $850–960) would spend roughly $350 regenerating docs on ~750 names whose <em>only</em> defect is a name-axis decomposition finding — those docs get freshened, but the flagged defect cannot clear, and that name-structure backlog is already owned by the qualifier-order grammar redesign and individual <code>sn edit</code> renames.</p>
   <table>
     <tr><th>Spec</th><th>Names</th><th>Batches</th><th>Projected cost</th><th>Coverage</th></tr>
-    <tr><td><code>prose,audit:latex,audit:spelling,audit:length</code> <strong>(recommended)</strong></td><td>1,540</td><td>16</td><td><strong>≈ $570–650</strong></td><td>every docs-fixable defect: all three prose classes + all docs-axis audit findings</td></tr>
+    <tr><td><code>prose,audit:latex,audit:spelling,audit:length</code> <strong>(recommended)</strong></td><td>1,540</td><td>16</td><td><strong>≈ $570–650 as-run; ≈ $300–380 after the refine-livelock fix</strong></td><td>every docs-fixable defect: all three prose classes + all docs-axis audit findings</td></tr>
     <tr><td><code>prose</code></td><td>1,504</td><td>16</td><td>≈ $560–630</td><td>prose only; leaves 36 docs-axis audit names for hand edits</td></tr>
     <tr><td><code>all</code> (as piloted)</td><td>2,288</td><td>23</td><td>≈ $850–960</td><td>adds ~750 name-axis-only names whose finding a docs pass cannot clear</td></tr>
   </table>
@@ -154,6 +154,7 @@
   <ul>
     <li><strong>Deliberately discarded content.</strong> The old docs' measurement-practice notes (calibration workflows, survey equipment, multi-ion substitutions) are removed, not relocated. The policy position is that this content belongs in facility/diagnostic documentation; if the lead wants it preserved, a harvest pass over DocsRevisions is possible at any time — nothing is lost, every prior text is snapshotted.</li>
     <li><strong>Docs cannot fix names.</strong> 2,125 of 2,288 matched names carry only name-axis findings; after any docs campaign the decomposition backlog remains and must be handled by the grammar/rename track.</li>
+    <li><strong>Pilot exposed two pre-launch defects (2026-07-18 investigation).</strong> (a) A refine claim-race livelock burned 53% of pilot spend: 20 refine replicas racing a 1–2-name eligible set produced 39 paid gpt-5.5 calls whose persist no-oped (token/stage mismatch) on two quarantined members — refine convergence itself is healthy (critique is injected into the refine prompt and one cycle fixes almost every case). (b) The deterministic audit is not re-stamped after refinement. Both fixes gate the launch — followups queued in the evergreen plan.</li>
     <li><strong>Pilot is n=25.</strong> Convergence at 96% with zero reintroduction is strong but one batch; the per-batch gate exists precisely because batch 7 may behave differently from batch 1.</li>
   </ul>
 
