@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-standard-names">
+  <meta name="reckon-type" content="doc">
+  <meta name="plan-slug" content="canonical-qualifier-order-s3-landed">
+  <meta name="plan-title" content="§3 landed — grammar residuals closed + decomposition re-parse triage">
+  <meta name="plan-summary" content="normalized_parallel/perpendicular shadow removed; vocab-disjointness guard at its intentional floor; §3 per-token curation complete; a $0 re-parse triage buckets 2252 stale decomposition-audit findings.">
+  <meta name="plan-informs" content="canonical-qualifier-order">
+  <title>§3 landed — grammar residuals + decomposition triage | imas-standard-names</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="s3">§3 landed — grammar residuals + decomposition re-parse triage
+      <span class="badge badge-shipped">✓ landed 2026-07-18</span></h2>
+    <p>Evergreen: <a href="/imas-standard-names/canonical-qualifier-order.html">canonical-qualifier-order</a> §3.
+    Closes the last three §3 followups (<code>f-cqo-normdir-shadow</code>, <code>f-cqo-003</code>,
+    <code>f-cqo-004</code>) and delivers the decomposition re-parse triage script + dry-run manifest
+    that the docs-campaign plan gated on §3 being final
+    (<code>model-selection-and-global-refine</code> · <code>f-decomp-reparse-triage</code>).</p>
+
+    <h3>1 — normalized-direction shadow removed (ISN <code>d150b6c</code>)</h3>
+    <p><code>components.yml</code> and <code>coordinate_axes.yml</code> registered
+    <code>normalized_parallel</code> and <code>normalized_perpendicular</code> as projection tokens.
+    Longest-match then <strong>shadowed the operator reading</strong>:
+    <code>normalized_parallel_momentum_flux</code> fused to a
+    <code>projection=normalized_parallel</code> instead of the GyroBohm-normalization
+    <em>operator</em> applied to the parallel momentum flux — silently changing the meaning of
+    every GyroBohm-normalized projected quantity. The unit-suspicion validator carried a
+    stop-gap component-prefix exemption to paper over it, but the ambiguity itself was live.</p>
+    <p><strong>Resolution (physics-grounded, deterministic).</strong> <code>parallel</code> and
+    <code>perpendicular</code> are <em>field-relative</em> directions (along / across <strong>B</strong>)
+    with no distinct normalized-direction variant — so a leading <code>normalized</code> on them can
+    only ever be the operator. Both tokens are removed from <code>components.yml</code> and
+    <code>coordinate_axes.yml</code>; the genuine normalized coordinate-frame directions
+    (<code>normalized_radial</code>→ρ, <code>normalized_vertical</code>, <code>normalized_toroidal</code>→φ,
+    <code>normalized_poloidal</code>→θ) are retained. The stop-gap exemption is deleted — the operator
+    is now exempted through the existing dimensionless-operator path, which also restores correct
+    unit-suspicion for the genuine <code>normalized_radial</code>-class components (a ρ-component
+    magnetic field still carries Tesla).</p>
+    <div style="overflow-x:auto"><table>
+      <thead><tr><th>Name</th><th>Before (shadowed)</th><th>After</th></tr></thead>
+      <tbody>
+        <tr><td><code>normalized_parallel_momentum_flux</code></td>
+            <td>projection=<code>normalized_parallel</code></td>
+            <td>operator <code>normalized</code> + projection=<code>parallel</code></td></tr>
+        <tr><td><code>normalized_radial_magnetic_field</code></td>
+            <td>projection=<code>normalized_radial</code></td>
+            <td>projection=<code>normalized_radial</code> (unchanged — genuine)</td></tr>
+      </tbody>
+    </table></div>
+    <p>The 4 affected GyroBohm names re-parse to the canonical
+    <code>&lt;direction&gt;_normalized_&lt;base&gt;</code> form (component leads the normalization
+    qualifier, per the royal-adjective-order decision) and are surfaced as migration backlog, not
+    papered over. ISN suite 1822 passed (the single failing
+    <code>test_find_git_root_raises_when_no_repo</code> is a pre-existing environmental tmp-path
+    flake, orthogonal to grammar); codegen in sync.</p>
+
+    <h3>2 — vocabulary-disjointness guard at its intentional floor (<code>f-cqo-003</code>)</h3>
+    <p><code>tests/grammar/test_vocab_uniqueness.py</code> asserts the segment-role vocabularies are
+    pairwise disjoint outside a small, documented allowlist, and is green. The ratchet the followup
+    tracked is complete: <code>qualifiers ∩ {operators, physical_bases, generic_physical_bases,
+    subjects(particle/state), processes, locus_registry}</code> are all now <strong>empty</strong>
+    (the mis-filed tokens were pulled to their true segments across the §2 dupe removal and the
+    rc55–rc59 curation). The remaining allowlist entries are genuinely intentional dual-roles
+    (<code>components ∩ coordinate_axes</code>; <code>channels ∩ physical_bases</code> for energy/momentum;
+    <code>zones ∩ regions/locus</code>; <code>generic_bases ⊂ bases</code>; the three fusion-reactant
+    <code>qualifiers ∩ subjects</code> pairs; <code>qualifiers ∩ physics_domains</code> for
+    equilibrium/mhd/nbi) — not mis-files. The guard actively blocks re-introduction.</p>
+
+    <h3>3 — §3 per-token curation complete (<code>f-cqo-004</code>)</h3>
+    <p>The deep per-token review landed incrementally across the §3 slices, each recorded in the
+    vocab file it touched and in its followup outcome:</p>
+    <ul>
+      <li><strong>base-bound / compound bases</strong> — the token-by-token verdict (atomic base vs
+        qualifier vs coordinate-carrier) and the compound-vs-qualifier rule are recorded in
+        <code>physical_bases.yml</code> (the wetted/surface/cross-sectional area family, spectral,
+        the channels-dual energy/momentum design).</li>
+      <li><strong>scoping vs kind-forming qualifiers</strong> — <code>scoping_qualifiers.yml</code>
+        carries the phrase-scoping binding class (implicit/explicit/effective/incident/…), grounded
+        in English royal adjective order (Forsyth; Scontras et al. 2017).</li>
+      <li><strong>regime qualifiers vs <code>due_to_</code> processes</strong> — the process vocabulary
+        was curated (97→89) and <code>qualifiers ∩ processes</code> is now empty.</li>
+      <li><strong>components vs operators</strong> — the normalized-direction shadow above was the
+        last open grammar residual of this class.</li>
+    </ul>
+    <p>With the normalized-direction ambiguity resolved, §3's curation is complete: no un-adjudicated
+    cross-segment mis-file remains (the guard proves it), and the remaining dual-roles are documented
+    design, not debt.</p>
+
+    <h3>4 — deterministic decomposition re-parse triage (imas-codex <code>e3d20e11</code>)</h3>
+    <p>The <code>decomposition_audit</code> substring-scans a name's <em>raw id</em>, so it flags a
+    closed-vocab token even when the grammar correctly slots it
+    (<code>ion_current_density</code> → subject=ion). Most stored findings on accepted names are
+    therefore <strong>stale, not real</strong>. A new <code>$0</code>, LLM-free triage re-parses every
+    flagged accepted name under the (now final) grammar and buckets it deterministically:</p>
+    <div style="overflow-x:auto"><table>
+      <thead><tr><th>Bucket</th><th>Rule</th><th>Count</th><th>Action</th></tr></thead>
+      <tbody>
+        <tr><td><strong>drain</strong></td>
+            <td>parse slots the token; parsed <code>physical_base</code> is clean</td>
+            <td>1809</td><td>clear finding + re-stamp segments (free)</td></tr>
+        <tr><td><strong>suppress</strong></td>
+            <td>token embedded in a grammar-registered lexicalised base
+              (<code>convection_velocity</code>, <code>diffusion_coefficient</code>)</td>
+            <td>173</td><td>clear finding — legitimate (free)</td></tr>
+        <tr><td><strong>rename</strong></td>
+            <td>token absorbed into a non-registered compound
+              (<code>reference_magnetic_field</code>, <code>vacuum_magnetic_vector_potential</code>)</td>
+            <td>270</td><td>rename rotation (compose free on DSv4, review-only cost)</td></tr>
+        <tr><td>parse_fail / non_canonical</td><td>grammar rejects the name</td><td>0 / 0</td>
+            <td>none — §5 tail is clean</td></tr>
+      </tbody>
+    </table></div>
+    <p>Total flagged: <strong>2252</strong>. <strong>1982 (88%) clear for free</strong> (drain +
+    suppress); the <strong>270-name rename queue</strong> is sized at a projected
+    <strong>$21.60</strong> review cost (270 × $0.08; compose is free on local DSv4). Zero parse
+    failures confirms the grammar handles every flagged name — the §5 tail stayed closed through the
+    normdir change. Full manifest (incl. per-name suggestions):
+    <a href="canonical-qualifier-order-manifests/decomp-triage-dry-run.json">decomp-triage-dry-run.json</a>.</p>
+    <p>Delivered as <code>imas_codex/standard_names/decomposition_triage.py</code> (pure bucketing,
+    unit-tested against real catalog names) + the <code>imas-codex sn decomp-triage</code> subcommand
+    (read-only dry-run default; <code>--apply</code> clears the drain/suppress findings and re-stamps
+    segment edges).</p>
+
+    <h3>What's next</h3>
+    <div class="next-card">
+      <p>The manifest is a <strong>dry run — no writes</strong>, deliberately staged for lead review
+      before the drain and rename rotation (both gated in
+      <code>model-selection-and-global-refine · f-decomp-reparse-triage</code>):</p>
+      <ol>
+        <li><strong>Apply the free drain</strong> — <code>sn decomp-triage --apply</code> clears the
+          1982 drain/suppress findings and re-stamps segments once the bucket split is signed off.</li>
+        <li><strong>Rename rotation</strong> — the 270-name queue composes on DSv4 + blind-pair review
+          (~$21.60), batched with checkpoints like the docs rotations.</li>
+        <li><strong>Durable audit fix</strong> — make <code>decomposition_audit_check</code>
+          parse-aware (scan the parsed <code>physical_base</code>, exempt registered bases) so the
+          drain sticks and buckets a/b never recur.</li>
+      </ol>
+    </div>
+  </main>
+</body>
+</html>

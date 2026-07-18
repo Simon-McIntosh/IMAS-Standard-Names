@@ -1,0 +1,2253 @@
+{
+  "total": 2252,
+  "buckets": {
+    "drain": 1809,
+    "suppress": 173,
+    "rename": 270,
+    "parse_fail": 0,
+    "non_canonical": 0
+  },
+  "clearable_free": 1982,
+  "rename_queue": [
+    {
+      "name": "absorbed_power_of_beam_tracing_beam",
+      "physical_base": "absorbed_power",
+      "absorbed_tokens": [
+        "absorbed"
+      ],
+      "suggestion": "absorbed \u2192 qualifier; base \u2192 power"
+    },
+    {
+      "name": "absorbed_power_of_neutral_beam_injector",
+      "physical_base": "absorbed_power",
+      "absorbed_tokens": [
+        "absorbed"
+      ],
+      "suggestion": "absorbed \u2192 qualifier; base \u2192 power"
+    },
+    {
+      "name": "absorbed_power_of_plant_system",
+      "physical_base": "absorbed_power",
+      "absorbed_tokens": [
+        "absorbed"
+      ],
+      "suggestion": "absorbed \u2192 qualifier; base \u2192 power"
+    },
+    {
+      "name": "absorbed_radiated_power_at_divertor_target",
+      "physical_base": "absorbed_radiated_power",
+      "absorbed_tokens": [
+        "absorbed",
+        "radiated"
+      ],
+      "suggestion": "absorbed: absorbed (qualifier), radiated (qualifier)"
+    },
+    {
+      "name": "absorbed_radiated_power_of_breeder_blanket_module",
+      "physical_base": "absorbed_radiated_power",
+      "absorbed_tokens": [
+        "absorbed",
+        "radiated"
+      ],
+      "suggestion": "absorbed: absorbed (qualifier), radiated (qualifier)"
+    },
+    {
+      "name": "accumulated_helium_3_prefill_count_due_to_gas_injection",
+      "physical_base": "prefill_count",
+      "absorbed_tokens": [
+        "prefill"
+      ],
+      "suggestion": "prefill \u2192 qualifier; base \u2192 count"
+    },
+    {
+      "name": "accumulated_hydrogen_prefill_count",
+      "physical_base": "prefill_count",
+      "absorbed_tokens": [
+        "prefill"
+      ],
+      "suggestion": "prefill \u2192 qualifier; base \u2192 count"
+    },
+    {
+      "name": "accumulated_lithium_prefill_count_due_to_gas_injection",
+      "physical_base": "prefill_count",
+      "absorbed_tokens": [
+        "prefill"
+      ],
+      "suggestion": "prefill \u2192 qualifier; base \u2192 count"
+    },
+    {
+      "name": "accumulated_oxygen_prefill_count_due_to_gas_injection",
+      "physical_base": "prefill_count",
+      "absorbed_tokens": [
+        "prefill"
+      ],
+      "suggestion": "prefill \u2192 qualifier; base \u2192 count"
+    },
+    {
+      "name": "accumulated_radiated_energy_due_to_impurity_radiation",
+      "physical_base": "radiated_energy",
+      "absorbed_tokens": [
+        "energy",
+        "radiated"
+      ],
+      "suggestion": "radiated \u2192 qualifier; base \u2192 energy"
+    },
+    {
+      "name": "accumulated_total_gas_count_at_midplane_due_to_gas_injection",
+      "physical_base": "gas_count",
+      "absorbed_tokens": [
+        "gas"
+      ],
+      "suggestion": "gas \u2192 qualifier; base \u2192 count"
+    },
+    {
+      "name": "accumulated_xenon_prefill_count",
+      "physical_base": "prefill_count",
+      "absorbed_tokens": [
+        "prefill"
+      ],
+      "suggestion": "prefill \u2192 qualifier; base \u2192 count"
+    },
+    {
+      "name": "alfven_frequency",
+      "physical_base": "alfven_frequency",
+      "absorbed_tokens": [
+        "alfven"
+      ],
+      "suggestion": "alfven \u2192 qualifier; base \u2192 frequency"
+    },
+    {
+      "name": "alfven_frequency_imaginary_part",
+      "physical_base": "alfven_frequency",
+      "absorbed_tokens": [
+        "alfven"
+      ],
+      "suggestion": "alfven \u2192 qualifier; base \u2192 frequency"
+    },
+    {
+      "name": "alfven_frequency_real_part",
+      "physical_base": "alfven_frequency",
+      "absorbed_tokens": [
+        "alfven"
+      ],
+      "suggestion": "alfven \u2192 qualifier; base \u2192 frequency"
+    },
+    {
+      "name": "alfven_time",
+      "physical_base": "alfven_time",
+      "absorbed_tokens": [
+        "alfven"
+      ],
+      "suggestion": "alfven \u2192 qualifier; base \u2192 time"
+    },
+    {
+      "name": "alpha_angle_of_antenna_strap",
+      "physical_base": "alpha_angle",
+      "absorbed_tokens": [
+        "alpha"
+      ],
+      "suggestion": "alpha \u2192 qualifier; base \u2192 angle"
+    },
+    {
+      "name": "alpha_angle_of_iron_core_segment",
+      "physical_base": "alpha_angle",
+      "absorbed_tokens": [
+        "alpha"
+      ],
+      "suggestion": "alpha \u2192 qualifier; base \u2192 angle"
+    },
+    {
+      "name": "alpha_parameter",
+      "physical_base": "alpha_parameter",
+      "absorbed_tokens": [
+        "alpha"
+      ],
+      "suggestion": "alpha \u2192 qualifier; base \u2192 parameter"
+    },
+    {
+      "name": "ammonia_deuterated_prefill_count",
+      "physical_base": "prefill_count",
+      "absorbed_tokens": [
+        "prefill"
+      ],
+      "suggestion": "prefill \u2192 qualifier; base \u2192 count"
+    },
+    {
+      "name": "ammonia_prefill_count",
+      "physical_base": "prefill_count",
+      "absorbed_tokens": [
+        "prefill"
+      ],
+      "suggestion": "prefill \u2192 qualifier; base \u2192 count"
+    },
+    {
+      "name": "argon_prefill_count",
+      "physical_base": "prefill_count",
+      "absorbed_tokens": [
+        "prefill"
+      ],
+      "suggestion": "prefill \u2192 qualifier; base \u2192 count"
+    },
+    {
+      "name": "atomic_count_of_pellet",
+      "physical_base": "atomic_count",
+      "absorbed_tokens": [
+        "atomic"
+      ],
+      "suggestion": "atomic \u2192 qualifier; base \u2192 count"
+    },
+    {
+      "name": "atomic_fraction_of_neutron_detector_converter",
+      "physical_base": "atomic_fraction",
+      "absorbed_tokens": [
+        "atomic"
+      ],
+      "suggestion": "atomic \u2192 qualifier; base \u2192 fraction"
+    },
+    {
+      "name": "atomic_mass",
+      "physical_base": "atomic_mass",
+      "absorbed_tokens": [
+        "atomic"
+      ],
+      "suggestion": "atomic \u2192 qualifier; base \u2192 mass"
+    },
+    {
+      "name": "atomic_mass_of_wall_material",
+      "physical_base": "atomic_mass",
+      "absorbed_tokens": [
+        "atomic"
+      ],
+      "suggestion": "atomic \u2192 qualifier; base \u2192 mass"
+    },
+    {
+      "name": "average_charge_number",
+      "physical_base": "average_charge_number",
+      "absorbed_tokens": [
+        "average"
+      ],
+      "suggestion": "average \u2192 qualifier; base \u2192 charge_number"
+    },
+    {
+      "name": "average_temperature_at_internal_transport_barrier",
+      "physical_base": "average_temperature",
+      "absorbed_tokens": [
+        "average"
+      ],
+      "suggestion": "average \u2192 qualifier; base \u2192 temperature"
+    },
+    {
+      "name": "average_temperature_at_limiter",
+      "physical_base": "average_temperature",
+      "absorbed_tokens": [
+        "average"
+      ],
+      "suggestion": "average \u2192 qualifier; base \u2192 temperature"
+    },
+    {
+      "name": "average_temperature_at_magnetic_axis",
+      "physical_base": "average_temperature",
+      "absorbed_tokens": [
+        "average"
+      ],
+      "suggestion": "average \u2192 qualifier; base \u2192 temperature"
+    },
+    {
+      "name": "average_temperature_at_pedestal_top",
+      "physical_base": "average_temperature",
+      "absorbed_tokens": [
+        "average"
+      ],
+      "suggestion": "average \u2192 qualifier; base \u2192 temperature"
+    },
+    {
+      "name": "beam_area_of_neutral_beam_injector",
+      "physical_base": "beam_area",
+      "absorbed_tokens": [
+        "beam"
+      ],
+      "suggestion": "beam \u2192 qualifier; base \u2192 area"
+    },
+    {
+      "name": "bremsstrahlung_power",
+      "physical_base": "bremsstrahlung_power",
+      "absorbed_tokens": [
+        "bremsstrahlung"
+      ],
+      "suggestion": "bremsstrahlung \u2192 qualifier; base \u2192 power"
+    },
+    {
+      "name": "calibration_factor_of_spectrometer",
+      "physical_base": "calibration_factor",
+      "absorbed_tokens": [
+        "calibration"
+      ],
+      "suggestion": "calibration \u2192 qualifier; base \u2192 factor"
+    },
+    {
+      "name": "calibration_factor_of_visible_camera",
+      "physical_base": "calibration_factor",
+      "absorbed_tokens": [
+        "calibration"
+      ],
+      "suggestion": "calibration \u2192 qualifier; base \u2192 factor"
+    },
+    {
+      "name": "carbon_prefill_count_due_to_gas_injection",
+      "physical_base": "prefill_count",
+      "absorbed_tokens": [
+        "prefill"
+      ],
+      "suggestion": "prefill \u2192 qualifier; base \u2192 count"
+    },
+    {
+      "name": "coolant_pressure",
+      "physical_base": "coolant_pressure",
+      "absorbed_tokens": [
+        "coolant"
+      ],
+      "suggestion": "coolant \u2192 qualifier; base \u2192 pressure"
+    },
+    {
+      "name": "coolant_pressure_at_cooling_circuit_inlet",
+      "physical_base": "coolant_pressure",
+      "absorbed_tokens": [
+        "coolant"
+      ],
+      "suggestion": "coolant \u2192 qualifier; base \u2192 pressure"
+    },
+    {
+      "name": "coolant_temperature",
+      "physical_base": "coolant_temperature",
+      "absorbed_tokens": [
+        "coolant"
+      ],
+      "suggestion": "coolant \u2192 qualifier; base \u2192 temperature"
+    },
+    {
+      "name": "coolant_temperature_at_inlet",
+      "physical_base": "coolant_temperature",
+      "absorbed_tokens": [
+        "coolant"
+      ],
+      "suggestion": "coolant \u2192 qualifier; base \u2192 temperature"
+    },
+    {
+      "name": "coolant_temperature_at_outlet",
+      "physical_base": "coolant_temperature",
+      "absorbed_tokens": [
+        "coolant"
+      ],
+      "suggestion": "coolant \u2192 qualifier; base \u2192 temperature"
+    },
+    {
+      "name": "coolant_volume_of_breeder_blanket",
+      "physical_base": "coolant_volume",
+      "absorbed_tokens": [
+        "coolant"
+      ],
+      "suggestion": "coolant \u2192 qualifier; base \u2192 volume"
+    },
+    {
+      "name": "core_atomic_count_of_pellet",
+      "physical_base": "atomic_count",
+      "absorbed_tokens": [
+        "atomic"
+      ],
+      "suggestion": "atomic \u2192 qualifier; base \u2192 count"
+    },
+    {
+      "name": "critical_electric_field",
+      "physical_base": "critical_electric_field",
+      "absorbed_tokens": [
+        "critical"
+      ],
+      "suggestion": "critical \u2192 qualifier; base \u2192 electric_field"
+    },
+    {
+      "name": "critical_momentum_due_to_avalanche",
+      "physical_base": "critical_momentum",
+      "absorbed_tokens": [
+        "momentum",
+        "critical"
+      ],
+      "suggestion": "critical \u2192 qualifier; base \u2192 momentum"
+    },
+    {
+      "name": "critical_temperature_at_pedestal_top",
+      "physical_base": "critical_temperature",
+      "absorbed_tokens": [
+        "critical"
+      ],
+      "suggestion": "critical \u2192 qualifier; base \u2192 temperature"
+    },
+    {
+      "name": "deposited_power",
+      "physical_base": "deposited_power",
+      "absorbed_tokens": [
+        "deposited"
+      ],
+      "suggestion": "deposited \u2192 qualifier; base \u2192 power"
+    },
+    {
+      "name": "deposited_power_at_divertor_target_due_to_halo_current",
+      "physical_base": "deposited_power",
+      "absorbed_tokens": [
+        "deposited"
+      ],
+      "suggestion": "deposited \u2192 qualifier; base \u2192 power"
+    },
+    {
+      "name": "deposited_power_density_due_to_fast_particle_source",
+      "physical_base": "deposited_power_density",
+      "absorbed_tokens": [
+        "deposited"
+      ],
+      "suggestion": "deposited \u2192 qualifier; base \u2192 power_density"
+    },
+    {
+      "name": "derivative_with_respect_to_poloidal_angle_of_normalized_effective_particle_energy",
+      "physical_base": "normalized_effective_particle_energy",
+      "absorbed_tokens": [
+        "energy",
+        "particle",
+        "effective"
+      ],
+      "suggestion": "absorbed: energy (channel), particle (channel), effective (qualifier)"
+    },
+    {
+      "name": "deuterium_prefill_count",
+      "physical_base": "prefill_count",
+      "absorbed_tokens": [
+        "prefill"
+      ],
+      "suggestion": "prefill \u2192 qualifier; base \u2192 count"
+    },
+    {
+      "name": "difference_of_fast_neutral_beam_motional_stark_wavelength_and_fast_neutral_beam_reference_wavelength_of_spectral_line",
+      "physical_base": "fast_neutral_beam_motional_stark_wavelength",
+      "absorbed_tokens": [
+        "fast",
+        "beam",
+        "motional_stark",
+        "neutral",
+        "neutral_beam"
+      ],
+      "suggestion": "absorbed: fast (population), beam (qualifier), motional_stark (qualifier), neutral (subject), neutral_beam (subject)"
+    },
+    {
+      "name": "effective_spectral_width_of_spectrometer_channel",
+      "physical_base": "spectral_width",
+      "absorbed_tokens": [
+        "spectral"
+      ],
+      "suggestion": "spectral \u2192 qualifier; base \u2192 width"
+    },
+    {
+      "name": "electron_absorbed_power_of_beam_tracing_beam",
+      "physical_base": "absorbed_power",
+      "absorbed_tokens": [
+        "absorbed"
+      ],
+      "suggestion": "absorbed \u2192 qualifier; base \u2192 power"
+    },
+    {
+      "name": "electron_absorbed_wave_power",
+      "physical_base": "absorbed_wave_power",
+      "absorbed_tokens": [
+        "absorbed",
+        "wave"
+      ],
+      "suggestion": "absorbed: absorbed (qualifier), wave (qualifier)"
+    },
+    {
+      "name": "electron_average_temperature_at_midplane",
+      "physical_base": "average_temperature",
+      "absorbed_tokens": [
+        "average"
+      ],
+      "suggestion": "average \u2192 qualifier; base \u2192 temperature"
+    },
+    {
+      "name": "electron_critical_temperature_at_pedestal_top",
+      "physical_base": "critical_temperature",
+      "absorbed_tokens": [
+        "critical"
+      ],
+      "suggestion": "critical \u2192 qualifier; base \u2192 temperature"
+    },
+    {
+      "name": "electron_deposited_power",
+      "physical_base": "deposited_power",
+      "absorbed_tokens": [
+        "deposited"
+      ],
+      "suggestion": "deposited \u2192 qualifier; base \u2192 power"
+    },
+    {
+      "name": "ethane_prefill_count",
+      "physical_base": "prefill_count",
+      "absorbed_tokens": [
+        "prefill"
+      ],
+      "suggestion": "prefill \u2192 qualifier; base \u2192 count"
+    },
+    {
+      "name": "ethylene_prefill_count",
+      "physical_base": "prefill_count",
+      "absorbed_tokens": [
+        "prefill"
+      ],
+      "suggestion": "prefill \u2192 qualifier; base \u2192 count"
+    },
+    {
+      "name": "external_loop_voltage",
+      "physical_base": "external_loop_voltage",
+      "absorbed_tokens": [
+        "external"
+      ],
+      "suggestion": "external \u2192 qualifier; base \u2192 loop_voltage"
+    },
+    {
+      "name": "faraday_angle",
+      "physical_base": "faraday_angle",
+      "absorbed_tokens": [
+        "faraday"
+      ],
+      "suggestion": "faraday \u2192 qualifier; base \u2192 angle"
+    },
+    {
+      "name": "fast_electron_absorbed_wave_power",
+      "physical_base": "absorbed_wave_power",
+      "absorbed_tokens": [
+        "absorbed",
+        "wave"
+      ],
+      "suggestion": "absorbed: absorbed (qualifier), wave (qualifier)"
+    },
+    {
+      "name": "fast_ion_absorbed_wave_power",
+      "physical_base": "absorbed_wave_power",
+      "absorbed_tokens": [
+        "absorbed",
+        "wave"
+      ],
+      "suggestion": "absorbed: absorbed (qualifier), wave (qualifier)"
+    },
+    {
+      "name": "fast_ion_charge_state_absorbed_wave_power",
+      "physical_base": "absorbed_wave_power",
+      "absorbed_tokens": [
+        "absorbed",
+        "wave"
+      ],
+      "suggestion": "absorbed: absorbed (qualifier), wave (qualifier)"
+    },
+    {
+      "name": "fast_ion_critical_energy",
+      "physical_base": "critical_energy",
+      "absorbed_tokens": [
+        "energy",
+        "critical"
+      ],
+      "suggestion": "critical \u2192 qualifier; base \u2192 energy"
+    },
+    {
+      "name": "floating_electrostatic_potential",
+      "physical_base": "floating_electrostatic_potential",
+      "absorbed_tokens": [
+        "floating"
+      ],
+      "suggestion": "floating \u2192 qualifier; base \u2192 electrostatic_potential"
+    },
+    {
+      "name": "flux_surface_averaged_major_radius",
+      "physical_base": "major_radius",
+      "absorbed_tokens": [
+        "major"
+      ],
+      "suggestion": "major \u2192 qualifier; base \u2192 radius"
+    },
+    {
+      "name": "forward_power_of_ion_cyclotron_heating_antenna",
+      "physical_base": "forward_power",
+      "absorbed_tokens": [
+        "forward"
+      ],
+      "suggestion": "forward \u2192 qualifier; base \u2192 power"
+    },
+    {
+      "name": "forward_power_of_lower_hybrid_antenna",
+      "physical_base": "forward_power",
+      "absorbed_tokens": [
+        "forward"
+      ],
+      "suggestion": "forward \u2192 qualifier; base \u2192 power"
+    },
+    {
+      "name": "gas_pressure_of_ion_cyclotron_heating_antenna",
+      "physical_base": "gas_pressure",
+      "absorbed_tokens": [
+        "gas"
+      ],
+      "suggestion": "gas \u2192 qualifier; base \u2192 pressure"
+    },
+    {
+      "name": "hydrogen_prefill_count",
+      "physical_base": "prefill_count",
+      "absorbed_tokens": [
+        "prefill"
+      ],
+      "suggestion": "prefill \u2192 qualifier; base \u2192 count"
+    },
+    {
+      "name": "incident_radiated_power_of_breeder_blanket_module",
+      "physical_base": "radiated_power",
+      "absorbed_tokens": [
+        "radiated"
+      ],
+      "suggestion": "radiated \u2192 qualifier; base \u2192 power"
+    },
+    {
+      "name": "initial_power_of_beam_tracing_beam",
+      "physical_base": "initial_power",
+      "absorbed_tokens": [
+        "initial"
+      ],
+      "suggestion": "initial \u2192 qualifier; base \u2192 power"
+    },
+    {
+      "name": "ion_absorbed_wave_power",
+      "physical_base": "absorbed_wave_power",
+      "absorbed_tokens": [
+        "absorbed",
+        "wave"
+      ],
+      "suggestion": "absorbed: absorbed (qualifier), wave (qualifier)"
+    },
+    {
+      "name": "ion_atomic_mass",
+      "physical_base": "atomic_mass",
+      "absorbed_tokens": [
+        "atomic"
+      ],
+      "suggestion": "atomic \u2192 qualifier; base \u2192 mass"
+    },
+    {
+      "name": "ion_average_temperature_at_internal_transport_barrier",
+      "physical_base": "average_temperature",
+      "absorbed_tokens": [
+        "average"
+      ],
+      "suggestion": "average \u2192 qualifier; base \u2192 temperature"
+    },
+    {
+      "name": "ion_average_temperature_at_limiter",
+      "physical_base": "average_temperature",
+      "absorbed_tokens": [
+        "average"
+      ],
+      "suggestion": "average \u2192 qualifier; base \u2192 temperature"
+    },
+    {
+      "name": "ion_average_temperature_at_magnetic_axis",
+      "physical_base": "average_temperature",
+      "absorbed_tokens": [
+        "average"
+      ],
+      "suggestion": "average \u2192 qualifier; base \u2192 temperature"
+    },
+    {
+      "name": "ion_average_temperature_at_pedestal_top",
+      "physical_base": "average_temperature",
+      "absorbed_tokens": [
+        "average"
+      ],
+      "suggestion": "average \u2192 qualifier; base \u2192 temperature"
+    },
+    {
+      "name": "ion_charge_state_absorbed_power_of_beam_tracing_beam",
+      "physical_base": "absorbed_power",
+      "absorbed_tokens": [
+        "absorbed"
+      ],
+      "suggestion": "absorbed \u2192 qualifier; base \u2192 power"
+    },
+    {
+      "name": "ion_charge_state_absorbed_wave_power",
+      "physical_base": "absorbed_wave_power",
+      "absorbed_tokens": [
+        "absorbed",
+        "wave"
+      ],
+      "suggestion": "absorbed: absorbed (qualifier), wave (qualifier)"
+    },
+    {
+      "name": "ion_charge_state_average_charge_number",
+      "physical_base": "average_charge_number",
+      "absorbed_tokens": [
+        "average"
+      ],
+      "suggestion": "average \u2192 qualifier; base \u2192 charge_number"
+    },
+    {
+      "name": "ion_charge_state_lower_bound_charge",
+      "physical_base": "lower_bound_charge",
+      "absorbed_tokens": [
+        "lower_bound",
+        "lower"
+      ],
+      "suggestion": "lower_bound \u2192 qualifier; base \u2192 charge"
+    },
+    {
+      "name": "ion_field_line_average_temperature_over_scrape_off_layer",
+      "physical_base": "field_line_average_temperature",
+      "absorbed_tokens": [
+        "average",
+        "field_line"
+      ],
+      "suggestion": "absorbed: average (qualifier), field_line (qualifier)"
+    },
+    {
+      "name": "ion_upper_bound_charge_number",
+      "physical_base": "upper_bound_charge_number",
+      "absorbed_tokens": [
+        "upper_bound",
+        "upper"
+      ],
+      "suggestion": "upper_bound \u2192 qualifier; base \u2192 charge_number"
+    },
+    {
+      "name": "krypton_prefill_count",
+      "physical_base": "prefill_count",
+      "absorbed_tokens": [
+        "prefill"
+      ],
+      "suggestion": "prefill \u2192 qualifier; base \u2192 count"
+    },
+    {
+      "name": "launched_power_of_lower_hybrid_antenna",
+      "physical_base": "launched_power",
+      "absorbed_tokens": [
+        "launched"
+      ],
+      "suggestion": "launched \u2192 qualifier; base \u2192 power"
+    },
+    {
+      "name": "launched_power_of_wave_beam",
+      "physical_base": "launched_power",
+      "absorbed_tokens": [
+        "launched"
+      ],
+      "suggestion": "launched \u2192 qualifier; base \u2192 power"
+    },
+    {
+      "name": "launched_wave_duration",
+      "physical_base": "launched_wave_duration",
+      "absorbed_tokens": [
+        "launched",
+        "wave"
+      ],
+      "suggestion": "absorbed: launched (qualifier), wave (qualifier)"
+    },
+    {
+      "name": "launched_wave_frequency",
+      "physical_base": "launched_wave_frequency",
+      "absorbed_tokens": [
+        "launched",
+        "wave"
+      ],
+      "suggestion": "absorbed: launched (qualifier), wave (qualifier)"
+    },
+    {
+      "name": "left_hand_circularly_polarized_electric_field",
+      "physical_base": "left_hand_circularly_polarized_electric_field",
+      "absorbed_tokens": [
+        "left_hand_circularly_polarized"
+      ],
+      "suggestion": "left_hand_circularly_polarized \u2192 qualifier; base \u2192 electric_field"
+    },
+    {
+      "name": "left_hand_circularly_polarized_wave_electric_field",
+      "physical_base": "left_hand_circularly_polarized_wave_electric_field",
+      "absorbed_tokens": [
+        "left_hand_circularly_polarized",
+        "wave"
+      ],
+      "suggestion": "absorbed: left_hand_circularly_polarized (qualifier), wave (qualifier)"
+    },
+    {
+      "name": "left_hand_circularly_polarized_wave_electric_field_real_part",
+      "physical_base": "left_hand_circularly_polarized_wave_electric_field",
+      "absorbed_tokens": [
+        "left_hand_circularly_polarized",
+        "wave"
+      ],
+      "suggestion": "absorbed: left_hand_circularly_polarized (qualifier), wave (qualifier)"
+    },
+    {
+      "name": "lower_bound_charge",
+      "physical_base": "lower_bound_charge",
+      "absorbed_tokens": [
+        "lower_bound",
+        "lower"
+      ],
+      "suggestion": "lower_bound \u2192 qualifier; base \u2192 charge"
+    },
+    {
+      "name": "lower_bound_energy_of_detector_pixel",
+      "physical_base": "lower_bound_energy",
+      "absorbed_tokens": [
+        "energy",
+        "lower_bound",
+        "lower"
+      ],
+      "suggestion": "lower_bound \u2192 qualifier; base \u2192 energy"
+    },
+    {
+      "name": "lower_bound_energy_of_neutron_detector",
+      "physical_base": "lower_bound_energy",
+      "absorbed_tokens": [
+        "energy",
+        "lower_bound",
+        "lower"
+      ],
+      "suggestion": "lower_bound \u2192 qualifier; base \u2192 energy"
+    },
+    {
+      "name": "major_length_of_ferritic_element",
+      "physical_base": "major_length",
+      "absorbed_tokens": [
+        "major"
+      ],
+      "suggestion": "major \u2192 qualifier; base \u2192 length"
+    },
+    {
+      "name": "major_length_of_poloidal_field_coil",
+      "physical_base": "major_length",
+      "absorbed_tokens": [
+        "major"
+      ],
+      "suggestion": "major \u2192 qualifier; base \u2192 length"
+    },
+    {
+      "name": "major_radius",
+      "physical_base": "major_radius",
+      "absorbed_tokens": [
+        "major"
+      ],
+      "suggestion": "major \u2192 qualifier; base \u2192 radius"
+    },
+    {
+      "name": "maximum_gas_flow",
+      "physical_base": "maximum_gas_flow",
+      "absorbed_tokens": [
+        "gas"
+      ],
+      "suggestion": "absorbed: gas (qualifier)"
+    },
+    {
+      "name": "maximum_surface_temperature",
+      "physical_base": "maximum_surface_temperature",
+      "absorbed_tokens": [
+        "surface"
+      ],
+      "suggestion": "absorbed: surface (qualifier)"
+    },
+    {
+      "name": "methane_carbon_13_prefill_count",
+      "physical_base": "prefill_count",
+      "absorbed_tokens": [
+        "prefill"
+      ],
+      "suggestion": "prefill \u2192 qualifier; base \u2192 count"
+    },
+    {
+      "name": "minimum_gas_flow",
+      "physical_base": "minimum_gas_flow",
+      "absorbed_tokens": [
+        "gas"
+      ],
+      "suggestion": "absorbed: gas (qualifier)"
+    },
+    {
+      "name": "minimum_safety_factor",
+      "physical_base": "minimum_safety_factor",
+      "absorbed_tokens": [
+        "minimum_safety_factor",
+        "minimum_safety_factor"
+      ],
+      "suggestion": "absorbed: minimum_safety_factor (geometry), minimum_safety_factor (path)"
+    },
+    {
+      "name": "minor_radius_of_plasma_boundary",
+      "physical_base": "minor_radius",
+      "absorbed_tokens": [
+        "minor"
+      ],
+      "suggestion": "minor \u2192 qualifier; base \u2192 radius"
+    },
+    {
+      "name": "mode_width",
+      "physical_base": "mode_width",
+      "absorbed_tokens": [
+        "mode"
+      ],
+      "suggestion": "mode \u2192 qualifier; base \u2192 width"
+    },
+    {
+      "name": "motional_stark_radiance_at_spectral_line",
+      "physical_base": "motional_stark_radiance",
+      "absorbed_tokens": [
+        "motional_stark"
+      ],
+      "suggestion": "motional_stark \u2192 qualifier; base \u2192 radiance"
+    },
+    {
+      "name": "neon_prefill_count",
+      "physical_base": "prefill_count",
+      "absorbed_tokens": [
+        "prefill"
+      ],
+      "suggestion": "prefill \u2192 qualifier; base \u2192 count"
+    },
+    {
+      "name": "net_absorbed_power_of_plant_system",
+      "physical_base": "absorbed_power",
+      "absorbed_tokens": [
+        "absorbed"
+      ],
+      "suggestion": "absorbed \u2192 qualifier; base \u2192 power"
+    },
+    {
+      "name": "neutral_species_atomic_mass",
+      "physical_base": "atomic_mass",
+      "absorbed_tokens": [
+        "atomic"
+      ],
+      "suggestion": "atomic \u2192 qualifier; base \u2192 mass"
+    },
+    {
+      "name": "neutron_maximum_energy_of_neutron_detector",
+      "physical_base": "maximum_energy",
+      "absorbed_tokens": [
+        "energy"
+      ],
+      "suggestion": "absorbed: energy (channel)"
+    },
+    {
+      "name": "nitrogen_prefill_count",
+      "physical_base": "prefill_count",
+      "absorbed_tokens": [
+        "prefill"
+      ],
+      "suggestion": "prefill \u2192 qualifier; base \u2192 count"
+    },
+    {
+      "name": "non_axisymmetric_magnetic_field",
+      "physical_base": "non_axisymmetric_magnetic_field",
+      "absorbed_tokens": [
+        "non_axisymmetric"
+      ],
+      "suggestion": "non_axisymmetric \u2192 qualifier; base \u2192 magnetic_field"
+    },
+    {
+      "name": "normalized_atomic_count_of_pellet",
+      "physical_base": "atomic_count",
+      "absorbed_tokens": [
+        "atomic"
+      ],
+      "suggestion": "atomic \u2192 qualifier; base \u2192 count"
+    },
+    {
+      "name": "normalized_particle_perturbed_energy",
+      "physical_base": "perturbed_energy",
+      "absorbed_tokens": [
+        "energy"
+      ],
+      "suggestion": "absorbed: energy (channel)"
+    },
+    {
+      "name": "nuclear_heating_power_of_breeder_blanket",
+      "physical_base": "nuclear_heating_power",
+      "absorbed_tokens": [
+        "heating",
+        "nuclear"
+      ],
+      "suggestion": "nuclear \u2192 qualifier; base \u2192 heating_power"
+    },
+    {
+      "name": "nuclear_heating_power_of_breeder_blanket_layer",
+      "physical_base": "nuclear_heating_power",
+      "absorbed_tokens": [
+        "heating",
+        "nuclear"
+      ],
+      "suggestion": "nuclear \u2192 qualifier; base \u2192 heating_power"
+    },
+    {
+      "name": "nuclear_heating_power_of_breeder_blanket_module",
+      "physical_base": "nuclear_heating_power",
+      "absorbed_tokens": [
+        "heating",
+        "nuclear"
+      ],
+      "suggestion": "nuclear \u2192 qualifier; base \u2192 heating_power"
+    },
+    {
+      "name": "nuclear_heating_power_of_breeder_blanket_shield",
+      "physical_base": "nuclear_heating_power",
+      "absorbed_tokens": [
+        "heating",
+        "nuclear"
+      ],
+      "suggestion": "nuclear \u2192 qualifier; base \u2192 heating_power"
+    },
+    {
+      "name": "nuclear_power_density_of_breeder_blanket_layer",
+      "physical_base": "nuclear_power_density",
+      "absorbed_tokens": [
+        "nuclear"
+      ],
+      "suggestion": "nuclear \u2192 qualifier; base \u2192 power_density"
+    },
+    {
+      "name": "nuclear_power_density_of_breeder_blanket_module",
+      "physical_base": "nuclear_power_density",
+      "absorbed_tokens": [
+        "nuclear"
+      ],
+      "suggestion": "nuclear \u2192 qualifier; base \u2192 power_density"
+    },
+    {
+      "name": "nuclear_power_density_of_limiter_tile",
+      "physical_base": "nuclear_power_density",
+      "absorbed_tokens": [
+        "nuclear"
+      ],
+      "suggestion": "nuclear \u2192 qualifier; base \u2192 power_density"
+    },
+    {
+      "name": "nuclear_power_of_limiter_tile",
+      "physical_base": "nuclear_power",
+      "absorbed_tokens": [
+        "nuclear"
+      ],
+      "suggestion": "nuclear \u2192 qualifier; base \u2192 power"
+    },
+    {
+      "name": "nuclear_target_atomic_fraction_of_neutron_detector_converter",
+      "physical_base": "nuclear_target_atomic_fraction",
+      "absorbed_tokens": [
+        "atomic",
+        "nuclear",
+        "target"
+      ],
+      "suggestion": "absorbed: atomic (qualifier), nuclear (qualifier), target (qualifier)"
+    },
+    {
+      "name": "ordinary_mode_fraction_of_wave_beam",
+      "physical_base": "ordinary_mode_fraction",
+      "absorbed_tokens": [
+        "mode",
+        "ordinary_mode"
+      ],
+      "suggestion": "ordinary_mode \u2192 qualifier; base \u2192 fraction"
+    },
+    {
+      "name": "outer_atomic_count_of_pellet",
+      "physical_base": "atomic_count",
+      "absorbed_tokens": [
+        "atomic"
+      ],
+      "suggestion": "atomic \u2192 qualifier; base \u2192 count"
+    },
+    {
+      "name": "parallel_wave_electric_field",
+      "physical_base": "wave_electric_field",
+      "absorbed_tokens": [
+        "wave"
+      ],
+      "suggestion": "wave \u2192 qualifier; base \u2192 electric_field"
+    },
+    {
+      "name": "parallel_wave_electric_field_amplitude",
+      "physical_base": "wave_electric_field",
+      "absorbed_tokens": [
+        "wave"
+      ],
+      "suggestion": "wave \u2192 qualifier; base \u2192 electric_field"
+    },
+    {
+      "name": "parallel_wave_electric_field_imaginary_part",
+      "physical_base": "wave_electric_field",
+      "absorbed_tokens": [
+        "wave"
+      ],
+      "suggestion": "wave \u2192 qualifier; base \u2192 electric_field"
+    },
+    {
+      "name": "parallel_wave_electric_field_real_part",
+      "physical_base": "wave_electric_field",
+      "absorbed_tokens": [
+        "wave"
+      ],
+      "suggestion": "wave \u2192 qualifier; base \u2192 electric_field"
+    },
+    {
+      "name": "parallel_wave_magnetic_field",
+      "physical_base": "wave_magnetic_field",
+      "absorbed_tokens": [
+        "wave"
+      ],
+      "suggestion": "wave \u2192 qualifier; base \u2192 magnetic_field"
+    },
+    {
+      "name": "per_toroidal_mode_fast_electron_absorbed_wave_power",
+      "physical_base": "absorbed_wave_power",
+      "absorbed_tokens": [
+        "absorbed",
+        "wave"
+      ],
+      "suggestion": "absorbed: absorbed (qualifier), wave (qualifier)"
+    },
+    {
+      "name": "per_toroidal_mode_fast_ion_absorbed_wave_power",
+      "physical_base": "absorbed_wave_power",
+      "absorbed_tokens": [
+        "absorbed",
+        "wave"
+      ],
+      "suggestion": "absorbed: absorbed (qualifier), wave (qualifier)"
+    },
+    {
+      "name": "per_toroidal_mode_left_hand_circularly_polarized_electric_field",
+      "physical_base": "left_hand_circularly_polarized_electric_field",
+      "absorbed_tokens": [
+        "left_hand_circularly_polarized"
+      ],
+      "suggestion": "left_hand_circularly_polarized \u2192 qualifier; base \u2192 electric_field"
+    },
+    {
+      "name": "per_toroidal_mode_left_hand_circularly_polarized_wave_electric_field",
+      "physical_base": "left_hand_circularly_polarized_wave_electric_field",
+      "absorbed_tokens": [
+        "left_hand_circularly_polarized",
+        "wave"
+      ],
+      "suggestion": "absorbed: left_hand_circularly_polarized (qualifier), wave (qualifier)"
+    },
+    {
+      "name": "per_toroidal_mode_right_hand_circularly_polarized_wave_electric_field",
+      "physical_base": "right_hand_circularly_polarized_wave_electric_field",
+      "absorbed_tokens": [
+        "right_hand_circularly_polarized",
+        "wave"
+      ],
+      "suggestion": "absorbed: right_hand_circularly_polarized (qualifier), wave (qualifier)"
+    },
+    {
+      "name": "per_toroidal_mode_thermal_electron_absorbed_wave_power",
+      "physical_base": "absorbed_wave_power",
+      "absorbed_tokens": [
+        "absorbed",
+        "wave"
+      ],
+      "suggestion": "absorbed: absorbed (qualifier), wave (qualifier)"
+    },
+    {
+      "name": "per_toroidal_mode_thermal_ion_absorbed_wave_power",
+      "physical_base": "absorbed_wave_power",
+      "absorbed_tokens": [
+        "absorbed",
+        "wave"
+      ],
+      "suggestion": "absorbed: absorbed (qualifier), wave (qualifier)"
+    },
+    {
+      "name": "perpendicular_normalized_particle_perturbed_energy",
+      "physical_base": "perturbed_energy",
+      "absorbed_tokens": [
+        "energy"
+      ],
+      "suggestion": "absorbed: energy (channel)"
+    },
+    {
+      "name": "perturbed_plasma_mass_density_imaginary_part",
+      "physical_base": "perturbed_plasma_mass_density",
+      "absorbed_tokens": [
+        "plasma"
+      ],
+      "suggestion": "absorbed: plasma (channel_qualifier)"
+    },
+    {
+      "name": "perturbed_plasma_mass_density_real_part",
+      "physical_base": "perturbed_plasma_mass_density",
+      "absorbed_tokens": [
+        "plasma"
+      ],
+      "suggestion": "absorbed: plasma (channel_qualifier)"
+    },
+    {
+      "name": "perturbed_plasma_pressure_imaginary_part",
+      "physical_base": "perturbed_plasma_pressure",
+      "absorbed_tokens": [
+        "plasma"
+      ],
+      "suggestion": "absorbed: plasma (channel_qualifier)"
+    },
+    {
+      "name": "perturbed_plasma_pressure_real_part",
+      "physical_base": "perturbed_plasma_pressure",
+      "absorbed_tokens": [
+        "plasma"
+      ],
+      "suggestion": "absorbed: plasma (channel_qualifier)"
+    },
+    {
+      "name": "perturbed_plasma_temperature_imaginary_part",
+      "physical_base": "perturbed_plasma_temperature",
+      "absorbed_tokens": [
+        "plasma"
+      ],
+      "suggestion": "absorbed: plasma (channel_qualifier)"
+    },
+    {
+      "name": "perturbed_plasma_temperature_real_part",
+      "physical_base": "perturbed_plasma_temperature",
+      "absorbed_tokens": [
+        "plasma"
+      ],
+      "suggestion": "absorbed: plasma (channel_qualifier)"
+    },
+    {
+      "name": "perturbed_vacuum_magnetic_field",
+      "physical_base": "vacuum_magnetic_field",
+      "absorbed_tokens": [
+        "vacuum"
+      ],
+      "suggestion": "vacuum \u2192 qualifier; base \u2192 magnetic_field"
+    },
+    {
+      "name": "polarization_angle_at_constraint_position",
+      "physical_base": "polarization_angle",
+      "absorbed_tokens": [
+        "polarization"
+      ],
+      "suggestion": "polarization \u2192 qualifier; base \u2192 angle"
+    },
+    {
+      "name": "poloidal_cross_sectional_area_of_plasma_boundary",
+      "physical_base": "cross_sectional_area",
+      "absorbed_tokens": [
+        "cross_sectional"
+      ],
+      "suggestion": "cross_sectional \u2192 qualifier; base \u2192 area"
+    },
+    {
+      "name": "poloidal_current_weighted_average_external_magnetic_flux",
+      "physical_base": "current_weighted_average_external_magnetic_flux",
+      "absorbed_tokens": [
+        "average",
+        "current_weighted",
+        "external"
+      ],
+      "suggestion": "absorbed: average (qualifier), current_weighted (qualifier), external (qualifier)"
+    },
+    {
+      "name": "poloidal_launched_wave_index_of_lower_hybrid_antenna",
+      "physical_base": "launched_wave_index",
+      "absorbed_tokens": [
+        "launched",
+        "wave"
+      ],
+      "suggestion": "absorbed: launched (qualifier), wave (qualifier)"
+    },
+    {
+      "name": "poloidal_perturbed_vacuum_magnetic_field",
+      "physical_base": "vacuum_magnetic_field",
+      "absorbed_tokens": [
+        "vacuum"
+      ],
+      "suggestion": "vacuum \u2192 qualifier; base \u2192 magnetic_field"
+    },
+    {
+      "name": "poloidal_perturbed_vacuum_magnetic_field_imaginary_part",
+      "physical_base": "vacuum_magnetic_field",
+      "absorbed_tokens": [
+        "vacuum"
+      ],
+      "suggestion": "vacuum \u2192 qualifier; base \u2192 magnetic_field"
+    },
+    {
+      "name": "poloidal_perturbed_vacuum_magnetic_field_real_part",
+      "physical_base": "vacuum_magnetic_field",
+      "absorbed_tokens": [
+        "vacuum"
+      ],
+      "suggestion": "vacuum \u2192 qualifier; base \u2192 magnetic_field"
+    },
+    {
+      "name": "prefill_count",
+      "physical_base": "prefill_count",
+      "absorbed_tokens": [
+        "prefill"
+      ],
+      "suggestion": "prefill \u2192 qualifier; base \u2192 count"
+    },
+    {
+      "name": "prefill_gas_pressure",
+      "physical_base": "prefill_gas_pressure",
+      "absorbed_tokens": [
+        "gas",
+        "prefill"
+      ],
+      "suggestion": "absorbed: gas (qualifier), prefill (qualifier)"
+    },
+    {
+      "name": "propane_prefill_count",
+      "physical_base": "prefill_count",
+      "absorbed_tokens": [
+        "prefill"
+      ],
+      "suggestion": "prefill \u2192 qualifier; base \u2192 count"
+    },
+    {
+      "name": "radial_non_axisymmetric_magnetic_field",
+      "physical_base": "non_axisymmetric_magnetic_field",
+      "absorbed_tokens": [
+        "non_axisymmetric"
+      ],
+      "suggestion": "non_axisymmetric \u2192 qualifier; base \u2192 magnetic_field"
+    },
+    {
+      "name": "radial_perturbed_vacuum_magnetic_field",
+      "physical_base": "vacuum_magnetic_field",
+      "absorbed_tokens": [
+        "vacuum"
+      ],
+      "suggestion": "vacuum \u2192 qualifier; base \u2192 magnetic_field"
+    },
+    {
+      "name": "radial_perturbed_vacuum_magnetic_field_imaginary_part",
+      "physical_base": "vacuum_magnetic_field",
+      "absorbed_tokens": [
+        "vacuum"
+      ],
+      "suggestion": "vacuum \u2192 qualifier; base \u2192 magnetic_field"
+    },
+    {
+      "name": "radial_perturbed_vacuum_magnetic_field_real_part",
+      "physical_base": "vacuum_magnetic_field",
+      "absorbed_tokens": [
+        "vacuum"
+      ],
+      "suggestion": "vacuum \u2192 qualifier; base \u2192 magnetic_field"
+    },
+    {
+      "name": "radial_vacuum_magnetic_vector_potential",
+      "physical_base": "vacuum_magnetic_vector_potential",
+      "absorbed_tokens": [
+        "vacuum"
+      ],
+      "suggestion": "vacuum \u2192 qualifier; base \u2192 magnetic_vector_potential"
+    },
+    {
+      "name": "radial_volumetric_force",
+      "physical_base": "volumetric_force",
+      "absorbed_tokens": [
+        "volumetric"
+      ],
+      "suggestion": "volumetric \u2192 qualifier; base \u2192 force"
+    },
+    {
+      "name": "radial_wave_electric_field",
+      "physical_base": "wave_electric_field",
+      "absorbed_tokens": [
+        "wave"
+      ],
+      "suggestion": "wave \u2192 qualifier; base \u2192 electric_field"
+    },
+    {
+      "name": "radiated_power_density",
+      "physical_base": "radiated_power_density",
+      "absorbed_tokens": [
+        "radiated"
+      ],
+      "suggestion": "radiated \u2192 qualifier; base \u2192 power_density"
+    },
+    {
+      "name": "radiated_power_of_breeder_blanket_module",
+      "physical_base": "radiated_power",
+      "absorbed_tokens": [
+        "radiated"
+      ],
+      "suggestion": "radiated \u2192 qualifier; base \u2192 power"
+    },
+    {
+      "name": "radiated_power_over_scrape_off_layer",
+      "physical_base": "radiated_power",
+      "absorbed_tokens": [
+        "radiated"
+      ],
+      "suggestion": "radiated \u2192 qualifier; base \u2192 power"
+    },
+    {
+      "name": "radiative_temperature",
+      "physical_base": "radiative_temperature",
+      "absorbed_tokens": [
+        "radiative"
+      ],
+      "suggestion": "radiative \u2192 qualifier; base \u2192 temperature"
+    },
+    {
+      "name": "radiative_temperature_at_magnetic_axis",
+      "physical_base": "radiative_temperature",
+      "absorbed_tokens": [
+        "radiative"
+      ],
+      "suggestion": "radiative \u2192 qualifier; base \u2192 temperature"
+    },
+    {
+      "name": "ratio_of_line_averaged_hydrogen_density_to_line_averaged_total_hydrogenic_density",
+      "physical_base": "line_averaged_hydrogen_density",
+      "absorbed_tokens": [
+        "hydrogen"
+      ],
+      "suggestion": "absorbed: hydrogen (subject)"
+    },
+    {
+      "name": "ratio_of_particle_temperature_to_reference_particle_temperature",
+      "physical_base": "particle_temperature",
+      "absorbed_tokens": [
+        "particle"
+      ],
+      "suggestion": "particle \u2192 channel; base \u2192 temperature"
+    },
+    {
+      "name": "ratio_of_total_ion_density_to_electron_density",
+      "physical_base": "total_ion_density",
+      "absorbed_tokens": [
+        "total",
+        "ion"
+      ],
+      "suggestion": "absorbed: total (aggregation), ion (subject)"
+    },
+    {
+      "name": "ratio_of_tritium_density_to_deuterium_density",
+      "physical_base": "tritium_density",
+      "absorbed_tokens": [
+        "tritium"
+      ],
+      "suggestion": "tritium \u2192 subject; base \u2192 density"
+    },
+    {
+      "name": "ratio_of_upper_bound_plasma_current_to_initial_plasma_current_due_to_disruption",
+      "physical_base": "upper_bound_plasma_current",
+      "absorbed_tokens": [
+        "plasma",
+        "upper_bound",
+        "upper"
+      ],
+      "suggestion": "absorbed: plasma (channel_qualifier), upper_bound (qualifier), upper (zone)"
+    },
+    {
+      "name": "ratio_of_vertical_vorticity_to_major_radius",
+      "physical_base": "vertical_vorticity",
+      "absorbed_tokens": [
+        "vertical"
+      ],
+      "suggestion": "vertical \u2192 component; base \u2192 vorticity"
+    },
+    {
+      "name": "ratio_of_volume_averaged_argon_density_to_volume_averaged_electron_density",
+      "physical_base": "volume_averaged_argon_density",
+      "absorbed_tokens": [
+        "argon"
+      ],
+      "suggestion": "absorbed: argon (subject)"
+    },
+    {
+      "name": "ratio_of_volume_averaged_beryllium_density_to_volume_averaged_electron_density",
+      "physical_base": "volume_averaged_beryllium_density",
+      "absorbed_tokens": [
+        "beryllium"
+      ],
+      "suggestion": "absorbed: beryllium (subject)"
+    },
+    {
+      "name": "ratio_of_volume_averaged_boron_density_to_volume_averaged_electron_density",
+      "physical_base": "volume_averaged_boron_density",
+      "absorbed_tokens": [
+        "boron"
+      ],
+      "suggestion": "absorbed: boron (subject)"
+    },
+    {
+      "name": "ratio_of_volume_averaged_carbon_density_to_volume_averaged_electron_density",
+      "physical_base": "volume_averaged_carbon_density",
+      "absorbed_tokens": [
+        "carbon"
+      ],
+      "suggestion": "absorbed: carbon (subject)"
+    },
+    {
+      "name": "ratio_of_volume_averaged_deuterium_density_to_volume_averaged_electron_density",
+      "physical_base": "volume_averaged_deuterium_density",
+      "absorbed_tokens": [
+        "deuterium"
+      ],
+      "suggestion": "absorbed: deuterium (subject)"
+    },
+    {
+      "name": "ratio_of_volume_averaged_deuterium_tritium_density_to_volume_averaged_electron_density",
+      "physical_base": "volume_averaged_deuterium_tritium_density",
+      "absorbed_tokens": [
+        "deuterium_tritium",
+        "deuterium",
+        "deuterium_tritium",
+        "tritium"
+      ],
+      "suggestion": "absorbed: deuterium_tritium (qualifier), deuterium (subject), deuterium_tritium (subject), tritium (subject)"
+    },
+    {
+      "name": "ratio_of_volume_averaged_helium_3_density_to_volume_averaged_electron_density",
+      "physical_base": "volume_averaged_helium_3_density",
+      "absorbed_tokens": [
+        "helium",
+        "helium_3"
+      ],
+      "suggestion": "absorbed: helium (subject), helium_3 (subject)"
+    },
+    {
+      "name": "ratio_of_volume_averaged_helium_4_density_to_volume_averaged_electron_density",
+      "physical_base": "volume_averaged_helium_4_density",
+      "absorbed_tokens": [
+        "helium",
+        "helium_4"
+      ],
+      "suggestion": "absorbed: helium (subject), helium_4 (subject)"
+    },
+    {
+      "name": "ratio_of_volume_averaged_hydrogen_density_to_volume_averaged_total_hydrogenic_density",
+      "physical_base": "volume_averaged_hydrogen_density",
+      "absorbed_tokens": [
+        "hydrogen"
+      ],
+      "suggestion": "absorbed: hydrogen (subject)"
+    },
+    {
+      "name": "ratio_of_volume_averaged_krypton_density_to_volume_averaged_electron_density",
+      "physical_base": "volume_averaged_krypton_density",
+      "absorbed_tokens": [
+        "krypton"
+      ],
+      "suggestion": "absorbed: krypton (subject)"
+    },
+    {
+      "name": "ratio_of_volume_averaged_neon_density_to_volume_averaged_electron_density",
+      "physical_base": "volume_averaged_neon_density",
+      "absorbed_tokens": [
+        "neon"
+      ],
+      "suggestion": "absorbed: neon (subject)"
+    },
+    {
+      "name": "ratio_of_volume_averaged_nitrogen_density_to_volume_averaged_electron_density",
+      "physical_base": "volume_averaged_nitrogen_density",
+      "absorbed_tokens": [
+        "nitrogen"
+      ],
+      "suggestion": "absorbed: nitrogen (subject)"
+    },
+    {
+      "name": "ratio_of_volume_averaged_oxygen_density_to_volume_averaged_electron_density",
+      "physical_base": "volume_averaged_oxygen_density",
+      "absorbed_tokens": [
+        "oxygen"
+      ],
+      "suggestion": "absorbed: oxygen (subject)"
+    },
+    {
+      "name": "ratio_of_volume_averaged_tritium_density_to_volume_averaged_electron_density",
+      "physical_base": "volume_averaged_tritium_density",
+      "absorbed_tokens": [
+        "tritium"
+      ],
+      "suggestion": "absorbed: tritium (subject)"
+    },
+    {
+      "name": "ratio_of_volume_averaged_tungsten_density_to_volume_averaged_electron_density",
+      "physical_base": "volume_averaged_tungsten_density",
+      "absorbed_tokens": [
+        "tungsten"
+      ],
+      "suggestion": "absorbed: tungsten (subject)"
+    },
+    {
+      "name": "reference_calibration_wavelength_of_spectrometer_channel",
+      "physical_base": "reference_calibration_wavelength",
+      "absorbed_tokens": [
+        "calibration",
+        "reference"
+      ],
+      "suggestion": "absorbed: calibration (qualifier), reference (qualifier)"
+    },
+    {
+      "name": "reference_magnetic_field",
+      "physical_base": "reference_magnetic_field",
+      "absorbed_tokens": [
+        "reference"
+      ],
+      "suggestion": "reference \u2192 qualifier; base \u2192 magnetic_field"
+    },
+    {
+      "name": "reference_major_radius",
+      "physical_base": "reference_major_radius",
+      "absorbed_tokens": [
+        "major",
+        "reference"
+      ],
+      "suggestion": "absorbed: major (qualifier), reference (qualifier)"
+    },
+    {
+      "name": "reference_wavelength_of_filter",
+      "physical_base": "reference_wavelength",
+      "absorbed_tokens": [
+        "reference"
+      ],
+      "suggestion": "reference \u2192 qualifier; base \u2192 wavelength"
+    },
+    {
+      "name": "reference_wavelength_of_spectrometer_channel",
+      "physical_base": "reference_wavelength",
+      "absorbed_tokens": [
+        "reference"
+      ],
+      "suggestion": "reference \u2192 qualifier; base \u2192 wavelength"
+    },
+    {
+      "name": "reflected_power_of_ion_cyclotron_heating_antenna",
+      "physical_base": "reflected_power",
+      "absorbed_tokens": [
+        "reflected"
+      ],
+      "suggestion": "reflected \u2192 qualifier; base \u2192 power"
+    },
+    {
+      "name": "reflected_power_of_lower_hybrid_antenna",
+      "physical_base": "reflected_power",
+      "absorbed_tokens": [
+        "reflected"
+      ],
+      "suggestion": "reflected \u2192 qualifier; base \u2192 power"
+    },
+    {
+      "name": "requested_voltage_of_neutron_detector",
+      "physical_base": "requested_voltage",
+      "absorbed_tokens": [
+        "requested"
+      ],
+      "suggestion": "requested \u2192 qualifier; base \u2192 voltage"
+    },
+    {
+      "name": "requested_voltage_of_spectrometer",
+      "physical_base": "requested_voltage",
+      "absorbed_tokens": [
+        "requested"
+      ],
+      "suggestion": "requested \u2192 qualifier; base \u2192 voltage"
+    },
+    {
+      "name": "right_hand_circularly_polarized_wave_electric_field",
+      "physical_base": "right_hand_circularly_polarized_wave_electric_field",
+      "absorbed_tokens": [
+        "right_hand_circularly_polarized",
+        "wave"
+      ],
+      "suggestion": "absorbed: right_hand_circularly_polarized (qualifier), wave (qualifier)"
+    },
+    {
+      "name": "right_hand_circularly_polarized_wave_electric_field_imaginary_part",
+      "physical_base": "right_hand_circularly_polarized_wave_electric_field",
+      "absorbed_tokens": [
+        "right_hand_circularly_polarized",
+        "wave"
+      ],
+      "suggestion": "absorbed: right_hand_circularly_polarized (qualifier), wave (qualifier)"
+    },
+    {
+      "name": "right_hand_circularly_polarized_wave_electric_field_real_part",
+      "physical_base": "right_hand_circularly_polarized_wave_electric_field",
+      "absorbed_tokens": [
+        "right_hand_circularly_polarized",
+        "wave"
+      ],
+      "suggestion": "absorbed: right_hand_circularly_polarized (qualifier), wave (qualifier)"
+    },
+    {
+      "name": "root_mean_square_of_wave_current_of_antenna_strap",
+      "physical_base": "wave_current",
+      "absorbed_tokens": [
+        "wave"
+      ],
+      "suggestion": "wave \u2192 qualifier; base \u2192 current"
+    },
+    {
+      "name": "runaway_electron_critical_electric_field",
+      "physical_base": "critical_electric_field",
+      "absorbed_tokens": [
+        "critical"
+      ],
+      "suggestion": "critical \u2192 qualifier; base \u2192 electric_field"
+    },
+    {
+      "name": "runaway_electron_critical_momentum_due_to_hot_tail",
+      "physical_base": "critical_momentum",
+      "absorbed_tokens": [
+        "momentum",
+        "critical"
+      ],
+      "suggestion": "critical \u2192 qualifier; base \u2192 momentum"
+    },
+    {
+      "name": "sawtooth_period",
+      "physical_base": "sawtooth_period",
+      "absorbed_tokens": [
+        "sawtooth"
+      ],
+      "suggestion": "sawtooth \u2192 qualifier; base \u2192 period"
+    },
+    {
+      "name": "silane_prefill_count",
+      "physical_base": "prefill_count",
+      "absorbed_tokens": [
+        "prefill"
+      ],
+      "suggestion": "prefill \u2192 qualifier; base \u2192 count"
+    },
+    {
+      "name": "spectral_absorptivity_of_filter",
+      "physical_base": "spectral_absorptivity",
+      "absorbed_tokens": [
+        "spectral"
+      ],
+      "suggestion": "spectral \u2192 qualifier; base \u2192 absorptivity"
+    },
+    {
+      "name": "spectral_calibration_factor_of_spectrometer",
+      "physical_base": "spectral_calibration_factor",
+      "absorbed_tokens": [
+        "calibration",
+        "spectral"
+      ],
+      "suggestion": "absorbed: calibration (qualifier), spectral (qualifier)"
+    },
+    {
+      "name": "spectral_efficiency_of_filter",
+      "physical_base": "spectral_efficiency",
+      "absorbed_tokens": [
+        "spectral"
+      ],
+      "suggestion": "spectral \u2192 qualifier; base \u2192 efficiency"
+    },
+    {
+      "name": "spectral_etendue_of_spectrometer_channel",
+      "physical_base": "spectral_etendue",
+      "absorbed_tokens": [
+        "spectral"
+      ],
+      "suggestion": "spectral \u2192 qualifier; base \u2192 etendue"
+    },
+    {
+      "name": "spectral_flux_of_spectrometer_channel",
+      "physical_base": "spectral_flux",
+      "absorbed_tokens": [
+        "spectral"
+      ],
+      "suggestion": "spectral \u2192 qualifier; base \u2192 flux"
+    },
+    {
+      "name": "spectral_radiance",
+      "physical_base": "spectral_radiance",
+      "absorbed_tokens": [
+        "spectral"
+      ],
+      "suggestion": "spectral \u2192 qualifier; base \u2192 radiance"
+    },
+    {
+      "name": "spectral_radiance_of_soft_xray_detector",
+      "physical_base": "spectral_radiance",
+      "absorbed_tokens": [
+        "spectral"
+      ],
+      "suggestion": "spectral \u2192 qualifier; base \u2192 radiance"
+    },
+    {
+      "name": "spectral_refractive_index_of_optical_element",
+      "physical_base": "spectral_refractive_index",
+      "absorbed_tokens": [
+        "spectral"
+      ],
+      "suggestion": "spectral \u2192 qualifier; base \u2192 refractive_index"
+    },
+    {
+      "name": "spectral_wavelength_of_optical_element",
+      "physical_base": "spectral_wavelength",
+      "absorbed_tokens": [
+        "spectral"
+      ],
+      "suggestion": "spectral \u2192 qualifier; base \u2192 wavelength"
+    },
+    {
+      "name": "spectral_width_of_filter",
+      "physical_base": "spectral_width",
+      "absorbed_tokens": [
+        "spectral"
+      ],
+      "suggestion": "spectral \u2192 qualifier; base \u2192 width"
+    },
+    {
+      "name": "spectral_width_of_spectrometer_channel",
+      "physical_base": "spectral_width",
+      "absorbed_tokens": [
+        "spectral"
+      ],
+      "suggestion": "spectral \u2192 qualifier; base \u2192 width"
+    },
+    {
+      "name": "surface_area_of_divertor_tile",
+      "physical_base": "surface_area",
+      "absorbed_tokens": [
+        "surface"
+      ],
+      "suggestion": "surface \u2192 qualifier; base \u2192 area"
+    },
+    {
+      "name": "surface_area_of_filter",
+      "physical_base": "surface_area",
+      "absorbed_tokens": [
+        "surface"
+      ],
+      "suggestion": "surface \u2192 qualifier; base \u2192 area"
+    },
+    {
+      "name": "surface_area_of_flux_surface",
+      "physical_base": "surface_area",
+      "absorbed_tokens": [
+        "surface"
+      ],
+      "suggestion": "surface \u2192 qualifier; base \u2192 area"
+    },
+    {
+      "name": "surface_area_of_neutron_detector",
+      "physical_base": "surface_area",
+      "absorbed_tokens": [
+        "surface"
+      ],
+      "suggestion": "surface \u2192 qualifier; base \u2192 area"
+    },
+    {
+      "name": "surface_area_of_optical_element",
+      "physical_base": "surface_area",
+      "absorbed_tokens": [
+        "surface"
+      ],
+      "suggestion": "surface \u2192 qualifier; base \u2192 area"
+    },
+    {
+      "name": "surface_emissivity",
+      "physical_base": "surface_emissivity",
+      "absorbed_tokens": [
+        "surface"
+      ],
+      "suggestion": "surface \u2192 qualifier; base \u2192 emissivity"
+    },
+    {
+      "name": "surface_roughness_of_optical_element",
+      "physical_base": "surface_roughness",
+      "absorbed_tokens": [
+        "surface"
+      ],
+      "suggestion": "surface \u2192 qualifier; base \u2192 roughness"
+    },
+    {
+      "name": "surface_temperature",
+      "physical_base": "surface_temperature",
+      "absorbed_tokens": [
+        "surface"
+      ],
+      "suggestion": "surface \u2192 qualifier; base \u2192 temperature"
+    },
+    {
+      "name": "target_atomic_fraction_of_neutron_detector_converter",
+      "physical_base": "target_atomic_fraction",
+      "absorbed_tokens": [
+        "atomic",
+        "target"
+      ],
+      "suggestion": "absorbed: atomic (qualifier), target (qualifier)"
+    },
+    {
+      "name": "thermal_electron_absorbed_wave_power",
+      "physical_base": "absorbed_wave_power",
+      "absorbed_tokens": [
+        "absorbed",
+        "wave"
+      ],
+      "suggestion": "absorbed: absorbed (qualifier), wave (qualifier)"
+    },
+    {
+      "name": "thermal_ion_absorbed_wave_power",
+      "physical_base": "absorbed_wave_power",
+      "absorbed_tokens": [
+        "absorbed",
+        "wave"
+      ],
+      "suggestion": "absorbed: absorbed (qualifier), wave (qualifier)"
+    },
+    {
+      "name": "time_derivative_of_bremsstrahlung_count_at_detector_pixel",
+      "physical_base": "bremsstrahlung_count",
+      "absorbed_tokens": [
+        "bremsstrahlung"
+      ],
+      "suggestion": "bremsstrahlung \u2192 qualifier; base \u2192 count"
+    },
+    {
+      "name": "time_derivative_of_mode_width",
+      "physical_base": "mode_width",
+      "absorbed_tokens": [
+        "mode"
+      ],
+      "suggestion": "mode \u2192 qualifier; base \u2192 width"
+    },
+    {
+      "name": "time_derivative_of_volume_averaged_electron_density",
+      "physical_base": "volume_averaged_electron_density",
+      "absorbed_tokens": [
+        "electron"
+      ],
+      "suggestion": "absorbed: electron (subject)"
+    },
+    {
+      "name": "toroidal_launched_wave_index_of_lower_hybrid_antenna",
+      "physical_base": "launched_wave_index",
+      "absorbed_tokens": [
+        "launched",
+        "wave"
+      ],
+      "suggestion": "absorbed: launched (qualifier), wave (qualifier)"
+    },
+    {
+      "name": "toroidal_linear_mhd_mode_reference_phase",
+      "physical_base": "mhd_mode_reference_phase",
+      "absorbed_tokens": [
+        "mhd",
+        "mode",
+        "reference"
+      ],
+      "suggestion": "absorbed: mhd (qualifier), mode (qualifier), reference (qualifier)"
+    },
+    {
+      "name": "toroidal_mhd_mode_number",
+      "physical_base": "mhd_mode_number",
+      "absorbed_tokens": [
+        "mhd",
+        "mode"
+      ],
+      "suggestion": "mhd \u2192 qualifier; base \u2192 mode_number"
+    },
+    {
+      "name": "toroidal_non_axisymmetric_magnetic_field",
+      "physical_base": "non_axisymmetric_magnetic_field",
+      "absorbed_tokens": [
+        "non_axisymmetric"
+      ],
+      "suggestion": "non_axisymmetric \u2192 qualifier; base \u2192 magnetic_field"
+    },
+    {
+      "name": "toroidal_perturbed_vacuum_magnetic_field",
+      "physical_base": "vacuum_magnetic_field",
+      "absorbed_tokens": [
+        "vacuum"
+      ],
+      "suggestion": "vacuum \u2192 qualifier; base \u2192 magnetic_field"
+    },
+    {
+      "name": "toroidal_perturbed_vacuum_magnetic_field_imaginary_part",
+      "physical_base": "vacuum_magnetic_field",
+      "absorbed_tokens": [
+        "vacuum"
+      ],
+      "suggestion": "vacuum \u2192 qualifier; base \u2192 magnetic_field"
+    },
+    {
+      "name": "toroidal_perturbed_vacuum_magnetic_field_real_part",
+      "physical_base": "vacuum_magnetic_field",
+      "absorbed_tokens": [
+        "vacuum"
+      ],
+      "suggestion": "vacuum \u2192 qualifier; base \u2192 magnetic_field"
+    },
+    {
+      "name": "toroidal_reference_magnetic_field",
+      "physical_base": "reference_magnetic_field",
+      "absorbed_tokens": [
+        "reference"
+      ],
+      "suggestion": "reference \u2192 qualifier; base \u2192 magnetic_field"
+    },
+    {
+      "name": "toroidal_vacuum_magnetic_field",
+      "physical_base": "vacuum_magnetic_field",
+      "absorbed_tokens": [
+        "vacuum"
+      ],
+      "suggestion": "vacuum \u2192 qualifier; base \u2192 magnetic_field"
+    },
+    {
+      "name": "toroidal_volumetric_force",
+      "physical_base": "volumetric_force",
+      "absorbed_tokens": [
+        "volumetric"
+      ],
+      "suggestion": "volumetric \u2192 qualifier; base \u2192 force"
+    },
+    {
+      "name": "toroidal_wave_electric_field",
+      "physical_base": "wave_electric_field",
+      "absorbed_tokens": [
+        "wave"
+      ],
+      "suggestion": "wave \u2192 qualifier; base \u2192 electric_field"
+    },
+    {
+      "name": "total_external_heating_power",
+      "physical_base": "external_heating_power",
+      "absorbed_tokens": [
+        "heating",
+        "external"
+      ],
+      "suggestion": "external \u2192 qualifier; base \u2192 heating_power"
+    },
+    {
+      "name": "total_gas_source_rate_at_midplane_due_to_gas_injection",
+      "physical_base": "gas_source_rate",
+      "absorbed_tokens": [
+        "gas"
+      ],
+      "suggestion": "gas \u2192 qualifier; base \u2192 source_rate"
+    },
+    {
+      "name": "total_lower_gas_source_rate_of_vacuum_vessel_due_to_gas_injection",
+      "physical_base": "gas_source_rate",
+      "absorbed_tokens": [
+        "gas"
+      ],
+      "suggestion": "gas \u2192 qualifier; base \u2192 source_rate"
+    },
+    {
+      "name": "total_plasma_radiated_power",
+      "physical_base": "radiated_power",
+      "absorbed_tokens": [
+        "radiated"
+      ],
+      "suggestion": "radiated \u2192 qualifier; base \u2192 power"
+    },
+    {
+      "name": "total_thermal_coolant_absorbed_power_at_wall",
+      "physical_base": "coolant_absorbed_power",
+      "absorbed_tokens": [
+        "absorbed",
+        "coolant"
+      ],
+      "suggestion": "absorbed: absorbed (qualifier), coolant (qualifier)"
+    },
+    {
+      "name": "tritium_prefill_count",
+      "physical_base": "prefill_count",
+      "absorbed_tokens": [
+        "prefill"
+      ],
+      "suggestion": "prefill \u2192 qualifier; base \u2192 count"
+    },
+    {
+      "name": "twist_period_of_fiber_optic_current_sensor",
+      "physical_base": "twist_period",
+      "absorbed_tokens": [
+        "twist"
+      ],
+      "suggestion": "twist \u2192 qualifier; base \u2192 period"
+    },
+    {
+      "name": "upper_bound_charge_number",
+      "physical_base": "upper_bound_charge_number",
+      "absorbed_tokens": [
+        "upper_bound",
+        "upper"
+      ],
+      "suggestion": "upper_bound \u2192 qualifier; base \u2192 charge_number"
+    },
+    {
+      "name": "upper_bound_energy_of_detector_pixel",
+      "physical_base": "upper_bound_energy",
+      "absorbed_tokens": [
+        "energy",
+        "upper_bound",
+        "upper"
+      ],
+      "suggestion": "upper_bound \u2192 qualifier; base \u2192 energy"
+    },
+    {
+      "name": "upper_bound_wavelength_of_camera",
+      "physical_base": "upper_bound_wavelength",
+      "absorbed_tokens": [
+        "upper_bound",
+        "upper"
+      ],
+      "suggestion": "upper_bound \u2192 qualifier; base \u2192 wavelength"
+    },
+    {
+      "name": "vacuum_magnetic_field",
+      "physical_base": "vacuum_magnetic_field",
+      "absorbed_tokens": [
+        "vacuum"
+      ],
+      "suggestion": "vacuum \u2192 qualifier; base \u2192 magnetic_field"
+    },
+    {
+      "name": "vacuum_magnetic_vector_potential",
+      "physical_base": "vacuum_magnetic_vector_potential",
+      "absorbed_tokens": [
+        "vacuum"
+      ],
+      "suggestion": "vacuum \u2192 qualifier; base \u2192 magnetic_vector_potential"
+    },
+    {
+      "name": "vacuum_poloidal_current_function",
+      "physical_base": "vacuum_poloidal_current_function",
+      "absorbed_tokens": [
+        "poloidal",
+        "poloidal_current",
+        "vacuum"
+      ],
+      "suggestion": "vacuum \u2192 qualifier; base \u2192 poloidal_current_function"
+    },
+    {
+      "name": "vertical_non_axisymmetric_magnetic_field",
+      "physical_base": "non_axisymmetric_magnetic_field",
+      "absorbed_tokens": [
+        "non_axisymmetric"
+      ],
+      "suggestion": "non_axisymmetric \u2192 qualifier; base \u2192 magnetic_field"
+    },
+    {
+      "name": "vertical_vacuum_magnetic_vector_potential",
+      "physical_base": "vacuum_magnetic_vector_potential",
+      "absorbed_tokens": [
+        "vacuum"
+      ],
+      "suggestion": "vacuum \u2192 qualifier; base \u2192 magnetic_vector_potential"
+    },
+    {
+      "name": "vertical_volumetric_force",
+      "physical_base": "volumetric_force",
+      "absorbed_tokens": [
+        "volumetric"
+      ],
+      "suggestion": "volumetric \u2192 qualifier; base \u2192 force"
+    },
+    {
+      "name": "vertical_wave_electric_field",
+      "physical_base": "wave_electric_field",
+      "absorbed_tokens": [
+        "wave"
+      ],
+      "suggestion": "wave \u2192 qualifier; base \u2192 electric_field"
+    },
+    {
+      "name": "volume_averaged_ion_charge_state_average_charge_number",
+      "physical_base": "average_charge_number",
+      "absorbed_tokens": [
+        "average"
+      ],
+      "suggestion": "average \u2192 qualifier; base \u2192 charge_number"
+    },
+    {
+      "name": "volume_averaged_runaway_electron_critical_momentum_due_to_avalanche",
+      "physical_base": "critical_momentum",
+      "absorbed_tokens": [
+        "momentum",
+        "critical"
+      ],
+      "suggestion": "critical \u2192 qualifier; base \u2192 momentum"
+    },
+    {
+      "name": "volumetric_force",
+      "physical_base": "volumetric_force",
+      "absorbed_tokens": [
+        "volumetric"
+      ],
+      "suggestion": "volumetric \u2192 qualifier; base \u2192 force"
+    },
+    {
+      "name": "volumetric_fraction_of_breeder_blanket_layer",
+      "physical_base": "volumetric_fraction",
+      "absorbed_tokens": [
+        "volumetric"
+      ],
+      "suggestion": "volumetric \u2192 qualifier; base \u2192 fraction"
+    },
+    {
+      "name": "wave_electric_field",
+      "physical_base": "wave_electric_field",
+      "absorbed_tokens": [
+        "wave"
+      ],
+      "suggestion": "wave \u2192 qualifier; base \u2192 electric_field"
+    },
+    {
+      "name": "wave_frequency",
+      "physical_base": "wave_frequency",
+      "absorbed_tokens": [
+        "wave"
+      ],
+      "suggestion": "wave \u2192 qualifier; base \u2192 frequency"
+    },
+    {
+      "name": "wave_magnetic_field",
+      "physical_base": "wave_magnetic_field",
+      "absorbed_tokens": [
+        "wave"
+      ],
+      "suggestion": "wave \u2192 qualifier; base \u2192 magnetic_field"
+    },
+    {
+      "name": "wave_phase_of_antenna_strap",
+      "physical_base": "wave_phase",
+      "absorbed_tokens": [
+        "wave"
+      ],
+      "suggestion": "wave \u2192 qualifier; base \u2192 phase"
+    },
+    {
+      "name": "wave_phase_of_wave_beam",
+      "physical_base": "wave_phase",
+      "absorbed_tokens": [
+        "wave"
+      ],
+      "suggestion": "wave \u2192 qualifier; base \u2192 phase"
+    },
+    {
+      "name": "xenon_prefill_count",
+      "physical_base": "prefill_count",
+      "absorbed_tokens": [
+        "prefill"
+      ],
+      "suggestion": "prefill \u2192 qualifier; base \u2192 count"
+    }
+  ],
+  "rename_queue_projected_review_cost_usd": 21.6,
+  "grammar_backlog": []
+}

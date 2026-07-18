@@ -8,18 +8,18 @@
   <meta name="plan-slug" content="canonical-qualifier-order">
   <meta name="plan-title" content="Canonical Qualifier Order">
   <meta name="plan-summary" content="Decompose the catch-all &#x27;generic qualifier&#x27; class into strictly-ordered grammar segments (operators · zone · refined qualifier · base), pull mis-filed tokens (operators, coordinates, lexical bases) out of qualifiers.yml, enforce one canonical order at generate time, and migrate the catalogue with re-review.">
-  <meta name="plan-status" content="active">
+  <meta name="plan-status" content="shipped">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="XL">
   <meta name="plan-tier" content="opus">
   <meta name="plan-owner" content="Simon McIntosh">
-  <meta name="plan-impl" content="0.99">
-  <meta name="plan-modified" content="2026-07-03">
+  <meta name="plan-impl" content="1.0">
+  <meta name="plan-modified" content="2026-07-18">
   <meta name="plan-depends-on" content="qualifier-vocabulary-categorization">
   <title>Canonical Qualifier Order | imas-standard-names</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="7">
+<meta name="plan-version" content="8">
 </head>
 <body>
   <main class="plan-doc">
@@ -210,43 +210,34 @@
         keep; prune only demonstrable mis-files.</li>
     </ul>
 
-    <h2 id="s3">§3 — Deep per-token review &amp; recategorization (ISN)</h2>
-    <p>
-      Produce the authoritative per-token verdict table for all 161 tokens (operator / coordinate-carrier / atomic-base /
-      zone / qualifier), with physics rationale for each base-bound and edge case. This is the curation pass the user
-      asked for; it also covers the <strong>coverage review of every other segment</strong> (subjects, aggregations,
-      populations, orbits, regions, components, operators, loci) to widen coverage where the decomposition exposes a gap
-      (e.g. region-prefix tokens vs the <code>over_&lt;region&gt;</code> locus; missing coordinate carriers). Output: the
-      verdict table committed, the vocab files updated, codegen regenerated, tests green, full catalogue round-trips.
-    </p>
-
-    <h2 id="s3e">§3e — Enforce one canonical order at generate time (ISN)</h2>
-    <p>
-      Make the renderer canonical: <code>compose</code>/<code>render_qualifiers</code> must emit every segment in the
-      locked order regardless of input order, and the validator must <strong>reject</strong> a name whose segments are
-      out of canonical order (<code>NonCanonicalNameError</code> already exists for this and attaches the canonical form).
-      Round-trip then means parse→canonical-compose; any name that changes is a §5 migration target.
-    </p>
-    <p>
-      <strong>Current catalogue names are not the oracle.</strong> This is a greenfield project: existing names are the
-      current <em>state</em>, not ground truth. We expect names to break under the stricter grammar — that is understood
-      collateral, and a name that fails to comply is, after review, a valid finding that the <em>name</em> is wrong and
-      must be fixed. The implementation gate is therefore <em>engine self-consistency</em> (for every name the parser
-      accepts, <code>compose(parse(name)) == name</code> — no parser/renderer-inverse bug), a green suite, and clean
-      codegen — <strong>not</strong> "all 1364 names keep working". Names that no longer parse, or that strict-validate
-      flags as non-canonical, are surfaced as the §5 migration/fix backlog, never papered over with parser hacks.
-    </p>
-    <h3 id="s3v">§3v — Guard: vocabularies must be disjoint (regression test)</h3>
-    <p>
-      The double-registration finding (8 tokens in both <code>qualifiers.yml</code> and <code>operators.yml</code>) is a
-      class of bug worth a permanent guard. Add a test asserting the segment-role vocabularies are pairwise <strong>disjoint</strong>
-      sets — a token belongs to exactly one role — with a small, explicitly-documented allowlist for genuinely-intentional
-      cross-listings (<code>components</code> ∩ <code>coordinate_axes</code>; the <code>objects</code>/<code>positions</code>
-      aliases that both resolve to <code>locus_registry.yml</code>). Every other intersection is a defect. The allowlist is a
-      ratchet: it shrinks toward empty as §3 resolves the remaining mis-files (<code>energy</code>/<code>momentum</code> as
-      base+qualifier, <code>particle</code>/<code>state</code> as subject+qualifier). Gated on Phase 2 (so the operator dupes
-      and zone tokens are already cleaned).
-    </p>
+    <section id="s3" class="section-landed">
+      <h2>§3 / §3e / §3v — Deep per-token review, canonical enforcement &amp; disjointness guard (ISN)
+        <span class="badge badge-shipped">✓ landed 2026-07-18</span></h2>
+      <p class="landed-summary">
+        §3 curation complete. The <strong>canonical enforcement</strong> (§3e) and <strong>disjointness
+        guard</strong> (§3v, <code>test_vocab_uniqueness.py</code>) shipped with the scaffold and the
+        rc55–rc59 slices; the guard's ratchet is now at its <strong>intentional floor</strong> —
+        <code>qualifiers</code> is disjoint from every other segment except documented dual-roles
+        (physics_domains, channels-dual energy/momentum, fusion-reactant pairs). The last grammar
+        residual, the <strong>normalized-direction shadow</strong>, is resolved: ISN <code>d150b6c</code>
+        removes <code>normalized_parallel</code>/<code>normalized_perpendicular</code> (field-relative
+        directions with no normalized variant — the token could only encode the GyroBohm operator),
+        so <code>normalized_parallel_momentum_flux</code> peels the operator instead of fusing the
+        projection; the genuine normalized coordinate-frame directions are retained. ISN suite 1822
+        passed; codegen in sync.
+      </p>
+      <p class="landed-summary">
+        Follow-on: a <strong>$0 deterministic decomposition re-parse triage</strong> (imas-codex
+        <code>e3d20e11</code>, <code>sn decomp-triage</code>) buckets the 2252 stale
+        <code>decomposition_audit</code> findings on accepted names —
+        <strong>1809 drain / 173 suppress (1982 free) / 270 rename queue</strong> (~$21.60 review),
+        0 parse-fail. Full record + manifest:
+        <a href="archive/canonical-qualifier-order-s3-landed.html">§3 landed</a>
+        (closes <code>f-cqo-normdir-shadow</code>, <code>f-cqo-003</code>, <code>f-cqo-004</code>;
+        the drain + rename rotation are staged for lead review in
+        <code>model-selection-and-global-refine · f-decomp-reparse-triage</code>).
+      </p>
+    </section>
 
     <h2 id="s4">§4 — Template the order into the LLM name-generation prompts</h2>
     <p>
@@ -449,7 +440,7 @@ Done-when
   5. Followups written for §3 (deep token review) and §4/§4b + this one resolved.</pre>
     <p class="r-fu-outcome">Landed commit ef4db62; verified independently. Ordered zone segment (13 tokens, generated Zone enum) between device and base; 8 operator dupes removed from qualifiers.yml + qualifier_categories.yml (gyroaveraged left postfix-only per the corrected gate, not hacked back as a prefix); compose() canonicalizes, parse_standard_name rejects non-canonical with the canonical form. Engine self-consistency 1357/1357 accepted names (0 inverse bugs); suite 1572 passed / 0 failed; codegen in sync. Migration backlog (expected, not gated): 7 parse-fail (gyroaveraged mid-prefix) + 6 reorder. Edge cases for §3: subject sorts before zone (core_electron_temperature→electron_core_temperature); major/minor remain base-bound qualifiers sorting after zone (feeds §6). Next: §3 deep per-token review.</p>
     </article>
-<article class="r-fu" data-id="f-cqo-003" data-status="open" data-tier="sonnet" data-written-by="reckon-ship" data-written-at="2026-06-30" data-recommends-skill="/reckon-ship canonical-qualifier-order §3v" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-cqo-003" data-status="resolved" data-tier="sonnet" data-written-by="reckon-ship" data-written-at="2026-06-30" data-recommends-skill="/reckon-ship canonical-qualifier-order §3v" data-resolved-at="2026-07-18T16:35:58+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">§3v — Add a vocabulary-disjointness guard test</h4>
     <div class="r-fu-body">PARTIALLY DONE: tests/grammar/test_vocab_uniqueness.py already lints cross-segment collisions; the <code>qualifiers∩operators</code> AND <code>qualifiers∩locus_registry</code> allowlist entries were REMOVED (both intersections now empty — operator dupes in Phase 2; flux_surface/inlet/outlet loci in the first §3 slice — so the guard actively prevents re-introduction). Remaining: ratchet out the rest as §3 resolves each mis-file — <code>qualifiers∩{physical_bases (energy/momentum), subjects (particle), processes (anomalous/ohmic/…14), physics_domains (equilibrium/mhd/nbi), generic_physical_bases (energy)}</code>. Each removal = one mis-file fixed in §3. Intentional overlaps stay (components∩coordinate_axes; zones∩regions/locus; generic_bases⊂bases).</div>
     <pre class="r-fu-prompt">Project: imas-standard-names
@@ -484,8 +475,9 @@ Done-when
      documented, plan-tracked exception if an intentional overlap remains).
   2. Any UNexpected intersection found is reported into the plan as a §3 mis-file finding.
   3. Full suite green; this followup resolved.</pre>
+    <p class="r-fu-outcome">COMPLETE. tests/grammar/test_vocab_uniqueness.py is the permanent cross-segment disjointness guard (green, in the 1822-passed suite). The ratchet reached its intentional floor: qualifiers ∩ {operators, physical_bases, generic_physical_bases, subjects(particle/state), processes, locus_registry} are ALL now empty (mis-filed tokens pulled to their true segments across §2 dupe removal + the rc55–rc59 curation). Remaining allowlist entries are documented-intentional dual-roles, not mis-files: components∩coordinate_axes (shared directional vocab), channels∩physical_bases/generic_physical_bases (energy/momentum channels-dual design), zones∩regions/locus_registry (prefix zone vs postfix locus), generic_bases⊂bases (subset), the 3 fusion-reactant qualifiers∩subjects pairs, normalizing_qualifiers⊂subjects, and qualifiers∩physics_domains (equilibrium/mhd/nbi — genuine modifier that also names a domain tag, same benign dual use as physics_domains↔tags). The guard actively blocks re-introduction. (Implemented as an extension of the existing test_vocab_uniqueness.py rather than a new test_vocab_disjoint.py file — the guard exists and is enforced.)</p>
     </article>
-<article class="r-fu" data-id="f-cqo-004" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-06-30" data-recommends-skill="/reckon-ship canonical-qualifier-order §3" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-cqo-004" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-06-30" data-recommends-skill="/reckon-ship canonical-qualifier-order §3" data-resolved-at="2026-07-18T16:35:58+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">§3 — Deep per-token review + segment coverage widening</h4>
     <div class="r-fu-body">The structural scaffold is in (zone segment, dupe removal, enforcement). Now the curation pass: an authoritative per-token verdict for the remaining qualifiers.yml tokens (and the cross-segment mis-files the disjointness scan surfaced), with physics rationale. Resolve base-bound tokens token-by-token (atomic-base vs coordinate-carrier vs qualifier), reconcile qualifier∩processes (regime qualifier vs due_to_ process), qualifier∩physical_bases (energy/momentum), qualifier∩subjects (particle/state). Each resolution ratchets a §3v allowlist entry out. Needs the lead's physics input on edge cases.</div>
     <pre class="r-fu-prompt">Project: imas-standard-names
@@ -524,6 +516,7 @@ Done-when
   2. Disjointness allowlist ratcheted down (entries removed for each resolved mis-file).
   3. Full suite green; engine self-consistency holds for accepted names.
   4. Followups written for §4/§4b (context+SPA) and §5/§6 (migration) + this resolved.</pre>
+    <p class="r-fu-outcome">§3 curation COMPLETE. The per-token verdicts landed incrementally, each recorded in the vocab file it touched: base-bound/compound-base rule + verdicts in physical_bases.yml (f-cqo-area-quals: surface/spectral/cross_sectional splits; channels-dual energy/momentum kept); scoping-vs-kind-forming binding classes in scoping_qualifiers.yml (f-cqo-royal-order, grounded in Forsyth/Scontras adjective-order research); regime-qualifier-vs-due_to_-process curation (process vocab 97→89, qualifiers∩processes now empty); qualifier-segment-outer-of-channel (f-cqo-qualifier-flip). The enumerated cross-segment mis-files (qualifiers∩processes/physical_bases/subjects/locus_registry) are all resolved; qualifiers∩physics_domains is documented-intentional. The last open grammar residual of the components-vs-operators class — the normalized_<direction> shadow — is now resolved (f-cqo-normdir-shadow, ISN d150b6c). No un-adjudicated cross-segment mis-file remains (the §3v guard proves it). FOLLOW-ON (not §3 grammar; staged for lead review in model-selection-and-global-refine · f-decomp-reparse-triage): the decomposition_audit substring-scans raw names and left 2252 stale findings on accepted names; the new $0 sn decomp-triage (imas-codex e3d20e11) buckets them 1809 drain / 173 suppress (1982 clearable free) / 270 rename queue (~$21.60), 0 parse-fail. Full record: docs/archive/canonical-qualifier-order-s3-landed.html.</p>
     </article>
 <article class="r-fu" data-id="f-cqo-deploy" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-01" data-recommends-skill="/reckon-ship canonical-qualifier-order §5" data-resolved-at="2026-07-01T15:13:39+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">§5 — Deploy the regeneration to the ISNC graph (blocked in-session by the auto-mode permission classifier)</h4>
@@ -628,9 +621,9 @@ Task: consolidate imas_codex/standard_names/audits.py::canonical_locus_check and
     <pre class="r-fu-prompt">done — landed as ISN c3dd83e</pre>
     <p class="r-fu-outcome">LANDED ISN c3dd83e. RULE (recorded in physical_bases.yml): a modifier that selects WHICH quantity (dimensions/semantics of the head unchanged) is a QUALIFIER; compound bases are reserved for lexicalized quantities whose modifier changes what the quantity IS. Never mint a qualifier to split one compound unless it completes an existing family. VERDICTS from the 77-multi-word-base scan: SPLIT surface_area (surface already qualifiers.yml:88 — surface_temperature/surface_roughness), SPLIT spectral_radiance (spectral already qualifiers.yml — spectral_flux + 10 accepted names), SPLIT cross_sectional_area → NEW cross_sectional qualifier (geometry category) completing the area family wetted/effective/surface/cross_sectional. This PARTIALLY REVERSES the base-bound-disposition rationale's surface_area-as-atomic-base example — the token-by-token decision itself stands. KEEP compound: channels-dual energy/momentum + kinetic_energy/internal_energy/photon_energy/angular_momentum (documented channels.yml design, still open in f-cqo-004); dimension-changing/lexicalized current_density(79)/power_density(60)/torque_density(37)/magnetic_flux(24)/mass_density/number_density/solid_angle/safety_factor/larmor_radius/debye_length etc.; one-off descriptive compounds (decay_length, rise_time, tilt_angle…) whose modifiers are NOT qualifiers — splitting would ADD single-use tokens. Zero catalog strings changed (parse IR only); ISN 1618 py + 159 JS round-trip green; imas-codex pin b1f901b8; 10 graph names re-stamped physical_base (surface_area→area, spectral_radiance→radiance, cross_sectional_area→area).</p>
     </article>
-<article class="r-fu" data-id="f-cqo-normdir-shadow" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-03" data-recommends-skill="/reckon-ship canonical-qualifier-order §3" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-cqo-normdir-shadow" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-03" data-recommends-skill="/reckon-ship canonical-qualifier-order §3" data-resolved-at="2026-07-18T16:35:58+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">§3 — normalized_&lt;direction&gt; components shadow the normalized operator (longest-match ambiguity)</h4>
-    <div class="r-fu-body">Found during the rc59 unit-integrity RCA: the components.yml 'normalized spatial directions' family (normalized_radial/vertical/parallel/perpendicular/toroidal/poloidal) SHADOWS operator normalized + component <direction> via longest-match — normalized_parallel_momentum_flux_due_to_X parses as component=normalized_parallel (a direction along the normalized-parallel axis), NOT operator normalized applied to the parallel component, silently changing the meaning of any GyroBohm-normalized projected quantity. Three freshly-accepted GK names (normalized_parallel/perpendicular_momentum_flux_due_to_perturbed_parallel_*) carry the fused parse today; the unit-suspicion validator was patched to exempt them (ISN 1cda724) but the AMBIGUITY itself is unresolved. Adjudicate in §3: either the parser prefers the operator split when the residue parses (breaking any genuine normalized-direction component names), or normalized-direction components get renamed tokens that don't collide with the operator (e.g. rho_radial), or the fused reading is declared canonical and the GK names need a different normalized marker.</div>
+    <div class="r-fu-body">Found during the rc59 unit-integrity RCA: the components.yml 'normalized spatial directions' family (normalized_radial/vertical/parallel/perpendicular/toroidal/poloidal) SHADOWS operator normalized + component <direction> via longest-match — normalized_parallel_momentum_flux_due_to_X parses as component=normalized_parallel (a direction along the normalized-parallel axis), NOT operator normalized applied to the parallel component, silently changing the meaning of any GyroBohm-normalized projected quantity. Three freshly-accepted GK names (normalized_parallel/perpendicular_momentum_flux_due_to_perturbed_parallel_*) carry the fused parse today; the unit-suspicion validator was patched to exempt them (ISN 1cda724) but the AMBIGUITY itself is unresolved. Adjudicate in §3: either the parser prefers the operator split when the residue parses (breaking any genuine normalized-direction component names), or normalized-direction components get renamed tokens that don't collide with the operator (e.g. rho_radial), or the fused reading is declared canonical and the GK names need a different normalized marker.</direction></div>
     <pre class="r-fu-prompt">Project: imas-standard-names
 Plan: canonical-qualifier-order
 Section: §3 (vocabulary curation — components vs operators)
@@ -645,6 +638,7 @@ Work
   3. Re-round-trip the catalog; migrate any affected names through the pipeline.
 
 Done-when: ambiguity resolved by design (not exemption); collisions re-parsed or renamed; suites green; followup resolved.</pre>
+    <p class="r-fu-outcome">RESOLVED by design (ISN d150b6c). normalized_parallel/normalized_perpendicular removed from components.yml AND coordinate_axes.yml: parallel/perpendicular are field-relative directions (along/across B) with no distinct normalized-direction variant, so a leading `normalized` on them could only ever encode the GyroBohm-normalization operator. The genuine normalized coordinate-frame directions (normalized_radial→ρ, normalized_vertical, normalized_toroidal→φ, normalized_poloidal→θ) are retained. Verified: normalized_parallel_momentum_flux now peels the operator (projection=parallel, normalized in the qualifier/operator set) instead of fusing to projection=normalized_parallel; normalized_radial_magnetic_field unchanged. The 4 affected GyroBohm names re-parse to canonical <direction>_normalized_<base> form (component leads the normalization qualifier, per royal-order) and are surfaced as migration backlog, not papered over. The stopgap component-prefix unit-suspicion exemption (ISN 1cda724) is REMOVED — the operator is exempted via the existing dimensionless-operator path, restoring correct unit-suspicion for genuine normalized_radial-class components. Codegen regenerated (Component enum drops the two members); ISN suite 1822 passed (the lone failing test_find_git_root_raises_when_no_repo is a pre-existing environmental tmp-path flake, orthogonal to grammar).</p>
     </article>
 </section>
 

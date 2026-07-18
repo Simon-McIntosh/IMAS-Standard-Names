@@ -18,7 +18,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-18">
-<meta name="plan-version" content="16">
+<meta name="plan-version" content="17">
 <meta name="plan-blocks" content="catalog-expert-review-remediation">
 <meta name="plan-impl" content="0.95">
 </head>
@@ -329,7 +329,7 @@ Done-when
   1. re-run the 25-name pilot scope as a smoke (idempotent; names already accepted → tiny drain) with refine waste &lt;5%
   2. tests green, committed+pushed
   3. this followup resolved; launch gate (b) f-campaign-audit-restamp still open or resolved before approval</pre>
-    <p class="r-fu-outcome">Landed imas-codex af69e3e2: strictly-increasing per-node claim_seq stamped at claim + settle re-read in BOTH docs/names winner verifiers (superseded racer stands down before paying); docs-pool replicas capped at ceil(scope/2) on scoped drains (1-2-name set → 1 replica, zero concurrency); paid-call-without-persist tripwire in every run summary (warn >2%), per-pool 'completed' relabelled 'processed'. 17 new race tests. Smoke (fresh stratified 25, run 9aa921c3): refine waste 0.0% (15 paid calls, 0 wasted persists), $0.18/name vs $0.42 pilot — spend −56% at equal scope. Residual: settle reduces (not provably eliminates) the race for large unscoped runs; seed-level compare-and-set is the full close if the tripwire ever fires. Archive: docs/archive/model-selection-and-global-refine-s5-launch-gates-landed.html</p>
+    <p class="r-fu-outcome">Landed imas-codex af69e3e2: strictly-increasing per-node claim_seq stamped at claim + settle re-read in BOTH docs/names winner verifiers (superseded racer stands down before paying); docs-pool replicas capped at ceil(scope/2) on scoped drains (1-2-name set → 1 replica, zero concurrency); paid-call-without-persist tripwire in every run summary (warn &gt;2%), per-pool 'completed' relabelled 'processed'. 17 new race tests. Smoke (fresh stratified 25, run 9aa921c3): refine waste 0.0% (15 paid calls, 0 wasted persists), $0.18/name vs $0.42 pilot — spend −56% at equal scope. Residual: settle reduces (not provably eliminates) the race for large unscoped runs; seed-level compare-and-set is the full close if the tripwire ever fires. Archive: docs/archive/model-selection-and-global-refine-s5-launch-gates-landed.html</p>
     </article>
 <article class="r-fu" data-id="f-campaign-audit-restamp" data-status="resolved" data-tier="sonnet" data-written-by="reckon-ship" data-written-at="2026-07-18" data-recommends-skill="/reckon-ship model-selection-and-global-refine §5" data-resolved-at="2026-07-18T13:12:08+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">LAUNCH GATE: re-stamp the deterministic audit after each campaign batch</h4>
@@ -361,7 +361,7 @@ Rotation command (repeat until selection empties; N=200 first, then 450):
 Checkpoint after each rotation (orchestrator): accept rate ≥0.90, zero prose reintroduction, zero drift, cost/name ≈$0.20, refine paid-call-without-persist &lt;5%, spot-check 5 before/after diffs across domains; record rotation row in the §5 archive. Halt + root-cause on any miss.
 Done-when: sn run --campaign &quot;prose,audit:latex,audit:spelling,audit:length&quot; --dry-run → total 0; final counts + spend in §5 archive; then f-expert-review-reply-doc.</pre>
     </article>
-<article class="r-fu" data-id="f-decomp-reparse-triage" data-status="open" data-tier="sonnet" data-written-by="reckon-ship" data-written-at="2026-07-18" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-decomp-reparse-triage" data-status="resolved" data-tier="sonnet" data-written-by="reckon-ship" data-written-at="2026-07-18" data-recommends-skill="" data-resolved-at="2026-07-18T16:37:23+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Deterministic decomposition re-parse triage (LLM-free) → sized rename queue</h4>
     <div class="r-fu-body">Verified 2026-07-18: flagged names parse cleanly under the current grammar with unchanged name strings (ion_current_density → subject=ION + base=current_density) — the stored decomposition is stale, not the name. A $0 script re-parses all 2,255 flagged accepted names and buckets: (a) re-parse slots the token → re-stamp stored segments + clear finding; (b) whitelisted lexicalised compound → suppress; (c) still absorbed post-parse (e.g. reference_magnetic_field) → rename queue, composed free on local DSv4 with review-only cost (~$0.06–0.10/name). Runs after canonical-qualifier-order residuals (f-cqo-003/004, f-cqo-normdir-shadow) so the parse is final.</div>
     <pre class="r-fu-prompt">Project: imas-standard-names / code: imas-codex (branch main)
@@ -371,6 +371,28 @@ Work
   2. Dry-run manifest with bucket counts for lead review before any write; then apply (a)/(b) and re-run the validation drain.
   3. Queue bucket (c) as a rename rotation: compose on local DSv4 (free), blind-pair review (only real cost), sn edit cascade mechanics, batched with checkpoints like the docs rotations.
 Done-when: dry-run bucket counts recorded; (a)+(b) applied + re-stamped; rename queue sized with projected review cost; followup for the rename rotation queued.</pre>
+    <p class="r-fu-outcome">SCRIPT + DRY-RUN MANIFEST LANDED (this run). Prereq met: canonical-qualifier-order §3 residuals are final (ISN d150b6c). Delivered imas-codex e3d20e11: imas_codex/standard_names/decomposition_triage.py (pure, LLM-free re-parse bucketing, unit-tested against real catalog names) + `sn decomp-triage` (read-only dry-run default; --apply path). The audit substring-scans a name's raw id, so it flags a closed token even when the grammar correctly slots it (ion_current_density→subject=ion) — confirmed the stored findings are stale, not the names. Deterministic rule: re-parse→ (a) DRAIN if the parsed physical_base has no leaked closed token (finding stale, clear+re-stamp); (b) SUPPRESS if a token remains inside a grammar-registered atomic base (convection_velocity, diffusion_coefficient) — legitimate; (c) RENAME if a token is absorbed into a non-registered compound (reference_magnetic_field, vacuum_magnetic_vector_potential). DRY-RUN over all 2252 flagged accepted names: drain 1809 / suppress 173 (1982 clearable free) / rename 270 / parse-fail 0 / non-canonical 0. Rename queue sized: ~$21.60 review (270 × $0.08; compose free on DSv4). Manifest: docs/archive/canonical-qualifier-order-manifests/decomp-triage-dry-run.json; full record docs/archive/canonical-qualifier-order-s3-landed.html. NOT applied — the write pass is gated on lead review of the bucket split per this followup's own design. Next queued: f-decomp-triage-apply.</p>
+    </article>
+<article class="r-fu" data-id="f-decomp-triage-apply" data-status="open" data-tier="sonnet" data-written-by="reckon-ship" data-written-at="2026-07-18" data-recommends-skill="/reckon-ship model-selection-and-global-refine §5" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Lead: apply the decomposition-triage free drain, then run the 270-name rename rotation</h4>
+    <div class="r-fu-body">The dry-run manifest is signed off first (drain 1809 / suppress 173 = 1982 clearable free; rename 270 ≈ $21.60). Then: (1) apply the free drain (`sn decomp-triage --apply` clears the stale/lexicalised findings + re-stamps segment edges); (2) make decomposition_audit_check parse-aware (scan the parsed physical_base, exempt registered bases) so the drain sticks and buckets a/b never recur; (3) run the 270-name rename rotation — compose free on DSv4, blind-pair review, sn edit cascade mechanics, batched with checkpoints like the docs rotations.</div>
+    <pre class="r-fu-prompt">Project: imas-standard-names / code: imas-codex (branch main)
+Section: §5 follow-on — decomposition-triage apply + rename rotation
+Tier: sonnet (opus for the audit-logic change)
+Prereq: lead has reviewed docs/archive/canonical-qualifier-order-manifests/decomp-triage-dry-run.json bucket split.
+
+Context
+  The re-parse triage (imas-codex e3d20e11, `sn decomp-triage`) buckets the 2252 stale decomposition_audit findings on accepted names: 1809 drain + 173 suppress (1982 clearable, no LLM, no name change) + 270 rename queue (genuine absorption). 0 parse-fail. This followup does the writes.
+
+Work
+  1. FREE DRAIN (classifier-gated write): `cd ~/Code/imas-codex &amp;&amp; uv run imas-codex sn decomp-triage --apply`. Clears the decomposition_audit lines from validation_issues for the drain/suppress buckets and re-stamps segment edges via rederive_structural_edges. Verify the flagged-accepted count drops ~2252 → ~270.
+  2. DURABLE AUDIT FIX (opus): make imas_codex/standard_names/audits.py::decomposition_audit_check parse-aware — scan the PARSED physical_base (not the raw id) and exempt a physical_base that is a grammar-registered atomic base. Add tests. This stops the drain/suppress class recurring on the next sn run (without it, clearing is futile). Commit+push.
+  3. RENAME ROTATION (270 names): the manifest&#x27;s rename_queue carries per-name absorbed tokens + a naive segmentation suggestion. Compose the corrected names on local DSv4 (free), blind-pair review (the only real cost, ~$21.60), apply via sn edit cascade mechanics, batched with a checkpoint per ~90 names (accept rate, drift, before/after diffs) like the docs rotations. Some (c) entries may be legitimate atomic quantities the lead keeps (alfven_frequency, wave_electric_field) — the rotation adjudicates, does not blindly rename.
+
+Done-when
+  1. free drain applied; flagged-accepted decomposition count down to the rename set; audit made parse-aware + tests green + pushed
+  2. rename rotation complete (or the residual keep-set recorded with rationale); final counts + spend in the §5 archive
+  3. this followup resolved</pre>
     </article>
 </section>
 </main>
