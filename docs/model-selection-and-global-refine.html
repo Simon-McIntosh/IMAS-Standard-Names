@@ -18,7 +18,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-18">
-<meta name="plan-version" content="14">
+<meta name="plan-version" content="15">
 <meta name="plan-blocks" content="catalog-expert-review-remediation">
 <meta name="plan-impl" content="0.9">
 </head>
@@ -296,7 +296,7 @@ Prose-only alternative: replace --campaign all with --campaign prose (1,384 name
 The campaign halts between batches on any gate miss (≥90% acceptance, zero banned-prose reintroduction, zero name drift) and prints --campaign-resume-from for the restart. After completion: verify zero accepted names match the prose predicates (sn run --campaign prose --dry-run → total 0), record final counts + spend in the §5 archive, then close expert-review reply open item 1 via f-expert-review-reply-doc.</pre>
     <p class="r-fu-outcome">Superseded by f-docs-campaign-batches-2: the audit-class breakdown (2,125 of 2,288 matched names carry ONLY name-axis decomposition findings a docs pass cannot clear) sharpened the recommendation to the docs-fixable spec — prose,audit:latex,audit:spelling,audit:length = 1,540 names / 16 batches ≈ $570–650. Full before/after evidence doc authored: docs/docs-campaign-before-after.html.</p>
     </article>
-<article class="r-fu" data-id="f-docs-campaign-batches-2" data-status="open" data-tier="haiku" data-written-by="reckon-ship" data-written-at="2026-07-18" data-recommends-skill="/reckon-ship model-selection-and-global-refine §5" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-docs-campaign-batches-2" data-status="resolved" data-tier="haiku" data-written-by="reckon-ship" data-written-at="2026-07-18" data-recommends-skill="/reckon-ship model-selection-and-global-refine §5" data-resolved-at="2026-07-18T11:30:16+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Lead: approve the docs-campaign scale-up (recommended spec: docs-fixable defects, 1,540 names ≈ $570–650)</h4>
     <div class="r-fu-body">Pilot converged (96% acceptance, zero prose reintroduction, zero drift; $0.37–0.42/name). Audit-class analysis shows the 'all' spec would spend ~$350 on ~750 names whose only defect is a name-axis decomposition finding a docs campaign cannot clear — recommended spec is prose + docs-axis audit checks: 1,540 names, 16 batches, ≈$570–650. Evidence: docs/docs-campaign-before-after.html (weakness taxonomy, before/after pairs, mechanism mapping).</div>
     <pre class="r-fu-prompt">Decision inputs: docs/docs-campaign-before-after.html (weaknesses, before/after evidence, spec comparison) + docs/archive/model-selection-and-global-refine-s5-pilot-landed.html (pilot metrics, per-phase cost).
@@ -305,6 +305,7 @@ Recommended (docs-fixable defects only), run (or via ! in a Claude session):
   cd ~/Code/imas-codex &amp;&amp; uv run imas-codex sn run --source dd --campaign &quot;prose,audit:latex,audit:spelling,audit:length&quot; --include-accepted --campaign-batch-cost-cap 50 --campaign-cost-ceiling 700
 Alternatives: --campaign prose (1,504 names, leaves 36 docs-axis audit names for hand edits); --campaign all (2,288 names ≈ $850–960, adds ~750 name-axis-only names whose finding cannot clear).
 The campaign halts between batches on any gate miss (≥90% acceptance, zero banned-prose reintroduction, zero name drift) and prints --campaign-resume-from. After completion: verify sn run --campaign prose --dry-run → total 0; record final counts + spend in the §5 archive; re-scope decomposition findings to the name-axis workstream explicitly; then close expert-review reply open item 1 via f-expert-review-reply-doc.</pre>
+    <p class="r-fu-outcome">Superseded by f-docs-campaign-rotations: lead directive 2026-07-18 — run high-spend docs work in stratified rotations with an orchestrator review checkpoint between each, so storms like the refine claim-race livelock are caught after ~200 names, not 1,540. Cost basis also corrected: healthy-path ≈ $0.20/name post-livelock-fix → recommended spec ≈ $300–380 total.</p>
     </article>
 <article class="r-fu" data-id="f-refine-claim-livelock" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-18" data-recommends-skill="/reckon-ship model-selection-and-global-refine §5" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">LAUNCH GATE: fix the refine_docs claim-race livelock (53% of pilot spend wasted)</h4>
@@ -346,6 +347,26 @@ Done-when
   1. campaign batches leave no stale validated_at; test with a mock validate fn
   2. pilot names re-stamped, counts recorded in the §5 archive
   3. committed+pushed; this followup resolved</pre>
+    </article>
+<article class="r-fu" data-id="f-docs-campaign-rotations" data-status="open" data-tier="haiku" data-written-by="reckon-ship" data-written-at="2026-07-18" data-recommends-skill="/reckon-ship model-selection-and-global-refine §5" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Docs campaign in stratified rotations with review checkpoints (gated on both launch fixes)</h4>
+    <div class="r-fu-body">After f-refine-claim-livelock and f-campaign-audit-restamp land: rotation 1 = stratified 200 names of the docs-fixable spec (~$40), then orchestrator review (accept rate, reintroductions, cost/name, paid-call-without-persist tripwire, sample diffs); then 3 rotations of ~450 (~$90 each) with the same checkpoint. Selection is self-pruning — fixed names stop matching the predicates, so each rotation re-runs the same command and --campaign-pilot re-stratifies over the remaining defect set.</div>
+    <pre class="r-fu-prompt">Prereqs: f-refine-claim-livelock + f-campaign-audit-restamp resolved.
+Rotation command (repeat until selection empties; N=200 first, then 450):
+  cd ~/Code/imas-codex &amp;&amp; uv run imas-codex sn run --source dd --campaign &quot;prose,audit:latex,audit:spelling,audit:length&quot; --campaign-pilot N --include-accepted --campaign-batch-cost-cap 50 --campaign-cost-ceiling 120
+Checkpoint after each rotation (orchestrator): accept rate ≥0.90, zero prose reintroduction, zero drift, cost/name ≈$0.20, refine paid-call-without-persist &lt;5%, spot-check 5 before/after diffs across domains; record rotation row in the §5 archive. Halt + root-cause on any miss.
+Done-when: sn run --campaign &quot;prose,audit:latex,audit:spelling,audit:length&quot; --dry-run → total 0; final counts + spend in §5 archive; then f-expert-review-reply-doc.</pre>
+    </article>
+<article class="r-fu" data-id="f-decomp-reparse-triage" data-status="open" data-tier="sonnet" data-written-by="reckon-ship" data-written-at="2026-07-18" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Deterministic decomposition re-parse triage (LLM-free) → sized rename queue</h4>
+    <div class="r-fu-body">Verified 2026-07-18: flagged names parse cleanly under the current grammar with unchanged name strings (ion_current_density → subject=ION + base=current_density) — the stored decomposition is stale, not the name. A $0 script re-parses all 2,255 flagged accepted names and buckets: (a) re-parse slots the token → re-stamp stored segments + clear finding; (b) whitelisted lexicalised compound → suppress; (c) still absorbed post-parse (e.g. reference_magnetic_field) → rename queue, composed free on local DSv4 with review-only cost (~$0.06–0.10/name). Runs after canonical-qualifier-order residuals (f-cqo-003/004, f-cqo-normdir-shadow) so the parse is final.</div>
+    <pre class="r-fu-prompt">Project: imas-standard-names / code: imas-codex (branch main)
+Prereq: canonical-qualifier-order §3 residuals landed (grammar final).
+Work
+  1. Script (sn CLI subcommand or audit-utils entry, not one-off): for each accepted name with a decomposition_audit finding, parse via imas_standard_names.grammar.parse_standard_name; bucket (a) token now slotted → update stored segment fields + re-stamp validation (LLM-free drain); (b) compound whitelist → suppress finding; (c) still absorbed → emit rename-queue manifest (name, absorbed tokens, suggested segmentation).
+  2. Dry-run manifest with bucket counts for lead review before any write; then apply (a)/(b) and re-run the validation drain.
+  3. Queue bucket (c) as a rename rotation: compose on local DSv4 (free), blind-pair review (only real cost), sn edit cascade mechanics, batched with checkpoints like the docs rotations.
+Done-when: dry-run bucket counts recorded; (a)+(b) applied + re-stamped; rename queue sized with projected review cost; followup for the rename rotation queued.</pre>
     </article>
 </section>
 </main>
