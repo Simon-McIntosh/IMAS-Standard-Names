@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-standard-names">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="model-selection-and-global-refine-s5-rotation1-landed">
+  <meta name="plan-title" content="§5 rotation 1 (resilient re-run) — checkpoint: pipeline validated, halted on a prose-predicate false positive">
+  <meta name="plan-summary" content="The clean re-run of rotation 1 on the resilient blind pair (claude-sonnet-5 + grok-4.5) ran storm-free: zero quorum degradation, zero outages, 98% acceptance, 0 name drift, 3.4% refine waste. It halted after batch 1 (100 names) when the convergence gate flagged 2 refined docs as reintroducing banned prose — but both flags are a false positive: the estimator_recipe pattern's 'derived ... from' arm matches the phrase 'is derived from [related quantity]', which is legitimate provenance the refine model writes, not a compute recipe. Go/no-go on the remaining ~$270: qualified GO after a surgical validator fix + a cost re-baseline to ~$0.29/name.">
+  <meta name="plan-status" content="historical">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <title>§5 rotation 1 resilient re-run | model-selection-and-global-refine</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+  <h1>§5 — Rotation 1 (resilient re-run) checkpoint (2026-07-20)</h1>
+  <p>Evergreen: <a href="/imas-standard-names/model-selection-and-global-refine.html">model-selection-and-global-refine</a> §5 ·
+  driver <code>f-docs-campaign-rotations</code> · prior attempt <a href="/imas-standard-names/archive/model-selection-and-global-refine-s5-rotation1-halted.html">rotation 1 halted</a>.</p>
+  <p>This is the first live docs-campaign rotation on the <strong>rebuilt, resilient pipeline</strong> — the re-run the halted rotation's NEXT card called for. Purpose: prove the pipeline no longer degrades under real 200-name load (the July-18 halt was an upstream reviewer outage that collapsed the blind pair to single-reviewer), and produce a valid checkpoint the lead can treat as the go/no-go for the remaining ~$270 of rotations. <strong>Headline: the pipeline is validated. The rotation halted on a narrow, fixable false positive in the prose gate — not a pipeline defect and not a quality regression.</strong></p>
+
+  <h2>Quick status</h2>
+  <table>
+    <tr><th>Item</th><th>Value</th></tr>
+    <tr><td>Run</td><td><code>c355df39</code> · 2026-07-20 · <code>sn run --source dd --campaign "prose,audit:latex,audit:spelling,audit:length" --campaign-pilot 200 --include-accepted --campaign-batch-cost-cap 50 --campaign-cost-ceiling 120</code></td></tr>
+    <tr><td>Blind pair</td><td><code>claude-sonnet-5</code> + <code>grok-4.5</code> (imas-codex <code>b5b5eccb</code>) — replaces the 429-prone <code>qwen3.7-max</code> + <code>minimax-m3</code></td></tr>
+    <tr><td>Scope reached</td><td>batch 1 of 2 — <strong>100 names enriched</strong> (halted before batch 2 by the convergence gate)</td></tr>
+    <tr><td>Outcome</td><td>⚠ halted after 1 batch: <em>banned prose reintroduced in 2 doc(s) (cap 0)</em> — both false positives (see root cause)</td></tr>
+    <tr><td>Spend</td><td><strong>$29.47</strong> of the $50 batch cap · <strong>~19&nbsp;min</strong> wall (1161 s) — 8× faster than the 2.5 h estimate</td></tr>
+    <tr><td>Selection</td><td>1,409 → ~1,311 (98 accepted docs dropped out of the defect predicates; sticky)</td></tr>
+  </table>
+
+  <h2>Checkpoint metrics — batch 1 (100 names)</h2>
+  <table>
+    <tr><th>Gate axis</th><th>Threshold</th><th>Rotation 1 (resilient)</th><th>Verdict</th></tr>
+    <tr><td><strong>Review quorum intact</strong></td><td>blind-pair quorum on every leaf</td><td><strong>117 leaf reviews, 100% <code>quorum_consensus</code>; 0 degraded to single-reviewer</strong> (13 <code>single_review</code> are derived-parent reviews, single-model <em>by design</em>, ~2–3× cheaper)</td><td>✅ PASS — the July-18 failure mode is <strong>eliminated</strong></td></tr>
+    <tr><td>Upstream outages</td><td>0</td><td>0 — no 429 / empty-response / governor backoff anywhere in 100 names</td><td>✅ PASS</td></tr>
+    <tr><td>Docs acceptance</td><td>≥ 90%</td><td><strong>98%</strong> (98 accepted, 2 exhausted sub-threshold)</td><td>✅ PASS</td></tr>
+    <tr><td>Name-identity drift</td><td>0</td><td>0 — docs-only refine events on unchanged ids; no <code>StandardNameChange</code>, no rename</td><td>✅ PASS</td></tr>
+    <tr><td>Refine claim-race waste (gate a)</td><td>&lt; 5%</td><td>3.4% (2 of 59 paid refine calls, ≈ $0.16) — within the documented residual for the settle-based fix</td><td>✅ PASS</td></tr>
+    <tr><td><strong>Banned prose reintroduced</strong></td><td>0</td><td>2 flagged → <strong>both false positives</strong> (legitimate "is derived from [related quantity]" provenance, not a recipe)</td><td>⚠ predicate MISS — see root cause</td></tr>
+    <tr><td><strong>Cost / name</strong></td><td>≈ $0.20</td><td><strong>$0.29</strong> ($29.47 / 100) — the resilient premium review pair costs more than the retired cheap pair</td><td>⚠ OVER (+47%) — re-baseline</td></tr>
+  </table>
+
+  <h2>Root cause of the halt — a narrow false positive in the estimator-recipe pattern</h2>
+  <p>The two docs that halted the run — <code>line_averaged_hydrogen_density</code> and <code>ratio_of_tritium_density_to_deuterium_density</code> — were both reviewer-accepted at full quorum (0.863, 0.906) and are high quality: a precise one-line description, a single defining LaTeX relation, and clean cross-links to related names. Each tripped exactly one banned-prose pattern, the <code>estimator_recipe</code> arm:</p>
+  <pre style="white-space:pre-wrap;font-size:.82rem;background:rgba(128,128,128,.10);padding:.6rem;border-radius:4px">\bis (?:computed|calculated|estimated|obtained|derived) (?:as|by|from)\b</pre>
+  <p>matched by the phrase <strong>"It <u>is derived from</u> the local [hydrogen density](name:hydrogen_density)…"</strong>. This is a <em>provenance / semantic-relationship</em> statement — the refine model's house style for any quantity defined relative to a base quantity — <strong>not</strong> a procedural estimator recipe. The pattern is meant to catch "here is how you compute it in practice"; "derived from [related name]" is the cross-referencing style the strict-normative policy actually wants.</p>
+
+  <h3>The pattern is right about the backlog, wrong about refined provenance</h3>
+  <p>Scanning all 2,200 accepted docs, 797 (36.2%) match the <code>estimator_recipe</code> pattern. A 12-doc stratified sample of those matches confirms they are <strong>genuine banned prose</strong>, correctly selected — the real pre-campaign backlog:</p>
+  <ul style="font-size:.86rem">
+    <li><code>absorbed_power_of_beam_tracing_beam</code> — "In practice this quantity <strong>is computed by</strong> integrating local absorption along the…"</li>
+    <li><code>fast_ion_density</code> — "…<strong>is obtained by</strong> integrating the fast-ion distribution… and <strong>is computed by</strong> Fokker-Planck or Monte Carlo orbit codes"</li>
+    <li><code>poloidal_electron_velocity</code> — "In practice, $v_{\theta,e}$ <strong>is computed from</strong> kinetic or fluid models by projecting…"</li>
+    <li><code>vertical_coordinate_of_geometric_axis</code> — "In practice, $Z_\mathrm{geom}$ <strong>is computed from</strong> an equilibrium reconstruction…"</li>
+  </ul>
+  <p>These trip the <code>computed / obtained … by / from</code> arms (with "In practice" procedural padding alongside) — exactly the prose the campaign exists to strip. The refine model <em>removes</em> that style; the only <code>estimator_recipe</code> residue it leaves is the <strong>"is derived from"</strong> arm on legitimate provenance. That single arm is the entire halt cause, and it recurs on any derived quantity, so it would halt <em>every</em> rotation until narrowed.</p>
+
+  <h2>Before → after (archetype)</h2>
+  <p>DocsRevision before-text is not retained in-graph, so per-name diffs aren't reconstructable; the archetype is unambiguous. Pre-campaign accepted docs carry the recipe/padding style above; the 98 refined-and-accepted docs in this batch are prose-clean, e.g.:</p>
+  <table>
+    <tr><th>Name (accepted, batch 1)</th><th>Refined doc (opening)</th><th>Prose scan</th></tr>
+    <tr><td><code>power_density_due_to_fusion</code></td><td>"Fusion power density is the local energy-release rate generated by nuclear-fusion reactions per unit volume…"</td><td>CLEAN</td></tr>
+    <tr><td><code>reflected_power_of_ion_cyclotron_heating_antenna</code></td><td>"Reflected power of an ion cyclotron heating antenna is the backward-traveling RF power at a defined reference plane…"</td><td>CLEAN</td></tr>
+    <tr><td><code>radius_of_plasma_filament</code></td><td>"Radius of a plasma filament is the geometric radius of a circular boundary of the annular cross-section…"</td><td>CLEAN</td></tr>
+    <tr><td><code>absorbed_radiated_power_of_breeder_blanket_module</code></td><td>"…the net electromagnetic photon power retained by the module after plasma radiation interacts with its plasma-facing surface…"</td><td>CLEAN</td></tr>
+    <tr><td><code>line_averaged_hydrogen_density</code></td><td>"…quantifies the chord-averaged concentration of protium ions… It <strong>is derived from</strong> the local [hydrogen density]…"</td><td>estimator_recipe ×1 (false positive)</td></tr>
+  </table>
+
+  <h2>Two exhausted names (non-convergence, expected)</h2>
+  <ul style="font-size:.86rem">
+    <li><code>total_neutral_particle_flux_at_wall_due_to_surface_emission</code> — chain 3/3, score 0.844 (0.006 under the 0.85 bar)</li>
+    <li><code>poloidal_perturbed_magnetic_flux_at_measurement_position_due_to_wave_particle_interaction</code> — chain 3/3, score 0.588 (a genuinely hard name)</li>
+  </ul>
+  <p>Also noted: <code>ratio_of_tritium_density_to_deuterium_density</code> carries a separate genuine <em>name-axis</em> finding (<code>audit:repeated_token_check</code> — duplicated "density" token, likely tautology). That is not a docs-campaign target; it belongs to the name-axis workstream.</p>
+
+  <h2>Checkpoint verdict &amp; go/no-go</h2>
+  <p><strong>Disposition: QUALIFIED GO on the remaining ~$270 — after two cheap pre-conditions the lead's own "fix root causes before the bulk pass" guardrail already calls for.</strong> The pipeline itself is proven: quorum held on 100% of leaf reviews, zero outages, 98% acceptance, zero drift, refine waste inside gate, and 8× faster than estimated. The July-18 blocker is retired.</p>
+  <ol>
+    <li><strong>Narrow the <code>estimator_recipe</code> "derived from" false positive</strong> (validator root-fix). Options for the lead: (a) drop <code>derived</code> from the verb alternation, keeping <code>computed|calculated|estimated|obtained</code> — the sampled genuine recipes all use those, so coverage is retained; or (b) exempt "derived from [name:link] / the local &lt;quantity&gt;" provenance specifically. Either stops the spurious halts <em>and</em> shrinks the campaign selection to real defects. This is a doc-policy semantics call — is "is derived from [related quantity]" acceptable normative prose? — hence the lead decides which fix.</li>
+    <li><strong>Re-baseline the budget to ≈ $0.29/name.</strong> The resilient blind pair (<code>claude-sonnet-5</code> + <code>grok-4.5</code>) is the cost driver — better discrimination and no 429s, but ~$0.09–0.11/name dearer than the retired pair. The ~1,300 remaining docs-fixable names ≈ <strong>$380</strong>, not $270. The lead accepts the premium, trims the spec (e.g. prose-only), or caps rotations.</li>
+  </ol>
+  <p>Without fix (1) it is a <strong>NO-GO</strong>: every rotation halts on the same provenance false positive after ~1 batch. With it, rotations run clean and the self-pruning selection converges to zero over ~$380.</p>
+
+  <h2>What's next</h2>
+  <p>Land the <code>estimator_recipe</code> narrowing (with a regression test that the two halted docs scan clean and the 12 sampled backlog recipes still flag), re-baseline the budget, then resume the stratified rotations on the same command — the selection re-stratifies over the remaining ~1,300 and the 98 fixed names stay out. Tracked as <code>f-docs-campaign-rotations</code> (stays open) plus the new validator-fix followup.</p>
+</main>
+</body>
+</html>

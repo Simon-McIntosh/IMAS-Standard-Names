@@ -17,8 +17,8 @@
   <title>Model Selection and Global Refine | imas-standard-names</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-07-18">
-<meta name="plan-version" content="19">
+<meta name="plan-modified" content="2026-07-20">
+<meta name="plan-version" content="20">
 <meta name="plan-blocks" content="catalog-expert-review-remediation">
 <meta name="plan-impl" content="0.95">
 </head>
@@ -97,7 +97,7 @@
 
   <section id="s5" class="section-landed">
   <header>
-    <span class="badge badge-shipped">✓ launch gates landed 2026-07-18 — rotations unblocked</span>
+    <span class="badge badge-shipped">✓ rotation 1 validated the pipeline 2026-07-20 — go/no-go: QUALIFIED GO (prose-predicate fix pending)</span>
     <h2>§5 — Documentation-simplification campaign (pilot → scale)</h2>
   </header>
   <p class="landed-summary">
@@ -123,13 +123,26 @@
   the SN test suite made green. Rotation 1 itself was <strong>NOT</strong> re-run — the
   campaign now runs on a fixed, resilient, observable pipeline but the docs-refinement
   pass is still pending. <code>f-docs-campaign-rotations</code> stays open.</p>
+  <p><strong>Rotation 1 re-run 2026-07-20 — pipeline VALIDATED; halted on a prose-predicate false positive</strong>
+  (<a href="archive/model-selection-and-global-refine-s5-rotation1-landed.html">rotation 1 resilient re-run</a>, run <code>c355df39</code>).
+  The July-18 quorum-outage failure mode is <strong>eliminated</strong>: 117 leaf reviews 100% <code>quorum_consensus</code> on the
+  <code>claude-sonnet-5</code> + <code>grok-4.5</code> blind pair, 0 outages, 0 governor backoff (the 13 <code>single_review</code> are
+  derived-parent reviews, single-model by design). Batch 1 (100 names): <strong>98% accept</strong> (98 accepted / 2 exhausted),
+  <strong>0 name drift</strong>, refine waste <strong>3.4%</strong> (&lt;5% gate), ~19 min, <strong>$29.47</strong>. The convergence gate then halted
+  before batch 2 on <em>banned prose reintroduced in 2 docs (cap 0)</em> — <code>line_averaged_hydrogen_density</code>,
+  <code>ratio_of_tritium_density_to_deuterium_density</code> — <strong>both false positives</strong>: the <code>estimator_recipe</code> pattern's
+  <code>derived …from</code> arm matches "<em>is derived from [related quantity]</em>" (legitimate provenance the refine model writes),
+  not a compute recipe. The pattern is correct on the backlog (12/12 sampled of 797 accepted-doc matches are genuine
+  "in practice … is computed by …" recipes) but over-flags refined provenance, so it would halt every rotation until narrowed.
+  Cost/name <strong>$0.29</strong> vs the $0.20 target — the resilient premium review pair is the driver (~1,300 remaining ≈ $380, not $270).</p>
   <aside class="next-card">
-    <strong>NEXT:</strong> re-run rotation 1 on the new resilient blind pair — best in a
-    <em>fresh session</em> (this section's session expanded into the full resilience/benchmark
-    work). Standard command, now stall-free and observable:
-    <code>uv run imas-codex sn run --source dd --campaign "prose,audit:latex,audit:spelling,audit:length" --campaign-pilot 200 --include-accepted --campaign-batch-cost-cap 50 --campaign-cost-ceiling 120</code>
-    — then the orchestrator checkpoint (accept ≥0.90, zero prose reintroduction, zero
-    drift, cost/name ≈$0.20, quorum-incomplete deferrals ≈0) and record the rotation row.
+    <strong>NEXT (go/no-go = QUALIFIED GO):</strong> the pipeline is proven; two cheap pre-conditions gate the remaining rotations
+    (<code>f-prose-derived-from-fix</code>). (1) Narrow the <code>estimator_recipe</code> <code>derived-from</code> arm — lead doc-policy call:
+    drop <code>derived</code> from the verb list (keep computed/calculated/estimated/obtained), or exempt "derived from [name-link]" provenance —
+    with a regression test that the 2 halted docs scan clean and the sampled backlog recipes still flag. (2) Re-baseline budget to ≈$0.29/name.
+    Then resume the unchanged rotation command:
+    <code>uv run imas-codex sn run --source dd --campaign "prose,audit:latex,audit:spelling,audit:length" --campaign-pilot 200 --include-accepted --campaign-batch-cost-cap 50 --campaign-cost-ceiling 120</code>.
+    Without (1) it is a NO-GO — every rotation halts on the same provenance false positive.
   </aside>
   </section>
 
@@ -418,10 +431,34 @@ Done-when
   3. this followup resolved</pre>
     <p class="r-fu-outcome">RESOLVED differently than scoped — the whole premise collapsed under the lead's controlled-base insight. The decomposition_audit was RETIRED (imas-codex 5a08c744), not made parse-aware, because it is OBSOLETE now that physical/geometric bases are a controlled vocabulary. Root cause: it compared a name's surface base PHRASE (model.physical_base, e.g. reference_magnetic_field, absorbed_power, nuclear_heating_power) against the registered base-TOKEN set — but the actual base token (ir.base.token: magnetic_field, power, heating_power) is ALWAYS registered (the parser raises UnknownBaseTokenError for a made-up base). The surface phrase legitimately carries glued kind-forming qualifiers (royal-order: ion_atomic_mass, wave_electric_field). So a composer cannot hide structure in the base slot — the failure mode the audit was built for cannot occur. Every one of its ~2252 findings was a historic false positive. There is NO rename rotation: the '270 rename queue' was itself false positives (kind-forming glue + binary-op nested args + upper_bound substring artifacts; verified 0 genuine after excluding the qualifier segment, skipping binary-ops, and exempting base-head tokens). Steps actually taken: (1) parse-aware audit landed as a stepping stone (c6191e61), free drain applied (1982 cleared, 2252→270), single-shot `sn decomp-triage` CLI+module DELETED per lead directive; (2) then the controlled-base realization → decomposition_audit_check + find_absorbed_closed_tokens primitive + tests removed, reviewer prompt reframed to 'base registry is grammar-enforced; emit vocab_gap when no base fits', all remaining decomposition_audit findings drained graph-wide (1641 cleared, 0 remain). Net: the decomposition audit and its scaffolding are gone; the base grammar itself is the guarantee. imas-codex commits e3d20e11 (superseded) → c6191e61 → 5a08c744.</p>
     </article>
+<article class="r-fu" data-id="f-prose-derived-from-fix" data-status="open" data-tier="sonnet" data-written-by="reckon-ship" data-written-at="2026-07-20" data-recommends-skill="/reckon-ship model-selection-and-global-refine §5" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Lead: narrow the estimator_recipe &#x27;derived from&#x27; false positive, then resume rotations</h4>
+    <div class="r-fu-body">Rotation 1's resilient re-run (run c355df39) validated the pipeline but the convergence gate halted after batch 1 on 2 FALSE-POSITIVE prose flags: 'is derived from [related quantity]' provenance matched the estimator_recipe pattern's 'derived ...from' arm. This recurs on every derived quantity, so it halts every rotation. Narrow the pattern (lead picks the fix), add a regression test, re-baseline budget to ~$0.29/name, then resume the stratified rotations. Doc-policy semantics call — is 'is derived from [related quantity]' acceptable normative prose? — hence the lead decides which fix.</div>
+    <pre class="r-fu-prompt">Project: imas-standard-names / code: imas-codex (branch main)
+Section: §5 — prose-predicate root-fix (gates the remaining rotations)
+Tier: sonnet
+
+Context
+  Rotation 1 resilient re-run (run c355df39, 2026-07-20; archive docs/archive/model-selection-and-global-refine-s5-rotation1-landed.html) proved the pipeline: 100% leaf quorum_consensus on the claude-sonnet-5 + grok-4.5 blind pair, 0 outages, 98% accept, 0 drift, 3.4% refine waste. It halted after batch 1 because the convergence gate saw banned prose reintroduced in 2 docs (line_averaged_hydrogen_density, ratio_of_tritium_density_to_deuterium_density). Both are FALSE POSITIVES: the estimator_recipe pattern in imas_codex/standard_names/prose_policy.py, `\bis (?:computed|calculated|estimated|obtained|derived) (?:as|by|from)\b`, matched &#x27;It is derived from the local [hydrogen density](name:hydrogen_density)…&#x27; — legitimate provenance / cross-reference the refine model writes for any derived quantity, NOT a procedural estimator recipe. Evidence: of 2,200 accepted docs, 797 (36.2%) match estimator_recipe; a 12-doc sample of those are ALL genuine backlog recipes (&#x27;In practice this quantity is computed by …&#x27;), which trip the computed/obtained arms — the refine model strips those and only leaves the &#x27;derived from&#x27; provenance residue.
+
+Decision (lead) + Work
+  1. Pick the fix (doc-policy call): (a) drop `derived` from the verb alternation, keeping computed|calculated|estimated|obtained — the sampled genuine recipes all use those, so backlog coverage is retained; or (b) exempt &#x27;derived from [name:link] / the local &lt;quantity&gt;&#x27; provenance specifically. Apply in prose_policy.py.
+  2. Regression test: banned_prose_findings() returns CLEAN on the two halted docs&#x27; text and still flags the 12 sampled backlog recipes (and the estimator_recipe class stays non-empty for &#x27;is computed by&#x27; text). Commit+push (explicit paths, no AI trailers, no plan refs).
+  3. Re-baseline the budget to ≈$0.29/name (resilient premium review pair). ~1,300 remaining docs-fixable names ≈ $380 — the lead accepts the premium, trims the spec (e.g. prose-only), or caps rotations.
+  4. Resume the stratified rotations on the unchanged command (uv run imas-codex sn run --source dd --campaign &quot;prose,audit:latex,audit:spelling,audit:length&quot; --campaign-pilot 200 --include-accepted --campaign-batch-cost-cap 50 --campaign-cost-ceiling 120); the selection re-stratifies over the remaining ~1,300 and the 98 fixed names stay out.
+
+Done-when
+  1. estimator_recipe narrowing committed + regression test green + pushed
+  2. budget re-baselined and recorded in the §5 archive
+  3. rotations resume; each rotation&#x27;s checkpoint row recorded; this followup resolved when the pipeline runs a full rotation without a false-positive halt</pre>
+    </article>
 </section>
 <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="s5" data-id="c-rotation1-halted" data-who="reckon-ship" data-when="2026-07-18T21:20:00+00:00">
     <div class="r-comment-body">Rotation 1 (stratified 200) launched 2026-07-18 and HALTED by the orchestrator ~6 min in: 2 of the 3 RD-quorum reviewer models (qwen3.7-max, minimax-m3) entered an upstream empty-response outage, degrading 67% of reviews to single-reviewer and violating the §6 'review quorum unchanged' invariant. Halt bounded degraded-quorum accepts to ~27 (vs ~200) at ≈$6.17 (~$1.43 wasted on the two dead models); selection 1,437→1,409. External blocker, not a campaign defect — re-run unchanged once reviewer availability recovers. f-docs-campaign-rotations stays open. Record: archive/model-selection-and-global-refine-s5-rotation1-halted.html</div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-rotation1-resilient" data-who="reckon-ship" data-when="2026-07-20T05:30:00+00:00">
+    <div class="r-comment-body">Rotation 1 RE-RUN on the resilient pipeline (run c355df39, 2026-07-20) — PIPELINE VALIDATED; halted after batch 1 on a prose-predicate false positive. The July-18 quorum-outage failure mode is ELIMINATED: 117 leaf reviews 100% quorum_consensus on the blind pair claude-sonnet-5 + grok-4.5; 0 outages / 0 governor backoff; 13 single_review are derived-parent reviews (single-model BY DESIGN, ~2-3x cheaper). Batch 1 (100 names): 98% accept (98 accepted / 2 exhausted), 0 name drift, refine waste 3.4% (<5% gate), ~19 min, $29.47. Halted before batch 2 by the convergence gate ('banned prose reintroduced in 2 docs, cap 0': line_averaged_hydrogen_density, ratio_of_tritium_density_to_deuterium_density) — BOTH FALSE POSITIVES: the estimator_recipe pattern's 'derived ...from' arm matches 'is derived from [related quantity]' (legitimate provenance the refine model writes), not a compute recipe. The pattern is CORRECT on the backlog (12/12 sampled of 797 accepted-doc matches are genuine 'in practice ... is computed by ...' recipes) but over-flags refined provenance, so it would halt every rotation until narrowed. Cost/name $0.29 vs $0.20 target — the resilient premium review pair is the driver. GO/NO-GO on the remaining ~$270: QUALIFIED GO after (1) narrowing the estimator_recipe derived-from arm [lead doc-policy call] and (2) re-baselining budget to ~$0.29/name (~$380 for ~1,300 remaining docs-fixable). Without (1) it is NO-GO. f-docs-campaign-rotations stays open; f-prose-derived-from-fix queued. Record: archive/model-selection-and-global-refine-s5-rotation1-landed.html</div>
 </div>
 </section>
 </main>
