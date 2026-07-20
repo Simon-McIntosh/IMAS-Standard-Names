@@ -52,17 +52,20 @@
   <h2 id="s2">§2 — The three changes</h2>
   <ol>
     <li><strong>Refine + docs-gen prompt.</strong> Require every LaTeX symbol to be <em>defined by identity</em> in its where-clause,
-      preferring a <code>name:</code> link when the symbol is a catalog quantity. Explicitly instruct: do <em>not</em> restate the
-      unit of the primary quantity (it is the structured <code>unit</code> field) or of any linked auxiliary quantity (it is carried
-      by the link). A unit may be stated only for a non-name math/geometry symbol where dimensional clarity genuinely needs it.</li>
-    <li><strong><code>latex_def_check</code> audit.</strong> Stop accepting a bare unit-in-brackets as the definition satisfier —
-      require a definition word or a resolvable <code>name:</code> identity within the definition window. This aligns the machine
-      check with the policy and removes the incentive to unit-annotate. Add unit tests: a symbol with only a unit and no identity now
-      <em>fails</em>; a symbol defined by a <code>name:</code> link passes; a genuine non-name symbol with a stated unit still passes.</li>
-    <li><strong>Selection predicate <code>audit:symbol_units</code> (optional, gates the cleanup).</strong> A read-only predicate that
-      flags accepted docs restating a derivable unit (the "<code>with unit X</code>" / "<code>… in &lt;UNIT&gt;</code>" forms next to a
-      symbol whose identity is the primary quantity or a linked name). Feeds the campaign selector so a cleanup rotation is self-pruning
-      exactly like the current prose campaign.</li>
+      preferring a <code>name:</code> link when the symbol is a catalog quantity. And — <strong>no units in documentation prose at
+      all</strong> (lead directive 2026-07-20): a unit states dimension, not identity; the quantity's unit is the authoritative
+      structured <code>unit</code> field and a linked quantity carries its own via its link. There is <em>no</em> "non-name symbol"
+      exception — units simply do not belong in the description/documentation text.</li>
+    <li><strong><code>latex_def_check</code> audit (landed <code>a27beea6</code>).</strong> Stops accepting a bare unit-in-brackets as
+      the definition satisfier — requires a definition word or a resolvable <code>name:</code> identity within the definition window.
+      Tests: unit-only <em>fails</em>, <code>name:</code>-link passes, def-word passes. This removes the incentive to unit-annotate but
+      does <em>not</em> itself ban units from prose — that is change 3.</li>
+    <li><strong>Audit <code>audit:symbol_units</code> — flag any unit token in documentation prose.</strong> The enforcement side of the
+      "no units in prose" policy: a low-false-positive check that flags accepted docs carrying unit statements ("<code>with unit X</code>",
+      "<code>in &lt;UNIT&gt;</code>", unit expressions inside <code>\mathrm{…}</code> such as <code>m^{-3}</code>/<code>s^{-1}</code>), while
+      excluding <code>\mathrm{}</code> subscript labels (<code>\mathrm{axis}</code>, <code>\mathrm{eff}</code>). Doubles as the campaign
+      <em>selection</em> predicate so the cleanup rotation is self-pruning. FP rate validated against the live catalog before it lands as
+      a hard audit.</li>
   </ol>
   <p>Changes 1–2 are a small, testable prompt + audit edit (tier: sonnet). They are <strong>not</strong> a defect that halts the
   running campaign — units-in-prose is redundant, not wrong — so rotation&nbsp;3 continues untouched.</p>
@@ -126,7 +129,7 @@
 
   <section data-reckon="decisions" id="decisions" class="r-decisions">
     <h2><span class="sec">§</span> Decisions</h2>
-    <div class="r-dec" data-key="unit-satisfier" data-choice="" data-by="" data-when="">
+    <div class="r-dec" data-key="unit-satisfier" data-choice="require-identity" data-by="user" data-when="2026-07-20">
       <p class="r-dec-q">Should a bare unit-in-brackets still satisfy <code>latex_def_check</code> for a non-name math symbol, or must every symbol have an identity/definition word?</p>
       <p class="r-dec-opts">
         <button class="r-opt" data-value="require-identity">Require identity/definition word for all symbols (unit alone never satisfies)</button>
@@ -134,7 +137,7 @@
       </p>
       <p class="r-dec-rat"></p>
     </div>
-    <div class="r-dec" data-key="primary-unit-in-prose" data-choice="" data-by="" data-when="">
+    <div class="r-dec" data-key="primary-unit-in-prose" data-choice="forbid" data-by="user" data-when="2026-07-20">
       <p class="r-dec-q">May a doc state the primary quantity's own unit in prose at all, given it is already the structured <code>unit</code> field?</p>
       <p class="r-dec-opts">
         <button class="r-opt" data-value="forbid">Forbid — rely on the structured unit field (prose stays identity-only)</button>
@@ -142,7 +145,7 @@
       </p>
       <p class="r-dec-rat"></p>
     </div>
-    <div class="r-dec" data-key="cleanup-scope" data-choice="" data-by="" data-when="">
+    <div class="r-dec" data-key="cleanup-scope" data-choice="targeted-cleanup" data-by="user" data-when="2026-07-20">
       <p class="r-dec-q">Run a dedicated <code>audit:symbol_units</code> cleanup campaign over already-clean redundant-unit docs, or only absorb the policy through the running campaign and future refines?</p>
       <p class="r-dec-opts">
         <button class="r-opt" data-value="targeted-cleanup">Targeted cleanup rotation (~$75–155, clean catalog now)</button>
