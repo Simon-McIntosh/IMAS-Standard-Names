@@ -158,8 +158,10 @@
   <section data-reckon="followups" id="followups" class="r-followups">
     <h2><span class="sec">§</span> Followups</h2>
     <article class="r-fu" data-id="f-symdef-policy-audit" data-status="open" data-tier="sonnet" data-written-by="reckon-create" data-written-at="2026-07-20">
-      <h4 class="r-fu-title">Land the symbol-definition prompt + latex_def_check change (§2), validate on a smoke batch</h4>
-      <div class="r-fu-body">Implement §2 changes 1–2: the refine/docs-gen prompt requires identity-based symbol definitions (prefer <code>name:</code> links) and forbids restating derivable units; <code>latex_def_check</code> stops accepting a bare unit as the definition satisfier. Add unit tests. Land while the current campaign still has ~502 names queued so they absorb the new policy for free. Then decide the cleanup scope (targeted vs absorb-only) per the open decisions before adding the <code>audit:symbol_units</code> predicate.</div>
+      <h4 class="r-fu-title">Apply the staged prompt at smoke time, run the smoke, then the targeted cleanup</h4>
+      <div class="r-fu-body"><strong>Landed (import-safe, mid-run):</strong> <code>latex_def_check</code> requires identity not a bare unit (imas-codex <code>a27beea6</code>); <code>symbol_units_check</code> advisory flag for units in prose + <code>audit:symbol_units</code> selector (imas-codex <code>ee22b1f4</code>, validated 432/2,100 docs).
+      <strong>Held (prompts are live-read → would leak into the running campaign):</strong> the <code>_docs_format.md</code> / <code>generate_docs_system.md</code> edits are staged at <code>scratchpad/STAGED_prompt_no_units.md</code> — apply only after rotation 3 exits. Includes a lead judgment call: reword the "Spectrum unit rule" (currently "recovers the total power <em>in W</em>") to name the recovered quantity instead of its unit.
+      <strong>Sequence:</strong> (1) rotation 3 exits → apply staged prompt; (2) smoke ~30 → confirm identity-defined, unit-free docs; (3) full audit re-stamp so <code>audit:symbol_units</code> findings populate <code>validation_issues</code> (selection reads stored findings); (4) run the targeted cleanup rotation <code>--campaign audit:symbol_units</code> (~432 docs, ~$62–121).</div>
       <pre class="r-fu-prompt">Project: imas-standard-names / code: imas-codex (branch main)
 Section: §2 — symbol-definition policy: prompt + audit
 Tier:    sonnet
