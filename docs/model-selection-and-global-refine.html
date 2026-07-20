@@ -117,12 +117,13 @@
   candidate, a quorum-independent adjudicator (<code>gpt-5.6-luna</code>) rules each flag legitimate-or-not, so definitional prose no
   longer halts the run. Seats held; lead accepts ≈$0.29/name (premium blind pair).</p>
   <p><strong>Rotations running clean — see the <a href="archive/model-selection-and-global-refine-s5-rotations-landed.html">rotation checkpoint ledger</a>.</strong>
-  Two rotations landed clean with <strong>no false-positive halt</strong> — rotation 1 (200: 199 accepted, $0.292/name, 1,047→889)
-  and rotation 2 (450: <strong>446 accepted</strong>, $0.274/name, 889→502). Across both: gate adjudicated every grep flag as
-  legitimate (0 genuine reintroductions), 0 name drift, 0 outages, refine waste &lt;5%, quorum intact; every checkpoint axis PASS.
-  A retry-classification gap on upstream 500s was found and fixed en route (imas-codex <code>cbd9cb6f</code>). Rotation 3 (pilot 450)
-  in progress over the remaining ~502; each rotation self-prunes and appends a ledger row. Done when the dry-run selection reaches 0,
-  then close expert-review reply open item 1 via <code>f-expert-review-reply-doc</code>. Tracked by <code>f-docs-campaign-rotations</code>.</p>
+  Three rotations landed clean with <strong>no false-positive halt</strong> — R1 (200: 199 accepted, $0.292/name, 1,047→889),
+  R2 (450: 446, $0.274, 889→502), R3 (450: <strong>441</strong>, $0.336, 502→<strong>115</strong>). Across all three: gate adjudicated
+  every grep flag as legitimate (0 genuine reintroductions), 0 name drift, 0 outages, refine waste &lt;5%, quorum intact; every
+  checkpoint axis PASS. A retry-classification gap on upstream 500s was fixed en route (imas-codex <code>cbd9cb6f</code>).
+  <strong>115 remain</strong> (audit:length 52 + residual prose) — one more rotation drains most; the length tail may need per-name
+  attention or a waiver. Done when the dry-run selection reaches 0, then close expert-review reply open item 1 via
+  <code>f-expert-review-reply-doc</code>. Tracked by <code>f-docs-campaign-rotations</code>.</p>
   <p><strong>Follow-on policy plan:</strong> the refine seat annotates a unit on nearly every LaTeX symbol; units are recoverable
   (structured <code>unit</code> field / linked names), so the non-redundant target is symbol <em>identity</em>, not units.
   Scoped + priced in <a href="sn-symbol-definition-policy.html">sn-symbol-definition-policy</a> (prompt + <code>latex_def_check</code>
