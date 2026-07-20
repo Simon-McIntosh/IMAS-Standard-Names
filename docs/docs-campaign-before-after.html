@@ -130,6 +130,70 @@
   </div>
   <p style="font-size:.9em;color:#666">Not a compression case: the refinement made the surface-independence of the integral explicit and sharpened the sensor-current vs enclosed-current disambiguation. The campaign target is normativity, not brevity — clean-but-thin docs gain substance (two pilot members with <em>no</em> prior documentation got full docs written).</p>
 
+  <h2>§2b — Before / after from the live rotations (2026-07-20)</h2>
+  <p>Fresh pairs from rotations 1–2 of the stratified campaign (LLM-adjudicated gate). Same convention: "before" is the DocsRevision
+  snapshot at the pre-rotation accepted text, "after" is the current accepted text that passed the <code>claude-sonnet-5</code> +
+  <code>grok-4.5</code> blind-pair quorum. Full ledger: <a href="archive/model-selection-and-global-refine-s5-rotations-landed.html">rotation checkpoint ledger</a>.</p>
+
+  <h3>Example 5 — <code>electron_density_at_magnetic_axis</code> (estimator recipe + typical values; 1,347 → 950 chars, score 0.90)</h3>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;align-items:start">
+    <div style="border:1px solid #c9a; border-radius:6px;padding:.75rem 1rem;overflow-x:auto;background:rgba(200,80,60,.06);font-size:.93em;line-height:1.45">
+      <h4 style="margin-top:0">Before</h4>
+      <p>…$n_e^{\mathrm{axis}} = \lim_{\mathbf{x}\to\mathbf{x}_{\mathrm{axis}}} n_e(\mathbf{x})$ … For a smooth flux-surface quantity, this is equivalently the value at $\rho=0$…</p>
+      <p><mark style="background:rgba(220,90,60,.28);padding:0 .15em;border-radius:2px">In practice, the magnetic-axis location is determined from an equilibrium reconstruction, and the electron density is evaluated there from local measurements or from a fitted radial density representation. The value is commonly constrained by Thomson scattering, interferometry, or reflectometry…</mark></p>
+      <p><mark style="background:rgba(220,90,60,.28);padding:0 .15em;border-radius:2px">Typical central electron densities in magnetically confined fusion plasmas are often of order 10<sup>19</sup>–10<sup>20</sup> m<sup>−3</sup>, varying with fueling, confinement regime, density limits, and profile shape.</mark></p>
+    </div>
+    <div style="border:1px solid #9c9; border-radius:6px;padding:.75rem 1rem;overflow-x:auto;background:rgba(60,160,90,.07);font-size:.93em;line-height:1.45">
+      <h4 style="margin-top:0">After</h4>
+      <p>Particle number density of the electron population evaluated at the magnetic axis is the local electron count per physical volume at the innermost point of nested closed poloidal magnetic-flux surfaces. …$n_e^{\mathrm{axis}} = \lim_{\mathbf{x}\to\mathbf{x}_{\mathrm{axis}}} n_e(\mathbf{x})$ where $n_e(\mathbf{x})$ is the electron number-density field, $\mathbf{x}$ is position, and $\mathbf{x}_{\mathrm{axis}}$ is the magnetic-axis position.</p>
+      <p>This is the electron-specific realization of <a href="#">density_at_magnetic_axis</a>. It counts free electrons directly and is not summed over ionic charge states or combined with ion populations; <a href="#">ion_density_at_magnetic_axis</a> describes the corresponding ion population.</p>
+    </div>
+  </div>
+  <p style="font-size:.9em;color:#666">The measurement-recipe paragraph and the typical-magnitude paragraph are gone; in their place a parent cross-link (<code>density_at_magnetic_axis</code>) and a sibling disambiguation (<code>ion_density_at_magnetic_axis</code>). Definition + family structure replace workflow + numbers.</p>
+
+  <h3>Example 6 — <code>toroidal_neutral_momentum_diffusivity</code> (recipe + typical values <em>and</em> a physics/notation correction; 2,177 → 1,919 chars, score 0.90)</h3>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;align-items:start">
+    <div style="border:1px solid #c9a; border-radius:6px;padding:.75rem 1rem;overflow-x:auto;background:rgba(200,80,60,.06);font-size:.93em;line-height:1.45">
+      <h4 style="margin-top:0">Before</h4>
+      <p>…the component of the toroidal-momentum flux directed across the transport surface is written as $\Gamma^{\mathrm{diff}} = -D\,\nabla_\perp \Pi_\phi^{\mathrm{n}}$ where $\nabla_\perp$ is the spatial gradient taken <em>normal to the transport surface</em>…</p>
+      <p><mark style="background:rgba(220,90,60,.28);padding:0 .15em;border-radius:2px">This coefficient is generally not measured directly. It is computed or prescribed in fluid-neutral and reduced edge-transport closures from neutral thermal speeds, mean free paths, and momentum-exchange rates…</mark></p>
+      <p><mark style="background:rgba(220,90,60,.28);padding:0 .15em;border-radius:2px">Typical effective values in edge plasma applications are of order 0.01 to a few m² s⁻¹, depending on neutral temperature, collisionality, geometry…</mark></p>
+    </div>
+    <div style="border:1px solid #9c9; border-radius:6px;padding:.75rem 1rem;overflow-x:auto;background:rgba(60,160,90,.07);font-size:.93em;line-height:1.45">
+      <h4 style="margin-top:0">After</h4>
+      <p>…$\Gamma_{\Pi_j,\phi}^{\mathrm{diff}} = -D_{\mathrm{mom},\phi}^{n}\,\frac{1}{R}\frac{\partial \Pi_j^{n}}{\partial \phi}$ … The factor $R^{-1}\partial/\partial\phi$ is the derivative with respect to arclength in the toroidal direction, and the minus sign gives down-gradient diffusion.</p>
+      <p>The toroidal qualifier identifies the <em>transport direction</em> (the flux component and gradient direction), not the component $j$ of momentum being transported. This coefficient is one directional component of <a href="#">neutral_momentum_diffusivity</a>, complementary to <a href="#">parallel_</a>, <a href="#">poloidal_</a>, and <a href="#">vertical_neutral_momentum_diffusivity</a>; distinct from the resulting <a href="#">toroidal_neutral_momentum_flux</a>.</p>
+    </div>
+  </div>
+  <p style="font-size:.9em;color:#666">Beyond stripping the recipe and the value range, the refinement <strong>fixed the physics</strong>: the vague "gradient normal to the transport surface" ($\nabla_\perp$) became the correct toroidal derivative $R^{-1}\partial/\partial\phi$, and the transport-direction-vs-momentum-component ambiguity is now explicit — with the full sibling family linked. Normativity, not brevity.</p>
+
+  <h3>Example 7 — <code>flux_surface_averaged_boron_density_at_plasma_boundary</code> (recipe + typical values removed; per-symbol units added; 2,178 → 1,662 chars, score 0.91)</h3>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;align-items:start">
+    <div style="border:1px solid #c9a; border-radius:6px;padding:.75rem 1rem;overflow-x:auto;background:rgba(200,80,60,.06);font-size:.93em;line-height:1.45">
+      <h4 style="margin-top:0">Before</h4>
+      <p>…$\langle n_\mathrm{B} \rangle_\psi = \frac{\oint_{\psi} n_\mathrm{B}(\ell)\, d\ell / B_p(\ell)}{\oint_{\psi} d\ell / B_p(\ell)}$ where $\ell$ is arclength, $B_p$ is the poloidal magnetic-field magnitude, and $n_\mathrm{B}$ is the local total boron density. <em>(no units stated on the symbols)</em></p>
+      <p><mark style="background:rgba(220,90,60,.28);padding:0 .15em;border-radius:2px">In practice, the local boron distribution is inferred from vacuum ultraviolet spectroscopy, charge-exchange recombination spectroscopy, soft X-ray measurements, and collisional-radiative modeling…</mark></p>
+      <p><mark style="background:rgba(220,90,60,.28);padding:0 .15em;border-radius:2px">Typical flux-surface-averaged boron densities near the confined-plasma edge or separatrix are 10<sup>16</sup>–10<sup>18</sup> m<sup>−3</sup>, varying with wall conditioning, boronization history…</mark></p>
+    </div>
+    <div style="border:1px solid #9c9; border-radius:6px;padding:.75rem 1rem;overflow-x:auto;background:rgba(60,160,90,.07);font-size:.93em;line-height:1.45">
+      <h4 style="margin-top:0">After</h4>
+      <p>…$\langle n_{\mathrm{B}} \rangle_{\psi_b} = \frac{\oint_{\psi=\psi_b} n_{\mathrm{B}}(\ell)\, d\ell / B_p(\ell)}{\oint_{\psi=\psi_b} d\ell / B_p(\ell)}$ where <span style="background:rgba(80,120,220,.14)">$\psi$ is the poloidal magnetic flux label with unit Wb, $\ell$ is arclength with unit m, $B_p$ is the poloidal magnetic-field magnitude with unit T, and $n_{\mathrm{B}}$ is the local total boron density with unit m<sup>−3</sup></span>.</p>
+      <p>This quantity is the boundary flux-surface average corresponding to the local <a href="#">boron_density_at_plasma_boundary</a>. It differs from <a href="#">volume_averaged_boron_density</a> and <a href="#">line_averaged_boron_density</a>…</p>
+    </div>
+  </div>
+  <p style="font-size:.9em;color:#666">Recipe and value-range removed and the boundary/separatrix scoping made explicit — but the refinement <em>also</em> annotated <span style="background:rgba(80,120,220,.14)">a unit on every symbol</span> (highlighted). Useful precision, or redundant with the structured <code>unit</code> field and the linked quantities? See the open policy question below.</p>
+
+  <aside class="next-card" style="border-left:4px solid #6a7; background:rgba(60,160,90,.06)">
+    <strong>Open policy question (lead) — per-symbol units: define, or derive?</strong>
+    <p style="margin:.4rem 0">The refine seat now annotates a unit on nearly every symbol in the where-clause (Example 7). This is partly <em>incentivised by the audit</em>: <code>latex_def_check</code> counts a symbol as "defined" if a nearby sentence has a definition word (<code>is / denotes / where …</code>) <strong>or a unit in brackets</strong> — so a bare unit satisfies the symbol-definition check. But units are recoverable elsewhere:</p>
+    <ul style="margin:.3rem 0 .5rem 1.1rem;font-size:.92em">
+      <li>the <strong>primary quantity's</strong> unit is already the structured <code>unit</code> field (rendered on the name's page) — restating it in prose duplicates a machine-readable fact;</li>
+      <li><strong>auxiliary quantities that are themselves standard names</strong> carry their own unit via the <code>name:</code> link — restating risks <em>drift</em> if that name's unit changes;</li>
+      <li>only a <strong>non-name math/geometry symbol</strong> (arclength $\ell$, an angle) has no other source — and even there the unit is usually trivial.</li>
+    </ul>
+    <p style="margin:.4rem 0">What is genuinely non-redundant is the symbol's <strong>identity</strong> — binding each symbol to the quantity it denotes, ideally a <code>name:</code> link — not its unit. Restating units in prose is the same anti-pattern the campaign removes elsewhere (facts that belong in structured fields), one level down. <strong>Recommendation:</strong> require symbol <em>definitions</em> (identity + link); stop accepting bare-unit-in-brackets as the <code>latex_def_check</code> satisfier; suppress unit restatement except for a genuinely unsourced auxiliary symbol where dimensional clarity needs it. This is a refine-prompt + audit tweak for future rotations — <em>not</em> a defect that halts the current run (units-in-prose is redundant, not wrong), and existing docs can be re-normalized cheaply in a later pass.</p>
+  </aside>
+
   <h2>§3 — How each mechanism addresses each weakness</h2>
   <table>
     <tr><th>Weakness</th><th>Mechanism that removes it</th><th>Mechanism that keeps it out</th></tr>
