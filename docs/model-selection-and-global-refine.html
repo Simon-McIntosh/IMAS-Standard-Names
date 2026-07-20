@@ -109,8 +109,27 @@
   </p>
   <p><strong>Remaining:</strong> stratified rotations with orchestrator checkpoints (<code>f-docs-campaign-rotations</code>: 200 names ≈ $40, then ~450-name rotations). Done when: zero accepted entries carry banned-prose classes (machine-audited), audit-quarantine count on accepted names is zero or explicitly waived per name, and the expert-review-reply document's open item 1 is closed.</p>
   <p><strong>Rotation 1 — attempted 2026-07-18, halted on a reviewer-quorum outage</strong> (<a href="archive/model-selection-and-global-refine-s5-rotation1-halted.html">rotation 1 halted</a>). Launched over stratified 200 (of 1,437 docs-fixable); ~6 min in, 2 of the 3 RD-quorum reviewer models (<code>qwen3.7-max</code>, <code>minimax-m3</code>) entered an upstream empty-response outage and 67% of reviews degraded to single-reviewer — violating the §6 "review quorum unchanged" invariant. The orchestrator halted (campaign is abortable by design), bounding degraded-quorum accepts to ~27 (vs ~200) at ≈$6.17 spend (~$1.43 wasted on the two dead models). Selection 1,437 → 1,409. The miss is external, not a campaign defect; the re-run is unchanged. <code>f-docs-campaign-rotations</code> stays open.</p>
+  <p><strong>Root-caused and unblocked (2026-07-19/20) — see the research doc
+  <a href="sn-model-selection-2026-07.html">SN model selection + reviewer-resilience</a>.</strong>
+  The outage was upstream OpenRouter provider capacity (the blind pair
+  <code>qwen3.7-max</code>+<code>minimax-m3</code> 429 under the pool's concurrency), not a
+  campaign defect. Resolving it (a scope expansion beyond this section) delivered:
+  a resilient, better-discriminating blind pair <strong><code>claude-sonnet-5</code> +
+  <code>grok-4.5</code></strong> (imas-codex <code>b5b5eccb</code>, chosen on a new labelled
+  discrimination benchmark + concurrency vetting); pipeline-resilience fixes (global
+  AIMD rate governor with bounded recovery, quorum-integrity guard that defers rather
+  than silently accepting on one review, LLM-activity heartbeat); an all-seat model
+  benchmark (all other seats HOLD their incumbents) exercising the real prompts; and
+  the SN test suite made green. Rotation 1 itself was <strong>NOT</strong> re-run — the
+  campaign now runs on a fixed, resilient, observable pipeline but the docs-refinement
+  pass is still pending. <code>f-docs-campaign-rotations</code> stays open.</p>
   <aside class="next-card">
-    <strong>NEXT:</strong> re-run rotation 1 once OpenRouter reviewer availability recovers. Smoke first: <code>uv run imas-codex sn run --source dd --campaign "prose,audit:latex,audit:spelling,audit:length" --campaign-pilot 3 --include-accepted --campaign-cost-ceiling 5</code> — confirm 3-model <code>quorum_consensus</code> reviews land, then run the full rotation (<code>--campaign-pilot 200 … --campaign-cost-ceiling 120</code>). If the outage persists, the lead may elect <code>--reviewer-profile opus-only</code> (accepts a different quality baseline).
+    <strong>NEXT:</strong> re-run rotation 1 on the new resilient blind pair — best in a
+    <em>fresh session</em> (this section's session expanded into the full resilience/benchmark
+    work). Standard command, now stall-free and observable:
+    <code>uv run imas-codex sn run --source dd --campaign "prose,audit:latex,audit:spelling,audit:length" --campaign-pilot 200 --include-accepted --campaign-batch-cost-cap 50 --campaign-cost-ceiling 120</code>
+    — then the orchestrator checkpoint (accept ≥0.90, zero prose reintroduction, zero
+    drift, cost/name ≈$0.20, quorum-incomplete deferrals ≈0) and record the rotation row.
   </aside>
   </section>
 
