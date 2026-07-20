@@ -8,7 +8,8 @@
   <meta name="plan-slug"       content="sn-symbol-definition-policy">
   <meta name="plan-title"      content="SN Symbol Definition Policy">
   <meta name="plan-summary"    content="Make docs define each LaTeX symbol by identity + name-link, not by a redundant unit restatement; fix latex_def_check to stop accepting bare units as the definition satisfier; scope and price the catalog cleanup.">
-  <meta name="plan-status"     content="draft">
+  <meta name="plan-status"     content="shipped">
+  <meta name="plan-impl"       content="1.0">
   <meta name="plan-roi"        content="mid">
   <meta name="plan-effort"     content="S">
   <meta name="plan-tier"       content="sonnet">
@@ -21,6 +22,15 @@
 <body>
 <main class="plan-doc">
   <h1>Symbol definition policy — define identity, don't restate units</h1>
+  <p class="landed-summary" style="border-left:4px solid #3a7d44;background:rgba(60,160,90,.06);padding:.6rem 1rem">
+    <strong>✓ SHIPPED 2026-07-20.</strong> Policy landed across the pipeline: <code>latex_def_check</code> requires symbol
+    identity not a bare unit (<code>a27beea6</code>); no-units prompt across generate/refine/review seats + shared partial,
+    Spectrum rule reworded, both narrow exceptions removed (<code>38dfeb97</code>); advisory <code>symbol_units_check</code> +
+    <code>audit:symbol_units</code> selector, FP-hardened against label subscripts / variable exponents / unit vectors
+    (<code>ee22b1f4</code> → <code>ac75e0df</code>). <strong>Smoke:</strong> 30/30 unit-free, 10/10 stripped, $13.
+    <strong>Cleanup:</strong> 357 unit-docs selected → 356 refined unit-free ($89, $0.25/name) + 8 detector-FPs resolved →
+    <strong><code>audit:symbol_units</code> now selects 0</strong>; zero genuine units remain catalog-wide. A full audit re-stamp
+    surfaced 43 latent deterministic defects (not new) that the fast-grep path had masked — folded into the docs campaign.</p>
   <p>Follow-on from <a href="/imas-standard-names/model-selection-and-global-refine.html">model-selection-and-global-refine</a> §5.
   The docs-refinement campaign produces high-quality normative docs, but the refine seat annotates a unit on nearly every LaTeX
   symbol (see <a href="/imas-standard-names/docs-campaign-before-after.html">before/after evidence §2b, Example 7</a>). This plan
@@ -157,7 +167,7 @@
 
   <section data-reckon="followups" id="followups" class="r-followups">
     <h2><span class="sec">§</span> Followups</h2>
-    <article class="r-fu" data-id="f-symdef-policy-audit" data-status="open" data-tier="sonnet" data-written-by="reckon-create" data-written-at="2026-07-20">
+    <article class="r-fu" data-id="f-symdef-policy-audit" data-status="resolved" data-tier="sonnet" data-written-by="reckon-create" data-written-at="2026-07-20" data-resolved-at="2026-07-20" data-resolved-by="reckon-ship">
       <h4 class="r-fu-title">Run the targeted units cleanup (smoke PASSED)</h4>
       <div class="r-fu-body"><strong>Landed:</strong> <code>latex_def_check</code> identity rule (imas-codex <code>a27beea6</code>); <code>symbol_units_check</code> advisory + <code>audit:symbol_units</code> selector (<code>ee22b1f4</code>); no-units prompt across generate/refine/review seats + shared format partial, Spectrum rule reworded, both narrow exceptions removed (<code>38dfeb97</code>).
       <strong>Smoke PASSED (2026-07-20):</strong> 30-name run, <strong>30/30 refined docs unit-free, 10/10 unit-bearing docs stripped to none</strong>, 0 errors, $13.04. The new policy produces identity-defined, unit-free docs end-to-end (e.g. <code>ion_diffusivity</code>: tensor definition via <code>name:</code> links, no units).
