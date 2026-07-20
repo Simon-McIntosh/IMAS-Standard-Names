@@ -67,12 +67,25 @@
       <td>502 → <strong>115</strong> (−387)</td>
       <td>✅ PASS</td>
     </tr>
+    <tr>
+      <td><strong>4</strong> · 2026-07-20<br><span style="font-size:.8rem">pilot 120, 1 batch</span></td>
+      <td>91 → <strong>87 (96%)</strong></td>
+      <td>$30.02 · <strong>$0.35</strong></td>
+      <td>110 consensus + 31 escalation + 6 single; <strong>0 outage-degraded</strong></td>
+      <td><strong>0 genuine</strong> — 1 grep flag adjudicated legitimate</td>
+      <td>0.0%</td>
+      <td>0 (names_composed=0)</td>
+      <td>116 → <strong>59</strong></td>
+      <td>✅ PASS</td>
+    </tr>
   </table>
-  <p style="font-size:.9rem"><strong>Remaining 115</strong> (2026-07-20 after rotation 3): audit:length 52 · prose:typical_values 43 · prose:estimator_recipe 51 ·
-  prose:procedural_padding 28 · audit:latex 3 · audit:spelling 6 (predicates overlap). The tail is dominated by <code>audit:length</code>
-  (docs over the length cap — genuinely hard to shorten) and re-quarantined prose. One more rotation drains most; the length residue may
-  need per-name attention or an explicit waiver. Rotation 3's $0.336/name ran slightly higher (more refine escalations); it reached the
-  $150 ceiling exactly at completion.</p>
+  <p style="font-size:.9rem"><strong>Docs campaign effectively drained.</strong> After rotation 4 the <code>prose,audit:latex,audit:spelling,audit:length</code>
+  dry-run shows 59, but <strong>52 of those are <code>audit:length</code> — a NAME-axis finding</strong> (<code>length_soft_cap_check</code>
+  flags names over 70 chars), which a docs campaign can never clear (it refines documentation, not names). That predicate was mis-included
+  in the docs spec. The true <strong>docs-fixable residue is 9</strong> (audit:latex 3 · audit:spelling 6 · prose:estimator_recipe 1),
+  cleared in a final small rotation. The 52 name-length findings are re-scoped to the <strong>name-axis workstream</strong> (name
+  shortening / rename), consistent with the §5 done-when clause that name-axis findings are re-scoped rather than silently waived.
+  Every rotation also ran on the new no-units prompt from rotation 4 on, so refreshed docs are unit-free.</p>
   <p style="font-size:.9rem"><strong>Transient upstream 500s</strong> (OpenRouter/Azure, gpt-5.5 refine seat): 1 in rotation 1, 3 in rotation 2
   (~0.14% of calls). Each dropped a single refine call, leaving the name's prior accepted doc — self-healing (the name re-enters the
   next rotation's selection). Root-caused as a retry-classification gap and fixed (imas-codex <code>cbd9cb6f</code>): a 500 is now
