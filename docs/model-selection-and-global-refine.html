@@ -97,7 +97,7 @@
 
   <section id="s5" class="section-landed">
   <header>
-    <span class="badge badge-shipped">✓ rotation 1 validated the pipeline 2026-07-20 — prose fix landed, seats held, rotations unblocked</span>
+    <span class="badge badge-shipped">✓ rotations running clean 2026-07-20 — LLM-adjudicated gate, rotation 1 full 199/200 accept, no false-positive halt</span>
     <h2>§5 — Documentation-simplification campaign (pilot → scale)</h2>
   </header>
   <p class="landed-summary">
@@ -107,48 +107,21 @@
     <strong>All 4 unit-defect quarantines resolved at root:</strong> 3 parents had unit '1' mis-inherited from <code>normalized_*</code> children (seeder exclusion <code>e73331a9</code> + scoped repair <code>db261bca</code>/<code>fab5af85</code> + docs re-aligned via <code>sn edit</code>, all accepted); the 4th was an audit false positive on the canonical transport-velocity form (exemption <code>b4e38135</code>). All four now <code>valid</code>.
     <strong>Smoke (fresh stratified 25, run <code>9aa921c3</code>): 24/25 accepted, 0 reintroduction, 0 drift, refine waste 0.0%, re-audit 25 cleared/0 re-quarantined, $0.18/name</strong> — confirms the ≈$300–380 basis for the 1,540-name docs-fixable spec.
   </p>
-  <p><strong>Remaining:</strong> stratified rotations with orchestrator checkpoints (<code>f-docs-campaign-rotations</code>: 200 names ≈ $40, then ~450-name rotations). Done when: zero accepted entries carry banned-prose classes (machine-audited), audit-quarantine count on accepted names is zero or explicitly waived per name, and the expert-review-reply document's open item 1 is closed.</p>
-  <p><strong>Rotation 1 — attempted 2026-07-18, halted on a reviewer-quorum outage</strong> (<a href="archive/model-selection-and-global-refine-s5-rotation1-halted.html">rotation 1 halted</a>). Launched over stratified 200 (of 1,437 docs-fixable); ~6 min in, 2 of the 3 RD-quorum reviewer models (<code>qwen3.7-max</code>, <code>minimax-m3</code>) entered an upstream empty-response outage and 67% of reviews degraded to single-reviewer — violating the §6 "review quorum unchanged" invariant. The orchestrator halted (campaign is abortable by design), bounding degraded-quorum accepts to ~27 (vs ~200) at ≈$6.17 spend (~$1.43 wasted on the two dead models). Selection 1,437 → 1,409. The miss is external, not a campaign defect; the re-run is unchanged. <code>f-docs-campaign-rotations</code> stays open.</p>
-  <p><strong>Root-caused and unblocked (2026-07-19/20) — see the research doc
-  <a href="sn-model-selection-2026-07.html">SN model selection + reviewer-resilience</a>.</strong>
-  The outage was upstream OpenRouter provider capacity (the blind pair
-  <code>qwen3.7-max</code>+<code>minimax-m3</code> 429 under the pool's concurrency), not a
-  campaign defect. Resolving it (a scope expansion beyond this section) delivered:
-  a resilient, better-discriminating blind pair <strong><code>claude-sonnet-5</code> +
-  <code>grok-4.5</code></strong> (imas-codex <code>b5b5eccb</code>, chosen on a new labelled
-  discrimination benchmark + concurrency vetting); pipeline-resilience fixes (global
-  AIMD rate governor with bounded recovery, quorum-integrity guard that defers rather
-  than silently accepting on one review, LLM-activity heartbeat); an all-seat model
-  benchmark (all other seats HOLD their incumbents) exercising the real prompts; and
-  the SN test suite made green. Rotation 1 itself was <strong>NOT</strong> re-run — the
-  campaign now runs on a fixed, resilient, observable pipeline but the docs-refinement
-  pass is still pending. <code>f-docs-campaign-rotations</code> stays open.</p>
-  <p><strong>Rotation 1 re-run 2026-07-20 — pipeline VALIDATED; halted on a prose-predicate false positive</strong>
-  (<a href="archive/model-selection-and-global-refine-s5-rotation1-landed.html">rotation 1 resilient re-run</a>, run <code>c355df39</code>).
-  The July-18 quorum-outage failure mode is <strong>eliminated</strong>: 117 leaf reviews 100% <code>quorum_consensus</code> on the
-  <code>claude-sonnet-5</code> + <code>grok-4.5</code> blind pair, 0 outages, 0 governor backoff (the 13 <code>single_review</code> are
-  derived-parent reviews, single-model by design). Batch 1 (100 names): <strong>98% accept</strong> (98 accepted / 2 exhausted),
-  <strong>0 name drift</strong>, refine waste <strong>3.4%</strong> (&lt;5% gate), ~19 min, <strong>$29.47</strong>. The convergence gate then halted
-  before batch 2 on <em>banned prose reintroduced in 2 docs (cap 0)</em> — <code>line_averaged_hydrogen_density</code>,
-  <code>ratio_of_tritium_density_to_deuterium_density</code> — <strong>both false positives</strong>: the <code>estimator_recipe</code> pattern's
-  <code>derived …from</code> arm matches "<em>is derived from [related quantity]</em>" (legitimate provenance the refine model writes),
-  not a compute recipe. The pattern is correct on the backlog (12/12 sampled of 797 accepted-doc matches are genuine
-  "in practice … is computed by …" recipes) but over-flags refined provenance, so it would halt every rotation until narrowed.
-  Cost/name <strong>$0.29</strong> vs the $0.20 target — the resilient premium review pair is the driver (~1,300 remaining ≈ $380, not $270).</p>
-  <p><strong>Cleared 2026-07-20 — GO.</strong> The prose false positive is fixed: the <code>estimator_recipe</code> exemption was scoped to
-  linked-quantity provenance <code>derived from … [x](name:x)</code> (imas-codex <code>6c6ffec8</code> → narrowed to name-link-conditioned
-  <code>f1a4fbbc</code>; catalog scan showed only 4 of 68 "derived from" accepted docs are linked provenance, ~20 are genuine
-  "derived from &lt;procedure&gt;" recipes that must keep flagging). Cost reviewed per-model (rotation-1 split: gpt-5.5 refine+escalation
-  $11.34, sonnet-5 review $9.04, grok $4.78, luna docs-gen $3.99) — <strong>lead holds all seats and accepts ≈$0.29/name as-is</strong>: the
-  sonnet-5+grok review pair is the best docs discriminator (AUC 0.910) and the only concurrency-resilient option, and refine holds gpt-5.5
-  (resolution 0.874 / collateral 0.147; luna and terra both measured worse or a wash).</p>
-  <aside class="next-card">
-    <strong>NEXT:</strong> resume rotation 1 in a fresh session — blocker cleared, seats locked. The command re-stratifies over the
-    remaining ~1,311 docs-fixable names:
-    <code>uv run imas-codex sn run --source dd --campaign "prose,audit:latex,audit:spelling,audit:length" --campaign-pilot 200 --include-accepted --campaign-batch-cost-cap 50 --campaign-cost-ceiling 120</code>
-    — then the orchestrator checkpoint (accept ≥0.90, zero prose reintroduction, zero drift, cost/name ≈$0.29, refine waste &lt;5%) and record the rotation row.
-    Tracked by <code>f-docs-campaign-rotations</code>.
-  </aside>
+  <p><strong>Gate hardened to LLM adjudication (2026-07-20).</strong> Two earlier rotation attempts halted on the convergence
+  gate — first a reviewer-quorum outage (<a href="archive/model-selection-and-global-refine-s5-rotation1-halted.html">rotation 1 halted</a>;
+  resolved by the resilient <code>claude-sonnet-5</code> + <code>grok-4.5</code> blind pair + AIMD governor, see
+  <a href="sn-model-selection-2026-07.html">SN model selection + reviewer-resilience</a>), then a prose-predicate false positive
+  (<a href="archive/model-selection-and-global-refine-s5-rotation1-landed.html">rotation 1 re-run</a>: the <code>estimator_recipe</code>
+  pattern over-flagged legitimate "is derived from [related quantity]" provenance). Rather than chase regex arms, the banned-prose
+  convergence gate is now <strong>LLM-adjudicated</strong> (imas-codex <code>1c2e166a</code> + <code>fbd6a51b</code>): a grep flags a
+  candidate, a quorum-independent adjudicator (<code>gpt-5.6-luna</code>) rules each flag legitimate-or-not, so definitional prose no
+  longer halts the run. Seats held; lead accepts ≈$0.29/name (premium blind pair).</p>
+  <p><strong>Rotations running clean — see the <a href="archive/model-selection-and-global-refine-s5-rotations-landed.html">rotation checkpoint ledger</a>.</strong>
+  Rotation 1 (full 200, 2026-07-20) ran to completion with <strong>no false-positive halt</strong>: <strong>199/200 accepted</strong>,
+  the gate adjudicated all 3 grep flags as legitimate (0 genuine reintroductions), 0 name drift, 0 outages, refine waste 1.8%/3.6%,
+  <strong>$0.292/name</strong> ($58.44), selection 1,047 → 889. Every checkpoint axis PASS. Rotation 2 (pilot 450) in progress; each
+  rotation self-prunes and appends a ledger row. Done when the dry-run selection reaches 0, then close expert-review reply open item 1
+  via <code>f-expert-review-reply-doc</code>. Tracked by <code>f-docs-campaign-rotations</code>.</p>
   </section>
 
   <h2 id="s6">§6 — Risks</h2>

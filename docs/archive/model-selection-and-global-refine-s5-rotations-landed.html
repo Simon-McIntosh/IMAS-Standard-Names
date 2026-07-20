@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-standard-names">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="model-selection-and-global-refine-s5-rotations-landed">
+  <meta name="plan-title" content="§5 docs-campaign rotations — checkpoint ledger (LLM-adjudicated gate)">
+  <meta name="plan-summary" content="The stratified docs-campaign rotations under the LLM-adjudicated banned-prose convergence gate. Rotation 1 (clean, full 200) ran to completion without a false-positive halt — the gate adjudicated 3 grep-flagged docs as legitimate and continued. One checkpoint row per rotation; the campaign is done when the dry-run selection empties.">
+  <meta name="plan-status" content="active">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <title>§5 docs-campaign rotations ledger | model-selection-and-global-refine</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+  <h1>§5 — Docs-campaign rotations checkpoint ledger</h1>
+  <p>Evergreen: <a href="/imas-standard-names/model-selection-and-global-refine.html">model-selection-and-global-refine</a> §5 ·
+  driver <code>f-docs-campaign-rotations</code> · prior attempts
+  <a href="/imas-standard-names/archive/model-selection-and-global-refine-s5-rotation1-halted.html">rotation 1 halted (reviewer outage)</a> ·
+  <a href="/imas-standard-names/archive/model-selection-and-global-refine-s5-rotation1-landed.html">rotation 1 re-run (prose false-positive halt)</a>.</p>
+  <p>This ledger records the <strong>stratified rotations run under the LLM-adjudicated banned-prose convergence gate</strong>
+  (imas-codex <code>1c2e166a</code> + <code>fbd6a51b</code>): a grep flags candidate prose, an LLM adjudicator
+  (<code>gpt-5.6-luna</code>, quorum-independent) rules each flag legitimate-or-not, so the gate no longer halts on the
+  <em>"is derived from [related quantity]"</em> and <em>definitional "for example"</em> false positives that stopped the two
+  earlier attempts. One checkpoint row per rotation; the campaign is done when
+  <code>sn run --campaign "prose,audit:latex,audit:spelling,audit:length" --dry-run → total 0</code>.</p>
+
+  <h2>Rotation ledger</h2>
+  <table>
+    <tr>
+      <th>Rotation</th><th>Names (accept)</th><th>Spend · $/name</th>
+      <th>Quorum</th><th>Prose gate</th><th>Refine waste</th><th>Drift</th><th>Selection after</th><th>Verdict</th>
+    </tr>
+    <tr>
+      <td><strong>1</strong> · 2026-07-20<br><span style="font-size:.8rem">runs <code>621f60b9</code>+<code>d8d18ee7</code></span></td>
+      <td>200 → <strong>199 (99.5%)</strong></td>
+      <td>$58.44 · <strong>$0.292</strong></td>
+      <td>244 consensus + 42 escalation + 21 single (derived parents, by design); <strong>0 outage-degraded</strong></td>
+      <td><strong>0 genuine</strong> — 3 grep flags all adjudicated legitimate</td>
+      <td>1.8% / 3.6%</td>
+      <td>0 (names_composed=0)</td>
+      <td>1,047 → <strong>889</strong> (−158)</td>
+      <td>✅ PASS</td>
+    </tr>
+    <tr>
+      <td><strong>2</strong> · 2026-07-20</td>
+      <td colspan="8"><em>running — pilot 450, ceiling $150 (re-baselined for $0.29/name); checkpoint row on completion</em></td>
+    </tr>
+  </table>
+
+  <h2>Rotation 1 (clean, full) — checkpoint detail</h2>
+  <p>The first docs-campaign rotation to run <strong>to completion with no false-positive halt</strong>. Both 100-name batches
+  processed; the LLM-adjudicated gate cleared every grep flag as legitimate and the campaign reported
+  <code>Campaign complete: 2 batches, 199/200 docs accepted, re-audit 7 re-quarantined / 193 cleared,
+  prose-adjudicator cleared 3 grep flag(s) as legitimate, spend $58.44</code>.</p>
+  <table>
+    <tr><th>Gate axis</th><th>Threshold</th><th>Rotation 1</th><th>Verdict</th></tr>
+    <tr><td>Docs acceptance</td><td>≥ 0.90</td><td><strong>199/200 = 0.995</strong> (1 refine name lost to a transient upstream 500)</td><td>✅ PASS</td></tr>
+    <tr><td>Review quorum intact</td><td>full pair per leaf</td><td>244 <code>quorum_consensus</code> + 42 <code>authoritative_escalation</code>; 21 <code>single_review</code> are derived-parent reviews (single-model <em>by design</em>); <strong>0 degraded by outage</strong></td><td>✅ PASS</td></tr>
+    <tr><td>Upstream outages</td><td>0</td><td>0 — the July-18 quorum-collapse failure mode did not recur</td><td>✅ PASS</td></tr>
+    <tr><td>Banned prose reintroduced</td><td>0</td><td>3 grep flags (<code>coordinate</code>, <code>launched_power_of_lower_hybrid_antenna</code>, <code>particle_current_density</code>) → <strong>all adjudicated legitimate definitional prose; 0 genuine</strong></td><td>✅ PASS</td></tr>
+    <tr><td>Name-identity drift</td><td>0</td><td>0 — <code>names_composed=0</code> both batches; docs-only refine on unchanged ids</td><td>✅ PASS</td></tr>
+    <tr><td>Refine claim-race waste</td><td>&lt; 5%</td><td>1.8% (batch 1, 1/55) · 3.6% (batch 2, 2/55)</td><td>✅ PASS</td></tr>
+    <tr><td>Cost / name</td><td>≈ $0.29</td><td><strong>$0.292</strong> ($58.44 / 200) — on the re-baselined premium-pair estimate</td><td>✅ PASS</td></tr>
+    <tr><td>Transient call failures</td><td>bounded</td><td>1 / 968 (0.1%) — one OpenRouter/Azure 500 on a single refine call; isolated, not an outage</td><td>✅ PASS</td></tr>
+  </table>
+
+  <h3>The LLM-adjudicated gate did its job</h3>
+  <p>The three grep flags the deterministic prose predicate raised were each ruled <em>legitimate</em> by the adjudicator with a
+  reasoned verdict — the exact behaviour the two earlier halts needed:</p>
+  <ul style="font-size:.86rem">
+    <li><code>coordinate</code> — <em>"the 'For example' clauses provide taxonomy and concrete definitional distinctions among coordinate types, variables, and sign conventions rather than procedural or magnitude-related padding."</em></li>
+    <li><code>launched_power_of_lower_hybrid_antenna</code> — <em>"a definitional per-antenna power-balance equation … without prescribing an external measurement or estimation procedure."</em></li>
+    <li><code>particle_current_density</code> — <em>"the governing kinetic moment and a definitional relation to the perturbed quantity, not an external measurement or estimation procedure."</em></li>
+  </ul>
+  <p>The deterministic re-audit is the machine check on prose-clean: <strong>193 names cleared</strong> their defect predicates and
+  dropped out of the selection; <strong>7 re-quarantined</strong> (docs that still trip an audit predicate after refine, carried to a
+  later rotation). Net selection: 1,047 → 889.</p>
+
+  <h3>Cost note — ceiling re-baselined</h3>
+  <p>Rotation 1 confirmed <strong>$0.292/name</strong>, matching the premium blind-pair re-baseline (not the retired $0.20 basis the
+  original followup command assumed). Rotations 2+ therefore run with <code>--campaign-cost-ceiling 150</code> (was 120) so a 450-name
+  rotation (≈$130) completes in one pass with a single checkpoint, keeping the <code>--campaign-batch-cost-cap 50</code> per-batch guard.
+  ~889 remaining ≈ <strong>$260</strong> to empty the selection, inside the lead's accepted premium.</p>
+
+  <h2>What's next</h2>
+  <p>Rotation 2 (pilot 450) is running. On each rotation: run the orchestrator checkpoint (accept ≥0.90, 0 prose reintroduction,
+  0 drift, cost/name ≈$0.29, refine waste &lt;5%, quorum intact), append the row above, then re-run the same command — the selection
+  self-prunes. Done when the dry-run total reaches 0; then close expert-review reply open item 1 via
+  <code>f-expert-review-reply-doc</code>. Tracked by <code>f-docs-campaign-rotations</code>.</p>
+</main>
+</body>
+</html>
