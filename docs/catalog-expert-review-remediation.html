@@ -16,8 +16,8 @@
   <title>Catalog Expert Review Remediation | imas-standard-names</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-07-17">
-<meta name="plan-version" content="28">
+<meta name="plan-modified" content="2026-07-21">
+<meta name="plan-version" content="29">
 <meta name="plan-impl" content="0.95">
 <meta name="plan-depends-on" content="model-selection-and-global-refine">
 </head>
@@ -672,6 +672,24 @@ Steps
   5. Export: uv run imas-codex sn release --export-only into clean ISNC; validate; SPA tests/build; verify term cards + pinned DD links + deprecation stubs absent (nothing approved); cut catalog RC via supported tooling.
 
 Done-when: 22/22 tangential successors accepted; row-10 renamed; export validated; catalog RC tagged; followup resolved.</pre>
+    </article>
+<article class="r-fu" data-id="f-ordinal-carrier-readability" data-status="open" data-tier="sonnet" data-written-by="reckon-ship" data-written-at="2026-07-21T10:29:32+00:00" data-recommends-skill="/reckon-edit catalog-expert-review-remediation" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Review ordinal-led carrier readability under the bare-component-prefix rule</h4>
+    <div class="r-fu-body">Lead flagged that names like x_first_measurement_direction_unit_vector_of_strain_gauge read awkwardly ('x first' means little at a glance). This is NOT a bug: it is the canonical grammar output. The grammar deliberately bans the explicit x_component_of_<base> long form (components.yml) and uses a bare x_/y_/z_ prefix meaning 'x-component of'; the name is structurally identical to 20+ accepted siblings (x_direction_unit_vector_of_camera, x_major_axis_unit_vector_of_shatter_cone). The only awkwardness is that the carrier token itself leads with an ordinal (first_/second_measurement_direction_unit_vector, tied to DD operational_instrumentation sensor/direction{,_second}). Open question for a grammar/naming review: should ordinal-led geometry carriers be re-phrased, or the component-prefix rule adjusted, so component + ordinal-carrier names read naturally? No catalog action required for this RC; the 6 strain_gauge names are DD-faithful and ship as-is.</div>
+    <pre class="r-fu-prompt">Project: imas-standard-names
+Plan: catalog-expert-review-remediation
+Section: naming-convention review (ordinal-led carriers)
+Tier: sonnet
+
+Context
+  The bare component-prefix grammar rule (x_/y_/z_ = &#x27;x-component of&#x27;) produces awkward reading when the geometry carrier itself leads with an ordinal, e.g. x_first_measurement_direction_unit_vector_of_strain_gauge. This is canonical output, not a defect: the explicit x_component_of_&lt;base&gt; form is deliberately banned (imas_standard_names/grammar/vocabularies/components.yml), and 20+ accepted names share the x_&lt;vector&gt;_of_&lt;object&gt; shape. The affected carriers are first_/second_measurement_direction_unit_vector (geometry_carriers.yml), tied to DD operational_instrumentation sensor/direction and sensor/direction_second.
+
+Steps
+  1. Enumerate all accepted names whose grammar is &lt;component&gt;_&lt;ordinal-led carrier&gt;_of_&lt;object&gt;; assess readability catalog-wide (not just strain gauge).
+  2. Decide with the lead: (a) accept as canonical (document the convention), (b) re-phrase ordinal-led carriers, or (c) adjust the component-prefix rule for ordinal carriers.
+  3. If a change is chosen, scope the grammar/vocab edit + affected-name migration and open a dedicated plan.
+
+Done-when: decision recorded; if no change, convention documented; if change, migration plan opened.</pre>
     </article>
 </section>
 <section data-reckon="research" id="research" class="r-research-list">
