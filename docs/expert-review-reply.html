@@ -16,32 +16,31 @@
 <body>
 <main class="plan-doc">
   <h2 id="s1">§1 — Summary</h2>
-  <p>This document replies point-by-point to the review of the standard-name catalog release candidates carried out on 7–10 July 2026. Every comment was first re-verified against the live name graph (several observations referred to states that had already changed), classified, and then resolved at the level that prevents recurrence: the catalog entry itself, the naming grammar, the presentation layer, or the generation pipeline and its review criteria. Sixteen of the eighteen points are implemented; the two remaining items are in bounded progress (three renamed entries are re-clearing review after a pipeline fix, and the catalog-wide documentation simplification campaign is scoped but not yet run).</p>
+  <p>This document replies point-by-point to the review of the standard-name catalog release candidates carried out on 7–10 July 2026. Every comment was first re-verified against the live name graph (several observations referred to states that had already changed), classified, and then resolved at the level that prevents recurrence: the catalog entry itself, the naming grammar, the presentation layer, or the generation pipeline and its review criteria. All eighteen points are now dispositioned — sixteen implemented, two forms deliberately kept with the reasoning recorded in the entry itself.</p>
+  <p>The one comment that was still open <em>at scale</em> when this reply was first drafted — comment 1, the verbosity of the ~1,050 accepted entries that predate the strict-normative policy — has since been fully resolved. A budgeted, gated refine campaign ran the whole backlog through the same generate→review→score pipeline as normal work and drained the documentation-axis defect set to zero across five reviewed rotations. <strong>§5 is a complete change log of that campaign</strong>, with every change carrying a commit SHA or graph-event reference. The engineering record lives in two cross-linked plans: <a href="model-selection-and-global-refine.html">model-selection-and-global-refine</a> (the campaign engine and seat decisions) and the <a href="catalog-expert-review-remediation.html">catalog-expert-review-remediation</a> programme (the finding-by-finding remediation). The only work that remains is release mechanics — the catalog export and RC cut — plus a small name-axis residue re-scoped to the naming workstream; neither is an unresolved review comment.</p>
   <p>Two cross-cutting policies came out of the review and now gate all future generation: <strong>strict-normative documentation</strong> (definitions state identity, equations, domain, sign and exclusions; diagnostic inventories, estimator recipes, typical values and practical commentary are prohibited and machine-rejected), and <strong>explicit coordinate-frame semantics</strong> (each frame token has exactly one meaning, with first-class definitions published for every grammar concept).</p>
 
   <figure>
     <svg viewBox="0 0 760 96" role="img" aria-label="Disposition of the 18 review points" style="width:100%;max-width:760px;font-family:system-ui,sans-serif">
       <g fill="none" stroke="#555" stroke-width="1">
-        <rect x="2" y="30" width="540" height="34" fill="#eef6ee"/>
-        <rect x="542" y="30" width="130" height="34" fill="#fdf6e3"/>
-        <rect x="672" y="30" width="86" height="34" fill="#fff"/>
+        <rect x="2" y="30" width="600" height="34" fill="#eef6ee"/>
+        <rect x="606" y="30" width="152" height="34" fill="#fff"/>
       </g>
       <g fill="#202124" font-size="13">
-        <text x="10" y="52">Implemented — 13</text>
-        <text x="550" y="52">In progress — 3</text>
-        <text x="680" y="52">Kept — 2</text>
+        <text x="12" y="52">Implemented — 16</text>
+        <text x="616" y="52">Kept — 2</text>
         <text x="2" y="18" font-size="14" font-weight="600">Disposition of the 18 review points</text>
-        <text x="2" y="86" font-size="12" fill="#555">"Kept" = current form retained deliberately, with the reasoning documented in the entry itself (points 9 and 11).</text>
+        <text x="2" y="86" font-size="12" fill="#555">"Kept" = current form retained deliberately, reasoning documented in the entry (points 9 and 11). Release close-out (catalog export + RC) and a 58-name naming-axis residue remain — tracked in the remediation programme, not open review comments.</text>
       </g>
     </svg>
-    <figcaption>Each point below carries its decision, what changed, and a concrete example of the outcome.</figcaption>
+    <figcaption>Each point below carries its decision, what changed, and a concrete example of the outcome. The last open item at scale — comment 1's documentation-simplification backlog — is now closed; §5 logs the campaign.</figcaption>
   </figure>
 
   <h2 id="s2">§2 — Point-by-point response</h2>
   <table>
     <thead><tr><th>#</th><th>Review comment</th><th>Decision</th><th>What changed and example outcome</th></tr></thead>
     <tbody>
-      <tr><td>1</td><td>Definitions are strong but surrounding prose is verbose, method-specific, speculative or tangential (e.g. <code>thermal_plasma_energy</code>, <code>total_power_due_to_ion_cyclotron_heating</code>).</td><td><strong>Accepted — policy + staged cleanup.</strong></td><td>A strict-normative documentation policy is locked and enforced in the generator, the review rubric, and a machine validation gate: typical-value ranges, estimator recipes, diagnostic inventories and advice are prohibited. The two cited entries are rewritten and re-accepted (e.g. <code>total_power_due_to_ion_cyclotron_heating</code> is now three short paragraphs: identity, sum over launchers, boundary exclusions). <em>In progress:</em> ~64% of the catalog's older entries still predate the policy; a catalog-wide simplification campaign is scoped and awaits scheduling.</td></tr>
+      <tr><td>1</td><td>Definitions are strong but surrounding prose is verbose, method-specific, speculative or tangential (e.g. <code>thermal_plasma_energy</code>, <code>total_power_due_to_ion_cyclotron_heating</code>).</td><td><strong>Accepted — policy + staged cleanup.</strong></td><td>A strict-normative documentation policy is locked and enforced in the generator, the review rubric, and a machine validation gate: typical-value ranges, estimator recipes, diagnostic inventories and advice are prohibited. The two cited entries are rewritten and re-accepted (e.g. <code>total_power_due_to_ion_cyclotron_heating</code> is now three short paragraphs: identity, sum over launchers, boundary exclusions). <em>Done at scale:</em> the catalog-wide simplification campaign has run — a budgeted generate→review→score refine campaign drained the documentation-axis defect set from 1,047 to 0 across five reviewed rotations (≈$365 total, ~98–99% mean acceptance, zero banned-prose reintroduction, zero name drift). The full change log is <a href="#s5">§5</a>.</td></tr>
       <tr><td>2</td><td>DD source paths should link to DD documentation; links were absent in a reviewed RC.</td><td><strong>Accepted — implemented end-to-end.</strong></td><td>Every DD-backed source now carries an immutable snapshot: exact DD version, path, raw leaf and parent documentation. The site renders a link to the exact pinned DD release (never <em>latest</em>), shows the authoritative DD text with a meaningful-parent fallback for terse leaves, and labels derived context separately. The export fails closed if any source lacks its pinned snapshot; all 8,741 sources are pinned (verified invariant).</td></tr>
       <tr><td>3</td><td>Loci such as LCFS and ITB are usable tokens but have no discoverable definitions.</td><td><strong>Accepted — implemented.</strong></td><td>All 168 loci (plus geometric bases) are now first-class <em>StandardTerms</em> with governed definitions, list/fetch/search APIs, and definition cards in the catalog site (Grammar tab and per-name parse chips). LCFS/ITB are display and search abbreviations only, never parser aliases.</td></tr>
       <tr><td>4</td><td>Generalising a DD path can erase the owning component or local-axis meaning (X-ray crystal reflector <code>x2_curvature</code>; "vertical" misinterpretation).</td><td><strong>Accepted — grammar redesign.</strong></td><td>DD-shaped <code>x1/x2</code> labels are removed from the grammar and replaced by descriptive object-local frame carriers: <code>first_local_tangential_*</code> (more-horizontal in-plane tangent, positive toroidal) and <code>second_local_tangential_*</code> (completes the right-handed triad with the plasma-facing normal). The unsupported "vertical" reading of X2 is corrected everywhere, including generator prompts and cluster labels, so regeneration cannot reintroduce it. All 22 affected catalog names are renamed and re-accepted with recorded lineage (e.g. <code>x2_coordinate_of_optical_element</code> → <code>second_local_tangential_coordinate_of_optical_element</code>).</td></tr>
@@ -72,11 +71,109 @@
 
   <h2 id="s4">§4 — Open items and timeline</h2>
   <ul>
-    <li><strong>Catalog-wide documentation simplification</strong> (point 1 at scale): ~1,250 of 1,943 accepted entries predate the strict-normative policy and still carry typical-value or procedural prose. The regeneration campaign is scoped; entries will re-clear the normative review rubric in batches before the next release candidate.</li>
-    <li><strong>Qualifier-ordering convention:</strong> the review of point 17's borderline names surfaced a latent grammar gap — state qualifiers ("saturated", "fluctuating") could legally sit on either side of the species subject. The grammar now enforces the state-outside-subject canonical order and the three affected names are renamed (e.g. <code>ion_saturated_current_density</code> → <code>saturated_ion_current_density</code>).</li>
-    <li><strong>Ion-state inventory cleanup</strong> (point 6) and the <strong>coordinate-gap proposals</strong> (point 14) proceed through the normal proposal/review pipeline.</li>
-    <li>The next catalog release candidate will be cut only after these items land and the full validation, rendering and link-integrity gates pass.</li>
+    <li><strong>Catalog-wide documentation simplification</strong> (comment 1 at scale) — <strong>resolved</strong>. The regeneration campaign has run: the documentation-axis defect set drained from 1,047 to 0 across five reviewed rotations, every batch re-audited by the deterministic ISN check, with zero banned-prose reintroduction and zero name drift. Full change log and per-rotation results in <a href="#s5">§5</a>.</li>
+    <li><strong>Naming-axis residue</strong> — re-scoped, not waived. The campaign's defect selector surfaced 58 findings a documentation pass can never clear because they concern the <em>name</em>, not its prose: 52 names longer than 70 characters (the soft-length check) and 6 <code>*_strain_gauge</code> names flagged British "gauge" → American "gage". These are handed to the naming workstream (name shortening + the gauge→gage rename) rather than left as a silent gap.</li>
+    <li><strong>Qualifier-ordering convention:</strong> the review of comment 17's borderline names surfaced a latent grammar gap — state qualifiers ("saturated", "fluctuating") could legally sit on either side of the species subject. The grammar now enforces the state-outside-subject canonical order and the three affected names were renamed and re-accepted (e.g. <code>ion_saturated_current_density</code> → <code>saturated_ion_current_density</code>).</li>
+    <li><strong>Ion-state inventory cleanup</strong> (comment 6) and the <strong>coordinate-gap proposals</strong> (comment 14) proceed through the normal proposal/review pipeline.</li>
+    <li><strong>Release close-out</strong> is the only remaining gate: the supported ISNC export and the catalog RC cut, verified against the rendered deployment (pinned DD links, StandardTerm cards, link integrity). This is tracked in the <a href="catalog-expert-review-remediation.html">remediation programme</a> and no longer waits on any open review comment.</li>
   </ul>
+
+  <h2 id="s5">§5 — Change log: the documentation-simplification campaign (comment 1 at scale)</h2>
+  <p>This section logs every change made to close comment 1 across the whole accepted catalog, not just the two cited entries. The work was deliberately sequenced against the guardrails the lead set: <em>no naive full regeneration</em> (cost-prohibitive and provenance-destructive); the campaign rides the same generate→review→score pipeline as normal work (no privileged accept path); and every root cause is fixed in the prompts and validators <em>before</em> any bulk pass, so regeneration converges rather than churns. Changes below are commits in the generation pipeline repository (<code>imas-codex</code>) unless marked <strong>ISN</strong> (the grammar/validation library); live-graph mutations are recorded as graph events. The engineering narrative, per-rotation checkpoints and cost forensics are in the <a href="model-selection-and-global-refine.html">model-selection-and-global-refine</a> plan (§4–§5) and its archived ledgers.</p>
+
+  <figure>
+    <svg viewBox="0 0 720 250" role="img" aria-label="Documentation-axis defect selection draining to zero across five rotations" style="width:100%;max-width:720px;font-family:system-ui,sans-serif">
+      <text x="0" y="16" font-size="14" font-weight="600" fill="#202124">Documentation-axis defect set draining to zero</text>
+      <line x1="34" y1="210" x2="700" y2="210" stroke="#999" stroke-width="1"/>
+      <g fill="#4a7fb5">
+        <rect x="40"  y="30"  width="80" height="180"/>
+        <rect x="150" y="57"  width="80" height="153"/>
+        <rect x="260" y="124" width="80" height="86"/>
+        <rect x="370" y="190" width="80" height="20"/>
+        <rect x="480" y="200" width="80" height="10"/>
+        <rect x="590" y="206" width="80" height="4" fill="#2e7d32"/>
+      </g>
+      <g fill="#202124" font-size="13" text-anchor="middle" font-weight="600">
+        <text x="80"  y="24">1,047</text>
+        <text x="190" y="51">889</text>
+        <text x="300" y="118">502</text>
+        <text x="410" y="184">115</text>
+        <text x="520" y="194">59</text>
+        <text x="630" y="200" fill="#2e7d32">0</text>
+      </g>
+      <g fill="#555" font-size="12" text-anchor="middle">
+        <text x="80"  y="228">start</text>
+        <text x="190" y="228">after R1</text>
+        <text x="300" y="228">after R2</text>
+        <text x="410" y="228">after R3</text>
+        <text x="520" y="228">after R4</text>
+        <text x="630" y="228">after R5</text>
+      </g>
+      <text x="34" y="246" font-size="11" fill="#777">Selection is self-pruning: a fixed name stops matching the defect predicates, so each rotation re-runs the same command over the shrinking remainder.</text>
+    </svg>
+    <figcaption>The documentation-axis defect selection over the five reviewed rotations. Each rotation re-audited its batch deterministically before continuing; the drain to zero is measured, not asserted.</figcaption>
+  </figure>
+
+  <h3>5.1 — Root-cause fixes landed before the bulk pass</h3>
+  <p>Each of these removes a defect class at its source, so a regenerated definition converges to the corrected form instead of reintroducing the criticised prose.</p>
+  <table>
+    <thead><tr><th>Change</th><th>Reference</th><th>Effect</th></tr></thead>
+    <tbody>
+      <tr><td>Strict-normative documentation policy (generator prompt + schema + review rubric + machine validation gate)</td><td><code>4b36befa</code></td><td>Typical-value ranges, estimator recipes, diagnostic inventories and advice are prohibited and machine-rejected — the policy the whole campaign enforces.</td></tr>
+      <tr><td>Symbol-definition policy — refine seat no longer annotates a unit on every LaTeX symbol</td><td>plan <a href="sn-symbol-definition-policy.html">sn-symbol-definition-policy</a></td><td>Units are recoverable from the structured field, so prose targets symbol <em>identity</em>, not units; a catalog-wide sweep cleared 357 unit-carrying docs to 0. From rotation 4 on, every refreshed doc ran on this no-units prompt.</td></tr>
+      <tr><td>Derived-parent parse gate rescoped; parent/child relationship injected into the review prompts</td><td><code>93276ebf</code></td><td>Grammar family parents (structural peels) are no longer mis-quarantined as partial names, and reviewers see the parent/child context — the lead's requirement that a missed acceptance gate be corrected at root, not papered over. 52/52 parse quarantines clear read-only.</td></tr>
+      <tr><td>Revalidation surface repaired end-to-end</td><td><code>68f8fa65</code>, <code>3a562921</code>, <code>363a6ee1</code>, <code>b68b1e52</code></td><td>The <code>--revalidate</code> sweep covers quarantined names, runs before scope routing, drains through a dedicated LLM-free validate worker, and no longer excludes legacy-source names — so accepted fixes become visible instead of staying quarantined.</td></tr>
+      <tr><td>Kind vocabulary unified on the catalog Kind enum; refine/compose response models made non-nullable literals</td><td><code>6ef0ab2c</code></td><td>Structured output cannot emit an invalid kind; the format signal no longer depends on an examples include that could fail to load.</td></tr>
+      <tr><td>Decomposition audit retired (the base grammar is a controlled vocabulary)</td><td><code>e3d20e11</code> → <code>c6191e61</code> → <code>5a08c744</code></td><td>The audit compared a name's surface base phrase against the registered base-token set, but the parser already rejects any unregistered base token — so all ~2,250 of its findings were false positives. Retiring it removed a large phantom defect class from the selection; ~1,982 stale findings drained free, the remainder cleared graph-wide.</td></tr>
+      <tr><td>Unit-defect quarantines resolved at root</td><td>seeder exclusion <code>e73331a9</code>; scoped repairs <code>db261bca</code>, <code>fab5af85</code>; audit exemption <code>b4e38135</code></td><td>Three family parents had unit "1" mis-inherited from their <code>normalized_*</code> children (seeder now excludes that path; docs re-aligned via <code>sn edit</code>, all re-accepted); the fourth quarantine was a false positive on the canonical transport-velocity form. All four now valid.</td></tr>
+      <tr><td>Banned-prose "derived from" exemption narrowed to linked-quantity provenance</td><td>ISN/pipeline <code>6c6ffec8</code> → <code>f1a4fbbc</code></td><td>"is derived from … [quantity](name:id)" provenance the refine seat legitimately writes no longer trips the estimator-recipe predicate, while genuine "derived from &lt;procedure&gt;" recipes still flag.</td></tr>
+    </tbody>
+  </table>
+
+  <h3>5.2 — Campaign engine and safety gates</h3>
+  <p>The refine capability is not a new privileged path; it is a scope of the existing <code>sn run</code> command, so every refined definition clears the same review quorum as any generated one.</p>
+  <table>
+    <thead><tr><th>Change</th><th>Reference</th><th>Effect</th></tr></thead>
+    <tbody>
+      <tr><td>Global-refine campaign engine (<code>sn run --campaign</code> scope)</td><td><code>a1c8ca1e</code> (44 tests)</td><td>Defect-predicate selector, reviewed dry-run manifest, budgeted resumable batches, convergence gate (≥90% acceptance, zero prose reintroduction, zero name drift), and DocsRevision + StandardNameChange provenance on every edit.</td></tr>
+      <tr><td>Banned-prose vocabulary moved out of the benchmark module into a neutral policy module</td><td><code>a469501d</code></td><td>Production selection logic no longer depends on a benchmark module.</td></tr>
+      <tr><td>Refine claim-race livelock fixed (per-node claim sequence + settle re-read; replica cap on scoped drains; paid-call-without-persist tripwire)</td><td><code>af69e3e2</code> (17 race tests)</td><td>A pilot pathology in which many refine replicas raced a 1–2-name eligible set and all paid while only one persisted (53% of pilot spend) is eliminated — measured refine waste fell to 0–3.6% across every rotation.</td></tr>
+      <tr><td>Per-batch deterministic re-audit</td><td><code>fa503f83</code> (95 tests)</td><td>Every campaign batch re-runs the full ISN audit (LaTeX, spelling, length, unit checks) through an id-scoped LLM-free drain, so a genuine defect re-quarantines instead of washing to "valid" on the prose grep alone.</td></tr>
+      <tr><td>Convergence gate hardened to LLM adjudication</td><td><code>1c2e166a</code> + <code>fbd6a51b</code></td><td>The banned-prose grep is now a cheap pre-filter only; a quorum-independent adjudicator rules each flag legitimate-or-not, so definitional prose that legitimately uses compute verbs no longer halts a rotation on a false positive.</td></tr>
+      <tr><td>Response-schema complexity fix (name-refine escalator was silently failing)</td><td><code>cbe551cc</code></td><td>A grammar-segments model had grown past the provider's per-object property cap, hanging then failing every escalated name-refine call; a derived computed field brought it back under the cap with a regression guard.</td></tr>
+      <tr><td>Retry classification for transient upstream 500s</td><td><code>cbd9cb6f</code></td><td>A 500 is now retried like a 503 (distinct from the 429 path that drives concurrency pullback); the few transient drops in rotations 1–2 self-healed on the next rotation.</td></tr>
+      <tr><td>Model-seat config moved out of source into project seats</td><td><code>3fefe5a8</code></td><td>Escalation and prose-adjudicator model choices are read from configuration, not hardcoded in feature code.</td></tr>
+    </tbody>
+  </table>
+
+  <h3>5.3 — The rotations</h3>
+  <p>The campaign ran in stratified rotations with an orchestrator checkpoint between each (accept rate ≥ 0.90, zero prose reintroduction, zero name drift, refine waste &lt; 5%, review quorum intact). The selection self-prunes, so each rotation re-ran the same command over the shrinking remainder until the dry-run emptied. Every checkpoint axis passed; there were no outages and no false-positive halts.</p>
+  <table>
+    <thead><tr><th>Rotation</th><th>Names (accepted)</th><th>Spend · $/name</th><th>Prose gate</th><th>Drift</th><th>Selection after</th></tr></thead>
+    <tbody>
+      <tr><td>R1</td><td>200 → 199 (99.5%)</td><td>$58.44 · $0.292</td><td>0 genuine (3 grep flags adjudicated legitimate)</td><td>0</td><td>1,047 → 889</td></tr>
+      <tr><td>R2</td><td>450 → 446 (99.1%)</td><td>$122.13 · $0.274</td><td>0 genuine (3 adjudicated legitimate)</td><td>0</td><td>889 → 502</td></tr>
+      <tr><td>R3</td><td>450 → 441 (98%)</td><td>$151.00 · $0.336</td><td>0 genuine (5 adjudicated legitimate)</td><td>0</td><td>502 → 115</td></tr>
+      <tr><td>R4</td><td>91 → 87 (96%)</td><td>$30.02 · $0.35</td><td>0 genuine (1 adjudicated legitimate)</td><td>0</td><td>116 → 59</td></tr>
+      <tr><td>R5</td><td>9 → 9 (100%)</td><td>$2.52</td><td>0 genuine</td><td>0</td><td>docs-fixable → 0</td></tr>
+      <tr><td><strong>Total</strong></td><td><strong>≈ 1,180 documentation refreshes</strong></td><td><strong>≈ $365</strong></td><td><strong>0 genuine reintroductions</strong></td><td><strong>0</strong></td><td><strong>1,047 → 0</strong></td></tr>
+    </tbody>
+  </table>
+  <p>Full per-rotation checkpoint detail (quorum composition, refine-waste splits, adjudicator verdicts) is in the archived <a href="archive/model-selection-and-global-refine-s5-rotations-landed.html">rotation checkpoint ledger</a>. A stratified 25-name smoke (run <code>9aa921c3</code>) before launch confirmed the basis: 24/25 accepted, 0 reintroduction, 0 drift, 0.0% refine waste, re-audit 25 cleared / 0 re-quarantined, $0.18/name.</p>
+
+  <h3>5.4 — Live-graph outcomes and provenance repairs</h3>
+  <ul>
+    <li><strong>Revalidation sweep:</strong> 436 pending/quarantined names re-stamped under the fixed derived-parent gate; quarantined <code>origin='derived'</code> dropped 62 → 10 (the remainder are genuine, now docs-campaign targets). Campaign selection shrank as stale quarantines cleared.</li>
+    <li><strong>Parse-error triage:</strong> the three genuine pipeline-origin parse errors were resolved — two renamed and re-accepted at 0.91 / 0.96, and the vocab-gap probe name recomposed into two accepted per-array siblings after a lead-authorised provenance-split repair.</li>
+    <li><strong>Audit re-stamp:</strong> the pilot's <code>perturbed_particle_energy</code>, which had washed to "valid" on the prose grep, correctly re-quarantined on its unit defect once the per-batch deterministic re-audit landed — then resolved at root with the other three unit quarantines.</li>
+    <li><strong>Decomposition findings drained:</strong> the retired audit's ~2,250 false-positive findings were cleared graph-wide (≈1,982 via the free drain, the balance graph-wide), removing a phantom defect class rather than "fixing" names that were never wrong.</li>
+    <li><strong>No name drift:</strong> across all five rotations <code>names_composed = 0</code> — the campaign refined documentation on unchanged identifiers and never touched name identity, honouring the guardrail that docs campaigns never rename.</li>
+  </ul>
+
+  <h3>5.5 — Model seats used by the campaign</h3>
+  <p>The seats were settled by a measured role-by-role benchmark before the campaign spent at scale (applied in <code>ce0144e1</code>): documentation generation on <code>gpt-5.6-luna</code> (rubric parity, zero banned prose vs 15%, cheaper), the refine seat held on <code>gpt-5.5</code> (best resolution, lowest collateral), the review quorum on the resilient blind pair <code>claude-sonnet-5</code> + <code>grok-4.5</code>, the name-refine escalator switched to <code>gpt-5.6-fable</code> (lowest do-no-harm collateral on the hard tail), and the prose adjudicator on <code>gpt-5.6-luna</code>. The lead accepted ≈ $0.29/name for the premium review pair after a per-model cost review. Benchmark tables: <a href="archive/model-selection-and-global-refine-s2-s3-landed.html">role-benchmark archive</a> and the reviewer-resilience record in <a href="sn-model-selection-2026-07.html">sn-model-selection-2026-07</a>.</p>
+
+  <p class="landed-summary" style="margin-top:1.5rem">All three campaign guardrails held: no name was regenerated from scratch, every refined definition cleared the standing review quorum, and the criticised defect classes were fixed in prompts and validators before the bulk pass — so the documentation-axis defect set drained monotonically to zero across the five rotations with zero prose reintroduction and zero name drift. Comment 1 is closed at scale; only the release close-out (§4) remains.</p>
 </main>
 </body>
 </html>
