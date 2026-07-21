@@ -319,7 +319,7 @@ loci:
   sensor:
     # generic operational-instrumentation sensor (DD operational_instrumentation/
     # sensor) — orientation vectors, attachment geometry; use the specific
-    # *_sensor tokens (strain_gage_sensor, temperature_sensor) where the DD
+    # *_sensor tokens (strain_gauge_sensor, temperature_sensor) where the DD
     # names the sensor kind
     type: entity
     allowed_relations: [of]
@@ -400,17 +400,17 @@ loci:
     type: entity
     allowed_relations: [of]
     definition: The gauge treated as a distinct physical, plant, or diagnostic object in a standard name.
-  strain_gage_sensor:
-    # mechanical strain-gage sensor on structural components
+  strain_gauge_sensor:
+    # mechanical strain-gauge sensor on structural components
     type: entity
     allowed_relations: [of]
-    definition: The strain gage sensor treated as a distinct physical, plant, or diagnostic object in a standard name.
-  strain_gage:
-    # strain-gage rosette (multi-axis strain measurement); carrier for its
+    definition: The strain gauge sensor treated as a distinct physical, plant, or diagnostic object in a standard name.
+  strain_gauge:
+    # strain-gauge rosette (multi-axis strain measurement); carrier for its
     # ordered measurement-direction unit vectors (first/second)
     type: entity
     allowed_relations: [of]
-    definition: The strain gage treated as a distinct physical, plant, or diagnostic object in a standard name.
+    definition: The strain gauge treated as a distinct physical, plant, or diagnostic object in a standard name.
 
   # ── coil-conductor and diagnostic-optic entities (VocabGap analysis) ──
   # Genuine DD hardware objects (PF/TF/non-axisymmetric coil conductor
