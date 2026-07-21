@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="catalog-expert-review-remediation">
   <meta name="plan-title" content="Catalog Expert Review Remediation">
   <meta name="plan-summary" content="Classify and resolve expert findings across catalog data, grammar, rendering, and the generation pipeline">
-  <meta name="plan-status" content="in-progress">
+  <meta name="plan-status" content="shipped">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="XL">
   <meta name="plan-tier" content="opus">
@@ -17,8 +17,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-21">
-<meta name="plan-version" content="29">
-<meta name="plan-impl" content="0.95">
+<meta name="plan-version" content="30">
+<meta name="plan-impl" content="1.0">
 <meta name="plan-depends-on" content="model-selection-and-global-refine">
 </head>
 <body>
@@ -86,8 +86,19 @@
       the engine + gates rode the normal pipeline (campaign scope <code>a1c8ca1e</code>, claim-race fix <code>af69e3e2</code>,
       per-batch re-audit <code>fa503f83</code>, LLM-adjudicated gate <code>1c2e166a</code>+<code>fbd6a51b</code>).
       <strong>Full change log:</strong> <a href="expert-review-reply.html">expert-review-reply</a> §5 — every change carries a SHA or graph-event reference.
-      <strong>Residue (routed through the pipeline, never direct-accepted):</strong> 6 <code>*_strain_gauge</code>→<code>*_strain_gage</code> US-spelling renames. The other 52 flags were dropped when the arbitrary 70-char length cap was removed as an anti-pattern (imas-codex <code>7e583184</code>) — a name is as short as its physics requires, and no shorter.
-      <strong>Still open here:</strong> release close-out only — ISNC export + catalog RC (<code>f-final-editorial-export</code>, <code>f-close-out-residuals</code>); no review comment blocks the RC.
+      <strong>Residue (superseded — see §7.6 below):</strong> the "6 <code>*_strain_gauge</code>→<code>*_strain_gage</code> US-spelling renames" framing was a misdiagnosis on both counts. The 52 length flags were correctly dropped when the arbitrary 70-char cap was removed as an anti-pattern (imas-codex <code>7e583184</code>) — a name is as short as its physics requires, and no shorter.
+    </p>
+  </section>
+
+  <section id="landed-s76" class="section-landed">
+    <header><span class="badge badge-shipped">✓ §7.6 export + catalog RC 2026-07-21</span><h3>Catalog RC v0.2.0rc63 cut — strain-gauge docs + four root fixes</h3></header>
+    <p class="landed-summary">
+      <strong>Released <code>v0.2.0rc63</code> → origin</strong> (ISNC <code>007a39f1</code>); 1858 names, all four export gates pass, staging validates; ISNC CI green.
+      The planned "6 US-spelling renames" residue was a <strong>double misdiagnosis</strong>: <code>american_spelling_check</code> is <em>advisory</em> (never quarantines) and <code>gauge</code> is the standard American spelling / the DD's own word ("strain rosette gauge"); the 6 names are DD-faithful (<code>sensor/direction{,_second}/{x,y,z}</code>) and were <strong>never renamed</strong>.
+      The real defect was unfilled placeholder <em>documentation</em> (critical <code>placeholder_check</code>) on 5 names — fixed with clean authored <code>sn edit --docs</code> (≈0.90 each), zero renames.
+      <strong>Four root-cause bugs</strong> fixed en route: NC-17 <code>gauge</code> allowlist (<code>27ac45ee</code>), <code>sn run</code> DD-source re-seed crash (<code>3bdf37d5</code>), export deprecation-stub Cypher SyntaxError (<code>a0b7c1ca</code>), and <code>_is_quarantined</code> ISN-ERROR severity — which caught a bare <code>coordinate</code> that would otherwise have blocked the release (<code>426132e8</code>).
+      Full record: <a href="archive/catalog-expert-review-remediation-s76-landed.html">§7.6 landed</a>.
+      One advisory follow-on remains (<code>f-ordinal-carrier-readability</code>): ordinal-led carrier names read awkwardly under the bare component-prefix rule — a grammar-review question, not an RC blocker.
     </p>
   </section>
 
@@ -510,7 +521,7 @@ Done-when
   3. bounded catalog/prompt regression followup is queued</pre>
     <p class="r-fu-outcome">Manifest recorded: docs/archive/catalog-expert-review-manifests/manifest-q-conventions.md. Verdict: row-15 is a catalog WORDING defect, not a DD defect (no upstream issue needed). Defect confirmed in exactly 2 of 10 q-family names (safety_factor, safety_factor_at_pedestal_top); names 3-5 use a correct pitch/flux-increment form and were left. Corrected sign wording is relative alignment of B_phi and I_p, per the locked no-cocos-in-descriptions decision (no COCOS number in prose). safety_factor doc applied (drafted); pedestal_top + the 4 arg-min-|q| row-16 edits STAGED. All 6 await batch review to accept. Side-findings recorded: safety_factor_at_plasma_boundary has an empty definition; _at_..._0_95 carries prohibited 'typical values 3-5' verbose prose.</p>
     </article>
-<article class="r-fu" data-id="f-final-editorial-export" data-status="open" data-tier="sonnet" data-written-by="Codex" data-written-at="2026-07-15" data-recommends-skill="/reckon-ship catalog-expert-review-remediation §4.6" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-final-editorial-export" data-status="resolved" data-tier="sonnet" data-written-by="Codex" data-written-at="2026-07-15" data-recommends-skill="/reckon-ship catalog-expert-review-remediation §4.6" data-resolved-at="2026-07-21T11:16:27+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Finish editorial fixes and export the catalog RC</h4>
     <div class="r-fu-body"><p>Simplify the flux-loop area definition, export accepted graph edits through the supported CLI, validate source links and term cards, and cut the catalog RC after semantic migrations land.</p></div>
     <pre class="r-fu-prompt">Project: imas-standard-names
@@ -531,6 +542,7 @@ Done-when
   1. flux-loop wording passes review and graph docs acceptance
   2. ISNC export, validation, SPA tests/build and source-link checks pass
   3. RC is cut through supported release tooling and outcome recorded</pre>
+    <p class="r-fu-outcome">Subsumed by §7.6 close-out: editorial fixes complete and catalog RC v0.2.0rc63 exported + cut. See f-close-out-residuals outcome and the §7.6 landed archive.</p>
     </article>
 <article class="r-fu" data-id="f-complete-staged-review" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-15" data-recommends-skill="/reckon-ship catalog-expert-review-remediation §4.3" data-resolved-at="2026-07-16T14:22:13+00:00" data-resolved-by="recovery-session">
     <h4 class="r-fu-title">Complete review of staged edits (needs clear-gate authorization)</h4>
@@ -653,7 +665,7 @@ Steps (each unblocks the next stage of §7.5-7.6)
 Done-when: all six executed or explicitly deferred; export + ISNC RC can proceed; followup resolved with outcomes.</pre>
     <p class="r-fu-outcome">Lead granted all six 2026-07-16: RC cut (v0.8.0rc54 pushed), --override-edits editorial batch (rows 7/11/18 + poloidal residue accepted), Cypher DD backfill (8741/8741 pinned), gyrocenter=transport (locked; 5 names reclassified via the new sn reclassify command b05bab63), score-gate exemption (bc7adf49). REMAINING (as of 2026-07-16): 3 exhausted tangential successors — subsequently recovered via <code>sn rescore</code> fresh-quorum re-review (2026-07-17), not a direct accept; row-10 provenance-cleanup not yet run.</p>
     </article>
-<article class="r-fu" data-id="f-close-out-residuals" data-status="open" data-tier="opus" data-written-by="recovery-session" data-written-at="2026-07-16" data-recommends-skill="/reckon-ship catalog-expert-review-remediation §7.6" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-close-out-residuals" data-status="resolved" data-tier="opus" data-written-by="recovery-session" data-written-at="2026-07-16" data-recommends-skill="/reckon-ship catalog-expert-review-remediation §7.6" data-resolved-at="2026-07-21T11:16:27+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Close residuals then export + catalog RC</h4>
     <div class="r-fu-body">残り: (1) DONE — the 3 exhausted local-tangential successors (aperture first/second, bragg second) were recovered via <code>sn rescore</code> fresh-quorum re-review (accepted 0.975/0.9625/0.9625, 2026-07-17), <strong>never a direct accept</strong> (a banned anti-pattern; an exhausted-but-sound name is recovered only by resubmitting the same name to a fresh quorum); (2) row-10: sn provenance-cleanup manifest+apply, then rename thermal_electron_stored_energy→thermal_electron_energy; (3) ~11 needs-human domain moves via sn reclassify; (4) graph hygiene: fast_ion_charge_state_absorbed_wave_power hint mismatch, per_toroidal_mode_wave_absorbed_power stranded reviewed, ~35 stale open edits on superseded predecessors, stuck SNRun cf44b10a, 22 remaining docs-pending hint edits; (5) ISNC export via sn release --export-only, SPA build/tests, catalog RC.</div>
     <pre class="r-fu-prompt">Project: imas-standard-names
@@ -672,10 +684,11 @@ Steps
   5. Export: uv run imas-codex sn release --export-only into clean ISNC; validate; SPA tests/build; verify term cards + pinned DD links + deprecation stubs absent (nothing approved); cut catalog RC via supported tooling.
 
 Done-when: 22/22 tangential successors accepted; row-10 renamed; export validated; catalog RC tagged; followup resolved.</pre>
+    <p class="r-fu-outcome">§7.6 landed — catalog RC v0.2.0rc63 cut (ISNC 007a39f1). The '6 US-spelling renames' residue was a double misdiagnosis: american_spelling_check is advisory (never quarantines) and 'gauge' is valid US spelling / the DD's own word; the 6 names are DD-faithful (sensor/direction{,_second}/{x,y,z}) and unchanged. Real defect was unfilled placeholder DOCS (critical placeholder_check) on 5 names — fixed via clean authored sn edit --docs (≈0.90), zero renames. Four root bugs fixed en route: NC-17 gauge allowlist (27ac45ee), sn-run DD-source re-seed (3bdf37d5), export deprecation-stub Cypher (a0b7c1ca), _is_quarantined ISN-ERROR severity (426132e8; caught bare 'coordinate'). Export 1858/1909, all gates pass, staging validates. Full record: docs/archive/catalog-expert-review-remediation-s76-landed.html.</p>
     </article>
 <article class="r-fu" data-id="f-ordinal-carrier-readability" data-status="open" data-tier="sonnet" data-written-by="reckon-ship" data-written-at="2026-07-21T10:29:32+00:00" data-recommends-skill="/reckon-edit catalog-expert-review-remediation" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Review ordinal-led carrier readability under the bare-component-prefix rule</h4>
-    <div class="r-fu-body">Lead flagged that names like x_first_measurement_direction_unit_vector_of_strain_gauge read awkwardly ('x first' means little at a glance). This is NOT a bug: it is the canonical grammar output. The grammar deliberately bans the explicit x_component_of_<base> long form (components.yml) and uses a bare x_/y_/z_ prefix meaning 'x-component of'; the name is structurally identical to 20+ accepted siblings (x_direction_unit_vector_of_camera, x_major_axis_unit_vector_of_shatter_cone). The only awkwardness is that the carrier token itself leads with an ordinal (first_/second_measurement_direction_unit_vector, tied to DD operational_instrumentation sensor/direction{,_second}). Open question for a grammar/naming review: should ordinal-led geometry carriers be re-phrased, or the component-prefix rule adjusted, so component + ordinal-carrier names read naturally? No catalog action required for this RC; the 6 strain_gauge names are DD-faithful and ship as-is.</div>
+    <div class="r-fu-body">Lead flagged that names like x_first_measurement_direction_unit_vector_of_strain_gauge read awkwardly ('x first' means little at a glance). This is NOT a bug: it is the canonical grammar output. The grammar deliberately bans the explicit x_component_of_<base/> long form (components.yml) and uses a bare x_/y_/z_ prefix meaning 'x-component of'; the name is structurally identical to 20+ accepted siblings (x_direction_unit_vector_of_camera, x_major_axis_unit_vector_of_shatter_cone). The only awkwardness is that the carrier token itself leads with an ordinal (first_/second_measurement_direction_unit_vector, tied to DD operational_instrumentation sensor/direction{,_second}). Open question for a grammar/naming review: should ordinal-led geometry carriers be re-phrased, or the component-prefix rule adjusted, so component + ordinal-carrier names read naturally? No catalog action required for this RC; the 6 strain_gauge names are DD-faithful and ship as-is.</div>
     <pre class="r-fu-prompt">Project: imas-standard-names
 Plan: catalog-expert-review-remediation
 Section: naming-convention review (ordinal-led carriers)
