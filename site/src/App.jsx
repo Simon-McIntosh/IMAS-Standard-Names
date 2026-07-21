@@ -88,7 +88,17 @@ function emptyFilters() {
 }
 
 function Shell() {
-  const { NAMES, loading, error } = useData();
+  const { NAMES: ALL_NAMES, review_batch: reviewBatch, loading, error } = useData();
+  // Review-batch build: constrain the entire universe to the batch id-set.
+  // This is a fixed view — there is no "show all" toggle. Every downstream
+  // derivation (results, facets, indexes) reads NAMES, so narrowing here
+  // narrows the whole SPA. A normal build leaves NAMES untouched.
+  const NAMES = useMemo(() => {
+    if (!reviewBatch || !reviewBatch.length) return ALL_NAMES;
+    const batch = new Set(reviewBatch);
+    return ALL_NAMES.filter((n) => batch.has(n.name) || batch.has(n.id));
+  }, [ALL_NAMES, reviewBatch]);
+  const reviewBatchActive = Boolean(reviewBatch && reviewBatch.length);
   const [urlState, setUrlState] = useUrlState();
   const [query, setQuery] = useState(urlState.query);
   const [filters, setFilters] = useState(emptyFilters);
@@ -235,6 +245,20 @@ function Shell() {
         view={view}
         setView={setView}
       />
+      {reviewBatchActive && (
+        <div
+          className="review-batch-banner"
+          style={{
+            padding: '6px 16px',
+            fontSize: '12px',
+            color: 'var(--text-2)',
+            background: 'var(--surface-2, rgba(127,127,127,0.08))',
+            borderBottom: '1px solid var(--border, rgba(127,127,127,0.2))',
+          }}
+        >
+          Reviewing {NAMES.length} {NAMES.length === 1 ? 'name' : 'names'} in this batch
+        </div>
+      )}
       {view === 'browse' ? (
         <Browse
           filters={filters}

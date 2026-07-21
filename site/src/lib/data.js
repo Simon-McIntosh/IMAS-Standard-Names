@@ -14,6 +14,9 @@ const EMPTY = {
   GRAMMAR_VOCAB: {},
   STANDARD_TERMS: [],
   NAMES: [],
+  // Present only on a review-batch build: the fixed id-set the SPA
+  // constrains its entire universe to. Absent (null) on a normal build.
+  review_batch: null,
 };
 
 // Canonical sort order from the upstream emitter. `sort_tier` and
@@ -74,6 +77,10 @@ export function DataProvider({ children }) {
           GRAMMAR_VOCAB: data.GRAMMAR_VOCAB ?? {},
           STANDARD_TERMS: Array.isArray(data.STANDARD_TERMS) ? data.STANDARD_TERMS : [],
           NAMES: Array.isArray(data.NAMES) ? data.NAMES : [],
+          review_batch:
+            Array.isArray(data.review_batch) && data.review_batch.length
+              ? data.review_batch
+              : null,
           loading: false,
           error: null,
           versions,
