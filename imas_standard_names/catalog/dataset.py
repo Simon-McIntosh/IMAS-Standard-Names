@@ -1290,13 +1290,21 @@ def build_site_dataset(
     else:
         version = f"{len(names)} names"
 
-    return {
+    dataset: dict[str, Any] = {
         "CATALOG_VERSION": version,
         "CATEGORIES": _build_categories(names),
         "GRAMMAR_VOCAB": _build_grammar_vocab(),
         "STANDARD_TERMS": [term.model_dump(mode="json") for term in standard_terms()],
         "NAMES": names,
     }
+
+    # Review-batch builds constrain the SPA to a fixed id-set. Emit the
+    # ids (sorted for determinism) only when the manifest carries a
+    # non-empty batch — normal builds keep today's exact output.
+    if manifest is not None and manifest.review_batch:
+        dataset["review_batch"] = sorted(manifest.review_batch)
+
+    return dataset
 
 
 def write_site_dataset(

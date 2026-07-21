@@ -1034,8 +1034,11 @@ class StandardNameCatalogManifest(BaseModel):
     source_repo: str | None = None
     source_commit_sha: str | None = None
     # Export scope and timing provenance (added in v0.7.0rc31).
-    export_scope: Literal["full", "domain", "scoped"] | None = None
+    export_scope: Literal["full", "domain", "scoped", "review"] | None = None
     domains_included: list[str] = Field(default_factory=list)
+    # Review-batch id-set: on a ``review`` export this holds the exact
+    # standard-name ids in the PR'd batch; absent on normal builds.
+    review_batch: list[str] | None = None
     catalog_commit_sha: str | None = None
     exported_at: datetime | None = None
     edge_model_version: str | None = None

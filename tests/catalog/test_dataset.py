@@ -1316,3 +1316,61 @@ class TestGrammarVocab:
         vocab = _build_grammar_vocab()
         tokens = {d["token"] for d in vocab["physics_domains"]}
         assert "equilibrium" in tokens
+
+
+def _write_catalog(tmp_path: Path, manifest: dict) -> Path:
+    """Write the synthetic entries plus a custom manifest and return the
+    ``standard_names`` directory build_site_dataset consumes."""
+    names_dir = tmp_path / "standard_names"
+    names_dir.mkdir()
+    (names_dir / "equilibrium.yml").write_text(
+        yaml.safe_dump(SYNTHETIC_EQUILIBRIUM), encoding="utf-8"
+    )
+    (names_dir / "core_plasma_physics.yml").write_text(
+        yaml.safe_dump(SYNTHETIC_CORE), encoding="utf-8"
+    )
+    (tmp_path / "catalog.yml").write_text(yaml.safe_dump(manifest), encoding="utf-8")
+    return names_dir
+
+
+class TestReviewBatch:
+    """A ``review`` export carries a fixed id-set through the manifest into
+    the SPA dataset; normal builds are unaffected."""
+
+    def test_manifest_model_accepts_review_scope_and_batch(self) -> None:
+        """export_scope='review' + review_batch round-trip through the model."""
+        from imas_standard_names.models import StandardNameCatalogManifest
+
+        data = dict(SYNTHETIC_MANIFEST)
+        data["export_scope"] = "review"
+        data["review_batch"] = ["ion_temperature", "magnetic_field"]
+        manifest = StandardNameCatalogManifest.model_validate(data)
+        assert manifest.export_scope == "review"
+        assert manifest.review_batch == ["ion_temperature", "magnetic_field"]
+
+    def test_build_emits_sorted_review_batch(self, tmp_path: Path) -> None:
+        """A review manifest makes build_site_dataset emit a sorted id-set."""
+        manifest = dict(SYNTHETIC_MANIFEST)
+        manifest["export_scope"] = "review"
+        # Deliberately unsorted to prove the emitted list is sorted.
+        manifest["review_batch"] = ["magnetic_field", "ion_temperature"]
+        catalog_dir = _write_catalog(tmp_path, manifest)
+
+        dataset = build_site_dataset(catalog_dir)
+
+        assert dataset["review_batch"] == ["ion_temperature", "magnetic_field"]
+
+    def test_normal_build_has_no_review_batch_key(self, site_dataset: dict) -> None:
+        """A normal (full/domain) manifest never emits the key."""
+        assert "review_batch" not in site_dataset
+
+    def test_empty_review_batch_is_omitted(self, tmp_path: Path) -> None:
+        """An empty batch list is treated as absent — no key emitted."""
+        manifest = dict(SYNTHETIC_MANIFEST)
+        manifest["export_scope"] = "review"
+        manifest["review_batch"] = []
+        catalog_dir = _write_catalog(tmp_path, manifest)
+
+        dataset = build_site_dataset(catalog_dir)
+
+        assert "review_batch" not in dataset
