@@ -81,13 +81,13 @@
   </table>
   <p style="font-size:.9rem"><strong>Docs campaign COMPLETE — docs-axis defects fully drained (1,047 → 0).</strong> A final small rotation
   (2026-07-20, 9/9 accepted, $2.52) cleared the last prose + latex findings. The <code>prose,audit:latex,audit:spelling,audit:length</code>
-  dry-run still shows a residue, but <strong>every remaining finding is NAME-axis, which a docs campaign can never clear</strong> (it
-  refines documentation, not names): <strong>52 <code>audit:length</code></strong> (<code>length_soft_cap_check</code> flags names over
-  70 chars) and <strong>6 <code>audit:spelling</code></strong> (all the same — <code>*_strain_gauge</code> names flagged British
-  "gauge" → American "gage", a finding on the <em>name</em> field). Both predicates were mis-included in the docs spec. These 58
-  name-axis findings are re-scoped to the <strong>name-axis workstream</strong> (name shortening + the gauge→gage rename), consistent
-  with the §5 done-when clause that name-axis findings are re-scoped rather than silently waived. From rotation 4 on, every refreshed
-  doc also ran on the new no-units prompt, so it is unit-free.</p>
+  dry-run still shows a residue, but <strong>the only genuine remaining finding is NAME-axis, which a docs campaign can never clear</strong>
+  (it refines documentation, not names): <strong>6 <code>audit:spelling</code></strong> (all the same — <code>*_strain_gauge</code> names
+  carrying a British spelling; the catalog is US-spelling throughout, so they are renamed <code>*_strain_gage</code> through the normal
+  compose→review pipeline, <em>never</em> a direct accept). The other <strong>52 <code>audit:length</code></strong> flags were
+  <strong>not defects</strong>: the arbitrary 70-char <code>length_soft_cap_check</code> was removed as an anti-pattern (imas-codex
+  <code>7e583184</code>) — a name is as short as its physics requires and no shorter, so length alone never triggers a rename. From
+  rotation 4 on, every refreshed doc also ran on the new no-units prompt, so it is unit-free.</p>
   <p style="font-size:.85rem;color:#666"><strong>Rotation 5</strong> (final) · 2026-07-20 · pilot 15 → 9 eligible · 9/9 accepted · $2.52 ·
   docs-fixable 9 → 0 (the residual 6 are name-axis). Total docs campaign spend across R1–R5 ≈ $365 for the docs-axis clean-up of a
   ~2,300-name catalog.</p>
