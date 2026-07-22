@@ -325,6 +325,9 @@ bases:
   shearing_rate:
     aliases: []
     kind: scalar
+  signal_to_noise_ratio:
+    aliases: []
+    kind: scalar
   size:
     aliases: []
     kind: scalar
@@ -367,6 +370,9 @@ bases:
     kind: scalar
     inherently_dimensional: true
   torque_density:
+    aliases: []
+    kind: scalar
+  transit_time:
     aliases: []
     kind: scalar
   transmissivity:
