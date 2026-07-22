@@ -534,6 +534,7 @@ class Position(StrEnum):
     FLUX_SURFACE = "flux_surface"
     GEOMETRIC_AXIS = "geometric_axis"
     HALO_BOUNDARY = "halo_boundary"
+    INBOARD_MIDPLANE = "inboard_midplane"
     INLET = "inlet"
     INSIDE_FLUX_SURFACE = "inside_flux_surface"
     INTERNAL_TRANSPORT_BARRIER = "internal_transport_barrier"

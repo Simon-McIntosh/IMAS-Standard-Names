@@ -127,6 +127,9 @@ bases:
   electrostatic_potential:
     aliases: []
     kind: scalar
+  ellipticity:
+    aliases: []
+    kind: scalar
   elongation:
     aliases: []
     kind: scalar

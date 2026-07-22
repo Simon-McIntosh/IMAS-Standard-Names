@@ -560,6 +560,16 @@ loci:
     type: position
     allowed_relations: [at, of, over]
     definition: The spatial location identified as the halo boundary in the relevant plasma, diagnostic, or plant context.
+  inboard_midplane:
+    type: position
+    allowed_relations: [at, of]
+    definition: >-
+      High-field-side (inboard) equatorial midplane - the inner-midplane
+      counterpart of outboard_midplane. The inner-midplane reference is the
+      inboard intersection of the horizontal plane through the magnetic axis
+      (or the DD midplane_identifier) with the plasma boundary / first wall.
+      DD: e.g. equilibrium/time_slice/profiles_1d/r_inboard (inboard major
+      radius of the flux surface at the midplane).
   inlet:
     type: position
     allowed_relations: [at, of]
