@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"   content="imas-standard-names">
+  <meta name="reckon-type"    content="plan">
+  <meta name="plan-slug"      content="sn-dd-unit-curation">
+  <meta name="plan-title"     content="SN↔DD Unit Curation">
+  <meta name="plan-summary"   content="Reconcile SN and DD unit strings on one pint parser so the unit-mismatch axis stops flagging ordering-only false positives; prune the stale ion_charge finding; triage genuine defects.">
+  <meta name="plan-status"    content="draft">
+  <meta name="plan-roi"       content="high">
+  <meta name="plan-effort"    content="M">
+  <meta name="plan-tier"      content="opus">
+  <meta name="plan-owner"     content="Simon McIntosh">
+  <title>SN↔DD Unit Curation | imas-standard-names</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h2 id="s1">§1 — Problem &amp; goal</h2>
+    <p>The downstream SN↔DD <strong>unit-mismatch axis</strong> (followup
+    <code>f-ddhu-004</code>) compares each standard name's declared
+    <code>unit</code> against the unit its Data-Dictionary source facet
+    declares, and flags disagreements. A large fraction of what it flags is
+    <em>not</em> a physical disagreement — it is the <strong>same unit written
+    in a different token order or symbol spelling</strong> on the two sides.
+    Those false positives bury the handful of genuine dimensional defects and
+    make the axis untrustworthy for curation.</p>
+    <p>This plan closes the axis in three moves:</p>
+    <ol>
+      <li><strong>Ordering normalization</strong> — make the DD-side and
+      SN-side unit strings flow through the <em>same pint parser and the same
+      canonical formatter</em> before they are compared, so ordering-only and
+      spelling-only differences collapse. The user's directive: <em>"both the
+      DD and the SN should use the same pint unit parser; this defines the
+      order — this check is reconcilable in code."</em> §2 confirms it is.</li>
+      <li><strong>Prune the stale <code>ion_charge</code> finding</strong> —
+      remove the mismatch finding that is an artifact of the ordering bug (or
+      of an already-landed rename) rather than a real defect.</li>
+      <li><strong>Triage the genuine residual</strong> — review the small set
+      of names whose declared unit truly disagrees with the DD after
+      normalization, and correct each at source.</li>
+    </ol>
+    <p><strong>Scope split.</strong> This repo (ISN) owns the unit models and
+    the three unit formatters — it is where the canonical form is <em>defined</em>.
+    The mismatch axis itself runs downstream in the imas-codex catalog
+    pipeline, which <em>consumes</em> ISN's canonical form. This plan delivers a
+    single ISN-side canonical-unit function and reconciles the formatters onto
+    it; the downstream axis then compares canonical strings on both sides.</p>
+
+    <h2 id="s2">§2 — Check &amp; confirm (verdict: reconcilable in code)</h2>
+    <p>Confirmed against the live source. There are <strong>three independent
+    unit-formatting paths</strong> in this repo, and they do <em>not</em> agree:</p>
+    <ul>
+      <li><strong>DD path — the <code>"U"</code> formatter</strong>
+      (<code>imas_standard_names/units/__init__.py:10</code>): joins
+      <code>unit.items()</code> with dots, <em>unsorted</em>, and — because it
+      is not the short (<code>~</code>) variant — emits <strong>long unit
+      names</strong>. This is the "dot exponential form" the user referred to.</li>
+      <li><strong>SN path — the <code>"F"</code> formatter</strong>
+      (<code>imas_standard_names/__init__.py:106</code>,
+      <code>format_unit_udunits_dot_exponent</code>): <code>sorted(...)</code>
+      by short symbol, with <code>int(exp)</code>. Reached via
+      <code>StandardNameScalarEntry.formatted_unit("dotexp")</code> →
+      <code>{u:~F}</code>. This is the "sorted pint form".</li>
+      <li><strong>SN storage — <code>_canonicalize_unit_order</code></strong>
+      (<code>imas_standard_names/models.py:326</code>): a <strong>regex</strong>
+      parser that sorts raw authored tokens lexicographically — a
+      <em>second, independent</em> ordering implementation that does not touch
+      pint at all.</li>
+    </ul>
+
+    <p>Empirical run of all three paths over sample units (input token order
+    deliberately scrambled):</p>
+    <div style="overflow-x:auto">
+    <table style="border-collapse:collapse;font-size:13px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace">
+      <thead>
+        <tr style="border-bottom:2px solid #333">
+          <th style="text-align:left;padding:4px 12px 4px 0">input</th>
+          <th style="text-align:left;padding:4px 12px 4px 0;color:#a32">DD <code>"U"</code> (unsorted, long)</th>
+          <th style="text-align:left;padding:4px 12px 4px 0;color:#0a7">SN <code>~F</code> (sorted, short)</th>
+          <th style="text-align:left;padding:4px 12px 4px 0;color:#0a7">regex canonicalize</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="border-bottom:1px solid #ddd"><td style="padding:3px 12px 3px 0"><code>s^-1.m</code></td><td style="color:#a32">meter.second^-1.0</td><td style="color:#0a7">m.s^-1</td><td style="color:#0a7">m.s^-1</td></tr>
+        <tr style="border-bottom:1px solid #ddd"><td style="padding:3px 12px 3px 0"><code>m.s^-1</code></td><td style="color:#a32">meter.second^-1</td><td style="color:#0a7">m.s^-1</td><td style="color:#0a7">m.s^-1</td></tr>
+        <tr style="border-bottom:1px solid #ddd"><td style="padding:3px 12px 3px 0"><code>m^-3.kg</code></td><td style="color:#a32">kilogram.meter^-3.0</td><td style="color:#0a7">kg.m^-3</td><td style="color:#0a7">kg.m^-3</td></tr>
+        <tr style="border-bottom:1px solid #ddd"><td style="padding:3px 12px 3px 0"><code>m^-1.keV</code></td><td style="color:#a32">kiloelectron_volt.meter^-1.0</td><td style="color:#0a7">keV.m^-1</td><td style="color:#0a7">keV.m^-1</td></tr>
+        <tr style="border-bottom:1px solid #ddd"><td style="padding:3px 12px 3px 0"><code>V.s</code></td><td style="color:#a32">second.volt</td><td style="color:#0a7">V.s</td><td style="color:#0a7">V.s</td></tr>
+        <tr><td style="padding:3px 12px 3px 0"><code>kg.m^2.s^-3.A^-1</code></td><td style="color:#a32">ampere^-1.kilogram.meter^2.0.second^-3.0</td><td style="color:#0a7">A^-1.kg.m^2.s^-3</td><td style="color:#0a7">A^-1.kg.m^2.s^-3</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <p><strong>Three findings from the run:</strong></p>
+    <ol>
+      <li><strong>The DD <code>"U"</code> formatter is the entire source of the
+      spurious mismatches.</strong> For the identical physical unit it emits
+      <code>meter.second^-1.0</code> where the SN side stores <code>m.s^-1</code>
+      — a guaranteed string mismatch on every compound unit.</li>
+      <li><strong><code>"U"</code> also has an order-dependent float-exponent
+      bug.</strong> <code>m.s^-1</code> (already canonical) formats as
+      <code>second^-1</code>, but <code>s^-1.m</code> (reordered) formats as
+      <code>second^-1.0</code> — the same unit yields different strings
+      depending on the author's token order, because pint re-parsing yields
+      float exponents that <code>"U"</code> renders verbatim (<code>~F</code>
+      guards this with <code>int(exp)</code>; <code>"U"</code> does not).</li>
+      <li><strong><code>~F</code> and the regex canonicalizer agree on every
+      sample</strong> — good — but they are two separate implementations of the
+      ordering. They agree today only because authored short symbols happen to
+      equal pint's short symbols; a unit alias or prefix pint spells
+      differently would silently diverge.</li>
+    </ol>
+
+    <p><strong>Verdict:</strong> the user's claim holds — the check is
+    reconcilable in code. Both sides already have pint. Route both the DD unit
+    string and the SN unit string through <code>pint.Unit(...)</code> and format
+    both with the <em>same</em> sorted short-symbol formatter
+    (<code>~F</code>); the ordering-only and spelling-only mismatches vanish and
+    only genuine dimensional differences survive. The <code>~F</code> formatter
+    is already correct; the <code>"U"</code> formatter is the outlier to retire
+    or fix, and the regex canonicalizer should fold onto the same single
+    ordering authority.</p>
+
+    <figure style="margin:1.5em 0">
+      <svg viewBox="0 0 900 360" width="100%" style="max-width:900px;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif" role="img" aria-label="One unit flows through three code paths; only pint tilde-F is canonical, and reconciliation routes both sides through it.">
+        <rect x="0" y="0" width="900" height="360" fill="#ffffff"/>
+        <text x="16" y="26" font-size="15" font-weight="600" fill="#1a1a1a">One unit, three code paths — reconcile both sides on pint <tspan font-family="ui-monospace,monospace">~F</tspan></text>
+
+        <!-- input -->
+        <rect x="16" y="52" width="180" height="58" fill="#ffffff" stroke="#333" stroke-width="1"/>
+        <text x="26" y="76" font-size="13" fill="#1a1a1a">author / DD input</text>
+        <text x="26" y="98" font-size="14" font-family="ui-monospace,monospace" fill="#1a1a1a">s^-1.m  (any order)</text>
+
+        <!-- arrows -->
+        <line x1="196" y1="81" x2="250" y2="60" stroke="#999" stroke-width="1"/>
+        <line x1="196" y1="81" x2="250" y2="140" stroke="#999" stroke-width="1"/>
+        <line x1="196" y1="81" x2="250" y2="220" stroke="#999" stroke-width="1"/>
+
+        <!-- path A: DD "U" (defect) -->
+        <rect x="252" y="34" width="392" height="52" fill="#ffffff" stroke="#a32" stroke-width="1"/>
+        <rect x="252" y="34" width="4" height="52" fill="#a32"/>
+        <text x="266" y="54" font-size="13" fill="#1a1a1a">DD <tspan font-family="ui-monospace,monospace">"U"</tspan> formatter · units/__init__.py</text>
+        <text x="266" y="74" font-size="14" font-family="ui-monospace,monospace" fill="#a32">meter.second^-1.0</text>
+        <text x="654" y="58" font-size="12" fill="#a32">long names,</text>
+        <text x="654" y="74" font-size="12" fill="#a32">float exp, unsorted</text>
+
+        <!-- path B: SN ~F (canonical) -->
+        <rect x="252" y="114" width="392" height="52" fill="#ffffff" stroke="#0a7" stroke-width="1"/>
+        <rect x="252" y="114" width="4" height="52" fill="#0a7"/>
+        <text x="266" y="134" font-size="13" fill="#1a1a1a">SN <tspan font-family="ui-monospace,monospace">~F</tspan> formatter · __init__.py</text>
+        <text x="266" y="154" font-size="14" font-family="ui-monospace,monospace" fill="#0a7">m.s^-1</text>
+        <text x="654" y="138" font-size="12" fill="#087">short, sorted,</text>
+        <text x="654" y="154" font-size="12" fill="#087">int exp — canonical</text>
+
+        <!-- path C: regex -->
+        <rect x="252" y="194" width="392" height="52" fill="#ffffff" stroke="#0a7" stroke-width="1" stroke-dasharray="4 3"/>
+        <rect x="252" y="194" width="4" height="52" fill="#0a7"/>
+        <text x="266" y="214" font-size="13" fill="#1a1a1a">regex canonicalize · models.py</text>
+        <text x="266" y="234" font-size="14" font-family="ui-monospace,monospace" fill="#0a7">m.s^-1</text>
+        <text x="654" y="218" font-size="12" fill="#666">agrees today,</text>
+        <text x="654" y="234" font-size="12" fill="#666">separate impl (not pint)</text>
+
+        <!-- reconciliation bar -->
+        <rect x="16" y="286" width="868" height="58" fill="#ffffff" stroke="#333" stroke-width="1"/>
+        <text x="30" y="310" font-size="13" font-weight="600" fill="#1a1a1a">Fix — one ordering authority:</text>
+        <text x="30" y="330" font-size="13" fill="#1a1a1a">route DD unit and SN unit through the same <tspan font-family="ui-monospace,monospace">pint.Unit(...)</tspan> + <tspan font-family="ui-monospace,monospace">~F</tspan>, then compare strings → ordering/spelling mismatches vanish; only real defects remain.</text>
+      </svg>
+      <figcaption style="font-size:13px;color:#444;margin-top:6px">One physical unit, three code paths. The DD <code>"U"</code> formatter (red) diverges by long names, float exponents, and no sort; <code>~F</code> (solid green) is the canonical short-sorted form; the regex canonicalizer (dashed green) agrees today but is a second ordering implementation. Reconciliation routes both compared sides through pint <code>~F</code>.</figcaption>
+    </figure>
+
+    <h2 id="s3">§3 — Reconciliation design</h2>
+    <p>Deliver a single ISN-side canonical-unit function and make every path
+    defer to it:</p>
+    <ul>
+      <li><strong>One helper.</strong> Add <code>canonical_unit(s: str) -&gt;
+      str</code> that parses through <code>pint.Unit(s)</code> and formats with
+      <code>{u:~F}</code> (short symbols, sorted, integer exponents). This is
+      the single ordering authority the user mandated.</li>
+      <li><strong>Retire or fix the <code>"U"</code> formatter</strong> so the
+      DD side no longer emits long names / float exponents / unsorted order.
+      Preferred: standardize on <code>~F</code> everywhere and remove the
+      divergent <code>"U"</code> path (see decision below).</li>
+      <li><strong>Fold the regex canonicalizer onto the same authority</strong>
+      (or, if kept for speed, guard it with a parity test asserting
+      <code>_canonicalize_unit_order(u) == canonical_unit(u)</code> over the
+      full catalog unit set, so divergence fails CI).</li>
+      <li><strong>Downstream comparison</strong> becomes
+      <code>canonical_unit(sn_unit) == canonical_unit(dd_unit)</code> — a pure
+      string compare after both are normalized. The imas-codex axis imports the
+      helper from ISN rather than re-implementing formatting.</li>
+    </ul>
+    <p>Migration note: the SN catalog already stores the sorted short form, so
+    reconciliation does not rewrite stored units — it only changes the DD-side
+    comparison string. Retiring <code>"U"</code> requires auditing its
+    consumers (currently only the module registry in
+    <code>units/__init__.py</code>; no in-repo caller was found) before removal.</p>
+
+    <h2 id="s4">§4 — Curation: prune stale + triage genuine</h2>
+    <p>Once ordering-only false positives are gone, the residual list is small.
+    From the model-selection plan the pre-reconciliation "genuine unit defect"
+    candidates were: <code>effective_particle_energy</code>,
+    <code>particle_mass</code>, <code>perturbed_particle_energy</code>,
+    <code>effective_thermal_ion_charge_state_energy_velocity_due_to_convection</code>.</p>
+    <ul>
+      <li><strong>Prune the stale <code>ion_charge</code> finding.</strong>
+      <code>effective_thermal_ion_charge_state_energy_velocity_due_to_convection</code>
+      must be re-checked against the live catalog and DD facet <em>after</em>
+      reconciliation lands: determine whether its flag was an artifact of the
+      <code>"U"</code> ordering bug (prune it) or a true dimensional
+      disagreement (keep it in triage). The user's read is that the
+      <code>ion_charge</code> finding is stale and should be pruned.</li>
+      <li><strong>Triage each genuine residual.</strong> For every name that
+      still mismatches after normalization, read the DD source facet's unit and
+      the name's declared unit, decide which is correct, and correct at source
+      via <code>sn edit</code> (never raw Cypher — per project convention). A
+      name may be legitimately dimensionless-vs-dimensional if it is a derived
+      operator form; record the reason when a mismatch is intentional.</li>
+    </ul>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+      <h2><span class="sec">§</span> Decisions</h2>
+
+      <div class="r-dec" data-key="formatter-unification" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">How to make DD and SN share one canonical unit form?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="retire-U-standardize-F">Retire "U", standardize on ~F via canonical_unit()</button>
+          <button class="r-opt" data-value="fix-U-in-place">Fix "U" in place (short symbols, int exp, sort)</button>
+        </p>
+        <p class="r-dec-rat"></p>
+      </div>
+
+      <div class="r-dec" data-key="canonicalizer-authority" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">Should _canonicalize_unit_order be reimplemented on pint, or kept as regex with a parity test?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="pint-single-authority">Reimplement on pint (one ordering authority)</button>
+          <button class="r-opt" data-value="keep-regex-parity-test">Keep regex, guard with catalog-wide parity test</button>
+        </p>
+        <p class="r-dec-rat"></p>
+      </div>
+
+      <div class="r-dec" data-key="ion-charge-finding" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">Is the ion_charge (effective_thermal_ion_charge_state_energy_velocity_due_to_convection) finding stale (prune) or genuine (triage)?</p>
+        <p class="r-dec-rat"></p>
+      </div>
+    </section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+      <h2><span class="sec">§</span> Followups</h2>
+
+      <article class="r-fu" data-id="f-sdu-001" data-status="open" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-07-22">
+        <h4 class="r-fu-title">§3 — Unify unit formatting on one pint-defined canonical form</h4>
+        <div class="r-fu-body">
+          <p>Implement the single ordering authority so DD-side and SN-side unit
+          strings reconcile. Add <code>canonical_unit(s)</code> (pint parse +
+          <code>~F</code>), reconcile the <code>"U"</code> formatter, and add the
+          parity/round-trip tests that prove ordering-only mismatches collapse.
+          §2 confirmed the mechanism and the <code>"U"</code> float-exponent
+          bug; this followup lands the fix. §4 curation (prune stale
+          <code>ion_charge</code> + triage genuine) is a separate followup that
+          runs after this lands, because the residual list is only trustworthy
+          once normalization is in place.</p>
+        </div>
+        <pre class="r-fu-prompt">Project: imas-standard-names
+Plan:    sn-dd-unit-curation (http://localhost:8765/imas-standard-names/sn-dd-unit-curation.html)
+Section: §3
+Tier:    opus
+
+Context
+  The SN↔DD unit-mismatch axis flags ordering-only and spelling-only false
+  positives. §2 confirmed the cause: three divergent unit-formatting paths —
+  the DD "U" formatter emits long names + float exponents + unsorted order,
+  while the SN ~F formatter and a separate regex canonicalizer both produce
+  the sorted short form. Unify everything on one pint-defined canonical form.
+
+State to read  (CODE / FILES — not the plan itself)
+  imas_standard_names/units/__init__.py    ("U" formatter — the outlier)
+  imas_standard_names/__init__.py:104-131  ("F" / format_unit_udunits_dot_exponent — the correct one)
+  imas_standard_names/models.py:324-380,633-671  (_canonicalize_unit_order, formatted_unit, scalar validator)
+  tests/  (existing unit tests to extend)
+
+Scope locks / constraints  (non-decision)
+  - pint is already a dep (pyproject: pint>=0.24.4,<0.25.0). No new deps.
+  - Do NOT rewrite stored catalog units — they already store the sorted short
+    form. This change only affects the DD-side comparison string + retiring/fixing "U".
+  - Before removing "U", grep all consumers of it and of the units/__init__.py
+    module registry; there was no in-repo caller found, but confirm.
+  - The mismatch axis itself lives downstream in imas-codex; this followup only
+    delivers the ISN-side canonical_unit() helper it will import.
+
+Done-when
+  1. canonical_unit(s) added (pint.Unit + {u:~F}); "U" reconciled per the
+     locked formatter-unification decision.
+  2. Test proving ordering/spelling variants of the same unit normalize equal
+     (e.g. "s^-1.m" == "m.s^-1"), and that the float-exponent artifact is gone.
+  3. Parity/authority check per the locked canonicalizer-authority decision.
+  4. Full test suite green.
+  5. Followup written into the plan for §4 curation; this followup resolved.</pre>
+      </article>
+
+    </section>
+
+  </main>
+</body>
+</html>
