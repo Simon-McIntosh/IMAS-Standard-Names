@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-standard-names">
+  <meta name="reckon-type" content="doc">
+  <meta name="plan-slug" content="sn-dd-unit-curation-s3-landed">
+  <meta name="plan-title" content="§3 landed — one pint-defined canonical unit authority">
+  <meta name="plan-summary" content="canonical_unit() is the single source of truth for unit ordering + spelling; the divergent 'U' formatter is retired; the regex canonicalizer is folded onto pint and demoted to a CI stability guard; ordering/spelling-only mismatches now collapse to string equality.">
+  <meta name="plan-informs" content="sn-dd-unit-curation">
+  <title>§3 landed — canonical unit authority | imas-standard-names</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="s3">§3 landed — one pint-defined canonical unit authority
+      <span class="badge badge-shipped">✓ landed 2026-07-22</span></h2>
+    <p>Evergreen: <a href="/imas-standard-names/sn-dd-unit-curation.html">sn-dd-unit-curation</a> §3.
+    Resolves followup <code>f-sdu-001</code>. Delivers the ISN-side
+    <code>canonical_unit()</code> helper the downstream imas-codex mismatch axis imports,
+    collapses the three divergent unit-formatting paths (§2) onto one authority, and adds the
+    stability + round-trip tests that prove ordering-only and spelling-only mismatches vanish.</p>
+
+    <h3>What shipped</h3>
+    <div style="overflow-x:auto"><table>
+      <thead><tr><th>#</th><th>Change</th><th>File</th></tr></thead>
+      <tbody>
+        <tr><td>1</td>
+            <td><code>canonical_unit(s)</code> added — the single source-of-truth formatter
+                (pint parse + <code>~F</code>, integer exponents, ASCII short symbols).
+                Exported as <code>from imas_standard_names import canonical_unit</code>.</td>
+            <td><code>imas_standard_names/__init__.py</code></td></tr>
+        <tr><td>2</td>
+            <td>The divergent <code>"U"</code> formatter (long names, float exponents, unsorted)
+                is <strong>removed</strong>. Grep confirmed no in-repo consumer of it or of the
+                <code>units</code> module registry; the DD-alias registry is retained.</td>
+            <td><code>imas_standard_names/units/__init__.py</code></td></tr>
+        <tr><td>3</td>
+            <td>The scalar/vector/name-only unit validators (<code>_canonicalize_unit_order</code>)
+                delegate ordering to <code>canonical_unit()</code> instead of the hand-rolled
+                regex parse+sort — one ordering authority. Authoring guards (no whitespace,
+                no <code>/</code>/<code>*</code>, <code>"1"</code> for dimensionless) stay.</td>
+            <td><code>imas_standard_names/models.py</code></td></tr>
+        <tr><td>4</td>
+            <td>Stability test: <code>canonical_unit()</code> output must match the dot-exponent
+                grammar (sorted ASCII short tokens, integer exponents, no <code>.0</code>) over the
+                full catalog unit set — a pint bump or symbol re-spelling fails CI. Plus round-trip
+                and validator-parity tests.</td>
+            <td><code>tests/name_schema/test_canonical_unit.py</code></td></tr>
+      </tbody>
+    </table></div>
+
+    <h3>The spelling-drift trap §2 warned about — caught and closed</h3>
+    <p>§2 finding #3 flagged that pint's short symbols can diverge from authored ASCII tokens.
+    A catalog scan proved it live: the authored unit <code>m.ohm</code> renders through pint
+    <code>~F</code> as <code>m.Ω</code> (Unicode Ω) — and micro-prefixed units would render
+    <code>µs</code>, degrees Celsius <code>°C</code>. A naïve pint switch would have silently
+    rewritten stored units and injected non-ASCII glyphs, breaking the migration invariant
+    (<em>do not rewrite stored units</em>).</p>
+    <p><strong>Fix:</strong> the single <code>~F</code> formatter now maps pint's non-ASCII short
+    glyphs to their ASCII spellings (<code>Ω→ohm</code>, <code>µ→u</code>, <code>°→deg</code>)
+    <em>before</em> sorting, so ordering matches the retired regex byte-for-byte. Verified: across
+    all <strong>20 distinct catalog units</strong>, the pint form and the old regex form now agree
+    <strong>exactly (0 divergences)</strong>. Any future glyph not in the ASCII map survives into the
+    output and trips the stability test rather than corrupting a stored unit.</p>
+
+    <h3>Reconciliation property proven</h3>
+    <p>Ordering and spelling variants of one physical unit normalize equal — the exact property the
+    downstream axis relies on:</p>
+    <div style="overflow-x:auto"><table>
+      <thead><tr><th>input</th><th><code>canonical_unit()</code></th></tr></thead>
+      <tbody>
+        <tr><td><code>s^-1.m</code>, <code>m.s^-1</code></td><td><code>m.s^-1</code> (float-exp <code>.0</code> artifact gone)</td></tr>
+        <tr><td><code>T.m^-2.A</code>, <code>m^-2.A.T</code></td><td><code>A.T.m^-2</code></td></tr>
+        <tr><td><code>s.kg.m^2</code>, <code>s.m^2.kg</code></td><td><code>kg.m^2.s</code></td></tr>
+        <tr><td><code>m.ohm</code>, <code>ohm.m</code></td><td><code>m.ohm</code> (ASCII, not <code>m.Ω</code>)</td></tr>
+      </tbody>
+    </table></div>
+    <p>Downstream comparison becomes
+    <code>canonical_unit(sn_unit) == canonical_unit(dd_unit)</code> — a pure string compare after
+    both sides are normalized through the one authority.</p>
+
+    <h3>Verification</h3>
+    <p>New <code>tests/name_schema/test_canonical_unit.py</code> green; the unit-focused groups
+    (catalog validation, storage/loader, codegen drift, JSON-schema contract, semantic units,
+    name-schema, name-only) pass. The one pre-existing suite failure
+    (<code>test_find_git_root_raises_when_no_repo</code>, an environmental tmp-path flake) is
+    unrelated to units and predates this change.</p>
+
+    <div class="next-card">
+      <p><strong>What's next — §4 curation.</strong> With normalization in place the residual
+      mismatch list is finally trustworthy. §4 re-checks
+      <code>effective_thermal_ion_charge_state_energy_velocity_due_to_convection</code> against the
+      live catalog + DD facet (the user's read: the <code>ion_charge</code> finding is stale — prune
+      it) and triages each genuine residual, correcting at source via <code>sn edit</code>.
+      Tracked as the §4 followup on the evergreen.</p>
+    </div>
+  </main>
+</body>
+</html>

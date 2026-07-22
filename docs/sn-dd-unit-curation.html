@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="sn-dd-unit-curation">
   <meta name="plan-title" content="SN↔DD Unit Curation">
   <meta name="plan-summary" content="Reconcile SN and DD unit strings on one pint parser so the unit-mismatch axis stops flagging ordering-only false positives; prune the stale ion_charge finding; triage genuine defects.">
-  <meta name="plan-status" content="draft">
+  <meta name="plan-status" content="active">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="M">
   <meta name="plan-tier" content="opus">
@@ -17,7 +17,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-22">
-<meta name="plan-version" content="1">
+<meta name="plan-version" content="2">
+<meta name="plan-impl" content="0.5">
 </head>
 <body>
   <main class="plan-doc">
@@ -175,42 +176,22 @@
       <figcaption style="font-size:13px;color:#444;margin-top:6px">One physical unit, three code paths. The DD <code>"U"</code> formatter (red) diverges by long names, float exponents, and no sort; <code>~F</code> (solid green) is the canonical short-sorted form; the regex canonicalizer (dashed green) agrees today but is a second ordering implementation. Reconciliation routes both compared sides through pint <code>~F</code>.</figcaption>
     </figure>
 
-    <h2 id="s3">§3 — Reconciliation design (locked)</h2>
-    <p>Both decisions are locked (see §Decisions): <strong>retire <code>"U"</code></strong>
-    and make one pint-defined formatter the single source of truth, and
-    <strong>fold the regex canonicalizer onto that same authority</strong> with
-    the regex retained only as a test-time stability guard. Concretely:</p>
-    <ul>
-      <li><strong>One helper — the source of truth.</strong> Add
-      <code>canonical_unit(s: str) -&gt; str</code> that parses through
-      <code>pint.Unit(s)</code> and formats with <code>{u:~F}</code> (short
-      symbols, sorted, integer exponents). Every consumer defers to it; there is
-      no second formatter.</li>
-      <li><strong>Retire the <code>"U"</code> formatter.</strong> Remove the
-      divergent path in <code>units/__init__.py</code> (long names, float
-      exponents, unsorted). Re-point any consumer at <code>canonical_unit()</code>
-      first — no in-repo caller was found, so confirm and delete.</li>
-      <li><strong>Fold the regex canonicalizer into <code>canonical_unit()</code>.</strong>
-      <code>StandardNameScalarEntry</code>'s <code>unit</code> validator calls
-      <code>canonical_unit()</code> instead of the hand-rolled
-      <code>_canonicalize_unit_order</code> regex, so ordering has exactly one
-      authority (pint). The <code>canonical_unit()</code> path must coerce
-      exponents to <code>int</code> so pint's float re-parse never leaks a
-      <code>.0</code> into a stored unit.</li>
-      <li><strong>Regex survives as a stability test, not a producer.</strong> A
-      unit test asserts <code>canonical_unit()</code> output matches the
-      dot-exponent grammar via regex — sorted short tokens, integer exponents,
-      no <code>.0</code> artifact — over the full catalog unit set, so a pint
-      version bump or symbol-spelling change fails CI rather than silently
-      drifting the catalog's canonical form.</li>
-      <li><strong>Downstream comparison</strong> becomes
-      <code>canonical_unit(sn_unit) == canonical_unit(dd_unit)</code> — a pure
-      string compare after both are normalized. The imas-codex axis imports the
-      helper from ISN rather than re-implementing formatting.</li>
-    </ul>
-    <p>Migration note: the SN catalog already stores the sorted short form, so
-    reconciliation does not rewrite stored units — it only changes the DD-side
-    comparison string and collapses two ordering implementations into one.</p>
+    <h2 id="s3">§3 — Reconciliation design
+      <span class="badge badge-shipped">✓ landed 2026-07-22</span></h2>
+    <p class="landed-summary">
+      Added <code>canonical_unit(s)</code> (pint parse + <code>~F</code>, integer
+      exponents, ASCII short symbols) as the single ordering/spelling authority,
+      exported from <code>imas_standard_names</code>; retired the divergent
+      <code>"U"</code> formatter (no in-repo consumer); folded the
+      <code>_canonicalize_unit_order</code> regex onto <code>canonical_unit()</code>
+      and demoted the grammar check to a CI stability test. A catalog scan caught
+      the §2 spelling-drift trap live — authored <code>m.ohm</code> renders pint
+      <code>m.Ω</code> — fixed by ASCII-mapping pint's non-ASCII glyphs
+      (<code>Ω→ohm</code>, <code>µ→u</code>, <code>°→deg</code>) before sorting;
+      all 20 catalog units now agree exactly (0 divergences). Ordering/spelling
+      variants normalize equal and the float-exponent <code>.0</code> artifact is
+      gone. 347 unit-affected tests green.
+      Full record: <a href="archive/sn-dd-unit-curation-s3-landed.html">§3 landed</a>.</p>
 
     <h2 id="s4">§4 — Curation: prune stale + triage genuine</h2>
     <p>Once ordering-only false positives are gone, the residual list is small.
@@ -242,7 +223,7 @@
       <button class="r-opt chosen" data-value="retire-U-standardize-F">Retire &quot;U&quot;, standardize on ~F via canonical_unit()</button>
       <button class="r-opt" data-value="fix-U-in-place">Fix &quot;U&quot; in place (short symbols, int exp, sort)</button>
       </p>
-    <p class="r-dec-rat">The <code>"U"</code> formatter is the sole source of the spurious mismatches (long names, order-dependent float exponents, unsorted). Retire it and make the already-correct <code>~F</code> formatter (short symbols, sorted, integer exponents) the single source of truth, exposed as <code>canonical_unit(s)</code>. No in-repo caller of <code>"U"</code> was found; its consumers must be re-pointed at <code>canonical_unit()</code> before removal.</p>
+    <p class="r-dec-rat">The &quot;U&quot; formatter is the sole source of the spurious mismatches (long names, order-dependent float exponents, unsorted). Retire it and make the already-correct ~F formatter (short symbols, sorted, integer exponents) the single source of truth, exposed as canonical_unit(s) . No in-repo caller of &quot;U&quot; was found; its consumers must be re-pointed at canonical_unit() before removal.</p>
     </div>
 <div class="r-dec" data-key="canonicalizer-authority" data-choice="pint-single-authority" data-by="smc" data-when="2026-07-22T15:32:05+00:00">
     <p class="r-dec-q">Should _canonicalize_unit_order be reimplemented on pint, or kept as regex with a parity test?</p>
@@ -250,7 +231,7 @@
       <button class="r-opt chosen" data-value="pint-single-authority">Reimplement on pint (one ordering authority)</button>
       <button class="r-opt" data-value="keep-regex-parity-test">Keep regex, guard with catalog-wide parity test</button>
       </p>
-    <p class="r-dec-rat">Fold <code>_canonicalize_unit_order</code> into the pint-based <code>canonical_unit()</code> so ordering has exactly one authority (pint parse + <code>~F</code>). The regex is <strong>not</strong> retired outright — it is demoted to a <strong>unit-test stability assertion</strong> on <code>canonical_unit()</code> output: a test asserts the canonical string matches the dot-exponent grammar (sorted short tokens, integer exponents, no <code>.0</code> artifact) so a pint version bump or symbol-spelling change fails CI rather than silently drifting the catalog's canonical form.</p>
+    <p class="r-dec-rat">Fold _canonicalize_unit_order into the pint-based canonical_unit() so ordering has exactly one authority (pint parse + ~F ). The regex is not retired outright — it is demoted to a unit-test stability assertion on canonical_unit() output: a test asserts the canonical string matches the dot-exponent grammar (sorted short tokens, integer exponents, no .0 artifact) so a pint version bump or symbol-spelling change fails CI rather than silently drifting the catalog&#x27;s canonical form.</p>
     </div>
 <div class="r-dec" data-key="ion-charge-finding" data-choice="" data-by="" data-when="">
     <p class="r-dec-q">Is the ion_charge (effective_thermal_ion_charge_state_energy_velocity_due_to_convection) finding stale (prune) or genuine (triage)?</p>
@@ -260,7 +241,7 @@
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-sdu-001" data-status="open" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-07-22" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-sdu-001" data-status="resolved" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-07-22" data-recommends-skill="" data-resolved-at="2026-07-22T21:16:04+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">§3 — Unify unit formatting on one pint-defined canonical form</h4>
     <div class="r-fu-body"><p>Implement the single ordering authority so DD-side and SN-side unit
           strings reconcile. Add <code>canonical_unit(s)</code> (pint parse +
@@ -298,20 +279,69 @@ Scope locks / constraints  (non-decision)
   - The mismatch axis itself lives downstream in imas-codex; this followup only
     delivers the ISN-side canonical_unit() helper it will import.
 
-Done-when  (both decisions are LOCKED: retire "U"; fold regex into pint; single source of truth)
+Done-when  (both decisions are LOCKED: retire &quot;U&quot;; fold regex into pint; single source of truth)
   1. canonical_unit(s) added (pint.Unit + {u:~F}, exponents coerced to int) —
      the single source-of-truth formatter.
-  2. The "U" formatter is REMOVED from units/__init__.py after confirming no
+  2. The &quot;U&quot; formatter is REMOVED from units/__init__.py after confirming no
      consumers (re-point any found at canonical_unit() first).
-  3. StandardNameScalarEntry's unit validator calls canonical_unit() instead of
+  3. StandardNameScalarEntry&#x27;s unit validator calls canonical_unit() instead of
      the hand-rolled _canonicalize_unit_order regex (one ordering authority).
   4. Regex STABILITY test: asserts canonical_unit() output matches the
-     dot-exponent grammar (sorted short tokens, integer exponents, no ".0"
+     dot-exponent grammar (sorted short tokens, integer exponents, no &quot;.0&quot;
      artifact) over the full catalog unit set — guards against pint drift.
   5. Round-trip test: ordering/spelling variants of one unit normalize equal
-     (e.g. "s^-1.m" == "m.s^-1"); the float-exponent artifact is gone.
+     (e.g. &quot;s^-1.m&quot; == &quot;m.s^-1&quot;); the float-exponent artifact is gone.
   6. Full test suite green.
   7. Followup written into the plan for §4 curation; this followup resolved.</pre>
+    <p class="r-fu-outcome">§3 landed — canonical_unit() is the single pint-defined ordering/spelling authority; "U" formatter retired (no consumer); regex folded onto pint + demoted to a CI stability test. Caught the §2 spelling-drift trap live (m.ohm -> pint m.Ω) and fixed it by ASCII-mapping pint glyphs before sorting — all 20 catalog units agree exactly (0 divergences). 347 unit-affected tests green. See archive/sn-dd-unit-curation-s3-landed.html.</p>
+    </article>
+<article class="r-fu" data-id="f-sdu-002" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-22" data-recommends-skill="/reckon-ship sn-dd-unit-curation §4" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">§4 — Curation: prune stale ion_charge + triage genuine residuals</h4>
+    <div class="r-fu-body"><p>Normalization (§3) has landed, so the residual mismatch list is finally trustworthy. Re-check <code>effective_thermal_ion_charge_state_energy_velocity_due_to_convection</code> against the live catalog + DD facet — the user's read is the <code>ion_charge</code> finding is stale (an artifact of the retired <code>"U"</code> ordering bug); prune it if confirmed. Then triage each name that still mismatches after <code>canonical_unit()</code> normalization, correcting at source via <code>sn edit</code>. Depends on the downstream imas-codex axis being re-pointed at <code>canonical_unit()</code> so the residual list reflects the reconciled comparison.</p></div>
+    <pre class="r-fu-prompt">Project: imas-standard-names
+Plan:    sn-dd-unit-curation (http://localhost:8765/imas-standard-names/sn-dd-unit-curation.html)
+Section: §4
+Tier:    opus
+
+Context
+  §3 landed the ISN-side canonical_unit() authority (pint parse + ~F, ASCII
+  short symbols). Ordering-only and spelling-only false positives now collapse
+  under canonical_unit(sn) == canonical_unit(dd). With normalization in place the
+  residual SN&lt;-&gt;DD unit-mismatch list is finally trustworthy and small; §4 prunes
+  the stale finding and triages each genuine residual.
+
+State to read
+  GET /plan/imas-standard-names/sn-dd-unit-curation   (decisions, followups, status)
+  imas_standard_names/__init__.py  (canonical_unit — the helper the axis imports)
+  The pre-reconciliation candidate list (from the model-selection plan):
+    effective_particle_energy, particle_mass, perturbed_particle_energy,
+    effective_thermal_ion_charge_state_energy_velocity_due_to_convection
+
+Pre-req / constraint
+  - The downstream mismatch axis lives in imas-codex and must import
+    canonical_unit() from ISN before the residual list is regenerated. Confirm
+    the axis is re-pointed (or regenerate the list applying canonical_unit() to
+    both sides yourself) BEFORE triaging — a list built on the old &quot;U&quot; form is
+    not trustworthy.
+  - All graph edits go through `sn edit` / `sn run` — NEVER raw Cypher
+    (project convention; the classifier blocks it anyway).
+
+Open decision to resolve (do NOT pre-decide in code)
+  ion-charge-finding: is effective_thermal_ion_charge_state_energy_velocity_due_to_convection
+  stale (prune) or a genuine dimensional disagreement (triage)? Lock this
+  decision with the re-checked evidence.
+
+Done-when
+  1. The residual list is regenerated with both sides normalized through
+     canonical_unit(); ordering/spelling-only entries are gone.
+  2. The ion_charge finding is adjudicated against the live catalog + DD facet;
+     the ion-charge-finding decision is locked with rationale (prune or keep).
+  3. Each genuine residual is triaged: DD facet unit vs declared unit compared,
+     the correct one chosen, corrected at source via `sn edit`. Intentional
+     dimensionless-vs-dimensional cases (derived operator forms) are recorded
+     with their reason rather than &#x27;fixed&#x27;.
+  4. Plan updated: §4 collapsed with the per-name verdicts; this followup
+     resolved; plan status set to shipped/done if §4 is the last section.</pre>
     </article>
 </section>
 

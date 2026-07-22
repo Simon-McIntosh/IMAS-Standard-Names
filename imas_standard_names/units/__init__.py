@@ -1,18 +1,13 @@
-"""Unit handling for IMAS MCP Server."""
+"""Unit handling for IMAS MCP Server.
+
+Canonical unit formatting lives in :func:`imas_standard_names.canonical_unit`
+(pint parse + sorted ASCII short symbols). This module only owns the pint
+registry seeded with the Data-Dictionary non-SI unit aliases.
+"""
 
 import importlib.resources
-from typing import Any
 
 import pint
-
-
-# register UDUNITS unit format with pint
-@pint.register_unit_format("U")
-def format_unit_simple(
-    unit, registry: pint.UnitRegistry, **options: dict[str, Any]
-) -> str:
-    return ".".join(u if p == 1 else f"{u}^{p}" for u, p in unit.items())
-
 
 # Initialize unit registry
 unit_registry = pint.UnitRegistry()

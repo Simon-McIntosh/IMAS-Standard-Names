@@ -63,7 +63,7 @@ from pydantic import (
     model_validator,
 )
 
-from imas_standard_names import pint
+from imas_standard_names import canonical_unit, pint
 from imas_standard_names.field_types import (
     STANDARD_NAME_PATTERN,
     Description,
@@ -324,15 +324,19 @@ class StandardNameBase(BaseModel):
     # Base unit helpers (shared by scalar/vector subclasses, full and name-only).
     @staticmethod
     def _canonicalize_unit_order(v: str) -> str:
-        """Auto-correct unit token order to canonical lexicographic form.
+        """Auto-correct unit token order to canonical dot-exponent form.
 
         This helps LLMs and human authors by accepting units in any order
         and automatically reordering to canonical form. For example:
         's^-2.m' -> 'm.s^-2'
         'keV.m^-1' -> 'keV.m^-1' (already canonical)
 
-        Dimensionless quantities must use "1" as the canonical form.
-        Empty strings and other invalid values will fail validation.
+        Authoring conventions (no whitespace, no '/' or '*', '1' for
+        dimensionless) are enforced here; token ordering and symbol spelling
+        are delegated to :func:`canonical_unit`, the single pint-based
+        authority, so there is no second ordering implementation to drift.
+
+        Empty strings and units pint cannot parse fail validation.
         """
         if v == "1":
             return "1"
@@ -346,26 +350,9 @@ class StandardNameBase(BaseModel):
             raise ValueError(
                 "Use dot-exponent style (e.g. m.s^-2); '/' and '*' are forbidden"
             )
-
-        # Parse tokens and reorder lexicographically
-        token_re = re.compile(r"^([A-Za-z0-9]+)(\^([+-]?\d+))?$")
-        parts_raw = v.split(".")
-        parsed: list[tuple[str, int]] = []
-        for part in parts_raw:
-            m = token_re.match(part)
-            if not m:
-                raise ValueError(f"Invalid unit token '{part}' in '{v}'")
-            sym = m.group(1)
-            exp = int(m.group(3) or 1)
-            if exp == 0:
-                raise ValueError(f"Zero exponent not allowed in unit token '{part}'")
-            parsed.append((sym, exp))
-
-        canonical = ".".join(
-            sym if exp == 1 else f"{sym}^{exp}"
-            for sym, exp in sorted(parsed, key=lambda x: x[0])
-        )
-        return canonical
+        if not pint:
+            return v
+        return canonical_unit(v)
 
     @staticmethod
     def _validate_unit_with_pint(v: str) -> str:
