@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-23">
-<meta name="plan-version" content="4">
+<meta name="plan-version" content="5">
 <meta name="plan-impl" content="1.0">
 </head>
 <body>
@@ -374,7 +374,7 @@ Done-when
   4. Tests green; followup written; this followup resolved.</pre>
     <p class="r-fu-outcome">Landed (imas-codex). The SN↔DD unit-mismatch axis now normalises both sides through ISN canonical_unit (via imas_codex/units/dd_unit_exceptions.units_agree) and — critically — reads the LIVE HAS_STANDARD_NAME edges, not the denormalised source_paths scalar (which stranded phantom mismatches), excluding terminal superseded/exhausted/contested names. ion_charge handled: charge-number e→1 is a curated DD-unit-bug glob, and the pruned velocity finding carries no DD facet so the edge axis never sees it. Full-catalog regen confirmed ordering/spelling/stale-scalar/dead-name/DD-bug/equivalence false positives all gone. Genuine residual (all catalog-origin, so reset-to-extracted applies once source_filter='dd' is dropped) triaged graph-side: mis-attachments reset+detached (power_of_wave_beam psi, rotation_frequency Hz, total_neutron_flux_due_to_fusion power, poloidal_flux over-merge), 3 wrong-unit catalog names reset (etendue m.sr, particle_distribution '1', + dead distribution_amplitude), 38 multi-HAS_UNIT-edge corruptions deduped to the canonical unit, 4 missing HAS_UNIT edges backfilled, 3 neutral-flux edges reconciled to their W.m^-2 property, poloidal_flux detached from f_df_dpsi (product_of_poloidal_current preserved). All 6 tests/graph/test_sn_unit_integrity.py green; referential-integrity + data-quality suites green (97 passed). imas-codex commit 7d9648e7 (canonical_unit re-point + dd_unit_exceptions.yaml + loader + drop obsolete backfill script). A parallel hardening pass added StandardName edge-integrity invariants + a HAS_UNIT self-heal writer fix (imas-codex 30ba5053 root cause: _write_standard_name_edges MERGE'd HAS_UNIT without dropping an existing different-unit edge).</p>
     </article>
-<article class="r-fu" data-id="f-sdu-004" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-23T12:00:00+00:00" data-recommends-skill="/reckon-create sn-dd-attachment-consistency" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-sdu-004" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-23T12:00:00+00:00" data-recommends-skill="/reckon-create sn-dd-attachment-consistency" data-resolved-at="2026-07-23T11:46:16+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">SN↔DD attachment consistency — reconcile the source_paths scalar + close edge-gaps</h4>
     <div class="r-fu-body"><p>Hardening the SN↔DD edge fabric (imas-codex tests/graph/test_sn_edge_integrity.py) surfaced a broad pre-existing consistency issue distinct from the unit axis: ~25 accepted StandardNames whose denormalised <code>source_paths</code> scalar diverges from their live <code>HAS_STANDARD_NAME</code>/<code>PRODUCED_NAME</code> edges. The divergence is MIXED-direction — some are scalar-stale (edges are truth, e.g. area_of_flux_surface scalar lists grid/surface but edges are grid/area) and some are edge-GAPS (scalar is right but attachment edges are missing, e.g. atomic_number has 8 z_n paths in the scalar but only 1 HAS_STANDARD_NAME edge). A blind scalar:=edges reconcile fixes the stale class but MASKS the edge-gap class. Needs: (1) reconcile the scalar to the live edges under the edges-are-truth convention, and (2) treat attachment COMPLETENESS (missing HAS_STANDARD_NAME edges for paths an accepted SN should cover) as a separate coverage concern/test, not silently dropped. Also fold in the writer root-cause for the scalar drift if found. imas-codex-scoped.</p></div>
     <pre class="r-fu-prompt">Project: imas-codex
@@ -412,6 +412,54 @@ Done-when
      prune/refine/attach (mirror the HAS_UNIT self-heal pattern).
   4. test_source_paths_scalar_consistent_with_edges green; edge-gap coverage tracked or closed;
      tests green; this followup resolved.</pre>
+    <p class="r-fu-outcome">Scalar drift root-caused + fixed, and the scalar reconciled graph-wide. ROOT CAUSE (confirmed by reading every write/mutation site): sn.source_paths is a compose-time snapshot written once (graph_ops.py:2684, coalesce(new,existing)) and reconciled NOWHERE — persist_refined_name migrates edges but not the scalar, the prune/sever path deletes edges but not the scalar, and reconcile_standard_name_sources only touches FROM_DD_PATH edges. DURABLE FIX (imas-codex b955da37): reconcile_standard_name_source_paths() materializes sn.source_paths := sorted distinct union of 'dd:'+imas.id (HAS_STANDARD_NAME) ∪ non-derived PRODUCED_NAME src.id (preserving derived: entries), scoped to non-terminal names, idempotent; wired into the post-drain reconcile in loop.py so it can't desync again after any future refine/prune/remap. Plus the HAS_UNIT self-heal writer fix (b955da37's sibling 30ba5053). DATA: reconciled graph-wide to steady state (reconcile now returns 0). 28 integrity tests green (edge-integrity 4, unit-integrity 6, loader 14, source_paths-reconcile 4). Attachment COMPLETENESS (backfilling missing HAS_STANDARD_NAME edges for DD-eligible, unit-agreeing paths an accepted SN should cover — e.g. atomic_number → all z_n) is deliberately NOT folded into the scalar-consistency invariant (it would flap on legitimate compose history); re-scoped to f-sdu-005. Note: an eager scalar materialize (Step B) ran before the two-step recommendation, so pure scalar-only edge-gap hints with neither edge (e.g. atomic_number's 7 extra z_n) dropped from the scalar; not a real loss — f-sdu-005 backfills those edges from DD-side eligibility + units_agree, not the stale scalar.</p>
+    </article>
+<article class="r-fu" data-id="f-sdu-005" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-23T12:40:00+00:00" data-recommends-skill="/reckon-create sn-dd-attachment-completeness" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">SN↔DD attachment completeness — backfill missing HAS_STANDARD_NAME edges</h4>
+    <div class="r-fu-body"><p>Distinct from the now-closed scalar-consistency concern (f-sdu-004): the SN↔DD attachment fabric is INCOMPLETE — some accepted StandardNames lack a <code>HAS_STANDARD_NAME</code> edge to DD paths they should cover. Diagnosis (edge-hardening pass): ~65 accepted-SN scalar/produced paths point to an existing, SN-eligible DD node whose unit AGREES with the SN, yet carry no attachment edge (e.g. <code>area_of_flux_surface</code> m^2 ← <code>.../grid/surface</code>; <code>electron_temperature</code> eV ← <code>langmuir_probes/.../t_e</code>; <code>poloidal_angle_of_measurement_position</code> rad ← <code>.../position/theta</code>; <code>atomic_number</code> ← all <code>z_n</code>). These are real coverage gaps, not junk. Backfill the missing edges from DD-side eligibility + <code>units_agree()</code> gating (route the z_n→atomic_number 'e'/'1' quirk through the dd_unit_exceptions charge-number rule), via the sanctioned attach path — never raw Cypher for name/docs. Once edges land, the durable source_paths reconcile (b955da37) picks them into the scalar automatically. Consider a coverage gate/test so future gaps surface. imas-codex-scoped, DATA + possibly attach-path code.</p></div>
+    <pre class="r-fu-prompt">Project: imas-codex
+Plan:    (SN↔DD attachment completeness — see ISN plan sn-dd-unit-curation f-sdu-005)
+Tier:    opus
+
+Context
+  f-sdu-003 (unit axis) and f-sdu-004 (source_paths scalar drift root-cause + durable
+  reconcile_standard_name_source_paths, imas-codex b955da37) are landed and green. Remaining:
+  the attachment fabric is INCOMPLETE — accepted SNs lack HAS_STANDARD_NAME edges to DD paths
+  they should cover. The edge-hardening pass classified ~65 such edge-gaps (existing DD node,
+  SN-eligible node_category, unit agrees) plus ~483 remapped entries (correctly dropped by the
+  scalar reconcile).
+
+State to read
+  tests/graph/test_sn_edge_integrity.py (the invariants; note test_dd_attachment_unit_agrees_with_name
+    is scoped to DD paths that HAVE a unit edge)
+  imas_codex/standard_names/graph_ops.py (reconcile_standard_name_source_paths + the attach path)
+  imas_codex/units/dd_unit_exceptions.py (units_agree — gate every backfill through it)
+  imas_codex/core/node_categories.py (SN_SOURCE_CATEGORIES — eligibility)
+
+  Classification query (regenerate the worklists):
+    MATCH (sn:StandardName {name_stage:&#x27;accepted&#x27;})
+    WHERE sn.source_paths IS NOT NULL AND size(sn.source_paths)&gt;0
+    OPTIONAL MATCH (imas:IMASNode)-[:HAS_STANDARD_NAME]-&gt;(sn)
+    WITH sn, collect(DISTINCT &#x27;dd:&#x27;+imas.id) AS hsn
+    OPTIONAL MATCH (src:StandardNameSource)-[:PRODUCED_NAME]-&gt;(sn)
+    WHERE src.source_type=&#x27;dd&#x27;
+    WITH sn, hsn, collect(DISTINCT src.id) AS prod
+    WITH sn, [p IN (hsn+prod) WHERE p IS NOT NULL] AS edgep
+    MATCH (src2:StandardNameSource)-[:PRODUCED_NAME]-&gt;(sn)
+    WHERE src2.source_type=&#x27;dd&#x27; AND NOT (&#x27;dd:&#x27;+src2.source_id IN hsn)
+    MATCH (n:IMASNode {id: src2.source_id})
+    RETURN sn.id AS name, src2.source_id AS dd_path, n.node_category AS cat, n.unit AS dd_unit
+    ORDER BY name
+
+Done-when
+  1. For each PRODUCED_NAME dd path lacking a HAS_STANDARD_NAME edge where node is SN-eligible AND
+     units_agree(sn.unit, dd_unit, dd_path): create the (imas)-[:HAS_STANDARD_NAME]-&gt;(sn) edge via
+     the sanctioned attach path. Unit-disagreeing / ineligible ones: record, don&#x27;t attach.
+  2. Re-run reconcile_standard_name_source_paths so scalars pick up the new edges (or let the next
+     sn run post-drain do it).
+  3. Optional: add a coverage gate that surfaces future SN-eligible unit-agreeing PRODUCED-but-
+     unattached paths.
+  4. Tests green; this followup resolved.</pre>
     </article>
 </section>
 
