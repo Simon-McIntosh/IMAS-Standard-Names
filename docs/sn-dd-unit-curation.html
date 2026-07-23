@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="sn-dd-unit-curation">
   <meta name="plan-title" content="SN↔DD Unit Curation">
   <meta name="plan-summary" content="Reconcile SN and DD unit strings on one pint parser so the unit-mismatch axis stops flagging ordering-only false positives; prune the stale ion_charge finding; triage genuine defects.">
-  <meta name="plan-status" content="active">
+  <meta name="plan-status" content="shipped">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="M">
   <meta name="plan-tier" content="opus">
@@ -16,9 +16,9 @@
   <title>SN↔DD Unit Curation | imas-standard-names</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-07-22">
-<meta name="plan-version" content="2">
-<meta name="plan-impl" content="0.5">
+<meta name="plan-modified" content="2026-07-23">
+<meta name="plan-version" content="3">
+<meta name="plan-impl" content="1.0">
 </head>
 <body>
   <main class="plan-doc">
@@ -193,27 +193,25 @@
       gone. 347 unit-affected tests green.
       Full record: <a href="archive/sn-dd-unit-curation-s3-landed.html">§3 landed</a>.</p>
 
-    <h2 id="s4">§4 — Curation: prune stale + triage genuine</h2>
-    <p>Once ordering-only false positives are gone, the residual list is small.
-    From the model-selection plan the pre-reconciliation "genuine unit defect"
-    candidates were: <code>effective_particle_energy</code>,
-    <code>particle_mass</code>, <code>perturbed_particle_energy</code>,
-    <code>effective_thermal_ion_charge_state_energy_velocity_due_to_convection</code>.</p>
-    <ul>
-      <li><strong>Prune the stale <code>ion_charge</code> finding.</strong>
-      <code>effective_thermal_ion_charge_state_energy_velocity_due_to_convection</code>
-      must be re-checked against the live catalog and DD facet <em>after</em>
-      reconciliation lands: determine whether its flag was an artifact of the
-      <code>"U"</code> ordering bug (prune it) or a true dimensional
-      disagreement (keep it in triage). The user's read is that the
-      <code>ion_charge</code> finding is stale and should be pruned.</li>
-      <li><strong>Triage each genuine residual.</strong> For every name that
-      still mismatches after normalization, read the DD source facet's unit and
-      the name's declared unit, decide which is correct, and correct at source
-      via <code>sn edit</code> (never raw Cypher — per project convention). A
-      name may be legitimately dimensionless-vs-dimensional if it is a derived
-      operator form; record the reason when a mismatch is intentional.</li>
-    </ul>
+    <h2 id="s4">§4 — Curation: prune stale + triage genuine
+      <span class="badge badge-shipped">✓ landed 2026-07-23</span></h2>
+    <p class="landed-summary">
+      Re-checked all four pre-reconciliation candidates against the <strong>live
+      catalog</strong>, normalising both sides through <code>canonical_unit()</code>.
+      <strong>1 finding pruned (stale), 3 recorded as intentional, 0 genuine defects — no
+      <code>sn edit</code> required.</strong> The <code>ion_charge</code> finding
+      (<code>effective_thermal_ion_charge_state_energy_velocity_due_to_convection</code>) is
+      <strong>pruned as stale</strong>: it is a convective <em>velocity</em>, so <code>m.s^-1</code>
+      is correct, and it has no DD source facet — the flag tripped on the embedded
+      <code>energy</code> token plus the retired <code>"U"</code> ordering artifact. The two
+      energy parents (<code>effective_particle_energy</code>, <code>perturbed_particle_energy</code>)
+      are intentionally unit-less normalised-coordinate parents (dimensionless quantity in their
+      children); <code>particle_mass</code> is an intentional generalisation of the DD's
+      <em>normalised</em> mass (<code>source_unit=1</code>) to the physical concept, with the
+      DD-faithful dimensionless value carried by <code>normalized_particle_mass</code>. All four are
+      <code>validation_status=valid</code>. Downstream imas-codex axis still needs re-pointing at
+      <code>canonical_unit()</code> (follow-on).
+      Full record: <a href="archive/sn-dd-unit-curation-s4-landed.html">§4 landed</a>.</p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
@@ -233,9 +231,9 @@
       </p>
     <p class="r-dec-rat">Fold _canonicalize_unit_order into the pint-based canonical_unit() so ordering has exactly one authority (pint parse + ~F ). The regex is not retired outright — it is demoted to a unit-test stability assertion on canonical_unit() output: a test asserts the canonical string matches the dot-exponent grammar (sorted short tokens, integer exponents, no .0 artifact) so a pint version bump or symbol-spelling change fails CI rather than silently drifting the catalog&#x27;s canonical form.</p>
     </div>
-<div class="r-dec" data-key="ion-charge-finding" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="ion-charge-finding" data-choice="prune-stale" data-by="reckon-ship" data-when="2026-07-23T09:02:29+00:00">
     <p class="r-dec-q">Is the ion_charge (effective_thermal_ion_charge_state_energy_velocity_due_to_convection) finding stale (prune) or genuine (triage)?</p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">Prune — stale. effective_thermal_ion_charge_state_energy_velocity_due_to_convection is a convective VELOCITY (head noun velocity_due_to_convection); its m.s^-1 unit is dimensionally correct and it carries NO DD source facet (source_unit=None) for the axis to disagree with. The flag was a false positive — a token-level check tripping on the embedded energy/charge_state tokens in a velocity name, compounded by the now-retired &quot;U&quot; ordering artifact. Live-catalog re-check: validation_status=valid. Confirms the user&#x27;s read.</p>
     </div>
 </section>
 
@@ -293,9 +291,9 @@ Done-when  (both decisions are LOCKED: retire &quot;U&quot;; fold regex into pin
      (e.g. &quot;s^-1.m&quot; == &quot;m.s^-1&quot;); the float-exponent artifact is gone.
   6. Full test suite green.
   7. Followup written into the plan for §4 curation; this followup resolved.</pre>
-    <p class="r-fu-outcome">§3 landed — canonical_unit() is the single pint-defined ordering/spelling authority; "U" formatter retired (no consumer); regex folded onto pint + demoted to a CI stability test. Caught the §2 spelling-drift trap live (m.ohm -> pint m.Ω) and fixed it by ASCII-mapping pint glyphs before sorting — all 20 catalog units agree exactly (0 divergences). 347 unit-affected tests green. See archive/sn-dd-unit-curation-s3-landed.html.</p>
+    <p class="r-fu-outcome">§3 landed — canonical_unit() is the single pint-defined ordering/spelling authority; "U" formatter retired (no consumer); regex folded onto pint + demoted to a CI stability test. Caught the §2 spelling-drift trap live (m.ohm -&gt; pint m.Ω) and fixed it by ASCII-mapping pint glyphs before sorting — all 20 catalog units agree exactly (0 divergences). 347 unit-affected tests green. See archive/sn-dd-unit-curation-s3-landed.html.</p>
     </article>
-<article class="r-fu" data-id="f-sdu-002" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-22" data-recommends-skill="/reckon-ship sn-dd-unit-curation §4" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-sdu-002" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-22" data-recommends-skill="/reckon-ship sn-dd-unit-curation §4" data-resolved-at="2026-07-23T09:02:29+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">§4 — Curation: prune stale ion_charge + triage genuine residuals</h4>
     <div class="r-fu-body"><p>Normalization (§3) has landed, so the residual mismatch list is finally trustworthy. Re-check <code>effective_thermal_ion_charge_state_energy_velocity_due_to_convection</code> against the live catalog + DD facet — the user's read is the <code>ion_charge</code> finding is stale (an artifact of the retired <code>"U"</code> ordering bug); prune it if confirmed. Then triage each name that still mismatches after <code>canonical_unit()</code> normalization, correcting at source via <code>sn edit</code>. Depends on the downstream imas-codex axis being re-pointed at <code>canonical_unit()</code> so the residual list reflects the reconciled comparison.</p></div>
     <pre class="r-fu-prompt">Project: imas-standard-names
@@ -342,6 +340,38 @@ Done-when
      with their reason rather than &#x27;fixed&#x27;.
   4. Plan updated: §4 collapsed with the per-name verdicts; this followup
      resolved; plan status set to shipped/done if §4 is the last section.</pre>
+    <p class="r-fu-outcome">§4 landed — all four candidates re-checked against the live catalog with canonical_unit() normalising both sides. 1 pruned (ion_charge — stale convective velocity, m.s^-1 correct, no DD facet), 3 recorded as intentional (effective_particle_energy + perturbed_particle_energy unit-less normalised-coordinate parents; particle_mass an intentional generalisation of DD normalised mass source_unit=1, dimensionless value in child normalized_particle_mass). 0 genuine defects → no sn edit required; all four validation_status=valid. ion-charge-finding decision locked = prune-stale. See archive/sn-dd-unit-curation-s4-landed.html.</p>
+    </article>
+<article class="r-fu" data-id="f-sdu-003" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-23T00:00:00+00:00" data-recommends-skill="/reckon-ship sn-dd-unit-curation" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Re-point the downstream imas-codex mismatch axis at canonical_unit() and suppress the ion_charge false positive</h4>
+    <div class="r-fu-body"><p>ISN §3/§4 are complete: <code>canonical_unit()</code> is the single ordering/spelling authority and the ISN-side candidate list is adjudicated. The downstream SN&#8596;DD unit-mismatch axis in <strong>imas-codex</strong> does not yet import <code>canonical_unit()</code> (grep confirms no hits). Re-point it so both sides normalise through the ISN helper, add a suppression/override so the pruned <code>ion_charge</code> velocity false positive cannot re-surface, and regenerate the axis over the full catalog to confirm the residual set carries no ordering/spelling artifacts. This work is imas-codex-scoped, not ISN.</p></div>
+    <pre class="r-fu-prompt">Project: imas-codex
+Plan:    (SN↔DD unit reconciliation — consumer side; see ISN plan sn-dd-unit-curation)
+Tier:    opus
+
+Context
+  ISN landed canonical_unit() (imas_standard_names.canonical_unit) as the single pint-defined
+  unit ordering/spelling authority, and adjudicated the pre-reconciliation candidate list
+  (ion_charge pruned as stale; energy/mass parents recorded as intentional). The imas-codex
+  SN↔DD unit-mismatch axis still uses its own unit handling and has NOT been re-pointed at the
+  ISN helper.
+
+State to read
+  imas_standard_names/__init__.py            (canonical_unit — import this)
+  imas_codex/units/                          (normalize_unit_symbol — current imas-codex path)
+  imas_codex/standard_names/                 (where the SN↔DD unit comparison axis runs)
+  ISN plan archive/sn-dd-unit-curation-s4-landed.html  (per-name verdicts + rationale)
+
+Done-when
+  1. The mismatch axis compares canonical_unit(sn_unit) == canonical_unit(dd_facet_unit) on both
+     sides (import ISN&#x27;s canonical_unit; retire any divergent local formatter).
+  2. A suppression/override records the ion_charge velocity finding as adjudicated-stale so it
+     cannot re-surface (effective_thermal_ion_charge_state_energy_velocity_due_to_convection —
+     a convective velocity, m.s^-1 correct, no DD facet).
+  3. The axis is regenerated over the full catalog; the residual set is confirmed free of
+     ordering/spelling-only artifacts, and any NEW genuine residual is triaged via `sn edit`
+     (never raw Cypher).
+  4. Tests green; followup written; this followup resolved.</pre>
     </article>
 </section>
 

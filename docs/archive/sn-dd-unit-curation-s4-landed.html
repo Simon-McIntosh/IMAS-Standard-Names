@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-standard-names">
+  <meta name="reckon-type" content="doc">
+  <meta name="plan-slug" content="sn-dd-unit-curation-s4-landed">
+  <meta name="plan-title" content="§4 landed — curation: ion_charge finding pruned, residuals triaged">
+  <meta name="plan-summary" content="With canonical_unit() normalising both sides, the residual SN↔DD unit-mismatch list holds no genuine dimensional defect. The ion_charge finding is pruned (stale — it is a convective velocity, m.s^-1 is correct). The three remaining candidates are recorded as intentional cases; none needed a graph edit.">
+  <meta name="plan-informs" content="sn-dd-unit-curation">
+  <title>§4 landed — unit curation | imas-standard-names</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="s4">§4 landed — curation: prune stale + triage genuine
+      <span class="badge badge-shipped">✓ landed 2026-07-23</span></h2>
+    <p>Evergreen: <a href="/imas-standard-names/sn-dd-unit-curation.html">sn-dd-unit-curation</a> §4.
+    Resolves followup <code>f-sdu-002</code> and locks the <code>ion-charge-finding</code> decision.
+    With §3's <code>canonical_unit()</code> normalising both sides, the pre-reconciliation
+    "genuine unit defect" candidate list was re-checked against the <strong>live catalog</strong>
+    (Neo4j) and each name's DD source facet. <strong>Outcome: one finding pruned as stale, three
+    recorded as intentional, zero genuine dimensional defects — no graph edit was required.</strong></p>
+
+    <div class="quick-status" style="display:flex;gap:12px;flex-wrap:wrap;margin:1em 0">
+      <div class="stat"><strong>1</strong> finding pruned (stale)</div>
+      <div class="stat"><strong>3</strong> recorded as intentional</div>
+      <div class="stat"><strong>0</strong> genuine defects to fix</div>
+      <div class="stat"><strong>0</strong> <code>sn edit</code> writes</div>
+    </div>
+
+    <h3>How the residual list was regenerated</h3>
+    <p>The SN↔DD mismatch axis itself lives downstream in imas-codex and has
+    <em>not yet</em> been re-pointed at <code>canonical_unit()</code>
+    (<code>grep canonical_unit imas_codex/</code> → no hits). Per the plan's
+    pre-requisite, the residual list was regenerated here directly: each candidate was
+    queried from the live graph for its declared <code>unit</code>, its DD source facet
+    (<code>source_path</code> / <code>source_unit</code>), physical base, kind, and validation
+    state, and both unit strings were passed through
+    <code>imas_standard_names.canonical_unit()</code>. Ordering-only and spelling-only
+    differences collapse under it (verified: <code>canonical_unit("s^-1.m") == canonical_unit("m.s^-1") == "m.s^-1"</code>).</p>
+
+    <h3>Per-name verdicts</h3>
+    <div style="overflow-x:auto"><table>
+      <thead><tr>
+        <th>standard name</th><th>SN unit</th><th>DD facet (<code>source_unit</code>)</th>
+        <th>base / kind</th><th>verdict</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td><code>effective_thermal_ion_charge_state_energy_velocity_due_to_convection</code></td>
+          <td><code>m.s^-1</code></td>
+          <td>— (no DD facet)</td>
+          <td>velocity / vector</td>
+          <td><strong>PRUNE — stale.</strong> The name's head noun is
+            <em>velocity_due_to_convection</em>; the quantity is the effective velocity vector
+            for convective transport of thermal energy by an ion charge-state population, so
+            <code>m.s^-1</code> is dimensionally correct. The flag was a false positive — a
+            token-level check tripping on the <code>energy</code>/<code>charge_state</code>
+            tokens embedded in a velocity name, compounded by the now-retired <code>"U"</code>
+            ordering artifact. There is no DD source facet for the axis to disagree with.
+            <code>validation_status=valid</code>.</td>
+        </tr>
+        <tr>
+          <td><code>effective_particle_energy</code></td>
+          <td>— (unit-less)</td>
+          <td>— (no DD facet)</td>
+          <td>energy / scalar</td>
+          <td><strong>Record — intentional.</strong> Pure derived gyrokinetic velocity-space
+            coordinate. An applied human edit already repaired it "to unit-less"; the
+            dimensionless normalised quantity is carried by its child
+            <code>normalized_effective_particle_energy</code> (unit <code>1</code>). No DD facet;
+            not a SN↔DD mismatch. <code>validation_status=valid</code>.</td>
+        </tr>
+        <tr>
+          <td><code>perturbed_particle_energy</code></td>
+          <td>— (unit-less)</td>
+          <td>— (no DD facet)</td>
+          <td>energy / scalar</td>
+          <td><strong>Record — intentional.</strong> Same pattern as
+            <code>effective_particle_energy</code>: derived normalised-coordinate parent, unit-less
+            by applied human edit, dimensionless quantity in the normalised child. No DD facet.
+            <code>validation_status=valid</code>.</td>
+        </tr>
+        <tr>
+          <td><code>particle_mass</code></td>
+          <td>— (unit-less)</td>
+          <td><code>1</code> (DD path <code>gyrokinetics_local/species/mass_norm</code>, "Normalised mass")</td>
+          <td>mass / scalar</td>
+          <td><strong>Record — intentional generalisation.</strong> The only candidate with a DD
+            facet. The DD path is a <em>normalised</em> (dimensionless) mass; the standard name was
+            generalised to the physical inertial-mass concept, and the DD-faithful dimensionless
+            quantity is captured by its child <code>normalized_particle_mass</code> (unit
+            <code>1</code>, same <code>source_path</code>). The parent↔DD unit difference is a
+            deliberate generalisation artifact, not a defect: coercing the parent to the DD's
+            <code>1</code> would re-break the physical description. An applied human edit already
+            addressed this. <code>validation_status=valid</code>.</td>
+        </tr>
+      </tbody>
+    </table></div>
+
+    <h3>ion-charge-finding decision (locked)</h3>
+    <p><strong>Prune — stale.</strong> The finding is an artifact, not a dimensional
+    disagreement: <code>effective_thermal_ion_charge_state_energy_velocity_due_to_convection</code>
+    is a convective velocity whose <code>m.s^-1</code> unit is correct, and it carries no DD source
+    facet for the axis to compare against. Confirms the user's read. No graph mutation is needed to
+    "remove" it — the adjudication is the record; the downstream axis will stop surfacing it once it
+    is re-pointed at <code>canonical_unit()</code> and given the noted suppression.</p>
+
+    <h3>Why no <code>sn edit</code> ran</h3>
+    <p>Done-when #3 permits recording intentional dimensionless-vs-dimensional cases "with their
+    reason rather than 'fixed'." All four candidates are <code>validation_status=valid</code> and
+    <code>accepted</code>; none is a genuine dimensional defect that a source correction toward the
+    DD facet would improve. Editing any of them would either re-introduce the mis-inherited
+    dimensionless unit the prior human edits removed (the energy/mass parents) or contradict a
+    correct unit (the velocity). So the correct curation action was adjudication and recording — not
+    mutation.</p>
+
+    <h3>What's next</h3>
+    <div class="next-card">
+      <p>Two follow-ons, both downstream of ISN (imas-codex):</p>
+      <ul>
+        <li><strong>Re-point the mismatch axis at <code>canonical_unit()</code></strong> and add a
+          suppression/override so the <code>ion_charge</code> velocity false positive cannot
+          re-surface, then regenerate the axis over the full catalog to confirm the residual set is
+          empty of ordering/spelling artifacts.</li>
+        <li><strong>Generalisation-unit policy (optional):</strong> revisit whether physical parents
+          lifted from a normalised DD facet (e.g. <code>particle_mass</code>) should carry an
+          explicit physical unit (<code>kg</code>/<code>u</code>) rather than being unit-less. This
+          is a naming-policy question, not a mismatch defect; tracked separately if pursued.</li>
+      </ul>
+    </div>
+  </main>
+</body>
+</html>
