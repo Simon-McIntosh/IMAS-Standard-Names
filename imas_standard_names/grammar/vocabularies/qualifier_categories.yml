@@ -154,6 +154,7 @@ qualifier_categories:
     - ejima
     - greenwald
     - gyro_bohm
+    - ipb98y2
 
   # Species-related (non-subject) qualifiers
   species:

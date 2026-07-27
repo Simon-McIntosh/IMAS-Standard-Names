@@ -248,6 +248,15 @@ def test_find_git_root_raises_when_no_repo(tmp_path: Path) -> None:
     ``ClickException`` rather than silently falling back to ``cwd``."""
     plain = tmp_path / "no-repo"
     plain.mkdir()
+    # The lookup walks every ancestor, so this asserts nothing unless no
+    # ancestor of tmp_path is a repo. TMPDIR often sits under a runtime
+    # directory a stray '.git' can appear in, which would silently turn the
+    # assertion below into a false pass; report that as a skip instead.
+    polluted = next((p for p in plain.resolve().parents if (p / ".git").exists()), None)
+    if polluted is not None:
+        pytest.skip(
+            f"tmp_path has a .git ancestor ({polluted}); cannot test the no-repo path"
+        )
     with pytest.raises(Exception) as excinfo:
         catalog_site._find_git_root(plain)
     assert "No git repository found" in str(excinfo.value)

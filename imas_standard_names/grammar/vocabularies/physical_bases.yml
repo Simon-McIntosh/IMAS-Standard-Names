@@ -411,6 +411,15 @@ bases:
   width:
     aliases: []
     kind: scalar
+  half_width:
+    # half-width of a peaked profile (the distance from the peak to the
+    # half-maximum on one side, e.g. a hard-X-ray emissivity peak). Distinct
+    # from width: a half-width is reported per side, so it pairs with a locus
+    # or bound qualifier naming which side. Sits with width / angular_width
+    # rather than in geometric_base so the width family stays in one segment.
+    aliases: []
+    kind: scalar
+    inherently_dimensional: true
 
   # === FOCS, neutron, and optical diagnostic bases ===
 
@@ -598,6 +607,15 @@ bases:
   peaking_factor:
     # dimensionless profile peaking factor (e.g. central/volume-averaged ratio,
     # t_e_peaking); a shape descriptor of a 1D profile.
+    aliases: []
+    kind: scalar
+  confinement_enhancement_factor:
+    # dimensionless ratio of the observed energy confinement time to the value
+    # predicted by a confinement scaling law (the H-factor, e.g. H98(y,2)).
+    # Lexicalised alongside safety_factor / peaking_factor rather than
+    # decomposed, so the quantity has one token; WHICH scaling law it is
+    # measured against is carried by a scaling qualifier (ipb98y2, …), letting
+    # further scalings be added without touching this base.
     aliases: []
     kind: scalar
   field_current_coupling_coefficient:

@@ -178,6 +178,11 @@
 - bohm                          # Bohm normalized
 - greenwald                     # Greenwald-normalized (density)
 
+# --- Confinement scaling laws ---
+# Names the scaling law a confinement_enhancement_factor is measured against, so
+# each further scaling adds one token here rather than a new base.
+- ipb98y2                       # IPB98(y,2) H-mode energy confinement scaling
+
 # Only atomic tokens — compound gaps (lower_inner, upper_outer, etc.)
 # must compose from these atomic qualifiers.
 

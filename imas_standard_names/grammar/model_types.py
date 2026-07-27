@@ -230,6 +230,7 @@ class Qualifier(StrEnum):
     GYRO_BOHM = "gyro_bohm"
     BOHM = "bohm"
     GREENWALD = "greenwald"
+    IPB98Y2 = "ipb98y2"
     FLOATING = "floating"
     REFLECTED = "reflected"
     POLARIZATION = "polarization"
