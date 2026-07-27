@@ -334,10 +334,13 @@ def _save_versions(worktree: Path, versions: Sequence[VersionEntry]) -> None:
 
     Sort order: ``latest`` first (so it sorts to the top of any version
     selector dropdown), then entries in descending semver order — with a
-    stable release outranking its own release candidates — then any entry
-    that does not parse as semver, string-descending, after the parseable
-    ones. This mirrors mike's default behaviour closely enough for the
-    selector UI.
+    stable release outranking its own release candidates and semver build
+    metadata carrying no precedence weight (see ``_version_sort_key``) —
+    then any entry that does not parse as semver, string-descending, after
+    the parseable ones. This mirrors mike's default behaviour closely
+    enough for the selector UI. ``sorted()`` is stable, so entries tied on
+    precedence (e.g. two ``+build`` variants of the same rc) keep their
+    original relative order rather than shuffling between deploys.
     """
     sorted_versions = sorted(versions, key=_version_sort_key, reverse=True)
     serialised = [v.to_dict() for v in sorted_versions]
@@ -355,6 +358,7 @@ _SEMVER_RE = re.compile(
     (?P<minor>\d+)
     (?:\.(?P<patch>\d+))?
     (?:-?rc(?P<rc>\d+))?
+    (?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?
     $""",
     re.VERBOSE | re.IGNORECASE,
 )
@@ -368,6 +372,13 @@ def _version_sort_key(entry: VersionEntry) -> tuple:
     ``rc`` numbers outrank lower ones. Non-semver versions sort by their
     string after the semver block, so branch-style labels (``main``,
     ``pr-123``) still land predictably, below every parseable version.
+
+    Per semver, build metadata (``+west-task-2e``) is matched but excluded
+    from the key entirely — it carries no precedence, so
+    ``v0.2.0rc65+a`` and ``v0.2.0rc65+b`` and ``v0.2.0rc65`` all produce
+    the identical key and tie. ``entry.version`` (with its build metadata
+    intact) and ``entry.title``/``entry.aliases`` are never altered by
+    sorting — only this key is derived from them.
     """
     has_latest = "latest" in entry.aliases
     match = _SEMVER_RE.match(entry.version)

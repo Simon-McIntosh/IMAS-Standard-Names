@@ -7,8 +7,18 @@
 // string into (major, minor, patch, rc) and compares numerically, newest
 // first, with a stable release sorting above all its own release
 // candidates.
+//
+// Semver build metadata (`+west-task-2e`, dot-separated [0-9A-Za-z-]
+// identifiers) is parsed off but carries NO precedence weight — per the
+// semver spec, `v0.2.0rc65+a` and `v0.2.0rc65+b` and `v0.2.0rc65` all tie.
+// Ties are broken by the stable underlying sort (Array#sort with a
+// comparator returning 0 preserves input order), so same-precedence
+// entries never shuffle between deploys. The build metadata is never
+// stripped from the entry itself — only `version` strings are parsed for
+// comparison; the caller's objects (and their `title`/`aliases`) pass
+// through untouched.
 
-const VERSION_RE = /^v?(\d+)\.(\d+)\.(\d+)(?:-?rc(\d+))?$/i;
+const VERSION_RE = /^v?(\d+)\.(\d+)\.(\d+)(?:-?rc(\d+))?(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?$/i;
 
 /**
  * Parse a version string into its numeric components.
@@ -33,7 +43,10 @@ export function parseVersion(version) {
 
 /**
  * Compare two parsed versions, descending (newest first). A stable release
- * (rc === null) sorts above every rc of the same major.minor.patch.
+ * (rc === null) sorts above every rc of the same major.minor.patch. Build
+ * metadata is not part of the parsed shape (it carries no precedence), so
+ * two entries differing only by build metadata compare equal (0) and their
+ * relative order is left to the caller's stable sort.
  *
  * @param {{major:number,minor:number,patch:number,rc:number|null}} a
  * @param {{major:number,minor:number,patch:number,rc:number|null}} b

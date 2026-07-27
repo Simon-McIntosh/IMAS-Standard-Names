@@ -15,6 +15,33 @@ describe('parseVersion', () => {
     expect(parseVersion('')).toBeNull();
     expect(parseVersion(undefined)).toBeNull();
   });
+
+  it('parses build metadata off an rc, without it affecting precedence', () => {
+    expect(parseVersion('v0.2.0rc65+west-task-2e')).toEqual({
+      major: 0,
+      minor: 2,
+      patch: 0,
+      rc: 65,
+    });
+  });
+
+  it('parses build metadata off a stable release', () => {
+    expect(parseVersion('v0.2.0+west-task-2e')).toEqual({
+      major: 0,
+      minor: 2,
+      patch: 0,
+      rc: null,
+    });
+  });
+
+  it('parses multi-segment dotted build metadata', () => {
+    expect(parseVersion('v0.2.0rc65+west-task-2e.1')).toEqual({
+      major: 0,
+      minor: 2,
+      patch: 0,
+      rc: 65,
+    });
+  });
 });
 
 describe('sortVersions', () => {
@@ -112,6 +139,71 @@ describe('sortVersions', () => {
 
   it('returns an empty array for an empty list', () => {
     expect(sortVersions([])).toEqual([]);
+  });
+
+  it('gives a +build entry equal precedence to the same rc without a build tag', () => {
+    const input = [{ version: 'v0.2.0rc65' }, { version: 'v0.2.0rc65+west-task-2e' }];
+    // Equal precedence -> stable sort preserves input order.
+    expect(sortVersions(input).map((v) => v.version)).toEqual([
+      'v0.2.0rc65',
+      'v0.2.0rc65+west-task-2e',
+    ]);
+  });
+
+  it('keeps the tie stable regardless of which +build entry comes first in the input', () => {
+    const input = [{ version: 'v0.2.0rc65+west-task-2e' }, { version: 'v0.2.0rc65' }];
+    expect(sortVersions(input).map((v) => v.version)).toEqual([
+      'v0.2.0rc65+west-task-2e',
+      'v0.2.0rc65',
+    ]);
+  });
+
+  it('breaks a tie between two different +build labels on the same rc stably', () => {
+    const input = [
+      { version: 'v0.2.0rc65+west-task-2e' },
+      { version: 'v0.2.0rc65+other-batch' },
+    ];
+    // Both tie in precedence (build metadata is not weighed) -> original
+    // relative order is preserved, proving the sort is stable.
+    expect(sortVersions(input).map((v) => v.version)).toEqual([
+      'v0.2.0rc65+west-task-2e',
+      'v0.2.0rc65+other-batch',
+    ]);
+    const reversed = [
+      { version: 'v0.2.0rc65+other-batch' },
+      { version: 'v0.2.0rc65+west-task-2e' },
+    ];
+    expect(sortVersions(reversed).map((v) => v.version)).toEqual([
+      'v0.2.0rc65+other-batch',
+      'v0.2.0rc65+west-task-2e',
+    ]);
+  });
+
+  it('a +build entry never sorts below an older rc', () => {
+    const input = [
+      { version: 'v0.2.0rc10' },
+      { version: 'v0.2.0rc65+west-task-2e' },
+      { version: 'v0.2.0rc9' },
+    ];
+    expect(sortVersions(input).map((v) => v.version)).toEqual([
+      'v0.2.0rc65+west-task-2e',
+      'v0.2.0rc10',
+      'v0.2.0rc9',
+    ]);
+  });
+
+  it('preserves title and aliases untouched on a +build entry through sortVersions', () => {
+    const input = [
+      { version: 'v0.2.0rc65+west-task-2e', title: 'west review batch', aliases: ['latest'] },
+      { version: 'v0.2.0rc64', title: 'v0.2.0rc64', aliases: [] },
+    ];
+    const sorted = sortVersions(input);
+    expect(sorted[0]).toEqual({
+      version: 'v0.2.0rc65+west-task-2e',
+      title: 'west review batch',
+      aliases: ['latest'],
+    });
+    expect(sorted[0]).toBe(input[0]); // same object identity — nothing rewritten
   });
 
   it('does not mutate the input array', () => {

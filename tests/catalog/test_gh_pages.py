@@ -271,6 +271,64 @@ def test_save_versions_preserves_title_and_aliases_across_resort(
     assert by_version["v0.2.0rc64"].aliases == ("latest",)
 
 
+def test_version_sort_key_build_metadata_parses_and_is_ignored_for_precedence() -> None:
+    """A ``+build`` suffix parses (the version string is not rejected) but
+    contributes nothing to the sort key — it ties with the bare rc."""
+    with_build = VersionEntry("v0.2.0rc65+west-task-2e", "t", ())
+    bare = VersionEntry("v0.2.0rc65", "t", ())
+    assert _version_sort_key(with_build) == _version_sort_key(bare)
+
+
+def test_version_sort_key_build_metadata_ties_sort_stably() -> None:
+    """Two entries differing only by build metadata tie in precedence;
+    ``sorted()`` is stable, so their relative input order is preserved
+    regardless of which one appears first."""
+    a = VersionEntry("v0.2.0rc65+west-task-2e", "a", ())
+    b = VersionEntry("v0.2.0rc65+other-batch", "b", ())
+    assert [v.version for v in sorted([a, b], key=_version_sort_key, reverse=True)] == [
+        a.version,
+        b.version,
+    ]
+    assert [v.version for v in sorted([b, a], key=_version_sort_key, reverse=True)] == [
+        b.version,
+        a.version,
+    ]
+
+
+def test_version_sort_key_build_metadata_still_orders_numerically_against_other_rcs() -> (
+    None
+):
+    items = [
+        VersionEntry("v0.2.0rc10", "t", ()),
+        VersionEntry("v0.2.0rc65+west-task-2e", "t", ()),
+        VersionEntry("v0.2.0rc9", "t", ()),
+    ]
+    items_sorted = sorted(items, key=_version_sort_key, reverse=True)
+    assert [v.version for v in items_sorted] == [
+        "v0.2.0rc65+west-task-2e",
+        "v0.2.0rc10",
+        "v0.2.0rc9",
+    ]
+
+
+def test_save_versions_preserves_build_metadata_title_and_aliases_across_resort(
+    tmp_path: Path,
+) -> None:
+    """``version`` (including its ``+build`` tag), ``title``, and
+    ``aliases`` must all survive a round trip through ``_save_versions`` /
+    ``_load_versions`` untouched."""
+    versions = [
+        VersionEntry("v0.2.0rc65+west-task-2e", "west review batch", ("latest",)),
+        VersionEntry("v0.2.0rc64", "v0.2.0rc64", ()),
+    ]
+    _save_versions(tmp_path, versions)
+    reloaded = _load_versions(tmp_path)
+    by_version = {v.version: v for v in reloaded}
+    assert by_version["v0.2.0rc65+west-task-2e"].title == "west review batch"
+    assert by_version["v0.2.0rc65+west-task-2e"].aliases == ("latest",)
+    assert by_version["v0.2.0rc64"].title == "v0.2.0rc64"
+
+
 # ---------------------------------------------------------------------------
 # Integration tests (real git, real worktrees)
 # ---------------------------------------------------------------------------
