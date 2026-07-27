@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { sortVersions } from './versions.js';
 
 // Runtime data loader and React context.
 //
@@ -66,7 +67,7 @@ export function DataProvider({ children }) {
         let versions = null;
         try {
           const vres = await fetch('../versions.json', { cache: 'no-cache' });
-          if (vres.ok) versions = await vres.json();
+          if (vres.ok) versions = sortVersions(await vres.json());
         } catch {
           /* ignore */
         }
