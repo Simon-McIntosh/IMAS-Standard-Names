@@ -23,6 +23,8 @@ import pytest
 
 from imas_standard_names.catalog.gh_pages import (
     VersionEntry,
+    _load_versions,
+    _save_versions,
     _strip_alias_from_others,
     _upsert_version,
     _version_sort_key,
@@ -162,6 +164,111 @@ def test_version_sort_key_semver_descending() -> None:
     ]
     items_sorted = sorted(items, key=_version_sort_key, reverse=True)
     assert [v.version for v in items_sorted] == ["v2.0.0", "v1.1.0", "v1.0.0"]
+
+
+def test_version_sort_key_rc_numeric_not_lexicographic() -> None:
+    """Regression fixture: the exact deployed ordering this bug produced.
+
+    ``_SEMVER_RE`` used to require the pre-release to start with ``-`` or
+    ``+``; ``rc64`` starts with ``r`` so it never matched and every entry
+    fell to the non-semver, plain-string-sort branch. That produced
+    rc9 > rc8 > rc7 > rc63 > rc62 > ... — lexicographic, not numeric.
+    """
+    names = [
+        "v0.2.0rc64",
+        "v0.2.0rc9",
+        "v0.2.0rc8",
+        "v0.2.0rc7",
+        "v0.2.0rc63",
+        "v0.2.0rc62",
+        "v0.2.0rc61",
+        "v0.2.0rc60",
+        "v0.2.0rc6",
+    ]
+    items = [VersionEntry(n, n, ()) for n in names]
+    items_sorted = sorted(items, key=_version_sort_key, reverse=True)
+    assert [v.version for v in items_sorted] == [
+        "v0.2.0rc64",
+        "v0.2.0rc63",
+        "v0.2.0rc62",
+        "v0.2.0rc61",
+        "v0.2.0rc60",
+        "v0.2.0rc9",
+        "v0.2.0rc8",
+        "v0.2.0rc7",
+        "v0.2.0rc6",
+    ]
+
+
+def test_version_sort_key_stable_outranks_its_own_release_candidates() -> None:
+    items = [
+        VersionEntry("v0.2.0rc64", "v0.2.0rc64", ()),
+        VersionEntry("v0.2.0", "v0.2.0", ()),
+        VersionEntry("v0.2.0rc1", "v0.2.0rc1", ()),
+    ]
+    items_sorted = sorted(items, key=_version_sort_key, reverse=True)
+    assert [v.version for v in items_sorted] == [
+        "v0.2.0",
+        "v0.2.0rc64",
+        "v0.2.0rc1",
+    ]
+
+
+def test_version_sort_key_orders_major_minor_patch_before_rc() -> None:
+    items = [
+        VersionEntry("v0.2.0rc5", "v0.2.0rc5", ()),
+        VersionEntry("v1.0.0", "v1.0.0", ()),
+        VersionEntry("v0.10.0", "v0.10.0", ()),
+        VersionEntry("v0.2.9", "v0.2.9", ()),
+        VersionEntry("v0.2.10", "v0.2.10", ()),
+    ]
+    items_sorted = sorted(items, key=_version_sort_key, reverse=True)
+    assert [v.version for v in items_sorted] == [
+        "v1.0.0",
+        "v0.10.0",
+        "v0.2.10",
+        "v0.2.9",
+        "v0.2.0rc5",
+    ]
+
+
+def test_version_sort_key_non_semver_labels_land_last_and_stable() -> None:
+    """Branch-style labels always rank below every parseable version.
+
+    Among themselves they fall back to a descending string sort (the
+    pre-existing, mike-mirroring behaviour) — predictable, not the same
+    "preserve original order" rule the SPA-side ``sortVersions`` uses.
+    """
+    items = [
+        VersionEntry("v0.2.0rc1", "v0.2.0rc1", ()),
+        VersionEntry("main", "main", ()),
+        VersionEntry("v0.1.0", "v0.1.0", ()),
+        VersionEntry("pr-123", "pr-123", ()),
+    ]
+    items_sorted = sorted(items, key=_version_sort_key, reverse=True)
+    assert [v.version for v in items_sorted] == [
+        "v0.2.0rc1",
+        "v0.1.0",
+        "pr-123",
+        "main",
+    ]
+
+
+def test_save_versions_preserves_title_and_aliases_across_resort(
+    tmp_path: Path,
+) -> None:
+    """Re-sorting must not perturb any entry's ``title``/``aliases``."""
+    versions = [
+        VersionEntry("v0.2.0rc9", "custom title rc9", ("stable",)),
+        VersionEntry("v0.2.0rc64", "custom title rc64", ("latest",)),
+    ]
+    _save_versions(tmp_path, versions)
+    reloaded = _load_versions(tmp_path)
+    by_version = {v.version: v for v in reloaded}
+    assert by_version["v0.2.0rc9"].title == "custom title rc9"
+    assert by_version["v0.2.0rc9"].aliases == ("stable",)
+    assert by_version["v0.2.0rc64"].title == "custom title rc64"
+    assert by_version["v0.2.0rc64"].aliases == ("latest",)
 
 
 # ---------------------------------------------------------------------------

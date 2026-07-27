@@ -333,10 +333,11 @@ def _save_versions(worktree: Path, versions: Sequence[VersionEntry]) -> None:
     """Serialise ``versions`` to ``versions.json``.
 
     Sort order: ``latest`` first (so it sorts to the top of any version
-    selector dropdown), then entries in descending semver-ish order; any
-    entry that does not parse as semver falls back to a string-descending
-    sort and lands after the parseable ones. This mirrors mike's
-    default behaviour closely enough for the selector UI.
+    selector dropdown), then entries in descending semver order — with a
+    stable release outranking its own release candidates — then any entry
+    that does not parse as semver, string-descending, after the parseable
+    ones. This mirrors mike's default behaviour closely enough for the
+    selector UI.
     """
     sorted_versions = sorted(versions, key=_version_sort_key, reverse=True)
     serialised = [v.to_dict() for v in sorted_versions]
@@ -353,17 +354,20 @@ _SEMVER_RE = re.compile(
     \.
     (?P<minor>\d+)
     (?:\.(?P<patch>\d+))?
-    (?P<pre>[-+].*)?
+    (?:-?rc(?P<rc>\d+))?
     $""",
-    re.VERBOSE,
+    re.VERBOSE | re.IGNORECASE,
 )
 
 
 def _version_sort_key(entry: VersionEntry) -> tuple:
     """Stable sort key that puts ``latest`` on top and orders semver desc.
 
-    Non-semver versions sort by their string after the semver block, so
-    branch-style labels (``main``, ``pr-123``) still land predictably.
+    A stable release (no ``rcN`` suffix) outranks every release candidate
+    of the same ``major.minor.patch``; among release candidates, higher
+    ``rc`` numbers outrank lower ones. Non-semver versions sort by their
+    string after the semver block, so branch-style labels (``main``,
+    ``pr-123``) still land predictably, below every parseable version.
     """
     has_latest = "latest" in entry.aliases
     match = _SEMVER_RE.match(entry.version)
@@ -371,17 +375,16 @@ def _version_sort_key(entry: VersionEntry) -> tuple:
         major = int(match.group("major"))
         minor = int(match.group("minor"))
         patch = int(match.group("patch") or 0)
-        # An empty ``pre`` (final release) outranks any pre-release of
-        # the same numeric tuple, so represent it as empty-string-greater
-        # than any tagged pre suffix by giving final releases an empty
-        # high-order sentinel.
-        pre = match.group("pre") or ""
-        # We want "no pre-release" to sort AFTER pre-releases of the
-        # same numeric tuple — invert by treating empty as a large value.
-        pre_key = (0 if pre == "" else 1, pre)
-        return (1 if has_latest else 0, 1, major, minor, patch, pre_key)
+        rc = match.group("rc")
+        # A stable release (rc is None) must outrank every rc of the same
+        # numeric tuple. Represent "no rc" as a value one greater than any
+        # real rc number so ascending-int comparison ranks it highest;
+        # reverse=True on the outer sort then puts it first.
+        rc_key = (int(rc) + 1) if rc is not None else 0
+        is_stable = 1 if rc is None else 0
+        return (1 if has_latest else 0, 1, major, minor, patch, is_stable, rc_key)
     # Non-semver: still rank below semver entries, but stable string sort.
-    return (1 if has_latest else 0, 0, 0, 0, 0, (0, entry.version))
+    return (1 if has_latest else 0, 0, 0, 0, 0, 0, 0, entry.version)
 
 
 def _aliases_for(versions: Iterable[VersionEntry], version: str) -> tuple[str, ...]:
