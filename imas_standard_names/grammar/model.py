@@ -20,6 +20,7 @@ from imas_standard_names.grammar.constants import (
     GENERIC_PHYSICAL_BASES,
 )
 from imas_standard_names.grammar.ir import (
+    BARE_PREFIX_OPERATORS,
     LOCUS_VALUE_PATTERN,
     AxisProjection,
     BaseKind,
@@ -237,29 +238,10 @@ _LOCUS_QUALIFIER_ORDER: tuple[str, ...] = (
     "inner",
     "outer",
 )
-_BARE_PREFIX_TRANSFORMATIONS: frozenset[str] = frozenset(
-    {
-        "accumulated",
-        "change_in",
-        "cumulative",
-        "cumulative_inside_flux_surface",
-        "flux_surface_averaged",
-        "gyroaveraged",
-        "line_averaged",
-        "line_integrated",
-        "maximum_over_flux_surface",
-        "minimum_over_flux_surface",
-        "normalized",
-        "per_poloidal_mode",
-        "per_toroidal_and_poloidal_mode_number",
-        "per_toroidal_mode",
-        "perturbed",
-        "surface_integrated",
-        "time_averaged",
-        "volume_averaged",
-        "volume_integrated",
-    }
-)
+# The bare-spelling prefix set is declared in the IR layer, which the renderer
+# also consults — one list, so the model's transformation slot and the rendered
+# spelling cannot drift apart.
+_BARE_PREFIX_TRANSFORMATIONS: frozenset[str] = BARE_PREFIX_OPERATORS
 
 
 # ---------------------------------------------------------------------------
@@ -405,15 +387,26 @@ def _ir_to_model_dict(ir: StandardNameIR) -> dict[str, str]:
             unary_ops.append(op)
 
     if binary_op is not None:
-        if unary_ops:
+        # A flux-surface reduction is the one operator the flat model can carry
+        # alongside a binary application: it occupies the free `transformation`
+        # slot and always renders OUTERMOST, so no wrap order needs recording.
+        # The average of a ratio (<|grad rho|^2/R^2>) is a distinct quantity from
+        # the ratio of averages, and only this spelling expresses it.
+        reduction_ops, _ = _flux_surface_reduction_vocab()
+        reductions = [op for op in unary_ops if op.op in reduction_ops]
+        others = [op for op in unary_ops if op.op not in reduction_ops]
+        if others or len(reductions) > 1:
+            unrepresentable = others or reductions
             raise ValueError(
                 "operator(s) "
-                f"{', '.join(repr(op.op) for op in unary_ops)} wrapping the "
-                f"binary operator {binary_op.op!r} are not representable in "
+                f"{', '.join(repr(op.op) for op in unrepresentable)} wrapping "
+                f"the binary operator {binary_op.op!r} are not representable in "
                 "the flat StandardName model; the IR layer "
                 "(grammar.parser.parse / grammar.render.compose) round-trips "
                 "nested operator expressions"
             )
+        if reductions:
+            d["transformation"] = reductions[0].op
         # Binary operator: extract operands from args
         model_op = _BINARY_IR_TO_MODEL.get(binary_op.op, f"{binary_op.op}_of")
         d["binary_operator"] = model_op
@@ -778,6 +771,19 @@ def _model_to_ir(model: StandardName) -> StandardNameIR:
         b_str = _value_of(model.secondary_base) if model.secondary_base else ""
         a_ir = _parse_simple_base(a_str)
         b_ir = _parse_simple_base(b_str)
+
+        # A transformation alongside a binary operator wraps it (the validator
+        # admits only flux-surface reductions here), so it goes on the stack
+        # FIRST — the operator list is outer-to-inner.
+        if model.transformation:
+            tf_token = _value_of(model.transformation)
+            operators.append(
+                OperatorApplication(
+                    kind=OperatorKind.UNARY_PREFIX,
+                    op=tf_token,
+                    bare_prefix=tf_token in _BARE_PREFIX_TRANSFORMATIONS,
+                )
+            )
 
         operators.append(
             OperatorApplication(
@@ -1188,7 +1194,7 @@ class StandardName(BaseModel):
 
     @model_validator(mode="after")
     def _check_major_radius_not_coordinate_of_locus(self) -> StandardName:
-        """§6: a point's radial (R) coordinate is ``radial_coordinate_of_<X>``.
+        """A point's radial (R) coordinate is ``radial_coordinate_of_<X>``.
 
         ``major_radius`` is reserved for the bare R0 reference and length/
         operator compounds; it must NOT carry a positional/geometry locus.
@@ -1209,7 +1215,7 @@ class StandardName(BaseModel):
             msg = (
                 f"'{base}' cannot take a positional/geometry locus; a "
                 f"point's radial coordinate is 'radial_coordinate_of_{carrier_val}' "
-                "(§6: geometric_base=radial_coordinate, symmetric with "
+                "(geometric_base=radial_coordinate, symmetric with "
                 "vertical_coordinate). Reserve major_radius for the bare R0 "
                 "reference and length/operator compounds."
             )
@@ -1290,17 +1296,27 @@ class StandardName(BaseModel):
     def _check_binary_operator_exclusivity(self) -> StandardName:
         """Binary operator is exclusive with component, transformation,
         decomposition, coordinate, subject, device, and geometric_base.
+
+        A flux-surface reduction is the single exception in the transformation
+        slot: it renders outermost over the binary application (the average of a
+        ratio), so the flat model needs no wrap-order field to reproduce it.
+        Every other transformation could sit either side of the operator and is
+        therefore still refused.
         """
         if self.binary_operator:
             exclusive_fields = {
                 "component": self.component,
-                "transformation": self.transformation,
                 "decomposition": self.decomposition,
                 "coordinate": self.coordinate,
                 "subject": self.subject,
                 "device": self.device,
                 "geometric_base": self.geometric_base,
             }
+            reduction_ops, _ = _flux_surface_reduction_vocab()
+            if self.transformation and _value_of(self.transformation) not in (
+                reduction_ops
+            ):
+                exclusive_fields["transformation"] = self.transformation
             for field_name, field_value in exclusive_fields.items():
                 if field_value:
                     msg = (
@@ -1468,7 +1484,9 @@ def _flux_surface_reduction_vocab() -> tuple[frozenset[str], frozenset[str]]:
     return ops, flagged
 
 
-def _check_flux_surface_reduction_gate(ir: StandardNameIR) -> None:
+def _check_flux_surface_reduction_gate(
+    ir: StandardNameIR, *, applied_by_enclosing: frozenset[str] = frozenset()
+) -> None:
     """Reject flux-surface reduction operators applied to flux functions.
 
     A base flagged ``constant_on_flux_surface`` is constant on any flux
@@ -1477,6 +1495,13 @@ def _check_flux_surface_reduction_gate(ir: StandardNameIR) -> None:
     Reduction tokens surface either on the IR operator stack or, in the
     bare-prefix qualifier spelling, in the qualifier list; binary operator
     arguments nest full IRs, so recurse into them.
+
+    ``applied_by_enclosing`` carries reduction tokens applied by an OUTER
+    expression, which a nested argument cannot see from its own IR. A reduction
+    over a binary form reaches every operand, and an operand that is a flux
+    function pulls out of the reduction — either the whole expression is
+    constant on the surface (a true no-op) or the reduction factorises through
+    that operand, and the factored spelling is the one to register.
     """
     reduction_ops, flagged_bases = _flux_surface_reduction_vocab()
     if not reduction_ops or not flagged_bases:
@@ -1484,7 +1509,7 @@ def _check_flux_surface_reduction_gate(ir: StandardNameIR) -> None:
     applied = {getattr(op, "op", None) for op in (ir.operators or [])} | {
         q.token for q in (ir.qualifiers or [])
     }
-    hit = applied & reduction_ops
+    hit = (applied | applied_by_enclosing) & reduction_ops
     base_token = getattr(ir.base, "token", None)
     if hit and base_token in flagged_bases:
         op = sorted(hit)[0]
@@ -1495,10 +1520,11 @@ def _check_flux_surface_reduction_gate(ir: StandardNameIR) -> None:
             f"(e.g. '{base_token}_at_plasma_boundary') for both the local "
             "and flux-surface-averaged quantities"
         )
+    inherited = (applied & reduction_ops) | applied_by_enclosing
     for op_app in ir.operators or []:
         for arg in getattr(op_app, "args", None) or []:
             if isinstance(arg, StandardNameIR):
-                _check_flux_surface_reduction_gate(arg)
+                _check_flux_surface_reduction_gate(arg, applied_by_enclosing=inherited)
 
 
 # The adjective spelling of the maximum reduction lives in qualifiers.yml as a

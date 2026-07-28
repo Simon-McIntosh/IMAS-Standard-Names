@@ -43,6 +43,7 @@ from typing import Any
 
 from imas_standard_names.grammar import vocab_loaders
 from imas_standard_names.grammar.ir import (
+    BARE_PREFIX_OPERATORS,
     TOKEN_PATTERN,
     AxisProjection,
     BaseKind,
@@ -262,7 +263,7 @@ def _default_vocabs() -> Vocabularies:
 class Diagnostic:
     """A single parser/validator diagnostic entry.
 
-    Matches the contract confirmed by W1b: ``category`` is one of
+    Contract: ``category`` is one of
     ``"non_canonical"``, ``"vocab_gap"``, or ``"ambiguity"``; ``layer`` is
     ``"parser"`` or ``"validator"``; ``severity`` is ``"info"``,
     ``"warning"``, or ``"error"``.
@@ -533,8 +534,12 @@ def _peel_outer_operator(
         if meta.get("kind") == OperatorKind.BINARY.value
     }
 
-    # a) unary postfix: s ends with "_<op>", longest op first
+    # a) unary postfix: s ends with "_<op>", longest op first. A postfix at the
+    # tail of a binary form belongs to the second operand, so leave it for the
+    # operand's own parse rather than wrapping the binary application in it.
     postfix_match = _longest_suffix_match(s, postfix_ops)
+    if postfix_match is not None and _postfix_belongs_to_a_binary_operand(s, v):
+        postfix_match = None
     if postfix_match is not None:
         new_s = s[: -len(postfix_match) - 1]  # drop "_<op>"
         if new_s:
@@ -576,6 +581,29 @@ def _peel_outer_operator(
     # by the IR→Model adapter in model.py. We do NOT peel them here because
     # they can form compound axes (e.g. normalized_radial) that projection
     # stripping needs to see intact.
+
+    # b3) bare unary prefix wrapping a BINARY form:
+    # "<bare_prefix_op>_<binary_op>_of_<A>_<sep>_<B>". The fall-through in b2
+    # relies on the qualifier + base stage resolving the remainder, and a binary
+    # application is not a base — so a bare prefix over a binary form has to be
+    # peeled here or the name cannot resolve at all. Peeling it keeps the
+    # operator a first-class segment (the flux-surface reduction gate keys off
+    # operator and qualifier tokens, so an operator glued into a base string
+    # would be invisible to it); bare_prefix makes the renderer reproduce the
+    # joiner-free spelling.
+    bare_over_binary = _longest_bare_prefix_over_binary_match(
+        s, prefix_ops, binary_ops, v
+    )
+    if bare_over_binary is not None:
+        return (
+            OperatorApplication(
+                kind=OperatorKind.UNARY_PREFIX,
+                op=bare_over_binary,
+                bare_prefix=True,
+            ),
+            s[len(bare_over_binary) + 1 :],
+            [],
+        )
 
     # c) binary: s starts with "<op>_of_" and contains its declared separator
     for op in sorted(binary_ops, key=len, reverse=True):
@@ -717,6 +745,86 @@ def _longest_indexed_prefix_operator_match(
         consumed = len(fused)
         if best is None or consumed > best[1]:
             best = (fused, consumed)
+    return best
+
+
+_BARE_PREFIX_OPERATORS_LONGEST_FIRST: tuple[str, ...] = tuple(
+    sorted(BARE_PREFIX_OPERATORS, key=len, reverse=True)
+)
+
+
+def _postfix_belongs_to_a_binary_operand(s: str, v: Vocabularies) -> bool:
+    """Whether a trailing postfix operator on ``s`` sits inside a binary operand.
+
+    ``ratio_of_A_to_square_magnetic_field_magnitude`` renders identically whether
+    the ``magnitude`` wraps the whole ratio or belongs to operand B, so the
+    grammar has to fix one reading. It reads as the operand's: a postfix scalar
+    extraction takes a vector or complex argument, and a ratio of scalars is
+    neither. Hoisting it would also cut the operand short and change which
+    quantity the name denotes. Bare-prefix operators may stand in front of the
+    binary form (a reduction over a ratio), so look through those first.
+    """
+    binary_ops = _binary_operator_tokens(v)
+    if not binary_ops:
+        return False
+    rest = s
+    while not _spells_binary_application(rest, binary_ops, v):
+        for op in _BARE_PREFIX_OPERATORS_LONGEST_FIRST:
+            head = f"{op}_"
+            if rest.startswith(head):
+                rest = rest[len(head) :]
+                break
+        else:
+            return False
+    return True
+
+
+def _binary_operator_tokens(v: Vocabularies) -> set[str]:
+    """Registered binary operator tokens."""
+    return {
+        name
+        for name, meta in v.operators.items()
+        if meta.get("kind") == OperatorKind.BINARY.value
+    }
+
+
+def _spells_binary_application(s: str, binary_ops: set[str], v: Vocabularies) -> bool:
+    """Whether ``s`` spells ``<binary_op>_of_<A>_<sep>_<B>``.
+
+    A cheap string test — it does NOT parse the operands, so a true result means
+    "shaped like a binary application", not "resolves". Callers use it to choose
+    a peel order, and the operand parse in the binary peel is the real gate.
+    """
+    for op in binary_ops:
+        prefix = f"{op}_of_"
+        if not s.startswith(prefix):
+            continue
+        sep = v.operators[op].get("separator")
+        if sep and f"_{sep}_" in s[len(prefix) :]:
+            return True
+    return False
+
+
+def _longest_bare_prefix_over_binary_match(
+    s: str, prefix_ops: set[str], binary_ops: set[str], v: Vocabularies
+) -> str | None:
+    """Longest bare-spelling prefix operator whose remainder spells a binary form.
+
+    Matches ``<bare_prefix_op>_<binary_op>_of_...`` and returns the prefix
+    operator token. Restricting the match to a binary remainder is what keeps
+    this from stealing the qualifier reading of an ordinary name: in
+    ``flux_surface_averaged_electron_density`` the remainder is a base, so the
+    operator stays a qualifier exactly as before.
+    """
+    best: str | None = None
+    for op in prefix_ops & BARE_PREFIX_OPERATORS:
+        head = f"{op}_"
+        if not s.startswith(head):
+            continue
+        if not _spells_binary_application(s[len(head) :], binary_ops, v):
+            continue
+        if best is None or len(op) > len(best):
+            best = op
     return best
 
 
@@ -862,6 +970,10 @@ def parse(name: str, vocabs: Vocabularies | None = None) -> ParseResult:
     while True:
         op_app, new_s = _peel_trailing_postfix_operator(s, v)
         if op_app is None:
+            break
+        if _postfix_belongs_to_a_binary_operand(s, v):
+            # Leave it for the binary operand's own parse; hoisting it here would
+            # attach it to the binary application instead.
             break
         trailing_postfix.append(op_app)
         s = new_s

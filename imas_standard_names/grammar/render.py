@@ -1,14 +1,14 @@
 """Grammar canonical renderer (strict generator).
 
-Plan 38 / W1a deliverable. Implements :func:`compose` — a pure function
-that maps a :class:`StandardNameIR` to its single canonical string form.
-There are no fallbacks: malformed IR raises :class:`RenderError`.
+Implements :func:`compose` — a pure function that maps a
+:class:`StandardNameIR` to its single canonical string form. There are no
+fallbacks: malformed IR raises :class:`RenderError`.
 
 The renderer is deliberately isolated from vocabulary resolution. It
 consumes validated IR structures (see :mod:`imas_standard_names.grammar.ir`)
 and emits token strings; vocabulary lookups happen at parse time.
 
-See the grammar specification §4 for the template spec.
+See the rendering templates in ``vocabularies/operators.yml``.
 """
 
 from __future__ import annotations
@@ -176,8 +176,13 @@ def _render_operator_stack(
         else:
             operand = _render_operator_stack(rest, inner, enclosing_ir)
             rest = []
-        assert_operator_of_form(op, registry=None)
-        outer = f"{op.op}_of_{operand}"
+        if op.bare_prefix:
+            # Joiner-free spelling (flux_surface_averaged_ratio_of_A_to_B). The
+            # IR restricts the flag to operators that have a bare spelling.
+            outer = f"{op.op}_{operand}"
+        else:
+            assert_operator_of_form(op, registry=None)
+            outer = f"{op.op}_of_{operand}"
         # Any remaining operators in ``rest`` still need to wrap the result.
         return _render_operator_stack(rest, outer, enclosing_ir)
 
@@ -259,7 +264,7 @@ def compose(ir: StandardNameIR) -> str:
         rendered += render_locus(ir.locus)
         rendered += render_mechanism(ir.mechanism)
 
-    # Safety net: enforce the §A3 trailing-locus rule on the final string.
+    # Safety net: enforce the trailing-locus rule on the final string.
     # When the outermost operator pushes text after the locus suffix, the
     # resulting name violates the trailing-position invariant and must be
     # rejected rather than emitted.

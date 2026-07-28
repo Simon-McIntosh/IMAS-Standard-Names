@@ -1,6 +1,6 @@
 """Grammar intermediate representation (IR).
 
-Plan 38 / W1a deliverable. Pydantic v2 models for the 5-group IR:
+Pydantic v2 models for the 5-group IR:
 
     StandardNameIR := {
         operators:  [OperatorApplication],       # outer-to-inner stack
@@ -15,7 +15,7 @@ This module defines *shape only*. It does not resolve tokens against
 vocabulary YAMLs — that wiring happens in the vocabulary loaders and parser
 (parser). Validators here enforce structural invariants (non-empty tokens,
 consistent projection/base pairing, legal locus-relation type matrix, no
-empty operator arg lists) and the §A3 `_of_` disambiguation assertions.
+empty operator arg lists) and the `_of_` disambiguation assertions.
 
 The canonical renderer lives in :mod:`imas_standard_names.grammar.render`.
 """
@@ -44,6 +44,7 @@ __all__ = [
     "QuantityOrCarrier",
     "StandardNameIR",
     "LOCUS_RELATION_MATRIX",
+    "BARE_PREFIX_OPERATORS",
     "BINARY_SEPARATORS",
     "assert_binary_has_separator",
     "assert_locus_is_trailing",
@@ -124,7 +125,7 @@ class LocusType(StrEnum):
     GEOMETRY = "geometry"
 
 
-# Locus relation compatibility matrix (see grammar specification §5).
+# Locus relation compatibility matrix (see vocabularies/locus_registry.yml).
 # ``along`` is a third preposition on POSITION-typed loci, alongside ``of``
 # (intrinsic geometry) and ``at`` (field evaluated there): it names a
 # path-like locus (line_of_sight, pellet_path) that a quantity varies ALONG
@@ -139,8 +140,41 @@ LOCUS_RELATION_MATRIX: dict[LocusType, frozenset[LocusRelation]] = {
 }
 
 
-# Allowed separators for binary operators (see grammar specification §A3 / §6).
+# Allowed separators for binary operators (see vocabularies/operators.yml).
 BINARY_SEPARATORS: frozenset[str] = frozenset({"and", "to"})
+
+
+# Unary-prefix operators that spell WITHOUT the ``_of_`` joiner
+# (``flux_surface_averaged_electron_density``, not
+# ``flux_surface_averaged_of_electron_density``). These normally reach the IR as
+# qualifiers on the base, because a bare prefix is indistinguishable from a
+# qualifier when the operand is an ordinary base. They reach the operator stack
+# only when the operand has no base to hang off — an operator application, e.g.
+# a binary form — and there they must carry ``bare_prefix`` so the renderer
+# reproduces the joiner-free spelling.
+BARE_PREFIX_OPERATORS: frozenset[str] = frozenset(
+    {
+        "accumulated",
+        "change_in",
+        "cumulative",
+        "cumulative_inside_flux_surface",
+        "flux_surface_averaged",
+        "gyroaveraged",
+        "line_averaged",
+        "line_integrated",
+        "maximum_over_flux_surface",
+        "minimum_over_flux_surface",
+        "normalized",
+        "per_poloidal_mode",
+        "per_toroidal_and_poloidal_mode_number",
+        "per_toroidal_mode",
+        "perturbed",
+        "surface_integrated",
+        "time_averaged",
+        "volume_averaged",
+        "volume_integrated",
+    }
+)
 
 
 # ---------------------------------------------------------------------------
@@ -326,6 +360,14 @@ class OperatorApplication(BaseModel):
         default=None,
         description="Binary-operator separator; required for kind=binary.",
     )
+    bare_prefix: bool = Field(
+        default=False,
+        description=(
+            "Render this unary_prefix operator as '<op>_<operand>' rather than "
+            "'<op>_of_<operand>'. Only tokens in BARE_PREFIX_OPERATORS may set "
+            "it, and both spellings of such a token denote distinct names."
+        ),
+    )
 
     @field_validator("op")
     @classmethod
@@ -364,14 +406,22 @@ class OperatorApplication(BaseModel):
                 raise ValueError(
                     f"unary operator {self.op!r} must not carry a separator"
                 )
+        if self.bare_prefix:
+            if self.kind is not OperatorKind.UNARY_PREFIX:
+                raise ValueError(
+                    f"bare_prefix applies to the unary_prefix rendering template "
+                    f"only; operator {self.op!r} has kind {self.kind.value}"
+                )
+            if self.op not in BARE_PREFIX_OPERATORS:
+                raise ValueError(
+                    f"operator {self.op!r} has no bare spelling; bare_prefix is "
+                    f"restricted to {sorted(BARE_PREFIX_OPERATORS)}"
+                )
         return self
 
 
 class StandardNameIR(BaseModel):
-    """Top-level 5-group IR for a standard name.
-
-    See the grammar specification §3 for the full spec.
-    """
+    """Top-level 5-group IR for a standard name."""
 
     model_config = ConfigDict(frozen=True, extra="forbid")
 
@@ -425,7 +475,7 @@ StandardNameIR.model_rebuild()
 
 
 # ---------------------------------------------------------------------------
-# §A3 assertion helpers
+# Operator-form assertion helpers
 # ---------------------------------------------------------------------------
 
 
@@ -433,7 +483,7 @@ def assert_operator_of_form(
     op: OperatorApplication,
     registry: Mapping[str, Any] | None = None,
 ) -> None:
-    """Assert ``op`` obeys the §A3 operator-form rule.
+    """Assert ``op`` obeys the operator-form rule.
 
     A ``unary_prefix`` operator must resolve against ``registry`` (when
     provided) to a registered prefix operator. ``registry`` is expected to
