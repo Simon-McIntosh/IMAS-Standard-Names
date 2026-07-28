@@ -1,9 +1,9 @@
 # Project Overview
 
-IMAS Standard Names (ISN) is a **grammar library** and **read-only catalog server** for the ITER Modelling and Analysis Suite (IMAS). It defines the rules for composing valid standard names and serves the approved catalog through read-only MCP tools.
+IMAS Standard Names (ISN) is the **grammar library** for the ITER Modelling and Analysis Suite (IMAS). It owns the controlled vocabulary, the parser and renderer, catalog validation, and the documentation site. It defines the rules for composing valid standard names; it does not serve them to AI assistants — Model Context Protocol tools over standard names live in [imas-codex](https://github.com/iterorganization/imas-codex).
 
 **Domain**: Fusion energy data standardization  
-**Tech Stack**: Python 3.12+, Pydantic, SQLite, YAML, MCP servers  
+**Tech Stack**: Python 3.12+, Pydantic, SQLite, YAML  
 **Key Concept**: All standard names follow strict grammar rules for describing physics and geometrical quantities
 
 **Project boundary**: ISN defines what a valid standard name *is*. [imas-codex](https://github.com/iterorganization/imas-codex) decides what standard names to *create*. See [docs/architecture/boundary.md](docs/architecture/boundary.md) for the full contract.
@@ -136,14 +136,11 @@ See [docs/architecture/boundary.md](docs/architecture/boundary.md) for the full 
 2. **Wrong base combinations**: Never use `component` with `geometric_base`
 3. **Missing physics_domain**: Must be a valid `PhysicsDomain` value, not a tag
 4. **Units in names**: Use YAML `unit` field, not in name text
-5. **Synchronous MCP tools**: All tool methods must be `async`
-6. **Missing error schemas**: Always return structured errors with examples
 
 ## Project Structure
 
 ```
 imas_standard_names/
-├── tools/           # MCP read-only tool implementations
 ├── grammar/         # Grammar parsing, composition, and validation
 ├── catalog/         # SQLite catalog management
 ├── graph/           # NetworkX local graph builder (optional)
@@ -180,16 +177,10 @@ per-domain catalog YAML (`<domain>.yml`). Five edge types are emitted:
 Forward references and external names appear as stub nodes
 (`node["stub"] = True`). Install with `uv sync --extra graph-local`.
 
-Four MCP tools in `tools/graph.py` wrap the graph:
-
-- `get_standard_name_neighbours(name, edge_types=None, direction="both")`
-- `get_standard_name_ancestors(name, max_depth=None)` — transitive closure
-  over HAS_ARGUMENT (out) ∪ HAS_ERROR (in), i.e. ordering parents.
-- `get_standard_name_descendants(name, max_depth=None)` — inverse.
-- `shortest_standard_name_path(source, target, edge_types=None)`
-
-All four are registered as optional read-only tools (skipped when the
-`networkx` import is unavailable).
+`graph/local_graph.py` exposes the traversal helpers directly:
+`get_neighbours`, `get_ancestors`, `get_descendants`, and `shortest_path`. Ancestors
+are the transitive closure over HAS_ARGUMENT (out) ∪ HAS_ERROR (in), i.e. the
+ordering parents; descendants are the inverse.
 
 
 ## Project Setup
@@ -360,9 +351,6 @@ uv run ruff format
 # Validate standard names catalog (requires catalog to be configured)
 uv run validate_catalog $STANDARD_NAMES_CATALOG_ROOT
 
-# Start MCP server (read-only)
-uv run standard-names-mcp
-
 # Generate grammar types
 uv run python -m imas_standard_names.grammar_codegen.generate
 ```
@@ -467,7 +455,6 @@ class Config:
   - Network requests
   - File I/O operations
   - Database queries
-  - MCP tool operations
 
 ```python
 import anyio
@@ -520,10 +507,8 @@ async def validate_standard_name(name: str) -> bool:
 
 - Use absolute imports: `from imas_standard_names.module import Class`
 - Place all imports at the top of the file unless properly justified elsewhere
-- All MCP tool methods must be `async`
 - Return structured data via `.model_dump()` or error dictionaries with schema
 - 100% test coverage required for all new/modified code
-- Follow existing patterns in `tools/` directory for MCP tool development
 - **Never use ALL CAPS for emphasis** in documentation, docstrings, or user-facing text
   - Use **bold**, _italic_, or `code` formatting instead
   - Exception: acronyms (e.g., IMAS, MCP, CF) and constants in code
@@ -552,29 +537,6 @@ spec_path = grammar_package_path / "specification.yml"
 
 **Note on Code Generation:**
 Generated files (model_types.py, constants.py, tag_types.py, field_schemas.py) are formatted by pre-commit hooks to ensure consistency with project formatting standards. The generate script produces code that follows ruff guidelines, but actual formatting is applied by the project's pre-commit configuration.
-
-### MCP Tool Pattern
-
-All MCP tools are **read-only** — they query the catalog and grammar but do not modify data.
-
-```python
-from imas_standard_names.decorators.mcp import mcp_tool
-from imas_standard_names.tools.base import BaseTool
-
-class MyTool(BaseTool):
-    @mcp_tool(description="Clear single sentence description of purpose for llm")
-    async def tool_method(self, param: str, ctx: Context | None = None):
-        try:
-            # Implementation (read-only query)
-            return result.model_dump()
-        except Exception as e:
-            return {
-                "error": type(e).__name__,
-                "message": str(e),
-                "schema": input_schema(),
-                "examples": example_inputs()
-            }
-```
 
 ## Documentation Standards
 - Include concise docstrings for all public methods and classes

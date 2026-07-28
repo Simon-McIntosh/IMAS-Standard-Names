@@ -4,9 +4,9 @@ Thank you for your interest in contributing to the IMAS Standard Names project! 
 
 ## Project Overview
 
-IMAS Standard Names is a grammar library and read-only catalog server for the fusion energy research community. The project defines rules for composing valid standard names and serves the approved catalog through MCP tools.
+IMAS Standard Names is the grammar library for the fusion energy research community. The project defines the rules for composing valid standard names, validates the approved catalog, and publishes the documentation site.
 
-Name *generation* is handled by [imas-codex](https://github.com/iterorganization/imas-codex). This project focuses on grammar, validation, and catalog serving.
+Name *generation* is handled by [imas-codex](https://github.com/iterorganization/imas-codex), which also serves standard-name tools to AI assistants. This project focuses on grammar, parsing, validation, and the catalog build.
 
 ## How to Contribute
 
@@ -15,23 +15,16 @@ Name *generation* is handled by [imas-codex](https://github.com/iterorganization
 - **Grammar rules**: Propose changes or additions to the naming grammar
 - **Validation logic**: Improve semantic, structural, or description validation
 - **Documentation**: Improve grammar reference, guidelines, or architecture docs
-- **MCP tools**: Enhance the read-only query and reference tools
+- **Catalog build**: Improve the SQLite build, the docs site, or the grammar reference
 - **Bug fixes**: Fix issues in grammar parsing, catalog building, or validation
 
 ### Using the IMAS MCP Server for Reference
 
-This repository includes configuration for the Model Context Protocol (MCP) server, which provides schema information and documentation for IMAS data structures.
-
-> **Note:** Using the IMAS MCP server requires a local Docker installation on your system.
+This repository includes configuration for a Model Context Protocol (MCP) server that provides schema information and documentation for IMAS data structures. It is served by the sibling [imas-codex](https://github.com/iterorganization/imas-codex) checkout, so clone that alongside this one.
 
 #### VS Code Integration
 
-The repository includes a `.vscode/mcp.json` configuration file that sets up the necessary MCP servers:
-
-1. Install Docker on your system if not already installed
-2. Open the project in VS Code with the GitHub Copilot extension enabled
-3. When prompted, enter your GitHub Personal Access Token (Note: this PAT token needs read access to metadata and read/write access to actions, issues, and pull requests)
-4. The MCP servers (IMAS and GitHub) will be accessible to Copilot for providing schema information and documentation
+`.vscode/mcp.json` registers the `imas-dd` server. Open the project in VS Code with an MCP-capable assistant and the server becomes available for schema lookups and documentation.
 
 ### Reporting Issues
 

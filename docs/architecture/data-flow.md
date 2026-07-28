@@ -1,11 +1,11 @@
 # Data Flow
 
-End-to-end lifecycle of an IMAS standard name, from Data Dictionary path to MCP query result.
+End-to-end lifecycle of an IMAS standard name, from Data Dictionary path to published catalog.
 
 ## Pipeline Overview
 
 ```
-DD paths ──▶ codex mint ──▶ graph ──▶ publish ──▶ YAML catalog ──▶ human review ──▶ ISN build ──▶ .db dist ──▶ MCP read
+DD paths ──▶ codex mint ──▶ graph ──▶ publish ──▶ YAML catalog ──▶ human review ──▶ ISN build ──▶ .db dist ──▶ docs + API
 ```
 
 ## Detailed Flow
@@ -47,11 +47,11 @@ DD paths ──▶ codex mint ──▶ graph ──▶ publish ──▶ YAML c
 │                                                     │                      │
 │                                                     ▼                      │
 │                                    ┌──────────────────────────────────┐    │
-│                                    │  MCP Server (read-only tools)    │    │
+│                                    │  Docs site + Python API          │    │
 │                                    │  grammar · search · validate     │    │
 │                                    └──────────────────────────────────┘    │
 │                                                                             │
-│  Validates YAML, builds SQLite database, serves via MCP read-only tools.   │
+│  Validates YAML, builds the SQLite database, publishes docs and the API.    │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -91,13 +91,16 @@ Once YAML files are merged, ISN builds the catalog:
 - Produces a SQLite `.db` file
 - The `.db` is distributed as part of the `imas-standard-names-catalog` package
 
-### 7. MCP Read Tools (this project)
+### 7. Read Access (this project)
 
-The ISN MCP server loads the `.db` and serves it through read-only tools:
+ISN loads the `.db` and exposes it two ways:
 
-- **Grammar tools**: `get_grammar`, `compose_standard_name`, `parse_standard_name`
-- **Query tools**: `search_standard_names`, `list_standard_names`, `fetch_standard_names`, `check_standard_names`
-- **Reference tools**: `validate_catalog`, `get_vocabulary`, `get_tokamak_parameters`
+- **Python API**: `imas_standard_names.grammar` for parse/compose/context, and
+  `StandardNameCatalog` for catalog query
+- **Documentation site**: the published grammar reference and catalog browser
+
+Model Context Protocol tools over the same data are served by **imas-codex**,
+which calls this API.
 
 ## Where Each Project Fits
 
@@ -105,4 +108,4 @@ The ISN MCP server loads the `.db` and serves it through read-only tools:
 |-------|---------|------|
 | DD analysis, minting, graph, publish | **imas-codex** | Generates candidate names using ISN grammar |
 | YAML source files, human review | **imas-standard-names-catalog** | Stores approved names as reviewed YAML |
-| Grammar, validation, catalog build, MCP serve | **imas-standard-names** (this project) | Defines grammar, builds catalog, serves read-only |
+| Grammar, validation, catalog build, docs site | **imas-standard-names** (this project) | Defines grammar, builds catalog, publishes docs and API |

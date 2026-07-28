@@ -1,4 +1,4 @@
-"""Tests for plan 41: local NetworkX graph + MCP tools + renderer upgrades."""
+"""Tests for the local NetworkX graph built over the per-domain catalog YAML."""
 
 from __future__ import annotations
 
@@ -19,7 +19,7 @@ from imas_standard_names.graph.local_graph import (  # noqa: E402
 )
 
 # ---------------------------------------------------------------------------
-# Fixture catalog (plan 41 §6 — covers all edge types + stub)
+# Fixture catalog — covers every edge type plus a stub node
 # ---------------------------------------------------------------------------
 _DOMAIN_FIXTURE = [
     # Simple base for components to wrap.
@@ -340,52 +340,3 @@ class TestGraphTraversal:
         g = build_catalog_graph(fixture_catalog)
         with pytest.raises(ValueError):
             get_neighbours(g, "magnetic_field", edge_types={"HAS_WAT"})
-
-
-# ---------------------------------------------------------------------------
-# MCP tool wrapper
-# ---------------------------------------------------------------------------
-class TestLocalGraphMCPTool:
-    def test_tool_builds_graph_and_returns_neighbours(
-        self, fixture_catalog: Path
-    ) -> None:
-        import asyncio
-
-        from imas_standard_names.tools.graph import LocalGraphTool
-
-        tool = LocalGraphTool(catalog_root=str(fixture_catalog))
-        result = asyncio.run(
-            tool.get_standard_name_neighbours("x_magnetic_field", direction="out")
-        )
-        assert result["name"] == "x_magnetic_field"
-        assert result["count"] == 1
-        assert result["results"][0]["neighbour"] == "magnetic_field"
-
-    def test_tool_rejects_bad_direction(self, fixture_catalog: Path) -> None:
-        import asyncio
-
-        from imas_standard_names.tools.graph import LocalGraphTool
-
-        tool = LocalGraphTool(catalog_root=str(fixture_catalog))
-        result = asyncio.run(
-            tool.get_standard_name_neighbours("magnetic_field", direction="sideways")
-        )
-        assert "error" in result
-
-    def test_tool_ancestors_descendants_path(self, fixture_catalog: Path) -> None:
-        import asyncio
-
-        from imas_standard_names.tools.graph import LocalGraphTool
-
-        tool = LocalGraphTool(catalog_root=str(fixture_catalog))
-        anc = asyncio.run(tool.get_standard_name_ancestors("x_magnetic_field"))
-        assert "magnetic_field" in anc["ancestors"]
-
-        desc = asyncio.run(tool.get_standard_name_descendants("magnetic_field"))
-        assert "x_magnetic_field" in desc["descendants"]
-
-        path = asyncio.run(
-            tool.shortest_standard_name_path("x_magnetic_field", "magnetic_field")
-        )
-        assert path["hops"] == 1
-        assert path["path"][-1]["edge_type_in"] == "HAS_ARGUMENT"

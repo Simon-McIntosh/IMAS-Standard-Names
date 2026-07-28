@@ -1,6 +1,5 @@
 """Shared pytest fixtures for IMAS Standard Names tests."""
 
-import asyncio
 import importlib.resources as ir
 from pathlib import Path
 
@@ -9,7 +8,6 @@ import yaml
 
 from imas_standard_names.models import create_standard_name_entry
 from imas_standard_names.repository import StandardNameCatalog
-from imas_standard_names.tools.fetch import FetchTool
 
 
 def _write_entry_yaml(root: Path, entry):
@@ -102,25 +100,6 @@ def temp_catalog(temp_catalog_dir):
     """
     catalog = StandardNameCatalog(root=temp_catalog_dir)
     return catalog
-
-
-@pytest.fixture
-def temp_fetch_tool(temp_catalog):
-    """Create a FetchTool using the temporary catalog."""
-    return FetchTool(temp_catalog)
-
-
-@pytest.fixture
-def invoke_async():
-    """Helper to invoke async tool methods synchronously."""
-
-    def _invoke(tool, method_name, **kwargs):
-        method = getattr(tool, method_name)
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        return loop.run_until_complete(method(**kwargs))
-
-    return _invoke
 
 
 @pytest.fixture

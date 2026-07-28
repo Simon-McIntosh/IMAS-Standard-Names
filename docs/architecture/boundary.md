@@ -2,23 +2,25 @@
 
 ## What ISN Is
 
-IMAS Standard Names (ISN) is a **grammar library** and **read-only catalog server**. It provides:
+IMAS Standard Names (ISN) is a **grammar library**. It provides:
 
 - A formal grammar for composing and validating standard names for fusion data variables
-- A read-only MCP server that exposes the catalog and grammar to AI assistants
 - Python APIs for parsing, composing, and validating standard names
 - A SQLite-backed catalog of approved standard name entries
+- The documentation site that publishes the grammar and the catalog
 
 ## What ISN Is Not
 
-ISN is **not** a name generator. It does not decide *which* standard names should exist — it defines *what a valid standard name looks like* and serves the approved catalog.
+ISN is **not** a name generator. It does not decide *which* standard names should exist — it defines *what a valid standard name looks like* and holds the approved catalog.
 
-Name generation — discovering which IMAS Data Dictionary paths need standard names, minting candidates, and managing the approval pipeline — belongs to [imas-codex](https://github.com/iterorganization/imas-codex).
+ISN also does **not** serve tools to AI assistants. Model Context Protocol tools over standard names are served by [imas-codex](https://github.com/iterorganization/imas-codex), which calls the Python API below.
+
+Name generation — discovering which IMAS Data Dictionary paths need standard names, minting candidates, and managing the approval pipeline — belongs to imas-codex as well.
 
 **The boundary:**
 
 > ISN defines what a valid standard name **is**.
-> imas-codex decides what standard names to **create**.
+> imas-codex decides what standard names to **create**, and serves them.
 
 ---
 
@@ -100,36 +102,6 @@ entry = create_standard_name_entry({
 
 ---
 
-## MCP Tool Contract
-
-The MCP server exposes **10 read-only tools**. These tools serve the catalog and grammar — they do not modify data.
-
-### Grammar and Schema
-
-| Tool | Purpose |
-|------|---------|
-| `get_grammar` | Grammar rules, patterns, and composition guidance |
-| `get_schema` | Entry schema for understanding catalog entry structure |
-| `compose_standard_name` | Build valid names from structured parts |
-| `parse_standard_name` | Parse names into grammatical components |
-
-### Catalog Query
-
-| Tool | Purpose |
-|------|---------|
-| `search_standard_names` | Find names by concept using semantic search |
-| `list_standard_names` | List names with filtering by status, tags, kind |
-| `fetch_standard_names` | Get complete metadata for specific names |
-| `check_standard_names` | Fast batch validation of name existence |
-
-### Reference and Validation
-
-| Tool | Purpose |
-|------|---------|
-| `validate_catalog` | Check catalog integrity and grammar compliance |
-| `get_vocabulary` | Controlled vocabulary tokens by grammar segment |
-| `get_tokamak_parameters` | Reference tokamak machine parameters |
-
 ---
 
 ## Data Flow
@@ -148,15 +120,15 @@ The MCP server exposes **10 read-only tools**. These tools serve the catalog and
                                                       │
                                                       ▼
                                               ┌───────────────┐
-                                              │  MCP server    │
-                                              │  (read-only)   │
+                                              │  docs site +   │
+                                              │  Python API    │
                                               └───────────────┘
 ```
 
 1. **imas-codex** reads the IMAS Data Dictionary and generates candidate standard names
 2. Candidates are reviewed and merged into the **YAML catalog** repository
 3. ISN **builds** the YAML into a SQLite `.db` file
-4. The ISN **MCP server** serves the catalog and grammar as read-only tools
+4. ISN publishes the catalog through the **documentation site** and the Python API; imas-codex serves it to AI assistants
 
 ---
 

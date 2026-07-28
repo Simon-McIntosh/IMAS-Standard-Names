@@ -57,7 +57,7 @@ jobs:
       - name: Install from wheel
         run: |
           pip install dist/*.whl
-          standard-names-mcp --help
+          standard-names --help
 
   publish-pypi:
     needs: test-install

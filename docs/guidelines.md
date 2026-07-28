@@ -531,7 +531,7 @@ Add new tokens to a vocabulary:
   "already_present": [],
   "status": "success",
   "requires_restart": true,
-  "details": "Vocabulary updated and codegen completed successfully. **Important:** Restart the MCP server to load the updated grammar types."
+  "details": "Vocabulary updated and codegen completed successfully. **Important:** Restart any long-running process to load the updated grammar types."
 }
 ```
 
@@ -541,7 +541,7 @@ Add new tokens to a vocabulary:
 - `"failed"` — Token format invalid OR codegen failed (see `details`)
 - `"unchanged"` — All tokens already present
 
-**Action required:** When `requires_restart: true`, restart the MCP server to load updated grammar enums.
+**Action required:** When `requires_restart: true`, restart any long-running process that imported the grammar so it picks up the updated enums.
 
 #### Remove Tokens
 

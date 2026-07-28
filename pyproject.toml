@@ -15,12 +15,8 @@ dependencies = [
   "click>=8.1.8,<9.0.0",
   "pyyaml>=6.0.2,<7.0.0",
   "pint>=0.24.4,<0.25.0",
-  "fastmcp~=3.2.0",
   # Security floor constraints for transitive dependencies
   "urllib3>=2.7.0",            # CVE-2026-44432, CVE-2026-44431
-  "python-multipart>=0.0.27", # CVE-2026-42561, CVE-2026-40347
-  "lxml>=6.1.0",              # CVE-2026-41066
-  "authlib>=1.6.11",          # CVE-2026-41425
 ]
 keywords = [
   "fusion",
@@ -41,7 +37,6 @@ is_genericname = "imas_standard_names.issues.cli:is_genericname"
 update_links = "imas_standard_names.issues.cli:update_links"
 validate_catalog = "imas_standard_names.validation.cli:validate_catalog_cli"
 standard-names = "imas_standard_names.cli:standard_names"
-standard-names-mcp = "imas_standard_names.cli.server:main"
 build-grammar = "imas_standard_names.grammar_codegen.generate:main"
 generate-schema = "imas_standard_names.schemas.generate:main"
 
@@ -126,7 +121,6 @@ dev = [
   "pytest-html>=4.1.1,<5.0.0",
   "ipykernel>=6.29.5,<7.0.0",
   "types-pyyaml>=6.0.12.20241230,<7.0.0",
-  "mcp-cli>=0.1.0,<1.0.0",
   # Include quality tools for development
   "proselint>=0.14.0,<0.15.0",
   "spacy>=3.8.0,<4.0.0",
