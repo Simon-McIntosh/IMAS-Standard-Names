@@ -8,7 +8,12 @@ conventions, and LLM orientation data into a single dictionary.
 
 import copy
 import functools
+import hashlib
+import json
+import os
+import tempfile
 from importlib import resources
+from pathlib import Path
 from typing import Any
 
 import yaml
@@ -549,6 +554,192 @@ def _build_vocabulary_usage_stats() -> dict[str, Any]:
 
 
 # ---------------------------------------------------------------------------
+# Cross-process payload cache
+# ---------------------------------------------------------------------------
+
+CACHE_ENABLE_ENV = "IMAS_STANDARD_NAMES_CONTEXT_CACHE"
+CACHE_DIR_ENV = "IMAS_STANDARD_NAMES_CACHE_DIR"
+_CACHE_SUBDIR = "grammar-context"
+_CACHE_RETAIN = 8
+_DISABLE_VALUES = frozenset({"0", "off", "no", "false"})
+
+_PACKAGE_DIR = Path(__file__).resolve().parent.parent
+_GRAMMAR_DIR = Path(__file__).resolve().parent
+
+
+def _cache_enabled() -> bool:
+    """Whether the on-disk payload cache may be read or written."""
+    return os.environ.get(CACHE_ENABLE_ENV, "").strip().lower() not in _DISABLE_VALUES
+
+
+def _cache_dir() -> Path:
+    """Per-user cache directory holding serialised context payloads.
+
+    Honours ``IMAS_STANDARD_NAMES_CACHE_DIR``, then ``platformdirs`` when it is
+    importable, then ``XDG_CACHE_HOME``, then ``~/.cache``.
+    """
+    if override := os.environ.get(CACHE_DIR_ENV):
+        return Path(override).expanduser() / _CACHE_SUBDIR
+    try:
+        from platformdirs import user_cache_dir
+
+        base = Path(user_cache_dir("imas-standard-names"))
+    except Exception:
+        xdg = os.environ.get("XDG_CACHE_HOME")
+        root = Path(xdg).expanduser() if xdg else Path.home() / ".cache"
+        base = root / "imas-standard-names"
+    return base / _CACHE_SUBDIR
+
+
+def _distribution_version() -> str:
+    """Installed distribution version, or an empty string when unavailable."""
+    try:
+        from importlib.metadata import version
+
+        return version("imas-standard-names")
+    except Exception:
+        return ""
+
+
+def _fingerprint_paths() -> list[Path]:
+    """Every packaged file whose content shapes the payload.
+
+    All Python modules of the package (the builders themselves, the
+    code-generated segment constants, and the models the payload reflects) plus
+    the grammar specification and every YAML vocabulary beside it.
+    """
+    paths = sorted(_PACKAGE_DIR.rglob("*.py"))
+    paths += sorted(_GRAMMAR_DIR.rglob("*.yml"))
+    paths += sorted(_GRAMMAR_DIR.rglob("*.yaml"))
+    return paths
+
+
+def _source_digest() -> str:
+    """Digest the bytes of every packaged input plus the distribution version.
+
+    Hashing content rather than tracking a version constant means an edited
+    vocabulary token or an edited builder yields a different key on the next
+    process, with nothing to remember to bump.
+    """
+    digest = hashlib.blake2b(digest_size=32)
+    digest.update(_distribution_version().encode())
+    for path in _fingerprint_paths():
+        digest.update(path.relative_to(_PACKAGE_DIR).as_posix().encode())
+        digest.update(path.read_bytes())
+    return digest.hexdigest()
+
+
+def _catalog_digest() -> str:
+    """Digest the catalog entries that ``_build_vocabulary_usage_stats`` scans.
+
+    Keyed on the resolved catalog location plus ``(relative path, size,
+    mtime_ns)`` for each catalog YAML file — a size/mtime fingerprint rather
+    than file content, because a production catalog holds thousands of entries
+    and reading them all would cost as much as the scan the cache avoids. An
+    edit that preserves both size and mtime_ns is therefore invisible; every
+    ordinary write changes mtime_ns. Derived artifacts under dot-directories
+    (the generated SQLite catalog, version control) are excluded so they cannot
+    invalidate the key on their own.
+    """
+    digest = hashlib.blake2b(digest_size=32)
+    try:
+        from imas_standard_names.paths import get_default_catalog_path
+
+        root = get_default_catalog_path()
+    except Exception:
+        root = None
+
+    if root is None:
+        digest.update(b"absent")
+        return digest.hexdigest()
+
+    root = Path(root)
+    digest.update(str(root).encode())
+    try:
+        if root.is_file():
+            entries = [root]
+        else:
+            entries = sorted(
+                path
+                for pattern in ("*.yml", "*.yaml")
+                for path in root.rglob(pattern)
+                if not any(
+                    part.startswith(".") for part in path.relative_to(root).parts
+                )
+            )
+        for path in entries:
+            stat = path.stat()
+            relative = path.name if path == root else path.relative_to(root).as_posix()
+            digest.update(relative.encode())
+            digest.update(f"{stat.st_size}:{stat.st_mtime_ns}".encode())
+    except OSError:
+        # An unreadable catalog cannot be fingerprinted; a random key keeps the
+        # process on the rebuild path instead of trusting an unrelated entry.
+        digest.update(os.urandom(16))
+    return digest.hexdigest()
+
+
+def _cache_key() -> str:
+    """Fingerprint of every input the payload is derived from."""
+    combined = hashlib.blake2b(digest_size=16)
+    combined.update(_source_digest().encode())
+    combined.update(_catalog_digest().encode())
+    return combined.hexdigest()
+
+
+def _read_cache_entry(path: Path) -> dict[str, Any] | None:
+    """Load a serialised payload, treating any defect as a cache miss."""
+    try:
+        with path.open(encoding="utf-8") as handle:
+            payload = json.load(handle)
+    except (OSError, ValueError):
+        return None
+    return payload if isinstance(payload, dict) else None
+
+
+def _write_cache_entry(path: Path, payload: dict[str, Any]) -> None:
+    """Serialise a payload so concurrent readers only ever see a whole file.
+
+    The payload is written to a temporary file in the destination directory and
+    moved into place with :func:`os.replace`, which is atomic within a
+    filesystem. Any failure is silently dropped — the cache is an accelerator,
+    never a dependency.
+    """
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        handle = tempfile.NamedTemporaryFile(
+            mode="w",
+            encoding="utf-8",
+            dir=path.parent,
+            prefix=f"{path.stem}.",
+            suffix=".tmp",
+            delete=False,
+        )
+        try:
+            with handle:
+                json.dump(payload, handle)
+            os.replace(handle.name, path)
+        except BaseException:
+            Path(handle.name).unlink(missing_ok=True)
+            raise
+    except OSError:
+        return
+    _prune_cache(path.parent)
+
+
+def _prune_cache(directory: Path) -> None:
+    """Keep the newest few entries so superseded fingerprints do not pile up."""
+    try:
+        entries = sorted(
+            directory.glob("*.json"), key=lambda p: p.stat().st_mtime_ns, reverse=True
+        )
+        for stale in entries[_CACHE_RETAIN:]:
+            stale.unlink(missing_ok=True)
+    except OSError:
+        return
+
+
+# ---------------------------------------------------------------------------
 # Public API
 # ---------------------------------------------------------------------------
 
@@ -560,12 +751,34 @@ def get_grammar_context() -> dict[str, Any]:
     context into a single dictionary suitable for external consumers.
     Includes the 5-group IR context alongside the flat segment surface.
 
-    The payload is derived from static vocabulary data plus a full catalog
-    scan (usage statistics), which is expensive — the aggregate is built
-    once per process and a deep copy is returned so callers may freely
-    mutate their view without corrupting the cache.
+    The payload is derived from static vocabulary data plus a full catalog scan
+    (usage statistics), which costs tens of seconds. It is memoised per process
+    and persisted to a per-user cache directory keyed on a fingerprint of every
+    input — package sources, grammar specification, YAML vocabularies, and the
+    catalog files the scan reads — so a fresh process reloads it instead of
+    rebuilding it, and any input change yields a different key.
+
+    Set ``IMAS_STANDARD_NAMES_CONTEXT_CACHE=0`` to always rebuild, and
+    ``IMAS_STANDARD_NAMES_CACHE_DIR`` to relocate the cache directory.
+
+    Each call returns a deep copy, so callers may freely mutate their view.
     """
-    return copy.deepcopy(_build_full_context())
+    return copy.deepcopy(_load_or_build_context())
+
+
+@functools.lru_cache(maxsize=1)
+def _load_or_build_context() -> dict[str, Any]:
+    """Return the payload from the disk cache, building and storing it if absent."""
+    if not _cache_enabled():
+        return _build_full_context()
+
+    path = _cache_dir() / f"{_cache_key()}.json"
+    if (payload := _read_cache_entry(path)) is not None:
+        return payload
+
+    payload = _build_full_context()
+    _write_cache_entry(path, payload)
+    return payload
 
 
 @functools.lru_cache(maxsize=1)
