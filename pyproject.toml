@@ -67,8 +67,8 @@ graph = [
   "neo4j>=5.0",
 ]
 
-# Local NetworkX-backed catalog graph (plan 41). Enables
-# imas_standard_names.graph.local_graph + MCP traversal tools.
+# Local NetworkX-backed catalog graph. Enables
+# imas_standard_names.graph.local_graph traversal.
 graph-local = [
   "networkx>=3.0",
 ]
