@@ -365,6 +365,16 @@ bases:
     aliases: []
     kind: scalar
     inherently_dimensional: true
+  # Gradient of the toroidal flux radius, |grad rho|. rho is a LENGTH, so its
+  # gradient is dimensionless. It is deliberately NOT flagged
+  # constant_on_flux_surface: rho is constant on a flux surface but its
+  # gradient is not, and flagging it would make the flux-surface reduction
+  # gate refuse the surface-averaged metric coefficients that need it.
+  # A registered base rather than gradient_of_toroidal_flux_radius because a
+  # transformation may not apply to a geometry carrier, which rho is.
+  toroidal_flux_radius_gradient:
+    aliases: []
+    kind: vector
   torque:
     aliases: []
     kind: scalar
