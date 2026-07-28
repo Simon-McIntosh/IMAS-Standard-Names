@@ -1,4 +1,4 @@
-"""Unit handling for IMAS MCP Server.
+"""Unit handling for IMAS Standard Names.
 
 Canonical unit formatting lives in :func:`imas_standard_names.canonical_unit`
 (pint parse + sorted ASCII short symbols). This module only owns the pint
