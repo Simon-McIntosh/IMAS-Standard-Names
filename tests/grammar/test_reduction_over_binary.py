@@ -134,22 +134,33 @@ def test_operand_postfix_stays_inside_the_operand(vocabs: Vocabularies) -> None:
 # ---------------------------------------------------------------------------
 
 
-def test_reduction_over_binary_still_refuses_a_flux_function() -> None:
-    """A reduction over a binary form whose operand is a flux function is a no-op.
+@pytest.mark.parametrize(
+    "name",
+    [
+        # flux function as the FIRST operand only
+        "flux_surface_averaged_ratio_of_safety_factor_to_square_major_radius",
+        # flux function as the SECOND operand only
+        "flux_surface_averaged_ratio_of_square_major_radius_to_safety_factor",
+        # both operands flux functions
+        "flux_surface_averaged_ratio_of_safety_factor_to_magnetic_shear",
+    ],
+)
+def test_reduction_over_binary_refuses_a_flux_function_operand(name: str) -> None:
+    """The gate must name the flagged base, and must fire on a single operand.
 
-    ``safety_factor`` is constant on a flux surface, so averaging a ratio built
-    from it over that surface reduces to the ratio itself. The gate has to see
-    through the binary application; before the relaxation it never had to.
+    ``safety_factor`` and ``magnetic_shear`` are constant on a flux surface, so a
+    reduction over a ratio built from one either has nothing to average (both
+    operands constant) or factors out of that operand — and the factored spelling
+    is the one to register. The gate must see through the binary application to
+    reach it: the outer IR carries a placeholder base, so a test that only
+    asserted "raises somehow" would pass for the wrong reason.
     """
-    name = "flux_surface_averaged_ratio_of_safety_factor_to_square_major_radius"
-    with pytest.raises(ValueError, match="constant on a flux surface"):
+    with pytest.raises(ValueError) as excinfo:
         parse_standard_name(name)
-
-
-def test_reduction_gate_checks_the_second_operand_too() -> None:
-    name = "flux_surface_averaged_ratio_of_square_major_radius_to_safety_factor"
-    with pytest.raises(ValueError, match="constant on a flux surface"):
-        parse_standard_name(name)
+    message = str(excinfo.value)
+    assert "constant on a flux surface" in message
+    flagged = "safety_factor" if "safety_factor" in name else "magnetic_shear"
+    assert f"cannot apply to '{flagged}'" in message
 
 
 def test_reduction_over_a_non_flux_function_binary_is_accepted() -> None:
@@ -157,9 +168,79 @@ def test_reduction_over_a_non_flux_function_binary_is_accepted() -> None:
     parse_standard_name(GRADIENT_OVER_SQUARE_MAJOR_RADIUS)
 
 
+def test_reduction_carries_no_dimensionality_assertion() -> None:
+    """The metric coefficients keep their own DD units (m^-2, T^-2).
+
+    ``normalized`` and ``logarithm`` declare ``dimensionless``, and the
+    dimension-transforming operators declare a unit change. A flux-surface
+    reduction declares neither — it is unit-preserving — so nothing in the
+    grammar forces one of these names to unit '1'.
+    """
+    from imas_standard_names.grammar.vocab_loaders import load_operators
+
+    operators = load_operators().operators
+    for token in (
+        "flux_surface_averaged",
+        "maximum_over_flux_surface",
+        "minimum_over_flux_surface",
+    ):
+        definition = operators[token]
+        assert definition.flux_surface_reduction is True
+        assert definition.dimensionless is False
+        assert definition.dimension_transforming is False
+
+
 # ---------------------------------------------------------------------------
 # Non-reduction transformations over a binary form
 # ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    "reduction",
+    ["flux_surface_averaged", "maximum_over_flux_surface", "minimum_over_flux_surface"],
+)
+def test_every_flux_surface_reduction_wraps_a_binary_form(reduction: str) -> None:
+    """The widened class is exactly the operators flagged ``flux_surface_reduction``.
+
+    All three share the bare spelling and the outermost render position, so the
+    relaxation covers them uniformly rather than singling out the averaging one.
+    """
+    name = f"{reduction}_ratio_of_electron_density_to_square_major_radius"
+    model = parse_standard_name(name)
+    assert model.transformation == reduction
+    assert model.binary_operator == "ratio_of"
+
+
+@pytest.mark.parametrize(
+    "prefix",
+    [
+        # bare-spelling transformations that are NOT flux-surface reductions
+        "volume_averaged",
+        "line_averaged",
+        "time_averaged",
+        "normalized",
+        "perturbed",
+        "change_in",
+        # _of_-form transformations
+        "logarithm_of",
+        "inverse_of",
+        "tendency_of",
+        "maximum_of",
+        "root_mean_square_of",
+    ],
+)
+def test_no_other_transformation_wraps_a_binary_form(prefix: str) -> None:
+    """The relaxation does NOT widen beyond flux-surface reductions.
+
+    A non-reduction transformation could sit either side of the operator
+    (``normalized`` of a ratio versus a ratio of normalized operands), and the
+    flat model has one transformation slot and no wrap-order field, so it stays
+    refused. Pin the whole list: silently admitting one of these would let the
+    composer emit a name whose structure the model records ambiguously.
+    """
+    name = f"{prefix}_ratio_of_electron_density_to_square_major_radius"
+    with pytest.raises(ValueError, match="not representable in the flat"):
+        parse_standard_name(name)
 
 
 def test_non_reduction_bare_prefix_parses_but_is_not_valid(
@@ -177,18 +258,22 @@ def test_non_reduction_bare_prefix_parses_but_is_not_valid(
         parse_standard_name(name)
 
 
-def test_of_form_reduction_over_binary_is_not_the_canonical_spelling() -> None:
-    """One admissible spelling per name: the bare form wins.
+@pytest.mark.parametrize(
+    "reduction",
+    ["flux_surface_averaged", "maximum_over_flux_surface", "minimum_over_flux_surface"],
+)
+def test_of_form_reduction_over_binary_is_not_the_canonical_spelling(
+    reduction: str,
+) -> None:
+    """One admissible spelling per name across the whole widened class.
 
-    ``flux_surface_averaged_of_ratio_of_...`` parses at the IR level (the generic
-    ``<op>_of_`` prefix peel), but it must not be a second valid spelling of a
-    name the bare form already denotes.
+    ``<reduction>_of_ratio_of_...`` parses at the IR level (the generic
+    ``<op>_of_`` prefix peel), so without this it would be a second valid
+    spelling of a name the bare form already denotes.
     """
-    of_form = (
-        "flux_surface_averaged_of_ratio_of"
-        "_square_toroidal_flux_radius_gradient_magnitude"
-        "_to_square_major_radius"
-    )
+    of_form = f"{reduction}_of_ratio_of_electron_density_to_square_major_radius"
+    bare_form = f"{reduction}_ratio_of_electron_density_to_square_major_radius"
+    parse_standard_name(bare_form)  # the canonical one is accepted
     with pytest.raises(ValueError):
         parse_standard_name(of_form)
 
