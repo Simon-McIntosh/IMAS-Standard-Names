@@ -1,4 +1,4 @@
-"""Tests for Phase 2: Binary operator grammar extensions.
+"""Tests for binary operator grammar extensions.
 
 Covers parsing, composition, round-trip, mutual exclusivity, connector
 detection, and edge cases for binary operator expressions.
@@ -178,7 +178,10 @@ class TestBinaryOperatorExclusivity:
 
     @pytest.mark.xfail(
         strict=True,
-        reason="rc20 token 'square_of' replaced by bare 'square' in current grammar (plan 38 §A7)",
+        reason=(
+            "the transformation token is bare 'square'; the legacy "
+            "'square_of' spelling remains invalid"
+        ),
     )
     def test_binary_excludes_transformation(self):
         with pytest.raises(ValueError, match="binary_operator.*transformation"):
@@ -320,9 +323,13 @@ class TestBinaryOperatorEdgeCases:
         """Test that rightmost split handles compound bases correctly.
 
         The parser splits on the rightmost connector, yielding
-        physical_base='supply_and_demand'. The model validator rejects
-        this because it contains the reserved connector word 'and',
-        which is correct — such names are genuinely ambiguous.
+        physical_base='supply_and_demand'. The validity oracle rejects that
+        literal operand because it is outside the closed base vocabulary.
+        This specific diagnostic takes precedence over the broader connector
+        ambiguity because it gives the composer an actionable vocabulary gate.
         """
-        with pytest.raises(ValueError, match="reserved connector word"):
+        with pytest.raises(
+            ValueError,
+            match="Unknown physical_base token 'supply_and_demand'",
+        ):
             parse_name("product_of_supply_and_demand_and_output")
