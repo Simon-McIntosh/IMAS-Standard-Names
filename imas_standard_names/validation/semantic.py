@@ -62,7 +62,7 @@ EXTENT_BASE = GeometricBase.EXTENT.value
 INTRINSIC_COORDINATE_BASES = {
     GeometricBase.NORMALIZED_POLOIDAL_FLUX_COORDINATE.value,
     GeometricBase.NORMALIZED_TOROIDAL_FLUX_COORDINATE.value,
-    GeometricBase.TOROIDAL_FLUX_RADIUS.value,
+    GeometricBase.TOROIDAL_FLUX_COORDINATE.value,
     GeometricBase.POLOIDAL_ANGLE.value,
     GeometricBase.TOROIDAL_ANGLE.value,
 }

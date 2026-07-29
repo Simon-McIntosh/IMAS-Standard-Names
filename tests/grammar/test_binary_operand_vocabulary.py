@@ -69,12 +69,19 @@ def test_un_normalized_poloidal_flux_coordinate_is_indexable() -> None:
     )
 
 
-def test_toroidal_flux_coordinate_alias_resolves_to_radius() -> None:
-    legacy = "derivative_with_respect_to_toroidal_flux_coordinate_of_pressure"
+def test_toroidal_flux_coordinate_is_canonical() -> None:
+    coordinate = parse_standard_name(
+        "derivative_with_respect_to_toroidal_flux_coordinate_of_pressure"
+    )
+    assert coordinate.transformation == (
+        "derivative_with_respect_to_toroidal_flux_coordinate"
+    )
 
     with pytest.raises(NonCanonicalNameError) as excinfo:
-        parse_standard_name(legacy)
+        parse_standard_name(
+            "derivative_with_respect_to_toroidal_flux_radius_of_pressure"
+        )
 
     assert excinfo.value.canonical_form == (
-        "derivative_with_respect_to_toroidal_flux_radius_of_pressure"
+        "derivative_with_respect_to_toroidal_flux_coordinate_of_pressure"
     )

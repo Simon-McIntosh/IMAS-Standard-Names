@@ -46,7 +46,7 @@ def test_position_qualifier_satisfies_geometric_requirement():
 def test_intrinsic_coordinate_bases_exempt_when_bare():
     for name in (
         "normalized_toroidal_flux_coordinate",
-        "toroidal_flux_radius",
+        "toroidal_flux_coordinate",
         "poloidal_angle",
     ):
         issues = _issues_for(name)

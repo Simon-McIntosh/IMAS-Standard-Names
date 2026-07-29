@@ -29,7 +29,7 @@ REJECTED = [
     "flux_surface_averaged_plasma_pressure_at_plasma_boundary",
     "flux_surface_averaged_poloidal_magnetic_flux",
     # geometry-carrier flux labels
-    "flux_surface_averaged_toroidal_flux_radius",
+    "flux_surface_averaged_toroidal_flux_coordinate",
     # max/min over a flux surface of a flux function is equally degenerate
     "maximum_over_flux_surface_safety_factor",
     "minimum_over_flux_surface_magnetic_shear",

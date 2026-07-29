@@ -52,7 +52,7 @@ def vocabs() -> Vocabularies:
 # (geometry-carrier) vocabulary, paired with a registered physical base.
 _FLUX_DERIVATIVE_NAMES = [
     "derivative_with_respect_to_radial_coordinate_of_volume",
-    "derivative_with_respect_to_toroidal_flux_radius_of_pressure",
+    "derivative_with_respect_to_toroidal_flux_coordinate_of_pressure",
     "derivative_with_respect_to_normalized_toroidal_flux_coordinate_of_pressure",
     "derivative_with_respect_to_normalized_poloidal_flux_coordinate_of_volume",
 ]

@@ -7,7 +7,7 @@ spanning FOUR dimensionalities. Each needs its own name carrying its own
 unit; one shared name recording unit ``1`` for members of different
 dimension is a semantic collapse.
 
-Two of the family turn on |grad rho|. ``rho`` (the toroidal flux radius) is
+Two of the family turn on |grad rho|. ``rho`` (the toroidal flux coordinate) is
 a LENGTH, so its gradient is dimensionless — and although ``rho`` is
 constant on a flux surface, its gradient is NOT, so the gradient base must
 never carry ``constant_on_flux_surface``: flagging it would trip the
@@ -15,8 +15,8 @@ flux-surface reduction gate against exactly the ``flux_surface_averaged``
 prefix these names need.
 
 The gradient cannot be spelled with the ``gradient`` operator, because a
-transformation may not apply to a geometry carrier and ``toroidal_flux_radius``
-is one — ``gradient_of_toroidal_flux_radius`` raises. The vector base carries
+transformation may not apply to a geometry carrier and ``toroidal_flux_coordinate``
+is one — ``gradient_of_toroidal_flux_coordinate`` raises. The vector base carries
 it instead.
 """
 
@@ -77,11 +77,11 @@ def test_toroidal_flux_radius_gradient_is_dimensionless() -> None:
 def test_flux_surface_average_of_the_gradient_is_not_gated_as_a_no_op() -> None:
     """The reduction gate must let the gradient through.
 
-    Contrast ``flux_surface_averaged_toroidal_flux_radius``, which the gate
+    Contrast ``flux_surface_averaged_toroidal_flux_coordinate``, which the gate
     correctly refuses because the flux label itself is a flux function.
     """
     assert parse_standard_name(
         "flux_surface_averaged_toroidal_flux_radius_gradient_magnitude"
     )
     with pytest.raises(ValueError, match="constant on a flux surface"):
-        parse_standard_name("flux_surface_averaged_toroidal_flux_radius")
+        parse_standard_name("flux_surface_averaged_toroidal_flux_coordinate")

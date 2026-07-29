@@ -28,7 +28,7 @@ from imas_standard_names.grammar.model import (
 # vocabulary, paired with representative bases.
 _COORDS = [
     "radial_coordinate",
-    "toroidal_flux_radius",
+    "toroidal_flux_coordinate",
     "normalized_poloidal_flux_coordinate",
 ]
 _BASES = ["volume", "pressure", "area"]
