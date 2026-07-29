@@ -45,6 +45,24 @@ def test_unit_empty_string_rejected():
         )
 
 
+def test_unit_none_rejected_with_dimensionless_guidance():
+    """Quantitative entries must spell dimensionless units explicitly."""
+    with pytest.raises(
+        ValueError,
+        match="Unit is required.*use '1' for dimensionless quantities",
+    ):
+        create_standard_name_entry(
+            {
+                "kind": "scalar",
+                "name": "some_quantity",
+                "description": "Missing-unit quantity",
+                "documentation": "Quantitative entry without an authored unit.",
+                "unit": None,
+                "status": "draft",
+            }
+        )
+
+
 @pytest.mark.parametrize(
     "style,expected_variants",
     [

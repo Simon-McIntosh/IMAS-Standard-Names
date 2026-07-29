@@ -26,12 +26,13 @@ This specification defines the canonical grammar, validation rules, and semantic
 ### Canonical Pattern
 
 ```text
-[<component>_component_of | <coordinate>]?
-[<subject>]?
-<geometric_base | physical_base>
-[of_<object> | from_<source>]?
-[of_<geometry> | at_<position>]?
+[<operator application>]?
+[<axis>_]?
+[<ordered prefix segments>]?
+<geometry carrier | physical base>
+[of_<entity> | at_<position> | over_<geometry-or-region> | along_<path>]?
 [due_to_<process>]?
+[<postfix operator>]?
 ```
 
 ### Segment Definitions
@@ -40,13 +41,13 @@ For detailed segment descriptions and auto-generated vocabulary tables, see [Gra
 
 | Segment        | Required | Description                                     | Exclusive With |
 | -------------- | -------- | ----------------------------------------------- | -------------- |
-| component      | No       | Physical vector component direction             | coordinate     |
-| coordinate     | No       | Geometric vector coordinate axis                | component      |
+| component      | No       | Axis of a physical vector projection             | coordinate     |
+| coordinate     | No       | Axis of a geometry-carrier projection            | component      |
 | subject        | No       | Particle species or plasma population           |                |
 | geometric_base | No\*     | Spatial/geometric quantity                      | physical_base  |
 | physical_base  | No\*     | Physical measurement/property                   | geometric_base |
-| object         | No       | Hardware whose property is described (of\_)     | source         |
-| source         | No       | Device from which measurement obtained (from\_) | object         |
+| device         | No       | Hardware signal source used as a prefix          | object         |
+| object         | No       | Entity whose intrinsic property is described     | device         |
 | geometry       | No       | Geometric object property (of\_)                | position       |
 | position       | No       | Location where field evaluated (at\_)           | geometry       |
 | process        | No       | Physical mechanism (due*to*)                    |                |
@@ -65,19 +66,19 @@ For detailed segment descriptions and auto-generated vocabulary tables, see [Gra
 **Physical Base:**
 
 - Represents physical measurements, fields, or properties
-- Open-ended vocabulary (defined in catalog entries, not grammar)
-- Uses `component` prefix for vector components
-- Example: `electron_temperature`, `radial_component_of_magnetic_field`, `voltage_from_flux_loop`
+- Closed vocabulary defined in `physical_bases.yml`
+- Uses a direct axis prefix for vector components
+- Example: `electron_temperature`, `radial_magnetic_field`, `flux_loop_voltage`
 
 ### Segment Templates
 
 | Segment    | Template                | Example                                 |
 | ---------- | ----------------------- | --------------------------------------- |
-| component  | `{token}_component_of_` | `radial_component_of_magnetic_field`    |
+| component  | `{token}_`              | `radial_magnetic_field`                 |
 | coordinate | `{token}_`              | `radial_position_of_flux_loop`          |
 | object     | `of_{token}`            | `area_of_flux_loop`                     |
-| source     | `from_{token}`          | `voltage_from_flux_loop`                |
-| geometry   | `of_{token}`            | `major_radius_of_plasma_boundary`       |
+| device     | `{token}_`              | `flux_loop_voltage`                     |
+| geometry   | `of_{token}`            | `radial_coordinate_of_plasma_boundary`  |
 | position   | `at_{token}`            | `electron_temperature_at_magnetic_axis` |
 | process    | `due_to_{token}`        | `heat_flux_due_to_conduction`           |
 
@@ -92,7 +93,7 @@ For detailed segment descriptions and auto-generated vocabulary tables, see [Gra
 | GRM001  | Name must contain exactly one base (geometric_base XOR physical_base) |
 | GRM002  | Segment order must follow canonical pattern                           |
 | GRM003  | component and coordinate are mutually exclusive                       |
-| GRM004  | object and source are mutually exclusive                              |
+| GRM004  | object and device are mutually exclusive                              |
 | GRM005  | geometry and position are mutually exclusive                          |
 | GRM006  | coordinate requires geometric_base                                    |
 | GRM007  | component requires physical_base                                      |
@@ -140,22 +141,22 @@ centroid_of_divertor_tile                 (geometric_base + object)
 ```text
 electron_temperature                      (subject + physical_base)
 magnetic_field                            (physical_base)
-radial_component_of_magnetic_field        (component + physical_base)
-voltage_from_flux_loop                    (physical_base + source)
+radial_magnetic_field                     (component + physical_base)
+flux_loop_voltage                         (device + physical_base)
 area_of_poloidal_magnetic_field_probe     (physical_base + object)
 electron_temperature_at_magnetic_axis     (subject + physical_base + position)
-major_radius_of_plasma_boundary           (physical_base + geometry)
+radial_coordinate_of_plasma_boundary      (geometry carrier + geometry)
 ```
 
 ### Anti-Patterns
 
 | Invalid                                    | Violation     | Correct                              |
 | ------------------------------------------ | ------------- | ------------------------------------ |
-| `magnetic_field_radial_component`          | Segment order | `radial_component_of_magnetic_field` |
-| `radial_component_of_position`             | GRM007        | `radial_position_of_flux_loop`       |
-| `radial_position_component_of_flux_loop`   | GRM006        | `radial_position_of_flux_loop`       |
+| `magnetic_field_radial`                    | Segment order | `radial_magnetic_field`              |
+| `position_radial_of_flux_loop`             | GRM006        | `radial_position_of_flux_loop`       |
+| `radial_position_at_flux_loop`             | GRM005        | `radial_position_of_flux_loop`       |
 | `electron_temperature_at_boundary_of_axis` | GRM005        | Pick one: at_boundary OR of_axis     |
-| `voltage_of_flux_loop`                     | Semantic      | `voltage_from_flux_loop`             |
+| `voltage_from_flux_loop`                   | Semantic      | `flux_loop_voltage`                  |
 
 ---
 
@@ -167,7 +168,7 @@ All controlled vocabularies are defined in:
 - `imas_standard_names/grammar/vocabularies/subjects.yml`
 - `imas_standard_names/grammar/vocabularies/geometric_bases.yml`
 - `imas_standard_names/grammar/vocabularies/objects.yml`
-- `imas_standard_names/grammar/vocabularies/sources.yml`
+- `imas_standard_names/grammar/vocabularies/locus_registry.yml`
 - `imas_standard_names/grammar/vocabularies/positions.yml`
 - `imas_standard_names/grammar/vocabularies/processes.yml`
 

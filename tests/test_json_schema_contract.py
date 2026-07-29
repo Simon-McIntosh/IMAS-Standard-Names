@@ -178,12 +178,12 @@ def test_schema_loadable_via_importlib():
 # ---------------------------------------------------------------------------
 
 
-def test_write_entry_schema_to_custom_path():
+def test_write_entry_schema_to_custom_path(tmp_path):
     """write_entry_schema() can write to a specified path."""
     schema = generate_entry_schema()
-    # Write to the default location (already exists); verify it round-trips
-    written = write_entry_schema()
-    assert written == _SCHEMA_PATH
+    target = tmp_path / "entry_schema.json"
+    written = write_entry_schema(target)
+    assert written == target
     reloaded = json.loads(written.read_text())
     assert reloaded["$schema_version"] == schema["$schema_version"]
 
@@ -193,30 +193,35 @@ def test_write_entry_schema_to_custom_path():
 # ---------------------------------------------------------------------------
 
 
-def test_cli_main_generates_schema():
+def test_cli_main_generates_schema(tmp_path):
     """The CLI main() function generates the schema file."""
     from click.testing import CliRunner
 
     from imas_standard_names.schemas.generate import main
 
     runner = CliRunner()
-    result = runner.invoke(main, ["--output", str(_SCHEMA_PATH)])
+    target = tmp_path / "entry_schema.json"
+    result = runner.invoke(main, ["--output", str(target)])
     assert result.exit_code == 0, f"CLI failed: {result.output}"
     assert "Schema written to" in result.output
 
     # The schema file should exist and be valid
-    assert _SCHEMA_PATH.is_file()
-    content = json.loads(_SCHEMA_PATH.read_text())
+    assert target.is_file()
+    content = json.loads(target.read_text())
     assert "$schema_version" in content
 
 
-def test_cli_main_default_output():
-    """CLI with no --output flag writes to the default location."""
+def test_cli_main_default_output(monkeypatch, tmp_path):
+    """CLI with no --output flag writes to an isolated default location."""
     from click.testing import CliRunner
 
+    from imas_standard_names.schemas import generate
     from imas_standard_names.schemas.generate import main
 
+    target = tmp_path / "entry_schema.json"
+    monkeypatch.setattr(generate, "_SCHEMA_PATH", target)
     runner = CliRunner()
     result = runner.invoke(main, [])
     assert result.exit_code == 0, f"CLI failed: {result.output}"
     assert "Schema written to" in result.output
+    assert target.is_file()

@@ -77,15 +77,15 @@ status: draft
 
 **Goal:** Add a measurement obtained from diagnostic hardware.
 
-**Pattern:** `<physical_base>_from_{source}`
+**Pattern:** `<device>_<physical_base>`
 
 **Template:**
 
 ```yaml
-name: <physical_base>_from_<source>
+name: <device>_<physical_base>
 kind: scalar
 unit: <unit>
-description: <physical_base> from <source>.
+description: <Physical_base> signal of <device>.
 tags: [<primary_tag>, measured]
 status: draft
 ```
@@ -93,7 +93,7 @@ status: draft
 **Example:**
 
 ```yaml
-name: voltage_from_flux_loop
+name: flux_loop_voltage
 kind: scalar
 unit: V
 description: Voltage from flux loop.
@@ -107,12 +107,12 @@ status: draft
 
 **Goal:** Add a component of a physical vector field (e.g., radial magnetic field).
 
-**Pattern:** `{component}_component_of_{physical_base}`
+**Pattern:** `{component}_{physical_base}`
 
 **Template:**
 
 ```yaml
-name: <component>_component_of_<physical_base>
+name: <component>_<physical_base>
 kind: scalar
 unit: <unit>
 description: <Component> component of <physical_base>.
@@ -123,7 +123,7 @@ status: draft
 **Example:**
 
 ```yaml
-name: radial_component_of_magnetic_field
+name: radial_magnetic_field
 kind: scalar
 unit: T
 description: Radial component of magnetic field.
@@ -183,10 +183,10 @@ status: draft
 **Example:**
 
 ```yaml
-name: major_radius_of_plasma_boundary
+name: radial_coordinate_of_plasma_boundary
 kind: scalar
 unit: m
-description: Major radius of plasma boundary.
+description: Radial coordinate of the plasma boundary.
 tags: [equilibrium, geometry]
 status: draft
 ```
@@ -221,10 +221,10 @@ Fix any reported issues and re-run until validation passes.
 | ------------------------------------------- | ------------------------------------ | --------------------------------------- |
 | `<subject>_<physical_base>`                 | Basic physical measurement           | `electron_temperature`                  |
 | `<coordinate>_<geometric_base>_of_<object>` | Hardware geometry                    | `radial_position_of_flux_loop`          |
-| `<physical_base>_from_<source>`             | Diagnostic measurement               | `voltage_from_flux_loop`                |
-| `<component>_component_of_<physical_base>`  | Physical vector component            | `radial_component_of_magnetic_field`    |
+| `<device>_<physical_base>`                  | Diagnostic device signal             | `flux_loop_voltage`                     |
+| `<component>_<physical_base>`               | Physical vector component            | `radial_magnetic_field`                 |
 | `<physical_base>_at_<position>`             | Field at location                    | `electron_temperature_at_magnetic_axis` |
-| `<physical_base>_of_<geometry>`             | Geometric property of spatial object | `major_radius_of_plasma_boundary`       |
+| `<geometry_carrier>_of_<geometry>`          | Geometric property of spatial object | `radial_coordinate_of_plasma_boundary`  |
 
 ---
 

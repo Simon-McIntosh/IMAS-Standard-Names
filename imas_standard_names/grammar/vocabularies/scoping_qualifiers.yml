@@ -61,4 +61,3 @@ scoping_qualifiers:
     # the base after it.
   - linear # linear(-phase) <X> (linear plasma decay time)
   - stray # stray <X> (stray magnetic field)
-  - breakdown # breakdown(-phase) <X>

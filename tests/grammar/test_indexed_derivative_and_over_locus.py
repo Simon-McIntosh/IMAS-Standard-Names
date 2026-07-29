@@ -45,14 +45,14 @@ def vocabs() -> Vocabularies:
 
 
 # ---------------------------------------------------------------------------
-# Bug 1 — indexed flux-coordinate derivative prefix
+# Indexed flux-coordinate derivative prefix
 # ---------------------------------------------------------------------------
 
 # Coordinate tokens drawn from the registered coordinate / flux-coordinate
 # (geometry-carrier) vocabulary, paired with a registered physical base.
 _FLUX_DERIVATIVE_NAMES = [
     "derivative_with_respect_to_radial_coordinate_of_volume",
-    "derivative_with_respect_to_toroidal_flux_coordinate_of_pressure",
+    "derivative_with_respect_to_toroidal_flux_radius_of_pressure",
     "derivative_with_respect_to_normalized_toroidal_flux_coordinate_of_pressure",
     "derivative_with_respect_to_normalized_poloidal_flux_coordinate_of_volume",
 ]
@@ -111,7 +111,7 @@ def test_indexed_flux_derivative_nested_under_maximum(
 
 
 # ---------------------------------------------------------------------------
-# Bug 2 — over_<X> must validate against the region vocabulary
+# over_<X> must validate against the region vocabulary
 # ---------------------------------------------------------------------------
 
 # Names whose over_<X> target is NOT a registered region; must be rejected.

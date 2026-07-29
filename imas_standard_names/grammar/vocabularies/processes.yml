@@ -138,3 +138,4 @@
 - first_orbit_loss             # prompt fast-ion first-orbit loss (unconfined fast ions lost on their first orbit)
 - line_radiation               # bound-bound atomic line radiation (distinct from impurity_radiation / radiation)
 - synchrotron_radiation        # synchrotron / electron-cyclotron radiation losses
+- pumping                      # active removal or transfer of gas by a pumping system

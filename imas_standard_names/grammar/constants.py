@@ -32,7 +32,7 @@ from .model_types import (
     Subject,
     Zone,
 )
-from .vocab_loaders import load_physical_bases
+from .vocab_loaders import load_locus_registry, load_physical_bases
 
 
 @dataclass(frozen=True)
@@ -65,6 +65,7 @@ SEGMENT_TOKEN_MAP: dict[str, tuple[str, ...]] = {
     "region": tuple(member.value for member in Region),
     "path": tuple(member.value for member in Position),
     "process": tuple(member.value for member in Process),
+    "locus_qualifier": tuple(load_locus_registry().locus_qualifiers),
 }
 
 SEGMENT_RULES: tuple[SegmentRule, ...] = (

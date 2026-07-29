@@ -15,7 +15,7 @@ each segment drawing from controlled vocabularies.
 The grammar follows this pattern:
 
 ```text
-[<component>_component_of | <coordinate>]?
+[<axis>_]?
 [<subject>]?
 [<device> | of_<object>]?
 <geometric_base | physical_base>
@@ -26,7 +26,10 @@ The grammar follows this pattern:
 **Key concepts:**
 
 - **Split Base Structure**: Names must have either a `geometric_base` (spatial/geometric quantities) OR a `physical_base` (physical measurements/properties), but not both.
-- **component vs coordinate**: Use `component` for physical vectors (with `physical_base`), use `coordinate` for geometric vectors (with `geometric_base`).
+- **component vs coordinate**: An axis directly prefixes a physical vector
+  component (`radial_magnetic_field`) or a geometric carrier coordinate
+  (`radial_position_of_flux_loop`). The base determines which projection is
+  meant; there is no `_component_of_` marker.
 - **device vs object**: Use `<device>_<signal>` for dynamic signals FROM device (e.g., `flux_loop_voltage`); use `<property>_of_<object>` for static properties OF object (e.g., `area_of_flux_loop`).
 - **of_geometry vs at_position**: Use `of_<geometry>` for geometric properties OF spatial objects; use `at_<position>` for fields evaluated AT locations.
 
@@ -62,7 +65,7 @@ and others.
 
 **Usage:**
 
-- Physical vectors: `{token}_component_of_{physical_vector}` (e.g., `radial_component_of_magnetic_field`)
+- Physical vectors: `{token}_{physical_vector}` (e.g., `radial_magnetic_field`)
 - Geometric vectors: `{token}_{geometric_base}` (e.g., `radial_position_of_flux_loop`)
 
 {{ grammar_vocabulary_table('components') }}
@@ -93,7 +96,7 @@ Object tokens specify physical hardware or equipment whose intrinsic properties 
 
 **Examples:**
 
-- `major_radius_of_flux_loop` — intrinsic geometric property
+- `radial_coordinate_of_flux_loop` — intrinsic geometric property
 - `area_of_poloidal_magnetic_field_probe` — equipment characteristic
 
 {{ grammar_vocabulary_table('objects') }}
@@ -129,7 +132,7 @@ Transformations are prefixed to the physical base.
 - `square_of_electron_temperature` — square of temperature
 - `volume_averaged_electron_density` — spatial average
 - `time_derivative_of_magnetic_flux` — temporal derivative
-- `maximum_over_flux_surface_electron_pressure` — extremum over surface
+- `maximum_over_flux_surface_electron_temperature` — extremum over surface
 
 **Categories:**
 
@@ -173,15 +176,15 @@ Certain segments cannot appear together in the same standard name:
 
 - `electron_temperature` — subject + physical_base
 - `magnetic_field` — physical_base (vector)
-- `radial_component_of_magnetic_field` — component + physical_base
+- `radial_magnetic_field` — component + physical_base
 - `flux_loop_voltage` — device + physical_base (device signal)
 - `area_of_poloidal_magnetic_field_probe` — physical_base + object
 
 **With position or geometry:**
 
 - `electron_temperature_at_plasma_boundary` — physical scalar + position
-- `radial_component_of_magnetic_field_at_magnetic_axis` — component + physical_base + position
-- `major_radius_of_plasma_boundary` — physical_base + geometry
+- `radial_magnetic_field_at_magnetic_axis` — component + physical_base + position
+- `radial_coordinate_of_plasma_boundary` — geometric carrier + geometry
 
 **With process:**
 
@@ -192,11 +195,11 @@ Certain segments cannot appear together in the same standard name:
 
 Examples that violate the grammar:
 
-❌ `magnetic_field_radial_component` — component must come first  
+❌ `magnetic_field_radial` — component must come first
 ❌ `at_plasma_boundary_electron_temperature` — segments out of order  
 ❌ `electron_temperature_at_plasma_boundary_of_magnetic_axis` — both position and geometry (mutually exclusive)  
-❌ `radial_component_of_position` — component requires physical_base, not geometric_base  
-❌ `radial_position_component_of_flux_loop` — should use coordinate form, not component
+❌ `radial_position_at_flux_loop` — an entity property uses `_of_`, not `_at_`
+❌ `position_radial_of_flux_loop` — the axis prefix must precede the carrier
 
 ---
 

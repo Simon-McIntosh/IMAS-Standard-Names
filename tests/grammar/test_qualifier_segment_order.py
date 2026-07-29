@@ -35,9 +35,9 @@ def test_cross_category_qualifiers_canonicalize():
 
 
 def test_same_category_qualifiers_keep_authored_order():
-    # breakdown and stray are both in the `state` category; the stable sort
-    # preserves their authored order.
-    name = "breakdown_stray_magnetic_field_magnitude"
+    # fluctuating and saturated are both phrase-scoping qualifiers in the
+    # `state` category; the stable sort preserves their authored order.
+    name = "fluctuating_saturated_ion_current_density"
     parsed = parse_standard_name(name)
     assert compose_standard_name(parsed) == name
 

@@ -217,6 +217,10 @@ bases:
     aliases: []
     kind: vector
     inherently_dimensional: true
+  magnetic_pressure:
+    aliases: []
+    kind: scalar
+    inherently_dimensional: true
   magnetic_flux:
     aliases: []
     kind: scalar
@@ -658,6 +662,66 @@ bases:
     # square_of_ion_charge_number (z_ion_square).
     aliases: []
     kind: scalar
+
+  # === diagnostic and statistical quantities ===
+  intensity:
+    # Radiant, acoustic, particle, or signal intensity defined per the
+    # measurement context.
+    aliases: []
+    kind: scalar
+    inherently_dimensional: true
+  sensitivity:
+    # Change in an observed response per change in its stimulus.
+    aliases: []
+    kind: scalar
+  focal_length:
+    # Distance from an optical element's principal plane to its focal point.
+    aliases: []
+    kind: scalar
+    inherently_dimensional: true
+  bandwidth:
+    # Width of a frequency interval transmitted, measured, or processed.
+    aliases: []
+    kind: scalar
+    inherently_dimensional: true
+  grating_line_density:
+    # Number of ruled grating lines per unit transverse length.
+    aliases: []
+    kind: scalar
+    inherently_dimensional: true
+  response_function:
+    # Response of a measurement or physical system as a function of its input.
+    aliases: []
+    kind: scalar
+  orbit_integral:
+    # Integral of a quantity along a particle orbit.
+    aliases: []
+    kind: scalar
+  kurtosis:
+    # Standardized fourth central moment of a distribution.
+    aliases: []
+    kind: scalar
+  skewness:
+    # Standardized third central moment of a distribution.
+    aliases: []
+    kind: scalar
+  strain:
+    # Relative deformation represented by the symmetric strain tensor.
+    aliases: []
+    kind: tensor
+  acceleration:
+    # Time derivative of velocity.
+    aliases: []
+    kind: vector
+    inherently_dimensional: true
+  polarization_vector:
+    # Vector describing the polarization state of a field or wave.
+    aliases: []
+    kind: vector
+  stokes_vector:
+    # Four-component vector describing the polarization state of radiation.
+    aliases: []
+    kind: vector
 
   # === base-bound lexical compounds promoted to atomic bases ===
   # These tokens form a single lexicalised quantity in which the leading word

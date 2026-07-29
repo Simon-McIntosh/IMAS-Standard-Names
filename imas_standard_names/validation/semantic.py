@@ -532,7 +532,6 @@ def _check_dimensionless_physical_quantity(
 
     try:
         parsed = parse_standard_name(entry.name)
-        physical_base = getattr(parsed, "physical_base", None)
         binary_operator = getattr(parsed, "binary_operator", None)
         transformation = getattr(parsed, "transformation", None)
 
@@ -565,6 +564,7 @@ def _check_dimensionless_physical_quantity(
 
             ir = ir_parse(entry.name).ir
             if ir is not None:
+                physical_base = ir.base.token
                 qualifier_tokens = {q.token for q in (ir.qualifiers or [])}
                 if qualifier_tokens & exempt_qualifiers:
                     return issues
@@ -574,7 +574,7 @@ def _check_dimensionless_physical_quantity(
                 if operator_tokens & exempt_ops:
                     return issues
         except Exception:
-            pass
+            physical_base = getattr(parsed, "physical_base", None)
 
         inherently_dimensional = _load_inherently_dimensional_bases()
         if physical_base and physical_base in inherently_dimensional:
