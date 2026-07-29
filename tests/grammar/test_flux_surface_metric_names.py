@@ -35,8 +35,11 @@ EXPRESSIBLE = [
     ("flux_surface_averaged_inverse_square_magnetic_field_magnitude", "T^-2"),
     ("flux_surface_averaged_square_magnetic_field_magnitude", "T^2"),
     ("flux_surface_averaged_inverse_major_radius", "m^-1"),
-    ("flux_surface_averaged_toroidal_flux_radius_gradient_magnitude", "1"),
-    ("flux_surface_averaged_square_toroidal_flux_radius_gradient_magnitude", "1"),
+    ("flux_surface_averaged_toroidal_flux_coordinate_gradient_magnitude", "1"),
+    (
+        "flux_surface_averaged_square_toroidal_flux_coordinate_gradient_magnitude",
+        "1",
+    ),
 ]
 
 
@@ -52,25 +55,25 @@ def test_metric_coefficient_names_are_distinct() -> None:
     assert len(set(names)) == len(names)
 
 
-def test_toroidal_flux_radius_gradient_is_a_registered_vector_base() -> None:
+def test_toroidal_flux_coordinate_gradient_is_a_registered_vector_base() -> None:
     """The |grad rho| carrier is a vector base, so ``magnitude`` applies."""
-    base = load_physical_bases().bases["toroidal_flux_radius_gradient"]
+    base = load_physical_bases().bases["toroidal_flux_coordinate_gradient"]
     assert base.kind == "vector"
 
 
-def test_toroidal_flux_radius_gradient_is_not_a_flux_function() -> None:
+def test_toroidal_flux_coordinate_gradient_is_not_a_flux_function() -> None:
     """rho is constant on a flux surface; its gradient is not.
 
     Flagging the gradient would make the flux-surface reduction gate reject
     the averaged names, which are the only reason the base exists.
     """
-    base = load_physical_bases().bases["toroidal_flux_radius_gradient"]
+    base = load_physical_bases().bases["toroidal_flux_coordinate_gradient"]
     assert not base.constant_on_flux_surface
 
 
-def test_toroidal_flux_radius_gradient_is_dimensionless() -> None:
+def test_toroidal_flux_coordinate_gradient_is_dimensionless() -> None:
     """|grad rho| is a length gradient, so it carries no SI unit."""
-    base = load_physical_bases().bases["toroidal_flux_radius_gradient"]
+    base = load_physical_bases().bases["toroidal_flux_coordinate_gradient"]
     assert not base.inherently_dimensional
 
 
@@ -81,7 +84,7 @@ def test_flux_surface_average_of_the_gradient_is_not_gated_as_a_no_op() -> None:
     correctly refuses because the flux label itself is a flux function.
     """
     assert parse_standard_name(
-        "flux_surface_averaged_toroidal_flux_radius_gradient_magnitude"
+        "flux_surface_averaged_toroidal_flux_coordinate_gradient_magnitude"
     )
     with pytest.raises(ValueError, match="constant on a flux surface"):
         parse_standard_name("flux_surface_averaged_toroidal_flux_coordinate")

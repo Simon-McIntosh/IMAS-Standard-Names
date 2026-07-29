@@ -39,12 +39,12 @@ from imas_standard_names.grammar.render import compose
 
 GRADIENT_OVER_SQUARE_MAJOR_RADIUS = (
     "flux_surface_averaged_ratio_of"
-    "_square_toroidal_flux_radius_gradient_magnitude"
+    "_square_toroidal_flux_coordinate_gradient_magnitude"
     "_to_square_major_radius"
 )
 GRADIENT_OVER_SQUARE_FIELD = (
     "flux_surface_averaged_ratio_of"
-    "_square_toroidal_flux_radius_gradient_magnitude"
+    "_square_toroidal_flux_coordinate_gradient_magnitude"
     "_to_square_magnetic_field_magnitude"
 )
 
@@ -306,7 +306,7 @@ def test_reduction_over_binary_is_distinct_from_the_ratio_of_reductions(
     """<A/B> and <A>/<B> are different quantities and must be different names."""
     average_of_ratio = parse(GRADIENT_OVER_SQUARE_MAJOR_RADIUS, vocabs=vocabs).ir
     ratio_of_averages = parse(
-        "ratio_of_flux_surface_averaged_square_toroidal_flux_radius_gradient_magnitude"
+        "ratio_of_flux_surface_averaged_square_toroidal_flux_coordinate_gradient_magnitude"
         "_to_flux_surface_averaged_square_major_radius",
         vocabs=vocabs,
     ).ir
@@ -323,7 +323,9 @@ def test_separator_inside_an_operand_does_not_mis_split(vocabs: Vocabularies) ->
     """
     ir = parse(GRADIENT_OVER_SQUARE_MAJOR_RADIUS, vocabs=vocabs).ir
     binary = next(op for op in ir.operators if op.kind is OperatorKind.BINARY)
-    assert compose(binary.args[0]) == ("square_toroidal_flux_radius_gradient_magnitude")
+    assert compose(binary.args[0]) == (
+        "square_toroidal_flux_coordinate_gradient_magnitude"
+    )
     assert compose(binary.args[1]) == "square_major_radius"
 
 

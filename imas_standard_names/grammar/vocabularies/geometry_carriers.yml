@@ -39,7 +39,7 @@ carriers:
   radial_coordinate:
     aliases: []
   toroidal_flux_coordinate:
-    aliases: [toroidal_flux_radius]
+    aliases: []
     constant_on_flux_surface: true
   # === Migrated from geometric_bases.yml (carrier-type entries) ===
   contour:
