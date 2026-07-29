@@ -27,12 +27,12 @@ def test_literal_operand_fallback_is_diagnostic() -> None:
         "ratio_of_electron_pressure_to_magnetic_pressure",
         (
             "flux_surface_averaged_ratio_of"
-            "_square_toroidal_flux_radius_gradient_magnitude"
+            "_square_toroidal_flux_coordinate_gradient_magnitude"
             "_to_square_major_radius"
         ),
         (
             "flux_surface_averaged_ratio_of"
-            "_square_toroidal_flux_radius_gradient_magnitude"
+            "_square_toroidal_flux_coordinate_gradient_magnitude"
             "_to_square_magnetic_field_magnitude"
         ),
     ],
@@ -69,7 +69,7 @@ def test_un_normalized_poloidal_flux_coordinate_is_indexable() -> None:
     )
 
 
-def test_toroidal_flux_coordinate_is_canonical() -> None:
+def test_toroidal_flux_coordinate_is_canonical_and_radius_is_rejected() -> None:
     coordinate = parse_standard_name(
         "derivative_with_respect_to_toroidal_flux_coordinate_of_pressure"
     )
@@ -77,11 +77,10 @@ def test_toroidal_flux_coordinate_is_canonical() -> None:
         "derivative_with_respect_to_toroidal_flux_coordinate"
     )
 
-    with pytest.raises(NonCanonicalNameError) as excinfo:
+    with pytest.raises(ValueError) as excinfo:
         parse_standard_name(
             "derivative_with_respect_to_toroidal_flux_radius_of_pressure"
         )
 
-    assert excinfo.value.canonical_form == (
-        "derivative_with_respect_to_toroidal_flux_coordinate_of_pressure"
-    )
+    assert not isinstance(excinfo.value, NonCanonicalNameError)
+    assert not hasattr(excinfo.value, "canonical_form")
