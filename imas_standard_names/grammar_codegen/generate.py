@@ -407,7 +407,7 @@ from dataclasses import dataclass
 from .model_types import (
     {enum_imports},
 )
-from .vocab_loaders import load_physical_bases
+from .vocab_loaders import load_locus_registry, load_physical_bases
 
         """
     ).strip()
@@ -539,6 +539,9 @@ def _render_segment_metadata(meta: Mapping[str, Any]) -> str:
             token_map_lines.append(f'    "{identifier}": {tuple_repr},')
         else:
             token_map_lines.append(f'    "{identifier}": (),')
+    token_map_lines.append(
+        '    "locus_qualifier": tuple(load_locus_registry().locus_qualifiers),'
+    )
     token_map_lines.append("}")
     token_map_repr = "\n".join(token_map_lines)
     order_repr = _format_tuple_literal(meta["segment_order"], indent=4, base_indent=0)

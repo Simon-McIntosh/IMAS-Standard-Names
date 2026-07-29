@@ -460,6 +460,22 @@ loci:
     type: entity
     allowed_relations: [of]
     definition: The fibre bundle treated as a distinct physical, plant, or diagnostic object in a standard name.
+  detector:
+    type: entity
+    allowed_relations: [of]
+    definition: A device that converts an incident physical signal into a measurable response.
+  grating:
+    type: entity
+    allowed_relations: [of]
+    definition: An optical element with periodic structure that disperses radiation by wavelength.
+  shunt:
+    type: entity
+    allowed_relations: [of]
+    definition: A calibrated low-resistance element used to infer current from its voltage drop.
+  valve:
+    type: entity
+    allowed_relations: [of]
+    definition: A controllable device that regulates fluid or gas flow.
 
   # ====================================================================
   # Position-typed loci (field at location: _at_<position>, _of_<position>)
@@ -794,6 +810,22 @@ loci:
       the separatrix major radius) - the geometric outer-midplane reference
       selected by the DD midplane_identifier option 'dr_dz_zero_sep'. DD:
       equilibrium/time_slice/boundary_separatrix/dr_dz_zero_point.
+  rectangle_center:
+    type: position
+    allowed_relations: [at, of]
+    definition: The geometric center of a rectangular cross section or aperture.
+  annulus_center:
+    type: position
+    allowed_relations: [at, of]
+    definition: The geometric center of an annular cross section.
+  oblique_reference_point:
+    type: position
+    allowed_relations: [at, of]
+    definition: The reference point used to locate an obliquely oriented geometric element.
+  arc_of_circle_center:
+    type: position
+    allowed_relations: [at, of]
+    definition: The center of curvature of a circular arc.
 
   # ====================================================================
   # Geometry-typed loci (shape/region boundary: _at_, _of_, _over_)

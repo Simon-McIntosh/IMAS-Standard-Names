@@ -1590,6 +1590,82 @@ def _check_extremum_infix_gate(ir: StandardNameIR) -> None:
                 _check_extremum_infix_gate(arg)
 
 
+def _binary_operand_is_resolved(ir: StandardNameIR, known: frozenset[str]) -> bool:
+    """Whether an operand resolves through registered base vocabulary."""
+    if ir.operators:
+        return all(
+            _binary_operand_is_resolved(arg, known)
+            for operator in ir.operators
+            for arg in operator.args
+        )
+    return ir.base.token in known
+
+
+def _binary_operand_is_elided(
+    ir: StandardNameIR,
+    *,
+    qualifiers: frozenset[str],
+    sibling_is_resolved: bool,
+) -> bool:
+    """Whether a bare operand is a mechanically safe qualifier elision.
+
+    Binary families conventionally elide a shared base from one operand, as
+    in ``ratio_of_electron_to_ion_temperature``. The elided side is admissible
+    only when it contains no operators and every word is registered qualifier
+    vocabulary, while the sibling operand resolves normally.
+    """
+    return (
+        sibling_is_resolved
+        and not ir.operators
+        and ir.projection is None
+        and ir.locus is None
+        and ir.mechanism is None
+        and all(word in qualifiers for word in ir.base.token.split("_"))
+    )
+
+
+def _check_binary_operand_vocabulary(ir: StandardNameIR) -> None:
+    """Reject literal binary operands outside the closed vocabulary.
+
+    The structural parser remains intentionally liberal and records a
+    diagnostic for literal fallbacks. This validity-oracle gate admits only
+    registered operands or the mechanically verifiable shared-base elision
+    used by species ratios.
+    """
+    from imas_standard_names.grammar.parser import (  # noqa: PLC0415
+        load_default_vocabularies,
+    )
+    from imas_standard_names.grammar.support import (  # noqa: PLC0415
+        UnknownBaseTokenError,
+    )
+
+    vocabs = load_default_vocabularies()
+    known = vocabs.base_universe()
+    for operator in ir.operators:
+        if operator.kind is not OperatorKind.BINARY:
+            for arg in operator.args:
+                _check_binary_operand_vocabulary(arg)
+            continue
+
+        left, right = operator.args
+        left_resolved = _binary_operand_is_resolved(left, known)
+        right_resolved = _binary_operand_is_resolved(right, known)
+        left_ok = left_resolved or _binary_operand_is_elided(
+            left,
+            qualifiers=vocabs.qualifiers,
+            sibling_is_resolved=right_resolved,
+        )
+        right_ok = right_resolved or _binary_operand_is_elided(
+            right,
+            qualifiers=vocabs.qualifiers,
+            sibling_is_resolved=left_resolved,
+        )
+        if not left_ok:
+            raise UnknownBaseTokenError(left.base.token, tuple(sorted(known)))
+        if not right_ok:
+            raise UnknownBaseTokenError(right.base.token, tuple(sorted(known)))
+
+
 # Species that carry a charge (ionization) state: the bare ion tokens plus
 # every element/isotope species (an element resolved by charge state is the
 # impurity-transport customer — argon_charge_state_density, …). Sourced from
@@ -1706,6 +1782,7 @@ def parse_standard_name(name: str) -> StandardName:
         raise
     _check_flux_surface_reduction_gate(result.ir)
     _check_extremum_infix_gate(result.ir)
+    _check_binary_operand_vocabulary(result.ir)
     model = StandardName.model_validate(_ir_to_model_dict(result.ir))
     _check_state_gate(model)
     # Strict canonical-form parsing: the grammar admits exactly ONE spelling
@@ -1731,7 +1808,19 @@ def _assert_lossless_canonical(name: str, canonical: str) -> None:
     persisted names. A pure reorder has identical underscore-token multisets;
     anything else raises a plain ValueError with NO canonical_form attribute.
     """
-    input_tokens = Counter(name.split("_"))
+    from imas_standard_names.grammar.parser import (  # noqa: PLC0415
+        load_default_vocabularies as _load_vocabs,
+    )
+
+    vocabs = _load_vocabs()
+    alias_map = {**vocabs.base_aliases, **vocabs.carrier_aliases}
+    normalized = f"_{name}_"
+    for alias, canonical_token in sorted(
+        alias_map.items(), key=lambda item: len(item[0]), reverse=True
+    ):
+        normalized = normalized.replace(f"_{alias}_", f"_{canonical_token}_")
+
+    input_tokens = Counter(normalized.strip("_").split("_"))
     canonical_tokens = Counter(canonical.split("_"))
     if input_tokens == canonical_tokens:
         return

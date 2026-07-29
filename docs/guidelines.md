@@ -31,7 +31,7 @@ Standard names follow these fundamental requirements:
 Standard names follow a fixed segment pattern:
 
 ```text
-[<component>_component_of | <coordinate>]?
+[<axis>_]?
 [<subject>]?
 [<device> | of_<object>]?
 <geometric_base | physical_base>
@@ -60,7 +60,8 @@ See [Grammar Reference](grammar-reference.md) for the complete specification and
 
 **Component vs Coordinate:**
 
-- Use `component` with `physical_base` for physical vectors: `{axis}_component_of_{physical_vector}`
+- Prefix a physical vector directly with its axis:
+  `{axis}_{physical_vector}`.
 - Use `coordinate` with `geometric_base` for geometric vectors: `{axis}_{geometric_base}`
 
 **Device vs Object:**
@@ -76,7 +77,8 @@ See [Grammar Reference](grammar-reference.md) for the complete specification and
 
 **Geometry vs Position:**
 
-- `of_<geometry>` — geometric property OF spatial object (e.g., `major_radius_of_plasma_boundary`)
+- `of_<geometry>` — geometric property OF spatial object (e.g.,
+  `radial_coordinate_of_plasma_boundary`)
 - `at_<position>` — field quantity evaluated AT location (e.g., `electron_temperature_at_magnetic_axis`)
 
 ### Segment Reference
@@ -95,7 +97,7 @@ Specify vector direction (e.g., `radial`, `toroidal`, `vertical`, `x`, `y`, `z`,
 
 **Usage:**
 
-- Physical vectors: `radial_component_of_magnetic_field`
+- Physical vectors: `radial_magnetic_field`
 - Geometric vectors: `radial_position_of_flux_loop`
 
 ### Subjects
@@ -123,7 +125,7 @@ Hardware or equipment for describing intrinsic properties and device signals (te
 1. **Intrinsic properties** (using `of_<object>`):
 
    - `area_of_flux_loop` — equipment geometric property
-   - `major_radius_of_poloidal_field_coil` — hardware dimension
+   - `radial_coordinate_of_poloidal_field_coil` — hardware position
    - `number_of_turns_of_rogowski_coil` — hardware parameter
 
 2. **Device signals** (using `<object>_<signal>`):
@@ -141,7 +143,7 @@ Spatial locations or geometric objects (templates: `at_{token}` or `of_{token}`)
 
 - `electron_temperature_at_magnetic_axis` — field at location
 - `pressure_at_plasma_boundary` — measurement at position
-- `major_radius_of_plasma_boundary` — geometric property
+- `radial_coordinate_of_plasma_boundary` — geometric property
 
 ### Processes
 
@@ -237,8 +239,8 @@ plasma_pressure
 Physical vectors use component + physical_base:
 
 ```text
-radial_component_of_magnetic_field
-toroidal_component_of_plasma_velocity
+radial_magnetic_field
+toroidal_plasma_velocity
 parallel_heat_flux
 ```
 
@@ -269,7 +271,7 @@ poloidal_magnetic_field_probe_voltage   (probe output signal)
 
 ```text
 area_of_flux_loop                       (loop geometric property)
-major_radius_of_poloidal_field_coil     (coil dimension)
+radial_coordinate_of_poloidal_field_coil (coil position)
 number_of_turns_of_flux_loop            (hardware parameter)
 ```
 
@@ -294,7 +296,7 @@ density_at_outer_midplane
 Use of_geometry for geometric properties of spatial objects:
 
 ```text
-major_radius_of_plasma_boundary
+radial_coordinate_of_plasma_boundary
 area_of_first_wall
 curvature_of_flux_surface
 ```

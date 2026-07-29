@@ -323,7 +323,7 @@ class StandardNameBase(BaseModel):
 
     # Base unit helpers (shared by scalar/vector subclasses, full and name-only).
     @staticmethod
-    def _canonicalize_unit_order(v: str) -> str:
+    def _canonicalize_unit_order(v: str | None) -> str:
         """Auto-correct unit token order to canonical dot-exponent form.
 
         This helps LLMs and human authors by accepting units in any order
@@ -338,6 +338,11 @@ class StandardNameBase(BaseModel):
 
         Empty strings and units pint cannot parse fail validation.
         """
+        if v is None:
+            raise ValueError(
+                "Unit is required for quantitative entries; use '1' for "
+                "dimensionless quantities"
+            )
         if v == "1":
             return "1"
         if v == "":

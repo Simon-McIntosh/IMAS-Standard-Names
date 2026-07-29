@@ -94,6 +94,8 @@ class Vocabularies:
     operators: Mapping[str, dict[str, Any]] = field(default_factory=dict)
     bases: frozenset[str] = field(default_factory=frozenset)
     carriers: frozenset[str] = field(default_factory=frozenset)
+    base_aliases: Mapping[str, str] = field(default_factory=dict)
+    carrier_aliases: Mapping[str, str] = field(default_factory=dict)
     qualifiers: frozenset[str] = field(default_factory=frozenset)
     # token → normalized category for the genuine modifier qualifiers
     # (qualifiers.yml). Empty for tokens that only peel as qualifiers via the
@@ -237,6 +239,16 @@ def load_default_vocabularies() -> Vocabularies:
         operators=operators,
         bases=frozenset(bases_reg.bases),
         carriers=frozenset(carriers_reg.carriers),
+        base_aliases={
+            alias: token
+            for token, definition in bases_reg.bases.items()
+            for alias in definition.aliases
+        },
+        carrier_aliases={
+            alias: token
+            for token, definition in carriers_reg.carriers.items()
+            for alias in definition.aliases
+        },
         qualifiers=qualifiers,
         qualifier_categories=vocab_loaders.load_qualifier_categories(),
         locus_qualifiers=tuple(loci_reg.locus_qualifiers),
@@ -505,7 +517,9 @@ def _longest_match(s: str, candidates: frozenset[str] | set[str]) -> str | None:
 
 
 def _peel_outer_operator(
-    s: str, v: Vocabularies
+    s: str,
+    v: Vocabularies,
+    diagnostics: list[Diagnostic] | None = None,
 ) -> tuple[OperatorApplication | None, str, list[StandardNameIR]]:
     """Peel ONE outer operator off ``s``.
 
@@ -615,19 +629,27 @@ def _peel_outer_operator(
         if sep is None:
             continue
         sep_marker = f"_{sep}_"
-        # Use rightmost split to maximize the first operand (compound bases
-        # may contain the separator word).
+        # Collect rightmost-first candidates, then prefer the first split
+        # whose operands both resolve strictly. A connector word may occur
+        # inside a registered operand (for example signal_to_noise_ratio);
+        # accepting literal fallbacks at the first split would cut that base
+        # apart before the parser reaches its registered boundary.
+        candidates: list[tuple[str, str]] = []
         sep_idx = rest.rfind(sep_marker)
         while sep_idx > 0:
             a_str = rest[:sep_idx]
             b_str = rest[sep_idx + len(sep_marker) :]
             if not a_str or not b_str:
                 break
-            # Try strict parsing first; fall back to literal bases when
-            # sub-expressions contain unregistered compound tokens (e.g.
-            # "magnetic_pressure").
-            a_ir = _try_parse_or_literal(a_str, v)
-            b_ir = _try_parse_or_literal(b_str, v)
+            candidates.append((a_str, b_str))
+            sep_idx = rest.rfind(sep_marker, 0, sep_idx)
+
+        for a_str, b_str in candidates:
+            try:
+                a_ir = parse(a_str, vocabs=v).ir
+                b_ir = parse(b_str, vocabs=v).ir
+            except ParseError:
+                continue
             if a_ir is not None and b_ir is not None:
                 return (
                     OperatorApplication(
@@ -639,7 +661,23 @@ def _peel_outer_operator(
                     "",
                     [a_ir, b_ir],
                 )
-            sep_idx = rest.rfind(sep_marker, 0, sep_idx)
+
+        # No fully registered split resolved. Retain the liberal IR fallback
+        # for diagnostics; the strict validity oracle gates its vocabulary.
+        for a_str, b_str in candidates:
+            a_ir = _try_parse_or_literal(a_str, v, diagnostics)
+            b_ir = _try_parse_or_literal(b_str, v, diagnostics)
+            if a_ir is not None and b_ir is not None:
+                return (
+                    OperatorApplication(
+                        kind=OperatorKind.BINARY,
+                        op=op,
+                        separator=sep,
+                        args=[a_ir, b_ir],
+                    ),
+                    "",
+                    [a_ir, b_ir],
+                )
 
     return None, s, []
 
@@ -702,7 +740,7 @@ def _coordinate_universe(v: Vocabularies) -> frozenset[str]:
     ``normalized_poloidal_flux_coordinate``, …) plus the bare coordinate axes
     (``radial``, ``poloidal``, …).
     """
-    return v.carriers | frozenset(v.axes)
+    return v.carriers | frozenset(v.carrier_aliases) | frozenset(v.axes)
 
 
 def _longest_indexed_prefix_operator_match(
@@ -741,8 +779,9 @@ def _longest_indexed_prefix_operator_match(
         coord = remainder[:of_idx]
         if coord not in coords:
             continue
-        fused = f"{op}_{coord}"
-        consumed = len(fused)
+        canonical_coord = v.carrier_aliases.get(coord, coord)
+        fused = f"{op}_{canonical_coord}"
+        consumed = len(f"{op}_{coord}")
         if best is None or consumed > best[1]:
             best = (fused, consumed)
     return best
@@ -828,7 +867,11 @@ def _longest_bare_prefix_over_binary_match(
     return best
 
 
-def _try_parse_or_literal(s: str, v: Vocabularies) -> StandardNameIR | None:
+def _try_parse_or_literal(
+    s: str,
+    v: Vocabularies,
+    diagnostics: list[Diagnostic] | None = None,
+) -> StandardNameIR | None:
     """Try to parse ``s`` as a full standard name; fall back to a literal base.
 
     Returns ``None`` only when ``s`` is syntactically invalid (not
@@ -841,6 +884,19 @@ def _try_parse_or_literal(s: str, v: Vocabularies) -> StandardNameIR | None:
         return parse(s, vocabs=v).ir
     except ParseError:
         if TOKEN_PATTERN.match(s):
+            if diagnostics is not None:
+                diagnostics.append(
+                    Diagnostic(
+                        category="vocab_gap",
+                        layer="parser",
+                        message=(
+                            f"binary operand {s!r} used the literal-base fallback; "
+                            "the validity oracle will require registered or "
+                            "qualifier-elided operand vocabulary"
+                        ),
+                        severity="warning",
+                    )
+                )
             return StandardNameIR(
                 base=QuantityOrCarrier(token=s, kind=BaseKind.QUANTITY)
             )
@@ -863,6 +919,18 @@ def _match_base_with_qualifiers(
     Returns ``(base_or_carrier, qualifiers, projection_or_none)``.
     """
 
+    if s in v.carrier_aliases:
+        return (
+            QuantityOrCarrier(token=v.carrier_aliases[s], kind=BaseKind.GEOMETRY),
+            [],
+            None,
+        )
+    if s in v.base_aliases:
+        return (
+            QuantityOrCarrier(token=v.base_aliases[s], kind=BaseKind.QUANTITY),
+            [],
+            None,
+        )
     if s in v.carriers:
         return QuantityOrCarrier(token=s, kind=BaseKind.GEOMETRY), [], None
     if s in v.bases:
@@ -991,7 +1059,7 @@ def parse(name: str, vocabs: Vocabularies | None = None) -> ParseResult:
     operator_stack: list[OperatorApplication] = list(trailing_postfix)
     binary_terminator: OperatorApplication | None = None
     while True:
-        op_app, new_s, _ = _peel_outer_operator(s, v)
+        op_app, new_s, _ = _peel_outer_operator(s, v, diagnostics)
         if op_app is None:
             break
         if op_app.kind is OperatorKind.BINARY:

@@ -162,7 +162,7 @@ All quantities are either measured or calculated; "measured" is redundant.
 
 ### Example 3: Magnetic Field
 
-**Standard Name**: `toroidal_component_of_magnetic_field`  
+**Standard Name**: `toroidal_magnetic_field`
 **Metadata**:
 
 ```yaml

@@ -373,6 +373,7 @@ class Process(StrEnum):
     FIRST_ORBIT_LOSS = "first_orbit_loss"
     LINE_RADIATION = "line_radiation"
     SYNCHROTRON_RADIATION = "synchrotron_radiation"
+    PUMPING = "pumping"
 
 
 class GenericPhysicalBase(StrEnum):
@@ -510,6 +511,10 @@ class Object(StrEnum):
     APERTURE = "aperture"
     FILTER_WINDOW = "filter_window"
     FIBRE_BUNDLE = "fibre_bundle"
+    DETECTOR = "detector"
+    GRATING = "grating"
+    SHUNT = "shunt"
+    VALVE = "valve"
 
 
 class Position(StrEnum):
@@ -576,6 +581,12 @@ class Position(StrEnum):
     X_POINT = "x_point"
     ACTIVE_LIMITER_POINT = "active_limiter_point"
     DR_DZ_ZERO_POINT = "dr_dz_zero_point"
+    RECTANGLE_CENTER = "rectangle_center"
+    ANNULUS_CENTER = "annulus_center"
+    OBLIQUE_REFERENCE_POINT = "oblique_reference_point"
+    ARC_OF_CIRCLE_CENTER = "arc_of_circle_center"
+    ACTIVE_WALL_POINT = "active_wall_point"
+    BEAM_PATH = "beam_path"
 
 
 class GeometricBase(StrEnum):
@@ -585,12 +596,12 @@ class GeometricBase(StrEnum):
     OFFSET = "offset"
     POSITION = "position"
     RADIAL_COORDINATE = "radial_coordinate"
-    TOROIDAL_FLUX_COORDINATE = "toroidal_flux_coordinate"
     CONTOUR = "contour"
     COORDINATE = "coordinate"
     DISPLACEMENT = "displacement"
     EXTENT = "extent"
     NORMALIZED_POLOIDAL_FLUX_COORDINATE = "normalized_poloidal_flux_coordinate"
+    POLOIDAL_MAGNETIC_FLUX_COORDINATE = "poloidal_magnetic_flux_coordinate"
     OUTLINE = "outline"
     SENSOR_NORMAL = "sensor_normal"
     SURFACE_NORMAL = "surface_normal"
