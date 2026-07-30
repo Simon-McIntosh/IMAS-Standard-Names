@@ -12,7 +12,14 @@ from collections.abc import Mapping
 from functools import cache
 from typing import Annotated, Any
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    ValidationInfo,
+    field_validator,
+    model_validator,
+)
 
 from imas_standard_names.grammar.constants import (
     BINARY_OPERATOR_CONNECTORS,
@@ -56,7 +63,11 @@ from imas_standard_names.grammar.model_types import (
     Transformation,
     Zone,
 )
-from imas_standard_names.grammar.parser import ParseError, parse as _parse_ir
+from imas_standard_names.grammar.parser import (
+    ParseError,
+    _NonCanonicalParseError,
+    parse as _parse_ir,
+)
 from imas_standard_names.grammar.render import compose as _compose_ir
 from imas_standard_names.grammar.support import (
     TOKEN_PATTERN,
@@ -387,6 +398,12 @@ def _ir_to_model_dict(ir: StandardNameIR) -> dict[str, str]:
             unary_ops.append(op)
 
     if binary_op is not None:
+        if any(_contains_binary_operator(argument) for argument in binary_op.args):
+            raise ValueError(
+                "nested binary operator tree is not representable in the "
+                "flat StandardName model; use grammar.parser.parse(..., "
+                "strict=True) for lossless validation"
+            )
         # A flux-surface reduction is the one operator the flat model can carry
         # alongside a binary application: it occupies the free `transformation`
         # slot and always renders OUTERMOST, so no wrap order needs recording.
@@ -417,6 +434,14 @@ def _ir_to_model_dict(ir: StandardNameIR) -> dict[str, str]:
             d["secondary_base"] = _compose_ir(binary_op.args[1])
     else:
         # Unary operators
+        prefix_ops = [op for op in unary_ops if op.kind is OperatorKind.UNARY_PREFIX]
+        postfix_ops = [op for op in unary_ops if op.kind is OperatorKind.UNARY_POSTFIX]
+        if len(prefix_ops) > 1 or len(postfix_ops) > 1:
+            raise ValueError(
+                "ordered unary operator chain is not representable in the "
+                "flat StandardName model; use grammar.parser.parse(..., "
+                "strict=True) for lossless validation"
+            )
         for op in unary_ops:
             if op.kind is OperatorKind.UNARY_PREFIX:
                 d["transformation"] = op.op
@@ -628,6 +653,15 @@ def _ir_to_model_dict(ir: StandardNameIR) -> dict[str, str]:
                 d["physical_base"] = ir.base.token
 
     return _apply_locus_and_mechanism(d, ir)
+
+
+def _contains_binary_operator(ir: StandardNameIR) -> bool:
+    """Whether an IR subtree contains any binary operator application."""
+    return any(
+        operator.kind is OperatorKind.BINARY
+        or any(_contains_binary_operator(argument) for argument in operator.args)
+        for operator in ir.operators
+    )
 
 
 def _should_fold_inner_operand(
@@ -1358,7 +1392,7 @@ class StandardName(BaseModel):
         return self
 
     @model_validator(mode="after")
-    def _check_generic_physical_base(self) -> StandardName:
+    def _check_generic_physical_base(self, info: ValidationInfo) -> StandardName:
         """Validate that generic physical bases have required qualification.
 
         Generic physical bases (area, current, power, temperature, voltage, etc.)
@@ -1402,6 +1436,7 @@ class StandardName(BaseModel):
                     self.transformation,
                     self.decomposition,
                     self.binary_operator,
+                    bool(info.context and info.context.get("enclosing_operator")),
                 ]
             )
 
@@ -1484,188 +1519,6 @@ def _flux_surface_reduction_vocab() -> tuple[frozenset[str], frozenset[str]]:
     return ops, flagged
 
 
-def _check_flux_surface_reduction_gate(
-    ir: StandardNameIR, *, applied_by_enclosing: frozenset[str] = frozenset()
-) -> None:
-    """Reject flux-surface reduction operators applied to flux functions.
-
-    A base flagged ``constant_on_flux_surface`` is constant on any flux
-    surface, so flux-surface reductions of it are no-ops (FSA of an FSA);
-    the local and flux-surface-averaged DD leaves share one name instead.
-    Reduction tokens surface either on the IR operator stack or, in the
-    bare-prefix qualifier spelling, in the qualifier list; binary operator
-    arguments nest full IRs, so recurse into them.
-
-    ``applied_by_enclosing`` carries reduction tokens applied by an OUTER
-    expression, which a nested argument cannot see from its own IR. A reduction
-    over a binary form reaches every operand, and an operand that is a flux
-    function pulls out of the reduction — either the whole expression is
-    constant on the surface (a true no-op) or the reduction factorises through
-    that operand, and the factored spelling is the one to register.
-    """
-    reduction_ops, flagged_bases = _flux_surface_reduction_vocab()
-    if not reduction_ops or not flagged_bases:
-        return
-    applied = {getattr(op, "op", None) for op in (ir.operators or [])} | {
-        q.token for q in (ir.qualifiers or [])
-    }
-    hit = (applied | applied_by_enclosing) & reduction_ops
-    base_token = getattr(ir.base, "token", None)
-    if hit and base_token in flagged_bases:
-        op = sorted(hit)[0]
-        raise ValueError(
-            f"operator '{op}' cannot apply to '{base_token}': the base is "
-            "constant on a flux surface (a flux function), so a flux-surface "
-            "reduction of it is a no-op — use the unreduced name "
-            f"(e.g. '{base_token}_at_plasma_boundary') for both the local "
-            "and flux-surface-averaged quantities"
-        )
-    inherited = (applied & reduction_ops) | applied_by_enclosing
-    for op_app in ir.operators or []:
-        for arg in getattr(op_app, "args", None) or []:
-            if isinstance(arg, StandardNameIR):
-                _check_flux_surface_reduction_gate(arg, applied_by_enclosing=inherited)
-
-
-# The adjective spelling of the maximum reduction lives in qualifiers.yml as a
-# flat token (peak = "peak / maximum value"), which has no per-token flags, so
-# it is named here alongside the flag-driven operator tokens it is synonymous
-# with. peak is treated as an infix extremum exactly like maximum.
-_EXTREMUM_INFIX_QUALIFIER_SYNONYMS = frozenset({"peak"})
-
-
-@cache
-def _extremum_infix_vocab() -> tuple[frozenset[str], frozenset[str]]:
-    """(infix extremum tokens, bases whose extremum must be a transformation)."""
-    from imas_standard_names.grammar.vocab_loaders import (  # noqa: PLC0415
-        load_operators,
-        load_physical_bases,
-    )
-
-    extremum = (
-        frozenset(
-            token
-            for token, defn in load_operators().operators.items()
-            if defn.extremum_reduction
-        )
-        | _EXTREMUM_INFIX_QUALIFIER_SYNONYMS
-    )
-    flagged = frozenset(
-        token
-        for token, defn in load_physical_bases().bases.items()
-        if defn.extremum_is_transformation
-    )
-    return extremum, flagged
-
-
-def _check_extremum_infix_gate(ir: StandardNameIR) -> None:
-    """Reject an extremum qualifier embedded as an infix inside a flux base.
-
-    An extremum of a transport flux over a spatial domain (peak/maximum value
-    on a wall, target, …) is a reduction TRANSFORMATION and must be spelled
-    ``maximum_of_<channel>_flux_at_<locus>`` / ``minimum_of_...`` — the token
-    belongs in transformation (prefix) position, not as an infix qualifier
-    inside the base (``energy_peak_flux``, ``energy_maximum_flux``). Only the
-    qualifier list is inspected: the same token in operator position is the
-    canonical ``maximum_of_`` transformation and stays legal. Binary operator
-    arguments nest full IRs, so recurse into them.
-    """
-    extremum, flagged_bases = _extremum_infix_vocab()
-    if not extremum or not flagged_bases:
-        return
-    infix = {q.token for q in (ir.qualifiers or [])} & extremum
-    base_token = getattr(ir.base, "token", None)
-    if infix and base_token in flagged_bases:
-        tok = sorted(infix)[0]
-        raise ValueError(
-            f"qualifier '{tok}' cannot be an infix inside '{base_token}': an "
-            "extremum of a flux over a spatial domain is a reduction "
-            "transformation — spell it 'maximum_of_<channel>_flux_at_<locus>' "
-            "(e.g. 'maximum_of_energy_flux_at_first_wall'), not as an infix "
-            "extremum qualifier"
-        )
-    for op_app in ir.operators or []:
-        for arg in getattr(op_app, "args", None) or []:
-            if isinstance(arg, StandardNameIR):
-                _check_extremum_infix_gate(arg)
-
-
-def _binary_operand_is_resolved(ir: StandardNameIR, known: frozenset[str]) -> bool:
-    """Whether an operand resolves through registered base vocabulary."""
-    if ir.operators:
-        return all(
-            _binary_operand_is_resolved(arg, known)
-            for operator in ir.operators
-            for arg in operator.args
-        )
-    return ir.base.token in known
-
-
-def _binary_operand_is_elided(
-    ir: StandardNameIR,
-    *,
-    qualifiers: frozenset[str],
-    sibling_is_resolved: bool,
-) -> bool:
-    """Whether a bare operand is a mechanically safe qualifier elision.
-
-    Binary families conventionally elide a shared base from one operand, as
-    in ``ratio_of_electron_to_ion_temperature``. The elided side is admissible
-    only when it contains no operators and every word is registered qualifier
-    vocabulary, while the sibling operand resolves normally.
-    """
-    return (
-        sibling_is_resolved
-        and not ir.operators
-        and ir.projection is None
-        and ir.locus is None
-        and ir.mechanism is None
-        and all(word in qualifiers for word in ir.base.token.split("_"))
-    )
-
-
-def _check_binary_operand_vocabulary(ir: StandardNameIR) -> None:
-    """Reject literal binary operands outside the closed vocabulary.
-
-    The structural parser remains intentionally liberal and records a
-    diagnostic for literal fallbacks. This validity-oracle gate admits only
-    registered operands or the mechanically verifiable shared-base elision
-    used by species ratios.
-    """
-    from imas_standard_names.grammar.parser import (  # noqa: PLC0415
-        load_default_vocabularies,
-    )
-    from imas_standard_names.grammar.support import (  # noqa: PLC0415
-        UnknownBaseTokenError,
-    )
-
-    vocabs = load_default_vocabularies()
-    known = vocabs.base_universe()
-    for operator in ir.operators:
-        if operator.kind is not OperatorKind.BINARY:
-            for arg in operator.args:
-                _check_binary_operand_vocabulary(arg)
-            continue
-
-        left, right = operator.args
-        left_resolved = _binary_operand_is_resolved(left, known)
-        right_resolved = _binary_operand_is_resolved(right, known)
-        left_ok = left_resolved or _binary_operand_is_elided(
-            left,
-            qualifiers=vocabs.qualifiers,
-            sibling_is_resolved=right_resolved,
-        )
-        right_ok = right_resolved or _binary_operand_is_elided(
-            right,
-            qualifiers=vocabs.qualifiers,
-            sibling_is_resolved=left_resolved,
-        )
-        if not left_ok:
-            raise UnknownBaseTokenError(left.base.token, tuple(sorted(known)))
-        if not right_ok:
-            raise UnknownBaseTokenError(right.base.token, tuple(sorted(known)))
-
-
 # Species that carry a charge (ionization) state: the bare ion tokens plus
 # every element/isotope species (an element resolved by charge state is the
 # impurity-transport customer — argon_charge_state_density, …). Sourced from
@@ -1745,29 +1598,28 @@ def compose_standard_name(parts: Mapping[str, Any] | StandardName) -> str:
         model = StandardName.model_validate(parts)
     _check_state_gate(model)
     ir = _model_to_ir(model)
-    _check_flux_surface_reduction_gate(ir)
-    _check_extremum_infix_gate(ir)
-    return _compose_ir(ir)
+    rendered = _compose_ir(ir)
+    _parse_ir(rendered, strict=True)
+    return rendered
 
 
 def parse_standard_name(name: str) -> StandardName:
     """Parse a name into a validated :class:`StandardName`, or raise.
 
-    This is the single validity oracle for the grammar: a name is valid iff
-    this function returns without raising. It enforces the full contract —
-    known tokens, segment compatibility, generic-base qualification, the
-    flux-surface reduction gate, the extremum-infix gate, and strict
-    canonical spelling (exactly one
-    admissible spelling per name; a non-canonical token order raises
-    :class:`NonCanonicalNameError` with the canonical form attached).
+    This convenience facade returns the flat model for names that model can
+    represent. Lossless :func:`imas_standard_names.grammar.parser.parse` with
+    ``strict=True`` is the authoritative validity oracle, including ordered
+    operator chains that cannot project into this flat model.
 
     Do NOT use :func:`imas_standard_names.grammar.parser.validate_round_trip`
     as a validity check: it operates on the lenient IR parser and is an
     IR-diagnostics tool, not the oracle (see docs/architecture/boundary.md).
     """
     try:
-        result = _parse_ir(name)
+        result = _parse_ir(name, strict=True)
     except ParseError as exc:
+        if isinstance(exc, _NonCanonicalParseError):
+            raise NonCanonicalNameError(name, exc.canonical_form) from exc
         if exc.residue:
             from imas_standard_names.grammar.parser import (  # noqa: PLC0415
                 load_default_vocabularies as _load_vocabs,
@@ -1780,17 +1632,14 @@ def parse_standard_name(name: str) -> StandardName:
             known = tuple(sorted(vocabs.bases | vocabs.carriers))
             raise UnknownBaseTokenError(exc.residue, known) from exc
         raise
-    _check_flux_surface_reduction_gate(result.ir)
-    _check_extremum_infix_gate(result.ir)
-    _check_binary_operand_vocabulary(result.ir)
     model = StandardName.model_validate(_ir_to_model_dict(result.ir))
     _check_state_gate(model)
     # Strict canonical-form parsing: the grammar admits exactly ONE spelling
     # per name. A name whose tokens parse but sit in non-canonical order
     # (e.g. fast_trapped_ion_density vs trapped_fast_ion_density) is
     # ungrammatical — raise with the canonical form attached rather than
-    # silently reordering on compose. The IR-level parse() stays lenient;
-    # it serves diagnostics.
+    # silently reordering on compose. The strict IR oracle has already checked
+    # the lossless form; this projection check protects the flat facade.
     canonical = _compose_ir(_model_to_ir(model))
     if canonical != name:
         _assert_lossless_canonical(name, canonical)

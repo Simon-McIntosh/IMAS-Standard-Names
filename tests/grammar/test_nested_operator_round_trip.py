@@ -1,29 +1,21 @@
-"""Model-level round-trip for nested / composed operator names.
+"""Model and ordered-IR round-trip for nested operator names.
 
-These names carry an OUTER unary operator (a prefix transformation like
+These names carry an outer unary operator (a prefix transformation like
 ``time_derivative``/``gradient`` or a postfix ``magnitude``) wrapping an
-INNER expression that itself contains a bare-prefix transformation
+inner expression that itself contains a bare-prefix transformation
 qualifier (``volume_averaged``, ``flux_surface_averaged``,
 ``normalized``, ...).
 
-The bug being guarded here lives in the parse-side IR->model adapter
-(``_ir_to_model_dict``): the inner bare-prefix qualifier collided with
-the outer operator's ``transformation`` slot and reordered tokens, so
+The flat :class:`StandardName` model has a single ``transformation`` and
+a single ``decomposition`` slot. A compatible inner bare-prefix expression
+therefore occupies one ``physical_base`` compound string, while the ordered IR
+retains every operator explicitly.
 
-    compose_standard_name(parse_standard_name(name)) != name
-
-even though the IR-level round-trip (``compose(parse(name).ir)``) was
-always correct. The flat :class:`StandardName` model has a single
-``transformation`` and a single ``decomposition`` slot, so the inner
-expression (projection + qualifiers + base, minus the outer operator,
-locus and mechanism) must be folded into a single ``physical_base``
-compound string — mirroring how binary operands are folded.
-
-A single transformation DOES now coexist with a projection axis
+A single transformation can coexist with a projection axis
 (``time_derivative_of_radial_electric_field`` — the projection lives in
 ``component``, the operator in ``transformation``; see
 ``test_operator_projection_coexistence.py``). The flat model still cannot
-represent two structurally distinct PREFIX operators
+represent two structurally distinct prefix operators
 (``gradient_of_time_derivative_of_...``); those names are a documented
 limitation and must keep raising rather than silently dropping tokens.
 """
@@ -37,67 +29,77 @@ from imas_standard_names.grammar.model import (
     parse_standard_name,
 )
 
-# Names that MUST survive a full model-level round-trip after the fix:
+# Names that must survive a full model-level round-trip:
 # outer unary operator (prefix or postfix) wrapping an inner expression
 # whose canonical spelling contains a bare-prefix transformation qualifier,
 # optionally with a trailing locus on the outer model.
-IN_SCOPE = [
+FLAT_MODEL_FORMS = [
     # of-prefix outer operator + inner bare-transformation + species subject
-    "time_derivative_of_volume_averaged_electron_density",
-    "time_derivative_of_flux_surface_averaged_electron_density",
+    "maximum_of_volume_averaged_electron_density",
+    "maximum_of_flux_surface_averaged_electron_density",
     "gradient_of_normalized_electron_temperature",
     # postfix outer operator + inner bare-transformation
-    "volume_averaged_electron_density_magnitude",
+    "volume_averaged_magnetic_field_magnitude",
     # outer operator + inner bare-transformation + trailing locus
-    "time_derivative_of_volume_averaged_electron_density_at_magnetic_axis",
-    # of-prefix transformation wrapping a PROJECTION axis: the projection
+    "maximum_of_volume_averaged_electron_density_at_magnetic_axis",
+    # of-prefix transformation wrapping a projection axis: the projection
     # stays in `component`, no fold, so it round-trips (transformation ×
-    # component coexistence — formerly out of scope).
+    # component coexistence).
     "time_derivative_of_radial_electric_field",
 ]
 
-# Single-operator and binary cases that already round-tripped and must
-# keep doing so (regression guard — the fold must not disturb them).
-ALREADY_WORKING = [
+# Single-operator and binary baseline forms.
+BASELINE_FORMS = [
     "time_derivative_of_electron_density",
     "gradient_of_electron_pressure",
     "volume_averaged_electron_density",
-    "electron_density_magnitude",
+    "magnetic_field_magnitude",
     "ratio_of_electron_to_ion_temperature",
 ]
 
 # Names the flat model provably cannot represent. Folding the inner
 # expression into physical_base loses a token (a projection axis, or a
 # second structurally-distinct unary operator), so the strict
-# lossless-canonical guard MUST reject them rather than silently emit a
+# lossless-canonical guard must reject them rather than silently emit a
 # token-dropped name. Documented limitation; tracked for a future nested
 # model. Each entry is (name, the token folding would drop).
-OUT_OF_SCOPE = [
-    # operator-of-operator: two structurally-distinct PREFIX operators;
+IR_ONLY_FORMS = [
+    # operator-of-operator: two structurally-distinct prefix operators;
     # folding drops the inner 'time_derivative'
     "gradient_of_time_derivative_of_electron_temperature",
+    # Higher-precedence bare prefixes canonically wrap these explicit
+    # operators, and the flat model has no second transformation slot.
+    "volume_averaged_time_derivative_of_electron_density",
 ]
 
 
-@pytest.mark.parametrize("name", IN_SCOPE)
-def test_in_scope_nested_operator_round_trips(name: str):
+@pytest.mark.parametrize("name", FLAT_MODEL_FORMS)
+def test_flat_model_nested_operator_round_trips(name: str):
     model = parse_standard_name(name)
     assert compose_standard_name(model) == name
 
 
-@pytest.mark.parametrize("name", ALREADY_WORKING)
-def test_already_working_names_still_round_trip(name: str):
+@pytest.mark.parametrize("name", BASELINE_FORMS)
+def test_single_operator_and_binary_names_round_trip(name: str):
     model = parse_standard_name(name)
     assert compose_standard_name(model) == name
 
 
-@pytest.mark.parametrize("name", OUT_OF_SCOPE)
-def test_out_of_scope_nested_names_still_reject(name: str):
+@pytest.mark.parametrize("name", IR_ONLY_FORMS)
+def test_flat_model_rejects_multi_prefix_chains(name: str):
     """The flat model cannot represent these; they must raise, never
     silently drop a token. The lossless-canonical guard is the safety net.
     """
     with pytest.raises(ValueError):
         parse_standard_name(name)
+
+
+@pytest.mark.parametrize("name", IR_ONLY_FORMS)
+def test_lossless_ir_strictly_validates_nested_prefix_chains(name: str) -> None:
+    """The ordered IR validates structures the flat facade cannot project."""
+    from imas_standard_names import compose, parse
+
+    assert compose(parse(name, strict=True).ir) == name
 
 
 class TestUnaryOverBinary:
