@@ -1,4 +1,4 @@
-"""Tests for the JSON schema contract (Feature 04)."""
+"""Tests for StandardNameEntry JSON schema generation and validation."""
 
 import json
 from pathlib import Path

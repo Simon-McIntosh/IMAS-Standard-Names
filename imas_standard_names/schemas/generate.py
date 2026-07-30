@@ -1,4 +1,4 @@
-"""Generate a versioned JSON schema for StandardNameEntry."""
+"""Generate the JSON schema for StandardNameEntry."""
 
 import json
 from pathlib import Path
