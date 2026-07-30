@@ -35,8 +35,12 @@ The following functions and models form the cross-project contract that imas-cod
 | `get_grammar_context()` | `imas_standard_names.grammar.context` | Returns all naming knowledge (patterns, vocabulary, rules) as a single dict for LLM pipelines |
 | `parse_standard_name()` | `imas_standard_names.grammar.model` | Parses a name string into a typed `StandardName` with grammar segments |
 | `compose_standard_name()` | `imas_standard_names.grammar.model` | Builds a valid name string from a `StandardName` or dict of parts |
+| `parse()` | `imas_standard_names` | Parses a name into the diagnostic IR, preserving its operator chain outermost first |
+| `compose()` | `imas_standard_names` | Renders a `StandardNameIR` into its canonical string |
+| `StandardNameIR` | `imas_standard_names` | Ordered intermediate representation used for structural inspection |
 
 ```python
+from imas_standard_names import StandardNameIR, compose, parse
 from imas_standard_names.grammar.context import get_grammar_context
 from imas_standard_names.grammar.model import parse_standard_name, compose_standard_name
 
@@ -44,11 +48,17 @@ from imas_standard_names.grammar.model import parse_standard_name, compose_stand
 ctx = get_grammar_context()
 
 # Parse a name into segments
-parsed = parse_standard_name("radial_component_of_magnetic_field")
+parsed = parse_standard_name("radial_magnetic_field")
 print(parsed.component)  # "radial"
 
 # Compose from parts
 name = compose_standard_name({"component": "radial", "physical_base": "magnetic_field"})
+
+# Inspect a nested operator chain without relying on parser internals
+diagnostic = parse("square_of_inverse_of_pressure")
+assert isinstance(diagnostic.ir, StandardNameIR)
+assert [operator.op for operator in diagnostic.ir.operators] == ["square", "inverse"]
+assert compose(diagnostic.ir) == "square_of_inverse_of_pressure"
 ```
 
 **Parse contract — `parse_standard_name` is the single validity oracle.** A
@@ -58,12 +68,19 @@ generic-base qualification gate, the flux-surface reduction gate, and strict
 canonical spelling (exactly one admissible spelling per name; a non-canonical
 token order raises `NonCanonicalNameError` carrying the canonical form).
 
-`grammar.parser.validate_round_trip` is **not** the oracle. It runs on the
-lenient IR parser and only answers "does this name render back to itself?",
-which is strictly weaker than validity — it skips the segment-compatibility and
-gating checks. Treat it as an IR-diagnostics tool for locating parse/compose
-drift, never as a validity check. Callers deciding whether a name is acceptable
-must use `parse_standard_name`.
+The package-level `parse`, `compose`, `StandardNameIR`, and
+`validate_round_trip` exports form the stable structural-inspection surface.
+`StandardNameIR.operators` is ordered outermost first. These tools are not the
+validity oracle: `validate_round_trip` only answers "does this name render back
+to itself?", which is strictly weaker than validity because it skips the
+segment-compatibility and gating checks. Callers deciding whether a name is
+acceptable must use `parse_standard_name`, then may use `parse` to inspect its
+ordered structure.
+
+`get_grammar_context()["grammar"]["vocabularies"]["qualifier_categories"]`
+exposes the category-to-token mapping in canonical category order. The mapping
+is derived from the same registry that canonical composition applies, so prompt
+consumers can stack qualifiers in an order that the validity oracle accepts.
 
 ### Models
 

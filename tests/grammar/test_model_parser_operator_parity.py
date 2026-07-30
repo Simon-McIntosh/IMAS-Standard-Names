@@ -2,30 +2,27 @@
 
 The IR parser (``parse``/``render.compose``) and the flat ``StandardName``
 model (``parse_standard_name``/``compose_standard_name``) are two entry points
-onto the same grammar. Downstream consumers go through the MODEL layer, but the
-operator round-trip was historically tested only through the PARSER layer
-(``validate_round_trip``). That left a gap: an indexed prefix operator
-(``derivative_with_respect_to_<coord>``) round-tripped through the parser yet
-raised a ``ValidationError`` at the model layer, because the fused
-``<op>_<coord>`` token is not a member of the closed ``Transformation`` /
-``Decomposition`` StrEnums.
+onto the same grammar. They must accept and render the same canonical spelling
+for every registered operator, including indexed prefix operators such as
+``derivative_with_respect_to_<coord>`` whose fused ``<op>_<coord>`` token must
+cross both the IR parser and the closed model enums.
 
-This module closes that gap with an exhaustive, data-driven parity check: for
-EVERY operator declared in ``operators.yml``, build a representative canonical
-name and assert that
+The parity check derives a representative canonical name for every operator
+declared in ``operators.yml`` and asserts that
 
     compose_standard_name(parse_standard_name(name)) == name      (model round-trip)
     compose_standard_name(parse_standard_name(name)) == render(parse(name).ir)  (parity)
 
-Driving the parametrization from the loaded operator registry means a newly
-added operator is automatically covered — a future operator that breaks the
-model layer fails here, not in a downstream pipeline.
+Driving the parametrization from the loaded operator registry keeps coverage
+complete as that registry changes and makes any disagreement fail at the
+grammar boundary.
 """
 
 from __future__ import annotations
 
 import pytest
 
+from imas_standard_names import StandardNameIR, compose, parse
 from imas_standard_names.grammar.ir import OperatorKind
 from imas_standard_names.grammar.model import (
     compose_standard_name,
@@ -34,9 +31,7 @@ from imas_standard_names.grammar.model import (
 from imas_standard_names.grammar.parser import (
     Vocabularies,
     load_default_vocabularies,
-    parse,
 )
-from imas_standard_names.grammar.render import compose as render
 
 # Representative bases. A scalar base for most operators; a vector base for the
 # scalar-extraction postfixes (magnitude, real_part, imaginary_part) that
@@ -100,7 +95,7 @@ def test_every_operator_model_parser_parity(
     for name in candidates:
         try:
             model_round_trip = compose_standard_name(parse_standard_name(name))
-            parser_render = render(parse(name, vocabs=vocabs).ir)
+            parser_render = compose(parse(name, vocabs=vocabs).ir)
         except Exception as exc:  # noqa: BLE001 — record and try the next form
             last_error = exc
             continue
@@ -113,3 +108,11 @@ def test_every_operator_model_parser_parity(
         f"operator {op!r} ({meta['kind']}) did not round-trip through the model "
         f"layer for any candidate {candidates!r}; last error: {last_error!r}"
     )
+
+
+def test_public_ir_api_preserves_outermost_first_operator_chain() -> None:
+    parsed = parse("square_of_inverse_of_pressure")
+
+    assert isinstance(parsed.ir, StandardNameIR)
+    assert [operator.op for operator in parsed.ir.operators] == ["square", "inverse"]
+    assert compose(parsed.ir) == "square_of_inverse_of_pressure"

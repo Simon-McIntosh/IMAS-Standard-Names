@@ -3,6 +3,11 @@
 import pytest
 
 from imas_standard_names.grammar.context import get_grammar_context
+from imas_standard_names.grammar.model import compose_standard_name
+from imas_standard_names.grammar.vocab_loaders import (
+    load_qualifier_categories,
+    load_scoping_qualifiers,
+)
 
 
 @pytest.fixture(scope="module")
@@ -99,6 +104,48 @@ def test_vocabulary_sections_covers_all_segments(context: dict):
             f"Segment {seg_id!r}: token sets differ between "
             f"vocabulary_sections and SEGMENT_TOKEN_MAP"
         )
+
+
+def test_grammar_context_exposes_qualifier_categories_in_validator_order(
+    context: dict,
+):
+    """The prompt-facing category order must match canonical composition."""
+    category_of = load_qualifier_categories()
+    expected_categories = list(dict.fromkeys(category_of.values()))
+    exposed = context["grammar"]["vocabularies"]["qualifier_categories"]
+
+    assert list(exposed) == expected_categories
+    assert {
+        token: category for category, tokens in exposed.items() for token in tokens
+    } == category_of
+
+    scoping = load_scoping_qualifiers()
+    representatives = [
+        next(token for token in tokens if token in scoping)
+        for tokens in exposed.values()
+        if any(token in scoping for token in tokens)
+    ]
+    assert len(representatives) > 1
+    assert (
+        compose_standard_name(
+            {
+                "qualifier": tuple(reversed(representatives)),
+                "physical_base": "pressure",
+            }
+        )
+        == f"{'_'.join(representatives)}_pressure"
+    )
+
+
+def test_grammar_context_points_to_stable_operator_chain_api(context: dict):
+    parse_api = context["grammar"]["parse_api"]
+    assert parse_api == {
+        "parse": "imas_standard_names:parse",
+        "compose": "imas_standard_names:compose",
+        "validate_round_trip": "imas_standard_names:validate_round_trip",
+        "ir_model": "imas_standard_names:StandardNameIR",
+        "operator_chain_order": "outermost_first",
+    }
 
 
 def test_segment_descriptions_is_nonempty_dict(context: dict):
