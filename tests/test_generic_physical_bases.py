@@ -11,6 +11,7 @@ from pydantic import ValidationError
 from imas_standard_names.grammar.constants import GENERIC_PHYSICAL_BASES
 from imas_standard_names.grammar.model import StandardName, parse_standard_name
 from imas_standard_names.grammar.model_types import Component, Object, Position, Subject
+from imas_standard_names.validation import semantic
 
 
 class TestGenericPhysicalBaseValidation:
@@ -210,3 +211,20 @@ class TestSemanticallyEmptyCatchAlls:
     def test_qualified_catch_all_valid(self):
         model = StandardName(subject=Subject.ELECTRON, physical_base="count")
         assert model.compose() == "electron_count"
+
+
+def test_coordinate_warning_suggests_short_component_form(monkeypatch) -> None:
+    """The semantic hint uses the canonical short projection spelling."""
+
+    class ParsedName:
+        coordinate = "radial"
+        physical_base = "magnetic_field"
+
+    monkeypatch.setattr(semantic, "parse_standard_name", lambda _name: ParsedName())
+    issues = semantic._check_coordinate_with_base_type(
+        "radial_coordinate_magnetic_field", None
+    )
+
+    assert issues
+    assert "radial_magnetic_field" in issues[0]
+    assert "_component_of_" not in issues[0]

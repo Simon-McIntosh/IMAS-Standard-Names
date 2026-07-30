@@ -19,7 +19,7 @@
     Higher elongation increases [plasma_volume](#plasma_volume) and improves confinement
     through favorable geometric effects, but also increases susceptibility to [vertical_displacement_event](#vertical_displacement_event)
     requiring active feedback control. Elongation affects [plasma_current](#plasma_current)
-    limits and [safety_factor](#safety_factor) requirements. See [major_radius_of_plasma_boundary](#major_radius_of_plasma_boundary)
+    limits and [safety_factor](#safety_factor) requirements. See [radial_coordinate_of_plasma_boundary](#radial_coordinate_of_plasma_boundary)
     and [minor_radius_of_plasma_boundary](#minor_radius_of_plasma_boundary) for geometric
     relationships.
 
@@ -80,7 +80,7 @@
     Geometric properties:
 
 
-    The LCFS is characterized by shape parameters including [major_radius_of_plasma_boundary](#major_radius_of_plasma_boundary),
+    The LCFS is characterized by shape parameters including [radial_coordinate_of_plasma_boundary](#radial_coordinate_of_plasma_boundary),
     [minor_radius_of_plasma_boundary](#minor_radius_of_plasma_boundary), and [elongation_of_plasma_boundary](#elongation_of_plasma_boundary).
     These geometric quantities define the plasma cross-section and affect confinement
     quality.
@@ -129,14 +129,14 @@
     and [plasma_density_at_magnetic_axis](#plasma_density_at_magnetic_axis) are key
     performance indicators. The magnetic axis location determines the geometric center
     of the plasma and is used as reference for shape parameters. See [plasma_boundary](#plasma_boundary)
-    for boundary relationships and [major_radius_of_plasma_boundary](#major_radius_of_plasma_boundary)
+    for boundary relationships and [radial_coordinate_of_plasma_boundary](#radial_coordinate_of_plasma_boundary)
     for geometric scaling.
 
 
     Related quantities:
 
 
-    The magnetic axis relates to [major_radius_of_plasma_boundary](#major_radius_of_plasma_boundary),
+    The magnetic axis relates to [radial_coordinate_of_plasma_boundary](#radial_coordinate_of_plasma_boundary),
     [minor_radius_of_plasma_boundary](#minor_radius_of_plasma_boundary), and [toroidal_magnetic_field](#toroidal_magnetic_field)
     at axis. Axis location affects [plasma_current](#plasma_current) distribution
     and [safety_factor](#safety_factor) profiles.
@@ -156,7 +156,7 @@
     Typical values:
 
 
-    Axis location varies with plasma shape and position control settings. Major radius
+    Axis location varies with plasma shape and position control settings. The radial coordinate
     typically ranges from machine center to outer vessel radius, vertical position
     controlled to maintain plasma centering.
 
@@ -214,18 +214,18 @@
     separatrix mapping.'
   status: draft
   kind: metadata
-- name: major_radius_of_plasma_boundary
-  description: Major radius at plasma boundary.
-  documentation: 'Major radius $R$ evaluated at the outboard midplane of the [plasma_boundary](#plasma_boundary)
+- name: radial_coordinate_of_plasma_boundary
+  description: Radial coordinate at plasma boundary.
+  documentation: 'Radial coordinate $R$ evaluated at the outboard midplane of the [plasma_boundary](#plasma_boundary)
     (last closed flux surface). The plasma boundary is the last closed flux surface
-    separating confined plasma from the scrape-off layer. Major radius characterizes
+    separating confined plasma from the scrape-off layer. The radial coordinate characterizes
     the outer radial extent of confined plasma.
 
 
     Geometric definition:
 
 
-    For shaped plasmas, this is the major radius at the outboard midplane where the
+    For shaped plasmas, this is the radial coordinate at the outboard midplane where the
     vertical coordinate equals the [magnetic_axis](#magnetic_axis) Z-coordinate: $R_{\text{boundary}}(Z
     = Z_{\text{axis}})$ in m.
 
@@ -235,7 +235,7 @@
 
     This quantity characterizes the outer radial extent of confined plasma and is
     used in calculating [plasma_volume](#plasma_volume), surface area, and shape parameters.
-    Major radius affects [energy_confinement_time](#energy_confinement_time) through
+    The radial coordinate affects [energy_confinement_time](#energy_confinement_time) through
     scaling laws and determines [plasma_current](#plasma_current) requirements. See
     [minor_radius_of_plasma_boundary](#minor_radius_of_plasma_boundary) for aspect
     ratio and [elongation_of_plasma_boundary](#elongation_of_plasma_boundary) for
@@ -245,21 +245,21 @@
     Measurement methods:
 
 
-    Major radius is determined from equilibrium reconstruction using external [magnetic_field](#magnetic_field)
+    The radial coordinate is determined from equilibrium reconstruction using external [magnetic_field](#magnetic_field)
     measurements. [Flux_loop_voltage](#flux_loop_voltage) integration provides boundary
     position information. Plasma imaging systems measure boundary geometry directly.
-    Major radius analysis requires [magnetic_axis](#magnetic_axis) location and [plasma_boundary](#plasma_boundary)
+    Radial-coordinate analysis requires [magnetic_axis](#magnetic_axis) location and [plasma_boundary](#plasma_boundary)
     identification. Geometric measurements use standard tokamak coordinate systems.
 
 
     Typical values:
 
 
-    Small tokamaks: 0.5-1.0 m, medium tokamaks: 1.5-3.0 m, ITER: 6.2 m (design). Major
-    radius is primarily determined by machine geometry and external coil configuration.
+    Small tokamaks: 0.5-1.0 m, medium tokamaks: 1.5-3.0 m, ITER: 6.2 m (design). The
+    radial coordinate is primarily determined by machine geometry and external coil configuration.
 
 
-    Sign convention: Positive major radius measured from machine center, following
+    Sign convention: Positive radial coordinate measured from machine center, following
     standard cylindrical coordinate conventions and tokamak geometry.'
   status: active
   kind: scalar
@@ -275,8 +275,8 @@
     $$a_{\text{boundary}} = \frac{R_{\text{out}} - R_{\text{in}}}{2}$$
 
 
-    where $R_{\text{out}}$ is [major_radius_of_plasma_boundary](#major_radius_of_plasma_boundary)
-    at outboard midplane and $R_{\text{in}}$ is major radius at inboard midplane,
+    where $R_{\text{out}}$ is [radial_coordinate_of_plasma_boundary](#radial_coordinate_of_plasma_boundary)
+    at outboard midplane and $R_{\text{in}}$ is the radial coordinate at the inboard midplane,
     both in m.
 
 
@@ -288,7 +288,7 @@
     It serves as the characteristic length scale for normalized radial coordinates.
     Minor radius affects [energy_confinement_time](#energy_confinement_time) through
     scaling laws and determines [plasma_current](#plasma_current) requirements. See
-    [major_radius_of_plasma_boundary](#major_radius_of_plasma_boundary) for aspect
+    [radial_coordinate_of_plasma_boundary](#radial_coordinate_of_plasma_boundary) for aspect
     ratio and [elongation_of_plasma_boundary](#elongation_of_plasma_boundary) for
     shape relationships.
 
@@ -336,7 +336,7 @@
 
 
     The plasma boundary serves as the reference surface for defining plasma shape
-    parameters including [major_radius_of_plasma_boundary](#major_radius_of_plasma_boundary),
+    parameters including [radial_coordinate_of_plasma_boundary](#radial_coordinate_of_plasma_boundary),
     [minor_radius_of_plasma_boundary](#minor_radius_of_plasma_boundary), and [elongation_of_plasma_boundary](#elongation_of_plasma_boundary).
     It separates the confined plasma region from the open field line region and determines
     the [plasma_volume](#plasma_volume) enclosed by magnetic surfaces.
@@ -396,7 +396,7 @@
     Plasma volume determines total stored energy, particle inventory, and fusion power
     in burning plasmas. Larger volume generally improves confinement through favorable
     scaling laws. Volume affects [energy_confinement_time](#energy_confinement_time)
-    and determines [plasma_current](#plasma_current) requirements. See [major_radius_of_plasma_boundary](#major_radius_of_plasma_boundary),
+    and determines [plasma_current](#plasma_current) requirements. See [radial_coordinate_of_plasma_boundary](#radial_coordinate_of_plasma_boundary),
     [minor_radius_of_plasma_boundary](#minor_radius_of_plasma_boundary), and [elongation_of_plasma_boundary](#elongation_of_plasma_boundary)
     for geometric relationships.
 

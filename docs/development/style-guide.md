@@ -42,12 +42,14 @@ This guide provides authoring best practices for creating well-formed, consisten
 
 **Examples:**
 
+<!-- isn-parse-examples:start -->
 ```text
 position_of_flux_loop
 radial_position_of_flux_loop
 vertex_of_plasma_boundary
 centroid_of_divertor_tile
 ```
+<!-- isn-parse-examples:end -->
 
 ### Physical Base
 
@@ -61,13 +63,15 @@ centroid_of_divertor_tile
 
 **Examples:**
 
+<!-- isn-parse-examples:start -->
 ```text
 electron_temperature
-radial_component_of_magnetic_field
-voltage_from_flux_loop
+radial_magnetic_field
+flux_loop_voltage
 area_of_poloidal_magnetic_field_probe
 electron_temperature_at_magnetic_axis
 ```
+<!-- isn-parse-examples:end -->
 
 ---
 
@@ -75,10 +79,10 @@ electron_temperature_at_magnetic_axis
 
 ### component vs coordinate
 
-| Segment    | Use With       | Pattern                          | Example                              |
-| ---------- | -------------- | -------------------------------- | ------------------------------------ |
-| component  | physical_base  | `{axis}_component_of_{physical}` | `radial_component_of_magnetic_field` |
-| coordinate | geometric_base | `{axis}_{geometric}`             | `radial_position_of_flux_loop`       |
+| Segment    | Use With       | Pattern              | Example                        |
+| ---------- | -------------- | -------------------- | ------------------------------ |
+| component  | physical_base  | `{axis}_{physical}`  | `radial_magnetic_field`        |
+| coordinate | geometric_base | `{axis}_{geometric}` | `radial_position_of_flux_loop` |
 
 ### device vs object
 
@@ -99,13 +103,13 @@ current_of_poloidal_field_coil           (intrinsic property of coil)
 
 | Segment  | Template     | Meaning                              | Example                                 |
 | -------- | ------------ | ------------------------------------ | --------------------------------------- |
-| geometry | `of_{token}` | Geometric property OF spatial object | `major_radius_of_plasma_boundary`       |
+| geometry | `of_{token}` | Geometric property OF spatial object | `radial_coordinate_of_plasma_boundary`  |
 | position | `at_{token}` | Field quantity evaluated AT location | `electron_temperature_at_magnetic_axis` |
 
 **Same token, different prepositions:**
 
 ```text
-major_radius_of_plasma_boundary           (geometric property of the boundary)
+radial_coordinate_of_plasma_boundary      (radial coordinate of the boundary)
 electron_temperature_at_plasma_boundary   (field evaluated at the boundary)
 ```
 
@@ -128,7 +132,7 @@ status: draft | active | deprecated
 
 | Field         | Rule                                                           | Example                               |
 | ------------- | -------------------------------------------------------------- | ------------------------------------- |
-| `name`        | Must match grammar exactly                                     | `radial_component_of_magnetic_field`  |
+| `name`        | Must match grammar exactly                                     | `radial_magnetic_field`               |
 | `kind`        | `scalar` for all entries (vector metadata is inferred)         | `scalar`                              |
 | `unit`        | SI symbols, use `.` for multiplication, `^` for powers         | `T`, `eV`, `m.s^-1`                   |
 | `status`      | `draft` `active` `deprecated` `superseded`                     | `draft`                               |
@@ -173,16 +177,17 @@ tags: [measured, geometry]
 
 ## Anti-Patterns
 
-| Invalid                                  | Problem                   | Correct                               |
-| ---------------------------------------- | ------------------------- | ------------------------------------- |
-| `magnetic_field_radial_component`        | Wrong segment order       | `radial_component_of_magnetic_field`  |
-| `radial_component_of_position`           | component with geometric  | `radial_position_of_flux_loop`        |
-| `radial_position_component_of_flux_loop` | coordinate with component | `radial_position_of_flux_loop`        |
-| `voltage_from_flux_loop`                 | Wrong pattern for signal  | `flux_loop_voltage`                   |
-| `electron_temperature_ev`                | Units in name             | `electron_temperature` (unit in YAML) |
-| `pf_coil_current_1`                      | Index after quantity      | `pf_coil_1_current`                   |
-| `Electron_Temperature`                   | Not lowercase             | `electron_temperature`                |
-| `electron__temperature`                  | Double underscore         | `electron_temperature`                |
+| Invalid                                  | Problem                    | Correct                               |
+| ---------------------------------------- | -------------------------- | ------------------------------------- |
+| `radial_component_of_magnetic_field`     | Retired long projection    | `radial_magnetic_field`               |
+| `magnetic_field_radial_component`        | Wrong segment order        | `radial_magnetic_field`               |
+| `radial_component_of_position`           | Component with geometric   | `radial_position_of_flux_loop`        |
+| `radial_position_component_of_flux_loop` | Coordinate with component  | `radial_position_of_flux_loop`        |
+| `voltage_from_flux_loop`                 | Wrong pattern for signal   | `flux_loop_voltage`                   |
+| `electron_temperature_ev`                | Units in name              | `electron_temperature` (unit in YAML) |
+| `pf_coil_current_1`                      | Index after quantity       | `pf_coil_1_current`                   |
+| `Electron_Temperature`                   | Not lowercase              | `electron_temperature`                |
+| `electron__temperature`                  | Double underscore          | `electron_temperature`                |
 
 ---
 
@@ -216,11 +221,11 @@ Before proposing a new standard name:
 
 ```text
 <subject>_<physical_base>                       electron_temperature
-<component>_component_of_<physical_base>        radial_component_of_magnetic_field
+<component>_<physical_base>                     radial_magnetic_field
 <device>_<physical_base>                        flux_loop_voltage
 <physical_base>_of_<object>                     area_of_flux_loop
 <physical_base>_at_<position>                   electron_temperature_at_magnetic_axis
-<physical_base>_of_<geometry>                   major_radius_of_plasma_boundary
+<geometric_base>_of_<geometry>                  radial_coordinate_of_plasma_boundary
 <physical_base>_due_to_<process>                heat_flux_due_to_conduction
 ```
 

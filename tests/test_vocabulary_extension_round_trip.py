@@ -121,7 +121,7 @@ class TestPositionTokens:
         "token,enum_member",
         [
             ("ferritic_element_centroid", Position.FERRITIC_ELEMENT_CENTROID),
-            # neutron_detector reclassified as entity in locus_registry (plan 38 §A5)
+            # neutron_detector is an entity rather than a position locus.
             pytest.param(
                 "neutron_detector",
                 getattr(Position, "NEUTRON_DETECTOR", None),
@@ -173,7 +173,7 @@ class TestPositionTokens:
         ],
     )
     def test_position_of_geometry_round_trip(self, position):
-        # §6: a point's R coordinate is radial_coordinate_of_<X>, not
+        # A point's R coordinate is radial_coordinate_of_<X>, not
         # major_radius_of_<X> (which is now rejected). This still exercises the
         # position-locus round-trip via geometry.
         name = f"radial_coordinate_of_{position}"
@@ -191,7 +191,7 @@ class TestComponentTokens:
     """Verify the normalized coordinate-frame component tokens.
 
     ``normalized_parallel`` / ``normalized_perpendicular`` were removed
-    (canonical-qualifier-order §3): parallel/perpendicular are field-relative
+    Parallel/perpendicular are field-relative
     directions with no distinct normalized variant, so a ``normalized_<dir>``
     prefix on them could only ever encode the GyroBohm-normalization OPERATOR,
     which was being shadowed by the component token via longest-match. Only the
@@ -252,17 +252,17 @@ class TestComponentTokens:
 
 
 class TestTransformationTokens:
-    """Verify rc14 transformation vocabulary additions."""
+    """Verify transformation vocabulary membership."""
 
     @pytest.mark.parametrize(
         "token,enum_member",
         [
-            # electron_equivalent and ratio_of are rc20 tokens not in operators.yml (plan 38 §A7)
+            # These tokens belong to different operator roles.
             pytest.param(
                 "electron_equivalent",
                 getattr(Transformation, "ELECTRON_EQUIVALENT", None),
                 marks=pytest.mark.xfail(
-                    reason="rc20 grammar: ELECTRON_EQUIVALENT removed in operators.yml (plan 38 §A7)",
+                    reason="electron_equivalent is not a transformation operator",
                     strict=True,
                 ),
             ),
@@ -270,7 +270,7 @@ class TestTransformationTokens:
                 "ratio_of",
                 getattr(Transformation, "RATIO_OF", None),
                 marks=pytest.mark.xfail(
-                    reason="rc20 grammar: RATIO_OF is now a BinaryOperator, not Transformation (plan 38 §A7)",
+                    reason="ratio_of is a binary operator, not a transformation",
                     strict=True,
                 ),
             ),
@@ -280,7 +280,7 @@ class TestTransformationTokens:
         assert Transformation(token) == enum_member
 
     @pytest.mark.xfail(
-        reason="rc20 grammar: electron_equivalent not in Transformation enum (plan 38 §A7)",
+        reason="electron_equivalent is not a transformation operator",
         strict=True,
     )
     def test_electron_equivalent_compose_round_trip(self):
@@ -304,7 +304,7 @@ class TestTransformationTokens:
         assert reparsed.subject is not None or reparsed.transformation is not None
 
     @pytest.mark.xfail(
-        reason="rc20 grammar: RATIO_OF is now a BinaryOperator, not Transformation (plan 38 §A7)",
+        reason="ratio_of is a binary operator, not a transformation",
         strict=True,
     )
     def test_ratio_of_round_trip(self):
@@ -315,34 +315,7 @@ class TestTransformationTokens:
         assert compose_standard_name(parsed) == name
 
 
-# ---------------------------------------------------------------------------
-# Coordinate-prefix split (deferred)
-# ---------------------------------------------------------------------------
-
-
-class TestCoordinatePrefixDeferral:
-    """Acknowledge that the coordinate-prefix split is deferred.
-
-    AUD-04 in imas-codex handles the interim for coordinate-prefix names
-    such as major_radius_of_*, vertical_coordinate_of_*, toroidal_angle_of_*.
-    """
-
-    def test_d6_deferred_placeholder(self):
-        """Placeholder confirming the split is intentionally out of scope."""
-        # rc15 will add a coordinate_prefix grammar segment with vocabulary:
-        #   major_radius_of, minor_radius_of, vertical_coordinate_of,
-        #   toroidal_angle_of, poloidal_angle_of,
-        #   normalized_toroidal_flux_coordinate_of,
-        #   normalized_poloidal_flux_coordinate_of
-        assert True  # deliberate pass-through
-
-
-# ---------------------------------------------------------------------------
-# D.7 — Parser error-message improvements (forbidden patterns)
-# ---------------------------------------------------------------------------
-
-
-class TestD7ForbiddenPatterns:
+class TestForbiddenPatterns:
     """Verify parser error hints for common mistakes."""
 
     def test_diamagnetic_component_of_forbidden(self):
@@ -351,7 +324,7 @@ class TestD7ForbiddenPatterns:
 
     def test_diamagnetic_component_of_suggests_canonical(self):
         with pytest.raises(
-            ValueError, match="radial_component_of_<subject>_diamagnetic_drift_velocity"
+            ValueError, match="radial_<subject>_velocity_due_to_diamagnetic_drift"
         ):
             validate_forbidden_patterns(
                 "diamagnetic_component_of_electron_drift_velocity"
@@ -379,7 +352,7 @@ class TestD7ForbiddenPatterns:
 
 
 class TestExistingRoundTripRegression:
-    """Verify that rc14 additions don't break existing names."""
+    """Verify representative established names still round-trip."""
 
     @pytest.mark.parametrize(
         "name",
@@ -395,7 +368,6 @@ class TestExistingRoundTripRegression:
             # real_part is a postfix scalar-extraction operator: <base>_real_part
             "magnetic_field_real_part",
             "cumulative_inside_flux_surface_power",
-            # rc13 tokens
             "power_due_to_collisions",
             "electron_temperature_at_ferritic_insert_centroid",
         ],

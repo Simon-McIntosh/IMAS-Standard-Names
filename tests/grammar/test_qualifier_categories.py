@@ -60,6 +60,6 @@ def test_ir_qualifier_carries_its_category() -> None:
     """The parser populates IR Qualifier.category from the map."""
     from imas_standard_names.grammar.parser import parse
 
-    ir = parse("major_radius_of_flux_loop").ir
+    ir = parse("major_area").ir
     by_token = {q.token: q.category for q in ir.qualifiers}
     assert by_token.get("major") == "geometry"

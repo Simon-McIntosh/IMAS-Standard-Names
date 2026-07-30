@@ -305,7 +305,7 @@ def _check_coordinate_with_base_type(name: str, entry: StandardNameEntry) -> lis
             issues.append(
                 f"{name}: WARNING - 'coordinate' is for geometric/spatial quantities, "
                 f"not physical fields like '{physical_base}'. Consider using 'component' "
-                f"for directional decomposition: {coordinate}_component_of_{physical_base}"
+                f"for directional decomposition: {coordinate}_{physical_base}"
             )
     except Exception:
         pass
