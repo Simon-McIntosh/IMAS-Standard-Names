@@ -767,7 +767,10 @@ def get_grammar_context() -> dict[str, Any]:
     Set ``IMAS_STANDARD_NAMES_CONTEXT_CACHE=0`` to always rebuild, and
     ``IMAS_STANDARD_NAMES_CACHE_DIR`` to relocate the cache directory.
 
-    Each call returns a deep copy, so callers may freely mutate their view.
+    Each call returns a deep copy of the mutable payload fields, so callers may
+    freely mutate those portions of their view. The
+    ``grammar.advisory_aliases`` mapping remains recursively immutable because
+    it is validated policy guidance rather than caller-owned working data.
     """
     return copy.deepcopy(_load_or_build_context())
 
@@ -775,11 +778,20 @@ def get_grammar_context() -> dict[str, Any]:
 @functools.lru_cache(maxsize=1)
 def _load_or_build_context() -> dict[str, Any]:
     """Return the payload from the disk cache, building and storing it if absent."""
+    from imas_standard_names.grammar.loader import freeze_advisory_aliases
+
     if not _cache_enabled():
         return _build_full_context()
 
     path = _cache_dir() / f"{_cache_key()}.json"
     if (payload := _read_cache_entry(path)) is not None:
+        grammar = payload.get("grammar")
+        if isinstance(grammar, dict) and isinstance(
+            grammar.get("advisory_aliases"), dict
+        ):
+            grammar["advisory_aliases"] = freeze_advisory_aliases(
+                grammar["advisory_aliases"]
+            )
         return payload
 
     payload = _build_full_context()
@@ -834,10 +846,13 @@ def _build_grammar_context() -> dict[str, Any]:
 
     Returns a dict with keys: ``ir_groups`` (the 5 IR slots + mechanism),
     ``vocabularies`` (tokens per closed-vocab file), ``locus_relation_matrix``,
-    ``canonical_templates``, and ``parse_api`` (callable names).
+    ``advisory_aliases`` (validated policy guidance), ``canonical_templates``,
+    and ``parse_api`` (callable names).
 
-    Any loader failure yields an empty field but never raises — consumers
-    must tolerate partially populated vocabularies.
+    Optional vocabulary-enrichment loader failures yield empty fields, so
+    consumers must tolerate partially populated vocabularies. Advisory-alias
+    policy is required and validated fail-closed: a defect raises instead of
+    exposing partial or unverified guidance.
     """
 
     from imas_standard_names.grammar import vocab_loaders
@@ -845,6 +860,7 @@ def _build_grammar_context() -> dict[str, Any]:
         BINARY_SEPARATORS,
         LOCUS_RELATION_MATRIX,
     )
+    from imas_standard_names.grammar.loader import load_advisory_aliases
 
     def _safe(fn, default):  # type: ignore[no-untyped-def]
         try:
@@ -901,6 +917,7 @@ def _build_grammar_context() -> dict[str, Any]:
             for locus_type, relations in LOCUS_RELATION_MATRIX.items()
         },
         "binary_separators": sorted(BINARY_SEPARATORS),
+        "advisory_aliases": load_advisory_aliases(),
         "canonical_templates": {
             "unary_prefix": "<op>_of_<inner>",
             "unary_postfix": "<inner>_<op>",
