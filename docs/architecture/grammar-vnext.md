@@ -33,10 +33,14 @@ the strict parser's validity result.
 
 ## Closed vocabulary and canonical output
 
-Every grammatical segment is registry-backed. The parser may diagnose an
-advisory alias, but strict validation accepts only the unique canonical
-spelling. `compose(ir)` emits that spelling and raises instead of inventing a
-fallback.
+Every grammatical segment consumed by strict parsing is registry-backed. The
+diagnostic parser may report an advisory alias, but strict parsing establishes
+validity and accepts only the unique canonical spelling.
+
+`compose(ir)` deterministically renders the supplied IR and rejects structural
+malformation. It does not establish vocabulary membership, strict validity, or
+advisory-alias canonicality; callers requiring those guarantees validate the
+rendered name with `parse(name, strict=True)`.
 
 The registry is authoritative for operator kind, rendering template, precedence,
 separator, index parameters, argument kinds, and semantic flags. Operator tokens
