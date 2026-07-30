@@ -96,8 +96,8 @@ entry = create_standard_name_entry({
     "name": "electron_temperature",
     "kind": "scalar",
     "unit": "eV",
-    "physics_domain": "core_plasma_physics",
-    "description": "Temperature of the electron population",
+    "description": "Electron temperature.",
+    "documentation": "Temperature of the electron population.",
 })
 ```
 
