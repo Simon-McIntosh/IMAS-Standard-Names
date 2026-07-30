@@ -35,13 +35,13 @@ from imas_standard_names.grammar.model import (
 # optionally with a trailing locus on the outer model.
 FLAT_MODEL_FORMS = [
     # of-prefix outer operator + inner bare-transformation + species subject
-    "time_derivative_of_volume_averaged_electron_density",
-    "time_derivative_of_flux_surface_averaged_electron_density",
+    "maximum_of_volume_averaged_electron_density",
+    "maximum_of_flux_surface_averaged_electron_density",
     "gradient_of_normalized_electron_temperature",
     # postfix outer operator + inner bare-transformation
-    "volume_averaged_electron_density_magnitude",
+    "volume_averaged_magnetic_field_magnitude",
     # outer operator + inner bare-transformation + trailing locus
-    "time_derivative_of_volume_averaged_electron_density_at_magnetic_axis",
+    "maximum_of_volume_averaged_electron_density_at_magnetic_axis",
     # of-prefix transformation wrapping a projection axis: the projection
     # stays in `component`, no fold, so it round-trips (transformation ×
     # component coexistence).
@@ -53,7 +53,7 @@ BASELINE_FORMS = [
     "time_derivative_of_electron_density",
     "gradient_of_electron_pressure",
     "volume_averaged_electron_density",
-    "electron_density_magnitude",
+    "magnetic_field_magnitude",
     "ratio_of_electron_to_ion_temperature",
 ]
 
@@ -67,6 +67,9 @@ IR_ONLY_FORMS = [
     # operator-of-operator: two structurally-distinct prefix operators;
     # folding drops the inner 'time_derivative'
     "gradient_of_time_derivative_of_electron_temperature",
+    # Higher-precedence bare prefixes canonically wrap these explicit
+    # operators, and the flat model has no second transformation slot.
+    "volume_averaged_time_derivative_of_electron_density",
 ]
 
 

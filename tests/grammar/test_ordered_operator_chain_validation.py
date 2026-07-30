@@ -99,6 +99,41 @@ def test_outer_operator_respects_registered_precedence() -> None:
         parse("gradient_of_maximum_of_pressure", strict=True)
 
 
+def test_explicit_prefix_respects_inner_bare_prefix_precedence() -> None:
+    with pytest.raises(ParseError, match="precedence"):
+        parse("inverse_of_volume_averaged_electron_temperature", strict=True)
+
+    name = "volume_averaged_inverse_of_electron_temperature"
+    assert compose(parse(name, strict=True).ir) == name
+
+
+@pytest.mark.parametrize(
+    "name",
+    [
+        "magnetic_moment",
+        "square_of_magnetic_moment",
+    ],
+)
+def test_registered_atomic_base_wins_before_postfix_operator(name: str) -> None:
+    ir = parse(name, strict=True).ir
+
+    assert ir.base.token == "magnetic_moment"
+    assert all(operator.op != "moment" for operator in ir.operators)
+    assert compose(ir) == name
+
+
+@pytest.mark.parametrize(
+    "name",
+    [
+        "magnetic_field_real_part",
+        "magnetic_field_imaginary_part",
+        "square_of_magnetic_field_fourier_coefficient",
+    ],
+)
+def test_registered_decomposition_forms_remain_strictly_valid(name: str) -> None:
+    assert compose(parse(name, strict=True).ir) == name
+
+
 @pytest.mark.parametrize(
     "name",
     [
@@ -134,3 +169,24 @@ def test_strict_validation_enforces_recursive_operator_semantics(
 ) -> None:
     with pytest.raises(ParseError, match=reason):
         parse(name, strict=True)
+
+
+def test_invalid_deep_binary_chain_parses_each_substring_once(monkeypatch) -> None:
+    """Memoization bounds adversarial split exploration by distinct substrings."""
+    from imas_standard_names.grammar import parser
+
+    calls: list[tuple[str, bool]] = []
+    original = parser._parse_uncached
+
+    def counted(name, vocabs, *, strict):
+        calls.append((name, strict))
+        return original(name, vocabs, strict=strict)
+
+    monkeypatch.setattr(parser, "_parse_uncached", counted)
+    invalid = "ratio_of_" + "_to_".join(["electron_density"] * 10 + ["unknown"])
+
+    with pytest.raises(ParseError):
+        parse(invalid, strict=True)
+
+    assert len(calls) == len(set(calls))
+    assert len(calls) <= len(invalid) ** 2

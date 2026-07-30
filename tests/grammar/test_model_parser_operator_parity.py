@@ -1,9 +1,9 @@
 """Model-layer ↔ parser-layer parity for every registered operator.
 
-The IR parser (``parse``/``render.compose``) and the flat ``StandardName``
-model (``parse_standard_name``/``compose_standard_name``) are two entry points
-onto the same grammar. Downstream consumers go through the model layer, but the
-flat facade stores indexed prefix operators such as
+The strict IR parser (``parse(..., strict=True)``/``render.compose``) is the
+lossless validity oracle. The flat ``StandardName`` facade
+(``parse_standard_name``/``compose_standard_name``) projects the subset it can
+represent. The flat facade stores indexed prefix operators such as
 ``derivative_with_respect_to_<coord>`` as fused tokens that are not members of
 the closed ``Transformation`` / ``Decomposition`` StrEnums. The facade and
 ordered IR must nevertheless render the same canonical name.
@@ -123,3 +123,23 @@ def test_public_ir_api_preserves_outermost_first_operator_chain() -> None:
         "square",
     ]
     assert compose(parsed.ir) == name
+
+
+def test_strict_ir_is_validity_oracle_when_flat_facade_cannot_project() -> None:
+    name = "gradient_of_time_derivative_of_electron_temperature"
+
+    assert compose(parse(name, strict=True).ir) == name
+    with pytest.raises(ValueError, match="flat StandardName model"):
+        parse_standard_name(name)
+
+
+def test_flat_facade_uses_strict_validity_contract() -> None:
+    name = "inverse_of_volume_averaged_electron_temperature"
+
+    with pytest.raises(ValueError, match="precedence"):
+        parse_standard_name(name)
+
+
+def test_strict_oracle_reuses_flat_segment_semantics() -> None:
+    with pytest.raises(ValueError, match="compatible species subject"):
+        parse("charge_state_density", strict=True)

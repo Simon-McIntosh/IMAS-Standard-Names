@@ -40,6 +40,7 @@ from __future__ import annotations
 
 import re
 from collections.abc import Mapping
+from contextvars import ContextVar
 from dataclasses import dataclass, field
 from difflib import get_close_matches
 from typing import Any
@@ -102,11 +103,16 @@ class Vocabularies:
     carrier_aliases: Mapping[str, str] = field(default_factory=dict)
     base_kinds: Mapping[str, str] = field(default_factory=dict)
     flux_function_bases: frozenset[str] = field(default_factory=frozenset)
+    extremum_infix_bases: frozenset[str] = field(default_factory=frozenset)
     qualifiers: frozenset[str] = field(default_factory=frozenset)
     # token → normalized category for the genuine modifier qualifiers
     # (qualifiers.yml). Empty for tokens that only peel as qualifiers via the
     # acceptance union (operators, loci, subjects); IR metadata only.
     qualifier_categories: Mapping[str, str] = field(default_factory=dict)
+    # token → grammar segment roles. This retains the closed qualifier
+    # categories needed to prove binary shared-base elisions without treating
+    # an arbitrary run of individually known words as a valid qualifier.
+    qualifier_roles: Mapping[str, frozenset[str]] = field(default_factory=dict)
     # Ordered geometric qualifiers (canonical intra-order) that compose onto a
     # ``qualifiable`` locus feature (inner_strike_point, upper_outer_strike_point).
     locus_qualifiers: tuple[str, ...] = ()
@@ -171,6 +177,7 @@ def load_default_vocabularies() -> Vocabularies:
             "returns": entry.returns,
             "arg_types": entry.arg_types,
             "flux_surface_reduction": entry.flux_surface_reduction,
+            "extremum_reduction": entry.extremum_reduction,
         }
 
     # Build qualifier set: Subject tokens + Object tokens + YAML-loaded
@@ -237,6 +244,24 @@ def load_default_vocabularies() -> Vocabularies:
         | channel_quals
         | channel_qualifier_quals
     )
+    qualifier_roles: dict[str, set[str]] = {}
+
+    def register_role(tokens: frozenset[str], role: str) -> None:
+        for token in tokens:
+            qualifier_roles.setdefault(token, set()).add(role)
+
+    register_role(subject_quals, "subject")
+    register_role(object_quals, "object")
+    register_role(aggregation_quals, "aggregation")
+    register_role(population_quals, "population")
+    register_role(orbit_quals, "orbit")
+    register_role(state_quals, "state")
+    register_role(zone_quals, "zone")
+    register_role(channel_quals, "channel")
+    register_role(channel_qualifier_quals, "channel_qualifier")
+    modifier_categories = vocab_loaders.load_qualifier_categories()
+    for token, category in modifier_categories.items():
+        qualifier_roles.setdefault(token, set()).add(f"qualifier:{category}")
 
     return Vocabularies(
         axes=frozenset(axes_reg.axes),
@@ -269,8 +294,16 @@ def load_default_vocabularies() -> Vocabularies:
             for token, definition in carriers_reg.carriers.items()
             if definition.constant_on_flux_surface
         ),
+        extremum_infix_bases=frozenset(
+            token
+            for token, definition in bases_reg.bases.items()
+            if definition.extremum_is_transformation
+        ),
         qualifiers=qualifiers,
-        qualifier_categories=vocab_loaders.load_qualifier_categories(),
+        qualifier_categories=modifier_categories,
+        qualifier_roles={
+            token: frozenset(roles) for token, roles in qualifier_roles.items()
+        },
         locus_qualifiers=tuple(loci_reg.locus_qualifiers),
         qualifiable_loci=frozenset(qualifiable_loci_set),
     )
@@ -327,6 +360,58 @@ class ParseError(ValueError):
         super().__init__(message)
         self.suggestions: list[str] = list(suggestions or [])
         self.residue: str | None = residue
+
+
+class _NonCanonicalParseError(ParseError):
+    """Strict rejection carrying the unique canonical flat spelling."""
+
+    def __init__(self, name: str, canonical_form: str) -> None:
+        super().__init__(
+            f"name is not canonical: flat segment order renders as {canonical_form!r}"
+        )
+        self.name = name
+        self.canonical_form = canonical_form
+
+
+@dataclass(frozen=True)
+class _CachedParseError:
+    message: str
+    suggestions: tuple[str, ...]
+    residue: str | None
+    name: str | None = None
+    canonical_form: str | None = None
+
+    @classmethod
+    def from_exception(cls, error: ParseError) -> _CachedParseError:
+        return cls(
+            str(error),
+            tuple(error.suggestions),
+            error.residue,
+            getattr(error, "name", None),
+            getattr(error, "canonical_form", None),
+        )
+
+    def raise_fresh(self) -> None:
+        if self.name is not None and self.canonical_form is not None:
+            raise _NonCanonicalParseError(self.name, self.canonical_form)
+        raise ParseError(
+            self.message,
+            suggestions=list(self.suggestions),
+            residue=self.residue,
+        )
+
+
+@dataclass
+class _ParseContext:
+    vocabs: Vocabularies
+    cache: dict[tuple[str, bool], ParseResult | _CachedParseError] = field(
+        default_factory=dict
+    )
+
+
+_ACTIVE_PARSE_CONTEXT: ContextVar[_ParseContext | None] = ContextVar(
+    "_ACTIVE_PARSE_CONTEXT", default=None
+)
 
 
 # ---------------------------------------------------------------------------
@@ -552,6 +637,13 @@ def _peel_outer_operator(
     (a binary operator has no further prefix/postfix beyond its args).
     """
 
+    # A complete registered base/qualifier/projection expression has priority
+    # over every operator-shaped substring inside it. This protects atomic
+    # suffixes such as magnetic_moment and compound axes such as
+    # normalized_toroidal from reinterpretation as operators.
+    if _resolves_without_postfix(s, v):
+        return None, s, []
+
     # Split operators by kind.
     postfix_ops = {
         name
@@ -573,7 +665,11 @@ def _peel_outer_operator(
     # tail of an explicit prefix or binary form belongs to that operator's
     # operand, so leave it for the operand's own parse rather than hoisting it
     # outside the leading application.
-    postfix_match = _longest_suffix_match(s, postfix_ops)
+    postfix_match = (
+        None
+        if _resolves_without_postfix(s, v)
+        else _longest_suffix_match(s, postfix_ops)
+    )
     if postfix_match is not None and _postfix_belongs_to_an_operator_operand(s, v):
         postfix_match = None
     if postfix_match is not None:
@@ -712,6 +808,9 @@ def _peel_trailing_postfix_operator(
 
     Returns ``(None, s)`` when no postfix operator suffix is present.
     """
+    if _resolves_without_postfix(s, v):
+        return None, s
+
     postfix_ops = {
         name
         for name, meta in v.operators.items()
@@ -727,6 +826,15 @@ def _peel_trailing_postfix_operator(
         OperatorApplication(kind=OperatorKind.UNARY_POSTFIX, op=match),
         new_s,
     )
+
+
+def _resolves_without_postfix(s: str, v: Vocabularies) -> bool:
+    """Whether the complete spelling resolves without a postfix peel."""
+    try:
+        _match_base_with_qualifiers(s, v)
+    except ParseError:
+        return False
+    return True
 
 
 def _longest_suffix_match(s: str, tokens: set[str]) -> str | None:
@@ -1101,22 +1209,26 @@ def _operator_metadata(
 
 def _strict_operator_spelling(ir: StandardNameIR, v: Vocabularies) -> None:
     """Enforce one canonical spelling for every registered operator."""
-    ordered_precedence: list[tuple[str, int]] = []
+    inner_bare_precedence: list[tuple[str, int]] = []
     for qualifier in ir.qualifiers:
         meta = v.operators.get(qualifier.token)
         if (
             meta is not None
             and meta.get("kind") == OperatorKind.UNARY_PREFIX.value
             and qualifier.token not in BARE_PREFIX_OPERATORS
+            and not meta.get("extremum_reduction")
         ):
             raise ParseError(
                 f"operator spelling for {qualifier.token!r} requires "
                 f"'{qualifier.token}_of_<operand>'; the glued form is not canonical"
             )
         if qualifier.token in BARE_PREFIX_OPERATORS and meta is not None:
-            ordered_precedence.append((qualifier.token, int(meta.get("precedence", 0))))
+            inner_bare_precedence.append(
+                (qualifier.token, int(meta.get("precedence", 0)))
+            )
 
     binary_seen = False
+    prefix_precedence: list[tuple[str, int]] = []
     for index, operator in enumerate(ir.operators):
         registered_token, meta = _operator_metadata(operator, v)
         declared_kind = meta.get("kind")
@@ -1125,7 +1237,6 @@ def _strict_operator_spelling(ir: StandardNameIR, v: Vocabularies) -> None:
                 f"operator {operator.op!r} has kind {operator.kind.value!r}, "
                 f"but the registry declares {declared_kind!r}"
             )
-        ordered_precedence.append((registered_token, int(meta.get("precedence", 0))))
         if operator.kind is OperatorKind.BINARY:
             if binary_seen or index != len(ir.operators) - 1:
                 raise ParseError(
@@ -1140,6 +1251,7 @@ def _strict_operator_spelling(ir: StandardNameIR, v: Vocabularies) -> None:
                     f"{registered_separator!r}, got {operator.separator!r}"
                 )
         elif operator.kind is OperatorKind.UNARY_PREFIX:
+            prefix_precedence.append((registered_token, int(meta.get("precedence", 0))))
             canonical_bare = registered_token in BARE_PREFIX_OPERATORS
             if operator.bare_prefix != canonical_bare:
                 form = (
@@ -1153,6 +1265,13 @@ def _strict_operator_spelling(ir: StandardNameIR, v: Vocabularies) -> None:
         for argument in operator.args:
             _strict_operator_spelling(argument, v)
 
+    # Prefix precedence governs prefix nesting only. Postfix operators have an
+    # authored tail position that already fixes their binding (both
+    # square_of_field_magnitude and square_of_field_fourier_coefficient are
+    # canonical), while a binary application terminates the local chain.
+    # Explicit prefixes wrap the qualifier-held bare prefixes on the base, so
+    # they precede them in the actual outer-to-inner order.
+    ordered_precedence = [*prefix_precedence, *inner_bare_precedence]
     for outer, inner in zip(ordered_precedence, ordered_precedence[1:], strict=False):
         if outer[1] < inner[1]:
             raise ParseError(
@@ -1178,18 +1297,90 @@ def _operand_is_resolved(ir: StandardNameIR, v: Vocabularies) -> bool:
     )
 
 
+def _qualifier_segmentations(
+    spelling: str, v: Vocabularies
+) -> list[tuple[tuple[str, frozenset[str]], ...]]:
+    """Return at most two closed-vocabulary qualifier segmentations."""
+    words = tuple(spelling.split("_"))
+    candidates = [
+        (tuple(token.split("_")), token, roles)
+        for token, roles in v.qualifier_roles.items()
+        if roles
+    ]
+    by_start: dict[int, list[tuple[tuple[str, frozenset[str]], ...]]] = {
+        len(words): [()]
+    }
+    for start in range(len(words) - 1, -1, -1):
+        solutions: list[tuple[tuple[str, frozenset[str]], ...]] = []
+        for token_words, token, roles in candidates:
+            end = start + len(token_words)
+            if words[start:end] != token_words:
+                continue
+            for suffix in by_start.get(end, []):
+                solutions.append(((token, roles), *suffix))
+                if len(solutions) == 2:
+                    break
+            if len(solutions) == 2:
+                break
+        by_start[start] = solutions
+    return by_start.get(0, [])
+
+
+def _has_unambiguous_qualifier_roles(
+    segmentation: tuple[tuple[str, frozenset[str]], ...],
+) -> bool:
+    """Whether one segmentation maps uniquely to compatible segment roles."""
+    if any(len(roles) != 1 for _, roles in segmentation):
+        return False
+    roles = [next(iter(token_roles)) for _, token_roles in segmentation]
+    single_cardinality = {
+        "aggregation",
+        "population",
+        "orbit",
+        "state",
+        "subject",
+        "object",
+        "channel",
+        "channel_qualifier",
+    }
+    return all(
+        roles.count(role) <= 1
+        for role in single_cardinality
+        | {r for r in roles if r.startswith("qualifier:")}
+    )
+
+
 def _operand_is_qualifier_elision(
-    ir: StandardNameIR, v: Vocabularies, *, sibling_is_resolved: bool
+    ir: StandardNameIR, sibling: StandardNameIR, v: Vocabularies
 ) -> bool:
     """Whether an unresolved operand safely elides a shared sibling base."""
-    return (
-        sibling_is_resolved
-        and not ir.operators
-        and ir.projection is None
-        and ir.locus is None
-        and ir.mechanism is None
-        and all(word in v.qualifiers for word in ir.base.token.split("_"))
-    )
+    if (
+        ir.operators
+        or ir.projection is not None
+        or ir.locus is not None
+        or ir.mechanism is not None
+        or sibling.operators
+        or sibling.projection is not None
+        or sibling.locus is not None
+        or sibling.mechanism is not None
+        or sibling.base.token not in v.base_universe()
+    ):
+        return False
+
+    segmentations = _qualifier_segmentations(ir.base.token, v)
+    if len(segmentations) != 1 or not _has_unambiguous_qualifier_roles(
+        segmentations[0]
+    ):
+        return False
+
+    # Prove the elision by restoring the sibling's registered base and running
+    # the same strict validity oracle used for authored names.
+    expanded = f"{ir.base.token}_{sibling.base.token}"
+    try:
+        parse(expanded, vocabs=v, strict=True)
+    except ParseError:
+        return False
+    return True
 
 
 def _strict_binary_operands(
@@ -1206,19 +1397,21 @@ def _strict_binary_operands(
         left_resolved = _operand_is_resolved(left, v)
         right_resolved = _operand_is_resolved(right, v)
         if not left_resolved:
-            if _operand_is_qualifier_elision(
-                left, v, sibling_is_resolved=right_resolved
-            ):
+            if right_resolved and _operand_is_qualifier_elision(left, right, v):
                 allowed_elisions.add(id(left))
             else:
-                raise ParseError(f"binary operand {compose(left)!r} is not registered")
+                raise ParseError(
+                    f"binary operand {compose(left)!r} is not registered",
+                    residue=left.base.token,
+                )
         if not right_resolved:
-            if _operand_is_qualifier_elision(
-                right, v, sibling_is_resolved=left_resolved
-            ):
+            if left_resolved and _operand_is_qualifier_elision(right, left, v):
                 allowed_elisions.add(id(right))
             else:
-                raise ParseError(f"binary operand {compose(right)!r} is not registered")
+                raise ParseError(
+                    f"binary operand {compose(right)!r} is not registered",
+                    residue=right.base.token,
+                )
         _strict_binary_operands(left, v, allowed_elisions)
         _strict_binary_operands(right, v, allowed_elisions)
 
@@ -1226,6 +1419,11 @@ def _strict_binary_operands(
 def _operator_accepts(actual: str, allowed: list[str]) -> bool:
     """Whether an inferred operand kind satisfies a registry constraint."""
     if actual in allowed:
+        return True
+    # Base metadata records structural rank, not whether a scalar/vector value
+    # is real or complex. A complex-only decomposition therefore cannot be
+    # disproved from a registered scalar/vector kind.
+    if allowed == ["complex"] and actual in {"scalar", "vector", "scalar_or_vector"}:
         return True
     if "scalar_or_vector" in allowed and actual in {"scalar", "vector"}:
         return True
@@ -1284,6 +1482,24 @@ def _strict_expression_kind(
     ):
         raise ParseError(f"generic base {ir.base.token!r} requires qualification")
 
+    # Bare-prefix operators live in the qualifier-held inner expression.
+    # Evaluate them before walking the explicit outer-to-inner stack in reverse.
+    for qualifier in reversed(ir.qualifiers):
+        if qualifier.token not in BARE_PREFIX_OPERATORS:
+            continue
+        meta = v.operators[qualifier.token]
+        if current_kind == "geometry":
+            raise ParseError(
+                f"operator {qualifier.token!r} cannot apply to a geometry carrier"
+            )
+        allowed = list(meta.get("arg_types") or [])
+        if allowed and not _operator_accepts(current_kind, allowed):
+            raise ParseError(
+                f"operator {qualifier.token!r} requires one of {allowed}, "
+                f"got {current_kind!r}"
+            )
+        current_kind = _operator_result_kind(meta, [current_kind])
+
     for operator in reversed(ir.operators):
         _, meta = _operator_metadata(operator, v)
         if operator.kind is OperatorKind.BINARY:
@@ -1322,21 +1538,6 @@ def _strict_expression_kind(
                     )
         current_kind = _operator_result_kind(meta, operand_kinds)
 
-    for qualifier in reversed(ir.qualifiers):
-        if qualifier.token not in BARE_PREFIX_OPERATORS:
-            continue
-        meta = v.operators[qualifier.token]
-        if current_kind == "geometry":
-            raise ParseError(
-                f"operator {qualifier.token!r} cannot apply to a geometry carrier"
-            )
-        allowed = list(meta.get("arg_types") or [])
-        if allowed and not _operator_accepts(current_kind, allowed):
-            raise ParseError(
-                f"operator {qualifier.token!r} requires one of {allowed}, "
-                f"got {current_kind!r}"
-            )
-        current_kind = _operator_result_kind(meta, [current_kind])
     return current_kind
 
 
@@ -1379,13 +1580,91 @@ def _strict_flux_surface_reductions(
         )
 
 
+def _strict_extremum_infix(ir: StandardNameIR, v: Vocabularies) -> None:
+    """Reject an extremum adjective where an operator spelling is required."""
+    extremum_tokens = {
+        token for token, meta in v.operators.items() if meta.get("extremum_reduction")
+    } | {"peak"}
+    infix = {qualifier.token for qualifier in ir.qualifiers} & extremum_tokens
+    if infix and ir.base.token in v.extremum_infix_bases:
+        token = sorted(infix)[0]
+        raise ParseError(
+            f"qualifier {token!r} cannot be an infix inside {ir.base.token!r}: "
+            "an extremum of a flux is a reduction transformation"
+        )
+    for operator in ir.operators:
+        for argument in operator.args:
+            _strict_extremum_infix(argument, v)
+
+
+def _strict_state_semantics(ir: StandardNameIR, v: Vocabularies) -> None:
+    """Apply the shared state-to-subject compatibility contract to lossless IR."""
+    state_tokens = [
+        qualifier.token
+        for qualifier in ir.qualifiers
+        if "state" in v.qualifier_roles.get(qualifier.token, ())
+    ]
+    if state_tokens:
+        subject_tokens = [
+            qualifier.token
+            for qualifier in ir.qualifiers
+            if "subject" in v.qualifier_roles.get(qualifier.token, ())
+        ]
+        from imas_standard_names.grammar.model import (  # noqa: PLC0415
+            _STATE_SUBJECT_COMPAT,
+        )
+
+        state = state_tokens[0]
+        subject = subject_tokens[0] if len(subject_tokens) == 1 else None
+        if subject not in _STATE_SUBJECT_COMPAT.get(state, frozenset()):
+            raise ParseError(f"state {state!r} requires one compatible species subject")
+    for operator in ir.operators:
+        for argument in operator.args:
+            _strict_state_semantics(argument, v)
+
+
+def _strict_flat_segment_semantics(name: str, ir: StandardNameIR) -> None:
+    """Reuse flat-model validators whenever the ordered IR is projectable."""
+    from imas_standard_names.grammar.model import (  # noqa: PLC0415
+        StandardName,
+        _assert_lossless_canonical,
+        _check_state_gate,
+        _ir_to_model_dict,
+        _model_to_ir,
+    )
+
+    try:
+        model_data = _ir_to_model_dict(ir)
+    except ValueError as error:
+        if "not representable in the flat StandardName model" in str(error):
+            return
+        raise ParseError(str(error)) from error
+    try:
+        model = StandardName.model_validate(model_data)
+        _check_state_gate(model)
+    except ValueError as error:
+        raise ParseError(str(error)) from error
+
+    canonical = compose(_model_to_ir(model))
+    if canonical == name:
+        return
+    try:
+        _assert_lossless_canonical(name, canonical)
+    except ValueError as error:
+        raise ParseError(str(error)) from error
+    raise _NonCanonicalParseError(name, canonical)
+
+
 def _strict_validate(name: str, ir: StandardNameIR, v: Vocabularies) -> None:
     """Validate the lossless ordered IR without projecting to the flat model."""
     _strict_operator_spelling(ir, v)
     allowed_elisions: set[int] = set()
     _strict_binary_operands(ir, v, allowed_elisions)
     _strict_flux_surface_reductions(ir, v)
+    _strict_extremum_infix(ir, v)
     _strict_expression_kind(ir, v, allowed_elisions)
+    _strict_state_semantics(ir, v)
+    _strict_flat_segment_semantics(name, ir)
     rendered = compose(ir)
     if rendered != name:
         raise ParseError(
@@ -1398,31 +1677,14 @@ def _strict_validate(name: str, ir: StandardNameIR, v: Vocabularies) -> None:
 # ---------------------------------------------------------------------------
 
 
-def parse(
+def _parse_uncached(
     name: str,
-    vocabs: Vocabularies | None = None,
+    vocabs: Vocabularies,
     *,
-    strict: bool = False,
+    strict: bool,
 ) -> ParseResult:
-    """Parse ``name`` into a :class:`ParseResult`.
-
-    Raises :class:`ParseError` when the residue cannot be resolved
-    against the closed base vocabulary. With ``strict=True``, additionally
-    validate the lossless ordered IR against operator registry metadata,
-    closed operand vocabulary, generic-base qualification, recursive
-    flux-surface semantics, and canonical spelling. Strict validation does not
-    project through the flat :class:`StandardName` model, so every operator in
-    a nested expression remains structurally visible.
-    """
-
-    if not isinstance(name, str) or not name:
-        raise ParseError("name must be a non-empty string")
-    if not TOKEN_PATTERN.match(name):
-        raise ParseError(
-            f"name {name!r} is not a valid grammar token (must be lowercase snake_case)"
-        )
-
-    v = vocabs if vocabs is not None else _default_vocabs()
+    """Parse one memoization-cache miss."""
+    v = vocabs
     diagnostics: list[Diagnostic] = []
     s = name
 
@@ -1517,6 +1779,58 @@ def parse(
     return result
 
 
+def parse(
+    name: str,
+    vocabs: Vocabularies | None = None,
+    *,
+    strict: bool = False,
+) -> ParseResult:
+    """Parse ``name`` into a :class:`ParseResult`.
+
+    Raises :class:`ParseError` when the residue cannot be resolved against the
+    closed base vocabulary. With ``strict=True``, this is the authoritative
+    validity oracle for both flat and ordered grammar: it validates registry
+    metadata, closed operand vocabulary, segment semantics, generic-base
+    qualification, recursive flux-surface semantics, and canonical spelling
+    without projecting through the flat :class:`StandardName` facade.
+
+    Recursive binary exploration is memoized by substring and validation mode,
+    so ambiguous invalid connector chains do not repeatedly parse the same
+    candidate operands.
+    """
+    if not isinstance(name, str) or not name:
+        raise ParseError("name must be a non-empty string")
+    if not TOKEN_PATTERN.match(name):
+        raise ParseError(
+            f"name {name!r} is not a valid grammar token (must be lowercase snake_case)"
+        )
+
+    v = vocabs if vocabs is not None else _default_vocabs()
+    context = _ACTIVE_PARSE_CONTEXT.get()
+    context_token = None
+    if context is None or context.vocabs is not v:
+        context = _ParseContext(vocabs=v)
+        context_token = _ACTIVE_PARSE_CONTEXT.set(context)
+
+    key = (name, strict)
+    try:
+        cached = context.cache.get(key)
+        if isinstance(cached, _CachedParseError):
+            cached.raise_fresh()
+        if cached is not None:
+            return cached
+        try:
+            result = _parse_uncached(name, v, strict=strict)
+        except ParseError as error:
+            context.cache[key] = _CachedParseError.from_exception(error)
+            raise
+        context.cache[key] = result
+        return result
+    finally:
+        if context_token is not None:
+            _ACTIVE_PARSE_CONTEXT.reset(context_token)
+
+
 def validate_round_trip(name: str, vocabs: Vocabularies | None = None) -> bool:
     """Return ``True`` iff ``compose(parse(name).ir) == name``.
 
@@ -1526,12 +1840,11 @@ def validate_round_trip(name: str, vocabs: Vocabularies | None = None) -> bool:
     IR-diagnostics tool only — not a validity oracle. It runs on the lenient
     IR parser and answers "does this name render back to itself?", which is
     weaker than validity: it does not enforce segment compatibility, the
-    generic-base gate, or the flux-surface reduction gate. Use
-    :func:`parse` with ``strict=True`` for a lossless ordered operator
-    expression, or
-    :func:`imas_standard_names.grammar.model.parse_standard_name` for a name
-    representable by the flat model. Use this helper only to locate IR
-    parse/compose round-trip drift.
+    generic-base gate, or the flux-surface reduction gate. Use :func:`parse`
+    with ``strict=True`` as the validity oracle. Use
+    :func:`imas_standard_names.grammar.model.parse_standard_name` only when a
+    validated name must also project into the flat model. Use this helper only
+    to locate IR parse/compose round-trip drift.
     """
 
     result = parse(name, vocabs=vocabs)

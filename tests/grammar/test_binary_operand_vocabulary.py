@@ -7,7 +7,7 @@ from imas_standard_names.grammar import (
     UnknownBaseTokenError,
     parse_standard_name,
 )
-from imas_standard_names.grammar.parser import parse
+from imas_standard_names.grammar.parser import ParseError, parse
 
 
 def test_literal_operand_fallback_is_diagnostic() -> None:
@@ -39,6 +39,30 @@ def test_literal_operand_fallback_is_diagnostic() -> None:
 )
 def test_registered_or_elided_operands_are_valid(name: str) -> None:
     parse_standard_name(name)
+
+
+@pytest.mark.parametrize(
+    "name",
+    [
+        "ratio_of_electron_to_ion_temperature",
+        "ratio_of_deuterium_to_tritium_density",
+        "ratio_of_total_to_electron_density",
+    ],
+)
+def test_registered_qualifier_elisions_are_strictly_valid(name: str) -> None:
+    parse(name, strict=True)
+
+
+@pytest.mark.parametrize(
+    "name",
+    [
+        "ratio_of_total_net_to_electron_density",
+        "ratio_of_electron_ion_to_pressure",
+    ],
+)
+def test_ambiguous_compound_elisions_are_rejected(name: str) -> None:
+    with pytest.raises(ParseError, match="not registered"):
+        parse(name, strict=True)
 
 
 @pytest.mark.parametrize(

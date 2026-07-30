@@ -15,12 +15,10 @@ Accepted structure:
 * The parser accepts any bare-prefix unary operator in front of a binary form.
   A uniform spelling rule keeps physics policy out of the tokenizer and yields a
   domain-specific rejection message instead of "residue does not match any base".
-* The validity oracle (``parse_standard_name``) admits only a flux-surface
-  reduction operator over a binary form. A non-reduction bare prefix
-  (``volume_averaged``, ``normalized``, ...) parses at the IR level and is then
-  refused by the flat model, whose ``binary_operator`` stays exclusive with every
-  other transformation. Widening that to the whole averaging family is a
-  vocabulary-flag decision, not a code change.
+* The strict lossless parser is the validity oracle. The flat
+  ``parse_standard_name`` facade can project a flux-surface reduction operator
+  over a binary form, but refuses non-reduction wrappers because its
+  ``binary_operator`` stays exclusive with every other transformation.
 """
 
 from __future__ import annotations
@@ -78,6 +76,7 @@ def test_metric_coefficient_round_trips(name: str, vocabs: Vocabularies) -> None
 @pytest.mark.parametrize("name", METRIC_COEFFICIENT_NAMES)
 def test_metric_coefficient_is_valid(name: str) -> None:
     """The strict oracle accepts it, so the canonical spelling is exactly this."""
+    assert compose(parse(name, strict=True).ir) == name
     model = parse_standard_name(name)
     assert model.transformation == "flux_surface_averaged"
     assert model.binary_operator == "ratio_of"
@@ -243,18 +242,17 @@ def test_no_other_transformation_wraps_a_binary_form(prefix: str) -> None:
         parse_standard_name(name)
 
 
-def test_non_reduction_bare_prefix_parses_but_is_not_valid(
+def test_non_reduction_bare_prefix_is_valid_but_not_flat_projectable(
     vocabs: Vocabularies,
 ) -> None:
-    """``volume_averaged`` over a binary form parses; the oracle refuses it.
+    """``volume_averaged`` over a binary form is valid ordered grammar.
 
-    The parser applies one uniform bare-prefix spelling rule; the flat model
-    admits only a flux-surface reduction alongside ``binary_operator``. Refusing
-    at the oracle rather than at the tokenizer produces an actionable message.
+    The flat facade admits only a flux-surface reduction alongside
+    ``binary_operator`` and reports that representation boundary explicitly.
     """
     name = "volume_averaged_ratio_of_electron_density_to_square_of_major_radius"
-    parse(name, vocabs=vocabs)  # IR layer: accepted
-    with pytest.raises(ValueError):
+    parse(name, vocabs=vocabs, strict=True)
+    with pytest.raises(ValueError, match="not representable in the flat"):
         parse_standard_name(name)
 
 
