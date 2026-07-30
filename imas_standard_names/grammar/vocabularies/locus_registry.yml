@@ -818,10 +818,6 @@ loci:
     type: position
     allowed_relations: [at, of]
     definition: The geometric center of an annular cross section.
-  oblique_reference_point:
-    type: position
-    allowed_relations: [at, of]
-    definition: The reference point used to locate an obliquely oriented geometric element.
   arc_of_circle_center:
     type: position
     allowed_relations: [at, of]

@@ -583,7 +583,6 @@ class Position(StrEnum):
     DR_DZ_ZERO_POINT = "dr_dz_zero_point"
     RECTANGLE_CENTER = "rectangle_center"
     ANNULUS_CENTER = "annulus_center"
-    OBLIQUE_REFERENCE_POINT = "oblique_reference_point"
     ARC_OF_CIRCLE_CENTER = "arc_of_circle_center"
     ACTIVE_WALL_POINT = "active_wall_point"
     BEAM_PATH = "beam_path"
