@@ -6,7 +6,6 @@ from pathlib import Path
 import click
 from pydantic import TypeAdapter
 
-import imas_standard_names
 from imas_standard_names.models import StandardNameEntry
 
 _ENTRY_ADAPTER = TypeAdapter(StandardNameEntry)
@@ -17,16 +16,11 @@ _SCHEMA_PATH = Path(__file__).resolve().parent / "entry_schema.json"
 def generate_entry_schema() -> dict:
     """Export the Pydantic JSON schema for ``StandardNameEntry``.
 
-    The returned dictionary is a standard JSON Schema object augmented with
-    a ``$schema_version`` field tied to the installed package version.
-
     Returns:
         A JSON-serializable dictionary containing the full JSON schema
         for the ``StandardNameEntry`` discriminated union.
     """
-    schema = _ENTRY_ADAPTER.json_schema()
-    schema["$schema_version"] = imas_standard_names.__version__
-    return schema
+    return _ENTRY_ADAPTER.json_schema()
 
 
 def write_entry_schema(path: Path | None = None) -> Path:
