@@ -11,7 +11,7 @@ from imas_standard_names.grammar.parser import parse
 
 
 def test_literal_operand_fallback_is_diagnostic() -> None:
-    result = parse("ratio_of_wibble_frobnicator_to_square_major_radius")
+    result = parse("ratio_of_wibble_frobnicator_to_square_of_major_radius")
 
     assert any(
         diagnostic.category == "vocab_gap"
@@ -27,13 +27,13 @@ def test_literal_operand_fallback_is_diagnostic() -> None:
         "ratio_of_electron_pressure_to_magnetic_pressure",
         (
             "flux_surface_averaged_ratio_of"
-            "_square_toroidal_flux_coordinate_gradient_magnitude"
-            "_to_square_major_radius"
+            "_square_of_toroidal_flux_coordinate_gradient_magnitude"
+            "_to_square_of_major_radius"
         ),
         (
             "flux_surface_averaged_ratio_of"
-            "_square_toroidal_flux_coordinate_gradient_magnitude"
-            "_to_square_magnetic_field_magnitude"
+            "_square_of_toroidal_flux_coordinate_gradient_magnitude"
+            "_to_square_of_magnetic_field_magnitude"
         ),
     ],
 )
@@ -45,7 +45,7 @@ def test_registered_or_elided_operands_are_valid(name: str) -> None:
     "name,operand",
     [
         (
-            "ratio_of_wibble_frobnicator_to_square_major_radius",
+            "ratio_of_wibble_frobnicator_to_square_of_major_radius",
             "wibble_frobnicator",
         ),
         ("ratio_of_substrate_to_electron_density", "substrate"),

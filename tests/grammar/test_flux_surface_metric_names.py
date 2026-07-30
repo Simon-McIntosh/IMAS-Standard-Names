@@ -9,7 +9,7 @@ dimension is a semantic collapse.
 
 Two of the family turn on |grad rho|. ``rho`` (the toroidal flux coordinate) is
 a LENGTH, so its gradient is dimensionless — and although ``rho`` is
-constant on a flux surface, its gradient is NOT, so the gradient base must
+constant on a flux surface, its gradient is not, so the gradient base must
 never carry ``constant_on_flux_surface``: flagging it would trip the
 flux-surface reduction gate against exactly the ``flux_surface_averaged``
 prefix these names need.
@@ -24,20 +24,23 @@ from __future__ import annotations
 
 import pytest
 
-from imas_standard_names.grammar.model import parse_standard_name
+from imas_standard_names import compose, parse
+from imas_standard_names.grammar.parser import ParseError
 from imas_standard_names.grammar.vocab_loaders import load_physical_bases
 
-# Each member of the family that is expressible with the flat grammar, with
-# the DD unit it must carry. Distinct units are the point: a single name
-# cannot serve two of these rows.
+# Each member of the family, with the DD unit it must carry. Distinct units are
+# the point: a single name cannot serve two of these rows.
 EXPRESSIBLE = [
-    ("flux_surface_averaged_inverse_square_major_radius", "m^-2"),
-    ("flux_surface_averaged_inverse_square_magnetic_field_magnitude", "T^-2"),
-    ("flux_surface_averaged_square_magnetic_field_magnitude", "T^2"),
-    ("flux_surface_averaged_inverse_major_radius", "m^-1"),
+    ("flux_surface_averaged_inverse_of_square_of_major_radius", "m^-2"),
+    (
+        "flux_surface_averaged_inverse_of_square_of_magnetic_field_magnitude",
+        "T^-2",
+    ),
+    ("flux_surface_averaged_square_of_magnetic_field_magnitude", "T^2"),
+    ("flux_surface_averaged_inverse_of_major_radius", "m^-1"),
     ("flux_surface_averaged_toroidal_flux_coordinate_gradient_magnitude", "1"),
     (
-        "flux_surface_averaged_square_toroidal_flux_coordinate_gradient_magnitude",
+        "flux_surface_averaged_square_of_toroidal_flux_coordinate_gradient_magnitude",
         "1",
     ),
 ]
@@ -45,8 +48,24 @@ EXPRESSIBLE = [
 
 @pytest.mark.parametrize(("name", "unit"), EXPRESSIBLE)
 def test_metric_coefficient_parses(name: str, unit: str) -> None:
-    """Every expressible member round-trips through the validity oracle."""
-    assert parse_standard_name(name) is not None, unit
+    """Every member strictly validates and round-trips losslessly."""
+    result = parse(name, strict=True)
+    assert compose(result.ir) == name, unit
+
+
+@pytest.mark.parametrize(
+    "name",
+    [
+        "flux_surface_averaged_inverse_square_major_radius",
+        "flux_surface_averaged_inverse_square_magnetic_field_magnitude",
+        "flux_surface_averaged_square_magnetic_field_magnitude",
+        "flux_surface_averaged_inverse_major_radius",
+        ("flux_surface_averaged_square_toroidal_flux_coordinate_gradient_magnitude"),
+    ],
+)
+def test_glued_metric_operator_spellings_are_not_canonical(name: str) -> None:
+    with pytest.raises(ParseError, match="operator spelling"):
+        parse(name, strict=True)
 
 
 def test_metric_coefficient_names_are_distinct() -> None:
@@ -83,8 +102,9 @@ def test_flux_surface_average_of_the_gradient_is_not_gated_as_a_no_op() -> None:
     Contrast ``flux_surface_averaged_toroidal_flux_coordinate``, which the gate
     correctly refuses because the flux label itself is a flux function.
     """
-    assert parse_standard_name(
-        "flux_surface_averaged_toroidal_flux_coordinate_gradient_magnitude"
+    assert parse(
+        "flux_surface_averaged_toroidal_flux_coordinate_gradient_magnitude",
+        strict=True,
     )
-    with pytest.raises(ValueError, match="constant on a flux surface"):
-        parse_standard_name("flux_surface_averaged_toroidal_flux_coordinate")
+    with pytest.raises(ParseError, match="constant on a flux surface"):
+        parse("flux_surface_averaged_toroidal_flux_coordinate", strict=True)

@@ -1,10 +1,12 @@
 """Standard name grammar parser.
 
-Implements a *staged, liberal* parser that turns a standard-name string
+Implements a multi-pass parser that turns a standard-name string
 into a :class:`~imas_standard_names.grammar.ir.StandardNameIR` plus a
 list of :class:`Diagnostic` records. The parser is the inverse of
 :func:`imas_standard_names.grammar.render.compose`; together they form
-the required round-trip pair.
+the required round-trip pair. Diagnostic mode is liberal where explicitly
+documented; ``strict=True`` validates the lossless ordered expression against
+the operator-expression contract without projecting through the flat model.
 
 Parsing is driven by closed vocabularies loaded from
 ``grammar/vocabularies/*.yml`` via :mod:`vocab_loaders`. Callers may
@@ -20,7 +22,8 @@ Algorithm::
     3. Peel outer operators right-to-outermost         -> operators
        a) unary_postfix (longest match at end)
        b) unary_prefix  (longest match `<op>_of_...`)
-       c) binary        (`<binary_op>_of_<A>_<sep>_<B>`)
+       c) bare prefix over a nested operator expression
+       d) binary        (`<binary_op>_of_<A>_<sep>_<B>`)
        repeat until no operator peels
     4. Match residue: carrier > base > axis+resolve > qualifier+recurse
        Projection is detected inline when an axis prefix precedes
@@ -42,6 +45,7 @@ from difflib import get_close_matches
 from typing import Any
 
 from imas_standard_names.grammar import vocab_loaders
+from imas_standard_names.grammar.constants import GENERIC_PHYSICAL_BASES
 from imas_standard_names.grammar.ir import (
     BARE_PREFIX_OPERATORS,
     TOKEN_PATTERN,
@@ -96,6 +100,8 @@ class Vocabularies:
     carriers: frozenset[str] = field(default_factory=frozenset)
     base_aliases: Mapping[str, str] = field(default_factory=dict)
     carrier_aliases: Mapping[str, str] = field(default_factory=dict)
+    base_kinds: Mapping[str, str] = field(default_factory=dict)
+    flux_function_bases: frozenset[str] = field(default_factory=frozenset)
     qualifiers: frozenset[str] = field(default_factory=frozenset)
     # token → normalized category for the genuine modifier qualifiers
     # (qualifiers.yml). Empty for tokens that only peel as qualifiers via the
@@ -170,7 +176,7 @@ def load_default_vocabularies() -> Vocabularies:
     # Build qualifier set: Subject tokens + Object tokens + YAML-loaded
     # modifier prefixes.  Tokens that are also in bases/carriers are safe —
     # the parser tries full base match first; qualifiers only strip
-    # recursively when the full string is NOT itself a registered base or
+    # recursively when the full string is not itself a registered base or
     # carrier.
     subject_quals = frozenset(s.value for s in Subject)
     object_quals = frozenset(o.value for o in Object)
@@ -249,6 +255,20 @@ def load_default_vocabularies() -> Vocabularies:
             for token, definition in carriers_reg.carriers.items()
             for alias in definition.aliases
         },
+        base_kinds={
+            token: definition.kind for token, definition in bases_reg.bases.items()
+        }
+        | dict.fromkeys(carriers_reg.carriers, "geometry"),
+        flux_function_bases=frozenset(
+            token
+            for token, definition in bases_reg.bases.items()
+            if definition.constant_on_flux_surface
+        )
+        | frozenset(
+            token
+            for token, definition in carriers_reg.carriers.items()
+            if definition.constant_on_flux_surface
+        ),
         qualifiers=qualifiers,
         qualifier_categories=vocab_loaders.load_qualifier_categories(),
         locus_qualifiers=tuple(loci_reg.locus_qualifiers),
@@ -382,7 +402,7 @@ def _strip_locus(
     ``vocab_gap`` diagnostic. ``_over_`` and ``_along_`` require a
     registered locus — an unregistered token is left in the residue so the
     unknown-base match rejects the name rather than fabricating a locus.
-    ``_of_`` without a registry hit is LEFT alone so step-4 operator peeling
+    ``_of_`` without a registry hit is left for operator peeling
     can resolve it as a binary-operator template.
     """
 
@@ -454,9 +474,10 @@ def _strip_locus(
     #    locus marker (e.g. maximum_over_flux_surface for the analogous _over_
     #    case).
     #
-    #    The _over_ relation does NOT take this fallback: it is valid solely
+    #    The _over_ relation does not take this fallback: it is valid solely
     #    for region-typed loci (the locus_registry compatibility matrix), and
-    #    those are matched in step 1. An unregistered _over_<X> would otherwise
+    #    those are matched by the registry-backed pass. An unregistered
+    #    _over_<X> would otherwise
     #    fabricate a spurious region locus (e.g. velocity_over_magnetic_field),
     #    masking the correct construction (ratio_of_velocity_to_magnetic_field).
     #    Leaving it in the residue makes the base match fail → ParseError.
@@ -549,10 +570,11 @@ def _peel_outer_operator(
     }
 
     # a) unary postfix: s ends with "_<op>", longest op first. A postfix at the
-    # tail of a binary form belongs to the second operand, so leave it for the
-    # operand's own parse rather than wrapping the binary application in it.
+    # tail of an explicit prefix or binary form belongs to that operator's
+    # operand, so leave it for the operand's own parse rather than hoisting it
+    # outside the leading application.
     postfix_match = _longest_suffix_match(s, postfix_ops)
-    if postfix_match is not None and _postfix_belongs_to_a_binary_operand(s, v):
+    if postfix_match is not None and _postfix_belongs_to_an_operator_operand(s, v):
         postfix_match = None
     if postfix_match is not None:
         new_s = s[: -len(postfix_match) - 1]  # drop "_<op>"
@@ -592,30 +614,26 @@ def _peel_outer_operator(
 
     # b2) bare unary prefix: These operators (normalized, volume_averaged, etc.)
     # fall through to the qualifier + base matching stage and are handled
-    # by the IR→Model adapter in model.py. We do NOT peel them here because
+    # by the IR→Model adapter in model.py. We do not peel them here because
     # they can form compound axes (e.g. normalized_radial) that projection
     # stripping needs to see intact.
 
-    # b3) bare unary prefix wrapping a BINARY form:
-    # "<bare_prefix_op>_<binary_op>_of_<A>_<sep>_<B>". The fall-through in b2
-    # relies on the qualifier + base stage resolving the remainder, and a binary
-    # application is not a base — so a bare prefix over a binary form has to be
-    # peeled here or the name cannot resolve at all. Peeling it keeps the
-    # operator a first-class segment (the flux-surface reduction gate keys off
-    # operator and qualifier tokens, so an operator glued into a base string
-    # would be invisible to it); bare_prefix makes the renderer reproduce the
-    # joiner-free spelling.
-    bare_over_binary = _longest_bare_prefix_over_binary_match(
+    # b3) bare unary prefix wrapping an explicit operator expression:
+    # "<bare_prefix_op>_<unary_or_binary_application>". The fall-through in b2
+    # relies on qualifier + base matching, but an operator application is not a
+    # base. Peeling keeps the outer reduction first-class and preserves the
+    # nested operator order; bare_prefix reproduces the joiner-free spelling.
+    bare_over_operator = _longest_bare_prefix_over_operator_match(
         s, prefix_ops, binary_ops, v
     )
-    if bare_over_binary is not None:
+    if bare_over_operator is not None:
         return (
             OperatorApplication(
                 kind=OperatorKind.UNARY_PREFIX,
-                op=bare_over_binary,
+                op=bare_over_operator,
                 bare_prefix=True,
             ),
-            s[len(bare_over_binary) + 1 :],
+            s[len(bare_over_operator) + 1 :],
             [],
         )
 
@@ -792,30 +810,41 @@ _BARE_PREFIX_OPERATORS_LONGEST_FIRST: tuple[str, ...] = tuple(
 )
 
 
-def _postfix_belongs_to_a_binary_operand(s: str, v: Vocabularies) -> bool:
-    """Whether a trailing postfix operator on ``s`` sits inside a binary operand.
+def _postfix_belongs_to_an_operator_operand(s: str, v: Vocabularies) -> bool:
+    """Whether a trailing postfix sits inside a leading operator application.
 
-    ``ratio_of_A_to_square_magnetic_field_magnitude`` renders identically whether
-    the ``magnitude`` wraps the whole ratio or belongs to operand B, so the
-    grammar has to fix one reading. It reads as the operand's: a postfix scalar
-    extraction takes a vector or complex argument, and a ratio of scalars is
-    neither. Hoisting it would also cut the operand short and change which
-    quantity the name denotes. Bare-prefix operators may stand in front of the
-    binary form (a reduction over a ratio), so look through those first.
+    ``square_of_magnetic_field_magnitude`` is the square of the field
+    magnitude, not the magnitude of its square. The same rule keeps a trailing
+    postfix inside the right operand of a binary application. A bare reduction
+    may wrap either form, so look through a bare prefix only when its remainder
+    is itself an explicit operator application.
     """
     binary_ops = _binary_operator_tokens(v)
-    if not binary_ops:
-        return False
-    rest = s
-    while not _spells_binary_application(rest, binary_ops, v):
-        for op in _BARE_PREFIX_OPERATORS_LONGEST_FIRST:
-            head = f"{op}_"
-            if rest.startswith(head):
-                rest = rest[len(head) :]
-                break
-        else:
+    prefix_ops = {
+        name
+        for name, meta in v.operators.items()
+        if meta.get("kind") == OperatorKind.UNARY_PREFIX.value
+    }
+    if _spells_leading_operator_application(s, prefix_ops, binary_ops, v):
+        return True
+    postfix_ops = {
+        name
+        for name, meta in v.operators.items()
+        if meta.get("kind") == OperatorKind.UNARY_POSTFIX.value
+    }
+    postfix = _longest_suffix_match(s, postfix_ops)
+    if postfix is not None:
+        undecorated = s[: -len(postfix) - 1]
+        if undecorated in v.base_universe():
             return False
-    return True
+    for op in _BARE_PREFIX_OPERATORS_LONGEST_FIRST:
+        head = f"{op}_"
+        if not s.startswith(head):
+            continue
+        return _spells_nested_operator_application(
+            s[len(head) :], prefix_ops, binary_ops, v
+        )
+    return False
 
 
 def _binary_operator_tokens(v: Vocabularies) -> set[str]:
@@ -830,7 +859,7 @@ def _binary_operator_tokens(v: Vocabularies) -> set[str]:
 def _spells_binary_application(s: str, binary_ops: set[str], v: Vocabularies) -> bool:
     """Whether ``s`` spells ``<binary_op>_of_<A>_<sep>_<B>``.
 
-    A cheap string test — it does NOT parse the operands, so a true result means
+    A cheap string test — it does not parse the operands, so a true result means
     "shaped like a binary application", not "resolves". Callers use it to choose
     a peel order, and the operand parse in the binary peel is the real gate.
     """
@@ -844,23 +873,66 @@ def _spells_binary_application(s: str, binary_ops: set[str], v: Vocabularies) ->
     return False
 
 
-def _longest_bare_prefix_over_binary_match(
+def _spells_nested_operator_application(
+    s: str,
+    prefix_ops: set[str],
+    binary_ops: set[str],
+    v: Vocabularies,
+) -> bool:
+    """Whether ``s`` is a registered explicit operator application."""
+    if _spells_leading_operator_application(s, prefix_ops, binary_ops, v):
+        return True
+
+    postfix_ops = {
+        name
+        for name, meta in v.operators.items()
+        if meta.get("kind") == OperatorKind.UNARY_POSTFIX.value
+    }
+    postfix = _longest_suffix_match(s, postfix_ops)
+    if postfix is None:
+        return False
+    operand = s[: -len(postfix) - 1]
+    # Locus/mechanism tails are stripped before ordinary operator peeling.
+    # Do not steal those forms into a bare-prefix tree here; this predicate is
+    # for an unambiguously nested postfix expression.
+    return bool(operand) and not any(
+        marker in operand
+        for marker in ("_at_", "_over_", "_along_", "_due_to_", "_of_")
+    )
+
+
+def _spells_leading_operator_application(
+    s: str,
+    prefix_ops: set[str],
+    binary_ops: set[str],
+    v: Vocabularies,
+) -> bool:
+    """Whether ``s`` starts with a registered prefix or binary application."""
+    if _spells_binary_application(s, binary_ops, v):
+        return True
+    if _longest_prefix_operator_match(s, prefix_ops) is not None:
+        return True
+    return _longest_indexed_prefix_operator_match(s, prefix_ops, v) is not None
+
+
+def _longest_bare_prefix_over_operator_match(
     s: str, prefix_ops: set[str], binary_ops: set[str], v: Vocabularies
 ) -> str | None:
-    """Longest bare-spelling prefix operator whose remainder spells a binary form.
+    """Longest bare prefix whose remainder spells an explicit operator form.
 
-    Matches ``<bare_prefix_op>_<binary_op>_of_...`` and returns the prefix
-    operator token. Restricting the match to a binary remainder is what keeps
-    this from stealing the qualifier reading of an ordinary name: in
+    Restricting the match to an operator remainder keeps this from stealing the
+    qualifier reading of an ordinary name: in
     ``flux_surface_averaged_electron_density`` the remainder is a base, so the
-    operator stays a qualifier exactly as before.
+    operator stays a qualifier.
     """
     best: str | None = None
     for op in prefix_ops & BARE_PREFIX_OPERATORS:
         head = f"{op}_"
         if not s.startswith(head):
             continue
-        if not _spells_binary_application(s[len(head) :], binary_ops, v):
+        if not _spells_nested_operator_application(
+            s[len(head) :], prefix_ops, binary_ops, v
+        ):
             continue
         if best is None or len(op) > len(best):
             best = op
@@ -1001,15 +1073,346 @@ def _match_base_with_qualifiers(
 
 
 # ---------------------------------------------------------------------------
+# Strict ordered-IR validation
+# ---------------------------------------------------------------------------
+
+
+def _operator_metadata(
+    operator: OperatorApplication, v: Vocabularies
+) -> tuple[str, Mapping[str, Any]]:
+    """Resolve an IR operator to its registered token and metadata."""
+    direct = v.operators.get(operator.op)
+    if direct is not None:
+        return operator.op, direct
+
+    for token in sorted(v.operators, key=len, reverse=True):
+        meta = v.operators[token]
+        marker = f"{token}_"
+        if not operator.op.startswith(marker) or not meta.get("indexed"):
+            continue
+        index = operator.op[len(marker) :]
+        if list(meta.get("index_params") or []) == ["coord"] and index in (
+            _coordinate_universe(v)
+        ):
+            return token, meta
+
+    raise ParseError(f"operator {operator.op!r} is not registered")
+
+
+def _strict_operator_spelling(ir: StandardNameIR, v: Vocabularies) -> None:
+    """Enforce one canonical spelling for every registered operator."""
+    ordered_precedence: list[tuple[str, int]] = []
+    for qualifier in ir.qualifiers:
+        meta = v.operators.get(qualifier.token)
+        if (
+            meta is not None
+            and meta.get("kind") == OperatorKind.UNARY_PREFIX.value
+            and qualifier.token not in BARE_PREFIX_OPERATORS
+        ):
+            raise ParseError(
+                f"operator spelling for {qualifier.token!r} requires "
+                f"'{qualifier.token}_of_<operand>'; the glued form is not canonical"
+            )
+        if qualifier.token in BARE_PREFIX_OPERATORS and meta is not None:
+            ordered_precedence.append((qualifier.token, int(meta.get("precedence", 0))))
+
+    binary_seen = False
+    for index, operator in enumerate(ir.operators):
+        registered_token, meta = _operator_metadata(operator, v)
+        declared_kind = meta.get("kind")
+        if declared_kind != operator.kind.value:
+            raise ParseError(
+                f"operator {operator.op!r} has kind {operator.kind.value!r}, "
+                f"but the registry declares {declared_kind!r}"
+            )
+        ordered_precedence.append((registered_token, int(meta.get("precedence", 0))))
+        if operator.kind is OperatorKind.BINARY:
+            if binary_seen or index != len(ir.operators) - 1:
+                raise ParseError(
+                    f"binary operator {operator.op!r} must terminate its "
+                    "enclosing outer-to-inner operator chain"
+                )
+            binary_seen = True
+            registered_separator = meta.get("separator")
+            if registered_separator != operator.separator:
+                raise ParseError(
+                    f"binary operator {operator.op!r} requires separator "
+                    f"{registered_separator!r}, got {operator.separator!r}"
+                )
+        elif operator.kind is OperatorKind.UNARY_PREFIX:
+            canonical_bare = registered_token in BARE_PREFIX_OPERATORS
+            if operator.bare_prefix != canonical_bare:
+                form = (
+                    f"{registered_token}_<operand>"
+                    if canonical_bare
+                    else f"{registered_token}_of_<operand>"
+                )
+                raise ParseError(
+                    f"operator spelling for {registered_token!r} must be {form!r}"
+                )
+        for argument in operator.args:
+            _strict_operator_spelling(argument, v)
+
+    for outer, inner in zip(ordered_precedence, ordered_precedence[1:], strict=False):
+        if outer[1] < inner[1]:
+            raise ParseError(
+                f"operator {outer[0]!r} with precedence {outer[1]} cannot "
+                f"wrap {inner[0]!r} with precedence {inner[1]}"
+            )
+
+
+def _operand_is_resolved(ir: StandardNameIR, v: Vocabularies) -> bool:
+    """Whether an operator operand bottoms out in registered base vocabulary."""
+    binary = next(
+        (operator for operator in ir.operators if operator.kind is OperatorKind.BINARY),
+        None,
+    )
+    if binary is not None:
+        return all(_operand_is_resolved(argument, v) for argument in binary.args)
+    if ir.base.token not in v.base_universe():
+        return False
+    return all(
+        _operand_is_resolved(argument, v)
+        for operator in ir.operators
+        for argument in operator.args
+    )
+
+
+def _operand_is_qualifier_elision(
+    ir: StandardNameIR, v: Vocabularies, *, sibling_is_resolved: bool
+) -> bool:
+    """Whether an unresolved operand safely elides a shared sibling base."""
+    return (
+        sibling_is_resolved
+        and not ir.operators
+        and ir.projection is None
+        and ir.locus is None
+        and ir.mechanism is None
+        and all(word in v.qualifiers for word in ir.base.token.split("_"))
+    )
+
+
+def _strict_binary_operands(
+    ir: StandardNameIR, v: Vocabularies, allowed_elisions: set[int]
+) -> None:
+    """Validate closed binary operands and record safe qualifier elisions."""
+    for operator in ir.operators:
+        if operator.kind is not OperatorKind.BINARY:
+            for argument in operator.args:
+                _strict_binary_operands(argument, v, allowed_elisions)
+            continue
+
+        left, right = operator.args
+        left_resolved = _operand_is_resolved(left, v)
+        right_resolved = _operand_is_resolved(right, v)
+        if not left_resolved:
+            if _operand_is_qualifier_elision(
+                left, v, sibling_is_resolved=right_resolved
+            ):
+                allowed_elisions.add(id(left))
+            else:
+                raise ParseError(f"binary operand {compose(left)!r} is not registered")
+        if not right_resolved:
+            if _operand_is_qualifier_elision(
+                right, v, sibling_is_resolved=left_resolved
+            ):
+                allowed_elisions.add(id(right))
+            else:
+                raise ParseError(f"binary operand {compose(right)!r} is not registered")
+        _strict_binary_operands(left, v, allowed_elisions)
+        _strict_binary_operands(right, v, allowed_elisions)
+
+
+def _operator_accepts(actual: str, allowed: list[str]) -> bool:
+    """Whether an inferred operand kind satisfies a registry constraint."""
+    if actual in allowed:
+        return True
+    if "scalar_or_vector" in allowed and actual in {"scalar", "vector"}:
+        return True
+    if actual == "scalar_or_vector" and {"scalar", "vector"} & set(allowed):
+        return False
+    return False
+
+
+def _operator_result_kind(meta: Mapping[str, Any], operand_kinds: list[str]) -> str:
+    """Infer the output kind declared by an operator application."""
+    declared = meta.get("returns")
+    if declared in {None, "scalar_or_vector", "rate"}:
+        concrete = {kind for kind in operand_kinds if kind in {"scalar", "vector"}}
+        if len(concrete) == 1:
+            return concrete.pop()
+        return "scalar_or_vector"
+    return str(declared)
+
+
+def _strict_expression_kind(
+    ir: StandardNameIR,
+    v: Vocabularies,
+    allowed_elisions: set[int],
+    *,
+    enclosing_operator: bool = False,
+) -> str:
+    """Validate one ordered expression and return its inferred result kind."""
+    binary = next(
+        (operator for operator in ir.operators if operator.kind is OperatorKind.BINARY),
+        None,
+    )
+    if binary is None:
+        if ir.base.token in v.base_universe():
+            current_kind = v.base_kinds.get(
+                ir.base.token,
+                "geometry" if ir.base.kind is BaseKind.GEOMETRY else "scalar_or_vector",
+            )
+        elif id(ir) in allowed_elisions:
+            current_kind = "scalar_or_vector"
+        else:
+            raise ParseError(f"base token {ir.base.token!r} is not registered")
+    else:
+        current_kind = "scalar_or_vector"
+
+    has_local_operator = bool(ir.operators) or any(
+        qualifier.token in BARE_PREFIX_OPERATORS for qualifier in ir.qualifiers
+    )
+    if (
+        ir.base.token in GENERIC_PHYSICAL_BASES
+        and not enclosing_operator
+        and not has_local_operator
+        and not ir.qualifiers
+        and ir.projection is None
+        and ir.locus is None
+        and ir.mechanism is None
+    ):
+        raise ParseError(f"generic base {ir.base.token!r} requires qualification")
+
+    for operator in reversed(ir.operators):
+        _, meta = _operator_metadata(operator, v)
+        if operator.kind is OperatorKind.BINARY:
+            operand_kinds = [
+                _strict_expression_kind(
+                    argument,
+                    v,
+                    allowed_elisions,
+                    enclosing_operator=True,
+                )
+                for argument in operator.args
+            ]
+        elif operator.args:
+            operand_kinds = [
+                _strict_expression_kind(
+                    operator.args[0],
+                    v,
+                    allowed_elisions,
+                    enclosing_operator=True,
+                )
+            ]
+        else:
+            operand_kinds = [current_kind]
+
+        if "geometry" in operand_kinds:
+            raise ParseError(
+                f"operator {operator.op!r} cannot apply to a geometry carrier"
+            )
+        allowed = list(meta.get("arg_types") or [])
+        if allowed:
+            for actual in operand_kinds:
+                if not _operator_accepts(actual, allowed):
+                    raise ParseError(
+                        f"operator {operator.op!r} requires one of {allowed}, "
+                        f"got {actual!r}"
+                    )
+        current_kind = _operator_result_kind(meta, operand_kinds)
+
+    for qualifier in reversed(ir.qualifiers):
+        if qualifier.token not in BARE_PREFIX_OPERATORS:
+            continue
+        meta = v.operators[qualifier.token]
+        if current_kind == "geometry":
+            raise ParseError(
+                f"operator {qualifier.token!r} cannot apply to a geometry carrier"
+            )
+        allowed = list(meta.get("arg_types") or [])
+        if allowed and not _operator_accepts(current_kind, allowed):
+            raise ParseError(
+                f"operator {qualifier.token!r} requires one of {allowed}, "
+                f"got {current_kind!r}"
+            )
+        current_kind = _operator_result_kind(meta, [current_kind])
+    return current_kind
+
+
+def _strict_flux_surface_reductions(
+    ir: StandardNameIR,
+    v: Vocabularies,
+    *,
+    inherited: frozenset[str] = frozenset(),
+) -> None:
+    """Reject reductions recursively applied to flux-function bases."""
+    reductions = {
+        token
+        for token, meta in v.operators.items()
+        if meta.get("flux_surface_reduction")
+    }
+    active = set(inherited)
+    active.update(
+        qualifier.token for qualifier in ir.qualifiers if qualifier.token in reductions
+    )
+    binary_seen = False
+    for operator in ir.operators:
+        if operator.op in reductions:
+            active.add(operator.op)
+        if operator.kind is OperatorKind.BINARY:
+            binary_seen = True
+            for argument in operator.args:
+                _strict_flux_surface_reductions(
+                    argument, v, inherited=frozenset(active)
+                )
+        else:
+            for argument in operator.args:
+                _strict_flux_surface_reductions(
+                    argument, v, inherited=frozenset(active)
+                )
+    if not binary_seen and active and ir.base.token in v.flux_function_bases:
+        operator = sorted(active)[0]
+        raise ParseError(
+            f"operator {operator!r} cannot apply to {ir.base.token!r}: "
+            "the base is constant on a flux surface"
+        )
+
+
+def _strict_validate(name: str, ir: StandardNameIR, v: Vocabularies) -> None:
+    """Validate the lossless ordered IR without projecting to the flat model."""
+    _strict_operator_spelling(ir, v)
+    allowed_elisions: set[int] = set()
+    _strict_binary_operands(ir, v, allowed_elisions)
+    _strict_flux_surface_reductions(ir, v)
+    _strict_expression_kind(ir, v, allowed_elisions)
+    rendered = compose(ir)
+    if rendered != name:
+        raise ParseError(
+            f"name is not canonical: rendered ordered expression is {rendered!r}"
+        )
+
+
+# ---------------------------------------------------------------------------
 # Public entry points
 # ---------------------------------------------------------------------------
 
 
-def parse(name: str, vocabs: Vocabularies | None = None) -> ParseResult:
+def parse(
+    name: str,
+    vocabs: Vocabularies | None = None,
+    *,
+    strict: bool = False,
+) -> ParseResult:
     """Parse ``name`` into a :class:`ParseResult`.
 
     Raises :class:`ParseError` when the residue cannot be resolved
-    against the closed base vocabulary.
+    against the closed base vocabulary. With ``strict=True``, additionally
+    validate the lossless ordered IR against operator registry metadata,
+    closed operand vocabulary, generic-base qualification, recursive
+    flux-surface semantics, and canonical spelling. Strict validation does not
+    project through the flat :class:`StandardName` model, so every operator in
+    a nested expression remains structurally visible.
     """
 
     if not isinstance(name, str) or not name:
@@ -1023,7 +1426,7 @@ def parse(name: str, vocabs: Vocabularies | None = None) -> ParseResult:
     diagnostics: list[Diagnostic] = []
     s = name
 
-    # Stage 0: trailing postfix operators.
+    # Trailing-postfix pass.
     #
     # A postfix decomposition operator (``magnitude``, ``moment``, ...) renders
     # at the very END of the canonical string — AFTER any locus/mechanism
@@ -1039,22 +1442,22 @@ def parse(name: str, vocabs: Vocabularies | None = None) -> ParseResult:
         op_app, new_s = _peel_trailing_postfix_operator(s, v)
         if op_app is None:
             break
-        if _postfix_belongs_to_a_binary_operand(s, v):
-            # Leave it for the binary operand's own parse; hoisting it here would
-            # attach it to the binary application instead.
+        if _postfix_belongs_to_an_operator_operand(s, v):
+            # Leave it for the leading application's operand parse; hoisting it
+            # here would reverse the authored operator order.
             break
         trailing_postfix.append(op_app)
         s = new_s
 
-    # Stage 1: mechanism
+    # Mechanism pass.
     mechanism, s = _strip_mechanism(s)
 
-    # Stage 2: locus
+    # Locus pass.
     locus, s, locus_diags = _strip_locus(s, v)
     diagnostics.extend(locus_diags)
 
-    # Stage 3: operator peeling (outermost layer after locus/mechanism).
-    # Trailing postfix operators peeled in stage 0 are the outermost wrap and
+    # Operator-peeling pass (outermost layer after locus/mechanism).
+    # Trailing postfix operators peeled first are the outermost wrap and
     # precede anything peeled here (a prefix/binary operator-of form).
     operator_stack: list[OperatorApplication] = list(trailing_postfix)
     binary_terminator: OperatorApplication | None = None
@@ -1079,7 +1482,7 @@ def parse(name: str, vocabs: Vocabularies | None = None) -> ParseResult:
         # Synthesise a placeholder base so the outer IR validates. The
         # binary operator lives on the outer IR's operators stack and its
         # args carry the real structure. The placeholder is never rendered.
-        # The full operator stack — trailing postfix (stage 0) plus any
+        # The full operator stack — trailing postfix plus any
         # prefix operators peeled before the binary terminator — wraps the
         # binary result, outermost first.
         ir = StandardNameIR(
@@ -1088,9 +1491,12 @@ def parse(name: str, vocabs: Vocabularies | None = None) -> ParseResult:
             locus=locus,
             mechanism=mechanism,
         )
-        return ParseResult(ir=ir, diagnostics=diagnostics)
+        result = ParseResult(ir=ir, diagnostics=diagnostics)
+        if strict:
+            _strict_validate(name, result.ir, v)
+        return result
 
-    # Stage 4: carrier > base > axis (projection) > qualifier
+    # Base-resolution pass: carrier > base > axis (projection) > qualifier.
     if not s:
         raise ParseError(
             "empty residue after peeling operators and decorators",
@@ -1105,7 +1511,10 @@ def parse(name: str, vocabs: Vocabularies | None = None) -> ParseResult:
         locus=locus,
         mechanism=mechanism,
     )
-    return ParseResult(ir=ir, diagnostics=diagnostics)
+    result = ParseResult(ir=ir, diagnostics=diagnostics)
+    if strict:
+        _strict_validate(name, result.ir, v)
+    return result
 
 
 def validate_round_trip(name: str, vocabs: Vocabularies | None = None) -> bool:
@@ -1114,13 +1523,15 @@ def validate_round_trip(name: str, vocabs: Vocabularies | None = None) -> bool:
     Raises :class:`ParseError` when the name fails to parse. Otherwise
     compares the rendered form against the input byte-for-byte.
 
-    IR-diagnostics tool only — NOT the validity oracle. It runs on the lenient
+    IR-diagnostics tool only — not a validity oracle. It runs on the lenient
     IR parser and answers "does this name render back to itself?", which is
     weaker than validity: it does not enforce segment compatibility, the
     generic-base gate, or the flux-surface reduction gate. Use
-    :func:`imas_standard_names.grammar.model.parse_standard_name` (strict) to
-    decide whether a name is valid; use this helper to locate IR
-    parse/compose round-trip drift (see docs/architecture/boundary.md).
+    :func:`parse` with ``strict=True`` for a lossless ordered operator
+    expression, or
+    :func:`imas_standard_names.grammar.model.parse_standard_name` for a name
+    representable by the flat model. Use this helper only to locate IR
+    parse/compose round-trip drift.
     """
 
     result = parse(name, vocabs=vocabs)

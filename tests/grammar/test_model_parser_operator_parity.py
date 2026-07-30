@@ -2,16 +2,14 @@
 
 The IR parser (``parse``/``render.compose``) and the flat ``StandardName``
 model (``parse_standard_name``/``compose_standard_name``) are two entry points
-onto the same grammar. Downstream consumers go through the MODEL layer, but the
-operator round-trip was historically tested only through the PARSER layer
-(``validate_round_trip``). That left a gap: an indexed prefix operator
-(``derivative_with_respect_to_<coord>``) round-tripped through the parser yet
-raised a ``ValidationError`` at the model layer, because the fused
-``<op>_<coord>`` token is not a member of the closed ``Transformation`` /
-``Decomposition`` StrEnums.
+onto the same grammar. Downstream consumers go through the model layer, but the
+flat facade stores indexed prefix operators such as
+``derivative_with_respect_to_<coord>`` as fused tokens that are not members of
+the closed ``Transformation`` / ``Decomposition`` StrEnums. The facade and
+ordered IR must nevertheless render the same canonical name.
 
-This module closes that gap with an exhaustive, data-driven parity check: for
-EVERY operator declared in ``operators.yml``, build a representative canonical
+This module provides an exhaustive, data-driven parity check: for
+every operator declared in ``operators.yml``, build a representative canonical
 name and assert that
 
     compose_standard_name(parse_standard_name(name)) == name      (model round-trip)
@@ -49,7 +47,7 @@ def _candidate_names(op: str, meta: dict) -> list[str]:
     """Representative canonical name(s) to try for one operator.
 
     Returns an ordered list of candidates; the first that round-trips through
-    BOTH layers is the one asserted on. The variants cover the structural
+    both layers is the one asserted on. The variants cover the structural
     forms: indexed-prefix (fused ``<op>_<coord>_of_<base>``), bare-vs-``_of_``
     prefix, postfix tail, and binary ``<op>_of_<A>_<sep>_<B>``.
     """
@@ -115,8 +113,13 @@ def test_every_operator_model_parser_parity(
 
 
 def test_public_ir_api_preserves_outermost_first_operator_chain() -> None:
-    parsed = parse("square_of_inverse_of_pressure")
+    name = "flux_surface_averaged_inverse_of_square_of_major_radius"
+    parsed = parse(name, strict=True)
 
     assert isinstance(parsed.ir, StandardNameIR)
-    assert [operator.op for operator in parsed.ir.operators] == ["square", "inverse"]
-    assert compose(parsed.ir) == "square_of_inverse_of_pressure"
+    assert [operator.op for operator in parsed.ir.operators] == [
+        "flux_surface_averaged",
+        "inverse",
+        "square",
+    ]
+    assert compose(parsed.ir) == name

@@ -10,13 +10,13 @@ Expressing them needs a reduction operator to wrap a binary form. The reduction
 spells BARE (``flux_surface_averaged_<inner>``), so the operator has to survive
 parse as a first-class segment while still rendering without an ``_of_`` joiner.
 
-Scope of the relaxation exercised here:
+Accepted structure:
 
-* The PARSER accepts any bare-prefix unary operator in front of a binary form.
+* The parser accepts any bare-prefix unary operator in front of a binary form.
   A uniform spelling rule keeps physics policy out of the tokenizer and yields a
   domain-specific rejection message instead of "residue does not match any base".
-* The VALIDITY ORACLE (``parse_standard_name``) admits only a FLUX-SURFACE
-  REDUCTION operator over a binary form. A non-reduction bare prefix
+* The validity oracle (``parse_standard_name``) admits only a flux-surface
+  reduction operator over a binary form. A non-reduction bare prefix
   (``volume_averaged``, ``normalized``, ...) parses at the IR level and is then
   refused by the flat model, whose ``binary_operator`` stays exclusive with every
   other transformation. Widening that to the whole averaging family is a
@@ -39,13 +39,13 @@ from imas_standard_names.grammar.render import compose
 
 GRADIENT_OVER_SQUARE_MAJOR_RADIUS = (
     "flux_surface_averaged_ratio_of"
-    "_square_toroidal_flux_coordinate_gradient_magnitude"
-    "_to_square_major_radius"
+    "_square_of_toroidal_flux_coordinate_gradient_magnitude"
+    "_to_square_of_major_radius"
 )
 GRADIENT_OVER_SQUARE_FIELD = (
     "flux_surface_averaged_ratio_of"
-    "_square_toroidal_flux_coordinate_gradient_magnitude"
-    "_to_square_magnetic_field_magnitude"
+    "_square_of_toroidal_flux_coordinate_gradient_magnitude"
+    "_to_square_of_magnetic_field_magnitude"
 )
 
 METRIC_COEFFICIENT_NAMES = (
@@ -117,7 +117,7 @@ def test_reduction_is_a_distinct_operator_segment(
 def test_operand_postfix_stays_inside_the_operand(vocabs: Vocabularies) -> None:
     """A trailing ``magnitude`` belongs to the second operand, not the ratio.
 
-    ``ratio_of_A_to_square_magnetic_field_magnitude`` renders identically whether
+    ``ratio_of_A_to_square_of_magnetic_field_magnitude`` renders identically whether
     the magnitude is read as the ratio's postfix or as part of operand B, so the
     grammar has to pick one. The magnitude of a ratio of scalars is meaningless
     (``magnitude`` takes vector/complex), so the operand reading is the only
@@ -125,12 +125,12 @@ def test_operand_postfix_stays_inside_the_operand(vocabs: Vocabularies) -> None:
     """
     ir = parse(GRADIENT_OVER_SQUARE_FIELD, vocabs=vocabs).ir
     binary = next(op for op in ir.operators if op.kind is OperatorKind.BINARY)
-    assert compose(binary.args[1]) == "square_magnetic_field_magnitude"
+    assert compose(binary.args[1]) == "square_of_magnetic_field_magnitude"
     assert not any(op.kind is OperatorKind.UNARY_POSTFIX for op in ir.operators)
 
 
 # ---------------------------------------------------------------------------
-# The no-op reduction gate must survive the relaxation
+# No-op reduction gate
 # ---------------------------------------------------------------------------
 
 
@@ -138,9 +138,9 @@ def test_operand_postfix_stays_inside_the_operand(vocabs: Vocabularies) -> None:
     "name",
     [
         # flux function as the FIRST operand only
-        "flux_surface_averaged_ratio_of_safety_factor_to_square_major_radius",
+        "flux_surface_averaged_ratio_of_safety_factor_to_square_of_major_radius",
         # flux function as the SECOND operand only
-        "flux_surface_averaged_ratio_of_square_major_radius_to_safety_factor",
+        "flux_surface_averaged_ratio_of_square_of_major_radius_to_safety_factor",
         # both operands flux functions
         "flux_surface_averaged_ratio_of_safety_factor_to_magnetic_shear",
     ],
@@ -203,9 +203,9 @@ def test_every_flux_surface_reduction_wraps_a_binary_form(reduction: str) -> Non
     """The widened class is exactly the operators flagged ``flux_surface_reduction``.
 
     All three share the bare spelling and the outermost render position, so the
-    relaxation covers them uniformly rather than singling out the averaging one.
+    rule covers them uniformly rather than singling out the averaging one.
     """
-    name = f"{reduction}_ratio_of_electron_density_to_square_major_radius"
+    name = f"{reduction}_ratio_of_electron_density_to_square_of_major_radius"
     model = parse_standard_name(name)
     assert model.transformation == reduction
     assert model.binary_operator == "ratio_of"
@@ -214,7 +214,7 @@ def test_every_flux_surface_reduction_wraps_a_binary_form(reduction: str) -> Non
 @pytest.mark.parametrize(
     "prefix",
     [
-        # bare-spelling transformations that are NOT flux-surface reductions
+        # bare-spelling transformations that are not flux-surface reductions
         "volume_averaged",
         "line_averaged",
         "time_averaged",
@@ -230,7 +230,7 @@ def test_every_flux_surface_reduction_wraps_a_binary_form(reduction: str) -> Non
     ],
 )
 def test_no_other_transformation_wraps_a_binary_form(prefix: str) -> None:
-    """The relaxation does NOT widen beyond flux-surface reductions.
+    """Only flux-surface reductions can wrap a binary form.
 
     A non-reduction transformation could sit either side of the operator
     (``normalized`` of a ratio versus a ratio of normalized operands), and the
@@ -238,7 +238,7 @@ def test_no_other_transformation_wraps_a_binary_form(prefix: str) -> None:
     refused. Pin the whole list: silently admitting one of these would let the
     composer emit a name whose structure the model records ambiguously.
     """
-    name = f"{prefix}_ratio_of_electron_density_to_square_major_radius"
+    name = f"{prefix}_ratio_of_electron_density_to_square_of_major_radius"
     with pytest.raises(ValueError, match="not representable in the flat"):
         parse_standard_name(name)
 
@@ -252,7 +252,7 @@ def test_non_reduction_bare_prefix_parses_but_is_not_valid(
     admits only a flux-surface reduction alongside ``binary_operator``. Refusing
     at the oracle rather than at the tokenizer produces an actionable message.
     """
-    name = "volume_averaged_ratio_of_electron_density_to_square_major_radius"
+    name = "volume_averaged_ratio_of_electron_density_to_square_of_major_radius"
     parse(name, vocabs=vocabs)  # IR layer: accepted
     with pytest.raises(ValueError):
         parse_standard_name(name)
@@ -271,15 +271,15 @@ def test_of_form_reduction_over_binary_is_not_the_canonical_spelling(
     ``<op>_of_`` prefix peel), so without this it would be a second valid
     spelling of a name the bare form already denotes.
     """
-    of_form = f"{reduction}_of_ratio_of_electron_density_to_square_major_radius"
-    bare_form = f"{reduction}_ratio_of_electron_density_to_square_major_radius"
+    of_form = f"{reduction}_of_ratio_of_electron_density_to_square_of_major_radius"
+    bare_form = f"{reduction}_ratio_of_electron_density_to_square_of_major_radius"
     parse_standard_name(bare_form)  # the canonical one is accepted
     with pytest.raises(ValueError):
         parse_standard_name(of_form)
 
 
 # ---------------------------------------------------------------------------
-# Ambiguity: the new form cannot be mis-split
+# Ambiguity: the nested form cannot be mis-split
 # ---------------------------------------------------------------------------
 
 
@@ -306,8 +306,8 @@ def test_reduction_over_binary_is_distinct_from_the_ratio_of_reductions(
     """<A/B> and <A>/<B> are different quantities and must be different names."""
     average_of_ratio = parse(GRADIENT_OVER_SQUARE_MAJOR_RADIUS, vocabs=vocabs).ir
     ratio_of_averages = parse(
-        "ratio_of_flux_surface_averaged_square_toroidal_flux_coordinate_gradient_magnitude"
-        "_to_flux_surface_averaged_square_major_radius",
+        "ratio_of_flux_surface_averaged_square_of_toroidal_flux_coordinate_gradient_magnitude"
+        "_to_flux_surface_averaged_square_of_major_radius",
         vocabs=vocabs,
     ).ir
     assert average_of_ratio != ratio_of_averages
@@ -318,25 +318,24 @@ def test_separator_inside_an_operand_does_not_mis_split(vocabs: Vocabularies) ->
     """The ``_to_`` split must not land inside a base that contains ``to``.
 
     The binary split walks candidate separator positions right-to-left and keeps
-    the first whose BOTH sides resolve, so a base token containing the separator
+    the first whose both sides resolve, so a base token containing the separator
     word cannot strand an unresolvable operand.
     """
     ir = parse(GRADIENT_OVER_SQUARE_MAJOR_RADIUS, vocabs=vocabs).ir
     binary = next(op for op in ir.operators if op.kind is OperatorKind.BINARY)
     assert compose(binary.args[0]) == (
-        "square_toroidal_flux_coordinate_gradient_magnitude"
+        "square_of_toroidal_flux_coordinate_gradient_magnitude"
     )
-    assert compose(binary.args[1]) == "square_major_radius"
+    assert compose(binary.args[1]) == "square_of_major_radius"
 
 
-def test_bare_reduction_prefix_over_a_plain_base_is_unchanged(
+def test_bare_reduction_prefix_over_a_plain_base_uses_qualifier_shape(
     vocabs: Vocabularies,
 ) -> None:
-    """The new peel must not steal the qualifier reading of a non-binary name.
+    """A bare reduction over a plain base uses the qualifier reading.
 
     ``flux_surface_averaged_electron_density`` has no binary form after the
-    prefix, so the reduction stays a qualifier and the name keeps its existing
-    IR shape.
+    prefix, so the reduction stays a qualifier.
     """
     ir = parse("flux_surface_averaged_electron_density", vocabs=vocabs).ir
     assert not ir.operators
