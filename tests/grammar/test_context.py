@@ -38,6 +38,7 @@ EXPECTED_KEYS = [
     "critical_distinctions",
     "base_requirements",
     "vocabulary_usage_stats",
+    "grammar",
 ]
 
 
@@ -146,6 +147,13 @@ def test_grammar_context_points_to_stable_operator_chain_api(context: dict):
         "ir_model": "imas_standard_names:StandardNameIR",
         "operator_chain_order": "outermost_first",
     }
+
+
+def test_grammar_context_exposes_segment_scoped_advisory_aliases(context: dict):
+    aliases = context["grammar"]["advisory_aliases"]
+
+    assert aliases["position"]["rectangle_centre"]["canonical"] == "rectangle_center"
+    assert aliases["physical_base"]["strain_tensor"]["canonical"] == "strain"
 
 
 def test_segment_descriptions_is_nonempty_dict(context: dict):

@@ -1,0 +1,17 @@
+# Guidance aliases help retry systems replace a source term with a registered
+# canonical token. They never extend the parser vocabulary.
+segments:
+  position:
+    rectangle_centre:
+      canonical: rectangle_center
+      reason: British spelling of the registered rectangular reference point.
+    rectangular_cross_section_centre:
+      canonical: rectangle_center
+      reason: Explicit cross-section wording denotes the same geometric center.
+    annulus_centre:
+      canonical: annulus_center
+      reason: British spelling of the registered annular reference point.
+  physical_base:
+    strain_tensor:
+      canonical: strain
+      reason: The registered strain base is tensor-valued, so the suffix repeats its kind.
