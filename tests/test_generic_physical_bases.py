@@ -8,6 +8,7 @@ position, or geometry context.
 import pytest
 from pydantic import ValidationError
 
+from imas_standard_names.grammar import ParseError
 from imas_standard_names.grammar.constants import GENERIC_PHYSICAL_BASES
 from imas_standard_names.grammar.model import StandardName, parse_standard_name
 from imas_standard_names.grammar.model_types import Component, Object, Position, Subject
@@ -141,14 +142,14 @@ class TestGenericPhysicalBaseValidation:
     def test_parse_unqualified_generic_fails(self):
         """Test that parsing unqualified generic names fails."""
         with pytest.raises(
-            ValidationError,
-            match="Generic physical_base 'current' requires qualification",
+            ParseError,
+            match="generic base 'current' requires qualification",
         ):
             parse_standard_name("current")
 
         with pytest.raises(
-            ValidationError,
-            match="Generic physical_base 'voltage' requires qualification",
+            ParseError,
+            match="generic base 'voltage' requires qualification",
         ):
             parse_standard_name("voltage")
 

@@ -1,4 +1,4 @@
-"""Cross-segment vocabulary uniqueness lint (W40 task).
+"""Cross-segment vocabulary uniqueness lint.
 
 Ensures tokens are unique across vocabulary files, with one whitelisted
 exception: physics_domains and tags intentionally share all domain tokens
@@ -10,11 +10,6 @@ Rationale:
   semantic interpretation. A token should map to exactly one vocabulary
   segment, except for the physics_domains ↔ tags whitelist.
 
-  As of W40 graph harvest, one real collision exists:
-    - 'current_drive' appears in both physical_bases.yml and physics_domains.yml
-
-  This test will fail on that collision until resolved (see ISN issue).
-
 Whitelist:
   physics_domains.yml ↔ tags.yml collisions are ALLOWED because:
     1. All physics domains are also valid tags for standard name metadata
@@ -23,8 +18,6 @@ Whitelist:
     3. Maintaining two separate lists would create sync drift
 
 """
-
-from __future__ import annotations
 
 from pathlib import Path
 
@@ -43,12 +36,14 @@ def load_vocab_tokens() -> dict[str, set[str]]:
     )
     vocab_tokens = {}
 
-    # qualifier_categories.yml is a token→category MAP, not a token-defining
-    # vocabulary: it intentionally re-lists qualifiers.yml tokens and its
-    # top-level keys are category names. scoping_qualifiers.yml is an
-    # intentional SUBSET of qualifiers.yml (the phrase-scoping binding class),
-    # not a segment vocabulary. Exclude both from the uniqueness scan.
-    skip = {"qualifier_categories.yml", "scoping_qualifiers.yml"}
+    # These resources describe ordering, binding, or retry guidance rather than
+    # defining grammar-segment tokens. Their values intentionally refer to the
+    # canonical vocabularies and do not participate in cross-segment uniqueness.
+    skip = {
+        "advisory_aliases.yml",
+        "qualifier_categories.yml",
+        "scoping_qualifiers.yml",
+    }
 
     for yml_file in sorted(vocab_dir.glob("*.yml")):
         if yml_file.name in skip:
@@ -98,55 +93,17 @@ def test_vocab_cross_segment_uniqueness():
     vocab_tokens = load_vocab_tokens()
     collisions = compute_collisions(vocab_tokens)
 
-    # Allowed cross-segment overlaps (documented dual-role tokens).
+    # Keep this allowlist limited to documented dual-role tokens. A token
+    # otherwise belongs to exactly one segment; fix the vocabulary rather than
+    # adding an exception for an accidental collision.
     #
-    # RATCHET: this allowlist shrinks toward empty as the canonical-qualifier-order
-    # grammar redesign resolves mis-files. A token belongs to exactly one segment
-    # role; every entry here is either intentional (documented) or a tracked
-    # §3-review target to be eliminated. Do NOT add entries to silence a new
-    # mis-file — fix the vocab instead.
-    #
-    # ELIMINATED (guard now active — do not re-add):
-    # - qualifiers.yml ↔ operators.yml: the 8 double-registered operator tokens
-    #   (normalized, perturbed, volume_averaged, …) were removed from qualifiers.yml;
-    #   this intersection is now empty and the guard prevents its re-introduction.
-    #
-    # Intentional (keep):
     # - components.yml ↔ coordinate_axes.yml: shared directional vocab by design
     # - generic_physical_bases.yml ↔ physical_bases.yml: subset relationship
     # - zones.yml ↔ regions.yml / locus_registry.yml: zone PREFIX vs locus POSTFIX
-    #
-    # ELIMINATED (guard now active — do not re-add):
-    # - qualifiers.yml ↔ locus_registry.yml: the mis-filed loci flux_surface, inlet,
-    #   outlet were removed from qualifiers.yml — they are loci (at_inlet / over_…),
-    #   and prefix-form names (coolant_outlet_temperature → coolant_temperature_at_outlet)
-    #   migrate to the locus form. Intersection now empty.
-    #
-    # ELIMINATED (guard now active — do not re-add):
-    # - qualifiers.yml ↔ physical_bases.yml AND qualifiers.yml ↔
-    #   generic_physical_bases.yml: the only overlapping tokens were energy and
-    #   momentum (the transport-channel words). They moved to channels.yml (the
-    #   dedicated `channel` segment), so both intersections are now empty.
-    #
-    # ELIMINATED (guard now active — do not re-add):
-    # - qualifiers.yml ↔ subjects.yml: 'particle' moved to channels.yml, 'state'
-    #   to its subject-compound role — intersection now empty.
-    # - qualifiers.yml ↔ regions.yml: region words live in zones.yml (prefix) /
-    #   regions.yml (locus), not qualifiers — intersection now empty.
-    #
-    # INTENTIONAL dual-role (keep):
     # - qualifiers.yml ↔ physics_domains.yml: equilibrium, mhd, nbi are genuine
     #   modifier qualifiers (mhd_mode, nbi_power) that also name a physics domain
     #   (classification tag). Same benign dual use as the physics_domains↔tags
     #   whitelist — the grammar never confuses the qualifier vs domain context.
-    #
-    # ELIMINATED (guard now active — do not re-add):
-    # - qualifiers.yml ↔ processes.yml: the only overlapping tokens were
-    #   convection and heating, compound-base words (convection_velocity,
-    #   heating_power). Those compounds are now atomic physical_bases, so the
-    #   tokens left qualifiers.yml and this intersection is empty. qualifiers is
-    #   now disjoint from every other segment vocabulary except the documented
-    #   physics_domains dual-role and the normalizing_qualifiers metadata subset.
     allowed_overlap_pairs = {
         frozenset({"qualifiers.yml", "physics_domains.yml"}),
         frozenset({"components.yml", "coordinate_axes.yml"}),
@@ -163,7 +120,7 @@ def test_vocab_cross_segment_uniqueness():
         #  - zones.yml ↔ regions.yml / locus_registry.yml: the same region word
         #    is both a prefix zone (scrape_off_layer_density) and a postfix
         #    locus (over_scrape_off_layer / at_pedestal). Both forms coexist by
-        #    design (see zones.yml header and the canonical-qualifier-order plan).
+        #    design (see the zones.yml header).
         frozenset({"zones.yml", "regions.yml"}),
         frozenset({"zones.yml", "locus_registry.yml"}),
         # channels.yml is the transport-channel PREFIX segment (heat, particle,
@@ -173,8 +130,7 @@ def test_vocab_cross_segment_uniqueness():
         # energy is additionally a generic_physical_base. The parser matches the
         # longest base first, so a standalone energy/momentum resolves as the
         # base while the *_flux / *_diffusivity / *_source compounds strip the
-        # channel. Both forms coexist by design (see channels.yml header and the
-        # canonical-qualifier-order plan).
+        # channel. Both forms coexist by design (see the channels.yml header).
         frozenset({"channels.yml", "physical_bases.yml"}),
         frozenset({"channels.yml", "generic_physical_bases.yml"}),
         # qualifiers.yml ↔ subjects.yml: the fusion reactant pairs
@@ -220,7 +176,7 @@ def test_no_empty_vocabularies():
     """
     vocab_tokens = load_vocab_tokens()
 
-    # Expected stub vocabularies (W40: not yet populated)
+    # Expected stub vocabularies that are not yet populated.
     expected_stubs = {
         "binary_operators.yml",
         "components.yml",

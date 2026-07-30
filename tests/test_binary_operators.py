@@ -4,8 +4,6 @@ Covers parsing, composition, round-trip, mutual exclusivity, connector
 detection, and edge cases for binary operator expressions.
 """
 
-from __future__ import annotations
-
 import pytest
 
 from imas_standard_names.grammar import (
@@ -267,31 +265,31 @@ class TestBinaryOperatorConnectors:
         name = compose_name(
             {
                 "binary_operator": "product_of",
-                "physical_base": "a",
-                "secondary_base": "b",
+                "physical_base": "density",
+                "secondary_base": "temperature",
             }
         )
-        assert "_and_" in name
+        assert name == "product_of_density_and_temperature"
 
     def test_ratio_uses_to(self):
         name = compose_name(
             {
                 "binary_operator": "ratio_of",
-                "physical_base": "a",
-                "secondary_base": "b",
+                "physical_base": "electron_temperature",
+                "secondary_base": "ion_temperature",
             }
         )
-        assert "_to_" in name
+        assert name == "ratio_of_electron_temperature_to_ion_temperature"
 
     def test_difference_uses_and(self):
         name = compose_name(
             {
                 "binary_operator": "difference_of",
-                "physical_base": "a",
-                "secondary_base": "b",
+                "physical_base": "total_pressure",
+                "secondary_base": "electron_pressure",
             }
         )
-        assert "_and_" in name
+        assert name == "difference_of_total_pressure_and_electron_pressure"
 
 
 class TestBinaryOperatorEdgeCases:
