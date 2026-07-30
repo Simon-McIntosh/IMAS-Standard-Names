@@ -292,13 +292,16 @@ def _build_quick_start_steps() -> dict[str, str]:
         ),
         "2_add_modifiers": (
             "Add optional segments: component/coordinate (vectors), subject "
-            "(species), object/device (equipment), position/geometry "
+            "(species), equipment via an of_<entity> postfix locus, "
+            "position/geometry "
             "(location), process (mechanism)"
         ),
         "3_check_exclusivity": (
-            "Critical: component with physical_base ONLY; coordinate with "
-            "geometric_base ONLY; device for dynamic signals, object for "
-            "static properties"
+            "Critical: component with physical_base; coordinate with "
+            "geometric_base; author device signals and static object properties "
+            "with an of_<entity> locus (voltage_of_flux_loop, "
+            "area_of_flux_loop); device-prefix names such as flux_loop_voltage "
+            "are retained for parse compatibility only"
         ),
         "4_apply_templates": (
             "Templates transform tokens (see 'templates' field): radial + "
@@ -418,8 +421,11 @@ def _build_critical_distinctions() -> list[dict[str, str]]:
         {
             "pair": "device vs object",
             "rule": (
-                "device: dynamic signals from device (flux_loop_voltage); "
-                "object: static properties of object (area_of_flux_loop)"
+                "author dynamic device signals with relation syntax "
+                "(voltage_of_flux_loop); the device-prefix form "
+                "(flux_loop_voltage) is retained for parse compatibility only; "
+                "author static object properties with relation syntax "
+                "(area_of_flux_loop)"
             ),
         },
         {

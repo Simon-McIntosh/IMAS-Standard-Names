@@ -241,6 +241,34 @@ def test_critical_distinctions_is_nonempty_list(context: dict):
         assert "rule" in item
 
 
+def test_instrument_signal_guidance_uses_canonical_relation_syntax(context: dict):
+    anti_pattern = next(
+        item
+        for item in context["anti_patterns"]
+        if item["mistake"]
+        == "Using the device prefix when authoring new instrument names"
+    )
+    canonical_name = anti_pattern["example_right"]
+    compatibility_name = anti_pattern["example_wrong"]
+
+    common_pattern = next(
+        item
+        for item in context["common_patterns"]
+        if item["pattern"] == "device_signal"
+    )
+    distinction = next(
+        item
+        for item in context["critical_distinctions"]
+        if item["pair"] == "device vs object"
+    )
+
+    assert common_pattern["example"] == canonical_name
+    for guidance in (context["quick_start"], distinction["rule"]):
+        assert canonical_name in guidance
+        assert compatibility_name in guidance
+        assert "compatib" in guidance.lower()
+
+
 def test_base_requirements_is_dict_with_segment_keys(context: dict):
     br = context["base_requirements"]
     assert isinstance(br, dict)
