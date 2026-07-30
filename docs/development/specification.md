@@ -46,8 +46,8 @@ For detailed segment descriptions and auto-generated vocabulary tables, see [Gra
 | subject        | No       | Particle species or plasma population           |                |
 | geometric_base | No\*     | Spatial/geometric quantity                      | physical_base  |
 | physical_base  | No\*     | Physical measurement/property                   | geometric_base |
-| device         | No       | Hardware signal source used as a prefix          | object         |
-| object         | No       | Entity whose intrinsic property is described     | device         |
+| device         | No       | Compatibility-only hardware prefix               | object         |
+| object         | No       | Preferred entity relation for signals/properties | device         |
 | geometry       | No       | Geometric object property (of\_)                | position       |
 | position       | No       | Location where field evaluated (at\_)           | geometry       |
 | process        | No       | Physical mechanism (due*to*)                    |                |
@@ -68,7 +68,7 @@ For detailed segment descriptions and auto-generated vocabulary tables, see [Gra
 - Represents physical measurements, fields, or properties
 - Closed vocabulary defined in `physical_bases.yml`
 - Uses a direct axis prefix for vector components
-- Example: `electron_temperature`, `radial_magnetic_field`, `flux_loop_voltage`
+- Example: `electron_temperature`, `radial_magnetic_field`, `voltage_of_flux_loop`
 
 ### Segment Templates
 
@@ -76,8 +76,8 @@ For detailed segment descriptions and auto-generated vocabulary tables, see [Gra
 | ---------- | ----------------------- | --------------------------------------- |
 | component  | `{token}_`              | `radial_magnetic_field`                 |
 | coordinate | `{token}_`              | `radial_position_of_flux_loop`          |
-| object     | `of_{token}`            | `area_of_flux_loop`                     |
-| device     | `{token}_`              | `flux_loop_voltage`                     |
+| object     | `of_{token}`            | `voltage_of_flux_loop`                  |
+| device     | `{token}_`              | `flux_loop_voltage` (compatibility only) |
 | geometry   | `of_{token}`            | `radial_coordinate_of_plasma_boundary`  |
 | position   | `at_{token}`            | `electron_temperature_at_magnetic_axis` |
 | process    | `due_to_{token}`        | `heat_flux_due_to_conduction`           |
@@ -129,24 +129,28 @@ Standard names may include a `provenance` block describing their derivation. See
 
 ### Geometric Base Examples
 
+<!-- isn-authoring-examples:start -->
 ```text
 position_of_flux_loop                     (geometric_base + object)
 radial_position_of_flux_loop              (coordinate + geometric_base + object)
 vertex_of_plasma_boundary                 (geometric_base + geometry)
 centroid_of_divertor_tile                 (geometric_base + object)
 ```
+<!-- isn-authoring-examples:end -->
 
 ### Physical Base Examples
 
+<!-- isn-authoring-examples:start -->
 ```text
 electron_temperature                      (subject + physical_base)
 magnetic_field                            (physical_base)
 radial_magnetic_field                     (component + physical_base)
-flux_loop_voltage                         (device + physical_base)
+voltage_of_flux_loop                      (physical_base + object)
 area_of_poloidal_magnetic_field_probe     (physical_base + object)
 electron_temperature_at_magnetic_axis     (subject + physical_base + position)
 radial_coordinate_of_plasma_boundary      (geometry carrier + geometry)
 ```
+<!-- isn-authoring-examples:end -->
 
 ### Anti-Patterns
 
@@ -156,7 +160,8 @@ radial_coordinate_of_plasma_boundary      (geometry carrier + geometry)
 | `position_radial_of_flux_loop`             | GRM006        | `radial_position_of_flux_loop`       |
 | `radial_position_at_flux_loop`             | GRM005        | `radial_position_of_flux_loop`       |
 | `electron_temperature_at_boundary_of_axis` | GRM005        | Pick one: at_boundary OR of_axis     |
-| `voltage_from_flux_loop`                   | Semantic      | `flux_loop_voltage`                  |
+| `voltage_from_flux_loop`                   | Semantic      | `voltage_of_flux_loop`               |
+| `flux_loop_voltage`                        | Compatibility | `voltage_of_flux_loop`               |
 
 ---
 

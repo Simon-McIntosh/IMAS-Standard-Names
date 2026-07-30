@@ -30,7 +30,10 @@ The grammar follows this pattern:
   component (`radial_magnetic_field`) or a geometric carrier coordinate
   (`radial_position_of_flux_loop`). The base determines which projection is
   meant; there is no `_component_of_` marker.
-- **device vs object**: Use `<device>_<signal>` for dynamic signals FROM device (e.g., `flux_loop_voltage`); use `<property>_of_<object>` for static properties OF object (e.g., `area_of_flux_loop`).
+- **instrument and object relations**: Author both signals and intrinsic
+  properties with the `of_<entity>` postfix (for example,
+  `voltage_of_flux_loop` and `area_of_flux_loop`). The `<device>_<signal>`
+  prefix remains parseable only for compatibility with existing names.
 - **of_geometry vs at_position**: Use `of_<geometry>` for geometric properties OF spatial objects; use `at_<position>` for fields evaluated AT locations.
 
 ### Vocabularies Summary
@@ -165,6 +168,7 @@ Certain segments cannot appear together in the same standard name:
 
 ### Valid Names Using Split Base Structure
 
+<!-- isn-authoring-examples:start -->
 **Geometric base examples (spatial/geometric quantities):**
 
 - `position_of_flux_loop` — geometric_base with object
@@ -177,7 +181,7 @@ Certain segments cannot appear together in the same standard name:
 - `electron_temperature` — subject + physical_base
 - `magnetic_field` — physical_base (vector)
 - `radial_magnetic_field` — component + physical_base
-- `flux_loop_voltage` — device + physical_base (device signal)
+- `voltage_of_flux_loop` — physical_base + object (instrument signal)
 - `area_of_poloidal_magnetic_field_probe` — physical_base + object
 
 **With position or geometry:**
@@ -190,6 +194,7 @@ Certain segments cannot appear together in the same standard name:
 
 - `heat_flux_due_to_conduction` — physical_base + process
 - `particle_flux_due_to_diffusion` — physical_base + process
+<!-- isn-authoring-examples:end -->
 
 ### Invalid Names
 

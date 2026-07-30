@@ -47,7 +47,7 @@ FORBIDDEN_SUFFIX_PATTERNS: tuple[tuple[str, str, tuple[str, ...]], ...] = (
         "diamagnetic_component_of_",
         (
             "'diamagnetic' is a drift qualifier, not a spatial axis. "
-            "Did you mean: radial_component_of_<subject>_diamagnetic_drift_velocity?"
+            "Did you mean: radial_<subject>_velocity_due_to_diamagnetic_drift?"
         ),
         (),
     ),
