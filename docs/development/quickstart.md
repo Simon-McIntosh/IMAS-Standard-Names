@@ -32,6 +32,7 @@ status: draft
 
 **Example:**
 
+<!-- isn-authoring-examples:start -->
 ```yaml
 name: electron_temperature
 kind: scalar
@@ -40,6 +41,7 @@ description: Electron temperature.
 tags: [plasma]
 status: draft
 ```
+<!-- isn-authoring-examples:end -->
 
 ---
 
@@ -62,6 +64,7 @@ status: draft
 
 **Example:**
 
+<!-- isn-authoring-examples:start -->
 ```yaml
 name: radial_position_of_flux_loop
 kind: scalar
@@ -70,6 +73,7 @@ description: Radial position of flux loop.
 tags: [magnetics, geometry]
 status: draft
 ```
+<!-- isn-authoring-examples:end -->
 
 ---
 
@@ -77,29 +81,31 @@ status: draft
 
 **Goal:** Add a measurement obtained from diagnostic hardware.
 
-**Pattern:** `<device>_<physical_base>`
+**Pattern:** `<physical_base>_of_<object>`
 
 **Template:**
 
 ```yaml
-name: <device>_<physical_base>
+name: <physical_base>_of_<object>
 kind: scalar
 unit: <unit>
-description: <Physical_base> signal of <device>.
+description: <Physical_base> signal of <object>.
 tags: [<primary_tag>, measured]
 status: draft
 ```
 
 **Example:**
 
+<!-- isn-authoring-examples:start -->
 ```yaml
-name: flux_loop_voltage
+name: voltage_of_flux_loop
 kind: scalar
 unit: V
-description: Voltage from flux loop.
+description: Voltage of flux loop.
 tags: [magnetics, measured]
 status: draft
 ```
+<!-- isn-authoring-examples:end -->
 
 ---
 
@@ -122,6 +128,7 @@ status: draft
 
 **Example:**
 
+<!-- isn-authoring-examples:start -->
 ```yaml
 name: radial_magnetic_field
 kind: scalar
@@ -130,6 +137,7 @@ description: Radial component of magnetic field.
 tags: [magnetics]
 status: draft
 ```
+<!-- isn-authoring-examples:end -->
 
 ---
 
@@ -152,6 +160,7 @@ status: draft
 
 **Example:**
 
+<!-- isn-authoring-examples:start -->
 ```yaml
 name: electron_temperature_at_magnetic_axis
 kind: scalar
@@ -160,6 +169,7 @@ description: Electron temperature at magnetic axis.
 tags: [plasma]
 status: draft
 ```
+<!-- isn-authoring-examples:end -->
 
 ---
 
@@ -182,6 +192,7 @@ status: draft
 
 **Example:**
 
+<!-- isn-authoring-examples:start -->
 ```yaml
 name: radial_coordinate_of_plasma_boundary
 kind: scalar
@@ -190,6 +201,7 @@ description: Radial coordinate of the plasma boundary.
 tags: [equilibrium, geometry]
 status: draft
 ```
+<!-- isn-authoring-examples:end -->
 
 ---
 
@@ -221,7 +233,7 @@ Fix any reported issues and re-run until validation passes.
 | ------------------------------------------- | ------------------------------------ | --------------------------------------- |
 | `<subject>_<physical_base>`                 | Basic physical measurement           | `electron_temperature`                  |
 | `<coordinate>_<geometric_base>_of_<object>` | Hardware geometry                    | `radial_position_of_flux_loop`          |
-| `<device>_<physical_base>`                  | Diagnostic device signal             | `flux_loop_voltage`                     |
+| `<physical_base>_of_<object>`               | Diagnostic device signal/property    | `voltage_of_flux_loop`                  |
 | `<component>_<physical_base>`               | Physical vector component            | `radial_magnetic_field`                 |
 | `<physical_base>_at_<position>`             | Field at location                    | `electron_temperature_at_magnetic_axis` |
 | `<geometry_carrier>_of_<geometry>`          | Geometric property of spatial object | `radial_coordinate_of_plasma_boundary`  |

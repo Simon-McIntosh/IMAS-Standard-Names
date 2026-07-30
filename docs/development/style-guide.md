@@ -42,14 +42,14 @@ This guide provides authoring best practices for creating well-formed, consisten
 
 **Examples:**
 
-<!-- isn-parse-examples:start -->
+<!-- isn-authoring-examples:start -->
 ```text
 position_of_flux_loop
 radial_position_of_flux_loop
 vertex_of_plasma_boundary
 centroid_of_divertor_tile
 ```
-<!-- isn-parse-examples:end -->
+<!-- isn-authoring-examples:end -->
 
 ### Physical Base
 
@@ -57,21 +57,21 @@ centroid_of_divertor_tile
 
 **Requirements:**
 
-- Open-ended vocabulary (defined in catalog entries)
+- Closed vocabulary defined in `physical_bases.yml`
 - Use `component` prefix for physical vector components
 - Can combine with `object`, `source`, `position`, `geometry`, `process`
 
 **Examples:**
 
-<!-- isn-parse-examples:start -->
+<!-- isn-authoring-examples:start -->
 ```text
 electron_temperature
 radial_magnetic_field
-flux_loop_voltage
+voltage_of_flux_loop
 area_of_poloidal_magnetic_field_probe
 electron_temperature_at_magnetic_axis
 ```
-<!-- isn-parse-examples:end -->
+<!-- isn-authoring-examples:end -->
 
 ---
 
@@ -84,17 +84,19 @@ electron_temperature_at_magnetic_axis
 | component  | physical_base  | `{axis}_{physical}`  | `radial_magnetic_field`        |
 | coordinate | geometric_base | `{axis}_{geometric}` | `radial_position_of_flux_loop` |
 
-### device vs object
+### Instrument and hardware relations
 
-| Segment | Pattern/Template    | Meaning                        | Example             |
-| ------- | ------------------- | ------------------------------ | ------------------- |
-| device  | `{device}_{signal}` | Dynamic signal FROM device     | `flux_loop_voltage` |
-| object  | `of_{token}`        | Intrinsic property OF hardware | `area_of_flux_loop` |
+Use the `of_<entity>` postfix for both dynamic signals and intrinsic hardware
+properties when authoring names. The device-prefix segment remains parseable
+only for compatibility with existing names.
 
-**Same device/object, different patterns:**
+| Form          | Pattern/Template        | Meaning                         | Example                |
+| ------------- | ----------------------- | ------------------------------- | ---------------------- |
+| object locus  | `{quantity}_of_{entity}` | Preferred instrument relation   | `voltage_of_flux_loop` |
+| device prefix | `{device}_{quantity}`    | Compatibility parsing only      | `flux_loop_voltage`    |
 
 ```text
-flux_loop_voltage                        (dynamic signal from device)
+voltage_of_flux_loop                     (signal associated with the loop)
 area_of_flux_loop                        (intrinsic property of object)
 current_of_poloidal_field_coil           (intrinsic property of coil)
 ```
@@ -183,7 +185,8 @@ tags: [measured, geometry]
 | `magnetic_field_radial_component`        | Wrong segment order        | `radial_magnetic_field`               |
 | `radial_component_of_position`           | Component with geometric   | `radial_position_of_flux_loop`        |
 | `radial_position_component_of_flux_loop` | Coordinate with component  | `radial_position_of_flux_loop`        |
-| `voltage_from_flux_loop`                 | Wrong pattern for signal   | `flux_loop_voltage`                   |
+| `voltage_from_flux_loop`                 | Wrong relation marker      | `voltage_of_flux_loop`                |
+| `flux_loop_voltage`                      | Compatibility-only prefix  | `voltage_of_flux_loop`                |
 | `electron_temperature_ev`                | Units in name              | `electron_temperature` (unit in YAML) |
 | `pf_coil_current_1`                      | Index after quantity       | `pf_coil_1_current`                   |
 | `Electron_Temperature`                   | Not lowercase              | `electron_temperature`                |
@@ -222,8 +225,7 @@ Before proposing a new standard name:
 ```text
 <subject>_<physical_base>                       electron_temperature
 <component>_<physical_base>                     radial_magnetic_field
-<device>_<physical_base>                        flux_loop_voltage
-<physical_base>_of_<object>                     area_of_flux_loop
+<physical_base>_of_<object>                     area_of_flux_loop / voltage_of_flux_loop
 <physical_base>_at_<position>                   electron_temperature_at_magnetic_axis
 <geometric_base>_of_<geometry>                  radial_coordinate_of_plasma_boundary
 <physical_base>_due_to_<process>                heat_flux_due_to_conduction
