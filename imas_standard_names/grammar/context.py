@@ -851,6 +851,10 @@ def _build_grammar_context() -> dict[str, Any]:
     ops = _safe(vocab_loaders.load_operators, None)
     bases = _safe(vocab_loaders.load_physical_bases, None)
     carriers = _safe(vocab_loaders.load_geometry_carriers, None)
+    qualifier_category_of = _safe(vocab_loaders.load_qualifier_categories, {})
+    qualifier_categories: dict[str, list[str]] = {}
+    for token, category in qualifier_category_of.items():
+        qualifier_categories.setdefault(category, []).append(token)
 
     return {
         "ir_groups": [
@@ -884,6 +888,7 @@ def _build_grammar_context() -> dict[str, Any]:
             },
             "physical_bases": sorted(bases.bases) if bases else [],
             "geometry_carriers": sorted(carriers.carriers) if carriers else [],
+            "qualifier_categories": qualifier_categories,
         },
         "locus_relation_matrix": {
             locus_type.value: sorted(r.value for r in relations)
@@ -900,12 +905,11 @@ def _build_grammar_context() -> dict[str, Any]:
             "mechanism": "<core>_due_to_<process>",
         },
         "parse_api": {
-            "parse": "imas_standard_names.grammar.parser:parse",
-            "compose": "imas_standard_names.grammar.render:compose",
-            "validate_round_trip": (
-                "imas_standard_names.grammar.parser:validate_round_trip"
-            ),
-            "ir_model": "imas_standard_names.grammar.ir:StandardNameIR",
+            "parse": "imas_standard_names:parse",
+            "compose": "imas_standard_names:compose",
+            "validate_round_trip": "imas_standard_names:validate_round_trip",
+            "ir_model": "imas_standard_names:StandardNameIR",
+            "operator_chain_order": "outermost_first",
         },
     }
 

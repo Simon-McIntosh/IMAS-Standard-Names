@@ -26,6 +26,7 @@ from __future__ import annotations
 
 import pytest
 
+from imas_standard_names import StandardNameIR, compose, parse
 from imas_standard_names.grammar.ir import OperatorKind
 from imas_standard_names.grammar.model import (
     compose_standard_name,
@@ -34,9 +35,7 @@ from imas_standard_names.grammar.model import (
 from imas_standard_names.grammar.parser import (
     Vocabularies,
     load_default_vocabularies,
-    parse,
 )
-from imas_standard_names.grammar.render import compose as render
 
 # Representative bases. A scalar base for most operators; a vector base for the
 # scalar-extraction postfixes (magnitude, real_part, imaginary_part) that
@@ -100,7 +99,7 @@ def test_every_operator_model_parser_parity(
     for name in candidates:
         try:
             model_round_trip = compose_standard_name(parse_standard_name(name))
-            parser_render = render(parse(name, vocabs=vocabs).ir)
+            parser_render = compose(parse(name, vocabs=vocabs).ir)
         except Exception as exc:  # noqa: BLE001 — record and try the next form
             last_error = exc
             continue
@@ -113,3 +112,11 @@ def test_every_operator_model_parser_parity(
         f"operator {op!r} ({meta['kind']}) did not round-trip through the model "
         f"layer for any candidate {candidates!r}; last error: {last_error!r}"
     )
+
+
+def test_public_ir_api_preserves_outermost_first_operator_chain() -> None:
+    parsed = parse("square_of_inverse_of_pressure")
+
+    assert isinstance(parsed.ir, StandardNameIR)
+    assert [operator.op for operator in parsed.ir.operators] == ["square", "inverse"]
+    assert compose(parsed.ir) == "square_of_inverse_of_pressure"
