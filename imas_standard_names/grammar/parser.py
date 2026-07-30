@@ -1659,6 +1659,11 @@ def _strict_flat_segment_semantics(
                 None,
             )
             if binary is not None:
+                root_shell = ir.model_copy(update={"operators": []})
+                _strict_operator_free_core(
+                    root_shell,
+                    operator_qualified=True,
+                )
                 if ir.operators != [binary]:
                     binary_core = ir.model_copy(update={"operators": [binary]})
                     _strict_flat_segment_semantics(

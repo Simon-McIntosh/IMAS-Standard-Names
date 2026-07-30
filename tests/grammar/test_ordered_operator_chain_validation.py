@@ -349,3 +349,49 @@ def test_single_binary_application_remains_flat_compatible() -> None:
     name = "ratio_of_electron_density_to_ion_density"
 
     assert compose_standard_name(parse_standard_name(name)) == name
+
+
+NESTED_DENSITY_RATIO = (
+    "ratio_of_ratio_of_electron_density_to_ion_density"
+    "_to_square_of_magnetic_field_magnitude"
+)
+
+
+@pytest.mark.parametrize(
+    "decorator",
+    [
+        "at_wibble",
+        "due_to_wibble",
+    ],
+)
+def test_nested_binary_tree_rejects_unknown_root_decorator(decorator: str) -> None:
+    with pytest.raises(ParseError):
+        parse(f"{NESTED_DENSITY_RATIO}_{decorator}", strict=True)
+
+
+@pytest.mark.parametrize(
+    "decorator",
+    [
+        "at_magnetic_axis",
+        "due_to_non_inductive_current_drive",
+    ],
+)
+def test_nested_binary_tree_accepts_registered_root_decorator(
+    decorator: str,
+) -> None:
+    name = f"{NESTED_DENSITY_RATIO}_{decorator}"
+
+    assert compose(parse(name, strict=True).ir) == name
+
+
+@pytest.mark.parametrize(
+    "prefix",
+    [
+        "electron",
+        "charge_state",
+        "total_net",
+    ],
+)
+def test_nested_binary_tree_cannot_launder_root_qualifiers(prefix: str) -> None:
+    with pytest.raises(ParseError):
+        parse(f"{prefix}_{NESTED_DENSITY_RATIO}", strict=True)
