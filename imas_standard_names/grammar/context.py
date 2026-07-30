@@ -767,7 +767,10 @@ def get_grammar_context() -> dict[str, Any]:
     Set ``IMAS_STANDARD_NAMES_CONTEXT_CACHE=0`` to always rebuild, and
     ``IMAS_STANDARD_NAMES_CACHE_DIR`` to relocate the cache directory.
 
-    Each call returns a deep copy, so callers may freely mutate their view.
+    Each call returns a deep copy of the mutable payload fields, so callers may
+    freely mutate those portions of their view. The
+    ``grammar.advisory_aliases`` mapping remains recursively immutable because
+    it is validated policy guidance rather than caller-owned working data.
     """
     return copy.deepcopy(_load_or_build_context())
 
@@ -843,10 +846,13 @@ def _build_grammar_context() -> dict[str, Any]:
 
     Returns a dict with keys: ``ir_groups`` (the 5 IR slots + mechanism),
     ``vocabularies`` (tokens per closed-vocab file), ``locus_relation_matrix``,
-    ``canonical_templates``, and ``parse_api`` (callable names).
+    ``advisory_aliases`` (validated policy guidance), ``canonical_templates``,
+    and ``parse_api`` (callable names).
 
-    Any loader failure yields an empty field but never raises — consumers
-    must tolerate partially populated vocabularies.
+    Optional vocabulary-enrichment loader failures yield empty fields, so
+    consumers must tolerate partially populated vocabularies. Advisory-alias
+    policy is required and validated fail-closed: a defect raises instead of
+    exposing partial or unverified guidance.
     """
 
     from imas_standard_names.grammar import vocab_loaders
