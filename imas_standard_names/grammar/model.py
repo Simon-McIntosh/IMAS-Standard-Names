@@ -12,7 +12,14 @@ from collections.abc import Mapping
 from functools import cache
 from typing import Annotated, Any
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    ValidationInfo,
+    field_validator,
+    model_validator,
+)
 
 from imas_standard_names.grammar.constants import (
     BINARY_OPERATOR_CONNECTORS,
@@ -1370,7 +1377,7 @@ class StandardName(BaseModel):
         return self
 
     @model_validator(mode="after")
-    def _check_generic_physical_base(self) -> StandardName:
+    def _check_generic_physical_base(self, info: ValidationInfo) -> StandardName:
         """Validate that generic physical bases have required qualification.
 
         Generic physical bases (area, current, power, temperature, voltage, etc.)
@@ -1414,6 +1421,7 @@ class StandardName(BaseModel):
                     self.transformation,
                     self.decomposition,
                     self.binary_operator,
+                    bool(info.context and info.context.get("enclosing_operator")),
                 ]
             )
 

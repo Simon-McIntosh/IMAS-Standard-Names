@@ -190,3 +190,98 @@ def test_invalid_deep_binary_chain_parses_each_substring_once(monkeypatch) -> No
 
     assert len(calls) == len(set(calls))
     assert len(calls) <= len(invalid) ** 2
+
+
+@pytest.mark.parametrize(
+    "core",
+    [
+        "electron_ion_density",
+        "total_net_density",
+        "electron_density_due_to_wibble",
+        "electron_density_at_wibble",
+        "fast_trapped_ion_density",
+    ],
+)
+def test_unprojectable_operator_chain_does_not_hide_invalid_core(core: str) -> None:
+    with pytest.raises(ParseError):
+        parse(f"maximum_of_inverse_of_{core}", strict=True)
+
+
+@pytest.mark.parametrize(
+    "core",
+    [
+        "electron_density",
+        "trapped_fast_ion_density",
+        "electron_density_due_to_non_inductive_current_drive",
+        "electron_density_at_magnetic_axis",
+    ],
+)
+def test_unprojectable_operator_chain_accepts_valid_core(core: str) -> None:
+    name = f"maximum_of_inverse_of_{core}"
+
+    assert compose(parse(name, strict=True).ir) == name
+
+
+@pytest.mark.parametrize(
+    "core",
+    [
+        "electron_ion_density",
+        "total_net_density",
+        "electron_density_due_to_wibble",
+        "electron_density_at_wibble",
+        "fast_trapped_ion_density",
+    ],
+)
+def test_binary_operand_operator_chain_does_not_hide_invalid_core(core: str) -> None:
+    name = (
+        f"ratio_of_maximum_of_inverse_of_{core}_to_square_of_magnetic_field_magnitude"
+    )
+
+    with pytest.raises(ParseError):
+        parse(name, strict=True)
+
+
+@pytest.mark.parametrize(
+    "core",
+    [
+        "electron_density",
+        "trapped_fast_ion_density",
+    ],
+)
+def test_binary_operand_operator_chain_accepts_valid_core(core: str) -> None:
+    name = (
+        f"ratio_of_maximum_of_inverse_of_{core}_to_square_of_magnetic_field_magnitude"
+    )
+
+    assert compose(parse(name, strict=True).ir) == name
+
+
+@pytest.mark.parametrize(
+    "decorator",
+    [
+        "at_wibble",
+        "due_to_wibble",
+    ],
+)
+def test_unprojectable_binary_wrapper_does_not_hide_invalid_decorator(
+    decorator: str,
+) -> None:
+    name = f"maximum_of_ratio_of_electron_density_to_ion_density_{decorator}"
+
+    with pytest.raises(ParseError):
+        parse(name, strict=True)
+
+
+@pytest.mark.parametrize(
+    "decorator",
+    [
+        "at_magnetic_axis",
+        "due_to_non_inductive_current_drive",
+    ],
+)
+def test_unprojectable_binary_wrapper_accepts_valid_decorator(
+    decorator: str,
+) -> None:
+    name = f"maximum_of_ratio_of_electron_density_to_ion_density_{decorator}"
+
+    assert compose(parse(name, strict=True).ir) == name

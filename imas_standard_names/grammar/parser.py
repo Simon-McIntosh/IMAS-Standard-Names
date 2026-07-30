@@ -1623,7 +1623,12 @@ def _strict_state_semantics(ir: StandardNameIR, v: Vocabularies) -> None:
             _strict_state_semantics(argument, v)
 
 
-def _strict_flat_segment_semantics(name: str, ir: StandardNameIR) -> None:
+def _strict_flat_segment_semantics(
+    name: str,
+    ir: StandardNameIR,
+    *,
+    enclosing_operator: bool = False,
+) -> None:
     """Reuse flat-model validators whenever the ordered IR is projectable."""
     from imas_standard_names.grammar.model import (  # noqa: PLC0415
         StandardName,
@@ -1633,14 +1638,46 @@ def _strict_flat_segment_semantics(name: str, ir: StandardNameIR) -> None:
         _model_to_ir,
     )
 
+    for operator in ir.operators:
+        for argument in operator.args:
+            _strict_flat_segment_semantics(
+                compose(argument),
+                argument,
+                enclosing_operator=True,
+            )
+
     try:
         model_data = _ir_to_model_dict(ir)
     except ValueError as error:
         if "not representable in the flat StandardName model" in str(error):
+            binary = next(
+                (
+                    operator
+                    for operator in ir.operators
+                    if operator.kind is OperatorKind.BINARY
+                ),
+                None,
+            )
+            if binary is not None:
+                binary_core = ir.model_copy(update={"operators": [binary]})
+                _strict_flat_segment_semantics(
+                    compose(binary_core),
+                    binary_core,
+                    enclosing_operator=bool(ir.operators[:-1]) or enclosing_operator,
+                )
+            else:
+                core = ir.model_copy(update={"operators": []})
+                _strict_operator_free_core(
+                    core,
+                    operator_qualified=bool(ir.operators) or enclosing_operator,
+                )
             return
         raise ParseError(str(error)) from error
     try:
-        model = StandardName.model_validate(model_data)
+        model = StandardName.model_validate(
+            model_data,
+            context={"enclosing_operator": enclosing_operator},
+        )
         _check_state_gate(model)
     except ValueError as error:
         raise ParseError(str(error)) from error
@@ -1653,6 +1690,43 @@ def _strict_flat_segment_semantics(name: str, ir: StandardNameIR) -> None:
     except ValueError as error:
         raise ParseError(str(error)) from error
     raise _NonCanonicalParseError(name, canonical)
+
+
+def _strict_operator_free_core(
+    core: StandardNameIR,
+    *,
+    operator_qualified: bool,
+) -> None:
+    """Validate a wrapped core without flattening its ordered operator stack."""
+    from imas_standard_names.grammar.model import (  # noqa: PLC0415
+        StandardName,
+        _assert_lossless_canonical,
+        _check_state_gate,
+        _ir_to_model_dict,
+        _model_to_ir,
+    )
+
+    core_name = compose(core)
+    try:
+        model_data = _ir_to_model_dict(core)
+        model = StandardName.model_validate(
+            model_data,
+            context={"enclosing_operator": operator_qualified},
+        )
+        _check_state_gate(model)
+    except ValueError as error:
+        raise ParseError(str(error)) from error
+
+    canonical = compose(_model_to_ir(model))
+    if canonical == core_name:
+        return
+    try:
+        _assert_lossless_canonical(core_name, canonical)
+    except ValueError as error:
+        raise ParseError(str(error)) from error
+    raise ParseError(
+        f"wrapped core is not canonical: flat segment order renders as {canonical!r}"
+    )
 
 
 def _strict_validate(name: str, ir: StandardNameIR, v: Vocabularies) -> None:
