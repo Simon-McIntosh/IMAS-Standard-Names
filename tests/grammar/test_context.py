@@ -145,6 +145,18 @@ def test_grammar_context_points_to_stable_operator_chain_api(context: dict):
         "compose": "imas_standard_names:compose",
         "validate_round_trip": "imas_standard_names:validate_round_trip",
         "ir_model": "imas_standard_names:StandardNameIR",
+        "validity_oracle": {
+            "call": "imas_standard_names:parse",
+            "arguments": {"strict": True},
+        },
+        "default_parse_mode": "diagnostic",
+        "round_trip_mode": "diagnostic_only",
+        "flat_projection": {
+            "call": "imas_standard_names.grammar.model:parse_standard_name",
+            "validation": "strict",
+            "representation": "flat",
+            "ordered_ir": "may_reject_unrepresentable",
+        },
         "operator_chain_order": "outermost_first",
     }
 

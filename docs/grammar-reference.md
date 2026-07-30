@@ -12,20 +12,25 @@ each segment drawing from controlled vocabularies.
 
 ### Canonical Pattern
 
-The grammar follows this pattern:
+The non-operator core follows the generated segment pattern shown below.
+Operators wrap that core recursively:
 
 ```text
-[<axis>_]?
-[<subject>]?
-[<device> | of_<object>]?
-<geometric_base | physical_base>
-[of_<geometry> | at_<position>]?
-[due_to_<process>]?
+<expression> :=
+    <core>
+  | <unary_prefix>_of_<expression>
+  | <expression>_<unary_postfix>
+  | <binary>_of_<expression>_<separator>_<expression>
 ```
 
 **Key concepts:**
 
 - **Split Base Structure**: Names must have either a `geometric_base` (spatial/geometric quantities) OR a `physical_base` (physical measurements/properties), but not both.
+- **Strict authority**: `parse(name, strict=True)` is the validity oracle.
+  The default parse and `validate_round_trip()` are diagnostic.
+- **Recursive operators**: `StandardNameIR.operators` is outermost first;
+  binary operands and explicit unary operands are themselves
+  `StandardNameIR` values.
 - **component vs coordinate**: An axis directly prefixes a physical vector
   component (`radial_magnetic_field`) or a geometric carrier coordinate
   (`radial_position_of_flux_loop`). The base determines which projection is
@@ -123,36 +128,39 @@ transport (conduction, convection, radiation), particle transport (diffusion), f
 
 {{ grammar_vocabulary_table('processes') }}
 
-### Transformations
+### Operators
 
-Transformation tokens modify a physical base by applying a mathematical operation.
-Transformations are prefixed to the physical base.
+The unified operator registry defines bare tokens, kinds, precedence,
+separators, index parameters, and semantic constraints. The renderer supplies
+the punctuation around the bare token:
 
-**Template:** `{transformation}_{physical_base}`
+| Kind | Template |
+|------|----------|
+| Unary prefix | `<op>_of_<inner>` |
+| Registry-declared bare prefix | `<op>_<inner>` |
+| Unary postfix | `<inner>_<op>` |
+| Binary | `<op>_of_<A>_<separator>_<B>` |
 
-**Examples:**
+Examples:
 
-- `square_of_electron_temperature` — square of temperature
-- `volume_averaged_electron_density` — spatial average
-- `time_derivative_of_magnetic_flux` — temporal derivative
-- `maximum_over_flux_surface_electron_temperature` — extremum over surface
+- `square_of_inverse_of_pressure` — ordered unary chain
+- `square_of_magnetic_field_magnitude` — prefix outside a postfix operator
+- `ratio_of_electron_density_to_ion_density` — binary ratio
+- `flux_surface_averaged_ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_magnetic_field_magnitude`
+  — reduction over a recursive binary expression
 
-**Categories:**
+Higher precedence wraps farther out; equal-precedence operators keep authored
+order. Binary split candidates are tried right-to-left and accepted only when
+both recursive operands resolve. Successful and failed substring parses are
+memoized per validation mode.
 
-- **Existing:** `square_of`, `change_over_time_in`, `logarithm_of`, `inverse_of`
-- **Scaling:** `normalized`
-- **Spatial averages:** `volume_averaged`, `flux_surface_averaged`, `line_averaged`
-- **Spatial integrals:** `surface_integrated`, `volume_integrated`
-- **Temporal:** `time_integrated`, `time_derivative_of`
-- **Extrema:** `maximum_of`, `minimum_of`, `maximum_over_flux_surface`, `minimum_over_flux_surface`
-- **Calculus:** `derivative_of`, `radial_derivative_of`
-
-**Note:** `time_derivative_of` and `change_over_time_in` are both valid transformation tokens
-describing the same mathematical operation. The parser accepts either form.
-
-**Exclusivity:** Transformations cannot be combined with `component`, `coordinate`, or `geometric_base`.
+#### Unary operator tokens
 
 {{ grammar_vocabulary_table('transformations') }}
+
+#### Binary operator surface tokens
+
+{{ grammar_vocabulary_table('binary_operators') }}
 
 ---
 
@@ -210,12 +218,12 @@ Examples that violate the grammar:
 
 ## Implementation
 
-The grammar lives in these modules:
+The package-level public surface is `parse`, `compose`, and `StandardNameIR`.
+Use `parse(name, strict=True)` for validation. Use
+`parse_standard_name(name)` only when a strict-valid name must also project
+into the flat `StandardName` facade; valid nested binary trees may be
+unrepresentable there.
 
-- **Grammar Specification:** `imas_standard_names/grammar/specification.yml`
-- **Type Generation:** `imas_standard_names/grammar_codegen/generate.py`
-- **Runtime Types:** `imas_standard_names/grammar/types.py` (auto-generated)
-- **Parser/Composer:** `imas_standard_names/grammar/support.py`
-- **Pydantic Models:** `imas_standard_names/grammar/model.py`
-
-See the [specification](development/specification.md) for detailed semantic rules and validation requirements.
+See the [canonical grammar](architecture/grammar-vnext.md) for recursive
+operator semantics and the [project boundary](architecture/boundary.md) for
+the stable API contract.

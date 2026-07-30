@@ -3,8 +3,10 @@
 import re
 from pathlib import Path
 
+import pytest
 import yaml
 
+from imas_standard_names import compose, parse
 from imas_standard_names.grammar.context import get_grammar_context
 from imas_standard_names.grammar.model import (
     compose_standard_name,
@@ -35,6 +37,31 @@ FENCED_BLOCK = re.compile(
     r"```(?P<language>text|yaml)\s*(?P<body>.*?)\s*```", re.DOTALL
 )
 BACKTICK_NAME = re.compile(r"`([a-z][a-z0-9_]*)`")
+
+PARSER_CONTRACT_DOCS = (
+    ROOT / "AGENTS.md",
+    ROOT / "README.md",
+    ROOT / "docs" / "architecture" / "boundary.md",
+    ROOT / "docs" / "architecture" / "grammar-vnext.md",
+    ROOT / "docs" / "grammar-reference.md",
+    ROOT / "docs" / "architecture" / "data-flow.md",
+)
+
+STRICT_OPERATOR_EXAMPLES = {
+    "square_of_inverse_of_pressure",
+    "square_of_magnetic_field_magnitude",
+    "ratio_of_electron_density_to_ion_density",
+    (
+        "flux_surface_averaged_ratio_of"
+        "_square_of_toroidal_flux_coordinate_gradient_magnitude"
+        "_to_square_of_magnetic_field_magnitude"
+    ),
+}
+
+FLAT_PROJECTION_LIMIT_EXAMPLE = (
+    "ratio_of_ratio_of_electron_density_to_ion_density"
+    "_to_square_of_magnetic_field_magnitude"
+)
 
 
 def _compatibility_only_fields() -> set[str]:
@@ -106,3 +133,38 @@ def test_scalar_equilibrium_examples_round_trip() -> None:
     for name in scalar_names:
         parsed = parse_standard_name(name)
         assert compose_standard_name(parsed) == name
+
+
+def test_documented_operator_examples_use_the_strict_oracle() -> None:
+    """Every ordered-operator example in the contract docs is strict-valid."""
+    corpus = "\n".join(path.read_text() for path in PARSER_CONTRACT_DOCS)
+
+    for name in STRICT_OPERATOR_EXAMPLES:
+        assert name in corpus
+        assert compose(parse(name, strict=True).ir) == name
+
+
+def test_documented_flat_projection_limit_is_a_valid_ordered_tree() -> None:
+    """The projection example distinguishes representation from validity."""
+    corpus = "\n".join(path.read_text() for path in PARSER_CONTRACT_DOCS)
+
+    assert FLAT_PROJECTION_LIMIT_EXAMPLE in corpus
+    assert (
+        compose(parse(FLAT_PROJECTION_LIMIT_EXAMPLE, strict=True).ir)
+        == FLAT_PROJECTION_LIMIT_EXAMPLE
+    )
+    with pytest.raises(ValueError, match="not representable in the flat"):
+        parse_standard_name(FLAT_PROJECTION_LIMIT_EXAMPLE)
+
+
+def test_parser_contract_docs_do_not_name_a_flat_or_diagnostic_oracle() -> None:
+    """Assigned docs consistently identify strict IR parsing as authority."""
+    corpus = "\n".join(path.read_text() for path in PARSER_CONTRACT_DOCS)
+    obsolete_claims = (
+        "parse_standard_name is the single validity oracle",
+        "`parse_standard_name` is the single validity oracle",
+        "physical_base` is open vocabulary",
+        "Liberal parser, strict generator",
+    )
+
+    assert not [claim for claim in obsolete_claims if claim in corpus]
