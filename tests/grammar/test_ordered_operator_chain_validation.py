@@ -4,6 +4,10 @@ import pytest
 
 from imas_standard_names import compose, parse
 from imas_standard_names.grammar.ir import OperatorKind
+from imas_standard_names.grammar.model import (
+    compose_standard_name,
+    parse_standard_name,
+)
 from imas_standard_names.grammar.parser import ParseError
 
 INVERSE_SQUARED_RADIUS = "flux_surface_averaged_inverse_of_square_of_major_radius"
@@ -285,3 +289,63 @@ def test_unprojectable_binary_wrapper_accepts_valid_decorator(
     name = f"maximum_of_ratio_of_electron_density_to_ion_density_{decorator}"
 
     assert compose(parse(name, strict=True).ir) == name
+
+
+@pytest.mark.parametrize(
+    "name",
+    [
+        (
+            "ratio_of_ratio_of_electron_density_to_ion_density"
+            "_to_square_of_magnetic_field_magnitude"
+        ),
+        (
+            "ratio_of_product_of_electron_density_and_ion_density"
+            "_to_square_of_magnetic_field_magnitude"
+        ),
+        (
+            "product_of_ratio_of_electron_density_to_ion_density"
+            "_and_square_of_magnetic_field_magnitude"
+        ),
+        (
+            "product_of_square_of_magnetic_field_magnitude"
+            "_and_ratio_of_electron_density_to_ion_density"
+        ),
+    ],
+)
+def test_nested_binary_tree_is_strictly_valid_ordered_ir(name: str) -> None:
+    assert compose(parse(name, strict=True).ir) == name
+
+
+@pytest.mark.parametrize(
+    "name",
+    [
+        (
+            "ratio_of_ratio_of_total_net_to_electron_density"
+            "_to_square_of_magnetic_field_magnitude"
+        ),
+        (
+            "product_of_square_of_magnetic_field_magnitude"
+            "_and_ratio_of_electron_ion_density_to_ion_density"
+        ),
+    ],
+)
+def test_nested_binary_tree_recursively_rejects_invalid_operand(name: str) -> None:
+    with pytest.raises(ParseError):
+        parse(name, strict=True)
+
+
+def test_nested_binary_tree_exceeds_flat_facade_without_becoming_invalid() -> None:
+    name = (
+        "ratio_of_ratio_of_electron_density_to_ion_density"
+        "_to_square_of_magnetic_field_magnitude"
+    )
+
+    parse(name, strict=True)
+    with pytest.raises(ValueError, match="not representable in the flat"):
+        parse_standard_name(name)
+
+
+def test_single_binary_application_remains_flat_compatible() -> None:
+    name = "ratio_of_electron_density_to_ion_density"
+
+    assert compose_standard_name(parse_standard_name(name)) == name

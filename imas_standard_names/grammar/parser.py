@@ -1659,12 +1659,13 @@ def _strict_flat_segment_semantics(
                 None,
             )
             if binary is not None:
-                binary_core = ir.model_copy(update={"operators": [binary]})
-                _strict_flat_segment_semantics(
-                    compose(binary_core),
-                    binary_core,
-                    enclosing_operator=bool(ir.operators[:-1]) or enclosing_operator,
-                )
+                if ir.operators != [binary]:
+                    binary_core = ir.model_copy(update={"operators": [binary]})
+                    _strict_flat_segment_semantics(
+                        compose(binary_core),
+                        binary_core,
+                        enclosing_operator=True,
+                    )
             else:
                 core = ir.model_copy(update={"operators": []})
                 _strict_operator_free_core(

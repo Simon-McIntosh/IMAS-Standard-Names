@@ -398,6 +398,12 @@ def _ir_to_model_dict(ir: StandardNameIR) -> dict[str, str]:
             unary_ops.append(op)
 
     if binary_op is not None:
+        if any(_contains_binary_operator(argument) for argument in binary_op.args):
+            raise ValueError(
+                "nested binary operator tree is not representable in the "
+                "flat StandardName model; use grammar.parser.parse(..., "
+                "strict=True) for lossless validation"
+            )
         # A flux-surface reduction is the one operator the flat model can carry
         # alongside a binary application: it occupies the free `transformation`
         # slot and always renders OUTERMOST, so no wrap order needs recording.
@@ -647,6 +653,15 @@ def _ir_to_model_dict(ir: StandardNameIR) -> dict[str, str]:
                 d["physical_base"] = ir.base.token
 
     return _apply_locus_and_mechanism(d, ir)
+
+
+def _contains_binary_operator(ir: StandardNameIR) -> bool:
+    """Whether an IR subtree contains any binary operator application."""
+    return any(
+        operator.kind is OperatorKind.BINARY
+        or any(_contains_binary_operator(argument) for argument in operator.args)
+        for operator in ir.operators
+    )
 
 
 def _should_fold_inner_operand(
