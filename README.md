@@ -23,11 +23,19 @@ pip install imas-standard-names
 ### Python Library
 
 ```python
-from imas_standard_names import StandardNameCatalog
+from imas_standard_names import StandardNameIR, compose, parse
+from imas_standard_names.repository import StandardNameCatalog
 
 catalog = StandardNameCatalog()
 entry = catalog.get("electron_temperature")
 print(f"{entry.name}: {entry.unit} — {entry.description}")
+
+# Strict parsing is the validity oracle for both flat names and recursive
+# operator expressions.
+result = parse("square_of_inverse_of_pressure", strict=True)
+assert isinstance(result.ir, StandardNameIR)
+assert [operator.op for operator in result.ir.operators] == ["square", "inverse"]
+assert compose(result.ir) == "square_of_inverse_of_pressure"
 ```
 
 ## Installation
@@ -98,8 +106,12 @@ Full documentation: **[iterorganization.github.io/IMAS-Standard-Names](https://i
 
 | Entry point | Purpose |
 |------|---------|
-| `imas_standard_names.grammar.parse` | Parse a name into its grammatical components |
-| `imas_standard_names.grammar.compose` | Render a name from an intermediate representation |
+| `imas_standard_names.parse(name, strict=True)` | Authoritative validation for flat and recursively ordered grammar |
+| `imas_standard_names.parse(name)` | Diagnostic parse into a lossless `StandardNameIR` |
+| `imas_standard_names.compose` | Render a `StandardNameIR` into its canonical spelling |
+| `imas_standard_names.StandardNameIR` | Public recursive representation; operator lists are outermost first |
+| `imas_standard_names.grammar.model.parse_standard_name` | Strict-validating projection into the flat `StandardName` facade; may reject a valid ordered tree it cannot represent |
+| `imas_standard_names.validate_round_trip` | Diagnostic parse/render drift check; not a validity test |
 | `imas_standard_names.grammar.context.get_grammar_context` | Grammar rules and vocabulary for LLM pipelines |
 | `imas_standard_names.repository.StandardNameCatalog` | Query the catalog |
 | `imas_standard_names.canonical_unit` | Canonical unit authority |

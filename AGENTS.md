@@ -64,8 +64,8 @@ mirrored as `StrEnum` members in `grammar/model_types.py`. The parser uses greed
 longest-prefix matching for closed-vocabulary segments. These rules prevent ambiguity:
 
 **1. No compound tokens that subsume tokens from other segments.**
-A closed-vocabulary segment (e.g., `subject`) must NOT contain tokens that include
-words belonging to `physical_base` (open vocabulary). Example violation:
+A closed-vocabulary segment (e.g., `subject`) must not contain tokens that include
+words belonging to the closed `physical_base` segment. Example violation:
 `trapped_particle` as a subject token — the parser greedily consumes "particle",
 leaving an inconsistent `physical_base`. Correct: `trapped` alone is the subject;
 `particle_density` stays intact in `physical_base`.
@@ -77,10 +77,13 @@ Never combine them into a single subject token (e.g., `trapped_fast_particle`)
 because this prevents consistent grouping of orbit variants.
 
 **3. Test round-trip consistency before adding tokens.**
-Before adding any vocabulary token, verify that ALL existing names containing
+Before adding any vocabulary token, verify that all existing names containing
 the candidate string still parse and round-trip identically:
 ```python
+from imas_standard_names import parse
 from imas_standard_names.grammar.model import parse_standard_name, compose_standard_name
+
+parse(name, strict=True)  # authoritative validity check
 p = parse_standard_name(name)
 assert compose_standard_name(p) == name  # Round-trip
 ```
@@ -95,15 +98,15 @@ bases = {parse_standard_name(n).physical_base for n in orbit_variants}
 assert len(bases) == 1, f"Inconsistent grouping: {bases}"
 ```
 
-**5. `physical_base` is open vocabulary — never add to closed segments what belongs there.**
+**5. `physical_base` is closed vocabulary — never add to other segments what belongs there.**
 If a concept is a physical quantity (density, temperature, power_density, flux, etc.),
 it belongs in `physical_base` regardless of how compound it is. Only qualifier/modifier
 roles (species, orbit class, component, coordinate) belong in closed segments.
 
-**6. Validate with the catalog renderer.**
-After any vocabulary change, run the catalog renderer's `_parse_base()` on all
-existing names and verify that related names group together. The catalog site is
-the primary consumer of grammar decomposition for grouping.
+**6. Validate with the strict parser.**
+After any vocabulary change, run strict parsing over the catalog and verify
+that related names group together. The public parser is the grammar authority;
+catalog rendering is one consumer of its decomposition.
 
 ### YAML Structure Requirements
 
@@ -123,10 +126,20 @@ description: Starts with capital, under 120 chars
 
 ISN exposes a stable Python API that [imas-codex](https://github.com/iterorganization/imas-codex) depends on:
 
-- **Grammar**: `get_grammar_context()`, `parse_standard_name()`, `compose_standard_name()`
+- **Grammar IR**: package-level `parse()`, `compose()`, `StandardNameIR`,
+  `validate_round_trip()`, and `get_grammar_context()`
+- **Flat facade**: `parse_standard_name()`, `compose_standard_name()`
 - **Models**: `StandardNameEntryBase`, `create_standard_name_entry()`
 - **Validation**: `run_semantic_checks()`, `validate_description()`, `run_structural_checks()`
 - **Constants**: grammar vocabulary `StrEnum`s, tag constants, `PhysicsDomain`
+
+`parse(name, strict=True)` is the sole validity oracle for flat names and
+recursive ordered operator expressions. The default `parse(name)` mode and
+`validate_round_trip(name)` are diagnostic. `parse_standard_name(name)` first
+strictly validates, then projects into the flat `StandardName` model; it may
+reject a valid ordered operator tree that the flat facade cannot represent.
+Operator lists in `StandardNameIR` are outermost first, and unary and binary
+operands recurse through `StandardNameIR`.
 
 See [docs/architecture/boundary.md](docs/architecture/boundary.md) for the full contract and stability commitment.
 
@@ -544,18 +557,18 @@ Generated files (model_types.py, constants.py, tag_types.py, field_schemas.py) a
 - Document exceptions that may be raised
 
 ```python
-def parse_standard_name(name: str) -> dict[str, str]:
-    """Parse a standard name into its grammatical components.
+def validate_name(name: str) -> StandardNameIR:
+    """Validate a standard name and return its lossless grammar IR.
     
     ## Example
     
     ```python
-    parts = parse_standard_name("radial_component_of_magnetic_field")
-    print(parts["component"])  # "radial"
+    result = parse("square_of_inverse_of_pressure", strict=True)
+    return result.ir
     ```
     
     Raises:
-        ValueError: If name is invalid
+        ParseError: If name violates the grammar contract.
     """
     ...
 ```
@@ -608,6 +621,11 @@ How the parser resolves token-role ambiguity (see `grammar/parser.py`):
    because separator matching happens at the peel stages, not inside
    registered tokens.
 
+   Recursive binary exploration tries connector candidates right-to-left and
+   accepts a split only when both operands resolve. Parse results and failures
+   are memoized by substring and validation mode, bounding ambiguous connector
+   chains without changing their meaning.
+
 2. **Longest base match wins** — a registered multi-word base beats a
    qualifier + shorter-base split: `electron_kinetic_energy` keeps base
    `kinetic_energy`; in `ion_kinetic_energy_flux` the residue after `flux`
@@ -626,7 +644,10 @@ How the parser resolves token-role ambiguity (see `grammar/parser.py`):
 
 ### Qualifier Ordering
 
-Qualifiers are stored as an **ordered list** (insertion order from parse). Compose emits them in list order. Do NOT sort alphabetically — this breaks round-trip.
+Qualifiers are stored as an **ordered list**. Scoping qualifiers compose by
+the canonical category order in `qualifier_categories.yml`; tokens within one
+category retain their authored order. Other structured qualifier segments use
+their own registry order. Do not sort the full list alphabetically.
 
 ### Adding New Vocabulary
 

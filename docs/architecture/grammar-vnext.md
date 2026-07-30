@@ -1,275 +1,191 @@
-# Canonical Grammar Philosophy
+# Canonical Grammar
 
 > **Status**: Current specification.
-> **Scope**: Defines the canonical-form philosophy, the 5-group intermediate
-> representation (IR), canonical rendering templates, and the `_of_`
-> disambiguation rules that govern the ISN grammar.
-> **Companion code**: `imas_standard_names/grammar/ir.py` (IR model),
-> `imas_standard_names/grammar/render.py` (strict generator).
-> **Parser**: `imas_standard_names/grammar/parser.py`.
+> **Scope**: Defines strict validation, the recursive intermediate
+> representation (IR), canonical rendering, and operator-expression parsing.
 
-## 1. Design philosophy
+## Public parsing contract
 
-The grammar is built on five design commitments. Every subsequent rule
-flows from them.
+The package-level grammar surface is:
 
-### 1.1 Liberal parser, strict generator
+```python
+from imas_standard_names import StandardNameIR, compose, parse
 
-- The **parser** (`grammar/parser.py`) accepts known legacy and
-  colloquial variants. It emits `Diagnostic(category="non_canonical", …)`
-  annotations but always returns a valid IR when the residue resolves.
-- The **generator** (`grammar/render.py::compose`) emits **exactly one**
-  canonical string per IR. It has no fallbacks: malformed IR raises
-  `RenderError` rather than producing a best-effort string.
-- Round-trip safety is defined against the IR:
-  `compose(parse(name).ir) == canonical_form(name)` for every valid name.
+result = parse("square_of_inverse_of_pressure", strict=True)
+assert isinstance(result.ir, StandardNameIR)
+assert [operator.op for operator in result.ir.operators] == ["square", "inverse"]
+assert compose(result.ir) == "square_of_inverse_of_pressure"
+```
 
-### 1.2 Relations keep their prepositions
+`parse(name, strict=True)` is the authoritative validity oracle. It validates
+closed vocabulary, segment semantics, recursive operator semantics, precedence,
+and canonical spelling over the lossless IR.
 
-The four relational prepositions are **preserved**:
+The default `parse(name)` mode is diagnostic. It returns the same IR shape and
+diagnostics but deliberately omits some strict semantic gates.
+`validate_round_trip(name)` is also diagnostic: it asks only whether
+`compose(parse(name).ir) == name`.
 
-| Preposition | Role | Example |
-|---|---|---|
-| `_of_` | locus / unary-operator application | `elongation_of_plasma_boundary` |
-| `_at_` | evaluation at a point-like locus | `power_flux_density_at_inner_divertor_target` |
-| `_over_` | evaluation over a region | `integral_over_plasma_volume` |
-| `_due_to_` | mechanism / causal agent | `ion_momentum_flux_due_to_diamagnetic_drift` |
+`parse_standard_name(name)` is a strict-validating projection into the flat
+`StandardName` facade. A valid expression can exceed that facade, particularly
+when one binary operator contains another. Projection failure does not overturn
+the strict parser's validity result.
 
-Preposition stripping is rejected: prepositions carry
-boundary and semantic information that is expensive to recover from a flat
-token stream.
+## Closed vocabulary and canonical output
 
-### 1.3 Prepositions are scarce, single-role resources
+Every grammatical segment consumed by strict parsing is registry-backed. The
+diagnostic parser may report an advisory alias, but strict parsing establishes
+validity and accepts only the unique canonical spelling.
 
-Each preposition marks **exactly one** semantic role. In particular:
+`compose(ir)` deterministically renders the supplied IR and rejects structural
+malformation. It does not establish vocabulary membership, strict validity, or
+advisory-alias canonicality; callers requiring those guarantees validate the
+rendered name with `parse(name, strict=True)`.
 
-- `_at_` — position-typed locus only
-- `_over_` — region-typed locus only
-- `_due_to_` — mechanism only
-- `_of_` — operator application **or** entity-/position-typed locus (see §4)
+The registry is authoritative for operator kind, rendering template, precedence,
+separator, index parameters, argument kinds, and semantic flags. Operator tokens
+are bare: the template supplies `_of_` or the binary connector.
 
-This scarcity is what makes the grammar parseable without global backtracking.
-
-### 1.4 Operators carry explicit scope markers
-
-All operator templates render their scope marker inside the template engine,
-not inside the operator token:
-
-- Unary prefix operators render as `<op>_of_<inner>` — the `_of_` is emitted
-  by `render.py`, not baked into the token string. The operator registry
-  stores `magnitude`, not `magnitude_of`.
-- Unary postfix operators render as `<inner>_<op>` — no preposition needed.
-- Binary operators render as `<op>_of_<A>_<sep>_<B>` with the separator
-  (`_and_`, `_to_`) disambiguating which branch is which.
-
-This matters because it keeps one canonical place (the operator registry)
-where operator semantics live, and it lets the parser peel operators via
-longest-match against a clean bare-token vocabulary.
-
-### 1.5 Closed vocabularies everywhere (no fallback)
-
-Every segment of the IR — operators, qualifiers, base, axis, locus tokens,
-processes — is backed by a **closed** YAML vocabulary. Permissive fallbacks
-Open `physical_base` behavior is unsafe because it lets names
-drift outside the reviewed vocabulary and defeat the round-trip guarantee.
-
-## 2. Zero legacy acceptance
-
-Only canonical spellings are valid public output. The diagnostic IR parser
-may recognize an alternate vocabulary alias, but the strict validity oracle
-reports its canonical replacement.
-
-Consequences for the grammar:
-
-- The generator emits only the canonical form for an IR.
-- The diagnostic parser may recognize alternate surface strings, but every non-canonical
-  input yields a `Diagnostic(category="non_canonical")`, and the IR is
-  always re-rendered into the canonical form before publication.
-- There is no compatibility output mode that preserves alternate spellings.
-
-## 3. 5-group intermediate representation (IR)
-
-The IR organizes the flat model fields into five groups, one of which
-(operators) is recursive.
+## Recursive IR
 
 ```text
 StandardNameIR := {
-    operators:  [OperatorApplication],       # outer-to-inner stack
-    projection: AxisProjection | None,       # <axis>_component / _coordinate
-    qualifiers: [Qualifier],                 # species / source entity
-    base:       QuantityBase | GeometryCarrier,
-    locus:      LocusRef | None,             # _of_E / _at_L / _over_R
-    mechanism:  Process | None,              # _due_to_P
+    operators:  [OperatorApplication],       # outermost first
+    projection: AxisProjection | None,
+    qualifiers: [Qualifier],
+    base:       QuantityOrCarrier,
+    locus:      LocusRef | None,
+    mechanism:  Process | None,
 }
 
 OperatorApplication := {
     kind: "unary_prefix" | "unary_postfix" | "binary",
-    op:   Token,                             # bare; registry-resolved
-    args: [StandardNameIR],                  # unary: 1 arg; binary: 2 args
-}
-
-AxisProjection := {
-    axis:  CoordinateAxis,                   # closed vocab
-    shape: "component" | "coordinate",
-}
-
-LocusRef := {
-    relation: "of" | "at" | "over",
-    token:    LocusToken,                    # closed registry
-    type:     "entity" | "position" | "region" | "geometry",
+    op:   Token,
+    args: [StandardNameIR],
+    separator: "and" | "to" | None,
 }
 ```
 
-Rules:
+The IR is recursive:
 
-- **Operators are a tree, not a flat list.** `maximum_of_derivative_of_X_with_respect_to_Y`
-  has two nested operators; each `args[i]` is itself a `StandardNameIR`.
-- **Projection is typed by base.** `shape=component` requires `base` to be a
-  `QuantityBase`; `shape=coordinate` requires `base` to be a
-  `GeometryCarrier`. This encodes the distinction that `radial_magnetic_field`
-  is a quantity projection while `radial_coordinate_of_magnetic_axis` is a
-  geometric coordinate lookup.
-- **Qualifiers are plain prefix tokens** drawn from closed vocabularies
-  (species, source entity). They are unordered conceptually, but render in
-  a canonical order (see §4.3).
-- **`base` is exactly one token** from either `physical_bases.yml` or
-  `geometry_carriers.yml`. There is no "base stack" and no open fallback.
-- **Locus is optional and typed.** The relation is chosen from the locus
-  type via a compatibility matrix (§5); it is never a free choice.
-- **Mechanism is optional** and drawn from the closed `processes.yml`.
+- A unary chain is ordered outermost first. A unary application can carry one
+  explicit `StandardNameIR` operand; the compact form uses the remaining
+  operator stack and enclosing core as that operand.
+- A binary application always carries two ordered `StandardNameIR` operands.
+  The left and right branches retain their own operator trees.
+- `compose()` preserves authored operator order. It does not commute,
+  reassociate, or simplify expressions.
 
-## 4. Canonical rendering templates
+For `square_of_inverse_of_pressure`, the operator list is `square`, then
+`inverse`. For
+`ratio_of_ratio_of_electron_density_to_ion_density_to_square_of_magnetic_field_magnitude`,
+the outer ratio's left operand is itself a ratio tree. The flat facade cannot
+represent that second form, but the recursive IR can.
 
-The generator is a pure function `compose(ir) -> str`. Its structure is:
+## Operator templates
+
+| Kind | Canonical template | Arity |
+|------|--------------------|-------|
+| Unary prefix | `<op>_of_<inner>` | one |
+| Bare unary prefix | `<op>_<inner>` | one, only for registry-declared bare spellings |
+| Unary postfix | `<inner>_<op>` | one |
+| Binary | `<op>_of_<A>_<separator>_<B>` | two |
+
+Binary `product` and `difference` use `_and_`; `ratio` uses `_to_`.
+Indexed operators bind their registered indices without changing the recursive
+shape. For example, `derivative_with_respect_to` accepts a coordinate index,
+while indexed postfix operators use their own registered parameters.
+
+The operator registry contains unary prefix, unary postfix, and binary entries.
+Its precedence values currently range from root decorators through
+decompositions and algebraic transforms to reductions and modal or indexed
+forms. Higher precedence wraps farther out. Equal-precedence operators retain
+their authored order:
 
 ```text
-compose(ir) :=
-    render_operators(ir.operators, inner_fn)
-        where inner_fn() :=
-            [render_projection(ir.projection) + "_of_"]?
-            [render_qualifiers(ir.qualifiers) + "_"]?
-            base_token
-            [render_locus(ir.locus)]?
-            [render_mechanism(ir.mechanism)]?
+square_of_inverse_of_pressure
+inverse_of_square_of_pressure
 ```
 
-### 4.1 `render_operators(ops, inner_fn)`
+These are distinct valid trees. In contrast, a lower-precedence operator cannot
+wrap a higher-precedence operator in the wrong order.
 
-Apply operators outer-to-inner. Outer = first element of the list.
+The full current token inventory and metadata are generated from the operator
+registry in the [grammar reference](../grammar-reference.md#operators).
 
-- `unary_prefix`: `"<op>_of_<rest>"` where `<rest>` is the recursive rendering
-  of the remaining operator list applied to `inner_fn()`.
-- `unary_postfix`: `"<rest>_<op>"` (no preposition).
-- `binary`: `"<op>_of_<A>_<sep>_<B>"` where `A` and `B` are `compose(args[0])`
-  and `compose(args[1])` respectively; `<sep>` ∈ {`and`, `to`} determined by
-  the operator's registered separator.
+## Binary splitting and associativity
 
-### 4.2 `render_projection(projection)`
+A binary surface form has no parentheses, so the explicit nested operator
+prefixes carry the tree structure. The parser:
 
-- `shape=component` → `"<axis>_component"`
-- `shape=coordinate` → `"<axis>_coordinate"` (only valid when base is a
-  `GeometryCarrier`)
+1. identifies the outer registered binary operator and its declared connector;
+2. tries connector positions from right to left;
+3. recursively parses both candidate operands;
+4. accepts the first split for which both branches resolve;
+5. retains that ordered tree exactly.
 
-The trailing `_of_` is emitted by the surrounding template, not by
-`render_projection`.
+This rule prevents `_to_` or `_and_` inside a registered operand from forcing a
+bad split. It also defines surface associativity without algebraic
+reinterpretation: nested binary operators must be spelled explicitly, and
+rendering reproduces the chosen tree.
 
-### 4.3 `render_qualifiers(qualifiers)`
+Recursive exploration memoizes both successful parses and failures by substring
+and validation mode. Ambiguous or adversarial connector chains therefore do not
+re-parse the same candidate operands repeatedly.
 
-Qualifiers render in **stable canonical order**: lexicographic by token
-string. Multi-qualifier names are rare in practice, but when they occur the
-ordering must be deterministic so that distinct permutations do not render
-to distinct strings.
+## Strict semantic validation
 
-### 4.4 `render_locus(locus)`
+After structural parsing, strict mode recursively checks:
 
-- `locus` is rendered as `"_<relation>_<token>"`.
-- `relation` is validated against `locus.type` via the compatibility matrix
-  (§5). A mismatch raises `RenderError`.
-- The locus suffix is always the **last `_of_`** in a name (trailing-position
-  rule), which lets the parser identify it without global backtracking.
+- operator registration, kind, separator, indexed form, and precedence;
+- closed vocabulary for every binary operand;
+- operator argument-kind and expression-kind constraints;
+- flat segment compatibility within every wrapped core;
+- generic-base qualification;
+- state-to-species compatibility;
+- flux-surface reduction semantics through nested unary and binary branches;
+- byte-identical canonical rendering.
 
-### 4.5 `render_mechanism(mechanism)`
+Wrapping an invalid flat core in operators cannot make it valid. Likewise, an
+unknown locus or mechanism on a recursive binary tree remains invalid.
 
-- Renders as `"_due_to_<process>"`.
-- Always trailing — after the locus, if both are present.
+## Projection, qualifiers, loci, and mechanisms
 
-## 5. Locus relation compatibility matrix
+Projection is typed by the base:
 
-```text
-type       | of  | at  | over
------------+-----+-----+------
-entity     |  ✓  |  ·  |  ·
-position   |  ✓  |  ✓  |  ·
-region     |  ·  |  ·  |  ✓
-geometry   |  ✓  |  ·  |  ·
-```
+- an axis over a quantity is a component, such as `radial_magnetic_field`;
+- an axis over a geometry carrier is a coordinate, such as
+  `radial_position_of_flux_loop`.
 
-- `entity` and `geometry` accept only `_of_` (they answer "of what").
-- `position` accepts `_of_` and `_at_` (both "where" relations; parser
-  chooses by context, generator renders whatever the IR specifies).
-- `region` accepts only `_over_` (regions are extended, not point-like).
+Qualifiers use registry-defined canonical order. Scoping qualifiers follow the
+ordered category registry, and tokens within one category retain authored
+order. The grammar never alphabetizes the complete qualifier list.
 
-Applying the wrong relation to a typed locus is a **hard error** in the
-generator and a **diagnostic** in the parser.
+Relations keep their meaning:
 
-## 6. `_of_` disambiguation — exactly three roles
+| Relation | Role |
+|----------|------|
+| `_of_` | unary or binary operator application, or an entity/geometry locus |
+| `_at_` | point-like locus |
+| `_over_` | region locus |
+| `_along_` | path locus |
+| `_due_to_` | mechanism |
 
-`_of_` appears only in the following structural positions.
-The parser uses these rules to unambiguously classify every `_of_` it sees.
+The parser peels a trailing postfix operator, mechanism, and locus before
+resolving the outer prefix or binary expression and then the core. Registered
+multi-word tokens remain atomic throughout this process.
 
-| Role | Template | Disambiguator |
-|---|---|---|
-| **Unary prefix operator** | `<op>_of_<inner>` | `<op>` matches the operator registry via **longest-match-first**; `<inner>` is a recursively parseable IR. |
-| **Binary operator** | `<op>_of_<A>_<sep>_<B>` | Mandatory `_and_` or `_to_` separator in the tail. |
-| **Locus relation** | `…_of_<LocusToken>` | Always **trailing position**. The final `_of_` in a name is always a locus relation, provided the trailing token is in `locus_registry.yml` with `of ∈ allowed_relations`. |
+## Cross-project contract
 
-### 6.1 Assertion helpers (encoded in code)
+`get_grammar_context()["grammar"]` exposes:
 
-The IR model and `render.py` encode three assertion helpers that pin these
-rules at runtime:
+- registry-derived vocabularies and canonical templates;
+- the locus relation matrix and binary separators;
+- segment-scoped advisory aliases;
+- the package-level parse, compose, and IR entry points;
+- the strict validity mode, diagnostic default, round-trip diagnostic mode,
+  flat-projection boundary, and outermost-first operator order.
 
-- `assert_operator_of_form(op, registry)` — an `OperatorApplication` with
-  `kind=unary_prefix` must resolve `op` to a registered prefix operator.
-- `assert_binary_has_separator(op, registry)` — an `OperatorApplication`
-  with `kind=binary` must resolve to an operator whose registry entry
-  declares a separator (`and` or `to`).
-- `assert_locus_is_trailing(ir)` — at render time, the locus suffix is the
-  final `_<relation>_<token>` segment in the rendered string, followed only
-  by an optional `_due_to_<process>` mechanism tail.
-
-These helpers are invoked from the IR's Pydantic validators and from
-`compose()` as safety nets. They are **not** registry lookups themselves —
-the parser and renderer receive the same registry-backed vocabulary context.
-The helpers accept a registry argument, which may be a `dict`, a `Mapping`,
-or `None` for pure-shape checks.
-
-### 6.2 Forms explicitly rejected
-
-Usages of `_of_` that do not fit one of the three roles above are rejected
-by the parser:
-
-- **Free-form "property of object" where the trailing token is not a
-  registered locus.** Must be either added to `locus_registry.yml` or
-  rewritten.
-- **Direct component prefix** (`radial_magnetic_field`).
-  The canonical spelling uses the axis directly, and the typed base records
-  that `_of_` is the **operator-application `_of_`** rendered by the
-  projection template, not a locus relation. The parser distinguishes it
-  because it is immediately preceded by a closed `CoordinateAxis` token
-  followed by `_component` or `_coordinate`.
-- **Baked-in operator tokens** (`magnitude_of`, `time_derivative_of`).
-  The operator registry stores bare `magnitude`, `time_derivative`; the
-  `_of_` is emitted by `render_operators`.
-- **Unregistered trailing loci.** The final relation target must resolve
-  through `locus_registry.yml`; otherwise the residue is rejected instead of
-  being accepted as a free-form object.
-
-## 7. Relationship between grammar modules
-
-The typed IR and renderer (`ir.py`, `render.py`) sit behind the public
-flat-model surface (`grammar/model.py`). The parser produces IR, the renderer
-composes it, and the model adapter preserves the public structured interface.
-
-## 8. References
-
-- Boundary contract — `docs/architecture/boundary.md` in this repo.
+See [Project Boundary](boundary.md) for the stability commitment and
+[Data Flow](data-flow.md) for how strict validation enters the publication
+pipeline.

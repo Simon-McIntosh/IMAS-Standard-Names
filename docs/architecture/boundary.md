@@ -33,11 +33,13 @@ The following functions and models form the cross-project contract that imas-cod
 | Function | Module | Purpose |
 |----------|--------|---------|
 | `get_grammar_context()` | `imas_standard_names.grammar.context` | Returns all naming knowledge (patterns, vocabulary, rules) as a single dict for LLM pipelines |
-| `parse_standard_name()` | `imas_standard_names.grammar.model` | Parses a name string into a typed `StandardName` with grammar segments |
-| `compose_standard_name()` | `imas_standard_names.grammar.model` | Builds a valid name string from a `StandardName` or dict of parts |
-| `parse()` | `imas_standard_names` | Parses a name into the diagnostic IR, preserving its operator chain outermost first |
+| `parse(name, strict=True)` | `imas_standard_names` | Authoritative validity oracle for flat names and recursive ordered expressions |
+| `parse(name)` | `imas_standard_names` | Diagnostic parse into a lossless `StandardNameIR`; this is the default mode |
 | `compose()` | `imas_standard_names` | Renders a `StandardNameIR` into its canonical string |
-| `StandardNameIR` | `imas_standard_names` | Ordered intermediate representation used for structural inspection |
+| `StandardNameIR` | `imas_standard_names` | Public recursive representation; operator lists are ordered outermost first |
+| `validate_round_trip()` | `imas_standard_names` | Diagnostic parse/render drift check; not a validity test |
+| `parse_standard_name()` | `imas_standard_names.grammar.model` | Strict-validating projection into the flat `StandardName` facade |
+| `compose_standard_name()` | `imas_standard_names.grammar.model` | Builds a valid name string from a `StandardName` or dict of parts |
 
 ```python
 from imas_standard_names import StandardNameIR, compose, parse
@@ -47,40 +49,52 @@ from imas_standard_names.grammar.model import parse_standard_name, compose_stand
 # Get complete grammar context for an LLM pipeline
 ctx = get_grammar_context()
 
-# Parse a name into segments
+# Validate and project a flat name into segments
 parsed = parse_standard_name("radial_magnetic_field")
 print(parsed.component)  # "radial"
 
 # Compose from parts
 name = compose_standard_name({"component": "radial", "physical_base": "magnetic_field"})
 
-# Inspect a nested operator chain without relying on parser internals
-diagnostic = parse("square_of_inverse_of_pressure")
-assert isinstance(diagnostic.ir, StandardNameIR)
-assert [operator.op for operator in diagnostic.ir.operators] == ["square", "inverse"]
-assert compose(diagnostic.ir) == "square_of_inverse_of_pressure"
+# Validate and inspect a nested operator chain without relying on internals
+validated = parse("square_of_inverse_of_pressure", strict=True)
+assert isinstance(validated.ir, StandardNameIR)
+assert [operator.op for operator in validated.ir.operators] == ["square", "inverse"]
+assert compose(validated.ir) == "square_of_inverse_of_pressure"
 ```
 
-**Parse contract — `parse_standard_name` is the single validity oracle.** A
-name is valid if and only if `parse_standard_name` returns without raising. It
-enforces the full contract: known tokens, segment compatibility, the
-generic-base qualification gate, the flux-surface reduction gate, and strict
-canonical spelling (exactly one admissible spelling per name; a non-canonical
-token order raises `NonCanonicalNameError` carrying the canonical form).
+**Parse contract — `parse(name, strict=True)` is the sole validity oracle.** It
+validates registry metadata, closed operand vocabulary, flat segment
+compatibility, generic-base qualification, recursive flux-surface semantics,
+operator precedence, and canonical spelling without first flattening the
+ordered expression. A name is valid if and only if this call returns without
+raising `ParseError`.
 
-The package-level `parse`, `compose`, `StandardNameIR`, and
-`validate_round_trip` exports form the stable structural-inspection surface.
-`StandardNameIR.operators` is ordered outermost first. These tools are not the
-validity oracle: `validate_round_trip` only answers "does this name render back
-to itself?", which is strictly weaker than validity because it skips the
-segment-compatibility and gating checks. Callers deciding whether a name is
-acceptable must use `parse_standard_name`, then may use `parse` to inspect its
-ordered structure.
+The default `parse(name)` mode is diagnostic. It preserves the lossless IR and
+reports aliases or ambiguities, but it intentionally does not apply every
+semantic gate. `validate_round_trip(name)` also uses that diagnostic mode and
+answers only whether the parsed IR renders byte-for-byte to the input.
+
+`parse_standard_name(name)` first performs strict validation and then projects
+the result into the flat `StandardName` model. Use it when a consumer needs
+flat segment fields. A recursively ordered expression can be valid according
+to the oracle yet raise because the flat facade cannot represent its tree; for
+example, a binary operator nested inside another binary operator. That
+projection limitation does not make the name invalid.
+
+`StandardNameIR.operators` is ordered outermost first. Unary operands and both
+ordered binary operands are recursive `StandardNameIR` values. Equal-precedence
+operators retain authored order; different precedence levels must place the
+higher-precedence wrapper farther out. Binary split candidates are tried from
+right to left and accepted only when both recursive operands resolve, so
+separator words embedded in registered operands do not determine the split.
 
 `get_grammar_context()["grammar"]["vocabularies"]["qualifier_categories"]`
 exposes the category-to-token mapping in canonical category order. The mapping
 is derived from the same registry that canonical composition applies, so prompt
 consumers can stack qualifiers in an order that the validity oracle accepts.
+Its `parse_api` metadata names the strict oracle, diagnostic default, round-trip
+diagnostic, and flat-projection boundary explicitly.
 
 ### Models
 

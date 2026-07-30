@@ -847,7 +847,7 @@ def _build_grammar_context() -> dict[str, Any]:
     Returns a dict with keys: ``ir_groups`` (the 5 IR slots + mechanism),
     ``vocabularies`` (tokens per closed-vocab file), ``locus_relation_matrix``,
     ``advisory_aliases`` (validated policy guidance), ``canonical_templates``,
-    and ``parse_api`` (callable names).
+    and ``parse_api`` (public callables plus validation and projection modes).
 
     Optional vocabulary-enrichment loader failures yield empty fields, so
     consumers must tolerate partially populated vocabularies. Advisory-alias
@@ -932,6 +932,18 @@ def _build_grammar_context() -> dict[str, Any]:
             "compose": "imas_standard_names:compose",
             "validate_round_trip": "imas_standard_names:validate_round_trip",
             "ir_model": "imas_standard_names:StandardNameIR",
+            "validity_oracle": {
+                "call": "imas_standard_names:parse",
+                "arguments": {"strict": True},
+            },
+            "default_parse_mode": "diagnostic",
+            "round_trip_mode": "diagnostic_only",
+            "flat_projection": {
+                "call": "imas_standard_names.grammar.model:parse_standard_name",
+                "validation": "strict",
+                "representation": "flat",
+                "ordered_ir": "may_reject_unrepresentable",
+            },
             "operator_chain_order": "outermost_first",
         },
     }
