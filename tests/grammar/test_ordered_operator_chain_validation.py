@@ -279,7 +279,6 @@ def test_unprojectable_binary_wrapper_does_not_hide_invalid_decorator(
 @pytest.mark.parametrize(
     "decorator",
     [
-        "at_magnetic_axis",
         "due_to_non_inductive_current_drive",
     ],
 )
@@ -289,6 +288,18 @@ def test_unprojectable_binary_wrapper_accepts_valid_decorator(
     name = f"maximum_of_ratio_of_electron_density_to_ion_density_{decorator}"
 
     assert compose(parse(name, strict=True).ir) == name
+
+
+def test_unprojectable_binary_wrapper_scopes_position_to_final_operand() -> None:
+    name = "maximum_of_ratio_of_electron_density_to_ion_density_at_magnetic_axis"
+
+    parsed = parse(name, strict=True).ir
+    binary = parsed.operators[-1]
+
+    assert parsed.locus is None
+    assert binary.args[1].locus is not None
+    assert binary.args[1].locus.token == "magnetic_axis"
+    assert compose(parsed) == name
 
 
 @pytest.mark.parametrize(
@@ -372,7 +383,6 @@ def test_nested_binary_tree_rejects_unknown_root_decorator(decorator: str) -> No
 @pytest.mark.parametrize(
     "decorator",
     [
-        "at_magnetic_axis",
         "due_to_non_inductive_current_drive",
     ],
 )
@@ -382,6 +392,13 @@ def test_nested_binary_tree_accepts_registered_root_decorator(
     name = f"{NESTED_DENSITY_RATIO}_{decorator}"
 
     assert compose(parse(name, strict=True).ir) == name
+
+
+def test_nested_binary_tree_rejects_noncanonical_final_operand_locus() -> None:
+    name = f"{NESTED_DENSITY_RATIO}_at_magnetic_axis"
+
+    with pytest.raises(ParseError, match="rendered ordered expression"):
+        parse(name, strict=True)
 
 
 @pytest.mark.parametrize(
