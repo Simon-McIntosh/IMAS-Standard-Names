@@ -431,7 +431,13 @@ def _ir_to_model_dict(ir: StandardNameIR) -> dict[str, str]:
         # Render each operand back to its string form (physical_base, secondary_base)
         if len(binary_op.args) == 2:
             d["physical_base"] = _compose_ir(binary_op.args[0])
-            d["secondary_base"] = _compose_ir(binary_op.args[1])
+            right_operand = binary_op.args[1]
+            if right_operand.locus is not None:
+                right_core = right_operand.model_copy(update={"locus": None})
+                d["secondary_base"] = _compose_ir(right_core)
+                _apply_locus_and_mechanism(d, right_operand)
+            else:
+                d["secondary_base"] = _compose_ir(right_operand)
     else:
         # Unary operators
         prefix_ops = [op for op in unary_ops if op.kind is OperatorKind.UNARY_PREFIX]
@@ -911,6 +917,29 @@ def _model_to_ir(model: StandardName) -> StandardNameIR:
     # Mechanism
     if model.process:
         mechanism = IRProcess(token=_value_of(model.process))
+
+    if model.binary_operator and locus is not None:
+        binary_index = next(
+            index
+            for index, operator in enumerate(operators)
+            if operator.kind is OperatorKind.BINARY
+        )
+        binary = operators[binary_index]
+        right_operand = binary.args[1]
+        if right_operand.locus is not None:
+            raise ValueError(
+                "a binary expression cannot carry a locus when its final "
+                "operand already has one"
+            )
+        operators[binary_index] = binary.model_copy(
+            update={
+                "args": [
+                    binary.args[0],
+                    right_operand.model_copy(update={"locus": locus}),
+                ]
+            }
+        )
+        locus = None
 
     return StandardNameIR(
         operators=operators,

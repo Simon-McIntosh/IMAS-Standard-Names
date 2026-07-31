@@ -42,7 +42,7 @@ class TestBinaryOperatorCompose:
         )
         assert model.compose() == "difference_of_total_pressure_and_electron_pressure"
 
-    def test_binary_operator_with_position_suffix(self):
+    def test_binary_operator_with_final_operand_position(self):
         name = compose_name(
             {
                 "binary_operator": "ratio_of",
@@ -54,6 +54,17 @@ class TestBinaryOperatorCompose:
         assert (
             name == "ratio_of_electron_temperature_to_ion_temperature_at_magnetic_axis"
         )
+
+    def test_binary_operator_rejects_repeated_final_operand_position(self):
+        model = StandardName(
+            binary_operator="ratio_of",
+            physical_base="electron_temperature",
+            secondary_base="ion_temperature_at_magnetic_axis",
+            position="magnetic_axis",
+        )
+
+        with pytest.raises(ValueError, match="final operand already has one"):
+            model.compose()
 
     def test_binary_operator_with_process_suffix(self):
         name = compose_name(
@@ -104,7 +115,7 @@ class TestBinaryOperatorParse:
         assert result.physical_base == "total_pressure"
         assert result.secondary_base == "electron_pressure"
 
-    def test_parse_with_suffix(self):
+    def test_parse_with_final_operand_position(self):
         result = parse_name(
             "ratio_of_electron_temperature_to_ion_temperature_at_magnetic_axis"
         )

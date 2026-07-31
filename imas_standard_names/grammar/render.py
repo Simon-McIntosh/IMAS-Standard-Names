@@ -249,6 +249,14 @@ def compose(ir: StandardNameIR) -> str:
             f"compose() expects a StandardNameIR, got {type(ir).__name__}"
         )
 
+    if ir.locus is not None and any(
+        operator.kind is OperatorKind.BINARY for operator in ir.operators
+    ):
+        raise RenderError(
+            "a locus on an enclosing binary expression is ambiguous with a "
+            "locus on its final operand; attach the locus to an operand"
+        )
+
     try:
         inner = _render_base_with_decorators(ir)
         rendered = _render_operator_stack(list(ir.operators), inner, ir)
@@ -257,11 +265,11 @@ def compose(ir: StandardNameIR) -> str:
     except ValueError as exc:
         raise RenderError(str(exc)) from exc
 
-    # Binary operators replace `inner` entirely, losing any locus/mechanism
-    # that was rendered into `inner` by _render_base_with_decorators.
-    # Re-append them from the top-level IR.
+    # Binary operators replace `inner` entirely, losing any mechanism that was
+    # rendered into `inner` by _render_base_with_decorators. Re-append it from
+    # the top-level IR. A top-level locus is rejected above because its flat
+    # spelling cannot distinguish it from a final-operand locus.
     if any(op.kind is OperatorKind.BINARY for op in ir.operators):
-        rendered += render_locus(ir.locus)
         rendered += render_mechanism(ir.mechanism)
 
     # Safety net: enforce the trailing-locus rule on the final string.

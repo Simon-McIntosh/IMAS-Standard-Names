@@ -733,7 +733,27 @@ def _peel_outer_operator(
             [],
         )
 
-    # c) binary: s starts with "<op>_of_" and contains its declared separator
+    binary = _peel_binary_operator(s, v, diagnostics)
+    if binary is not None:
+        return binary
+
+    return None, s, []
+
+
+def _peel_binary_operator(
+    s: str,
+    v: Vocabularies,
+    diagnostics: list[Diagnostic] | None = None,
+) -> tuple[OperatorApplication, str, list[StandardNameIR]] | None:
+    """Resolve one leading binary application, including recursive operands.
+
+    Binary operands own their complete recursive expression, including a
+    terminal locus.  Resolving this form before the enclosing parser strips a
+    locus prevents the final operand's suffix from being hoisted onto the
+    binary expression, whose surface spelling cannot preserve that distinction.
+    """
+
+    binary_ops = _binary_operator_tokens(v)
     for op in sorted(binary_ops, key=len, reverse=True):
         prefix = f"{op}_of_"
         if not s.startswith(prefix):
@@ -793,7 +813,30 @@ def _peel_outer_operator(
                     [a_ir, b_ir],
                 )
 
-    return None, s, []
+    return None
+
+
+def _peel_leading_binary_expression(
+    s: str,
+    v: Vocabularies,
+    diagnostics: list[Diagnostic] | None = None,
+) -> list[OperatorApplication] | None:
+    """Resolve a binary application and any explicit unary wrappers.
+
+    The returned stack is outermost first. A unary-only expression returns
+    ``None`` so its trailing decorators continue through the flat parser path.
+    """
+
+    operators: list[OperatorApplication] = []
+    residue = s
+    while True:
+        operator, new_residue, _ = _peel_outer_operator(residue, v, diagnostics)
+        if operator is None:
+            return None
+        operators.append(operator)
+        if operator.kind is OperatorKind.BINARY:
+            return operators
+        residue = new_residue
 
 
 def _peel_trailing_postfix_operator(
@@ -1793,6 +1836,23 @@ def _parse_uncached(
 
     # Mechanism pass.
     mechanism, s = _strip_mechanism(s)
+
+    # A binary application has precedence over a trailing locus: the suffix
+    # may belong to its recursively parsed final operand.  Parsing the binary
+    # first is the only lossless interpretation because an enclosing binary
+    # locus has the same flat spelling and the renderer rejects that ambiguous
+    # IR shape.
+    leading_expression = _peel_leading_binary_expression(s, v, diagnostics)
+    if leading_expression is not None:
+        ir = StandardNameIR(
+            operators=[*trailing_postfix, *leading_expression],
+            base=QuantityOrCarrier(token="placeholder", kind=BaseKind.QUANTITY),
+            mechanism=mechanism,
+        )
+        result = ParseResult(ir=ir, diagnostics=diagnostics)
+        if strict:
+            _strict_validate(name, result.ir, v)
+        return result
 
     # Locus pass.
     locus, s, locus_diags = _strip_locus(s, v)
