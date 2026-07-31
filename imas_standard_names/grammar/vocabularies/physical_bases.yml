@@ -551,7 +551,17 @@ bases:
     # radiometric radiance: power per unit area per unit solid angle
     # (W.m^-2.sr^-1); the wavelength-resolved form is the `spectral`
     # qualifier: spectral_radiance.
-    # DD: spectrometer_*/processed_line/radiance, soft_x_rays/channel/intensity
+    # Distinct from photon_radiance, which counts photons rather than energy.
+    # DD: soft_x_rays/channel/intensity and other power-valued radiance signals
+    aliases: []
+    kind: scalar
+    inherently_dimensional: true
+  photon_radiance:
+    # photon count rate per unit projected area per unit solid angle
+    # (m^-2.s^-1.sr^-1). This is the established IUPAC/CIE photon-number
+    # counterpart of energy radiance, not an alias of radiance or brightness.
+    # IUPAC Gold Book P04639; CIE e-ILV 17-21-051.
+    # DD: spectrometer_*/processed_line/radiance
     aliases: []
     kind: scalar
     inherently_dimensional: true
