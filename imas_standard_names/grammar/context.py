@@ -905,6 +905,7 @@ def _build_grammar_context() -> dict[str, Any]:
                     "precedence": entry.precedence,
                     "separator": entry.separator,
                     "indexed": entry.indexed,
+                    "semantic_effects": sorted(entry.semantic_effects),
                 }
                 for token, entry in (ops.operators.items() if ops else ())
             },

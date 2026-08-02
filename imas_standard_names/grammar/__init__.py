@@ -22,6 +22,7 @@ from .model_types import (
     Subject,
     Transformation,
 )
+from .operator_semantics import get_operator_semantics
 from .support import (
     TOKEN_PATTERN,
     UnknownBaseTokenError,
@@ -73,6 +74,7 @@ __all__ = [
     "compose_name",
     "parse_name",
     "get_grammar_context",
+    "get_operator_semantics",
     "normalize_standard_name",
     "validate_forbidden_patterns",
     "value_of",

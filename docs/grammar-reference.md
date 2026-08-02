@@ -218,7 +218,13 @@ Examples that violate the grammar:
 
 ## Implementation
 
-The package-level public surface is `parse`, `compose`, and `StandardNameIR`.
+The package-level public surface includes `parse`, `compose`, `StandardNameIR`,
+and `get_operator_semantics`. Use the semantic lookup when behavior depends on
+an operator's meaning: it returns an immutable effect set for any token and an
+empty set for unknown or non-operator tokens. Query tokens found in both the
+operator and qualifier IR groups because bare-prefix operators can normalize as
+qualifiers. The same metadata is serialized in
+`get_grammar_context()["grammar"]["vocabularies"]["operators"]`.
 Use `parse(name, strict=True)` for validation. Use
 `parse_standard_name(name)` only when a strict-valid name must also project
 into the flat `StandardName` facade; valid nested binary trees may be
