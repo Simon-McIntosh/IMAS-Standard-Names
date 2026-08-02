@@ -115,6 +115,7 @@ def load_locus_registry() -> LocusRegistry:
 # ---------------------------------------------------------------------------
 
 OperatorKind = Literal["unary_prefix", "unary_postfix", "binary"]
+OperatorSemanticEffect = Literal["temporal_change"]
 
 
 class OperatorDef(BaseModel, extra="forbid"):
@@ -143,6 +144,7 @@ class OperatorDef(BaseModel, extra="forbid"):
     # is only legal in transformation (prefix) position — maximum_of_<base> —
     # so the same token appearing as an INFIX qualifier is rejected.
     extremum_reduction: bool = False
+    semantic_effects: frozenset[OperatorSemanticEffect] = frozenset()
 
 
 class OperatorRegistry(BaseModel, extra="forbid"):

@@ -1,7 +1,6 @@
 # Operator registry vocabulary
 #
-# Unified replacement for transformations.yml + decomposition.yml +
-# reductions.py patterns.  All operator tokens are stored as BARE tokens
+# All operator tokens are stored as bare tokens
 # (no trailing _of_); the rendering engine appends _of_ for unary_prefix
 # operators and handles binary separators.
 #
@@ -13,14 +12,14 @@
 #   separator     - str used between arguments for binary operators
 #   indexed       - bool; if true, index parameters are appended to the name
 #   index_params  - list[str] naming the index parameters (requires indexed=true)
+#   semantic_effects - stable semantic categories supplied to consumers
 #
 # Rendering templates:
 #   unary_prefix   ->  <token>_of_<inner>
 #   unary_postfix  ->  <inner>_<token>
 #   binary         ->  <token>_of_<A><separator><B>
 #
-# Unified registry of prefix, postfix, and binary operators (superseded the
-# separate transformations.yml and decomposition.yml vocabularies).
+# Unified registry of prefix, postfix, and binary operators.
 
 operators:
 
@@ -193,6 +192,7 @@ operators:
     precedence: 20
     returns: rate
     dimension_transforming: true
+    semantic_effects: [temporal_change]
 
   # Finite/discrete increment (Delta) of the base over an event — NOT a rate.
   # Unlike tendency/time_derivative (which return a per-time rate and render
@@ -204,6 +204,7 @@ operators:
     kind: unary_prefix
     precedence: 20
     returns: scalar_or_vector
+    semantic_effects: [temporal_change]
 
   time_averaged:
     kind: unary_prefix
@@ -215,6 +216,7 @@ operators:
     precedence: 20
     returns: rate
     dimension_transforming: true
+    semantic_effects: [temporal_change]
 
   variation:
     kind: unary_prefix

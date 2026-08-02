@@ -37,12 +37,18 @@ The following functions and models form the cross-project contract that imas-cod
 | `parse(name)` | `imas_standard_names` | Diagnostic parse into a lossless `StandardNameIR`; this is the default mode |
 | `compose()` | `imas_standard_names` | Renders a `StandardNameIR` into its canonical string |
 | `StandardNameIR` | `imas_standard_names` | Public recursive representation; operator lists are ordered outermost first |
+| `get_operator_semantics(token)` | `imas_standard_names` | Returns the immutable semantic-effect set for an operator token; unknown tokens return an empty set |
 | `validate_round_trip()` | `imas_standard_names` | Diagnostic parse/render drift check; not a validity test |
 | `parse_standard_name()` | `imas_standard_names.grammar.model` | Strict-validating projection into the flat `StandardName` facade |
 | `compose_standard_name()` | `imas_standard_names.grammar.model` | Builds a valid name string from a `StandardName` or dict of parts |
 
 ```python
-from imas_standard_names import StandardNameIR, compose, parse
+from imas_standard_names import (
+    StandardNameIR,
+    compose,
+    get_operator_semantics,
+    parse,
+)
 from imas_standard_names.grammar.context import get_grammar_context
 from imas_standard_names.grammar.model import parse_standard_name, compose_standard_name
 
@@ -61,6 +67,13 @@ validated = parse("square_of_inverse_of_pressure", strict=True)
 assert isinstance(validated.ir, StandardNameIR)
 assert [operator.op for operator in validated.ir.operators] == ["square", "inverse"]
 assert compose(validated.ir) == "square_of_inverse_of_pressure"
+
+# Operator meaning is owned by the same registry as the token. Bare-prefix
+# operators can parse as qualifiers, so consumers query semantics by token.
+changed = parse("change_in_electron_density", strict=True).ir
+assert "change_in" in [qualifier.token for qualifier in changed.qualifiers]
+assert get_operator_semantics("change_in") == frozenset({"temporal_change"})
+assert get_operator_semantics("electron") == frozenset()
 ```
 
 **Parse contract — `parse(name, strict=True)` is the sole validity oracle.** It
@@ -95,6 +108,16 @@ is derived from the same registry that canonical composition applies, so prompt
 consumers can stack qualifiers in an order that the validity oracle accepts.
 Its `parse_api` metadata names the strict oracle, diagnostic default, round-trip
 diagnostic, and flat-projection boundary explicitly.
+
+Each entry under
+`get_grammar_context()["grammar"]["vocabularies"]["operators"]` also exposes
+its sorted `semantic_effects` list. The metadata is authored beside the token in
+the operator registry and is available through `get_operator_semantics()` as a
+`frozenset`. Consumers should traverse both `StandardNameIR.operators` and
+`StandardNameIR.qualifiers` and query each token; this keeps the lookup correct
+when a bare-prefix operator is normalized into the qualifier group. The initial
+stable effect, `temporal_change`, identifies a finite change, tendency, or time
+derivative without encoding those tokens in a consumer.
 
 ### Models
 

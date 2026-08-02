@@ -50,6 +50,8 @@ try:
     except ImportError:  # pragma: no cover - build-time only
         get_grammar_context = None  # type: ignore[assignment]
 
+    from imas_standard_names.grammar.operator_semantics import get_operator_semantics
+
     __all__ = [
         *__all__,
         "Diagnostic",
@@ -59,6 +61,7 @@ try:
         "StandardTerm",
         "compose",
         "get_grammar_context",
+        "get_operator_semantics",
         "parse",
         "validate_round_trip",
         "fetch_standard_terms",
