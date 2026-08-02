@@ -1,0 +1,311 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="docs-project" content="imas-standard-names">
+<meta name="plan-slug" content="mast-semantic-source-repair">
+<meta name="reckon-type" content="plan">
+<title>mast-semantic-source-repair</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-title" content="MAST Standard Name Semantic Source Repair">
+<meta name="plan-summary" content="Enumerate the MAST machine-description Standard Names, distinguish missing names from wrong DD-path attachments and absent experimental signal sources, repair the graph source contract through imas-codex, and publish only through an authorized ISNC release candidate.">
+<meta name="plan-status" content="active">
+<meta name="plan-roi" content="high">
+<meta name="plan-effort" content="L">
+<meta name="plan-owner" content="Simon McIntosh">
+<meta name="plan-modified" content="2026-08-02">
+<meta name="plan-informs" content="nova:mast-machine-description,nova:mast-catalog-geometry-recovery">
+<meta name="plan-capability-version" content="1.0">
+<meta name="plan-capability-class" content="orchestrator">
+<meta name="plan-capability-reasoning" content="deep">
+<meta name="plan-capability-context" content="extended">
+<meta name="plan-capability-tool-autonomy" content="guided">
+<meta name="plan-capability-verification" content="strict">
+<meta name="plan-capability-risk" content="elevated">
+<meta name="plan-impl" content="0.0">
+<meta name="plan-version" content="1">
+</head>
+<body>
+<main class="plan-doc">
+<header>
+  <span class="badge badge-active">active plan · 2026-08-02</span>
+  <h1>MAST Standard Name semantic source repair</h1>
+  <p>This plan repairs the distinction that matters: a Standard Name is the stable semantic
+  identity; a DD path or MAST signal is an <code>sn-source</code> that provides provenance for that
+  identity. A source defect is not automatically a naming defect. The graph and catalog remain
+  read-only until publication authority is given.</p>
+</header>
+
+<section class="quick-status">
+  <div class="status-card"><strong>Exact absent names</strong>
+    <span class="badge badge-blocked">six</span>
+    <p>Six object-specific identities are absent from both the live graph query and the current ISNC release candidate.</p></div>
+  <div class="status-card"><strong>Wrong attachments</strong>
+    <span class="badge badge-blocked">confirmed</span>
+    <p>Iron-core and flux-surface names are attached to different physical objects.</p></div>
+  <div class="status-card"><strong>MAST signal sources</strong>
+    <span class="badge badge-blocked">zero roots</span>
+    <p><code>get_facility_coverage("MAST")</code> returns no discovery roots or scored paths.</p></div>
+  <div class="status-card"><strong>Publication</strong>
+    <span class="badge badge-pending">authority required</span>
+    <p>Manifest, grammar checks and dry runs may proceed; graph apply and ISNC release may not.</p></div>
+</section>
+
+<figure>
+  <img src="/imas-standard-names/figures/mast-semantic-source-repair/source-contract.svg"
+       alt="DD paths and MAST facility signals feeding a stable Standard Name, which is projected into an authorized ISNC release candidate">
+  <figcaption>DD and experimental sources are provenance. They may be absent, stale or wrong while
+  the Standard Name itself remains well defined.</figcaption>
+</figure>
+
+<h2>Current read-only evidence</h2>
+<p>The baseline was refreshed through the current <code>imas-cx</code> MCP server rather than copied
+from the earlier ledger. The server is operational. It reports no MAST facility discovery roots,
+no coverage categories and zero scored paths. Standard Name search/fetch and provenance tracing
+also expose three separate states that must not be collapsed:</p>
+<ol>
+  <li><strong>Definition correct, source wrong:</strong> the name and description describe one
+  object, but a source edge points at a different DD object.</li>
+  <li><strong>Definition too generic for an object-specific DD leaf:</strong> the description is not
+  literally false, but it loses the active-coil/passive-loop/vessel distinction and breaks the
+  expected R/Z pair family.</li>
+  <li><strong>Name absent:</strong> no exact record exists to receive the correct source edge. This
+  is the genuinely SN-side part of the work.</li>
+</ol>
+<p>Most graph DD sources still cite 4.1.0, while Nova authors 4.1.1. A version refresh is required
+even where the name and path association is otherwise correct. It is a provenance validation step,
+not a request to invent different semantics.</p>
+
+<h2>The six absent Standard Names</h2>
+<table>
+  <thead><tr><th>Required identity</th><th>Target DD source</th><th>Why the existing record cannot be reused</th><th>Which side is wrong</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><code>vertical_outline_of_coil_conductor_element</code></td>
+      <td><code>pf_active/coil/element/geometry/outline/z</code></td>
+      <td>The graph currently attaches the path to generic <code>vertical_outline</code>. That text
+      can describe a vertical outline in general, but does not say the points belong to an active
+      coil conductor element and does not pair with the object-specific radial identity.</td>
+      <td><strong>SN record absent</strong>; existing source attachment is under-specific.</td>
+    </tr>
+    <tr>
+      <td><code>radial_outline_of_passive_loop</code></td>
+      <td><code>pf_passive/loop/element/geometry/outline/r</code></td>
+      <td><code>radial_outline_of_iron_core_segment</code> is attached here, but its description is
+      explicitly an iron-core outline. A passive conducting loop is a different physical object.
+      <code>radial_outline_of_coil_conductor_element</code> is also not a safe substitute because
+      its wording describes a coil conductor element and its only live source is a passive
+      arcs-of-circle radius field, not this outline.</td>
+      <td><strong>SN record absent</strong> and wrong graph source edges are present.</td>
+    </tr>
+    <tr>
+      <td><code>vertical_outline_of_passive_loop</code></td>
+      <td><code>pf_passive/loop/element/geometry/outline/z</code></td>
+      <td>The generic <code>vertical_outline</code> attachment omits passive-loop identity. Reusing
+      it would make the R and Z leaves of the same vector resolve through different semantic
+      families and would not distinguish this loop from iron core, active coil or cryostat.</td>
+      <td><strong>SN record absent</strong>; existing source attachment is under-specific.</td>
+    </tr>
+    <tr>
+      <td><code>radial_outline_of_vacuum_vessel</code></td>
+      <td><code>wall/description_2d/vessel/unit/element/outline/r</code></td>
+      <td>The vertical sibling exists, is accepted and has a description that correctly says
+      vacuum-vessel element. The radial half is absent, so the object-specific R/Z pair is
+      incomplete. A generic wall outline is not equivalent to one vessel element's outline.</td>
+      <td><strong>SN record absent</strong>; the vertical sibling proves the intended family.</td>
+    </tr>
+    <tr>
+      <td><code>poloidal_angle_of_poloidal_magnetic_field_probe</code></td>
+      <td><code>magnetics/b_field_pol_probe/poloidal_angle</code></td>
+      <td>The live source is attached to <code>poloidal_angle_of_flux_surface</code>. That name and
+      description are internally correct for a point around the magnetic axis, but the DD leaf is
+      the orientation of a probe's sensitive axis. These are different vectors, origins and uses;
+      the mismatch changes the B<sub>R</sub>/B<sub>Z</sub> projection and is physics-significant.</td>
+      <td><strong>SN record absent</strong>; existing flux-surface source edge is incorrect.</td>
+    </tr>
+    <tr>
+      <td><code>radial_coordinate_of_toroidal_magnetic_field_probe</code></td>
+      <td><code>magnetics/b_field_phi_probe/position/r</code> at DD 4.1.1</td>
+      <td>A generic measurement-position coordinate could carry the units, but not the diagnostic
+      object. A line-of-sight coordinate is definitely wrong because a point probe is not a ray.
+      The DD4 canonical family is <code>b_field_phi_probe</code>; legacy
+      <code>b_field_tor_probe</code> aliases must not be used as the current publication anchor.</td>
+      <td><strong>SN record absent</strong>; current-family DD source must be selected explicitly.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>Confirmed incorrect or incomplete source records</h2>
+<table>
+  <thead><tr><th>Current name</th><th>What is correct about it</th><th>What is wrong in its sources or release state</th><th>Repair rule</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><code>radial_outline_of_iron_core_segment</code></td>
+      <td>The name and short description agree with
+      <code>iron_core/segment/geometry/outline/r</code>.</td>
+      <td>The live graph also attaches active-coil, passive-loop, equilibrium-boundary,
+      non-axisymmetric-control-surface, ferritic and plasma-element R paths. Those paths do not
+      become iron-core outlines merely because their leaf is named <code>r</code>. The record is
+      also absent as a top-level name from the current ISNC release candidate.</td>
+      <td>Keep the correct iron-core identity; detach every unrelated path and bind each path to
+      its own semantic identity. Resolve graph/ISNC parity by stable id.</td>
+    </tr>
+    <tr>
+      <td><code>vertical_outline</code></td>
+      <td>Its broad description can truthfully describe a vertical contour coordinate.</td>
+      <td>It is drafted and currently aggregates active coil, passive loop, iron core, ferritic,
+      cryostat, equilibrium and wall sources. The attachment is semantically under-specific for
+      stable machine-component authoring and hides absent object-specific siblings.</td>
+      <td>Retain only genuinely generic sources if the generic name remains useful; move every
+      object-specific DD leaf to an object-specific pair.</td>
+    </tr>
+    <tr>
+      <td><code>radial_outline_of_coil_conductor_element</code></td>
+      <td>The accepted definition itself correctly describes an active coil-conductor outline R
+      coordinate.</td>
+      <td>Its only live semantic source is
+      <code>pf_passive/loop/element/geometry/arcs_of_circle/r</code>, which is a passive geometry
+      arc coordinate and not an active outline. The live record is not present as a top-level name
+      in the current ISNC release candidate.</td>
+      <td>Attach the active outline R path, remove the passive arc source, add the missing vertical
+      sibling, and prove graph/ISNC source parity.</td>
+    </tr>
+    <tr>
+      <td><code>poloidal_angle_of_flux_surface</code></td>
+      <td>Its name and documentation correctly define the angular coordinate of a flux-surface
+      point around the magnetic axis.</td>
+      <td><code>magnetics/b_field_pol_probe/poloidal_angle</code> is attached in both graph and
+      ISNC even though it describes a diagnostic orientation. This is an incorrect source edge,
+      not a reason to rewrite the flux-surface definition.</td>
+      <td>Detach only the probe source and attach it to the new probe-orientation name.</td>
+    </tr>
+    <tr>
+      <td><code>vertical_outline_of_vacuum_vessel</code></td>
+      <td>Name, description and DD object agree; the 4.1.0 source path is the intended vessel
+      element Z outline.</td>
+      <td>The source version is stale relative to the 4.1.1 authoring target, and the radial sibling
+      is absent.</td>
+      <td>Revalidate and refresh provenance to 4.1.1 without changing the definition; add the
+      radial sibling.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>Experimental sources are a separate missing layer</h2>
+<p>The zero MAST coverage result is source-side. It does not imply that all MAST concepts need new
+Standard Names. The facility layer should add typed <code>signal</code>, <code>analysis_code</code>,
+<code>experimental_data</code>, <code>data_access</code> and <code>documentation</code> sources for
+the existing semantic identities. Priority roots are FAIR-MAST L1/L2 Zarr, the JSON shot-metadata
+API, UKAEA MAST open-data records, vacuum-shot selections, diagnostic channel documentation and
+the equilibrium-analysis code that interprets those signals.</p>
+<p>Signal sources carry facility, accessor, channel, shot range, units, sign/calibration convention
+and processing level. They support the Nova generate/refine loop and make experimental provenance
+queryable. They must never replace the DD source for a Data Dictionary concept, and a channel name
+must never be promoted into a globally scoped Standard Name.</p>
+
+<h2>Execution stages</h2>
+<ol>
+  <li><strong>Freeze an exact focus manifest.</strong> Enumerate every MAST machine-description DD
+  path and record expected name, current graph identity/stage, complete sources, ISNC presence,
+  DD 4.1.1 documentation and MAST facility coverage. Store a digest and the imas-codex, ISN and
+  ISNC commits used.</li>
+  <li><strong>Adjudicate names in ISN.</strong> Parse and round-trip the six candidates, confirm
+  their physical-base/subject construction, object-specific family policy, units and COCOS
+  transformation. If a proposed spelling fails grammar or collides with an existing semantic
+  identity, resolve it here before graph work.</li>
+  <li><strong>Prepare a targeted imas-codex transaction.</strong> Express exact detach/attach/create
+  operations for only the focus manifest. Guard against cross-object leaf-name grouping,
+  distinct-vector conflicts, stable-id replacement and DD-version drift. Do not invoke a broad
+  reconciliation or catalog rebuild.</li>
+  <li><strong>Add facility source discovery.</strong> Define MAST discovery roots, manifest the
+  vacuum and diagnostic signals needed by Nova, and run source-unwind checks read-only before any
+  source application.</li>
+  <li><strong>Validate before authority.</strong> Run strict ISN parse/compose, source-invariant,
+  stable-id graph/catalog diff and dry-run export gates. Produce an exact proposed delta and stop.</li>
+  <li><strong>Apply after authority.</strong> With explicit permission, apply one scoped graph
+  transaction, export one ISNC release candidate, validate the catalog, pin the exact artifacts and
+  re-query through <code>imas-cx</code>. No hand editing of catalog YAML.</li>
+</ol>
+
+<h2>Acceptance and negative gates</h2>
+<ul>
+  <li>Every focus DD path has exactly one semantically compatible accepted identity or one explicit
+  reviewed non-nameable disposition.</li>
+  <li>No name's description changes merely to accommodate a wrong source. Correct definitions are
+  preserved while edges move.</li>
+  <li>R/Z leaves for the same component resolve to the same object-specific semantic family.</li>
+  <li>No graph-only accepted identity disappears from the release candidate, and no ISNC record is
+  restored with incomplete sources.</li>
+  <li>DD sources validate at 4.1.1 and carry the correct COCOS transformation; no stale 4.1.0 URL is
+  treated as current evidence without revalidation.</li>
+  <li>MAST facility coverage is non-empty, but facility signals do not mint facility-specific
+  Standard Names or replace DD provenance.</li>
+  <li>Without explicit publication authority the terminal artifact is a dry-run manifest and
+  proposed delta. Any graph or catalog mutation is a failure.</li>
+</ul>
+
+<section data-reckon="decisions" id="decisions" class="r-decisions">
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="source-contract" data-choice="name-is-semantic-source-is-provenance" data-by="Simon McIntosh" data-when="2026-08-02">
+    <p class="r-dec-q">What is the relationship between a Standard Name and an sn-source?</p>
+    <p class="r-dec-ctx">A Standard Name is the stable semantic identity. DD paths and facility signals are provenance sources that realize it; they are not the name and do not define a catalog map.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="name-is-semantic-source-is-provenance">Standard Name is semantic identity; sources are provenance</button>
+      <button class="r-opt" data-value="name-is-catalog-map">Standard Name is a catalog mapping</button>
+      </p>
+    <p class="r-dec-rat">Locked by the lead: SNs are standard names, not catalog maps. A name may be correctly defined while a DD-path or signal source edge is absent or wrong.</p>
+    </div>
+<div class="r-dec" data-key="publication-authority" data-choice="plan-and-validate-only" data-by="Simon McIntosh" data-when="2026-08-02">
+    <p class="r-dec-q">May this plan alter the catalog or live graph now?</p>
+    <p class="r-dec-ctx">Read-only graph and catalog inspection is authorized. Catalog mutation is not.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="plan-and-validate-only">Plan and validate read-only; wait for publication authority</button>
+      <button class="r-opt" data-value="publish-now">Mutate graph and publish a release candidate</button>
+      </p>
+    <p class="r-dec-rat">No authority has been given to alter the Standard Name catalog. The plan may prepare manifests, tests and dry-run evidence, but apply/export/release waits for explicit authorization.</p>
+    </div>
+</section>
+<section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-mssr-source-contract" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-context="extended" data-capability-tool-autonomy="guided" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-create" data-written-at="2026-08-02" data-recommends-skill="/reckon-ship mast-semantic-source-repair" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Repair MAST name and source parity without conflating names with source mappings</h4>
+    <div class="r-fu-body"><p>Build the exact MAST semantic-source manifest, adjudicate six absent names and the wrong or under-specific DD attachments, add a facility-signal provenance plan, and prove graph/ISNC/DD 4.1.1 parity. Run read-only and dry-run gates now; no graph apply, catalog export, release, commit or push outside this plan repository until explicit authority is granted.</p></div>
+    <pre class="r-fu-prompt">Project record: imas-standard-names
+Execution repositories: imas-standard-names for grammar and validation, imas-codex for graph source operations, imas-standard-names-catalog for the release candidate.
+Plan: mast-semantic-source-repair
+Capability: orchestrator
+Requirements: deep reasoning, extended context, guided external writes, strict verification, elevated risk
+
+Locked semantics
+- Standard Names are stable semantic identities, not catalog maps.
+- DD paths, derived relations, manual anchors and facility signals are StandardNameSource provenance.
+- A correct name can have a wrong or absent source edge; repair the edge rather than rewriting a correct definition.
+- No catalog or live-graph mutation is authorized in the current planning session.
+
+Read-only baseline to refresh
+- Use imas-cx get_facility_coverage, search/fetch and trace tools at the current imas-codex commit.
+- Use DD 4.1.1 path documentation, not the stale DD 4.1.0 source projection.
+- Compare the live graph by stable name id against the exact ISNC release candidate.
+
+Work
+1. Freeze the complete MAST focus manifest: physical DD paths, expected semantic identity, current graph name, name stage, all attached sources, ISNC presence and facility-signal coverage.
+2. Classify every difference as: missing Standard Name; wrong DD source; under-specific generic source; correct graph name absent from ISNC; stale DD version/provenance; or absent experimental signal source.
+3. Adjudicate the six absent identities documented in the plan. Confirm grammar decomposition and pair-family consistency before proposing any record.
+4. Prepare targeted detach/attach operations for wrong sources. Never run an unbounded reconcile or recreate graph content from the catalog.
+5. Define MAST facility discovery roots and source manifests for vacuum-shot signals, diagnostic channels and analysis/documentation anchors. Signal sources support provenance and refinement; they do not replace DD semantic sources.
+6. Dry-run export and compare by stable id. With later explicit authority, apply the targeted graph transaction, export one ISNC release candidate and re-query the live MCP tools.
+
+Done when
+- Every focus path has one semantically compatible accepted name or an explicit reviewed non-nameable disposition.
+- No iron-core, flux-surface or line-of-sight name remains attached to a different physical object or angle.
+- Exact R/Z pair families exist for active conductor, passive loop and vessel outlines where the DD distinguishes those objects.
+- DD sources cite and validate against 4.1.1; facility MAST coverage is non-empty and typed by source category.
+- Graph and authorized ISNC release candidate agree by stable id, name, stage and complete sources; ISN strict parse/compose and catalog validation pass.
+- The Nova MAST ledger re-queries cleanly through imas-cx with all residual gaps explicitly explained.</pre>
+    </article>
+</section>
+</main>
+</body>
+</html>
