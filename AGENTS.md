@@ -8,6 +8,14 @@ IMAS Standard Names (ISN) is the **grammar library** for the ITER Modelling and 
 
 **Project boundary**: ISN defines what a valid standard name *is*. [imas-codex](https://github.com/iterorganization/imas-codex) decides what standard names to *create*. See [docs/architecture/boundary.md](docs/architecture/boundary.md) for the full contract.
 
+**Plan routing**: Keep a Reckon plan in this repository only when its deliverable changes
+the grammar, controlled vocabulary, parser, renderer, validation, or public grammar API.
+Plans for DD/facility source discovery, <code>StandardNameSource</code> provenance,
+candidate-name lifecycle, graph transactions, or ISNC release orchestration belong in
+[imas-codex](https://github.com/iterorganization/imas-codex), even when they call ISN to
+parse a candidate or request a vocabulary addition. Do not duplicate the coordination
+plan here; link to the imas-codex plan from the relevant grammar change when one is needed.
+
 > **Shared guardrails:** See `~/.agents/AGENTS.md` for git safety (banned
 > commands, stash rules), parallel agent rules, model selection, and commit
 > conventions. This file contains only repo-specific instructions.
