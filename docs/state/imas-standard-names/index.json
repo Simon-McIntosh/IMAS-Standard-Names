@@ -1,20 +1,20 @@
 {
-  "updated": "2026-08-10T10:30:00",
+  "updated": "2026-08-10T15:01:44",
   "project": "imas-standard-names",
   "doc": "index",
   "data": {
     "slug": "imas-standard-names",
     "name": "IMAS Standard Names",
-    "active_sprint_id": "S1",
+    "active_sprint_id": null,
     "sprints": [
       {
         "id": "S1",
-        "status": "active",
+        "status": "done",
         "theme": "Geometry identity grammar prerequisite",
         "starts": "2026-08-10",
         "ends": "2026-08-28",
         "description": "Deliver the closed section-plane and local-arc grammar needed by the imas-codex pre-WEST semantic-integrity sprint without moving DD or graph authority into ISN.",
-        "summary": "Active cross-project prerequisite for imas-codex S8.",
+        "summary": "Shipped the closed section-plane and local-circle grammar: canonical poloidal_plane serialization, strict local/global separation, non-ordinal identity and public grammar context are merged at b32f6b8; 1,993 tests passed.",
         "items": [
           {
             "slug": "geometry-plane-and-arc-grammar",
@@ -30,9 +30,14 @@
         "when": "2026-08-10",
         "who": "Simon McIntosh",
         "what": "Started the geometry identity grammar prerequisite for the imas-codex pre-WEST sprint: section-plane ordering/vocabulary, local circle-arc semantics, global-coordinate separation and strict no-ordinal identity."
+      },
+      {
+        "when": "2026-08-10",
+        "who": "Simon McIntosh",
+        "what": "Closed the geometry identity sprint after independent full-suite validation: 1,993 passed, 33 skipped, 82 expected failures, 2 warnings; post-merge smoke 5/5."
       }
     ],
     "blockers": [],
-    "_version": 2
+    "_version": 3
   }
 }

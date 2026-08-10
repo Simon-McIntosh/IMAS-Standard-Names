@@ -11,7 +11,7 @@
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-title" content="Geometry Plane and Arc Representation Grammar">
 <meta name="plan-summary" content="Extend the canonical ISN grammar with ordered section-plane semantics and source-authoritative arc representation vocabulary so poloidal cross-sections, local circle radii, and global cylindrical coordinates are distinct, round-trippable identities without ordinal endpoint tokens.">
-<meta name="plan-status" content="active">
+<meta name="plan-status" content="shipped">
 <meta name="plan-roi" content="high">
 <meta name="plan-effort" content="L">
 <meta name="plan-owner" content="Simon McIntosh">
@@ -25,9 +25,11 @@
 <meta name="plan-capability-tool-autonomy" content="guided">
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="elevated">
-<meta name="plan-impl" content="0.0">
-<meta name="plan-version" content="4">
+<meta name="plan-impl" content="1.0">
+<meta name="plan-version" content="6">
 <meta name="plan-sprint" content="S1">
+<meta name="plan-commits" content="ef0165baf8508a26e290192f20fe7356cb69d074,03b18ea825fac96b571a3d20aed4b4792777d4e8,b32f6b8dce9ee1b751244f809c96b35385bc1cf3">
+<meta name="plan-artifacts" content="/imas-standard-names/evidence/archive/geometry-plane-and-arc-grammar-landed">
 </head>
 <body>
 <main class="plan-doc">
@@ -36,27 +38,26 @@
   <h1>Geometry Plane and Arc Representation Grammar</h1>
   <p class="lead">A physical cross-section is incomplete without its plane, and a local circle radius is not the tokamak cylindrical radial coordinate merely because both DD leaves are named <code>r</code>. ISN must make those meanings grammatically distinct and round-trippable.</p>
 </section>
-<section id="semantic-separation">
-  <h2>Required semantic separation</h2>
-  <figure>
-    <img src="/imas-standard-names/figures/geometry-grammar/semantic-separation.svg" alt="Three distinct identities for plane-qualified cross sections, local circle radii and global radial coordinates, with ordinal labels excluded">
-    <figcaption>The grammar owns identity. DD paths retain representation and sample-order provenance, while public parse/compose APIs expose the closed segment vocabulary to imas-codex.</figcaption>
-  </figure>
+<section id="semantic-separation" class="section-landed">
+  <header>
+    <span class="badge badge-shipped">✓ landed 2026-08-10</span>
+    <h2>Required semantic separation</h2>
+  </header>
+  <p class="landed-summary"><code>poloidal_plane_cross_section</code>, <code>local_circle_radius_of_passive_loop_element</code> and <code>radial_coordinate_of_passive_loop_element</code> now preserve three distinct identities; ordinal forms remain invalid. Full record: <a href="/imas-standard-names/evidence/archive/geometry-plane-and-arc-grammar-landed#semantic-separation">semantic separation</a> (merge <code>b32f6b8</code>).</p>
 </section>
-<section id="grammar-contract">
-  <h2>Grammar contract</h2>
-  <table>
-    <thead><tr><th>Concept</th><th>Grammar requirement</th><th>Negative gate</th></tr></thead>
-    <tbody>
-      <tr><td>Cross-section</td><td>Closed <code>section_plane</code> segment in canonical order; <code>poloidal</code> is the first required token</td><td>Known-plane section cannot compose without the plane</td></tr>
-      <tr><td>Circle arc</td><td>Owner/carrier-qualified local representation quantity distinct from outline and global coordinate</td><td><code>arcs_of_circle/r</code> cannot imply tokamak <code>radial_coordinate</code> from spelling alone</td></tr>
-      <tr><td>Ordered samples</td><td>Order remains provenance only</td><td>No start/end/first/second/third token enters any identity segment</td></tr>
-    </tbody>
-  </table>
+<section id="grammar-contract" class="section-landed">
+  <header>
+    <span class="badge badge-shipped">✓ landed 2026-08-10</span>
+    <h2>Grammar contract</h2>
+  </header>
+  <p class="landed-summary">Added closed section-plane and geometry-representation segments, canonical <code>poloidal_plane_</code> serialization, strict parser/composer constraints, generated public types and grammar-context exposure. The independently verified tree passed 1,993 tests with 33 skipped, 82 expected failures, 2 warnings and 91% total coverage; <a href="/imas-standard-names/evidence/archive/geometry-plane-and-arc-grammar-landed#verification">full verification record</a>.</p>
 </section>
-<section id="scope-boundary">
-  <h2>Repository boundary</h2>
-  <p>This repository owns grammar segment ordering, vocabulary, parser, composer, semantic checks, generated maps, public grammar context and release-candidate validation. imas-codex owns DD defect resolutions, source-path interpretation, graph membership, LLM prompts, review authority and recovery transactions.</p>
+<section id="scope-boundary" class="section-landed">
+  <header>
+    <span class="badge badge-shipped">✓ landed 2026-08-10</span>
+    <h2>Repository boundary</h2>
+  </header>
+  <p class="landed-summary">The change is confined to ISN grammar, validation, generated types and public grammar context. DD interpretation, graph membership and promotion/recovery authority remain in imas-codex; <a href="/imas-standard-names/evidence/archive/geometry-plane-and-arc-grammar-landed#scope-boundary">boundary evidence</a>.</p>
 </section>
 <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
@@ -81,10 +82,11 @@
 </section>
 <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-geometry-plane-arc" data-status="open" data-written-by="reckon-create" data-written-at="2026-08-10" data-recommends-skill="/reckon-ship geometry-plane-and-arc-grammar" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-geometry-plane-arc" data-status="resolved" data-written-by="reckon-create" data-written-at="2026-08-10" data-recommends-skill="/reckon-ship geometry-plane-and-arc-grammar" data-resolved-at="2026-08-10T13:00:28+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Add plane-qualified section and local-arc semantics to the public grammar</h4>
     <div class="r-fu-body"><p>Add the section-plane segment and arc representation vocabulary to ISN, place the new segment canonically in the grammar, expose it through the public grammar context, and prove strict parse/compose round trips and ambiguity rejection.</p></div>
     <pre class="r-fu-prompt">/reckon-ship geometry-plane-and-arc-grammar</pre>
+    <p class="r-fu-outcome">Landed in b32f6b8: closed plane and local-circle grammar, unambiguous poloidal_plane serialization, public context/codegen and strict semantic gates; 1,993 passed, 33 skipped, 82 expected failures, 2 warnings, 91% coverage.</p>
     </article>
 </section>
 </main>

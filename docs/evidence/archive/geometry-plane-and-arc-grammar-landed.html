@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="docs-project" content="imas-standard-names">
+<meta name="plan-slug" content="geometry-plane-and-arc-grammar-landed">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-evidence-for" content="geometry-plane-and-arc-grammar">
+<meta name="plan-verifies" content="geometry-plane-and-arc-grammar#semantic-separation,geometry-plane-and-arc-grammar#grammar-contract,geometry-plane-and-arc-grammar#scope-boundary">
+<meta name="plan-title" content="Geometry Plane and Arc Representation Grammar — landed evidence">
+<meta name="plan-summary" content="Verified grammar delivery for plane-qualified sections, owner-qualified local circle radii, global-coordinate separation and non-ordinal identity.">
+<meta name="plan-status" content="reference">
+<meta name="plan-owner" content="Simon McIntosh">
+<meta name="plan-modified" content="2026-08-10">
+<title>Geometry Plane and Arc Representation Grammar — landed evidence</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+<header class="plan-hero">
+  <p class="eyebrow">Landed grammar evidence · 2026-08-10</p>
+  <h1>Plane-qualified sections and local arc geometry</h1>
+  <p class="lead">The public grammar now distinguishes a section's plane, an object's local circle representation and the machine-global cylindrical coordinate. Sampling order remains provenance rather than Standard Name identity.</p>
+</header>
+
+<section id="semantic-separation">
+  <h2>Semantic separation</h2>
+  <figure>
+    <img src="/imas-standard-names/figures/geometry-grammar/semantic-separation.svg" alt="Distinct identities for plane-qualified cross sections, local circle radii and global radial coordinates, with ordinal labels excluded">
+    <figcaption>The serialized plane marker removes the ambiguity between a section-plane qualifier and an existing axis projection; local representation and global coordinate remain separate identities.</figcaption>
+  </figure>
+  <table>
+    <thead><tr><th>Identity</th><th>Result</th><th>Semantic distinction</th></tr></thead>
+    <tbody>
+      <tr><td><code>poloidal_plane_cross_section</code></td><td>Accepted</td><td>A cross-section whose identity includes the poloidal section plane.</td></tr>
+      <tr><td><code>poloidal_cross_section</code></td><td>Accepted</td><td>The pre-existing poloidal axis projection of <code>cross_section</code>; it is not reinterpreted as a plane.</td></tr>
+      <tr><td><code>poloidal_plane_cross_sectional_area_of_conductor_cross_section</code></td><td>Accepted</td><td>The cross-sectional area of a conductor section, qualified by its poloidal plane.</td></tr>
+      <tr><td><code>local_circle_radius_of_passive_loop_element</code></td><td>Accepted</td><td>An object-local circle representation radius owned by a passive-loop element.</td></tr>
+      <tr><td><code>radial_coordinate_of_passive_loop_element</code></td><td>Accepted</td><td>The element's machine-global cylindrical radial coordinate.</td></tr>
+      <tr><td><code>radial_outline_of_passive_loop_element</code></td><td>Accepted</td><td>The radial component of the element outline, distinct from both radius meanings.</td></tr>
+      <tr><td><code>local_circle_radius</code></td><td>Rejected</td><td>A local representation radius has no identity without an owner.</td></tr>
+      <tr><td><code>radial_local_circle_radius_of_passive_loop_element</code></td><td>Rejected</td><td>A global radial projection cannot be combined with the owner-local circle radius.</td></tr>
+      <tr><td><code>first_local_circle_radius_of_passive_loop_element</code></td><td>Rejected</td><td>Sample order stays in source provenance and never enters the Standard Name.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="grammar-contract">
+  <h2>Grammar contract delivered</h2>
+  <table>
+    <thead><tr><th>Surface</th><th>Landed behavior</th></tr></thead>
+    <tbody>
+      <tr><td>Section plane</td><td>Closed semantic vocabulary <code>["poloidal"]</code>, serialized canonically through the unambiguous <code>poloidal_plane_</code> segment.</td></tr>
+      <tr><td>Geometry representation</td><td>Closed <code>local_circle</code> representation segment with an owner requirement and explicit conflicts against global coordinate projections.</td></tr>
+      <tr><td>Parser and composer</td><td>Strict parse, recursive IR, flat-model projection and rendering preserve both plane-marked and axis-projected identities losslessly.</td></tr>
+      <tr><td>Public API</td><td>Generated enums/constants and grammar context expose both closed segments to downstream consumers.</td></tr>
+      <tr><td>Vocabulary hygiene</td><td>The lexical token <code>poloidal_plane</code> is unique across segments; no ambiguity is hidden by an overlap allowlist.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="verification">
+  <h2>Verification record</h2>
+  <p>The first independent broad run against <code>ef0165b</code> correctly failed: 4 failed, 1,989 passed, 33 skipped and 82 expected failures. It exposed documentation extraction, two projection/plane round-trip ambiguities and a vocabulary collision. The corrective commit <code>03b18ea</code> introduced the canonical <code>_plane_</code> marker and repaired all four findings.</p>
+  <table>
+    <thead><tr><th>Gate</th><th>Result</th><th>Evidence</th></tr></thead>
+    <tbody>
+      <tr><td>Focused correction</td><td>4/4 regressions and 13/13 focused geometry tests passed</td><td><code>03b18ea</code></td></tr>
+      <tr><td>Independent full suite</td><td>1,993 passed, 33 skipped, 82 expected failures, 2 warnings in 932.76 s; 91% total coverage</td><td>Detached corrected tree</td></tr>
+      <tr><td>Check-only gates</td><td>Ruff lint, Ruff formatting and grammar code-generation drift passed</td><td>Independent verification worker</td></tr>
+      <tr><td>Integrated tree</td><td>5/5 post-merge public-behavior smoke tests passed in 0.48 s</td><td><code>b32f6b8</code></td></tr>
+      <tr><td>Tree identity</td><td>Corrected and integrated trees both <code>533ba5a53af0a4114a1806ca57ed36465da9b1a7</code></td><td>No merge-content drift</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="scope-boundary">
+  <h2>Repository boundary retained</h2>
+  <p>ISN owns the segment ordering, closed vocabularies, parser, composer, semantic constraints, generated public types, grammar context and validation. No DD source-path interpretation, graph membership, promotion authority or recovery transaction moved into this repository; those remain imas-codex responsibilities.</p>
+</section>
+</main>
+</body>
+</html>
