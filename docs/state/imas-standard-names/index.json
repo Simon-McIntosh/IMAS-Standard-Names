@@ -5,10 +5,10 @@
   "data": {
     "slug": "imas-standard-names",
     "name": "IMAS Standard Names",
-    "active_sprint_id": "G1",
+    "active_sprint_id": "S1",
     "sprints": [
       {
-        "id": "G1",
+        "id": "S1",
         "status": "active",
         "theme": "Geometry identity grammar prerequisite",
         "starts": "2026-08-10",
