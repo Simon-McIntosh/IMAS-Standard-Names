@@ -1,8 +1,38 @@
 {
-  "updated": "2026-06-24T17:44:13",
+  "updated": "2026-08-10T10:30:00",
   "project": "imas-standard-names",
   "doc": "index",
   "data": {
-    "_version": 1
+    "slug": "imas-standard-names",
+    "name": "IMAS Standard Names",
+    "active_sprint_id": "G1",
+    "sprints": [
+      {
+        "id": "G1",
+        "status": "active",
+        "theme": "Geometry identity grammar prerequisite",
+        "starts": "2026-08-10",
+        "ends": "2026-08-28",
+        "description": "Deliver the closed section-plane and local-arc grammar needed by the imas-codex pre-WEST semantic-integrity sprint without moving DD or graph authority into ISN.",
+        "summary": "Active cross-project prerequisite for imas-codex S8.",
+        "items": [
+          {
+            "slug": "geometry-plane-and-arc-grammar",
+            "why_now": "Cross-sections need canonical plane semantics and circle-arc representation parameters must not collapse into global tokamak coordinates or hardware outlines.",
+            "done_when": "Closed vocabulary, canonical ordering, strict parse/compose round trips, semantic rejection tests and a validated release candidate are available through the public grammar API."
+          }
+        ]
+      }
+    ],
+    "milestones": [],
+    "timeline": [
+      {
+        "when": "2026-08-10",
+        "who": "Simon McIntosh",
+        "what": "Started the geometry identity grammar prerequisite for the imas-codex pre-WEST sprint: section-plane ordering/vocabulary, local circle-arc semantics, global-coordinate separation and strict no-ordinal identity."
+      }
+    ],
+    "blockers": [],
+    "_version": 2
   }
 }

@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="docs-project" content="imas-standard-names">
+<meta name="plan-slug" content="geometry-plane-and-arc-grammar">
+<meta name="reckon-type" content="plan">
+<title>geometry-plane-and-arc-grammar</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-title" content="Geometry Plane and Arc Representation Grammar">
+<meta name="plan-summary" content="Extend the canonical ISN grammar with ordered section-plane semantics and source-authoritative arc representation vocabulary so poloidal cross-sections, local circle radii, and global cylindrical coordinates are distinct, round-trippable identities without ordinal endpoint tokens.">
+<meta name="plan-status" content="active">
+<meta name="plan-roi" content="high">
+<meta name="plan-effort" content="L">
+<meta name="plan-owner" content="Simon McIntosh">
+<meta name="plan-modified" content="2026-08-10">
+<meta name="plan-depends-on" content="">
+<meta name="plan-blocks" content="imas-codex:sn-pipeline-hardening,imas-codex:sn-benchmark-evolution">
+<meta name="plan-capability-version" content="1.0">
+<meta name="plan-capability-class" content="orchestrator">
+<meta name="plan-capability-reasoning" content="deep">
+<meta name="plan-capability-context" content="extended">
+<meta name="plan-capability-tool-autonomy" content="guided">
+<meta name="plan-capability-verification" content="strict">
+<meta name="plan-capability-risk" content="elevated">
+<meta name="plan-impl" content="0.0">
+<meta name="plan-version" content="3">
+<meta name="plan-sprint" content="G1">
+</head>
+<body>
+<main class="plan-doc">
+<section class="plan-hero">
+  <p class="eyebrow">Grammar prerequisite · source-authoritative geometry</p>
+  <h1>Geometry Plane and Arc Representation Grammar</h1>
+  <p class="lead">A physical cross-section is incomplete without its plane, and a local circle radius is not the tokamak cylindrical radial coordinate merely because both DD leaves are named <code>r</code>. ISN must make those meanings grammatically distinct and round-trippable.</p>
+</section>
+<section id="semantic-separation">
+  <h2>Required semantic separation</h2>
+  <figure>
+    <img src="/imas-standard-names/figures/geometry-grammar/semantic-separation.svg" alt="Three distinct identities for plane-qualified cross sections, local circle radii and global radial coordinates, with ordinal labels excluded">
+    <figcaption>The grammar owns identity. DD paths retain representation and sample-order provenance, while public parse/compose APIs expose the closed segment vocabulary to imas-codex.</figcaption>
+  </figure>
+</section>
+<section id="grammar-contract">
+  <h2>Grammar contract</h2>
+  <table>
+    <thead><tr><th>Concept</th><th>Grammar requirement</th><th>Negative gate</th></tr></thead>
+    <tbody>
+      <tr><td>Cross-section</td><td>Closed <code>section_plane</code> segment in canonical order; <code>poloidal</code> is the first required token</td><td>Known-plane section cannot compose without the plane</td></tr>
+      <tr><td>Circle arc</td><td>Owner/carrier-qualified local representation quantity distinct from outline and global coordinate</td><td><code>arcs_of_circle/r</code> cannot imply tokamak <code>radial_coordinate</code> from spelling alone</td></tr>
+      <tr><td>Ordered samples</td><td>Order remains provenance only</td><td>No start/end/first/second/third token enters any identity segment</td></tr>
+    </tbody>
+  </table>
+</section>
+<section id="scope-boundary">
+  <h2>Repository boundary</h2>
+  <p>This repository owns grammar segment ordering, vocabulary, parser, composer, semantic checks, generated maps, public grammar context and release-candidate validation. imas-codex owns DD defect resolutions, source-path interpretation, graph membership, LLM prompts, review authority and recovery transactions.</p>
+</section>
+<section data-reckon="decisions" id="decisions" class="r-decisions">
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="section-plane-scope" data-choice="all-carriers" data-by="Simon McIntosh" data-when="2026-08-10T08:10:47+00:00">
+    <p class="r-dec-q">Where must section-plane semantics be available?</p>
+    <p class="r-dec-ctx">A cross-section is incomplete unless the plane is part of the identity. The rule applies to hardware and any other carrier for which the section plane changes the physical object represented.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="all-carriers">Add a canonical section-plane segment usable across all semantically valid carriers.</button>
+      <button class="r-opt" data-value="hardware-only">Limit the segment to hardware cross-sections.</button>
+      </p>
+    <p class="r-dec-rat">Locked by the lead as 1A: ISN must add the grammar segment, ordering, and vocabulary. The segment is generic; carrier-specific admissibility remains grammar/semantic validation.</p>
+    </div>
+<div class="r-dec" data-key="ordinality" data-choice="never-ordinal" data-by="Simon McIntosh" data-when="2026-08-10T08:10:47+00:00">
+    <p class="r-dec-q">May sample order or endpoint position enter the identity?</p>
+    <p class="r-dec-ctx">DD paths may contain first, second, start, or end positions, but those are sampling/provenance details.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="never-ordinal">Keep ordinality out of Standard Names.</button>
+      <button class="r-opt" data-value="allow-ordinal">Add endpoint or sample-order tokens.</button>
+      </p>
+    <p class="r-dec-rat">Strict project rule: first, second, start, end, and equivalent ordered sample labels remain in DD provenance and never enter the Standard Name.</p>
+    </div>
+</section>
+<section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-geometry-plane-arc" data-status="open" data-written-by="reckon-create" data-written-at="2026-08-10" data-recommends-skill="/reckon-ship geometry-plane-and-arc-grammar" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Add plane-qualified section and local-arc semantics to the public grammar</h4>
+    <div class="r-fu-body"><p>Add the section-plane segment and arc representation vocabulary to ISN, place the new segment canonically in the grammar, expose it through the public grammar context, and prove strict parse/compose round trips and ambiguity rejection.</p></div>
+    <pre class="r-fu-prompt">Project: imas-standard-names
+Plan: geometry-plane-and-arc-grammar
+
+Objective
+Extend the canonical ISN grammar so cross-sections name their plane and circle-arc geometry can express local representation quantities without being confused with global tokamak cylindrical coordinates. Preserve the strict rule that ordinal sample positions never enter identity.
+
+Required work
+1. Design and add a closed section_plane grammar segment with canonical ordering. Seed poloidal and add only other planes justified by the existing catalog/domain corpus.
+2. Add or refine closed vocabulary and grammar structure for source-authoritative arc representation: local circle radius/centre/arc carrier semantics must be distinct from radial_coordinate in the tokamak cylindrical frame and from the physical outline of a conductor.
+3. Define valid carrier/representation/plane combinations and reject missing or contradictory plane semantics where a cross-section requires a plane.
+4. Keep start/end/first/second/third tokens out of every grammar segment. Ordered points remain source provenance only.
+5. Update parser, composer, renderer, semantic checks, generated grammar maps, JSON schema/public grammar context, examples, and catalog guidance through the public API only.
+6. Add round-trip and ambiguity tests using representative identities: poloidal cross-section of a conductor, a local circle radius for an arc representation, a global radial coordinate of a physical point, an outline coordinate, and a normal-vector component.
+7. Cut and validate an ISN release candidate, then provide the exact dependency/version contract to imas-codex. Do not edit DD-source mappings or the Neo4j graph here.
+
+Done when
+- The new segment ordering and vocabulary round-trip through public parse/compose APIs.
+- Missing/incorrect plane and global-vs-local radius confusions fail deterministically.
+- No ordinal token is accepted into identity.
+- imas-codex can consume the public grammar context without duplicating tokens or segment names.</pre>
+    </article>
+</section>
+</main>
+</body>
+</html>

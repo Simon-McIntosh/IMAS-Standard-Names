@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 350" role="img" aria-labelledby="title desc">
+  <title id="title">Geometry identity separation in the ISN grammar</title>
+  <desc id="desc">A plane-qualified conductor cross section, a local circle radius, and a global cylindrical radial coordinate remain three different grammar identities. Ordinal endpoint labels stay outside the identity.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><path d="M0,0 L9,3 L0,6 Z" fill="#64748b"/></marker>
+    <style>
+      .src{fill:#f8fafc;stroke:#64748b;stroke-width:2;rx:9}
+      .id{fill:#eff6ff;stroke:#2563eb;stroke-width:2;rx:9}
+      .no{fill:#fff1f2;stroke:#e11d48;stroke-width:2;rx:9}
+      .line{stroke:#64748b;stroke-width:2;fill:none;marker-end:url(#arrow)}
+      .t{font:600 15px system-ui,sans-serif;fill:#0f172a;text-anchor:middle}
+      .s{font:13px system-ui,sans-serif;fill:#334155;text-anchor:middle}
+    </style>
+  </defs>
+  <rect class="src" x="25" y="35" width="280" height="70"/><text class="t" x="165" y="64">hardware cross section</text><text class="s" x="165" y="87">carrier + section plane</text>
+  <rect class="src" x="25" y="140" width="280" height="70"/><text class="t" x="165" y="169">arcs_of_circle / r</text><text class="s" x="165" y="192">local construction representation</text>
+  <rect class="src" x="25" y="245" width="280" height="70"/><text class="t" x="165" y="274">physical point / r</text><text class="s" x="165" y="297">tokamak cylindrical frame</text>
+
+  <rect class="id" x="365" y="35" width="380" height="70"/><text class="t" x="555" y="64">poloidal cross section of …</text><text class="s" x="555" y="87">section_plane participates in identity</text>
+  <rect class="id" x="365" y="140" width="380" height="70"/><text class="t" x="555" y="169">local circle radius of …</text><text class="s" x="555" y="192">arc representation, not tokamak R</text>
+  <rect class="id" x="365" y="245" width="380" height="70"/><text class="t" x="555" y="274">radial coordinate of …</text><text class="s" x="555" y="297">global cylindrical position quantity</text>
+  <path class="line" d="M305 70 L365 70"/><path class="line" d="M305 175 L365 175"/><path class="line" d="M305 280 L365 280"/>
+
+  <rect class="no" x="790" y="120" width="165" height="110"/><text class="t" x="872" y="153">never identity</text><text class="s" x="872" y="179">start / end</text><text class="s" x="872" y="199">first / second</text><text class="s" x="872" y="219">sample order</text>
+</svg>
