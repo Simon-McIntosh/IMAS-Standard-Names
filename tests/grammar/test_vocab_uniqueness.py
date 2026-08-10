@@ -55,7 +55,14 @@ def load_vocab_tokens() -> dict[str, set[str]]:
         tokens = set()
         if isinstance(data, list):
             # Flat list format (e.g., qualifiers.yml, processes.yml)
-            tokens.update(str(item) for item in data if item)
+            if yml_file.name == "section_planes.yml":
+                # Section planes are semantic values rendered by their segment
+                # template as an explicit ``<value>_plane`` prefix. Compare the
+                # canonical lexical tokens, not the enum values, so this gate
+                # measures parser ambiguity.
+                tokens.update(f"{item}_plane" for item in data if item)
+            else:
+                tokens.update(str(item) for item in data if item)
         elif isinstance(data, dict):
             # Most vocabs have a top-level key containing the items dict
             for top_key in data.keys():

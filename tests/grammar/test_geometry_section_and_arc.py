@@ -13,7 +13,7 @@ from imas_standard_names.grammar.parser import ParseError
 
 
 def test_poloidal_cross_section_uses_plane_segment_not_projection() -> None:
-    name = "poloidal_cross_sectional_area_of_flux_surface"
+    name = "poloidal_plane_cross_sectional_area_of_flux_surface"
 
     ir = parse(name, strict=True).ir
     model = parse_standard_name(name)
@@ -39,9 +39,11 @@ def test_section_plane_has_one_canonical_position() -> None:
                 "object": "coil_conductor",
             }
         )
-        == "poloidal_cross_section_of_coil_conductor"
+        == "poloidal_plane_cross_section_of_coil_conductor"
     )
-    geometric_model = parse_standard_name("poloidal_cross_section_of_coil_conductor")
+    geometric_model = parse_standard_name(
+        "poloidal_plane_cross_section_of_coil_conductor"
+    )
     assert geometric_model.section_plane is SectionPlane.POLOIDAL
     assert geometric_model.geometric_base.value == "cross_section"
 
@@ -53,8 +55,15 @@ def test_section_plane_has_one_canonical_position() -> None:
                 "object": "conductor_cross_section",
             }
         )
-        == "poloidal_cross_sectional_area_of_conductor_cross_section"
+        == "poloidal_plane_cross_sectional_area_of_conductor_cross_section"
     )
+
+    projection_name = "poloidal_cross_section"
+    projection_ir = parse(projection_name, strict=True).ir
+    assert projection_ir.projection is not None
+    assert projection_ir.projection.axis == "poloidal"
+    assert projection_ir.qualifiers == []
+    assert compose(projection_ir) == projection_name
 
     with pytest.raises(ParseError, match="cross-sectional identities require"):
         parse("cross_sectional_area_of_conductor_cross_section", strict=True)
@@ -128,8 +137,8 @@ def test_local_circle_representation_rejects_missing_or_conflicting_semantics(
         "start_local_circle_radius_of_passive_loop_element",
         "end_local_circle_radius_of_passive_loop_element",
         "first_local_circle_radius_of_passive_loop_element",
-        "second_poloidal_cross_sectional_area_of_conductor_cross_section",
-        "third_poloidal_cross_sectional_area_of_conductor_cross_section",
+        "second_poloidal_plane_cross_sectional_area_of_conductor_cross_section",
+        "third_poloidal_plane_cross_sectional_area_of_conductor_cross_section",
     ],
 )
 def test_ordered_sample_labels_are_not_identity_tokens(name: str) -> None:
@@ -144,7 +153,7 @@ def test_public_context_exposes_plane_and_representation_vocabularies() -> None:
 
     assert vocabularies["section_planes"] == ["poloidal"]
     assert vocabularies["geometry_representations"] == ["local_circle"]
-    assert templates["section_plane"] == "<plane>_<cross_sectional_quantity>"
+    assert templates["section_plane"] == "<plane>_plane_<cross_sectional_quantity>"
     assert (
         templates["geometry_representation"] == "<representation>_<quantity>_of_<owner>"
     )

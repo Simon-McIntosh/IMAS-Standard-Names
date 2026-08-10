@@ -36,9 +36,11 @@ Operators wrap that core recursively:
   (`radial_position_of_flux_loop`). The base determines which projection is
   meant; there is no `_component_of_` marker.
 - **section plane**: A cross-sectional identity includes its plane. In
-  `poloidal_cross_sectional_area_of_conductor_cross_section`, `poloidal` is
-  the `section_plane`, not a vector component. A cross-sectional spelling
-  without a registered plane is invalid.
+  `poloidal_plane_cross_sectional_area_of_conductor_cross_section`, `poloidal`
+  is the `section_plane`, serialized with the explicit `_plane` marker rather
+  than as a vector component. A cross-sectional spelling without a registered
+  plane is invalid. The existing `poloidal_cross_section` spelling remains an
+  axis projection of the `cross_section` geometry carrier.
 - **local geometry representation**: A construction radius stored for a
   circular arc is `local_circle_radius_of_<owner>`. It is not the global
   cylindrical `radial_coordinate_of_<owner>` and not an outline coordinate.
@@ -104,9 +106,9 @@ section. They appear before the cross-sectional quantity. `poloidal` is the
 initial closed token; endpoint and sample-order words are not members of this
 or any related geometry-identity vocabulary.
 
-The carrier form is `poloidal_cross_section_of_coil_conductor`. A scalar
+The carrier form is `poloidal_plane_cross_section_of_coil_conductor`. A scalar
 property of that section uses the same segment, for example
-`poloidal_cross_sectional_area_of_coil_conductor`.
+`poloidal_plane_cross_sectional_area_of_coil_conductor`.
 
 {{ grammar_vocabulary_table('section_planes') }}
 
@@ -221,8 +223,8 @@ Certain segments cannot appear together in the same standard name:
 - `radial_magnetic_field` — component + physical_base
 - `voltage_of_flux_loop` — physical_base + object (instrument signal)
 - `area_of_poloidal_magnetic_field_probe` — physical_base + object
-- `poloidal_cross_sectional_area_of_conductor_cross_section` — section_plane + physical_base + object
-- `poloidal_cross_section_of_coil_conductor` — section_plane + geometric_base + object
+- `poloidal_plane_cross_sectional_area_of_conductor_cross_section` — section_plane + physical_base + object
+- `poloidal_plane_cross_section_of_coil_conductor` — section_plane + geometric_base + object
 - `local_circle_radius_of_passive_loop_element` — geometry_representation + physical_base + object
 
 **With position or geometry:**

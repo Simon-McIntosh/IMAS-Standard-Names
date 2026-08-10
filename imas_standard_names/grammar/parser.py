@@ -113,7 +113,7 @@ class Vocabularies:
     # categories needed to prove binary shared-base elisions without treating
     # an arbitrary run of individually known words as a valid qualifier.
     qualifier_roles: Mapping[str, frozenset[str]] = field(default_factory=dict)
-    section_planes: frozenset[str] = field(default_factory=frozenset)
+    section_planes: Mapping[str, str] = field(default_factory=dict)
     geometry_representations: frozenset[str] = field(default_factory=frozenset)
     # Ordered geometric qualifiers (canonical intra-order) that compose onto a
     # ``qualifiable`` locus feature (inner_strike_point, upper_outer_strike_point).
@@ -200,7 +200,8 @@ def load_default_vocabularies() -> Vocabularies:
     # State-resolution tokens (charge_state, internal_state) peel like
     # qualifiers; the model retains the single token in the ``state`` segment.
     state_quals = vocab_loaders.load_states()
-    section_plane_quals = vocab_loaders.load_section_planes()
+    section_plane_values = vocab_loaders.load_section_planes()
+    section_plane_quals = {f"{plane}_plane": plane for plane in section_plane_values}
     representation_quals = vocab_loaders.load_geometry_representations()
 
     # Add unary_prefix operator tokens as qualifiers so that "bare" prefix
@@ -243,7 +244,7 @@ def load_default_vocabularies() -> Vocabularies:
         | population_quals
         | orbit_quals
         | state_quals
-        | section_plane_quals
+        | section_plane_quals.keys()
         | representation_quals
         | prefix_op_quals
         | zone_quals
@@ -262,7 +263,7 @@ def load_default_vocabularies() -> Vocabularies:
     register_role(population_quals, "population")
     register_role(orbit_quals, "orbit")
     register_role(state_quals, "state")
-    register_role(section_plane_quals, "section_plane")
+    register_role(frozenset(section_plane_quals), "section_plane")
     register_role(representation_quals, "geometry_representation")
     register_role(zone_quals, "zone")
     register_role(channel_quals, "channel")
@@ -1177,7 +1178,8 @@ def _match_base_with_qualifiers(
     for split in range(len(parts) - 1, 0, -1):
         prefix = "_".join(parts[:split])
         rest = "_".join(parts[split:])
-        if prefix not in v.section_planes or not rest:
+        section_plane = v.section_planes.get(prefix)
+        if section_plane is None or not rest:
             continue
         try:
             base, deeper, inner_proj = _match_base_with_qualifiers(
@@ -1192,7 +1194,7 @@ def _match_base_with_qualifiers(
             continue
         return (
             base,
-            [Qualifier(token=prefix, category="section_plane"), *deeper],
+            [Qualifier(token=section_plane, category="section_plane"), *deeper],
             None,
         )
 

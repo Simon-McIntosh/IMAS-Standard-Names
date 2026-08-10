@@ -28,7 +28,7 @@ This specification defines the canonical grammar, validation rules, and semantic
 ```text
 [<operator application>]?
 [<axis>_]?
-[<section_plane>_]?
+[<section_plane>_plane_]?
 [<ordered prefix segments>]?
 [<geometry_representation>_]?
 <geometry carrier | physical base>
@@ -80,7 +80,7 @@ For detailed segment descriptions and auto-generated vocabulary tables, see [Gra
 | ---------- | ----------------------- | --------------------------------------- |
 | component  | `{token}_`              | `radial_magnetic_field`                 |
 | coordinate | `{token}_`              | `radial_position_of_flux_loop`          |
-| section_plane | `{token}_`           | `poloidal_cross_sectional_area_of_conductor_cross_section` |
+| section_plane | `{token}_plane_`     | `poloidal_plane_cross_sectional_area_of_conductor_cross_section` |
 | geometry_representation | `{token}_` | `local_circle_radius_of_passive_loop_element` |
 | object     | `of_{token}`            | `voltage_of_flux_loop`                  |
 | device     | `{token}_`              | `flux_loop_voltage` (compatibility only) |
@@ -159,11 +159,9 @@ voltage_of_flux_loop                      (physical_base + object)
 area_of_poloidal_magnetic_field_probe     (physical_base + object)
 electron_temperature_at_magnetic_axis     (subject + physical_base + position)
 radial_coordinate_of_plasma_boundary      (geometry carrier + geometry)
-poloidal_cross_sectional_area_of_conductor_cross_section
-                                             (section_plane + physical_base + object)
-poloidal_cross_section_of_coil_conductor      (section_plane + geometric_base + object)
-local_circle_radius_of_passive_loop_element
-                                             (geometry_representation + physical_base + object)
+poloidal_plane_cross_sectional_area_of_conductor_cross_section (section_plane + physical_base + object)
+poloidal_plane_cross_section_of_coil_conductor (section_plane + geometric_base + object)
+local_circle_radius_of_passive_loop_element    (geometry_representation + physical_base + object)
 ```
 <!-- isn-authoring-examples:end -->
 
@@ -177,7 +175,7 @@ local_circle_radius_of_passive_loop_element
 | `electron_temperature_at_boundary_of_axis` | GRM005        | Pick one: at_boundary OR of_axis     |
 | `voltage_from_flux_loop`                   | Semantic      | `voltage_of_flux_loop`               |
 | `flux_loop_voltage`                        | Compatibility | `voltage_of_flux_loop`               |
-| `cross_sectional_area_of_conductor_cross_section` | Missing plane | `poloidal_cross_sectional_area_of_conductor_cross_section` |
+| `cross_sectional_area_of_conductor_cross_section` | Missing plane | `poloidal_plane_cross_sectional_area_of_conductor_cross_section` |
 | `radial_local_circle_radius_of_passive_loop_element` | Frame conflation | `local_circle_radius_of_passive_loop_element` |
 | `first_local_circle_radius_of_passive_loop_element` | Sample order in identity | `local_circle_radius_of_passive_loop_element` |
 

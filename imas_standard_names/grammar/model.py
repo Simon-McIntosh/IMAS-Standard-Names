@@ -926,7 +926,11 @@ def _model_to_ir(model: StandardName) -> StandardNameIR:
                 token=_value_of(model.geometric_base), kind=BaseKind.GEOMETRY
             )
             if model.section_plane:
-                qualifiers.append(Qualifier(token=_value_of(model.section_plane)))
+                qualifiers.append(
+                    Qualifier(
+                        token=_value_of(model.section_plane), category="section_plane"
+                    )
+                )
         elif model.physical_base:
             # Re-parse the physical_base to decompose qualifiers + base
             base, qualifiers = _decompose_physical_base(
@@ -1060,7 +1064,9 @@ def _decompose_physical_base(
     # order) regardless of the order they were supplied in, so a non-canonical
     # authored order canonicalizes here and is rejected by parse_standard_name.
     if section_plane:
-        qualifiers.append(Qualifier(token=_value_of(section_plane)))
+        qualifiers.append(
+            Qualifier(token=_value_of(section_plane), category="section_plane")
+        )
     if aggregation:
         qualifiers.append(Qualifier(token=_value_of(aggregation)))
 
@@ -1298,10 +1304,10 @@ class StandardName(BaseModel):
                 or self.physical_base.startswith("cross_sectional_")
             )
         )
-        if cross_sectional and self.section_plane is None:
+        if cross_sectional and self.section_plane is None and self.coordinate is None:
             raise ValueError(
                 "cross-sectional identities require a section_plane; use "
-                "'poloidal' for a tokamak poloidal cross section"
+                "'poloidal_plane' for a tokamak poloidal cross section"
             )
         if self.section_plane is not None and not cross_sectional:
             raise ValueError(

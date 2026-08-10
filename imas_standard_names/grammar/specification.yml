@@ -84,7 +84,7 @@
 
 canonical_pattern: >
   [<component> | <coordinate>]?
-  [<section_plane>]?
+  [<section_plane>_plane]?
   [<aggregation>]?
   [<qualifier>]*
   [<zone>]?
@@ -182,12 +182,14 @@ segments:
       components.
   - id: section_plane
     optional: true
+    template: "{token}_plane_"
     vocabulary: section_planes
     description: >
       Plane containing a physical or geometric section. This single-token
-      segment renders immediately after any component/coordinate projection
-      and before all other prefix segments. Poloidal identifies a section in
-      the tokamak poloidal plane; it is not a vector component in this role.
+      segment renders as <token>_plane immediately after any
+      component/coordinate projection and before all other prefix segments.
+      Poloidal identifies a section in the tokamak poloidal plane; the explicit
+      plane marker distinguishes it from a vector component in this role.
       A cross-sectional quantity or cross-section carrier must carry a
       section_plane, because changing the plane changes the represented
       object.

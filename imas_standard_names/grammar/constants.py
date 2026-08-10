@@ -90,7 +90,7 @@ SEGMENT_RULES: tuple[SegmentRule, ...] = (
     SegmentRule(
         identifier="section_plane",
         optional=True,
-        template=None,
+        template="{token}_plane_",
         exclusive_with=(),
         tokens=SEGMENT_TOKEN_MAP["section_plane"],
     ),
@@ -263,6 +263,7 @@ SUFFIX_SEGMENTS: tuple[str, ...] = SEGMENT_ORDER[BASE_SEGMENT_INDICES[-1] + 1 :]
 SUFFIX_SEGMENTS_REVERSED: tuple[str, ...] = tuple(reversed(SUFFIX_SEGMENTS))
 
 SEGMENT_TEMPLATES: dict[str, str] = {
+    "section_plane": "{token}_plane_",
     "object": "of_{token}",
     "geometry": "of_{token}",
     "position": "at_{token}",

@@ -149,8 +149,8 @@ def _get_vocabulary_description(segment_id: str) -> str:
             "and e2 = e3 x e1; e2 is not global vertical"
         ),
         "section_plane": (
-            "Plane containing a cross section; poloidal is a section plane, "
-            "not a vector projection, in poloidal_cross_sectional_area"
+            "Plane containing a cross section; poloidal_plane is an explicit "
+            "section-plane prefix, distinct from the poloidal axis projection"
         ),
         "geometry_representation": (
             "Object-local geometry representation; local_circle_radius names "
@@ -939,7 +939,7 @@ def _build_grammar_context() -> dict[str, Any]:
             "binary": "<op>_of_<A>_<separator>_<B>",
             "projection_component": "<axis>_<base>",
             "projection_coordinate": "<axis>_<carrier>",
-            "section_plane": "<plane>_<cross_sectional_quantity>",
+            "section_plane": "<plane>_plane_<cross_sectional_quantity>",
             "geometry_representation": "<representation>_<quantity>_of_<owner>",
             "locus": "<core>_<relation>_<locus_token>",
             "mechanism": "<core>_due_to_<process>",
