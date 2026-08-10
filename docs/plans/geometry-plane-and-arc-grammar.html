@@ -26,7 +26,7 @@
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="elevated">
 <meta name="plan-impl" content="0.0">
-<meta name="plan-version" content="3">
+<meta name="plan-version" content="4">
 <meta name="plan-sprint" content="S1">
 </head>
 <body>
@@ -84,26 +84,7 @@
 <article class="r-fu" data-id="f-geometry-plane-arc" data-status="open" data-written-by="reckon-create" data-written-at="2026-08-10" data-recommends-skill="/reckon-ship geometry-plane-and-arc-grammar" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Add plane-qualified section and local-arc semantics to the public grammar</h4>
     <div class="r-fu-body"><p>Add the section-plane segment and arc representation vocabulary to ISN, place the new segment canonically in the grammar, expose it through the public grammar context, and prove strict parse/compose round trips and ambiguity rejection.</p></div>
-    <pre class="r-fu-prompt">Project: imas-standard-names
-Plan: geometry-plane-and-arc-grammar
-
-Objective
-Extend the canonical ISN grammar so cross-sections name their plane and circle-arc geometry can express local representation quantities without being confused with global tokamak cylindrical coordinates. Preserve the strict rule that ordinal sample positions never enter identity.
-
-Required work
-1. Design and add a closed section_plane grammar segment with canonical ordering. Seed poloidal and add only other planes justified by the existing catalog/domain corpus.
-2. Add or refine closed vocabulary and grammar structure for source-authoritative arc representation: local circle radius/centre/arc carrier semantics must be distinct from radial_coordinate in the tokamak cylindrical frame and from the physical outline of a conductor.
-3. Define valid carrier/representation/plane combinations and reject missing or contradictory plane semantics where a cross-section requires a plane.
-4. Keep start/end/first/second/third tokens out of every grammar segment. Ordered points remain source provenance only.
-5. Update parser, composer, renderer, semantic checks, generated grammar maps, JSON schema/public grammar context, examples, and catalog guidance through the public API only.
-6. Add round-trip and ambiguity tests using representative identities: poloidal cross-section of a conductor, a local circle radius for an arc representation, a global radial coordinate of a physical point, an outline coordinate, and a normal-vector component.
-7. Cut and validate an ISN release candidate, then provide the exact dependency/version contract to imas-codex. Do not edit DD-source mappings or the Neo4j graph here.
-
-Done when
-- The new segment ordering and vocabulary round-trip through public parse/compose APIs.
-- Missing/incorrect plane and global-vs-local radius confusions fail deterministically.
-- No ordinal token is accepted into identity.
-- imas-codex can consume the public grammar context without duplicating tokens or segment names.</pre>
+    <pre class="r-fu-prompt">/reckon-ship geometry-plane-and-arc-grammar</pre>
     </article>
 </section>
 </main>
