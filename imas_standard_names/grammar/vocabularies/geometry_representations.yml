@@ -1,0 +1,5 @@
+# Local construction representations for geometry quantities.
+#
+# These tokens describe the frame and primitive in which a quantity is stored.
+# They do not name a machine-global coordinate axis.
+- local_circle

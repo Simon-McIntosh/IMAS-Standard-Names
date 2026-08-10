@@ -44,6 +44,11 @@ carriers:
   # === Migrated from geometric_bases.yml (carrier-type entries) ===
   contour:
     aliases: []
+  cross_section:
+    aliases: []
+    definition: >
+      Planar section of a physical or geometric object. The containing plane
+      is a required section_plane segment of the standard name.
   coordinate:
     aliases: []
   displacement:

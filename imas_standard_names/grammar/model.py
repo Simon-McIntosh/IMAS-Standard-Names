@@ -51,6 +51,7 @@ from imas_standard_names.grammar.model_types import (
     Coordinate,
     Decomposition,
     GeometricBase,
+    GeometryRepresentation,
     Object,
     Orbit,
     Population,
@@ -58,6 +59,7 @@ from imas_standard_names.grammar.model_types import (
     Process,
     Qualifier as QualifierToken,
     Region,
+    SectionPlane,
     State,
     Subject,
     Transformation,
@@ -116,6 +118,10 @@ _AGGREGATION_VALUES: frozenset[str] = frozenset(a.value for a in Aggregation)
 _POPULATION_VALUES: frozenset[str] = frozenset(p.value for p in Population)
 _STATE_VALUES: frozenset[str] = frozenset(s.value for s in State)
 _ORBIT_VALUES: frozenset[str] = frozenset(o.value for o in Orbit)
+_SECTION_PLANE_VALUES: frozenset[str] = frozenset(p.value for p in SectionPlane)
+_GEOMETRY_REPRESENTATION_VALUES: frozenset[str] = frozenset(
+    representation.value for representation in GeometryRepresentation
+)
 
 # Zone: ordered plasma-region / geometric sub-selector PREFIX segment. Unlike
 # the single-token aggregation/orbit/population segments, a name may carry
@@ -492,12 +498,36 @@ def _ir_to_model_dict(ir: StandardNameIR) -> dict[str, str]:
         # Base + qualifiers → physical_base or geometric_base
         if ir.base.kind is BaseKind.GEOMETRY:
             d["geometric_base"] = ir.base.token
+            plane_tokens = [
+                qualifier.token
+                for qualifier in ir.qualifiers
+                if qualifier.token in _SECTION_PLANE_VALUES
+            ]
+            other_tokens = [
+                qualifier.token
+                for qualifier in ir.qualifiers
+                if qualifier.token not in _SECTION_PLANE_VALUES
+            ]
+            if len(plane_tokens) > 1:
+                raise ValueError(
+                    "Two 'section_plane' tokens cannot stack in a single name; "
+                    "the section_plane segment admits at most one token."
+                )
+            if other_tokens:
+                raise ValueError(
+                    "geometry carriers cannot carry non-plane prefix qualifiers; "
+                    f"got {other_tokens}"
+                )
+            if plane_tokens:
+                d["section_plane"] = plane_tokens[0]
         else:
             # physical_base: fold uncategorized qualifiers back as prefix
             subject = None
             device = None
             transformation_token = None
             aggregation = None
+            section_plane = None
+            geometry_representation = None
             population = None
             state = None
             orbit = None
@@ -514,7 +544,22 @@ def _ir_to_model_dict(ir: StandardNameIR) -> dict[str, str]:
                 # (never silent last-wins — that would drop a token from the
                 # name, e.g. fast_thermal_ion_density). Aggregation legitimately
                 # stacks with population, so total_fast_ion_energy is valid.
-                if q.token in _AGGREGATION_VALUES:
+                if q.token in _SECTION_PLANE_VALUES:
+                    if section_plane is not None:
+                        raise ValueError(
+                            "Two 'section_plane' tokens cannot stack in a single name; "
+                            "the section_plane segment admits at most one token."
+                        )
+                    section_plane = q.token
+                elif q.token in _GEOMETRY_REPRESENTATION_VALUES:
+                    if geometry_representation is not None:
+                        raise ValueError(
+                            "Two 'geometry_representation' tokens cannot stack in a "
+                            "single name; the geometry_representation segment admits "
+                            "at most one token."
+                        )
+                    geometry_representation = q.token
+                elif q.token in _AGGREGATION_VALUES:
                     if aggregation is not None:
                         msg = (
                             f"Two 'aggregation' tokens ('{aggregation}' and "
@@ -632,6 +677,10 @@ def _ir_to_model_dict(ir: StandardNameIR) -> dict[str, str]:
                     base_qualifiers.append(q.token)
             if aggregation:
                 d["aggregation"] = aggregation
+            if section_plane:
+                d["section_plane"] = section_plane
+            if geometry_representation:
+                d["geometry_representation"] = geometry_representation
             if orbit:
                 d["orbit"] = orbit
             if population:
@@ -876,6 +925,8 @@ def _model_to_ir(model: StandardName) -> StandardNameIR:
             base = QuantityOrCarrier(
                 token=_value_of(model.geometric_base), kind=BaseKind.GEOMETRY
             )
+            if model.section_plane:
+                qualifiers.append(Qualifier(token=_value_of(model.section_plane)))
         elif model.physical_base:
             # Re-parse the physical_base to decompose qualifiers + base
             base, qualifiers = _decompose_physical_base(
@@ -885,6 +936,8 @@ def _model_to_ir(model: StandardName) -> StandardNameIR:
                 model.population,
                 model.orbit,
                 model.aggregation,
+                model.section_plane,
+                model.geometry_representation,
                 model.zone,
                 model.channel,
                 model.channel_qualifier,
@@ -974,6 +1027,8 @@ def _decompose_physical_base(
     population: Population | None = None,
     orbit: Orbit | None = None,
     aggregation: Aggregation | None = None,
+    section_plane: SectionPlane | None = None,
+    geometry_representation: GeometryRepresentation | None = None,
     zone: tuple[Zone, ...] = (),
     channel: Channel | None = None,
     channel_qualifier: ChannelQualifier | None = None,
@@ -1004,6 +1059,8 @@ def _decompose_physical_base(
     # Zone tokens are emitted in the FIXED canonical intra-order (Zone enum
     # order) regardless of the order they were supplied in, so a non-canonical
     # authored order canonicalizes here and is rejected by parse_standard_name.
+    if section_plane:
+        qualifiers.append(Qualifier(token=_value_of(section_plane)))
     if aggregation:
         qualifiers.append(Qualifier(token=_value_of(aggregation)))
 
@@ -1060,6 +1117,8 @@ def _decompose_physical_base(
             qualifiers.append(channel_qualifier_q)
         if channel_q is not None:
             qualifiers.append(channel_q)
+        if geometry_representation is not None:
+            qualifiers.append(Qualifier(token=_value_of(geometry_representation)))
         qualifiers.extend(result.ir.qualifiers)
         return result.ir.base, qualifiers
     except (ParseError, ValueError):
@@ -1069,6 +1128,8 @@ def _decompose_physical_base(
             qualifiers.append(channel_qualifier_q)
         if channel_q is not None:
             qualifiers.append(channel_q)
+        if geometry_representation is not None:
+            qualifiers.append(Qualifier(token=_value_of(geometry_representation)))
         return QuantityOrCarrier(
             token=physical_base, kind=BaseKind.QUANTITY
         ), qualifiers
@@ -1081,6 +1142,7 @@ class StandardName(BaseModel):
 
     component: Component | None = None
     coordinate: Coordinate | None = None
+    section_plane: SectionPlane | None = None
     aggregation: Aggregation | None = None
     orbit: Orbit | None = None
     population: Population | None = None
@@ -1119,6 +1181,7 @@ class StandardName(BaseModel):
     # are also valid bases (standalone electron_energy, kinetic_energy); the
     # parser disambiguates by longest-base match.
     channel: Channel | None = None
+    geometry_representation: GeometryRepresentation | None = None
     geometric_base: GeometricBase | None = None
     physical_base: BaseToken | None = None
     object: Object | None = None
@@ -1221,6 +1284,60 @@ class StandardName(BaseModel):
         if self.geometric_base is None and self.physical_base is None:
             msg = "Either geometric_base or physical_base must be set"
             raise ValueError(msg)
+        return self
+
+    @model_validator(mode="after")
+    def _check_section_plane_semantics(self) -> StandardName:
+        cross_sectional = (
+            self.geometric_base is not None
+            and _value_of(self.geometric_base) == "cross_section"
+        ) or bool(
+            self.physical_base
+            and (
+                self.physical_base == "cross_sectional"
+                or self.physical_base.startswith("cross_sectional_")
+            )
+        )
+        if cross_sectional and self.section_plane is None:
+            raise ValueError(
+                "cross-sectional identities require a section_plane; use "
+                "'poloidal' for a tokamak poloidal cross section"
+            )
+        if self.section_plane is not None and not cross_sectional:
+            raise ValueError(
+                "section_plane is only valid on a cross-sectional quantity or "
+                "cross_section geometry carrier"
+            )
+        if self.section_plane is not None and (
+            self.component is not None or self.coordinate is not None
+        ):
+            raise ValueError(
+                "section_plane cannot be combined with a component or coordinate "
+                "projection"
+            )
+        return self
+
+    @model_validator(mode="after")
+    def _check_geometry_representation_semantics(self) -> StandardName:
+        if self.geometry_representation is None:
+            return self
+        if (
+            _value_of(self.geometry_representation) != "local_circle"
+            or self.physical_base != "radius"
+        ):
+            raise ValueError(
+                "geometry_representation 'local_circle' is valid only with "
+                "physical_base 'radius'"
+            )
+        if self.object is None:
+            raise ValueError(
+                "geometry_representation 'local_circle' requires an explicit "
+                "owner in the object locus"
+            )
+        if self.component is not None or self.coordinate is not None:
+            raise ValueError(
+                "a local-circle radius is not a component or coordinate projection"
+            )
         return self
 
     @field_validator("locus_qualifiers", mode="before")
@@ -1448,6 +1565,7 @@ class StandardName(BaseModel):
             has_qualification = any(
                 [
                     self.aggregation,
+                    self.section_plane,
                     self.qualifier,
                     self.orbit,
                     self.population,
@@ -1456,6 +1574,7 @@ class StandardName(BaseModel):
                     self.zone,
                     self.channel_qualifier,
                     self.channel,
+                    self.geometry_representation,
                     self.object,
                     self.position,
                     self.geometry,

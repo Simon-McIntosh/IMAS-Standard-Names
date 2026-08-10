@@ -35,6 +35,15 @@ Operators wrap that core recursively:
   component (`radial_magnetic_field`) or a geometric carrier coordinate
   (`radial_position_of_flux_loop`). The base determines which projection is
   meant; there is no `_component_of_` marker.
+- **section plane**: A cross-sectional identity includes its plane. In
+  `poloidal_cross_sectional_area_of_conductor_cross_section`, `poloidal` is
+  the `section_plane`, not a vector component. A cross-sectional spelling
+  without a registered plane is invalid.
+- **local geometry representation**: A construction radius stored for a
+  circular arc is `local_circle_radius_of_<owner>`. It is not the global
+  cylindrical `radial_coordinate_of_<owner>` and not an outline coordinate.
+  The explicit owner prevents the source representation from becoming a
+  globally scoped quantity.
 - **instrument and object relations**: Author both signals and intrinsic
   properties with the `of_<entity>` postfix (for example,
   `voltage_of_flux_loop` and `area_of_flux_loop`). The `<device>_<signal>`
@@ -87,6 +96,27 @@ nitrogen, neon, argon, tungsten, lithium), extended species (alpha particle, fas
 and reaction mixtures (deuterium-tritium).
 
 {{ grammar_vocabulary_table('subjects') }}
+
+### Section Planes
+
+Section-plane tokens identify the plane containing a physical or geometric
+section. They appear before the cross-sectional quantity. `poloidal` is the
+initial closed token; endpoint and sample-order words are not members of this
+or any related geometry-identity vocabulary.
+
+The carrier form is `poloidal_cross_section_of_coil_conductor`. A scalar
+property of that section uses the same segment, for example
+`poloidal_cross_sectional_area_of_coil_conductor`.
+
+{{ grammar_vocabulary_table('section_planes') }}
+
+### Geometry Representations
+
+Geometry-representation tokens identify an object-local construction
+primitive. `local_circle` composes only with `radius` and an explicit owner:
+`local_circle_radius_of_passive_loop_element`.
+
+{{ grammar_vocabulary_table('geometry_representations') }}
 
 ### Geometric Bases
 
@@ -191,6 +221,9 @@ Certain segments cannot appear together in the same standard name:
 - `radial_magnetic_field` — component + physical_base
 - `voltage_of_flux_loop` — physical_base + object (instrument signal)
 - `area_of_poloidal_magnetic_field_probe` — physical_base + object
+- `poloidal_cross_sectional_area_of_conductor_cross_section` — section_plane + physical_base + object
+- `poloidal_cross_section_of_coil_conductor` — section_plane + geometric_base + object
+- `local_circle_radius_of_passive_loop_element` — geometry_representation + physical_base + object
 
 **With position or geometry:**
 
@@ -213,6 +246,9 @@ Examples that violate the grammar:
 ❌ `electron_temperature_at_plasma_boundary_of_magnetic_axis` — both position and geometry (mutually exclusive)  
 ❌ `radial_position_at_flux_loop` — an entity property uses `_of_`, not `_at_`
 ❌ `position_radial_of_flux_loop` — the axis prefix must precede the carrier
+❌ `cross_sectional_area_of_conductor_cross_section` — a section must include its plane
+❌ `radial_local_circle_radius_of_passive_loop_element` — a local circle radius is not global cylindrical R
+❌ `first_local_circle_radius_of_passive_loop_element` — sample order stays in source provenance
 
 ---
 

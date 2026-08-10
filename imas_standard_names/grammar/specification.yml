@@ -84,6 +84,7 @@
 
 canonical_pattern: >
   [<component> | <coordinate>]?
+  [<section_plane>]?
   [<aggregation>]?
   [<qualifier>]*
   [<zone>]?
@@ -93,6 +94,7 @@ canonical_pattern: >
   [<device>]?
   [<channel_qualifier>]?
   [<channel>]?
+  [<geometry_representation>]?
   <geometric_base | physical_base>
   [of_<object>]?
   [of_<geometry> | at_<position>[_equal_to_<value>]? | over_<region>]?
@@ -178,6 +180,17 @@ segments:
       unit-vector carriers identify e1 or e2 themselves. Coordinate projection
       tokens such as x, y, and z may then select their machine-Cartesian
       components.
+  - id: section_plane
+    optional: true
+    vocabulary: section_planes
+    description: >
+      Plane containing a physical or geometric section. This single-token
+      segment renders immediately after any component/coordinate projection
+      and before all other prefix segments. Poloidal identifies a section in
+      the tokamak poloidal plane; it is not a vector component in this role.
+      A cross-sectional quantity or cross-section carrier must carry a
+      section_plane, because changing the plane changes the represented
+      object.
   - id: aggregation
     optional: true
     vocabulary: aggregations
@@ -318,6 +331,16 @@ segments:
       electron_energy): the parser matches the longest base first, so the
       standalone forms parse as base and the *_flux / *_diffusivity / *_source
       forms strip the channel. Both coexist by design.
+  - id: geometry_representation
+    optional: true
+    vocabulary: geometry_representations
+    description: >
+      Object-local construction representation for a geometry quantity.
+      local_circle identifies a radius belonging to a circular-arc
+      representation in the owner's local geometry; it is distinct from the
+      global cylindrical radial_coordinate and from an outline coordinate.
+      The representation renders immediately before the physical base and
+      requires an explicit owner locus.
   - id: geometric_base
     optional: true
     vocabulary: geometric_bases
@@ -434,6 +457,7 @@ segments:
 vocabularies:
   components: !include vocabularies/components.yml
   coordinate_axes: !include vocabularies/coordinate_axes.yml
+  section_planes: !include vocabularies/section_planes.yml
   subjects: !include vocabularies/subjects.yml
   states: !include vocabularies/states.yml
   # rc32 subject-vocabulary decomposition: orthogonal single-token modifier
@@ -458,20 +482,18 @@ vocabularies:
   # channel: transport-channel PREFIX segment (what is transported:
   # heat/particle/energy/momentum). Innermost prefix, single-token.
   channels: !include vocabularies/channels.yml
+  geometry_representations: !include vocabularies/geometry_representations.yml
   processes: !include vocabularies/processes.yml
   generic_physical_bases: !include vocabularies/generic_physical_bases.yml
   binary_operators: !include vocabularies/binary_operators.yml
-  # --- vNext vocabularies (plan 38 §A9) ---
-  # objects.yml + positions.yml migrated to locus_registry.yml (typed locus entries)
-  # geometric_bases.yml migrated to geometry_carriers.yml (closed shape carriers)
-  # transformations.yml + decomposition.yml → operators.yml (unified operator registry)
-  # Vocabulary names kept as ``objects``, ``positions``, ``geometric_bases`` for
-  # backward compatibility with generated enum class names (Object, Position, GeometricBase).
+  # Typed vocabulary registries. Objects and positions select typed locus
+  # entries; geometric bases select closed shape carriers. The source keys
+  # match the generated enum class names (Object, Position, GeometricBase).
   objects: !include vocabularies/locus_registry.yml
   positions: !include vocabularies/locus_registry.yml
   geometric_bases: !include vocabularies/geometry_carriers.yml
-  # transformations + decomposition → both generated from operators.yml (bare vNext tokens).
-  # rc20 tests that assert _of_-suffixed token forms are marked xfail (plan 38 §A10).
+  # Transformations and decomposition expose the applicable bare tokens from
+  # the unified operator registry.
   transformations: !include vocabularies/operators.yml
   decomposition: !include vocabularies/operators.yml
 

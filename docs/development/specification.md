@@ -28,7 +28,9 @@ This specification defines the canonical grammar, validation rules, and semantic
 ```text
 [<operator application>]?
 [<axis>_]?
+[<section_plane>_]?
 [<ordered prefix segments>]?
+[<geometry_representation>_]?
 <geometry carrier | physical base>
 [of_<entity> | at_<position> | over_<geometry-or-region> | along_<path>]?
 [due_to_<process>]?
@@ -43,9 +45,11 @@ For detailed segment descriptions and auto-generated vocabulary tables, see [Gra
 | -------------- | -------- | ----------------------------------------------- | -------------- |
 | component      | No       | Axis of a physical vector projection             | coordinate     |
 | coordinate     | No       | Axis of a geometry-carrier projection            | component      |
+| section_plane  | No       | Plane containing a cross-sectional identity       |                |
 | subject        | No       | Particle species or plasma population           |                |
 | geometric_base | No\*     | Spatial/geometric quantity                      | physical_base  |
 | physical_base  | No\*     | Physical measurement/property                   | geometric_base |
+| geometry_representation | No | Object-local construction representation       |                |
 | device         | No       | Compatibility-only hardware prefix               | object         |
 | object         | No       | Preferred entity relation for signals/properties | device         |
 | geometry       | No       | Geometric object property (of\_)                | position       |
@@ -76,6 +80,8 @@ For detailed segment descriptions and auto-generated vocabulary tables, see [Gra
 | ---------- | ----------------------- | --------------------------------------- |
 | component  | `{token}_`              | `radial_magnetic_field`                 |
 | coordinate | `{token}_`              | `radial_position_of_flux_loop`          |
+| section_plane | `{token}_`           | `poloidal_cross_sectional_area_of_conductor_cross_section` |
+| geometry_representation | `{token}_` | `local_circle_radius_of_passive_loop_element` |
 | object     | `of_{token}`            | `voltage_of_flux_loop`                  |
 | device     | `{token}_`              | `flux_loop_voltage` (compatibility only) |
 | geometry   | `of_{token}`            | `radial_coordinate_of_plasma_boundary`  |
@@ -98,6 +104,8 @@ For detailed segment descriptions and auto-generated vocabulary tables, see [Gra
 | GRM006  | coordinate requires geometric_base                                    |
 | GRM007  | component requires physical_base                                      |
 | GRM008  | All vocabulary tokens must exist in specification.yml                 |
+| GRM009  | Cross-sectional identities must carry one registered section plane    |
+| GRM010  | Local geometry representations must carry their owner locus            |
 
 ### Semantic Constraints
 
@@ -108,6 +116,8 @@ For detailed segment descriptions and auto-generated vocabulary tables, see [Gra
 | SEM003  | Units must be SI-consistent and match IMAS DD where applicable |
 | SEM004  | `physics_domain` must be a valid `PhysicsDomain` enum value    |
 | SEM005  | Provenance dependencies must form a DAG (no cycles)            |
+| SEM006  | A local-circle radius is distinct from cylindrical R and outline coordinates |
+| SEM007  | Endpoint and sample order remain source provenance, not identity tokens |
 
 ---
 
@@ -149,6 +159,11 @@ voltage_of_flux_loop                      (physical_base + object)
 area_of_poloidal_magnetic_field_probe     (physical_base + object)
 electron_temperature_at_magnetic_axis     (subject + physical_base + position)
 radial_coordinate_of_plasma_boundary      (geometry carrier + geometry)
+poloidal_cross_sectional_area_of_conductor_cross_section
+                                             (section_plane + physical_base + object)
+poloidal_cross_section_of_coil_conductor      (section_plane + geometric_base + object)
+local_circle_radius_of_passive_loop_element
+                                             (geometry_representation + physical_base + object)
 ```
 <!-- isn-authoring-examples:end -->
 
@@ -162,6 +177,9 @@ radial_coordinate_of_plasma_boundary      (geometry carrier + geometry)
 | `electron_temperature_at_boundary_of_axis` | GRM005        | Pick one: at_boundary OR of_axis     |
 | `voltage_from_flux_loop`                   | Semantic      | `voltage_of_flux_loop`               |
 | `flux_loop_voltage`                        | Compatibility | `voltage_of_flux_loop`               |
+| `cross_sectional_area_of_conductor_cross_section` | Missing plane | `poloidal_cross_sectional_area_of_conductor_cross_section` |
+| `radial_local_circle_radius_of_passive_loop_element` | Frame conflation | `local_circle_radius_of_passive_loop_element` |
+| `first_local_circle_radius_of_passive_loop_element` | Sample order in identity | `local_circle_radius_of_passive_loop_element` |
 
 ---
 
@@ -170,6 +188,8 @@ radial_coordinate_of_plasma_boundary      (geometry carrier + geometry)
 All controlled vocabularies are defined in:
 
 - `imas_standard_names/grammar/vocabularies/components.yml`
+- `imas_standard_names/grammar/vocabularies/section_planes.yml`
+- `imas_standard_names/grammar/vocabularies/geometry_representations.yml`
 - `imas_standard_names/grammar/vocabularies/subjects.yml`
 - `imas_standard_names/grammar/vocabularies/geometric_bases.yml`
 - `imas_standard_names/grammar/vocabularies/objects.yml`

@@ -113,6 +113,8 @@ class Vocabularies:
     # categories needed to prove binary shared-base elisions without treating
     # an arbitrary run of individually known words as a valid qualifier.
     qualifier_roles: Mapping[str, frozenset[str]] = field(default_factory=dict)
+    section_planes: frozenset[str] = field(default_factory=frozenset)
+    geometry_representations: frozenset[str] = field(default_factory=frozenset)
     # Ordered geometric qualifiers (canonical intra-order) that compose onto a
     # ``qualifiable`` locus feature (inner_strike_point, upper_outer_strike_point).
     locus_qualifiers: tuple[str, ...] = ()
@@ -198,6 +200,8 @@ def load_default_vocabularies() -> Vocabularies:
     # State-resolution tokens (charge_state, internal_state) peel like
     # qualifiers; the model retains the single token in the ``state`` segment.
     state_quals = vocab_loaders.load_states()
+    section_plane_quals = vocab_loaders.load_section_planes()
+    representation_quals = vocab_loaders.load_geometry_representations()
 
     # Add unary_prefix operator tokens as qualifiers so that "bare" prefix
     # operators (those that attach without _of_, like volume_averaged,
@@ -239,6 +243,8 @@ def load_default_vocabularies() -> Vocabularies:
         | population_quals
         | orbit_quals
         | state_quals
+        | section_plane_quals
+        | representation_quals
         | prefix_op_quals
         | zone_quals
         | channel_quals
@@ -256,6 +262,8 @@ def load_default_vocabularies() -> Vocabularies:
     register_role(population_quals, "population")
     register_role(orbit_quals, "orbit")
     register_role(state_quals, "state")
+    register_role(section_plane_quals, "section_plane")
+    register_role(representation_quals, "geometry_representation")
     register_role(zone_quals, "zone")
     register_role(channel_quals, "channel")
     register_role(channel_qualifier_quals, "channel_qualifier")
@@ -304,6 +312,8 @@ def load_default_vocabularies() -> Vocabularies:
         qualifier_roles={
             token: frozenset(roles) for token, roles in qualifier_roles.items()
         },
+        section_planes=section_plane_quals,
+        geometry_representations=representation_quals,
         locus_qualifiers=tuple(loci_reg.locus_qualifiers),
         qualifiable_loci=frozenset(qualifiable_loci_set),
     )
@@ -1161,6 +1171,31 @@ def _match_base_with_qualifiers(
 
     parts = s.split("_")
 
+    # A plane token may also be a projection axis (poloidal). When the
+    # remainder is explicitly cross-sectional, the section-plane reading is
+    # authoritative and must win before projection matching.
+    for split in range(len(parts) - 1, 0, -1):
+        prefix = "_".join(parts[:split])
+        rest = "_".join(parts[split:])
+        if prefix not in v.section_planes or not rest:
+            continue
+        try:
+            base, deeper, inner_proj = _match_base_with_qualifiers(
+                rest, v, _allow_projection=False
+            )
+        except ParseError:
+            continue
+        cross_sectional = base.token == "cross_section" or any(
+            qualifier.token == "cross_sectional" for qualifier in deeper
+        )
+        if inner_proj is not None or not cross_sectional:
+            continue
+        return (
+            base,
+            [Qualifier(token=prefix, category="section_plane"), *deeper],
+            None,
+        )
+
     # --- Priority 3: axis prefix → projection ---
     if _allow_projection:
         projection_axes = v.axes | v.component_axes
@@ -1385,6 +1420,8 @@ def _has_unambiguous_qualifier_roles(
         "object",
         "channel",
         "channel_qualifier",
+        "section_plane",
+        "geometry_representation",
     }
     return all(
         roles.count(role) <= 1

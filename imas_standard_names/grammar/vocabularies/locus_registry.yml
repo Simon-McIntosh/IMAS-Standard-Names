@@ -238,6 +238,10 @@ loci:
     type: entity
     allowed_relations: [of]
     definition: The passive loop treated as a distinct physical, plant, or diagnostic object in a standard name.
+  passive_loop_element:
+    type: entity
+    allowed_relations: [of]
+    definition: A discrete geometry element of a passive conducting loop.
   passive_structure:
     type: entity
     allowed_relations: [of]

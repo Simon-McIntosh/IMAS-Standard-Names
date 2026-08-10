@@ -48,6 +48,10 @@ class Coordinate(StrEnum):
     Z = "z"
 
 
+class SectionPlane(StrEnum):
+    POLOIDAL = "poloidal"
+
+
 class Subject(StrEnum):
     ELECTRON = "electron"
     ION = "ion"
@@ -291,6 +295,10 @@ class Channel(StrEnum):
     MOMENTUM = "momentum"
 
 
+class GeometryRepresentation(StrEnum):
+    LOCAL_CIRCLE = "local_circle"
+
+
 class Process(StrEnum):
     CONDUCTION = "conduction"
     CONVECTION = "convection"
@@ -465,6 +473,7 @@ class Object(StrEnum):
     OPTICAL_ELEMENT = "optical_element"
     REFLECTOR = "reflector"
     PASSIVE_LOOP = "passive_loop"
+    PASSIVE_LOOP_ELEMENT = "passive_loop_element"
     PASSIVE_STRUCTURE = "passive_structure"
     PELLET = "pellet"
     PELLET_INJECTOR = "pellet_injector"
@@ -597,6 +606,7 @@ class GeometricBase(StrEnum):
     RADIAL_COORDINATE = "radial_coordinate"
     TOROIDAL_FLUX_COORDINATE = "toroidal_flux_coordinate"
     CONTOUR = "contour"
+    CROSS_SECTION = "cross_section"
     COORDINATE = "coordinate"
     DISPLACEMENT = "displacement"
     EXTENT = "extent"
@@ -732,6 +742,7 @@ class Decomposition(StrEnum):
 __all__ = [
     "Component",
     "Coordinate",
+    "SectionPlane",
     "Subject",
     "State",
     "Population",
@@ -742,6 +753,7 @@ __all__ = [
     "Qualifier",
     "ChannelQualifier",
     "Channel",
+    "GeometryRepresentation",
     "Process",
     "GenericPhysicalBase",
     "BinaryOperator",
