@@ -148,6 +148,14 @@ def _get_vocabulary_description(segment_id: str) -> str:
             "right-handed frame, with plasma-facing normal e3, positive-phi e1, "
             "and e2 = e3 x e1; e2 is not global vertical"
         ),
+        "section_plane": (
+            "Plane containing a cross section; poloidal_plane is an explicit "
+            "section-plane prefix, distinct from the poloidal axis projection"
+        ),
+        "geometry_representation": (
+            "Object-local geometry representation; local_circle_radius names "
+            "a circular-arc radius, not the global radial coordinate"
+        ),
         "subject": "Particle species or plasma component (e.g., electron, ion, deuterium)",
         "object": "Physical object, diagnostic hardware, or equipment (e.g., flux_loop, bolometer)",
         "position": "Spatial location where field is evaluated (use with at_ template)",
@@ -874,6 +882,10 @@ def _build_grammar_context() -> dict[str, Any]:
     bases = _safe(vocab_loaders.load_physical_bases, None)
     carriers = _safe(vocab_loaders.load_geometry_carriers, None)
     qualifier_category_of = _safe(vocab_loaders.load_qualifier_categories, {})
+    section_planes = _safe(vocab_loaders.load_section_planes, frozenset())
+    geometry_representations = _safe(
+        vocab_loaders.load_geometry_representations, frozenset()
+    )
     qualifier_categories: dict[str, list[str]] = {}
     for token, category in qualifier_category_of.items():
         qualifier_categories.setdefault(category, []).append(token)
@@ -911,6 +923,8 @@ def _build_grammar_context() -> dict[str, Any]:
             },
             "physical_bases": sorted(bases.bases) if bases else [],
             "geometry_carriers": sorted(carriers.carriers) if carriers else [],
+            "section_planes": sorted(section_planes),
+            "geometry_representations": sorted(geometry_representations),
             "qualifier_categories": qualifier_categories,
         },
         "locus_relation_matrix": {
@@ -925,6 +939,8 @@ def _build_grammar_context() -> dict[str, Any]:
             "binary": "<op>_of_<A>_<separator>_<B>",
             "projection_component": "<axis>_<base>",
             "projection_coordinate": "<axis>_<carrier>",
+            "section_plane": "<plane>_plane_<cross_sectional_quantity>",
+            "geometry_representation": "<representation>_<quantity>_of_<owner>",
             "locus": "<core>_<relation>_<locus_token>",
             "mechanism": "<core>_due_to_<process>",
         },

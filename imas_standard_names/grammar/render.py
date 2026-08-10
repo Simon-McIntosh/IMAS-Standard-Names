@@ -70,12 +70,21 @@ def render_qualifiers(qualifiers: Iterable[Qualifier]) -> str:
     which matches the left-to-right order extracted by the parser.
     This ensures parse→compose round-trip fidelity.
 
+    A section-plane qualifier uses an explicit ``_plane`` marker. The marker
+    keeps the semantic value ``poloidal`` distinct from the existing
+    ``poloidal`` axis projection while leaving the IR value vocabulary-focused.
+
     Returns an empty string when no qualifiers are present. Otherwise
     returns the tokens joined by ``_`` with no leading or trailing
     underscore; the caller is responsible for gluing it onto the base.
     """
 
-    tokens = [q.token for q in qualifiers]
+    tokens = [
+        f"{qualifier.token}_plane"
+        if qualifier.category == "section_plane"
+        else qualifier.token
+        for qualifier in qualifiers
+    ]
     return "_".join(tokens)
 
 

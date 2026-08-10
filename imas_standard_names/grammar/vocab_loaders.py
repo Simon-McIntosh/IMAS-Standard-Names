@@ -344,6 +344,18 @@ def load_aggregations() -> frozenset[str]:
     return _load_flat_token_list("aggregations.yml", "aggregations")
 
 
+def load_section_planes() -> frozenset[str]:
+    """Load plane tokens used to qualify cross-sectional identities."""
+    return _load_flat_token_list("section_planes.yml", "section_planes")
+
+
+def load_geometry_representations() -> frozenset[str]:
+    """Load object-local geometry representation tokens."""
+    return _load_flat_token_list(
+        "geometry_representations.yml", "geometry_representations"
+    )
+
+
 def load_zones() -> tuple[str, ...]:
     """Load zone tokens from ``zones.yml`` in canonical intra-order.
 
