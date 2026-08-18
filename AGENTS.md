@@ -196,7 +196,8 @@ per-domain catalog YAML (`<domain>.yml`). Five edge types are emitted:
 | `REFERENCES` | `links[]` | entry → referenced name |
 
 Forward references and external names appear as stub nodes
-(`node["stub"] = True`). Install with `uv sync --extra graph-local`.
+(`node["stub"] = True`). Run graph-local tooling from the existing root
+environment with `uv run --no-sync`; an absent graph-local extra is a blocker.
 
 `graph/local_graph.py` exposes the traversal helpers directly:
 `get_neighbours`, `get_ancestors`, `get_descendants`, and `shortest_path`. Ancestors
@@ -239,7 +240,7 @@ cd /home/ITER/mcintos/Code/imas-standard-names && uv run pytest
 - **Package manager**: `uv`
 - **Add dependencies**: `uv add <package>`
 - **Add dev dependencies**: `uv add --dev <package>`
-- **Sync and lock**: `uv sync`
+- **Environment**: Follow `~/.agents/AGENTS.md` "Development Environment"; use the existing root `.venv` with `uv run --no-sync`, and report a missing or broken environment.
 
 ### CLI Tools
 - **Framework**: Use `click` for all CLI tools
@@ -345,18 +346,16 @@ uv run standard-names release --bump minor --dry-run -m 'Test'
 
 ### Environment Setup
 
-Use `uv` for all development tasks:
+Use the user-provisioned root `.venv` for all development tasks, as required by
+`~/.agents/AGENTS.md` "Development Environment". Agents do not provision or
+rebuild it; a missing environment or extra is a blocker. Detached worktrees use:
 
 ```bash
-# Set up environment
-uv venv
-uv sync
-
-# Install dependencies
-uv sync --all-extras
+UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-standard-names/.venv \
+  PYTHONPATH="$PWD" uv run --no-sync <command>
 
 # Install pre-commit hooks (required for contributors)
-uv run pre-commit install
+uv run --no-sync pre-commit install
 ```
 
 ### Build and Test Commands

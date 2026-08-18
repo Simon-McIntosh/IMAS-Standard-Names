@@ -59,9 +59,12 @@ If you find a problem or have a suggestion:
 3. Set up your development environment:
 
    ```bash
-   uv sync
-   uv run pre-commit install
+   uv run --no-sync pre-commit install
    ```
+
+   Agents use the user-provisioned repository-root `.venv` under the
+   `~/.agents/AGENTS.md` "Development Environment" policy; a missing or broken
+   environment is a blocker to report.
 
 4. Run tests:
 
