@@ -230,6 +230,10 @@ loci:
     type: entity
     allowed_relations: [of]
     definition: A component that redirects, filters, focuses, disperses, or otherwise transforms electromagnetic radiation.
+  polarizer:
+    type: entity
+    allowed_relations: [of]
+    definition: An optical element whose relevant function is selecting a polarization state of the radiation it transmits or reflects.
   reflector:
     type: entity
     allowed_relations: [of]
@@ -250,6 +254,11 @@ loci:
     type: entity
     allowed_relations: [of]
     definition: The pellet treated as a distinct physical, plant, or diagnostic object in a standard name.
+  pellet_fragment:
+    # solid fragment produced by shattering a pellet (DD spi/injector/fragment)
+    type: entity
+    allowed_relations: [of]
+    definition: A solid fragment produced by shattering an injected pellet.
   pellet_injector:
     # shattered-pellet-injector unit (DD spi/injector) — orientation vectors,
     # injection geometry
@@ -342,6 +351,12 @@ loci:
     type: entity
     allowed_relations: [of]
     definition: A diagnostic system that resolves detected radiation or particles by energy, wavelength, frequency, or mass-to-charge ratio.
+  wave_diagnostic_channel:
+    # shared receiver channel of a wave-based diagnostic (ECE, reflectometer,
+    # refractometer); the channel, not the antenna, carries the tuned frequency
+    type: entity
+    allowed_relations: [of]
+    definition: The receiver channel of a wave-based diagnostic treated as a distinct diagnostic object in a standard name.
   spectrometer_channel:
     type: entity
     allowed_relations: [of]
@@ -831,6 +846,12 @@ loci:
   # Geometry-typed loci (shape/region boundary: _at_, _of_, _over_)
   # ====================================================================
 
+  active_spatial_resolution_zone:
+    # volume along a channel sight line from which the measured signal
+    # originates (DD mse/channel/active_spatial_resolution)
+    type: geometry
+    allowed_relations: [at, of, over]
+    definition: The spatial volume from which a diagnostic channel collects the signal it reports.
   active_wall_point:
     type: geometry
     allowed_relations: [at, of, over]
