@@ -655,7 +655,7 @@ loci:
   minimum_safety_factor:
     type: position
     allowed_relations: [at, of]
-    definition: The flux-surface location at which the selected safety-factor measure attains its minimum.
+    definition: The flux-surface location at which the safety-factor magnitude attains its minimum.
   neoclassical_tearing_mode_center:
     type: position
     allowed_relations: [at, of]
