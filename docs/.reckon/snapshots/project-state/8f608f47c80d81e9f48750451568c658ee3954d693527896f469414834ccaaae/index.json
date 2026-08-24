@@ -1,0 +1,43 @@
+{
+  "updated": "2026-08-10T15:01:44",
+  "project": "imas-standard-names",
+  "doc": "index",
+  "data": {
+    "slug": "imas-standard-names",
+    "name": "IMAS Standard Names",
+    "active_sprint_id": null,
+    "sprints": [
+      {
+        "id": "S1",
+        "status": "done",
+        "theme": "Geometry identity grammar prerequisite",
+        "starts": "2026-08-10",
+        "ends": "2026-08-28",
+        "description": "Deliver the closed section-plane and local-arc grammar needed by the imas-codex pre-WEST semantic-integrity sprint without moving DD or graph authority into ISN.",
+        "summary": "Shipped the closed section-plane and local-circle grammar: canonical poloidal_plane serialization, strict local/global separation, non-ordinal identity and public grammar context are merged at b32f6b8; 1,993 tests passed.",
+        "items": [
+          {
+            "slug": "geometry-plane-and-arc-grammar",
+            "why_now": "Cross-sections need canonical plane semantics and circle-arc representation parameters must not collapse into global tokamak coordinates or hardware outlines.",
+            "done_when": "Closed vocabulary, canonical ordering, strict parse/compose round trips, semantic rejection tests and a validated release candidate are available through the public grammar API."
+          }
+        ]
+      }
+    ],
+    "milestones": [],
+    "timeline": [
+      {
+        "when": "2026-08-10",
+        "who": "Simon McIntosh",
+        "what": "Started the geometry identity grammar prerequisite for the imas-codex pre-WEST sprint: section-plane ordering/vocabulary, local circle-arc semantics, global-coordinate separation and strict no-ordinal identity."
+      },
+      {
+        "when": "2026-08-10",
+        "who": "Simon McIntosh",
+        "what": "Closed the geometry identity sprint after independent full-suite validation: 1,993 passed, 33 skipped, 82 expected failures, 2 warnings; post-merge smoke 5/5."
+      }
+    ],
+    "blockers": [],
+    "_version": 3
+  }
+}

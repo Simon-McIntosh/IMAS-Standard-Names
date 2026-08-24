@@ -1,0 +1,22 @@
+[
+  {
+    "type": "project",
+    "id": "project",
+    "path": "state/imas-standard-names/project.json",
+    "existed": true,
+    "snapshot": ".reckon/snapshots/project-state/8f608f47c80d81e9f48750451568c658ee3954d693527896f469414834ccaaae/destinations/state/imas-standard-names/project.json",
+    "sha256": "08575b2a43e74f8a9157e2888b4cfaf4e692ac73023203b79a133d6a7e6d8818"
+  },
+  {
+    "type": "sprint",
+    "id": "S1",
+    "path": "sprints/S1.html",
+    "existed": false
+  },
+  {
+    "type": "timeline",
+    "id": "timeline",
+    "path": "state/imas-standard-names/timeline.html",
+    "existed": false
+  }
+]

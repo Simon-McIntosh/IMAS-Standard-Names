@@ -1,0 +1,37 @@
+{
+  "format": "distributed",
+  "status": "complete",
+  "project": "imas-standard-names",
+  "source": "state/imas-standard-names/index.json",
+  "source_sha256": "8f608f47c80d81e9f48750451568c658ee3954d693527896f469414834ccaaae",
+  "source_version": 3,
+  "snapshot": ".reckon/snapshots/project-state/8f608f47c80d81e9f48750451568c658ee3954d693527896f469414834ccaaae/index.json",
+  "snapshot_sha256": "8f608f47c80d81e9f48750451568c658ee3954d693527896f469414834ccaaae",
+  "destination_snapshot_manifest": ".reckon/snapshots/project-state/8f608f47c80d81e9f48750451568c658ee3954d693527896f469414834ccaaae/destinations.json",
+  "parity_sha256": "103cdbde831b2ef05bbfb89f480436a36967b9c7348346ae3143d8f8c1b6004c",
+  "findings": [],
+  "resources": [
+    {
+      "type": "project",
+      "id": "project",
+      "path": "state/imas-standard-names/project.json",
+      "sha256": "ac808c18dd924c6d4b4695d593082d3177667a2d06f851f86b242b70bc75cabe",
+      "version": 0
+    },
+    {
+      "type": "sprint",
+      "id": "S1",
+      "path": "sprints/S1.html",
+      "sha256": "4961515ca2861f0d04872e1a4de8cbc59434509086aa37650b005f4445ca89c5",
+      "version": 0
+    },
+    {
+      "type": "timeline",
+      "id": "timeline",
+      "path": "state/imas-standard-names/timeline.html",
+      "sha256": "0b1a9e59cc4e784c8f87d80fbcadafead0a4643970b609154f51149553461f7f",
+      "version": 0
+    }
+  ],
+  "completed_at": "2026-08-24T12:15:19+00:00"
+}
