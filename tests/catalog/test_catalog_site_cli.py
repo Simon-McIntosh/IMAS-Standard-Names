@@ -16,8 +16,6 @@ fixtures. The npm path itself is well-trodden by Vite's own test
 suite and by manual smoke tests.
 """
 
-from __future__ import annotations
-
 from pathlib import Path
 
 import pytest
@@ -80,8 +78,71 @@ def test_site_deploy_help_signature_unchanged(runner: CliRunner) -> None:
         "--set-default",
         "--site-name",
         "--site-url",
+        "--review-base",
+        "--review-head",
     ):
         assert option in help_text, f"option {option} disappeared from --help"
+
+
+def test_site_deploy_passes_review_refs_to_dataset_build(
+    runner: CliRunner,
+    empty_catalog_dir: Path,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The deploy command routes the immutable PR refs into data.json."""
+    site_dir = tmp_path / "site"
+    site_dir.mkdir()
+    (site_dir / "package.json").write_text("{}\n", encoding="utf-8")
+    observed: dict[str, str | None] = {}
+
+    monkeypatch.setattr(catalog_site, "_find_git_root", lambda _p: empty_catalog_dir)
+    monkeypatch.setattr(
+        catalog_site,
+        "_build_site",
+        lambda _catalog, _dist, _site, **kwargs: observed.update(kwargs) or 2,
+    )
+    monkeypatch.setattr(catalog_site, "deploy_to_gh_pages", lambda **_kwargs: None)
+
+    result = runner.invoke(
+        deploy_cmd,
+        [
+            str(empty_catalog_dir),
+            "--version",
+            "pr-2",
+            "--site-dir",
+            str(site_dir),
+            "--review-base",
+            "base-sha",
+            "--review-head",
+            "head-sha",
+        ],
+    )
+
+    assert result.exit_code == 0, result.output
+    assert observed == {
+        "review_base_ref": "base-sha",
+        "review_head_ref": "head-sha",
+    }
+
+
+def test_site_deploy_requires_paired_review_refs(
+    runner: CliRunner,
+    empty_catalog_dir: Path,
+) -> None:
+    """A one-sided preview ref cannot define a semantic catalog delta."""
+    result = runner.invoke(
+        deploy_cmd,
+        [
+            str(empty_catalog_dir),
+            "--version",
+            "pr-2",
+            "--review-base",
+            "base-sha",
+        ],
+    )
+    assert result.exit_code == 2
+    assert "must be provided together" in result.output
 
 
 def test_serve_help_signature_unchanged(runner: CliRunner) -> None:

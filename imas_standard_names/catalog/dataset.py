@@ -44,11 +44,10 @@ Legacy status values are normalised before filtering:
 Unknown values are logged as warnings and the entry is dropped.
 """
 
-from __future__ import annotations
-
 import json
 import logging
 import re
+import subprocess
 from collections import Counter
 from dataclasses import dataclass
 from pathlib import Path
@@ -577,8 +576,7 @@ def _sort_tier(
     reads top-to-bottom as base → components → magnitude → aggregation
     → operator-derived → locus-evaluated → metadata → variant.
 
-    See Design Review §8 (catalog redesign) for the rule table. The
-    classifier derives from grammar IR fields where available; tiers 2
+    The classifier derives from grammar IR fields where available; tiers 2
     (magnitude / norm) and 4 (gradient / shear / etc.) use the
     parser's ``operator_tokens`` as the primary signal, with substring
     tests on the name string as a defensive fallback for unparseable
@@ -937,6 +935,131 @@ def _load_entries(catalog_path: Path) -> list[dict[str, Any]]:
     return entries
 
 
+def _git_output(repo_root: Path, *args: str) -> str:
+    """Return text emitted by a read-only Git command."""
+    result = subprocess.run(
+        ["git", "-C", str(repo_root), *args],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode != 0:
+        detail = result.stderr.strip() or result.stdout.strip()
+        raise ValueError(f"git {' '.join(args)} failed: {detail}")
+    return result.stdout
+
+
+def _resolve_catalog_git_context(catalog_path: Path) -> tuple[Path, Path]:
+    """Return the catalog repository root and catalog-relative path."""
+    catalog_path = catalog_path.resolve()
+    repo_root = Path(
+        _git_output(catalog_path, "rev-parse", "--show-toplevel").strip()
+    ).resolve()
+    try:
+        relative_path = catalog_path.relative_to(repo_root)
+    except ValueError as exc:
+        raise ValueError(f"catalog path {catalog_path} is outside {repo_root}") from exc
+    return repo_root, relative_path
+
+
+def _resolve_commit(repo_root: Path, ref: str) -> str:
+    """Resolve ``ref`` to an immutable commit identity."""
+    return _git_output(
+        repo_root,
+        "rev-parse",
+        "--verify",
+        "--end-of-options",
+        f"{ref}^{{commit}}",
+    ).strip()
+
+
+def _git_file_text(repo_root: Path, commit: str, relative_path: Path) -> str | None:
+    """Read one file from a commit, returning ``None`` when absent."""
+    result = subprocess.run(
+        ["git", "-C", str(repo_root), "show", f"{commit}:{relative_path.as_posix()}"],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode == 0:
+        return result.stdout
+    if (
+        "does not exist" in result.stderr
+        or "exists on disk, but not in" in result.stderr
+    ):
+        return None
+    detail = result.stderr.strip() or result.stdout.strip()
+    raise ValueError(f"git show {commit}:{relative_path.as_posix()} failed: {detail}")
+
+
+def _load_entries_at_commit(
+    repo_root: Path,
+    catalog_relative_path: Path,
+    commit: str,
+) -> list[dict[str, Any]]:
+    """Load catalog entries from ``commit`` without changing the checkout."""
+    output = _git_output(
+        repo_root,
+        "ls-tree",
+        "-r",
+        "--name-only",
+        commit,
+        "--",
+        catalog_relative_path.as_posix(),
+    )
+    entries: list[dict[str, Any]] = []
+    for file_name in sorted(output.splitlines()):
+        if Path(file_name).suffix not in {".yml", ".yaml"}:
+            continue
+        text = _git_file_text(repo_root, commit, Path(file_name))
+        if text is None:
+            continue
+        try:
+            data = yaml.safe_load(text)
+        except yaml.YAMLError:
+            continue
+        if isinstance(data, list):
+            entries.extend(
+                item for item in data if isinstance(item, dict) and "name" in item
+            )
+        elif isinstance(data, dict) and "name" in data:
+            entries.append(data)
+    return entries
+
+
+def _manifest_from_data(data: Any) -> StandardNameCatalogManifest | None:
+    """Validate manifest data while preserving the builder's tolerant behavior."""
+    if not isinstance(data, dict):
+        return None
+    try:
+        return StandardNameCatalogManifest(**data)
+    except Exception:
+        return None
+
+
+def _load_manifest_at_commit(
+    repo_root: Path,
+    catalog_relative_path: Path,
+    commit: str,
+) -> StandardNameCatalogManifest | None:
+    """Load the catalog manifest associated with ``catalog_relative_path``."""
+    candidates = [
+        catalog_relative_path.parent / "catalog.yml",
+        catalog_relative_path / "catalog.yml",
+    ]
+    for candidate in candidates:
+        text = _git_file_text(repo_root, commit, candidate)
+        if text is None:
+            continue
+        try:
+            data = yaml.safe_load(text)
+        except yaml.YAMLError:
+            continue
+        if manifest := _manifest_from_data(data):
+            return manifest
+    return None
+
+
 def _load_manifest(catalog_path: Path) -> StandardNameCatalogManifest | None:
     """Load ``catalog.yml`` if present alongside (or in) the catalog dir.
 
@@ -957,12 +1080,8 @@ def _load_manifest(catalog_path: Path) -> StandardNameCatalogManifest | None:
             data = yaml.safe_load(candidate.read_text(encoding="utf-8"))
         except yaml.YAMLError:
             continue
-        if not isinstance(data, dict):
-            continue
-        try:
-            return StandardNameCatalogManifest(**data)
-        except Exception:
-            continue
+        if manifest := _manifest_from_data(data):
+            return manifest
     return None
 
 
@@ -1235,6 +1354,9 @@ def _enrich_with_reverse_links(
 
 def build_site_dataset(
     catalog_path: Path,
+    *,
+    review_base_ref: str | None = None,
+    review_head_ref: str | None = None,
 ) -> dict[str, Any]:
     """Build the SPA dataset from a directory of standard-name YAMLs.
 
@@ -1245,6 +1367,10 @@ def build_site_dataset(
         catalog manifest is read from ``catalog_path.parent/catalog.yml``
         when present (the published layout); a missing manifest is not
         an error.
+    review_base_ref, review_head_ref : str, optional
+        Paired Git refs for a catalog review preview. The head-side entries
+        added or semantically edited between the refs become the complete
+        emitted dataset. Deleted and unchanged entries are not emitted.
 
     Returns
     -------
@@ -1258,12 +1384,54 @@ def build_site_dataset(
     values (``active``, ``draft``, ``deprecated``, ``superseded``) are
     emitted.  Entries with unknown status values are logged and dropped.
     """
+    if (review_base_ref is None) != (review_head_ref is None):
+        raise ValueError(
+            "review_base_ref and review_head_ref must be provided together"
+        )
+
     catalog_path = Path(catalog_path)
-    raw_entries = _load_entries(catalog_path)
+    preview_scope: dict[str, Any] | None = None
+    preview_names: set[str] | None = None
+    if review_base_ref is not None and review_head_ref is not None:
+        repo_root, catalog_relative_path = _resolve_catalog_git_context(catalog_path)
+        base_commit = _resolve_commit(repo_root, review_base_ref)
+        head_commit = _resolve_commit(repo_root, review_head_ref)
+        base_entries = _load_entries_at_commit(
+            repo_root, catalog_relative_path, base_commit
+        )
+        raw_entries = _load_entries_at_commit(
+            repo_root, catalog_relative_path, head_commit
+        )
+        base_by_name = {str(entry["name"]): entry for entry in base_entries}
+        head_by_name = {str(entry["name"]): entry for entry in raw_entries}
+        added = set(head_by_name) - set(base_by_name)
+        deleted = set(base_by_name) - set(head_by_name)
+        edited = {
+            name
+            for name in set(base_by_name) & set(head_by_name)
+            if base_by_name[name] != head_by_name[name]
+        }
+        preview_names = added | edited
+        preview_scope = {
+            "base_ref": base_commit,
+            "head_ref": head_commit,
+            "added": len(added),
+            "edited": len(edited),
+            "deleted": len(deleted),
+            "visible": len(preview_names),
+        }
+        manifest = _load_manifest_at_commit(
+            repo_root, catalog_relative_path, head_commit
+        )
+    else:
+        raw_entries = _load_entries(catalog_path)
+        manifest = _load_manifest(catalog_path)
 
     # Normalise status — emit every entry with a known canonical status.
     entries: list[dict[str, Any]] = []
     for raw in raw_entries:
+        if preview_names is not None and str(raw.get("name")) not in preview_names:
+            continue
         entry = dict(raw)
         normalised = _normalise_status(entry.get("status"))
         if normalised is None:
@@ -1279,7 +1447,6 @@ def build_site_dataset(
     # ``children`` for the detail panel.
     _enrich_with_reverse_links(names, entries)
 
-    manifest = _load_manifest(catalog_path)
     if manifest is not None:
         # Use the ACTUAL number of records emitted, not the manifest's
         # ``published_count`` — manifest counts can lag if the export
@@ -1298,10 +1465,13 @@ def build_site_dataset(
         "NAMES": names,
     }
 
-    # Review-batch builds constrain the SPA to a fixed id-set. Emit the
-    # ids (sorted for determinism) only when the manifest carries a
-    # non-empty batch — normal builds keep today's exact output.
-    if manifest is not None and manifest.review_batch:
+    if preview_scope is not None:
+        visible_names = sorted(record["name"] for record in names)
+        dataset["review_batch"] = visible_names
+        dataset["preview_scope"] = preview_scope
+        if manifest is not None and manifest.review_batch:
+            dataset["review_batch_provenance"] = sorted(manifest.review_batch)
+    elif manifest is not None and manifest.review_batch:
         dataset["review_batch"] = sorted(manifest.review_batch)
 
     return dataset
@@ -1310,6 +1480,9 @@ def build_site_dataset(
 def write_site_dataset(
     catalog_path: Path,
     out_path: Path,
+    *,
+    review_base_ref: str | None = None,
+    review_head_ref: str | None = None,
 ) -> int:
     """Build and write the SPA dataset to ``out_path`` as JSON.
 
@@ -1324,7 +1497,11 @@ def write_site_dataset(
     """
     catalog_path = Path(catalog_path)
     out_path = Path(out_path)
-    dataset = build_site_dataset(catalog_path)
+    dataset = build_site_dataset(
+        catalog_path,
+        review_base_ref=review_base_ref,
+        review_head_ref=review_head_ref,
+    )
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(
         json.dumps(dataset, indent=2, ensure_ascii=False) + "\n",

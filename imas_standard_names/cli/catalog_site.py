@@ -22,8 +22,6 @@ fast with a clear error message rather than after running the dataset
 builder.
 """
 
-from __future__ import annotations
-
 import shutil
 import subprocess
 import tempfile
@@ -111,6 +109,9 @@ def _build_site(
     catalog_path: Path,
     dist_dir: Path,
     site_dir: Path,
+    *,
+    review_base_ref: str | None = None,
+    review_head_ref: str | None = None,
 ) -> int:
     """Build the SPA and write the dataset JSON next to ``index.html``.
 
@@ -118,7 +119,12 @@ def _build_site(
     the count to the user.
     """
     _build_spa(dist_dir, site_dir)
-    return write_site_dataset(catalog_path, dist_dir / "data.json")
+    return write_site_dataset(
+        catalog_path,
+        dist_dir / "data.json",
+        review_base_ref=review_base_ref,
+        review_head_ref=review_head_ref,
+    )
 
 
 def _find_git_root(catalog_path: Path) -> Path:
@@ -260,6 +266,16 @@ def serve_cmd(
     default=None,
     help="Path to the imas-standard-names site/ directory (Vite SPA source).",
 )
+@click.option(
+    "--review-base",
+    default=None,
+    help="Catalog base Git ref for a semantic review-preview scope.",
+)
+@click.option(
+    "--review-head",
+    default=None,
+    help="Catalog head Git ref for a semantic review-preview scope.",
+)
 def deploy_cmd(
     catalog_path: Path,
     doc_version: str,
@@ -270,6 +286,8 @@ def deploy_cmd(
     remote: str,
     branch: str,
     site_dir: Path | None,
+    review_base: str | None,
+    review_head: str | None,
 ) -> None:
     """Build the SPA and deploy it to gh-pages/<version>/.
 
@@ -290,6 +308,10 @@ def deploy_cmd(
             "warning: --site-name / --site-url are now no-ops",
             err=True,
         )
+    if (review_base is None) != (review_head is None):
+        raise click.UsageError(
+            "--review-base and --review-head must be provided together"
+        )
 
     resolved_site_dir = _resolve_site_dir(site_dir)
     repo_root = _find_git_root(catalog_path)
@@ -300,6 +322,8 @@ def deploy_cmd(
             catalog_path,
             dist_dir,
             resolved_site_dir,
+            review_base_ref=review_base,
+            review_head_ref=review_head,
         )
         if n == 0:
             click.echo("Warning: No standard names found in catalog", err=True)

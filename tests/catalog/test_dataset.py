@@ -10,9 +10,8 @@ the live generated ISNC catalog — its data drifts as the upstream
 vocabulary evolves, which made name-specific assertions flaky.
 """
 
-from __future__ import annotations
-
 import json
+import subprocess
 from pathlib import Path
 
 import pytest
@@ -1053,7 +1052,7 @@ class TestSortKeys:
     def test_magnetic_field_family_order(self, site_dataset: dict) -> None:
         """Snapshot the magnetic_field family ordering.
 
-        Expected order per Design Review §8:
+        Expected grammar-derived family order:
             magnetic_field           (tier 0, vector base)
             radial_magnetic_field    (tier 1, axis index 0)
             toroidal_magnetic_field  (tier 1, axis index 1)
@@ -1374,3 +1373,87 @@ class TestReviewBatch:
         dataset = build_site_dataset(catalog_dir)
 
         assert "review_batch" not in dataset
+
+
+def _commit_catalog(repo: Path, message: str) -> str:
+    """Commit the synthetic catalog and return its immutable identity."""
+    subprocess.run(
+        ["git", "add", "catalog.yml", "standard_names/equilibrium.yml"],
+        cwd=repo,
+        check=True,
+    )
+    subprocess.run(
+        ["git", "commit", "-m", message], cwd=repo, check=True, capture_output=True
+    )
+    return subprocess.run(
+        ["git", "rev-parse", "HEAD"],
+        cwd=repo,
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+
+
+def test_review_preview_emits_only_added_and_edited_entries(tmp_path: Path) -> None:
+    """A Git-scoped preview emits the semantic head delta and exact counts."""
+    repo = tmp_path / "catalog-repo"
+    names_dir = repo / "standard_names"
+    names_dir.mkdir(parents=True)
+    subprocess.run(["git", "init", "-b", "main"], cwd=repo, check=True)
+    subprocess.run(
+        ["git", "config", "user.email", "tests@example.invalid"],
+        cwd=repo,
+        check=True,
+    )
+    subprocess.run(["git", "config", "user.name", "Test User"], cwd=repo, check=True)
+
+    manifest = dict(SYNTHETIC_MANIFEST)
+    manifest["review_batch"] = ["magnetic_field", "safety_factor"]
+    (repo / "catalog.yml").write_text(yaml.safe_dump(manifest), encoding="utf-8")
+    base_entries = [
+        dict(SYNTHETIC_EQUILIBRIUM[0]),
+        dict(SYNTHETIC_EQUILIBRIUM[4]),
+        dict(SYNTHETIC_EQUILIBRIUM[6]),
+    ]
+    (names_dir / "equilibrium.yml").write_text(
+        yaml.safe_dump(base_entries), encoding="utf-8"
+    )
+    base_ref = _commit_catalog(repo, "test: establish catalog baseline")
+
+    edited = dict(SYNTHETIC_EQUILIBRIUM[4])
+    edited["description"] = "Edited safety factor description."
+    head_entries = [
+        dict(SYNTHETIC_EQUILIBRIUM[0]),
+        edited,
+        dict(SYNTHETIC_EQUILIBRIUM[2]),
+    ]
+    (names_dir / "equilibrium.yml").write_text(
+        yaml.safe_dump(head_entries, sort_keys=False), encoding="utf-8"
+    )
+    head_ref = _commit_catalog(repo, "test: update review entries")
+
+    dataset = build_site_dataset(
+        names_dir,
+        review_base_ref=base_ref,
+        review_head_ref=head_ref,
+    )
+
+    visible = {entry["name"] for entry in dataset["NAMES"]}
+    assert visible == {"poloidal_magnetic_field", "safety_factor"}
+    assert "magnetic_field" not in visible
+    assert dataset["review_batch"] == [
+        "poloidal_magnetic_field",
+        "safety_factor",
+    ]
+    assert dataset["review_batch_provenance"] == [
+        "magnetic_field",
+        "safety_factor",
+    ]
+    assert dataset["preview_scope"] == {
+        "base_ref": base_ref,
+        "head_ref": head_ref,
+        "added": 1,
+        "edited": 1,
+        "deleted": 1,
+        "visible": 2,
+    }
