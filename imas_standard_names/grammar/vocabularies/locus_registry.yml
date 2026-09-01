@@ -652,10 +652,10 @@ loci:
     allowed_relations: [at, of]
     definition: A reference plane through the tokamak on which the vertical coordinate is zero in the adopted coordinate system.
     qualifiable: true
-  minimum_safety_factor:
+  minimum_absolute_safety_factor:
     type: position
     allowed_relations: [at, of]
-    definition: The flux-surface location at which the safety-factor magnitude attains its minimum.
+    definition: The surface where the absolute value of the safety factor is minimum.
   neoclassical_tearing_mode_center:
     type: position
     allowed_relations: [at, of]
