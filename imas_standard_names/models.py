@@ -457,6 +457,34 @@ class ArgumentRef(BaseModel):
         return self
 
 
+class CatalogSourceBinding(BaseModel):
+    """Immutable reference to a source-system record used by a catalog entry."""
+
+    model_config = ConfigDict(extra="ignore")
+
+    kind: str = Field(min_length=1)
+    ref: str = Field(min_length=1)
+    version: str = Field(min_length=1)
+
+    @model_validator(mode="before")
+    @classmethod
+    def migrate_legacy_binding(cls, value: Any) -> Any:
+        """Translate the retired DD and facility identifier keys on load."""
+        if not isinstance(value, dict):
+            return value
+
+        migrated = dict(value)
+        dd_path = migrated.get("dd_path")
+        signal_id = migrated.get("signal_id")
+        if dd_path not in (None, ""):
+            migrated.setdefault("kind", "imas-dd")
+            migrated.setdefault("ref", dd_path)
+            migrated.setdefault("version", migrated.get("dd_version"))
+        elif signal_id not in (None, ""):
+            migrated.setdefault("ref", signal_id)
+        return migrated
+
+
 class StandardNameEntryBase(StandardNameBase):
     """Full catalog entry definition (fields common to scalar and vector kinds).
 
@@ -479,9 +507,8 @@ class StandardNameEntryBase(StandardNameBase):
     arguments: list[ArgumentRef] | None = None
     error_variants: dict[Literal["upper", "lower", "index"], str] | None = None
 
-    # Debug / provenance: sources that generated or mapped to this name
-    # Populated by codex sn export --include-sources; None in catalog-only installs.
-    sources: list[dict[str, Any]] | None = None
+    # Source-system bindings included by provenance-aware catalog exports.
+    sources: list["CatalogSourceBinding"] | None = None
 
     @field_validator("links")
     @classmethod

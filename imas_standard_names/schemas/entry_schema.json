@@ -93,6 +93,33 @@
       "title": "ArgumentRef",
       "type": "object"
     },
+    "CatalogSourceBinding": {
+      "description": "Immutable reference to a source-system record used by a catalog entry.",
+      "properties": {
+        "kind": {
+          "minLength": 1,
+          "title": "Kind",
+          "type": "string"
+        },
+        "ref": {
+          "minLength": 1,
+          "title": "Ref",
+          "type": "string"
+        },
+        "version": {
+          "minLength": 1,
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "ref",
+        "version"
+      ],
+      "title": "CatalogSourceBinding",
+      "type": "object"
+    },
     "ExpressionProvenance": {
       "description": "Provenance describing an algebraic expression of existing names.\n\nFields\n------\nmode: Literal[\"expression\"] discriminator.\nexpression: Free-form (but catalog-governed) expression string.\ndependencies: List of standard name identifiers referenced by the\n    expression (used for dependency graph construction / validation).",
       "properties": {
@@ -330,8 +357,7 @@
           "anyOf": [
             {
               "items": {
-                "additionalProperties": true,
-                "type": "object"
+                "$ref": "#/$defs/CatalogSourceBinding"
               },
               "type": "array"
             },
@@ -539,8 +565,7 @@
           "anyOf": [
             {
               "items": {
-                "additionalProperties": true,
-                "type": "object"
+                "$ref": "#/$defs/CatalogSourceBinding"
               },
               "type": "array"
             },
@@ -703,8 +728,7 @@
           "anyOf": [
             {
               "items": {
-                "additionalProperties": true,
-                "type": "object"
+                "$ref": "#/$defs/CatalogSourceBinding"
               },
               "type": "array"
             },
@@ -912,8 +936,7 @@
           "anyOf": [
             {
               "items": {
-                "additionalProperties": true,
-                "type": "object"
+                "$ref": "#/$defs/CatalogSourceBinding"
               },
               "type": "array"
             },
@@ -1121,8 +1144,7 @@
           "anyOf": [
             {
               "items": {
-                "additionalProperties": true,
-                "type": "object"
+                "$ref": "#/$defs/CatalogSourceBinding"
               },
               "type": "array"
             },

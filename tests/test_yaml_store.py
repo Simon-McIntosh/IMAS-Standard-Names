@@ -11,6 +11,17 @@ from imas_standard_names.yaml_store import (
 )
 
 
+def _entry_with_source(source: dict[str, str]) -> dict:
+    return {
+        "name": "plasma_current",
+        "kind": "scalar",
+        "description": "Plasma current.",
+        "documentation": "Total plasma current in the tokamak.",
+        "unit": "A",
+        "sources": [source],
+    }
+
+
 def test_yaml_store_load(tmp_path: Path):
     store = YamlStore(tmp_path)
     # Write a YAML file directly to test load
@@ -24,6 +35,66 @@ def test_yaml_store_load(tmp_path: Path):
     )
     loaded = {mm.name: mm for mm in store.load()}
     assert "plasma_current" in loaded
+
+
+def test_dd_source_binding_round_trips_in_generic_shape() -> None:
+    entry = create_standard_name_entry(
+        _entry_with_source(
+            {
+                "kind": "imas-dd",
+                "ref": "summary/global_quantities/ip/value",
+                "version": "4.0.0",
+            }
+        )
+    )
+
+    dumped = entry.model_dump(mode="json", exclude_none=True)["sources"]
+
+    assert dumped == [
+        {
+            "kind": "imas-dd",
+            "ref": "summary/global_quantities/ip/value",
+            "version": "4.0.0",
+        }
+    ]
+
+
+def test_facility_source_binding_round_trips_without_mapping_facet() -> None:
+    entry = create_standard_name_entry(
+        _entry_with_source(
+            {
+                "kind": "west-uda",
+                "ref": "MAI/PLASMA/IP",
+                "version": "62253",
+                "semantic_facet": "measured",
+            }
+        )
+    )
+
+    dumped = entry.model_dump(mode="json", exclude_none=True)["sources"]
+
+    assert dumped == [{"kind": "west-uda", "ref": "MAI/PLASMA/IP", "version": "62253"}]
+
+
+def test_legacy_dd_source_binding_loads_as_generic_shape() -> None:
+    entry = create_standard_name_entry(
+        _entry_with_source(
+            {
+                "dd_path": "summary/global_quantities/ip/value",
+                "dd_version": "4.0.0",
+            }
+        )
+    )
+
+    dumped = entry.model_dump(mode="json", exclude_none=True)["sources"]
+
+    assert dumped == [
+        {
+            "kind": "imas-dd",
+            "ref": "summary/global_quantities/ip/value",
+            "version": "4.0.0",
+        }
+    ]
 
 
 def test_catalog_yaml_separates_consecutive_entries() -> None:
