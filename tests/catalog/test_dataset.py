@@ -119,6 +119,24 @@ SYNTHETIC_EQUILIBRIUM: list[dict] = [
         "arguments": [{"name": "safety_factor", "operator_kind": "locus"}],
     },
     {
+        "name": "toroidal_magnetic_field_at_magnetic_axis",
+        "kind": "scalar",
+        "status": "active",
+        "description": "Toroidal magnetic field at the magnetic axis.",
+        "documentation": _DOC,
+        "unit": "T",
+        "physics_domain": "equilibrium",
+    },
+    {
+        "name": "vertical_coordinate_of_geometric_axis",
+        "kind": "scalar",
+        "status": "active",
+        "description": "Vertical coordinate of the geometric axis.",
+        "documentation": _DOC,
+        "unit": "m",
+        "physics_domain": "equilibrium",
+    },
+    {
         "name": "plasma_inductance",
         "kind": "scalar",
         "status": "active",
@@ -169,8 +187,8 @@ SYNTHETIC_MANIFEST: dict = {
     "dd_version_lineage": ["4.0.0"],
     "generated_by": "test",
     "generated_at": "2026-01-01T00:00:00Z",
-    "candidate_count": 9,
-    "published_count": 9,
+    "candidate_count": 11,
+    "published_count": 11,
     "domains_included": ["equilibrium", "core_plasma_physics"],
 }
 
@@ -546,8 +564,7 @@ class TestGrammarMetadata:
     def test_poloidal_magnetic_field_keeps_axis(self, site_dataset: dict) -> None:
         record = _find_record(site_dataset, "poloidal_magnetic_field")
         assert record["axis"] == "poloidal"
-        # Vector components inherit vector algebra from their projection.
-        assert record["algebra"] == "vector"
+        assert record["algebra"] == "scalar"
 
     def test_safety_factor_at_magnetic_axis_keeps_locus(
         self, site_dataset: dict
@@ -568,6 +585,29 @@ class TestAlgebraAxis:
     def test_scalar_default(self, site_dataset: dict) -> None:
         record = _find_record(site_dataset, "electron_temperature")
         assert record["algebra"] == "scalar"
+
+    @pytest.mark.parametrize(
+        "name",
+        [
+            "toroidal_magnetic_field_at_magnetic_axis",
+            "vertical_coordinate_of_geometric_axis",
+        ],
+    )
+    def test_axis_bearing_scalar_keeps_declared_kind(
+        self, site_dataset: dict, name: str
+    ) -> None:
+        record = _find_record(site_dataset, name)
+        assert record["axis"] is not None
+        assert record["algebra"] == "scalar"
+
+    def test_presented_kind_matches_declared_kind(self, site_dataset: dict) -> None:
+        declared_by_name = {
+            entry["name"]: entry["kind"]
+            for entry in [*SYNTHETIC_EQUILIBRIUM, *SYNTHETIC_CORE]
+        }
+        assert len(site_dataset["NAMES"]) == len(declared_by_name)
+        for record in site_dataset["NAMES"]:
+            assert record["algebra"] == declared_by_name[record["name"]]
 
     def test_every_record_has_algebra(self, site_dataset: dict) -> None:
         valid = {"scalar", "vector", "tensor", "complex", "metadata"}

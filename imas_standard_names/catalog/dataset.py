@@ -119,10 +119,9 @@ _CHANNEL_QUALIFIER_TOKENS: frozenset[str] = frozenset(
 
 
 # Coordinate-axis ordering for sort_axis_index emission.
-# A vector or tensor component projected onto one of these axes sorts
-# by this index within the component tier (tier 1). Names with no axis
-# get index 99 so they sort after axis-bearing siblings (rare; only
-# matters for tier 1).
+# An axis-projected family member sorts by this index within the component
+# tier. Its catalog kind remains independent: a component value can be scalar
+# even though its parent quantity is a vector.
 _AXIS_ORDER: dict[str, int] = {
     "radial": 0,
     "toroidal": 1,
@@ -659,7 +658,7 @@ def _sort_tier(
         return 6
     if parent is None and algebra in {"vector", "tensor", "complex"}:
         return 0
-    if facets.has_projection and algebra in {"vector", "tensor", "complex"}:
+    if facets.has_projection:
         return 1
     # Tier 2 — magnitude / norm. Driven by the parser's classified
     # postfix operator tokens, not by name-string regex.
@@ -915,15 +914,6 @@ def _build_record(entry: dict[str, Any]) -> dict[str, Any]:
     category = entry.get("physics_domain") or "uncategorized"
     facets = _derive_grammar_facets(name)
     algebra = entry.get("kind") or "scalar"
-    # Vector components inherit vector algebra from their projection axis.
-    # A name like radial_magnetic_field carries axis="radial" — the
-    # coefficient B_R of a vector B = B_R r̂ + B_φ φ̂ + B_Z ẑ is not
-    # rotation-invariant and therefore must not be classified as scalar.
-    # Same parallel-construction reasoning as the schema's treatment of
-    # tensor components.
-    if algebra == "scalar" and facets.has_projection:
-        algebra = "vector"
-
     parent = _parent_token(name, facets, entry)
     sort_tier = _sort_tier(name, str(algebra), parent, facets)
     sort_axis_index = _sort_axis_index(facets)
