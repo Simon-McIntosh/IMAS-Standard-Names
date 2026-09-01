@@ -100,6 +100,7 @@ This is the single entry point for any system that needs to understand
 standard name grammar, naming conventions, and validation rules.
 """
 
+
 def get_grammar_context() -> dict[str, Any]:
     """Return complete grammar context for prompt rendering and validation.
 

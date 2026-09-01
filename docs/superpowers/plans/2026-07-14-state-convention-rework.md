@@ -175,16 +175,19 @@ ROUND_TRIP = [
     "parallel_neutral_internal_state_momentum_flux",
 ]
 
+
 @pytest.mark.parametrize("name", ROUND_TRIP)
 def test_state_names_round_trip(name):
     parsed = parse_standard_name(name)
     assert compose_standard_name(parsed) == name
+
 
 def test_state_segment_populated():
     p = parse_standard_name("ion_charge_state_density")
     assert p.subject.value == "ion"
     assert p.state.value == "charge_state"
     assert p.physical_base == "density"
+
 
 def test_state_renders_after_subject():
     # population + subject + state order
@@ -255,10 +258,12 @@ git pull --no-rebase origin main && git push origin main
 import pytest
 from imas_standard_names.grammar.model import parse_standard_name, compose_standard_name
 
+
 def test_state_without_subject_rejected():
     with pytest.raises(ValueError, match="state.*requires.*subject"):
         # charge_state as a bare base-adjacent token with no species subject
         compose_standard_name({"state": "charge_state", "physical_base": "density"})
+
 
 def test_state_with_subject_ok():
     p = parse_standard_name("ion_charge_state_density")
@@ -315,11 +320,15 @@ git pull --no-rebase origin main && git push origin main
 ```python
 def test_charge_state_on_neutral_rejected():
     with pytest.raises(ValueError, match="charge_state.*ion"):
-        compose_standard_name({"subject": "neutral", "state": "charge_state", "physical_base": "density"})
+        compose_standard_name(
+            {"subject": "neutral", "state": "charge_state", "physical_base": "density"}
+        )
+
 
 def test_internal_state_on_neutral_ok():
     p = parse_standard_name("neutral_internal_state_density")
     assert compose_standard_name(p) == "neutral_internal_state_density"
+
 
 def test_charge_state_on_ion_ok():
     p = parse_standard_name("ion_charge_state_density")
@@ -336,12 +345,16 @@ Expected: FAIL.
 Extend the gate in `model.py`:
 
 ```python
-_ION_LIKE_SUBJECTS = frozenset({"ion", "impurity_ion"})  # + element/isotope species — see note
+_ION_LIKE_SUBJECTS = frozenset(
+    {"ion", "impurity_ion"}
+)  # + element/isotope species — see note
 _NEUTRAL_LIKE_SUBJECTS = frozenset({"neutral"})
 _STATE_COMPAT = {
-    "charge_state": _ION_LIKE_SUBJECTS,          # ions carry charge states
-    "internal_state": _NEUTRAL_LIKE_SUBJECTS | _ION_LIKE_SUBJECTS,  # neutrals; ions allowed (molecular ions, future)
+    "charge_state": _ION_LIKE_SUBJECTS,  # ions carry charge states
+    "internal_state": _NEUTRAL_LIKE_SUBJECTS
+    | _ION_LIKE_SUBJECTS,  # neutrals; ions allowed (molecular ions, future)
 }
+
 
 def _check_state_subject_compat(ir) -> None:
     st = getattr(ir, "state", None)
@@ -405,11 +418,13 @@ Expected: `0` (if not zero, STOP — those need migration first).
 ```python
 def test_fused_subject_tokens_removed():
     from imas_standard_names.grammar.model_types import Subject
+
     vals = {m.value for m in Subject}
     assert "ion_state" not in vals
     assert "ion_charge_state" not in vals
     assert "neutral_state" not in vals
     assert "state" not in vals
+
 
 def test_ion_charge_state_parses_via_segment():
     p = parse_standard_name("ion_charge_state_density")

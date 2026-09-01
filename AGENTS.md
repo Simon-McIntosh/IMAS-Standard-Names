@@ -413,6 +413,7 @@ async def test_search_returns_relevant_results():
     assert len(results) > 0
     assert results[0].name.startswith("magnetic_")
 
+
 # Avoid: Tests implementation details
 async def test_search_uses_correct_index():
     # Don't test internal implementation
@@ -466,6 +467,7 @@ import pydantic
 
 class FeatureSchema(pydantic.BaseModel):
     """Feature data schema."""
+
     name: str
     description: str
     embedding: list[float]
@@ -474,6 +476,7 @@ class FeatureSchema(pydantic.BaseModel):
 @dataclass
 class Config:
     """Application configuration."""
+
     timeout: float
     retries: int
 ```

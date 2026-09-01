@@ -129,13 +129,15 @@ derivative without encoding those tokens in a consumer.
 ```python
 from imas_standard_names.models import create_standard_name_entry
 
-entry = create_standard_name_entry({
-    "name": "electron_temperature",
-    "kind": "scalar",
-    "unit": "eV",
-    "description": "Electron temperature.",
-    "documentation": "Temperature of the electron population.",
-})
+entry = create_standard_name_entry(
+    {
+        "name": "electron_temperature",
+        "kind": "scalar",
+        "unit": "eV",
+        "description": "Electron temperature.",
+        "documentation": "Temperature of the electron population.",
+    }
+)
 ```
 
 ### Validation
