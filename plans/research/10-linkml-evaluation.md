@@ -82,6 +82,7 @@ Feature 04 (JSON Schema Contract) will export the schema directly from Pydantic:
 
 ```python
 from imas_standard_names.models import _STANDARD_NAME_ENTRY_ADAPTER
+
 schema = _STANDARD_NAME_ENTRY_ADAPTER.json_schema()
 ```
 

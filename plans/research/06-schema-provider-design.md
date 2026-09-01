@@ -68,6 +68,7 @@ from imas_standard_names.grammar.constants import (
     SEGMENT_TEMPLATES,
 )
 
+
 @lru_cache(maxsize=1)
 def _provide_grammar_overview() -> dict[str, str]:
     """Assemble grammar rules for prompt injection."""
@@ -87,6 +88,7 @@ def _provide_grammar_overview() -> dict[str, str]:
 
 ```python
 from imas_standard_names.grammar.constants import SEGMENT_TOKEN_MAP
+
 
 @lru_cache(maxsize=1)
 def _provide_vocabulary_tokens() -> dict[str, str]:
@@ -110,6 +112,7 @@ from imas_standard_names.grammar.field_schemas import (
     FIELD_GUIDANCE,
     TYPE_SPECIFIC_REQUIREMENTS,
 )
+
 
 @lru_cache(maxsize=1)
 def _provide_field_schema_guidance() -> dict[str, str]:
@@ -213,6 +216,7 @@ _DYNAMIC_PROVIDERS: dict[str, Callable] = {
     "domain_existing_names": _provide_domain_existing_names,
 }
 
+
 async def get_schema_for_prompt(
     schema_needs: list[str],
     *,
@@ -267,6 +271,7 @@ Catalog data changes when `write_standard_names` is called. Use a simple cache d
 
 ```python
 _catalog_cache: dict[str, Any] = {}
+
 
 def clear_catalog_cache() -> None:
     """Invalidate all catalog-derived caches."""

@@ -233,8 +233,10 @@ The codex LLM layer provides [^8]:
 ```python
 batch, cost, tokens = call_llm_structured(
     model="google/gemini-3-flash-preview",
-    messages=[{"role": "system", "content": system_prompt},
-              {"role": "user", "content": user_prompt}],
+    messages=[
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": user_prompt},
+    ],
     response_model=ScoreBatch,  # Pydantic model
 )
 ```

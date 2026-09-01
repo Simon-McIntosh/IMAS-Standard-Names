@@ -162,11 +162,11 @@ New spec loader (mirrors `tag_spec.py`):
 ```python
 @dataclass
 class PhysicsDomainSpec:
-    domains: tuple[str, ...]           # enum values
-    descriptions: dict[str, str]       # domain → description
-    categories: dict[str, str]         # domain → category
-    tag_aliases: dict[str, str]        # old tag → domain
-    
+    domains: tuple[str, ...]  # enum values
+    descriptions: dict[str, str]  # domain → description
+    categories: dict[str, str]  # domain → category
+    tag_aliases: dict[str, str]  # old tag → domain
+
     @classmethod
     def from_file(cls, path: Path) -> PhysicsDomainSpec: ...
 ```
@@ -180,12 +180,14 @@ it replaces PrimaryTag):
 ```python
 class PhysicsDomain(str, Enum):
     """Physics domain classification for IMAS standard names."""
+
     EQUILIBRIUM = "equilibrium"
     TRANSPORT = "transport"
     # ... all 31 values
 
-PHYSICS_DOMAIN_DESCRIPTIONS: dict[str, str] = { ... }
-TAG_TO_PHYSICS_DOMAIN: dict[str, str] = { ... }
+
+PHYSICS_DOMAIN_DESCRIPTIONS: dict[str, str] = {...}
+TAG_TO_PHYSICS_DOMAIN: dict[str, str] = {...}
 ```
 
 ### 1d. Run `build-grammar` and verify codegen
@@ -211,12 +213,18 @@ uv run build-grammar
 # Replace:
 #   Tags = Annotated[list[str], Field(...)]
 # With:
-PhysicsDomainField = Annotated[str, Field(
-    description="Physics domain classification from PhysicsDomain enum.",
-)]
-Tags = Annotated[list[str], Field(
-    description="Secondary classification tags from controlled vocabulary.",
-)]
+PhysicsDomainField = Annotated[
+    str,
+    Field(
+        description="Physics domain classification from PhysicsDomain enum.",
+    ),
+]
+Tags = Annotated[
+    list[str],
+    Field(
+        description="Secondary classification tags from controlled vocabulary.",
+    ),
+]
 ```
 
 ### 2b. Update `models.py` — StandardNameEntryBase
@@ -226,17 +234,20 @@ class StandardNameEntryBase(BaseModel):
     # ... existing fields ...
     physics_domain: PhysicsDomainField  # NEW — required, replaces tags[0]
     tags: Tags = Field(default_factory=list)  # CHANGED — now optional, secondary only
-    
+
     @field_validator("physics_domain")
     def validate_physics_domain(cls, v: str) -> str:
         """Validate physics_domain is a valid PhysicsDomain enum value."""
         from .grammar.tag_types import PhysicsDomain
+
         try:
             PhysicsDomain(v)
         except ValueError:
-            raise ValueError(f"Invalid physics_domain: '{v}'. Valid: {[d.value for d in PhysicsDomain]}")
+            raise ValueError(
+                f"Invalid physics_domain: '{v}'. Valid: {[d.value for d in PhysicsDomain]}"
+            )
         return v
-    
+
     @field_validator("tags")
     def validate_secondary_tags(cls, v: list[str]) -> list[str]:
         """Validate tags are all secondary tags (no primary/physics_domain values)."""
@@ -454,7 +465,9 @@ Write a migration script (one-time, don't commit):
 for entry_path in Path("resources/standard_name_examples").rglob("*.yml"):
     data = yaml.safe_load(entry_path.read_text())
     if "physics_domain" not in data and data.get("tags"):
-        data["physics_domain"] = TAG_TO_PHYSICS_DOMAIN.get(data["tags"][0], data["tags"][0])
+        data["physics_domain"] = TAG_TO_PHYSICS_DOMAIN.get(
+            data["tags"][0], data["tags"][0]
+        )
         data["tags"] = data["tags"][1:]
     entry_path.write_text(yaml.dump(data))
 ```
