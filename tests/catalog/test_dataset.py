@@ -314,8 +314,9 @@ class TestNormaliseSources:
 
     def test_pinned_source_resolves_through_imas_python(self) -> None:
         source = {
-            "dd_path": "summary/global_quantities/energy_thermal/value",
-            "dd_version": "4.0.0",
+            "kind": "imas-dd",
+            "ref": "summary/global_quantities/energy_thermal/value",
+            "version": "4.0.0",
             "dd_documentation": {
                 "leaf": "Inline content must not override imas-python.",
             },
@@ -368,8 +369,9 @@ class TestNormaliseSources:
 
     def test_unresolvable_path_is_recorded_without_raising(self) -> None:
         source = {
-            "dd_path": "summary/global_quantities/not_a_dd_leaf",
-            "dd_version": "4.0.0",
+            "kind": "imas-dd",
+            "ref": "summary/global_quantities/not_a_dd_leaf",
+            "version": "4.0.0",
         }
 
         projected = _normalise_sources([source])[0]
@@ -555,6 +557,70 @@ class TestRecordShape:
     def test_unit_present_for_physical_quantity(self, site_dataset: dict) -> None:
         record = _find_record(site_dataset, "plasma_inductance")
         assert record["unit"] == "H"
+
+    def test_every_fixture_entry_has_nonempty_detail_payload(
+        self, site_dataset: dict
+    ) -> None:
+        required_content = {"name", "short", "long", "unit", "parse"}
+        for record in site_dataset["NAMES"]:
+            payload = {key: record.get(key) for key in required_content}
+            assert all(payload.values()), f"empty detail payload for {record['name']}"
+
+    def test_generic_bindings_survive_resolution_failure_in_built_dataset(
+        self,
+        catalog_dir: Path,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        catalog_file = catalog_dir / "core_plasma_physics.yml"
+        entries = yaml.safe_load(catalog_file.read_text(encoding="utf-8"))
+        entries[0]["sources"] = [
+            {
+                "kind": "imas-dd",
+                "ref": "summary/global_quantities/energy_thermal/value",
+                "version": "4.0.0",
+            }
+        ]
+        entries[1]["sources"] = [
+            {
+                "kind": "imas-dd",
+                "ref": "summary/global_quantities/not_a_dd_leaf",
+                "version": "4.0.0",
+            }
+        ]
+        catalog_file.write_text(yaml.safe_dump(entries), encoding="utf-8")
+
+        def resolve(ref: str, version: str) -> dict:
+            assert version == "4.0.0"
+            if ref.endswith("not_a_dd_leaf"):
+                raise LookupError("no such Data Dictionary leaf")
+            return {
+                "leaf_definition": "Value",
+                "parent_path": "summary/global_quantities/energy_thermal",
+                "parent_definition": "Thermal plasma energy content.",
+                "data_type": "FLT",
+                "unit": "J",
+                "coordinates": ["time"],
+                "resolution_source": "imas-python",
+                "resolution_status": "resolved",
+            }
+
+        monkeypatch.setattr(dataset_module, "_resolve_dd_source", resolve)
+        dataset = build_site_dataset(catalog_dir)
+        resolved = _find_record(dataset, "electron_temperature")
+        unresolved = _find_record(dataset, "ion_temperature")
+
+        assert resolved["short"] == "Electron temperature."
+        assert resolved["long"] == _DOC
+        assert resolved["unit"] == "eV"
+        assert resolved["sources"][0]["parent_definition"] == (
+            "Thermal plasma energy content."
+        )
+        assert resolved["sources"][0]["resolution_status"] == "resolved"
+        assert unresolved["short"] == "Ion temperature."
+        assert unresolved["long"] == _DOC
+        assert unresolved["unit"] == "eV"
+        assert unresolved["sources"][0]["resolution_status"] == "unresolved"
+        assert "LookupError" in unresolved["sources"][0]["resolution_error"]
 
 
 class TestGrammarMetadata:

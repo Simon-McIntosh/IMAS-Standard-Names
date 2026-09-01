@@ -127,11 +127,11 @@ describe('useChildIndex', () => {
 });
 
 describe('groupSources', () => {
-  it('groups by first path segment', () => {
+  it('groups generic bindings by the first reference segment', () => {
     const sources = [
-      { path: 'equilibrium/a/b', status: 'composed' },
-      { path: 'equilibrium/c', status: 'composed' },
-      { path: 'magnetics/ip/data', status: 'composed' },
+      { kind: 'imas-dd', ref: 'equilibrium/a/b', version: '4.1.0' },
+      { kind: 'imas-dd', ref: 'equilibrium/c', version: '4.1.0' },
+      { kind: 'imas-dd', ref: 'magnetics/ip/data', version: '4.1.0' },
     ];
     const groups = groupSources(sources);
     expect(groups).toHaveLength(2);
@@ -142,10 +142,10 @@ describe('groupSources', () => {
 
   it('sorts groups descending by member count', () => {
     const sources = [
-      { path: 'magnetics/a', status: 'composed' },
-      { path: 'equilibrium/a', status: 'composed' },
-      { path: 'equilibrium/b', status: 'composed' },
-      { path: 'equilibrium/c', status: 'composed' },
+      { kind: 'imas-dd', ref: 'magnetics/a', version: '4.1.0' },
+      { kind: 'imas-dd', ref: 'equilibrium/a', version: '4.1.0' },
+      { kind: 'imas-dd', ref: 'equilibrium/b', version: '4.1.0' },
+      { kind: 'imas-dd', ref: 'equilibrium/c', version: '4.1.0' },
     ];
     const groups = groupSources(sources);
     expect(groups[0][0]).toBe('equilibrium');

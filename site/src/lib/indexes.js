@@ -56,13 +56,14 @@ export function useGroupIndex(names) {
   }, [names]);
 }
 
-// Group a list of sources by their IDS root (path segment before the first '/').
+// Group a list of source bindings by their reference root (segment before '/').
 // Returned entries are sorted descending by member count so the biggest IDS
 // group renders first in the detail panel.
 export function groupSources(sources) {
   const by = {};
   for (const s of sources) {
-    const root = s.path.split('/')[0];
+    if (typeof s.ref !== 'string' || !s.ref) continue;
+    const root = s.ref.split('/')[0];
     (by[root] ||= []).push(s);
   }
   return Object.entries(by).sort((a, b) => b[1].length - a[1].length);
