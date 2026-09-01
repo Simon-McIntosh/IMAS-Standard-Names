@@ -562,7 +562,7 @@ class Position(StrEnum):
     MAGNETIC_AXIS = "magnetic_axis"
     MEASUREMENT_POSITION = "measurement_position"
     MIDPLANE = "midplane"
-    MINIMUM_SAFETY_FACTOR = "minimum_safety_factor"
+    MINIMUM_ABSOLUTE_SAFETY_FACTOR = "minimum_absolute_safety_factor"
     NEOCLASSICAL_TEARING_MODE_CENTER = "neoclassical_tearing_mode_center"
     NEOCLASSICAL_TEARING_MODE_ONSET = "neoclassical_tearing_mode_onset"
     NORMALIZED_POLOIDAL_MAGNETIC_FLUX = "normalized_poloidal_magnetic_flux"
