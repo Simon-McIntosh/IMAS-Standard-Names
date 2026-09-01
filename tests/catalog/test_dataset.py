@@ -17,7 +17,11 @@ from pathlib import Path
 import pytest
 import yaml
 
-from imas_standard_names.catalog import build_site_dataset, write_site_dataset
+from imas_standard_names.catalog import (
+    build_site_dataset,
+    dataset as dataset_module,
+    write_site_dataset,
+)
 from imas_standard_names.catalog.dataset import (
     _arguments_parent,
     _build_grammar_vocab,
@@ -269,7 +273,7 @@ class TestNormaliseSeeAlso:
 
 
 class TestNormaliseSources:
-    """``_normalise_sources`` emits semantic DD data, not ledger fields."""
+    """``_normalise_sources`` dispatches generic source-system bindings."""
 
     def test_extracts_dd_path_and_status(self) -> None:
         sources = [
@@ -279,11 +283,13 @@ class TestNormaliseSources:
                 "status": "composed",
             }
         ]
-        assert _normalise_sources(sources) == [{"path": "equilibrium/time_slice/ip"}]
+        assert _normalise_sources(sources) == [
+            {"kind": "imas-dd", "ref": "equilibrium/time_slice/ip"}
+        ]
 
     def test_falls_back_to_id_minus_prefix(self) -> None:
         sources = [{"id": "dd:foo/bar", "status": "attached"}]
-        assert _normalise_sources(sources) == [{"path": "foo/bar"}]
+        assert _normalise_sources(sources) == [{"kind": "imas-dd", "ref": "foo/bar"}]
 
     def test_handles_none(self) -> None:
         assert _normalise_sources(None) == []
@@ -301,6 +307,9 @@ class TestNormaliseSources:
         }
         projected = _normalise_sources([source])[0]
 
+        assert projected["kind"] == "imas-dd"
+        assert projected["ref"] == "summary/global_quantities/energy_thermal/value"
+        assert projected["version"] == "4.0.0"
         assert projected["leaf_definition"] == "Value"
         assert projected["parent_path"] == ("summary/global_quantities/energy_thermal")
         assert "Thermal plasma energy content" in projected["parent_definition"]
@@ -311,6 +320,33 @@ class TestNormaliseSources:
         assert projected["resolution_status"] == "resolved"
         assert "model" not in projected
         assert "source_id" not in projected
+        assert "dd_path" not in projected
+        assert "dd_version" not in projected
+        assert "semantic_facet" not in projected
+
+    def test_facility_binding_is_not_sent_to_dd_resolver(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        def reject_dd_dispatch(path: str, version: str) -> dict:
+            pytest.fail(f"facility binding was sent to DD resolver: {path} {version}")
+
+        monkeypatch.setattr(dataset_module, "_resolve_dd_source", reject_dd_dispatch)
+        source = {
+            "kind": "west-uda",
+            "ref": "MAI/PLASMA/IP",
+            "version": "62253",
+            "semantic_facet": "measured",
+        }
+
+        projected = _normalise_sources([source])[0]
+
+        assert projected == {
+            "kind": "west-uda",
+            "ref": "MAI/PLASMA/IP",
+            "version": "62253",
+            "resolution_status": "unresolved",
+            "resolution_error": "No resolver registered for source kind 'west-uda'",
+        }
 
     def test_unresolvable_path_is_recorded_without_raising(self) -> None:
         source = {
@@ -706,7 +742,7 @@ class TestSeeAlsoNormalisation:
 
 
 class TestSourcesNormalisation:
-    """Sources become ``[{path, status}]`` records."""
+    """Sources expose generic bindings without operational ledger fields."""
 
     def test_sources_expose_path_without_operational_status(
         self, site_dataset: dict
@@ -714,10 +750,12 @@ class TestSourcesNormalisation:
         for record in site_dataset["NAMES"]:
             if record["sources"]:
                 for src in record["sources"]:
-                    assert "path" in src
+                    assert "kind" in src
+                    assert "ref" in src
                     assert "status" not in src
                     assert "id" not in src
-                    assert src["path"]  # non-empty
+                    assert src["ref"]
+                    assert "semantic_facet" not in src
                 return
         pytest.skip("no records with sources in current catalog")
 

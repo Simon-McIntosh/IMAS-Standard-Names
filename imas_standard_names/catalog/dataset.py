@@ -22,8 +22,8 @@ record carries:
 * prose: ``short`` (description), ``long`` (documentation minus the
   ``Sign convention:`` paragraph), ``sign`` (the extracted paragraph)
 * navigation: ``seeAlso`` (links normalised, ``name:`` prefix stripped),
-  ``arguments`` (just the argument names), ``sources`` (public semantic DD
-  metadata with a pinned version and no operational ledger fields),
+  ``arguments`` (just the argument names), ``sources`` (source-system bindings
+  plus any metadata resolved from their pinned source version),
   ``superseded_by`` (name of replacement or
   ``null``), ``deprecates`` (name being deprecated or ``null``)
 * ``parse`` — a list of role/text/note segments (operators, qualifiers,
@@ -304,7 +304,6 @@ def _resolve_dd_source(path: str, dd_version: str) -> dict[str, Any]:
     )
     data_type = getattr(metadata.data_type, "value", str(metadata.data_type))
     return {
-        "dd_version": dd_version,
         "leaf_definition": metadata.documentation,
         "parent_path": parent_path,
         "parent_definition": parent.documentation,
@@ -333,7 +332,6 @@ def _legacy_source_projection(raw: dict[str, Any]) -> dict[str, Any]:
         "unit": ("unit",),
         "coordinates": ("coordinates",),
         "lifecycle": ("lifecycle", "dd_lifecycle"),
-        "semantic_facet": ("semantic_facet", "facet"),
         "enhanced_context": ("enhanced_context",),
         "enhancement_kind": ("enhancement_kind",),
     }
@@ -375,11 +373,11 @@ def _legacy_source_projection(raw: dict[str, Any]) -> dict[str, Any]:
 
 
 def _normalise_sources(sources: list[dict[str, Any]] | None) -> list[dict[str, Any]]:
-    """Resolve public DD semantics and strip operational ledger fields.
+    """Resolve source bindings and strip producer-only provenance fields.
 
-    ``path`` falls back to ``id`` (minus its ``dd:`` prefix) when the
-    entry has no explicit ``dd_path``. Pinned sources resolve through
-    imas-python; failures remain visible on the emitted source record.
+    Retired ``dd_path`` / ``dd_version`` records are translated at the read
+    boundary. Only ``imas-dd`` dispatches to imas-python; every other kind is
+    preserved as an unresolved binding for a source-specific resolver.
     """
     if not sources:
         return []
@@ -387,20 +385,31 @@ def _normalise_sources(sources: list[dict[str, Any]] | None) -> list[dict[str, A
     for raw in sources:
         if not isinstance(raw, dict):
             continue
-        path = raw.get("dd_path") or ""
-        if not path:
+        kind = raw.get("kind") or ""
+        ref = raw.get("ref") or raw.get("dd_path") or raw.get("signal_id") or ""
+        if not ref:
             ident = raw.get("id") or ""
             if isinstance(ident, str) and ident.startswith("dd:"):
-                path = ident[len("dd:") :]
-        if not path:
+                kind = kind or "imas-dd"
+                ref = ident[len("dd:") :]
+        if not kind and raw.get("dd_path") not in (None, ""):
+            kind = "imas-dd"
+        if not kind or not ref:
             continue
-        projected: dict[str, Any] = {"path": str(path)}
-        version = raw.get("dd_version") or raw.get("version")
+        version = raw.get("version") or raw.get("dd_version")
+        projected: dict[str, Any] = {
+            "kind": str(kind),
+            "ref": str(ref),
+        }
         if version not in (None, ""):
             version_text = str(version)
-            projected["dd_version"] = version_text
+            projected["version"] = version_text
+        else:
+            version_text = ""
+
+        if kind == "imas-dd" and version_text:
             try:
-                projected.update(_resolve_dd_source(str(path), version_text))
+                projected.update(_resolve_dd_source(str(ref), version_text))
             except Exception as exc:
                 projected.update(
                     {
@@ -409,8 +418,15 @@ def _normalise_sources(sources: list[dict[str, Any]] | None) -> list[dict[str, A
                         "resolution_error": f"{type(exc).__name__}: {exc}",
                     }
                 )
-        else:
+        elif kind == "imas-dd":
             projected.update(_legacy_source_projection(raw))
+        else:
+            projected.update(
+                {
+                    "resolution_status": "unresolved",
+                    "resolution_error": f"No resolver registered for source kind {kind!r}",
+                }
+            )
         normalised.append(projected)
     return normalised
 
