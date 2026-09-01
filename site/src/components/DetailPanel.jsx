@@ -45,7 +45,7 @@ export function DetailPanel({
 
   const grouped = groupSources(n.sources);
   const cat = CATEGORIES.find((c) => c.id === n.category);
-  const sourceWord = n.sources.length === 1 ? 'path' : 'paths';
+  const sourceWord = n.sources.length === 1 ? 'binding' : 'bindings';
 
   return (
     <div className="detail" ref={scrollRef}>
@@ -194,7 +194,7 @@ export function DetailPanel({
         <h3 className="detail-h">
           Sources
           <span className="detail-h-sub">
-            {n.sources.length} data-dictionary {sourceWord}
+            {n.sources.length} source {sourceWord}
           </span>
         </h3>
         <div className="sources">

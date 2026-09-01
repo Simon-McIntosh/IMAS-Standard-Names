@@ -3,8 +3,9 @@ import { fireEvent, render } from '@testing-library/react';
 import { SourceGroup } from '../../src/components/SourceGroup.jsx';
 
 const source = {
-  path: 'summary/global_quantities/energy_thermal/value',
-  dd_version: '4.0.0',
+  kind: 'imas-dd',
+  ref: 'summary/global_quantities/energy_thermal/value',
+  version: '4.0.0',
   leaf_definition: 'Value',
   parent_path: 'summary/global_quantities/energy_thermal',
   parent_definition: 'Thermal plasma energy.',
@@ -22,9 +23,26 @@ describe('SourceGroup', () => {
     expect(getByText(/From parent/)).toBeInTheDocument();
   });
 
-  it('does not invent a latest link for a legacy source', () => {
-    const { container } = render(<SourceGroup ids="summary" items={[{ path: source.path }]} />);
+  it('does not invent a latest link for an unpinned source', () => {
+    const { container } = render(
+      <SourceGroup ids="summary" items={[{ kind: 'imas-dd', ref: source.ref }]} />,
+    );
     expect(container.querySelector('a.source-path')).toBeNull();
     expect(container.textContent).not.toContain('latest');
+  });
+
+  it('keeps an unresolved binding visible with its own content', () => {
+    const unresolved = {
+      kind: 'imas-dd',
+      ref: 'summary/global_quantities/not_a_dd_leaf',
+      version: '4.0.0',
+      resolution_status: 'unresolved',
+      resolution_error: 'LookupError: no such leaf',
+    };
+    const { getByText } = render(
+      <SourceGroup ids="summary" items={[unresolved]} />,
+    );
+    expect(getByText('global_quantities/not_a_dd_leaf ↗')).toBeInTheDocument();
+    expect(getByText('Unresolved')).toBeVisible();
   });
 });

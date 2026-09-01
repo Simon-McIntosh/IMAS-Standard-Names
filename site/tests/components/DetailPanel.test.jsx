@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { render } from '@testing-library/react';
+import { fireEvent, render } from '@testing-library/react';
 import { DetailPanel } from '../../src/components/DetailPanel.jsx';
 import { DataProvider } from '../../src/lib/data.js';
 
@@ -282,6 +282,55 @@ describe('DetailPanel hero', () => {
       );
       await findByText('Test description');
       expect(container.querySelector('.detail-attrs')).toBeNull();
+    } finally {
+      global.fetch = origFetch;
+    }
+  });
+});
+
+describe('DetailPanel generic source bindings', () => {
+  it('renders entry content and resolved Data Dictionary context', async () => {
+    const origFetch = global.fetch;
+    const entry = {
+      ...MOCK_ENTRY,
+      sources: [{
+        kind: 'imas-dd',
+        ref: 'summary/global_quantities/energy_thermal/value',
+        version: '4.0.0',
+        leaf_definition: 'Value',
+        parent_path: 'summary/global_quantities/energy_thermal',
+        parent_definition: 'Thermal plasma energy content.',
+        data_type: 'FLT',
+        unit: 'J',
+        coordinates: ['time'],
+        resolution_source: 'imas-python',
+        resolution_status: 'resolved',
+      }],
+    };
+    global.fetch = mockFetch(makeDataset(entry));
+    try {
+      const { findByRole, findByText, getByRole } = render(
+        <DataProvider>
+          <DetailPanel
+            name="electron_temperature"
+            onSelect={() => {}}
+            onClose={() => {}}
+            childIndex={{}}
+            groupIndex={{}}
+            filters={{}}
+            setFilters={() => {}}
+            setView={() => {}}
+          />
+        </DataProvider>,
+      );
+      expect(await findByText('Test description')).toBeVisible();
+      expect(await findByText('Long documentation goes here')).toBeVisible();
+      expect(getByRole('heading', { name: 'electron_temperature' })).toBeVisible();
+      fireEvent.click(await findByRole('button', {
+        name: 'Show source information for summary/global_quantities/energy_thermal/value',
+      }));
+      expect(await findByText('Thermal plasma energy content.')).toBeVisible();
+      expect(await findByText('DD 4.0.0')).toBeVisible();
     } finally {
       global.fetch = origFetch;
     }

@@ -6,8 +6,8 @@ function SourcePreview({ source }) {
   const primary = meaningfulParent ? source.parent_definition : source.leaf_definition;
   return (
     <div className="source-preview" role="tooltip">
-      <div className="source-preview-path mono">{source.path}</div>
-      {source.dd_version && <div className="source-preview-version">DD {source.dd_version}</div>}
+      <div className="source-preview-path mono">{source.ref}</div>
+      {source.version && <div className="source-preview-version">{source.kind === 'imas-dd' ? 'DD ' : ''}{source.version}</div>}
       {primary && <p>{primary}</p>}
       {meaningfulParent && (
         <div className="source-preview-parent">
@@ -34,41 +34,54 @@ function SourcePreview({ source }) {
   );
 }
 
-// Collapsible card grouping sources by IDS root. The path shown per row
-// has the IDS prefix stripped because it's already in the group heading.
+// Collapsible card grouping bindings by reference root. The reference shown
+// per row has that root stripped because it is already in the group heading.
 export function SourceGroup({ ids, items }) {
   const [open, setOpen] = useState(true);
   const [preview, setPreview] = useState(null);
-  const groupVersion = items.find((item) => item.dd_version)?.dd_version;
-  const idsUrl = ddDocumentationUrl(ids, groupVersion, { idsOnly: true });
+  const groupKind = items[0]?.kind;
+  const groupVersion = items.find((item) => item.version)?.version;
+  const idsUrl = groupKind === 'imas-dd'
+    ? ddDocumentationUrl(ids, groupVersion, { idsOnly: true })
+    : null;
+  const sourceLabel = groupKind === 'imas-dd' ? 'DD' : groupKind;
   return (
     <div className="source-group">
       <div className="source-group-head">
         <button className="source-group-toggle" onClick={() => setOpen(!open)} aria-expanded={open}>
         <span className="caret">{open ? '▾' : '▸'}</span>
-        <span className="source-type">DD</span>
+        <span className="source-type">{sourceLabel}</span>
         </button>
         {idsUrl ? (
           <a className="mono source-ids-link" href={idsUrl} target="_blank" rel="noreferrer">{ids} ↗</a>
-        ) : <span className="mono source-ids-link is-unlinked" title="Pinned DD version unavailable">{ids}</span>}
+        ) : <span className="mono source-ids-link is-unlinked" title="Source documentation link unavailable">{ids}</span>}
         <span className="source-group-count">{items.length}</span>
       </div>
       {open && (
         <div className="source-group-body">
           {items.map((s, i) => {
-            const url = ddDocumentationUrl(s.path, s.dd_version);
-            const shownPath = s.path.slice(ids.length + 1);
+            const url = s.kind === 'imas-dd'
+              ? ddDocumentationUrl(s.ref, s.version)
+              : null;
+            const shownRef = s.ref.startsWith(`${ids}/`)
+              ? s.ref.slice(ids.length + 1)
+              : s.ref;
             return (
-            <div className="source-item" key={`${s.path}-${i}`} onMouseLeave={() => setPreview(null)}>
+            <div className="source-item" key={`${s.kind}-${s.ref}-${s.version || ''}-${i}`} onMouseLeave={() => setPreview(null)}>
               {url ? (
                 <a className="source-path mono" href={url} target="_blank" rel="noreferrer"
                   onFocus={() => setPreview(i)} onMouseEnter={() => setPreview(i)}>
-                  {shownPath} ↗
+                  {shownRef} ↗
                 </a>
               ) : (
-                <span className="source-path mono" title="Pinned DD version unavailable; link disabled">{shownPath}</span>
+                <span className="source-path mono" title="Source documentation link unavailable">{shownRef}</span>
               )}
-              <button className="source-info" aria-label={`Show source information for ${s.path}`}
+              {s.resolution_status === 'unresolved' && (
+                <span className="source-unresolved" title={s.resolution_error || 'Source reference could not be resolved'}>
+                  Unresolved
+                </span>
+              )}
+              <button className="source-info" aria-label={`Show source information for ${s.ref}`}
                 aria-expanded={preview === i} onClick={() => setPreview(preview === i ? null : i)}
                 onFocus={() => setPreview(i)}>i</button>
               {preview === i && <SourcePreview source={s} />}
