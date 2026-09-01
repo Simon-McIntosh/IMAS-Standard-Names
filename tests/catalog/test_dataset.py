@@ -288,10 +288,46 @@ class TestNormaliseSources:
     def test_handles_none(self) -> None:
         assert _normalise_sources(None) == []
 
-    def test_pinned_documentation_projection_strips_operational_fields(self) -> None:
+    def test_pinned_source_resolves_through_imas_python(self) -> None:
         source = {
             "dd_path": "summary/global_quantities/energy_thermal/value",
             "dd_version": "4.0.0",
+            "dd_documentation": {
+                "leaf": "Inline content must not override imas-python.",
+            },
+            "model": "must-not-leak",
+            "status": "composed",
+            "source_id": "must-not-leak",
+        }
+        projected = _normalise_sources([source])[0]
+
+        assert projected["leaf_definition"] == "Value"
+        assert projected["parent_path"] == ("summary/global_quantities/energy_thermal")
+        assert "Thermal plasma energy content" in projected["parent_definition"]
+        assert projected["data_type"] == "FLT"
+        assert projected["unit"] == "J"
+        assert projected["coordinates"] == ["time"]
+        assert projected["resolution_source"] == "imas-python"
+        assert projected["resolution_status"] == "resolved"
+        assert "model" not in projected
+        assert "source_id" not in projected
+
+    def test_unresolvable_path_is_recorded_without_raising(self) -> None:
+        source = {
+            "dd_path": "summary/global_quantities/not_a_dd_leaf",
+            "dd_version": "4.0.0",
+        }
+
+        projected = _normalise_sources([source])[0]
+
+        assert projected["resolution_source"] == "imas-python"
+        assert projected["resolution_status"] == "unresolved"
+        assert "not_a_dd_leaf" in projected["resolution_error"]
+        assert "leaf_definition" not in projected
+
+    def test_legacy_inline_source_is_still_accepted(self) -> None:
+        source = {
+            "dd_path": "summary/global_quantities/energy_thermal/value",
             "dd_documentation": {
                 "leaf": "Value",
                 "parent_path": "summary/global_quantities/energy_thermal",
@@ -303,23 +339,14 @@ class TestNormaliseSources:
                 "description": "Context inferred from the parent hierarchy.",
                 "kind": "generated",
             },
-            "model": "must-not-leak",
-            "status": "composed",
-            "source_id": "must-not-leak",
         }
-        assert _normalise_sources([source]) == [
-            {
-                "path": "summary/global_quantities/energy_thermal/value",
-                "dd_version": "4.0.0",
-                "leaf_definition": "Value",
-                "parent_path": "summary/global_quantities/energy_thermal",
-                "parent_definition": "Thermal plasma energy.",
-                "data_type": "FLT_0D",
-                "lifecycle": "active",
-                "enhanced_context": "Context inferred from the parent hierarchy.",
-                "enhancement_kind": "generated",
-            }
-        ]
+
+        projected = _normalise_sources([source])[0]
+
+        assert projected["leaf_definition"] == "Value"
+        assert projected["parent_definition"] == "Thermal plasma energy."
+        assert projected["resolution_source"] == "catalog-inline"
+        assert projected["resolution_status"] == "legacy-inline"
 
     def test_enhanced_context_without_description_never_leaks_dict(self) -> None:
         source = {
@@ -722,9 +749,8 @@ class TestWriteSiteDataset:
 class TestLocalIrPeel:
     """Standalone IR peel: one layer at a time, recursion is implicit.
 
-    The rc8 SPA shortcut to ``ir.base.token`` collapsed every layer
-    in one go — these tests pin the corrected per-layer behaviour
-    so future refactors cannot regress.
+    A direct ``ir.base.token`` shortcut collapses every layer at once;
+    these tests pin the intended per-layer behaviour.
     """
 
     def test_leaf_returns_none(self):
@@ -732,9 +758,8 @@ class TestLocalIrPeel:
         assert _local_ir_peel("elongation") is None
 
     def test_qualifier_with_locus_peels_qualifier(self):
-        # The headline regression — `upper_elongation_of_plasma_boundary`
-        # used to report parent=`elongation` (skipping the boundary
-        # locus); should now stay on the boundary side of the family.
+        # The parent must retain the boundary locus rather than skipping
+        # directly to `elongation`.
         assert (
             _local_ir_peel("upper_elongation_of_plasma_boundary")
             == "elongation_of_plasma_boundary"

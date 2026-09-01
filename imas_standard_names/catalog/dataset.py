@@ -44,12 +44,14 @@ Legacy status values are normalised before filtering:
 Unknown values are logged as warnings and the entry is dropped.
 """
 
+import importlib
 import json
 import logging
 import re
 import subprocess
 from collections import Counter
 from dataclasses import dataclass
+from functools import cache
 from pathlib import Path
 from typing import Any
 
@@ -274,11 +276,110 @@ def _normalise_see_also(links: list[str] | None) -> list[str]:
     return result
 
 
+@cache
+def _dd_factory(dd_version: str) -> Any:
+    """Return the cached imas-python factory for one pinned DD version."""
+    imas = importlib.import_module("imas")
+    return imas.IDSFactory(dd_version)
+
+
+@cache
+def _dd_metadata_root(dd_version: str, ids_name: str) -> Any:
+    """Return the metadata root for one IDS in a pinned DD version."""
+    return _dd_factory(dd_version).new(ids_name).metadata
+
+
+def _resolve_dd_source(path: str, dd_version: str) -> dict[str, Any]:
+    """Resolve one pinned DD source through imas-python metadata."""
+    ids_name, separator, relative_path = path.partition("/")
+    if not separator or not ids_name or not relative_path:
+        raise ValueError(f"DD path must include an IDS name and leaf path: {path!r}")
+
+    ids_path = importlib.import_module("imas.ids_path").IDSPath(relative_path)
+    metadata = ids_path.goto_metadata(_dd_metadata_root(dd_version, ids_name))
+    parent = metadata._parent
+    parent_relative_path = str(parent.path)
+    parent_path = (
+        f"{ids_name}/{parent_relative_path}" if parent_relative_path else ids_name
+    )
+    data_type = getattr(metadata.data_type, "value", str(metadata.data_type))
+    return {
+        "dd_version": dd_version,
+        "leaf_definition": metadata.documentation,
+        "parent_path": parent_path,
+        "parent_definition": parent.documentation,
+        "data_type": data_type,
+        "unit": metadata.units,
+        "coordinates": [str(coordinate) for coordinate in metadata.coordinates],
+        "resolution_source": "imas-python",
+        "resolution_status": "resolved",
+    }
+
+
+def _legacy_source_projection(raw: dict[str, Any]) -> dict[str, Any]:
+    """Project legacy inline DD fields when no pinned version is available."""
+    projected: dict[str, Any] = {}
+    authoritative = raw.get("dd_documentation")
+    if not isinstance(authoritative, dict):
+        authoritative = {}
+    enhanced = raw.get("enhanced_context")
+    if not isinstance(enhanced, dict):
+        enhanced = {}
+    aliases = {
+        "leaf_definition": ("leaf_definition", "documentation"),
+        "parent_path": ("parent_path",),
+        "parent_definition": ("parent_definition", "parent_documentation"),
+        "data_type": ("data_type",),
+        "unit": ("unit",),
+        "coordinates": ("coordinates",),
+        "lifecycle": ("lifecycle", "dd_lifecycle"),
+        "semantic_facet": ("semantic_facet", "facet"),
+        "enhanced_context": ("enhanced_context",),
+        "enhancement_kind": ("enhancement_kind",),
+    }
+    for public_key, candidate_keys in aliases.items():
+        value = next(
+            (raw.get(key) for key in candidate_keys if raw.get(key) not in (None, "")),
+            None,
+        )
+        if value is not None:
+            projected[public_key] = value
+    context = projected.get("enhanced_context")
+    if isinstance(context, dict):
+        description = context.get("description")
+        if isinstance(description, str) and description:
+            projected["enhanced_context"] = description
+        else:
+            projected.pop("enhanced_context")
+    nested_authoritative = {
+        "leaf_definition": authoritative.get("leaf"),
+        "parent_path": authoritative.get("parent_path"),
+        "parent_definition": authoritative.get("parent"),
+        "data_type": authoritative.get("data_type"),
+        "unit": authoritative.get("unit"),
+        "coordinates": authoritative.get("coordinates"),
+        "lifecycle": authoritative.get("lifecycle_status"),
+        "lifecycle_version": authoritative.get("lifecycle_version"),
+    }
+    for key, value in nested_authoritative.items():
+        if value not in (None, "", []):
+            projected[key] = value
+    if enhanced.get("description"):
+        projected["enhanced_context"] = enhanced["description"]
+    if enhanced.get("kind"):
+        projected["enhancement_kind"] = enhanced["kind"]
+    if projected:
+        projected["resolution_source"] = "catalog-inline"
+        projected["resolution_status"] = "legacy-inline"
+    return projected
+
+
 def _normalise_sources(sources: list[dict[str, Any]] | None) -> list[dict[str, Any]]:
-    """Project public DD source semantics and strip operational ledger fields.
+    """Resolve public DD semantics and strip operational ledger fields.
 
     ``path`` falls back to ``id`` (minus its ``dd:`` prefix) when the
-    entry has no explicit ``dd_path``.
+    entry has no explicit ``dd_path``. Pinned sources resolve through
+    imas-python; failures remain visible on the emitted source record.
     """
     if not sources:
         return []
@@ -293,67 +394,23 @@ def _normalise_sources(sources: list[dict[str, Any]] | None) -> list[dict[str, A
                 path = ident[len("dd:") :]
         if not path:
             continue
-        # The producer owns these immutable DD fields. Legacy source records
-        # remain visible as plain text but are deliberately not linked to
-        # ``latest`` when their pinned version is absent.
         projected: dict[str, Any] = {"path": str(path)}
-        authoritative = raw.get("dd_documentation")
-        if not isinstance(authoritative, dict):
-            authoritative = {}
-        enhanced = raw.get("enhanced_context")
-        if not isinstance(enhanced, dict):
-            enhanced = {}
-        aliases = {
-            "dd_version": ("dd_version", "version"),
-            "leaf_definition": ("leaf_definition", "documentation"),
-            "parent_path": ("parent_path",),
-            "parent_definition": ("parent_definition", "parent_documentation"),
-            "data_type": ("data_type",),
-            "unit": ("unit",),
-            "coordinates": ("coordinates",),
-            "lifecycle": ("lifecycle", "dd_lifecycle"),
-            "semantic_facet": ("semantic_facet", "facet"),
-            "enhanced_context": ("enhanced_context",),
-            "enhancement_kind": ("enhancement_kind",),
-        }
-        for public_key, candidate_keys in aliases.items():
-            value = next(
-                (
-                    raw.get(key)
-                    for key in candidate_keys
-                    if raw.get(key) not in (None, "")
-                ),
-                None,
-            )
-            if value is not None:
-                projected[public_key] = value
-        # The producer may emit enhanced_context as a structured object; the
-        # public projection is always plain text, so keep only its description
-        # (the dict form would otherwise reach the renderer verbatim).
-        context = projected.get("enhanced_context")
-        if isinstance(context, dict):
-            description = context.get("description")
-            if isinstance(description, str) and description:
-                projected["enhanced_context"] = description
-            else:
-                projected.pop("enhanced_context")
-        nested_authoritative = {
-            "leaf_definition": authoritative.get("leaf"),
-            "parent_path": authoritative.get("parent_path"),
-            "parent_definition": authoritative.get("parent"),
-            "data_type": authoritative.get("data_type"),
-            "unit": authoritative.get("unit"),
-            "coordinates": authoritative.get("coordinates"),
-            "lifecycle": authoritative.get("lifecycle_status"),
-            "lifecycle_version": authoritative.get("lifecycle_version"),
-        }
-        for key, value in nested_authoritative.items():
-            if value not in (None, "", []):
-                projected[key] = value
-        if enhanced.get("description"):
-            projected["enhanced_context"] = enhanced["description"]
-        if enhanced.get("kind"):
-            projected["enhancement_kind"] = enhanced["kind"]
+        version = raw.get("dd_version") or raw.get("version")
+        if version not in (None, ""):
+            version_text = str(version)
+            projected["dd_version"] = version_text
+            try:
+                projected.update(_resolve_dd_source(str(path), version_text))
+            except Exception as exc:
+                projected.update(
+                    {
+                        "resolution_source": "imas-python",
+                        "resolution_status": "unresolved",
+                        "resolution_error": f"{type(exc).__name__}: {exc}",
+                    }
+                )
+        else:
+            projected.update(_legacy_source_projection(raw))
         normalised.append(projected)
     return normalised
 
@@ -475,8 +532,8 @@ def _derive_grammar_facets(name: str) -> _GrammarFacets:
     for qualifier in ir.qualifiers:
         token = qualifier.token
         qualifier_tokens.append(token)
-        # Classify into the dedicated single-token segments so the SPA renders
-        # distinct, filterable cards (rc32 decomposition + aggregation segment).
+        # Classify into dedicated single-token segments so the SPA renders
+        # distinct, filterable cards in the canonical decomposition.
         if token in _AGGREGATION_TOKENS:
             role, note = "aggregation", "Aggregation (total / net)"
         elif token in _ORBIT_TOKENS:
@@ -655,13 +712,10 @@ def _parent_token(
 
     3. **``None``** for true leaves and unparseable names.
 
-    Historical note: the rc8 implementation shortcut to
-    ``facets.base_token`` here, jumping past every structural layer
-    in one go. That made `upper_elongation_of_plasma_boundary`
-    report `elongation` as parent — collapsing two distinct boundary
-    elongation variants into a flat-tree with unrelated flux-surface
-    elongation. The new resolution peels exactly one layer; recursion
-    is implicit because each parent recomputes its own one-layer peel.
+    A direct ``facets.base_token`` shortcut would jump past every structural
+    layer and make `upper_elongation_of_plasma_boundary` report `elongation`
+    as its parent. Peeling exactly one layer preserves the boundary variants;
+    recursion is implicit because each parent recomputes its own peel.
     """
     # --- (1) Canonical pipeline-derived parent from YAML arguments ---
     if entry is not None:
