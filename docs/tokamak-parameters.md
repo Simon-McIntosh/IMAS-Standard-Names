@@ -19,17 +19,24 @@ The tokamak parameters database provides authoritative, curated parameters for m
 - Geometry: major radius, minor radius, plasma volume, elongation, triangularity, aspect ratio
 - Physics: magnetic field, plasma current, densities, temperatures, confinement time, fusion performance
 
-## Using the MCP Tool
+## Using the Python API
 
-The `get_tokamak_parameters` MCP tool provides programmatic access to the database with optional statistics aggregation.
+`TokamakParametersDB` provides programmatic access to the database with optional
+statistics aggregation.
+
+```python
+from imas_standard_names.tokamak_parameters import TokamakParametersDB
+
+db = TokamakParametersDB()
+```
 
 ### Single Machine
 
 Retrieve parameters for one tokamak:
 
 ```python
-# Returns full parameter set for ITER
-get_tokamak_parameters(machines='ITER')
+# Returns the full parameter set for ITER
+db.get("ITER")
 ```
 
 **Returns:**
@@ -58,8 +65,8 @@ catalog_version: "x.y.z"
 Retrieve parameters for multiple machines with aggregated statistics:
 
 ```python
-# Returns full data + min/max/mean/median statistics
-get_tokamak_parameters(machines='ITER JET DIII-D')
+machines = db.get_many(["ITER", "JET", "DIII-D"])
+stats = db.compute_statistics(machines)  # min/max/mean/median
 ```
 
 **Returns:**
@@ -98,11 +105,8 @@ catalog_version: "x.y.z"
 Retrieve the complete database with statistics:
 
 ```python
-# Returns all machines with comprehensive statistics
-get_tokamak_parameters(machines='all')
-
-# Or simply (defaults to 'all')
-get_tokamak_parameters()
+machines = db.get_all()
+stats = db.compute_statistics(machines)
 ```
 
 ## Data Sources
@@ -205,10 +209,10 @@ Typical values:
 - DIII-D: 1.67 m
 ```
 
-**Better (with MCP tool):**
+**Better (with the parameter database):**
 ```markdown
 Typical values:
-Use get_tokamak_parameters(machines='ITER JET DIII-D') to retrieve:
+Use db.get_many(["ITER", "JET", "DIII-D"]) to retrieve:
 - ITER: 6.2 m (design, baseline scenario)
 - JET: 2.96 m
 - DIII-D: 1.67 m
@@ -218,13 +222,13 @@ Use get_tokamak_parameters(machines='ITER JET DIII-D') to retrieve:
 ```markdown
 Typical values:
 Major tokamaks range from 0.67 m (C-Mod, compact) to 6.2 m (ITER, design).
-Use get_tokamak_parameters(machines='all') for complete parameter ranges.
+Use db.get_all() with db.compute_statistics() for complete parameter ranges.
 ```
 
 ### Workflow for Documentation
 
 1. **Identify Parameter**: Determine which tokamak parameter is relevant
-2. **Query Tool**: Use `get_tokamak_parameters` to retrieve verified values
+2. **Query the database**: Use `TokamakParametersDB` to retrieve verified values
 3. **Select Machines**: Choose representative machines (large/small, operational/design)
 4. **Include Context**: Note operational scenarios, design vs. achieved values
 5. **Cite Sources**: Reference specific machines, not generic "typical tokamaks"
@@ -239,7 +243,7 @@ The major radius of major tokamaks varies widely:
 - Compact machines: C-Mod (0.67 m), TCV (0.88 m)
 - Spherical tokamaks: MAST-U (0.85 m, A=1.3)
 
-Use get_tokamak_parameters(machines='all') for complete parameter statistics.
+Use db.compute_statistics(db.get_all()) for complete parameter statistics.
 ```
 
 **For plasma current documentation:**
@@ -330,9 +334,7 @@ imas_standard_names/
 │       ├── jet.yml
 │       ├── ...
 │       └── README.md           # Source documentation
-├── tokamak_parameters.py       # Pydantic models and loader
-└── tools/
-    └── tokamak.py              # MCP tool implementation
+└── tokamak_parameters.py       # Pydantic models and loader
 ```
 
 ### Pydantic Models
@@ -356,5 +358,4 @@ imas_standard_names/
 
 - Grammar specification: `imas_standard_names/grammar/specification.yml`
 - Standard names catalog: [imas-standard-names-catalog](https://github.com/iterorganization/imas-standard-names-catalog)
-- MCP tool registration: `imas_standard_names/tools/__init__.py`
 

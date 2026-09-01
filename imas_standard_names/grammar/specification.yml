@@ -8,7 +8,8 @@
 #
 # Generation details:
 # - The generator lives at: imas_standard_names/grammar_codegen/generate.py
-# - It writes: imas_standard_names/grammar/types.py
+# - It writes: imas_standard_names/grammar/model_types.py, constants.py,
+#   tag_types.py, and field_schemas.py
 # - It runs automatically during package build via Hatch (see hatch_build_hooks.py)
 # - A console entrypoint also exists in pyproject.toml: `build-grammar`
 # - You can regenerate locally without building by running:
@@ -23,38 +24,39 @@
 #   geometric_base or physical_base is required (mutually exclusive).
 #
 # component (for physical vectors) vs coordinate (for geometric/spatial vectors):
-#   * Use "component" for physical field vectors 
+#   * Use "component" for physical field vectors
 #     (magnetic_field, heat_flux, velocity) with physical_base
-#     Template: {axis}_component_of_{vector} 
-#     (e.g., radial_component_of_magnetic_field)
-#   * Use "coordinate" for geometric/spatial quantities 
+#     Short form only: {axis}_{vector} (e.g., radial_magnetic_field).
+#     The long form {axis}_component_of_{vector} is RETIRED and does not parse.
+#   * Use "coordinate" for geometric/spatial quantities
 #     (position, vertex, centroid, trajectory) with geometric_base
-#     Template: {axis}_{geometric_base} 
+#     Template: {axis}_{geometric_base}
 #     (e.g., radial_position_of_flux_loop_contour)
 #   * component and coordinate are mutually exclusive
 #   * coordinate requires geometric_base; component requires physical_base
+#   * component/coordinate is the FIRST (outermost) prefix segment — it
+#     precedes aggregation/orbit/population/subject in the locked order
+#     (radial_total_ion_energy_diffusivity, NOT total_radial_...)
 #
-# device (<device>_):
-#   * Use prefix pattern for device signals/outputs where device IS the source
-#     (e.g., flux_loop_voltage, passive_loop_current,
-#      poloidal_magnetic_field_probe_voltage)
-#   * For time-varying signals, measurements, or outputs FROM/THROUGH the device
-#   * Shares objects vocabulary with object segment
-#   * Mutually exclusive with of_object suffix
-#
-# object (of_<object>):
-#   * Use "of_" suffix for intrinsic properties/characteristics OF the hardware
-#     (e.g., area_of_flux_loop, position_of_poloidal_field_coil,
+# instrument / entity naming — postfix locus (of_<entity>) is the AUTHORING
+# convention:
+#   * Instrument and hardware entity names attach as the of_<entity> postfix
+#     locus for BOTH dynamic signals and intrinsic properties:
+#     (e.g., voltage_of_flux_loop, current_of_rogowski_coil,
+#      area_of_flux_loop, position_of_poloidal_field_coil,
 #      number_of_turns_of_passive_loop)
-#   * For static properties: dimensions, configuration parameters, geometric attributes
-#   * Shares objects vocabulary with device segment
-#   * Mutually exclusive with device_ prefix
-#
-# device vs object distinction:
-#   * device_<signal>: Dynamic signals/outputs (flux_loop_voltage)
-#   * <property>_of_object: Static characteristics (area_of_flux_loop)
+#   * This is the operating convention enforced by the codex compose prompts
+#     and validated in production review (voltage_of_flux_loop accepted at
+#     0.96; the device-prefix variant rejected).
 #   * For physics quantities measured BY devices, use generic names and
 #     document measurement method in metadata (per fusion metadata conventions)
+#
+# device (<device>_) — retained for parse compatibility only:
+#   * The device prefix segment (flux_loop_voltage-style) remains in the
+#     grammar so existing names keep parsing, but it is NOT the preferred
+#     authoring form — compose new names with the of_<entity> postfix locus.
+#   * Shares objects vocabulary with the object segment
+#   * Mutually exclusive with of_object suffix
 #
 # geometry (of_<target>) vs position (at_<location>):
 #   * Use "of_" for intrinsic properties/characteristics 
@@ -81,12 +83,21 @@
 #===============================================================================
 
 canonical_pattern: >
-  [<component>_component_of | <coordinate>]? 
-  [<subject>]? 
+  [<component> | <coordinate>]?
+  [<section_plane>_plane]?
+  [<aggregation>]?
+  [<qualifier>]*
+  [<zone>]?
+  [<orbit>]?
+  [<population>]?
+  [<subject>]?
   [<device>]?
-  <geometric_base | physical_base> 
-  [of_<object>]? 
-  [of_<geometry> | at_<position> | over_<region>]? 
+  [<channel_qualifier>]?
+  [<channel>]?
+  [<geometry_representation>]?
+  <geometric_base | physical_base>
+  [of_<object>]?
+  [of_<geometry> | at_<position>[_equal_to_<value>]? | over_<region>]?
   [due_to_<process>]?
 
 #===============================================================================
@@ -136,24 +147,139 @@ segments:
   - id: component
     optional: true
     vocabulary: components
-    template: "{token}_component_of"
+    # Short form only ({token}_<vector>, e.g. radial_magnetic_field); the
+    # long-form template {token}_component_of_<vector> is retired.
     exclusive_with:
       - coordinate
     description: >
-      Directional component of a physical vector quantity 
-      (fields, fluxes, velocities)
+      Directional projection or direction-dependent physical quantity
+      (fields, fluxes, velocities, curvature radii). Renders as the first
+      (outermost) prefix:
+      <component>_<aggregation>_<orbit>_<population>_<subject>_<base>.
+      Radial is exclusively the cylindrical R component. Flux-surface-normal
+      projections use flux_surface_normal, oriented toward increasing flux
+      label. Perpendicular is relative to the magnetic-field direction and is
+      not a synonym for flux_surface_normal. First/second local tangential
+      refer to the ordered tangents e1 and e2 of an object-local right-handed
+      orthonormal frame: e3 is the surface or plane normal oriented toward the
+      plasma; e1 is oriented in positive toroidal phi and is either explicitly
+      horizontal or has a smaller absolute global-Z component than e2; and
+      e2 = e3 x e1. As components they select a vector projection or a
+      direction-dependent scalar value. They do not denote coordinate values
+      or basis vectors, and neither implies a global-vertical or
+      principal-curvature direction.
   - id: coordinate
     optional: true
-    vocabulary: components
+    vocabulary: coordinate_axes
     exclusive_with:
       - component
     description: >
-      Coordinate axis for geometric/spatial vector decomposition 
-      (position, vertex, centroid, trajectory, displacement)
+      Coordinate axis for geometric/spatial vector decomposition
+      (position, vertex, centroid, trajectory, displacement). Local-frame
+      coordinate carriers identify signed coordinates along e1 or e2; local
+      unit-vector carriers identify e1 or e2 themselves. Coordinate projection
+      tokens such as x, y, and z may then select their machine-Cartesian
+      components.
+  - id: section_plane
+    optional: true
+    template: "{token}_plane_"
+    vocabulary: section_planes
+    description: >
+      Plane containing a physical or geometric section. This single-token
+      segment renders as <token>_plane immediately after any
+      component/coordinate projection and before all other prefix segments.
+      Poloidal identifies a section in the tokamak poloidal plane; the explicit
+      plane marker distinguishes it from a vector component in this role.
+      A cross-sectional quantity or cross-section carrier must carry a
+      section_plane, because changing the plane changes the represented
+      object.
+  - id: aggregation
+    optional: true
+    vocabulary: aggregations
+    description: >
+      Population/species/contribution reduction (total, net) — summed or netted
+      over sub-populations, species, or additive contributions. Single-token
+      closed segment, an orthogonal dimension from population (energy-state) that
+      legitimately stacks with it; renders OUTERMOST:
+      <aggregation>_<orbit>_<population>_<subject>_<base> (e.g. total_fast_ion_energy).
+      SPATIAL reductions (flux-surface average, volume integral) are NOT
+      aggregation — they use over_<region> / reduction tags / reduction provenance.
+  - id: qualifier
+    optional: true
+    vocabulary: qualifiers
+    description: >
+      Refined PHRASE-SCOPING qualifier (implicit, effective, incident,
+      fluctuating, ...; membership = scoping_qualifiers.yml, a subset of
+      qualifiers.yml). A scoping qualifier modifies the WHOLE compound noun
+      phrase — English adjective order (Forsyth's royal order; Scontras et
+      al.: less intrinsic composes further from the noun) — so it renders
+      outermost among the refined qualifiers, immediately after aggregation
+      and before zone, orbit, population, subject, and the channel pair:
+      <aggregation>_<qualifier...>_<zone>_<orbit>_<population>_<subject>_
+      <channel_qualifier>_<channel>_<base>
+      (implicit_electron_energy_source_rate, incident_neutron_fluence,
+      effective_ion_momentum_convection_velocity,
+      total_implicit_ion_energy_source_rate). Kind-forming qualifier tokens
+      (the qualifiers.yml default: atomic, prefill, saturated, critical,
+      deposited, ...) form a named quantity with the base (atomic_mass,
+      prefill_count, saturated_current, deposited_power) and stay glued to
+      it, INNER of the species block (ion_atomic_mass, argon_prefill_count,
+      electron_deposited_power — recipient-possessive). The segment admits
+      MULTIPLE tokens; stacked scoping qualifiers keep their authored order
+      (a canonical intra-order by category rank is planned but not yet
+      enforced). Genuinely LEXICALISED compounds (decay_length, decay_time,
+      kinetic_energy) are atomic physical_bases, not qualifier+base pairs.
+  - id: zone
+    optional: true
+    vocabulary: zones
+    description: >
+      Plasma-region / geometric sub-selector prefix (core, edge, pedestal,
+      separatrix, divertor, scrape_off_layer; vertical upper/lower; radial
+      inner/outer; PFC face front_surface/back_surface/wetted). A zone is a
+      location/origin classifier, so it renders OUTER of the species block
+      (English adjective order: origin precedes the material/type noun
+      adjuncts) and INNER of the scoping qualifiers:
+      <qualifier>_<zone>_<orbit>_<population>_<subject>_<base> (e.g.
+      core_electron_temperature, edge_electron_density,
+      core_fast_ion_pressure, lower_outer_squareness_of_flux_surface).
+      Unlike aggregation/orbit/population (single-token), the zone segment
+      admits MULTIPLE tokens (lower_outer) in a FIXED canonical intra-order
+      (vertical, radial, region, face — see zones.yml). The prefix form
+      (scrape_off_layer_density) is distinct from the postfix region locus
+      (over_scrape_off_layer); both coexist.
+  - id: orbit
+    optional: true
+    vocabulary: orbits
+    description: >
+      Particle orbit / transit class (trapped, co_passing, counter_passing,
+      co_current, counter_current). Single-token closed segment, orthogonal to
+      aggregation, population and subject; renders before population:
+      <aggregation>_<orbit>_<population>_<subject>_<base>.
+  - id: population
+    optional: true
+    vocabulary: populations
+    description: >
+      Species-population kind/state (energy-state fast/thermal/cold/hot/
+      suprathermal, molecularity molecular, bulk core). Single-token closed
+      segment; renders before the subject: <population>_<subject>_<base>.
+      Aggregation (total/net) is a separate outer segment (aggregations).
   - id: subject
     optional: true
     vocabulary: subjects
-    description: "Particle species or plasma population"
+    description: "Particle species or plasma entity"
+  - id: state
+    optional: true
+    vocabulary: states
+    description: >
+      State resolution: a quantity resolved for a specific state of the
+      species rather than the species aggregate. Single-token closed segment,
+      an orthogonal subject-refinement axis (like population), but rendered
+      IMMEDIATELY AFTER the subject because it binds tighter — the DD nests
+      ion[]/state[]/... and neutral[]/state[]/... inside the species:
+      <population>_<subject>_<state>_<channel>_<base>
+      (e.g. fast_ion_charge_state_pressure, neutral_internal_state_density).
+      charge_state is valid on ion-like subjects, internal_state on
+      neutral-like subjects (see the compatibility gate).
   - id: device
     optional: true
     vocabulary: objects
@@ -161,13 +287,62 @@ segments:
       - object
     description: >
       Diagnostic hardware or actuator device producing/conducting the signal.
-      Used for device signals and outputs where the device IS the source/conductor.
-      Pattern: <device>_<signal> where signal is the physical_base.
-      Examples: flux_loop_voltage (voltage from loop), 
-      passive_loop_current (current through loop),
-      poloidal_magnetic_field_probe_voltage (probe output),
-      ion_cyclotron_heating_antenna_forward_power (antenna power).
-      Distinction: device_ prefix for dynamic signals vs of_object suffix for static properties.
+      Retained for parse compatibility only — NOT the preferred authoring
+      form. Compose new names with the of_<entity> postfix locus instead
+      (voltage_of_flux_loop, current_of_rogowski_coil); the postfix-locus
+      convention covers both dynamic signals and intrinsic properties and is
+      the form enforced by compose tooling and production review.
+      Legacy pattern: <device>_<signal> where signal is the physical_base
+      (flux_loop_voltage, passive_loop_current) — still parses.
+  - id: channel_qualifier
+    optional: true
+    vocabulary: channel_qualifiers
+    description: >
+      Channel-qualifier — a qualifier that binds to the transport CHANNEL
+      (kinetic, plasma). It refines WHICH channel quantity is meant and stays
+      glued to the channel word, rendering immediately OUTER of the channel
+      (before it) and INNER of the refined qualifier(s):
+      <zone>_<qualifier>_<channel_qualifier>_<channel>_<base> (e.g.
+      kinetic_energy_flux = channel_qualifier=kinetic + channel=energy +
+      base=flux; plasma_momentum_flux = channel_qualifier=plasma +
+      channel=momentum + base=flux; incident_kinetic_energy_flux =
+      qualifier=incident + channel_qualifier=kinetic + channel=energy +
+      base=flux). SINGLE-token (at most one
+      channel-qualifier per name; two is a hard error). Dual-coexistence:
+      kinetic_energy / internal_energy are atomic bases AND kinetic is a
+      channel-qualifier; the parser's longest-base match disambiguates
+      (electron_kinetic_energy -> base=kinetic_energy;
+      ion_kinetic_energy_flux -> channel_qualifier=kinetic + channel=energy +
+      base=flux).
+  - id: channel
+    optional: true
+    vocabulary: channels
+    description: >
+      Transport channel — WHAT is transported (heat, particle, energy,
+      momentum). A structural role, not a generic qualifier: it is the
+      INNERMOST prefix segment, rendering immediately before the base and
+      AFTER the refined qualifier(s) — the qualifier scopes over the whole
+      channel phrase:
+      <subject>_<zone>_<qualifier>_<channel_qualifier>_<channel>_<base> (e.g.
+      heat_flux = channel=heat + base=flux; electron_energy_flux =
+      subject=electron + channel=energy + base=flux;
+      implicit_energy_source_rate = qualifier=implicit + channel=energy +
+      base=source_rate). SINGLE-token (at most one channel
+      per name; two channel tokens is a hard error). energy and momentum are
+      ALSO physical_bases (kinetic_energy, angular_momentum, standalone
+      electron_energy): the parser matches the longest base first, so the
+      standalone forms parse as base and the *_flux / *_diffusivity / *_source
+      forms strip the channel. Both coexist by design.
+  - id: geometry_representation
+    optional: true
+    vocabulary: geometry_representations
+    description: >
+      Object-local construction representation for a geometry quantity.
+      local_circle identifies a radius belonging to a circular-arc
+      representation in the owner's local geometry; it is distinct from the
+      global cylindrical radial_coordinate and from an outline coordinate.
+      The representation renders immediately before the physical base and
+      requires an explicit owner locus.
   - id: geometric_base
     optional: true
     vocabulary: geometric_bases
@@ -184,12 +359,12 @@ segments:
     exclusive_with:
       - geometric_base
     description: >
-      Physical quantity, measurement, or hardware property (open-ended).
+      Physical quantity, measurement, or hardware property.
+      Closed vocabulary — all valid tokens are listed in physical_bases.yml.
       Can represent physical fields (magnetic_field, temperature, voltage, flux, current),
-      derived quantities (gradient, divergence), measurement signals, 
+      derived quantities (gradient, divergence), measurement signals,
       or hardware characteristics (area, resistance, capacitance).
-      New physical base terms are defined through catalog entries, not the grammar.
-      Used with component prefix for physical vector components (e.g., radial_component_of_magnetic_field).
+      Used with component prefix for physical vector components (e.g., radial_magnetic_field).
   - id: object
     optional: true
     vocabulary: objects
@@ -197,15 +372,17 @@ segments:
     exclusive_with:
       - device
     description: >
-      Physical object, diagnostic hardware, or equipment whose intrinsic
-      property or characteristic is described.
-      Used for static properties: geometric dimensions, configuration parameters,
-      physical attributes that define the object.
-      Pattern: <property>_of_<object>
-      Examples: area_of_flux_loop (loop dimension),
+      Physical object, diagnostic hardware, or equipment the quantity
+      belongs to — the preferred postfix-locus authoring form for BOTH
+      dynamic signals and intrinsic properties.
+      Pattern: <quantity>_of_<object>
+      Examples: voltage_of_flux_loop (loop signal),
+      current_of_rogowski_coil (coil signal),
+      area_of_flux_loop (loop dimension),
       position_of_poloidal_field_coil (coil location),
       number_of_turns_of_passive_loop (construction parameter).
-      Distinction: of_object suffix for static properties vs device_ prefix for dynamic signals.
+      The legacy device_ prefix (flux_loop_voltage) still parses but is not
+      the preferred authoring form.
   - id: geometry
     optional: true
     vocabulary: positions
@@ -213,8 +390,9 @@ segments:
     exclusive_with:
       - position
       - region
+      - path
     description: >
-      Intrinsic geometric property OF the object 
+      Intrinsic geometric property OF the object
       (coordinates, dimensions, shapes that define it)
   - id: position
     optional: true
@@ -223,9 +401,15 @@ segments:
     exclusive_with:
       - geometry
       - region
+      - path
     description: >
-      Field quantity evaluated AT the spatial location 
-      (temperatures, densities, fluxes measured there)
+      Field quantity evaluated AT the spatial location
+      (temperatures, densities, fluxes measured there).
+      Supports value parameterization at_<position>_equal_to_<value> where
+      <value> is a numeric literal with underscores as decimal separators
+      (e.g. safety_factor_at_normalized_poloidal_magnetic_flux_equal_to_0_95
+      for q at psi_norm = 0.95). The model carries the value in the
+      position_value extension field.
   - id: region
     optional: true
     vocabulary: regions
@@ -233,17 +417,38 @@ segments:
     exclusive_with:
       - geometry
       - position
+      - path
     description: >
       Multi-dimensional plasma zone (volume, layer, or banded region)
       over which the quantity is integrated, averaged, or otherwise reduced.
       Regions are loci with extent (halo_region, core_region, divertor_region,
       scrape_off_layer, edge_region, halo_boundary); use "over_<region>" —
       not "at_<region>" — because a region is not a point/line/surface sample.
+  - id: path
+    optional: true
+    vocabulary: positions
+    template: "along_{token}"
+    exclusive_with:
+      - geometry
+      - position
+      - region
+    description: >
+      Path-like position along which the quantity varies, rather than a
+      single point it is evaluated at (position) or an intrinsic property
+      of (geometry). Use "along_<path>" for a diagnostic chord or traced
+      trajectory a quantity is sampled along (line_of_sight, pellet_path):
+      toroidal_angle_along_line_of_sight, electron_density_along_pellet_path.
   - id: process
     optional: true
     vocabulary: processes
     template: "due_to_{token}"
-    description: "Physical mechanism or process contributing to the quantity"
+    description: >
+      Physical mechanism or process contributing to the quantity.
+      Sum semantics: X_due_to_P represents a single additive term in a
+      decomposition of X by process.  The sum over all processes P
+      reconstructs the total: X = sum_P(X_due_to_P).
+      Example: electron_energy_source_density_due_to_ohmic_heating is the
+      ohmic contribution to the total electron energy source density.
 
 #===============================================================================
 # Vocabulary Sources
@@ -253,22 +458,44 @@ segments:
 
 vocabularies:
   components: !include vocabularies/components.yml
+  coordinate_axes: !include vocabularies/coordinate_axes.yml
+  section_planes: !include vocabularies/section_planes.yml
   subjects: !include vocabularies/subjects.yml
+  states: !include vocabularies/states.yml
+  # rc32 subject-vocabulary decomposition: orthogonal single-token modifier
+  # segments split out of the old compound subjects.
+  populations: !include vocabularies/populations.yml
+  orbits: !include vocabularies/orbits.yml
+  # aggregation: population/species/contribution reduction (total, net),
+  # outermost modifier segment, stacks orthogonally with population.
+  aggregations: !include vocabularies/aggregations.yml
   regions: !include vocabularies/regions.yml
+  # zone: ordered plasma-region / geometric sub-selector PREFIX segment
+  # (distinct from the postfix region locus). Multi-token, fixed intra-order.
+  zones: !include vocabularies/zones.yml
+  # qualifier: refined base-phrase qualifier segment (implicit, incident,
+  # effective, ...). Scopes over the whole channel phrase — renders outer of
+  # channel_qualifier/channel, inner of the zone. Multi-token.
+  qualifiers: !include vocabularies/qualifiers.yml
+  # channel_qualifier: qualifier that binds to the transport channel (kinetic,
+  # plasma). Renders outer of the channel, inner of the refined qualifiers.
+  # Single-token.
+  channel_qualifiers: !include vocabularies/channel_qualifiers.yml
+  # channel: transport-channel PREFIX segment (what is transported:
+  # heat/particle/energy/momentum). Innermost prefix, single-token.
+  channels: !include vocabularies/channels.yml
+  geometry_representations: !include vocabularies/geometry_representations.yml
   processes: !include vocabularies/processes.yml
   generic_physical_bases: !include vocabularies/generic_physical_bases.yml
   binary_operators: !include vocabularies/binary_operators.yml
-  # --- vNext vocabularies (plan 38 §A9) ---
-  # objects.yml + positions.yml migrated to locus_registry.yml (typed locus entries)
-  # geometric_bases.yml migrated to geometry_carriers.yml (closed shape carriers)
-  # transformations.yml + decomposition.yml → operators.yml (unified operator registry)
-  # Vocabulary names kept as ``objects``, ``positions``, ``geometric_bases`` for
-  # backward compatibility with generated enum class names (Object, Position, GeometricBase).
+  # Typed vocabulary registries. Objects and positions select typed locus
+  # entries; geometric bases select closed shape carriers. The source keys
+  # match the generated enum class names (Object, Position, GeometricBase).
   objects: !include vocabularies/locus_registry.yml
   positions: !include vocabularies/locus_registry.yml
   geometric_bases: !include vocabularies/geometry_carriers.yml
-  # transformations + decomposition → both generated from operators.yml (bare vNext tokens).
-  # rc20 tests that assert _of_-suffixed token forms are marked xfail (plan 38 §A10).
+  # Transformations and decomposition expose the applicable bare tokens from
+  # the unified operator registry.
   transformations: !include vocabularies/operators.yml
   decomposition: !include vocabularies/operators.yml
 
@@ -302,7 +529,7 @@ entry_schema:
       examples:
         - electron_temperature
         - gradient_of_electron_temperature
-        - radial_component_of_magnetic_field
+        - radial_magnetic_field
       guidance:
         validation: "Must follow grammar canonical pattern. Use get_grammar for composition rules."
         common_mistakes:
@@ -313,10 +540,11 @@ entry_schema:
     description:
       required: true
       type: string
-      description: "One concise sentence summarizing the physical quantity. Keep under 120 characters for readability. Should be self-contained and understandable without external context."
-      max_length: 180
+      description: "Concise summary of the physical quantity (1-3 sentences). Should be self-contained and understandable without external context."
+      max_length: 500
       guidance:
         yaml_formatting: "Use plain unquoted style for simple text. Use single quotes if special characters needed."
+        notation: "Plain text with Unicode Greek symbols: no LaTeX or $ math markup. Write Greek letters as symbols (φ, θ, ρ) and coordinate frames as (R, φ, Z). Capital Φ is reserved for flux, potential, or phase quantities, never the toroidal angle. LaTeX belongs in the documentation field, not the description."
         content_rules:
           - "Start with capital letter, end with period"
           - "Be specific and precise"
@@ -325,6 +553,7 @@ entry_schema:
         avoid:
           - "Repeating the name verbatim"
           - "Referencing IMAS Data Dictionary (DD), COCOS conventions, or implementation-specific paths"
+          - "LaTeX or $ math markup, and spelled-out Greek letter words (write the symbol: φ not phi, θ not theta, ρ not rho)"
     
     documentation:
       required: true
@@ -383,7 +612,7 @@ entry_schema:
           - "Physical interpretation and governing physics"
           - "Governing equations with full definitions (use display equations for main formulas)"
           - "Measurement or derivation methods"
-          - "Typical values and physical ranges (populate validity_domain and constraints fields when applicable)"
+          - "Typical values and physical ranges"
           - "Coordinate system definitions and sign conventions (if applicable)"
           - "Relationships to other quantities with explicit equations"
         yaml_formatting:
@@ -407,7 +636,7 @@ entry_schema:
         equations:
           inline_math: "Use $...$ for inline equations (e.g., $T_e$, $\\nabla p$, $\\mathbf{B}$)"
           display_math: "Use $$...$$ on separate lines for display equations"
-          symbols: "Use LaTeX commands ($\\phi$, $\\theta$, $\\rho$), not Unicode characters"
+          symbols: "Use LaTeX for all math symbols, never Unicode Greek: $\\phi$ for the toroidal angle, $\\theta$, $\\rho$, and coordinate frames as $(R, \\phi, Z)$. Capital $\\Phi$ is reserved for flux, potential, or phase quantities and must never denote the toroidal angle."
           vectors: "Use $\\mathbf{B}$, $\\mathbf{r}$, $\\mathbf{J}$ notation for vectors"
           requirements:
             - "All variables in equations must be defined either before first use, in a 'where' clause immediately after the equation, or inline when introduced"
@@ -486,24 +715,6 @@ entry_schema:
       guidance:
         critical_rule: "Must be a valid PhysicsDomain enum value."
         validation: "Validated against grammar/vocabularies/physics_domains.yml."
-    tags:
-      required: false
-      type: array
-      items: string
-      description: "Secondary classification tags from controlled vocabulary for cross-cutting classification."
-      validation_file: "vocabularies/tags.yml"
-      guidance:
-        validation: "All tags validated against secondary_tags in grammar/vocabularies/tags.yml."
-        common_mistake: "Do not put physics domain values in tags. Use the physics_domain field instead."
-        examples:
-          correct:
-            - ["measured", "calibrated", "local-measurement"]
-            - ["spatial-profile", "reconstructed"]
-            - ["global-quantity", "time-dependent"]
-          wrong:
-            - ["magnetics", "measured"]
-            - ["equilibrium", "spatial-profile"]
-    
     links:
       required: false
       type: array
@@ -610,45 +821,6 @@ entry_schema:
           validation:
             - "All dependencies must exist in catalog or be created in same batch"
     
-    validity_domain:
-      required: false
-      type: string
-      default: ""
-      description: "Controlled vocabulary region of validity"
-      examples:
-        - "core_plasma"
-        - "edge_plasma"
-        - "vacuum"
-        - "whole_plasma"
-      guidance:
-        purpose: "Specify the spatial or operational domain where this quantity is physically valid or typically measured"
-        use_when: "The quantity is inherently limited to a specific plasma region or operational regime"
-        examples:
-          - "core_plasma: for quantities only meaningful in confined plasma region"
-          - "edge_plasma: for edge/pedestal region specific quantities"
-          - "vacuum: for quantities in vacuum regions only"
-          - "whole_plasma: for quantities spanning entire plasma volume"
-    
-    constraints:
-      required: false
-      type: array
-      items: string
-      default: []
-      description: "Physical or mathematical constraints that must be satisfied (e.g. 'T_e > 0', 'kappa >= 1')"
-      examples:
-        - ["T_e > 0"]
-        - ["n_e >= 0", "n_e < 1e22 m^-3"]
-        - ["kappa >= 1"]
-      guidance:
-        purpose: "Specify hard physical bounds and mathematical constraints on the quantity"
-        use_for:
-          - "Physical bounds: non-negativity, fundamental limits from physics"
-          - "Mathematical constraints: relationships that must hold (e.g., 'elongation >= 1', '0 <= poloidal_beta <= 1')"
-          - "Dimensional constraints: valid ranges for dimensionless quantities"
-        format: "Use clear mathematical notation with units where applicable"
-        note: "Constraints represent hard limits, not typical operational ranges. For typical values, document in a dedicated field or structured metadata (future enhancement)"
-        validation: "Constraints are validated for format but not evaluated for physical correctness"
-    
     deprecates:
       required: false
       type: string
@@ -680,28 +852,28 @@ entry_schema:
       required_fields: [name, description, documentation, unit]
       field_overrides:
         unit: "Required (use '1' for dimensionless)"
-      optional_fields: [provenance, status, validity_domain, constraints, deprecates, superseded_by, links, cocos_transformation_type]
+      optional_fields: [provenance, status, deprecates, superseded_by, links, cocos_transformation_type]
       description: "Physical quantities with single value at each point"
     
     vector:
       required_fields: [name, description, documentation, unit]
       field_overrides:
         unit: "Required (use '1' for dimensionless)"
-      optional_fields: [provenance, status, validity_domain, constraints, deprecates, superseded_by, links, cocos_transformation_type]
+      optional_fields: [provenance, status, deprecates, superseded_by, links, cocos_transformation_type]
       description: "Vector field quantities with components"
 
     tensor:
       required_fields: [name, description, documentation, unit]
       field_overrides:
         unit: "Required (use '1' for dimensionless)"
-      optional_fields: [provenance, status, validity_domain, constraints, deprecates, superseded_by, links, cocos_transformation_type]
+      optional_fields: [provenance, status, deprecates, superseded_by, links, cocos_transformation_type]
       description: "Rank-2+ tensor quantities (metric tensor, stress tensor, conductivity tensor)"
 
     complex:
       required_fields: [name, description, documentation, unit]
       field_overrides:
         unit: "Required (use '1' for dimensionless)"
-      optional_fields: [provenance, status, validity_domain, constraints, deprecates, superseded_by, links, cocos_transformation_type]
+      optional_fields: [provenance, status, deprecates, superseded_by, links, cocos_transformation_type]
       description: "Complex-valued quantities (real + imaginary parts, or magnitude + phase)"
     
     metadata:
@@ -709,6 +881,6 @@ entry_schema:
       field_overrides:
         unit: "Optional (default empty string, omitted from serialization)"
       forbidden_fields: [provenance]
-      optional_fields: [status, validity_domain, constraints, deprecates, superseded_by, links, cocos_transformation_type]
+      optional_fields: [status, deprecates, superseded_by, links, cocos_transformation_type]
       description: "Definitional entries (boundaries, regions, concepts)"
       note: "Metadata entries are definitional anchors, not measurable/derived quantities"

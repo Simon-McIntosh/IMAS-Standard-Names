@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-standard-names">
+  <meta name="reckon-type" content="doc">
+  <meta name="plan-slug" content="catalog-naming-followups-s2-landed">
+  <meta name="plan-title" content="§2 landed — axis naming: dead aliases removed + generation catch-and-promote">
+  <meta name="plan-summary" content="Decision A (words-canonical, one way) implemented at the generate level: ISN alias deletion + imas-codex compose-time catch-and-promote; parser stays strict">
+  <meta name="plan-informs" content="catalog-naming-followups">
+  <title>§2 landed — axis naming | imas-standard-names</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="s1">§2 — Cylindrical axis-token naming <span class="badge badge-shipped">✓ landed 2026-07-05</span></h2>
+    <p>Evergreen: <a href="/imas-standard-names/catalog-naming-followups.html">catalog-naming-followups</a> §2
+    (decision <code>cylindrical-axis-naming = words-canonical</code>, followup <code>f-cnf-005</code>). Decision A:
+    physical directions keep canonical WORDS (radial/toroidal/vertical); arbitrary local axes use x/y/z; one canonical
+    form, no dual path.</p>
+
+    <p>The catalog was already one way (compose emits canonical; the ISN parser accepts only canonical tokens; the DD
+    funnel normalises r/phi/z at ingest). This section removed the misleading residue and hardened the generator so
+    NEW names benefit — not just an edit of existing names.</p>
+
+    <div style="overflow-x:auto"><table>
+      <thead><tr><th>Piece</th><th>What landed</th><th>Commit</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Dead aliases removed (ISN)</strong></td>
+            <td>Emptied the <code>poloidal:[pol]</code>, <code>radial:[r]</code>, <code>toroidal:[phi,tor]</code> alias
+            lists in <code>coordinate_axes.yml</code> — the parser loads axis KEYS only
+            (<code>frozenset(axes_reg.axes)</code>), so the alias lists were dead metadata implying a second, unsupported
+            spelling. Zero-consumer verified (parser, codegen, vocab_loaders, dataset publish, tests). Codegen regen was
+            a byte-identical no-op. The loader test was updated to assert every axis has empty aliases.</td>
+            <td><code>f57f2f0</code></td></tr>
+        <tr><td><strong>Generation catch-and-promote (imas-codex)</strong></td>
+            <td>The sanctioned C-funnel: in <code>GrammarSegments._validate_projection_axis</code> a stray DD-leaf
+            short-form is coerced to its canonical word BEFORE the registered-token check —
+            <code>r→radial</code>, <code>phi/tor→toroidal</code>, <code>pol→poloidal</code> — mirroring the existing
+            projection_shape coercion ("coerce rather than bounce"). <code>z</code> is deliberately excluded (a valid
+            canonical Cartesian axis; Cartesian-vs-cylindrical frame disambiguation is the DD-ingest boundary's job,
+            <code>families._classify_suffix</code>). Compose-time only.</td>
+            <td><code>de264aa1</code></td></tr>
+      </tbody>
+    </table></div>
+
+    <h3>One-way invariant preserved (no dual path)</h3>
+    <p>The catch-and-promote is a generation-time error-catcher, NOT a parser second spelling. The ISN parser stays
+    strict: a stored name using a short form (e.g. <code>r_coordinate_of_flux_loop</code>) is still rejected outright
+    (<code>parse_standard_name</code> raises) — test-proven in <code>test_axis_catch_and_promote.py</code>. So the
+    round-trip invariant holds and <code>r_…</code> can never enter the catalog.</p>
+
+    <h3>Verification</h3>
+    <ul>
+      <li>ISN full suite: 1634 passed, 28 skipped, 84 xfailed, exit 0 (<code>f57f2f0</code>).</li>
+      <li>Catcher test <code>tests/standard_names/test_axis_catch_and_promote.py</code>: 6 passed — short-forms promoted
+      (r/phi/tor/pol), <code>z</code> not coerced, and the strict parser still rejects the short-form name.</li>
+    </ul>
+
+    <h3>What's next</h3>
+    <p>Independent of §2. The remaining plan work is graph-side: §6 (dd-path dedup), §7 (open doc edits +
+    LaTeX-description generate-level fix), §4 (orientation-vector family completion).</p>
+  </main>
+</body>
+</html>

@@ -5,6 +5,7 @@ vocabulary/metadata (grammar_models).
 """
 
 from .model import (
+    NonCanonicalNameError,
     StandardName,
     compose_standard_name,
     parse_standard_name,
@@ -12,16 +13,21 @@ from .model import (
 from .model_types import (
     BinaryOperator,
     Component,
+    Coordinate,
     GenericPhysicalBase,
     GeometricBase,
+    GeometryRepresentation,
     Object,
     Position,
     Process,
+    SectionPlane,
     Subject,
     Transformation,
 )
+from .operator_semantics import get_operator_semantics
 from .support import (
     TOKEN_PATTERN,
+    UnknownBaseTokenError,
     coerce_enum,
     enum_values,
     normalize_standard_name,
@@ -29,10 +35,6 @@ from .support import (
     value_of,
 )
 
-# ---------------------------------------------------------------------------
-# vNext API (plan 38 W2b). Import after rc20 shims so the deprecation
-# wrapper in parser.py can discover ``parse_standard_name``.
-# ---------------------------------------------------------------------------
 from .ir import StandardNameIR
 from .parser import (
     Diagnostic,
@@ -44,6 +46,12 @@ from .parser import (
     validate_round_trip,
 )
 from .render import RenderError, compose
+from .terms import (
+    StandardTerm,
+    fetch_standard_terms,
+    search_standard_terms,
+    standard_terms,
+)
 
 try:
     from .context import get_grammar_context
@@ -60,12 +68,15 @@ compose_name = compose_standard_name
 parse_name = parse_standard_name
 
 __all__ = [
+    "NonCanonicalNameError",
     "TOKEN_PATTERN",
+    "UnknownBaseTokenError",
     "compose_standard_name",
     "parse_standard_name",
     "compose_name",
     "parse_name",
     "get_grammar_context",
+    "get_operator_semantics",
     "normalize_standard_name",
     "validate_forbidden_patterns",
     "value_of",
@@ -73,17 +84,21 @@ __all__ = [
     "coerce_enum",
     "BinaryOperator",
     "Component",
+    "Coordinate",
     "GenericPhysicalBase",
     "GeometricBase",
+    "GeometryRepresentation",
     "Object",
     "PhysicsDomain",
     "Position",
     "Process",
+    "SectionPlane",
     "Subject",
     "StandardName",
+    "StandardTerm",
     "TAG_TO_PHYSICS_DOMAIN",
     "Transformation",
-    # vNext API (plan 38 W2b)
+    # Grammar API
     "Diagnostic",
     "ParseError",
     "ParseResult",
@@ -94,4 +109,7 @@ __all__ = [
     "load_default_vocabularies",
     "parse",
     "validate_round_trip",
+    "fetch_standard_terms",
+    "search_standard_terms",
+    "standard_terms",
 ]

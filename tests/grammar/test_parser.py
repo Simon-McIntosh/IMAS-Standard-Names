@@ -1,10 +1,10 @@
-"""Unit tests for the grammar vNext parser (plan 38 W2b).
+"""Unit tests for the grammar parser (plan 38 W2b).
 
 These tests exercise the staged parser against fixture-injected closed
 vocabularies (physical_bases and locus_registry stubs will be populated
 by W2a; the parser itself does not depend on YAML contents).
 
-For every canonical vNext name the test asserts ``compose(parse(name).ir)
+For every canonical grammar name the test asserts ``compose(parse(name).ir)
 == name`` (round-trip). For non-canonical and error cases, the test
 asserts specific diagnostic / exception behaviour.
 """
@@ -31,7 +31,7 @@ from imas_standard_names.grammar.parser import (
 from imas_standard_names.grammar.render import compose
 
 # ---------------------------------------------------------------------------
-# Fixture: a minimal vNext vocabulary bundle
+# Fixture: a minimal grammar vocabulary bundle
 # ---------------------------------------------------------------------------
 
 
@@ -177,7 +177,7 @@ def test_parse_simple_locus(vocabs: Vocabularies):
 
 def test_parse_projection_plus_qualifier_plus_locus(vocabs: Vocabularies):
     """§A2 row: radial component, electron qualifier, at plasma_boundary."""
-    name = "radial_component_of_electron_pressure_at_plasma_boundary"
+    name = "radial_electron_pressure_at_plasma_boundary"
     result = parse(name, vocabs=vocabs)
     assert result.ir.projection is not None
     assert result.ir.projection.axis == "radial"
@@ -284,8 +284,7 @@ def test_parse_row25_two_of_disambiguation(vocabs: Vocabularies):
     """§A12 row 25: two ``_of_`` in one name (component vs locus).
 
     The postfix-component form ``<base>_<axis>_component_of_<locus>`` is
-    the vNext canonical per the plan; the parser resolves it without
-    ambiguity:
+    non-canonical; the parser resolves it without ambiguity:
 
       - trailing ``_of_ferritic_element_centroid`` -> locus (registry hit)
       - remaining ``_toroidal_component`` is a postfix projection... but
@@ -328,7 +327,7 @@ def test_parse_unknown_axis_falls_through_to_base_error(vocabs: Vocabularies):
 
 
 def test_parse_random_invented_base_rejected(vocabs: Vocabularies):
-    """rc20 would open-fallback this; vNext must reject."""
+    """rc20 would open-fallback this; the parser must reject."""
     with pytest.raises(ParseError):
         parse("quokka_density", vocabs=vocabs)
 
@@ -383,8 +382,8 @@ def test_parse_qualifier_plus_base(vocabs: Vocabularies):
 
 
 def test_parse_coordinate_projection_on_carrier(vocabs: Vocabularies):
-    """``vertical_coordinate_of_position_of_flux_loop`` (§A12 row 23 form)."""
-    name = "vertical_coordinate_of_position_of_flux_loop"
+    """``vertical_position_of_flux_loop`` (§A12 row 23 short form)."""
+    name = "vertical_position_of_flux_loop"
     result = parse(name, vocabs=vocabs)
     assert result.ir.projection is not None
     assert result.ir.projection.shape is ProjectionShape.COORDINATE

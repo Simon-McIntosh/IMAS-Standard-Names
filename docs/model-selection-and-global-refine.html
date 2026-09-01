@@ -1,0 +1,465 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"   content="imas-standard-names">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="model-selection-and-global-refine">
+  <meta name="plan-title" content="Model Selection and Global Refine">
+  <meta name="plan-summary" content="Benchmark the GPT-5.6 family across every pipeline role, then build a cautious global-refine capability for catalog-wide quality campaigns">
+  <meta name="plan-status" content="shipped">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort" content="L">
+  <meta name="plan-tier" content="opus">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-depends-on" content="">
+  <title>Model Selection and Global Refine | imas-standard-names</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-07-21">
+<meta name="plan-version" content="24">
+<meta name="plan-blocks" content="catalog-expert-review-remediation">
+<meta name="plan-impl" content="1.0">
+</head>
+<body>
+<main class="plan-doc">
+  <h2 id="s1">§1 — Outcome and motivation</h2>
+  <p>Two coupled deliverables. First, a <strong>complete role-by-role benchmark of the GPT-5.6 family</strong> (Sol, Terra, Luna) against the models currently holding each pipeline seat, so model selection is an evidence-based decision rather than a compose-only extrapolation. Second, a <strong>global-refine capability</strong>: a supported, budgeted way to run bounded quality campaigns over the accepted catalog (the immediate driver is the documentation-simplification backlog — ~1,250 accepted entries predating the strict-normative policy — plus the 129 accepted names carrying audit findings from the first full validation sweep). The two are sequenced deliberately: the refine campaign is the largest planned LLM spend, so the model seats it uses should be settled first — a cheaper, quality-equivalent refine model directly reduces the campaign's cost.</p>
+  <p>Guardrails locked by the lead: <em>no naive full regeneration</em> (cost-prohibitive and provenance-destructive); campaigns must ride the same generate→review→score pipeline as normal work (no privileged accept path); root causes are fixed in prompts/validators before any bulk pass so regeneration converges rather than churns.</p>
+
+  <figure>
+    <svg viewBox="0 0 880 150" role="img" aria-label="Plan pipeline" style="width:100%;max-width:880px;font-family:system-ui,sans-serif">
+      <defs><marker id="a" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#555"/></marker></defs>
+      <g fill="#fff" stroke="#555" stroke-width="1">
+        <rect x="4" y="40" width="196" height="66" rx="4"/>
+        <rect x="240" y="40" width="180" height="66" rx="4"/>
+        <rect x="460" y="40" width="180" height="66" rx="4"/>
+        <rect x="680" y="40" width="196" height="66" rx="4"/>
+      </g>
+      <g fill="#202124" font-size="13">
+        <text x="102" y="66" text-anchor="middle" font-weight="600">§2 Role benchmarks</text>
+        <text x="102" y="86" text-anchor="middle">refine · review · docs · classify</text>
+        <text x="330" y="66" text-anchor="middle" font-weight="600">§3 Seat decisions</text>
+        <text x="330" y="86" text-anchor="middle">lead locks per-role models</text>
+        <text x="550" y="66" text-anchor="middle" font-weight="600">§4 Global refine</text>
+        <text x="550" y="86" text-anchor="middle">campaign engine + gates</text>
+        <text x="778" y="66" text-anchor="middle" font-weight="600">§5 Docs campaign</text>
+        <text x="778" y="86" text-anchor="middle">pilot → batches → verify</text>
+      </g>
+      <g stroke="#555" stroke-width="1.2" marker-end="url(#a)"><line x1="200" y1="73" x2="235" y2="73"/><line x1="420" y1="73" x2="455" y2="73"/><line x1="640" y1="73" x2="675" y2="73"/></g>
+      <text x="4" y="136" font-size="12" fill="#555">Sequencing is load-bearing: seat decisions before the campaign; prompt/validator root-fixes before any bulk pass; pilot before scale.</text>
+    </svg>
+    <figcaption>Benchmarks feed seat decisions; the campaign engine runs only with settled seats and piloted convergence.</figcaption>
+  </figure>
+
+  <section id="s2" class="section-landed">
+  <header>
+    <span class="badge badge-shipped">✓ landed 2026-07-17</span>
+    <h2>§2 — Full GPT-5.6 role benchmarks</h2>
+  </header>
+  <p class="landed-summary">
+    Six seats measured for ≈$36 via <code>sn bench --role</code> (harness now permanent: refine / breaker-names / breaker-docs / docs / classifier + compose re-run with the local DSv4 route).
+    Refine: incumbent gpt-5.5 best (0.874 resolution, 0.147 collateral). Names breaker: Luna more independent (ρ 0.252 vs 0.319) with better flips (0.714 vs 0.545) at ¼ cost. Docs breaker: gpt-5.5 best on both axes. Docs generation: Luna zero banned prose vs 15%, rubric parity, 23% cheaper; Sol not worth 2.6×. Compose: free local DSv4 ties Luna at n=17. Classifier: Luna 77.5%, incumbent baseline running.
+    Two bench-fidelity root-fixes en route (grammar-vocab context <code>0a05c173</code>, scored-examples/kind <code>0baa04ee</code>) plus the kind-enum unification (<code>6ef0ab2c</code>).
+    Measured tables: imas-codex <code>docs/sn-role-benchmarks.md</code>. Full record: <a href="archive/model-selection-and-global-refine-s2-s3-landed.html">§2–§3 landed</a>.
+  </p>
+  </section>
+
+  <section id="s3" class="section-landed">
+  <header>
+    <span class="badge badge-shipped">✓ landed 2026-07-17</span>
+    <h2>§3 — Seat decisions</h2>
+  </header>
+  <p class="landed-summary">
+    Lead locked the batch (<code>seat-switches</code> decision): SWITCH docs generation and names breaker to gpt-5.6-luna; HOLD refine + docs breaker on gpt-5.5, compose on local deepseek-v4-flash, and classifier tier-1 on gpt-5.4 (rebaseline: 82.3% vs Luna 79.4% vs haiku 75.1% on the 209-path gold set). Applied in one commit (imas-codex <code>ce0144e1</code>) with evidence recorded in the section comments; stale sn-docs gpt-5.5 fallback retired.
+    Campaign cost inputs: docs-gen ≈$0.09/doc (Luna, 0% banned prose), refine ≈$0.08 (gpt-5.5). Full record: <a href="archive/model-selection-and-global-refine-s2-s3-landed.html">§2–§3 landed</a>.
+  </p>
+  </section>
+
+  <section id="s4" class="section-landed">
+  <header>
+    <span class="badge badge-shipped">✓ landed 2026-07-17</span>
+    <h2>§4 — Global-refine capability</h2>
+  </header>
+  <p class="landed-summary">
+    Campaign engine shipped as an <code>sn run --campaign</code> scope (imas-codex <code>a1c8ca1e</code>, 44 tests):
+    defect-predicate selector, reviewed dry-run manifest (live: 2,332 names → 24 batches; typical-values 1,263, estimator recipes 780, padding 676, audit-quarantined 179),
+    budgeted resumable batches, convergence gate (≥90% acceptance, zero prose reintroduction, zero name drift), DocsRevision + StandardNameChange provenance.
+    Root-fix (a): derived-parent parse gate rescoped + parent/child context injected into review prompts (<code>93276ebf</code>) — 52/52 parse quarantines clear read-only, 4 genuine unit defects retained.
+    Root-fix (b): all 3 parse-error names resolved — renames accepted at 0.91 / 0.96 (the latter via <code>sn rescore</code>), and the vocab-gap probe name recomposed into two accepted per-array siblings after a lead-authorized provenance-split repair.
+    Root-fix (c): audit-quarantined names selectable via the <code>quarantined</code> predicate.
+    Revalidation surface repaired end-to-end (<code>68f8fa65</code>, <code>3a562921</code>, <code>363a6ee1</code>, <code>b68b1e52</code>: sweep covers quarantined names, runs before scope routing, drains without composing, no legacy source scoping).
+    Full record: <a href="archive/model-selection-and-global-refine-s4-landed.html">§4 landed</a>.
+    <strong>Pending:</strong> lead re-runs <code>imas-codex sn run --source dd --revalidate --only validate</code> (expect derived quarantines 62 → 4) and approves the docs-campaign manifest.
+  </p>
+  </section>
+
+  <section id="s5" class="section-landed">
+  <header>
+    <span class="badge badge-shipped">✓ rotations running clean 2026-07-20 — LLM-adjudicated gate, rotation 1 full 199/200 accept, no false-positive halt</span>
+    <h2>§5 — Documentation-simplification campaign (pilot → scale)</h2>
+  </header>
+  <p class="landed-summary">
+    Pilot converged 2026-07-17 (96% acceptance, zero prose reintroduction, zero drift; <a href="archive/model-selection-and-global-refine-s5-pilot-landed.html">§5 pilot landed</a> · <a href="docs-campaign-before-after.html">before/after evidence</a>), then forensics exposed two launch gates — both now fixed and validated live (<a href="archive/model-selection-and-global-refine-s5-launch-gates-landed.html">§5 launch gates landed</a>).
+    <strong>Gate (a)</strong> refine claim-race livelock (53% of pilot spend): per-node <code>claim_seq</code> + settle re-read in both winner verifiers, replica cap ceil(scope/2) on scoped drains, paid-call-without-persist tripwire (imas-codex <code>af69e3e2</code>).
+    <strong>Gate (b)</strong> stale audit stamps: every campaign batch now re-runs the deterministic ISN audit through an id-scoped LLM-free drain (<code>fa503f83</code>); the 25 pilot names re-stamped — <code>perturbed_particle_energy</code> correctly re-quarantined.
+    <strong>All 4 unit-defect quarantines resolved at root:</strong> 3 parents had unit '1' mis-inherited from <code>normalized_*</code> children (seeder exclusion <code>e73331a9</code> + scoped repair <code>db261bca</code>/<code>fab5af85</code> + docs re-aligned via <code>sn edit</code>, all accepted); the 4th was an audit false positive on the canonical transport-velocity form (exemption <code>b4e38135</code>). All four now <code>valid</code>.
+    <strong>Smoke (fresh stratified 25, run <code>9aa921c3</code>): 24/25 accepted, 0 reintroduction, 0 drift, refine waste 0.0%, re-audit 25 cleared/0 re-quarantined, $0.18/name</strong> — confirms the ≈$300–380 basis for the 1,540-name docs-fixable spec.
+  </p>
+  <p><strong>Gate hardened to LLM adjudication (2026-07-20).</strong> Two earlier rotation attempts halted on the convergence
+  gate — first a reviewer-quorum outage (<a href="archive/model-selection-and-global-refine-s5-rotation1-halted.html">rotation 1 halted</a>;
+  resolved by the resilient <code>claude-sonnet-5</code> + <code>grok-4.5</code> blind pair + AIMD governor, see
+  <a href="sn-model-selection-2026-07.html">SN model selection + reviewer-resilience</a>), then a prose-predicate false positive
+  (<a href="archive/model-selection-and-global-refine-s5-rotation1-landed.html">rotation 1 re-run</a>: the <code>estimator_recipe</code>
+  pattern over-flagged legitimate "is derived from [related quantity]" provenance). Rather than chase regex arms, the banned-prose
+  convergence gate is now <strong>LLM-adjudicated</strong> (imas-codex <code>1c2e166a</code> + <code>fbd6a51b</code>): a grep flags a
+  candidate, a quorum-independent adjudicator (<code>gpt-5.6-luna</code>) rules each flag legitimate-or-not, so definitional prose no
+  longer halts the run. Seats held; lead accepts ≈$0.29/name (premium blind pair).</p>
+  <p><strong>Rotations running clean — see the <a href="archive/model-selection-and-global-refine-s5-rotations-landed.html">rotation checkpoint ledger</a>.</strong>
+  <strong>Docs campaign COMPLETE — docs-axis defects fully drained (1,047 → 0)</strong> across five clean rotations, no
+  false-positive halt — R1 (200: 199, $0.292, 1,047→889), R2 (450: 446, $0.274, 889→502), R3 (450: 441, $0.336, 502→115),
+  R4 (91: 87, $0.35, 116→59), R5 (9: 9, docs-fixable 9→0). Across all: gate adjudicated every grep flag as legitimate (0 genuine
+  reintroductions), 0 name drift, 0 outages, refine waste &lt;5%, quorum intact; every checkpoint axis PASS. A retry-classification
+  gap on upstream 500s was fixed en route (<code>cbd9cb6f</code>). <strong>The genuine residue is 6 US-spelling renames</strong>
+  (<code>*_strain_gauge</code>→<code>*_strain_gage</code>), routed through the normal compose→review pipeline (never direct-accepted);
+  the other 52 flags were an artifact of an arbitrary 70-char length cap now removed as an anti-pattern (imas-codex
+  <code>7e583184</code>) — a name is as short as possible while retaining full meaning, and no shorter, so length is not a defect.
+  Full ledger: <a href="archive/model-selection-and-global-refine-s5-rotations-landed.html">rotation checkpoint ledger</a>.
+  <strong>Expert-review reply logged (2026-07-21):</strong> the campaign change log now lives in
+  <a href="expert-review-reply.html">expert-review-reply</a> §5 (every change carries a SHA or graph-event reference) and
+  review comment 1 is closed at scale; plan status → shipped. Remaining catalog work is release close-out (ISNC export + RC),
+  tracked in <a href="catalog-expert-review-remediation.html">catalog-expert-review-remediation</a>.</p>
+  <p><strong>Follow-on policy plan:</strong> the refine seat annotates a unit on nearly every LaTeX symbol; units are recoverable
+  (structured <code>unit</code> field / linked names), so the non-redundant target is symbol <em>identity</em>, not units.
+  Scoped + priced in <a href="sn-symbol-definition-policy.html">sn-symbol-definition-policy</a> (prompt + <code>latex_def_check</code>
+  fix; ~$75–120 marginal cleanup, or $0 if absorbed by the running campaign). Not a halt condition for the current rotations.</p>
+  </section>
+
+  <h2 id="s6">§6 — Risks</h2>
+  <ul>
+    <li><strong>Refine churn:</strong> a below-par refine model rewrites correct physics. Mitigated by the convergence gate + pilot-first + review quorum unchanged.</li>
+    <li><strong>Benchmark overfit:</strong> role benches on historical fixtures can flatter a model that memorised similar text; keep held-out samples and judge with the production rubric, not the training critique.</li>
+    <li><strong>Cost surprise:</strong> 5.6 reasoning-token burn made list price misleading once already; every seat decision uses measured per-task cost.</li>
+    <li><strong>Quarantine interactions:</strong> review pools skip quarantined names — campaign batches must re-validate after refinement or accepted fixes stay invisible.</li>
+  </ul>
+
+  <section data-reckon="decisions" id="decisions" class="r-decisions">
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="refine-surface" data-choice="extend-sn-run" data-by="user" data-when="2026-07-17 07:12">
+    <p class="r-dec-q">Should the global-refine capability be a new top-level CLI command or an extension of the existing sn run campaign scopes?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="extend-sn-run">Extend sn run (--campaign selector riding --families/DocsRevision machinery)</button>
+      <button class="r-opt" data-value="new-cli">New dedicated command (e.g. sn refine) wrapping the same pools</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+<div class="r-dec" data-key="derived-parent-parse-gate" data-choice="I lean towards the exempt, but would prefer a robust pipeline / prompt edit that ingects the parent / child relasionship so that review models can take informed decisions. missed acceptance gates are an important signal that should be considered and corrected and not simply papered over" data-by="user" data-when="2026-07-17 07:14">
+    <p class="r-dec-q">Should the full-name parse gate apply to origin=&#x27;derived&#x27; family parents (currently quarantines 48 accepted grammar peels as partial names)?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="exempt-derived">Exempt derived parents from the full-name parse (keep their structural admission gate)</button>
+      <button class="r-opt" data-value="keep-and-triage">Keep the gate; triage the 48 individually</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+<div class="r-dec" data-key="seat-switches" data-choice="luna-docs-and-names-breaker" data-by="user" data-when="2026-07-17T19:32:06+00:00">
+    <p class="r-dec-q">Which pipeline seats move to a GPT-5.6 model? (Locked after §2 evidence lands — one batch decision across refine / name-breaker / docs-breaker / docs-gen / classifier.)</p>
+    <p class="r-dec-rat">One batch decision from the six 2026-07-17 role benches ($36 of $40): SWITCH docs generation sonnet-4.6→gpt-5.6-luna (rubric parity 0.813/0.806, zero banned prose vs 15%, 23% cheaper) and names breaker gpt-5.5→luna (independence rho 0.252 vs 0.319, flip quality 0.714 vs 0.545, quarter cost); HOLD refine gpt-5.5 (best resolution 0.874, lowest collateral), docs breaker gpt-5.5 (most independent AND best flips on the docs axis), compose deepseek-v4-flash local (free; luna gap 1.2pts = tie at n=17), classifier tier-1 gpt-5.4 (rebaseline 82.3% vs luna 79.4% vs haiku 75.1% on the 209-path gold set). Applied in imas-codex ce0144e1; stale sn-docs gpt-5.5 fallback retired.</p>
+    </div>
+</section>
+
+  <section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-role-benchmarks" data-status="resolved" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-07-17" data-recommends-skill="/reckon-ship model-selection-and-global-refine §2" data-resolved-at="2026-07-17T09:47:05+00:00" data-resolved-by="reckon-ship">
+    <h4 class="r-fu-title">Run the full GPT-5.6 role benchmarks</h4>
+    <div class="r-fu-body">Priority work: extend sn bench with per-role modes (refine-from-critique, breaker independence, docs generation, classifier gold set) and measure Luna/Terra (+Sol for docs only) against each incumbent with production prompts and reasoning-effort settings. ≤ $40 total.</div>
+    <pre class="r-fu-prompt">Project: imas-standard-names
+Plan:    model-selection-and-global-refine (http://localhost:8765/imas-standard-names/model-selection-and-global-refine.html)
+Section: §2
+Tier:    opus
+
+Context
+  Compose-only benchmarking (2026-07-17, imas-codex 80c1935) showed Luna quality-tied at 41% lower cost and Sol overpriced for structured tasks. Each remaining pipeline seat needs its own measured row before any switch.
+
+State to read  (CODE / FILES / DATA)
+  imas-codex: imas_codex/standard_names/benchmark*.py, sn bench CLI, pyproject [sn-refine]/[sn-review]/[sn-docs] model config, StandardNameReview records on the live graph (read-only) for the refine-from-critique corpus, definitions/physics/domain_gold_set.json.
+
+Scope locks / constraints  (non-decision)
+  Extend sn bench (no one-off scripts); model-id-based identifiers; production prompts + per-seat reasoning-effort; held-out samples for judging; budget ceiling $40 across all roles; no pipeline seat/config switches in this followup — evidence only. Live graph reads OK, no writes.
+
+Done-when
+  1. per-role benchmark modes committed with tests; measured table (quality + cost) per §2 row in the benchmark reference
+  2. switch/hold/needs-more-data recommendation per seat recorded in the plan
+  3. followup written into plan + this one resolved</pre>
+    <p class="r-fu-outcome">Harness landed (imas-codex 23e6f99d, d4994f97) + refine-context fidelity fix 0a05c173 (bench was starving the refine prompt of the closed-vocabulary listing production injects). Execution NOT complete: the post-fix refine run saved an EMPTY report (n=0 all models, sn_rolebench_refine_20260717T090827.json) and the remaining 4 roles are unrun. Superseded by f-role-benchmarks-2 which carries the diagnosis brief.</p>
+    </article>
+<article class="r-fu" data-id="f-refine-design" data-status="resolved" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-07-17" data-recommends-skill="/reckon-edit model-selection-and-global-refine" data-resolved-at="2026-07-17T09:00:17+00:00" data-resolved-by="reckon-ship">
+    <h4 class="r-fu-title">Design review: global-refine selector, gates, and surface decision</h4>
+    <div class="r-fu-body">Bring the §4 design to the lead with the refine-surface and derived-parent-parse-gate decisions; include the reviewed dry-run manifest shape and the convergence-gate thresholds. No implementation before the decisions lock.</div>
+    <pre class="r-fu-prompt">Project: imas-standard-names
+Plan:    model-selection-and-global-refine (http://localhost:8765/imas-standard-names/model-selection-and-global-refine.html)
+Section: §4
+Tier:    opus
+
+Context
+  The docs-simplification backlog (~1,250 entries) plus 129 audit-flagged accepted names need a bounded campaign engine. Guardrails: same pipeline, no naive regeneration, root-fix before bulk, pilot before scale.
+
+State to read  (CODE / FILES / DATA)
+  imas-codex sn run --families / DocsRevision machinery, edits scope, validation sweep results (plan research r-validation-backlog-swept in catalog-expert-review-remediation), review-pool quarantine skip behaviour.
+
+Scope locks / constraints  (non-decision)
+  No accept path bypassing review; docs campaigns never touch name identity; campaign manifest reviewed before execution; batches idempotent + abortable; convergence gate halts on threshold miss.
+
+Done-when
+  1. surface + derived-parent decisions locked by the lead
+  2. selector/gate design recorded with thresholds and manifest shape
+  3. implementation followup queued</pre>
+    <p class="r-fu-outcome">§4 landed — design executed under the locked extend-sn-run decision: campaign engine a1c8ca1e (selector/manifest/batching/convergence gate/provenance, 44 tests), derived-parent gate rescope + review-context injection 93276ebf (52/52 parse quarantines clear read-only, 4 genuine unit defects retained), revalidate sweep fix 68f8fa65; parse-error renames accepted 0.91/0.96. Archive: docs/archive/model-selection-and-global-refine-s4-landed.html</p>
+    </article>
+<article class="r-fu" data-id="f-revalidate-sweep" data-status="resolved" data-tier="haiku" data-written-by="reckon-ship" data-written-at="2026-07-17" data-recommends-skill="" data-resolved-at="2026-07-17T09:47:05+00:00" data-resolved-by="reckon-ship">
+    <h4 class="r-fu-title">Lead: run the curative revalidation sweep (classifier-gated)</h4>
+    <div class="r-fu-body">The fixed gate is live and the --revalidate sweep now covers quarantined names (68f8fa65), but the pooled run is blocked by the session permission classifier. The lead runs one command; 436 quarantined names re-stamp under the current grammar, clearing ~58 derived parents and the freshly renamed pair.</div>
+    <pre class="r-fu-prompt">Run in imas-codex on main (or via ! in a Claude session):
+  imas-codex sn run --source dd --revalidate --only validate
+Then verify: quarantined origin=&#x27;derived&#x27; count should drop 62 -&gt; 4 (residual genuine unit defects: effective_particle_energy, particle_mass, perturbed_particle_energy, effective_thermal_ion_charge_state_energy_velocity_due_to_convection). Record the post-sweep counts in the plan §4 landed summary.</pre>
+    <p class="r-fu-outcome">Partially executed and superseded: first run exposed two more surface bugs (sweep dead code below pool routing — fixed 3a562921; pools have no validate worker — --only validate now routes to a dedicated LLM-free drain, 363a6ee1; legacy IMASNode source-scoping excluded 330/436 including all 62 derived parents — dropped in b68b1e52). Two interim runs re-confirmed 106 genuine quarantines idempotently. Final re-run still pending — superseded by f-revalidate-rerun.</p>
+    </article>
+<article class="r-fu" data-id="f-prose-policy-module" data-status="resolved" data-tier="sonnet" data-written-by="reckon-ship" data-written-at="2026-07-17" data-recommends-skill="" data-resolved-at="2026-07-17T20:35:15+00:00" data-resolved-by="reckon-ship">
+    <h4 class="r-fu-title">Relocate banned-prose vocabulary out of benchmark_roles.py</h4>
+    <div class="r-fu-body">campaign.py imports BANNED_PROSE_PATTERNS/banned_prose_findings from benchmark_roles.py — a benchmark module owns production selection vocab. Move to a neutral prose_policy module; both consumers import it.</div>
+    <pre class="r-fu-prompt">Project: imas-standard-names / code: imas-codex
+Section: §4 follow-on (code hygiene)
+Tier: sonnet
+
+Context
+  The campaign selector and the docs role benchmark share the banned-prose vocabulary, currently owned by imas_codex/standard_names/benchmark_roles.py. Production selection logic must not depend on a benchmark module.
+
+Work
+  Create imas_codex/standard_names/prose_policy.py holding BANNED_PROSE_PATTERNS + banned_prose_findings; benchmark_roles.py and campaign.py import from it (re-export from benchmark_roles for back-compat if anything else imports it). Update tests.
+
+Done-when
+  1. No production module imports vocab from benchmark_roles
+  2. test_campaign.py + test_benchmark_roles.py green
+  3. Committed and pushed to imas-codex main</pre>
+    <p class="r-fu-outcome">Landed — imas-codex a469501d: imas_codex/standard_names/prose_policy.py now owns BANNED_PROSE_PATTERNS + banned_prose_findings; campaign.py and benchmark_roles.py import from it (back-compat re-exports retained in benchmark_roles). test_campaign + test_benchmark_roles 85/85 green.</p>
+    </article>
+<article class="r-fu" data-id="f-role-benchmarks-2" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-17" data-recommends-skill="/reckon-ship model-selection-and-global-refine §2" data-resolved-at="2026-07-17T19:34:06+00:00" data-resolved-by="reckon-ship">
+    <h4 class="r-fu-title">Diagnose the empty refine bench report, then run all five role benches</h4>
+    <div class="r-fu-body">GATES THE DOCS-REFINE CAMPAIGN (expert-review response). The sn bench --role harness is committed but the refine run judges zero cases and saves a hollow report; the other four roles are unrun. Diagnose, make n=0 fail loudly, re-run all five, write docs/sn-role-benchmarks.md with per-seat verdicts.</div>
+    <pre class="r-fu-prompt">Project: imas-standard-names / code: imas-codex (branch main)
+Plan:    model-selection-and-global-refine §2
+Tier:    opus
+
+Context
+  Role-bench harness committed: 23e6f99d (modes) + d4994f97 (corpus keys) + 0a05c173 (refine context now merges build_compose_context — without it the grammar-reference include rendered empty and every candidate invented unregistered tokens). Post-fix refine run STILL produced an empty report: ~/.local/share/imas-codex/benchmarks/sn_rolebench_refine_20260717T090827.json has n=0, cost=0, metrics={} for gpt-5.5/luna/terra despite 20 sample_ids. Suspects: (a) key mismatch between load_refine_corpus output and run_refine_bench after the 0a05c173 seam change; (b) every candidate failing RefinedName validation and being dropped uncounted; (c) judge-stage errors swallowed per-case.
+
+Work
+  1. In imas_codex/standard_names/benchmark_roles.py: find why every model uniformly judged 0 cases; fix; make run_*_bench RAISE (or set report.error) when a model ends with n=0 — an empty report must never render as a clean table. Test the tripwire.
+  2. Run sequentially with log capture + exit sentinels, $40 total ceiling (cost telemetry from OpenRouter response_cost):
+     uv run imas-codex sn bench --role refine   (verify n&gt;0, cost&gt;0 BEFORE proceeding)
+     then --role breaker-names, breaker-docs, docs, classifier
+  3. Write /home/ITER/mcintos/Code/imas-codex/docs/sn-role-benchmarks.md: summary table + per-seat measured tables (quality metrics, cost/item, incumbent marked) + verdict per seat: SWITCH(to X) / HOLD / NEEDS-MORE-DATA. Note the two harness fidelity fixes in a methods section.
+  4. Commit+push (explicit paths; no AI trailers; no plan refs in messages).
+
+Done-when
+  1. five non-empty JSON reports on disk; docs/sn-role-benchmarks.md pushed
+  2. verdicts recorded in the plan (§2 collapse + seat-switches decision context)
+  3. this followup resolved; §3 seat-decision batch queued for the lead</pre>
+    <p class="r-fu-outcome">All six seats measured (~$36): refine HOLD, names-breaker SWITCH luna, docs-breaker HOLD, docs-gen SWITCH luna, compose HOLD DSv4-local (free; tie with luna at n=17), classifier HOLD gpt-5.4 (82.3% vs luna 79.4%). Seat switches applied ce0144e1; decision locked. K3 unavailable launch-day (upstream 429s). Results doc: imas-codex docs/sn-role-benchmarks.md (final compose/classifier rows folding in). Archive: docs/archive/model-selection-and-global-refine-s2-s3-landed.html</p>
+    </article>
+<article class="r-fu" data-id="f-revalidate-rerun" data-status="resolved" data-tier="haiku" data-written-by="reckon-ship" data-written-at="2026-07-17" data-recommends-skill="" data-resolved-at="2026-07-17T20:29:27+00:00" data-resolved-by="reckon-ship">
+    <h4 class="r-fu-title">Lead: re-run the revalidation sweep (now reaches the full backlog)</h4>
+    <div class="r-fu-body">All four revalidation-surface fixes are on imas-codex main (68f8fa65, 3a562921, 363a6ee1, b68b1e52). One command re-stamps ~436 quarantined names under the fixed derived-parent gate; classifier-gated, so the lead runs it.</div>
+    <pre class="r-fu-prompt">Run (or via ! in a Claude session):
+  cd ~/Code/imas-codex &amp;&amp; uv run imas-codex sn run --source dd --revalidate --only validate
+Expect: ~436 cleared; drain re-stamps all; quarantined origin=&#x27;derived&#x27; drops 62 -&gt; 4 (genuine unit defects: effective_particle_energy, particle_mass, perturbed_particle_energy, effective_thermal_ion_charge_state_energy_velocity_due_to_convection). Verify with a quarantined-by-origin count and record post-sweep numbers in the §4 landed archive.</pre>
+    <p class="r-fu-outcome">Sweep executed 2026-07-17 (classifier allowed the LLM-free drain): 436 pending/quarantined re-stamped. Quarantined origin='derived' dropped 62 → 10 — the 4 expected unit defects plus 6 names whose latex_def_check/decomposition_audit findings are genuine (correct quarantines; they are docs-campaign targets, e.g. angle_of_iron_core_segment, ion_current_density). Accepted-stage quarantines now 125 total (109 catalog_edit + 10 derived + 4 pipeline + 2 none); remainder of the 384 re-quarantined are superseded/exhausted terminal-stage residue outside campaign scope. Campaign selection shrank 2,332 → 2,288.</p>
+    </article>
+<article class="r-fu" data-id="f-expert-review-reply-doc" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-17" data-recommends-skill="/reckon-edit catalog-expert-review-remediation" data-resolved-at="2026-07-21T05:25:31+00:00" data-resolved-by="reckon-ship">
+    <h4 class="r-fu-title">Produce the expert-review reply document logging ALL changes</h4>
+    <div class="r-fu-body">Lead mandate (2026-07-17): the expert catalog review needs a reply document that logs every change made in response — the §4/§5 campaign work here, the derived-parent gate rescope, the parse-error triages, the provenance repairs, and the docs-refine campaign results once run. Gated by the §2 bench verdicts → §3 seats → §5 campaign chain; draft structure can start now from the §4 landed archive.</div>
+    <pre class="r-fu-prompt">Project: imas-standard-names
+Plans:   catalog-expert-review-remediation (reply doc home) + model-selection-and-global-refine (change log source)
+Tier:    opus
+
+Context
+  The expert-review reply must enumerate every remediation change with evidence. Sources to fold in: docs/archive/model-selection-and-global-refine-s4-landed.html (campaign engine, gate rescope, parse-error triage, provenance-split repair, revalidation fixes with imas-codex SHAs a1c8ca1e/93276ebf/68f8fa65/3a562921/363a6ee1/b68b1e52 + repair change events), the docs-campaign pilot+batch results once §5 runs, post-sweep quarantine counts, and the existing reply-thread docs in the remediation plan (open item 1 = docs simplification).
+
+Work
+  Author the reply as HTML in docs/ per reckon conventions (graphics where they communicate: before/after quarantine counts, campaign convergence per batch). Cross-link both plans. Close open item 1 of the prior reply thread when the campaign lands.
+
+Done-when
+  1. reply document authored + audit-doc clean + pushed
+  2. every change in the log carries a SHA or graph-event reference
+  3. remediation plan followup resolved; RC release unblocked</pre>
+    <p class="r-fu-outcome">Reply document authored — docs/expert-review-reply.html §5 is now a complete change log of the documentation-simplification campaign (review comment 1 at scale), every change carrying a commit SHA or graph-event reference (root-fixes 4b36befa/93276ebf/68f8fa65+3a562921+363a6ee1+b68b1e52/6ef0ab2c/decomp-audit-retirement e3d20e11→c6191e61→5a08c744/unit-root-fixes e73331a9+db261bca+fab5af85+b4e38135/prose-exemption 6c6ffec8→f1a4fbbc; engine a1c8ca1e/a469501d/af69e3e2/fa503f83/1c2e166a+fbd6a51b/cbe551cc/cbd9cb6f/3fefe5a8; seats ce0144e1). Disposition figure, point-1 cell and §4 open-items updated to close comment 1; both plans cross-linked; rotation ledger + role-benchmark archives linked. audit-doc clean; committed+pushed b42cb670. Docs-axis defect set drained 1,047→0 across 5 rotations (≈$365, 0 prose reintroduction, 0 name drift). Remaining is release close-out (ISNC export + catalog RC) plus 6 US-spelling renames (strain_gauge→strain_gage, via the compose→review pipeline, never direct-accepted); the 52 over-length flags were dropped when the arbitrary 70-char length cap was removed as an anti-pattern (imas-codex 7e583184). Both tracked in catalog-expert-review-remediation (f-final-editorial-export / f-close-out-residuals) — neither is an open review comment.</p>
+    </article>
+<article class="r-fu" data-id="f-refine-kind-hardening" data-status="resolved" data-tier="sonnet" data-written-by="reckon-ship" data-written-at="2026-07-17" data-recommends-skill="" data-resolved-at="2026-07-17T10:16:51+00:00" data-resolved-by="reckon-ship">
+    <h4 class="r-fu-title">Harden RefinedName.kind: enum the schema field, enumerate kinds in the refine prompt</h4>
+    <div class="r-fu-body">Bench diagnosis exposed a latent production fragility: RefinedName.kind is a free string with no schema enum, and the refine prompt never enumerates scalar/vector/metadata — the only in-prompt kind signal is the scored-examples include. If examples ever fail to load, production refine degrades to mass kind-validation failures exactly as the bench did (60/60 dropped).</div>
+    <pre class="r-fu-prompt">Project: imas-standard-names / code: imas-codex (branch main)
+Section: §2 follow-on (production hardening)
+Tier: sonnet
+
+Context
+  See docs/sn-role-benchmarks.md methods section (bench-runner flag, 2026-07-17): RefinedName.kind free string, refine prompt omits kind vocabulary; production conveys kind only via the _compose_scored_examples.md include populated by load_compose_examples.
+
+Work
+  1. Constrain RefinedName.kind to the valid kind literals (scalar/vector/metadata — confirm the authoritative set from the ISN schema) so invalid kinds fail at parse with a clear message.
+  2. Enumerate the valid kinds explicitly in the refine prompt template so the signal does not depend on the examples include.
+  3. Regression test: refine context WITHOUT scored examples still yields schema-valid kind on a fixture case.
+
+Done-when
+  1. enum + prompt change + test committed and pushed
+  2. bench refine mode re-run smoke (3 cases) confirms no regression</pre>
+    <p class="r-fu-outcome">Implemented at source, wider than scoped (lead directive: never rely on examples for format — they are complementary): imas-codex 6ef0ab2c unifies the kind vocabulary on the ISN catalog Kind enum {scalar, vector, tensor, complex, metadata}. LinkML StandardNameKind trimmed to mirror ISN exactly (eigenfunction/spectrum retired — semantic categories, structurally scalar, zero live names); RefinedName.kind + StandardNameCandidate.kind are non-nullable Literals so the JSON schema carries a flat enum and structured output cannot emit an invalid kind; compose + refine prompts enumerate the kinds explicitly; derive_kind/recompute_parent_kind aligned; legacy graph values still collapse to scalar at export; three-way consistency test pins Literal == LinkML-generated enum == ISN Kind. Note: live compose already injected kind_definitions from ISN — the generate/import pattern was present; the LLM response models and refine prompt were the gaps.</p>
+    </article>
+<article class="r-fu" data-id="f-docs-campaign-batches" data-status="resolved" data-tier="haiku" data-written-by="reckon-ship" data-written-at="2026-07-17" data-recommends-skill="/reckon-ship model-selection-and-global-refine §5" data-resolved-at="2026-07-18T05:41:11+00:00" data-resolved-by="reckon-ship">
+    <h4 class="r-fu-title">Lead: approve the docs-campaign scale-up, then run the 23 batches</h4>
+    <div class="r-fu-body">Pilot converged (96% acceptance, zero prose reintroduction, zero drift) but measured cost is $0.37–0.42/name → ≈$850–960 for the full 2,288-name selection, well above the pre-pilot guess. The lead picks: full spec (~$900), prose-only spec (1,384 names ≈ $520–580, defers pure-audit fixes), or domain tranches. Then one command runs the batches under the convergence gate.</div>
+    <pre class="r-fu-prompt">Decision inputs: docs/archive/model-selection-and-global-refine-s5-pilot-landed.html (pilot metrics, per-phase cost, before/after samples, alternatives table).
+
+If approved as piloted, run (or via ! in a Claude session):
+  cd ~/Code/imas-codex &amp;&amp; uv run imas-codex sn run --source dd --campaign all --include-accepted --campaign-batch-cost-cap 50 --campaign-cost-ceiling 1000
+Prose-only alternative: replace --campaign all with --campaign prose (1,384 names).
+The campaign halts between batches on any gate miss (≥90% acceptance, zero banned-prose reintroduction, zero name drift) and prints --campaign-resume-from for the restart. After completion: verify zero accepted names match the prose predicates (sn run --campaign prose --dry-run → total 0), record final counts + spend in the §5 archive, then close expert-review reply open item 1 via f-expert-review-reply-doc.</pre>
+    <p class="r-fu-outcome">Superseded by f-docs-campaign-batches-2: the audit-class breakdown (2,125 of 2,288 matched names carry ONLY name-axis decomposition findings a docs pass cannot clear) sharpened the recommendation to the docs-fixable spec — prose,audit:latex,audit:spelling,audit:length = 1,540 names / 16 batches ≈ $570–650. Full before/after evidence doc authored: docs/docs-campaign-before-after.html.</p>
+    </article>
+<article class="r-fu" data-id="f-docs-campaign-batches-2" data-status="resolved" data-tier="haiku" data-written-by="reckon-ship" data-written-at="2026-07-18" data-recommends-skill="/reckon-ship model-selection-and-global-refine §5" data-resolved-at="2026-07-18T11:30:16+00:00" data-resolved-by="reckon-ship">
+    <h4 class="r-fu-title">Lead: approve the docs-campaign scale-up (recommended spec: docs-fixable defects, 1,540 names ≈ $570–650)</h4>
+    <div class="r-fu-body">Pilot converged (96% acceptance, zero prose reintroduction, zero drift; $0.37–0.42/name). Audit-class analysis shows the 'all' spec would spend ~$350 on ~750 names whose only defect is a name-axis decomposition finding a docs campaign cannot clear — recommended spec is prose + docs-axis audit checks: 1,540 names, 16 batches, ≈$570–650. Evidence: docs/docs-campaign-before-after.html (weakness taxonomy, before/after pairs, mechanism mapping).</div>
+    <pre class="r-fu-prompt">Decision inputs: docs/docs-campaign-before-after.html (weaknesses, before/after evidence, spec comparison) + docs/archive/model-selection-and-global-refine-s5-pilot-landed.html (pilot metrics, per-phase cost).
+
+Recommended (docs-fixable defects only), run (or via ! in a Claude session):
+  cd ~/Code/imas-codex &amp;&amp; uv run imas-codex sn run --source dd --campaign &quot;prose,audit:latex,audit:spelling,audit:length&quot; --include-accepted --campaign-batch-cost-cap 50 --campaign-cost-ceiling 700
+Alternatives: --campaign prose (1,504 names, leaves 36 docs-axis audit names for hand edits); --campaign all (2,288 names ≈ $850–960, adds ~750 name-axis-only names whose finding cannot clear).
+The campaign halts between batches on any gate miss (≥90% acceptance, zero banned-prose reintroduction, zero name drift) and prints --campaign-resume-from. After completion: verify sn run --campaign prose --dry-run → total 0; record final counts + spend in the §5 archive; re-scope decomposition findings to the name-axis workstream explicitly; then close expert-review reply open item 1 via f-expert-review-reply-doc.</pre>
+    <p class="r-fu-outcome">Superseded by f-docs-campaign-rotations: lead directive 2026-07-18 — run high-spend docs work in stratified rotations with an orchestrator review checkpoint between each, so storms like the refine claim-race livelock are caught after ~200 names, not 1,540. Cost basis also corrected: healthy-path ≈ $0.20/name post-livelock-fix → recommended spec ≈ $300–380 total.</p>
+    </article>
+<article class="r-fu" data-id="f-refine-claim-livelock" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-18" data-recommends-skill="/reckon-ship model-selection-and-global-refine §5" data-resolved-at="2026-07-18T13:12:08+00:00" data-resolved-by="reckon-ship">
+    <h4 class="r-fu-title">LAUNCH GATE: fix the refine_docs claim-race livelock (53% of pilot spend wasted)</h4>
+    <div class="r-fu-body">Pilot forensics (LLMCost run 02313084): 39 of 59 refine calls ($5.55 of $7.55) were paid gpt-5.5 calls whose persist_refined_docs no-oped with token/stage mismatch, concentrated on perturbed_particle_energy (27 calls) and vertical_coordinate_of_constraint_position (12). 20 refine replicas racing a 1–2-name eligible set defeat the _verify_docs_claim_winners window — each racer is momentarily the token holder at its own verify instant, all pay, only the last persist lands, and the sub-threshold score keeps the name eligible so the storm repeats.</div>
+    <pre class="r-fu-prompt">Project: imas-standard-names / code: imas-codex (branch main)
+Section: §5 launch gate (a)
+Tier: opus
+
+Evidence
+  Pilot log (persist_refined_docs: no-op … token/stage mismatch loops at 22:42–22:43) + LLMCost run 02313084 per-name refine call counts. Claim path: graph_ops.claim_refine_docs_batch → _claim_sn_atomic → _verify_docs_claim_winners; persist: persist_refined_docs (token+stage guarded — the guard is correct, the waste is upstream).
+
+Work (in order of leverage)
+  1. Scale docs-pool replicas to scope size for scoped drains (scope_run_id set): replicas = min(configured, max(1, ceil(eligible/2))) — 20 replicas on a 25-name batch is the amplifier.
+  2. Close the verify race: after claim + verify, re-read the token once more after a short settle (or verify with a strictly-increasing claim sequence number) so at most one racer proceeds to the paid call.
+  3. Tripwire: count paid-call-with-failed-persist per pool per run; surface in the run summary and warn when &gt;2%. Also rename/clarify the pool &#x27;completed&#x27; counter semantics (it counts processed attempts, not persisted work).
+  4. Regression test with a mock pool: N concurrent claimers, 1 eligible item → exactly 1 paid call proceeds.
+
+Done-when
+  1. re-run the 25-name pilot scope as a smoke (idempotent; names already accepted → tiny drain) with refine waste &lt;5%
+  2. tests green, committed+pushed
+  3. this followup resolved; launch gate (b) f-campaign-audit-restamp still open or resolved before approval</pre>
+    <p class="r-fu-outcome">Landed imas-codex af69e3e2: strictly-increasing per-node claim_seq stamped at claim + settle re-read in BOTH docs/names winner verifiers (superseded racer stands down before paying); docs-pool replicas capped at ceil(scope/2) on scoped drains (1-2-name set → 1 replica, zero concurrency); paid-call-without-persist tripwire in every run summary (warn &gt;2%), per-pool 'completed' relabelled 'processed'. 17 new race tests. Smoke (fresh stratified 25, run 9aa921c3): refine waste 0.0% (15 paid calls, 0 wasted persists), $0.18/name vs $0.42 pilot — spend −56% at equal scope. Residual: settle reduces (not provably eliminates) the race for large unscoped runs; seed-level compare-and-set is the full close if the tripwire ever fires. Archive: docs/archive/model-selection-and-global-refine-s5-launch-gates-landed.html</p>
+    </article>
+<article class="r-fu" data-id="f-campaign-audit-restamp" data-status="resolved" data-tier="sonnet" data-written-by="reckon-ship" data-written-at="2026-07-18" data-recommends-skill="/reckon-ship model-selection-and-global-refine §5" data-resolved-at="2026-07-18T13:12:08+00:00" data-resolved-by="reckon-ship">
+    <h4 class="r-fu-title">LAUNCH GATE: re-stamp the deterministic audit after each campaign batch</h4>
+    <div class="r-fu-body">The campaign's default_revalidate confirms lifted quarantines 'valid' on the banned-prose grep alone — the deterministic audit (latex_def_check, spelling, length, unit checks) is never re-run on refreshed docs. Pilot proof: all 25 pilot names carry validated_at timestamps predating the drain, and perturbed_particle_energy (genuine name_unit_consistency defect) is now stamped 'valid'.</div>
+    <pre class="r-fu-prompt">Project: imas-standard-names / code: imas-codex (branch main)
+Section: §5 launch gate (b)
+Tier: sonnet
+
+Context
+  campaign.py default_revalidate only re-quarantines on prose-grep reintroduction and confirms the rest valid. The LLM-free validation drain (sn run --revalidate --only validate machinery, 363a6ee1) already re-runs the full ISN audit and re-stamps validation_issues/validated_at — route each campaign batch through it.
+
+Work
+  1. In CampaignRunner step 5, replace/extend default_revalidate: clear validated_at on the batch ids and invoke the validation drain scoped to them (injectable fn, mock-tested), so every refreshed doc gets a fresh deterministic audit stamp and genuine defects (e.g. unit inconsistencies) re-quarantine instead of washing to &#x27;valid&#x27;.
+  2. Re-stamp the 25 pilot names the same way; verify perturbed_particle_energy re-quarantines on its unit defect and record post-stamp counts.
+  3. Keep the convergence gate reading the prose grep (fast) but add re-stamped audit deltas to the batch outcome for the archive.
+
+Done-when
+  1. campaign batches leave no stale validated_at; test with a mock validate fn
+  2. pilot names re-stamped, counts recorded in the §5 archive
+  3. committed+pushed; this followup resolved</pre>
+    <p class="r-fu-outcome">Landed imas-codex fa503f83: id-scoped LLM-free validation drain (drain_validation_for_ids) invoked in CampaignRunner step 5 on every touched batch id — clears validated_at then re-stamps through the full ISN audit before the prose re-quarantine lands on top; BatchOutcome/CampaignResult carry audit re-quarantined/cleared deltas; 95 tests. Pilot re-stamped live: 24 valid + perturbed_particle_energy correctly re-quarantined on its unit defect. The 4 unit-defect quarantines then resolved at ROOT: 3 parents had unit '1' mis-inherited from normalized_* children (seeder exclusion e73331a9, scoped repair db261bca/fab5af85, docs re-aligned via sn edit --axis docs, all accepted); the 4th was a name-unit audit false positive on the canonical transport-velocity form (exemption b4e38135). All four valid. Smoke batch loop: re-audit 25 cleared / 0 re-quarantined. Archive: docs/archive/model-selection-and-global-refine-s5-launch-gates-landed.html</p>
+    </article>
+<article class="r-fu" data-id="f-docs-campaign-rotations" data-status="resolved" data-tier="haiku" data-written-by="reckon-ship" data-written-at="2026-07-18" data-recommends-skill="/reckon-ship model-selection-and-global-refine §5" data-resolved-at="2026-07-20T22:19:35+00:00" data-resolved-by="reckon-ship">
+    <h4 class="r-fu-title">Docs campaign in stratified rotations with review checkpoints (gated on both launch fixes)</h4>
+    <div class="r-fu-body">After f-refine-claim-livelock and f-campaign-audit-restamp land: rotation 1 = stratified 200 names of the docs-fixable spec (~$40), then orchestrator review (accept rate, reintroductions, cost/name, paid-call-without-persist tripwire, sample diffs); then 3 rotations of ~450 (~$90 each) with the same checkpoint. Selection is self-pruning — fixed names stop matching the predicates, so each rotation re-runs the same command and --campaign-pilot re-stratifies over the remaining defect set.</div>
+    <pre class="r-fu-prompt">Prereqs: f-refine-claim-livelock + f-campaign-audit-restamp resolved.
+Rotation command (repeat until selection empties; N=200 first, then 450):
+  cd ~/Code/imas-codex &amp;&amp; uv run imas-codex sn run --source dd --campaign &quot;prose,audit:latex,audit:spelling,audit:length&quot; --campaign-pilot N --include-accepted --campaign-batch-cost-cap 50 --campaign-cost-ceiling 120
+Checkpoint after each rotation (orchestrator): accept rate ≥0.90, zero prose reintroduction, zero drift, cost/name ≈$0.20, refine paid-call-without-persist &lt;5%, spot-check 5 before/after diffs across domains; record rotation row in the §5 archive. Halt + root-cause on any miss.
+Done-when: sn run --campaign &quot;prose,audit:latex,audit:spelling,audit:length&quot; --dry-run → total 0; final counts + spend in §5 archive; then f-expert-review-reply-doc.</pre>
+    <p class="r-fu-outcome">Docs campaign COMPLETE — docs-axis defects drained 1,047→0 across 5 clean rotations (R1 200/199, R2 450/446, R3 450/441, R4 91/87, R5 9/9), every checkpoint axis PASS (quorum intact, 0 drift, 0 outages, refine waste &lt;5%), ~$365 total. LLM-adjudicated gate ran without false-positive halt. Only residue is 58 NAME-axis findings (52 name-length &gt;70 chars + 6 *_strain_gauge gauge→gage) a docs campaign cannot clear — re-scoped to the name-axis workstream. From R4 on, docs ran on the new no-units prompt (sn-symbol-definition-policy shipped: 357-doc units cleanup → 0). Ledger: archive/model-selection-and-global-refine-s5-rotations-landed.html. Next: f-expert-review-reply-doc.</p>
+    </article>
+<article class="r-fu" data-id="f-decomp-reparse-triage" data-status="resolved" data-tier="sonnet" data-written-by="reckon-ship" data-written-at="2026-07-18" data-recommends-skill="" data-resolved-at="2026-07-18T16:37:23+00:00" data-resolved-by="reckon-ship">
+    <h4 class="r-fu-title">Deterministic decomposition re-parse triage (LLM-free) → sized rename queue</h4>
+    <div class="r-fu-body">Verified 2026-07-18: flagged names parse cleanly under the current grammar with unchanged name strings (ion_current_density → subject=ION + base=current_density) — the stored decomposition is stale, not the name. A $0 script re-parses all 2,255 flagged accepted names and buckets: (a) re-parse slots the token → re-stamp stored segments + clear finding; (b) whitelisted lexicalised compound → suppress; (c) still absorbed post-parse (e.g. reference_magnetic_field) → rename queue, composed free on local DSv4 with review-only cost (~$0.06–0.10/name). Runs after canonical-qualifier-order residuals (f-cqo-003/004, f-cqo-normdir-shadow) so the parse is final.</div>
+    <pre class="r-fu-prompt">Project: imas-standard-names / code: imas-codex (branch main)
+Prereq: canonical-qualifier-order §3 residuals landed (grammar final).
+Work
+  1. Script (sn CLI subcommand or audit-utils entry, not one-off): for each accepted name with a decomposition_audit finding, parse via imas_standard_names.grammar.parse_standard_name; bucket (a) token now slotted → update stored segment fields + re-stamp validation (LLM-free drain); (b) compound whitelist → suppress finding; (c) still absorbed → emit rename-queue manifest (name, absorbed tokens, suggested segmentation).
+  2. Dry-run manifest with bucket counts for lead review before any write; then apply (a)/(b) and re-run the validation drain.
+  3. Queue bucket (c) as a rename rotation: compose on local DSv4 (free), blind-pair review (only real cost), sn edit cascade mechanics, batched with checkpoints like the docs rotations.
+Done-when: dry-run bucket counts recorded; (a)+(b) applied + re-stamped; rename queue sized with projected review cost; followup for the rename rotation queued.</pre>
+    <p class="r-fu-outcome">SCRIPT + DRY-RUN MANIFEST LANDED (this run). Prereq met: canonical-qualifier-order §3 residuals are final (ISN d150b6c). Delivered imas-codex e3d20e11: imas_codex/standard_names/decomposition_triage.py (pure, LLM-free re-parse bucketing, unit-tested against real catalog names) + `sn decomp-triage` (read-only dry-run default; --apply path). The audit substring-scans a name's raw id, so it flags a closed token even when the grammar correctly slots it (ion_current_density→subject=ion) — confirmed the stored findings are stale, not the names. Deterministic rule: re-parse→ (a) DRAIN if the parsed physical_base has no leaked closed token (finding stale, clear+re-stamp); (b) SUPPRESS if a token remains inside a grammar-registered atomic base (convection_velocity, diffusion_coefficient) — legitimate; (c) RENAME if a token is absorbed into a non-registered compound (reference_magnetic_field, vacuum_magnetic_vector_potential). DRY-RUN over all 2252 flagged accepted names: drain 1809 / suppress 173 (1982 clearable free) / rename 270 / parse-fail 0 / non-canonical 0. Rename queue sized: ~$21.60 review (270 × $0.08; compose free on DSv4). Manifest: docs/archive/canonical-qualifier-order-manifests/decomp-triage-dry-run.json; full record docs/archive/canonical-qualifier-order-s3-landed.html. NOT applied — the write pass is gated on lead review of the bucket split per this followup's own design. Next queued: f-decomp-triage-apply.</p>
+    </article>
+<article class="r-fu" data-id="f-decomp-triage-apply" data-status="resolved" data-tier="sonnet" data-written-by="reckon-ship" data-written-at="2026-07-18" data-recommends-skill="/reckon-ship model-selection-and-global-refine §5" data-resolved-at="2026-07-18T19:58:21+00:00" data-resolved-by="reckon-ship">
+    <h4 class="r-fu-title">Lead: apply the decomposition-triage free drain, then run the 270-name rename rotation</h4>
+    <div class="r-fu-body">The dry-run manifest is signed off first (drain 1809 / suppress 173 = 1982 clearable free; rename 270 ≈ $21.60). Then: (1) apply the free drain (`sn decomp-triage --apply` clears the stale/lexicalised findings + re-stamps segment edges); (2) make decomposition_audit_check parse-aware (scan the parsed physical_base, exempt registered bases) so the drain sticks and buckets a/b never recur; (3) run the 270-name rename rotation — compose free on DSv4, blind-pair review, sn edit cascade mechanics, batched with checkpoints like the docs rotations.</div>
+    <pre class="r-fu-prompt">Project: imas-standard-names / code: imas-codex (branch main)
+Section: §5 follow-on — decomposition-triage apply + rename rotation
+Tier: sonnet (opus for the audit-logic change)
+Prereq: lead has reviewed docs/archive/canonical-qualifier-order-manifests/decomp-triage-dry-run.json bucket split.
+
+Context
+  The re-parse triage (imas-codex e3d20e11, `sn decomp-triage`) buckets the 2252 stale decomposition_audit findings on accepted names: 1809 drain + 173 suppress (1982 clearable, no LLM, no name change) + 270 rename queue (genuine absorption). 0 parse-fail. This followup does the writes.
+
+Work
+  1. FREE DRAIN (classifier-gated write): `cd ~/Code/imas-codex &amp;&amp; uv run imas-codex sn decomp-triage --apply`. Clears the decomposition_audit lines from validation_issues for the drain/suppress buckets and re-stamps segment edges via rederive_structural_edges. Verify the flagged-accepted count drops ~2252 → ~270.
+  2. DURABLE AUDIT FIX (opus): make imas_codex/standard_names/audits.py::decomposition_audit_check parse-aware — scan the PARSED physical_base (not the raw id) and exempt a physical_base that is a grammar-registered atomic base. Add tests. This stops the drain/suppress class recurring on the next sn run (without it, clearing is futile). Commit+push.
+  3. RENAME ROTATION (270 names): the manifest&#x27;s rename_queue carries per-name absorbed tokens + a naive segmentation suggestion. Compose the corrected names on local DSv4 (free), blind-pair review (the only real cost, ~$21.60), apply via sn edit cascade mechanics, batched with a checkpoint per ~90 names (accept rate, drift, before/after diffs) like the docs rotations. Some (c) entries may be legitimate atomic quantities the lead keeps (alfven_frequency, wave_electric_field) — the rotation adjudicates, does not blindly rename.
+
+Done-when
+  1. free drain applied; flagged-accepted decomposition count down to the rename set; audit made parse-aware + tests green + pushed
+  2. rename rotation complete (or the residual keep-set recorded with rationale); final counts + spend in the §5 archive
+  3. this followup resolved</pre>
+    <p class="r-fu-outcome">RESOLVED differently than scoped — the whole premise collapsed under the lead's controlled-base insight. The decomposition_audit was RETIRED (imas-codex 5a08c744), not made parse-aware, because it is OBSOLETE now that physical/geometric bases are a controlled vocabulary. Root cause: it compared a name's surface base PHRASE (model.physical_base, e.g. reference_magnetic_field, absorbed_power, nuclear_heating_power) against the registered base-TOKEN set — but the actual base token (ir.base.token: magnetic_field, power, heating_power) is ALWAYS registered (the parser raises UnknownBaseTokenError for a made-up base). The surface phrase legitimately carries glued kind-forming qualifiers (royal-order: ion_atomic_mass, wave_electric_field). So a composer cannot hide structure in the base slot — the failure mode the audit was built for cannot occur. Every one of its ~2252 findings was a historic false positive. There is NO rename rotation: the '270 rename queue' was itself false positives (kind-forming glue + binary-op nested args + upper_bound substring artifacts; verified 0 genuine after excluding the qualifier segment, skipping binary-ops, and exempting base-head tokens). Steps actually taken: (1) parse-aware audit landed as a stepping stone (c6191e61), free drain applied (1982 cleared, 2252→270), single-shot `sn decomp-triage` CLI+module DELETED per lead directive; (2) then the controlled-base realization → decomposition_audit_check + find_absorbed_closed_tokens primitive + tests removed, reviewer prompt reframed to 'base registry is grammar-enforced; emit vocab_gap when no base fits', all remaining decomposition_audit findings drained graph-wide (1641 cleared, 0 remain). Net: the decomposition audit and its scaffolding are gone; the base grammar itself is the guarantee. imas-codex commits e3d20e11 (superseded) → c6191e61 → 5a08c744.</p>
+    </article>
+<article class="r-fu" data-id="f-prose-derived-from-fix" data-status="resolved" data-tier="sonnet" data-written-by="reckon-ship" data-written-at="2026-07-20" data-recommends-skill="/reckon-ship model-selection-and-global-refine §5" data-resolved-at="2026-07-20T06:08:02+00:00" data-resolved-by="reckon-ship">
+    <h4 class="r-fu-title">Lead: narrow the estimator_recipe &#x27;derived from&#x27; false positive, then resume rotations</h4>
+    <div class="r-fu-body">Rotation 1's resilient re-run (run c355df39) validated the pipeline but the convergence gate halted after batch 1 on 2 FALSE-POSITIVE prose flags: 'is derived from [related quantity]' provenance matched the estimator_recipe pattern's 'derived ...from' arm. This recurs on every derived quantity, so it halts every rotation. Narrow the pattern (lead picks the fix), add a regression test, re-baseline budget to ~$0.29/name, then resume the stratified rotations. Doc-policy semantics call — is 'is derived from [related quantity]' acceptable normative prose? — hence the lead decides which fix.</div>
+    <pre class="r-fu-prompt">Project: imas-standard-names / code: imas-codex (branch main)
+Section: §5 — prose-predicate root-fix (gates the remaining rotations)
+Tier: sonnet
+
+Context
+  Rotation 1 resilient re-run (run c355df39, 2026-07-20; archive docs/archive/model-selection-and-global-refine-s5-rotation1-landed.html) proved the pipeline: 100% leaf quorum_consensus on the claude-sonnet-5 + grok-4.5 blind pair, 0 outages, 98% accept, 0 drift, 3.4% refine waste. It halted after batch 1 because the convergence gate saw banned prose reintroduced in 2 docs (line_averaged_hydrogen_density, ratio_of_tritium_density_to_deuterium_density). Both are FALSE POSITIVES: the estimator_recipe pattern in imas_codex/standard_names/prose_policy.py, `\bis (?:computed|calculated|estimated|obtained|derived) (?:as|by|from)\b`, matched &#x27;It is derived from the local [hydrogen density](name:hydrogen_density)…&#x27; — legitimate provenance / cross-reference the refine model writes for any derived quantity, NOT a procedural estimator recipe. Evidence: of 2,200 accepted docs, 797 (36.2%) match estimator_recipe; a 12-doc sample of those are ALL genuine backlog recipes (&#x27;In practice this quantity is computed by …&#x27;), which trip the computed/obtained arms — the refine model strips those and only leaves the &#x27;derived from&#x27; provenance residue.
+
+Decision (lead) + Work
+  1. Pick the fix (doc-policy call): (a) drop `derived` from the verb alternation, keeping computed|calculated|estimated|obtained — the sampled genuine recipes all use those, so backlog coverage is retained; or (b) exempt &#x27;derived from [name:link] / the local &lt;quantity&gt;&#x27; provenance specifically. Apply in prose_policy.py.
+  2. Regression test: banned_prose_findings() returns CLEAN on the two halted docs&#x27; text and still flags the 12 sampled backlog recipes (and the estimator_recipe class stays non-empty for &#x27;is computed by&#x27; text). Commit+push (explicit paths, no AI trailers, no plan refs).
+  3. Re-baseline the budget to ≈$0.29/name (resilient premium review pair). ~1,300 remaining docs-fixable names ≈ $380 — the lead accepts the premium, trims the spec (e.g. prose-only), or caps rotations.
+  4. Resume the stratified rotations on the unchanged command (uv run imas-codex sn run --source dd --campaign &quot;prose,audit:latex,audit:spelling,audit:length&quot; --campaign-pilot 200 --include-accepted --campaign-batch-cost-cap 50 --campaign-cost-ceiling 120); the selection re-stratifies over the remaining ~1,300 and the 98 fixed names stay out.
+
+Done-when
+  1. estimator_recipe narrowing committed + regression test green + pushed
+  2. budget re-baselined and recorded in the §5 archive
+  3. rotations resume; each rotation&#x27;s checkpoint row recorded; this followup resolved when the pipeline runs a full rotation without a false-positive halt</pre>
+    <p class="r-fu-outcome">Prose exemption LANDED (imas-codex 6c6ffec8 → narrowed f1a4fbbc). estimator_recipe no longer flags 'is/can be derived from … [label](name:id)' linked-quantity provenance (the parent/child form the refine seat writes), while 'derived from <procedure measurement="">' and all compute-verb recipes still flag — catalog-verified: the 2 halted docs scan clean, 20 procedure docs still flag; regression tests green. NB the first commit was a blanket 'derived from' exemption; the lead flagged it and it was narrowed to be name-link-conditioned (only 4 of 68 'derived from' accepted docs are linked provenance; ~20 are genuine procedure recipes). BUDGET decided: lead accepts ~$0.29/name as-is after a per-model cost review (rotation-1 split: gpt-5.5 refine+escalation $11.34, sonnet-5 review $9.04, grok $4.78, luna docs-gen $3.99). SEATS held after review: review blind pair claude-sonnet-5 (docs AUC 0.910, best) + grok-4.5 (cheap, names 0.920), justified on discrimination + 16/16 concurrency (old qwen+minimax pair non-viable under load); refine HOLD gpt-5.5 (resolution 0.874 / collateral 0.147 — luna 0.765/0.218 and terra 0.837/0.145 both measured worse or a wash; generate≠refine). Rotation resume carried by f-docs-campaign-rotations.</procedure></p>
+    </article>
+</section>
+<section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s5" data-id="c-rotation1-halted" data-who="reckon-ship" data-when="2026-07-18T21:20:00+00:00">
+    <div class="r-comment-body">Rotation 1 (stratified 200) launched 2026-07-18 and HALTED by the orchestrator ~6 min in: 2 of the 3 RD-quorum reviewer models (qwen3.7-max, minimax-m3) entered an upstream empty-response outage, degrading 67% of reviews to single-reviewer and violating the §6 'review quorum unchanged' invariant. Halt bounded degraded-quorum accepts to ~27 (vs ~200) at ≈$6.17 (~$1.43 wasted on the two dead models); selection 1,437→1,409. External blocker, not a campaign defect — re-run unchanged once reviewer availability recovers. f-docs-campaign-rotations stays open. Record: archive/model-selection-and-global-refine-s5-rotation1-halted.html</div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-rotation1-resilient" data-who="reckon-ship" data-when="2026-07-20T05:30:00+00:00">
+    <div class="r-comment-body">Rotation 1 RE-RUN on the resilient pipeline (run c355df39, 2026-07-20) — PIPELINE VALIDATED; halted after batch 1 on a prose-predicate false positive. The July-18 quorum-outage failure mode is ELIMINATED: 117 leaf reviews 100% quorum_consensus on the blind pair claude-sonnet-5 + grok-4.5; 0 outages / 0 governor backoff; 13 single_review are derived-parent reviews (single-model BY DESIGN, ~2-3x cheaper). Batch 1 (100 names): 98% accept (98 accepted / 2 exhausted), 0 name drift, refine waste 3.4% (&lt;5% gate), ~19 min, $29.47. Halted before batch 2 by the convergence gate ('banned prose reintroduced in 2 docs, cap 0': line_averaged_hydrogen_density, ratio_of_tritium_density_to_deuterium_density) — BOTH FALSE POSITIVES: the estimator_recipe pattern's 'derived ...from' arm matches 'is derived from [related quantity]' (legitimate provenance the refine model writes), not a compute recipe. The pattern is CORRECT on the backlog (12/12 sampled of 797 accepted-doc matches are genuine 'in practice ... is computed by ...' recipes) but over-flags refined provenance, so it would halt every rotation until narrowed. Cost/name $0.29 vs $0.20 target — the resilient premium review pair is the driver. GO/NO-GO on the remaining ~$270: QUALIFIED GO after (1) narrowing the estimator_recipe derived-from arm [lead doc-policy call] and (2) re-baselining budget to ~$0.29/name (~$380 for ~1,300 remaining docs-fixable). Without (1) it is NO-GO. f-docs-campaign-rotations stays open; f-prose-derived-from-fix queued. Record: archive/model-selection-and-global-refine-s5-rotation1-landed.html</div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-session-20260720-close" data-who="reckon-ship" data-when="2026-07-20T07:40:00+00:00">
+    <div class="r-comment-body">Session 2026-07-20 close-out. (1) Prose false-positive that halted rotation 1 FIXED: estimator_recipe exemption scoped to linked-quantity provenance 'derived from … [x](name:x)' (imas-codex 6c6ffec8 → narrowed to name-link-conditioned f1a4fbbc after the lead flagged the blanket first version — catalog scan: only 4 of 68 'derived from' accepted docs are linked provenance; ~20 are genuine 'derived from <procedure>' recipes that must keep flagging). (2) Cost review: rotation-1 $29.47/100 = $0.29/name; per-model split gpt-5.5 $11.34 (refine+escalation), sonnet-5 $9.04 (review), grok $4.78, luna $3.99. LEAD DECISION — keep everything as-is: accept $0.29/name; hold the sonnet-5+grok review pair (best docs discriminator 0.910 + resilient; old pair non-viable under 16-way load); hold gpt-5.5 refine (best resolution + lowest churn; luna and terra measured worse or a wash). Rotations now unblocked; resume rotation 1 (re-stratifies over the remaining ~1,311 docs-fixable) in a fresh session via f-docs-campaign-rotations.</procedure></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-session-20260720-pm-close" data-who="reckon-ship" data-when="2026-07-20T11:05:00+00:00">
+    <div class="r-comment-body">Session 2026-07-20 (PM) close-out — rotations paused for a fresh session; the pipeline is now materially more robust. LANDED: (1) Rotation progress — rotation A batch 1 (100 names) + a re-stratified rotation batches 1-2 (~200) refined, 0 name drift, 0 names composed; selection 1,330-&gt;1,213 after the first fix (re-run the dry-run next session for the current count, ~1,000 est). Both runs halted on prose FALSE POSITIVES, motivating the gate rework. (2) PROSE GATE REWORKED (lead directive after a 3rd false-positive halt): the banned-prose grep is now only a cheap candidate PRE-FILTER; a light LLM adjudicator decides whether a flagged refined doc genuinely reintroduced banned prose (imas-codex fbd6a51b; seat gpt-5.6-luna, chosen on a 12-doc labelled bench, quorum-independent). Eliminates the recurring false-positive halts — estimator_recipe cannot converge to 0 by grep because good definitional docs legitimately use compute verbs. (3) BUG FOUND + FIXED: Anthropic 'Schema is too complex' — GrammarSegments had grown to 14 properties, over OpenRouter's ~13-per-object cap for Anthropic, so every opus/fable name-refine call hung ~15 min then failed; the name-refine escalator (was opus-4.8) was SILENTLY broken. Fix cbe551cc: projection_shape made a derived computed_field (already overwritten from base_kind) -&gt; 13 properties; regression guard added; confirmed live (0 schema errors, 4 models). (4) TIE-BREAK / ESCALATOR BENCHES (fable + sol vs incumbents): docs review breaker HOLD gpt-5.5; names review breaker HOLD luna; sol not compelling anywhere; refine escalator SWITCHED opus-4.8 -&gt; gpt-5.6-fable (fable lowest collateral / do-no-harm on the hard tail; opus measured WEAKEST refiner; fires only at chain cap). (5) CONFIG HYGIENE (lead directive): escalation + prose-adjudicator model choices moved out of source into pyproject seats [sn-escalation]/[sn-prose-adjudicator] read via get_model (imas-codex 3fefe5a8); AGENTS.md strengthened — never hardcode a model in feature code, no bench results in config comments. RESUME (fresh session, f-docs-campaign-rotations): re-run the dry-run for the current count, then the stratified rotation command; the adjudicated gate should now run rotations to completion without false-positive halts. Cost/name ~$0.29; ~$300 for the remaining set.</div>
+</div>
+</section>
+</main>
+</body>
+</html>

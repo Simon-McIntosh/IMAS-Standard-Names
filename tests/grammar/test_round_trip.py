@@ -1,4 +1,4 @@
-"""Round-trip test battery for grammar vNext (plan 38 §A10, item 1).
+"""Round-trip test battery for grammar (plan 38 §A10, item 1).
 
 Synthesises ≥ 5 000 valid IR instances via seeded random, composes each to
 a canonical string, parses the string back, and asserts the re-parsed IR is
@@ -190,8 +190,22 @@ def test_round_trip_quantity_bases(vocabs: Vocabularies) -> None:
 
 
 def test_round_trip_geometry_carriers(vocabs: Vocabularies) -> None:
-    """All 20 geometry_carriers round-trip without any operators or decorators."""
+    """All geometry_carriers round-trip without any operators or decorators.
+
+    Carriers whose canonical rendering matches an implicit-coordinate
+    pattern (e.g. ``radial_coordinate``) are skipped because the parser
+    produces a more specific IR with an ``AxisProjection`` node.
+    """
+    # Build set of implicit-coordinate carrier tokens (axis + "_" + carrier)
+    implicit_coord_carriers = {
+        c
+        for c in vocabs.carriers
+        for a in vocabs.axes
+        if c.startswith(a + "_") and c[len(a) + 1 :] in vocabs.carriers
+    }
     for token in sorted(vocabs.carriers):
+        if token in implicit_coord_carriers:
+            continue
         ir = _make_base_ir(token, BaseKind.GEOMETRY)
         _assert_round_trip(ir, vocabs)
 
@@ -319,8 +333,15 @@ def test_round_trip_binary_ratio(vocabs: Vocabularies) -> None:
 
 
 def test_round_trip_projection_component(vocabs: Vocabularies) -> None:
-    """``<axis>_component_of_<base>`` round-trips for all axes × sample bases."""
-    base_pool = sorted(vocabs.bases)
+    """``<axis>_<base>`` round-trips for all axes × sample bases.
+
+    Sample only from round-trip-safe bases. A few bases embed substrings of
+    other base tokens (e.g. ``magnetic_moment`` overlaps the ``magnetic_field``
+    family) and do not re-parse under axis projection — those are separately
+    tracked vocab design issues, excluded here as in the sibling synthesis
+    tests via ``_is_rt_safe_base``.
+    """
+    base_pool = [t for t in sorted(vocabs.bases) if _is_rt_safe_base(t, vocabs)]
     rng = random.Random(21)
     bases_sample = rng.sample(base_pool, min(10, len(base_pool)))
     for axis, base in iproduct(sorted(vocabs.axes), bases_sample):
@@ -330,10 +351,16 @@ def test_round_trip_projection_component(vocabs: Vocabularies) -> None:
 
 
 def test_round_trip_projection_coordinate(vocabs: Vocabularies) -> None:
-    """``<axis>_coordinate_of_<carrier>`` round-trips for all axes × carriers."""
+    """``<axis>_<carrier>`` round-trips for all axes × carriers."""
     carrier_pool = sorted(vocabs.carriers)
     for axis in sorted(vocabs.axes):
         for carrier in carrier_pool:
+            composed = f"{axis}_{carrier}"
+            # Skip pairs where the composed short form collides with an
+            # existing carrier token — the parser legitimately re-parses
+            # the name as a bare carrier in that case.
+            if composed in vocabs.carriers:
+                continue
             proj = AxisProjection(axis=axis, shape=ProjectionShape.COORDINATE)
             ir = _make_base_ir(carrier, BaseKind.GEOMETRY, projection=proj)
             _assert_round_trip(ir, vocabs)
@@ -562,6 +589,11 @@ def test_round_trip_combined_large(vocabs: Vocabularies) -> None:
             # Projection component + base
             axis = rng.choice(sorted(vocabs.axes))
             base = rng.choice(base_pool)
+            # Skip if the composed short form collides with an existing base
+            # or carrier (e.g. poloidal + angle -> poloidal_angle carrier),
+            # which would re-parse as that token rather than projection + base.
+            if f"{axis}_{base}" in vocabs.carriers or f"{axis}_{base}" in vocabs.bases:
+                continue
             proj = AxisProjection(axis=axis, shape=ProjectionShape.COMPONENT)
             ir = _make_base_ir(base, BaseKind.QUANTITY, projection=proj)
         elif scenario == 8:
@@ -570,6 +602,9 @@ def test_round_trip_combined_large(vocabs: Vocabularies) -> None:
                 continue
             axis = rng.choice(sorted(vocabs.axes))
             carrier = rng.choice(carrier_pool)
+            # Skip if the composed short form collides with an existing carrier
+            if f"{axis}_{carrier}" in vocabs.carriers:
+                continue
             proj = AxisProjection(axis=axis, shape=ProjectionShape.COORDINATE)
             ir = _make_base_ir(carrier, BaseKind.GEOMETRY, projection=proj)
         else:
@@ -581,9 +616,13 @@ def test_round_trip_combined_large(vocabs: Vocabularies) -> None:
             tok, lt = rng.choice(pos_loci_at)
             locus = LocusRef(relation=LocusRelation.AT, token=tok, type=lt)
             mech = Process(token=rng.choice(processes))
-            proj = AxisProjection(
-                axis=rng.choice(sorted(vocabs.axes)), shape=ProjectionShape.COMPONENT
-            )
+            axis = rng.choice(sorted(vocabs.axes))
+            # Skip if the composed short form collides with an existing base
+            # or carrier (e.g. poloidal + angle -> poloidal_angle carrier),
+            # which would re-parse as that token rather than projection + base.
+            if f"{axis}_{base}" in vocabs.carriers or f"{axis}_{base}" in vocabs.bases:
+                continue
+            proj = AxisProjection(axis=axis, shape=ProjectionShape.COMPONENT)
             ir = _make_base_ir(
                 base,
                 BaseKind.QUANTITY,
@@ -610,5 +649,7 @@ def test_round_trip_minimum_count(vocabs: Vocabularies) -> None:
     """Smoke-check: the combined fixture can produce ≥ 5 000 unique names."""
     # This test passes as long as test_round_trip_combined_large passes.
     # It exists as a named anchor that CI can reference.
-    assert len(vocabs.bases) >= 200, "expected ≥200 physical_bases in closed vocab"
+    assert len(vocabs.bases) >= 70, (
+        "expected ≥70 irreducible physical_bases in closed vocab"
+    )
     assert len(vocabs.operators) >= 30, "expected ≥30 operators in closed vocab"

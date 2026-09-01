@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"    content="imas-standard-names">
+  <meta name="reckon-type"     content="plan">
+  <meta name="plan-slug"       content="sn-symbol-definition-policy">
+  <meta name="plan-title"      content="SN Symbol Definition Policy">
+  <meta name="plan-summary"    content="Make docs define each LaTeX symbol by identity + name-link, not by a redundant unit restatement; fix latex_def_check to stop accepting bare units as the definition satisfier; scope and price the catalog cleanup.">
+  <meta name="plan-status"     content="shipped">
+  <meta name="plan-impl"       content="1.0">
+  <meta name="plan-roi"        content="mid">
+  <meta name="plan-effort"     content="S">
+  <meta name="plan-tier"       content="sonnet">
+  <meta name="plan-owner"      content="Simon McIntosh">
+  <meta name="plan-depends-on" content="model-selection-and-global-refine">
+  <title>SN Symbol Definition Policy | imas-standard-names</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+  <h1>Symbol definition policy — define identity, don't restate units</h1>
+  <p class="landed-summary" style="border-left:4px solid #3a7d44;background:rgba(60,160,90,.06);padding:.6rem 1rem">
+    <strong>✓ SHIPPED 2026-07-20.</strong> Policy landed across the pipeline: <code>latex_def_check</code> requires symbol
+    identity not a bare unit (<code>a27beea6</code>); no-units prompt across generate/refine/review seats + shared partial,
+    Spectrum rule reworded, both narrow exceptions removed (<code>38dfeb97</code>); advisory <code>symbol_units_check</code> +
+    <code>audit:symbol_units</code> selector, FP-hardened against label subscripts / variable exponents / unit vectors
+    (<code>ee22b1f4</code> → <code>ac75e0df</code>). <strong>Smoke:</strong> 30/30 unit-free, 10/10 stripped, $13.
+    <strong>Cleanup:</strong> 357 unit-docs selected → 356 refined unit-free ($89, $0.25/name) + 8 detector-FPs resolved →
+    <strong><code>audit:symbol_units</code> now selects 0</strong>; zero genuine units remain catalog-wide. A full audit re-stamp
+    surfaced 43 latent deterministic defects (not new) that the fast-grep path had masked — folded into the docs campaign.</p>
+  <p>Follow-on from <a href="/imas-standard-names/model-selection-and-global-refine.html">model-selection-and-global-refine</a> §5.
+  The docs-refinement campaign produces high-quality normative docs, but the refine seat annotates a unit on nearly every LaTeX
+  symbol (see <a href="/imas-standard-names/docs-campaign-before-after.html">before/after evidence §2b, Example 7</a>). This plan
+  makes the policy explicit: a symbol's <strong>identity</strong> (which quantity it denotes, ideally a <code>name:</code> link) is
+  the non-redundant thing docs must supply; its <strong>unit</strong> is already carried elsewhere and restating it in prose is
+  redundant and drift-prone. Three coupled changes: the prompt, the audit, and a scoped cleanup.</p>
+
+  <h2 id="s1">§1 — Why per-symbol units are the wrong target</h2>
+  <p>A standard name's documentation contains a defining relation whose symbols fall into three classes. For every class, the unit is
+  recoverable <em>without</em> restating it in prose:</p>
+  <table>
+    <tr><th>Symbol class</th><th>Where its unit already lives</th><th>Prose restatement is…</th></tr>
+    <tr><td>The <strong>primary quantity</strong> the name denotes</td><td>the structured <code>unit</code> field (rendered on the name's page)</td><td>duplicating a machine-readable field</td></tr>
+    <tr><td>An <strong>auxiliary quantity that is itself a standard name</strong></td><td>its own <code>unit</code>, reached via the <code>name:</code> link</td><td>redundant <em>and</em> drift-prone — goes stale if that name's unit changes</td></tr>
+    <tr><td>A <strong>non-name math/geometry symbol</strong> (arclength ℓ, an angle)</td><td>nowhere structured</td><td>the only case with any argument — and the unit is usually trivial</td></tr>
+  </table>
+  <p>What is genuinely non-redundant is the symbol's <strong>identity</strong>: binding it to the quantity it denotes. "<code>$B_p$ is
+  the poloidal magnetic-field magnitude [name:poloidal_magnetic_field]</code>" carries information a reader cannot derive; "<code>$B_p$
+  in T</code>" they can. Restating units in prose is the same anti-pattern the campaign already removes (facts that belong in
+  structured fields — like device-specific "typical values"), one level down.</p>
+
+  <h3>Root cause — the audit rewards the wrong thing</h3>
+  <p>The refine seat is partly <em>incentivised</em> to add units by the deterministic audit. <code>latex_def_check</code>
+  (<code>imas_codex/standard_names/audits.py</code>) counts a symbol as "defined" if a nearby sentence contains a definition word
+  (<code>is / are / denotes / represents / where / defined / being</code> / <code>given by</code> / …) <strong>OR a unit in
+  brackets</strong>. So a bare unit satisfies the symbol-definition check — the audit conflates "has a unit" with "is defined." A
+  symbol can carry a unit and still have no stated identity. Fixing the audit removes the incentive at its source.</p>
+
+  <h2 id="s2">§2 — The three changes</h2>
+  <ol>
+    <li><strong>Refine + docs-gen prompt.</strong> Require every LaTeX symbol to be <em>defined by identity</em> in its where-clause,
+      preferring a <code>name:</code> link when the symbol is a catalog quantity. And — <strong>no units in documentation prose at
+      all</strong> (lead directive 2026-07-20): a unit states dimension, not identity; the quantity's unit is the authoritative
+      structured <code>unit</code> field and a linked quantity carries its own via its link. There is <em>no</em> "non-name symbol"
+      exception — units simply do not belong in the description/documentation text.</li>
+    <li><strong><code>latex_def_check</code> audit (landed <code>a27beea6</code>).</strong> Stops accepting a bare unit-in-brackets as
+      the definition satisfier — requires a definition word or a resolvable <code>name:</code> identity within the definition window.
+      Tests: unit-only <em>fails</em>, <code>name:</code>-link passes, def-word passes. This removes the incentive to unit-annotate but
+      does <em>not</em> itself ban units from prose — that is change 3.</li>
+    <li><strong>Audit <code>audit:symbol_units</code> — flag any unit token in documentation prose.</strong> The enforcement side of the
+      "no units in prose" policy: a low-false-positive check that flags accepted docs carrying unit statements ("<code>with unit X</code>",
+      "<code>in &lt;UNIT&gt;</code>", unit expressions inside <code>\mathrm{…}</code> such as <code>m^{-3}</code>/<code>s^{-1}</code>), while
+      excluding <code>\mathrm{}</code> subscript labels (<code>\mathrm{axis}</code>, <code>\mathrm{eff}</code>). Doubles as the campaign
+      <em>selection</em> predicate so the cleanup rotation is self-pruning. FP rate validated against the live catalog before it lands as
+      a hard audit.</li>
+  </ol>
+  <p>Changes 1–2 are a small, testable prompt + audit edit (tier: sonnet). They are <strong>not</strong> a defect that halts the
+  running campaign — units-in-prose is redundant, not wrong — so rotation&nbsp;3 continues untouched.</p>
+
+  <h2 id="s3">§3 — Sequencing and the regeneration price</h2>
+  <p><strong>The cheapest moment to land this is now, while the current campaign is still running.</strong> The docs-refinement
+  campaign has ~502 names left in its selection; if the new prompt policy lands before those rotations finish, they pick it up at
+  <strong>zero marginal cost</strong> (they are being refined anyway). Only docs that are already prose-clean — so the current
+  campaign will never re-touch them — need a dedicated cleanup pass.</p>
+
+  <h3>Catalog measurements (live, 2026-07-20)</h3>
+  <ul>
+    <li><strong>2,097</strong> accepted docs; <strong>2,070 (98%)</strong> carry LaTeX formulas (define symbols).</li>
+    <li><strong>~550–600</strong> restate a per-symbol unit: 73 use the explicit "<code>with unit X</code>" style, ~520 use the
+      "<code>… in &lt;UNIT&gt;</code>" style (overlapping).</li>
+    <li>The running campaign will refine ~1,047 docs-fixable names over its life; roughly a quarter of the unit-restating docs
+      (~280) fall inside that set and are re-normalized <em>for free</em> once the policy lands.</li>
+  </ul>
+
+  <figure>
+    <svg viewBox="0 0 720 214" role="img" aria-label="Regeneration cost by scope" style="width:100%;max-width:720px;font-family:system-ui,sans-serif">
+      <text x="0" y="16" font-size="14" font-weight="600" fill="#202124">Regeneration price by scope (at ~$0.28/name)</text>
+      <g font-size="12.5" fill="#202124">
+        <!-- rows: label at x=0..250, bar from x=270 -->
+        <text x="0" y="46">Policy + audit change (dev)</text>
+        <rect x="270" y="35" width="10" height="15" fill="#3a7d44"/>
+        <text x="288" y="46" fill="#555">~$0 LLM + ~$5–10 smoke batch</text>
+
+        <text x="0" y="76">Marginal, if landed during current run</text>
+        <rect x="270" y="65" width="4" height="15" fill="#3a7d44"/>
+        <text x="282" y="76" fill="#555">$0 — ~502 remaining names absorb it</text>
+
+        <text x="0" y="106">Targeted cleanup (already-clean docs)</text>
+        <rect x="270" y="95" width="150" height="15" fill="#c96a4a"/>
+        <text x="428" y="106" fill="#555">~270–550 names → <tspan font-weight="600">$75–155</tspan></text>
+
+        <text x="0" y="136">Realistic total marginal (recommended)</text>
+        <rect x="270" y="125" width="105" height="15" fill="#c96a4a"/>
+        <text x="383" y="136" fill="#555"><tspan font-weight="600">~$75–120</tspan></text>
+
+        <text x="0" y="166">Worst case — re-refine every formula doc</text>
+        <rect x="270" y="155" width="330" height="15" fill="#8a8f98"/>
+        <text x="608" y="166" fill="#555">2,070 → ~$580 (unnecessary)</text>
+      </g>
+      <line x1="270" y1="182" x2="270" y2="28" stroke="#ccc" stroke-width="1"/>
+      <text x="0" y="200" font-size="11.5" fill="#666">Bars are proportional to name count. The recommended path lands the policy now (free absorption) then runs one targeted cleanup rotation.</text>
+    </svg>
+    <figcaption>The policy change itself is nearly free; the only real spend is a targeted cleanup of docs the running campaign won't otherwise re-touch. A full catalog re-refine is never necessary.</figcaption>
+  </figure>
+
+  <table>
+    <tr><th>Scope</th><th>Names</th><th>Est. cost</th><th>Notes</th></tr>
+    <tr><td>Policy + audit change (dev)</td><td>—</td><td><strong>~$0</strong></td><td>prompt + <code>latex_def_check</code> edit + tests; optional ~$5–10 30-name smoke</td></tr>
+    <tr><td>Absorbed by the running campaign</td><td>~502</td><td><strong>$0</strong></td><td>remaining selection picks up the new prompt policy for free <em>if landed now</em></td></tr>
+    <tr><td>Targeted cleanup (<code>audit:symbol_units</code>)</td><td>~270 incremental (of ~550 total)</td><td><strong>$75–155</strong></td><td>already-prose-clean docs with redundant units; self-pruning rotations</td></tr>
+    <tr><td>Worst case (full re-refine)</td><td>~2,070</td><td>~$580</td><td>unnecessary — only unit-restating docs need it</td></tr>
+  </table>
+  <p><strong>Bottom line: the realistic marginal price is ~$75–120</strong> for a clean catalog, dominated by one targeted cleanup
+  rotation — or effectively <strong>$0</strong> if the lead is content to let the running campaign + all future refines absorb the
+  policy and leave the ~270 already-clean redundant-unit docs as-is until they are next touched.</p>
+
+  <section data-reckon="decisions" id="decisions" class="r-decisions">
+    <h2><span class="sec">§</span> Decisions</h2>
+    <div class="r-dec" data-key="unit-satisfier" data-choice="require-identity" data-by="user" data-when="2026-07-20">
+      <p class="r-dec-q">Should a bare unit-in-brackets still satisfy <code>latex_def_check</code> for a non-name math symbol, or must every symbol have an identity/definition word?</p>
+      <p class="r-dec-opts">
+        <button class="r-opt" data-value="require-identity">Require identity/definition word for all symbols (unit alone never satisfies)</button>
+        <button class="r-opt" data-value="keep-for-nonname">Keep unit-as-satisfier only for non-name math/geometry symbols; require identity for catalog quantities</button>
+      </p>
+      <p class="r-dec-rat"></p>
+    </div>
+    <div class="r-dec" data-key="primary-unit-in-prose" data-choice="forbid" data-by="user" data-when="2026-07-20">
+      <p class="r-dec-q">May a doc state the primary quantity's own unit in prose at all, given it is already the structured <code>unit</code> field?</p>
+      <p class="r-dec-opts">
+        <button class="r-opt" data-value="forbid">Forbid — rely on the structured unit field (prose stays identity-only)</button>
+        <button class="r-opt" data-value="allow-once">Allow one mention of the primary unit; forbid restating linked-quantity units</button>
+      </p>
+      <p class="r-dec-rat"></p>
+    </div>
+    <div class="r-dec" data-key="cleanup-scope" data-choice="targeted-cleanup" data-by="user" data-when="2026-07-20">
+      <p class="r-dec-q">Run a dedicated <code>audit:symbol_units</code> cleanup campaign over already-clean redundant-unit docs, or only absorb the policy through the running campaign and future refines?</p>
+      <p class="r-dec-opts">
+        <button class="r-opt" data-value="targeted-cleanup">Targeted cleanup rotation (~$75–155, clean catalog now)</button>
+        <button class="r-opt" data-value="absorb-only">Absorb-only ($0 marginal; ~270 clean docs keep redundant units until next touched)</button>
+      </p>
+      <p class="r-dec-rat"></p>
+    </div>
+  </section>
+
+  <section data-reckon="followups" id="followups" class="r-followups">
+    <h2><span class="sec">§</span> Followups</h2>
+    <article class="r-fu" data-id="f-symdef-policy-audit" data-status="resolved" data-tier="sonnet" data-written-by="reckon-create" data-written-at="2026-07-20" data-resolved-at="2026-07-20" data-resolved-by="reckon-ship">
+      <h4 class="r-fu-title">Run the targeted units cleanup (smoke PASSED)</h4>
+      <div class="r-fu-body"><strong>Landed:</strong> <code>latex_def_check</code> identity rule (imas-codex <code>a27beea6</code>); <code>symbol_units_check</code> advisory + <code>audit:symbol_units</code> selector (<code>ee22b1f4</code>); no-units prompt across generate/refine/review seats + shared format partial, Spectrum rule reworded, both narrow exceptions removed (<code>38dfeb97</code>).
+      <strong>Smoke PASSED (2026-07-20):</strong> 30-name run, <strong>30/30 refined docs unit-free, 10/10 unit-bearing docs stripped to none</strong>, 0 errors, $13.04. The new policy produces identity-defined, unit-free docs end-to-end (e.g. <code>ion_diffusivity</code>: tensor definition via <code>name:</code> links, no units).
+      <strong>Re-stamp done (2026-07-20):</strong> full deterministic-audit re-stamp over all 2,347 accepted docs populated the <code>symbol_units</code> findings; <code>audit:symbol_units</code> now selects <strong>357</strong> docs. Side effect: 43 docs re-quarantined — not new defects but latent deterministic-audit findings (mostly <code>perturbed_*</code>/<code>*_real_part</code> tripping representation/amplitude checks) that the fast-grep path had washed to 'valid'; the campaign will fix them (original campaign grew 85→116).
+      <strong>Cleanup running:</strong> <code>--campaign audit:symbol_units --campaign-pilot 357</code> (4 batches, ceiling $130 ≈ $107 at $0.30/name); refines the 357 unit-docs unit-free under the new prompt, self-pruning as units clear. <strong>Then:</strong> finish the original docs campaign (~116) per <code>f-docs-campaign-rotations</code>.</div>
+      <pre class="r-fu-prompt">Project: imas-standard-names / code: imas-codex (branch main)
+Section: §2 — symbol-definition policy: prompt + audit
+Tier:    sonnet
+
+Context
+  The docs-refinement campaign annotates a unit on nearly every LaTeX symbol.
+  Units are recoverable (primary quantity → structured unit field; linked
+  auxiliary quantity → its own unit via the name: link), so restating them in
+  prose is redundant and drift-prone. What is non-redundant is the symbol's
+  IDENTITY. The refine seat is partly incentivised to add units because
+  latex_def_check accepts a bare unit-in-brackets as the "symbol is defined"
+  satisfier. Land this while the running campaign still has ~502 names queued so
+  they pick up the new policy at zero marginal cost. Honour the live decisions
+  above (unit-satisfier, primary-unit-in-prose) — do not re-litigate them.
+
+State to read  (CODE / FILES)
+  imas_codex/standard_names/audits.py — latex_def_check (~line 311), the
+    _DEFINITION_WORDS_SINGLE / _DEFINITION_PHRASES sets, and the
+    "unit in brackets" branch that currently satisfies the check.
+  imas_codex/standard_names/prompts/ — the refine_docs and generate_docs
+    prompt templates (symbol/where-clause guidance).
+  docs-campaign-before-after.html §2b Example 7 — the evidence of the pattern.
+
+Scope locks / constraints (non-decision)
+  - Do NOT halt or alter the running docs campaign; this is forward policy.
+  - No name-axis changes; docs-only.
+  - Explicit-path commits, no AI trailers, no plan refs in messages.
+
+Done-when
+  1. Prompt requires identity/name-link symbol definitions and forbids
+     restating derivable units (per the locked decisions); committed + pushed.
+  2. latex_def_check no longer accepts a bare unit as the sole satisfier;
+     unit tests cover: unit-only symbol FAILS, name-link identity PASSES,
+     non-name symbol with a stated unit PASSES (per the unit-satisfier decision).
+  3. ~30-name smoke rotation shows the new refines define symbols by identity
+     with no redundant units; cost recorded.
+  4. Followup written for the cleanup decision (targeted audit:symbol_units
+     campaign vs absorb-only) + this followup resolved.</pre>
+    </article>
+  </section>
+</main>
+</body>
+</html>

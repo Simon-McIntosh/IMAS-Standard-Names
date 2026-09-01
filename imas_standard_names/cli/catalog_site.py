@@ -1,16 +1,27 @@
-"""Catalog site commands for Standard Names.
+"""Catalog site CLI — Vite SPA build + gh-pages deploy.
 
-Provides the `catalog-site` Click command group for generating standalone
-documentation sites from external catalog repositories containing YAML
-standard name definitions.
+Replaces the previous MkDocs-based pipeline with a Vite + React SPA.
+The CLI signature is unchanged for backwards compatibility with ISNC's
+CI workflow:
 
-This is intended for use in external catalog repositories, not for building
-documentation for the imas-standard-names project itself.
+    standard-names site-deploy <catalog-dir> --version V [--push] [--set-default] [--site-name NAME] [--site-url URL]
+    standard-names serve <catalog-dir> [--port 8000] [--host 127.0.0.1] [--site-name NAME]
+
+The ``--site-name`` and ``--site-url`` options are retained as no-ops
+with deprecation warnings; the SPA carries a fixed title and does not
+need a configured ``site_url``.
+
+Two subprocesses are involved:
+
+* ``npm ci && npm run build`` inside ``site/`` — builds the SPA bundle
+  into ``site/dist`` (CI-style reproducible install).
+* ``npm run dev`` for ``serve`` — Vite's dev server.
+
+Node 20+ is required. If ``node`` / ``npm`` are missing, the CLI fails
+fast with a clear error message rather than after running the dataset
+builder.
 """
 
-from __future__ import annotations
-
-import os
 import shutil
 import subprocess
 import tempfile
@@ -18,256 +29,194 @@ from pathlib import Path
 
 import click
 
-from ..rendering.catalog import CatalogRenderer
+from ..catalog.dataset import write_site_dataset
+from ..catalog.gh_pages import deploy as deploy_to_gh_pages
 
-# Minimal mkdocs.yml template for versioned deployment (with mike plugin)
-MKDOCS_DEPLOY_TEMPLATE = """\
-site_name: "{site_name}"
-site_url: "{site_url}"
+# ``site/`` is checked into the repo at the same level as
+# ``imas_standard_names/``. ``__file__`` is
+# ``imas_standard_names/cli/catalog_site.py`` so two ``parents`` up
+# lands at the repo root. This path is only valid in a source checkout;
+# when installed as a package, callers must pass ``--site-dir`` explicitly.
+_DEFAULT_SITE_DIR = Path(__file__).resolve().parents[2] / "site"
 
-plugins:
-  - search
-  - mike:
-      canonical_version: latest
-      version_selector: true
-      css_dir: stylesheets
-      javascript_dir: javascripts
-
-nav:
-  - Home: index.md
-  - Standard Names: catalog.md
-
-theme:
-  name: material
-  features:
-    - navigation.tracking
-    - navigation.tabs
-    - navigation.tabs.sticky
-    - navigation.top
-    - search.highlight
-
-extra:
-  version:
-    provider: mike
-
-markdown_extensions:
-  - pymdownx.arithmatex:
-      generic: true
-  - footnotes
-  - attr_list
-  - toc:
-      permalink: true
-
-extra_css:
-  - stylesheets/catalog.css
-
-extra_javascript:
-  - https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js
-"""
-
-# Simpler mkdocs.yml template for local preview (no mike plugin)
-MKDOCS_SERVE_TEMPLATE = """\
-site_name: "{site_name}"
-site_url: "{site_url}"
-
-plugins:
-  - search
-
-nav:
-  - Home: index.md
-  - Standard Names: catalog.md
-
-theme:
-  name: material
-  features:
-    - navigation.tracking
-    - navigation.tabs
-    - navigation.tabs.sticky
-    - navigation.top
-    - search.highlight
-
-markdown_extensions:
-  - pymdownx.arithmatex:
-      generic: true
-  - footnotes
-  - attr_list
-  - toc:
-      permalink: true
-
-extra_css:
-  - stylesheets/catalog.css
-
-extra_javascript:
-  - https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js
-"""
-
-CATALOG_CSS = """\
-/* Standard Names Catalog Styles */
-.standard-name {
-    margin-bottom: 2rem;
-    padding: 1rem;
-    border-left: 3px solid var(--md-primary-fg-color);
-}
-
-.standard-name h4 {
-    margin-top: 0;
-    color: var(--md-primary-fg-color);
-}
-
-.standard-name code {
-    background-color: var(--md-code-bg-color);
-    padding: 0.2em 0.4em;
-    border-radius: 3px;
-}
-"""
+__all__ = ["deploy_cmd", "serve_cmd"]
 
 
-def _check_mike_available() -> bool:
-    """Check if mike is available in the environment."""
-    return shutil.which("mike") is not None
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
 
 
-def _mike_error_message() -> str:
-    """Return error message with installation instructions."""
-    return (
-        "mike is required for versioned documentation deployment.\n"
-        "Install with: uv add --group docs mike\n"
-        "Or: pip install mike"
-    )
+def _check_node_available() -> bool:
+    return shutil.which("npm") is not None and shutil.which("node") is not None
 
 
-def _generate_site_content(
+def _resolve_site_dir(site_dir: Path | None) -> Path:
+    """Return the validated site directory path.
+
+    If ``site_dir`` is provided explicitly (e.g. via ``--site-dir``),
+    use it directly. Otherwise fall back to the default source-checkout
+    relative path.
+    """
+    resolved = (site_dir or _DEFAULT_SITE_DIR).resolve()
+    if not (resolved / "package.json").exists():
+        raise click.ClickException(
+            f"site/ scaffold missing at {resolved}. "
+            "Pass --site-dir pointing to the imas-standard-names site/ directory, "
+            "or run from a source checkout."
+        )
+    return resolved
+
+
+def _ensure_node_toolchain() -> None:
+    if not _check_node_available():
+        raise click.ClickException(
+            "Node.js + npm required to build the catalog SPA. "
+            "Install Node 20+ and ensure both `node` and `npm` are on PATH."
+        )
+
+
+def _run(cmd: list[str], *, cwd: Path) -> None:
+    """Run a subprocess, raising a ``ClickException`` on non-zero exit."""
+    result = subprocess.run(cmd, cwd=cwd, check=False)
+    if result.returncode != 0:
+        raise click.ClickException(
+            f"{' '.join(cmd)} (cwd={cwd}) exited with code {result.returncode}"
+        )
+
+
+def _build_spa(dist_dir: Path, site_dir: Path) -> None:
+    """Build the Vite SPA into ``dist_dir``.
+
+    Runs ``npm ci`` (lockfile-driven, reproducible) followed by
+    ``npm run build`` inside ``site_dir``. The Vite build output lives
+    in ``site_dir/dist`` by convention; we copy it into ``dist_dir`` so
+    callers can place it anywhere (e.g. a tempdir for deployment).
+    """
+    _ensure_node_toolchain()
+    _run(["npm", "ci"], cwd=site_dir)
+    _run(["npm", "run", "build"], cwd=site_dir)
+
+    vite_dist = site_dir / "dist"
+    if not vite_dist.exists():
+        raise click.ClickException(f"Vite build produced no output at {vite_dist}")
+    if dist_dir.exists():
+        shutil.rmtree(dist_dir)
+    shutil.copytree(vite_dist, dist_dir)
+
+
+def _build_site(
     catalog_path: Path,
-    docs_dir: Path,
-    site_name: str,
-    mkdocs_template: str,
-    site_url: str = "",
+    dist_dir: Path,
+    site_dir: Path,
+    *,
+    review_base_ref: str | None = None,
+    review_head_ref: str | None = None,
 ) -> int:
-    """Generate mkdocs site content from catalog YAML files.
+    """Build the SPA and write the dataset JSON next to ``index.html``.
 
-    Returns the number of standard names found.
+    Returns the number of standard names written so callers can surface
+    the count to the user.
     """
-    renderer = CatalogRenderer(catalog_path)
-    stats = renderer.get_stats()
-
-    # Create docs structure
-    docs_content_dir = docs_dir / "docs"
-    docs_content_dir.mkdir(exist_ok=True)
-    stylesheets_dir = docs_content_dir / "stylesheets"
-    stylesheets_dir.mkdir(exist_ok=True)
-
-    # Generate mkdocs.yml
-    mkdocs_config = mkdocs_template.format(
-        site_name=site_name,
-        site_url=site_url,
+    _build_spa(dist_dir, site_dir)
+    return write_site_dataset(
+        catalog_path,
+        dist_dir / "data.json",
+        review_base_ref=review_base_ref,
+        review_head_ref=review_head_ref,
     )
-    (docs_dir / "mkdocs.yml").write_text(mkdocs_config)
-
-    # Generate CSS
-    (stylesheets_dir / "catalog.css").write_text(CATALOG_CSS)
-
-    # Generate index.md from README or create default
-    readme_path = catalog_path / "README.md"
-    if readme_path.exists():
-        index_content = readme_path.read_text(encoding="utf-8")
-    else:
-        # Generate default index from catalog stats
-        # Use link_prefix to point to catalog.md for category links
-        index_content = f"# {site_name}\n\n"
-        index_content += renderer.render_overview(link_prefix="catalog.md")
-
-    (docs_content_dir / "index.md").write_text(index_content)
-
-    # Generate catalog.md (no link prefix needed, anchors are on same page)
-    catalog_content = "# Standard Names Catalog\n\n"
-    catalog_content += renderer.render_overview()
-    catalog_content += "\n---\n\n"
-    catalog_content += renderer.render_catalog()
-    (docs_content_dir / "catalog.md").write_text(catalog_content)
-
-    return stats["total_names"]
 
 
-@click.group("catalog-site")
-def catalog_site_cmd():
-    """Generate standalone documentation sites for catalog repositories.
+def _find_git_root(catalog_path: Path) -> Path:
+    """Walk up from ``catalog_path`` to find the nearest ``.git`` directory.
 
-    These commands are for external catalog repositories containing YAML
-    standard name definitions. They generate a browsable mkdocs site
-    for the catalog content.
-
-    For the imas-standard-names project documentation, use mkdocs directly.
+    Matches the previous CLI's behaviour. If no ``.git`` is found, we
+    fail loudly: deployment without a host git repo cannot work and
+    silently falling back to ``cwd`` would be a footgun in CI.
     """
+    current = Path(catalog_path).resolve()
+    for parent in [current, *current.parents]:
+        if (parent / ".git").exists():
+            return parent
+    raise click.ClickException(
+        f"No git repository found at or above {catalog_path}; "
+        "site-deploy needs a git repo so it can publish to gh-pages."
+    )
 
 
-@catalog_site_cmd.command("serve")
+# ---------------------------------------------------------------------------
+# CLI commands
+# ---------------------------------------------------------------------------
+
+
+@click.command("serve")
 @click.argument(
     "catalog_path",
     type=click.Path(exists=True, file_okay=False, path_type=Path),
 )
 @click.option(
-    "--site-name",
-    default="Standard Names Catalog",
-    help="Site name for documentation",
-)
-@click.option(
     "--port",
     default=8000,
-    help="Port to serve on (default: 8000)",
+    show_default=True,
+    help="Port to serve on.",
 )
 @click.option(
     "--host",
     default="127.0.0.1",
-    help="Host to bind to (default: 127.0.0.1)",
+    show_default=True,
+    help="Host to bind to (pass 0.0.0.0 to expose over an SSH tunnel).",
+)
+@click.option(
+    "--site-name",
+    default=None,
+    help="Deprecated; retained for backwards compatibility (no-op).",
+)
+@click.option(
+    "--site-dir",
+    "site_dir",
+    type=click.Path(exists=True, file_okay=False, path_type=Path),
+    default=None,
+    help="Path to the imas-standard-names site/ directory (Vite SPA source).",
 )
 def serve_cmd(
     catalog_path: Path,
-    site_name: str,
     port: int,
     host: str,
-):
-    """Serve catalog site locally for preview.
+    site_name: str | None,
+    site_dir: Path | None,
+) -> None:
+    """Serve the catalog SPA locally for preview.
 
     CATALOG_PATH: Path to directory containing standard name YAML files.
 
-    Generates a temporary mkdocs site and serves it locally. Does not
-    require mike or a git repository. Use for previewing changes before
-    deploying.
+    Writes the catalog dataset to ``site/public/data.json`` then launches
+    ``npm run dev``. Vite serves the SPA with hot-reload from ``site/``.
     """
-    # Set up temporary docs directory
-    temp_dir = tempfile.mkdtemp(prefix="sn-catalog-site-")
-    docs_dir = Path(temp_dir)
+    if site_name:
+        click.echo("warning: --site-name is now a no-op", err=True)
 
-    try:
-        total_names = _generate_site_content(
-            catalog_path=catalog_path,
-            docs_dir=docs_dir,
-            site_name=site_name,
-            mkdocs_template=MKDOCS_SERVE_TEMPLATE,
-            site_url=f"http://{host}:{port}/",
-        )
+    _ensure_node_toolchain()
+    resolved_site_dir = _resolve_site_dir(site_dir)
 
-        if total_names == 0:
-            click.echo("Warning: No standard names found in catalog", err=True)
+    # Vite serves anything in ``public/`` at the site root, so writing
+    # ``data.json`` here means the dev server sees it without any extra
+    # plugin configuration.
+    public = resolved_site_dir / "public"
+    public.mkdir(exist_ok=True)
+    n = write_site_dataset(catalog_path, public / "data.json")
+    if n == 0:
+        click.echo("Warning: No standard names found in catalog", err=True)
+    click.echo(f"Generated dataset for {n} standard names")
+    click.echo(f"Starting dev server at http://{host}:{port}/")
+    click.echo("Press Ctrl+C to stop...")
 
-        click.echo(f"Generated site for {total_names} standard names")
-        click.echo(f"Serving at http://{host}:{port}/")
-        click.echo("Press Ctrl+C to stop...")
-
-        # Serve with mkdocs
-        result = subprocess.run(
-            ["mkdocs", "serve", "--dev-addr", f"{host}:{port}"],
-            cwd=docs_dir,
-        )
-
-        if result.returncode != 0:
-            raise SystemExit(result.returncode)
-
-    finally:
-        shutil.rmtree(docs_dir, ignore_errors=True)
+    _run(
+        ["npm", "run", "dev", "--", "--port", str(port), "--host", host],
+        cwd=resolved_site_dir,
+    )
 
 
-@catalog_site_cmd.command("deploy")
+@click.command("site-deploy")
 @click.argument(
     "catalog_path",
     type=click.Path(exists=True, file_okay=False, path_type=Path),
@@ -276,97 +225,122 @@ def serve_cmd(
     "--version",
     "doc_version",
     required=True,
-    help="Version string for deployment (e.g., 'v1.0', 'main', 'pr-123')",
-)
-@click.option(
-    "--site-name",
-    default="Standard Names Catalog",
-    help="Site name for documentation",
-)
-@click.option(
-    "--site-url",
-    default="",
-    help="Site URL for documentation",
+    help="Version string for deployment (e.g. 'v1.0', 'main', 'pr-123').",
 )
 @click.option(
     "--push",
     is_flag=True,
-    help="Push to gh-pages branch after deployment",
+    help="Push the gh-pages branch to the remote after deployment.",
 )
 @click.option(
     "--set-default",
     is_flag=True,
-    help="Set this version as the default (latest)",
+    help="Mark this version as the default (alias 'latest').",
+)
+@click.option(
+    "--site-name",
+    default=None,
+    help="Deprecated; retained for backwards compatibility (no-op).",
+)
+@click.option(
+    "--site-url",
+    default=None,
+    help="Deprecated; retained for backwards compatibility (no-op).",
+)
+@click.option(
+    "--remote",
+    default="origin",
+    show_default=True,
+    help="Git remote to push the gh-pages branch to.",
+)
+@click.option(
+    "--branch",
+    default="gh-pages",
+    show_default=True,
+    help="Deploy branch name.",
+)
+@click.option(
+    "--site-dir",
+    "site_dir",
+    type=click.Path(exists=True, file_okay=False, path_type=Path),
+    default=None,
+    help="Path to the imas-standard-names site/ directory (Vite SPA source).",
+)
+@click.option(
+    "--review-base",
+    default=None,
+    help="Catalog base Git ref for a semantic review-preview scope.",
+)
+@click.option(
+    "--review-head",
+    default=None,
+    help="Catalog head Git ref for a semantic review-preview scope.",
 )
 def deploy_cmd(
     catalog_path: Path,
     doc_version: str,
-    site_name: str,
-    site_url: str,
     push: bool,
     set_default: bool,
-):
-    """Deploy versioned catalog site using mike.
+    site_name: str | None,
+    site_url: str | None,
+    remote: str,
+    branch: str,
+    site_dir: Path | None,
+    review_base: str | None,
+    review_head: str | None,
+) -> None:
+    """Build the SPA and deploy it to gh-pages/<version>/.
 
     CATALOG_PATH: Path to directory containing standard name YAML files.
 
-    Generates a mkdocs site and deploys it as a versioned documentation
-    using mike. Requires a git repository and mike to be installed.
+    Backwards-compatible signature: ISNC's CI workflow calls this
+    command verbatim. The Vite SPA is built from ``site/`` and copied
+    under the deploy branch's ``<version>/`` directory. ``versions.json``
+    is updated in mike-compatible format so any existing tooling that
+    reads it continues to work.
 
     Typical CI workflow:
 
-        standard-names catalog-site deploy ./standard_names --version v1.0 --push
+        standard-names site-deploy ./standard_names --version v1.0 --push --set-default
     """
-    if not _check_mike_available():
-        click.echo(f"Error: {_mike_error_message()}", err=True)
-        raise SystemExit(1)
-
-    # Set up temporary docs directory
-    temp_dir = tempfile.mkdtemp(prefix="sn-catalog-site-")
-    docs_dir = Path(temp_dir)
-
-    try:
-        total_names = _generate_site_content(
-            catalog_path=catalog_path,
-            docs_dir=docs_dir,
-            site_name=site_name,
-            mkdocs_template=MKDOCS_DEPLOY_TEMPLATE,
-            site_url=site_url,
+    if site_name or site_url:
+        click.echo(
+            "warning: --site-name / --site-url are now no-ops",
+            err=True,
+        )
+    if (review_base is None) != (review_head is None):
+        raise click.UsageError(
+            "--review-base and --review-head must be provided together"
         )
 
-        if total_names == 0:
+    resolved_site_dir = _resolve_site_dir(site_dir)
+    repo_root = _find_git_root(catalog_path)
+
+    with tempfile.TemporaryDirectory(prefix="sn-site-") as tmp:
+        dist_dir = Path(tmp) / "dist"
+        n = _build_site(
+            catalog_path,
+            dist_dir,
+            resolved_site_dir,
+            review_base_ref=review_base,
+            review_head_ref=review_head,
+        )
+        if n == 0:
             click.echo("Warning: No standard names found in catalog", err=True)
+        click.echo(f"Built SPA for {n} standard names")
 
-        click.echo(f"Generated site for {total_names} standard names")
-
-        # Deploy with mike
-        mike_args = ["mike", "deploy", doc_version]
-        if set_default:
-            mike_args.extend(["--update-aliases", "latest"])
-        if push:
-            mike_args.append("--push")
-
-        env = os.environ.copy()
-        result = subprocess.run(
-            mike_args,
-            cwd=docs_dir,
-            env=env,
-            capture_output=True,
-            text=True,
+        deploy_to_gh_pages(
+            repo_root=repo_root,
+            src_dir=dist_dir,
+            version=doc_version,
+            alias_latest=set_default,
+            push=push,
+            remote=remote,
+            branch=branch,
         )
 
-        if result.returncode != 0:
-            click.echo(f"mike deploy failed:\n{result.stderr}", err=True)
-            raise SystemExit(1)
-
-        click.echo(f"✓ Deployed version '{doc_version}'")
-        if set_default:
-            click.echo("✓ Set as default version (latest)")
-        if push:
-            click.echo("✓ Pushed to gh-pages")
-
-    finally:
-        shutil.rmtree(docs_dir, ignore_errors=True)
-
-
-__all__ = ["catalog_site_cmd"]
+    click.echo(f"✓ Deployed version '{doc_version}'")
+    if set_default:
+        click.echo("✓ Set as default version (latest)")
+    if push:
+        click.echo(f"✓ Pushed to {remote}/{branch}")

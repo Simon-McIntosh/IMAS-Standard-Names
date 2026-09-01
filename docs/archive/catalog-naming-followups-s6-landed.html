@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-standard-names">
+  <meta name="reckon-type" content="doc">
+  <meta name="plan-slug" content="catalog-naming-followups-s6-landed">
+  <meta name="plan-title" content="§6 landed — dd-path dedup: single source_paths over-attach trimmed">
+  <meta name="plan-summary" content="dd_path_uniqueness_check 2→0; the over-attach was a source_paths list property, not an edge; the 6 expected momentum inconsistencies did not exist">
+  <meta name="plan-informs" content="catalog-naming-followups">
+  <title>§6 landed — dd-path dedup | imas-standard-names</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="s1">§6 — dd-path dedup residual <span class="badge badge-shipped">✓ landed 2026-07-05</span></h2>
+    <p>Evergreen: <a href="/imas-standard-names/catalog-naming-followups.html">catalog-naming-followups</a> §6
+    (followup <code>f-cnf-003</code>). Acceptance gate: <code>dd_path_uniqueness_check</code> (codex
+    <code>cafbb397</code>) must return zero over the accepted corpus.</p>
+
+    <h3>Ground truth vs the authored estimate</h3>
+    <p>The plan estimated "1 remaining duplicate path + 6 momentum-family base-carrier inconsistencies". A live-graph
+    audit (read-only, 2440 accepted names) corrected both:</p>
+    <ul>
+      <li><strong>dd_path_uniqueness_check = 2</strong> (not 1) — both SPI:
+      <code>spi/injector/injection_direction/y</code> and <code>/z</code> each carried two names.</li>
+      <li><strong>Momentum base-carrier inconsistencies = 0</strong> (not 6). No momentum vector-node family with axis
+      leaves is even present in the accepted corpus — the archived classification's 90 dup paths + 9 C-bucket cases
+      were already resolved by <a href="/imas-standard-names/independent-review-fixes.html">independent-review-fixes</a>;
+      the residual was resolved via a superseded <code>normalized_momentum_flux</code> rename. The SPI pair is a
+      newer residual not in that archive.</li>
+    </ul>
+
+    <h3>Root cause — a property, not an edge</h3>
+    <p>Both violations traced to ONE name: <code>x_direction_unit_vector_of_pellet_injector</code>. Its
+    <code>source_paths</code> LIST PROPERTY (which <code>dd_path_uniqueness_check</code> reads) claimed all three
+    <code>injection_direction/{x,y,z}</code> leaves, while the actual <code>HAS_STANDARD_NAME</code> edges were already
+    correct 1:1 (<code>x_</code>→/x, <code>y_</code>→/y, <code>z_</code>→/z). So the classification's "A-bucket detach"
+    was a stale-property trim, not an edge delete (an edge delete would have matched 0 rows).</p>
+
+    <h3>Fix (surgical, reversible, durable)</h3>
+    <pre><code>MATCH (sn:StandardName {id:'x_direction_unit_vector_of_pellet_injector'})
+SET sn.source_paths = [p IN sn.source_paths WHERE NOT p IN
+    ['dd:spi/injector/injection_direction/y','dd:spi/injector/injection_direction/z']]</code></pre>
+    <p>Guarded before/after (assert the 2 drops present + <code>/x</code> present before; assert after ==
+    <code>[/x]</code>, delta == 2). No node deleted, no edge changed, <code>y_</code>/<code>z_</code> names untouched.
+    <strong>Durable with no re-export:</strong> <code>source_paths</code> is pipeline-only graph state — it is neither
+    emitted to the ISNC YAML (<code>export.py:512-514</code>) nor written on import
+    (<code>catalog_import.py</code> never sets it), so a re-import cannot restore the over-attach.</p>
+
+    <h3>Verification</h3>
+    <ul>
+      <li><code>dd_path_uniqueness_check</code>: 2 → <strong>0</strong> over 2440 accepted names.</li>
+      <li><code>vector_family_consistency_check</code>: the SPI "covers multiple leaves x,y,z" flag gone; momentum
+      families still 0. Two flags remain (<code>sensor_attachment_point</code> <code>vertical</code>-vs-<code>z</code>)
+      — the Cartesian z-axis re-lock, handled in §7 via the drafted <code>z_coordinate_of_sensor_attachment_point</code>
+      rename.</li>
+    </ul>
+
+    <h3>Parked for §4</h3>
+    <p><code>y_direction_</code>/<code>z_direction_unit_vector_of_pellet_injector</code> each still carry a
+    <code>shatter_cone/direction/{y,z}</code> path in <code>source_paths</code> while those shatter_cone
+    <code>StandardNameSource</code> nodes are <code>vocab_gap</code> with no <code>HAS_STANDARD_NAME</code> edge — a
+    property/edge inconsistency to resolve when §4 handles the shatter_cone family.</p>
+  </main>
+</body>
+</html>

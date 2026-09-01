@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-standard-names">
+  <meta name="reckon-type" content="archive">
+  <meta name="plan-slug" content="sn-boundary-averaged-name-multiplicity-s4-landed">
+  <meta name="plan-status" content="done">
+  <title>§4 landed — persistent fixes | sn-boundary-averaged-name-multiplicity</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+  <h1>§4 landed — vocab / grammar / prompt / grouper encoding of the conditional rule</h1>
+  <p>Evergreen: <a href="/imas-standard-names/sn-boundary-averaged-name-multiplicity.html">sn-boundary-averaged-name-multiplicity</a> · landed 2026-07-10</p>
+
+  <h2>What shipped</h2>
+  <table>
+    <thead><tr><th>Level</th><th>Change</th><th>Commit</th></tr></thead>
+    <tbody>
+      <tr><td>Vocab (ISN)</td><td><code>constant_on_flux_surface: true</code> flag on <code>safety_factor</code>, <code>magnetic_shear</code>, <code>magnetic_flux</code>, <code>pressure</code> in <code>physical_bases.yml</code> and on the flux-label carriers (<code>toroidal_flux_radius</code>, <code>toroidal_flux_coordinate</code>, <code>normalized_toroidal_flux_coordinate</code>, <code>normalized_poloidal_flux_coordinate</code>) in <code>geometry_carriers.yml</code>; <code>flux_surface_reduction: true</code> on the three reduction operators in <code>operators.yml</code>. Membership per the locked <code>flux-function-base-list</code> decision (definitional-only).</td><td rowspan="2"><code>b8a2024</code> (ISN)</td></tr>
+      <tr><td>Grammar (ISN)</td><td>IR-level gate in <code>grammar/model.py</code>: a flux-surface reduction (<code>flux_surface_averaged</code>, <code>maximum/minimum_over_flux_surface</code>) applied to a flagged base fails BOTH <code>parse_standard_name</code> and <code>compose_standard_name</code> (recurses into binary-operator arguments). 19 unit tests in <code>tests/grammar/test_flux_surface_reduction_gate.py</code>; full ISN suite 1665 passed / 2 legacy fixtures updated to surface-varying bases.</td></tr>
+      <tr><td>Prompts (imas-codex)</td><td><code>generate_name_dd.md</code> separatrix_average path-rule row replaced with the conditional rule (locus always; prefix iff not constant_on_flux_surface; flux-function leaves share ONE name across both subtrees). <code>generate_name_system.md</code> averaging-operator bullet gains the no-op guard; <code>review.md</code> gains check [I2.8] (both directions: no reduction of a flux function; surface-varying averaged leaves must keep the prefix).</td><td rowspan="3"><code>8d6cb77b</code> (imas-codex)</td></tr>
+      <tr><td>Audit (imas-codex)</td><td><code>audits.find_flux_surface_reduction_violations()</code> — read-only live-catalog probe wired into the <code>sn run</code> startup reconcile block (warns with offender list). Pre-collapse it flags exactly 1 live violation: <code>flux_surface_averaged_magnetic_shear</code> (superseded by §3).</td></tr>
+      <tr><td>Grouper (imas-codex)</td><td><code>harmonize._FAMILY_REDUCTION_OPERATORS</code>: the three reduction operator tokens now join docs-harmonization families via the edge <code>operator</code> token (kind filter unchanged, so the broad unary_prefix class stays out). <code>derive_edges</code>/<code>parents.py</code> confirmed correct, untouched.</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Results</h2>
+  <ul>
+    <li>Gate verified end-to-end: <code>flux_surface_averaged_safety_factor_at_plasma_boundary</code> rejected; <code>flux_surface_averaged_electron_density_at_plasma_boundary</code> round-trips.</li>
+    <li>ISN pin in imas-codex bumped <code>515d83c → b8a2024</code> (extras-preserving <code>uv sync --extra test</code>).</li>
+    <li>Generalisation: no live <code>maximum/minimum_over_flux_surface</code> names exist; <code>summary/volume_average/*</code> (26 leaves / 27 names) explicitly scoped out — a volume average of a flux function is NOT a no-op.</li>
+  </ul>
+</main>
+</body>
+</html>

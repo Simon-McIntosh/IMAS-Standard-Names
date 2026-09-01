@@ -1,9 +1,8 @@
-"""Tests for tokamak parameters database and tool."""
+"""Tests for the tokamak parameters database."""
 
 import pytest
 
 from imas_standard_names.tokamak_parameters import TokamakParametersDB
-from imas_standard_names.tools.tokamak import TokamakParametersTool
 
 
 def test_load_iter_parameters():
@@ -112,77 +111,6 @@ def test_caching():
 
     # Should be the same object due to caching
     assert params1 is params2
-
-
-@pytest.mark.anyio
-async def test_mcp_tool_single_machine():
-    """Test MCP tool with single machine."""
-    tool = TokamakParametersTool()
-    result = await tool.get_tokamak_parameters("ITER")
-
-    assert "geometry" in result
-    assert result["geometry"]["major_radius"]["value"] == 6.2
-    assert "statistics" not in result
-    assert "catalog_version" in result
-
-
-@pytest.mark.anyio
-async def test_mcp_tool_multiple_machines():
-    """Test MCP tool with multiple machines."""
-    tool = TokamakParametersTool()
-    result = await tool.get_tokamak_parameters("ITER JET DIII-D")
-
-    assert "machines" in result
-    assert "statistics" in result
-    assert len(result["machines"]) == 3
-    assert "geometry" in result["statistics"]
-    assert "major_radius" in result["statistics"]["geometry"]
-    assert result["machine_count"] == 3
-    assert "catalog_version" in result
-
-
-@pytest.mark.anyio
-async def test_mcp_tool_all_machines():
-    """Test MCP tool with 'all' parameter."""
-    tool = TokamakParametersTool()
-    result = await tool.get_tokamak_parameters("all")
-
-    assert "machines" in result
-    assert "statistics" in result
-    assert result["machine_count"] >= 8
-    assert "catalog_version" in result
-
-
-@pytest.mark.anyio
-async def test_mcp_tool_default_is_all():
-    """Test MCP tool defaults to 'all' machines."""
-    tool = TokamakParametersTool()
-    result = await tool.get_tokamak_parameters()
-
-    assert "machines" in result
-    assert "statistics" in result
-    assert result["machine_count"] >= 8
-
-
-@pytest.mark.anyio
-async def test_mcp_tool_not_found():
-    """Test error handling for unknown machine."""
-    tool = TokamakParametersTool()
-    result = await tool.get_tokamak_parameters("UNKNOWN")
-
-    assert result["error"] == "MachineNotFound"
-    assert "available_machines" in result
-    assert "usage" in result
-
-
-@pytest.mark.anyio
-async def test_mcp_tool_partial_invalid():
-    """Test error when one machine in list is invalid."""
-    tool = TokamakParametersTool()
-    result = await tool.get_tokamak_parameters("ITER UNKNOWN JET")
-
-    assert result["error"] == "MachineNotFound"
-    assert "available_machines" in result
 
 
 def test_all_machines_have_required_fields():

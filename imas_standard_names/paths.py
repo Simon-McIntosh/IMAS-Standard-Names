@@ -166,6 +166,11 @@ class CatalogPaths:
             p = Path(s).expanduser().resolve()
             return p
 
+        # If it exists relative to CWD, use it directly (CI/catalog repos)
+        cwd_candidate = Path.cwd() / s
+        if cwd_candidate.exists():
+            return cwd_candidate.resolve()
+
         # For relative paths (../, ./), resolve relative to the project root
         # (parent of the package directory) instead of CWD
         if s.startswith(("../", "./", "..\\", ".\\")):

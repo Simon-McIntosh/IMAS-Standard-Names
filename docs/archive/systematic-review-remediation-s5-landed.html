@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-standard-names">
+  <title>§5 (P4) landed — catalog unit-family repairs | systematic-review-remediation</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+  <p><a href="/imas-standard-names/systematic-review-remediation.html">&larr; back to the evergreen plan</a></p>
+  <h1>§5 — P4: Catalog unit-family repairs <span class="badge badge-shipped">✓ landed 2026-07-11</span></h1>
+
+  <p>Executed as supervised <code>sn edit</code> operations against the production graph (lead-authorized
+  window), each repair re-validated and re-reviewed through the full P2 gate stack; accepted-name renames
+  stamped <code>superseded_from_stage=accepted</code> so P1 emits deprecation stubs at the next export.
+  The review §7 table was 4 days stale — every row was reconciled against the live graph first
+  (13 momentum rows had already been superseded by June pipeline work; 3 of the 4 energy-flux wall entries
+  had been re-united to W·m⁻² by the DD interim fix).</p>
+
+  <h2>Per-family outcome</h2>
+  <table>
+    <thead><tr><th>Family</th><th>Decision</th><th>Result</th></tr></thead>
+    <tbody>
+      <tr><td>Momentum → momentum_source</td><td>d-momentum-rename</td>
+        <td>18 accepted names, 17 edits (5 subtree roots + 12 projections). 14 successors accepted through the
+          gates (scores 0.875–1.0); the deferred diamagnetic cascade child recovered by explicit self-scope
+          rename. Residual check: <strong>0 accepted bare <code>*_momentum</code> at kg·m⁻¹·s⁻²</strong>.</td></tr>
+      <tr><td>Energy-flux dimension flips</td><td>d-energy-flux-reserve</td>
+        <td>2 still-applicable recombination entries (m⁻²·s⁻¹) folded into the particle-flux family as
+          <code>incident_neutral{,_state}_particle_flux_at_wall_due_to_recombination</code> — both accepted.
+          The energy_flux family is now uniformly W·m⁻² across all accepted rows.</td></tr>
+      <tr><td>Power-density outliers → energy_flux</td><td>d-power-density (lead-refined)</td>
+        <td>The locked <code>*_power_flux_*</code> target was grammar-inexpressible (a flux of power is
+          dimensionally nonsensical — W·m⁻² <em>is</em> the flux of energy). Lead decision: fold the 6 W·m⁻²
+          entries into <code>energy_flux</code>; peaks use the canonical transformation
+          <code>maximum_of_energy_flux_at_&lt;locus&gt;</code> (the infix <code>energy_peak_flux</code> spelling
+          was explicitly disallowed). 5 renames accepted/collapsed
+          (<code>energy_flux_at_divertor_target</code>, <code>maximum_of_energy_flux_at_{first_wall,divertor_target}</code>;
+          <code>energy_flux_at_first_wall</code> collapsed into the existing <code>energy_flux_at_wall</code> by
+          the reviewer). power_density (W·m⁻³) family untouched (71 rows).</td></tr>
+      <tr><td>One-line self-contradictions</td><td>—</td>
+        <td><code>toroidal_angle_of_active_limiter_point</code>: recomposed from its true DD source (a
+          dimensionless flux-limiter multiplier) rather than blessing the hallucinated <code>rad</code> anchor —
+          the DD has no φ for active_limiter_point. Hz→s⁻¹ (fusion neutron rate) and electron_source_rate
+          deferred (see residuals).</td></tr>
+      <tr><td>Source/flux validator rule</td><td>—</td>
+        <td>Live at ISN <code>4d43923</code>: flags families where <code>*_X</code> and <code>*_X_flux</code>/<code>*_X_source</code>
+          share identical units under near-identical names (warning severity) + 6 tests.</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Deprecation-stub spot-check</h2>
+  <p>Every renamed accepted old name shows <code>name_stage=superseded, superseded_from_stage=accepted</code>
+  in the graph (the 802 pre-existing superseded nodes carry <code>sfs=None</code>, so the new stamps are a clean
+  signal) — confirming P1 will emit their deprecation stubs at the next export.</p>
+
+  <h2>Residuals (documented, safe)</h2>
+  <ul>
+    <li><strong>3 neutral_state momentum successors exhausted</strong>
+      (<code>parallel/poloidal/toroidal_neutral_state_momentum_source</code>): near-threshold quorum
+      (0.756–0.825 vs 0.85), not a naming defect — the pipeline's own refine agreed no better name exists, and
+      the state-resolved DD sources are genuinely distinct from the accepted state-summed siblings. Their old
+      names are superseded; P1's skip-logic (successor not published ⇒ stub skipped) prevents any dangling
+      pointer, so this is safe. Not force-accepted — that would bypass the P2 gate. Left for a future
+      escalated-review or lead physics-judgement pass.</li>
+    <li><strong><code>maximum_of_energy_flux_at_limiter</code> drafted</strong>: the refine loop reworded
+      <code>along_limiter</code> → <code>at_limiter</code> (canonical locus preference); the successor drains
+      through a normal review rotation.</li>
+    <li><strong><code>parallel_net_ion_momentum_source</code></strong>: refine reworded from
+      <code>parallel_ion_momentum_source</code> ("net" is redundant — true of every family member); the clean
+      re-rename is blocked by the superseded-intermediate tombstone id (queued: tombstone-id supersede
+      mechanism — now blocking two honest repairs).</li>
+    <li><strong>Pair supersede</strong> (<code>power_density_at_wall</code> → existing
+      <code>energy_flux_at_wall</code>): no <code>sn edit</code> rename-onto-existing-id mechanism exists; staged
+      as a targeted write (<code>p4_pair_supersede.py</code>, both confirmed accepted W·m⁻²) run under the
+      supervised window.</li>
+    <li><strong>Hz→s⁻¹ + electron_source_rate</strong>: DD-unit-driven (unit_overrides territory) and a
+      mixed-source-set unit issue respectively — cross-scope, queued.</li>
+  </ul>
+
+  <h2>Mixed-unit sweep</h2>
+  <p>Regenerated from the live graph: 2312 accepted names, 310 grammar-groups, 36 mixed-unit — the residual is
+  principled splits (eV vs K temperatures, global s⁻¹ vs volumetric m⁻³·s⁻¹ rates) plus a short list of genuine
+  oddities recorded for later review (neutron-detector unit vectors carrying <code>m</code>; the bare-flux group).</p>
+</main>
+</body>
+</html>

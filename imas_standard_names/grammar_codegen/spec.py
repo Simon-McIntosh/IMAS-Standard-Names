@@ -220,7 +220,7 @@ def _flatten_unique(values: Iterable[Any]) -> tuple[str, ...]:
 
 
 def _extract_vocab_tokens(value: Any, vocab_name: str = "") -> tuple[str, ...]:
-    """Extract token names from a vocabulary value, handling vNext typed formats.
+    """Extract token names from a vocabulary value, handling typed formats.
 
     Supports the following vocabulary file formats:
     - Flat list of strings (legacy components/subjects/regions/processes)
@@ -232,9 +232,9 @@ def _extract_vocab_tokens(value: Any, vocab_name: str = "") -> tuple[str, ...]:
     - Bare dict with string keys (legacy flat dict vocabs)
 
     When ``vocab_name`` is ``"objects"`` or ``"positions"``, loci tokens are
-    filtered by ``type`` to preserve rc20 semantics:
+    filtered by ``type``:
     - ``objects``   → only ``entity``-typed loci (used as device/object prefixes)
-    - ``positions`` → only ``position``-typed loci (used as *at* suffixes)
+    - ``positions`` → ``position``- and ``geometry``-typed spatial loci
 
     When ``vocab_name`` is ``"transformations"`` or ``"decomposition"``, operator
     tokens are filtered by ``kind`` to exclude binary operators (``product``,
@@ -242,9 +242,12 @@ def _extract_vocab_tokens(value: Any, vocab_name: str = "") -> tuple[str, ...]:
     - ``transformations`` / ``decomposition`` → exclude ``kind: binary`` operators
     """
     # Type-filter mappings for backward-compatible locus_registry vocabulary slices
-    _LOCUS_TYPE_FILTERS: dict[str, str] = {
-        "objects": "entity",
-        "positions": "position",
+    _LOCUS_TYPE_FILTERS: dict[str, frozenset[str]] = {
+        "objects": frozenset({"entity"}),
+        # The legacy Position enum backs every spatial suffix class in
+        # SEGMENT_TOKEN_MAP, so it includes both point-like and
+        # geometry-typed loci.
+        "positions": frozenset({"position", "geometry"}),
     }
     # Vocab names that should exclude binary operators from operators.yml
     _UNARY_ONLY_OPERATOR_VOCABS: frozenset[str] = frozenset(
@@ -256,18 +259,18 @@ def _extract_vocab_tokens(value: Any, vocab_name: str = "") -> tuple[str, ...]:
     if isinstance(value, list):
         return _flatten_unique(value)
     if isinstance(value, dict):
-        # vNext typed vocabulary formats — extract the canonical root key
+        # Typed vocabulary formats — extract the canonical root key
         for root_key in ("loci", "carriers", "bases", "operators", "axes"):
             if root_key in value:
                 inner = value[root_key]
                 if root_key == "loci" and isinstance(inner, dict):
-                    locus_type = _LOCUS_TYPE_FILTERS.get(vocab_name)
-                    if locus_type:
+                    locus_types = _LOCUS_TYPE_FILTERS.get(vocab_name)
+                    if locus_types:
                         # Filter by type for objects/positions backward compat
                         return tuple(
                             k
                             for k, v in inner.items()
-                            if isinstance(v, dict) and v.get("type") == locus_type
+                            if isinstance(v, dict) and v.get("type") in locus_types
                         )
                     return _flatten_unique(inner.keys())
                 if root_key == "operators" and isinstance(inner, dict):

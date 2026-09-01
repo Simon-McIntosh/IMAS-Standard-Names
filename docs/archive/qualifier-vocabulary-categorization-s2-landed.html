@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-standard-names">
+  <meta name="reckon-type"  content="research">
+  <meta name="plan-slug"    content="qualifier-vocabulary-categorization-s2-landed">
+  <meta name="plan-title"   content="§2 landed — Qualifier Vocabulary Categorization">
+  <meta name="plan-summary" content="Per-stage record: qualifier categorization landed in ISN + SPA.">
+  <meta name="plan-informs" content="qualifier-vocabulary-categorization">
+  <title>§2 landed — Qualifier Vocabulary Categorization | imas-standard-names</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h2>§2 landed — Qualifier vocabulary categorization</h2>
+    <p>
+      Record for the qualifier-vocabulary-categorization plan §2 (all sub-sections). The Grammar
+      composer's qualifier picker is now categorized at the ISN root, not worked around in the SPA.
+    </p>
+
+    <h3>Outcomes</h3>
+    <table>
+      <thead><tr><th>Item</th><th>Result</th><th>Artifact</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>§2a — de-pollute the qualifier role</td>
+          <td>✓ keep-flag</td>
+          <td>The 136 cross-listed tokens (<code>bolometer</code>, <code>gradient</code>, …) were found
+              NOT to be in <code>qualifiers.yml</code> — they enter <code>Vocabularies.qualifiers</code>
+              only because the parser unions unary-prefix operators + locus/object tokens for stripping.
+              Fix: the emitter publishes <code>qualifiers.yml</code> (genuine set), not the union. Parser
+              acceptance untouched → zero round-trip risk.</td>
+        </tr>
+        <tr>
+          <td>§2b — categorize genuine qualifiers</td>
+          <td>✓ 12 categories</td>
+          <td><code>imas_standard_names/grammar/vocabularies/qualifier_categories.yml</code> — all 161
+              tokens mapped (transport·source·geometry·region·state·energy·diagnostic·polarization·temporal·normalized·species·engineering).
+              Parser populates IR <code>Qualifier.category</code> via <code>load_qualifier_categories()</code>.</td>
+        </tr>
+        <tr>
+          <td>§2c — emit categories</td>
+          <td>✓ 159 emitted</td>
+          <td><code>dataset.py::_build_grammar_vocab</code>: <code>GRAMMAR_VOCAB.qualifiers</code> =
+              genuine set minus subjects, each <code>{token, category}</code>.</td>
+        </tr>
+        <tr>
+          <td>§2d — site picker</td>
+          <td>✓ grouped by category</td>
+          <td><code>site/src/views/Grammar.jsx</code>: generic qualifier picker sub-groups by emitted
+              category; subtraction workaround removed; subjects no longer mixed in.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Verification</h3>
+    <ul>
+      <li>Full-catalog round-trip: <strong>1364/1364</strong> (8 binary-operator names use the verbatim fallback).</li>
+      <li>Python suite: <strong>1540 passed</strong> + the vocab-uniqueness test updated to exclude the category map.</li>
+      <li>SPA: <strong>154 passed</strong> incl. a category-grouping test (generic picker has no subject/aggregation group).</li>
+      <li>New invariant test: every <code>qualifiers.yml</code> token is categorized exactly once.</li>
+    </ul>
+
+    <h3>What's next</h3>
+    <p>
+      Optional refinement (queued as a followup on the parent plan): a domain-expert pass over the
+      family-based 12-category bucketing (e.g. <code>ferritic</code> material vs source;
+      <code>normalized</code> currently under state→normalized), and a deeper audit of whether any
+      genuinely mis-filed locus/operator tokens should be removed from the parser's qualifier
+      acceptance union (vs. merely excluded from the published role).
+    </p>
+  </main>
+</body>
+</html>

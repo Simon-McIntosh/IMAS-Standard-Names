@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-standard-names">
+  <meta name="reckon-type" content="doc">
+  <meta name="plan-slug" content="catalog-expert-review-remediation-s76-landed">
+  <meta name="plan-title" content="§7.6 landed — catalog RC v0.2.0rc63 cut; strain-gauge docs + four root fixes">
+  <meta name="plan-summary" content="The '6 US-spelling renames' residue was a double misdiagnosis: spelling is advisory and the names are DD-faithful. The real defect was broken placeholder documentation. Fixed 5 docs (no renames), landed four root-cause fixes surfaced en route, and cut catalog RC v0.2.0rc63 (1858 names, all gates pass).">
+  <meta name="plan-informs" content="catalog-expert-review-remediation">
+  <title>§7.6 landed — catalog RC v0.2.0rc63 | imas-standard-names</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="s76">§7.6 landed — export + catalog RC
+      <span class="badge badge-shipped">✓ landed 2026-07-21</span></h2>
+    <p>Evergreen: <a href="/imas-standard-names/catalog-expert-review-remediation.html">catalog-expert-review-remediation</a> §7.6.
+    Resolves <code>f-close-out-residuals</code>. The close-out surfaced that the planned residue
+    was mis-scoped twice over, and drove out four genuine root-cause bugs before the RC could cut.</p>
+
+    <h3>1 — the residue was a double misdiagnosis</h3>
+    <p>The plan carried the residue as "6 <code>*_strain_gauge</code>→<code>*_strain_gage</code> US-spelling renames."
+    Both halves were wrong:</p>
+    <ul>
+      <li><strong>Spelling was a red herring.</strong> <code>american_spelling_check</code> (NC-17) is an
+        <em>advisory</em> audit — it never quarantines. And <code>gauge</code> is the standard American
+        spelling (Merriam-Webster headword; the IMAS DD itself writes "strain rosette gauge"). The
+        <code>breame</code> library maps <code>gauge→gage</code>, a niche variant. Chasing it was incorrect.</li>
+      <li><strong>The names are correct.</strong> Verified 1:1 against the DD: <code>operational_instrumentation/sensor/direction</code>
+        and <code>.../direction_second</code> (a strain rosette gauge's two measurement-direction unit vectors),
+        each with x/y/z components → 6 names, structurally identical to 20+ accepted siblings
+        (<code>x_direction_unit_vector_of_camera</code>, …). Not a pipeline error.</li>
+      <li><strong>The real defect:</strong> 5 of the 6 documentation bodies contained unfilled/bracketed
+        placeholder text (e.g. <code>[x component of the second measurement-direction unit vector]</code>)
+        that trips <code>placeholder_check</code> — a <em>critical</em>, quarantining audit → excluded from export.</li>
+    </ul>
+
+    <h3>2 — docs fixed, zero renames</h3>
+    <p>Authored clean, bracket-free documentation for the 5 affected names, modelled on the one already-valid
+    sibling, applied through the pipeline via <code>sn edit --docs</code> (each scored ≈0.90, above the 0.85 bar).
+    All six now <code>name=accepted · docs=accepted · validation=valid</code>. A deterministic
+    <code>drain_validation</code> pass cleared the stale placeholder-era quarantines (0 re-quarantined).
+    The names themselves were never touched.</p>
+
+    <h3>3 — four root-cause fixes driven out en route</h3>
+    <table>
+      <thead><tr><th>Fix</th><th>Commit</th><th>What was broken</th></tr></thead>
+      <tbody>
+        <tr><td>NC-17 spelling allowlist</td><td>imas-codex <code>27ac45ee</code></td>
+          <td><code>gauge</code>/<code>gauged</code>/<code>gauges</code> exempted — valid US spelling wrongly flagged by breame. +regression test.</td></tr>
+        <tr><td>DD-source re-seed</td><td>imas-codex <code>3bdf37d5</code></td>
+          <td><code>_pin_dd_source_snapshots</code> raised "no exact dd_version" before consulting the existing node, so <code>sn run --focus</code>/<code>--edits</code> crashed re-seeding an already-pinned source. Now reuses the stored snapshot. +3 tests.</td></tr>
+        <tr><td>Export deprecation-stub query</td><td>imas-codex <code>a0b7c1ca</code></td>
+          <td><code>ORDER BY old.id</code> after an aggregation was a Neo4j SyntaxError that aborted <em>every</em> export. Ordered by projected <code>record.id</code>.</td></tr>
+        <tr><td>ISN-error quarantine severity</td><td>imas-codex <code>426132e8</code></td>
+          <td><code>_is_quarantined</code> treated all ISN <code>[semantic]</code>/<code>[structural]</code> issues as advisory; ISN's publish gate hard-fails on ERROR-level ones. A bare <code>coordinate</code> (geometric quantity lacking a qualifier) stayed <code>valid</code> and blocked the release. ERROR-level issues now quarantine. +3 tests.</td></tr>
+      </tbody>
+    </table>
+    <p>ISN grammar carried a matching correction: the <code>strain_gauge</code>/<code>strain_gauge_sensor</code>
+    locus tokens were briefly renamed to <code>gage</code> and then restored (ISN <code>73126e5</code>); imas-codex
+    re-pinned across the churn.</p>
+
+    <h3>4 — catalog RC cut</h3>
+    <p><strong>Released <code>v0.2.0rc63</code> → origin</strong> (ISNC commit <code>007a39f1</code>).
+    Export: <strong>1858 names</strong> of 1909 candidates (3 below-score, 5 unreviewed, 6 grammar-parse
+    excluded in RC mode, 1 bare <code>coordinate</code> quarantined). All four export gates PASS
+    (graph_tests, score_thresholds, cross_field_consistency, divergence_detection); staging validation clean.
+    The rc62→rc63 delta (≈2148→1858) is expected RC churn — superseded predecessors from this plan's own
+    remediation renames drop out, new names land.</p>
+
+    <h3>5 — follow-on</h3>
+    <p>One convention-level question was logged, not a defect:
+    <code>f-ordinal-carrier-readability</code> — names like
+    <code>x_first_measurement_direction_unit_vector_of_strain_gauge</code> read awkwardly because the
+    geometry carrier leads with an ordinal under the bare component-prefix grammar rule. The names are
+    canonical and DD-faithful; whether ordinal-led carriers should be re-phrased is a grammar review, not
+    an RC blocker.</p>
+  </main>
+</body>
+</html>

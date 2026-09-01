@@ -1,4 +1,4 @@
-"""Tests for the JSON schema contract (Feature 04)."""
+"""Tests for StandardNameEntry JSON schema generation and validation."""
 
 import json
 from pathlib import Path
@@ -32,12 +32,10 @@ def test_schema_includes_all_three_variants():
     assert "StandardNameMetadataEntry" in schema_text
 
 
-def test_schema_has_version():
-    """Schema includes a $schema_version field."""
+def test_schema_excludes_package_version_metadata():
+    """Schema generation is independent of the local package version."""
     schema = generate_entry_schema()
-    assert "$schema_version" in schema
-    assert isinstance(schema["$schema_version"], str)
-    assert len(schema["$schema_version"]) > 0
+    assert "$schema_version" not in schema
 
 
 def test_schema_has_defs():
@@ -140,7 +138,7 @@ def test_schema_file_is_valid_json():
     content = _SCHEMA_PATH.read_text()
     schema = json.loads(content)
     assert isinstance(schema, dict)
-    assert "$schema_version" in schema
+    assert "$schema_version" not in schema
 
 
 def test_schema_file_matches_generated():
@@ -151,10 +149,7 @@ def test_schema_file_matches_generated():
     """
     committed = json.loads(_SCHEMA_PATH.read_text())
     fresh = generate_entry_schema()
-    # Compare without version since dev version may differ between runs
-    committed_no_ver = {k: v for k, v in committed.items() if k != "$schema_version"}
-    fresh_no_ver = {k: v for k, v in fresh.items() if k != "$schema_version"}
-    assert committed_no_ver == fresh_no_ver
+    assert committed == fresh
 
 
 # ---------------------------------------------------------------------------
@@ -170,7 +165,7 @@ def test_schema_loadable_via_importlib():
     schema_file = package / "entry_schema.json"
     content = schema_file.read_text()
     schema = json.loads(content)
-    assert "$schema_version" in schema
+    assert "$schema_version" not in schema
 
 
 # ---------------------------------------------------------------------------
@@ -178,14 +173,14 @@ def test_schema_loadable_via_importlib():
 # ---------------------------------------------------------------------------
 
 
-def test_write_entry_schema_to_custom_path():
+def test_write_entry_schema_to_custom_path(tmp_path):
     """write_entry_schema() can write to a specified path."""
     schema = generate_entry_schema()
-    # Write to the default location (already exists); verify it round-trips
-    written = write_entry_schema()
-    assert written == _SCHEMA_PATH
+    target = tmp_path / "entry_schema.json"
+    written = write_entry_schema(target)
+    assert written == target
     reloaded = json.loads(written.read_text())
-    assert reloaded["$schema_version"] == schema["$schema_version"]
+    assert reloaded == schema
 
 
 # ---------------------------------------------------------------------------
@@ -193,30 +188,35 @@ def test_write_entry_schema_to_custom_path():
 # ---------------------------------------------------------------------------
 
 
-def test_cli_main_generates_schema():
+def test_cli_main_generates_schema(tmp_path):
     """The CLI main() function generates the schema file."""
     from click.testing import CliRunner
 
     from imas_standard_names.schemas.generate import main
 
     runner = CliRunner()
-    result = runner.invoke(main, ["--output", str(_SCHEMA_PATH)])
+    target = tmp_path / "entry_schema.json"
+    result = runner.invoke(main, ["--output", str(target)])
     assert result.exit_code == 0, f"CLI failed: {result.output}"
     assert "Schema written to" in result.output
 
     # The schema file should exist and be valid
-    assert _SCHEMA_PATH.is_file()
-    content = json.loads(_SCHEMA_PATH.read_text())
-    assert "$schema_version" in content
+    assert target.is_file()
+    content = json.loads(target.read_text())
+    assert content == generate_entry_schema()
 
 
-def test_cli_main_default_output():
-    """CLI with no --output flag writes to the default location."""
+def test_cli_main_default_output(monkeypatch, tmp_path):
+    """CLI with no --output flag writes to an isolated default location."""
     from click.testing import CliRunner
 
+    from imas_standard_names.schemas import generate
     from imas_standard_names.schemas.generate import main
 
+    target = tmp_path / "entry_schema.json"
+    monkeypatch.setattr(generate, "_SCHEMA_PATH", target)
     runner = CliRunner()
     result = runner.invoke(main, [])
     assert result.exit_code == 0, f"CLI failed: {result.output}"
     assert "Schema written to" in result.output
+    assert target.is_file()

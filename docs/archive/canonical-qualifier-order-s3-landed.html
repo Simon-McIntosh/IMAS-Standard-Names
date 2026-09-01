@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-standard-names">
+  <meta name="reckon-type" content="doc">
+  <meta name="plan-slug" content="canonical-qualifier-order-s3-landed">
+  <meta name="plan-title" content="§3 landed — grammar residuals closed + decomposition re-parse triage">
+  <meta name="plan-summary" content="normalized_parallel/perpendicular shadow removed; vocab-disjointness guard at its intentional floor; §3 per-token curation complete; a $0 re-parse triage buckets 2252 stale decomposition-audit findings.">
+  <meta name="plan-informs" content="canonical-qualifier-order">
+  <title>§3 landed — grammar residuals + decomposition triage | imas-standard-names</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="s3">§3 landed — grammar residuals + decomposition re-parse triage
+      <span class="badge badge-shipped">✓ landed 2026-07-18</span></h2>
+    <p>Evergreen: <a href="/imas-standard-names/canonical-qualifier-order.html">canonical-qualifier-order</a> §3.
+    Closes the last three §3 followups (<code>f-cqo-normdir-shadow</code>, <code>f-cqo-003</code>,
+    <code>f-cqo-004</code>) and delivers the decomposition re-parse triage script + dry-run manifest
+    that the docs-campaign plan gated on §3 being final
+    (<code>model-selection-and-global-refine</code> · <code>f-decomp-reparse-triage</code>).</p>
+
+    <h3>1 — normalized-direction shadow removed (ISN <code>d150b6c</code>)</h3>
+    <p><code>components.yml</code> and <code>coordinate_axes.yml</code> registered
+    <code>normalized_parallel</code> and <code>normalized_perpendicular</code> as projection tokens.
+    Longest-match then <strong>shadowed the operator reading</strong>:
+    <code>normalized_parallel_momentum_flux</code> fused to a
+    <code>projection=normalized_parallel</code> instead of the GyroBohm-normalization
+    <em>operator</em> applied to the parallel momentum flux — silently changing the meaning of
+    every GyroBohm-normalized projected quantity. The unit-suspicion validator carried a
+    stop-gap component-prefix exemption to paper over it, but the ambiguity itself was live.</p>
+    <p><strong>Resolution (physics-grounded, deterministic).</strong> <code>parallel</code> and
+    <code>perpendicular</code> are <em>field-relative</em> directions (along / across <strong>B</strong>)
+    with no distinct normalized-direction variant — so a leading <code>normalized</code> on them can
+    only ever be the operator. Both tokens are removed from <code>components.yml</code> and
+    <code>coordinate_axes.yml</code>; the genuine normalized coordinate-frame directions
+    (<code>normalized_radial</code>→ρ, <code>normalized_vertical</code>, <code>normalized_toroidal</code>→φ,
+    <code>normalized_poloidal</code>→θ) are retained. The stop-gap exemption is deleted — the operator
+    is now exempted through the existing dimensionless-operator path, which also restores correct
+    unit-suspicion for the genuine <code>normalized_radial</code>-class components (a ρ-component
+    magnetic field still carries Tesla).</p>
+    <div style="overflow-x:auto"><table>
+      <thead><tr><th>Name</th><th>Before (shadowed)</th><th>After</th></tr></thead>
+      <tbody>
+        <tr><td><code>normalized_parallel_momentum_flux</code></td>
+            <td>projection=<code>normalized_parallel</code></td>
+            <td>operator <code>normalized</code> + projection=<code>parallel</code></td></tr>
+        <tr><td><code>normalized_radial_magnetic_field</code></td>
+            <td>projection=<code>normalized_radial</code></td>
+            <td>projection=<code>normalized_radial</code> (unchanged — genuine)</td></tr>
+      </tbody>
+    </table></div>
+    <p>The 4 affected GyroBohm names re-parse to the canonical
+    <code>&lt;direction&gt;_normalized_&lt;base&gt;</code> form (component leads the normalization
+    qualifier, per the royal-adjective-order decision) and are surfaced as migration backlog, not
+    papered over. ISN suite 1822 passed (the single failing
+    <code>test_find_git_root_raises_when_no_repo</code> is a pre-existing environmental tmp-path
+    flake, orthogonal to grammar); codegen in sync.</p>
+
+    <h3>2 — vocabulary-disjointness guard at its intentional floor (<code>f-cqo-003</code>)</h3>
+    <p><code>tests/grammar/test_vocab_uniqueness.py</code> asserts the segment-role vocabularies are
+    pairwise disjoint outside a small, documented allowlist, and is green. The ratchet the followup
+    tracked is complete: <code>qualifiers ∩ {operators, physical_bases, generic_physical_bases,
+    subjects(particle/state), processes, locus_registry}</code> are all now <strong>empty</strong>
+    (the mis-filed tokens were pulled to their true segments across the §2 dupe removal and the
+    rc55–rc59 curation). The remaining allowlist entries are genuinely intentional dual-roles
+    (<code>components ∩ coordinate_axes</code>; <code>channels ∩ physical_bases</code> for energy/momentum;
+    <code>zones ∩ regions/locus</code>; <code>generic_bases ⊂ bases</code>; the three fusion-reactant
+    <code>qualifiers ∩ subjects</code> pairs; <code>qualifiers ∩ physics_domains</code> for
+    equilibrium/mhd/nbi) — not mis-files. The guard actively blocks re-introduction.</p>
+
+    <h3>3 — §3 per-token curation complete (<code>f-cqo-004</code>)</h3>
+    <p>The deep per-token review landed incrementally across the §3 slices, each recorded in the
+    vocab file it touched and in its followup outcome:</p>
+    <ul>
+      <li><strong>base-bound / compound bases</strong> — the token-by-token verdict (atomic base vs
+        qualifier vs coordinate-carrier) and the compound-vs-qualifier rule are recorded in
+        <code>physical_bases.yml</code> (the wetted/surface/cross-sectional area family, spectral,
+        the channels-dual energy/momentum design).</li>
+      <li><strong>scoping vs kind-forming qualifiers</strong> — <code>scoping_qualifiers.yml</code>
+        carries the phrase-scoping binding class (implicit/explicit/effective/incident/…), grounded
+        in English royal adjective order (Forsyth; Scontras et al. 2017).</li>
+      <li><strong>regime qualifiers vs <code>due_to_</code> processes</strong> — the process vocabulary
+        was curated (97→89) and <code>qualifiers ∩ processes</code> is now empty.</li>
+      <li><strong>components vs operators</strong> — the normalized-direction shadow above was the
+        last open grammar residual of this class.</li>
+    </ul>
+    <p>With the normalized-direction ambiguity resolved, §3's curation is complete: no un-adjudicated
+    cross-segment mis-file remains (the guard proves it), and the remaining dual-roles are documented
+    design, not debt.</p>
+
+    <h3>4 — the decomposition audit was obsolete under controlled bases — retired (imas-codex <code>5a08c744</code>)</h3>
+    <div class="next-card" style="border-left:4px solid #d97706">
+      <p><strong>Correction (2026-07-18):</strong> an initial re-parse triage bucketed the 2252
+      <code>decomposition_audit</code> findings as drain 1809 / suppress 173 / rename 270 and shipped
+      a <code>sn decomp-triage</code> tool + dry-run manifest. The lead's controlled-base point then
+      revealed the deeper truth: <strong>every one of those findings — including the "270 rename
+      queue" — was a historic false positive.</strong> The audit was retired, not refined.</p>
+    </div>
+    <p>The physical/geometric base slot is a <strong>controlled vocabulary</strong>: the parser
+    rejects an unregistered base token (<code>flibbertigibbet_field</code> →
+    <code>UnknownBaseTokenError</code>), so a composer <em>cannot</em> hide structure in an open
+    <code>physical_base</code> — the failure mode the audit was built to catch. The audit read a
+    name's surface base <em>phrase</em> (<code>model.physical_base</code>, e.g.
+    <code>reference_magnetic_field</code>, <code>absorbed_power</code>,
+    <code>nuclear_heating_power</code>) and compared it against the registered base-<em>token</em>
+    set — but the actual base token (<code>ir.base.token</code>: <code>magnetic_field</code>,
+    <code>power</code>, <code>heating_power</code>) is <strong>always registered</strong>. The
+    surface phrase legitimately carries glued <strong>kind-forming qualifiers</strong> (royal-order:
+    <code>ion_atomic_mass</code>, <code>wave_electric_field</code>). So there is no genuine
+    "absorbed token" this audit could ever detect on a name that parses; names that don't parse are
+    caught by the grammar gate.</p>
+    <div style="overflow-x:auto"><table>
+      <thead><tr><th>Apparent "rename" class</th><th>Reality</th></tr></thead>
+      <tbody>
+        <tr><td><code>absorbed_power</code>, <code>wave_electric_field</code>, <code>alfven_frequency</code> (262)</td>
+            <td>kind-forming qualifier glued to a registered base — correct per royal-order</td></tr>
+        <tr><td><code>ratio_of_A_to_B</code> (~20)</td>
+            <td>binary-operator names; <code>physical_base</code> is one nested argument, not a flat base</td></tr>
+        <tr><td><code>upper_bound_charge_number</code> (~8)</td>
+            <td>zone token <code>upper</code> matched inside the <code>upper_bound</code> qualifier — substring artifact</td></tr>
+        <tr><td><code>lower_bound_energy</code>, <code>critical_momentum</code> (~10)</td>
+            <td><code>energy</code>/<code>momentum</code> is the registered base head, not an absorption</td></tr>
+      </tbody>
+    </table></div>
+    <p><strong>Retired.</strong> <code>decomposition_audit_check</code>, the
+    <code>find_absorbed_closed_tokens</code> primitive, and their tests are removed; the reviewer
+    prompt's hand-scan-and-dock bullet is replaced with "the base registry is grammar-enforced; emit
+    a <code>vocab_gap</code> when no registered base fits." All stored findings were drained
+    graph-wide (2252 accepted-name findings via the interim tool, then the remaining 1641 across all
+    stages — <strong>0 remain</strong>). No name was renamed; none needed it. The base grammar itself
+    is now the guarantee. The interim <code>sn decomp-triage</code> tool was deleted (single-shot).
+    The original dry-run manifest is retained as a historical artifact:
+    <a href="canonical-qualifier-order-manifests/decomp-triage-dry-run.json">decomp-triage-dry-run.json</a>
+    (its "rename" bucket is now understood as false positives).</p>
+  </main>
+</body>
+</html>

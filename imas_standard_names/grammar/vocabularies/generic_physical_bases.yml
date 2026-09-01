@@ -47,3 +47,26 @@
 - velocity
 - voltage
 - volume
+
+# Semantically-empty catch-all bases. These name a role (a coefficient, a
+# rate, a flag) without naming the physical quantity, so they validate almost
+# anything unless gated. They require qualification for the same reason as the
+# quantities above: `rate` of what, `coefficient` for what. Physically-named
+# specialisations (diffusion_coefficient, growth_rate, refractive_index,
+# electrostatic_potential, …) remain first-class bases and are preferred.
+- coefficient
+- count
+- distribution
+- factor
+- field_strength
+- flag
+- flow
+- index
+- multiplicity
+- parameter
+- potential
+- rate
+- residual
+- size
+- source
+- weight

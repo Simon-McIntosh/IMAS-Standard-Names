@@ -1,0 +1,6 @@
+# Plane containing a section of a physical or geometric object.
+#
+# A section plane changes the identity of the section. It is not a vector
+# component or a coordinate projection, even when the same word is registered
+# as an axis token.
+- poloidal

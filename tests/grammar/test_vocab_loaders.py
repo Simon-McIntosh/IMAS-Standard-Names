@@ -49,11 +49,13 @@ def test_coordinate_axes_has_seed_entries():
     )
 
 
-def test_coordinate_axes_aliases_parsed():
+def test_coordinate_axes_have_no_aliases():
+    # Axis naming is one canonical form, one way: physical directions use
+    # canonical words (radial/toroidal/vertical/...), arbitrary local axes
+    # use x/y/z. No axis carries an alternate spelling.
     reg = load_coordinate_axes()
-    assert reg.axes["radial"].aliases == ["r"]
-    assert set(reg.axes["toroidal"].aliases) == {"phi", "tor"}
-    assert reg.axes["parallel"].aliases == []
+    for token, entry in reg.axes.items():
+        assert entry.aliases == [], f"axis '{token}' has dead alias metadata"
 
 
 # ---------------------------------------------------------------------------
@@ -84,21 +86,21 @@ def test_locus_registry_has_seed_entries():
 
 def test_locus_entry_types_are_valid():
     reg = load_locus_registry()
-    valid_types = {"entity", "position", "geometry"}
+    valid_types = {"entity", "position", "geometry", "region"}
     for name, entry in reg.loci.items():
         assert entry.type in valid_types, f"Invalid type for '{name}': {entry.type}"
 
 
 def test_locus_entry_relations_are_valid():
     reg = load_locus_registry()
-    valid_rels = {"of", "at", "over"}
+    valid_rels = {"of", "at", "over", "along"}
     for name, entry in reg.loci.items():
         bad = set(entry.allowed_relations) - valid_rels
         assert not bad, f"Invalid relations for '{name}': {bad}"
 
 
 def test_plasma_boundary_entity_of_only():
-    # plasma_boundary reclassified to position in vNext (plan 38 §A5)
+    # plasma_boundary reclassified to position in the grammar (plan 38 §A5)
     reg = load_locus_registry()
     pb = reg.loci["plasma_boundary"]
     assert pb.type == "position"
@@ -127,7 +129,7 @@ def test_operators_has_seed_entries():
     expected = {
         "magnitude",
         "time_derivative",
-        "time_average",
+        "time_averaged",
         "root_mean_square",
         "fourier_coefficient",
         "ratio",
@@ -191,7 +193,7 @@ def test_load_physical_bases_returns_registry():
 def test_physical_bases_stub_is_populated():
     """W2a populated physical_bases.yml from corpus mining."""
     reg = load_physical_bases()
-    assert len(reg.bases) >= 150
+    assert len(reg.bases) >= 70
 
 
 # ---------------------------------------------------------------------------
@@ -216,7 +218,7 @@ def test_geometry_carriers_stub_is_populated():
 
 
 def test_no_cross_registry_duplicates():
-    """Token names must be unique across all five vNext registries."""
+    """Token names must be unique across all five vocabulary registries."""
     # Should not raise
     validate_no_cross_registry_duplicates()
 
@@ -232,7 +234,11 @@ def test_cross_registry_detects_duplicate(monkeypatch):
         # Inject a name that also exists in coordinate_axes
         from imas_standard_names.grammar.vocab_loaders import LocusEntry
 
-        reg.loci["radial"] = LocusEntry(type="entity", allowed_relations=["of"])
+        reg.loci["radial"] = LocusEntry(
+            type="entity",
+            allowed_relations=["of"],
+            definition="Synthetic duplicate locus used only by this registry test.",
+        )
         return reg
 
     monkeypatch.setattr(_m, "load_locus_registry", _patched_locus)

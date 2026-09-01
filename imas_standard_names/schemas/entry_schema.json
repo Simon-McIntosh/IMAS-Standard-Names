@@ -17,7 +17,9 @@
             "unary_prefix",
             "unary_postfix",
             "binary",
-            "projection"
+            "projection",
+            "qualifier",
+            "locus"
           ],
           "title": "Operator Kind",
           "type": "string"
@@ -89,6 +91,33 @@
         "operator_kind"
       ],
       "title": "ArgumentRef",
+      "type": "object"
+    },
+    "CatalogSourceBinding": {
+      "description": "Immutable reference to a source-system record used by a catalog entry.",
+      "properties": {
+        "kind": {
+          "minLength": 1,
+          "title": "Kind",
+          "type": "string"
+        },
+        "ref": {
+          "minLength": 1,
+          "title": "Ref",
+          "type": "string"
+        },
+        "version": {
+          "minLength": 1,
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "ref",
+        "version"
+      ],
+      "title": "CatalogSourceBinding",
       "type": "object"
     },
     "ExpressionProvenance": {
@@ -200,7 +229,7 @@
           "examples": [
             "electron_temperature",
             "gradient_of_electron_temperature",
-            "radial_component_of_magnetic_field"
+            "radial_magnetic_field"
           ],
           "pattern": "^[a-z][a-z0-9_]*$",
           "title": "Name",
@@ -225,7 +254,7 @@
               "examples": [
                 "electron_temperature",
                 "gradient_of_electron_temperature",
-                "radial_component_of_magnetic_field"
+                "radial_magnetic_field"
               ],
               "pattern": "^[a-z][a-z0-9_]*$",
               "type": "string"
@@ -244,7 +273,7 @@
               "examples": [
                 "electron_temperature",
                 "gradient_of_electron_temperature",
-                "radial_component_of_magnetic_field"
+                "radial_magnetic_field"
               ],
               "pattern": "^[a-z][a-z0-9_]*$",
               "type": "string"
@@ -269,8 +298,8 @@
           "title": "Cocos Transformation Type"
         },
         "description": {
-          "description": "One concise sentence summarizing the physical quantity. Keep under 120 characters for readability. Should be self-contained and understandable without external context.",
-          "maxLength": 180,
+          "description": "Concise summary of the physical quantity (1-3 sentences). Should be self-contained and understandable without external context.",
+          "maxLength": 500,
           "title": "Description",
           "type": "string"
         },
@@ -278,46 +307,6 @@
           "description": "Authoritative, self-contained documentation providing clear, comprehensive explanation of the physical quantity. This field must be fully standalone - a domain expert should understand the quantity completely without consulting external sources.",
           "title": "Documentation",
           "type": "string"
-        },
-        "validity_domain": {
-          "default": "",
-          "description": "Controlled vocabulary region of validity",
-          "examples": [
-            "core_plasma",
-            "edge_plasma",
-            "vacuum",
-            "whole_plasma"
-          ],
-          "title": "Validity Domain",
-          "type": "string"
-        },
-        "constraints": {
-          "description": "Physical or mathematical constraints that must be satisfied (e.g. 'T_e > 0', 'kappa >= 1')",
-          "examples": [
-            [
-              "T_e > 0"
-            ],
-            [
-              "n_e >= 0",
-              "n_e < 1e22 m^-3"
-            ],
-            [
-              "kappa >= 1"
-            ]
-          ],
-          "items": {
-            "type": "string"
-          },
-          "title": "Constraints",
-          "type": "array"
-        },
-        "tags": {
-          "description": "Secondary classification tags from controlled vocabulary for cross-cutting classification.",
-          "items": {
-            "type": "string"
-          },
-          "title": "Tags",
-          "type": "array"
         },
         "links": {
           "description": "Internal cross-references to related standard names only. Use format 'name:standard_name_token' (e.g., 'name:plasma_boundary'). Internal references are validated against the catalog.",
@@ -363,6 +352,21 @@
           ],
           "default": null,
           "title": "Error Variants"
+        },
+        "sources": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/CatalogSourceBinding"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sources"
         },
         "kind": {
           "const": "complex",
@@ -433,7 +437,7 @@
           "examples": [
             "electron_temperature",
             "gradient_of_electron_temperature",
-            "radial_component_of_magnetic_field"
+            "radial_magnetic_field"
           ],
           "pattern": "^[a-z][a-z0-9_]*$",
           "title": "Name",
@@ -458,7 +462,7 @@
               "examples": [
                 "electron_temperature",
                 "gradient_of_electron_temperature",
-                "radial_component_of_magnetic_field"
+                "radial_magnetic_field"
               ],
               "pattern": "^[a-z][a-z0-9_]*$",
               "type": "string"
@@ -477,7 +481,7 @@
               "examples": [
                 "electron_temperature",
                 "gradient_of_electron_temperature",
-                "radial_component_of_magnetic_field"
+                "radial_magnetic_field"
               ],
               "pattern": "^[a-z][a-z0-9_]*$",
               "type": "string"
@@ -502,8 +506,8 @@
           "title": "Cocos Transformation Type"
         },
         "description": {
-          "description": "One concise sentence summarizing the physical quantity. Keep under 120 characters for readability. Should be self-contained and understandable without external context.",
-          "maxLength": 180,
+          "description": "Concise summary of the physical quantity (1-3 sentences). Should be self-contained and understandable without external context.",
+          "maxLength": 500,
           "title": "Description",
           "type": "string"
         },
@@ -511,46 +515,6 @@
           "description": "Authoritative, self-contained documentation providing clear, comprehensive explanation of the physical quantity. This field must be fully standalone - a domain expert should understand the quantity completely without consulting external sources.",
           "title": "Documentation",
           "type": "string"
-        },
-        "validity_domain": {
-          "default": "",
-          "description": "Controlled vocabulary region of validity",
-          "examples": [
-            "core_plasma",
-            "edge_plasma",
-            "vacuum",
-            "whole_plasma"
-          ],
-          "title": "Validity Domain",
-          "type": "string"
-        },
-        "constraints": {
-          "description": "Physical or mathematical constraints that must be satisfied (e.g. 'T_e > 0', 'kappa >= 1')",
-          "examples": [
-            [
-              "T_e > 0"
-            ],
-            [
-              "n_e >= 0",
-              "n_e < 1e22 m^-3"
-            ],
-            [
-              "kappa >= 1"
-            ]
-          ],
-          "items": {
-            "type": "string"
-          },
-          "title": "Constraints",
-          "type": "array"
-        },
-        "tags": {
-          "description": "Secondary classification tags from controlled vocabulary for cross-cutting classification.",
-          "items": {
-            "type": "string"
-          },
-          "title": "Tags",
-          "type": "array"
         },
         "links": {
           "description": "Internal cross-references to related standard names only. Use format 'name:standard_name_token' (e.g., 'name:plasma_boundary'). Internal references are validated against the catalog.",
@@ -596,6 +560,21 @@
           ],
           "default": null,
           "title": "Error Variants"
+        },
+        "sources": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/CatalogSourceBinding"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sources"
         },
         "kind": {
           "const": "metadata",
@@ -621,7 +600,7 @@
           "examples": [
             "electron_temperature",
             "gradient_of_electron_temperature",
-            "radial_component_of_magnetic_field"
+            "radial_magnetic_field"
           ],
           "pattern": "^[a-z][a-z0-9_]*$",
           "title": "Name",
@@ -646,7 +625,7 @@
               "examples": [
                 "electron_temperature",
                 "gradient_of_electron_temperature",
-                "radial_component_of_magnetic_field"
+                "radial_magnetic_field"
               ],
               "pattern": "^[a-z][a-z0-9_]*$",
               "type": "string"
@@ -665,7 +644,7 @@
               "examples": [
                 "electron_temperature",
                 "gradient_of_electron_temperature",
-                "radial_component_of_magnetic_field"
+                "radial_magnetic_field"
               ],
               "pattern": "^[a-z][a-z0-9_]*$",
               "type": "string"
@@ -690,8 +669,8 @@
           "title": "Cocos Transformation Type"
         },
         "description": {
-          "description": "One concise sentence summarizing the physical quantity. Keep under 120 characters for readability. Should be self-contained and understandable without external context.",
-          "maxLength": 180,
+          "description": "Concise summary of the physical quantity (1-3 sentences). Should be self-contained and understandable without external context.",
+          "maxLength": 500,
           "title": "Description",
           "type": "string"
         },
@@ -699,46 +678,6 @@
           "description": "Authoritative, self-contained documentation providing clear, comprehensive explanation of the physical quantity. This field must be fully standalone - a domain expert should understand the quantity completely without consulting external sources.",
           "title": "Documentation",
           "type": "string"
-        },
-        "validity_domain": {
-          "default": "",
-          "description": "Controlled vocabulary region of validity",
-          "examples": [
-            "core_plasma",
-            "edge_plasma",
-            "vacuum",
-            "whole_plasma"
-          ],
-          "title": "Validity Domain",
-          "type": "string"
-        },
-        "constraints": {
-          "description": "Physical or mathematical constraints that must be satisfied (e.g. 'T_e > 0', 'kappa >= 1')",
-          "examples": [
-            [
-              "T_e > 0"
-            ],
-            [
-              "n_e >= 0",
-              "n_e < 1e22 m^-3"
-            ],
-            [
-              "kappa >= 1"
-            ]
-          ],
-          "items": {
-            "type": "string"
-          },
-          "title": "Constraints",
-          "type": "array"
-        },
-        "tags": {
-          "description": "Secondary classification tags from controlled vocabulary for cross-cutting classification.",
-          "items": {
-            "type": "string"
-          },
-          "title": "Tags",
-          "type": "array"
         },
         "links": {
           "description": "Internal cross-references to related standard names only. Use format 'name:standard_name_token' (e.g., 'name:plasma_boundary'). Internal references are validated against the catalog.",
@@ -784,6 +723,21 @@
           ],
           "default": null,
           "title": "Error Variants"
+        },
+        "sources": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/CatalogSourceBinding"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sources"
         },
         "kind": {
           "const": "scalar",
@@ -854,7 +808,7 @@
           "examples": [
             "electron_temperature",
             "gradient_of_electron_temperature",
-            "radial_component_of_magnetic_field"
+            "radial_magnetic_field"
           ],
           "pattern": "^[a-z][a-z0-9_]*$",
           "title": "Name",
@@ -879,7 +833,7 @@
               "examples": [
                 "electron_temperature",
                 "gradient_of_electron_temperature",
-                "radial_component_of_magnetic_field"
+                "radial_magnetic_field"
               ],
               "pattern": "^[a-z][a-z0-9_]*$",
               "type": "string"
@@ -898,7 +852,7 @@
               "examples": [
                 "electron_temperature",
                 "gradient_of_electron_temperature",
-                "radial_component_of_magnetic_field"
+                "radial_magnetic_field"
               ],
               "pattern": "^[a-z][a-z0-9_]*$",
               "type": "string"
@@ -923,8 +877,8 @@
           "title": "Cocos Transformation Type"
         },
         "description": {
-          "description": "One concise sentence summarizing the physical quantity. Keep under 120 characters for readability. Should be self-contained and understandable without external context.",
-          "maxLength": 180,
+          "description": "Concise summary of the physical quantity (1-3 sentences). Should be self-contained and understandable without external context.",
+          "maxLength": 500,
           "title": "Description",
           "type": "string"
         },
@@ -932,46 +886,6 @@
           "description": "Authoritative, self-contained documentation providing clear, comprehensive explanation of the physical quantity. This field must be fully standalone - a domain expert should understand the quantity completely without consulting external sources.",
           "title": "Documentation",
           "type": "string"
-        },
-        "validity_domain": {
-          "default": "",
-          "description": "Controlled vocabulary region of validity",
-          "examples": [
-            "core_plasma",
-            "edge_plasma",
-            "vacuum",
-            "whole_plasma"
-          ],
-          "title": "Validity Domain",
-          "type": "string"
-        },
-        "constraints": {
-          "description": "Physical or mathematical constraints that must be satisfied (e.g. 'T_e > 0', 'kappa >= 1')",
-          "examples": [
-            [
-              "T_e > 0"
-            ],
-            [
-              "n_e >= 0",
-              "n_e < 1e22 m^-3"
-            ],
-            [
-              "kappa >= 1"
-            ]
-          ],
-          "items": {
-            "type": "string"
-          },
-          "title": "Constraints",
-          "type": "array"
-        },
-        "tags": {
-          "description": "Secondary classification tags from controlled vocabulary for cross-cutting classification.",
-          "items": {
-            "type": "string"
-          },
-          "title": "Tags",
-          "type": "array"
         },
         "links": {
           "description": "Internal cross-references to related standard names only. Use format 'name:standard_name_token' (e.g., 'name:plasma_boundary'). Internal references are validated against the catalog.",
@@ -1017,6 +931,21 @@
           ],
           "default": null,
           "title": "Error Variants"
+        },
+        "sources": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/CatalogSourceBinding"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sources"
         },
         "kind": {
           "const": "tensor",
@@ -1080,14 +1009,14 @@
     },
     "StandardNameVectorEntry": {
       "additionalProperties": false,
-      "description": "Vector standard name catalog entry.",
+      "description": "Vector standard name catalog entry.\n\nIndividual named components (e.g. radial_magnetic_field) are also\nclassified as vector because they carry implicit directional structure.",
       "properties": {
         "name": {
           "description": "Standard name token: snake_case (^[a-z][a-z0-9_]*$); starts with a letter; no double '__'.",
           "examples": [
             "electron_temperature",
             "gradient_of_electron_temperature",
-            "radial_component_of_magnetic_field"
+            "radial_magnetic_field"
           ],
           "pattern": "^[a-z][a-z0-9_]*$",
           "title": "Name",
@@ -1112,7 +1041,7 @@
               "examples": [
                 "electron_temperature",
                 "gradient_of_electron_temperature",
-                "radial_component_of_magnetic_field"
+                "radial_magnetic_field"
               ],
               "pattern": "^[a-z][a-z0-9_]*$",
               "type": "string"
@@ -1131,7 +1060,7 @@
               "examples": [
                 "electron_temperature",
                 "gradient_of_electron_temperature",
-                "radial_component_of_magnetic_field"
+                "radial_magnetic_field"
               ],
               "pattern": "^[a-z][a-z0-9_]*$",
               "type": "string"
@@ -1156,8 +1085,8 @@
           "title": "Cocos Transformation Type"
         },
         "description": {
-          "description": "One concise sentence summarizing the physical quantity. Keep under 120 characters for readability. Should be self-contained and understandable without external context.",
-          "maxLength": 180,
+          "description": "Concise summary of the physical quantity (1-3 sentences). Should be self-contained and understandable without external context.",
+          "maxLength": 500,
           "title": "Description",
           "type": "string"
         },
@@ -1165,46 +1094,6 @@
           "description": "Authoritative, self-contained documentation providing clear, comprehensive explanation of the physical quantity. This field must be fully standalone - a domain expert should understand the quantity completely without consulting external sources.",
           "title": "Documentation",
           "type": "string"
-        },
-        "validity_domain": {
-          "default": "",
-          "description": "Controlled vocabulary region of validity",
-          "examples": [
-            "core_plasma",
-            "edge_plasma",
-            "vacuum",
-            "whole_plasma"
-          ],
-          "title": "Validity Domain",
-          "type": "string"
-        },
-        "constraints": {
-          "description": "Physical or mathematical constraints that must be satisfied (e.g. 'T_e > 0', 'kappa >= 1')",
-          "examples": [
-            [
-              "T_e > 0"
-            ],
-            [
-              "n_e >= 0",
-              "n_e < 1e22 m^-3"
-            ],
-            [
-              "kappa >= 1"
-            ]
-          ],
-          "items": {
-            "type": "string"
-          },
-          "title": "Constraints",
-          "type": "array"
-        },
-        "tags": {
-          "description": "Secondary classification tags from controlled vocabulary for cross-cutting classification.",
-          "items": {
-            "type": "string"
-          },
-          "title": "Tags",
-          "type": "array"
         },
         "links": {
           "description": "Internal cross-references to related standard names only. Use format 'name:standard_name_token' (e.g., 'name:plasma_boundary'). Internal references are validated against the catalog.",
@@ -1250,6 +1139,21 @@
           ],
           "default": null,
           "title": "Error Variants"
+        },
+        "sources": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/CatalogSourceBinding"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sources"
         },
         "kind": {
           "const": "vector",
@@ -1338,6 +1242,5 @@
     {
       "$ref": "#/$defs/StandardNameMetadataEntry"
     }
-  ],
-  "$schema_version": "0.7.0rc27.dev1+g1982016ed"
+  ]
 }

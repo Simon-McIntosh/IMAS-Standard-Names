@@ -1,154 +1,159 @@
 - name: energy_confinement_time
   description: Energy confinement time.
-  documentation: 'Energy confinement time $\tau_E$ quantifying how long thermal energy is retained in
-    the plasma before being lost to the surroundings. This is the single most important figure of merit
-    for fusion performance and determines the approach to ignition conditions.
+  documentation: 'Energy confinement time $\tau_E$ quantifying how long thermal energy
+    is retained in the plasma before being lost to the surroundings. This is the single
+    most important figure of merit for fusion performance and determines the approach
+    to ignition conditions.
 
 
     $$\tau_E = \frac{W_{\text{th}}}{P_{\text{loss}}}$$
 
 
-    where $W_{\text{th}}$ is total thermal energy content in J and $P_{\text{loss}}$ is total power loss
-    in W.
+    where $W_{\text{th}}$ is total thermal energy content in J and $P_{\text{loss}}$
+    is total power loss in W.
 
 
     Physical significance:
 
 
-    Energy confinement time determines fusion performance through the triple product $n T \tau_E$. Longer
-    confinement times enable higher plasma temperatures and pressures, approaching fusion ignition conditions.
-    The fusion triple product criterion requires $n T \tau_E > 3 \times 10^{21}$ m$^{-3}$ keV s for D-T
-    fusion. Confinement quality affects [plasma_current](#plasma_current) requirements and [safety_factor](#safety_factor)
+    Energy confinement time determines fusion performance through the triple product
+    $n T \tau_E$. Longer confinement times enable higher plasma temperatures and pressures,
+    approaching fusion ignition conditions. The fusion triple product criterion requires
+    $n T \tau_E > 3 \times 10^{21}$ m$^{-3}$ keV s for D-T fusion. Confinement quality
+    affects [plasma_current](#plasma_current) requirements and [safety_factor](#safety_factor)
     limits for stable operation.
 
 
     Scaling laws:
 
 
-    Empirical scaling laws predict $\tau_E$ from machine and plasma parameters. H-mode confinement shows
-    $\tau_E \propto I_p^{0.93} B_T^{0.15} P^{-0.69} n^{0.41} R^{1.97} a^{0.58} \kappa^{0.78}$ (IPB98(y,2)
-    scaling), where $I_p$ is [plasma_current](#plasma_current), $B_T$ is toroidal field, $P$ is heating
-    power, and geometric factors follow. Confinement improves with higher current, density, and larger
-    machine size.
+    Empirical scaling laws predict $\tau_E$ from machine and plasma parameters. H-mode
+    confinement shows $\tau_E \propto I_p^{0.93} B_T^{0.15} P^{-0.69} n^{0.41} R^{1.97}
+    a^{0.58} \kappa^{0.78}$ (IPB98(y,2) scaling), where $I_p$ is [plasma_current](#plasma_current),
+    $B_T$ is toroidal field, $P$ is heating power, and geometric factors follow. Confinement
+    improves with higher current, density, and larger machine size.
 
 
     Measurement methods:
 
 
-    Energy confinement time is derived from total thermal energy content and power loss measurements.
-    Thermal energy is calculated from [electron_temperature](#electron_temperature) and [ion_temperature](#ion_temperature)
-    profiles integrated over [plasma_volume](#plasma_volume). Power loss includes radiated power, conducted
-    power to walls, and convective losses. [Electron_heat_flux](#electron_heat_flux) measurements provide
-    local transport analysis.
+    Energy confinement time is derived from total thermal energy content and power
+    loss measurements. Thermal energy is calculated from [electron_temperature](#electron_temperature)
+    and [ion_temperature](#ion_temperature) profiles integrated over [plasma_volume](#plasma_volume).
+    Power loss includes radiated power, conducted power to walls, and convective losses.
+    [Electron_heat_flux](#electron_heat_flux) measurements provide local transport
+    analysis.
 
 
     Typical values:
 
 
-    L-mode: 20-50 ms, H-mode: 100-300 ms for medium tokamaks; ITER target: ~4 s. Confinement time scales
-    with machine size and plasma current, following empirical scaling laws.'
+    L-mode: 20-50 ms, H-mode: 100-300 ms for medium tokamaks; ITER target: ~4 s. Confinement
+    time scales with machine size and plasma current, following empirical scaling
+    laws.'
   status: draft
-  tags:
-  - global-quantity
-  - performance-metric
   kind: scalar
   unit: s
 - name: heating_power_due_to_ohmic
   description: Ohmic heating power dissipated in plasma.
-  documentation: 'Heating power delivered to the plasma through ohmic (resistive) heating, given by the
-    volume integral. Ohmic heating is the primary heating mechanism during plasma startup and determines
-    initial plasma heating before auxiliary systems become effective.
+  documentation: 'Heating power delivered to the plasma through ohmic (resistive)
+    heating, given by the volume integral. Ohmic heating is the primary heating mechanism
+    during plasma startup and determines initial plasma heating before auxiliary systems
+    become effective.
 
 
     $$P_{\text{ohm}} = \int \eta j^2 \, dV$$
 
 
-    where $\eta$ is [plasma_resistivity](#plasma_resistivity) in $\Omega$·m, $j$ is current density magnitude
-    in A/m$^2$, $dV$ is the volume element in m$^3$, giving $P_{\text{ohm}}$ in W. Alternatively expressed
-    as $P_{\text{ohm}} = R_p I_p^2$ where $R_p$ is plasma resistance in $\Omega$ and $I_p$ is [plasma_current](#plasma_current)
+    where $\eta$ is [plasma_resistivity](#plasma_resistivity) in $\Omega$·m, $j$ is
+    current density magnitude in A/m$^2$, $dV$ is the volume element in m$^3$, giving
+    $P_{\text{ohm}}$ in W. Alternatively expressed as $P_{\text{ohm}} = R_p I_p^2$
+    where $R_p$ is plasma resistance in $\Omega$ and $I_p$ is [plasma_current](#plasma_current)
     in A.
 
 
     Physical significance:
 
 
-    Ohmic heating is the primary heating mechanism during plasma startup. The power scales as $P_{\text{ohm}}
-    \propto T_e^{-3/2}$ due to the temperature dependence of resistivity, making it ineffective at high
-    temperatures where auxiliary heating dominates. Ohmic heating affects [plasma_current](#plasma_current)
-    requirements and determines current ramp efficiency. See [plasma_resistivity](#plasma_resistivity)
-    for resistivity relationships and [plasma_current](#plasma_current) for current distribution.
+    Ohmic heating is the primary heating mechanism during plasma startup. The power
+    scales as $P_{\text{ohm}} \propto T_e^{-3/2}$ due to the temperature dependence
+    of resistivity, making it ineffective at high temperatures where auxiliary heating
+    dominates. Ohmic heating affects [plasma_current](#plasma_current) requirements
+    and determines current ramp efficiency. See [plasma_resistivity](#plasma_resistivity)
+    for resistivity relationships and [plasma_current](#plasma_current) for current
+    distribution.
 
 
     Measurement methods:
 
 
-    Ohmic heating power is calculated from [plasma_current](#plasma_current) and loop voltage measurements:
-    $P_{\text{ohm}} = V_{\text{loop}} I_p$. Plasma resistance is determined from voltage-current relationships.
-    Power balance analysis includes ohmic contribution to total heating. Current density profiles from
-    equilibrium reconstruction provide spatial heating distribution. Ohmic power is primary heating source
-    during current ramp phase.
+    Ohmic heating power is calculated from [plasma_current](#plasma_current) and loop
+    voltage measurements: $P_{\text{ohm}} = V_{\text{loop}} I_p$. Plasma resistance
+    is determined from voltage-current relationships. Power balance analysis includes
+    ohmic contribution to total heating. Current density profiles from equilibrium
+    reconstruction provide spatial heating distribution. Ohmic power is primary heating
+    source during current ramp phase.
 
 
     Typical values:
 
 
-    Startup phase: 1-10 MW, high-temperature phase: 0.1-1 MW for medium-sized tokamaks. Ohmic heating
-    decreases with increasing temperature and becomes negligible above ~5 keV.
+    Startup phase: 1-10 MW, high-temperature phase: 0.1-1 MW for medium-sized tokamaks.
+    Ohmic heating decreases with increasing temperature and becomes negligible above
+    ~5 keV.
 
 
-    Sign convention: Positive heating power indicates energy input to the plasma, following standard power
-    conventions with heating rate measured in watts.'
+    Sign convention: Positive heating power indicates energy input to the plasma,
+    following standard power conventions with heating rate measured in watts.'
   status: active
-  tags:
-  - ohmic-heating
   kind: scalar
   unit: W
 - name: plasma_current
   description: Total toroidal plasma current.
-  documentation: 'Total toroidal plasma current $I_p$ obtained by integrating the toroidal [current_density](#current_density)
-    over the plasma cross-section. Plasma current is fundamental for tokamak confinement, generating the
-    poloidal magnetic field that provides rotational transform of field lines.
+  documentation: 'Total toroidal plasma current $I_p$ obtained by integrating the
+    toroidal [current_density](#current_density) over the plasma cross-section. Plasma
+    current is fundamental for tokamak confinement, generating the poloidal magnetic
+    field that provides rotational transform of field lines.
 
 
     $$I_p = \int j_{\phi} \, dA$$
 
 
-    where $j_{\phi}$ is toroidal [plasma_current_density](#plasma_current_density) in A/m$^2$ and $dA$
-    is the differential area element in m$^2$.
+    where $j_{\phi}$ is toroidal [plasma_current_density](#plasma_current_density)
+    in A/m$^2$ and $dA$ is the differential area element in m$^2$.
 
 
     Physical significance:
 
 
-    Plasma current generates [poloidal_magnetic_field](#poloidal_magnetic_field) through Ampère''s law
-    and provides rotational transform for field line closure. Higher plasma current typically improves
-    [energy_confinement_time](#energy_confinement_time) through better magnetic confinement but reduces
-    [safety_factor](#safety_factor), affecting MHD stability limits. Current profile shape determines
-    bootstrap current fraction and affects [plasma_resistivity](#plasma_resistivity) requirements.
+    Plasma current generates [poloidal_magnetic_field](#poloidal_magnetic_field) through
+    Ampère''s law and provides rotational transform for field line closure. Higher
+    plasma current typically improves [energy_confinement_time](#energy_confinement_time)
+    through better magnetic confinement but reduces [safety_factor](#safety_factor),
+    affecting MHD stability limits. Current profile shape determines bootstrap current
+    fraction and affects [plasma_resistivity](#plasma_resistivity) requirements.
 
 
     Measurement methods:
 
 
     Plasma current is determined from external magnetic measurements using [flux_loop_voltage](#flux_loop_voltage)
-    integration and Rogowski coils. Equilibrium reconstruction codes invert magnetic measurements to determine
-    current profiles. The current relates to [magnetic_field](#magnetic_field) via $\nabla \times \mathbf{B}
-    = \mu_0 \mathbf{J}$ and can be inferred from poloidal field measurements.
+    integration and Rogowski coils. Equilibrium reconstruction codes invert magnetic
+    measurements to determine current profiles. The current relates to [magnetic_field](#magnetic_field)
+    via $\nabla \times \mathbf{B} = \mu_0 \mathbf{J}$ and can be inferred from poloidal
+    field measurements.
 
 
     Typical values:
 
 
-    Small tokamaks: 0.1-0.5 MA, medium tokamaks: 1-2 MA, ITER: up to 15 MA. Current density profiles typically
-    peak on-axis with values $10^5$-$10^6$ A/m$^2$ in the core region.
+    Small tokamaks: 0.1-0.5 MA, medium tokamaks: 1-2 MA, ITER: up to 15 MA. Current
+    density profiles typically peak on-axis with values $10^5$-$10^6$ A/m$^2$ in the
+    core region.
 
 
-    Sign convention: Positive indicates counter-clockwise toroidal current when viewed from above, same
-    direction as toroidal magnetic field for stable operation.'
+    Sign convention: Positive indicates counter-clockwise toroidal current when viewed
+    from above, same direction as toroidal magnetic field for stable operation.'
   status: active
-  tags:
-  - global-quantity
-  - measured
-  - time-dependent
   kind: scalar
   unit: A

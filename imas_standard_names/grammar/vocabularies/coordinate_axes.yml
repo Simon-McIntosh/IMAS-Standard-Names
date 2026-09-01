@@ -1,34 +1,46 @@
-# Coordinate axes vocabulary (plan 38 §A4)
+# Coordinate axes vocabulary
 #
 # Used with GeometryCarrier (shape=coordinate) to form projections like
 # "radial_coordinate_of_flux_loop".  Distinct from components.yml which
-# is used with QuantityBase (shape=component, e.g.
-# "radial_component_of_magnetic_field").
+# is used with QuantityBase (shape=component, e.g. "radial_magnetic_field").
 #
-# Populated by W2a from corpus mining (10 coordinate_axis tokens):
-#   normalized_parallel, normalized_poloidal, normalized_toroidal,
-#   parallel, perpendicular, poloidal, radial, toroidal, vertical, x
+# The normalized coordinate directions are flux/normalized-machine axes:
+#   normalized_radial → ρ, normalized_toroidal → φ, normalized_poloidal → θ,
+#   normalized_vertical → normalized Z.  `normalized_parallel` /
+#   `normalized_perpendicular` are deliberately ABSENT: parallel/perpendicular
+#   are field-relative directions with no distinct normalized-coordinate
+#   variant — a leading `normalized` on them is the GyroBohm/reference
+#   normalization operator, not a coordinate (canonical-qualifier-order §3).
 
 axes:
-  normalized_parallel:
-    aliases: []
   normalized_poloidal:
     aliases: []
+  normalized_radial:
+    aliases: []
   normalized_toroidal:
+    aliases: []
+  normalized_vertical:
     aliases: []
   parallel:
     aliases: []
   perpendicular:
     aliases: []
   poloidal:
-    aliases: [pol]
+    aliases: []
   radial:
-    aliases: [r]
+    aliases: []
   toroidal:
-    aliases: [phi, tor]
+    aliases: []
+  # Frame rule: Cartesian family triples are x, y, z; cylindrical triples are
+  # radial, toroidal, vertical. `vertical` is cylindrical Z and standalone
+  # machine-vertical quantities; `z` appears only as the third member of an
+  # x, y, z family. Per-family triple consistency is enforced by the
+  # imas-codex vector-node family audit.
   vertical:
-    aliases: [z]
+    aliases: []
   x:
     aliases: []
   y:
+    aliases: []
+  z:
     aliases: []

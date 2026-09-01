@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-standard-names">
+  <meta name="reckon-type" content="archive">
+  <meta name="plan-slug" content="sn-boundary-averaged-name-multiplicity-followups-landed">
+  <meta name="plan-status" content="done">
+  <title>Followups landed — q95 fix, DDv4 gate, composition family | sn-boundary-averaged-name-multiplicity</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+  <h1>Followups landed — q95 locus fix, DD-version gate, composition family</h1>
+  <p>Evergreen: <a href="/imas-standard-names/sn-boundary-averaged-name-multiplicity.html">sn-boundary-averaged-name-multiplicity</a> · landed 2026-07-10 · all deterministic ($0 LLM spend)</p>
+
+  <h2>f-bam-004 — separatrix q mis-anchored to q95</h2>
+  <p>DD defines <code>summary/local/separatrix*/q</code> as q evaluated AT the LCFS — not q95. The two
+    leaves had been consolidated onto <code>safety_factor_at_normalized_poloidal_magnetic_flux_equal_to_0_95</code>
+    (which also carries the two genuine q95 sources), and the correct
+    <code>safety_factor_at_plasma_boundary</code> sat superseded with no successor. Fix: revived the
+    boundary name (accepted) and moved the two separatrix sources onto it; the q95 name keeps only the
+    <code>q_95</code> sources.</p>
+
+  <h2>DD-version gate (imas-codex <code>51c19815</code>) — the systemic finding</h2>
+  <p>The q95/momentum anomalies traced to a systemic defect: the graph accumulated IMASNodes across DD
+    major versions and <strong>17,216 of 61,366 nodes (28%) are absent from DD 4.1.0</strong> (removed, or
+    renamed away — the DDv3 <code>*_tor</code> → <code>*_phi</code> family). Removal was recorded only as
+    <code>DEPRECATED_IN</code> edges that <em>no seeding query consulted</em>, so extraction kept seeding
+    DDv3-only paths: <strong>1,535 dd sources sat on non-DDv4 paths, 857 feeding live names</strong>.</p>
+  <table>
+    <thead><tr><th>Fix</th><th>Detail</th></tr></thead>
+    <tbody>
+      <tr><td>Root (code)</td><td>New <code>graph/dd_lifecycle.py</code>: derives the valid-path set and the NBC rename map (structure renames propagate to whole subtrees) from the packaged DD XML; stamps absent nodes <code>lifecycle_status='removed'</code> + <code>renamed_to</code>; wired into the DD build; idempotent with restore-on-return. All three seeding queries (dd extractor, extraction candidates, domain auto-seed sweep) exclude removed nodes. A read-only <code>sn run</code> probe (<code>find_removed_dd_sources</code>) flags survivors.</td></tr>
+      <tr><td>Graph stamp</td><td>17,216 nodes stamped removed; 2,824 annotated with their DD4 rename.</td></tr>
+      <tr><td>Source cleanup</td><td>Per-source policy over the 857: <strong>300</strong> redundant (DD4 rename-twin already produces the same name) → detached+stale; <strong>37</strong> re-anchored to their DD4 path (same name, deterministic bind); <strong>28</strong> rename-twins with different DD4 semantics (e.g. <code>ece t_e → t_radiation</code>: electron vs radiative temperature) → v3 source detached, DD4 name authoritative; <strong>492</strong> truly removed → detached+stale. 678 no-live-name v3 sources marked stale.</td></tr>
+      <tr><td>Name retirement</td><td><strong>111 names</strong> left with no DDv4 anchor → <code>name_stage='exhausted'</code> (terminal, kept for lineage, dropped from exports). Spot-checked before apply (e.g. <code>inner_triangularity_of_plasma_boundary</code> — DD4 removed <code>boundary_separatrix/triangularity_inner</code>).</td></tr>
+      <tr><td>Verification</td><td>0 v3 sources feeding live names; 0 orphans / 0 desyncs (2 transient derived-parent orphans healed via lifecycle normalize); both probes clean; doc links repointed.</td></tr>
+    </tbody>
+  </table>
+
+  <h2>f-bam-003 — composition density-ratio family (18 leaves)</h2>
+  <p>DD defines <code>summary/composition/*</code> as "ratio of the volume-averaged density (inside LCFS)
+    of each ion species to the volume-averaged electron density". Canonical explicit shape:
+    <code>ratio_of_volume_averaged_&lt;sp&gt;_density_to_volume_averaged_electron_density</code>.
+    14 renames via the cascade (dropping spurious <code>number</code>/<code>maximum</code>/<code>ion</code>/<code>total</code>
+    tokens and the <code>_fraction</code> shapes); 3 already canonical; hydrogen was a genuine collision —
+    <code>ratio_of_hydrogen_density_to_total_hydrogenic_density</code> correctly names the two
+    <code>isotope_fraction_hydrogen</code> leaves, so the composition source was detached and the canonical
+    hydrogen ratio persisted as a drafted name. All 18 leaves now single-name canonical.</p>
+
+  <h2>Open observations</h2>
+  <ul>
+    <li>Three drafted names await the next review rotation:
+      <code>flux_surface_averaged_effective_charge_at_plasma_boundary</code>,
+      <code>flux_surface_averaged_ion_density_at_plasma_boundary</code>,
+      <code>ratio_of_volume_averaged_hydrogen_density_to_volume_averaged_electron_density</code>.</li>
+    <li><code>ratio_of_hydrogen_density_to_total_hydrogenic_density</code> serves BOTH the line-average and
+      volume-average isotope-fraction leaves — same class of averaging-domain collision, low priority.</li>
+  </ul>
+</main>
+</body>
+</html>

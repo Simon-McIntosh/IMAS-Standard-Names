@@ -48,16 +48,6 @@ Unit = Annotated[
     ),
 ]
 
-# Tags: list[str] with controlled vocabulary validation
-# Secondary classification tags for cross-cutting classification
-# See grammar/vocabularies/tags.yml for complete controlled vocabulary
-Tags = Annotated[
-    list[str],
-    Field(
-        description=FIELD_DESCRIPTIONS["tags"],
-    ),
-]
-
 # Physics domain: controlled vocabulary from PhysicsDomain enum
 # Determines catalog subdirectory organization
 PhysicsDomainField = Annotated[
@@ -71,14 +61,6 @@ Links = Annotated[
     list[str],
     Field(
         description=FIELD_DESCRIPTIONS["links"],
-    ),
-]
-
-Constraints = Annotated[
-    list[str],
-    Field(
-        description=FIELD_DESCRIPTIONS["constraints"],
-        examples=FIELD_CONSTRAINTS["constraints"]["examples"],
     ),
 ]
 
@@ -97,24 +79,13 @@ Documentation = Annotated[
     ),
 ]
 
-Domain = Annotated[
-    str,
-    Field(
-        description=FIELD_DESCRIPTIONS["validity_domain"],
-        examples=FIELD_CONSTRAINTS["validity_domain"]["examples"],
-    ),
-]
-
 __all__ = [
     "STANDARD_NAME_PATTERN",
     "UNIT_PATTERN",
     "Name",
     "Unit",
-    "Tags",
     "PhysicsDomainField",
     "Links",
-    "Constraints",
     "Description",
     "Documentation",
-    "Domain",
 ]

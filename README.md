@@ -7,42 +7,35 @@
 
 # IMAS Standard Names
 
-Grammar library and read-only MCP server for IMAS Standard Names — a controlled vocabulary for fusion data variables.
+Grammar library for IMAS Standard Names — a controlled vocabulary for fusion data variables.
+
+This repository owns the grammar: the controlled vocabulary, the parser and
+renderer, catalog validation, and the documentation site. AI-assistant tools
+over standard names are served by
+[imas-codex](https://github.com/iterorganization/imas-codex).
 
 ## Quick Start
 
-### MCP Server
-
-Configure your AI assistant to use the standard names tools:
-
 ```bash
-# Install the MCP server
-uv tool install imas-standard-names
-
-# Or with pip
 pip install imas-standard-names
-```
-
-Add to your MCP configuration (e.g., Claude Desktop, VS Code):
-
-```json
-{
-  "mcpServers": {
-    "imas-standard-names": {
-      "command": "standard-names-mcp"
-    }
-  }
-}
 ```
 
 ### Python Library
 
 ```python
-from imas_standard_names import StandardNameCatalog
+from imas_standard_names import StandardNameIR, compose, parse
+from imas_standard_names.repository import StandardNameCatalog
 
 catalog = StandardNameCatalog()
 entry = catalog.get("electron_temperature")
 print(f"{entry.name}: {entry.unit} — {entry.description}")
+
+# Strict parsing is the validity oracle for both flat names and recursive
+# operator expressions.
+result = parse("square_of_inverse_of_pressure", strict=True)
+assert isinstance(result.ir, StandardNameIR)
+assert [operator.op for operator in result.ir.operators] == ["square", "inverse"]
+assert compose(result.ir) == "square_of_inverse_of_pressure"
 ```
 
 ## Installation
@@ -51,7 +44,7 @@ The tools and catalog are distributed separately:
 
 | Package | Purpose |
 |---------|---------|
-| `imas-standard-names` | Grammar library, validation, read-only MCP server |
+| `imas-standard-names` | Grammar library, parser, validation |
 | `imas-standard-names-catalog` | Standard names catalog (YAML + SQLite) |
 
 ### Basic Installation
@@ -93,7 +86,7 @@ uv sync
 
 This project uses a two-repository architecture:
 
-- **[imas-standard-names](https://github.com/iterorganization/imas-standard-names)** (this repo): Grammar library, validation, read-only MCP server, Python API
+- **[imas-standard-names](https://github.com/iterorganization/imas-standard-names)** (this repo): Grammar library, parser, validation, Python API
 - **[imas-standard-names-catalog](https://github.com/iterorganization/imas-standard-names-catalog)**: YAML source files and pre-built SQLite database
 
 Name *generation* is handled by [imas-codex](https://github.com/iterorganization/imas-codex), which uses ISN's grammar API to mint candidates.
@@ -109,32 +102,24 @@ Full documentation: **[iterorganization.github.io/IMAS-Standard-Names](https://i
 - [Quick Start](https://iterorganization.github.io/IMAS-Standard-Names/development/quickstart/) — getting started
 - [Architecture](docs/architecture/boundary.md) — project boundary and API contract
 
-## MCP Tools
+## Python API
 
-The MCP server provides **read-only** tools for AI assistants to work with standard names:
-
-### Grammar & Schema
-| Tool | Purpose |
+| Entry point | Purpose |
 |------|---------|
-| `get_grammar` | Grammar rules, patterns, and composition guidance |
-| `get_schema` | Entry schema for understanding catalog entry structure |
-| `compose_standard_name` | Build valid names from structured parts |
-| `parse_standard_name` | Parse names into grammatical components |
-| `get_vocabulary` | Controlled vocabulary tokens by grammar segment |
+| `imas_standard_names.parse(name, strict=True)` | Authoritative validation for flat and recursively ordered grammar |
+| `imas_standard_names.parse(name)` | Diagnostic parse into a lossless `StandardNameIR` |
+| `imas_standard_names.compose` | Render a `StandardNameIR` into its canonical spelling |
+| `imas_standard_names.StandardNameIR` | Public recursive representation; operator lists are outermost first |
+| `imas_standard_names.grammar.model.parse_standard_name` | Strict-validating projection into the flat `StandardName` facade; may reject a valid ordered tree it cannot represent |
+| `imas_standard_names.validate_round_trip` | Diagnostic parse/render drift check; not a validity test |
+| `imas_standard_names.grammar.context.get_grammar_context` | Grammar rules and vocabulary for LLM pipelines |
+| `imas_standard_names.repository.StandardNameCatalog` | Query the catalog |
+| `imas_standard_names.canonical_unit` | Canonical unit authority |
+| `standard-names` (CLI) | Build, search, and serve the catalog site |
+| `validate_catalog` (CLI) | Check catalog integrity and grammar compliance |
 
-### Catalog Query
-| Tool | Purpose |
-|------|---------|
-| `search_standard_names` | Find names by concept using semantic search |
-| `list_standard_names` | List names with filtering by status, tags, kind |
-| `fetch_standard_names` | Get complete metadata for specific names |
-| `check_standard_names` | Fast batch validation of name existence |
-
-### Reference & Validation
-| Tool | Purpose |
-|------|---------|
-| `validate_catalog` | Check catalog integrity and grammar compliance |
-| `get_tokamak_parameters` | Reference tokamak machine parameters |
+Tools that expose these over the Model Context Protocol live in
+[imas-codex](https://github.com/iterorganization/imas-codex).
 
 ## License
 

@@ -1,561 +1,893 @@
-# Locus registry vocabulary (plan 38 §A5)
+# Locus registry vocabulary
 #
-# Typed registry replacing the rc20 objects.yml + positions.yml + scattered
-# device/geometry entries.  Every locus token carries:
-#   type            - entity | position | geometry
-#   allowed_relations - subset of [of, at, over]
+# Typed registry of physical objects, locations, and shapes.  Every locus
+# token carries:
+#   type            - entity | position | geometry | region
+#   allowed_relations - subset of [of, at, over, along]
 #
 # Compatibility matrix enforced at validation time:
-#   entity   -> of          (intrinsic property of an entity)
-#   position -> at, of      (field at location, geometric property of location)
-#   geometry -> at, of, over (field over a geometric shape)
+#   entity   -> of                (intrinsic property of an entity)
+#   position -> at, of, along     (field at location, geometric property of
+#                                  location, or field varying ALONG a
+#                                  path-like position such as a beam chord)
+#   geometry -> at, of, over      (field over a geometric shape)
+#   region   -> over              (field averaged or integrated over a region)
 #
-# Populated by W2a from rc20 objects.yml + positions.yml migration and
-# corpus mining (44 entity + 41 position + 8 geometry tokens).
+# Curation policy:
+#   - Tokens must describe physics-meaningful loci, not DD structural artifacts
+#   - Ordinal point labels (first_point, second_point) belong in DD metadata
+#   - Discretization framework tokens (ggd_*) are not physics positions
+#   - Prefer atomic tokens composable via qualifiers over long compounds
+
+# Geometric qualifiers that compose onto a `qualifiable` feature, in canonical
+# intra-order (topological selector first: primary/secondary, then vertical
+# upper/lower, then radial inner/outer). Renders as <qual>..._<feature>, e.g.
+# inner_strike_point, upper_outer_strike_point. Scales to advanced divertor
+# topologies (snowflake / X-divertor / super-X) without enumerating every
+# strike-point / target combination as its own flat token.
+locus_qualifiers: [primary, secondary, upper, lower, inner, outer]
 
 loci:
 
   # ====================================================================
   # Entity-typed loci (intrinsic property: _of_<entity>)
-  # Migrated from objects.yml + corpus mining locus_entity tokens
+  # Hardware, diagnostic systems, and physical objects
   # ====================================================================
 
   antenna_strap:
     type: entity
     allowed_relations: [of]
+    definition: The antenna strap treated as a distinct physical, plant, or diagnostic object in a standard name.
   beam_tracing_beam:
     type: entity
     allowed_relations: [of]
+    definition: The beam tracing beam treated as a distinct physical, plant, or diagnostic object in a standard name.
   beam_tracing_ray:
     type: entity
     allowed_relations: [of]
+    definition: The beam tracing ray treated as a distinct physical, plant, or diagnostic object in a standard name.
   beamlet_group:
     type: entity
     allowed_relations: [of]
+    definition: The beamlet group treated as a distinct physical, plant, or diagnostic object in a standard name.
   bolometer:
     type: entity
     allowed_relations: [of]
+    definition: A diagnostic detector that measures incident radiant power through its thermal response.
+  bragg_crystal:
+    type: entity
+    allowed_relations: [of]
+    definition: A crystal optical element that diffracts radiation according to the Bragg condition.
   breeder_blanket:
     type: entity
     allowed_relations: [of]
+    definition: The breeder blanket treated as a distinct physical, plant, or diagnostic object in a standard name.
   breeder_blanket_layer:
     type: entity
     allowed_relations: [of]
+    definition: The breeder blanket layer treated as a distinct physical, plant, or diagnostic object in a standard name.
   breeder_blanket_module:
     type: entity
     allowed_relations: [of]
+    definition: The breeder blanket module treated as a distinct physical, plant, or diagnostic object in a standard name.
   breeder_blanket_shield:
     type: entity
     allowed_relations: [of]
-  breeding_blanket_module:
-    type: entity
-    allowed_relations: [of]
+    definition: The breeder blanket shield treated as a distinct physical, plant, or diagnostic object in a standard name.
   camera:
     type: entity
     allowed_relations: [of]
+    definition: An imaging system that maps radiation from a field of view onto spatially resolved detector channels.
   coordinate_system:
     type: entity
     allowed_relations: [of]
+    definition: The reference frame and coordinate basis used to express geometrical or vector quantities.
   correction_coil:
     type: entity
     allowed_relations: [of]
+    definition: The correction coil treated as a distinct physical, plant, or diagnostic object in a standard name.
   diagnostic_antenna:
     type: entity
     allowed_relations: [of]
+    definition: The diagnostic antenna treated as a distinct physical, plant, or diagnostic object in a standard name.
   diagnostic_aperture:
     type: entity
     allowed_relations: [of]
+    definition: The diagnostic aperture treated as a distinct physical, plant, or diagnostic object in a standard name.
   diamagnetic_loop:
     type: entity
     allowed_relations: [of]
+    definition: A magnetic-flux loop arranged to sense the plasma diamagnetic contribution to linked flux.
   divertor:
     type: entity
     allowed_relations: [of]
+    definition: The divertor treated as a distinct physical, plant, or diagnostic object in a standard name.
   divertor_tile:
     type: entity
     allowed_relations: [of]
+    definition: The divertor tile treated as a distinct physical, plant, or diagnostic object in a standard name.
   electron_cyclotron_beam:
     type: entity
     allowed_relations: [of]
+    definition: The electron cyclotron beam treated as a distinct physical, plant, or diagnostic object in a standard name.
   electron_cyclotron_heating_antenna:
     type: entity
     allowed_relations: [of]
+    definition: The electron cyclotron heating antenna treated as a distinct physical, plant, or diagnostic object in a standard name.
   electron_cyclotron_launcher:
     type: entity
     allowed_relations: [of]
+    definition: The electron cyclotron launcher treated as a distinct physical, plant, or diagnostic object in a standard name.
   electron_cyclotron_launcher_mirror:
     type: entity
     allowed_relations: [of]
+    definition: The electron cyclotron launcher mirror treated as a distinct physical, plant, or diagnostic object in a standard name.
   ferritic_element:
     type: entity
     allowed_relations: [of]
+    definition: The ferritic element treated as a distinct physical, plant, or diagnostic object in a standard name.
   ferritic_insert:
     type: entity
     allowed_relations: [of]
+    definition: The ferritic insert treated as a distinct physical, plant, or diagnostic object in a standard name.
   fiber_optic_current_sensor:
     type: entity
     allowed_relations: [of]
+    definition: The fiber optic current sensor treated as a distinct physical, plant, or diagnostic object in a standard name.
   filter:
     type: entity
     allowed_relations: [of]
+    definition: A component that selectively transmits or rejects parts of an incident signal or particle distribution.
   flux_loop:
     type: entity
     allowed_relations: [of]
+    definition: A conducting loop used to sense the time variation of magnetic flux linked through its effective area.
   gamma_ray_detector:
     type: entity
     allowed_relations: [of]
+    definition: The gamma ray detector treated as a distinct physical, plant, or diagnostic object in a standard name.
   gyrokinetic_eigenmode:
     type: entity
     allowed_relations: [of]
+    definition: The gyrokinetic eigenmode treated as a distinct physical, plant, or diagnostic object in a standard name.
   hard_xray_detector:
     type: entity
     allowed_relations: [of]
+    definition: The hard xray detector treated as a distinct physical, plant, or diagnostic object in a standard name.
   infrared_camera:
     type: entity
     allowed_relations: [of]
+    definition: The infrared camera treated as a distinct physical, plant, or diagnostic object in a standard name.
   interferometer_beam:
     type: entity
     allowed_relations: [of]
+    definition: The interferometer beam treated as a distinct physical, plant, or diagnostic object in a standard name.
   ion_cyclotron_heating_antenna:
     type: entity
     allowed_relations: [of]
+    definition: The ion cyclotron heating antenna treated as a distinct physical, plant, or diagnostic object in a standard name.
   ion_state:
     type: entity
     allowed_relations: [of]
+    definition: A governed ion configuration distinguished by its charge state and, where specified, internal quantum state.
   iron_core_segment:
     type: entity
     allowed_relations: [of]
+    definition: The iron core segment treated as a distinct physical, plant, or diagnostic object in a standard name.
   isotope:
     type: entity
     allowed_relations: [of]
+    definition: A nuclide of an element distinguished by its neutron number.
   langmuir_probe:
     type: entity
     allowed_relations: [of]
+    definition: An electrode diagnostic that infers local plasma properties from its current-voltage response.
   limiter_tile:
     type: entity
     allowed_relations: [of]
+    definition: The limiter tile treated as a distinct physical, plant, or diagnostic object in a standard name.
   lower_hybrid_antenna:
     type: entity
     allowed_relations: [of]
+    definition: The lower hybrid antenna treated as a distinct physical, plant, or diagnostic object in a standard name.
   lower_hybrid_antenna_row:
     type: entity
     allowed_relations: [of]
+    definition: The lower hybrid antenna row treated as a distinct physical, plant, or diagnostic object in a standard name.
   magnetic_field_probe:
     type: entity
     allowed_relations: [of]
+    definition: A diagnostic sensor used to measure a component of the local magnetic field.
   mass_spectrometer:
     type: entity
     allowed_relations: [of]
+    definition: The mass spectrometer treated as a distinct physical, plant, or diagnostic object in a standard name.
   mass_spectrometer_channel:
     type: entity
     allowed_relations: [of]
+    definition: The mass spectrometer channel treated as a distinct physical, plant, or diagnostic object in a standard name.
   mse:
     type: entity
     allowed_relations: [of]
+    definition: The mse treated as a distinct physical, plant, or diagnostic object in a standard name.
   neoclassical_tearing_mode:
     type: entity
     allowed_relations: [of]
+    definition: The neoclassical tearing mode treated as a distinct physical, plant, or diagnostic object in a standard name.
   neutral_beam_injector:
     type: entity
     allowed_relations: [of]
+    definition: The neutral beam injector treated as a distinct physical, plant, or diagnostic object in a standard name.
   neutron_detector:
     type: entity
     allowed_relations: [of]
+    definition: The neutron detector treated as a distinct physical, plant, or diagnostic object in a standard name.
   neutron_detector_converter:
     type: entity
     allowed_relations: [of]
+    definition: The neutron detector converter treated as a distinct physical, plant, or diagnostic object in a standard name.
   optical_element:
     type: entity
     allowed_relations: [of]
+    definition: A component that redirects, filters, focuses, disperses, or otherwise transforms electromagnetic radiation.
+  polarizer:
+    type: entity
+    allowed_relations: [of]
+    definition: An optical element whose relevant function is selecting a polarization state of the radiation it transmits or reflects.
+  reflector:
+    type: entity
+    allowed_relations: [of]
+    definition: An optical element whose relevant function is reflection from a defined surface.
   passive_loop:
     type: entity
     allowed_relations: [of]
+    definition: The passive loop treated as a distinct physical, plant, or diagnostic object in a standard name.
+  passive_loop_element:
+    type: entity
+    allowed_relations: [of]
+    definition: A discrete geometry element of a passive conducting loop.
   passive_structure:
     type: entity
     allowed_relations: [of]
+    definition: The passive structure treated as a distinct physical, plant, or diagnostic object in a standard name.
   pellet:
     type: entity
     allowed_relations: [of]
+    definition: The pellet treated as a distinct physical, plant, or diagnostic object in a standard name.
+  pellet_fragment:
+    # solid fragment produced by shattering a pellet (DD spi/injector/fragment)
+    type: entity
+    allowed_relations: [of]
+    definition: A solid fragment produced by shattering an injected pellet.
+  pellet_injector:
+    # shattered-pellet-injector unit (DD spi/injector) — orientation vectors,
+    # injection geometry
+    type: entity
+    allowed_relations: [of]
+    definition: The pellet injector treated as a distinct physical, plant, or diagnostic object in a standard name.
   pickup_coil:
     type: entity
     allowed_relations: [of]
-  plasma_boundary:
-    type: position
-    allowed_relations: [at, of]
+    definition: The pickup coil treated as a distinct physical, plant, or diagnostic object in a standard name.
+  plant_component_port:
+    type: entity
+    allowed_relations: [of]
+    definition: The plant component port treated as a distinct physical, plant, or diagnostic object in a standard name.
+  plant_subsystem:
+    type: entity
+    allowed_relations: [of]
+    definition: The plant subsystem treated as a distinct physical, plant, or diagnostic object in a standard name.
+  plant_system:
+    type: entity
+    allowed_relations: [of]
+    definition: The plant system treated as a distinct physical, plant, or diagnostic object in a standard name.
   plasma_facing_component:
     type: entity
     allowed_relations: [of]
+    definition: The plasma facing component treated as a distinct physical, plant, or diagnostic object in a standard name.
   plasma_filament:
     type: entity
     allowed_relations: [of]
+    definition: The plasma filament treated as a distinct physical, plant, or diagnostic object in a standard name.
   poloidal_field_coil:
     type: entity
     allowed_relations: [of]
+    definition: The poloidal field coil treated as a distinct physical, plant, or diagnostic object in a standard name.
   poloidal_magnetic_field_probe:
     type: entity
     allowed_relations: [of]
+    definition: The poloidal magnetic field probe treated as a distinct physical, plant, or diagnostic object in a standard name.
   port:
     type: entity
     allowed_relations: [of]
+    definition: The port treated as a distinct physical, plant, or diagnostic object in a standard name.
+  polarimeter_beam:
+    type: entity
+    allowed_relations: [of]
+    definition: The polarimeter beam treated as a distinct physical, plant, or diagnostic object in a standard name.
   radial_magnetic_field_probe:
     type: entity
     allowed_relations: [of]
+    definition: The radial magnetic field probe treated as a distinct physical, plant, or diagnostic object in a standard name.
   reciprocating_probe:
     type: entity
     allowed_relations: [of]
+    definition: The reciprocating probe treated as a distinct physical, plant, or diagnostic object in a standard name.
   reflectometer_antenna:
     type: entity
     allowed_relations: [of]
+    definition: The reflectometer antenna treated as a distinct physical, plant, or diagnostic object in a standard name.
   reflectometer_detector:
     type: entity
     allowed_relations: [of]
+    definition: The reflectometer detector treated as a distinct physical, plant, or diagnostic object in a standard name.
   rogowski_coil:
     type: entity
     allowed_relations: [of]
+    definition: A toroidal winding used to measure the electric current enclosed by its path.
   saddle_loop:
     type: entity
     allowed_relations: [of]
-  secondary_separatrix_x_point:
+    definition: The saddle loop treated as a distinct physical, plant, or diagnostic object in a standard name.
+  sensor:
+    # generic operational-instrumentation sensor (DD operational_instrumentation/
+    # sensor) — orientation vectors, attachment geometry; use the specific
+    # *_sensor tokens (strain_gauge_sensor, temperature_sensor) where the DD
+    # names the sensor kind
     type: entity
     allowed_relations: [of]
-  separatrix:
+    definition: A device element that converts a physical quantity into a measurable signal.
+  shatter_cone:
+    # shattered-pellet-injector shatter cone (DD spi/injector/shatter_cone) —
+    # cone axis and elliptical cross-section geometry
     type: entity
     allowed_relations: [of]
+    definition: The shatter cone treated as a distinct physical, plant, or diagnostic object in a standard name.
   soft_xray_detector:
     type: entity
     allowed_relations: [of]
+    definition: The soft xray detector treated as a distinct physical, plant, or diagnostic object in a standard name.
   spectrometer:
     type: entity
     allowed_relations: [of]
+    definition: A diagnostic system that resolves detected radiation or particles by energy, wavelength, frequency, or mass-to-charge ratio.
+  wave_diagnostic_channel:
+    # shared receiver channel of a wave-based diagnostic (ECE, reflectometer,
+    # refractometer); the channel, not the antenna, carries the tuned frequency
+    type: entity
+    allowed_relations: [of]
+    definition: The receiver channel of a wave-based diagnostic treated as a distinct diagnostic object in a standard name.
   spectrometer_channel:
     type: entity
     allowed_relations: [of]
+    definition: The spectrometer channel treated as a distinct physical, plant, or diagnostic object in a standard name.
   temperature_sensor:
     type: entity
     allowed_relations: [of]
+    definition: The temperature sensor treated as a distinct physical, plant, or diagnostic object in a standard name.
   thomson_scattering_detector:
     type: entity
     allowed_relations: [of]
+    definition: The thomson scattering detector treated as a distinct physical, plant, or diagnostic object in a standard name.
   thomson_scattering_laser:
     type: entity
     allowed_relations: [of]
+    definition: The thomson scattering laser treated as a distinct physical, plant, or diagnostic object in a standard name.
   toroidal_field_coil:
     type: entity
     allowed_relations: [of]
+    definition: The toroidal field coil treated as a distinct physical, plant, or diagnostic object in a standard name.
   toroidal_magnetic_field_probe:
     type: entity
     allowed_relations: [of]
+    definition: The toroidal magnetic field probe treated as a distinct physical, plant, or diagnostic object in a standard name.
   trim_coil:
     type: entity
     allowed_relations: [of]
+    definition: The trim coil treated as a distinct physical, plant, or diagnostic object in a standard name.
   vacuum_vessel:
     type: entity
     allowed_relations: [of]
+    definition: The vacuum vessel treated as a distinct physical, plant, or diagnostic object in a standard name.
   visible_camera:
     type: entity
     allowed_relations: [of]
+    definition: The visible camera treated as a distinct physical, plant, or diagnostic object in a standard name.
   wall_material:
     type: entity
     allowed_relations: [of]
+    definition: The wall material treated as a distinct physical, plant, or diagnostic object in a standard name.
   wave_beam:
     type: entity
     allowed_relations: [of]
+    definition: The wave beam treated as a distinct physical, plant, or diagnostic object in a standard name.
   working_fluid:
     type: entity
     allowed_relations: [of]
+    definition: The working fluid treated as a distinct physical, plant, or diagnostic object in a standard name.
+
+  # ── breadth-rotation gap closure (codex VocabGap analysis) ──────────
+  # Genuine hardware/structure entities surfaced by parser-rejected loci.
+  cryostat:
+    # large vacuum enclosure surrounding the magnet system (ITER-scale
+    # cryostat); intrinsic properties via _of_cryostat
+    type: entity
+    allowed_relations: [of]
+    definition: The cryostat treated as a distinct physical, plant, or diagnostic object in a standard name.
+  gauge:
+    # pressure/vacuum gauge sensor (intrinsic properties via _of_gauge)
+    type: entity
+    allowed_relations: [of]
+    definition: The gauge treated as a distinct physical, plant, or diagnostic object in a standard name.
+  strain_gauge_sensor:
+    # mechanical strain-gauge sensor on structural components
+    type: entity
+    allowed_relations: [of]
+    definition: The strain gauge sensor treated as a distinct physical, plant, or diagnostic object in a standard name.
+  strain_gauge:
+    # strain-gauge rosette (multi-axis strain measurement); carrier for its
+    # ordered measurement-direction unit vectors (first/second)
+    type: entity
+    allowed_relations: [of]
+    definition: The strain gauge treated as a distinct physical, plant, or diagnostic object in a standard name.
+
+  # ── coil-conductor and diagnostic-optic entities (VocabGap analysis) ──
+  # Genuine DD hardware objects (PF/TF/non-axisymmetric coil conductor
+  # geometry; diagnostic apertures, filter windows, fibre bundles).
+  # Intrinsic properties via _of_<entity>. Entity loci only — ordinal
+  # outline/element points stay in DD metadata, not the registry.
+  conductor:
+    # current-carrying conductor of a coil (tf/coil/conductor,
+    # coils_non_axisymmetric/coil/conductor)
+    type: entity
+    allowed_relations: [of]
+    definition: The conductor treated as a distinct physical, plant, or diagnostic object in a standard name.
+  coil_conductor:
+    # the conductor of a magnetic-field coil, as a named object
+    # (coils_non_axisymmetric/coil/conductor/...)
+    type: entity
+    allowed_relations: [of]
+    definition: The coil conductor treated as a distinct physical, plant, or diagnostic object in a standard name.
+  coil_conductor_element:
+    # a discrete element of a coil conductor's discretized path
+    # (coils_non_axisymmetric/coil/conductor/elements)
+    type: entity
+    allowed_relations: [of]
+    definition: The coil conductor element treated as a distinct physical, plant, or diagnostic object in a standard name.
+  conductor_cross_section:
+    # the cross-sectional profile of a coil conductor
+    # (coil/conductor/cross_section, pf_active/coil/geometry annulus)
+    type: entity
+    allowed_relations: [of]
+    definition: The conductor cross section treated as a distinct physical, plant, or diagnostic object in a standard name.
+  aperture:
+    # generic diagnostic aperture (utilities/aperture substructure;
+    # camera_x_rays/aperture, soft_x_rays/channel/aperture); distinct
+    # from the more specific diagnostic_aperture entity
+    type: entity
+    allowed_relations: [of]
+    definition: An opening that limits the accepted spatial or angular extent of a beam or line of sight.
+  filter_window:
+    # optical filter window of a camera/detector
+    # (camera_x_rays/filter_window, hard_x_rays/channel/filter_window)
+    type: entity
+    allowed_relations: [of]
+    definition: The filter window treated as a distinct physical, plant, or diagnostic object in a standard name.
+  fibre_bundle:
+    # fibre-optic bundle of a visible/spectroscopic diagnostic
+    # (camera_visible/channel/fibre_bundle, spectrometer_visible)
+    type: entity
+    allowed_relations: [of]
+    definition: The fibre bundle treated as a distinct physical, plant, or diagnostic object in a standard name.
+  detector:
+    type: entity
+    allowed_relations: [of]
+    definition: A device that converts an incident physical signal into a measurable response.
+  grating:
+    type: entity
+    allowed_relations: [of]
+    definition: An optical element with periodic structure that disperses radiation by wavelength.
+  shunt:
+    type: entity
+    allowed_relations: [of]
+    definition: A calibrated low-resistance element used to infer current from its voltage drop.
+  valve:
+    type: entity
+    allowed_relations: [of]
+    definition: A controllable device that regulates fluid or gas flow.
 
   # ====================================================================
   # Position-typed loci (field at location: _at_<position>, _of_<position>)
-  # Migrated from positions.yml + corpus mining locus_position tokens
+  # Physics-meaningful spatial locations in tokamak geometry
   # ====================================================================
 
-  active_limiter_point:
+  # line_of_sight: migrated from geometry_carriers.yml (was an unused bare
+  # carrier token; no name composed it standalone or via _of_). It names the
+  # coordinate running along a diagnostic chord, matching the ALONG semantics
+  # below (toroidal_angle_along_line_of_sight).
+  line_of_sight:
     type: position
-    allowed_relations: [at, of]
-  along_beam:
-    type: position
-    allowed_relations: [at, of]
-  along_beam_path:
-    type: position
-    allowed_relations: [at, of]
-  along_line_of_sight:
-    type: position
-    allowed_relations: [at, of]
-  along_pellet_path:
-    type: position
-    allowed_relations: [at, of]
+    allowed_relations: [at, of, along]
+    definition: The directed observation path from a diagnostic aperture or detector through the observed domain.
   antenna_row:
     type: position
     allowed_relations: [at, of]
+    definition: The spatial location identified as the antenna row in the relevant plasma, diagnostic, or plant context.
   beam_tracing_point:
     type: position
     allowed_relations: [at, of]
-  charge_state:
-    type: position
-    allowed_relations: [at, of]
+    definition: The spatial location identified as the beam tracing point in the relevant plasma, diagnostic, or plant context.
   closest_wall_point:
     type: position
     allowed_relations: [at, of]
-  constraint_position:
-    type: position
-    allowed_relations: [at, of]
+    definition: The spatial location identified as the closest wall point in the relevant plasma, diagnostic, or plant context.
   constant_toroidal_flux:
     type: position
     allowed_relations: [at, of]
+    definition: A location selected by a specified constant value of toroidal magnetic flux.
+  constraint_position:
+    type: position
+    allowed_relations: [at, of]
+    definition: The spatial location identified as the constraint position in the relevant plasma, diagnostic, or plant context.
   control_surface:
     type: position
     allowed_relations: [at, of]
-  control_surface_outline_point:
-    type: position
-    allowed_relations: [at, of]
+    definition: The spatial location identified as the control surface in the relevant plasma, diagnostic, or plant context.
   cooling_circuit_inlet:
     type: position
     allowed_relations: [at, of]
+    definition: The spatial location identified as the cooling circuit inlet in the relevant plasma, diagnostic, or plant context.
   current_center:
     type: position
     allowed_relations: [at, of]
-  delta_position:
+    definition: The spatial location identified as the current center in the relevant plasma, diagnostic, or plant context.
+  detector_pixel:
     type: position
     allowed_relations: [at, of]
+    definition: The spatial location identified as the detector pixel in the relevant plasma, diagnostic, or plant context.
+  diagnostic_component_centre:
+    type: position
+    allowed_relations: [at, of]
+    definition: The spatial location identified as the diagnostic component centre in the relevant plasma, diagnostic, or plant context.
   divertor_plate:
     type: position
     allowed_relations: [at, of]
+    definition: The spatial location identified as the divertor plate in the relevant plasma, diagnostic, or plant context.
+    qualifiable: true
   divertor_target:
     type: position
     allowed_relations: [at, of]
-  dr_dz_zero_point:
-    type: position
-    allowed_relations: [at, of]
+    definition: The spatial location identified as the divertor target in the relevant plasma, diagnostic, or plant context.
+    qualifiable: true
   ece_channel:
     type: position
     allowed_relations: [at, of]
+    definition: The spatial location identified as the ece channel in the relevant plasma, diagnostic, or plant context.
   ece_channel_emission_position:
     type: position
     allowed_relations: [at, of]
-  end_point:
-    type: position
-    allowed_relations: [at, of]
+    definition: The spatial location identified as the ece channel emission position in the relevant plasma, diagnostic, or plant context.
   ferritic_element_centroid:
     type: position
     allowed_relations: [at, of]
+    definition: The spatial location identified as the ferritic element centroid in the relevant plasma, diagnostic, or plant context.
   ferritic_insert_centroid:
     type: position
     allowed_relations: [at, of]
-  first_point_of_interferometer_beam:
-    type: position
-    allowed_relations: [at, of]
+    definition: The spatial location identified as the ferritic insert centroid in the relevant plasma, diagnostic, or plant context.
   first_wall:
     type: position
     allowed_relations: [at, of]
+    definition: The innermost material surface facing and enclosing the plasma chamber.
   first_wall_midplane:
     type: position
     allowed_relations: [at, of]
+    definition: The intersection of the first-wall surface with the specified tokamak midplane.
   flux_surface:
     type: position
     allowed_relations: [at, of]
-  gap_reference_point:
-    type: position
-    allowed_relations: [at, of]
+    definition: A surface formed by points sharing the same magnetic-flux label in a nested-flux-surface configuration.
   geometric_axis:
     type: position
     allowed_relations: [at, of]
-  ggd_element:
-    type: position
-    allowed_relations: [at, of]
-  ggd_grid_node:
-    type: position
-    allowed_relations: [at, of]
-  ggd_grid_point:
-    type: position
-    allowed_relations: [at, of]
-  ggd_grid_subset:
-    type: position
-    allowed_relations: [at, of]
-  ggd_node:
-    type: position
-    allowed_relations: [at, of]
+    definition: The axis defined solely by the geometry of the relevant object or plasma cross-section.
   halo_boundary:
     type: position
-    allowed_relations: [at, of]
-  halo_current_area_end_point:
+    allowed_relations: [at, of, over]
+    definition: The spatial location identified as the halo boundary in the relevant plasma, diagnostic, or plant context.
+  inboard_midplane:
     type: position
     allowed_relations: [at, of]
-  halo_current_area_start_point:
-    type: position
-    allowed_relations: [at, of]
+    definition: >-
+      High-field-side (inboard) equatorial midplane - the inner-midplane
+      counterpart of outboard_midplane. The inner-midplane reference is the
+      inboard intersection of the horizontal plane through the magnetic axis
+      (or the DD midplane_identifier) with the plasma boundary / first wall.
+      DD: e.g. equilibrium/time_slice/profiles_1d/r_inboard (inboard major
+      radius of the flux surface at the midplane).
   inlet:
     type: position
     allowed_relations: [at, of]
-  inner_divertor_target:
-    type: position
-    allowed_relations: [at, of]
-  inner_midplane:
-    type: position
-    allowed_relations: [at, of]
+    definition: The spatial location identified as the inlet in the relevant plasma, diagnostic, or plant context.
   inside_flux_surface:
     type: position
     allowed_relations: [at, of]
+    definition: The volume enclosed by the specified magnetic flux surface.
   internal_transport_barrier:
     type: position
     allowed_relations: [at, of]
-  ion_charge_state:
-    type: position
-    allowed_relations: [at, of]
+    definition: The flux-surface location of a localized reduction in radial transport that steepens one or more plasma profiles.
+    abbreviations: [ITB]
   last_closed_flux_surface:
     type: position
     allowed_relations: [at, of]
+    definition: The outermost magnetic flux surface whose field lines close toroidally, bounding the confined-plasma region.
+    abbreviations: [LCFS]
   launching_position:
     type: position
     allowed_relations: [at, of]
+    definition: The spatial location identified as the launching position in the relevant plasma, diagnostic, or plant context.
   limiter:
     type: position
-    allowed_relations: [at, of]
+    allowed_relations: [at, of, along]
+    definition: >-
+      Plasma-facing limiter. As a measurement locus, 'at_limiter' denotes the
+      scrape-off-layer plasma immediately adjacent to the limiter surface; the
+      DD provides only the limiter surface geometry
+      (wall/description_2d/limiter) and the precise plasma evaluation point is
+      not yet standardised (IMAS_3226). For the separatrix-limiter tangency
+      CONTACT point use active_limiter_point; for a quantity distributed OVER
+      the limiter surface (e.g. a peak power density) use the 'along' relation
+      (along_limiter).
   magnetic_axis:
     type: position
     allowed_relations: [at, of]
+    definition: The closed magnetic-field line about which nested toroidal magnetic flux surfaces are arranged.
   measurement_position:
     type: position
     allowed_relations: [at, of]
+    definition: The spatial location identified as the measurement position in the relevant plasma, diagnostic, or plant context.
   midplane:
     type: position
     allowed_relations: [at, of]
-  minimum_safety_factor:
+    definition: A reference plane through the tokamak on which the vertical coordinate is zero in the adopted coordinate system.
+    qualifiable: true
+  minimum_absolute_safety_factor:
     type: position
     allowed_relations: [at, of]
+    definition: The surface where the absolute value of the safety factor is minimum.
   neoclassical_tearing_mode_center:
     type: position
     allowed_relations: [at, of]
+    definition: The spatial location identified as the neoclassical tearing mode center in the relevant plasma, diagnostic, or plant context.
   neoclassical_tearing_mode_onset:
     type: position
     allowed_relations: [at, of]
-  normalized_poloidal_flux:
+    definition: The spatial location identified as the neoclassical tearing mode onset in the relevant plasma, diagnostic, or plant context.
+  # Named after the poloidal_magnetic_flux physical-base family (the legacy
+  # short form normalized_poloidal_flux was inconsistent with it). Supports
+  # value parameterization: at_normalized_poloidal_magnetic_flux_equal_to_0_95.
+  normalized_poloidal_magnetic_flux:
     type: position
     allowed_relations: [at, of]
-  ntm_onset:
-    type: position
-    allowed_relations: [at, of]
+    definition: A location selected by a specified normalized poloidal-magnetic-flux value.
   outboard_midplane:
     type: position
     allowed_relations: [at, of]
-  outboard_midplane_first_wall:
-    type: position
-    allowed_relations: [at, of]
-  outboard_midplane_height:
-    type: position
-    allowed_relations: [at, of]
+    definition: >-
+      Low-field-side (outboard) equatorial midplane. The outer-midplane
+      reference follows the DD midplane_identifier (default option
+      'dr_dz_zero_sep': the outboard separatrix point where dr/dz = 0). For a
+      value at the separatrix intersection use outboard_midplane_separatrix.
   outboard_midplane_separatrix:
     type: position
     allowed_relations: [at, of]
+    definition: >-
+      Intersection of the separatrix with the outboard (low-field-side)
+      midplane - the outboard separatrix point where dr/dz = 0 (the local
+      major-radius maximum of the separatrix). This is where a separatrix
+      POINT value is evaluated. DD:
+      equilibrium/time_slice/boundary_separatrix/dr_dz_zero_point; outer-midplane
+      reference per the midplane_identifier.
   outer:
     type: position
     allowed_relations: [at, of]
-  outer_divertor_target:
-    type: position
-    allowed_relations: [at, of]
-  outer_midplane:
-    type: position
-    allowed_relations: [at, of]
+    definition: The spatial location identified as the outer in the relevant plasma, diagnostic, or plant context.
   outlet:
     type: position
     allowed_relations: [at, of]
-  outline_point:
-    type: position
-    allowed_relations: [at, of]
+    definition: The spatial location identified as the outlet in the relevant plasma, diagnostic, or plant context.
   pedestal:
     type: position
     allowed_relations: [at, of]
+    definition: >-
+      H-mode edge transport-barrier (pedestal) region. Ambiguous as a single
+      point: for a profile VALUE use pedestal_top; for a maximum-gradient or
+      fit POSITION use pedestal_maximum. Prefer the more specific token over
+      this bare one. DD: summary/local/pedestal, summary/pedestal_fits/*.
+    defining_quantity: normalized_poloidal_flux_coordinate_of_pedestal
   pedestal_maximum:
     type: position
     allowed_relations: [at, of]
+    definition: >-
+      Location of the maximum pedestal gradient (the steep mid-pedestal), i.e.
+      the peak-gradient / fit position of the edge barrier. Distinct from the
+      pedestal top. DD: summary/pedestal_fits/*/d_dpsi_norm_max_position,
+      summary/local/pedestal/position/psi.
+    defining_quantity: normalized_poloidal_flux_coordinate_of_pedestal
   pedestal_top:
     type: position
     allowed_relations: [at, of]
+    definition: >-
+      Top of the H-mode edge pedestal (the barrier's inner shoulder), where
+      'the pedestal value' of a profile is conventionally reported. DD:
+      summary/pedestal_fits/* pedestal-top fit outputs.
+    defining_quantity: normalized_poloidal_flux_coordinate_of_pedestal
   pedestal_top_high_field_side:
     type: position
     allowed_relations: [at, of]
+    definition: The spatial location identified as the pedestal top high field side in the relevant plasma, diagnostic, or plant context.
   pedestal_top_low_field_side:
     type: position
     allowed_relations: [at, of]
+    definition: The spatial location identified as the pedestal top low field side in the relevant plasma, diagnostic, or plant context.
   pellet_path:
     type: position
-    allowed_relations: [at, of]
-  pellet_path_first_point:
-    type: position
-    allowed_relations: [at, of]
+    allowed_relations: [at, of, along]
+    definition: The trajectory followed by a pellet through the device or plasma.
   pellet_path_point:
     type: position
     allowed_relations: [at, of]
-  pellet_path_second_point:
+    definition: A specified point on a pellet trajectory.
+  plasma_boundary:
     type: position
     allowed_relations: [at, of]
+    definition: The surface used to delimit the plasma domain for the quantity being described.
+  plasma_boundary_gap:
+    type: position
+    allowed_relations: [at, of]
+    definition: The shortest directed separation between the plasma boundary and a specified reference surface or point.
   plasma_boundary_gap_reference_point:
     type: position
     allowed_relations: [at, of]
+    definition: The fixed reference point used to define a plasma-boundary gap measurement.
   post_sawtooth_crash:
     type: position
     allowed_relations: [at, of]
-  primary_strike_point:
-    type: position
-    allowed_relations: [at, of]
-  primary_x_point:
-    type: position
-    allowed_relations: [at, of]
-  reference_major_radius:
-    type: position
-    allowed_relations: [at, of]
-  reference_position:
-    type: position
-    allowed_relations: [at, of]
+    definition: The spatial location identified as the post sawtooth crash in the relevant plasma, diagnostic, or plant context.
   sawtooth_inversion_radius:
     type: position
     allowed_relations: [at, of]
-  second_point_of_interferometer_beam:
+    definition: The spatial location identified as the sawtooth inversion radius in the relevant plasma, diagnostic, or plant context.
+  sawtooth_mixing_radius:
+    # outer radius of the sawtooth reconnection/mixing region (companion to
+    # the sawtooth_inversion_radius); DD: sawteeth diagnostics
     type: position
     allowed_relations: [at, of]
-  secondary_separatrix:
+    definition: The spatial location identified as the sawtooth mixing radius in the relevant plasma, diagnostic, or plant context.
+  sensor_attachment_point:
     type: position
     allowed_relations: [at, of]
-  secondary_separatrix_outline_point:
+    definition: The spatial location identified as the sensor attachment point in the relevant plasma, diagnostic, or plant context.
+  separatrix:
     type: position
     allowed_relations: [at, of]
-  secondary_separatrix_strike_point:
-    type: position
-    allowed_relations: [at, of]
+    qualifiable: true
+    definition: >-
+      Last closed flux surface / separatrix. For a flux-surface-averaged
+      quantity apply the flux_surface_averaged operator (DD
+      summary/local/separatrix_average/*); for a bare point value at the
+      outboard midplane use outboard_midplane_separatrix. DD:
+      summary/local/separatrix/*, equilibrium/time_slice/boundary_separatrix.
   shattering_position:
     type: position
     allowed_relations: [at, of]
-  soft_xray_detector_line_of_sight_second_point:
-    type: position
-    allowed_relations: [at, of]
+    definition: The spatial location identified as the shattering position in the relevant plasma, diagnostic, or plant context.
   spectral_line:
     type: position
     allowed_relations: [at, of]
-  start_point:
-    type: position
-    allowed_relations: [at, of]
+    definition: The spatial location identified as the spectral line in the relevant plasma, diagnostic, or plant context.
   strike_point:
     type: position
     allowed_relations: [at, of]
+    definition: The point where a divertor separatrix branch intersects a plasma-facing target.
+    qualifiable: true
   tearing_mode_center:
     type: position
     allowed_relations: [at, of]
-  third_point_of_interferometer_beam:
-    type: position
-    allowed_relations: [at, of]
+    definition: The spatial location identified as the tearing mode center in the relevant plasma, diagnostic, or plant context.
   wall:
     type: position
     allowed_relations: [at, of]
+    definition: The spatial location identified as the wall in the relevant plasma, diagnostic, or plant context.
   x_point:
     type: position
     allowed_relations: [at, of]
+    definition: A poloidal-field null at which separatrix branches intersect in the poloidal plane.
+    qualifiable: true
+
+  # ── breadth-rotation gap closure (codex VocabGap analysis) ──────────
+  # Genuine physics-meaningful boundary loci (DD-confirmed control /
+  # equilibrium geometry points; not ordinal outline labels).
+  active_limiter_point:
+    # plasma boundary point currently in contact with the device limiter
+    # (real-time shape/position control reference)
+    type: position
+    allowed_relations: [at, of]
+    definition: >-
+      The point where the last closed flux surface of a limited plasma is
+      tangent to (makes contact with) the limiter surface - the
+      separatrix-limiter tangency point. Distinct from the SOL-adjacent
+      'at_limiter' locus. DD: pulse_schedule/position_control/active_limiter_point.
+  dr_dz_zero_point:
+    # plasma boundary location where dr/dz = 0 — the outboard local
+    # major-radius maximum (widest point of the separatrix)
+    type: position
+    allowed_relations: [at, of]
+    definition: >-
+      Outboard point on the separatrix where dr/dz = 0 (the local maximum of
+      the separatrix major radius) - the geometric outer-midplane reference
+      selected by the DD midplane_identifier option 'dr_dz_zero_sep'. DD:
+      equilibrium/time_slice/boundary_separatrix/dr_dz_zero_point.
+  rectangle_center:
+    type: position
+    allowed_relations: [at, of]
+    definition: The geometric center of a rectangular cross section or aperture.
+  annulus_center:
+    type: position
+    allowed_relations: [at, of]
+    definition: The geometric center of an annular cross section.
+  arc_of_circle_center:
+    type: position
+    allowed_relations: [at, of]
+    definition: The center of curvature of a circular arc.
 
   # ====================================================================
   # Geometry-typed loci (shape/region boundary: _at_, _of_, _over_)
   # ====================================================================
 
+  active_spatial_resolution_zone:
+    # volume along a channel sight line from which the measured signal
+    # originates (DD mse/channel/active_spatial_resolution)
+    type: geometry
+    allowed_relations: [at, of, over]
+    definition: The spatial volume from which a diagnostic channel collects the signal it reports.
   active_wall_point:
     type: geometry
     allowed_relations: [at, of, over]
+    definition: A point on the wall selected as active for the relevant geometric or physical construction.
   beam_path:
     type: geometry
     allowed_relations: [at, of, over]
+    definition: The geometrical curve followed by the central trajectory of a beam.
+
+  # ── Region tokens ──────────────────────────────────────────────────
+  # Multi-dimensional loci (volumes, layers, zones) used with _over_.
+  core_region:
+    type: region
+    allowed_relations: [over]
+    definition: The central confined-plasma region inside the edge transport-barrier region when one is present.
+  divertor_region:
+    type: region
+    allowed_relations: [over]
+    definition: The region surrounding divertor legs, targets, and associated plasma-facing structures.
+  edge_region:
+    type: region
+    allowed_relations: [over]
+    definition: The outer confined-plasma region adjacent to the plasma boundary.
+  halo_region:
+    type: region
+    allowed_relations: [over]
+    definition: The region outside the confined plasma through which halo currents or halo plasma may extend.
+  pedestal_region:
+    type: region
+    allowed_relations: [over]
+    definition: The edge transport-barrier region characterized by steep plasma-profile gradients.
+  scrape_off_layer:
+    type: region
+    allowed_relations: [over]
+    definition: The plasma region outside the last closed flux surface whose open field lines intersect material surfaces.
+  vessel:
+    type: region
+    allowed_relations: [over]
+    definition: The spatial region enclosed by the vacuum-vessel boundary.

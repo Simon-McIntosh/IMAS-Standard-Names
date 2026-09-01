@@ -12,10 +12,6 @@ from imas_standard_names.grammar import (
     compose_name,
     parse_name,
 )
-from imas_standard_names.grammar.support import (
-    compose_standard_name as compose_parts,
-    parse_standard_name as parse_parts,
-)
 
 
 class TestPerpendicular:
@@ -23,20 +19,25 @@ class TestPerpendicular:
 
     def test_compose_perpendicular_component(self):
         parts = {"component": "perpendicular", "physical_base": "magnetic_field"}
-        name = compose_parts(parts)
-        assert name == "perpendicular_component_of_magnetic_field"
+        name = compose_name(parts)
+        assert name == "perpendicular_magnetic_field"
 
     def test_parse_perpendicular_component(self):
-        parsed = parse_name("perpendicular_component_of_magnetic_field")
+        parsed = parse_name("perpendicular_magnetic_field")
         assert parsed.component.value == "perpendicular"
         assert parsed.physical_base == "magnetic_field"
 
     def test_perpendicular_round_trip(self):
-        model = StandardName(component="perpendicular", physical_base="heat_flux")
+        # heat_flux decomposes as channel=heat + base=flux (see channels.yml).
+        model = StandardName(
+            component="perpendicular", channel="heat", physical_base="flux"
+        )
         name = model.compose()
+        assert name == "perpendicular_heat_flux"
         parsed = parse_name(name)
         assert parsed.component.value == "perpendicular"
-        assert parsed.physical_base == "heat_flux"
+        assert parsed.channel.value == "heat"
+        assert parsed.physical_base == "flux"
 
 
 class TestSubjectTokens:
@@ -69,19 +70,19 @@ class TestSubjectTokens:
             "tritium_tritium",
             "hydrogenic",
             "neutral_beam",
-            "fast_neutral",
-            "fast_electron",
             "impurity_ion",
         ],
     )
     def test_subject_round_trip(self, subject):
+        # NOTE: fast_neutral/fast_electron decomposed into population+species
+        # (rc32) — see test_population_segment.py.
         """Each subject token should compose and parse correctly."""
         parts = {"subject": subject, "physical_base": "temperature"}
-        name = compose_parts(parts)
+        name = compose_name(parts)
         assert name == f"{subject}_temperature"
-        parsed = parse_parts(name)
-        assert parsed["subject"] == subject
-        assert parsed["physical_base"] == "temperature"
+        parsed = parse_name(name)
+        assert parsed.subject.value == subject
+        assert parsed.physical_base == "temperature"
 
     def test_alpha_particle_density(self):
         parsed = parse_name("alpha_particle_density")
@@ -107,7 +108,7 @@ class TestProcessTokens:
     @pytest.mark.parametrize(
         "process",
         [
-            "non_inductive",
+            "non_inductive_current_drive",
             "gas_injection",
             "pellet_injection",
             "beam_beam_fusion",
@@ -118,20 +119,38 @@ class TestProcessTokens:
     def test_process_round_trip(self, process):
         """Each process token should compose and parse correctly."""
         parts = {"physical_base": "power", "process": process}
-        name = compose_parts(parts)
+        name = compose_name(parts)
         assert name == f"power_due_to_{process}"
-        parsed = parse_parts(name)
-        assert parsed["process"] == process
-        assert parsed["physical_base"] == "power"
+        parsed = parse_name(name)
+        assert parsed.process.value == process
+        assert parsed.physical_base == "power"
 
     def test_non_inductive_current(self):
-        parsed = parse_name("plasma_current_due_to_non_inductive")
-        assert parsed.process.value == "non_inductive"
-        assert parsed.physical_base == "plasma_current"
+        # plasma is a channel-qualifier (channel_qualifiers.yml): it peels into
+        # the channel_qualifier segment, leaving current as the base.
+        parsed = parse_name("plasma_current_due_to_non_inductive_current_drive")
+        assert parsed.process.value == "non_inductive_current_drive"
+        assert parsed.channel_qualifier.value == "plasma"
+        assert parsed.physical_base == "current"
 
     def test_gas_injection_with_subject(self):
+        # particle_flux decomposes as channel=particle + base=flux.
         name = "deuterium_particle_flux_due_to_gas_injection"
         parsed = parse_name(name)
         assert parsed.subject.value == "deuterium"
-        assert parsed.physical_base == "particle_flux"
+        assert parsed.channel.value == "particle"
+        assert parsed.physical_base == "flux"
         assert parsed.process.value == "gas_injection"
+
+
+class TestRecyclingProcess:
+    """recycling process token (codex R4 VocabGap: divertor recycling)."""
+
+    def test_particle_flux_due_to_recycling_round_trips(self):
+        # particle_flux decomposes as channel=particle + base=flux.
+        name = "particle_flux_due_to_recycling"
+        parsed = parse_name(name)
+        assert parsed.process.value == "recycling"
+        assert parsed.channel.value == "particle"
+        assert parsed.physical_base == "flux"
+        assert compose_name(parsed) == name

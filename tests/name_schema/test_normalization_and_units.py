@@ -45,6 +45,24 @@ def test_unit_empty_string_rejected():
         )
 
 
+def test_unit_none_rejected_with_dimensionless_guidance():
+    """Quantitative entries must spell dimensionless units explicitly."""
+    with pytest.raises(
+        ValueError,
+        match="Unit is required.*use '1' for dimensionless quantities",
+    ):
+        create_standard_name_entry(
+            {
+                "kind": "scalar",
+                "name": "some_quantity",
+                "description": "Missing-unit quantity",
+                "documentation": "Quantitative entry without an authored unit.",
+                "unit": None,
+                "status": "draft",
+            }
+        )
+
+
 @pytest.mark.parametrize(
     "style,expected_variants",
     [
@@ -88,7 +106,7 @@ def test_formatted_unit_unknown_style():
         sn.formatted_unit(style="bogus")
 
 
-def test_tags_and_links_normalization():
+def test_links_and_constraints_normalization():
     sn = create_standard_name_entry(
         {
             "kind": "scalar",
@@ -97,17 +115,13 @@ def test_tags_and_links_normalization():
             "documentation": "Temperature of ions in the plasma.",
             "unit": "eV",
             "status": "active",
-            "tags": [" time-dependent ", "global-quantity", ""],
             "links": ["  https://example.com/ref  ", "", "https://example.com/ref"],
-            "constraints": [" Ti >= 0 ", ""],
         }
     )
-    assert sn.tags == ["time-dependent", "global-quantity"]
     assert sn.links == [
         "https://example.com/ref",
         "https://example.com/ref",
     ]  # duplication not removed (documented)
-    assert sn.constraints == ["Ti >= 0"]
 
 
 def test_deprecated_without_superseded_by_error():

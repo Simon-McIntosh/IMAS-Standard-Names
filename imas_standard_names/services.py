@@ -90,7 +90,6 @@ def row_to_model(conn: sqlite3.Connection, row: sqlite3.Row) -> StandardNameEntr
         "status": row["status"],
         "description": row["description"],
         "documentation": row["documentation"] or "",
-        "validity_domain": row["validity_domain"] or "",
         "deprecates": row["deprecates"] or None,
         "superseded_by": row["superseded_by"] or None,
     }

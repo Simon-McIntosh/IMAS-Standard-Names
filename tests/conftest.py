@@ -1,6 +1,5 @@
 """Shared pytest fixtures for IMAS Standard Names tests."""
 
-import asyncio
 import importlib.resources as ir
 from pathlib import Path
 
@@ -9,13 +8,12 @@ import yaml
 
 from imas_standard_names.models import create_standard_name_entry
 from imas_standard_names.repository import StandardNameCatalog
-from imas_standard_names.tools.fetch import FetchTool
 
 
 def _write_entry_yaml(root: Path, entry):
     """Write a standard name entry as a YAML file to disk.
 
-    Uses the per-domain list format (plan 40): entries are appended
+    Uses the per-domain list format: entries are appended
     to ``root/<domain>.yml`` as a YAML sequence.
     """
     domain = getattr(entry, "physics_domain", "general") or "general"
@@ -105,25 +103,6 @@ def temp_catalog(temp_catalog_dir):
 
 
 @pytest.fixture
-def temp_fetch_tool(temp_catalog):
-    """Create a FetchTool using the temporary catalog."""
-    return FetchTool(temp_catalog)
-
-
-@pytest.fixture
-def invoke_async():
-    """Helper to invoke async tool methods synchronously."""
-
-    def _invoke(tool, method_name, **kwargs):
-        method = getattr(tool, method_name)
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        return loop.run_until_complete(method(**kwargs))
-
-    return _invoke
-
-
-@pytest.fixture
 def sample_scalar_entry():
     """Sample scalar catalog entry for testing."""
     return {
@@ -132,7 +111,6 @@ def sample_scalar_entry():
         "description": "Test scalar entry.",
         "unit": "m",
         "status": "draft",
-        "tags": ["measured"],
     }
 
 
@@ -145,7 +123,6 @@ def sample_vector_entry():
         "description": "Test vector entry.",
         "unit": "T",
         "status": "draft",
-        "tags": ["spatial-profile"],
     }
 
 
@@ -164,7 +141,6 @@ def sample_entries_with_provenance():
             "kind": "scalar",
             "description": "Derived quantity using operator.",
             "unit": "m.s^-1",
-            "tags": ["derived"],
             "provenance": {
                 "mode": "operator",
                 "operators": ["time_derivative"],

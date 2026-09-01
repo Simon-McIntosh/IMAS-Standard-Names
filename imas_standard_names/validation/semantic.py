@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+import re
+from functools import lru_cache
+
 from ..grammar.model import parse_standard_name
 from ..grammar.model_types import GeometricBase
 from ..models import StandardNameEntry, StandardNameMetadataEntry
@@ -9,11 +12,38 @@ from ..provenance import OperatorProvenance
 
 __all__ = ["run_semantic_checks"]
 
+# Severity applied to unresolvable *inline* documentation references (the
+# markdown "[label](name:target)" form). Locked decision: ships as a
+# warning now; promote to "ERROR" here when the catalog is ready to fail
+# the build on dangling prose references. Structured references (links,
+# deprecates, superseded_by, arguments, error_variants) always error —
+# export already prunes those, so a dangling structured ref means a broken
+# export, not an editorial slip.
+INLINE_REFERENCE_SEVERITY = "WARNING"
+
+# Matches the markdown-link form used for inline standard-name references in
+# documentation prose, e.g. "[current at target](name:current_at_divertor_target)".
+_INLINE_NAME_REF_RE = re.compile(r"\]\(name:([A-Za-z][A-Za-z0-9_]*)\)")
+
 # Geometric bases that describe orientations (require object qualification)
 ORIENTATION_BASES = {
     GeometricBase.SURFACE_NORMAL.value,
     GeometricBase.SENSOR_NORMAL.value,
     GeometricBase.TANGENT_VECTOR.value,
+}
+
+# Unit-vector carriers are device orientation properties and need the owning
+# object too (a locus-less direction unit vector cannot say WHOSE direction it
+# is, and lets distinct vectors of one device collapse onto one name). Error
+# severity: the catalog's legacy locus-less generics are gone.
+UNIT_VECTOR_BASES = {
+    GeometricBase.UNIT_VECTOR.value,
+    GeometricBase.FIRST_LOCAL_TANGENTIAL_UNIT_VECTOR.value,
+    GeometricBase.SECOND_LOCAL_TANGENTIAL_UNIT_VECTOR.value,
+    GeometricBase.DIRECTION_UNIT_VECTOR.value,
+    GeometricBase.IMAGE_UP_UNIT_VECTOR.value,
+    GeometricBase.MAJOR_AXIS_UNIT_VECTOR.value,
+    GeometricBase.MINOR_AXIS_UNIT_VECTOR.value,
 }
 
 # Geometric bases that describe paths/boundaries (require object qualification)
@@ -26,9 +56,21 @@ PATH_BASES = {
 # Geometric base requiring dimension specification
 EXTENT_BASE = GeometricBase.EXTENT.value
 
+# Intrinsic plasma coordinate carriers: the coordinate IS the quantity and its
+# reference (the plasma equilibrium / machine frame) is universal, so a bare
+# name is complete — no object/geometry qualification required.
+INTRINSIC_COORDINATE_BASES = {
+    GeometricBase.NORMALIZED_POLOIDAL_FLUX_COORDINATE.value,
+    GeometricBase.NORMALIZED_TOROIDAL_FLUX_COORDINATE.value,
+    GeometricBase.TOROIDAL_FLUX_COORDINATE.value,
+    GeometricBase.POLOIDAL_ANGLE.value,
+    GeometricBase.TOROIDAL_ANGLE.value,
+}
+
 
 def run_semantic_checks(entries: dict[str, StandardNameEntry]) -> list[str]:
     issues: list[str] = []
+    known_names = set(entries)
     for name, entry in entries.items():
         # Existing provenance checks
         prov = getattr(entry, "provenance", None)
@@ -52,6 +94,131 @@ def run_semantic_checks(entries: dict[str, StandardNameEntry]) -> list[str]:
         issues.extend(_check_physical_base_with_object(name, entry))
         issues.extend(_check_dimensionless_physical_quantity(name, entry))
         issues.extend(_check_none_unit_with_quantitative_kind(name, entry))
+        issues.extend(_check_referential_integrity(name, entry, known_names))
+
+    issues.extend(_check_source_flux_unit_collision(entries))
+
+    return issues
+
+
+# Tokens whose presence in a name asserts a dimensional derivative of the
+# bare quantity: a flux is quantity per area per time, a source is quantity
+# created per volume (or area) per time. If the derived name and the bare
+# name carry the SAME unit, one of the pair is dimensionally misnamed —
+# the defect class where bare "*_momentum" entries were momentum source
+# densities sharing units with the differently-defined "*_momentum_flux"
+# family.
+_DIMENSIONAL_DERIVATIVE_TOKENS = ("flux", "source")
+
+
+def _check_source_flux_unit_collision(
+    entries: dict[str, StandardNameEntry],
+) -> list[str]:
+    """Flag ``X`` / ``X_flux`` (or ``X_source``) pairs sharing identical units.
+
+    Rule: for every entry whose name contains a ``flux`` or ``source`` token,
+    look up the sibling name with that token removed. If the sibling is also
+    published and both carry the same non-empty unit, the pair collides
+    dimensionally under near-identical names — a flux/source of a quantity
+    cannot share the quantity's own unit, so one of the two is misnamed.
+    Severity: Warning
+    """
+    issues: list[str] = []
+    for name, entry in entries.items():
+        unit = getattr(entry, "unit", None)
+        if not unit:
+            continue
+        tokens = name.split("_")
+        for index, token in enumerate(tokens):
+            if token not in _DIMENSIONAL_DERIVATIVE_TOKENS:
+                continue
+            sibling = "_".join(tokens[:index] + tokens[index + 1 :])
+            sibling_entry = entries.get(sibling)
+            if sibling_entry is None:
+                continue
+            if getattr(sibling_entry, "unit", None) == unit:
+                issues.append(
+                    f"{name}: WARNING - '{name}' and '{sibling}' differ only "
+                    f"by '{token}' but share unit '{unit}'. A {token} of a "
+                    "quantity has different dimensions from the quantity "
+                    "itself, so one of the pair is likely misnamed."
+                )
+    return issues
+
+
+def _check_referential_integrity(
+    name: str, entry: StandardNameEntry, known_names: set[str]
+) -> list[str]:
+    """Resolve every structured and inline name reference an entry carries.
+
+    ``links`` (internal ``name:`` entries), ``deprecates``, and
+    ``superseded_by`` are governance/documentation edges — a dangling
+    reference here means export produced or preserved a broken edge, so
+    these are reported at error severity.
+
+    ``arguments`` (operator decomposition edges) and ``error_variants``
+    (upper/lower/index siblings) are computed fields re-derived on export
+    (see :class:`StandardNameEntryBase`); ``yaml_store.YamlStore.load``
+    already carries a dedicated warning for these two (they may legitimately
+    reference a sibling not yet composed), so this check reports them at
+    warning severity too rather than duplicating that mechanism at a
+    stricter level.
+
+    Inline references embedded in documentation prose as markdown links
+    (``[label](name:target)``) are authored free text and drift more
+    easily; they are reported at :data:`INLINE_REFERENCE_SEVERITY`
+    (warning by default — see the module docstring for promotion).
+
+    A resolvable ``superseded_by``/``deprecates`` target is valid regardless
+    of the target's own status — deprecated stub entries pointing forward to
+    an active successor are exactly what this check must accept, not flag.
+    Severity: Error (links / deprecates / superseded_by) / Warning
+    (arguments, error_variants, inline — the last promotable to error).
+    """
+    issues: list[str] = []
+
+    for link in getattr(entry, "links", None) or []:
+        if isinstance(link, str) and link.startswith("name:"):
+            target = link[len("name:") :].strip()
+            if target and target not in known_names:
+                issues.append(
+                    f"{name}: ERROR - links references non-existent standard "
+                    f"name '{target}'"
+                )
+
+    for field in ("deprecates", "superseded_by"):
+        target = getattr(entry, field, None)
+        if target and target not in known_names:
+            issues.append(
+                f"{name}: ERROR - {field} references non-existent standard "
+                f"name '{target}'"
+            )
+
+    for arg in getattr(entry, "arguments", None) or []:
+        target = getattr(arg, "name", None)
+        if target and target not in known_names:
+            issues.append(
+                f"{name}: WARNING - arguments references non-existent standard "
+                f"name '{target}'"
+            )
+
+    error_variants = getattr(entry, "error_variants", None) or {}
+    for role, target in error_variants.items():
+        if target and target not in known_names:
+            issues.append(
+                f"{name}: WARNING - error_variants[{role}] references "
+                f"non-existent standard name '{target}'"
+            )
+
+    documentation = getattr(entry, "documentation", None)
+    if documentation:
+        for match in _INLINE_NAME_REF_RE.finditer(documentation):
+            target = match.group(1)
+            if target not in known_names:
+                issues.append(
+                    f"{name}: {INLINE_REFERENCE_SEVERITY} - documentation "
+                    f"references non-existent standard name '{target}'"
+                )
 
     return issues
 
@@ -59,25 +226,35 @@ def run_semantic_checks(entries: dict[str, StandardNameEntry]) -> list[str]:
 def _check_geometric_qualifier_requirement(
     name: str, entry: StandardNameEntry
 ) -> list[str]:
-    """Geometric bases MUST have object OR geometry qualification.
+    """Geometric bases MUST have object, geometry, OR position qualification.
 
-    Rule: Names with geometric_base require either object or geometry segment.
+    Rule: Names with geometric_base require an object, geometry, or position
+    segment. Intrinsic plasma coordinates are exempt (their reference is
+    universal); orientation/unit-vector/path bases are owned by their
+    dedicated checks below.
     Rationale: Geometric quantities describe spatial properties *of something*.
     Severity: Error
     """
     issues: list[str] = []
     try:
-        parsed = parse_standard_name(entry.standard_name)
+        parsed = parse_standard_name(name)
         geometric_base = getattr(parsed, "geometric_base", None)
 
-        if geometric_base:
+        if geometric_base and (
+            geometric_base not in INTRINSIC_COORDINATE_BASES
+            and geometric_base not in ORIENTATION_BASES
+            and geometric_base not in UNIT_VECTOR_BASES
+            and geometric_base not in PATH_BASES
+        ):
             obj = getattr(parsed, "object", None)
             geom = getattr(parsed, "geometry", None)
+            pos = getattr(parsed, "position", None)
 
-            if not obj and not geom:
+            if not obj and not geom and not pos:
                 issues.append(
                     f"{name}: ERROR - geometric quantity '{geometric_base}' requires "
-                    "object or geometry qualifier to specify what is being described. "
+                    "object, geometry, or position qualifier to specify what is "
+                    "being described. "
                     f"Example: {geometric_base}_of_flux_loop or {geometric_base}_at_midplane"
                 )
     except Exception:
@@ -96,7 +273,7 @@ def _check_component_with_base_type(name: str, entry: StandardNameEntry) -> list
     """
     issues: list[str] = []
     try:
-        parsed = parse_standard_name(entry.standard_name)
+        parsed = parse_standard_name(name)
         component = getattr(parsed, "component", None)
         geometric_base = getattr(parsed, "geometric_base", None)
 
@@ -120,7 +297,7 @@ def _check_coordinate_with_base_type(name: str, entry: StandardNameEntry) -> lis
     """
     issues: list[str] = []
     try:
-        parsed = parse_standard_name(entry.standard_name)
+        parsed = parse_standard_name(name)
         coordinate = getattr(parsed, "coordinate", None)
         physical_base = getattr(parsed, "physical_base", None)
 
@@ -128,7 +305,7 @@ def _check_coordinate_with_base_type(name: str, entry: StandardNameEntry) -> lis
             issues.append(
                 f"{name}: WARNING - 'coordinate' is for geometric/spatial quantities, "
                 f"not physical fields like '{physical_base}'. Consider using 'component' "
-                f"for directional decomposition: {coordinate}_component_of_{physical_base}"
+                f"for directional decomposition: {coordinate}_{physical_base}"
             )
     except Exception:
         pass
@@ -146,7 +323,7 @@ def _check_orientation_vector_completeness(
     """
     issues: list[str] = []
     try:
-        parsed = parse_standard_name(entry.standard_name)
+        parsed = parse_standard_name(name)
         geometric_base = getattr(parsed, "geometric_base", None)
 
         if geometric_base in ORIENTATION_BASES:
@@ -156,6 +333,13 @@ def _check_orientation_vector_completeness(
                 issues.append(
                     f"{name}: ERROR - {base_type} vector '{geometric_base}' must specify "
                     f"the object/surface it belongs to. Example: {geometric_base}_of_divertor_tile"
+                )
+        elif geometric_base in UNIT_VECTOR_BASES:
+            obj = getattr(parsed, "object", None)
+            if not obj:
+                issues.append(
+                    f"{name}: ERROR - unit vector '{geometric_base}' must specify "
+                    f"the device/object it orients. Example: {geometric_base}_of_camera"
                 )
     except Exception:
         pass
@@ -173,7 +357,7 @@ def _check_trajectory_path_qualification(
     """
     issues: list[str] = []
     try:
-        parsed = parse_standard_name(entry.standard_name)
+        parsed = parse_standard_name(name)
         geometric_base = getattr(parsed, "geometric_base", None)
 
         if geometric_base in PATH_BASES:
@@ -200,7 +384,7 @@ def _check_extent_dimensionality(name: str, entry: StandardNameEntry) -> list[st
     """
     issues: list[str] = []
     try:
-        parsed = parse_standard_name(entry.standard_name)
+        parsed = parse_standard_name(name)
         geometric_base = getattr(parsed, "geometric_base", None)
         component = getattr(parsed, "component", None)
 
@@ -217,24 +401,47 @@ def _check_extent_dimensionality(name: str, entry: StandardNameEntry) -> list[st
     return issues
 
 
+@lru_cache(maxsize=1)
+def _entity_typed_loci() -> frozenset[str]:
+    """Locus tokens typed ``entity`` in the registry (hardware/geometry carriers).
+
+    For an entity locus the ``_of_<entity>`` relation names an intrinsic
+    property of the entity (the locus matrix maps ``entity -> of``), so
+    ``<base>_of_<entity>`` is the canonical authoring form, not a
+    measurement-location smell.
+    """
+    from ..grammar.vocab_loaders import load_locus_registry  # noqa: PLC0415
+
+    registry = load_locus_registry()
+    return frozenset(
+        token for token, entry in registry.loci.items() if entry.type == "entity"
+    )
+
+
 def _check_physical_base_with_object(name: str, entry: StandardNameEntry) -> list[str]:
     """Physical bases with object qualification may indicate confusion.
 
     Rule: Physical quantities (temperature, density) are properties of subjects,
     not objects. Object qualification suggests measuring location rather than
     intrinsic property.
+
+    Suppressed for entity-typed loci: ``<base>_of_<entity>`` is the canonical
+    intrinsic-property form for a hardware/geometry carrier (the locus matrix
+    maps ``entity -> of``), so flagging it contradicts the authoring
+    convention and is pure noise.
     Severity: Info
     """
     issues: list[str] = []
     try:
-        parsed = parse_standard_name(entry.standard_name)
+        parsed = parse_standard_name(name)
         physical_base = getattr(parsed, "physical_base", None)
         obj = getattr(parsed, "object", None)
 
         if physical_base and obj:
             # Check if subject is also present (which would be more appropriate)
             subject = getattr(parsed, "subject", None)
-            if not subject:
+            obj_token = getattr(obj, "value", obj)
+            if not subject and obj_token not in _entity_typed_loci():
                 issues.append(
                     f"{name}: INFO - physical quantity '{physical_base}' with object '{obj}' "
                     "may indicate measurement location. Consider using subject (electron, ion) "
@@ -246,40 +453,53 @@ def _check_physical_base_with_object(name: str, entry: StandardNameEntry) -> lis
     return issues
 
 
-# Physical bases that inherently carry SI units — marking them dimensionless
-# is almost certainly a mistake.
-_INHERENTLY_DIMENSIONAL_BASES = frozenset(
-    {
-        "temperature",
-        "density",
-        "pressure",
-        "magnetic_field",
-        "electric_field",
-        "velocity",
-        "current",
-        "voltage",
-        "energy",
-        "power",
-        "force",
-        "mass",
-        "length",
-        "time",
-        "frequency",
-        "resistance",
-        "inductance",
-        "capacitance",
-        "flux",
-        "luminosity",
-        "torque",
-        "momentum",
-        "viscosity",
-        "conductivity",
-        "resistivity",
-        "charge",
-        "area",
-        "volume",
-    }
-)
+# ---------------------------------------------------------------------------
+# Dimensionless physical quantity check — vocabulary-driven
+# ---------------------------------------------------------------------------
+
+
+def _load_inherently_dimensional_bases() -> frozenset[str]:
+    """Load the set of physical bases marked ``inherently_dimensional`` in vocab."""
+    from ..grammar.vocab_loaders import load_physical_bases  # noqa: PLC0415
+
+    registry = load_physical_bases()
+    return frozenset(
+        token for token, defn in registry.bases.items() if defn.inherently_dimensional
+    )
+
+
+def _load_dimensionless_operators() -> frozenset[str]:
+    """Load operators marked ``dimensionless: true`` in the operator vocabulary."""
+    from ..grammar.vocab_loaders import load_operators  # noqa: PLC0415
+
+    registry = load_operators()
+    return frozenset(
+        token for token, defn in registry.operators.items() if defn.dimensionless
+    )
+
+
+def _load_dimension_transforming_operators() -> frozenset[str]:
+    """Load operators marked ``dimension_transforming: true`` in the vocabulary.
+
+    These change the dimensions of their argument (integrals, derivatives,
+    inverse, square), so the base-implies-unit heuristic does not apply —
+    ``volume_integrated_<density>`` is a dimensionless count.
+    """
+    from ..grammar.vocab_loaders import load_operators  # noqa: PLC0415
+
+    registry = load_operators()
+    return frozenset(
+        token
+        for token, defn in registry.operators.items()
+        if defn.dimension_transforming
+    )
+
+
+def _load_normalizing_qualifiers() -> frozenset[str]:
+    """Load qualifier tokens that imply dimensionless output from vocab."""
+    from ..grammar.vocab_loaders import load_normalizing_qualifiers  # noqa: PLC0415
+
+    return load_normalizing_qualifiers()
 
 
 def _check_dimensionless_physical_quantity(
@@ -288,9 +508,16 @@ def _check_dimensionless_physical_quantity(
     """Flag dimensionless unit on physical bases that inherently carry units.
 
     Rule: Scalar/vector entries with ``unit="1"`` whose physical base is a
-    quantity that normally carries SI units are likely misconfigured.  Ratios
-    and other binary-operator names are excluded because they can legitimately
-    be dimensionless.
+    quantity that normally carries SI units are likely misconfigured. The
+    following constructs are excluded because they can legitimately be
+    dimensionless:
+
+    - binary operators (ratio, product, difference);
+    - operators marked ``dimensionless: true`` in the operator vocabulary
+      (e.g. normalized, perturbed, logarithm);
+    - any qualifier listed in ``normalizing_qualifiers.yml``
+      (e.g. ``gyrocenter_pressure`` is gyrokinetic-normalized by convention).
+
     Severity: Warning
     """
     issues: list[str] = []
@@ -305,15 +532,52 @@ def _check_dimensionless_physical_quantity(
 
     try:
         parsed = parse_standard_name(entry.name)
-        physical_base = getattr(parsed, "physical_base", None)
         binary_operator = getattr(parsed, "binary_operator", None)
+        transformation = getattr(parsed, "transformation", None)
 
         # Binary operators (ratio, product, difference) can legitimately yield
         # dimensionless results, so skip the check for those.
         if binary_operator:
             return issues
 
-        if physical_base and physical_base in _INHERENTLY_DIMENSIONAL_BASES:
+        # Operators marked dimensionless in the vocabulary always produce
+        # dimensionless output (normalized, perturbed, logarithm, etc.);
+        # dimension-transforming operators (integrals, derivatives, inverse)
+        # change the unit of the base, so the base-implies-unit inference is
+        # invalid for them (volume_integrated density is a count).
+        dimensionless_ops = _load_dimensionless_operators()
+        transforming_ops = _load_dimension_transforming_operators()
+        exempt_ops = dimensionless_ops | transforming_ops
+        tx_value = getattr(transformation, "value", transformation)
+        if tx_value in exempt_ops:
+            return issues
+
+        # Qualifiers that imply normalization (from normalizing_qualifiers.yml)
+        # or that correspond to dimensionless operator tokens produce
+        # dimensionless output even when parsed as qualifiers.
+        normalizing_quals = _load_normalizing_qualifiers()
+        # Operator tokens can surface in the IR qualifier list (the parser's
+        # acceptance union), so exempt the transforming set there too.
+        exempt_qualifiers = dimensionless_ops | normalizing_quals | transforming_ops
+        try:
+            from ..grammar.parser import parse as ir_parse  # noqa: PLC0415
+
+            ir = ir_parse(entry.name).ir
+            if ir is not None:
+                physical_base = ir.base.token
+                qualifier_tokens = {q.token for q in (ir.qualifiers or [])}
+                if qualifier_tokens & exempt_qualifiers:
+                    return issues
+                operator_tokens = {
+                    getattr(op, "token", op) for op in (ir.operators or [])
+                }
+                if operator_tokens & exempt_ops:
+                    return issues
+        except Exception:
+            physical_base = getattr(parsed, "physical_base", None)
+
+        inherently_dimensional = _load_inherently_dimensional_bases()
+        if physical_base and physical_base in inherently_dimensional:
             issues.append(
                 f"{name}: WARNING - dimensionless unit '1' on physical quantity "
                 f"'{physical_base}' is unexpected. Quantities like '{physical_base}' "

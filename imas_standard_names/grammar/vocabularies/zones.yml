@@ -1,0 +1,55 @@
+# Zone vocabulary: plasma-region / geometric sub-selector prefixes
+#
+# Usage: <zone>_<base>  (recursive: <zone1>_<zone2>_<base>)
+# Examples:
+#   - core_electron_temperature
+#   - lower_outer_squareness_of_flux_surface
+#   - back_surface_curvature_of_optical_element
+#
+# The zone segment selects a plasma region or geometric quadrant/face in
+# PREFIX position. It is distinct from the postfix region locus
+# (over_<region>): the zone prefix form (scrape_off_layer_density) names a
+# quantity intrinsic to that zone, whereas the locus form
+# (..._over_scrape_off_layer) reduces a quantity over the region. Both forms
+# coexist; scrape_off_layer therefore appears in BOTH this file and
+# regions.yml by design.
+#
+# Tokens are ordered by a FIXED canonical intra-order, the way English fixes
+# adjective order. A name may carry several zone tokens (e.g. lower_outer);
+# they MUST appear in the order below. Corpus evidence for the
+# vertical-precedes-radial rule: lower_outer_squareness, lower_inner_squareness,
+# upper_inner_squareness, upper_outer_squareness.
+#
+# Canonical intra-order (outer group first; within a group, listed order):
+#   1. vertical position : upper, lower
+#   2. radial position   : inner, outer
+#   3. plasma region     : core, edge, pedestal, separatrix, divertor,
+#                          scrape_off_layer
+#   4. PFC / optical face : front_surface, back_surface, wetted
+#
+# The zone segment renders between subject/device and the refined qualifiers:
+#   <aggregation>_<orbit>_<population>_<subject>_<device>_<zone>_<qualifier>_<base>
+#
+# The zone parser-acceptance union strips these as prefixes; the StandardName
+# model retains them (multiple, in canonical intra-order) in the ``zone`` field.
+
+# --- vertical position ---
+- upper
+- lower
+
+# --- radial position ---
+- inner
+- outer
+
+# --- plasma region ---
+- core
+- edge
+- pedestal
+- separatrix
+- divertor
+- scrape_off_layer
+
+# --- PFC / optical-element face ---
+- front_surface
+- back_surface
+- wetted

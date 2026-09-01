@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-standard-names">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="sn-model-selection-2026-07">
+  <meta name="plan-title" content="SN pipeline model selection + reviewer-resilience (2026-07)">
+  <meta name="plan-summary" content="RCA of the reviewer-throttling campaign stall, the pipeline-resilience fixes it drove, and an all-seat model benchmark (discrimination + concurrency + reasoning-effort) that reseats the reviewer blind pair and confirms the other seats.">
+  <meta name="plan-informs" content="model-selection-and-global-refine">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <title>SN pipeline model selection + reviewer-resilience (2026-07) | imas-standard-names</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+  <h1>SN pipeline model selection + reviewer-resilience (2026-07)</h1>
+  <p><em>Research doc — informs <a href="/imas-standard-names/model-selection-and-global-refine.html">model-selection-and-global-refine</a>.</em>
+  All engineering landed in <strong>imas-codex</strong>; SHAs are cited inline. Benchmark numbers are from the 2026-07-19/20 all-seat run.</p>
+
+  <h2 id="s1">§1 — Outcome</h2>
+  <p>The documentation-simplification campaign stalled when its reviewer models returned empty/rate-limited responses under load. The root cause was <strong>upstream OpenRouter provider capacity</strong>, not a prompt bug: the blind-pair reviewers <code>qwen3.7-max</code> and <code>minimax-m3</code> are served by thin-capacity providers that HTTP-429 under the review pool's 64-way concurrency. Resolving it produced three things:</p>
+  <ul>
+    <li><strong>A resilient, better-discriminating reviewer blind pair</strong> — <code>claude-sonnet-5</code> + <code>grok-4.5</code> — chosen on a new labelled discrimination benchmark plus concurrency vetting.</li>
+    <li><strong>Pipeline-resilience fixes</strong> so a provider outage degrades gracefully and is observable, not a silent multi-hour stall: a global AIMD rate governor with bounded recovery, a quorum-integrity guard, and an LLM-activity heartbeat.</li>
+    <li><strong>An all-seat model benchmark</strong> exercising the real production prompts, with a reasoning-effort sweep — reusable as both a model discriminator and a debugging tool.</li>
+  </ul>
+
+  <h2 id="s2">§2 — The incident and its root cause</h2>
+  <p>Docs-campaign rotation&nbsp;1 (stratified 200 names) was halted by the orchestrator ~6&nbsp;min in when 2 of the 3 RD-quorum reviewer models entered an upstream empty-response outage and 67% of reviews degraded to single-reviewer — violating the "review quorum unchanged" churn-mitigation invariant.</p>
+  <p><strong>Reproduction settled the cause.</strong> Single high-effort review calls to <code>qwen3.7-max</code> and <code>minimax-m3</code> succeed (they are still listed and reasoning-capable). Under 16-way concurrency they fail:</p>
+  <table>
+    <tr><th>Model (16-way concurrency, effort=high)</th><th>Result</th></tr>
+    <tr><td><code>qwen3.7-max</code></td><td>13/16 OK, 3 empty ("returned empty/no reviews")</td></tr>
+    <tr><td><code>minimax-m3</code></td><td>mostly HTTP&nbsp;429 "temporarily rate-limited upstream"</td></tr>
+    <tr><td><code>grok-4.5</code>, <code>gemini-3.5-flash</code>, <code>gemini-3.1-pro</code>, <code>gpt-5.6-terra</code>, <code>deepseek-v4-pro</code>, <code>claude-sonnet-5</code></td><td>16/16 OK</td></tr>
+  </table>
+  <p>So the discriminating axis for a blind-pair seat is <strong>provider concurrency capacity first</strong>, then quality. (Muse&nbsp;Spark&nbsp;1.1 is excluded — <code>403</code> US-geo-restricted from this environment.)</p>
+
+  <h2 id="s3">§3 — Pipeline resilience (imas-codex)</h2>
+  <table>
+    <tr><th>Fix</th><th>What it does</th><th>SHA</th></tr>
+    <tr><td>Global AIMD rate governor</td><td>Process-global ceiling on concurrent LLM calls; multiplicative pullback on 429, <strong>bounded time-based recovery</strong> (~9&nbsp;s from floor, not the tens-of-minutes completion-gated crawl), <code>min_ceiling</code>&nbsp;8. No-op under healthy load.</td><td><code>8b59d8a3</code>, <code>e26c387b</code></td></tr>
+    <tr><td>Quorum-integrity guard</td><td>A name intended for a ≥2-model quorum can no longer be accepted on a single review when a secondary is throttled — it <strong>defers</strong> (releases to <code>drafted</code>) with a loud per-run counter. Legitimate single-model/derived-parent reviews unaffected.</td><td><code>39ea6a9f</code></td></tr>
+    <tr><td>LLM-activity heartbeat</td><td>At the shared call chokepoint: logs in-flight/completed/spend every 15&nbsp;s and WARNs on a >120&nbsp;s stall — turns a black-box run into an observable one.</td><td><code>e26c387b</code></td></tr>
+    <tr><td>Bench parallelization + fail-fast</td><td>The per-item review / refine / docs-gen / classifier / compose bench calls were serial; a single hung provider call (×5-retry×120&nbsp;s) ground a role for ~46&nbsp;min. Now bounded-concurrent with <code>max_retries=2</code> — a hang fails fast; flushed progress heartbeat for liveness.</td><td><code>74e0725b</code>, <code>7a8d606b</code>, <code>d1e9375f</code>, <code>46c27da4</code></td></tr>
+  </table>
+
+  <h2 id="s4">§4 — Benchmark methodology</h2>
+  <p>All seat benches run through <code>sn bench --role &lt;seat&gt;</code> and exercise the <strong>production prompts and graph context</strong> (so a bad result is a real production signal and the harness doubles as a debugging tool). Model slates are <strong>pyproject-driven</strong> (<code>[sn-benchmark].candidate-models</code>; each seat's incumbent read live from its own <code>[sn-*]</code> config), never hardcoded (<code>7087430d</code>). Enums — including <code>kind</code> — derive from the ISN <code>Kind</code> authority and are injected into the prompts (<code>940ec73f</code>).</p>
+  <ul>
+    <li><strong>Reviewer discrimination</strong> (new): labelled corpus of accepted (good) items vs deterministic seeded-defect twins (bad) — banned-prose / vacuous / unit-contradiction for docs; name mismatch / bare-base / non-canonical for names. Metric: AUC + calibration (good-pass, bad-recall). (<code>1bfeb2b1</code>, names-corpus fix <code>9c008c6d</code>.)</li>
+    <li><strong>Concurrency resilience</strong> (new): N parallel production review calls, tally success vs 429/empty.</li>
+    <li><strong>Reasoning-effort sweep</strong> (new): one row per (model, effort) so overthinking is measured, not assumed.</li>
+    <li>Existing seats: refine-from-critique (held-out judge), review-breaker independence, docs-generation rubric + banned-prose, domain-classifier gold set, and the compose (name-generation) bake-off.</li>
+  </ul>
+
+  <h3 id="s4a">Effort is a real, seat-and-model-dependent lever</h3>
+  <p>The clearest cross-cutting finding: reasoning effort is not "more is better." For judgment seats several models <em>overthink</em> at high effort; refine <em>benefits</em> from it. Measure per seat.</p>
+  <figure>
+    <svg viewBox="0 0 720 250" role="img" aria-label="Reasoning-effort effect on discrimination AUC, low vs high, per model" style="width:100%;max-width:720px;font-family:system-ui,sans-serif;background:#fff">
+      <!-- axes -->
+      <line x1="60" y1="20" x2="60" y2="200" stroke="#333" stroke-width="1"/>
+      <line x1="60" y1="200" x2="700" y2="200" stroke="#333" stroke-width="1"/>
+      <text x="16" y="40" font-size="12" fill="#333">AUC</text>
+      <text x="30" y="204" font-size="11" fill="#333">0.75</text>
+      <text x="30" y="114" font-size="11" fill="#333">0.85</text>
+      <text x="30" y="24" font-size="11" fill="#333">0.95</text>
+      <line x1="57" y1="200" x2="60" y2="200" stroke="#333"/><line x1="57" y1="110" x2="60" y2="110" stroke="#333"/><line x1="57" y1="20" x2="60" y2="20" stroke="#333"/>
+      <!-- y: 0.75->200, 0.95->20  => y = 200 - (auc-0.75)*900 -->
+      <!-- review-docs low vs high per model: (low,high) -->
+      <!-- grok 0.861->0.833; gemini-pro 0.854->0.771; sonnet-5 0.859->0.910; deepseek 0.860->0.799; terra 0.802->0.854; gemini-flash 0.837->0.823 -->
+      <g font-size="10.5" fill="#222" text-anchor="middle">
+        <!-- each model: low dot + high dot + connector -->
+        <!-- grok x=120 -->
+        <line x1="120" y1="100.1" x2="120" y2="125.3" stroke="#d9534f" stroke-width="2"/>
+        <circle cx="120" cy="100.1" r="4" fill="#fff" stroke="#333"/><circle cx="120" cy="125.3" r="4" fill="#d9534f"/>
+        <text x="120" y="216">grok</text>
+        <!-- gemini-pro x=215 -->
+        <line x1="215" y1="106.4" x2="215" y2="181.1" stroke="#d9534f" stroke-width="2"/>
+        <circle cx="215" cy="106.4" r="4" fill="#fff" stroke="#333"/><circle cx="215" cy="181.1" r="4" fill="#d9534f"/>
+        <text x="215" y="216">gem-pro</text>
+        <!-- deepseek x=310 -->
+        <line x1="310" y1="101.0" x2="310" y2="154.1" stroke="#d9534f" stroke-width="2"/>
+        <circle cx="310" cy="101.0" r="4" fill="#fff" stroke="#333"/><circle cx="310" cy="154.1" r="4" fill="#d9534f"/>
+        <text x="310" y="216">deepseek</text>
+        <!-- gemini-flash x=405 -->
+        <line x1="405" y1="123.3" x2="405" y2="136.4" stroke="#d9534f" stroke-width="2"/>
+        <circle cx="405" cy="123.3" r="4" fill="#fff" stroke="#333"/><circle cx="405" cy="136.4" r="4" fill="#d9534f"/>
+        <text x="405" y="216">gem-flash</text>
+        <!-- sonnet-5 x=500 (improves) -->
+        <line x1="500" y1="101.9" x2="500" y2="56.3" stroke="#5cb85c" stroke-width="2"/>
+        <circle cx="500" cy="101.9" r="4" fill="#fff" stroke="#333"/><circle cx="500" cy="56.3" r="4" fill="#5cb85c"/>
+        <text x="500" y="216">sonnet-5</text>
+        <!-- terra x=595 (improves) -->
+        <line x1="595" y1="156.8" x2="595" y2="110.2" stroke="#5cb85c" stroke-width="2"/>
+        <circle cx="595" cy="156.8" r="4" fill="#fff" stroke="#333"/><circle cx="595" cy="110.2" r="4" fill="#5cb85c"/>
+        <text x="595" y="216">terra</text>
+      </g>
+      <!-- legend -->
+      <g font-size="11" fill="#222">
+        <circle cx="70" cy="235" r="4" fill="#fff" stroke="#333"/><text x="80" y="239">low effort</text>
+        <circle cx="165" cy="235" r="4" fill="#d9534f"/><text x="175" y="239">high — worse (overthinks)</text>
+        <circle cx="380" cy="235" r="4" fill="#5cb85c"/><text x="390" y="239">high — better</text>
+      </g>
+    </svg>
+    <figcaption>Review-docs discrimination AUC, low→high effort. Open dot = low, filled = high; red drop = the model overthinks at high effort (grok, gemini-pro, deepseek, gemini-flash), green rise = improves (sonnet-5, terra). The pair runs best at low effort where both chosen reviewers are near their peak and cheaper.</figcaption>
+  </figure>
+
+  <h2 id="s5">§5 — Results by seat</h2>
+
+  <h3 id="s5a">Reviewer blind pair (the driving decision)</h3>
+  <p>Discrimination AUC (labelled good/bad), best effort per model, all concurrency-resilient unless noted:</p>
+  <table>
+    <tr><th>Model</th><th>docs AUC</th><th>names AUC</th><th>notes</th></tr>
+    <tr><td><strong>claude-sonnet-5</strong> (Anthropic)</td><td><strong>0.910</strong></td><td>0.906</td><td>best docs discriminator; improves with effort</td></tr>
+    <tr><td><strong>grok-4.5</strong> (xAI)</td><td>0.861</td><td><strong>0.920</strong></td><td>strong both axes, well-calibrated, cheap ($2/$6)</td></tr>
+    <tr><td>deepseek-v4-pro</td><td>0.860</td><td>0.985</td><td>best names, but ~8× slower provider → poor for a concurrency-heavy pool</td></tr>
+    <tr><td>gemini-3.1-pro</td><td>0.854</td><td>0.889</td><td>overthinks at high</td></tr>
+    <tr><td>gpt-5.6-terra</td><td>0.854</td><td>0.924</td><td>over-rejects docs (good-pass 0.08) — correlates with the OpenAI breaker</td></tr>
+    <tr><td>gemini-3.5-flash</td><td>0.837</td><td>0.882</td><td>cheapest</td></tr>
+  </table>
+  <p><strong>Decision — blind pair = <code>claude-sonnet-5</code> + <code>grok-4.5</code></strong> (imas-codex <code>b5b5eccb</code>), both axes of both <code>[sn-review.names.profiles.default]</code> and <code>[sn-review.docs]</code>; breakers held (luna names / gpt-5.5 docs). Vendor-diverse (Anthropic + xAI), both hold 16/16 under load. grok kept deliberately — its figures beat the non-grok alternative on both axes and it is cheaper, so it is not a marginal call.</p>
+
+  <h3 id="s5b">Other seats — all HOLD their incumbent</h3>
+  <table>
+    <tr><th>Seat</th><th>Decision</th><th>Evidence</th></tr>
+    <tr><td>compose (name-gen)</td><td>HOLD <code>deepseek-v4-flash</code> (local, free)</td><td>100% grammar-valid, $0, desc 0.942 on the isolated real-vLLM run; paid models (grok 0.968, kimi-k3 0.966) only marginally better — not worth it at compose volume. <strong>Claude family fails compose outright (0% grammar-valid).</strong></td></tr>
+    <tr><td>refine</td><td>HOLD <code>gpt-5.5</code></td><td>defect-resolution 0.865 @high, valid-rate 0.93; sonnet-5 fails the seat (provider hangs); no candidate edge. Refine benefits from high effort.</td></tr>
+    <tr><td>breaker-names</td><td>HOLD <code>gpt-5.6-luna</code></td><td>flip-quality 0.80 @low = best</td></tr>
+    <tr><td>breaker-docs</td><td>HOLD <code>gpt-5.5</code></td><td>weak signal (small disagreement counts); no better option</td></tr>
+    <tr><td>docs generation</td><td>HOLD <code>gpt-5.6-luna</code></td><td>rubric 0.847, zero banned prose, cheaper than terra's +0.008</td></tr>
+    <tr><td>classifier</td><td><code>gpt-5.5</code></td><td>Seated on gpt-5.5 (0.833) as the robust OpenAI-tier pick over terra (0.818). gemini-3.5-flash scores higher (0.876) and cheaper — recorded as the data-optimal alternative; OpenAI robustness chosen by the lead.</td></tr>
+  </table>
+
+  <h3 id="s5c">Attribution fix — <code>[sn-classifier]</code></h3>
+  <p>The physics-domain classifier (whose labels SN names inherit) had been borrowing the generic <code>[language]</code> model, so its config and model choice were not attributable to the SN project. It now has a dedicated <code>[sn-classifier]</code> seat (<code>5580b707</code>). Convention recorded in the imas-codex AGENTS.md: <strong>every model the SN pipeline drives lives under an <code>sn-*</code> seat</strong>, never a generic section.</p>
+
+  <h2 id="s6">§6 — Test infrastructure (made green)</h2>
+  <p>Two pre-existing blockers that broke the imas-codex SN test suite were fixed (not weakened): a <code>GraphClient()</code> built at pytest-collection time that hung on an SSH tunnel → bounded on a daemon thread (<code>be11a3fc</code>); and five content/logic failures fixed at root cause (public-name <code>sn</code>-abbreviation rename, an atomic run-id clear, the <code>kind</code> enum verified against the live ISN <code>Kind</code> enum, an ISN-inconsistent compose-prompt example replaced, and a refined golden). Full suite: exit 0.</p>
+
+  <h2 id="s7">§7 — Follow-ups</h2>
+  <ul>
+    <li>Re-run docs-campaign rotation&nbsp;1 on the new resilient blind pair (the original driver in <a href="/imas-standard-names/model-selection-and-global-refine.html">model-selection-and-global-refine</a> §5).</li>
+    <li>Optional: a names-axis reasoning-effort study before lowering the shared <code>[sn-review].reasoning-effort</code> from high (the docs data favours low for the pair; names not yet studied at that granularity).</li>
+    <li>Optional: reconsider the classifier as <code>gemini-3.5-flash</code> if the accuracy/cost gap (0.876 &amp; ~5× cheaper vs gpt-5.5 0.833) outweighs the OpenAI-robustness preference.</li>
+  </ul>
+</main>
+</body>
+</html>

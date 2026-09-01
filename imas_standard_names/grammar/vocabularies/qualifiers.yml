@@ -1,0 +1,310 @@
+# Qualifier vocabulary: BASE-binding prefix modifiers on physical bases.
+#
+# This file is the refined-qualifier vocabulary: every token here scopes over
+# the whole channel phrase and renders OUTER of the transport channel
+# (implicit_energy_source_rate = qualifier=implicit outer of channel=energy
+# outer of base=source_rate). The CHANNEL-binding qualifiers
+# (those that bind to the transport channel and render OUTER of it, e.g.
+# kinetic_energy_flux, plasma_momentum_flux) live in channel_qualifiers.yml —
+# do NOT add channel-binding qualifiers here.
+#
+# Usage: <qualifier>_<base>  (recursive: <qual1>_<qual2>_<base>)
+# Examples:
+#   - collisional_power_density
+#   - bootstrap_current_density
+#   - energy_confinement_time
+#   - non_inductive_current
+#   - center_of_mass_velocity
+#
+# Qualifiers are stripped recursively by _match_base_with_qualifiers()
+# before the residue is matched against registered physical bases.
+# The parser unions qualifiers with subject tokens; tokens that appear
+# in subjects.yml are marked [also-subject] below for documentation.
+#
+# NOTE: Components (toroidal, poloidal, radial, parallel, perpendicular)
+# are handled by components.yml via the coordinate/component segment —
+# they are NOT qualifiers.
+
+# === Original modifier_quals (parser.py hardcoded set) ===
+# These 19 tokens MUST remain for backward compatibility.
+
+# --- Transport channel ---
+# NOTE: heat, particle, energy, momentum moved to channels.yml (the dedicated
+# `channel` segment — what is transported). They are a structural role, not a
+# generic qualifier, and render as the innermost prefix (immediately before the
+# base, after any residual qualifier).
+
+# --- Aggregate/net qualifiers ---
+# NOTE: 'total' and 'net' moved to aggregations.yml (the aggregation segment —
+# summed/netted over sub-populations, species, or additive contributions).
+
+# --- Collision/transport regime ---
+# NOTE: 'thermal' moved to populations.yml (energy-state population modifier).
+
+# --- Source/mechanism ---
+- inductive                     # inductively driven
+
+# --- Orbit class / energy-state ---
+# Moved to populations.yml (orthogonal population segment): trapped, co_passing,
+# counter_passing, fast — they compose as <population>_<subject>_<base>.
+
+# --- Nuclear/material ---
+- nuclear                       # nuclear heating/energy
+- ferritic                      # ferritic material property
+- waste                         # waste (rejected) heat/energy
+
+# --- Direction ---
+- direction                     # directional qualifier
+
+# === Expanded qualifier vocabulary ===
+# Tokens extracted from compound physical_bases.yml entries and
+# standard name corpus analysis.
+
+# --- Transport regime / mechanism ---
+# NOTE: 'convection' removed — convection_velocity is now an atomic base
+# (physical_bases.yml). convection bound only to velocity and never qualified
+# any other base.
+- classical                     # classical (Braginskii) transport
+
+# --- Source / drive mechanism ---
+- beam                          # neutral beam source/drive
+- rf                            # radio-frequency source/drive
+- nbi                           # neutral beam injection
+- alpha                         # alpha particle source
+- radiative                     # radiative process
+- bremsstrahlung                # bremsstrahlung radiation
+- gas                           # gas injection/puff source
+
+# --- Geometry / spatial ---
+# NOTE: 'center_of_mass' removed — center_of_mass_velocity is now an atomic
+# base (physical_bases.yml). It bound only to velocity.
+- cross_field                   # cross-field (perpendicular to B) direction
+# NOTE: 'diamagnetic' moved to channel_qualifiers.yml (it binds to the transport
+# channel: diamagnetic_momentum_diffusivity). Legacy base-bound forms
+# (diamagnetic_velocity, diamagnetic_current_density) still peel it as a
+# qualifier via the unified acceptance set and round-trip unchanged.
+- e_cross_b                     # E×B drift qualifier
+- field_aligned                 # aligned with magnetic field
+- surface                       # surface (2D boundary) qualifier
+- cross_sectional               # planar-section qualifier (cross_sectional_area)
+- volumetric                    # volumetric (per unit volume) qualifier
+- field_line                    # along a field line
+- major                         # major (outer) geometric qualifier
+- minor                         # minor (inner) geometric qualifier
+- contravariant                 # contravariant tensor component
+- covariant                     # covariant tensor component
+
+# --- State / condition ---
+- equilibrium                   # equilibrium state
+- fluctuating                   # fluctuating component
+- mean                          # mean / time-averaged
+- effective                     # effective (weighted) value
+- critical                      # critical (threshold) value
+- average                       # averaged quantity
+- peak                          # peak / maximum value
+- upper_bound                   # upper bound: maximum value of a bounded quantity
+- lower_bound                   # lower bound: minimum value of a bounded quantity (e.g. bin edge)
+- saturated                     # saturated state
+- steady_state                  # steady-state condition
+- transient                     # transient / time-varying
+- atomic                        # atomic (single-particle) qualifier
+
+# --- Energy type ---
+# NOTE: 'kinetic' moved to channel_qualifiers.yml (the channel-binding qualifier
+# vocab — kinetic_energy_flux = channel_qualifier=kinetic + channel=energy).
+- stored                        # stored energy
+- radiated                      # radiated (emitted) energy/power
+- absorbed                      # absorbed energy/power
+- launched                      # launched (injected) power
+- deposited                     # deposited energy/power
+- conducted                     # conducted (conductive) transport
+- convected                     # convected (convective) transport
+- current_weighted              # current-density-weighted averaging qualifier
+- lost                          # lost (escaping) quantity
+
+# --- Measurement / diagnostic ---
+- bragg                         # Bragg diffraction (X-ray crystal spectroscopy)
+- measured                      # directly measured quantity
+- reconstructed                 # reconstructed (inferred) quantity
+- fitted                        # fitted / parametric quantity
+- simulated                     # simulation-derived quantity
+- target                        # target / reference value
+- reference                     # reference quantity
+
+# --- Species-related (non-subject) ---
+- slow                          # slow (sub-thermal) population
+# NOTE: 'suprathermal' moved to populations.yml (energy-state population modifier).
+# NOTE: 'plasma' moved to channel_qualifiers.yml (the channel-binding qualifier
+# vocab — plasma_momentum_flux = channel_qualifier=plasma + channel=momentum).
+
+# --- Flow regime ---
+- sonic                         # sonic flow regime
+
+# --- Wave polarization ---
+- left_hand_circularly_polarized    # left-hand circularly polarized wave
+- right_hand_circularly_polarized   # right-hand circularly polarized wave
+
+# --- Sign / polarity ---
+- positive                      # positive sign/direction
+- negative                      # negative sign/direction
+
+# --- Plasma region ---
+# NOTE: core, edge, pedestal, separatrix, divertor, scrape_off_layer moved to
+# zones.yml (the ordered zone prefix segment). The postfix region locus forms
+# (over_<region>) live in regions.yml / locus_registry.yml.
+
+# --- Temporal ---
+- initial                       # initial condition/value
+- final                         # final state/value
+- instantaneous                 # instantaneous (snapshot) value
+# NOTE: 'time_averaged' removed — it is the participle form of the time_average
+# reduction operator (renamed time_average -> time_averaged for family
+# consistency with volume_averaged / line_averaged / flux_surface_averaged).
+# The bare-prefix operator form renders time_averaged_<base>; the duplicate
+# qualifier token is dropped (mirrors the volume_averaged / gyroaveraged
+# operator-dupe removals).
+
+# --- Engineering / subsystem ---
+- coolant                       # coolant fluid qualifier
+- prefill                       # pre-fill injection qualifier
+# NOTE: 'heating' removed — heating_power is now an atomic base
+# (physical_bases.yml). It bound only to power.
+
+# --- Mode / instability ---
+- ideal                         # ideal (non-resistive) regime
+
+# --- Dimensionless / normalized forms ---
+- gyro_bohm                     # gyro-Bohm normalized
+- bohm                          # Bohm normalized
+- greenwald                     # Greenwald-normalized (density)
+
+# --- Confinement scaling laws ---
+# Names the scaling law a confinement_enhancement_factor is measured against, so
+# each further scaling adds one token here rather than a new base.
+- ipb98y2                       # IPB98(y,2) H-mode energy confinement scaling
+
+# Only atomic tokens — compound gaps (lower_inner, upper_outer, etc.)
+# must compose from these atomic qualifiers.
+
+# --- Position modifiers ---
+# NOTE: upper, lower, inner, outer moved to zones.yml (the ordered zone
+# prefix segment — vertical position upper/lower, radial position inner/outer).
+
+# --- Diagnostic / measurement ---
+- floating                      # floating state (floating potential, Langmuir probe)
+- reflected                     # reflected wave/signal (reflectometry)
+- polarization                  # wave polarization property
+- spectral                      # spectral (wavelength-resolved) measurement
+
+# --- Physics / MHD ---
+- mode                          # mode (MHD/wave mode frequency, mode number)
+- quench                        # quench event (thermal quench, current quench)
+# NOTE: 'vector' removed — vector_potential is now an atomic base
+# (physical_bases.yml). vector bound only to potential.
+- enhancement                   # enhancement (enhancement factor)
+
+# --- Control / engineering ---
+- requested                     # requested / reference setpoint (control systems)
+
+# --- Named parameters ---
+- ejima                         # Ejima (volt-second consumption coefficient)
+
+# --- Physics regime / type ---
+# NOTE: 'internal' removed — internal_inductance and internal_energy are now
+# atomic bases (physical_bases.yml). internal bound only to those two bases.
+- mhd                           # magnetohydrodynamic: mhd_mode_frequency, mhd_stored_energy
+- wave                          # wave (electromagnetic/acoustic): wave_absorbed_power, wave_number
+# fast_wave / slow_wave: ICRF wave-branch lexical terms (fast magnetosonic /
+# slow wave). Single qualifier tokens so 'fast'/'slow' here never read as an
+# energy-state population: fast_wave_power = qualifier fast_wave + base power
+# (NOT population=fast + wave_power). Longest-prefix matching makes the
+# lexical wave term win over the population token automatically.
+- fast_wave                     # fast (magnetosonic) wave branch: fast_wave_power
+- slow_wave                     # slow wave branch: slow_wave_power
+- linear                        # linear (perturbative regime): linear_growth_rate, linear_frequency
+
+# --- Position modifiers ---
+# NOTE: outer moved to zones.yml (radial position, counterpart to inner).
+
+# --- Coupling / interaction ---
+- mutual                        # mutual interaction (mutual inductance, mutual coupling)
+
+# --- Spatial / symmetry modifiers ---
+# NOTE: 'angular' removed — angular_momentum, angular_frequency, and
+# angular_velocity are now atomic bases (physical_bases.yml). angular bound
+# only to those three bases.
+- non_axisymmetric              # non-axisymmetric (non_axisymmetric_magnetic_field)
+
+# --- Measurement / signal qualifiers ---
+- pulse                         # pulse (pulse_height, pulse_shape) — detector signal characteristics
+
+# === breadth-rotation gap closure (codex VocabGap analysis) ===
+# Genuine atomic qualifiers surfaced by parser-rejected compound tokens.
+# Verified via parse() round-trip; named-physics and diagnostic-band terms.
+
+# --- State / region condition ---
+- vacuum                        # vacuum field/region (vacuum_magnetic_field, vacuum_toroidal_field)
+- stray                         # stray field/light (stray_magnetic_field, stray_light)
+- external                      # externally applied/sourced (external_magnetic_field, external_current)
+- breakdown                     # plasma breakdown phase (breakdown_voltage, breakdown_electric_field)
+
+# --- Diagnostic / measurement band & method ---
+- soft_xray                     # soft X-ray spectral band (soft_xray_emissivity, soft_xray_power)
+- doppler                       # Doppler-shifted/broadened (doppler_frequency, doppler_velocity)
+- viewing                       # line-of-sight viewing geometry (viewing_angle, viewing_direction)
+- calibration                   # calibration quantity (calibration_factor, calibration_coefficient)
+- beat                          # heterodyne beat (beat_frequency) — mixed-signal difference frequency
+- trigger                       # control/timing trigger (trigger_time, trigger_voltage)
+
+# --- Named physics ---
+- alfven                        # Alfven (alfven_velocity, alfven_frequency, alfven_mach_number)
+- townsend                      # Townsend (townsend_coefficient) — avalanche ionization in breakdown
+- sawtooth                      # sawtooth instability (sawtooth_period, sawtooth_amplitude)
+
+# === wave-diagnostic, MSE, numerical-split, and PFC-face additions ===
+# Genuine atomic qualifiers from codex VocabGap analysis. DD-confirmed.
+
+# --- Wave polarization / diagnostic method ---
+- faraday                       # Faraday rotation (polarimetry / FOCS): faraday_rotation_angle
+- ordinary_mode                 # O-mode wave polarization (reflectometry/ECE): ordinary_mode_temperature (ece t_radiation_o)
+- extraordinary_mode            # X-mode wave polarization (reflectometry/ECE): extraordinary_mode_temperature (ece t_radiation_x)
+- motional_stark                # motional Stark effect diagnostic (MSE): motional_stark_angle
+- straight_field_line           # straight-field-line flux coordinate (SFL): straight_field_line_angle
+
+# --- Turbulence ---
+- reynolds                      # Reynolds stress (turbulence momentum transport): reynolds_stress
+
+# --- Numerical source-term split (transport_solver_numerics) ---
+- implicit                      # implicit source-term contribution (decomposed source: implicit_part)
+- explicit                      # explicit source-term contribution (decomposed source: explicit_part)
+
+# --- Plasma-facing-component / optical-element face ---
+# NOTE: back_surface, front_surface moved to zones.yml (PFC / optical face).
+
+# === grammar-stabilisation qualifier additions (codex full-DD compose
+# gap analysis) === Genuine atomic qualifiers surfaced by parser-rejected
+# tokens. DD-confirmed.
+
+# --- Power/flux direction (wall + antenna) ---
+- incident                      # incident (impinging) wall power/flux — companion to absorbed/reflected
+- forward                       # forward antenna power — companion to reflected (launcher coupling)
+
+# --- Geometry / surface ---
+# NOTE: wetted moved to zones.yml (PFC face — heat-flux-receiving area).
+
+# --- FOCS fibre (spun fibre period) ---
+- spun                          # spun optical fibre (FOCS) qualifier: spun_period
+- twist                         # fibre twist period (FOCS): twist_period
+
+# --- Fusion reaction channel (DUAL-ROLE) ---
+# The reactant-pair tokens are primarily SUBJECTS (deuterium_tritium_density —
+# the effective fuel species). They ALSO act as a reaction-channel QUALIFIER
+# when a product subject follows, so the neutron flux from a given fusion
+# reaction reads deuterium_tritium_neutron_flux (qualifier + subject neutron +
+# base flux). The parser/model routes the pair to the qualifier segment only
+# when another subject follows; otherwise it stays the subject. Kept in
+# subjects.yml too — the subjects∩qualifiers overlap is intentional (allowlisted
+# in test_vocab_uniqueness).
+- deuterium_tritium
+- deuterium_deuterium
+- tritium_tritium

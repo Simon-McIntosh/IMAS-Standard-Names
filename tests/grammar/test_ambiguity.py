@@ -1,7 +1,7 @@
-"""Ambiguity harness for grammar vNext (plan 38 §A10, item 2).
+"""Ambiguity harness for grammar (plan 38 §A10, item 2).
 
 Provides 50 curated pairs of standard names that MUST parse to distinct IR
-objects under the vNext parser. Each pair is documented with the specific
+objects under the parser. Each pair is documented with the specific
 IR attribute that distinguishes it.
 
 The pairs cover:
@@ -89,30 +89,28 @@ def test_ambiguity_at_vs_of_pedestal(vocabs: Vocabularies) -> None:
 
 
 def test_ambiguity_at_vs_of_separatrix(vocabs: Vocabularies) -> None:
-    """Same for a position locus with both at+of: active_limiter_point."""
-    # separatrix is entity-typed (only allows 'of'), so use active_limiter_point
-    # which allows both 'at' and 'of'
+    """Same for a position locus with both at+of: measurement_position."""
     _assert_distinct_ir(
-        "safety_factor_at_active_limiter_point",
-        "safety_factor_of_active_limiter_point",
+        "safety_factor_at_measurement_position",
+        "safety_factor_of_measurement_position",
         vocabs,
     )
 
 
 def test_ambiguity_at_vs_of_active_limiter_point(vocabs: Vocabularies) -> None:
-    """Same for active_limiter_point locus."""
+    """Same for measurement_position locus."""
     _assert_distinct_ir(
-        "temperature_at_active_limiter_point",
-        "temperature_of_active_limiter_point",
+        "temperature_at_measurement_position",
+        "temperature_of_measurement_position",
         vocabs,
     )
 
 
-def test_ambiguity_at_vs_of_q_95(vocabs: Vocabularies) -> None:
-    """``_at_along_beam`` vs ``_of_along_beam`` — position locus with both relations."""
+def test_ambiguity_at_vs_of_line_of_sight(vocabs: Vocabularies) -> None:
+    """``_at_line_of_sight`` vs ``_of_line_of_sight`` — position locus with both relations."""
     _assert_distinct_ir(
-        "pressure_at_along_beam",
-        "pressure_of_along_beam",
+        "pressure_at_line_of_sight",
+        "pressure_of_line_of_sight",
         vocabs,
     )
 
@@ -163,9 +161,13 @@ def test_ambiguity_prefix_maximum_vs_postfix_magnitude(vocabs: Vocabularies) -> 
     _assert_distinct_ir("maximum_of_pressure", "pressure_magnitude", vocabs)
 
 
-def test_ambiguity_prefix_amplitude_vs_postfix_magnitude(vocabs: Vocabularies) -> None:
-    """``amplitude_of_temperature`` (prefix) vs ``temperature_magnitude`` (postfix)."""
-    _assert_distinct_ir("amplitude_of_temperature", "temperature_magnitude", vocabs)
+def test_ambiguity_amplitude_vs_magnitude_postfix(vocabs: Vocabularies) -> None:
+    """``temperature_amplitude`` vs ``temperature_magnitude`` — distinct postfix ops.
+
+    Both scalar-extraction operators are postfix; they differ only in the
+    operator token, so their IR must remain distinct.
+    """
+    _assert_distinct_ir("temperature_amplitude", "temperature_magnitude", vocabs)
 
 
 def test_ambiguity_prefix_vs_no_operator(vocabs: Vocabularies) -> None:
@@ -188,14 +190,16 @@ def test_ambiguity_prefix_flux_surface_averaged_vs_no_op(vocabs: Vocabularies) -
 # ---------------------------------------------------------------------------
 
 
-def test_ambiguity_maximum_vs_amplitude_prefix(vocabs: Vocabularies) -> None:
-    """``maximum_of_X`` vs ``amplitude_of_X`` differ in operator."""
-    _assert_distinct_ir("maximum_of_pressure", "amplitude_of_pressure", vocabs)
+def test_ambiguity_maximum_vs_amplitude(vocabs: Vocabularies) -> None:
+    """``maximum_of_X`` (prefix) vs ``X_amplitude`` (postfix) differ in operator."""
+    _assert_distinct_ir("maximum_of_pressure", "pressure_amplitude", vocabs)
 
 
-def test_ambiguity_maximum_vs_time_average(vocabs: Vocabularies) -> None:
-    """``maximum_of_X`` vs ``time_average_of_X``."""
-    _assert_distinct_ir("maximum_of_temperature", "time_average_of_temperature", vocabs)
+def test_ambiguity_maximum_vs_time_averaged(vocabs: Vocabularies) -> None:
+    """``maximum_of_X`` vs ``time_averaged_of_X``."""
+    _assert_distinct_ir(
+        "maximum_of_temperature", "time_averaged_of_temperature", vocabs
+    )
 
 
 def test_ambiguity_derivative_vs_gradient(vocabs: Vocabularies) -> None:
@@ -224,11 +228,15 @@ def test_ambiguity_flux_surface_averaged_vs_volume_average(
 # ---------------------------------------------------------------------------
 
 
-def test_ambiguity_nested_order_max_then_amplitude(vocabs: Vocabularies) -> None:
-    """``maximum_of_amplitude_of_X`` vs ``amplitude_of_maximum_of_X``."""
+def test_ambiguity_nested_prefix_over_postfix_amplitude(vocabs: Vocabularies) -> None:
+    """Different prefix outer op wrapping a postfix-amplitude inner base.
+
+    ``amplitude`` is postfix and attaches to the base, so it can only sit
+    INSIDE a prefix operator. The prefix outer op distinguishes the IR.
+    """
     _assert_distinct_ir(
-        "maximum_of_amplitude_of_pressure",
-        "amplitude_of_maximum_of_pressure",
+        "maximum_of_pressure_amplitude",
+        "time_averaged_of_pressure_amplitude",
         vocabs,
     )
 
@@ -244,11 +252,11 @@ def test_ambiguity_nested_order_max_then_flux_surface_averaged(
     )
 
 
-def test_ambiguity_nested_order_time_average_then_max(vocabs: Vocabularies) -> None:
-    """``time_average_of_maximum_of_X`` vs reversed."""
+def test_ambiguity_nested_order_time_averaged_then_max(vocabs: Vocabularies) -> None:
+    """``time_averaged_of_maximum_of_X`` vs reversed."""
     _assert_distinct_ir(
-        "time_average_of_maximum_of_temperature",
-        "maximum_of_time_average_of_temperature",
+        "time_averaged_of_maximum_of_temperature",
+        "maximum_of_time_averaged_of_temperature",
         vocabs,
     )
 
@@ -263,10 +271,14 @@ def test_ambiguity_nested_derivative_gradient(vocabs: Vocabularies) -> None:
 
 
 def test_ambiguity_three_operators_ordering(vocabs: Vocabularies) -> None:
-    """Three operators: different outer vs inner."""
+    """Three operators: swapping the two prefix ops over a postfix base.
+
+    ``amplitude`` is postfix (innermost, on the base); the two prefix ops
+    (maximum, gradient) swap outer/inner to yield distinct IR.
+    """
     _assert_distinct_ir(
-        "maximum_of_amplitude_of_gradient_of_pressure",
-        "amplitude_of_maximum_of_gradient_of_pressure",
+        "maximum_of_gradient_of_pressure_amplitude",
+        "gradient_of_maximum_of_pressure_amplitude",
         vocabs,
     )
 
@@ -416,43 +428,43 @@ def test_ambiguity_operator_mechanism_vs_just_operator(vocabs: Vocabularies) -> 
 
 
 def test_ambiguity_radial_vs_toroidal_component(vocabs: Vocabularies) -> None:
-    """``radial_component_of_X`` vs ``toroidal_component_of_X``."""
+    """``radial_X`` vs ``toroidal_X``."""
     _assert_distinct_ir(
-        "radial_component_of_pressure",
-        "toroidal_component_of_pressure",
+        "radial_pressure",
+        "toroidal_pressure",
         vocabs,
     )
 
 
 def test_ambiguity_radial_vs_poloidal_component(vocabs: Vocabularies) -> None:
-    """``radial_component_of_X`` vs ``poloidal_component_of_X``."""
+    """``radial_X`` vs ``poloidal_X``."""
     _assert_distinct_ir(
-        "radial_component_of_temperature",
-        "poloidal_component_of_temperature",
+        "radial_temperature",
+        "poloidal_temperature",
         vocabs,
     )
 
 
 def test_ambiguity_component_vs_coordinate_projection(vocabs: Vocabularies) -> None:
-    """``radial_component_of_<base>`` vs ``radial_coordinate_of_<carrier>``
+    """``radial_<base>`` vs ``radial_<carrier>``
     differ in projection shape and base kind."""
     _assert_distinct_ir(
-        "radial_component_of_pressure",
-        "radial_coordinate_of_normalized_minor_radius",
+        "radial_pressure",
+        "radial_normalized_minor_radius",
         vocabs,
     )
 
 
 def test_ambiguity_projection_vs_no_projection(vocabs: Vocabularies) -> None:
-    """``radial_component_of_pressure`` vs bare ``pressure``."""
-    _assert_distinct_ir("radial_component_of_pressure", "pressure", vocabs)
+    """``radial_pressure`` vs bare ``pressure``."""
+    _assert_distinct_ir("radial_pressure", "pressure", vocabs)
 
 
 def test_ambiguity_parallel_vs_perpendicular_component(vocabs: Vocabularies) -> None:
-    """``parallel_component_of_X`` vs ``perpendicular_component_of_X``."""
+    """``parallel_X`` vs ``perpendicular_X``."""
     _assert_distinct_ir(
-        "parallel_component_of_pressure",
-        "perpendicular_component_of_pressure",
+        "parallel_pressure",
+        "perpendicular_pressure",
         vocabs,
     )
 
@@ -460,18 +472,18 @@ def test_ambiguity_parallel_vs_perpendicular_component(vocabs: Vocabularies) -> 
 def test_ambiguity_projection_plus_locus_vs_just_projection(
     vocabs: Vocabularies,
 ) -> None:
-    """``radial_component_of_X_at_L`` vs ``radial_component_of_X``."""
+    """``radial_X_at_L`` vs ``radial_X``."""
     _assert_distinct_ir(
-        "radial_component_of_pressure_at_plasma_boundary",
-        "radial_component_of_pressure",
+        "radial_pressure_at_plasma_boundary",
+        "radial_pressure",
         vocabs,
     )
 
 
 def test_ambiguity_projection_plus_locus_vs_just_locus(vocabs: Vocabularies) -> None:
-    """``radial_component_of_X_at_L`` vs ``X_at_L``."""
+    """``radial_X_at_L`` vs ``X_at_L``."""
     _assert_distinct_ir(
-        "radial_component_of_pressure_at_plasma_boundary",
+        "radial_pressure_at_plasma_boundary",
         "pressure_at_plasma_boundary",
         vocabs,
     )

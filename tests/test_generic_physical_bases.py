@@ -8,9 +8,11 @@ position, or geometry context.
 import pytest
 from pydantic import ValidationError
 
+from imas_standard_names.grammar import ParseError
 from imas_standard_names.grammar.constants import GENERIC_PHYSICAL_BASES
 from imas_standard_names.grammar.model import StandardName, parse_standard_name
 from imas_standard_names.grammar.model_types import Component, Object, Position, Subject
+from imas_standard_names.validation import semantic
 
 
 class TestGenericPhysicalBaseValidation:
@@ -140,14 +142,14 @@ class TestGenericPhysicalBaseValidation:
     def test_parse_unqualified_generic_fails(self):
         """Test that parsing unqualified generic names fails."""
         with pytest.raises(
-            ValidationError,
-            match="Generic physical_base 'current' requires qualification",
+            ParseError,
+            match="generic base 'current' requires qualification",
         ):
             parse_standard_name("current")
 
         with pytest.raises(
-            ValidationError,
-            match="Generic physical_base 'voltage' requires qualification",
+            ParseError,
+            match="generic base 'voltage' requires qualification",
         ):
             parse_standard_name("voltage")
 
@@ -169,3 +171,61 @@ class TestGenericPhysicalBaseValidation:
                 match=f"Generic physical_base '{generic_base}' requires qualification",
             ):
                 StandardName(physical_base=generic_base)
+
+
+class TestSemanticallyEmptyCatchAlls:
+    """Semantically-empty catch-all bases are gated as generic.
+
+    Role-only bases (coefficient, factor, rate, flag, …) name a role rather
+    than a physical quantity, so they are gated exactly like current / power /
+    temperature: bare use is rejected, qualified use is accepted.
+    """
+
+    CATCH_ALLS = (
+        "coefficient",
+        "factor",
+        "parameter",
+        "index",
+        "residual",
+        "weight",
+        "flag",
+        "count",
+        "size",
+        "source",
+        "rate",
+        "multiplicity",
+        "distribution",
+        "potential",
+        "flow",
+        "field_strength",
+    )
+
+    @pytest.mark.parametrize("base", CATCH_ALLS)
+    def test_catch_all_is_gated(self, base):
+        assert base in GENERIC_PHYSICAL_BASES
+        with pytest.raises(
+            ValidationError,
+            match=f"Generic physical_base '{base}' requires qualification",
+        ):
+            StandardName(physical_base=base)
+
+    def test_qualified_catch_all_valid(self):
+        model = StandardName(subject=Subject.ELECTRON, physical_base="count")
+        assert model.compose() == "electron_count"
+
+
+def test_coordinate_warning_suggests_short_component_form(monkeypatch) -> None:
+    """The semantic hint uses the canonical short projection spelling."""
+
+    class ParsedName:
+        coordinate = "radial"
+        physical_base = "magnetic_field"
+
+    monkeypatch.setattr(semantic, "parse_standard_name", lambda _name: ParsedName())
+    issues = semantic._check_coordinate_with_base_type(
+        "radial_coordinate_magnetic_field", None
+    )
+
+    assert issues
+    assert "radial_magnetic_field" in issues[0]
+    assert "_component_of_" not in issues[0]

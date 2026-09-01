@@ -5,10 +5,10 @@ including all metadata, provenance, governance, and validation rules.
 
 The StandardNameEntry union type represents full catalog entries with:
 - Core identification (name, kind, description)
-- Physical properties (unit, constraints, validity domain)
+- Physical properties (unit)
 - Governance (status, deprecation, supersession)
 - Provenance (operators, reductions, expressions)
-- Metadata (tags, links, documentation)
+- Metadata (links, documentation)
 
 Example scalar entry:
   name: ion_temperature
@@ -16,10 +16,6 @@ Example scalar entry:
   status: active
   unit: eV
   description: Core ion temperature.
-  tags: [core, temperature]
-  constraints:
-    - T_i >= 0
-  validity_domain: core plasma
 
 Example vector entry:
   name: plasma_velocity
@@ -33,7 +29,6 @@ Example metadata entry:
   kind: metadata
   status: draft
   description: Definition of plasma boundary.
-  tags: [equilibrium, flux-coordinates]
   documentation: |
     Defines what constitutes the plasma boundary for different configurations.
 
@@ -56,7 +51,7 @@ from collections.abc import Iterable
 from datetime import datetime
 from enum import StrEnum
 from pathlib import Path
-from typing import Annotated, Literal, get_args
+from typing import Annotated, Any, Literal, get_args
 
 import yaml as _yaml
 from pydantic import (
@@ -68,30 +63,24 @@ from pydantic import (
     model_validator,
 )
 
-from imas_standard_names import pint
+from imas_standard_names import canonical_unit, pint
 from imas_standard_names.field_types import (
     STANDARD_NAME_PATTERN,
-    Constraints,
     Description,
     Documentation,
-    Domain,
     Links,
     Name,
-    Tags,
     Unit,
 )
 from imas_standard_names.grammar import vocab_loaders as _vocab_loaders
 from imas_standard_names.grammar.field_schemas import FIELD_DESCRIPTIONS
 
-# rc22: Component, Position, Process are retained in model_types for the rc23
-# deprecation cycle but are NO LONGER used in the validators below.
+# Component, Position, Process remain importable from model_types for
+# downstream compatibility but are NO LONGER used in the validators below.
 from imas_standard_names.grammar.model_types import (  # noqa: F401
     Component,
     Position,
     Process,
-)
-from imas_standard_names.grammar.tag_types import (
-    SECONDARY_TAGS,
 )
 from imas_standard_names.operators import (
     enforce_operator_naming as _enforce_operator_naming,
@@ -106,7 +95,7 @@ from imas_standard_names.provenance import (
 Status = Literal["draft", "active", "deprecated", "superseded"]
 
 # ---------------------------------------------------------------------------
-# rc22: vNext vocabulary caches (lazy-loaded once per process)
+# vocabulary caches (lazy-loaded once per process)
 # ---------------------------------------------------------------------------
 
 _COMPONENT_VOCAB_CACHE: frozenset[str] | None = None
@@ -117,7 +106,7 @@ _VOCAB_DIR = Path(__file__).parent / "grammar" / "vocabularies"
 
 
 def _get_component_vocab() -> frozenset[str]:
-    """Return the vNext component token set (from components.yml)."""
+    """Return the component token set (from components.yml)."""
     global _COMPONENT_VOCAB_CACHE
     if _COMPONENT_VOCAB_CACHE is None:
         with (_VOCAB_DIR / "components.yml").open(encoding="utf-8") as _fh:
@@ -129,7 +118,7 @@ def _get_component_vocab() -> frozenset[str]:
 
 
 def _get_coordinate_axes() -> frozenset[str]:
-    """Return the vNext coordinate axis token set (from coordinate_axes.yml)."""
+    """Return the coordinate axis token set (from coordinate_axes.yml)."""
     global _COORDINATE_AXES_CACHE
     if _COORDINATE_AXES_CACHE is None:
         _reg = _vocab_loaders.load_coordinate_axes()
@@ -138,7 +127,7 @@ def _get_coordinate_axes() -> frozenset[str]:
 
 
 def _get_locus_registry() -> dict:
-    """Return the vNext locus registry dict token -> LocusEntry."""
+    """Return the locus registry dict token -> LocusEntry."""
     global _LOCUS_REGISTRY_CACHE
     if _LOCUS_REGISTRY_CACHE is None:
         _reg = _vocab_loaders.load_locus_registry()
@@ -152,14 +141,14 @@ def _check_grammar_vocabulary_consistency(name: str) -> list[str]:
     Only flags cases where clear template patterns indicate missing vocabulary tokens.
     Does NOT flag compound base names like 'electron_temperature' or 'plasma_velocity'.
 
-    rc22: validators now check against vNext vocabulary loaders
-    (``grammar/vocab_loaders.py``) rather than the rc20 Component/Position/Process
-    enums in ``grammar/model_types``.  Those enums are retained for rc23 removal.
+    Validators check against the vocabulary loaders
+    (``grammar/vocab_loaders.py``) rather than the legacy Component/Position/
+    Process enums in ``grammar/model_types``.
     """
     errors = []
 
     # ------------------------------------------------------------------
-    # 1. 'component_of' pattern -> check against vNext components.yml tokens
+    # 1. 'component_of' pattern -> check against components.yml tokens
     #
     # Example valid:   "radial_component_of_magnetic_field"
     # Example invalid: "nonexistent_component_of_magnetic_field"
@@ -179,7 +168,7 @@ def _check_grammar_vocabulary_consistency(name: str) -> list[str]:
             )
 
     # ------------------------------------------------------------------
-    # 2. Coordinate prefix pattern -> check against vNext coordinate_axes.yml
+    # 2. Coordinate prefix pattern -> check against coordinate_axes.yml
     #
     # Example valid:   "radial_outline_of_plasma_boundary"
     # Skip check when the captured prefix contains '_of_' -- a multi-word
@@ -201,7 +190,7 @@ def _check_grammar_vocabulary_consistency(name: str) -> list[str]:
             )
 
     # ------------------------------------------------------------------
-    # 3. 'at_' pattern -> check against vNext locus_registry.yml
+    # 3. 'at_' pattern -> check against locus_registry.yml
     #
     # Only raise an error when the token IS found in the locus registry but
     # that locus type does NOT permit the 'at' relation.  Tokens absent from
@@ -230,9 +219,9 @@ def _check_grammar_vocabulary_consistency(name: str) -> list[str]:
         # no ValidationError raised here.
 
     # ------------------------------------------------------------------
-    # 4. 'due_to_' pattern check INTENTIONALLY OMITTED in rc22.
+    # 4. 'due_to_' pattern check INTENTIONALLY OMITTED.
     #
-    # The vNext parser's _strip_mechanism stage (grammar/parser.py) accepts
+    # The parser's _strip_mechanism stage (grammar/parser.py) accepts
     # any token after '_due_to_' without vocabulary enforcement.  Unknown
     # process tokens produce no error in the parser, so this validator must
     # not raise a false-positive either.  Process vocabulary coverage is
@@ -275,7 +264,7 @@ class StandardNameBase(BaseModel):
     """Core identity + governance fields valid without documentation.
 
     This is the shared base for both full catalog entries (with description,
-    documentation, tags, etc.) and lightweight name-only entries used during
+    documentation, etc.) and lightweight name-only entries used during
     pipeline stages that generate names before descriptions exist. It defines
     only the fields and validators that are meaningful in both modes:
 
@@ -334,17 +323,26 @@ class StandardNameBase(BaseModel):
 
     # Base unit helpers (shared by scalar/vector subclasses, full and name-only).
     @staticmethod
-    def _canonicalize_unit_order(v: str) -> str:
-        """Auto-correct unit token order to canonical lexicographic form.
+    def _canonicalize_unit_order(v: str | None) -> str:
+        """Auto-correct unit token order to canonical dot-exponent form.
 
         This helps LLMs and human authors by accepting units in any order
         and automatically reordering to canonical form. For example:
         's^-2.m' -> 'm.s^-2'
         'keV.m^-1' -> 'keV.m^-1' (already canonical)
 
-        Dimensionless quantities must use "1" as the canonical form.
-        Empty strings and other invalid values will fail validation.
+        Authoring conventions (no whitespace, no '/' or '*', '1' for
+        dimensionless) are enforced here; token ordering and symbol spelling
+        are delegated to :func:`canonical_unit`, the single pint-based
+        authority, so there is no second ordering implementation to drift.
+
+        Empty strings and units pint cannot parse fail validation.
         """
+        if v is None:
+            raise ValueError(
+                "Unit is required for quantitative entries; use '1' for "
+                "dimensionless quantities"
+            )
         if v == "1":
             return "1"
         if v == "":
@@ -357,26 +355,9 @@ class StandardNameBase(BaseModel):
             raise ValueError(
                 "Use dot-exponent style (e.g. m.s^-2); '/' and '*' are forbidden"
             )
-
-        # Parse tokens and reorder lexicographically
-        token_re = re.compile(r"^([A-Za-z0-9]+)(\^([+-]?\d+))?$")
-        parts_raw = v.split(".")
-        parsed: list[tuple[str, int]] = []
-        for part in parts_raw:
-            m = token_re.match(part)
-            if not m:
-                raise ValueError(f"Invalid unit token '{part}' in '{v}'")
-            sym = m.group(1)
-            exp = int(m.group(3) or 1)
-            if exp == 0:
-                raise ValueError(f"Zero exponent not allowed in unit token '{part}'")
-            parsed.append((sym, exp))
-
-        canonical = ".".join(
-            sym if exp == 1 else f"{sym}^{exp}"
-            for sym, exp in sorted(parsed, key=lambda x: x[0])
-        )
-        return canonical
+        if not pint:
+            return v
+        return canonical_unit(v)
 
     @staticmethod
     def _validate_unit_with_pint(v: str) -> str:
@@ -404,7 +385,14 @@ class ArgumentRef(BaseModel):
 
     name: str
     operator: str
-    operator_kind: Literal["unary_prefix", "unary_postfix", "binary", "projection"]
+    operator_kind: Literal[
+        "unary_prefix",
+        "unary_postfix",
+        "binary",
+        "projection",
+        "qualifier",
+        "locus",
+    ]
     role: Literal["a", "b"] | None = None
     separator: Literal["and", "to"] | None = None
     axis: str | None = None
@@ -412,7 +400,31 @@ class ArgumentRef(BaseModel):
 
     @model_validator(mode="after")
     def _check_operator_kind_fields(self):
-        """Enforce field requirements based on operator_kind."""
+        """Enforce field requirements based on operator_kind.
+
+        The structural derivation in the imas-codex pipeline peels one
+        layer of the ISN grammar per ``COMPONENT_OF`` edge and stamps
+        the layer kind here. Supported kinds:
+
+        * ``unary_prefix`` / ``unary_postfix`` — operator layer
+          (e.g. ``maximum_of_x``, ``x_magnitude``). Only ``operator``
+          carries data; role/separator/axis/shape MUST be absent.
+        * ``binary`` — binary operator layer (e.g. ``ratio_of_x_to_y``).
+          Requires ``role`` and ``separator``; ``axis`` and ``shape``
+          MUST be absent.
+        * ``projection`` — axis projection layer
+          (e.g. ``toroidal_magnetic_field``). Requires ``axis`` and
+          ``shape``; ``role`` and ``separator`` MUST be absent.
+        * ``qualifier`` — outermost qualifier layer
+          (e.g. ``upper_elongation_of_plasma_boundary`` peels ``upper``).
+          Only ``operator`` carries the qualifier token; all other
+          fields MUST be absent.
+        * ``locus`` — locus suffix layer
+          (e.g. ``elongation_of_plasma_boundary`` peels
+          ``plasma_boundary``). Only ``operator`` carries the locus
+          token; the relation (``of`` vs ``at``) is recoverable from
+          the source name's parse so is not carried on the edge.
+        """
         if self.operator_kind == "binary":
             if self.role is None or self.separator is None:
                 raise ValueError(
@@ -432,7 +444,8 @@ class ArgumentRef(BaseModel):
                     "role and separator are forbidden when operator_kind is 'projection'"
                 )
         else:
-            # unary_prefix / unary_postfix
+            # unary_prefix / unary_postfix / qualifier / locus — bare
+            # operator, no other fields.
             if self.role is not None or self.separator is not None:
                 raise ValueError(
                     f"role and separator are forbidden when operator_kind is '{self.operator_kind}'"
@@ -444,12 +457,40 @@ class ArgumentRef(BaseModel):
         return self
 
 
+class CatalogSourceBinding(BaseModel):
+    """Immutable reference to a source-system record used by a catalog entry."""
+
+    model_config = ConfigDict(extra="ignore")
+
+    kind: str = Field(min_length=1)
+    ref: str = Field(min_length=1)
+    version: str = Field(min_length=1)
+
+    @model_validator(mode="before")
+    @classmethod
+    def migrate_legacy_binding(cls, value: Any) -> Any:
+        """Translate the retired DD and facility identifier keys on load."""
+        if not isinstance(value, dict):
+            return value
+
+        migrated = dict(value)
+        dd_path = migrated.get("dd_path")
+        signal_id = migrated.get("signal_id")
+        if dd_path not in (None, ""):
+            migrated.setdefault("kind", "imas-dd")
+            migrated.setdefault("ref", dd_path)
+            migrated.setdefault("version", migrated.get("dd_version"))
+        elif signal_id not in (None, ""):
+            migrated.setdefault("ref", signal_id)
+        return migrated
+
+
 class StandardNameEntryBase(StandardNameBase):
     """Full catalog entry definition (fields common to scalar and vector kinds).
 
     Extends :class:`StandardNameBase` with the documentation and metadata fields
-    required of a published standard name: description, documentation, validity
-    domain, constraints, tags, links. This remains the class used for the full
+    required of a published standard name: description, documentation,
+    links. This remains the class used for the full
     catalog (serialization, JSON schema, rendering).
     """
 
@@ -460,21 +501,14 @@ class StandardNameEntryBase(StandardNameBase):
     documentation: Documentation  # Required: valuable standalone content
 
     # Governance / metadata (documentation-adjacent)
-    validity_domain: Domain = ""
-    constraints: Constraints = Field(default_factory=list)
-    tags: Tags = Field(default_factory=list)  # Secondary classification tags
     links: Links = Field(default_factory=list)
 
     # Structural graph edges (computed fields, re-derived on export)
     arguments: list[ArgumentRef] | None = None
     error_variants: dict[Literal["upper", "lower", "index"], str] | None = None
 
-    @field_validator("tags", "constraints")
-    @classmethod
-    def list_normalizer(cls, v: Iterable[str]) -> list[str]:  # type: ignore[override]
-        if v is None:
-            return []
-        return [str(item).strip() for item in v if str(item).strip()]
+    # Source-system bindings included by provenance-aware catalog exports.
+    sources: list["CatalogSourceBinding"] | None = None
 
     @field_validator("links")
     @classmethod
@@ -519,21 +553,6 @@ class StandardNameEntryBase(StandardNameBase):
                 )
 
         return result
-
-    @field_validator("tags")
-    @classmethod
-    def validate_secondary_tags(cls, v: list[str]) -> list[str]:  # type: ignore[override]
-        """Validate tags are all secondary tags from controlled vocabulary."""
-        if not v:
-            return v
-
-        unknown_tags = [tag for tag in v if tag not in SECONDARY_TAGS]
-        if unknown_tags:
-            raise ValueError(
-                f"Unknown secondary tag(s): {', '.join(unknown_tags)}. "
-                f"Valid secondary tags are defined in grammar/vocabularies/tags.yml"
-            )
-        return v
 
     @field_validator("documentation")
     @classmethod
@@ -688,7 +707,11 @@ class StandardNameScalarEntry(StandardNameEntryBase):
 
 
 class StandardNameVectorEntry(StandardNameEntryBase):
-    """Vector standard name catalog entry."""
+    """Vector standard name catalog entry.
+
+    Individual named components (e.g. radial_magnetic_field) are also
+    classified as vector because they carry implicit directional structure.
+    """
 
     kind: Literal["vector"] = "vector"
     unit: Unit  # Required for vector (use "1" for dimensionless)
@@ -1029,6 +1052,15 @@ class StandardNameCatalogManifest(BaseModel):
     excluded_unreviewed_count: int = 0
     source_repo: str | None = None
     source_commit_sha: str | None = None
+    # Export scope and timing provenance (added in v0.7.0rc31).
+    export_scope: Literal["full", "domain", "scoped", "review"] | None = None
+    domains_included: list[str] = Field(default_factory=list)
+    # Review-batch id-set: on a ``review`` export this holds the exact
+    # standard-name ids in the PR'd batch; absent on normal builds.
+    review_batch: list[str] | None = None
+    catalog_commit_sha: str | None = None
+    exported_at: datetime | None = None
+    edge_model_version: str | None = None
 
 
 __all__ = [

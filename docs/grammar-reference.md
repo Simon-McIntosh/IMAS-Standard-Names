@@ -12,22 +12,44 @@ each segment drawing from controlled vocabularies.
 
 ### Canonical Pattern
 
-The grammar follows this pattern:
+The non-operator core follows the generated segment pattern shown below.
+Operators wrap that core recursively:
 
 ```text
-[<component>_component_of | <coordinate>]?
-[<subject>]?
-[<device> | of_<object>]?
-<geometric_base | physical_base>
-[of_<geometry> | at_<position>]?
-[due_to_<process>]?
+<expression> :=
+    <core>
+  | <unary_prefix>_of_<expression>
+  | <expression>_<unary_postfix>
+  | <binary>_of_<expression>_<separator>_<expression>
 ```
 
 **Key concepts:**
 
 - **Split Base Structure**: Names must have either a `geometric_base` (spatial/geometric quantities) OR a `physical_base` (physical measurements/properties), but not both.
-- **component vs coordinate**: Use `component` for physical vectors (with `physical_base`), use `coordinate` for geometric vectors (with `geometric_base`).
-- **device vs object**: Use `<device>_<signal>` for dynamic signals FROM device (e.g., `flux_loop_voltage`); use `<property>_of_<object>` for static properties OF object (e.g., `area_of_flux_loop`).
+- **Strict authority**: `parse(name, strict=True)` is the validity oracle.
+  The default parse and `validate_round_trip()` are diagnostic.
+- **Recursive operators**: `StandardNameIR.operators` is outermost first;
+  binary operands and explicit unary operands are themselves
+  `StandardNameIR` values.
+- **component vs coordinate**: An axis directly prefixes a physical vector
+  component (`radial_magnetic_field`) or a geometric carrier coordinate
+  (`radial_position_of_flux_loop`). The base determines which projection is
+  meant; there is no `_component_of_` marker.
+- **section plane**: A cross-sectional identity includes its plane. In
+  `poloidal_plane_cross_sectional_area_of_conductor_cross_section`, `poloidal`
+  is the `section_plane`, serialized with the explicit `_plane` marker rather
+  than as a vector component. A cross-sectional spelling without a registered
+  plane is invalid. The existing `poloidal_cross_section` spelling remains an
+  axis projection of the `cross_section` geometry carrier.
+- **local geometry representation**: A construction radius stored for a
+  circular arc is `local_circle_radius_of_<owner>`. It is not the global
+  cylindrical `radial_coordinate_of_<owner>` and not an outline coordinate.
+  The explicit owner prevents the source representation from becoming a
+  globally scoped quantity.
+- **instrument and object relations**: Author both signals and intrinsic
+  properties with the `of_<entity>` postfix (for example,
+  `voltage_of_flux_loop` and `area_of_flux_loop`). The `<device>_<signal>`
+  prefix remains parseable only for compatibility with existing names.
 - **of_geometry vs at_position**: Use `of_<geometry>` for geometric properties OF spatial objects; use `at_<position>` for fields evaluated AT locations.
 
 ### Vocabularies Summary
@@ -62,7 +84,7 @@ and others.
 
 **Usage:**
 
-- Physical vectors: `{token}_component_of_{physical_vector}` (e.g., `radial_component_of_magnetic_field`)
+- Physical vectors: `{token}_{physical_vector}` (e.g., `radial_magnetic_field`)
 - Geometric vectors: `{token}_{geometric_base}` (e.g., `radial_position_of_flux_loop`)
 
 {{ grammar_vocabulary_table('components') }}
@@ -76,6 +98,27 @@ nitrogen, neon, argon, tungsten, lithium), extended species (alpha particle, fas
 and reaction mixtures (deuterium-tritium).
 
 {{ grammar_vocabulary_table('subjects') }}
+
+### Section Planes
+
+Section-plane tokens identify the plane containing a physical or geometric
+section. They appear before the cross-sectional quantity. `poloidal` is the
+initial closed token; endpoint and sample-order words are not members of this
+or any related geometry-identity vocabulary.
+
+The carrier form is `poloidal_plane_cross_section_of_coil_conductor`. A scalar
+property of that section uses the same segment, for example
+`poloidal_plane_cross_sectional_area_of_coil_conductor`.
+
+{{ grammar_vocabulary_table('section_planes') }}
+
+### Geometry Representations
+
+Geometry-representation tokens identify an object-local construction
+primitive. `local_circle` composes only with `radius` and an explicit owner:
+`local_circle_radius_of_passive_loop_element`.
+
+{{ grammar_vocabulary_table('geometry_representations') }}
 
 ### Geometric Bases
 
@@ -93,7 +136,7 @@ Object tokens specify physical hardware or equipment whose intrinsic properties 
 
 **Examples:**
 
-- `major_radius_of_flux_loop` — intrinsic geometric property
+- `radial_coordinate_of_flux_loop` — intrinsic geometric property
 - `area_of_poloidal_magnetic_field_probe` — equipment characteristic
 
 {{ grammar_vocabulary_table('objects') }}
@@ -117,36 +160,39 @@ transport (conduction, convection, radiation), particle transport (diffusion), f
 
 {{ grammar_vocabulary_table('processes') }}
 
-### Transformations
+### Operators
 
-Transformation tokens modify a physical base by applying a mathematical operation.
-Transformations are prefixed to the physical base.
+The unified operator registry defines bare tokens, kinds, precedence,
+separators, index parameters, and semantic constraints. The renderer supplies
+the punctuation around the bare token:
 
-**Template:** `{transformation}_{physical_base}`
+| Kind | Template |
+|------|----------|
+| Unary prefix | `<op>_of_<inner>` |
+| Registry-declared bare prefix | `<op>_<inner>` |
+| Unary postfix | `<inner>_<op>` |
+| Binary | `<op>_of_<A>_<separator>_<B>` |
 
-**Examples:**
+Examples:
 
-- `square_of_electron_temperature` — square of temperature
-- `volume_averaged_electron_density` — spatial average
-- `time_derivative_of_magnetic_flux` — temporal derivative
-- `maximum_over_flux_surface_electron_pressure` — extremum over surface
+- `square_of_inverse_of_pressure` — ordered unary chain
+- `square_of_magnetic_field_magnitude` — prefix outside a postfix operator
+- `ratio_of_electron_density_to_ion_density` — binary ratio
+- `flux_surface_averaged_ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_magnetic_field_magnitude`
+  — reduction over a recursive binary expression
 
-**Categories:**
+Higher precedence wraps farther out; equal-precedence operators keep authored
+order. Binary split candidates are tried right-to-left and accepted only when
+both recursive operands resolve. Successful and failed substring parses are
+memoized per validation mode.
 
-- **Existing:** `square_of`, `change_over_time_in`, `logarithm_of`, `inverse_of`
-- **Scaling:** `normalized`
-- **Spatial averages:** `volume_averaged`, `flux_surface_averaged`, `line_averaged`
-- **Spatial integrals:** `surface_integrated`, `volume_integrated`
-- **Temporal:** `time_integrated`, `time_derivative_of`
-- **Extrema:** `maximum_of`, `minimum_of`, `maximum_over_flux_surface`, `minimum_over_flux_surface`
-- **Calculus:** `derivative_of`, `radial_derivative_of`
-
-**Note:** `time_derivative_of` and `change_over_time_in` are both valid transformation tokens
-describing the same mathematical operation. The parser accepts either form.
-
-**Exclusivity:** Transformations cannot be combined with `component`, `coordinate`, or `geometric_base`.
+#### Unary operator tokens
 
 {{ grammar_vocabulary_table('transformations') }}
+
+#### Binary operator surface tokens
+
+{{ grammar_vocabulary_table('binary_operators') }}
 
 ---
 
@@ -162,6 +208,7 @@ Certain segments cannot appear together in the same standard name:
 
 ### Valid Names Using Split Base Structure
 
+<!-- isn-authoring-examples:start -->
 **Geometric base examples (spatial/geometric quantities):**
 
 - `position_of_flux_loop` — geometric_base with object
@@ -173,41 +220,54 @@ Certain segments cannot appear together in the same standard name:
 
 - `electron_temperature` — subject + physical_base
 - `magnetic_field` — physical_base (vector)
-- `radial_component_of_magnetic_field` — component + physical_base
-- `flux_loop_voltage` — device + physical_base (device signal)
+- `radial_magnetic_field` — component + physical_base
+- `voltage_of_flux_loop` — physical_base + object (instrument signal)
 - `area_of_poloidal_magnetic_field_probe` — physical_base + object
+- `poloidal_plane_cross_sectional_area_of_conductor_cross_section` — section_plane + physical_base + object
+- `poloidal_plane_cross_section_of_coil_conductor` — section_plane + geometric_base + object
+- `local_circle_radius_of_passive_loop_element` — geometry_representation + physical_base + object
 
 **With position or geometry:**
 
 - `electron_temperature_at_plasma_boundary` — physical scalar + position
-- `radial_component_of_magnetic_field_at_magnetic_axis` — component + physical_base + position
-- `major_radius_of_plasma_boundary` — physical_base + geometry
+- `radial_magnetic_field_at_magnetic_axis` — component + physical_base + position
+- `radial_coordinate_of_plasma_boundary` — geometric carrier + geometry
 
 **With process:**
 
 - `heat_flux_due_to_conduction` — physical_base + process
 - `particle_flux_due_to_diffusion` — physical_base + process
+<!-- isn-authoring-examples:end -->
 
 ### Invalid Names
 
 Examples that violate the grammar:
 
-❌ `magnetic_field_radial_component` — component must come first  
+❌ `magnetic_field_radial` — component must come first
 ❌ `at_plasma_boundary_electron_temperature` — segments out of order  
 ❌ `electron_temperature_at_plasma_boundary_of_magnetic_axis` — both position and geometry (mutually exclusive)  
-❌ `radial_component_of_position` — component requires physical_base, not geometric_base  
-❌ `radial_position_component_of_flux_loop` — should use coordinate form, not component
+❌ `radial_position_at_flux_loop` — an entity property uses `_of_`, not `_at_`
+❌ `position_radial_of_flux_loop` — the axis prefix must precede the carrier
+❌ `cross_sectional_area_of_conductor_cross_section` — a section must include its plane
+❌ `radial_local_circle_radius_of_passive_loop_element` — a local circle radius is not global cylindrical R
+❌ `first_local_circle_radius_of_passive_loop_element` — sample order stays in source provenance
 
 ---
 
 ## Implementation
 
-The grammar lives in these modules:
+The package-level public surface includes `parse`, `compose`, `StandardNameIR`,
+and `get_operator_semantics`. Use the semantic lookup when behavior depends on
+an operator's meaning: it returns an immutable effect set for any token and an
+empty set for unknown or non-operator tokens. Query tokens found in both the
+operator and qualifier IR groups because bare-prefix operators can normalize as
+qualifiers. The same metadata is serialized in
+`get_grammar_context()["grammar"]["vocabularies"]["operators"]`.
+Use `parse(name, strict=True)` for validation. Use
+`parse_standard_name(name)` only when a strict-valid name must also project
+into the flat `StandardName` facade; valid nested binary trees may be
+unrepresentable there.
 
-- **Grammar Specification:** `imas_standard_names/grammar/specification.yml`
-- **Type Generation:** `imas_standard_names/grammar_codegen/generate.py`
-- **Runtime Types:** `imas_standard_names/grammar/types.py` (auto-generated)
-- **Parser/Composer:** `imas_standard_names/grammar/support.py`
-- **Pydantic Models:** `imas_standard_names/grammar/model.py`
-
-See the [specification](development/specification.md) for detailed semantic rules and validation requirements.
+See the [canonical grammar](architecture/grammar-vnext.md) for recursive
+operator semantics and the [project boundary](architecture/boundary.md) for
+the stable API contract.

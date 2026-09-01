@@ -32,6 +32,7 @@ status: draft
 
 **Example:**
 
+<!-- isn-authoring-examples:start -->
 ```yaml
 name: electron_temperature
 kind: scalar
@@ -40,6 +41,7 @@ description: Electron temperature.
 tags: [plasma]
 status: draft
 ```
+<!-- isn-authoring-examples:end -->
 
 ---
 
@@ -62,6 +64,7 @@ status: draft
 
 **Example:**
 
+<!-- isn-authoring-examples:start -->
 ```yaml
 name: radial_position_of_flux_loop
 kind: scalar
@@ -70,6 +73,7 @@ description: Radial position of flux loop.
 tags: [magnetics, geometry]
 status: draft
 ```
+<!-- isn-authoring-examples:end -->
 
 ---
 
@@ -77,29 +81,31 @@ status: draft
 
 **Goal:** Add a measurement obtained from diagnostic hardware.
 
-**Pattern:** `<physical_base>_from_{source}`
+**Pattern:** `<physical_base>_of_<object>`
 
 **Template:**
 
 ```yaml
-name: <physical_base>_from_<source>
+name: <physical_base>_of_<object>
 kind: scalar
 unit: <unit>
-description: <physical_base> from <source>.
+description: <Physical_base> signal of <object>.
 tags: [<primary_tag>, measured]
 status: draft
 ```
 
 **Example:**
 
+<!-- isn-authoring-examples:start -->
 ```yaml
-name: voltage_from_flux_loop
+name: voltage_of_flux_loop
 kind: scalar
 unit: V
-description: Voltage from flux loop.
+description: Voltage of flux loop.
 tags: [magnetics, measured]
 status: draft
 ```
+<!-- isn-authoring-examples:end -->
 
 ---
 
@@ -107,12 +113,12 @@ status: draft
 
 **Goal:** Add a component of a physical vector field (e.g., radial magnetic field).
 
-**Pattern:** `{component}_component_of_{physical_base}`
+**Pattern:** `{component}_{physical_base}`
 
 **Template:**
 
 ```yaml
-name: <component>_component_of_<physical_base>
+name: <component>_<physical_base>
 kind: scalar
 unit: <unit>
 description: <Component> component of <physical_base>.
@@ -122,14 +128,16 @@ status: draft
 
 **Example:**
 
+<!-- isn-authoring-examples:start -->
 ```yaml
-name: radial_component_of_magnetic_field
+name: radial_magnetic_field
 kind: scalar
 unit: T
 description: Radial component of magnetic field.
 tags: [magnetics]
 status: draft
 ```
+<!-- isn-authoring-examples:end -->
 
 ---
 
@@ -152,6 +160,7 @@ status: draft
 
 **Example:**
 
+<!-- isn-authoring-examples:start -->
 ```yaml
 name: electron_temperature_at_magnetic_axis
 kind: scalar
@@ -160,6 +169,7 @@ description: Electron temperature at magnetic axis.
 tags: [plasma]
 status: draft
 ```
+<!-- isn-authoring-examples:end -->
 
 ---
 
@@ -182,14 +192,16 @@ status: draft
 
 **Example:**
 
+<!-- isn-authoring-examples:start -->
 ```yaml
-name: major_radius_of_plasma_boundary
+name: radial_coordinate_of_plasma_boundary
 kind: scalar
 unit: m
-description: Major radius of plasma boundary.
+description: Radial coordinate of the plasma boundary.
 tags: [equilibrium, geometry]
 status: draft
 ```
+<!-- isn-authoring-examples:end -->
 
 ---
 
@@ -221,10 +233,10 @@ Fix any reported issues and re-run until validation passes.
 | ------------------------------------------- | ------------------------------------ | --------------------------------------- |
 | `<subject>_<physical_base>`                 | Basic physical measurement           | `electron_temperature`                  |
 | `<coordinate>_<geometric_base>_of_<object>` | Hardware geometry                    | `radial_position_of_flux_loop`          |
-| `<physical_base>_from_<source>`             | Diagnostic measurement               | `voltage_from_flux_loop`                |
-| `<component>_component_of_<physical_base>`  | Physical vector component            | `radial_component_of_magnetic_field`    |
+| `<physical_base>_of_<object>`               | Diagnostic device signal/property    | `voltage_of_flux_loop`                  |
+| `<component>_<physical_base>`               | Physical vector component            | `radial_magnetic_field`                 |
 | `<physical_base>_at_<position>`             | Field at location                    | `electron_temperature_at_magnetic_axis` |
-| `<physical_base>_of_<geometry>`             | Geometric property of spatial object | `major_radius_of_plasma_boundary`       |
+| `<geometry_carrier>_of_<geometry>`          | Geometric property of spatial object | `radial_coordinate_of_plasma_boundary`  |
 
 ---
 

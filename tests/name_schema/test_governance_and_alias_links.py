@@ -118,18 +118,3 @@ def test_links_invalid_format():
                 "links": ["just_a_string"],  # neither URL nor name: reference
             }
         )
-
-
-def test_constraints_trimmed():
-    sn = create_standard_name_entry(
-        {
-            "kind": "scalar",
-            "name": "upper_bound_test",
-            "description": "Test",
-            "documentation": "Test entry for constraint trimming validation.",
-            "unit": "eV",
-            "status": "draft",
-            "constraints": ["  T > 0  ", ""],
-        }
-    )
-    assert sn.constraints == ["T > 0"]

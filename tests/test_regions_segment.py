@@ -39,11 +39,9 @@ from imas_standard_names.grammar.model_types import Position, Region
             "density",
         ),
         ("temperature_over_edge_region", Region.EDGE_REGION, "temperature"),
-        (
-            "magnetic_field_over_halo_boundary",
-            Region.HALO_BOUNDARY,
-            "magnetic_field",
-        ),
+        # halo_boundary is typed POSITION in the locus registry (sampled as
+        # at_halo_boundary), so it is intentionally NOT a region token — see
+        # tests/test_regions_locus_parity.py.
     ],
 )
 def test_region_round_trip(
@@ -89,14 +87,14 @@ def test_region_excludes_geometry() -> None:
 def test_region_tokens_not_in_positions_vocabulary() -> None:
     """Region tokens must have been moved out of the positions vocabulary.
 
-    The old-style ``..._at_halo_region`` name must no longer parse as a
-    ``position``; instead it falls through to a bare physical_base (no
-    suffix recognized). Constructing a StandardName with a Position value
-    of ``halo_region`` must fail since the enum no longer contains it.
+    ``halo_region`` is not registered in the locus vocabulary, so
+    ``..._at_halo_region`` fails to parse entirely. Constructing a
+    StandardName with a Position value of ``halo_region`` must also fail
+    since the enum no longer contains it.
     """
-    parsed = parse_standard_name("electron_temperature_at_halo_region")
-    assert parsed.position is None
-    assert parsed.region is None
+    # parser does not recognise halo_region as a locus → parse fails
+    with pytest.raises((ValueError, Exception)):  # noqa: B017
+        parse_standard_name("electron_temperature_at_halo_region")
 
     # Construction with a nonexistent Position value must fail.
     with pytest.raises(ValueError):

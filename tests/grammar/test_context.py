@@ -3,6 +3,11 @@
 import pytest
 
 from imas_standard_names.grammar.context import get_grammar_context
+from imas_standard_names.grammar.model import compose_standard_name
+from imas_standard_names.grammar.vocab_loaders import (
+    load_qualifier_categories,
+    load_scoping_qualifiers,
+)
 
 
 @pytest.fixture(scope="module")
@@ -25,7 +30,6 @@ EXPECTED_KEYS = [
     "documentation_guidance",
     "kind_definitions",
     "anti_patterns",
-    "tag_descriptions",
     "applicability",
     "field_guidance",
     "type_specific_requirements",
@@ -34,6 +38,7 @@ EXPECTED_KEYS = [
     "critical_distinctions",
     "base_requirements",
     "vocabulary_usage_stats",
+    "grammar",
 ]
 
 
@@ -79,6 +84,90 @@ def test_vocabulary_sections_is_nonempty_list(context: dict):
         assert "tokens" in section
 
 
+def test_vocabulary_sections_covers_all_segments(context: dict):
+    """Every segment in SEGMENT_TOKEN_MAP must appear with its correct tokens."""
+    from imas_standard_names.grammar.constants import SEGMENT_TOKEN_MAP
+
+    sections = context["vocabulary_sections"]
+    by_segment = {s["segment"]: s["tokens"] for s in sections}
+
+    for seg_id, expected_tokens in SEGMENT_TOKEN_MAP.items():
+        assert seg_id in by_segment, (
+            f"Segment {seg_id!r} has {len(expected_tokens)} tokens in "
+            f"SEGMENT_TOKEN_MAP but is missing from vocabulary_sections"
+        )
+        actual_tokens = by_segment[seg_id]
+        assert len(actual_tokens) == len(expected_tokens), (
+            f"Segment {seg_id!r}: vocabulary_sections has {len(actual_tokens)} "
+            f"tokens but SEGMENT_TOKEN_MAP has {len(expected_tokens)}"
+        )
+        assert set(actual_tokens) == set(expected_tokens), (
+            f"Segment {seg_id!r}: token sets differ between "
+            f"vocabulary_sections and SEGMENT_TOKEN_MAP"
+        )
+
+
+def test_grammar_context_exposes_qualifier_categories_in_validator_order(
+    context: dict,
+):
+    """The prompt-facing category order must match canonical composition."""
+    category_of = load_qualifier_categories()
+    expected_categories = list(dict.fromkeys(category_of.values()))
+    exposed = context["grammar"]["vocabularies"]["qualifier_categories"]
+
+    assert list(exposed) == expected_categories
+    assert {
+        token: category for category, tokens in exposed.items() for token in tokens
+    } == category_of
+
+    scoping = load_scoping_qualifiers()
+    representatives = [
+        next(token for token in tokens if token in scoping)
+        for tokens in exposed.values()
+        if any(token in scoping for token in tokens)
+    ]
+    assert len(representatives) > 1
+    assert (
+        compose_standard_name(
+            {
+                "qualifier": tuple(reversed(representatives)),
+                "physical_base": "pressure",
+            }
+        )
+        == f"{'_'.join(representatives)}_pressure"
+    )
+
+
+def test_grammar_context_points_to_stable_operator_chain_api(context: dict):
+    parse_api = context["grammar"]["parse_api"]
+    assert parse_api == {
+        "parse": "imas_standard_names:parse",
+        "compose": "imas_standard_names:compose",
+        "validate_round_trip": "imas_standard_names:validate_round_trip",
+        "ir_model": "imas_standard_names:StandardNameIR",
+        "validity_oracle": {
+            "call": "imas_standard_names:parse",
+            "arguments": {"strict": True},
+        },
+        "default_parse_mode": "diagnostic",
+        "round_trip_mode": "diagnostic_only",
+        "flat_projection": {
+            "call": "imas_standard_names.grammar.model:parse_standard_name",
+            "validation": "strict",
+            "representation": "flat",
+            "ordered_ir": "may_reject_unrepresentable",
+        },
+        "operator_chain_order": "outermost_first",
+    }
+
+
+def test_grammar_context_exposes_segment_scoped_advisory_aliases(context: dict):
+    aliases = context["grammar"]["advisory_aliases"]
+
+    assert aliases["position"]["rectangle_centre"]["canonical"] == "rectangle_center"
+    assert aliases["physical_base"]["strain_tensor"]["canonical"] == "strain"
+
+
 def test_segment_descriptions_is_nonempty_dict(context: dict):
     descs = context["segment_descriptions"]
     assert isinstance(descs, dict)
@@ -115,17 +204,6 @@ def test_anti_patterns_is_nonempty_list_of_dicts(context: dict):
         assert isinstance(item, dict)
         assert "mistake" in item
         assert "correction" in item
-
-
-def test_tag_descriptions_has_primary_and_secondary(context: dict):
-    td = context["tag_descriptions"]
-    assert isinstance(td, dict)
-    assert "primary" in td
-    assert "secondary" in td
-    assert isinstance(td["primary"], dict)
-    assert isinstance(td["secondary"], dict)
-    assert len(td["primary"]) > 0
-    assert len(td["secondary"]) > 0
 
 
 def test_applicability_has_required_keys(context: dict):
@@ -181,6 +259,34 @@ def test_critical_distinctions_is_nonempty_list(context: dict):
         assert isinstance(item, dict)
         assert "pair" in item
         assert "rule" in item
+
+
+def test_instrument_signal_guidance_uses_canonical_relation_syntax(context: dict):
+    anti_pattern = next(
+        item
+        for item in context["anti_patterns"]
+        if item["mistake"]
+        == "Using the device prefix when authoring new instrument names"
+    )
+    canonical_name = anti_pattern["example_right"]
+    compatibility_name = anti_pattern["example_wrong"]
+
+    common_pattern = next(
+        item
+        for item in context["common_patterns"]
+        if item["pattern"] == "device_signal"
+    )
+    distinction = next(
+        item
+        for item in context["critical_distinctions"]
+        if item["pair"] == "device vs object"
+    )
+
+    assert common_pattern["example"] == canonical_name
+    for guidance in (context["quick_start"], distinction["rule"]):
+        assert canonical_name in guidance
+        assert compatibility_name in guidance
+        assert "compatib" in guidance.lower()
 
 
 def test_base_requirements_is_dict_with_segment_keys(context: dict):

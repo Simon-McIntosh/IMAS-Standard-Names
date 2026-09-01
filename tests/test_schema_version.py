@@ -156,7 +156,7 @@ def test_catalog_read_handles_missing_metadata_table(tmp_path, caplog):
     conn.execute(
         "CREATE TABLE standard_name (name TEXT PRIMARY KEY, kind TEXT NOT NULL, "
         "status TEXT NOT NULL, unit TEXT, description TEXT NOT NULL, "
-        "documentation TEXT, validity_domain TEXT, deprecates TEXT, "
+        "documentation TEXT, deprecates TEXT, "
         "superseded_by TEXT, is_dimensionless INTEGER NOT NULL DEFAULT 0)"
     )
     conn.execute(
@@ -184,7 +184,7 @@ def test_catalog_read_handles_missing_schema_version_key(tmp_path, caplog):
     conn.execute(
         "CREATE TABLE standard_name (name TEXT PRIMARY KEY, kind TEXT NOT NULL, "
         "status TEXT NOT NULL, unit TEXT, description TEXT NOT NULL, "
-        "documentation TEXT, validity_domain TEXT, deprecates TEXT, "
+        "documentation TEXT, deprecates TEXT, "
         "superseded_by TEXT, is_dimensionless INTEGER NOT NULL DEFAULT 0)"
     )
     conn.execute(

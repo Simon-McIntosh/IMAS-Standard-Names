@@ -1,4 +1,4 @@
-# Geometry carriers vocabulary (plan 38 §A1)
+# Geometry carriers vocabulary
 #
 # Closed vocabulary of geometric shape tokens that can carry a coordinate
 # projection (shape=coordinate).  Distinct from physical_bases.yml which
@@ -12,21 +12,26 @@
 #
 # Structure per entry:
 #   aliases  - list of alternate tokens (empty default)
+#   constant_on_flux_surface - true for flux-label carriers (rho_tor and
+#              friends): constant on any flux surface, so a flux-surface
+#              reduction operator on them is a no-op and is rejected.
 #
-# Populated by W2a from corpus mining (plan 38 §A9) and migration from
-# geometric_bases.yml.
+# Migrated from geometric_bases.yml.
 
 carriers:
 
-  # === From corpus mining (8 geometry_carrier tokens) ===
+  # === Core geometry carriers ===
+  # line_of_sight moved to locus_registry.yml (position-typed locus, relation
+  # 'along': toroidal_angle_along_line_of_sight) — it named a diagnostic
+  # chord/path locus, not a standalone geometric-base noun, and no name used
+  # it bare or via _of_ composition.
   centroid:
-    aliases: []
-  line_of_sight:
     aliases: []
   normalized_minor_radius:
     aliases: []
   normalized_toroidal_flux_coordinate:
     aliases: []
+    constant_on_flux_surface: true
   offset:
     aliases: []
   position:
@@ -35,10 +40,15 @@ carriers:
     aliases: []
   toroidal_flux_coordinate:
     aliases: []
-
+    constant_on_flux_surface: true
   # === Migrated from geometric_bases.yml (carrier-type entries) ===
   contour:
     aliases: []
+  cross_section:
+    aliases: []
+    definition: >
+      Planar section of a physical or geometric object. The containing plane
+      is a required section_plane segment of the standard name.
   coordinate:
     aliases: []
   displacement:
@@ -47,6 +57,10 @@ carriers:
     aliases: []
   normalized_poloidal_flux_coordinate:
     aliases: []
+    constant_on_flux_surface: true
+  poloidal_magnetic_flux_coordinate:
+    aliases: []
+    constant_on_flux_surface: true
   outline:
     aliases: []
   sensor_normal:
@@ -62,8 +76,62 @@ carriers:
   vertex:
     aliases: []
 
-  # === EMW pilot rc27 additions (evidence N>=3) ===
-  x1_coordinate:  # Added rc27: EMW pilot evidence N=3
+  # === Local tangent-frame carriers ===
+  # These tokens describe an object-local right-handed orthonormal frame.  Its
+  # third direction e3 is normal to the relevant surface or plane and oriented
+  # toward the plasma.  The first tangent e1 is oriented in positive toroidal
+  # phi and is either explicitly horizontal or, under the more general DD
+  # convention, has a smaller absolute global-Z component than e2.  The second
+  # tangent is fixed by e2 = e3 x e1.  Neither tangent is thereby a global
+  # vertical direction or a principal-curvature direction.
+  first_local_tangential_coordinate:
     aliases: []
-  x2_coordinate:  # Added rc27: EMW pilot evidence N=3
+    definition: >
+      Signed coordinate along the first tangent e1 of an object-local
+      right-handed orthonormal frame. The plasma-facing surface or plane normal
+      is e3; e1 is oriented in positive toroidal phi and is either explicitly
+      horizontal or has a smaller absolute global-Z component than e2.
+  second_local_tangential_coordinate:
+    aliases: []
+    definition: >
+      Signed coordinate along the second tangent e2 of an object-local
+      right-handed orthonormal frame, where e2 = e3 x e1 and e3 is the
+      plasma-facing surface or plane normal. This coordinate is not the global
+      vertical coordinate.
+
+  first_local_tangential_unit_vector:
+    aliases: []
+    definition: >
+      First tangent unit vector e1 of an object-local right-handed orthonormal
+      frame. It is oriented in positive toroidal phi and is either explicitly
+      horizontal or has a smaller absolute global-Z component than e2; e3 is
+      the plasma-facing surface or plane normal.
+  second_local_tangential_unit_vector:
+    aliases: []
+    definition: >
+      Second tangent unit vector e2 of an object-local right-handed orthonormal
+      frame, fixed by e2 = e3 x e1 with e3 the plasma-facing surface or plane
+      normal. It is not necessarily vertical and is not necessarily a
+      principal-curvature direction.
+
+  # === Angular and normal-axis carriers ===
+  poloidal_angle:  # poloidal angle coordinate (sensor orientation, equilibrium grids)
+    aliases: []
+  toroidal_angle:  # toroidal angle coordinate (sensor orientation, probe geometry)
+    aliases: []
+  normal_coordinate:  # Frenet-Serret normal-axis coordinate (conductor cross-section outlines)
+    aliases: []
+  binormal_coordinate:  # Frenet-Serret binormal-axis coordinate (conductor cross-section outlines)
+    aliases: []
+  direction_unit_vector:  # unit vector along a specified direction
+    aliases: []
+  image_up_unit_vector:  # image-up orientation of an imaging device, distinct from its line-of-sight direction_unit_vector — N=3 (camera_ir camera/up/{x,y,z})
+    aliases: []
+  major_axis_unit_vector:  # major principal axis of an elliptical cross-section — N=3 (spi shatter_cone/unit_vector_major/{x,y,z})
+    aliases: []
+  minor_axis_unit_vector:  # minor principal axis of an elliptical cross-section — N=3 (spi shatter_cone/unit_vector_minor/{x,y,z})
+    aliases: []
+  first_measurement_direction_unit_vector:  # a strain-rosette gauge's first measurement-axis unit vector — N=3 (operational_instrumentation sensor/direction/{x,y,z})
+    aliases: []
+  second_measurement_direction_unit_vector:  # a strain-rosette gauge's second measurement-axis unit vector — N=3 (operational_instrumentation sensor/direction_second/{x,y,z})
     aliases: []

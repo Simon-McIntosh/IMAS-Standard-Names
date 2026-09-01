@@ -1,0 +1,25 @@
+# Aggregation vocabulary: population/species/contribution reduction
+# (single closed segment)
+#
+# An aggregation token marks a quantity that has been summed or netted over a
+# set of sub-populations, species, or additive contributions. It is a distinct
+# orthogonal dimension from `population` (energy-state) — it legitimately STACKS
+# with a population token, rendering OUTERMOST of every other modifier:
+#   <aggregation>_<orbit>_<population>_<subject>_<base>, e.g.
+#   - total_fast_ion_energy            (aggregation=total, population=fast,    subject=ion)
+#   - total_trapped_fast_ion_energy    (aggregation=total, orbit=trapped, population=fast, subject=ion)
+#   - total_thermal_ion_species_density(aggregation=total, population=thermal, subject=ion_species)
+#   - total_plasma_current             (aggregation=total, base=plasma_current)
+#
+# Single-token closed segment (at most one aggregation per name — no intra-
+# segment stacking).
+#
+# SCOPE — population/species/contribution summation ONLY. SPATIAL reductions
+# (flux-surface average, volume integral, mean over a region) are NOT
+# aggregation tokens: they are expressed via the existing `over_<region>`
+# segment, the flux-surface-average / reduction operator tags, and the
+# reduction-provenance metadata (see specification.yml `region` segment and the
+# reduction provenance schema). Do not add spatial-reduction tokens here.
+
+- total            # summed over sub-populations / species / additive contributions
+- net              # signed net of opposing contributions (e.g. net current drive)

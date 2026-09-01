@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-standard-names">
+  <title>§2 (P1) landed — deprecation architecture | systematic-review-remediation</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+  <p><a href="/imas-standard-names/systematic-review-remediation.html">&larr; back to the evergreen plan</a></p>
+  <h1>§2 — P1: Deprecation architecture (accepted names only) <span class="badge badge-shipped">✓ landed 2026-07-10</span></h1>
+
+  <h2>Quick status</h2>
+  <table>
+    <thead><tr><th>Item</th><th>Status</th><th>Commit</th></tr></thead>
+    <tbody>
+      <tr><td>Export-time deprecation stubs + chain collapse + status mapping</td><td>✓ shipped</td><td><code>bb76411e</code> (codex)</td></tr>
+      <tr><td>Stage-at-supersession recording (both supersede sites)</td><td>✓ shipped</td><td><code>bb76411e</code> (codex)</td></tr>
+      <tr><td>ISN stub validation + successor-forward rendering</td><td>✓ shipped</td><td><code>d5d3687</code> (ISN)</td></tr>
+      <tr><td>sn merge round-trip preserves stubs</td><td>✓ shipped (tested)</td><td><code>bb76411e</code> (codex)</td></tr>
+    </tbody>
+  </table>
+
+  <h2>What shipped</h2>
+  <ul>
+    <li><strong>Export stubs</strong> (<code>export.py</code>: <code>_fetch_deprecation_stubs</code> +
+      <code>_build_stub_entry</code>): every superseded name that had reached the published bar emits a
+      <code>status: deprecated</code> stub with <code>superseded_by</code> = the live successor resolved along the
+      <code>REFINED_FROM*</code> chain — chains collapse A→B→C to a single A→C stub; successors outside the
+      published set are skipped (no dangling pointers). Exported accepted names publish
+      <code>status: active</code> (decision d-status-mapping); draft leaves the published vocabulary.
+      <code>deprecated_stub_count</code> lands in <code>.export_report.json</code> only — the catalog manifest
+      model stays closed.</li>
+    <li><strong>Stage recording</strong> (<code>graph_ops.py</code>, +24): <code>superseded_from_stage</code> written
+      at both supersede sites. Drift adaptation: <code>persist_refined_name</code> cannot see the name-axis stage
+      (edit.py flips the predecessor to <code>refining</code> before persist), so it records the durable published
+      proxy <code>docs_stage='accepted'</code> — stricter than the letter of the decision: a stub is emitted only
+      for names that actually reached consumers; accepted-but-never-published renames emit nothing (decision
+      d-dep-scope honoured in spirit and effect).</li>
+    <li><strong>ISN side</strong>: models + SQLite schema already carried deprecated/superseded_by;
+      added the structural rule (deprecated ⇒ superseded_by present; resolution itself is P3's semantic check)
+      and successor-forward fields in <code>tools/fetch.py</code>. Round-trip test proves stubs persist across
+      build/read.</li>
+    <li><strong>sn merge</strong> (post-catalog-import architecture): <code>read_pr_changes</code> leaves unchanged
+      stubs alone; docs edits on live names still flow.</li>
+  </ul>
+
+  <h2>Verification</h2>
+  <ul>
+    <li>Test classes required by done-when all green: accepted rename → stub; draft rename → no stub
+      (<code>superseded_from_stage='accepted'</code> Cypher gate); chain collapse; ISN validate on stub-bearing
+      catalog; merge preserves stubs. Orchestrator re-ran independently: 17 passed (codex) + 5 passed (ISN).</li>
+    <li>Full suites at HEAD: ISN 1683 passed / 0 failed (the 3 failures P1 saw mid-flight were P3's in-progress
+      semantic.py state, since fixed). Codex blast-radius 130 passed / 1 pre-existing graph-marked failure
+      (<code>test_escalation_at_final_attempt</code>: RefinedName now requires <code>segments</code>; fixture drift
+      predates P1, folded into P6).</li>
+    <li>Scope audit: commits touch exactly the allocated files; no AI trailers.</li>
+  </ul>
+</main>
+</body>
+</html>

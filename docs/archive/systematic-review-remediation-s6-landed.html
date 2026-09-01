@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-standard-names">
+  <title>§6 (P5) landed — vocabulary curation and grammar closes | systematic-review-remediation</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+  <p><a href="/imas-standard-names/systematic-review-remediation.html">&larr; back to the evergreen plan</a></p>
+  <h1>§6 — P5: Vocabulary curation and grammar closes <span class="badge badge-shipped">✓ landed 2026-07-10</span></h1>
+
+  <h2>Quick status</h2>
+  <table>
+    <thead><tr><th>Item</th><th>Verdict</th><th>Commit</th></tr></thead>
+    <tbody>
+      <tr><td>processes.yml dedup (5 synonym families) + curation gate</td><td>✓ shipped</td><td><code>fb98228</code></td></tr>
+      <tr><td>Catch-all bases gated as generic (16 tokens)</td><td>✓ shipped — 0 published casualties</td><td><code>ac196d5</code></td></tr>
+      <tr><td>Qualifier intra-order by category rank</td><td>✓ shipped — the 1 affected name already canonical, no rename</td><td><code>b566f9b</code></td></tr>
+      <tr><td>parse-contract documentation (oracle vs IR diagnostics)</td><td>✓ shipped</td><td><code>919a988</code></td></tr>
+      <tr><td>Measurement-location advisory suppression</td><td>✓ shipped — 310 → 0 on live catalog</td><td><code>d912daa</code></td></tr>
+      <tr><td>tools/grammar.py derives from get_grammar_context()</td><td>✓ shipped — payload keys identical, no regression</td><td><code>8f0e3d5</code></td></tr>
+      <tr><td>halo triple-role + halo_boundary typing + regions parity gate</td><td>✓ shipped</td><td><code>49eee70</code>, <code>fb98228</code></td></tr>
+      <tr><td>RC/plan provenance banner sweep from vocab comments</td><td>✓ shipped</td><td><code>b2221b3</code></td></tr>
+      <tr><td>binary_operators.yml retirement</td><td>✗ deferred with reason — load-bearing (enum seed + 21 catalog names); drift hazard closed instead via source-parity gate</td><td><code>fe1968a</code></td></tr>
+      <tr><td>Transformation/Decomposition enum dedup</td><td>✗ deferred with reason — slots are load-bearing (291/51 catalog uses), byte-equality is a codegen artifact; either dedup form changes validation semantics</td><td>—</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Key results</h2>
+  <ul>
+    <li><strong>Synonym merges</strong>: thermalization triple → <code>thermalization</code>;
+      <code>coulomb_collisions</code> → <code>collisions</code> (species-resolved
+      <code>coulomb_collisions_with_electrons</code> retained as a distinct mechanism); radiation family →
+      <code>radiation</code> (+ physically distinct line/synchrotron/impurity/surface_emission retained);
+      <code>disruption_event</code> → <code>disruption</code>; <code>viscous</code> → <code>viscosity</code>.
+      Curation gate <code>tests/test_process_synonym_gate.py</code> blocks re-entry of every merged synonym
+      (token + enum axes).</li>
+    <li><strong>Migration backlog: EMPTY.</strong> Parsed-token sweep (not substring) over the live catalog found
+      zero names carrying a retired synonym and zero bare catch-all names — no supervised graph-edit migration
+      pass needed for P5.</li>
+    <li><strong>Full-catalog sweep</strong>: 2148 names, 2147 parse+round-trip identical; the single exception
+      (<code>flux_surface_averaged_magnetic_shear</code>) is the intentional FSA-reduction-gate rejection from
+      <code>b8a2024</code> (pre-P5, tracked by the FSA-gate work, listed as a must-reject in its test).</li>
+    <li><strong>Structural gates added</strong>: regions.yml ≡ region-typed loci (test parity gate);
+      binary-operator sources (binary_operators.yml / operators.yml / specification.yml) bound against drift.</li>
+    <li><strong>Suite</strong>: 1726 passed, 28 skipped, 83 xfailed, 0 failed.</li>
+  </ul>
+
+  <h2>Deferred follow-ups (codegen refactors, deliberately not rushed)</h2>
+  <ul>
+    <li>Full binary_operators.yml retirement: requires reworking VOCAB_TO_ENUM + connector derivation with
+      21-name round-trip verification. The silent-drift hazard is already closed by the parity gate.</li>
+    <li>Transformation/Decomposition enum dedup: needs a codegen contract change (slot-keyed membership),
+      not an alias.</li>
+  </ul>
+</main>
+</body>
+</html>

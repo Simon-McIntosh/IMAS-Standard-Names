@@ -1,6 +1,6 @@
-"""Grammar vNext intermediate representation (IR).
+"""Grammar intermediate representation (IR).
 
-Plan 38 / W1a deliverable. Pydantic v2 models for the 5-group IR:
+Pydantic v2 models for the 5-group IR:
 
     StandardNameIR := {
         operators:  [OperatorApplication],       # outer-to-inner stack
@@ -12,10 +12,10 @@ Plan 38 / W1a deliverable. Pydantic v2 models for the 5-group IR:
     }
 
 This module defines *shape only*. It does not resolve tokens against
-vocabulary YAMLs — that wiring happens in W1c/W2a (vocabularies) and W2b
+vocabulary YAMLs — that wiring happens in the vocabulary loaders and parser
 (parser). Validators here enforce structural invariants (non-empty tokens,
 consistent projection/base pairing, legal locus-relation type matrix, no
-empty operator arg lists) and the §A3 `_of_` disambiguation assertions.
+empty operator arg lists) and the `_of_` disambiguation assertions.
 
 The canonical renderer lives in :mod:`imas_standard_names.grammar.render`.
 """
@@ -30,6 +30,7 @@ from typing import Any, Literal
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 __all__ = [
+    "LOCUS_VALUE_PATTERN",
     "TOKEN_PATTERN",
     "AxisProjection",
     "BaseKind",
@@ -43,6 +44,7 @@ __all__ = [
     "QuantityOrCarrier",
     "StandardNameIR",
     "LOCUS_RELATION_MATRIX",
+    "BARE_PREFIX_OPERATORS",
     "BINARY_SEPARATORS",
     "assert_binary_has_separator",
     "assert_locus_is_trailing",
@@ -50,9 +52,13 @@ __all__ = [
 ]
 
 
-# A vNext token is lowercase ASCII snake_case. No leading/trailing underscore,
+# A grammar token is lowercase ASCII snake_case. No leading/trailing underscore,
 # no digits-only segments (``m_2`` is allowed; ``2`` alone is not).
 TOKEN_PATTERN = re.compile(r"^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$")
+
+# A locus value is a numeric literal with underscores as decimal separators:
+# ``0_95`` (= 0.95), ``1_0`` (= 1.0), ``2`` (= 2). At most one decimal point.
+LOCUS_VALUE_PATTERN = re.compile(r"^\d+(?:_\d+)?$")
 
 
 def _validate_token(value: str, *, field_name: str) -> str:
@@ -107,6 +113,7 @@ class LocusRelation(StrEnum):
     OF = "of"
     AT = "at"
     OVER = "over"
+    ALONG = "along"
 
 
 class LocusType(StrEnum):
@@ -118,17 +125,56 @@ class LocusType(StrEnum):
     GEOMETRY = "geometry"
 
 
-# Locus relation compatibility matrix (see grammar-vnext.md §5).
+# Locus relation compatibility matrix (see vocabularies/locus_registry.yml).
+# ``along`` is a third preposition on POSITION-typed loci, alongside ``of``
+# (intrinsic geometry) and ``at`` (field evaluated there): it names a
+# path-like locus (line_of_sight, pellet_path) that a quantity varies ALONG
+# rather than sits AT a single point of.
 LOCUS_RELATION_MATRIX: dict[LocusType, frozenset[LocusRelation]] = {
     LocusType.ENTITY: frozenset({LocusRelation.OF}),
-    LocusType.POSITION: frozenset({LocusRelation.OF, LocusRelation.AT}),
+    LocusType.POSITION: frozenset(
+        {LocusRelation.OF, LocusRelation.AT, LocusRelation.ALONG}
+    ),
     LocusType.REGION: frozenset({LocusRelation.OVER}),
     LocusType.GEOMETRY: frozenset({LocusRelation.OF}),
 }
 
 
-# Allowed separators for binary operators (see §A3 / grammar-vnext.md §6).
+# Allowed separators for binary operators (see vocabularies/operators.yml).
 BINARY_SEPARATORS: frozenset[str] = frozenset({"and", "to"})
+
+
+# Unary-prefix operators that spell WITHOUT the ``_of_`` joiner
+# (``flux_surface_averaged_electron_density``, not
+# ``flux_surface_averaged_of_electron_density``). These normally reach the IR as
+# qualifiers on the base, because a bare prefix is indistinguishable from a
+# qualifier when the operand is an ordinary base. They reach the operator stack
+# only when the operand has no base to hang off — an operator application, e.g.
+# a binary form — and there they must carry ``bare_prefix`` so the renderer
+# reproduces the joiner-free spelling.
+BARE_PREFIX_OPERATORS: frozenset[str] = frozenset(
+    {
+        "accumulated",
+        "change_in",
+        "cumulative",
+        "cumulative_inside_flux_surface",
+        "flux_surface_averaged",
+        "gyroaveraged",
+        "line_averaged",
+        "line_integrated",
+        "maximum_over_flux_surface",
+        "minimum_over_flux_surface",
+        "normalized",
+        "per_poloidal_mode",
+        "per_toroidal_and_poloidal_mode_number",
+        "per_toroidal_mode",
+        "perturbed",
+        "surface_integrated",
+        "time_averaged",
+        "volume_averaged",
+        "volume_integrated",
+    }
+)
 
 
 # ---------------------------------------------------------------------------
@@ -141,7 +187,7 @@ class Qualifier(BaseModel):
 
     Qualifiers are plain prefix tokens drawn from closed vocabularies. The
     actual vocabulary binding (species vs source_entity) is resolved in
-    W1c/W2a; at the IR level we record only the raw token string. A
+    the loaders; at the IR level we record only the raw token string. A
     ``category`` field is provided for forward-compatibility so parsers may
     tag the token with its vocabulary.
     """
@@ -196,18 +242,59 @@ class QuantityOrCarrier(BaseModel):
 
 
 class LocusRef(BaseModel):
-    """Typed locus reference with a relation preposition."""
+    """Typed locus reference with a relation preposition.
+
+    ``value`` carries an optional numeric parameterization rendered as
+    ``_equal_to_<value>`` after the locus token (underscore as decimal
+    separator, e.g. ``0_95`` for 0.95):
+    ``safety_factor_at_normalized_poloidal_magnetic_flux_equal_to_0_95``.
+    Only position-typed loci with the ``at`` relation admit a value.
+    """
 
     model_config = ConfigDict(frozen=True, extra="forbid")
 
     relation: LocusRelation
-    token: str = Field(description="Locus registry token.")
+    token: str = Field(
+        description="Locus registry FEATURE token (e.g. 'strike_point')."
+    )
+    qualifiers: tuple[str, ...] = Field(
+        default=(),
+        description=(
+            "Ordered geometric qualifiers composed onto a qualifiable feature "
+            "(e.g. ('inner',) for inner_strike_point, ('upper','outer') for "
+            "upper_outer_strike_point). Empty for a bare or non-qualifiable feature."
+        ),
+    )
     type: LocusType
+    value: str | None = Field(
+        default=None,
+        description=(
+            "Numeric literal parameterizing the locus (underscores as decimal "
+            "separators, e.g. '0_95'); rendered as '_equal_to_<value>'."
+        ),
+    )
 
     @field_validator("token")
     @classmethod
     def _check_token(cls, value: str) -> str:
         return _validate_token(value, field_name="locus token")
+
+    @field_validator("qualifiers")
+    @classmethod
+    def _check_qualifiers(cls, value: tuple[str, ...]) -> tuple[str, ...]:
+        for q in value:
+            _validate_token(q, field_name="locus qualifier")
+        return value
+
+    @field_validator("value")
+    @classmethod
+    def _check_value(cls, value: str | None) -> str | None:
+        if value is not None and not LOCUS_VALUE_PATTERN.fullmatch(value):
+            raise ValueError(
+                f"locus value {value!r} must be a numeric literal with "
+                f"underscores as decimal separators (e.g. '0_95', '1_0', '2')"
+            )
+        return value
 
     @model_validator(mode="after")
     def _check_relation_matrix(self) -> LocusRef:
@@ -217,6 +304,14 @@ class LocusRef(BaseModel):
             raise ValueError(
                 f"locus type {self.type.value!r} does not permit relation "
                 f"{self.relation.value!r}; allowed: {allowed_names}"
+            )
+        if self.value is not None and (
+            self.type is not LocusType.POSITION or self.relation is not LocusRelation.AT
+        ):
+            raise ValueError(
+                f"locus value {self.value!r} is only permitted on "
+                f"position-typed loci with the 'at' relation "
+                f"(got type={self.type.value!r}, relation={self.relation.value!r})"
             )
         return self
 
@@ -260,10 +355,18 @@ class OperatorApplication(BaseModel):
         ),
     )
     # Forward-compat: binary operators resolve their separator through the
-    # registry in W2a; at the IR level callers may pin it explicitly.
+    # registry; at the IR level callers may pin it explicitly.
     separator: Literal["and", "to"] | None = Field(
         default=None,
         description="Binary-operator separator; required for kind=binary.",
+    )
+    bare_prefix: bool = Field(
+        default=False,
+        description=(
+            "Render this unary_prefix operator as '<op>_<operand>' rather than "
+            "'<op>_of_<operand>'. Only tokens in BARE_PREFIX_OPERATORS may set "
+            "it, and both spellings of such a token denote distinct names."
+        ),
     )
 
     @field_validator("op")
@@ -303,14 +406,22 @@ class OperatorApplication(BaseModel):
                 raise ValueError(
                     f"unary operator {self.op!r} must not carry a separator"
                 )
+        if self.bare_prefix:
+            if self.kind is not OperatorKind.UNARY_PREFIX:
+                raise ValueError(
+                    f"bare_prefix applies to the unary_prefix rendering template "
+                    f"only; operator {self.op!r} has kind {self.kind.value}"
+                )
+            if self.op not in BARE_PREFIX_OPERATORS:
+                raise ValueError(
+                    f"operator {self.op!r} has no bare spelling; bare_prefix is "
+                    f"restricted to {sorted(BARE_PREFIX_OPERATORS)}"
+                )
         return self
 
 
 class StandardNameIR(BaseModel):
-    """Top-level 5-group IR for a standard name.
-
-    See :doc:`docs/architecture/grammar-vnext.md` §3 for the full spec.
-    """
+    """Top-level 5-group IR for a standard name."""
 
     model_config = ConfigDict(frozen=True, extra="forbid")
 
@@ -364,7 +475,7 @@ StandardNameIR.model_rebuild()
 
 
 # ---------------------------------------------------------------------------
-# §A3 assertion helpers
+# Operator-form assertion helpers
 # ---------------------------------------------------------------------------
 
 
@@ -372,7 +483,7 @@ def assert_operator_of_form(
     op: OperatorApplication,
     registry: Mapping[str, Any] | None = None,
 ) -> None:
-    """Assert ``op`` obeys the §A3 operator-form rule.
+    """Assert ``op`` obeys the operator-form rule.
 
     A ``unary_prefix`` operator must resolve against ``registry`` (when
     provided) to a registered prefix operator. ``registry`` is expected to
@@ -456,7 +567,11 @@ def assert_locus_is_trailing(rendered: str, ir: StandardNameIR) -> None:
         return
     relation = ir.locus.relation.value
     token = ir.locus.token
+    if ir.locus.qualifiers:
+        token = "_".join((*ir.locus.qualifiers, token))
     locus_segment = f"_{relation}_{token}"
+    if ir.locus.value is not None:
+        locus_segment += f"_equal_to_{ir.locus.value}"
 
     tail = rendered
     if ir.mechanism is not None:

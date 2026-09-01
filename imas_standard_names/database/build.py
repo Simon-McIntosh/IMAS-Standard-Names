@@ -71,7 +71,7 @@ def build_catalog(yaml_root: Path, db_path: Path, overwrite: bool = True) -> Pat
     )
     root = Path(yaml_root).resolve()
     digest_pairs = []  # (name, hash)
-    # Per-domain layout (plan 40): each file contains a list of entries.
+    # Per-domain layout: each file contains a list of entries.
     # Track integrity per entry (hash of canonical entry YAML) rather than
     # per file, so we can still detect per-entry additions/deletions/modifications.
     for yf in sorted(store.yaml_files()):

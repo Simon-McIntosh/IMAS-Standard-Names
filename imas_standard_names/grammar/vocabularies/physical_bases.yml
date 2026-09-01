@@ -1,218 +1,133 @@
-# Physical bases vocabulary (plan 38 §A6)
+# Physical bases vocabulary
 #
-# Closed vocabulary of physical quantity nouns used as the base of a
-# standard name.  Replaces the current open-fallback behaviour in the
-# parser: any residue not found here (or in geometry_carriers.yml) will
-# be REJECTED with an actionable diagnostic.
+# Closed vocabulary of irreducible dimensional base quantities.
+# Compound tokens (qualifier + base) have been factored out —
+# qualifiers live in qualifiers.yml.
 #
-# Token rule: a physical_base is a noun phrase describing a physical
-# quantity (temperature, pressure, density, magnetic_field, …) but is
-# NEVER a generic one — see generic_physical_bases.yml for those that
-# require a qualifier (current, power, voltage, …).
+# Reduction criteria:
+#   KEEP if the token represents a fundamental dimensional quantity
+#   that cannot be further decomposed into qualifier + base.
+#   KEEP dimensionless atomic quantities (beta, elongation, …).
+#   REMOVE if prefix tokens are valid qualifiers/subjects and
+#   the remainder is itself a valid base.
 #
 # Structure per entry:
-#   aliases  - list of alternate tokens (empty default)
-#   kind     - scalar | vector | tensor | complex
-#
-# Populated by W2a from the rc20 corpus mining (plan 38 §A9, 479 names).
-# Maximal closure: every physical_base residue from rc20 parsing that is
-# plausibly a quantity noun after operator/subject/locus decomposition.
+#   aliases                - list of alternate tokens (empty default)
+#   kind                   - scalar | vector | tensor | complex
+#   inherently_dimensional - true if this base always carries SI units;
+#                            unit='1' on these is flagged by the validator
+#                            unless an operator (normalized, perturbed, …)
+#                            explicitly produces dimensionless output.
+#   constant_on_flux_surface - true if this base is a flux function (constant
+#                            on any flux surface: safety factor, magnetic
+#                            shear, flux labels, ideal-MHD pressure). A
+#                            flux-surface reduction operator applied to such
+#                            a base is a no-op (FSA of an FSA) and the
+#                            composition gate rejects the name; the local and
+#                            flux-surface-averaged DD leaves share one name.
 
 bases:
-  accumulated_gas_injection:
+  absorptivity:
     aliases: []
     kind: scalar
   angle:
     aliases: []
     kind: scalar
-  angle_grid_of_flux_tube:
-    aliases: []
-    kind: scalar
-  angle_of_gyrokinetic_eigenmode:
-    aliases: []
-    kind: scalar
-  angular_momentum_source:
-    aliases: []
-    kind: scalar
-  anomalous_current_density:  # W31: anomalous/turbulent transport current density — evidence N=3 (edge_plasma_physics)
-    aliases: []
-    kind: vector
   area:
     aliases: []
     kind: scalar
-  atomic_mass:
+    inherently_dimensional: true
+  aspect_ratio:
     aliases: []
     kind: scalar
-  average_square_charge:
-    aliases: []
+  atomic_number:
+    aliases: [nuclear_charge_number]
     kind: scalar
-  ballooning_stability_parameter:
-    aliases: []
-    kind: scalar
-  beam_tracing_wavevector:
-    aliases: []
-    kind: vector
   beta:
-    aliases: []
-    kind: scalar
-  beta_poloidal:
-    aliases:
-    - poloidal_beta
-    kind: scalar
-  blanket_energy_multiplication_factor:
-    aliases: []
-    kind: scalar
-  bootstrap_current:
-    aliases: []
-    kind: scalar
-  bootstrap_current_density:  # W23A: j_bootstrap (core_profiles/profiles_1d/j_bootstrap) — evidence N=5 (core_profiles, core_sources, edge_profiles, plasma_profiles, plasma_sources)
-    aliases: []
-    kind: scalar
-  breeding_ratio:
     aliases: []
     kind: scalar
   capacitance:
     aliases: []
     kind: scalar
-  center_of_mass_velocity:
-    aliases: []
-    kind: vector
+    inherently_dimensional: true
   charge:
-    aliases: []
-    kind: scalar
-  charge_number:
-    aliases: []
-    kind: scalar
-  chemical_sputtering_coefficient:
     aliases: []
     kind: scalar
   coefficient:
     aliases: []
     kind: scalar
-  collected_ion_current:
-    aliases: []
-    kind: scalar
-  collisional_toroidal_torque_density:
-    aliases: []
-    kind: scalar
   collisionality:
     aliases: []
     kind: scalar
-  composition_fraction:
+  conductivity:
     aliases: []
     kind: scalar
+    inherently_dimensional: true
   confinement_time:
-    aliases: []
-    kind: scalar
-  contravariant_metric_tensor:
-    aliases: []
-    kind: tensor
-  convective_velocity:
-    aliases: []
-    kind: vector
-  coolant_inlet_pressure:
-    aliases: []
-    kind: scalar
-  coolant_inlet_temperature:
-    aliases: []
-    kind: scalar
-  coolant_outlet_temperature:
-    aliases: []
-    kind: scalar
-  cosine_shape_coefficient:
-    aliases: []
-    kind: scalar
-  coulomb_logarithm:
     aliases: []
     kind: scalar
   count:
     aliases: []
     kind: scalar
-  covariant_metric_tensor:  # W31: lower-index metric g_ij — counterpart to contravariant — evidence N=1 (magnetohydrodynamics)
-    aliases: []
-    kind: tensor
-  critical_temperature:
+  # NOTE: cross_sectional_area is NOT a compound base — `cross_sectional` is a
+  # geometry qualifier of `area` (qualifiers.yml), parallel with wetted_area /
+  # effective_area / surface_area. Rule: a modifier that selects WHICH area
+  # (dimensions unchanged) is a qualifier; compounds are reserved for
+  # lexicalized quantities whose modifier changes what the quantity IS
+  # (angular_momentum, solid_angle, current_density). Bare "cross_section"
+  # remains available for a future nuclear reaction-cross-section concept.
+  curvature:
     aliases: []
     kind: scalar
   current:
     aliases: []
     kind: scalar
-  current_constraint_exact_flag:
-    aliases: []
-    kind: scalar
+    inherently_dimensional: true
   current_density:
     aliases: []
     kind: vector
-  current_drive:
+  debye_length:
+    aliases: []
+    kind: scalar
+  delay:
     aliases: []
     kind: scalar
   density:
     aliases: []
     kind: scalar
-  density_pedestal_maximum_gradient_position:
-    aliases: []
-    kind: scalar
-  density_pedestal_position:
-    aliases: []
-    kind: scalar
-  density_pedestal_width:
-    aliases: []
-    kind: scalar
-  diamagnetic_current_density:
-    aliases: []
-    kind: scalar
-  diamagnetic_drift_velocity:
-    aliases: []
-    kind: vector
-  diamagnetic_energy:  # W31: plasma stored energy from diamagnetic measurement — evidence N=1 (transport)
-    aliases: []
-    kind: scalar
-  diagnostic_latency:  # Added rc27: EMW pilot evidence N=4
+    inherently_dimensional: true
+  diffusion_coefficient:
     aliases: []
     kind: scalar
   diffusivity:
     aliases: []
     kind: scalar
+  distance:
+    aliases: []
+    kind: scalar
+  coulomb_logarithm:
+    aliases: []
+    kind: scalar
+  damping_rate:
+    aliases: []
+    kind: scalar
   distribution:
     aliases: []
     kind: scalar
-  distribution_function:  # W31: kinetic distribution function f(x,v) in phase space — evidence N=1 (edge_plasma_physics)
-    aliases: []
-    kind: scalar
-  distribution_particle_count:
-    aliases: []
-    kind: scalar
-  dominant_charge_state:
-    aliases: []
-    kind: scalar
-  drift_velocity:
-    aliases: []
-    kind: vector
-  e_cross_b_drift_velocity:
-    aliases: []
-    kind: vector
-  effective_atomic_mass:
-    aliases: []
-    kind: scalar
-  effective_charge:
-    aliases: []
-    kind: scalar
-  eigenmode_frequency:  # W31: oscillation frequency of a plasma eigenmode — evidence N=1 (gyrokinetics)
-    aliases: []
-    kind: scalar
-  eigenmode_growth_rate:  # W31: linear growth rate of an unstable eigenmode — evidence N=1 (gyrokinetics)
+  duration:
     aliases: []
     kind: scalar
   electric_field:
     aliases: []
     kind: vector
+    inherently_dimensional: true
   electrical_conductivity:
     aliases: []
     kind: scalar
   electrostatic_potential:
     aliases: []
     kind: scalar
-  electrostatic_potential_parity:
+  ellipticity:
     aliases: []
     kind: scalar
   elongation:
@@ -224,34 +139,12 @@ bases:
   energy:
     aliases: []
     kind: scalar
-  energy_confinement_time:
-    aliases: []
-    kind: scalar
-  energy_convective_velocity:
-    aliases: []
-    kind: vector
-  energy_diffusivity:
-    aliases: []
-    kind: scalar
-  energy_flux:
-    aliases: []
-    kind: vector
-  energy_radial_diffusivity:
-    aliases: []
-    kind: scalar
-  energy_source:
-    aliases: []
-    kind: scalar
-  equilibrium_reconstruction_constraint_weight:
-    aliases: []
-    kind: scalar
-  exposure_time:
-    aliases: []
-    kind: scalar
+    inherently_dimensional: true
+  # NOTE: energy_flux / heat_flux / momentum_flux / particle_flux are NOT
+  # lexical bases. They decompose as channel + base: energy_flux = channel=energy
+  # + base=flux (see channels.yml). energy and momentum remain bases for their
+  # standalone / non-flux uses (kinetic_energy, angular_momentum).
   factor:
-    aliases: []
-    kind: scalar
-  faraday_rotation_angle:
     aliases: []
     kind: scalar
   field_strength:
@@ -260,344 +153,128 @@ bases:
   flag:
     aliases: []
     kind: scalar
-  floating_potential:
-    aliases: []
-    kind: scalar
   flow:
     aliases: []
     kind: scalar
   flux:
     aliases: []
     kind: scalar
-  flux_coordinate:
-    aliases: []
-    kind: scalar
-  flux_surface_area:
-    aliases: []
-    kind: scalar
-  flux_surface_cross_sectional_area:
-    aliases: []
-    kind: scalar
-  flux_tube_parallel_domain_poloidal_turn_count:
+    inherently_dimensional: true
+    # The transport-flux family (energy_flux, heat_flux, particle_flux,
+    # momentum_flux — all channel + base=flux). An extremum of a flux over a
+    # spatial domain is a reduction TRANSFORMATION and must be spelled
+    # maximum_of_<channel>_flux_at_<locus> / minimum_of_..., never as an infix
+    # extremum qualifier inside the base (energy_peak_flux, energy_maximum_flux).
+    extremum_is_transformation: true
+  # Dimensionless flux-limiter coefficient (e.g. the factor alpha_m bounding a
+  # transport flux to a fraction of its free-streaming value). A specific,
+  # named base preferred over the generic 'coefficient' for these quantities.
+  flux_limiter_coefficient:
     aliases: []
     kind: scalar
   force:
     aliases: []
     kind: vector
+    inherently_dimensional: true
   fraction:
     aliases: []
     kind: scalar
   frequency:
     aliases: []
     kind: scalar
-  fusion_power:
-    aliases: []
-    kind: scalar
-  fusion_power_density:
-    aliases: []
-    kind: scalar
+    inherently_dimensional: true
   gap:
     aliases: []
     kind: scalar
-  gap_distance:
+  growth_rate:
     aliases: []
     kind: scalar
-  gas_injection_rate:
-    aliases: []
-    kind: scalar
-  gas_puff_rate:
-    aliases: []
-    kind: scalar
-  gas_valve_flow_rate:
-    aliases: []
-    kind: scalar
-  greenwald_density:
-    aliases: []
-    kind: scalar
-  greenwald_fraction:
-    aliases: []
-    kind: scalar
-  grid_cell_volume:
-    aliases: []
-    kind: scalar
-  gyrokinetic_normalized_collisionality:
-    aliases: []
-    kind: scalar
-  heat_flux:
-    aliases: []
-    kind: scalar
-  heat_viscosity_current_density:  # W23A: j_heat_viscosity (edge_profiles/ggd/j_heat_viscosity, plasma_profiles/ggd/j_heat_viscosity) — evidence N=4
-    aliases: []
-    kind: vector
-  heating_power:
-    aliases: []
-    kind: scalar
-  hydrogen_isotope_fraction:
+  height:
     aliases: []
     kind: scalar
   impedance:
     aliases: []
     kind: scalar
+  index:
+    aliases: []
+    kind: scalar
   inductance:
     aliases: []
     kind: scalar
-  inertial_current_density:
-    aliases: []
-    kind: scalar
-  injection_occurrence_flag:
-    aliases: []
-    kind: scalar
-  injector_fragmentation_gas_flow_rate:
-    aliases: []
-    kind: scalar
-  injector_propellant_gas_flow_rate:
-    aliases: []
-    kind: scalar
-  injector_trigger_time:
-    aliases: []
-    kind: scalar
-  internal_inductance:
-    aliases: []
-    kind: scalar
-  inverse_major_radius:
-    aliases: []
-    kind: scalar
-  inverse_square_magnetic_field_strength:
-    aliases: []
-    kind: scalar
-  ion_poloidal_velocity:
-    aliases: []
-    kind: scalar
-  ion_toroidal_velocity:
-    aliases: []
-    kind: scalar
-  ionization_potential:  # W31: ionization energy of atomic species — evidence N=1 (edge_plasma_physics)
-    aliases: []
-    kind: scalar
-  kinetic_energy_density:
-    aliases: []
-    kind: scalar
-  larmor_radius:
-    aliases: []
-    kind: scalar
-  launched_power:
-    aliases: []
-    kind: scalar
+    inherently_dimensional: true
   length:
     aliases: []
     kind: scalar
+    inherently_dimensional: true
   li:
     aliases:
     - internal_inductance_normalized
     kind: scalar
-  line_integrated_emissivity:
-    aliases: []
-    kind: scalar
-  logarithmic_density_gradient:  # W31: d ln(n)/dx, standard gyrokinetic drive parameter — evidence N=1 (gyrokinetics)
-    aliases: []
-    kind: scalar
-  logarithmic_temperature_gradient:  # W31: d ln(T)/dx, standard gyrokinetic drive parameter — evidence N=1 (gyrokinetics)
-    aliases: []
-    kind: scalar
-  loop_voltage:
-    aliases: []
-    kind: scalar
-  lower_elongation:
-    aliases: []
-    kind: scalar
-  lower_hybrid_electric_field:
-    aliases: []
-    kind: vector
-  lower_outer_squareness:
-    aliases: []
-    kind: scalar
-  mach_number:  # W23A: mach_number_parallel (langmuir_probes/reciprocating/plunge/mach_number_parallel) — evidence N=3
+  mach_number:
     aliases: []
     kind: scalar
   magnetic_field:
     aliases: []
     kind: vector
-  magnetic_field_strength:
+    inherently_dimensional: true
+  magnetic_pressure:
     aliases: []
     kind: scalar
+    inherently_dimensional: true
   magnetic_flux:
     aliases: []
     kind: scalar
+    constant_on_flux_surface: true
   magnetic_moment:
     aliases: []
     kind: vector
   magnetic_shear:
     aliases: []
     kind: scalar
-  magnetic_vector_potential:
-    aliases: []
-    kind: vector
+    constant_on_flux_surface: true
   magnetization:
-    aliases: []
-    kind: scalar
-  magnetization_constraint_exact_flag:
-    aliases: []
-    kind: scalar
-  major_radius:
     aliases: []
     kind: scalar
   mass:
     aliases: []
     kind: scalar
-  minimum_charge_state:
+    inherently_dimensional: true
+  mass_number:
+    aliases: [nucleon_number]
+    kind: scalar
+  mass_density:
     aliases: []
     kind: scalar
-  minor_radius:
+    inherently_dimensional: true
+  metric_tensor:
     aliases: []
-    kind: scalar
+    kind: tensor
   mode_number:
     aliases: []
     kind: scalar
   momentum:
     aliases: []
     kind: scalar
-  momentum_convective_velocity:
-    aliases: []
-    kind: vector
-  momentum_diffusivity:
-    aliases: []
-    kind: scalar
-  momentum_flux:
-    aliases: []
-    kind: vector
-  momentum_flux_limiter:
-    aliases: []
-    kind: scalar
-  momentum_poloidal_diffusivity:
-    aliases: []
-    kind: scalar
-  momentum_radial_diffusivity:
-    aliases: []
-    kind: scalar
-  momentum_source:
-    aliases: []
-    kind: scalar
-  monte_carlo_marker_phase_space_position:
-    aliases: []
-    kind: scalar
-  neutron_emissivity:
-    aliases: []
-    kind: scalar
-  neutron_flux:
-    aliases: []
-    kind: scalar
-  non_axisymmetric_vacuum_magnetic_field:
-    aliases: []
-    kind: vector
-  normalized_larmor_radius:
-    aliases: []
-    kind: scalar
-  nuclear_heating_power:
+    inherently_dimensional: true
+  multiplicity:
     aliases: []
     kind: scalar
   number_density:
     aliases: []
     kind: scalar
-  onset_time:
+  opacity:
     aliases: []
     kind: scalar
-  orbit_frequency:
-    aliases: []
-    kind: scalar
-  parallel_viscosity_current_density:  # W23A: j_parallel_viscosity (edge_profiles/ggd/j_parallel_viscosity, plasma_profiles/ggd/j_parallel_viscosity) — evidence N=4
-    aliases: []
-    kind: vector
   parameter:
     aliases: []
     kind: scalar
-  particle_confinement_time:
-    aliases: []
-    kind: scalar
-  particle_count:
-    aliases: []
-    kind: scalar
-  particle_flux:
-    aliases: []
-    kind: vector
-  particle_flux_from_plasma:
-    aliases: []
-    kind: scalar
-  particle_flux_from_wall:
-    aliases: []
-    kind: scalar
-  particle_marker_orbit_time:
-    aliases: []
-    kind: scalar
-  particle_number_density:
-    aliases: []
-    kind: scalar
-  particle_number_density_source:
-    aliases: []
-    kind: scalar
-  particle_radial_diffusivity:
-    aliases: []
-    kind: scalar
-  perpendicular_viscosity_current_density:  # W23A: j_perpendicular_viscosity (edge_profiles/ggd/j_perpendicular_viscosity, plasma_profiles/ggd/j_perpendicular_viscosity) — evidence N=4
-    aliases: []
-    kind: vector
-  perturbed_electrostatic_potential_weight:
-    aliases: []
-    kind: scalar
-  perturbed_parallel_magnetic_field_weight:
-    aliases: []
-    kind: scalar
-  perturbed_parallel_vector_potential_weight:
+  period:
     aliases: []
     kind: scalar
   phase:
     aliases: []
     kind: scalar
-  photon_count_rate:
-    aliases: []
-    kind: scalar
-  physical_sputtering_coefficient:
-    aliases: []
-    kind: scalar
   pitch_angle:
-    aliases: []
-    kind: scalar
-  plasma_boundary_gap_distance:
-    aliases: []
-    kind: scalar
-  plasma_breakdown_time:
-    aliases: []
-    kind: scalar
-  plasma_current:
-    aliases: []
-    kind: scalar
-  plasma_duration:
-    aliases: []
-    kind: scalar
-  plasma_inductance:
-    aliases: []
-    kind: scalar
-  plasma_pressure:
-    aliases: []
-    kind: scalar
-  plasma_resistance:
-    aliases: []
-    kind: scalar
-  plasma_volume:
-    aliases: []
-    kind: scalar
-  plasma_volume_inside_flux_surface:
-    aliases: []
-    kind: scalar
-  plasma_vorticity:
-    aliases: []
-    kind: scalar
-  poloidal_magnetic_field:
-    aliases: []
-    kind: scalar
-  poloidal_magnetic_flux:
-    aliases: []
-    kind: scalar
-  poloidal_mode_number:
     aliases: []
     kind: scalar
   potential:
@@ -606,75 +283,18 @@ bases:
   power:
     aliases: []
     kind: scalar
-  power_flux_density:
-    aliases: []
-    kind: scalar
-  prefill_gas_injection:
-    aliases: []
-    kind: scalar
-  prefill_gas_pressure:
+    inherently_dimensional: true
+  power_density:
     aliases: []
     kind: scalar
   pressure:
     aliases: []
     kind: scalar
-  pressure_gradient:  # W31: spatial derivative of pressure ∇p — evidence N=1 (gyrokinetics, MHD)
-    aliases: []
-    kind: scalar
-  pressure_gradient_alpha_parameter:
-    aliases: []
-    kind: scalar
-  pressure_pedestal_fit_offset:
-    aliases: []
-    kind: scalar
-  pressure_pedestal_maximum_gradient_position:
-    aliases: []
-    kind: scalar
-  pressure_pedestal_position:
-    aliases: []
-    kind: scalar
-  pressure_pedestal_top:
-    aliases: []
-    kind: scalar
-  pressure_pedestal_width:
-    aliases: []
-    kind: scalar
-  pressure_scrape_off_layer:
-    aliases: []
-    kind: scalar
-  pressure_separatrix:
-    aliases: []
-    kind: scalar
-  pulse_number:
-    aliases: []
-    kind: scalar
-  pumping_speed:
-    aliases: []
-    kind: scalar
+    inherently_dimensional: true
+    constant_on_flux_surface: true
   q_profile:
     aliases:
     - safety_factor_profile
-    kind: scalar
-  radial_coordinate_gradient_magnitude:
-    aliases: []
-    kind: scalar
-  radiated_energy:
-    aliases: []
-    kind: scalar
-  radiated_power:
-    aliases: []
-    kind: scalar
-  radiated_power_density:
-    aliases: []
-    kind: scalar
-  radiated_power_inside_flux_surface:
-    aliases: []
-    kind: scalar
-  radiated_power_inside_last_closed_flux_surface:
-    aliases: []
-    kind: scalar
-  radiated_power_inside_vessel:
-    aliases: []
     kind: scalar
   radius:
     aliases: []
@@ -682,189 +302,518 @@ bases:
   rate:
     aliases: []
     kind: scalar
+  reflectivity:
+    aliases: []
+    kind: scalar
   refractive_index:
+    aliases: []
+    kind: scalar
+  residual:
     aliases: []
     kind: scalar
   resistance:
     aliases: []
     kind: scalar
-  resistive_diffusion_time:
+    inherently_dimensional: true
+  resistivity:
     aliases: []
     kind: scalar
-  resistivity:  # W23A: wall/*/resistivity, cryostat/*/resistivity — evidence N=6 (wall, cryostat, pf_active, tf)
-    aliases: []
-    kind: scalar
-  resonant_magnetic_perturbation_occurrence:
-    aliases: []
-    kind: scalar
-  rotation_frequency:  # W23A: rotation_frequency_tor (core_profiles, plasma_profiles, edge_profiles) — evidence N=8+
-    aliases: []
-    kind: scalar
-  rotational_pressure:
+    inherently_dimensional: true
+  rotation_frequency:
     aliases: []
     kind: scalar
   safety_factor:
     aliases: []
     kind: scalar
-  scrape_off_layer_density_decay_length:
+    constant_on_flux_surface: true
+  shearing_rate:
     aliases: []
     kind: scalar
-  scrape_off_layer_heat_flux_decay_length:
-    aliases: []
-    kind: scalar
-  scrape_off_layer_temperature_decay_length:
-    aliases: []
-    kind: scalar
-  seed_island_width:
-    aliases: []
-    kind: scalar
-  shape_coefficient:
-    aliases: []
-    kind: scalar
-  simulation_component_elapsed_time_interval:
-    aliases: []
-    kind: scalar
-  simulation_current_time:
-    aliases: []
-    kind: scalar
-  simulation_end_time:
-    aliases: []
-    kind: scalar
-  simulation_restart_time:
+  signal_to_noise_ratio:
     aliases: []
     kind: scalar
   size:
     aliases: []
     kind: scalar
+  solid_angle:
+    aliases: []
+    kind: scalar
   source:
     aliases: []
     kind: scalar
-  sputtering_angle_of_incidence:
+  source_rate:
     aliases: []
     kind: scalar
+  speed:
+    aliases: []
+    kind: scalar
+  # NOTE: spectral_radiance is NOT a compound base — `spectral` is a
+  # registered qualifier (spectral_flux, spectral_absorptivity_of_filter, …)
+  # and qualifies `radiance` the same way.
   squareness:
-    aliases: []
-    kind: scalar
-  steering_angle:
-    aliases: []
-    kind: scalar
-  stored_energy:
-    aliases: []
-    kind: scalar
-  supply_voltage:
-    aliases: []
-    kind: scalar
-  surface_voltage:
-    aliases: []
-    kind: scalar
-  sweep_duration:  # Added rc27: EMW pilot evidence N=3
     aliases: []
     kind: scalar
   temperature:
     aliases: []
     kind: scalar
-  temperature_peaking_factor:
-    aliases: []
-    kind: scalar
-  temperature_pedestal_maximum_gradient_position:
-    aliases: []
-    kind: scalar
-  temperature_pedestal_position:
-    aliases: []
-    kind: scalar
-  temperature_pedestal_width:
-    aliases: []
-    kind: scalar
-  thermal_energy:
-    aliases: []
-    kind: scalar
-  thermal_energy_pedestal:
+    inherently_dimensional: true
+  # NOTE: thermal_pressure / thermal_energy are deliberately NOT lexical bases.
+  # Energy-state modifiers live ONLY in the population segment (locked
+  # adjective order): thermal_pressure = population=thermal + base=pressure,
+  # and compounds order modifier-first (thermal_plasma_pressure,
+  # thermal_electron_pressure, total_thermal_plasma_pressure).
+  tilt_angle:
     aliases: []
     kind: scalar
   time:
     aliases: []
     kind: scalar
-  time_averaging_window_width:
+    inherently_dimensional: true
+  # Gradient of the toroidal flux radius, |grad rho|. rho is a LENGTH, so its
+  # gradient is dimensionless. It is deliberately NOT flagged
+  # constant_on_flux_surface: rho is constant on a flux surface but its
+  # gradient is not, and flagging it would make the flux-surface reduction
+  # gate refuse the surface-averaged metric coefficients that need it.
+  # A registered base rather than gradient_of_toroidal_flux_coordinate because a
+  # transformation may not apply to a geometry carrier, which rho is.
+  toroidal_flux_coordinate_gradient:
     aliases: []
-    kind: scalar
-  toroidal_beta:
-    aliases: []
-    kind: scalar
-  toroidal_current_density:
-    aliases: []
-    kind: scalar
-  toroidal_magnetic_field:
-    aliases: []
-    kind: scalar
-  toroidal_mode_number:
-    aliases: []
-    kind: scalar
-  toroidal_torque_density:
-    aliases: []
-    kind: scalar
+    kind: vector
   torque:
     aliases: []
     kind: scalar
+    inherently_dimensional: true
   torque_density:
     aliases: []
     kind: scalar
-  total_beta:
+  transit_time:
     aliases: []
     kind: scalar
-  transport_convection_velocity:
+  transmissivity:
     aliases: []
-    kind: vector
+    kind: scalar
   triangularity:
-    aliases: []
-    kind: scalar
-  upper_elongation:
-    aliases: []
-    kind: scalar
-  upper_triangularity:
     aliases: []
     kind: scalar
   velocity:
     aliases: []
     kind: vector
-  velocity_gradient:
-    aliases: []
-    kind: scalar
-  vertical_stability_margin:
-    aliases: []
-    kind: scalar
+    inherently_dimensional: true
   voltage:
     aliases: []
     kind: scalar
+    inherently_dimensional: true
   volume:
     aliases: []
     kind: scalar
-  volume_averaged_electron_density:
-    aliases: []
-    kind: scalar
-  volumetric_energy_source:
-    aliases: []
-    kind: scalar
+    inherently_dimensional: true
   vorticity:
     aliases: []
     kind: scalar
-  wave_absorbed_power:
+  photon_energy:
     aliases: []
     kind: scalar
-  wave_driven_absorbed_power_inside_flux_surface:
+  wavelength:
     aliases: []
     kind: scalar
-  wave_driven_toroidal_current:
-    aliases: []
-    kind: scalar
-  wave_driven_toroidal_current_inside_flux_surface:
-    aliases: []
-    kind: scalar
+  wave_vector:
+    aliases: [wavevector]
+    kind: vector
   weight:
     aliases: []
     kind: scalar
   width:
     aliases: []
     kind: scalar
-  x1_width:  # Added rc27: EMW pilot evidence N=3
+  half_width:
+    # half-width of a peaked profile (the distance from the peak to the
+    # half-maximum on one side, e.g. a hard-X-ray emissivity peak). Distinct
+    # from width: a half-width is reported per side, so it pairs with a locus
+    # or bound qualifier naming which side. Sits with width / angular_width
+    # rather than in geometric_base so the width family stays in one segment.
     aliases: []
     kind: scalar
+    inherently_dimensional: true
+
+  # === FOCS, neutron, and optical diagnostic bases ===
+
+  dead_time:
+    aliases: []
+    kind: scalar
+  # Named characteristic timescales are atomic bases (like confinement_time,
+  # dead_time) — a timescale is a named quantity (has a symbol/definition), not
+  # "time, X-flavored". The bare `time` base is the time coordinate/elapsed time
+  # and must not take due_to_<process> (see the time-base guard in model.py).
+  exposure_time:
+    aliases: []
+    kind: scalar
+  fall_time:
+    aliases: []
+    kind: scalar
+  rise_time:
+    aliases: []
+    kind: scalar
+  decay_time:
+    aliases: []
+    kind: scalar
+  # SOL/divertor decay length (lambda_q etc.) — a named quantity with its own
+  # symbol and scaling laws, the spatial analogue of the named timescales
+  # above; not "length, decay-flavored".
+  decay_length:
+    aliases: []
+    kind: scalar
+  resistive_diffusion_time:
+    aliases: []
+    kind: scalar
+  etendue:
+    aliases: [optical_throughput]
+    kind: scalar
+  verdet_constant:
+    aliases: []
+    kind: scalar
+
+  # === breadth-rotation gap closure (codex VocabGap analysis) ===
+  # Genuine atomic dimensional/dimensionless bases surfaced by parser-
+  # rejected tokens that blocked name composition. Verified against the
+  # IMAS DD (equilibrium, FOCS, polarimeter, blanket, SOL domains).
+
+  thickness:
+    # layer/wall/blanket material thickness (length normal to a surface);
+    # distinct from width (in-plane span) and length (path extent)
+    aliases: []
+    kind: scalar
+    inherently_dimensional: true
+  diameter:
+    # full transverse extent of a circular feature (= 2*radius); atomic
+    # because DD stores diameters directly (apertures, beams, pipes)
+    aliases: []
+    kind: scalar
+    inherently_dimensional: true
+  connection_length:
+    # scrape-off-layer parallel field-line connection length (target-to-
+    # target along B); a defining SOL transport scale
+    aliases: []
+    kind: scalar
+    inherently_dimensional: true
+  loop_voltage:
+    # toroidal one-turn loop voltage V_loop = dPsi/dt driving the plasma
+    # current; a lexicalised plasma quantity distinct from voltage_of_flux_loop
+    aliases: []
+    kind: scalar
+    inherently_dimensional: true
+  permeability:
+    # magnetic permeability mu relating B and H in a material/medium
+    aliases: []
+    kind: scalar
+    inherently_dimensional: true
+  poloidal_current_function:
+    # equilibrium F = R*B_phi (the "f" / poloidal-current flux function);
+    # its flux derivative gives the FF' source term in Grad-Shafranov
+    aliases: [diamagnetic_function]
+    kind: scalar
+    inherently_dimensional: true
+  flux_surface_averaged_metric:
+    # flux-surface-averaged geometric metric coefficient (the equilibrium
+    # gm1..gm9 family: <1/R^2>, <|grad rho|^2>, ...); the specific moment is
+    # named via qualifiers/object, not separate ordinal bases
+    aliases: [flux_surface_metric_coefficient]
+    kind: scalar
+  stokes_parameter:
+    # polarimetry Stokes parameter (I/Q/U/V intensity components of the
+    # polarization state); FOCS/polarimeter S0..S3. The specific component is
+    # named via qualifiers, not separate compound bases
+    aliases: []
+    kind: scalar
+  turn_count:
+    # number of conductor turns of a coil/loop (engineering construction
+    # parameter); dimensionless integer count
+    aliases: [number_of_turns]
+    kind: scalar
+  turns_per_metre:
+    # linear turn density of a solenoid/coil winding (turns per unit length)
+    aliases: []
+    kind: scalar
+    inherently_dimensional: true
+
+  # === radiometric, atomic, MHD, and diagnostic base additions ===
+  # Genuine irreducible bases from codex VocabGap analysis. DD-confirmed
+  # (spectrometers, SXR/HXR cameras, sawteeth, atomic state, equilibrium).
+  # Each is irreducible: no qualifier+base decomposition yields it.
+
+  ionisation_potential:
+    # cumulative/average atomic ionisation potential of an ion charge state
+    # (energy to strip electrons); British spelling matches the DD path name
+    # (core_profiles/.../ion/state/ionisation_potential). eV.
+    aliases: [ionization_potential]
+    kind: scalar
+    inherently_dimensional: true
+  radiance:
+    # radiometric radiance: power per unit area per unit solid angle
+    # (W.m^-2.sr^-1); the wavelength-resolved form is the `spectral`
+    # qualifier: spectral_radiance.
+    # Distinct from photon_radiance, which counts photons rather than energy.
+    # DD: soft_x_rays/channel/intensity and other power-valued radiance signals
+    aliases: []
+    kind: scalar
+    inherently_dimensional: true
+  photon_radiance:
+    # photon count rate per unit projected area per unit solid angle
+    # (m^-2.s^-1.sr^-1). This is the established IUPAC/CIE photon-number
+    # counterpart of energy radiance, not an alias of radiance or brightness.
+    # IUPAC Gold Book P04639; CIE e-ILV 17-21-051.
+    # DD: spectrometer_*/processed_line/radiance
+    aliases: []
+    kind: scalar
+    inherently_dimensional: true
+  brightness:
+    # radiometric brightness: power flux per unit solid angle per unit area
+    # (= power / etendue). DD names this distinctly from radiance
+    # (hard_x_rays/channel/brightness), so it is its own base.
+    aliases: []
+    kind: scalar
+    inherently_dimensional: true
+  instrument_function:
+    # spectrometer / diagnostic instrument response function (PSF); the
+    # detector line-shape that convolves the true spectrum. DD:
+    # spectrometer_*/channel/instrument_function. Units vary (may be
+    # normalized), so not inherently_dimensional.
+    aliases: []
+    kind: scalar
+  rotational_transform:
+    # rotational transform iota = 1/q (field-line winding per toroidal
+    # transit); dimensionless. Distinct from safety_factor. DD: summary
+    # iota, distributions SFL grids.
+    aliases: [iota]
+    kind: scalar
+  psi_star:
+    # perturbed poloidal flux Psi* = psi - phi (MHD sawtooth analysis);
+    # poloidal magnetic flux (Wb). DD: sawteeth/profiles_1d/psi_star_*.
+    aliases: []
+    kind: scalar
+    inherently_dimensional: true
+
+  # === grammar-stabilisation vocabulary additions (codex full-DD compose
+  # gap analysis) === Genuine irreducible bases surfaced by parser-rejected
+  # tokens that blocked name composition across the full DD. DD-confirmed.
+
+  magnetic_vector_potential:
+    # magnetic vector potential A (B = curl A); SI unit m.T (= V.s.m^-1 = Wb.m^-1).
+    # DD: a_field (n=34). Vector base distinct from scalar magnetic_flux. The
+    # shorter lexical surface form `vector_potential` is its own base entry
+    # (used by the MHD perturbed_parallel_vector_potential names).
+    aliases: []
+    kind: vector
+    inherently_dimensional: true
+  larmor_radius:
+    # gyroradius of a charged particle in a magnetic field (m); enables the
+    # dimensionless normalized_larmor_radius (rho*) via the normalized operator.
+    aliases: [gyroradius]
+    kind: scalar
+    inherently_dimensional: true
+  vibrational_level:
+    # molecular vibrational quantum level (dimensionless quantum number);
+    # atomic/molecular state index, not a physical length.
+    aliases: []
+    kind: scalar
+  probability:
+    # dimensionless probability (0..1) of an event/state.
+    aliases: []
+    kind: scalar
+  parity:
+    # gyrokinetic eigenmode parity (dimensionless: even/odd symmetry indicator).
+    aliases: []
+    kind: scalar
+  efficiency:
+    # dimensionless efficiency / yield ratio (0..1); dedups detection_efficiency,
+    # light_collection_efficiency, balance-of-plant efficiencies into one base.
+    aliases: []
+    kind: scalar
+  peaking_factor:
+    # dimensionless profile peaking factor (e.g. central/volume-averaged ratio,
+    # t_e_peaking); a shape descriptor of a 1D profile.
+    aliases: []
+    kind: scalar
+  confinement_enhancement_factor:
+    # dimensionless ratio of the observed energy confinement time to the value
+    # predicted by a confinement scaling law (the H-factor, e.g. H98(y,2)).
+    # Lexicalised alongside safety_factor / peaking_factor rather than
+    # decomposed, so the quantity has one token; WHICH scaling law it is
+    # measured against is carried by a scaling qualifier (ipb98y2, …), letting
+    # further scalings be added without touching this base.
+    aliases: []
+    kind: scalar
+  field_current_coupling_coefficient:
+    # electromagnetic coupling (Green's-function) response of a magnetic field
+    # to a coil current: B per unit I (SI unit A^-1.T). DD: em_coupling.
+    aliases: [field_per_current_coupling, magnetic_field_response]
+    kind: scalar
+    inherently_dimensional: true
+  roughness:
+    # optical-element surface roughness (RMS height); units vary (length or
+    # normalized), so not inherently_dimensional.
+    aliases: []
+    kind: scalar
+  fluence:
+    # time-integrated surface particle/photon flux (m^-2); cumulative areal dose.
+    aliases: []
+    kind: scalar
+    inherently_dimensional: true
+  tritium_breeding_ratio:
+    # dimensionless tritium breeding ratio (TBR) of a blanket.
+    aliases: []
+    kind: scalar
+  fusion_gain:
+    # dimensionless fusion energy gain Q (fusion power / input heating power).
+    aliases: []
+    kind: scalar
+  charge_number:
+    # signed integer charge number Z of an ion charge state (dimensionless);
+    # distinct from `charge` (the dimensional electric charge in C). Enables
+    # square_of_ion_charge_number (z_ion_square).
+    aliases: []
+    kind: scalar
+
+  # === diagnostic and statistical quantities ===
+  intensity:
+    # Radiant, acoustic, particle, or signal intensity defined per the
+    # measurement context.
+    aliases: []
+    kind: scalar
+    inherently_dimensional: true
+  sensitivity:
+    # Change in an observed response per change in its stimulus.
+    aliases: []
+    kind: scalar
+  focal_length:
+    # Distance from an optical element's principal plane to its focal point.
+    aliases: []
+    kind: scalar
+    inherently_dimensional: true
+  bandwidth:
+    # Width of a frequency interval transmitted, measured, or processed.
+    aliases: []
+    kind: scalar
+    inherently_dimensional: true
+  grating_line_density:
+    # Number of ruled grating lines per unit transverse length.
+    aliases: []
+    kind: scalar
+    inherently_dimensional: true
+  response_function:
+    # Response of a measurement or physical system as a function of its input.
+    aliases: []
+    kind: scalar
+  orbit_integral:
+    # Integral of a quantity along a particle orbit.
+    aliases: []
+    kind: scalar
+  kurtosis:
+    # Standardized fourth central moment of a distribution.
+    aliases: []
+    kind: scalar
+  skewness:
+    # Standardized third central moment of a distribution.
+    aliases: []
+    kind: scalar
+  strain:
+    # Relative deformation represented by the symmetric strain tensor.
+    aliases: []
+    kind: tensor
+  acceleration:
+    # Time derivative of velocity.
+    aliases: []
+    kind: vector
+    inherently_dimensional: true
+  polarization_vector:
+    # Vector describing the polarization state of a field or wave.
+    aliases: []
+    kind: vector
+  stokes_vector:
+    # Four-component vector describing the polarization state of radiation.
+    aliases: []
+    kind: vector
+
+  # === base-bound lexical compounds promoted to atomic bases ===
+  # These tokens form a single lexicalised quantity in which the leading word
+  # is NOT a free prefix qualifier: it binds to exactly one base and never
+  # qualifies any other. Per the corpus analysis they are atomic bases, not
+  # qualifier+base compositions. The former prefix qualifiers (convection,
+  # heating, vector, center_of_mass, angular, internal) are removed from
+  # qualifiers.yml because they are fully subsumed by these bases. The parser
+  # matches the longest base first, so the standalone compound resolves
+  # atomically; longer compounds (e.g. ion_kinetic_energy_density) still strip
+  # their genuine prefix qualifiers leftward.
+
+  convection_velocity:
+    # convective transport velocity (the drift velocity of a convected flux);
+    # convection binds to velocity and never qualifies any other base.
+    aliases: []
+    kind: vector
+    inherently_dimensional: true
+  heating_power:
+    # auxiliary/nuclear heating power delivered to a system; heating binds to
+    # power as a single lexical quantity (total_external_heating_power,
+    # nuclear_heating_power_of_breeder_blanket_module).
+    aliases: []
+    kind: scalar
+    inherently_dimensional: true
+  vector_potential:
+    # magnetic vector potential A (B = curl A); SI unit m.T (= Wb.m^-1). The
+    # lexical surface form used in MHD perturbation names
+    # (perturbed_parallel_vector_potential). Vector base, like
+    # magnetic_vector_potential.
+    aliases: []
+    kind: vector
+    inherently_dimensional: true
+  center_of_mass_velocity:
+    # bulk velocity of the centre-of-mass frame; center_of_mass binds to
+    # velocity as a single lexical quantity.
+    aliases: []
+    kind: vector
+    inherently_dimensional: true
+  angular_momentum:
+    # angular momentum L (kg.m^2.s^-1); angular binds to momentum.
+    aliases: []
+    kind: scalar
+    inherently_dimensional: true
+  angular_width:
+    # angular width / extent (rad); angular binds to width. Lexicalised
+    # alongside angular_momentum/frequency/velocity (the 'angular' qualifier
+    # retired in the base-bound promotion).
+    aliases: []
+    kind: scalar
+    inherently_dimensional: true
+  angular_frequency:
+    # angular frequency omega = 2*pi*f (rad.s^-1); angular binds to frequency.
+    aliases: []
+    kind: scalar
+    inherently_dimensional: true
+  angular_velocity:
+    # angular (rotational) velocity Omega (rad.s^-1); angular binds to velocity.
+    aliases: []
+    kind: vector
+    inherently_dimensional: true
+  internal_inductance:
+    # plasma internal inductance L_i (H); internal binds to inductance. The
+    # normalized form li is its own base.
+    aliases: []
+    kind: scalar
+    inherently_dimensional: true
+  internal_energy:
+    # thermodynamic internal energy U (J); internal binds to energy.
+    aliases: []
+    kind: scalar
+    inherently_dimensional: true
+  kinetic_energy:
+    # kinetic energy (J); kinetic binds to energy as a single lexical quantity
+    # for the standalone X_kinetic_energy forms. The `kinetic` qualifier is
+    # KEPT for kinetic_energy_density / kinetic_energy_flux, where it qualifies
+    # density/flux (longest-base-match: ion_kinetic_energy -> base=kinetic_energy,
+    # ion_kinetic_energy_density -> base=density + qualifier kinetic).
+    aliases: []
+    kind: scalar
+    inherently_dimensional: true
+  # NOTE: surface_area is NOT a compound base — `surface` is a registered
+  # qualifier (surface_temperature, surface_roughness) and qualifies `area`
+  # the same way, symmetric with wetted_area / effective_area /
+  # cross_sectional_area.

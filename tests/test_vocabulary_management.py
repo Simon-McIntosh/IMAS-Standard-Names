@@ -1,13 +1,12 @@
 """
 Tests for vocabulary auditing functionality.
 
-Tests the VocabularyTool MCP tool and its underlying VocabularyAuditor.
+Covers VocabularyAuditor and the vocabulary result models.
 """
 
 import pytest
 
 from imas_standard_names.repository import StandardNameCatalog
-from imas_standard_names.tools.vocabulary import VocabularyTool
 from imas_standard_names.vocabulary.audit import VocabularyAuditor
 from imas_standard_names.vocabulary.vocab_models import (
     AuditResult,
@@ -89,55 +88,6 @@ class TestVocabularyAuditor:
 
         assert result.has_vocabulary_gap is False
         assert result.gap_details is None
-
-
-class TestVocabularyToolIntegration:
-    """Integration tests for VocabularyTool (requires catalog)."""
-
-    @pytest.fixture
-    def vocab_tool(self, catalog):
-        """VocabularyTool fixture."""
-        return VocabularyTool(catalog)
-
-    @pytest.mark.anyio
-    async def test_manage_vocabulary_audit(self, vocab_tool):
-        """Test manage_vocabulary with audit action."""
-        result = await vocab_tool.manage_vocabulary({"action": "audit"})
-
-        assert isinstance(result, dict)
-        assert result.get("action") == "audit"
-        assert "summary" in result
-        assert "recommendations" in result
-
-    @pytest.mark.anyio
-    async def test_manage_vocabulary_check(self, vocab_tool):
-        """Test manage_vocabulary with check action."""
-        result = await vocab_tool.manage_vocabulary(
-            {"action": "check", "name": "cross_sectional_area_of_flux_surface"}
-        )
-
-        assert isinstance(result, dict)
-        assert result.get("action") == "check"
-        assert result.get("name") == "cross_sectional_area_of_flux_surface"
-        assert "current_parse" in result
-        assert "has_vocabulary_gap" in result
-
-    @pytest.mark.anyio
-    async def test_manage_vocabulary_invalid_action(self, vocab_tool):
-        """Test manage_vocabulary with invalid action."""
-        result = await vocab_tool.manage_vocabulary({"action": "invalid"})
-
-        assert "error" in result
-        assert "schema" in result
-        assert "examples" in result
-
-    @pytest.mark.anyio
-    async def test_manage_vocabulary_missing_required_field(self, vocab_tool):
-        """Test manage_vocabulary with missing required field."""
-        result = await vocab_tool.manage_vocabulary({"action": "check"})
-
-        # Should error due to missing 'name' field
-        assert "error" in result
 
 
 class TestVocabModels:

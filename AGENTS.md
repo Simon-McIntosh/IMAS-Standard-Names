@@ -1,12 +1,49 @@
 # Project Overview
 
-IMAS Standard Names (ISN) is a **grammar library** and **read-only catalog server** for the ITER Modelling and Analysis Suite (IMAS). It defines the rules for composing valid standard names and serves the approved catalog through read-only MCP tools.
+IMAS Standard Names (ISN) is the **grammar library** for the ITER Modelling and Analysis Suite (IMAS). It owns the controlled vocabulary, the parser and renderer, catalog validation, and the documentation site. It defines the rules for composing valid standard names; it does not serve them to AI assistants — Model Context Protocol tools over standard names live in [imas-codex](https://github.com/iterorganization/imas-codex).
 
 **Domain**: Fusion energy data standardization  
-**Tech Stack**: Python 3.12+, Pydantic, SQLite, YAML, MCP servers  
+**Tech Stack**: Python 3.12+, Pydantic, SQLite, YAML  
 **Key Concept**: All standard names follow strict grammar rules for describing physics and geometrical quantities
 
 **Project boundary**: ISN defines what a valid standard name *is*. [imas-codex](https://github.com/iterorganization/imas-codex) decides what standard names to *create*. See [docs/architecture/boundary.md](docs/architecture/boundary.md) for the full contract.
+
+**Plan routing**: Keep a Reckon plan in this repository only when its deliverable changes
+the grammar, controlled vocabulary, parser, renderer, validation, or public grammar API.
+Plans for DD/facility source discovery, <code>StandardNameSource</code> provenance,
+candidate-name lifecycle, graph transactions, or ISNC release orchestration belong in
+[imas-codex](https://github.com/iterorganization/imas-codex), even when they call ISN to
+parse a candidate or request a vocabulary addition. Do not duplicate the coordination
+plan here; link to the imas-codex plan from the relevant grammar change when one is needed.
+
+> **Shared guardrails:** See `~/.agents/AGENTS.md` for git safety (banned
+> commands, stash rules), parallel agent rules, model selection, and commit
+> conventions. This file contains only repo-specific instructions.
+
+## Live Standard Name Graph
+
+Use the project-scoped `imas-cx` MCP server for current standard-name and IMAS
+Data Dictionary graph data. It runs the sibling `imas-codex` checkout through
+`uv run imas-codex serve --read-only`; do not substitute catalog YAML, SQLite,
+or remembered graph state when the task depends on live pipeline data.
+
+- Use `get_standard_name_summary` with a `physical_base` such as `temperature`
+  for family membership, segment diversity, units, domains, and lineage counts.
+- Use `search_standard_names` for semantic discovery and grammar-segment
+  filters, then `fetch_standard_names` for exact names.
+- Use `find_related_standard_names` to inspect grammar families, companions,
+  and graph relationships around a name.
+- Use `list_standard_names` for filtered inventories,
+  `list_promotion_candidates` for live promotion state, and
+  `check_standard_names` for exact-name existence or validation checks.
+- Use `list_grammar_vocabulary` to discover valid filter tokens before issuing
+  segment-filtered searches.
+- Prefer `imas-cx` DD tools when a question combines DD paths with live
+  standard-name relationships. The external `imas-dd` server remains suitable
+  for DD-only reference queries.
+
+The configured server is read-only. Do not bypass that restriction or modify
+the live graph from this repository.
 
 ## Fusion Physics and Geometry Context
 
@@ -22,10 +59,62 @@ IMAS Standard Names (ISN) is a **grammar library** and **read-only catalog serve
 
 Critical distinctions for naming:
 
-- `component` + `physical_base`: `radial_component_of_magnetic_field`
+- `component` + `physical_base`: `radial_magnetic_field` (short form only;
+  the `{axis}_component_of_{base}` long form is retired and does not parse)
 - `coordinate` + `geometric_base`: `radial_position_of_flux_loop`
 - `of_object` vs `from_source`: intrinsic properties vs measurements
 - `at_position` vs `of_geometry`: evaluated at location vs property of object
+
+### Vocabulary Design Rules
+
+Grammar segments are defined in `imas_standard_names/grammar/vocabularies/*.yml` and
+mirrored as `StrEnum` members in `grammar/model_types.py`. The parser uses greedy
+longest-prefix matching for closed-vocabulary segments. These rules prevent ambiguity:
+
+**1. No compound tokens that subsume tokens from other segments.**
+A closed-vocabulary segment (e.g., `subject`) must not contain tokens that include
+words belonging to the closed `physical_base` segment. Example violation:
+`trapped_particle` as a subject token — the parser greedily consumes "particle",
+leaving an inconsistent `physical_base`. Correct: `trapped` alone is the subject;
+`particle_density` stays intact in `physical_base`.
+
+**2. Prefer atomic qualifiers over compound subjects.**
+Orbit-class qualifiers (`trapped`, `co_passing`, `counter_passing`) and species
+identifiers (`fast_particle`, `electron`, `ion`) are independent grammar axes.
+Never combine them into a single subject token (e.g., `trapped_fast_particle`)
+because this prevents consistent grouping of orbit variants.
+
+**3. Test round-trip consistency before adding tokens.**
+Before adding any vocabulary token, verify that all existing names containing
+the candidate string still parse and round-trip identically:
+```python
+from imas_standard_names import parse
+from imas_standard_names.grammar.model import parse_standard_name, compose_standard_name
+
+parse(name, strict=True)  # authoritative validity check
+p = parse_standard_name(name)
+assert compose_standard_name(p) == name  # Round-trip
+```
+
+**4. Grouping invariant: same physical quantity → same `physical_base`.**
+All names measuring the same physical quantity (differing only by population,
+orbit class, or species) MUST parse to the same `physical_base`. If a vocabulary
+change breaks this invariant, the token is wrong. Test with:
+```python
+# All orbit variants must share physical_base
+bases = {parse_standard_name(n).physical_base for n in orbit_variants}
+assert len(bases) == 1, f"Inconsistent grouping: {bases}"
+```
+
+**5. `physical_base` is closed vocabulary — never add to other segments what belongs there.**
+If a concept is a physical quantity (density, temperature, power_density, flux, etc.),
+it belongs in `physical_base` regardless of how compound it is. Only qualifier/modifier
+roles (species, orbit class, component, coordinate) belong in closed segments.
+
+**6. Validate with the strict parser.**
+After any vocabulary change, run strict parsing over the catalog and verify
+that related names group together. The public parser is the grammar authority;
+catalog rendering is one consumer of its decomposition.
 
 ### YAML Structure Requirements
 
@@ -45,10 +134,20 @@ description: Starts with capital, under 120 chars
 
 ISN exposes a stable Python API that [imas-codex](https://github.com/iterorganization/imas-codex) depends on:
 
-- **Grammar**: `get_grammar_context()`, `parse_standard_name()`, `compose_standard_name()`
+- **Grammar IR**: package-level `parse()`, `compose()`, `StandardNameIR`,
+  `validate_round_trip()`, and `get_grammar_context()`
+- **Flat facade**: `parse_standard_name()`, `compose_standard_name()`
 - **Models**: `StandardNameEntryBase`, `create_standard_name_entry()`
 - **Validation**: `run_semantic_checks()`, `validate_description()`, `run_structural_checks()`
 - **Constants**: grammar vocabulary `StrEnum`s, tag constants, `PhysicsDomain`
+
+`parse(name, strict=True)` is the sole validity oracle for flat names and
+recursive ordered operator expressions. The default `parse(name)` mode and
+`validate_round_trip(name)` are diagnostic. `parse_standard_name(name)` first
+strictly validates, then projects into the flat `StandardName` model; it may
+reject a valid ordered operator tree that the flat facade cannot represent.
+Operator lists in `StandardNameIR` are outermost first, and unary and binary
+operands recurse through `StandardNameIR`.
 
 See [docs/architecture/boundary.md](docs/architecture/boundary.md) for the full contract and stability commitment.
 
@@ -58,17 +157,14 @@ See [docs/architecture/boundary.md](docs/architecture/boundary.md) for the full 
 2. **Wrong base combinations**: Never use `component` with `geometric_base`
 3. **Missing physics_domain**: Must be a valid `PhysicsDomain` value, not a tag
 4. **Units in names**: Use YAML `unit` field, not in name text
-5. **Synchronous MCP tools**: All tool methods must be `async`
-6. **Missing error schemas**: Always return structured errors with examples
 
 ## Project Structure
 
 ```
 imas_standard_names/
-├── tools/           # MCP read-only tool implementations
 ├── grammar/         # Grammar parsing, composition, and validation
 ├── catalog/         # SQLite catalog management
-├── graph/           # NetworkX local graph builder (plan 41, optional)
+├── graph/           # NetworkX local graph builder (optional)
 ├── rendering/       # MkDocs catalog renderer
 ├── repository.py    # Main repository facade (read-only)
 ├── models.py        # Pydantic data models
@@ -86,7 +182,7 @@ tests/               # Test suite
 - Group related functionality in focused modules
 - Keep modules cohesive and loosely coupled
 
-### Local Graph (plan 41)
+### Local Graph
 
 The `graph/local_graph.py` module builds a NetworkX `DiGraph` over the
 per-domain catalog YAML (`<domain>.yml`). Five edge types are emitted:
@@ -100,18 +196,14 @@ per-domain catalog YAML (`<domain>.yml`). Five edge types are emitted:
 | `REFERENCES` | `links[]` | entry → referenced name |
 
 Forward references and external names appear as stub nodes
-(`node["stub"] = True`). Install with `uv sync --extra graph-local`.
+(`node["stub"] = True`). Run graph-local tooling from the repo's root
+environment with `uv run`; install the extra it needs with
+`uv sync --extra graph-local` when it is missing.
 
-Four MCP tools in `tools/graph.py` wrap the graph:
-
-- `get_standard_name_neighbours(name, edge_types=None, direction="both")`
-- `get_standard_name_ancestors(name, max_depth=None)` — transitive closure
-  over HAS_ARGUMENT (out) ∪ HAS_ERROR (in), i.e. ordering parents.
-- `get_standard_name_descendants(name, max_depth=None)` — inverse.
-- `shortest_standard_name_path(source, target, edge_types=None)`
-
-All four are registered as optional read-only tools (skipped when the
-`networkx` import is unavailable).
+`graph/local_graph.py` exposes the traversal helpers directly:
+`get_neighbours`, `get_ancestors`, `get_descendants`, and `shortest_path`. Ancestors
+are the transitive closure over HAS_ARGUMENT (out) ∪ HAS_ERROR (in), i.e. the
+ordering parents; descendants are the inverse.
 
 
 ## Project Setup
@@ -149,7 +241,7 @@ cd /home/ITER/mcintos/Code/imas-standard-names && uv run pytest
 - **Package manager**: `uv`
 - **Add dependencies**: `uv add <package>`
 - **Add dev dependencies**: `uv add --dev <package>`
-- **Sync and lock**: `uv sync`
+- **Environment**: Follow `~/.agents/AGENTS.md` "Development Environment"; work in the repo's root `.venv` with plain `uv run`, and bring a stale or absent one up to date with `uv sync`. Never `pip install`.
 
 ### CLI Tools
 - **Framework**: Use `click` for all CLI tools
@@ -157,7 +249,15 @@ cd /home/ITER/mcintos/Code/imas-standard-names && uv run pytest
 - **Entry points**: Configure in `[project.scripts]` section of `pyproject.toml`
 
 ### Code Quality
-- **Pre-commit hooks**: Enabled for all commits
+- **Pre-commit hooks**: check-only (`.pre-commit-config.yaml`) — `ruff check`,
+  `ruff format --check`, and the grammar codegen drift gate
+  (`build-grammar --check`, fires when grammar sources change). Hooks never
+  modify files; run `uv run ruff check --fix` and `uv run ruff format`
+  yourself before staging. Install once per clone: `uv run pre-commit install`.
+- **Grammar sources and generated modules commit together**: any change to
+  `grammar/specification.yml` or `grammar/vocabularies/*.yml` requires
+  `uv run python -m imas_standard_names.grammar_codegen.generate` in the
+  same commit — CI and the pre-commit gate both enforce this.
 - **Linting & formatting**: `ruff` (configuration in `pyproject.toml`)
 
 ### Security
@@ -194,11 +294,11 @@ BREAKING CHANGE: tags[0] replaced by dedicated physics_domain field.
 
 **Git workflow**:
 ```bash
-git status                      # Check current state
-git add -A                      # Stage all changes
-git commit -m 'message'         # Use single quotes (avoids bash ! expansion)
-git push origin main            # Push to fork
-git pull origin main            # Pull latest changes
+git status                          # Check current state
+git add <file1> <file2> ...         # Stage specific files (never git add -A)
+git commit -m 'message'             # Use single quotes (avoids bash ! expansion)
+git push origin main                # Push to fork
+git pull origin main                # Pull latest changes
 ```
 
 **Common gh commands**:
@@ -247,18 +347,25 @@ uv run standard-names release --bump minor --dry-run -m 'Test'
 
 ### Environment Setup
 
-Use `uv` for all development tasks:
+Develop against this repo's single root `.venv`, per `~/.agents/AGENTS.md`
+"Development Environment", which owns the policy. In the main checkout plain
+`uv run` is the default — it syncs first — and keeping the environment current is
+part of the work: `uv sync`, plus the extras a task needs
+(`uv sync --extra graph-local`, `--extra quality`, `--extra docs`). Declare new
+dependencies with `uv add` so they reach `pyproject.toml` and `uv.lock`.
 
 ```bash
-# Set up environment
-uv venv
-uv sync
-
-# Install dependencies
-uv sync --all-extras
-
-# Install pre-commit hooks (required for contributors)
+# Install pre-commit hooks (once per clone)
 uv run pre-commit install
+```
+
+A detached **worktree** never builds its own environment — it reuses the main
+checkout's, where `--no-sync` is the default because that environment is shared
+with concurrent workers:
+
+```bash
+UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-standard-names/.venv \
+  PYTHONPATH="$PWD" uv run --no-sync <command>
 ```
 
 ### Build and Test Commands
@@ -273,9 +380,6 @@ uv run ruff format
 
 # Validate standard names catalog (requires catalog to be configured)
 uv run validate_catalog $STANDARD_NAMES_CATALOG_ROOT
-
-# Start MCP server (read-only)
-uv run standard-names-mcp
 
 # Generate grammar types
 uv run python -m imas_standard_names.grammar_codegen.generate
@@ -308,6 +412,7 @@ async def test_search_returns_relevant_results():
     results = await search("magnetic_field")
     assert len(results) > 0
     assert results[0].name.startswith("magnetic_")
+
 
 # Avoid: Tests implementation details
 async def test_search_uses_correct_index():
@@ -362,6 +467,7 @@ import pydantic
 
 class FeatureSchema(pydantic.BaseModel):
     """Feature data schema."""
+
     name: str
     description: str
     embedding: list[float]
@@ -370,6 +476,7 @@ class FeatureSchema(pydantic.BaseModel):
 @dataclass
 class Config:
     """Application configuration."""
+
     timeout: float
     retries: int
 ```
@@ -381,7 +488,6 @@ class Config:
   - Network requests
   - File I/O operations
   - Database queries
-  - MCP tool operations
 
 ```python
 import anyio
@@ -434,10 +540,8 @@ async def validate_standard_name(name: str) -> bool:
 
 - Use absolute imports: `from imas_standard_names.module import Class`
 - Place all imports at the top of the file unless properly justified elsewhere
-- All MCP tool methods must be `async`
 - Return structured data via `.model_dump()` or error dictionaries with schema
 - 100% test coverage required for all new/modified code
-- Follow existing patterns in `tools/` directory for MCP tool development
 - **Never use ALL CAPS for emphasis** in documentation, docstrings, or user-facing text
   - Use **bold**, _italic_, or `code` formatting instead
   - Exception: acronyms (e.g., IMAS, MCP, CF) and constants in code
@@ -467,47 +571,24 @@ spec_path = grammar_package_path / "specification.yml"
 **Note on Code Generation:**
 Generated files (model_types.py, constants.py, tag_types.py, field_schemas.py) are formatted by pre-commit hooks to ensure consistency with project formatting standards. The generate script produces code that follows ruff guidelines, but actual formatting is applied by the project's pre-commit configuration.
 
-### MCP Tool Pattern
-
-All MCP tools are **read-only** — they query the catalog and grammar but do not modify data.
-
-```python
-from imas_standard_names.decorators.mcp import mcp_tool
-from imas_standard_names.tools.base import BaseTool
-
-class MyTool(BaseTool):
-    @mcp_tool(description="Clear single sentence description of purpose for llm")
-    async def tool_method(self, param: str, ctx: Context | None = None):
-        try:
-            # Implementation (read-only query)
-            return result.model_dump()
-        except Exception as e:
-            return {
-                "error": type(e).__name__,
-                "message": str(e),
-                "schema": input_schema(),
-                "examples": example_inputs()
-            }
-```
-
 ## Documentation Standards
 - Include concise docstrings for all public methods and classes
 - Add usage examples in markdown format where helpful
 - Document exceptions that may be raised
 
 ```python
-def parse_standard_name(name: str) -> dict[str, str]:
-    """Parse a standard name into its grammatical components.
+def validate_name(name: str) -> StandardNameIR:
+    """Validate a standard name and return its lossless grammar IR.
     
     ## Example
     
     ```python
-    parts = parse_standard_name("radial_component_of_magnetic_field")
-    print(parts["component"])  # "radial"
+    result = parse("square_of_inverse_of_pressure", strict=True)
+    return result.ir
     ```
     
     Raises:
-        ValueError: If name is invalid
+        ParseError: If name violates the grammar contract.
     """
     ...
 ```
@@ -523,6 +604,81 @@ def parse_standard_name(name: str) -> dict[str, str]:
   - Function names
 
 Write code as if it's always been this way.
+
+## Grammar Vocabulary Rules
+
+### Physical Base Vocabulary (Closed, Irreducible)
+
+`physical_bases.yml` contains the closed set of irreducible dimensional base quantities (~150; count it, don't trust this figure). A base is valid ONLY if:
+
+1. It represents a fundamental dimensional quantity (velocity, density, pressure, temperature, flux, etc.)
+2. It CANNOT be decomposed into `qualifier + existing_base`
+3. Dimensionless quantities are valid if genuinely atomic (beta, elongation, safety_factor)
+
+**CI gate:** `test_bases_are_irreducible()` validates that no base entry can decompose.
+
+**NEVER add compound bases** like `collisional_power_density`, `bootstrap_current_density`, or `thermal_velocity`. Instead, add the prefix token to `qualifiers.yml`.
+
+### Qualifier Vocabulary (Closed, Prefix Modifiers)
+
+`qualifiers.yml` contains the closed set of prefix modifier tokens (~110; count it, don't trust this figure). These strip recursively:
+- `collisional_power_density` → qualifier=`collisional`, base=`power_density`
+- `fast_collisional_power_density` → qualifiers=`[fast, collisional]`, base=`power_density`
+
+Multi-word tokens are supported (e.g. `cross_field`).
+
+**Adding a new qualifier:** Add the token to `qualifiers.yml`, run tests. The parser automatically uses it.
+
+### Disambiguation Rules
+
+How the parser resolves token-role ambiguity (see `grammar/parser.py`):
+
+1. **Peel order** — the parser peels trailing postfix operators, then the
+   `_due_to_` mechanism, then the locus (`_of_`/`_at_`/`_over_`/`_along_`),
+   then outer prefix/binary operators; only the residue is matched greedily
+   with priority geometry carrier > physical base > axis projection >
+   qualifier recursion. Multi-word tokens are atomic within their segment
+   because separator matching happens at the peel stages, not inside
+   registered tokens.
+
+   Recursive binary exploration tries connector candidates right-to-left and
+   accepts a split only when both operands resolve. Parse results and failures
+   are memoized by substring and validation mode, bounding ambiguous connector
+   chains without changing their meaning.
+
+2. **Longest base match wins** — a registered multi-word base beats a
+   qualifier + shorter-base split: `electron_kinetic_energy` keeps base
+   `kinetic_energy`; in `ion_kinetic_energy_flux` the residue after `flux`
+   resolves `kinetic` as a channel qualifier and `energy` as the channel.
+
+3. **Process via template only** — process tokens appear ONLY via the
+   `_due_to_{token}` suffix. A prefix that looks like a mechanism
+   (`collisional_power_density`) is a qualifier, not a process.
+
+4. **Reactant-pair dual role** — `deuterium_tritium`,
+   `deuterium_deuterium`, and `tritium_tritium` are subjects when they are
+   the final species token (`deuterium_tritium_density`) and
+   reaction-channel qualifiers when a product subject follows
+   (`deuterium_tritium_neutron_flux`). This is the only allowlisted
+   subjects∩qualifiers overlap.
+
+### Qualifier Ordering
+
+Qualifiers are stored as an **ordered list**. Scoping qualifiers compose by
+the canonical category order in `qualifier_categories.yml`; tokens within one
+category retain their authored order. Other structured qualifier segments use
+their own registry order. Do not sort the full list alphabetically.
+
+### Adding New Vocabulary
+
+| Need | Action | File |
+|------|--------|------|
+| New dimensional base | Add to `physical_bases.yml` (must be irreducible) | `vocabularies/physical_bases.yml` |
+| New prefix modifier | Add to `qualifiers.yml` | `vocabularies/qualifiers.yml` |
+| New process/mechanism | Add to `processes.yml` (used via `_due_to_`) | `vocabularies/processes.yml` |
+| New subject/species | Add to `subjects.yml` | `vocabularies/subjects.yml` |
+
+**Never:** Add a compound to physical_bases when it can be expressed as qualifier + base.
 
 ## Links to Documentation
 

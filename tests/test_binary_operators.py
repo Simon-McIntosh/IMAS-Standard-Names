@@ -1,22 +1,17 @@
-"""Tests for Phase 2: Binary operator grammar extensions.
+"""Tests for binary operator grammar extensions.
 
 Covers parsing, composition, round-trip, mutual exclusivity, connector
 detection, and edge cases for binary operator expressions.
 """
 
-from __future__ import annotations
-
 import pytest
 
 from imas_standard_names.grammar import (
     BinaryOperator,
+    ParseError,
     StandardName,
     compose_name,
     parse_name,
-)
-from imas_standard_names.grammar.support import (
-    compose_standard_name as compose_parts,
-    parse_standard_name as parse_parts,
 )
 
 
@@ -24,33 +19,30 @@ class TestBinaryOperatorCompose:
     """Test composition of names with binary operators."""
 
     def test_product_of_density_and_temperature(self):
-        parts = {
-            "binary_operator": "product_of",
-            "physical_base": "density",
-            "secondary_base": "temperature",
-        }
-        name = compose_parts(parts)
-        assert name == "product_of_density_and_temperature"
+        model = StandardName(
+            binary_operator="product_of",
+            physical_base="density",
+            secondary_base="temperature",
+        )
+        assert model.compose() == "product_of_density_and_temperature"
 
     def test_ratio_of_electron_temperature_to_ion_temperature(self):
-        parts = {
-            "binary_operator": "ratio_of",
-            "physical_base": "electron_temperature",
-            "secondary_base": "ion_temperature",
-        }
-        name = compose_parts(parts)
-        assert name == "ratio_of_electron_temperature_to_ion_temperature"
+        model = StandardName(
+            binary_operator="ratio_of",
+            physical_base="electron_temperature",
+            secondary_base="ion_temperature",
+        )
+        assert model.compose() == "ratio_of_electron_temperature_to_ion_temperature"
 
     def test_difference_of_pressures(self):
-        parts = {
-            "binary_operator": "difference_of",
-            "physical_base": "total_pressure",
-            "secondary_base": "electron_pressure",
-        }
-        name = compose_parts(parts)
-        assert name == "difference_of_total_pressure_and_electron_pressure"
+        model = StandardName(
+            binary_operator="difference_of",
+            physical_base="total_pressure",
+            secondary_base="electron_pressure",
+        )
+        assert model.compose() == "difference_of_total_pressure_and_electron_pressure"
 
-    def test_binary_operator_with_position_suffix(self):
+    def test_binary_operator_with_final_operand_position(self):
         name = compose_name(
             {
                 "binary_operator": "ratio_of",
@@ -63,16 +55,27 @@ class TestBinaryOperatorCompose:
             name == "ratio_of_electron_temperature_to_ion_temperature_at_magnetic_axis"
         )
 
+    def test_binary_operator_rejects_repeated_final_operand_position(self):
+        model = StandardName(
+            binary_operator="ratio_of",
+            physical_base="electron_temperature",
+            secondary_base="ion_temperature_at_magnetic_axis",
+            position="magnetic_axis",
+        )
+
+        with pytest.raises(ValueError, match="final operand already has one"):
+            model.compose()
+
     def test_binary_operator_with_process_suffix(self):
         name = compose_name(
             {
                 "binary_operator": "product_of",
                 "physical_base": "density",
                 "secondary_base": "velocity",
-                "process": "turbulent",
+                "process": "turbulent_transport",
             }
         )
-        assert name == "product_of_density_and_velocity_due_to_turbulent"
+        assert name == "product_of_density_and_velocity_due_to_turbulent_transport"
 
     def test_binary_operator_via_model(self):
         model = StandardName(
@@ -95,31 +98,31 @@ class TestBinaryOperatorParse:
     """Test parsing of names with binary operators."""
 
     def test_parse_product_of(self):
-        result = parse_parts("product_of_density_and_temperature")
-        assert result["binary_operator"] == "product_of"
-        assert result["physical_base"] == "density"
-        assert result["secondary_base"] == "temperature"
+        result = parse_name("product_of_density_and_temperature")
+        assert result.binary_operator == BinaryOperator.PRODUCT_OF
+        assert result.physical_base == "density"
+        assert result.secondary_base == "temperature"
 
     def test_parse_ratio_of(self):
-        result = parse_parts("ratio_of_electron_temperature_to_ion_temperature")
-        assert result["binary_operator"] == "ratio_of"
-        assert result["physical_base"] == "electron_temperature"
-        assert result["secondary_base"] == "ion_temperature"
+        result = parse_name("ratio_of_electron_temperature_to_ion_temperature")
+        assert result.binary_operator == BinaryOperator.RATIO_OF
+        assert result.physical_base == "electron_temperature"
+        assert result.secondary_base == "ion_temperature"
 
     def test_parse_difference_of(self):
-        result = parse_parts("difference_of_total_pressure_and_electron_pressure")
-        assert result["binary_operator"] == "difference_of"
-        assert result["physical_base"] == "total_pressure"
-        assert result["secondary_base"] == "electron_pressure"
+        result = parse_name("difference_of_total_pressure_and_electron_pressure")
+        assert result.binary_operator == BinaryOperator.DIFFERENCE_OF
+        assert result.physical_base == "total_pressure"
+        assert result.secondary_base == "electron_pressure"
 
-    def test_parse_with_suffix(self):
-        result = parse_parts(
+    def test_parse_with_final_operand_position(self):
+        result = parse_name(
             "ratio_of_electron_temperature_to_ion_temperature_at_magnetic_axis"
         )
-        assert result["binary_operator"] == "ratio_of"
-        assert result["physical_base"] == "electron_temperature"
-        assert result["secondary_base"] == "ion_temperature"
-        assert result["position"] == "magnetic_axis"
+        assert result.binary_operator == BinaryOperator.RATIO_OF
+        assert result.physical_base == "electron_temperature"
+        assert result.secondary_base == "ion_temperature"
+        assert result.position.value == "magnetic_axis"
 
     def test_parse_via_model(self):
         model = parse_name("product_of_density_and_temperature")
@@ -159,7 +162,7 @@ class TestBinaryOperatorRoundTrip:
                 "binary_operator": "product_of",
                 "physical_base": "density",
                 "secondary_base": "velocity",
-                "process": "turbulent",
+                "process": "turbulent_transport",
             },
         ],
     )
@@ -184,7 +187,10 @@ class TestBinaryOperatorExclusivity:
 
     @pytest.mark.xfail(
         strict=True,
-        reason="rc20 token 'square_of' replaced by bare 'square' in vNext grammar (plan 38 §A7)",
+        reason=(
+            "the transformation token is bare 'square'; the legacy "
+            "'square_of' spelling remains invalid"
+        ),
     )
     def test_binary_excludes_transformation(self):
         with pytest.raises(ValueError, match="binary_operator.*transformation"):
@@ -270,31 +276,31 @@ class TestBinaryOperatorConnectors:
         name = compose_name(
             {
                 "binary_operator": "product_of",
-                "physical_base": "a",
-                "secondary_base": "b",
+                "physical_base": "density",
+                "secondary_base": "temperature",
             }
         )
-        assert "_and_" in name
+        assert name == "product_of_density_and_temperature"
 
     def test_ratio_uses_to(self):
         name = compose_name(
             {
                 "binary_operator": "ratio_of",
-                "physical_base": "a",
-                "secondary_base": "b",
+                "physical_base": "electron_temperature",
+                "secondary_base": "ion_temperature",
             }
         )
-        assert "_to_" in name
+        assert name == "ratio_of_electron_temperature_to_ion_temperature"
 
     def test_difference_uses_and(self):
         name = compose_name(
             {
                 "binary_operator": "difference_of",
-                "physical_base": "a",
-                "secondary_base": "b",
+                "physical_base": "total_pressure",
+                "secondary_base": "electron_pressure",
             }
         )
-        assert "_and_" in name
+        assert name == "difference_of_total_pressure_and_electron_pressure"
 
 
 class TestBinaryOperatorEdgeCases:
@@ -309,10 +315,9 @@ class TestBinaryOperatorEdgeCases:
             )
 
     def test_name_starting_with_product_but_not_binary(self):
-        """A name like 'product_cross_section' should not be parsed as binary."""
-        result = parse_parts("product_cross_section")
-        assert "binary_operator" not in result
-        assert result["physical_base"] == "product_cross_section"
+        """A name like 'product_cross_section' is rejected by the parser."""
+        with pytest.raises((ParseError, ValueError)):
+            parse_name("product_cross_section")
 
     def test_binary_qualifies_generic_base(self):
         """Binary operator should qualify generic physical bases."""
@@ -324,9 +329,16 @@ class TestBinaryOperatorEdgeCases:
         assert model.physical_base == "temperature"
 
     def test_compound_base_with_and_in_name(self):
-        """Test that rightmost split handles compound bases correctly."""
-        # If a base name could contain the connector, rightmost split helps
-        result = parse_parts("product_of_supply_and_demand_and_output")
-        assert result["binary_operator"] == "product_of"
-        assert result["physical_base"] == "supply_and_demand"
-        assert result["secondary_base"] == "output"
+        """Test that rightmost split handles compound bases correctly.
+
+        The parser splits on the rightmost connector, yielding
+        physical_base='supply_and_demand'. The validity oracle rejects that
+        literal operand because it is outside the closed base vocabulary.
+        This specific diagnostic takes precedence over the broader connector
+        ambiguity because it gives the composer an actionable vocabulary gate.
+        """
+        with pytest.raises(
+            ValueError,
+            match="Unknown physical_base token 'supply_and_demand'",
+        ):
+            parse_name("product_of_supply_and_demand_and_output")

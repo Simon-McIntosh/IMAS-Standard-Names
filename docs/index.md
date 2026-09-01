@@ -1,6 +1,6 @@
 # IMAS Standard Names
 
-MCP server and Python library for working with IMAS Standard Names — a controlled vocabulary for fusion data variables.
+Grammar library for IMAS Standard Names — a controlled vocabulary for fusion data variables.
 
 ## About Standard Names
 
@@ -32,14 +32,8 @@ This separation allows:
 
 ## Quick Start
 
-### MCP Server
-
 ```bash
-# Install
 pip install imas-standard-names[catalog]
-
-# Run
-standard-names-mcp
 ```
 
 ### Python Library

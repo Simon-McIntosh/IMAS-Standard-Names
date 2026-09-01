@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-standard-names">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="model-selection-and-global-refine-s2-s3-landed">
+  <meta name="plan-title" content="GPT-5.6 role benchmarks + seat decisions — landed">
+  <meta name="plan-status" content="reference">
+  <title>Role benchmarks and seat decisions — landed | imas-standard-names</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+  <h1>§2–§3 — GPT-5.6 role benchmarks and seat decisions: landed record (2026-07-17)</h1>
+  <p>Six seats measured for ≈$36 (≤$40 ceiling); one budget-forced reduction (compose n=20, logged).
+  Verdicts locked by the lead as one batch (<code>seat-switches</code> decision) and applied in
+  imas-codex <code>ce0144e1</code>. Full measured tables: imas-codex <code>docs/sn-role-benchmarks.md</code>;
+  raw reports under <code>~/.local/share/imas-codex/benchmarks/sn_rolebench_*.json</code>.</p>
+
+  <h2>Verdicts</h2>
+  <table>
+    <thead><tr><th>Seat</th><th>Incumbent</th><th>Verdict</th><th>Decisive evidence</th></tr></thead>
+    <tbody>
+      <tr><td><code>sn-refine</code></td><td>gpt-5.5</td><td><strong>HOLD</strong></td><td>Defect resolution 0.874 vs Terra 0.837 / Luna 0.765; lowest collateral rewording (0.147); Luna worse on every quality axis at half cost.</td></tr>
+      <tr><td>names breaker</td><td>gpt-5.5</td><td><strong>SWITCH → gpt-5.6-luna</strong></td><td>More independent of the blind pair (ρ 0.252 vs 0.319; vs qwen 0.026), better verdict-flip quality (0.714 vs 0.545), ~¼ cost. Flip-quality on 7 flips is the soft axis; independence and cost are the robust n=30 signals.</td></tr>
+      <tr><td>docs breaker</td><td>gpt-5.5</td><td><strong>HOLD</strong></td><td>Incumbent both most independent (ρ 0.176) and best on overrides (0.286 vs 0.071/0.158); 5.6 tiers flip 2–3× more, nearly always wrongly.</td></tr>
+      <tr><td><code>sn-docs</code> generation</td><td>sonnet-4.6</td><td><strong>SWITCH → gpt-5.6-luna</strong></td><td>Zero banned-prose findings vs incumbent 15% under the strict-normative prompt (decisive for the campaign's convergence gate); rubric parity 0.813 vs 0.806; 23% cheaper. Sol +0.03 rubric at 2.6× Luna's cost — rejected.</td></tr>
+      <tr><td>domain classifier tier-1</td><td>gpt-5.4</td><td><strong>HOLD</strong></td><td>Head-to-head on the 209-path gold set: gpt-5.4 82.3% / Luna 79.4% / haiku-4.5 75.1%, all ≤$0.0006/item. Incumbent wins outright; Luna's two runs (77.5%, 79.4%) also calibrate ~2 pts of run variance, supporting the compose tie-band.</td></tr>
+      <tr><td><code>sn-compose</code></td><td>deepseek-v4-flash (local)</td><td><strong>HOLD</strong></td><td>n=17: gpt-5.5 0.891 / Terra 0.874 / Luna 0.826 / DSv4 0.814 — Luna↔DSv4 gap 1.2 pts = tie at this sample; DSv4 is $0.00/name marginal (2× H200 serve) and its compose-time descriptions judge above gpt-5.5 (0.957 vs 0.932). kimi-k3 unavailable (launch-day upstream 429s) — re-probe later.</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Bench-harness fixes shipped en route</h2>
+  <ul>
+    <li><code>0a05c173</code> — refine bench starved the prompt of the closed-vocabulary grammar listing production injects (candidates invented tokens).</li>
+    <li><code>0baa04ee</code> — refine bench passed no scored examples, the prompt's only <code>kind</code> signal; plus a loud-fail tripwire (n=0 raises with a failure breakdown instead of saving a hollow report).</li>
+    <li><code>6ef0ab2c</code> — the latent fragility fixed at source: kind vocabulary unified on the ISN catalog <code>Kind</code> enum (LinkML trimmed, LLM schemas carry a flat in-schema enum, prompts enumerate kinds; three-way consistency test). Format correctness no longer depends on examples.</li>
+    <li><code>7c846191</code> — local endpoints for models appearing in review-quorum <code>models</code> lists (unblocked <code>sn bench --models hosted_vllm/deepseek-v4-flash</code>).</li>
+    <li><code>cd18c024</code> — pipeline-version clear gate retired (drift logs, never blocks; the wipe recommendation is gone).</li>
+  </ul>
+
+  <h2>Campaign cost input (feeds §5)</h2>
+  <p>Docs generation at Luna's measured ≈$0.09/doc with a 0% generator banned-prose rate;
+  refine stays gpt-5.5 at ≈$0.08/refine. The §5 pilot supplies the end-to-end per-name number.</p>
+</main>
+</body>
+</html>

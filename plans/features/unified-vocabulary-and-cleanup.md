@@ -99,12 +99,14 @@ def test_diamagnetic_velocity_not_split():
     assert parsed.component == "radial"
     assert "diamagnetic_velocity" in parsed.physical_base
 
+
 def test_ion_temperature_subject_not_base():
     """ion is subject in ion_temperature, not start of physical_base."""
     name = "ion_temperature"
     parsed = parse_standard_name(name)
     assert parsed.subject == "ion"
     assert parsed.physical_base == "temperature"
+
 
 def test_neutral_density():
     """neutral is subject in neutral_density."""
@@ -113,17 +115,21 @@ def test_neutral_density():
     assert parsed.subject == "neutral"
     assert parsed.physical_base == "density"
 
+
 def test_vertical_component():
     """vertical is component when followed by component_of."""
     name = "vertical_component_of_magnetic_field"
     parsed = parse_standard_name(name)
     assert parsed.component == "vertical"
 
+
 def test_vertical_position():
     """vertical_position is a compound physical_base."""
     name = "vertical_position_of_magnetic_axis"
     parsed = parse_standard_name(name)
-    assert "vertical_position" in parsed.physical_base or parsed.geometric_base is not None
+    assert (
+        "vertical_position" in parsed.physical_base or parsed.geometric_base is not None
+    )
 ```
 
 ### Non-Grammar Ambiguities (document, don't fix)
@@ -199,6 +205,7 @@ def test_volume_averaged():
     assert parsed.physical_base == "electron_temperature"
     assert compose_standard_name(parsed) == name
 
+
 def test_time_derivative_synonym():
     """Both forms should parse to valid transformations."""
     for t in ["time_derivative_of", "change_over_time_in"]:
@@ -207,17 +214,24 @@ def test_time_derivative_synonym():
         assert parsed.transformation == t
         assert parsed.physical_base == "electron_temperature"
 
+
 def test_extremum_transformations():
-    for t in ["maximum_of", "minimum_of", "maximum_over_flux_surface",
-              "minimum_over_flux_surface"]:
+    for t in [
+        "maximum_of",
+        "minimum_of",
+        "maximum_over_flux_surface",
+        "minimum_over_flux_surface",
+    ]:
         name = f"{t}_electron_pressure"
         parsed = parse_standard_name(name)
         assert parsed.transformation == t
+
 
 def test_derivative_of():
     name = "derivative_of_electron_temperature"
     parsed = parse_standard_name(name)
     assert parsed.transformation == "derivative_of"
+
 
 def test_radial_derivative_vs_radial_component():
     """radial_derivative_of is transformation, not radial component."""

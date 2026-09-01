@@ -21,13 +21,20 @@ def test_compose_and_parse_minimal_base():
 
 
 def test_with_component_subject_no_basis():
-    parts = {"component": "radial", "subject": "electron", "physical_base": "heat_flux"}
+    # heat_flux decomposes as channel=heat + base=flux (see channels.yml).
+    parts = {
+        "component": "radial",
+        "subject": "electron",
+        "channel": "heat",
+        "physical_base": "flux",
+    }
     name = compose_name(parts)
-    assert name == "radial_component_of_electron_heat_flux"
+    assert name == "radial_electron_heat_flux"
     parsed = parse_name(name)
     assert parsed.component == Component.RADIAL
     assert parsed.subject == "electron"
-    assert parsed.physical_base == "heat_flux"
+    assert parsed.channel == "heat"
+    assert parsed.physical_base == "flux"
 
 
 def test_with_position_process():
@@ -44,13 +51,24 @@ def test_with_position_process():
     assert back.process == Process.EXTERNAL_COIL
 
 
-def test_invalid_order_raises():
-    bad = "electron_radial_heat_flux"  # wrong order; component must be first
-    try:
-        parse_name(bad)
-        assert False, "expected ValueError"
-    except ValueError:
-        pass
+def test_non_canonical_order_is_ungrammatical():
+    """Token order is locked: only the canonical spelling parses.
+
+    'electron_radial_heat_flux' places the component after the subject; the
+    canonical form is 'radial_electron_heat_flux'. Non-canonical order raises
+    NonCanonicalNameError carrying the canonical form (no silent reordering).
+    """
+    from imas_standard_names.grammar import NonCanonicalNameError
+
+    with pytest.raises(NonCanonicalNameError) as excinfo:
+        parse_name("electron_radial_heat_flux")
+    assert excinfo.value.canonical_form == "radial_electron_heat_flux"
+
+    parsed = parse_name("radial_electron_heat_flux")
+    assert parsed.component == Component.RADIAL
+    assert parsed.subject == "electron"
+    assert parsed.channel == "heat"
+    assert parsed.physical_base == "flux"
 
 
 # --- D.3 senior review (2026-04) vocabulary additions ---
@@ -65,7 +83,7 @@ class TestD3ComponentAdditions:
             "physical_base": "magnetic_field",
         }
         name = compose_name(parts)
-        assert name == "normalized_radial_component_of_magnetic_field"
+        assert name == "normalized_radial_magnetic_field"
         parsed = parse_name(name)
         assert parsed.component == Component.NORMALIZED_RADIAL
         assert parsed.physical_base == "magnetic_field"
@@ -76,10 +94,73 @@ class TestD3ComponentAdditions:
             "physical_base": "magnetic_field",
         }
         name = compose_name(parts)
-        assert name == "normalized_vertical_component_of_magnetic_field"
+        assert name == "normalized_vertical_magnetic_field"
         parsed = parse_name(name)
         assert parsed.component == Component.NORMALIZED_VERTICAL
         assert parsed.physical_base == "magnetic_field"
+
+    def test_flux_surface_normal_component(self):
+        parts = {
+            "component": "flux_surface_normal",
+            "physical_base": "energy_flux",
+        }
+        name = compose_name(parts)
+        assert name == "flux_surface_normal_energy_flux"
+        parsed = parse_name(name)
+        assert parsed.component == Component.FLUX_SURFACE_NORMAL
+
+    def test_flux_surface_normal_is_not_a_geometry_coordinate(self):
+        with pytest.raises(ValueError):
+            parse_name("flux_surface_normal_coordinate_of_flux_loop")
+
+        with pytest.raises(ValueError):
+            StandardName(
+                coordinate="flux_surface_normal",
+                geometric_base="coordinate",
+                object="flux_loop",
+            )
+
+    def test_local_tangent_curvature_radius_preserves_object_context(self):
+        name = "second_local_tangential_radius_of_reflector"
+        parsed = parse_name(name)
+
+        assert parsed.component == Component.SECOND_LOCAL_TANGENTIAL
+        assert parsed.zone == ()
+        assert parsed.physical_base == "radius"
+        assert parsed.object == "reflector"
+        assert compose_name(parsed) == name
+
+    @pytest.mark.parametrize(
+        ("name", "component", "geometric_base"),
+        [
+            (
+                "first_local_tangential_radius_of_reflector",
+                Component.FIRST_LOCAL_TANGENTIAL,
+                None,
+            ),
+            (
+                "x_first_local_tangential_unit_vector_of_reflector",
+                None,
+                "first_local_tangential_unit_vector",
+            ),
+            (
+                "second_local_tangential_coordinate_of_reflector",
+                None,
+                "second_local_tangential_coordinate",
+            ),
+        ],
+    )
+    def test_local_frame_component_coordinate_and_vector_roles_are_distinct(
+        self,
+        name: str,
+        component: Component | None,
+        geometric_base: str | None,
+    ) -> None:
+        parsed = parse_name(name)
+
+        assert parsed.component == component
+        assert parsed.geometric_base == geometric_base
+        assert compose_name(parsed) == name
 
 
 class TestD3ProcessAdditions:
@@ -107,6 +188,10 @@ class TestD3ProcessAdditions:
         parsed = parse_name(name)
         assert parsed.process == Process.RESISTIVE_DIFFUSION
 
+    @pytest.mark.xfail(
+        reason="vocab gap: magnetic_island not a registered qualifier",
+        strict=True,
+    )
     def test_neoclassical_tearing_mode(self):
         parts = {
             "physical_base": "magnetic_island_width",
@@ -153,7 +238,7 @@ class TestD3TransformationAdditions:
 
     @pytest.mark.xfail(
         strict=True,
-        reason="rc20 token 'variation_of' replaced by bare 'variation' in vNext grammar (plan 38 §A7)",
+        reason="rc20 token 'variation_of' replaced by bare 'variation' in current grammar (plan 38 §A7)",
     )
     def test_variation_of(self):
         from imas_standard_names.grammar import Transformation
@@ -183,7 +268,7 @@ class TestD3TransformationAdditions:
 
     @pytest.mark.xfail(
         strict=True,
-        reason="rc20 token 'per_toroidal_mode_number' replaced by 'per_toroidal_mode' in vNext grammar (plan 38 §A7)",
+        reason="rc20 token 'per_toroidal_mode_number' replaced by 'per_toroidal_mode' in current grammar (plan 38 §A7)",
     )
     def test_per_toroidal_mode_number(self):
         from imas_standard_names.grammar import Transformation

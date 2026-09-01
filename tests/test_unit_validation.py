@@ -129,6 +129,40 @@ class TestDimensionlessPhysicalQuantity:
         issues = _check_dimensionless_physical_quantity("electron_temperature", entry)
         assert issues == []
 
+    def test_no_warning_for_dimension_transforming_operator(self):
+        """Integral operators change the base's dimensions — a volume-integrated
+        density is a count, so unit '1' is legitimate."""
+        name = "volume_integrated_runaway_electron_density"
+        entry = _scalar(name, unit="1")
+        assert _check_dimensionless_physical_quantity(name, entry) == []
+
+    def test_no_warning_for_derivative_operator(self):
+        name = "derivative_of_electron_temperature"
+        entry = _scalar(name, unit="1")
+        assert _check_dimensionless_physical_quantity(name, entry) == []
+
+    def test_dimension_preserving_operator_still_warns(self):
+        """Averaging preserves dimensions — a volume-averaged density with
+        unit '1' is still suspicious."""
+        name = "volume_averaged_electron_density"
+        entry = _scalar(name, unit="1")
+        issues = _check_dimensionless_physical_quantity(name, entry)
+        assert len(issues) == 1
+        assert "density" in issues[0]
+
+    def test_no_warning_for_normalized_operator_on_projection(self):
+        """A GyroBohm-normalized projected flux is legitimately dimensionless.
+
+        ``normalized`` peels as the dimensionless operator (the projection
+        resolves to ``parallel``), so it is exempted via the dimensionless-
+        operator/qualifier path — no unit-suspicion warning."""
+        name = (
+            "normalized_parallel_momentum_flux_due_to_"
+            "perturbed_parallel_vector_potential"
+        )
+        entry = _scalar(name, unit="1")
+        assert _check_dimensionless_physical_quantity(name, entry) == []
+
 
 class TestNoneUnitWithQuantitativeKind:
     """Test _check_none_unit_with_quantitative_kind semantic check."""

@@ -1,4 +1,4 @@
-"""Tests for populated vNext vocabularies (plan 38 W2a).
+"""Tests for populated grammar vocabularies (plan 38 W2a).
 
 Asserts that the vocabulary files populated from rc20 corpus mining
 have sufficient coverage, contain key entries, and have no cross-registry
@@ -26,10 +26,10 @@ from imas_standard_names.grammar.vocab_loaders import (
 class TestRegistryCardinality:
     """Minimum entry counts for each populated registry."""
 
-    def test_physical_bases_minimum_150(self):
+    def test_physical_bases_minimum_70(self):
         reg = load_physical_bases()
-        assert len(reg.bases) >= 150, (
-            f"Expected >= 150 physical bases, got {len(reg.bases)}"
+        assert len(reg.bases) >= 70, (
+            f"Expected >= 70 physical bases, got {len(reg.bases)}"
         )
 
     def test_locus_registry_minimum_60(self):
@@ -68,54 +68,40 @@ class TestPhysicalBasesCorpusCoverage:
     @pytest.mark.parametrize(
         "token",
         [
+            # Irreducible dimensional bases (Plan 41 reduced vocabulary)
             "current_density",
-            "major_radius",
             "number_density",
             "magnetic_field",
-            "momentum_flux",
+            # NOTE: momentum_flux / particle_flux / energy_flux / heat_flux are
+            # no longer irreducible bases — they decompose as channel + flux
+            # (channel=momentum/particle/energy/heat + base=flux). See
+            # channels.yml. 'flux' is the irreducible base.
+            "flux",
             "temperature",
             "pressure",
-            "particle_flux",
             "velocity",
-            "energy_source",
-            "effective_charge",
             "magnetic_flux",
-            "flux_coordinate",
-            "radiated_power_density",
-            "radiated_power_inside_flux_surface",
             "angle",
-            "momentum_convective_velocity",
-            "momentum_flux_limiter",
-            "center_of_mass_velocity",
             "current",
-            "accumulated_gas_injection",
-            "gas_injection_rate",
-            "energy_flux",
-            "momentum_diffusivity",
-            "momentum_source",
-            "prefill_gas_injection",
-            "heating_power",
-            "plasma_current",
             "density",
-            "particle_radial_diffusivity",
-            "convective_velocity",
-            "larmor_radius",
-            "scrape_off_layer_density_decay_length",
-            "scrape_off_layer_heat_flux_decay_length",
-            "scrape_off_layer_temperature_decay_length",
-            "thermal_energy_pedestal",
-            "stored_energy",
-            "fusion_power_density",
-            "neutron_emissivity",
-            "particle_flux_from_wall",
-            "power_flux_density",
-            "lower_hybrid_electric_field",
-            "temperature_peaking_factor",
+            "energy",
+            "power",
+            "power_density",
+            "electric_field",
+            "emissivity",
+            "diffusivity",
+            "radius",
+            "frequency",
+            "resistivity",
+            "force",
+            "torque",
+            "mass",
+            "metric_tensor",
         ],
     )
-    def test_top50_base_present(self, bases, token):
+    def test_irreducible_base_present(self, bases, token):
         assert token in bases.bases, (
-            f"Corpus top-50 base '{token}' missing from physical_bases.yml"
+            f"Irreducible base '{token}' missing from physical_bases.yml"
         )
 
 
@@ -144,7 +130,7 @@ class TestOperatorKeyEntries:
             "maximum",
             "minimum",
             "time_derivative",
-            "time_average",
+            "time_averaged",
             "root_mean_square",
             "magnitude",
             "real_part",
@@ -179,7 +165,7 @@ class TestLocusRegistryKeyEntries:
         return load_locus_registry()
 
     def test_plasma_boundary_entity(self, loci):
-        # plasma_boundary reclassified to position in vNext (plan 38 §A5)
+        # plasma_boundary reclassified to position in the grammar (plan 38 §A5)
         assert "plasma_boundary" in loci.loci
         assert loci.loci["plasma_boundary"].type == "position"
 
@@ -191,9 +177,9 @@ class TestLocusRegistryKeyEntries:
         assert "x_point" in loci.loci
         assert loci.loci["x_point"].type == "position"
 
-    def test_separatrix_entity(self, loci):
+    def test_separatrix_position(self, loci):
         assert "separatrix" in loci.loci
-        assert loci.loci["separatrix"].type == "entity"
+        assert loci.loci["separatrix"].type == "position"
 
     def test_flux_loop_entity(self, loci):
         assert "flux_loop" in loci.loci
@@ -220,8 +206,34 @@ class TestLocusRegistryKeyEntries:
 # ---------------------------------------------------------------------------
 
 
+class TestGeometryCarriersKeyEntries:
+    """Key geometry carriers from corpus mining and W38 gap closure."""
+
+    @pytest.fixture()
+    def carriers(self):
+        return load_geometry_carriers()
+
+    @pytest.mark.parametrize(
+        "token",
+        [
+            "unit_vector",
+            "first_local_tangential_coordinate",
+            "second_local_tangential_coordinate",
+            "first_local_tangential_unit_vector",
+            "second_local_tangential_unit_vector",
+            "outline",
+            "position",
+            "contour",
+        ],
+    )
+    def test_key_carrier_present(self, carriers, token):
+        assert token in carriers.carriers, (
+            f"Key geometry carrier '{token}' missing from geometry_carriers.yml"
+        )
+
+
 class TestCrossRegistryDuplicates:
-    """No token may appear in more than one vNext registry."""
+    """No token may appear in more than one vocabulary registry."""
 
     def test_no_cross_registry_duplicates(self):
         validate_no_cross_registry_duplicates()
@@ -250,6 +262,6 @@ class TestPhysicalBaseKinds:
         reg = load_physical_bases()
         assert reg.bases["temperature"].kind == "scalar"
 
-    def test_contravariant_metric_tensor_is_tensor(self):
+    def test_metric_tensor_is_tensor(self):
         reg = load_physical_bases()
-        assert reg.bases["contravariant_metric_tensor"].kind == "tensor"
+        assert reg.bases["metric_tensor"].kind == "tensor"

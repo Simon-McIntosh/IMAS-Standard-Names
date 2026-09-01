@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-standard-names">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="model-selection-and-global-refine-s5-rotation1-halted">
+  <meta name="plan-title" content="§5 rotation 1 — halted on reviewer-quorum outage (checkpoint)">
+  <meta name="plan-summary" content="Rotation 1 (stratified 200) was launched and halted by the orchestrator after ~6 min when 2 of the 3 RD-quorum reviewer models entered an upstream empty-response outage; 67% of reviews degraded to single-reviewer, violating the plan's 'review quorum unchanged' churn-mitigation invariant. ~27 accepts landed before the halt; re-run queued for when reviewer availability recovers.">
+  <meta name="plan-status" content="historical">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <title>§5 rotation 1 halted | model-selection-and-global-refine</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+  <h1>§5 — Rotation 1 halted on reviewer-quorum outage (2026-07-18)</h1>
+  <p>Evergreen: <a href="/imas-standard-names/model-selection-and-global-refine.html">model-selection-and-global-refine</a> §5.
+  Rotation 1 of the stratified docs campaign (<code>f-docs-campaign-rotations</code>) was launched and <strong>halted by the orchestrator</strong> after ~6&nbsp;minutes. The stratified-rotation-with-checkpoint design exists precisely to catch storms early — this rotation caught one: a live upstream outage of two of the three RD-quorum reviewer models. Halting bounded degraded-quorum accepts to ~27 (vs the ~200 a full rotation would have written) and preserved a valid healthy-path checkpoint baseline for the re-run. <strong>This is not a campaign defect</strong> — the engine behaved correctly; the blocker is external LLM-provider availability.</p>
+
+  <h2>Quick status</h2>
+  <table>
+    <tr><th>Item</th><th>Status</th><th>Detail</th></tr>
+    <tr><td>Rotation 1 command</td><td>launched</td><td><code>sn run --source dd --campaign "prose,audit:latex,audit:spelling,audit:length" --campaign-pilot 200 --include-accepted --campaign-batch-cost-cap 50 --campaign-cost-ceiling 120</code></td></tr>
+    <tr><td>Selection at launch</td><td>1,437 docs-fixable → stratified pilot 200</td><td>2 batches of 100, distributed across 17 domains</td></tr>
+    <tr><td>Outcome</td><td>⛔ halted ~6 min in</td><td>2 of 3 RD-quorum reviewer models in an upstream empty-response outage; 67% of reviews degraded to single-reviewer</td></tr>
+    <tr><td>Partial writes before halt</td><td>~27 accepts</td><td>~54 generated · 45 reviewed · ~27 refined+accepted · 63 <code>StandardNameReview</code> nodes</td></tr>
+    <tr><td>Spend (approx, interrupted)</td><td>≈ $6.17</td><td><code>cost_is_exact=False</code> — run interrupted before cost finalization; ≈ $1.43 (23%) wasted on the two dead reviewer models' empty responses</td></tr>
+    <tr><td>Selection after halt</td><td>1,409 (−28)</td><td>The ~27 fixed names dropped out of the defect predicates — sticky (a re-run will not revisit them)</td></tr>
+    <tr><td>Re-run</td><td>queued</td><td><code>f-docs-campaign-rotations</code> stays open; re-run when OpenRouter reviewer availability recovers</td></tr>
+  </table>
+
+  <h2>Root cause — upstream reviewer-quorum outage</h2>
+  <p>The docs review stage runs a 3-model RD-quorum (review-and-defend). During rotation 1 two of the three models returned empty completions (<code>finish_reason='stop'</code>, no content) across dozens of names, sustained for the whole run window and surviving the 5-attempt retry ladder:</p>
+  <table>
+    <tr><th>Reviewer model</th><th>Quorum role</th><th>Status during rotation 1</th><th>Failed cycles</th><th>Spend (wasted)</th></tr>
+    <tr><td><code>openai/gpt-5.6-luna</code></td><td>primary</td><td>✅ working (also the docs-gen seat)</td><td>0</td><td>$2.28 (productive: gen+review)</td></tr>
+    <tr><td><code>qwen/qwen3.7-max</code></td><td>secondary</td><td>❌ empty responses</td><td>34</td><td>$1.07</td></tr>
+    <tr><td><code>minimax/minimax-m3</code></td><td>tertiary</td><td>❌ empty after 5 retries (ERROR+traceback)</td><td>19</td><td>$0.36</td></tr>
+    <tr><td><code>openai/gpt-5.5</code></td><td>authoritative escalation + refine seat</td><td>✅ working</td><td>0</td><td>$2.46 (productive: refine+tie-break)</td></tr>
+  </table>
+  <p>15 of the failures exhausted the retry ladder and surfaced as <code>ERROR — LLM failed after 5 attempts</code>. This is the same class of external transient the plan already noted at the §2 launch day (K3 unavailable on 429s) — a provider-side availability problem, not a defect in the campaign engine.</p>
+
+  <h2>Why the quorum degradation is a checkpoint miss</h2>
+  <p>With two secondaries down, the RD-quorum collapsed toward single-reviewer decisions:</p>
+  <div style="margin:.6rem 0 1rem">
+    <div style="display:flex;align-items:center;gap:.5rem;margin:.15rem 0;font-size:.85rem"><span style="flex:0 0 14rem"><code>single_review</code> (1 model)</span><span style="flex:1;background:rgba(128,128,128,.15);border-radius:3px;overflow:hidden;height:1.1rem"><span style="display:block;height:100%;border-radius:3px;background:#d9534f;width:67%"></span></span><span style="flex:0 0 3rem;text-align:right;font-variant-numeric:tabular-nums">30</span></div>
+    <div style="display:flex;align-items:center;gap:.5rem;margin:.15rem 0;font-size:.85rem"><span style="flex:0 0 14rem"><code>quorum_consensus</code> (≥2)</span><span style="flex:1;background:rgba(128,128,128,.15);border-radius:3px;overflow:hidden;height:1.1rem"><span style="display:block;height:100%;border-radius:3px;background:#5cb85c;width:27%"></span></span><span style="flex:0 0 3rem;text-align:right;font-variant-numeric:tabular-nums">12</span></div>
+    <div style="display:flex;align-items:center;gap:.5rem;margin:.15rem 0;font-size:.85rem"><span style="flex:0 0 14rem"><code>authoritative_escalation</code></span><span style="flex:1;background:rgba(128,128,128,.15);border-radius:3px;overflow:hidden;height:1.1rem"><span style="display:block;height:100%;border-radius:3px;background:#f0ad4e;width:7%"></span></span><span style="flex:0 0 3rem;text-align:right;font-variant-numeric:tabular-nums">3</span></div>
+    <div style="font-size:.78rem;opacity:.75;margin-top:.3rem">45 persisted reviews before halt — 67% decided by the primary reviewer alone.</div>
+  </div>
+  <p>The plan's §6 risk register names <strong>"review quorum unchanged"</strong> as the load-bearing mitigation against refine churn writing degraded documentation into the accepted catalog. A 1-of-3 effective quorum does not satisfy that invariant. Two consequences drove the halt decision:</p>
+  <ul>
+    <li><strong>Quality risk (hard to reverse):</strong> each accept is an accepted-name documentation rewrite on the live catalog. Under a full rotation ~200 would have landed under the weakened gate; halting bounded that to ~27. The primary reviewer (Luna, the strongest model and the production docs-gen seat) still gated every accept and the deterministic ISN audit re-stamped each batch, so the 27 are not unreviewed — but they lack the two secondary quorum votes.</li>
+    <li><strong>Invalid baseline:</strong> a checkpoint's acceptance rate / cost-per-name only means something under the intended quorum. Numbers gathered mid-outage cannot certify the healthy-path rotation cadence, so continuing would have burned ~$40 for an uninterpretable result.</li>
+  </ul>
+
+  <h2>The ~27 sticky accepts</h2>
+  <p>The names accepted during the outage window had their banned prose removed, so they no longer match the campaign's defect predicates and a re-run will <em>not</em> re-select them. They carry full provenance — <code>StandardNameReview</code> nodes stamped <code>method=single_review</code> plus <code>DocsRevision</code> events — so they are individually identifiable if the lead wants them re-reviewed under a restored quorum. Recommended disposition: leave them (primary-reviewer + score-gate + deterministic-audit accepted) unless a spot-check of their diffs surfaces a quality concern; a targeted re-review query on <code>method=single_review</code> reviews since 2026-07-18 can force them back through the quorum if desired.</p>
+
+  <h2>Checkpoint verdict (rotation 1)</h2>
+  <table>
+    <tr><th>Gate axis</th><th>Threshold</th><th>Rotation 1</th><th>Verdict</th></tr>
+    <tr><td>Review quorum intact</td><td>3-model RD-quorum</td><td>1-of-3 effective (67% single_review)</td><td>❌ MISS — external outage</td></tr>
+    <tr><td>Docs acceptance</td><td>≥ 90%</td><td>not validly measurable under degraded quorum</td><td>— void</td></tr>
+    <tr><td>Banned prose reintroduced</td><td>0</td><td>0 observed in the partial window</td><td>PASS (partial)</td></tr>
+    <tr><td>Name-identity drift</td><td>0</td><td>0 (docs-only refine events on unchanged ids)</td><td>PASS (partial)</td></tr>
+    <tr><td>Refine claim-race waste (gate a)</td><td>&lt; 5%</td><td>0% observed — the launch-gate fix held; waste here was upstream reviewer spend, a different axis</td><td>PASS</td></tr>
+    <tr><td>Cost/name</td><td>≈ $0.20</td><td>not validly measurable (retry waste from outage)</td><td>— void</td></tr>
+  </table>
+  <p><strong>Disposition: HALT + re-run.</strong> The miss is on an external precondition, so the response is to re-run rotation 1 unchanged once the two reviewer models recover — not to change the campaign. The stratified selection is self-pruning, so the re-run re-stratifies over the remaining 1,409 and the ~27 already-fixed names stay out.</p>
+
+  <h2>Incidental catalog-health signals (startup ledger, pre-existing)</h2>
+  <p>The run's always-on startup audits surfaced pre-existing conditions unrelated to the campaign, logged here for the record: 24 live names with no recoverable producing source; 10 live names still fed by DD paths absent from the current DD (re-anchor or retire); and 2 <code>flux_at_wall</code> parents with heterogeneous child units (<code>m^-2.s^-1</code> vs <code>W.m^-2</code>) skipped pending manual review. None block the campaign; each is a candidate for a separate provenance/units pass.</p>
+
+  <h2>What's next</h2>
+  <p>Re-run rotation 1 when OpenRouter reviewer availability recovers (verify with a 3-name smoke first — see the evergreen §5 NEXT card). The command and checkpoint criteria are unchanged; <code>f-docs-campaign-rotations</code> remains the driver. If the outage persists, the lead may elect a different <code>--reviewer-profile</code> (e.g. <code>opus-only</code>) for the re-run, accepting that it establishes a different quality baseline than the default 3-model quorum.</p>
+</main>
+</body>
+</html>

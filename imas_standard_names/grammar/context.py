@@ -6,12 +6,18 @@ external tools such as imas-codex. The main entry point is
 conventions, and LLM orientation data into a single dictionary.
 """
 
+import copy
+import functools
+import hashlib
+import json
+import os
+import tempfile
 from importlib import resources
+from pathlib import Path
 from typing import Any
 
 import yaml
 
-import imas_standard_names.grammar.model_types as grammar_types
 from imas_standard_names.grammar.constants import (
     APPLICABILITY_EXCLUDE,
     APPLICABILITY_INCLUDE,
@@ -20,17 +26,13 @@ from imas_standard_names.grammar.constants import (
     SEGMENT_ORDER,
     SEGMENT_RULES,
     SEGMENT_TEMPLATES,
+    SEGMENT_TOKEN_MAP,
 )
 from imas_standard_names.grammar.field_schemas import (
     DOCUMENTATION_GUIDANCE,
     FIELD_GUIDANCE,
     NAMING_GUIDANCE,
     TYPE_SPECIFIC_REQUIREMENTS,
-)
-from imas_standard_names.grammar.support import enum_values
-from imas_standard_names.grammar.tag_types import (
-    PRIMARY_TAG_DESCRIPTIONS,
-    SECONDARY_TAG_DESCRIPTIONS,
 )
 from imas_standard_names.grammar_codegen.spec import IncludeLoader
 
@@ -137,12 +139,31 @@ def _get_segment_descriptions() -> dict[str, str]:
 def _get_vocabulary_description(segment_id: str) -> str:
     """Generate a human-readable vocabulary description."""
     descriptions = {
-        "component": "Spatial or field-aligned direction (e.g., radial, toroidal, parallel)",
+        "component": (
+            "Directional projection or direction-dependent quantity. "
+            "radial is cylindrical R; "
+            "flux_surface_normal is outward toward increasing flux label; "
+            "perpendicular is magnetic-field-relative; local tangential "
+            "directions are the e1/e2 tangents of the DD-defined object-local "
+            "right-handed frame, with plasma-facing normal e3, positive-phi e1, "
+            "and e2 = e3 x e1; e2 is not global vertical"
+        ),
+        "section_plane": (
+            "Plane containing a cross section; poloidal_plane is an explicit "
+            "section-plane prefix, distinct from the poloidal axis projection"
+        ),
+        "geometry_representation": (
+            "Object-local geometry representation; local_circle_radius names "
+            "a circular-arc radius, not the global radial coordinate"
+        ),
         "subject": "Particle species or plasma component (e.g., electron, ion, deuterium)",
         "object": "Physical object, diagnostic hardware, or equipment (e.g., flux_loop, bolometer)",
         "position": "Spatial location where field is evaluated (use with at_ template)",
         "geometry": "Intrinsic geometric property of the object (use with of_ template)",
+        "path": "Path-like position a quantity varies along, e.g. a diagnostic chord (use with along_ template)",
         "process": "Physical process or mechanism (e.g., conduction, ohmic, radiation)",
+        "zone": "Plasma-region / geometric sub-selector prefix (e.g., core, edge, inner, outer, upper, lower)",
+        "channel": "Transport channel — WHAT is transported (heat, particle, energy, momentum)",
     }
     return descriptions.get(segment_id, "")
 
@@ -175,26 +196,26 @@ def _build_template_application_rule() -> str:
 
 
 def _build_vocabulary_sections() -> list[dict[str, Any]]:
-    """Build per-segment vocabulary sections with token lists and descriptions."""
+    """Build per-segment vocabulary sections with token lists and descriptions.
+
+    Uses ``SEGMENT_TOKEN_MAP`` as the single source of truth for all segment
+    tokens — this includes segments loaded from YAML vocabularies
+    (physical_base, device, region, qualifier) as well as enum-backed segments.
+    """
     sections: list[dict[str, Any]] = []
 
-    segment_enum_map: dict[str, str] = {
-        "component": "Component",
-        "coordinate": "Component",
-        "subject": "Subject",
-        "object": "Object",
-        "position": "Position",
-        "geometry": "Position",
-        "process": "Process",
-        "geometric_base": "GeometricBase",
-    }
+    # Iterate SEGMENT_ORDER first (preserves canonical display order),
+    # then append any segments in TOKEN_MAP but not in ORDER (e.g. qualifier).
+    seen: set[str] = set()
+    ordered_segments = list(SEGMENT_ORDER)
+    for seg_id in SEGMENT_TOKEN_MAP:
+        if seg_id not in seen and seg_id not in SEGMENT_ORDER:
+            ordered_segments.append(seg_id)
+    for seg_id in ordered_segments:
+        seen.add(seg_id)
 
-    for seg_id in SEGMENT_ORDER:
-        enum_name = segment_enum_map.get(seg_id)
-        if enum_name and hasattr(grammar_types, enum_name):
-            tokens = enum_values(getattr(grammar_types, enum_name))
-        else:
-            tokens = []
+    for seg_id in ordered_segments:
+        tokens = sorted(SEGMENT_TOKEN_MAP.get(seg_id, ()))
 
         section: dict[str, Any] = {
             "segment": seg_id,
@@ -222,16 +243,19 @@ def _build_anti_patterns() -> list[dict[str, str]]:
             "example_right": "radial_position_of_flux_loop",
         },
         {
-            "mistake": "Using coordinate with physical_base",
-            "correction": "Use component with physical_base instead",
-            "example_wrong": "radial_magnetic_field",
-            "example_right": "radial_component_of_magnetic_field",
+            "mistake": "Using the retired long component form with physical_base",
+            "correction": (
+                "Use the short form <axis>_<physical_base>; "
+                "the <axis>_component_of_<base> spelling does not parse"
+            ),
+            "example_wrong": "radial_component_of_magnetic_field",
+            "example_right": "radial_magnetic_field",
         },
         {
             "mistake": "Including units in the name",
-            "correction": "Use the unit field in the YAML entry",
+            "correction": "Use the unit field in the YAML entry (e.g. unit: eV)",
             "example_wrong": "temperature_in_eV",
-            "example_right": "electron_temperature (unit: eV)",
+            "example_right": "electron_temperature",
         },
         {
             "mistake": "Using camelCase or spaces",
@@ -240,10 +264,13 @@ def _build_anti_patterns() -> list[dict[str, str]]:
             "example_right": "electron_temperature",
         },
         {
-            "mistake": "Mixing device and object segments",
-            "correction": "Use device for dynamic signals, object for static properties",
-            "example_wrong": "area_of_flux_loop (with device segment)",
-            "example_right": "flux_loop_voltage (device) vs area_of_flux_loop (object)",
+            "mistake": "Using the device prefix when authoring new instrument names",
+            "correction": (
+                "Attach the instrument as the of_<entity> postfix locus; "
+                "the device-prefix form is retained for parse compatibility only"
+            ),
+            "example_wrong": "flux_loop_voltage",
+            "example_right": "voltage_of_flux_loop",
         },
         {
             "mistake": "Mixing geometry and position segments",
@@ -259,80 +286,130 @@ def _build_anti_patterns() -> list[dict[str, str]]:
 # ---------------------------------------------------------------------------
 
 
+def _build_quick_start_steps() -> dict[str, str]:
+    """Ordered quick-start steps for composing names (single source).
+
+    Consumed both by :func:`_build_quick_start` (the newline-joined string in
+    the LLM context) and by the MCP grammar tool's overview payload, so the
+    step text is authored exactly once.
+    """
+    return {
+        "1_choose_base": (
+            "Either physical_base (for physics quantities) OR geometric_base "
+            "(for geometric/spatial quantities)"
+        ),
+        "2_add_modifiers": (
+            "Add optional segments: component/coordinate (vectors), subject "
+            "(species), equipment via an of_<entity> postfix locus, "
+            "position/geometry "
+            "(location), process (mechanism)"
+        ),
+        "3_check_exclusivity": (
+            "Critical: component with physical_base; coordinate with "
+            "geometric_base; author device signals and static object properties "
+            "with an of_<entity> locus (voltage_of_flux_loop, "
+            "area_of_flux_loop); device-prefix names such as flux_loop_voltage "
+            "are retained for parse compatibility only"
+        ),
+        "4_apply_templates": (
+            "Templates transform tokens (see 'templates' field): radial + "
+            "magnetic_field -> radial_magnetic_field"
+        ),
+        "5_compose": ("Use compose_standard_name tool to validate composition"),
+    }
+
+
 def _build_quick_start() -> str:
     """Build the quick-start guide for composing names."""
+    steps = _build_quick_start_steps()
     return (
-        "1. Choose a base: physical_base (for physics quantities) "
-        "or geometric_base (for geometric/spatial quantities).\n"
-        "2. Add optional modifiers: component/coordinate (vectors), "
-        "subject (species), object/device (equipment), "
-        "position/geometry (location), process (mechanism).\n"
-        "3. Check exclusivity: component with physical_base only; "
-        "coordinate with geometric_base only; "
-        "device for dynamic signals, object for static properties.\n"
+        f"1. Choose a base: {steps['1_choose_base']}.\n"
+        f"2. Add optional modifiers: "
+        f"{steps['2_add_modifiers'].split(': ', 1)[-1]}.\n"
+        f"3. Check exclusivity: "
+        f"{steps['3_check_exclusivity'].split(': ', 1)[-1]}.\n"
         "4. Apply templates: templates transform tokens "
-        "(e.g., radial + component template -> radial_component_of).\n"
+        "(e.g., radial + magnetic_field -> radial_magnetic_field).\n"
         "5. Compose: use compose_standard_name tool to validate composition."
     )
 
 
 def _build_common_patterns() -> list[dict[str, str]]:
-    """Build common naming pattern examples."""
+    """Build common naming pattern examples.
+
+    Each entry carries a ``description`` (a short mechanism gloss, empty when
+    the formula speaks for itself). This is the single source consumed both by
+    the LLM context and by the MCP grammar tool's overview payload.
+    """
     return [
         {
             "pattern": "bare_quantity",
             "formula": "physical_base",
-            "example": "temperature",
+            "example": "safety_factor",
+            "description": "simple unqualified quantity",
         },
         {
             "pattern": "vector_quantity",
             "formula": "physical_base",
             "example": "magnetic_field",
+            "description": "vector without component decomposition",
         },
         {
             "pattern": "vector_component",
             "formula": "component + physical_base",
-            "example": "radial_component_of_magnetic_field",
+            "example": "radial_magnetic_field",
+            "description": "",
         },
         {
             "pattern": "species_quantity",
             "formula": "subject + physical_base",
             "example": "electron_temperature",
+            "description": "",
         },
         {
             "pattern": "species_vector",
             "formula": "component + subject + physical_base",
-            "example": "radial_component_of_electron_heat_flux",
+            "example": "radial_electron_heat_flux",
+            "description": "",
         },
         {
             "pattern": "spatial_coordinate",
             "formula": "coordinate + geometric_base + object",
             "example": "radial_position_of_flux_loop",
+            "description": "",
         },
         {
             "pattern": "device_signal",
-            "formula": "device + physical_base",
-            "example": "flux_loop_voltage",
+            "formula": "physical_base + of_<entity> locus",
+            "example": "voltage_of_flux_loop",
+            "description": (
+                "signal from instrument; the device-prefix form "
+                "'flux_loop_voltage' is parse-compatible but not for authoring"
+            ),
         },
         {
             "pattern": "object_property",
             "formula": "physical_base + object",
             "example": "area_of_flux_loop",
+            "description": "static property OF object",
         },
         {
             "pattern": "field_at_location",
             "formula": "physical_base + position",
             "example": "electron_temperature_at_magnetic_axis",
+            "description": "",
         },
         {
             "pattern": "property_of_geometry",
             "formula": "physical_base + geometry",
-            "example": "major_radius_of_plasma_boundary",
+            "example": "elongation_of_plasma_boundary",
+            "description": "",
         },
         {
             "pattern": "with_process",
             "formula": "physical_base + process",
-            "example": "power_due_to_ohmic",
+            "example": "power_due_to_ohmic_heating",
+            "description": "attributed to mechanism",
         },
     ]
 
@@ -352,8 +429,11 @@ def _build_critical_distinctions() -> list[dict[str, str]]:
         {
             "pair": "device vs object",
             "rule": (
-                "device: dynamic signals from device (flux_loop_voltage); "
-                "object: static properties of object (area_of_flux_loop)"
+                "author dynamic device signals with relation syntax "
+                "(voltage_of_flux_loop); the device-prefix form "
+                "(flux_loop_voltage) is retained for parse compatibility only; "
+                "author static object properties with relation syntax "
+                "(area_of_flux_loop)"
             ),
         },
         {
@@ -388,10 +468,10 @@ def _build_base_requirements() -> dict[str, Any]:
             "example": "radial_position_of_flux_loop",
         },
         "physical_base": {
-            "type": "Open vocabulary",
+            "type": "Closed vocabulary",
             "guidance": (
-                "Use standard physics terminology "
-                "(temperature, density, pressure, magnetic_field, etc.)"
+                "Use ONLY tokens from the physical_bases registry. "
+                "Unknown tokens are rejected in strict mode."
             ),
             "qualification": (
                 "Typically qualified with subject (electron_temperature) "
@@ -399,7 +479,7 @@ def _build_base_requirements() -> dict[str, Any]:
             ),
             "vector_prefix": "Use component (not coordinate) for vector components",
             "units": "Must have standardizable physical units",
-            "example": "radial_component_of_magnetic_field",
+            "example": "radial_magnetic_field",
         },
         "choice": "Exactly one base (geometric_base or physical_base) is required.",
     }
@@ -488,6 +568,192 @@ def _build_vocabulary_usage_stats() -> dict[str, Any]:
 
 
 # ---------------------------------------------------------------------------
+# Cross-process payload cache
+# ---------------------------------------------------------------------------
+
+CACHE_ENABLE_ENV = "IMAS_STANDARD_NAMES_CONTEXT_CACHE"
+CACHE_DIR_ENV = "IMAS_STANDARD_NAMES_CACHE_DIR"
+_CACHE_SUBDIR = "grammar-context"
+_CACHE_RETAIN = 8
+_DISABLE_VALUES = frozenset({"0", "off", "no", "false"})
+
+_PACKAGE_DIR = Path(__file__).resolve().parent.parent
+_GRAMMAR_DIR = Path(__file__).resolve().parent
+
+
+def _cache_enabled() -> bool:
+    """Whether the on-disk payload cache may be read or written."""
+    return os.environ.get(CACHE_ENABLE_ENV, "").strip().lower() not in _DISABLE_VALUES
+
+
+def _cache_dir() -> Path:
+    """Per-user cache directory holding serialised context payloads.
+
+    Honours ``IMAS_STANDARD_NAMES_CACHE_DIR``, then ``platformdirs`` when it is
+    importable, then ``XDG_CACHE_HOME``, then ``~/.cache``.
+    """
+    if override := os.environ.get(CACHE_DIR_ENV):
+        return Path(override).expanduser() / _CACHE_SUBDIR
+    try:
+        from platformdirs import user_cache_dir
+
+        base = Path(user_cache_dir("imas-standard-names"))
+    except Exception:
+        xdg = os.environ.get("XDG_CACHE_HOME")
+        root = Path(xdg).expanduser() if xdg else Path.home() / ".cache"
+        base = root / "imas-standard-names"
+    return base / _CACHE_SUBDIR
+
+
+def _distribution_version() -> str:
+    """Installed distribution version, or an empty string when unavailable."""
+    try:
+        from importlib.metadata import version
+
+        return version("imas-standard-names")
+    except Exception:
+        return ""
+
+
+def _fingerprint_paths() -> list[Path]:
+    """Every packaged file whose content shapes the payload.
+
+    All Python modules of the package (the builders themselves, the
+    code-generated segment constants, and the models the payload reflects) plus
+    the grammar specification and every YAML vocabulary beside it.
+    """
+    paths = sorted(_PACKAGE_DIR.rglob("*.py"))
+    paths += sorted(_GRAMMAR_DIR.rglob("*.yml"))
+    paths += sorted(_GRAMMAR_DIR.rglob("*.yaml"))
+    return paths
+
+
+def _source_digest() -> str:
+    """Digest the bytes of every packaged input plus the distribution version.
+
+    Hashing content rather than tracking a version constant means an edited
+    vocabulary token or an edited builder yields a different key on the next
+    process, with nothing to remember to bump.
+    """
+    digest = hashlib.blake2b(digest_size=32)
+    digest.update(_distribution_version().encode())
+    for path in _fingerprint_paths():
+        digest.update(path.relative_to(_PACKAGE_DIR).as_posix().encode())
+        digest.update(path.read_bytes())
+    return digest.hexdigest()
+
+
+def _catalog_digest() -> str:
+    """Digest the catalog entries that ``_build_vocabulary_usage_stats`` scans.
+
+    Keyed on the resolved catalog location plus ``(relative path, size,
+    mtime_ns)`` for each catalog YAML file — a size/mtime fingerprint rather
+    than file content, because a production catalog holds thousands of entries
+    and reading them all would cost as much as the scan the cache avoids. An
+    edit that preserves both size and mtime_ns is therefore invisible; every
+    ordinary write changes mtime_ns. Derived artifacts under dot-directories
+    (the generated SQLite catalog, version control) are excluded so they cannot
+    invalidate the key on their own.
+    """
+    digest = hashlib.blake2b(digest_size=32)
+    try:
+        from imas_standard_names.paths import get_default_catalog_path
+
+        root = get_default_catalog_path()
+    except Exception:
+        root = None
+
+    if root is None:
+        digest.update(b"absent")
+        return digest.hexdigest()
+
+    root = Path(root)
+    digest.update(str(root).encode())
+    try:
+        if root.is_file():
+            entries = [root]
+        else:
+            entries = sorted(
+                path
+                for pattern in ("*.yml", "*.yaml")
+                for path in root.rglob(pattern)
+                if not any(
+                    part.startswith(".") for part in path.relative_to(root).parts
+                )
+            )
+        for path in entries:
+            stat = path.stat()
+            relative = path.name if path == root else path.relative_to(root).as_posix()
+            digest.update(relative.encode())
+            digest.update(f"{stat.st_size}:{stat.st_mtime_ns}".encode())
+    except OSError:
+        # An unreadable catalog cannot be fingerprinted; a random key keeps the
+        # process on the rebuild path instead of trusting an unrelated entry.
+        digest.update(os.urandom(16))
+    return digest.hexdigest()
+
+
+def _cache_key() -> str:
+    """Fingerprint of every input the payload is derived from."""
+    combined = hashlib.blake2b(digest_size=16)
+    combined.update(_source_digest().encode())
+    combined.update(_catalog_digest().encode())
+    return combined.hexdigest()
+
+
+def _read_cache_entry(path: Path) -> dict[str, Any] | None:
+    """Load a serialised payload, treating any defect as a cache miss."""
+    try:
+        with path.open(encoding="utf-8") as handle:
+            payload = json.load(handle)
+    except (OSError, ValueError):
+        return None
+    return payload if isinstance(payload, dict) else None
+
+
+def _write_cache_entry(path: Path, payload: dict[str, Any]) -> None:
+    """Serialise a payload so concurrent readers only ever see a whole file.
+
+    The payload is written to a temporary file in the destination directory and
+    moved into place with :func:`os.replace`, which is atomic within a
+    filesystem. Any failure is silently dropped — the cache is an accelerator,
+    never a dependency.
+    """
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        handle = tempfile.NamedTemporaryFile(
+            mode="w",
+            encoding="utf-8",
+            dir=path.parent,
+            prefix=f"{path.stem}.",
+            suffix=".tmp",
+            delete=False,
+        )
+        try:
+            with handle:
+                json.dump(payload, handle)
+            os.replace(handle.name, path)
+        except BaseException:
+            Path(handle.name).unlink(missing_ok=True)
+            raise
+    except OSError:
+        return
+    _prune_cache(path.parent)
+
+
+def _prune_cache(directory: Path) -> None:
+    """Keep the newest few entries so superseded fingerprints do not pile up."""
+    try:
+        entries = sorted(
+            directory.glob("*.json"), key=lambda p: p.stat().st_mtime_ns, reverse=True
+        )
+        for stale in entries[_CACHE_RETAIN:]:
+            stale.unlink(missing_ok=True)
+    except OSError:
+        return
+
+
+# ---------------------------------------------------------------------------
 # Public API
 # ---------------------------------------------------------------------------
 
@@ -497,9 +763,54 @@ def get_grammar_context() -> dict[str, Any]:
 
     Aggregates grammar mechanics, naming conventions, and LLM orientation
     context into a single dictionary suitable for external consumers.
-    Includes the vNext 5-group IR context alongside the rc20 surface
-    for the duration of the rc21 transition (plan 38 W2b).
+    Includes the 5-group IR context alongside the flat segment surface.
+
+    The payload is derived from static vocabulary data plus a full catalog scan
+    (usage statistics), which costs tens of seconds. It is memoised per process
+    and persisted to a per-user cache directory keyed on a fingerprint of every
+    input — package sources, grammar specification, YAML vocabularies, and the
+    catalog files the scan reads — so a fresh process reloads it instead of
+    rebuilding it, and any input change yields a different key.
+
+    Set ``IMAS_STANDARD_NAMES_CONTEXT_CACHE=0`` to always rebuild, and
+    ``IMAS_STANDARD_NAMES_CACHE_DIR`` to relocate the cache directory.
+
+    Each call returns a deep copy of the mutable payload fields, so callers may
+    freely mutate those portions of their view. The
+    ``grammar.advisory_aliases`` mapping remains recursively immutable because
+    it is validated policy guidance rather than caller-owned working data.
     """
+    return copy.deepcopy(_load_or_build_context())
+
+
+@functools.lru_cache(maxsize=1)
+def _load_or_build_context() -> dict[str, Any]:
+    """Return the payload from the disk cache, building and storing it if absent."""
+    from imas_standard_names.grammar.loader import freeze_advisory_aliases
+
+    if not _cache_enabled():
+        return _build_full_context()
+
+    path = _cache_dir() / f"{_cache_key()}.json"
+    if (payload := _read_cache_entry(path)) is not None:
+        grammar = payload.get("grammar")
+        if isinstance(grammar, dict) and isinstance(
+            grammar.get("advisory_aliases"), dict
+        ):
+            grammar["advisory_aliases"] = freeze_advisory_aliases(
+                grammar["advisory_aliases"]
+            )
+        return payload
+
+    payload = _build_full_context()
+    _write_cache_entry(path, payload)
+    return payload
+
+
+@functools.lru_cache(maxsize=1)
+def _build_full_context() -> dict[str, Any]:
+    from imas_standard_names.grammar.terms import standard_terms
+
     return {
         # Grammar mechanics
         "canonical_pattern": _build_canonical_pattern(),
@@ -513,10 +824,6 @@ def get_grammar_context() -> dict[str, Any]:
         "documentation_guidance": DOCUMENTATION_GUIDANCE,
         "kind_definitions": _build_kind_definitions(),
         "anti_patterns": _build_anti_patterns(),
-        "tag_descriptions": {
-            "primary": PRIMARY_TAG_DESCRIPTIONS,
-            "secondary": SECONDARY_TAG_DESCRIPTIONS,
-        },
         "applicability": {
             "include": list(APPLICABILITY_INCLUDE),
             "exclude": list(APPLICABILITY_EXCLUDE),
@@ -531,26 +838,29 @@ def get_grammar_context() -> dict[str, Any]:
         "base_requirements": _build_base_requirements(),
         # Vocabulary usage statistics
         "vocabulary_usage_stats": _build_vocabulary_usage_stats(),
-        # vNext 5-group IR context (plan 38 W2b). Single ISN → codex
-        # contract point for the rc21 transition.
-        "vnext": _build_vnext_context(),
+        # Grammar 5-group IR context — the single ISN → codex contract point.
+        "grammar": _build_grammar_context(),
+        "standard_terms": [term.model_dump(mode="json") for term in standard_terms()],
     }
 
 
 # ---------------------------------------------------------------------------
-# vNext 5-group IR context builder (plan 38 W2b)
+# Grammar 5-group IR context builder
 # ---------------------------------------------------------------------------
 
 
-def _build_vnext_context() -> dict[str, Any]:
-    """Build a compact view of the vNext grammar for external consumers.
+def _build_grammar_context() -> dict[str, Any]:
+    """Build a compact view of the grammar for external consumers.
 
     Returns a dict with keys: ``ir_groups`` (the 5 IR slots + mechanism),
     ``vocabularies`` (tokens per closed-vocab file), ``locus_relation_matrix``,
-    ``canonical_templates``, and ``parse_api`` (callable names).
+    ``advisory_aliases`` (validated policy guidance), ``canonical_templates``,
+    and ``parse_api`` (public callables plus validation and projection modes).
 
-    Any loader failure yields an empty field but never raises — consumers
-    must tolerate partial population during the W2a vocabulary roll-out.
+    Optional vocabulary-enrichment loader failures yield empty fields, so
+    consumers must tolerate partially populated vocabularies. Advisory-alias
+    policy is required and validated fail-closed: a defect raises instead of
+    exposing partial or unverified guidance.
     """
 
     from imas_standard_names.grammar import vocab_loaders
@@ -558,6 +868,7 @@ def _build_vnext_context() -> dict[str, Any]:
         BINARY_SEPARATORS,
         LOCUS_RELATION_MATRIX,
     )
+    from imas_standard_names.grammar.loader import load_advisory_aliases
 
     def _safe(fn, default):  # type: ignore[no-untyped-def]
         try:
@@ -570,6 +881,14 @@ def _build_vnext_context() -> dict[str, Any]:
     ops = _safe(vocab_loaders.load_operators, None)
     bases = _safe(vocab_loaders.load_physical_bases, None)
     carriers = _safe(vocab_loaders.load_geometry_carriers, None)
+    qualifier_category_of = _safe(vocab_loaders.load_qualifier_categories, {})
+    section_planes = _safe(vocab_loaders.load_section_planes, frozenset())
+    geometry_representations = _safe(
+        vocab_loaders.load_geometry_representations, frozenset()
+    )
+    qualifier_categories: dict[str, list[str]] = {}
+    for token, category in qualifier_category_of.items():
+        qualifier_categories.setdefault(category, []).append(token)
 
     return {
         "ir_groups": [
@@ -586,6 +905,9 @@ def _build_vnext_context() -> dict[str, Any]:
                 token: {
                     "type": entry.type,
                     "allowed_relations": list(entry.allowed_relations),
+                    "definition": entry.definition,
+                    "abbreviations": list(entry.abbreviations),
+                    "references": list(entry.references),
                 }
                 for token, entry in (loci.loci.items() if loci else ())
             },
@@ -595,33 +917,51 @@ def _build_vnext_context() -> dict[str, Any]:
                     "precedence": entry.precedence,
                     "separator": entry.separator,
                     "indexed": entry.indexed,
+                    "semantic_effects": sorted(entry.semantic_effects),
                 }
                 for token, entry in (ops.operators.items() if ops else ())
             },
             "physical_bases": sorted(bases.bases) if bases else [],
             "geometry_carriers": sorted(carriers.carriers) if carriers else [],
+            "section_planes": sorted(section_planes),
+            "geometry_representations": sorted(geometry_representations),
+            "qualifier_categories": qualifier_categories,
         },
         "locus_relation_matrix": {
             locus_type.value: sorted(r.value for r in relations)
             for locus_type, relations in LOCUS_RELATION_MATRIX.items()
         },
         "binary_separators": sorted(BINARY_SEPARATORS),
+        "advisory_aliases": load_advisory_aliases(),
         "canonical_templates": {
             "unary_prefix": "<op>_of_<inner>",
             "unary_postfix": "<inner>_<op>",
             "binary": "<op>_of_<A>_<separator>_<B>",
-            "projection_component": "<axis>_component_of_<base>",
-            "projection_coordinate": "<axis>_coordinate_of_<carrier>",
+            "projection_component": "<axis>_<base>",
+            "projection_coordinate": "<axis>_<carrier>",
+            "section_plane": "<plane>_plane_<cross_sectional_quantity>",
+            "geometry_representation": "<representation>_<quantity>_of_<owner>",
             "locus": "<core>_<relation>_<locus_token>",
             "mechanism": "<core>_due_to_<process>",
         },
         "parse_api": {
-            "parse": "imas_standard_names.grammar.parser:parse",
-            "compose": "imas_standard_names.grammar.render:compose",
-            "validate_round_trip": (
-                "imas_standard_names.grammar.parser:validate_round_trip"
-            ),
-            "ir_model": "imas_standard_names.grammar.ir:StandardNameIR",
+            "parse": "imas_standard_names:parse",
+            "compose": "imas_standard_names:compose",
+            "validate_round_trip": "imas_standard_names:validate_round_trip",
+            "ir_model": "imas_standard_names:StandardNameIR",
+            "validity_oracle": {
+                "call": "imas_standard_names:parse",
+                "arguments": {"strict": True},
+            },
+            "default_parse_mode": "diagnostic",
+            "round_trip_mode": "diagnostic_only",
+            "flat_projection": {
+                "call": "imas_standard_names.grammar.model:parse_standard_name",
+                "validation": "strict",
+                "representation": "flat",
+                "ordered_ir": "may_reject_unrepresentable",
+            },
+            "operator_chain_order": "outermost_first",
         },
     }
 

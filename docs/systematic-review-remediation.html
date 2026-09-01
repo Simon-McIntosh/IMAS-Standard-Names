@@ -1,0 +1,646 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"   content="imas-standard-names">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="systematic-review-remediation">
+  <meta name="plan-title" content="Systematic Review Remediation">
+  <meta name="plan-summary" content="Backlog residual for neutral-state naming and state-convention grammar cleanup. Graph repair, clear-gate, and release-stub mechanics were transferred to imas-codex; this plan is no longer an active execution programme and does not block the geometry grammar prerequisite.">
+  <meta name="plan-status" content="pending">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort" content="XL">
+  <title>Systematic Review Remediation | imas-standard-names</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-08-10">
+<meta name="plan-impl" content="0.85">
+<meta name="plan-version" content="12">
+<meta name="plan-blocks" content="">
+<meta name="plan-capability-version" content="1.0">
+<meta name="plan-capability-class" content="orchestrator">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h2 id="s1">§1 — Purpose and source</h2>
+    <p>
+      This plan turns the ranked recommendations of the
+      <a href="/imas-standard-names/standard-names-systematic-review.html">Standard Names Systematic Review</a>
+      (§10 of that document) into six ordered, shippable phases with locked decisions. Everything the review
+      fixed in-session is excluded; everything it ranked as a recommendation is here, plus two governing
+      directives from the lead that shape the architecture:
+    </p>
+    <ul>
+      <li><strong>Deprecation applies to accepted names only.</strong> Rename chains among draft names carry
+        no governance value — a draft name has no consumers to break. Only an accepted name that is renamed
+        or superseded leaves a deprecation stub behind.</li>
+      <li><strong><code>sn edit</code> must run the full pipeline validation stack.</strong> The original
+        intent of the tool is that an edit is <em>additional external pressure steering the existing
+        pipeline</em> — never a bypass around it. Every edit path must funnel its results through exactly
+        the gates a pipeline-generated name passes.</li>
+    </ul>
+    <figure>
+      <svg viewBox="0 0 980 210" role="img" aria-label="Phase dependency graph" style="max-width:100%;height:auto;font-family:system-ui">
+        <defs>
+          <marker id="parr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="#374151"/>
+          </marker>
+        </defs>
+        <g font-size="13" fill="#111827">
+          <rect x="10"  y="30" width="180" height="52" fill="#ffffff" stroke="#374151"/>
+          <text x="100" y="52" text-anchor="middle" font-weight="600">P1 Deprecation</text>
+          <text x="100" y="70" text-anchor="middle" font-size="12">accepted-only trail</text>
+          <rect x="10"  y="120" width="180" height="52" fill="#ffffff" stroke="#374151"/>
+          <text x="100" y="142" text-anchor="middle" font-weight="600">P2 Edit parity</text>
+          <text x="100" y="160" text-anchor="middle" font-size="12">sn edit = pipeline gates</text>
+          <rect x="270" y="30" width="180" height="52" fill="#ffffff" stroke="#374151"/>
+          <text x="360" y="52" text-anchor="middle" font-weight="600">P3 Referential</text>
+          <text x="360" y="70" text-anchor="middle" font-size="12">links + z-axis docs</text>
+          <rect x="270" y="120" width="180" height="52" fill="#ffffff" stroke="#374151"/>
+          <text x="360" y="142" text-anchor="middle" font-weight="600">P4 Unit repairs</text>
+          <text x="360" y="160" text-anchor="middle" font-size="12">momentum, flux families</text>
+          <rect x="530" y="75" width="180" height="52" fill="#ffffff" stroke="#374151"/>
+          <text x="620" y="97" text-anchor="middle" font-weight="600">P5 Vocabulary</text>
+          <text x="620" y="115" text-anchor="middle" font-size="12">curation + grammar closes</text>
+          <rect x="790" y="75" width="180" height="52" fill="#ffffff" stroke="#374151"/>
+          <text x="880" y="97" text-anchor="middle" font-weight="600">P6 Hardening</text>
+          <text x="880" y="115" text-anchor="middle" font-size="12">pipeline ops + migration</text>
+        </g>
+        <g stroke="#374151" stroke-width="1.2" fill="none" marker-end="url(#parr)">
+          <line x1="190" y1="56"  x2="268" y2="56"/>
+          <line x1="190" y1="146" x2="268" y2="146"/>
+          <line x1="100" y1="82"  x2="100" y2="118" stroke-dasharray="4 3"/>
+          <line x1="450" y1="146" x2="530" y2="115"/>
+          <line x1="450" y1="56"  x2="530" y2="90"/>
+          <line x1="710" y1="101" x2="788" y2="101"/>
+        </g>
+        <g font-size="11" fill="#374151">
+          <text x="105" y="104">stubs use rename plumbing</text>
+          <text x="229" y="50" text-anchor="middle">gates</text>
+          <text x="229" y="140" text-anchor="middle">edits</text>
+        </g>
+      </svg>
+      <figcaption>Phase order. P1 and P2 are the architectural phases; P4 must not start before P2 (repairs are edits and must be steered through the validated pipeline) and benefits from P1 (renames of accepted names then leave stubs). P3 can run in parallel. P5 and P6 close the tail.</figcaption>
+    </figure>
+
+    <section id="s2" class="section-landed">
+      <header>
+        <span class="badge badge-shipped">✓ landed 2026-07-10</span>
+        <h2>§2 — P1: Deprecation architecture (accepted names only)</h2>
+      </header>
+      <p class="landed-summary">
+        Export emits <code>status: deprecated</code> stubs for superseded published names with chain collapse
+        (A→B→C ⇒ one A→C stub) and <code>superseded_by</code> pointing at the live successor; accepted exports
+        publish <code>status: active</code>; <code>superseded_from_stage</code> recorded at both supersede sites
+        (published-bar proxy where edit.py destroys the name-axis stage); <code>deprecated_stub_count</code> in
+        <code>.export_report.json</code>; ISN structural rule + successor-forward rendering; <code>sn merge</code>
+        preserves stubs. 17+5 new tests green; ISN suite 1683 passed.
+        Full record: <a href="archive/systematic-review-remediation-s2-landed.html">§2 landed</a>
+        (codex <code>bb76411e</code>, ISN <code>d5d3687</code>).
+      </p>
+    </section>
+
+    <section id="s3" class="section-landed">
+      <header>
+        <span class="badge badge-shipped">✓ landed 2026-07-10</span>
+        <h2>§3 — P2: sn edit validation parity</h2>
+      </header>
+      <p class="landed-summary">
+        Edit-origin artifacts now route through the same validation stack as pooled pipeline candidates
+        (validate_name_candidate + successor validation stamping — no privileged path to accepted); rename
+        cascades preflight-validate every descendant id and roll back atomically on collision; docs-edit claims
+        require docs_stage∈[accepted,exhausted] with filter_protected on persists and an explicit override for
+        catalog-edit-origin docs; family-scope flag and docs reconciled. Parity suite proves grammar-/semantic-/
+        protection-violating edits stopped per mode. 78 tests green.
+        Full record: <a href="archive/systematic-review-remediation-s3-landed.html">§3 landed</a>
+        (codex <code>5777ae32</code>, 792 insertions).
+      </p>
+    </section>
+
+    <section id="s4" class="section-landed">
+      <header>
+        <span class="badge badge-shipped">✓ landed 2026-07-10</span>
+        <h2>§4 — P3: Referential integrity and the z-axis gap</h2>
+      </header>
+      <p class="landed-summary">
+        Referential-integrity check live in <code>validation/semantic.py</code> (structured refs error, inline
+        <code>name:</code> refs warning with promotion knob — d-inline-ref-severity); live catalog measures
+        0 dangling structured, 153 dangling inline across 70 entries (44 unique targets). z-axis root cause:
+        attach-path merges never write documentation; completeness gate added to
+        <code>vector_family_consistency_check</code>. ISN suite 1683 passed.
+        Full record: <a href="archive/systematic-review-remediation-s4-landed.html">§4 landed</a>
+        (ISN <code>af41d50</code>, codex <code>d9d069ec</code>). Prod-graph docs repair + z-name minting queued
+        for the supervised P4 window.
+      </p>
+    </section>
+
+    <section id="s5" class="section-landed">
+      <header>
+        <span class="badge badge-shipped">✓ landed 2026-07-11</span>
+        <h2>§5 — P4: Catalog unit-family repairs (via sn edit, post-parity)</h2>
+      </header>
+      <p class="landed-summary">
+        Supervised production sn-edit repairs, each re-validated through the P2 gate stack, accepted renames
+        stamped superseded_from_stage=accepted for P1 stubs. Momentum→momentum_source: 17 edits, residual
+        check 0 accepted bare *_momentum. Energy-flux: 2 recombination entries folded to particle-flux;
+        energy_flux family uniformly W·m⁻². Power-density: lead-refined — no power_flux base (a flux of power
+        is nonsensical), 6 W·m⁻² entries fold into energy_flux with peaks as maximum_of_energy_flux_at_&lt;locus&gt;.
+        Source/flux near-name validator live (ISN 4d43923). Mixed-unit sweep: principled splits only.
+        Residuals (safe, documented): 3 near-threshold neutral_state successors exhausted (P1 skip-logic ⇒ no
+        dangling stub), one refine-reworded successor draining, the pair supersede
+        (power_density_at_wall→energy_flux_at_wall) staged as a targeted write.
+        Full record: <a href="archive/systematic-review-remediation-s5-landed.html">§5 landed</a>
+        (ISN <code>4d43923</code>; graph edits via the supervised chunk runs).
+      </p>
+    </section>
+
+    <section id="s6" class="section-landed">
+      <header>
+        <span class="badge badge-shipped">✓ landed 2026-07-10</span>
+        <h2>§6 — P5: Vocabulary curation and grammar closes</h2>
+      </header>
+      <p class="landed-summary">
+        Five process synonym families merged to canonical tokens with a re-entry curation gate; 16 catch-all
+        bases gated as generic (0 published casualties); qualifier intra-order enforced by category rank (the 1
+        affected name already canonical); parse-contract documented (parse_standard_name is the oracle);
+        measurement-location advisory 310→0 on the live catalog; tools/grammar.py derives from
+        get_grammar_context(); halo triple-role resolved; regions≡region-typed-loci and binary-operator
+        source-parity gates added. Migration backlog EMPTY — no supervised graph pass needed. Catalog sweep
+        2148 names / 2147 round-trip (1 intentional FSA-gate rejection); suite 1726 passed.
+        Full record: <a href="archive/systematic-review-remediation-s6-landed.html">§6 landed</a>
+        (commits <code>fb98228</code>…<code>fe1968a</code>). Deferred with reasons: binary_operators.yml
+        retirement, Transformation/Decomposition enum dedup (codegen refactors).
+      </p>
+    </section>
+
+    <section id="s7" class="section-landed">
+      <header>
+        <span class="badge badge-shipped">✓ landed 2026-07-10</span>
+        <h2>§7 — P6: Pipeline operational hardening and migration debt</h2>
+      </header>
+      <p class="landed-summary">
+        All debug-scan findings closed or verified already-fixed: regen gated on explicit --min-score,
+        atomic reset, enrich_parents verify-winners (+3 tests), RC dirty-tree policy reconciled, shutdown
+        stage-revert aligned, LinkML edit flags declared, export final-shape validation, escalation fixture
+        repaired, ISNC CI per-issue detail; the review's six "pre-existing failures" were timeout artifacts of
+        an uncached 63 s grammar-context call — fixed ISN-side (b724bbe: lru_cache + deepcopy). Full codex
+        suite 4292 passed / 0 failed, NO carve-outs. Deferred to a supervised soak window: stranded-reviewed
+        promotion (finding 4), claim heartbeat (7), atomic clear (13-clear), ISN pin bump.
+        Full record: <a href="archive/systematic-review-remediation-s7-landed.html">§7 landed</a>
+        (codex f98a5d41…f30b19da, ISNC f063f2c, ISN b724bbe).
+      </p>
+    </section>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="dep-scope" data-choice="accepted-only" data-by="Simon McIntosh" data-when="2026-07-07">
+    <p class="r-dec-q">Which names leave a deprecation trail when renamed or superseded?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="accepted-only">accepted-only</button>
+      <button class="r-opt" data-value="all-names">all-names</button>
+      </p>
+    <p class="r-dec-rat">Lead directive: draft names have no consumers, so rename chains among drafts carry no governance value and would bloat the catalog with stubs nobody needs. Only accepted names emit stubs; stubs are retained until a curator prunes them.</p>
+    </div>
+<div class="r-dec" data-key="edit-validation" data-choice="full-pipeline-parity" data-by="Simon McIntosh" data-when="2026-07-07">
+    <p class="r-dec-q">What validation does sn edit run on its results?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="full-pipeline-parity">full-pipeline-parity</button>
+      <button class="r-opt" data-value="edit-specific-checks">edit-specific-checks</button>
+      </p>
+    <p class="r-dec-rat">Lead directive restoring the tool&#x27;s original intent: an edit is additional external pressure steering the existing pipeline. Every edit-origin artifact passes exactly the gates a pipeline-generated name passes (ISN layer, round-trip, semantic/description, quarantine); no privileged path to accepted.</p>
+    </div>
+<div class="r-dec" data-key="status-mapping" data-choice="active-for-exported-accepted" data-by="review recommendation" data-when="2026-07-07">
+    <p class="r-dec-q">What does the catalog status field mean?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="active-for-exported-accepted">active-for-exported-accepted</button>
+      <button class="r-opt" data-value="keep-all-draft">keep-all-draft</button>
+      <button class="r-opt" data-value="delete-the-field">delete-the-field</button>
+      </p>
+    <p class="r-dec-rat">Exported accepted names publish as status=active; deprecation stubs are the only deprecated entries; draft disappears from the published catalog. A status field that never varies (2124/2124 draft today) carries no information — this mapping activates ISN&#x27;s designed governance semantics.</p>
+    </div>
+<div class="r-dec" data-key="momentum-rename" data-choice="momentum-source-family" data-by="review recommendation" data-when="2026-07-07">
+    <p class="r-dec-q">How to resolve the bare-momentum vs momentum-flux collision?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="momentum-source-family">momentum-source-family</button>
+      <button class="r-opt" data-value="docs-only-clarification">docs-only-clarification</button>
+      </p>
+    <p class="r-dec-rat">The ~30 bare *_momentum entries define momentum source densities and share units with the differently-defined *_momentum_flux family — a naming defect, not a docs defect. Rename to *_momentum_source; add the source/flux validator rule.</p>
+    </div>
+<div class="r-dec" data-key="energy-flux-reserve" data-choice="fold-into-particle-flux" data-by="review recommendation" data-when="2026-07-07">
+    <p class="r-dec-q">How to fix the four energy_flux entries carrying particle-flux units?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="fold-into-particle-flux">fold-into-particle-flux</button>
+      <button class="r-opt" data-value="change-units-to-W.m^-2">change-units-to-W.m^-2</button>
+      </p>
+    <p class="r-dec-rat">Their documentation already admits they are particle arrival fluxes; the honest fix is the name, not the unit. energy_flux is reserved for W·m⁻².</p>
+    </div>
+<div class="r-dec" data-key="power-density" data-choice="rename-to-power-flux" data-by="review recommendation" data-when="2026-07-07">
+    <p class="r-dec-q">How to fix the six W·m⁻² power_density entries?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="rename-to-power-flux">rename-to-power-flux</button>
+      <button class="r-opt" data-value="keep-dual-dimension">keep-dual-dimension</button>
+      </p>
+    <p class="r-dec-rat">power_density means W·m⁻³ in 63 of 69 entries; the six surface-flux outliers rename to *_power_flux_*, and one of the power_density_at_wall / energy_flux_at_wall duplicate pair is deprecated in favour of the other.</p>
+    </div>
+<div class="r-dec" data-key="qualifier-order" data-choice="enforce-category-rank" data-by="review recommendation" data-when="2026-07-07">
+    <p class="r-dec-q">Enforce canonical intra-order on multi-token qualifier segments?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="enforce-category-rank">enforce-category-rank</button>
+      <button class="r-opt" data-value="leave-unordered">leave-unordered</button>
+      </p>
+    <p class="r-dec-rat">Two spellings for one concept violates the grammar&#x27;s core one-name invariant; the zone mechanism already exists; exactly one published name is affected, so the cost only grows with delay.</p>
+    </div>
+<div class="r-dec" data-key="base-catchalls" data-choice="gate-as-generic" data-by="review recommendation" data-when="2026-07-07">
+    <p class="r-dec-q">What to do with the ~16 catch-all physical_bases tokens?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="gate-as-generic">gate-as-generic</button>
+      <button class="r-opt" data-value="delete-tokens">delete-tokens</button>
+      <button class="r-opt" data-value="leave-ungated">leave-ungated</button>
+      </p>
+    <p class="r-dec-rat">Gating (require qualification) matches the existing treatment of current/power/temperature and keeps legitimate compounds composable; deletion would break real names. Consistency of the gating policy is the point.</p>
+    </div>
+<div class="r-dec" data-key="processes-dedup" data-choice="merge-to-canonical" data-by="review recommendation" data-when="2026-07-07">
+    <p class="r-dec-q">How to deduplicate the processes.yml synonym families?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="merge-to-canonical">merge-to-canonical</button>
+      <button class="r-opt" data-value="freeze-as-is">freeze-as-is</button>
+      </p>
+    <p class="r-dec-rat">One canonical token per mechanism; affected names migrate via P2-parity edits; a curation gate stops rotation harvests reintroducing merged synonyms. Freezing would preserve three spellings of thermalization forever.</p>
+    </div>
+<div class="r-dec" data-key="parse-contract" data-choice="parse-standard-name-is-oracle" data-by="review recommendation" data-when="2026-07-07">
+    <p class="r-dec-q">Which parse entry point defines validity?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="parse-standard-name-is-oracle">parse-standard-name-is-oracle</button>
+      <button class="r-opt" data-value="align-ir-parser-strict">align-ir-parser-strict</button>
+      </p>
+    <p class="r-dec-rat">parse_standard_name (strict, canonical-spelling) is the validity oracle; validate_round_trip stays liberal for diagnostics and is documented as IR-only. Tightening the IR parser would cost the vocab-gap diagnostics the pipeline uses.</p>
+    </div>
+<div class="r-dec" data-key="inline-ref-severity" data-choice="warn-then-error" data-by="review recommendation" data-when="2026-07-07">
+    <p class="r-dec-q">Severity for unresolvable inline documentation references?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="warn-then-error">warn-then-error</button>
+      <button class="r-opt" data-value="error-immediately">error-immediately</button>
+      </p>
+    <p class="r-dec-rat">74 dangling inline references exist today; erroring immediately would block every release until the docs-regen pass lands. Warning first, promoted to error in the release after the catalog is clean.</p>
+    </div>
+</section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-srr-001" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="team-lead" data-written-at="2026-07-07" data-recommends-skill="" data-resolved-at="2026-07-10T14:59:28+00:00" data-resolved-by="reckon-ship">
+    <h4 class="r-fu-title">Ship P1 — deprecation architecture for accepted names</h4>
+    <div class="r-fu-body"><p>Build the accepted-only deprecation trail end to end: supersession stubs at export, status mapping, chain collapse, ISN rendering/validation of stubs, round-trip preservation. Honour decisions dep-scope and status-mapping.</p></div>
+    <pre class="r-fu-prompt">Project: imas-standard-names
+Plan:    systematic-review-remediation (http://localhost:8765/imas-standard-names/systematic-review-remediation.html)
+Section: §2 (P1)
+Tier:    opus
+
+Context
+  The systematic review found the governance lifecycle vestigial: renames of
+  accepted names vanish between exports with no trail. The codex graph already
+  records supersession; this phase surfaces it at the export boundary for
+  accepted names only.
+
+State to read
+  /imas-standard-names/standard-names-systematic-review.html §8 (evidence)
+  imas-codex: imas_codex/standard_names/export.py (_fetch_candidates, gates),
+    graph_ops.py supersede_prior_source_names region, catalog_import.py
+  ISN: imas_standard_names/models.py (Status, governance validator),
+    database/build.py, tools/ (rendering), validation/
+
+Scope locks / constraints
+  Stubs ONLY for names accepted at supersession time; draft renames emit
+  nothing. Chains collapse to the live successor. New accounting goes in
+  .export_report.json (manifest model is closed). Commit + push per coherent
+  change on main in each repo; no stash; explicit path staging.
+
+Done-when
+  1. sn edit --rename on an accepted name + export -&gt; successor active,
+     predecessor deprecated stub with superseded_by; draft rename -&gt; no stub
+  2. chain-collapse and round-trip (import-&gt;export) tests green
+  3. ISN validate passes on a stub-bearing catalog; SPA/MCP render stubs
+  4. followup outcome recorded in plan + this followup resolved</pre>
+    <p class="r-fu-outcome">§2 landed — codex bb76411e (export deprecation stubs with chain collapse, superseded_from_stage at both supersede sites, active status mapping, stub count in .export_report.json, sn merge preserves stubs; 17 tests) + ISN d5d3687 (structural rule deprecated⇒superseded_by, successor-forward fetch fields, round-trip test; 5 tests). Drift adaptation: persist_refined_name records the published-bar proxy docs_stage='accepted' since edit.py destroys the name-axis stage pre-persist — stubs only for names that reached consumers.</p>
+    </article>
+<article class="r-fu" data-id="f-srr-002" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="team-lead" data-written-at="2026-07-07" data-recommends-skill="" data-resolved-at="2026-07-10T19:30:00+00:00" data-resolved-by="reckon-ship">
+    <h4 class="r-fu-title">Ship P2 — sn edit validation parity</h4>
+    <div class="r-fu-body"><p>Route every edit path through the full pipeline gate stack; atomic validated cascades; docs-edit protection and claim preconditions; sibling family scope. Honour decision edit-validation.</p></div>
+    <pre class="r-fu-prompt">Project: imas-standard-names
+Plan:    systematic-review-remediation (http://localhost:8765/imas-standard-names/systematic-review-remediation.html)
+Section: §3 (P2)
+Tier:    opus
+
+Context
+  sn edit was built as external pressure steering the pipeline but grew bypass
+  paths (docs persists skip filter_protected; cascaded descendant ids are not
+  re-validated; docs-edit claim lacks stage preconditions; family scope acts on
+  a subtree). The review fix wave closed the protection-bypass defaults; this
+  phase completes gate parity.
+
+State to read
+  imas-codex: imas_codex/standard_names/edit.py, cascade.py, graph_ops.py
+    (persist_reviewed_name/persist_refined_name/supersede region, validate
+    worker quarantine path in workers.py), tests/standard_names/test_edit_*
+  Review doc §5 and the codex-debug-scan findings 9, 10, 11.
+
+Scope locks / constraints
+  No privileged edit path to accepted: identical gates as pooled candidates.
+  Cascade validation failures roll back atomically with acceptance. family =
+  direct siblings (or rename the scope value — flag and docs must agree).
+  Mocked unit tests only; never write the production graph.
+
+Done-when
+  1. parity suite: grammar-invalid / semantic-invalid / protected-violating
+     edits stopped by the same gates as pipeline candidates, per edit mode
+  2. cascade atomicity test (constraint collision -&gt; full rollback)
+  3. docs-edit claim preconditions + filter_protected on persists
+  4. followup outcome recorded + resolved</pre>
+    <p class="r-fu-outcome">§3 landed — codex 5777ae32: gate parity (edit artifacts through validate_name_candidate, no privileged path), cascade-atomicity preflight with full rollback, docs-edit stage preconditions + filter_protected + override flag, family-scope reconciled; parity suite (test_edit_parity.py 312 lines) + cascade-atomicity tests; 78 tests verified green by orchestrator.</p>
+    </article>
+<article class="r-fu" data-id="f-srr-003" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-written-by="team-lead" data-written-at="2026-07-07" data-recommends-skill="" data-resolved-at="2026-07-10T14:53:05+00:00" data-resolved-by="reckon-ship">
+    <h4 class="r-fu-title">Ship P3 — referential integrity + z-axis repair</h4>
+    <div class="r-fu-body"><p>ISN reference-resolution check (structured + inline, warn-then-error), inline-ref docs repair, z-axis generator fix and the six missing/empty z-names. Honour decision inline-ref-severity.</p></div>
+    <pre class="r-fu-prompt">Project: imas-standard-names
+Plan:    systematic-review-remediation (http://localhost:8765/imas-standard-names/systematic-review-remediation.html)
+Section: §4 (P3)
+Tier:    sonnet
+
+Context
+  Referential integrity was the catalog&#x27;s weakest axis (388 structured links —
+  now pruned at export — plus 74 dangling inline refs). Separately, a batch
+  generator drops the z-member of x/y/z triples (6/6 cases on z).
+
+State to read
+  ISN: imas_standard_names/validation/semantic.py (add check), models.py
+    links parsing (name: scheme), tests/test_validation_checks.py
+  imas-codex: generation path for coordinate/unit-vector triples (search
+    compose/derivation for direction_unit_vector), sn edit --docs flow
+  Review doc §7 table rows 1-2 and the catalog-sample-review evidence.
+
+Scope locks / constraints
+  Inline-ref severity: warning now, error after the catalog is clean.
+  Docs repairs go through the codex graph (sn edit), never hand-edited ISNC
+  YAML. z-repair includes minting z_direction_unit_vector_of_camera and the
+  missing diagnostic-aperture z sibling.
+
+Done-when
+  1. ISN check + tests; validate_catalog reports the 74 inline refs as warnings
+  2. docs-regen pass clears them; next export validates clean
+  3. six z-names exist with real documentation; generator regression test
+  4. followup outcome recorded + resolved</pre>
+    <p class="r-fu-outcome">§4 landed — ISN af41d50 (referential-integrity check: structured=error, inline=warning w/ promotion knob; live catalog: 0 structured, 153 inline across 70 entries) + codex d9d069ec (z-axis root cause = attach-path merges never write documentation; completeness gate in vector_family_consistency_check, 4 tests). Prod-graph docs repair + z-name minting queued for the supervised P4 window.</p>
+    </article>
+<article class="r-fu" data-id="f-srr-004" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="team-lead" data-written-at="2026-07-07" data-recommends-skill="" data-resolved-at="2026-07-11T06:53:39+00:00" data-resolved-by="reckon-ship">
+    <h4 class="r-fu-title">Ship P4 — unit-family repairs through the validated edit path</h4>
+    <div class="r-fu-body"><p>Momentum-source renames, energy-flux folds, power-flux renames, one-line contradiction fixes — all as sn edit operations after P1+P2 land. Honour decisions momentum-rename, energy-flux-reserve, power-density.</p></div>
+    <pre class="r-fu-prompt">Project: imas-standard-names
+Plan:    systematic-review-remediation (http://localhost:8765/imas-standard-names/systematic-review-remediation.html)
+Section: §5 (P4)
+Tier:    opus
+
+Context
+  Physics-semantics repairs identified by the catalog review; executed as
+  edits so the pipeline re-validates each and accepted renames leave stubs.
+  BLOCKED until P1 and P2 are recorded as shipped in this plan.
+
+State to read
+  Review doc §7 table (targets + evidence); catalog-sample-review report
+  quotes; imas-codex sn edit CLI (--rename/--docs, new override flags).
+
+Scope locks / constraints
+  Every repair via sn edit against the production graph WITH operator
+  supervision (these are deliberate curated writes — coordinate with the lead
+  for the run window); dry-run cascade previews first; batch by family.
+
+Done-when
+  1. all review §7 rows 3-5 and 7-8 repaired; mixed-unit sweep re-run shows
+     only the principled splits remain
+  2. accepted renames produced deprecation stubs in the next export
+  3. source/flux near-name validator rule live with tests
+  4. followup outcome recorded + resolved</pre>
+    <p class="r-fu-outcome">§5 landed — supervised production sn-edit repairs (chunks 1-5, lead-authorized window). Momentum→momentum_source: 17 edits, residual 0 accepted bare *_momentum. Energy-flux: 2 recombination entries folded to particle-flux; family uniformly W·m⁻². Power-density (lead-refined — no power_flux base, a flux of power is nonsensical): 6 W·m⁻² entries fold into energy_flux, peaks as maximum_of_energy_flux_at_<locus>; power_density family uniformly W·m⁻³. Source/flux validator live (ISN 4d43923). superseded_from_stage=accepted stamped on renamed accepteds for P1 stubs. Residuals tracked in f-srr-009 (3 near-threshold neutral_state exhausted — safe via P1 skip-logic; one refine-reworded successor draining; pair supersede staged as p4_pair_supersede.py; Hz→s⁻¹ + electron_source_rate cross-scope). Full record: docs/archive/systematic-review-remediation-s5-landed.html.</locus></p>
+    </article>
+<article class="r-fu" data-id="f-srr-005" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="team-lead" data-written-at="2026-07-07" data-recommends-skill="" data-resolved-at="2026-07-10T19:05:00+00:00" data-resolved-by="reckon-ship">
+    <h4 class="r-fu-title">Ship P5 — vocabulary curation and grammar closes</h4>
+    <div class="r-fu-body"><p>processes dedup + curation gate, physical_bases gating, qualifier intra-order, parse-contract documentation, hygiene tail, advisory suppression, MCP payload derivation. Honour decisions processes-dedup, base-catchalls, qualifier-order, parse-contract.</p></div>
+    <pre class="r-fu-prompt">Project: imas-standard-names
+Plan:    systematic-review-remediation (http://localhost:8765/imas-standard-names/systematic-review-remediation.html)
+Section: §6 (P5)
+Tier:    opus
+
+Context
+  The vocab audit found perfect structure but curation decay in the LLM-fed
+  sets, plus a set of small grammar/validator closes the review deferred as
+  design decisions — now locked in this plan&#x27;s Decisions section.
+
+State to read
+  ISN: grammar/vocabularies/{processes,physical_bases,generic_physical_bases,
+    regions,locus_registry,subjects,binary_operators}.yml, model.py qualifier
+    segment handling (zone-order mechanism to mirror), validation/ semantic
+    advisory, tools/grammar.py; vocab-audit findings in review doc §4.
+
+Scope locks / constraints
+  Vocabulary edits + regenerated modules in the same commit (drift gate).
+  Catalog names affected by token merges migrate via P2-parity edits — list
+  them in the outcome. Do not delete catch-all tokens; gate them.
+
+Done-when
+  1. processes synonym families merged; curation gate test blocks re-entry
+  2. catch-alls gated; qualifier intra-order enforced (1 name migrated)
+  3. advisory suppressed for hardware bases; tools/grammar.py derives from
+     get_grammar_context(); hygiene tail closed
+  4. full ISN suite green; followup outcome recorded + resolved</pre>
+    <p class="r-fu-outcome">§6 landed — commits fb98228/ac196d5/b566f9b/919a988/d912daa/8f0e3d5/49eee70/b2221b3/fe1968a: five synonym families merged + curation gate; 16 catch-alls gated (0 casualties); qualifier order canonical (no rename needed); parse-contract documented; advisory 310→0; MCP payloads derived; halo/regions/binary-operator gates. Migration backlog empty. Suite 1726 passed; catalog 2147/2148 round-trip (1 intentional FSA rejection). Deferred: binary_operators.yml retirement + Transformation/Decomposition dedup (codegen refactors, drift hazards closed).</p>
+    </article>
+<article class="r-fu" data-id="f-srr-006" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="team-lead" data-written-at="2026-07-07" data-recommends-skill="" data-resolved-at="2026-07-10T21:45:00+00:00" data-resolved-by="reckon-ship">
+    <h4 class="r-fu-title">Ship P6 — pipeline hardening and migration debt</h4>
+    <div class="r-fu-body"><p>Stranded-reviewed repair, claim-lease robustness, signals regen accounting, single-tx reset/clear, LinkML flag declaration, export tail, along-locus migration, ISNC CI validate detail.</p></div>
+    <pre class="r-fu-prompt">Project: imas-standard-names
+Plan:    systematic-review-remediation (http://localhost:8765/imas-standard-names/systematic-review-remediation.html)
+Section: §7 (P6)
+Tier:    opus
+
+Context
+  Operational findings from the debug scan that needed design rather than a
+  surgical fix, plus the six pre-existing test failures documenting the
+  incomplete along-locus migration.
+
+State to read
+  codex-debug-scan findings 4, 6, 7, 8, 13, 16, 19 (review doc §5 + scan
+  report anchors); imas-codex loop.py/workers.py/graph_ops.py claim region;
+  LinkML schema source for graph models; failing tests:
+  test_geometry_enumeration_collapse.py, test_compose_shape_parameter_surface.py,
+  test_benchmark.py; ISNC .github/workflows/validate.yml.
+
+Scope locks / constraints
+  Claim machinery changes need a soak verification (pooled run, LLMCost per
+  node spot-check) — coordinate the run window with the lead. Regenerate
+  LinkML models rather than hand-editing generated files.
+
+Done-when
+  1. full codex tests/standard_names suite green, no carve-outs
+  2. soak run shows no duplicate spend; stranded-reviewed repair promotes
+     qualifying names on startup
+  3. LinkML declares the edit flags; ISNC validate surfaces error detail
+  4. followup outcome recorded + resolved</pre>
+    <p class="r-fu-outcome">§7 landed — 10 codex commits (f98a5d41, 20772766, 4c01d3c1, e54fb812, 2626ec92, 0f631c40, e9c03cf6, f30b19da, daf12308, fff9acd3) + ISNC f063f2c + ISN b724bbe (grammar-context lru_cache, root cause of the review-era "six pre-existing failures"). Suite 4292 passed / 0 failed, no carve-outs. Soak-window items queued separately: finding 4 (stranded-reviewed promotion), 7 (claim heartbeat), 13-clear (atomic clear), ISN pin bump.</p>
+    </article>
+<article class="r-fu" data-id="f-srr-007" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-ship" data-written-at="2026-07-10" data-recommends-skill="/reckon-ship systematic-review-remediation §5" data-resolved-at="2026-08-10T08:25:59+00:00" data-resolved-by="reckon-edit">
+    <h4 class="r-fu-title">Supervised prod-graph repair pass — inline-ref docs regen + z-name minting (with P4 window)</h4>
+    <div class="r-fu-body">P3 shipped the check and the generator gate; the data repair needs supervised production-graph writes: regenerate documentation for the 70 entries carrying 153 dangling inline refs, mint z_direction_unit_vector_of_camera and the diagnostic-aperture z sibling, and regenerate the empty z docs. Batch with the P4 unit-family edit window (same operator supervision).</div>
+    <pre class="r-fu-prompt">Project: imas-standard-names + imas-codex (production graph)
+Plan: systematic-review-remediation §4 tail + §5 (P4 window)
+Tier: opus
+
+Context
+  P3 landed the referential-integrity check (ISN af41d50) and the triple-completeness gate (codex d9d069ec). The remaining §4 items are prod-graph writes: 70 entries with dangling inline refs (list reproducible via validate_catalog on the live catalog), missing z_direction_unit_vector_of_camera + diagnostic-aperture z sibling, empty z docs on 4 names.
+
+Scope locks / constraints
+  Production writes ONLY in a lead-supervised run window, batched with the P4 unit-family edits. Use sn edit --docs / the pipeline compose path; never hand-edit ISNC YAML. Dry-run previews first.
+
+Done-when
+  1. validate_catalog on the next export reports 0 dangling inline refs
+  2. all six z-axis names exist with real documentation (completeness gate green)
+  3. this followup resolved</pre>
+    <p class="r-fu-outcome">Transferred to imas-codex graph-wide semantic integrity and evidence recovery. ISN does not own production-graph mutation or documentation regeneration.</p>
+    </article>
+<article class="r-fu" data-id="f-srr-008" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-ship" data-written-at="2026-07-11" data-recommends-skill="" data-resolved-at="2026-07-14T06:31:38+00:00" data-resolved-by="reckon-ship">
+    <h4 class="r-fu-title">Reject peak/maximum-as-infix compositions on flux bases (grammar close)</h4>
+    <div class="r-fu-body">The P4 window surfaced that the grammar currently ACCEPTS both energy_peak_flux_* and energy_maximum_flux_* infix compositions; the lead rejected these spellings — the canonical form is the transformation maximum_of_<base/>_.... Add a compose-side rejection (or canonicalization) so peak/maximum cannot embed as an infix qualifier inside flux-family bases, mirroring the FSA no-op gate pattern.</div>
+    <pre class="r-fu-prompt">Project: imas-standard-names
+Plan: systematic-review-remediation (grammar close follow-on)
+Tier: sonnet
+
+Context
+  During the P4 unit-family repairs the lead rejected the energy_peak_flux_* spelling; the executed names use maximum_of_energy_flux_at_&lt;locus&gt; (transformation form). The grammar still parses the infix forms (energy_peak_flux_*, energy_maximum_flux_*), so the pipeline could mint the rejected spelling again.
+
+State to read
+  ISN grammar/model.py compose/parse paths; the FSA reduction gate (tests/grammar/test_flux_surface_reduction_gate.py, commit b8a2024) as the pattern for a composition-rejection rule; qualifier vocab entries for peak/maximum.
+
+Scope locks / constraints
+  Vocabulary/grammar edits + regenerated modules in the same commit (drift gate). Verify no published name currently uses the infix form before rejecting it (sweep the live catalog read-only).
+
+Done-when
+  1. Infix peak/maximum on flux bases rejected (or auto-canonicalized to maximum_of_) with tests
+  2. Full ISN suite green; catalog round-trip sweep unchanged
+  3. This followup resolved</pre>
+    <p class="r-fu-outcome">Shipped ISN 63e8d4e: compose+parse gate rejects extremum-as-infix on flux bases (energy_peak_flux/energy_maximum_flux) via an extremum_is_transformation flag; peak(qualifier)+maximum/minimum(operators) covered, recurses into binary args, leaves non-flux extremums (electron_peak_temperature) + the maximum_of_ transformation untouched. 19-case gate test; ISN suite 1753 passed. Pinned into codex (pin bump to 63e8d4e, codex suite green).</p>
+    </article>
+<article class="r-fu" data-id="f-srr-009" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-ship" data-written-at="2026-07-11" data-recommends-skill="/reckon-ship systematic-review-remediation §7" data-resolved-at="2026-07-14T06:31:38+00:00" data-resolved-by="reckon-ship">
+    <h4 class="r-fu-title">P4/P6 residual tail — pair supersede, exhausted neutral_state, tombstone-id mechanism, soak window</h4>
+    <div class="r-fu-body">Tracked residuals after the six phases landed. (1) Run the staged pair supersede p4_pair_supersede.py (power_density_at_wall→energy_flux_at_wall) — classifier-gated, needs a user-run command. (2) 3 near-threshold neutral_state momentum successors exhausted (safe: P1 skip-logic ⇒ no dangling stub) — escalated-review or lead physics call. (3) tombstone-id supersede mechanism (blocks parallel_net_ion re-rename and the pair clean-rename). (4) P6 soak window (live Neo4j): stranded-reviewed promotion (finding 4) — also drains the 31 stage-reviewed inline-ref targets behind f-srr-007; claim heartbeat (7); atomic clear_standard_names (13-clear); ISN pin bump to ≥ b724bbe; verify atomic-reset + refining→reviewed cypher against live DB + LLMCost no-duplicate-spend check.</div>
+    <pre class="r-fu-prompt">Project: imas-codex + imas-standard-names (production graph + live Neo4j)
+Plan: systematic-review-remediation — residual tail (f-srr-009)
+Tier: opus
+
+Context
+  All six phases landed their substantive work; this is the tracked tail requiring either a single user-run command or a lead-supervised soak window with live Neo4j.
+
+Items
+  1. Pair supersede: run /home/ITER/mcintos/.local/share/imas-codex/p4-staging/p4_pair_supersede.py (folds power_density_at_wall into energy_flux_at_wall; both accepted W.m^-2). Classifier-gated — user runs it.
+  2. 3 exhausted neutral_state momentum successors (parallel/poloidal/toroidal_neutral_state_momentum_source): near-threshold quorum, physics sound. Escalate the review model for these 3 or take a lead physics call; do NOT force-accept (bypasses the P2 gate). P1 skip-logic already prevents a dangling stub.
+  3. Tombstone-id supersede mechanism: add a CLI/graph path to supersede-into-an-existing-id (blocks parallel_net_ion→parallel_ion_momentum_source re-rename and clean pair renames).
+  4. Soak window (live Neo4j): implement + verify P6 finding 4 (stranded-reviewed startup promotion — also drains the 31 stage-reviewed inline-ref targets tracked in f-srr-007), finding 7 (claim heartbeat), finding 13 clear_standard_names single-tx; bump the codex ISN pin to &gt;= b724bbe (extras-preserving); confirm the atomic-reset CALL-subquery cypher and finding-16 refining→reviewed revert against real Neo4j; pooled-run LLMCost spot-check for no duplicate claim-race spend.
+
+Done-when
+  1. Pair supersede applied; 3 neutral_state resolved or lead-signed-off as residual
+  2. Soak items implemented + verified against live Neo4j; ISN pin bumped
+  3. f-srr-007 (inline-ref drain) closable; this followup resolved</pre>
+    <p class="r-fu-outcome">Tail landed except the neutral_state naming call (carried to f-srr-010). DONE: (1) pair supersede applied — power_density_at_wall superseded into energy_flux_at_wall (0 accepted W·m⁻² power_density remain); (2) tombstone-id supersede verb shipped (codex 76f179a7: sn supersede <old> --into <accepted>, refuses non-accepted, idempotent, soaked via dry-run+refusal); (3) P6 findings 4/7/13 shipped (codex b80aca37/e8995a59/6c15c4e5) + LIVE-GRAPH SOAKED: finding-4 promotion correct (0 eligible — 98 reviewed below 0.85, 1 excluded for open-edit), heartbeat wiring confirmed, finding-13 atomic clear graph-verified (test_clear_atomicity_graph.py) which caught a return-count over-count bug fixed in 4f74b1e3 (count now = actual deletions, not in-scope matches); (4) ISN pin bumped to 63e8d4e, codex suite green. NOTE finding-4 does NOT drain the 31 inline-ref targets — they are genuinely below-threshold, so f-srr-007 inline drain stays coupled to the docs-generation backlog (deferred to release-prep per lead). Heartbeat &gt;5min duplicate-spend observation deferred to the next natural long production run (mechanism unit-proven + wired).</accepted></old></p>
+    </article>
+<article class="r-fu" data-id="f-srr-010" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-ship" data-written-at="2026-07-14" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">neutral_state momentum successors + the _state_ subject-convention clarity review</h4>
+    <div class="r-fu-body">The 3 published rc62 names parallel/poloidal/toroidal_neutral_state_momentum were P4-renamed to *_neutral_state_momentum_source, whose successors twice EXHAUSTED at near-threshold quorum (0.756-0.825 vs 0.85). Their old names are superseded with no live successor → P1 skips the stub → they retire silently (breaking 3 published names). Investigation found neutral_state is an INTENTIONAL atomic subject (subjects.yml: ion_state/ion_charge_state/neutral_state kept atomic) used by ~40 accepted published names (fast_neutral_state_density, ion_state_energy_flux, ion_charge_state_temperature, ...), so the name is structurally consistent with an accepted family — the exhaustion was reviewer inconsistency, not a grammar defect. The lead finds the _state_ convention opaque/not self-describing. DECISION PENDING: (a) lead-accept the 3 for family consistency (curated override of a near-threshold miss — legitimate, distinct from an automated gate bypass; preserves granularity, emits proper stubs); (b) tombstone-redirect the 3 to the accepted state-summed siblings (loses per-state granularity); OR (c) open a family-wide _state_ naming-clarity migration (~40 names, needs a replacement token). Not force-accepted (P2-gate-respecting).</div>
+    <pre class="r-fu-prompt">Project: imas-standard-names + imas-codex (production graph)
+Plan: systematic-review-remediation — neutral_state resolution (f-srr-010)
+Tier: opus
+
+Context
+  3 published (rc62) names parallel/poloidal/toroidal_neutral_state_momentum were P4-renamed; the *_source successors exhausted at near-threshold quorum (0.756-0.825). neutral_state is an intentional atomic subject (subjects.yml) shared by ~40 accepted names (fast_neutral_state_density, ion_state_energy_flux, ...), so the structure is consistent with an accepted family; exhaustion was reviewer inconsistency. Old names superseded with no live successor → silent retirement of 3 published names unless resolved.
+
+Options (lead decides)
+  (a) Curated-accept the 3 successors (human override of a near-threshold quorum miss; NOT an automated gate bypass). Preserves per-state granularity; proper deprecation stubs. RECOMMENDED.
+  (b) sn supersede &lt;old&gt; --into &lt;state-summed sibling&gt; (parallel/poloidal/toroidal_neutral_momentum_source, accepted) — live redirect but loses per-state granularity.
+  (c) Family-wide _state_ naming-clarity review (~40 accepted names) — larger, needs a self-describing replacement token + migration; separate from the immediate 3.
+
+Done-when
+  1. The 3 published names no longer silently retire (accepted successors OR redirected)
+  2. If (c) chosen, a scoped plan for the _state_-convention migration
+  3. This followup resolved</pre>
+    </article>
+<article class="r-fu" data-id="f-srr-011" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-ship" data-written-at="2026-07-15" data-recommends-skill="superpowers:brainstorming" data-resolved-at="2026-08-10T08:25:59+00:00" data-resolved-by="reckon-edit">
+    <h4 class="r-fu-title">Redesign the ISN-version clear-gate — impact-based, not version-string; drop the graph-wide-clear footgun</h4>
+    <div class="r-fu-body">Lead-flagged footgun (2026-07-15): imas_codex pipeline_version.compute_pipeline_hash folds the installed imas-standard-names version string into a composite hash; loop.py trips a clear-gate whenever it changes and prints `sn clear --all --force --include-sources` (the wiped-catalog shape) as the remedy, escapable only via --skip-clear-gate. The gate cannot distinguish a BACKWARD-COMPATIBLE ISN bump (e.g. the added state segment — every existing name still parses and round-trips) from a BREAKING one (renamed/removed token). So every ISN bump trips it and the advertised fix is destructive. Intent (prevent silent name-quality drift when name-producing prompts/grammar change) is legitimate; the implementation is the problem.</div>
+    <pre class="r-fu-prompt">Project: imas-codex
+Plan: systematic-review-remediation — clear-gate redesign (f-srr-011)
+Tier: opus
+
+Context
+  The clear-gate (pipeline_version.py + loop.py, tripped in run_sn_pools startup) fires on any change to the pipeline composite hash — which includes the ISN version string — and recommends a graph-wide `sn clear`. A compatible ISN bump (added segment/token; existing names still round-trip) trips it identically to a breaking one; the only escape is --skip-clear-gate. This is a footgun: the default remedy wipes the catalog, and the escape flag is easy to over-use.
+
+State to read
+  imas_codex/standard_names/pipeline_version.py (compute_pipeline_hash; the PIPELINE_PROMPTS/PIPELINE_CODE/isn_version composite).
+  imas_codex/standard_names/loop.py (the gate enforcement + the printed clear recommendation ~line 1590 region; the --skip-clear-gate path).
+  The ISN drift gate + round-trip machinery (parse_standard_name/compose_standard_name) as the compatible-vs-breaking oracle.
+
+Scope locks / constraints
+  Preserve the real intent (block silent name-quality drift when name-PRODUCING inputs change). Never make a graph-wide clear the default remedy. Prefer measuring ACTUAL impact: re-validate existing accepted names against the new grammar (parse + round-trip) and flag only the ones that now FAIL; distinguish additive (compatible) from breaking changes; a compatible bump should require no action. Retire or narrow --skip-clear-gate.
+
+Done-when
+  1. Brainstorm + design an impact-based gate (compatible bump = no-op; breaking change = surgical re-validate/re-review of only affected names, never a blanket clear)
+  2. Implementation plan; tests proving a compatible ISN bump does not trip a clear and a breaking token change flags exactly the affected names
+  3. --skip-clear-gate footgun removed or reduced to a narrow, documented escape; this followup resolved</pre>
+    <p class="r-fu-outcome">Transferred to imas-codex semantic pipeline hardening and typed operator consolidation. ISN does not own graph clear/reset orchestration.</p>
+    </article>
+<article class="r-fu" data-id="f-srr-012" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-ship" data-written-at="2026-07-15" data-recommends-skill="" data-resolved-at="2026-08-10T08:25:59+00:00" data-resolved-by="reckon-edit">
+    <h4 class="r-fu-title">P1 stub gate should key on FORMAL-release status, not graph-accepted (no stubs for RC-only names)</h4>
+    <div class="r-fu-body">Lead insight (2026-07-15): P1 emits deprecation stubs for every superseded name whose superseded_from_stage='accepted' — but 'accepted' is a graph pipeline stage (passed LLM/RD review), NOT 'passed a formal PR review / shipped in a stable release'. The ISNC catalog is RC-ONLY (every tag v0.2.0rcNN; no formal release has ever been cut), so NO published name has real pinned consumers, and the stubs P1 creates are premature noise. A name that has only ever been in release candidates can simply be deleted on rename — deprecation tracking is only warranted once a name ships in a formal (non-RC) release, where breaking a consumer matters. Refine the P1 export stub gate to require a formal-release marker; until then it should emit zero stubs (superseded RC-only names delete/vanish, not stub). Directly affects the in-flight state-convention migration, which is creating ~130+ superseded ion nodes that would otherwise stub into rc63.</div>
+    <pre class="r-fu-prompt">Project: imas-codex
+Plan: systematic-review-remediation — P1 stub-gate refinement (f-srr-012)
+Tier: opus
+
+Context
+  P1 (export.py _fetch_deprecation_stubs) emits a status:deprecated stub for every superseded name with superseded_from_stage=&#x27;accepted&#x27;. &#x27;accepted&#x27; = graph pipeline stage, not formal-release. ISNC is RC-only (no formal release ever), so no name has pinned consumers and the stubs are premature. Lead: RC-only names delete on rename; stubs only for formally-released names.
+
+State to read
+  imas_codex/standard_names/export.py (_fetch_deprecation_stubs / _build_stub_entry, ~line 589 region; the superseded_from_stage=&#x27;accepted&#x27; gate).
+  The release/publish flow (catalog_release.py, publish.py) + ISNC tags (all rcNN) to define the &#x27;formally released&#x27; marker — e.g. a name is release-tracked once it appears in a non-RC release, recorded on the node or derivable from release history.
+  P1 landed doc: docs/archive/systematic-review-remediation-s2-landed.html.
+
+Scope locks / constraints
+  Preserve P1&#x27;s chain-collapse + accepted-only intent, but re-base &#x27;accepted&#x27; on FORMAL release, not graph name_stage. Until a formal release exists the gate emits zero stubs. Do not delete REFINED_FROM lineage (keep provenance); just don&#x27;t publish stubs for non-formally-released names. Add a test: an RC-only superseded name emits NO stub; a formally-released superseded name emits one.
+
+Done-when
+  1. Stub gate keys on formal-release status; RC-only superseded names emit no stub
+  2. Test proving RC-only vs formally-released stub behaviour
+  3. Migration&#x27;s superseded ion/neutral nodes do not pollute the next RC; this followup resolved</pre>
+    <p class="r-fu-outcome">Transferred to imas-codex semantic pipeline hardening because graph acceptance, catalog publication and stub materialization are graph/catalog orchestration concerns.</p>
+    </article>
+<article class="r-fu" data-id="f-srr-013" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-ship" data-written-at="2026-07-15" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">State-convention migration residuals — momentum_diffusivity kind, near-threshold stragglers, C1 token deletion</h4>
+    <div class="r-fu-body">The state-segment catalog migration (ion_state→ion_charge_state, neutral_state→neutral_internal_state) ran via scoped sn edit + --edits review (budget ~$47/$100). Ion: 130 ion_charge_state accepted, 18 old names folded to stubs (16 clean + 2 physics divergences: diffusivity→scalar, particle_flux→vector per lead physics reading). Neutral: all 80 old neutral_state swept, 70 neutral_internal_state accepted. RESIDUALS: (1) ion_charge_state_momentum_diffusivity is accepted as VECTOR but diffusivity should be SCALAR (the correct-kind scalar sits under the non-canonical ion_state_momentum_diffusivity) — needs a kind correction (no clean CLI; correct the canonical's kind to scalar, fold the ion_state one in). (2) ~45 near-threshold stragglers (ion ~11 + neutral ~45 counting churn) scored 0.49-0.83 — NOT mis-founded (legitimately internal_state/charge_state), just sub-0.85 quorum near-misses + refine reword churn; either accept as reviewed-near-threshold or spend refine budget to push over 0.85. (3) C1 (delete fused ion_state/neutral_state/bare-state subject tokens from ISN subjects.yml) DEFERRED — blocked on (a) concurrent peer grammar work uncommitted in the ISN checkout, and (b) the momentum_diffusivity straggler keeping one ion_state name accepted. Per f-srr-012, RC-only superseded names should not stub — the migration's stubs are inert until that gate lands.</div>
+    <pre class="r-fu-prompt">Project: imas-standard-names + imas-codex (production graph)
+Plan: systematic-review-remediation — state migration residuals (f-srr-013)
+Tier: opus
+
+Context
+  The state-segment migration bulk is done (ion + neutral families swept; 200 successors accepted). Remaining polish + the grammar-token deletion.
+
+Items
+  1. Fix ion_charge_state_momentum_diffusivity kind: diffusivity is a scalar transport coefficient; the accepted canonical is wrongly VECTOR while the correct SCALAR is under ion_state_momentum_diffusivity. Correct the canonical to scalar and fold the ion_state one in (no clean CLI — may need a targeted kind edit or the tombstone re-rename).
+  2. Near-threshold stragglers (~45, score 0.49-0.83): decide accept-as-reviewed vs refine-to-threshold. They are legitimately internal_state/charge_state (not mis-founded); the refine churn produced some odd token-order variants (effective_..._momentum_velocity) worth pruning.
+  3. C1 token deletion: once no accepted name uses ion_state/neutral_state/bare state (resolve item 1 first) AND the concurrent ISN grammar peer work is committed, delete those subject tokens from subjects.yml + regenerate + full-catalog round-trip; makes the state segment the sole canonical parse.
+  4. Coordinate with f-srr-012 (RC-only stubs) so the migration&#x27;s superseded nodes don&#x27;t pollute the next release.
+
+Done-when
+  1. momentum_diffusivity is scalar canonical; stragglers dispositioned
+  2. C1 landed (fused tokens gone; round-trip green) after peer grammar work commits
+  3. This followup resolved</pre>
+    </article>
+</section>
+
+  </main>
+</body>
+</html>

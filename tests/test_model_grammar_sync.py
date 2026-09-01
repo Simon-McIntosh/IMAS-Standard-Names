@@ -1,12 +1,8 @@
 """Test that StandardName model stays in sync with grammar specification.
 
-This test validates model.py and names.py (MCP tool) against the actual YAML
-grammar specification, ensuring that any changes to the grammar are reflected
-in both the model and the tool interface.
+This test validates model.py against the actual YAML grammar specification,
+ensuring that any change to the grammar is reflected in the model.
 """
-
-import asyncio
-import inspect
 
 import pytest
 
@@ -24,8 +20,6 @@ from imas_standard_names.grammar_codegen.generate import (
     _enum_class_name,
 )
 from imas_standard_names.grammar_codegen.spec import GrammarSpec
-from imas_standard_names.repository import StandardNameCatalog
-from imas_standard_names.tools.compose import ComposeTool
 
 
 def _load_grammar_spec():
@@ -71,6 +65,8 @@ def test_model_has_all_grammar_segments():
         "decomposition",
         "binary_operator",
         "secondary_base",
+        "position_value",
+        "locus_qualifiers",
     }
 
     assert grammar_segments <= model_fields, (
@@ -176,112 +172,3 @@ def test_model_optional_fields_match_specification():
             assert is_required, (
                 f"Field '{segment.identifier}' should be required according to specification.yml"
             )
-
-
-def test_names_tool_has_all_segment_parameters():
-    """Verify compose_standard_name MCP tool has parameters for all segments
-    plus grammar extension parameters (transformation, binary_operator, secondary_base).
-    """
-    spec = _load_grammar_spec()
-    tool = ComposeTool()
-
-    # Get the compose_standard_name method signature
-    sig = inspect.signature(tool.compose_standard_name)
-    tool_params = set(sig.parameters.keys())
-
-    # Remove non-segment parameters (self, ctx)
-    tool_params.discard("self")
-    tool_params.discard("ctx")
-
-    # Get expected segments from grammar plus extension fields
-    grammar_segments = {segment.identifier for segment in spec.segments}
-    extension_params = {"transformation", "binary_operator", "secondary_base"}
-    expected_params = grammar_segments | extension_params
-
-    assert tool_params == expected_params, (
-        f"compose_standard_name parameters don't match expected set!\n"
-        f"Missing parameters: {expected_params - tool_params}\n"
-        f"Extra parameters: {tool_params - expected_params}\n"
-        f"\nUpdate ComposeTool.compose_standard_name in compose.py"
-    )
-
-
-def test_names_tool_parameter_types_match_grammar():
-    """Verify compose_standard_name parameter types match grammar vocabularies."""
-    spec = _load_grammar_spec()
-    expected_type_map = _build_expected_type_map(spec)
-    tool = ComposeTool()
-
-    # Get the compose_standard_name method signature
-    sig = inspect.signature(tool.compose_standard_name)
-
-    for segment in spec.segments:
-        param_name = segment.identifier
-
-        # Skip ctx parameter
-        if param_name == "ctx":
-            continue
-
-        param = sig.parameters.get(param_name)
-        assert param is not None, f"Missing parameter: {param_name}"
-
-        # Get annotation
-        annotation_str = str(param.annotation)
-        expected_type = expected_type_map.get(param_name)
-
-        if expected_type:
-            # Check that the expected type appears in the annotation
-            assert expected_type.__name__ in annotation_str, (
-                f"Parameter '{param_name}' type mismatch.\n"
-                f"Expected type: {expected_type.__name__}\n"
-                f"Got annotation: {annotation_str}"
-            )
-
-    # Verify extension parameters exist with correct types
-    for ext_param, ext_type in [
-        ("transformation", "Transformation"),
-        ("binary_operator", "BinaryOperator"),
-        ("secondary_base", "str"),
-    ]:
-        param = sig.parameters.get(ext_param)
-        assert param is not None, f"Missing extension parameter: {ext_param}"
-        assert ext_type in str(param.annotation), (
-            f"Extension parameter '{ext_param}' type mismatch. "
-            f"Expected '{ext_type}' in {param.annotation}"
-        )
-
-
-def test_names_tool_compose_creates_valid_model():
-    """Verify compose_standard_name tool creates valid StandardName instances."""
-    tool = ComposeTool()
-
-    # Test basic composition - use vector base with component
-    result = asyncio.run(
-        tool.compose_standard_name(
-            physical_base="heat_flux", component="radial", subject="electron"
-        )
-    )
-
-    assert "name" in result
-    assert "parts" in result
-    assert result["name"] == "radial_component_of_electron_heat_flux"
-
-    # Test with object parameter
-    result = asyncio.run(
-        tool.compose_standard_name(physical_base="major_radius", object="flux_loop")
-    )
-
-    assert result["name"] == "major_radius_of_flux_loop"
-
-
-def test_names_tool_respects_exclusive_pairs():
-    """Verify compose_standard_name enforces exclusive segment pairs."""
-    tool = ComposeTool()
-
-    # Test component/coordinate exclusivity
-    with pytest.raises(ValueError, match="component.*coordinate"):
-        asyncio.run(
-            tool.compose_standard_name(
-                physical_base="temperature", component="radial", coordinate="toroidal"
-            )
-        )

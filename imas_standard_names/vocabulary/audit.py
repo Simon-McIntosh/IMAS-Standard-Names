@@ -171,9 +171,12 @@ class VocabularyAuditor:
         Returns:
             CheckResult with current parse and gap details if found
         """
-        # Parse the name
-        parsed = parse_standard_name(name)
-        current_parse = parsed.model_dump() if hasattr(parsed, "model_dump") else {}
+        # Parse the name — handle parse failures gracefully
+        try:
+            parsed = parse_standard_name(name)
+            current_parse = parsed.model_dump() if hasattr(parsed, "model_dump") else {}
+        except (ValueError, Exception):
+            current_parse = {}
 
         # Get all patterns from catalog
         all_names = self.repository.list_names()

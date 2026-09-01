@@ -93,7 +93,7 @@ DOCUMENTATION_GUIDANCE: dict[str, Any] = {
         "Physical interpretation and governing physics",
         "Governing equations with full definitions (use display equations for main formulas)",
         "Measurement or derivation methods",
-        "Typical values and physical ranges (populate validity_domain and constraints fields when applicable)",
+        "Typical values and physical ranges",
         "Coordinate system definitions and sign conventions (if applicable)",
         "Relationships to other quantities with explicit equations",
     ],
@@ -115,7 +115,7 @@ DOCUMENTATION_GUIDANCE: dict[str, Any] = {
     "equations": {
         "inline_math": "Use $...$ for inline equations (e.g., $T_e$, $\\nabla p$, $\\mathbf{B}$)",
         "display_math": "Use $$...$$ on separate lines for display equations",
-        "symbols": "Use LaTeX commands ($\\phi$, $\\theta$, $\\rho$), not Unicode characters",
+        "symbols": "Use LaTeX for all math symbols, never Unicode Greek: $\\phi$ for the toroidal angle, $\\theta$, $\\rho$, and coordinate frames as $(R, \\phi, Z)$. Capital $\\Phi$ is reserved for flux, potential, or phase quantities and must never denote the toroidal angle.",
         "vectors": "Use $\\mathbf{B}$, $\\mathbf{r}$, $\\mathbf{J}$ notation for vectors",
         "requirements": [
             "All variables in equations must be defined either before first use, in a 'where' clause immediately after the equation, or inline when introduced",
@@ -174,17 +174,14 @@ DOCUMENTATION_GUIDANCE: dict[str, Any] = {
 
 FIELD_DESCRIPTIONS: dict[str, str] = {
     "name": "Standard name token: snake_case (^[a-z][a-z0-9_]*$); starts with a letter; no double '__'.",
-    "description": "One concise sentence summarizing the physical quantity. Keep under 120 characters for readability. Should be self-contained and understandable without external context.",
+    "description": "Concise summary of the physical quantity (1-3 sentences). Should be self-contained and understandable without external context.",
     "documentation": "Authoritative, self-contained documentation providing clear, comprehensive explanation of the physical quantity. This field must be fully standalone - a domain expert should understand the quantity completely without consulting external sources.",
     "unit": "Unit in fused dot-exponent style (auto-corrected to lexicographic token order). Tokens: alphanumerics only; join with '.'; exponents use ^ (e.g. m.s^-2). No '/', '*', or whitespace. Empty string for dimensionless.",
     "physics_domain": "Physics domain classification from PhysicsDomain enum. Determines catalog subdirectory.",
-    "tags": "Secondary classification tags from controlled vocabulary for cross-cutting classification.",
     "links": "Internal cross-references to related standard names only. Use format 'name:standard_name_token' (e.g., 'name:plasma_boundary'). Internal references are validated against the catalog.",
     "status": "Lifecycle state: draft | active | deprecated | superseded.",
     "kind": "Discriminator field determining entry type (scalar vs vector vs metadata)",
     "provenance": "Describes how derived quantities are computed from base quantities",
-    "validity_domain": "Controlled vocabulary region of validity",
-    "constraints": "Physical or mathematical constraints that must be satisfied (e.g. 'T_e > 0', 'kappa >= 1')",
     "deprecates": "Standard name token that this entry deprecates (if promoting replacement)",
     "superseded_by": "Standard name token that supersedes this entry (required when status is 'superseded')",
     "cocos_transformation_type": "COCOS transformation type for this quantity. Determines how signs change under COCOS convention switches.",
@@ -198,13 +195,13 @@ FIELD_CONSTRAINTS: dict[str, dict[str, Any]] = {
         "examples": [
             "electron_temperature",
             "gradient_of_electron_temperature",
-            "radial_component_of_magnetic_field",
+            "radial_magnetic_field",
         ],
     },
     "description": {
         "required": True,
         "type": "string",
-        "max_length": 180,
+        "max_length": 500,
     },
     "documentation": {
         "required": True,
@@ -219,10 +216,6 @@ FIELD_CONSTRAINTS: dict[str, dict[str, Any]] = {
     "physics_domain": {
         "required": True,
         "type": "string",
-    },
-    "tags": {
-        "required": False,
-        "type": "array",
     },
     "links": {
         "required": False,
@@ -239,16 +232,6 @@ FIELD_CONSTRAINTS: dict[str, dict[str, Any]] = {
     "provenance": {
         "required": False,
         "type": "string",
-    },
-    "validity_domain": {
-        "required": False,
-        "type": "string",
-        "examples": ["core_plasma", "edge_plasma", "vacuum", "whole_plasma"],
-    },
-    "constraints": {
-        "required": False,
-        "type": "array",
-        "examples": [["T_e > 0"], ["n_e >= 0", "n_e < 1e22 m^-3"], ["kappa >= 1"]],
     },
     "deprecates": {
         "required": False,
@@ -278,6 +261,7 @@ FIELD_GUIDANCE: dict[str, dict[str, Any]] = {
     },
     "description": {
         "yaml_formatting": "Use plain unquoted style for simple text. Use single quotes if special characters needed.",
+        "notation": "Plain text with Unicode Greek symbols: no LaTeX or $ math markup. Write Greek letters as symbols (φ, θ, ρ) and coordinate frames as (R, φ, Z). Capital Φ is reserved for flux, potential, or phase quantities, never the toroidal angle. LaTeX belongs in the documentation field, not the description.",
         "content_rules": [
             "Start with capital letter, end with period",
             "Be specific and precise",
@@ -287,6 +271,7 @@ FIELD_GUIDANCE: dict[str, dict[str, Any]] = {
         "avoid": [
             "Repeating the name verbatim",
             "Referencing IMAS Data Dictionary (DD), COCOS conventions, or implementation-specific paths",
+            "LaTeX or $ math markup, and spelled-out Greek letter words (write the symbol: φ not phi, θ not theta, ρ not rho)",
         ],
     },
     "documentation": {
@@ -359,7 +344,7 @@ FIELD_GUIDANCE: dict[str, dict[str, Any]] = {
             "Physical interpretation and governing physics",
             "Governing equations with full definitions (use display equations for main formulas)",
             "Measurement or derivation methods",
-            "Typical values and physical ranges (populate validity_domain and constraints fields when applicable)",
+            "Typical values and physical ranges",
             "Coordinate system definitions and sign conventions (if applicable)",
             "Relationships to other quantities with explicit equations",
         ],
@@ -381,7 +366,7 @@ FIELD_GUIDANCE: dict[str, dict[str, Any]] = {
         "equations": {
             "inline_math": "Use $...$ for inline equations (e.g., $T_e$, $\\nabla p$, $\\mathbf{B}$)",
             "display_math": "Use $$...$$ on separate lines for display equations",
-            "symbols": "Use LaTeX commands ($\\phi$, $\\theta$, $\\rho$), not Unicode characters",
+            "symbols": "Use LaTeX for all math symbols, never Unicode Greek: $\\phi$ for the toroidal angle, $\\theta$, $\\rho$, and coordinate frames as $(R, \\phi, Z)$. Capital $\\Phi$ is reserved for flux, potential, or phase quantities and must never denote the toroidal angle.",
             "vectors": "Use $\\mathbf{B}$, $\\mathbf{r}$, $\\mathbf{J}$ notation for vectors",
             "requirements": [
                 "All variables in equations must be defined either before first use, in a 'where' clause immediately after the equation, or inline when introduced",
@@ -451,18 +436,6 @@ FIELD_GUIDANCE: dict[str, dict[str, Any]] = {
         "critical_rule": "Must be a valid PhysicsDomain enum value.",
         "validation": "Validated against grammar/vocabularies/physics_domains.yml.",
     },
-    "tags": {
-        "validation": "All tags validated against secondary_tags in grammar/vocabularies/tags.yml.",
-        "common_mistake": "Do not put physics domain values in tags. Use the physics_domain field instead.",
-        "examples": {
-            "correct": [
-                ["measured", "calibrated", "local-measurement"],
-                ["spatial-profile", "reconstructed"],
-                ["global-quantity", "time-dependent"],
-            ],
-            "wrong": [["magnetics", "measured"], ["equilibrium", "spatial-profile"]],
-        },
-    },
     "links": {
         "use_for": [
             "Related physical quantities (e.g., components of a vector)",
@@ -507,27 +480,6 @@ FIELD_GUIDANCE: dict[str, dict[str, Any]] = {
         "vector": "Vector field quantities with directional components",
         "metadata": "Definitional entries (boundaries, regions, concepts) - no unit or provenance required",
     },
-    "validity_domain": {
-        "purpose": "Specify the spatial or operational domain where this quantity is physically valid or typically measured",
-        "use_when": "The quantity is inherently limited to a specific plasma region or operational regime",
-        "examples": [
-            "core_plasma: for quantities only meaningful in confined plasma region",
-            "edge_plasma: for edge/pedestal region specific quantities",
-            "vacuum: for quantities in vacuum regions only",
-            "whole_plasma: for quantities spanning entire plasma volume",
-        ],
-    },
-    "constraints": {
-        "purpose": "Specify hard physical bounds and mathematical constraints on the quantity",
-        "use_for": [
-            "Physical bounds: non-negativity, fundamental limits from physics",
-            "Mathematical constraints: relationships that must hold (e.g., 'elongation >= 1', '0 <= poloidal_beta <= 1')",
-            "Dimensional constraints: valid ranges for dimensionless quantities",
-        ],
-        "format": "Use clear mathematical notation with units where applicable",
-        "note": "Constraints represent hard limits, not typical operational ranges. For typical values, document in a dedicated field or structured metadata (future enhancement)",
-        "validation": "Constraints are validated for format but not evaluated for physical correctness",
-    },
 }
 
 TYPE_SPECIFIC_REQUIREMENTS: dict[str, dict[str, Any]] = {
@@ -539,8 +491,6 @@ TYPE_SPECIFIC_REQUIREMENTS: dict[str, dict[str, Any]] = {
         "optional_fields": [
             "provenance",
             "status",
-            "validity_domain",
-            "constraints",
             "deprecates",
             "superseded_by",
             "links",
@@ -556,8 +506,6 @@ TYPE_SPECIFIC_REQUIREMENTS: dict[str, dict[str, Any]] = {
         "optional_fields": [
             "provenance",
             "status",
-            "validity_domain",
-            "constraints",
             "deprecates",
             "superseded_by",
             "links",
@@ -573,8 +521,6 @@ TYPE_SPECIFIC_REQUIREMENTS: dict[str, dict[str, Any]] = {
         "optional_fields": [
             "provenance",
             "status",
-            "validity_domain",
-            "constraints",
             "deprecates",
             "superseded_by",
             "links",
@@ -590,8 +536,6 @@ TYPE_SPECIFIC_REQUIREMENTS: dict[str, dict[str, Any]] = {
         "optional_fields": [
             "provenance",
             "status",
-            "validity_domain",
-            "constraints",
             "deprecates",
             "superseded_by",
             "links",
@@ -607,8 +551,6 @@ TYPE_SPECIFIC_REQUIREMENTS: dict[str, dict[str, Any]] = {
         "forbidden_fields": ["provenance"],
         "optional_fields": [
             "status",
-            "validity_domain",
-            "constraints",
             "deprecates",
             "superseded_by",
             "links",

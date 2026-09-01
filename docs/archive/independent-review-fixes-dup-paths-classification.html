@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-standard-names">
+  <meta name="reckon-type" content="doc">
+  <meta name="plan-slug" content="independent-review-fixes-dup-paths-classification">
+  <meta name="plan-title" content="Classification: 90 DD paths with two accepted standard names">
+  <meta name="plan-summary" content="Per-path adjudication of the 90 double-attached DD paths: 60 generic-vs-specific, 17 locus mismatches, 9 both-wrong, 4 defensible">
+  <meta name="plan-informs" content="independent-review-fixes">
+  <title>Duplicate DD-path classification | imas-standard-names</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="s1">§1 — Method and verdict</h2>
+    <p>Every DD path carrying two <em>accepted</em> standard names (90 paths, graph query on
+    <code>IMASNode-[:HAS_STANDARD_NAME]→StandardName</code>) was adjudicated against the DD docstring
+    (2026-07-04, read-only pass). Buckets: <strong>A</strong> generic-vs-specific double attach (the specific name
+    keeps the path) — <strong>60</strong>; <strong>B</strong> locus/device mismatch (one name's
+    <code>of_&lt;device&gt;</code> contradicts the path) — <strong>17</strong>; <strong>C</strong> both names fail the
+    DD semantics — <strong>9</strong>; <strong>D</strong> defensible synonym/uncertain — <strong>4</strong>.
+    86 of 90 are attach errors of exactly the class the new attach-gate guards reject going forward.</p>
+
+    <h2 id="s2">§2 — Worst physics mislabels</h2>
+    <ol>
+      <li><code>disruption/global_quantities/phi_halo_boundary</code> — carries a <em>poloidal</em>-flux name but the
+        DD quantity is <em>toroidal</em> magnetic flux; hard poloidal↔toroidal swap. Keep
+        <code>toroidal_magnetic_flux_at_halo_boundary</code>.</li>
+      <li><code>edge_transport/model/ggd/ion/energy/d_radial/values</code> — radial ion <em>energy</em> diffusivity
+        carrying <code>radial_neutral_energy_diffusion_coefficient</code> (wrong species) and
+        <code>radial_ion_particle_diffusivity</code> (wrong transported quantity). Neither right.</li>
+      <li><code>{edge,plasma}_profiles/ggd/ion/velocity_over_b_field/*</code> (4 paths) — DD quantity is
+        velocity÷B (m·s⁻¹·T⁻¹); every attached name calls it a plain velocity, and the radial variant fabricates
+        <code>e_cross_b_drift</code> and a <code>state</code> level absent from the path.</li>
+      <li><code>coils_non_axisymmetric/coil/conductor/resistance</code> — labelled
+        <code>resistance_of_toroidal_field_coil</code> on a correction-coil conductor; wrong device class.</li>
+      <li><code>pf_passive|pf_plasma/.../thick_line/first_point/z</code> — passive-conductor and plasma-filament
+        geometry points tagged with beam-diagnostic loci (<code>beam_tracing_point</code>,
+        <code>launching_position</code>).</li>
+    </ol>
+
+    <h2 id="s3">§3 — Full table</h2>
+    <p>One row per name-pair family; counts in parentheses where a pair repeats across sibling paths.
+    "keeps" = the name that should retain the path; the other is detached (A/B), or both are replaced (C).</p>
+    <div style="overflow-x:auto"><table>
+      <thead><tr><th>Path (family)</th><th>Bucket</th><th>Verdict</th></tr></thead>
+      <tbody>
+        <tr><td><code>{coils_non_axisymmetric,tf}/coil/conductor/elements/*/phi</code> (7)</td><td>A</td><td>keeps <code>toroidal_angle_of_coil_conductor_element</code></td></tr>
+        <tr><td><code>ntms/time_slice/mode/*/{n_tor,n_phi}</code> (4)</td><td>A</td><td>keeps <code>toroidal_mhd_mode_number</code></td></tr>
+        <tr><td><code>runaway_electrons/ggd_fluid/ddensity_dt_*/values</code> (3)</td><td>A</td><td>keeps <code>…_due_to_&lt;process&gt;</code></td></tr>
+        <tr><td><code>*/profiles_2d/ion/temperature</code>, <code>mhd/ggd/t_i_average</code> (4)</td><td>A</td><td>keeps <code>ion_average_temperature</code></td></tr>
+        <tr><td><code>{edge,plasma}_profiles/ggd/ion/velocity_over_b_field/*</code> (4)</td><td>C</td><td>needs a velocity-over-B (mobility-like) name; both current names wrong</td></tr>
+        <tr><td><code>*/ggd/j_diamagnetic/*</code> (4)</td><td>A</td><td>keeps <code>&lt;dir&gt;_diamagnetic_current_density</code> (component reading)</td></tr>
+        <tr><td><code>*/momentum/d/diamagnetic</code> (2)</td><td>A</td><td>keeps <code>diamagnetic_momentum_diffusivity</code></td></tr>
+        <tr><td><code>*/fibre_bundle/geometry/outline/x2</code> (3)</td><td>A</td><td>keeps <code>x2_coordinate_of_optical_element</code></td></tr>
+        <tr><td><code>camera_visible/channel/optical_element/geometry/x1_width</code></td><td>A</td><td>keeps <code>width_of_optical_element</code></td></tr>
+        <tr><td><code>spectrometer_uv/channel/aperture/x1_width</code></td><td>B</td><td>keeps <code>width_of_diagnostic_aperture</code></td></tr>
+        <tr><td><code>coils_non_axisymmetric/coil/conductor/resistance</code></td><td>B</td><td>keeps <code>resistance_of_correction_coil</code></td></tr>
+        <tr><td><code>disruption/global_quantities/phi_halo_boundary</code></td><td>B</td><td>keeps <code>toroidal_magnetic_flux_at_halo_boundary</code></td></tr>
+        <tr><td><code>distributions/.../{orbit}/collisions/.../torque_*</code> (5)</td><td>A</td><td>keeps orbit-population-qualified name</td></tr>
+        <tr><td><code>distributions/.../trapped/collisions/electrons/power_fast</code></td><td>A</td><td>keeps <code>trapped_fast_electron_power_density_due_to_collisions</code></td></tr>
+        <tr><td><code>ece/polarizer/centre/z</code></td><td>A</td><td>keeps <code>vertical_coordinate_of_diagnostic_antenna</code></td></tr>
+        <tr><td><code>edge_profiles/ggd/j_ion_neutral_friction/poloidal</code></td><td>A</td><td>keeps <code>poloidal_current_density_due_to_ion_neutral_friction</code></td></tr>
+        <tr><td><code>edge_sources/source/ggd/ion/momentum/radial</code></td><td>A</td><td>keeps <code>radial_ion_momentum_source</code></td></tr>
+        <tr><td><code>edge_sources/source/ggd/neutral/momentum/radial</code></td><td>A</td><td>keeps <code>radial_neutral_state_momentum_source</code> (spurious <code>state</code> noted)</td></tr>
+        <tr><td><code>edge_transport/model/ggd/ion/energy/d_radial/values</code></td><td>C</td><td>needs radial ion energy diffusivity; both wrong</td></tr>
+        <tr><td><code>edge_transport/model/ggd/ion/state/energy/d/values</code></td><td>D</td><td>synonyms; pick one canonical term</td></tr>
+        <tr><td><code>edge_transport/.../neutral/momentum/flux_limiter/radial</code></td><td>A</td><td>keeps <code>radial_neutral_momentum_coefficient</code></td></tr>
+        <tr><td><code>equilibrium/.../constraints/faraday_angle/measured</code></td><td>A</td><td>keeps <code>faraday_angle</code></td></tr>
+        <tr><td><code>equilibrium/.../constraints/flux_loop/measured</code></td><td>A</td><td>keeps <code>poloidal_magnetic_flux_at_sensor_attachment_point</code></td></tr>
+        <tr><td><code>hard_x_rays/channel/filter_window/outline/x2</code></td><td>A</td><td>keeps <code>x2_coordinate_of_filter_window</code></td></tr>
+        <tr><td><code>{hard,soft}_x_rays/channel/filter_window/radius</code> (2)</td><td>A</td><td>keeps <code>radius_of_filter</code></td></tr>
+        <tr><td><code>ic_antennas/.../strap/geometry/annulus/z</code></td><td>D</td><td>lean <code>vertical_coordinate_of_conductor_cross_section</code></td></tr>
+        <tr><td><code>ic_antennas/.../strap/geometry/rectangle/z</code></td><td>B</td><td>keeps <code>vertical_coordinate_of_conductor_cross_section</code></td></tr>
+        <tr><td><code>nbi/unit/aperture/centre/z</code></td><td>B</td><td>keeps <code>vertical_coordinate_of_aperture</code> (NBI is not a diagnostic)</td></tr>
+        <tr><td><code>neutron_diagnostic/detector/geometry/surface</code></td><td>B</td><td>keeps <code>surface_area_of_neutron_detector</code></td></tr>
+        <tr><td><code>pellets/.../path_geometry/second_point/z</code></td><td>B</td><td>keeps <code>vertical_coordinate_of_pellet_path_point</code></td></tr>
+        <tr><td><code>pf_passive/loop/element/geometry/oblique/z</code></td><td>D</td><td>lean <code>vertical_coordinate_of_passive_structure</code></td></tr>
+        <tr><td><code>pf_passive/.../thick_line/second_point/z</code></td><td>B</td><td>keeps <code>vertical_coordinate_of_passive_structure</code></td></tr>
+        <tr><td><code>pf_passive/.../thick_line/first_point/z</code></td><td>C</td><td>needs a passive-structure point name; both loci wrong</td></tr>
+        <tr><td><code>pf_plasma/element/geometry/annulus/radius_outer</code></td><td>B</td><td>keeps <code>outer_radius_of_plasma_filament</code></td></tr>
+        <tr><td><code>pf_plasma/.../thick_line/first_point/z</code></td><td>C</td><td>needs a plasma-filament point name; both loci wrong</td></tr>
+        <tr><td><code>plasma_profiles/.../velocity_diamagnetic/diamagnetic</code></td><td>A</td><td>keeps <code>ion_state_diamagnetic_velocity_due_to_diamagnetic_drift</code> (redundant tail noted)</td></tr>
+        <tr><td><code>plasma_transport/.../ion/momentum/flux/poloidal</code></td><td>A</td><td>keeps <code>poloidal_ion_momentum_flux</code></td></tr>
+        <tr><td><code>plasma_transport/.../ion/momentum/flux/z</code></td><td>B</td><td>keeps <code>vertical_ion_momentum_flux</code></td></tr>
+        <tr><td><code>plasma_transport/model/ggd/momentum/d_radial/values</code></td><td>C</td><td>species-less momentum diffusivity; both inject a species</td></tr>
+        <tr><td><code>plasma_transport/.../neutral/momentum/d_radial/values</code></td><td>A</td><td>keeps <code>radial_neutral_momentum_diffusion_coefficient</code></td></tr>
+        <tr><td><code>plasma_transport/.../neutral/momentum/flux/diamagnetic</code></td><td>A</td><td>keeps <code>neutral_state_momentum_flux_due_to_diamagnetic_drift</code></td></tr>
+        <tr><td><code>plasma_transport/.../neutral/state/momentum/v/radial</code></td><td>A</td><td>keeps <code>radial_neutral_state_momentum_convection_velocity</code></td></tr>
+        <tr><td><code>pulse_schedule/.../line_of_sight/third_point/phi</code> (2)</td><td>A</td><td>keeps <code>toroidal_angle_of_along_line_of_sight</code> (grammar of <code>of_along</code> noted)</td></tr>
+        <tr><td><code>reflectometer_fluctuation/.../first_point/z</code></td><td>B</td><td>keeps <code>vertical_coordinate_of_launching_position</code></td></tr>
+        <tr><td><code>runaway_electrons/.../volume_average/current_density</code></td><td>A</td><td>keeps <code>parallel_volume_averaged_runaway_electron_current_density</code></td></tr>
+        <tr><td><code>runaway_electrons/.../momentum_critical_avalanche</code></td><td>A</td><td>keeps <code>volume_averaged_runaway_electron_critical_momentum_due_to_avalanche</code></td></tr>
+        <tr><td><code>runaway_electrons/profiles_1d/ddensity_dt_dreicer</code></td><td>B</td><td>keeps <code>runaway_electron_source_rate_due_to_dreicer</code></td></tr>
+        <tr><td><code>spectrometer_uv/channel/grating/curvature_radius</code></td><td>D</td><td>synonyms; DD is a radius of curvature — neither says radius</td></tr>
+        <tr><td><code>spectrometer_uv/.../image_field/centre/z</code></td><td>B</td><td>keeps <code>vertical_coordinate_of_camera</code></td></tr>
+        <tr><td><code>spectrometer_visible/.../{fibre_bundle,polarizer}/radius</code> (2)</td><td>A</td><td>keeps <code>radius_of_optical_element</code></td></tr>
+        <tr><td><code>spectrometer_x_ray_crystal/{camera,channel/camera}/centre/z</code> (2)</td><td>B</td><td>keeps <code>vertical_coordinate_of_camera</code></td></tr>
+        <tr><td><code>spectrometer_x_ray_crystal/.../line_of_sight/first_point/z</code></td><td>B</td><td>keeps <code>vertical_coordinate_of_launching_position</code></td></tr>
+        <tr><td><code>spectrometer_x_ray_crystal/channel/wavelength_frames</code></td><td>B</td><td>keeps <code>wavelength_of_detector_pixel</code></td></tr>
+        <tr><td><code>summary/.../power_{launched_,}nbi/value</code> (2)</td><td>A</td><td>keeps <code>total_power_of_neutral_beam_injector</code>; FLAG: launched vs coupled power are different quantities sharing one name</td></tr>
+        <tr><td><code>summary/local/pedestal/magnetic_shear/value</code></td><td>A</td><td>keeps <code>magnetic_shear_at_pedestal</code></td></tr>
+        <tr><td><code>waves/.../beam_tracing/beam/position/theta</code></td><td>A</td><td>keeps <code>poloidal_angle_of_beam_tracing_beam</code></td></tr>
+        <tr><td><code>waves/.../e_field_n_phi/plus/phase</code></td><td>A</td><td>keeps <code>per_toroidal_mode_left_hand_circularly_polarized_wave_electric_field</code> (neither encodes phase — noted)</td></tr>
+        <tr><td><code>waves/.../profiles_2d/e_field_n_tor/plus/amplitude</code></td><td>C</td><td>needs per-toroidal-mode amplitude name; both incomplete</td></tr>
+      </tbody>
+    </table></div>
+    <p>Evergreen: <a href="/imas-standard-names/independent-review-fixes.html">independent-review-fixes</a> §6.</p>
+  </main>
+</body>
+</html>

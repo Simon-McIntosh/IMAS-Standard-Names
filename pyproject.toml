@@ -15,8 +15,8 @@ dependencies = [
   "click>=8.1.8,<9.0.0",
   "pyyaml>=6.0.2,<7.0.0",
   "pint>=0.24.4,<0.25.0",
-  "markdown>=3.8,<4.0",
-  "fastmcp~=3.2.0",
+  # Security floor constraints for transitive dependencies
+  "urllib3>=2.7.0",            # CVE-2026-44432, CVE-2026-44431
 ]
 keywords = [
   "fusion",
@@ -37,7 +37,6 @@ is_genericname = "imas_standard_names.issues.cli:is_genericname"
 update_links = "imas_standard_names.issues.cli:update_links"
 validate_catalog = "imas_standard_names.validation.cli:validate_catalog_cli"
 standard-names = "imas_standard_names.cli:standard_names"
-standard-names-mcp = "imas_standard_names.cli.server:main"
 build-grammar = "imas_standard_names.grammar_codegen.generate:main"
 generate-schema = "imas_standard_names.schemas.generate:main"
 
@@ -55,15 +54,16 @@ quality = [
   "spacy>=3.8.0,<4.0.0",
 ]
 
-# Neo4j driver for imas_standard_names.graph.sync consumers.
-# The pure-Python spec (imas_standard_names.graph.spec) needs no driver;
-# only sync_grammar() callers do. imas-codex installs this extra.
+# Neo4j driver for imas_standard_names.graph.sync consumers. No module here
+# imports neo4j: the pure-Python spec (imas_standard_names.graph.spec) needs no
+# driver, and sync_grammar() takes a caller-supplied driver, so this extra only
+# saves a consumer from declaring the driver itself.
 graph = [
   "neo4j>=5.0",
 ]
 
-# Local NetworkX-backed catalog graph (plan 41). Enables
-# imas_standard_names.graph.local_graph + MCP traversal tools.
+# Local NetworkX-backed catalog graph. Enables
+# imas_standard_names.graph.local_graph traversal.
 graph-local = [
   "networkx>=3.0",
 ]
@@ -76,14 +76,13 @@ test = [
 ]
 
 docs = [
+  "imas-python>=2.0.1",
   "mike>=2.1.3,<3.0.0",
   "mkdocs>=1.6.1,<2.0.0",
   "mkdocs-macros-plugin>=1.0.4,<2.0.0",
   "mkdocs-material>=9.6.5,<10.0.0",
-  "mkdocs-data-plugin>=0.2.0,<0.3.0",
   "mkdocs-table-reader-plugin>=3.1.0,<4.0.0",
   "mkdocs-include-markdown-plugin>=7.0.0,<8.0.0",
-  "mkdocs-mermaid2-plugin>=1.1.0,<2.0.0",
 ]
 [build-system]
 requires = [
@@ -116,17 +115,14 @@ artifacts = [
 
 [dependency-groups]
 dev = [
+  "imas-python>=2.0.1",
   "pre-commit>=4.1.0,<5.0.0",
   "ruff>=0.11.10,<1.0.0",
   "pytest>=9.0.3",
   "pytest-cov>=4.1.0",
   "pytest-html>=4.1.1",
   "ipykernel>=6.29.5,<7.0.0",
-  "pandas-stubs>=2.2.3.250308,<3.0.0",
   "types-pyyaml>=6.0.12.20241230,<7.0.0",
-  "logfire>=4.16.0,<5.0.0",
-  "mcp-cli>=0.1.0,<1.0.0",
-  "pandas>=2.2.3,<3.0.0",
   # Include quality tools for development
   "proselint>=0.14.0,<0.15.0",
   "spacy>=3.8.0,<4.0.0",

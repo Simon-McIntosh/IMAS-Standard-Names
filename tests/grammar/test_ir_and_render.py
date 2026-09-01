@@ -1,4 +1,4 @@
-"""Tests for grammar vNext IR model and canonical renderer (plan 38 W1a).
+"""Tests for grammar IR model and canonical renderer (plan 38 W1a).
 
 These tests validate the IR shape constraints and the canonical strings
 produced by :func:`imas_standard_names.grammar.render.compose`.
@@ -58,7 +58,7 @@ def test_compose_projection_plus_qualifier_plus_locus():
             type=LocusType.POSITION,
         ),
     )
-    assert compose(ir) == "radial_component_of_electron_pressure_at_plasma_boundary"
+    assert compose(ir) == "radial_electron_pressure_at_plasma_boundary"
 
 
 def test_compose_nested_prefix_operators():
@@ -133,7 +133,7 @@ def test_compose_mechanism_trails_locus():
 
 
 def test_compose_coordinate_shape_on_geometry_carrier():
-    """``vertical_coordinate_of_<geometry_carrier>`` — §A12 row 23."""
+    """``vertical_<geometry_carrier>`` — §A12 row 23."""
     ir = StandardNameIR(
         projection=AxisProjection(axis="vertical", shape=ProjectionShape.COORDINATE),
         base=QuantityOrCarrier(token="position", kind=BaseKind.GEOMETRY),
@@ -143,9 +143,7 @@ def test_compose_coordinate_shape_on_geometry_carrier():
             type=LocusType.ENTITY,
         ),
     )
-    assert compose(ir) == (
-        "vertical_coordinate_of_position_of_ion_cyclotron_heating_antenna"
-    )
+    assert compose(ir) == ("vertical_position_of_ion_cyclotron_heating_antenna")
 
 
 # ---------------------------------------------------------------------------

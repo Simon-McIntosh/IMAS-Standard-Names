@@ -1,0 +1,371 @@
+import { describe, expect, it } from 'vitest';
+import { fireEvent, render } from '@testing-library/react';
+import { DetailPanel } from '../../src/components/DetailPanel.jsx';
+import { DataProvider } from '../../src/lib/data.js';
+
+// Use a mock fetch that returns a single catalog entry so DetailPanel
+// can render the hero.
+const MOCK_ENTRY = {
+  name: 'electron_temperature',
+  category: 'transport',
+  group: 'temperature',
+  parent: null,
+  algebra: 'scalar',
+  status: 'active',
+  unit: 'eV',
+  tags: [],
+  short: 'Test description',
+  long: 'Long documentation goes here',
+  sign: null,
+  seeAlso: [],
+  arguments: [],
+  sources: [],
+  superseded_by: null,
+  deprecates: null,
+  parse: [],
+  components: [],
+  magnitude: null,
+  children: [],
+};
+
+function makeDataset(entry) {
+  return {
+    CATALOG_VERSION: 'test',
+    CATEGORIES: [{ id: 'transport', label: 'Transport', count: 1 }],
+    GRAMMAR_VOCAB: {},
+    NAMES: [entry],
+  };
+}
+
+function mockFetch(dataset) {
+  return (url) => {
+    if (url.includes('data.json')) {
+      return Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve(dataset),
+      });
+    }
+    return Promise.resolve({ ok: false });
+  };
+}
+
+describe('DetailPanel sticky strip', () => {
+  it('renders the .detail-sticky strip with kind badge + name + close', async () => {
+    const origFetch = global.fetch;
+    global.fetch = mockFetch(makeDataset(MOCK_ENTRY));
+    try {
+      const { container, findByText } = render(
+        <DataProvider>
+          <DetailPanel
+            name="electron_temperature"
+            onSelect={() => {}}
+            onClose={() => {}}
+            childIndex={{}}
+            groupIndex={{}}
+            filters={{}}
+            setFilters={() => {}}
+            setView={() => {}}
+          />
+        </DataProvider>
+      );
+      await findByText('Test description');
+      const sticky = container.querySelector('.detail-sticky');
+      expect(sticky).not.toBeNull();
+      const stickyName = sticky.querySelector('.detail-sticky-name');
+      expect(stickyName?.textContent).toBe('electron_temperature');
+      const stickyClose = sticky.querySelector('.detail-sticky-close');
+      expect(stickyClose).not.toBeNull();
+    } finally {
+      global.fetch = origFetch;
+    }
+  });
+
+  it('does not set .detail-scrolled by default (hero in viewport)', async () => {
+    const origFetch = global.fetch;
+    global.fetch = mockFetch(makeDataset(MOCK_ENTRY));
+    try {
+      const { container, findByText } = render(
+        <DataProvider>
+          <DetailPanel
+            name="electron_temperature"
+            onSelect={() => {}}
+            onClose={() => {}}
+            childIndex={{}}
+            groupIndex={{}}
+            filters={{}}
+            setFilters={() => {}}
+            setView={() => {}}
+          />
+        </DataProvider>
+      );
+      await findByText('Test description');
+      const detail = container.querySelector('.detail');
+      expect(detail).not.toBeNull();
+      expect(detail.classList.contains('detail-scrolled')).toBe(false);
+    } finally {
+      global.fetch = origFetch;
+    }
+  });
+});
+
+describe('DetailPanel lifecycle banner', () => {
+  it('active entry renders no lifecycle banner', async () => {
+    const origFetch = global.fetch;
+    global.fetch = mockFetch(makeDataset({ ...MOCK_ENTRY, status: 'active' }));
+    try {
+      const { container, findByText } = render(
+        <DataProvider>
+          <DetailPanel
+            name="electron_temperature"
+            onSelect={() => {}}
+            onClose={() => {}}
+            childIndex={{}}
+            groupIndex={{}}
+            filters={{}}
+            setFilters={() => {}}
+            setView={() => {}}
+          />
+        </DataProvider>
+      );
+      await findByText('Test description');
+      expect(container.querySelector('.detail-lifecycle-banner')).toBeNull();
+    } finally {
+      global.fetch = origFetch;
+    }
+  });
+
+  it('draft entry renders state-draft banner', async () => {
+    const origFetch = global.fetch;
+    global.fetch = mockFetch(makeDataset({ ...MOCK_ENTRY, status: 'draft' }));
+    try {
+      const { container, findByText } = render(
+        <DataProvider>
+          <DetailPanel
+            name="electron_temperature"
+            onSelect={() => {}}
+            onClose={() => {}}
+            childIndex={{}}
+            groupIndex={{}}
+            filters={{}}
+            setFilters={() => {}}
+            setView={() => {}}
+          />
+        </DataProvider>
+      );
+      await findByText('Test description');
+      const banner = container.querySelector('.detail-lifecycle-banner.state-draft');
+      expect(banner).not.toBeNull();
+    } finally {
+      global.fetch = origFetch;
+    }
+  });
+
+  it('deprecated entry renders state-deprecated banner without successor link', async () => {
+    const origFetch = global.fetch;
+    global.fetch = mockFetch(makeDataset({
+      ...MOCK_ENTRY,
+      status: 'deprecated',
+      superseded_by: 'some_other_name',
+    }));
+    try {
+      const { container, findByText } = render(
+        <DataProvider>
+          <DetailPanel
+            name="electron_temperature"
+            onSelect={() => {}}
+            onClose={() => {}}
+            childIndex={{}}
+            groupIndex={{}}
+            filters={{}}
+            setFilters={() => {}}
+            setView={() => {}}
+          />
+        </DataProvider>
+      );
+      await findByText('Test description');
+      const banner = container.querySelector('.detail-lifecycle-banner.state-deprecated');
+      expect(banner).not.toBeNull();
+      // Deprecated entries must NOT show a NameLink to superseded_by —
+      // deprecation has no committed replacement.
+      expect(banner.textContent).not.toContain('some_other_name');
+    } finally {
+      global.fetch = origFetch;
+    }
+  });
+
+  it('superseded entry renders state-superseded banner with clickable successor', async () => {
+    const origFetch = global.fetch;
+    const selected = [];
+    global.fetch = mockFetch(makeDataset({
+      ...MOCK_ENTRY,
+      status: 'superseded',
+      superseded_by: 'new_temperature',
+    }));
+    try {
+      const { container, findByText } = render(
+        <DataProvider>
+          <DetailPanel
+            name="electron_temperature"
+            onSelect={(name) => selected.push(name)}
+            onClose={() => {}}
+            childIndex={{}}
+            groupIndex={{}}
+            filters={{}}
+            setFilters={() => {}}
+            setView={() => {}}
+          />
+        </DataProvider>
+      );
+      await findByText('Test description');
+      const banner = container.querySelector('.detail-lifecycle-banner.state-superseded');
+      expect(banner).not.toBeNull();
+      // The successor name must appear — NameLink renders it humanised
+      // (underscores → spaces) so query by data-name attribute.
+      const link = banner.querySelector('[data-name="new_temperature"]');
+      expect(link).not.toBeNull();
+    } finally {
+      global.fetch = origFetch;
+    }
+  });
+});
+
+describe('DetailPanel hero', () => {
+  it('renders the hero with KindBadge + name + UnitPill', async () => {
+    const origFetch = global.fetch;
+    global.fetch = mockFetch(makeDataset(MOCK_ENTRY));
+    try {
+      const { container, findByText } = render(
+        <DataProvider>
+          <DetailPanel
+            name="electron_temperature"
+            onSelect={() => {}}
+            onClose={() => {}}
+            childIndex={{}}
+            groupIndex={{}}
+            filters={{}}
+            setFilters={() => {}}
+            setView={() => {}}
+          />
+        </DataProvider>
+      );
+      await findByText('Test description');
+      const hero = container.querySelector('.detail-hero');
+      expect(hero).not.toBeNull();
+      // KindBadge present
+      expect(hero.querySelector('.kind-badge')).not.toBeNull();
+      // Name
+      expect(hero.querySelector('.detail-name')?.textContent).toBe('electron_temperature');
+      // UnitPill present in the hero
+      expect(hero.querySelector('.unit-pill')).not.toBeNull();
+    } finally {
+      global.fetch = origFetch;
+    }
+  });
+
+  it('detail-attrs grid is gone', async () => {
+    const origFetch = global.fetch;
+    global.fetch = mockFetch(makeDataset(MOCK_ENTRY));
+    try {
+      const { container, findByText } = render(
+        <DataProvider>
+          <DetailPanel
+            name="electron_temperature"
+            onSelect={() => {}}
+            onClose={() => {}}
+            childIndex={{}}
+            groupIndex={{}}
+            filters={{}}
+            setFilters={() => {}}
+            setView={() => {}}
+          />
+        </DataProvider>
+      );
+      await findByText('Test description');
+      expect(container.querySelector('.detail-attrs')).toBeNull();
+    } finally {
+      global.fetch = origFetch;
+    }
+  });
+});
+
+describe('DetailPanel generic source bindings', () => {
+  it('renders entry content and resolved Data Dictionary context', async () => {
+    const origFetch = global.fetch;
+    const entry = {
+      ...MOCK_ENTRY,
+      sources: [{
+        kind: 'imas-dd',
+        ref: 'summary/global_quantities/energy_thermal/value',
+        version: '4.0.0',
+        leaf_definition: 'Value',
+        parent_path: 'summary/global_quantities/energy_thermal',
+        parent_definition: 'Thermal plasma energy content.',
+        data_type: 'FLT',
+        unit: 'J',
+        coordinates: ['time'],
+        resolution_source: 'imas-python',
+        resolution_status: 'resolved',
+      }],
+    };
+    global.fetch = mockFetch(makeDataset(entry));
+    try {
+      const { findByRole, findByText, getByRole } = render(
+        <DataProvider>
+          <DetailPanel
+            name="electron_temperature"
+            onSelect={() => {}}
+            onClose={() => {}}
+            childIndex={{}}
+            groupIndex={{}}
+            filters={{}}
+            setFilters={() => {}}
+            setView={() => {}}
+          />
+        </DataProvider>,
+      );
+      expect(await findByText('Test description')).toBeVisible();
+      expect(await findByText('Long documentation goes here')).toBeVisible();
+      expect(getByRole('heading', { name: 'electron_temperature' })).toBeVisible();
+      fireEvent.click(await findByRole('button', {
+        name: 'Show source information for summary/global_quantities/energy_thermal/value',
+      }));
+      expect(await findByText('Thermal plasma energy content.')).toBeVisible();
+      expect(await findByText('DD 4.0.0')).toBeVisible();
+    } finally {
+      global.fetch = origFetch;
+    }
+  });
+});
+
+describe('DetailPanel see-also section removed', () => {
+  it('renders no section with heading "See also"', async () => {
+    const origFetch = global.fetch;
+    global.fetch = mockFetch(makeDataset({
+      ...MOCK_ENTRY,
+      seeAlso: ['some_other_name'],
+    }));
+    try {
+      const { container, findByText } = render(
+        <DataProvider>
+          <DetailPanel
+            name="electron_temperature"
+            onSelect={() => {}}
+            onClose={() => {}}
+            childIndex={{}}
+            groupIndex={{}}
+            filters={{}}
+            setFilters={() => {}}
+            setView={() => {}}
+          />
+        </DataProvider>
+      );
+      await findByText('Test description');
+      // No section heading "See also" should exist — it was removed.
+      const headings = Array.from(container.querySelectorAll('.detail-h'));
+      const seeAlsoHeading = headings.find((h) => h.textContent.trim() === 'See also');
+      expect(seeAlsoHeading).toBeUndefined();
+    } finally {
+      global.fetch = origFetch;
+    }
+  });
+});

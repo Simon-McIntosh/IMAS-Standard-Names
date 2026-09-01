@@ -85,7 +85,13 @@ def validate_catalog_cli(
 
     structural = run_structural_checks(entries)
     semantic = run_semantic_checks(entries)
-    issues = structural + semantic
+    combined = structural + semantic
+    # Semantic issue strings carry a "NAME: SEVERITY - detail" prefix; only
+    # ERROR (or unprefixed, e.g. structural/heuristic) messages block.
+    # WARNING blocks under --strict; INFO never blocks.
+    issues = [i for i in combined if ": WARNING - " not in i and ": INFO - " not in i]
+    check_warnings = [i for i in combined if ": WARNING - " in i]
+    check_infos = [i for i in combined if ": INFO - " in i]
 
     # Run quality checks if enabled
     quality_issues = []
@@ -100,14 +106,16 @@ def validate_catalog_cli(
     quality_errors = [msg for level, msg in quality_issues if level == "error"]
     quality_warnings = [msg for level, msg in quality_issues if level == "warning"]
     error_count = len(issues) + len(quality_errors)
-    warning_count = len(quality_warnings)
-    info_count = len([msg for level, msg in quality_issues if level == "info"])
+    warning_count = len(quality_warnings) + len(check_warnings)
+    info_count = len([msg for level, msg in quality_issues if level == "info"]) + len(
+        check_infos
+    )
     entry_count = len(entries)
 
     # Determine pass/fail status
     # Fail if: structural/semantic errors, quality errors, or (strict mode + warnings)
     has_errors = bool(issues) or bool(quality_errors)
-    has_strict_warnings = strict and bool(quality_warnings)
+    has_strict_warnings = strict and (bool(quality_warnings) or bool(check_warnings))
     has_integrity_issues = bool(integrity_issues)
 
     # Output summary if requested
@@ -144,6 +152,9 @@ def validate_catalog_cli(
             code = iss.get("code")
             name = iss.get("name", iss.get("detail", ""))
             click.echo(f" - {code}: {name}")
+    if check_warnings or check_infos:
+        for issue in check_warnings + check_infos:
+            click.echo(f" - {issue}")
     if issues:
         click.echo("Validation FAILED:")
         for issue in issues:
@@ -158,7 +169,8 @@ def validate_catalog_cli(
     # Check for warnings in strict mode
     if has_strict_warnings:
         click.echo(
-            f"Validation FAILED (strict): {len(quality_warnings)} quality warning(s)"
+            f"Validation FAILED (strict): "
+            f"{len(quality_warnings) + len(check_warnings)} warning(s)"
         )
         raise SystemExit(1)
 

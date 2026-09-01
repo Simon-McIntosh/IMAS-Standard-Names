@@ -3,7 +3,7 @@
 This module exports a pure-Python, deterministic representation of the ISN
 grammar (segment order, tokens, templates) suitable for mirroring into an
 external graph store. It is the sole boundary between ISN and imas-codex
-for the LinkML schema and graph-sync workflow described in plan 29 ADR-8
+for the LinkML schema and graph-sync workflow
 (Phase E.2).
 
 Design rules:
@@ -182,7 +182,18 @@ def segment_edge_specs(parsed: StandardName) -> list[SegmentEdgeSpec]:
         value: Any = getattr(parsed, segment_name, None)
         if value is None:
             continue
-        token = value.value if hasattr(value, "value") else str(value)
+        # Multi-token segments (e.g. ``zone`` on ``lower_outer_squareness``)
+        # arrive as a tuple/list of tokens; an ABSENT one is an empty tuple,
+        # which is not ``None`` and must be skipped (else it serialises to the
+        # literal ``"()"``). Join the present tokens into the surface form.
+        if isinstance(value, tuple | list):
+            parts = [v.value if hasattr(v, "value") else str(v) for v in value]
+            parts = [p for p in parts if p]
+            if not parts:
+                continue
+            token = "_".join(parts)
+        else:
+            token = value.value if hasattr(value, "value") else str(value)
         edges.append(
             SegmentEdgeSpec(
                 position=position,
