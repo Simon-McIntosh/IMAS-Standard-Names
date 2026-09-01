@@ -2,7 +2,9 @@
 
 import logging
 import warnings
+from collections.abc import Mapping, Sequence
 from pathlib import Path
+from typing import Any
 
 import yaml
 
@@ -18,6 +20,34 @@ logger = logging.getLogger(__name__)
 # Fields that are no longer part of the catalog entry model.
 # They are stripped from loaded YAML data to support clean schema migration.
 _STRIPPED_FIELDS = {"physics_domain", "dd_paths"}
+
+
+def dump_catalog_yaml(entries: Sequence[Mapping[str, Any]]) -> str:
+    """Serialize catalog entries as review-friendly YAML.
+
+    Each entry is emitted as one item in the same YAML sequence and separated
+    from the next by one blank line. Unicode remains literal, and PyYAML wraps
+    prose at whitespace without using quoted-scalar continuation escapes.
+    """
+    if not entries:
+        return "[]\n"
+
+    rendered_entries = [
+        yaml.safe_dump(
+            [dict(entry)],
+            sort_keys=False,
+            allow_unicode=True,
+            default_flow_style=False,
+            width=88,
+        ).rstrip("\n")
+        for entry in entries
+    ]
+    return "\n\n".join(rendered_entries) + "\n"
+
+
+def write_catalog_yaml(path: str | Path, entries: Sequence[Mapping[str, Any]]) -> None:
+    """Write catalog entries to ``path`` using the canonical YAML rendering."""
+    Path(path).write_text(dump_catalog_yaml(entries), encoding="utf-8")
 
 
 class CatalogMigrationError(Exception):
@@ -170,4 +200,9 @@ class YamlStore:
         return models
 
 
-__all__ = ["CatalogMigrationError", "YamlStore"]
+__all__ = [
+    "CatalogMigrationError",
+    "YamlStore",
+    "dump_catalog_yaml",
+    "write_catalog_yaml",
+]
