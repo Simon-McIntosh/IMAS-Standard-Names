@@ -71,18 +71,24 @@ def test_catalog_domain_grouping_uses_declared_model_field(tmp_path: Path) -> No
 
 
 def test_repository_catalog_fixtures_declare_physics_domain() -> None:
+    example_root = Path("imas_standard_names/resources/standard_name_examples")
+    fixture_paths = (
+        sorted(Path("tests").rglob("*.yml"))
+        + sorted(Path("tests").rglob("*.yaml"))
+        + sorted(example_root.glob("*.yml"))
+    )
     missing: list[str] = []
-    for path in sorted(Path("tests").rglob("*.yml")) + sorted(
-        Path("tests").rglob("*.yaml")
-    ):
+    mismatched: list[str] = []
+    for path in fixture_paths:
         content = yaml.safe_load(path.read_text(encoding="utf-8"))
         entries = content if isinstance(content, list) else [content]
         for entry in entries:
-            if (
-                isinstance(entry, dict)
-                and "name" in entry
-                and "physics_domain" not in entry
-            ):
+            if not isinstance(entry, dict) or "name" not in entry:
+                continue
+            if "physics_domain" not in entry:
                 missing.append(f"{path}:{entry['name']}")
+            elif path.parent == example_root and entry["physics_domain"] != path.stem:
+                mismatched.append(f"{path}:{entry['name']}")
 
     assert missing == []
+    assert mismatched == []
