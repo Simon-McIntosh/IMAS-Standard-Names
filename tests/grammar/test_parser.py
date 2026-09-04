@@ -1,8 +1,7 @@
-"""Unit tests for the grammar parser (plan 38 W2b).
+"""Unit tests for the grammar parser.
 
-These tests exercise the staged parser against fixture-injected closed
-vocabularies (physical_bases and locus_registry stubs will be populated
-by W2a; the parser itself does not depend on YAML contents).
+These tests exercise the parser against fixture-injected closed vocabularies;
+the parser itself does not depend on YAML contents.
 
 For every canonical grammar name the test asserts ``compose(parse(name).ir)
 == name`` (round-trip). For non-canonical and error cases, the test
@@ -39,9 +38,8 @@ from imas_standard_names.grammar.render import compose
 def vocabs() -> Vocabularies:
     """Inject a minimal vocabulary covering all test names.
 
-    This fixture bypasses YAML loading so tests remain stable while W2a
-    populates the vocabulary files. Every base, locus, operator, qualifier,
-    and axis referenced in any test below is declared here.
+    This fixture bypasses YAML loading. Every base, locus, operator, qualifier,
+    and axis referenced in the tests below is declared here.
     """
 
     loci: dict[str, tuple[LocusType, frozenset[LocusRelation]]] = {
@@ -163,7 +161,7 @@ def vocabs() -> Vocabularies:
 
 
 def test_parse_simple_locus(vocabs: Vocabularies):
-    """§A12 row 1: ``elongation_of_plasma_boundary``."""
+    """Parse ``elongation_of_plasma_boundary`` with an entity locus."""
     name = "elongation_of_plasma_boundary"
     result = parse(name, vocabs=vocabs)
     assert isinstance(result, ParseResult)
@@ -176,7 +174,7 @@ def test_parse_simple_locus(vocabs: Vocabularies):
 
 
 def test_parse_projection_plus_qualifier_plus_locus(vocabs: Vocabularies):
-    """§A2 row: radial component, electron qualifier, at plasma_boundary."""
+    """Parse a radial component, electron qualifier, and position locus."""
     name = "radial_electron_pressure_at_plasma_boundary"
     result = parse(name, vocabs=vocabs)
     assert result.ir.projection is not None
@@ -190,10 +188,10 @@ def test_parse_projection_plus_qualifier_plus_locus(vocabs: Vocabularies):
 
 
 def test_parse_nested_prefix_operators(vocabs: Vocabularies):
-    """§A12 row 14 canonical decomposition (maximum + derivative_wrt)."""
+    """Parse the canonical nested maximum and indexed derivative decomposition."""
     name = (
-        "maximum_of_derivative_with_respect_to_normalized_poloidal_flux_of_"
-        "electron_pressure_at_pedestal"
+        "maximum_of_derivative_of_electron_pressure_at_pedestal_"
+        "with_respect_to_normalized_poloidal_flux"
     )
     result = parse(name, vocabs=vocabs)
     assert len(result.ir.operators) == 2
@@ -276,12 +274,12 @@ def test_validate_round_trip_helper(vocabs: Vocabularies):
 
 
 # ---------------------------------------------------------------------------
-# §A3 disambiguation — row 25
+# Component and locus disambiguation
 # ---------------------------------------------------------------------------
 
 
 def test_parse_row25_two_of_disambiguation(vocabs: Vocabularies):
-    """§A12 row 25: two ``_of_`` in one name (component vs locus).
+    """Distinguish the projection-like suffix from the locus ``_of_``.
 
     The postfix-component form ``<base>_<axis>_component_of_<locus>`` is
     non-canonical; the parser resolves it without ambiguity:
@@ -298,8 +296,7 @@ def test_parse_row25_two_of_disambiguation(vocabs: Vocabularies):
     name = "magnetic_moment_toroidal_component_of_ferritic_element_centroid"
     # The remainder after stripping locus is
     # "magnetic_moment_toroidal_component" which is not a valid base; the
-    # parser must raise rather than silently accept. This is the §A3
-    # disambiguation guarantee: the _of_ that binds to the locus is
+    # parser must raise rather than silently accept. The _of_ that binds to the locus is
     # consumed exclusively for the locus relation.
     with pytest.raises(ParseError) as excinfo:
         parse(name, vocabs=vocabs)
@@ -382,7 +379,7 @@ def test_parse_qualifier_plus_base(vocabs: Vocabularies):
 
 
 def test_parse_coordinate_projection_on_carrier(vocabs: Vocabularies):
-    """``vertical_position_of_flux_loop`` (§A12 row 23 short form)."""
+    """Parse the short-form ``vertical_position_of_flux_loop`` projection."""
     name = "vertical_position_of_flux_loop"
     result = parse(name, vocabs=vocabs)
     assert result.ir.projection is not None
