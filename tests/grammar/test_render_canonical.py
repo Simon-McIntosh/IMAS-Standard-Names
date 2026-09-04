@@ -6,16 +6,18 @@ produces the exact canonical string required by the grammar.
 Canonical form rules:
 - Operator wrapping: ``unary_prefix`` → ``<op>_of_<inner>``;
   ``unary_postfix`` → ``<inner>_<op>``; ``binary`` → ``<op>_of_<A>_<sep>_<B>``
+- A unary operator over an ordinary base with an ``of``, ``at``, or ``due_to``
+  tail renders between the base group and that tail
+- Operators inside a binary operand tree retain their natural positions
 - Projection prefix (canonical): ``<axis>_`` before qualifiers+base
   (component shape) or ``<axis>_`` before carrier (coordinate shape)
 - Locus suffix: ``_of_<tok>`` / ``_at_<tok>`` / ``_over_<tok>``
 - Mechanism suffix: ``_due_to_<process>``
-- Order: operators(outer→inner) → projection → qualifiers → base → locus → mechanism
+- Default order: operators(outer→inner) → projection → qualifiers → base → locus
+  → mechanism
 
 Each test states the rendering rule it verifies.
 """
-
-from __future__ import annotations
 
 import pytest
 
@@ -322,8 +324,8 @@ def test_render_mechanism_with_locus() -> None:
 # ---------------------------------------------------------------------------
 
 
-def test_render_full_a2_example() -> None:
-    """Render ``<op>_of_<axis>_<qual>_<base>_<locus>`` canonically."""
+def test_render_operator_between_projected_base_and_locus() -> None:
+    """Render ``<axis>_<qual>_<base>_<op>_<locus>`` canonically."""
     ir = StandardNameIR(
         operators=[
             OperatorApplication(kind=OperatorKind.UNARY_PREFIX, op="root_mean_square")
@@ -338,12 +340,12 @@ def test_render_full_a2_example() -> None:
         ),
     )
     assert compose(ir) == (
-        "root_mean_square_of_radial_electron_pressure_at_plasma_boundary"
+        "radial_electron_pressure_root_mean_square_at_plasma_boundary"
     )
 
 
 def test_render_nested_operators_outer_first() -> None:
-    """Render the outermost operator as the leftmost prefix."""
+    """Render the outermost operator nearest the trailing locus."""
     ir = StandardNameIR(
         operators=[
             OperatorApplication(kind=OperatorKind.UNARY_PREFIX, op="maximum"),
@@ -356,11 +358,11 @@ def test_render_nested_operators_outer_first() -> None:
             type=LocusType.POSITION,
         ),
     )
-    # maximum is outer → leftmost; derivative is inner → immediately around base
-    assert compose(ir) == "maximum_of_derivative_of_pressure_at_pedestal"
+    # The derivative is inner and nearest the base; maximum remains outer.
+    assert compose(ir) == "pressure_derivative_maximum_at_pedestal"
 
 
-def test_render_a12_row_14_nested_operators() -> None:
+def test_render_nested_indexed_operator_at_pedestal() -> None:
     """Render a nested maximum and indexed derivative at the pedestal."""
     ir = StandardNameIR(
         operators=[
@@ -384,7 +386,7 @@ def test_render_a12_row_14_nested_operators() -> None:
     )
 
 
-def test_render_a12_row_22_maximum_power_flux_density() -> None:
+def test_render_maximum_power_flux_density_at_target() -> None:
     """Render maximum power flux density at the inner divertor target."""
     ir = StandardNameIR(
         operators=[OperatorApplication(kind=OperatorKind.UNARY_PREFIX, op="maximum")],
@@ -395,7 +397,7 @@ def test_render_a12_row_22_maximum_power_flux_density() -> None:
             type=LocusType.POSITION,
         ),
     )
-    assert compose(ir) == "maximum_of_power_flux_density_at_inner_divertor_target"
+    assert compose(ir) == "power_flux_density_maximum_at_inner_divertor_target"
 
 
 # ---------------------------------------------------------------------------
