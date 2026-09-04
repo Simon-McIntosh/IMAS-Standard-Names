@@ -191,7 +191,12 @@ def _render_operator_stack(
             outer = f"{op.op}_{operand}"
         else:
             assert_operator_of_form(op, registry=None)
-            outer = f"{op.op}_of_{operand}"
+            indexed_parts = op.op.partition("_with_respect_to_")
+            if indexed_parts[1] and indexed_parts[0] and indexed_parts[2]:
+                operator, _, index = indexed_parts
+                outer = f"{operator}_of_{operand}_with_respect_to_{index}"
+            else:
+                outer = f"{op.op}_of_{operand}"
         # Any remaining operators in ``rest`` still need to wrap the result.
         return _render_operator_stack(rest, outer, enclosing_ir)
 

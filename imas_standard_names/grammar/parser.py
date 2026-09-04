@@ -924,6 +924,52 @@ def _coordinate_universe(v: Vocabularies) -> frozenset[str]:
     return v.carriers | frozenset(v.carrier_aliases) | frozenset(v.axes)
 
 
+def _rewrite_operand_first_indexed_operator(s: str, v: Vocabularies) -> str:
+    """Rewrite an operand-first coordinate derivative to the internal form.
+
+    The lossless IR keeps a coordinate-indexed operator as one fused token.
+    Canonical surface spelling places the complete operand before that index,
+    so parsing temporarily restores the fused prefix spelling consumed by the
+    existing operator peel. The renderer converts the fused token back to the
+    canonical operand-first spelling.
+    """
+    candidates: list[tuple[str, str, str]] = []
+    for op, meta in v.operators.items():
+        fixed_operator, fixed_relation, fixed_index = op.partition("_with_respect_to_")
+        if fixed_relation and fixed_operator and fixed_index:
+            candidates.append((op, fixed_operator, fixed_index))
+        if (
+            meta.get("kind") != OperatorKind.UNARY_PREFIX.value
+            or not meta.get("indexed")
+            or list(meta.get("index_params") or []) != ["coord"]
+        ):
+            continue
+        operator, relation, _ = op.partition("_with_respect_to")
+        if not relation or not operator:
+            continue
+        for coord in _coordinate_universe(v):
+            canonical_coord = v.carrier_aliases.get(coord, coord)
+            candidates.append((f"{op}_{canonical_coord}", operator, coord))
+
+    for fused_op, operator, index in sorted(
+        candidates, key=lambda candidate: len(candidate[2]), reverse=True
+    ):
+        suffix = f"_with_respect_to_{index}"
+        if not s.endswith(suffix):
+            continue
+        operand_end = len(s) - len(suffix)
+        marker = f"{operator}_of_"
+        operator_start = s.rfind(marker, 0, operand_end)
+        if operator_start < 0:
+            continue
+        operand_start = operator_start + len(marker)
+        operand = s[operand_start:operand_end]
+        if not operand:
+            continue
+        return f"{s[:operator_start]}{fused_op}_of_{operand}"
+    return s
+
+
 def _longest_indexed_prefix_operator_match(
     s: str, prefix_ops: set[str], v: Vocabularies
 ) -> tuple[str, int] | None:
@@ -1896,7 +1942,7 @@ def _parse_uncached(
     """Parse one memoization-cache miss."""
     v = vocabs
     diagnostics: list[Diagnostic] = []
-    s = name
+    s = _rewrite_operand_first_indexed_operator(name, v)
 
     # Trailing-postfix pass.
     #
