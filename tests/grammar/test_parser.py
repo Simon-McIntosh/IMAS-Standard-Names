@@ -8,8 +8,6 @@ For every canonical grammar name the test asserts ``compose(parse(name).ir)
 asserts specific diagnostic / exception behaviour.
 """
 
-from __future__ import annotations
-
 import pytest
 
 from imas_standard_names.grammar.ir import (
@@ -127,7 +125,7 @@ def vocabs() -> Vocabularies:
             "pressure",
             "temperature",
             "magnetic_field",
-            "magnetic_field_magnitude",  # intentionally NOT here; test derives via op
+            "magnetic_field_magnitude",  # intentionally absent; derived via operator
             "magnetic_moment",
             "plasma_current",
             "toroidal_field",
@@ -258,7 +256,7 @@ def test_parse_mechanism(vocabs: Vocabularies):
 
 def test_parse_time_derivative_with_locus(vocabs: Vocabularies):
     """Prefix op + locus — combined round-trip."""
-    name = "time_derivative_of_pressure_at_magnetic_axis"
+    name = "pressure_time_derivative_at_magnetic_axis"
     result = parse(name, vocabs=vocabs)
     assert len(result.ir.operators) == 1
     assert result.ir.operators[0].op == "time_derivative"
