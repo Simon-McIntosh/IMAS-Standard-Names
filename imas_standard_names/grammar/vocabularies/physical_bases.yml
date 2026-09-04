@@ -316,6 +316,13 @@ bases:
   refractive_index:
     aliases: []
     kind: scalar
+  relative_humidity:
+    # Water-vapour partial pressure relative to its saturation value. The
+    # detector-humidity DD source stores the fraction on the interval 0..1,
+    # so this is an irreducible dimensionless scalar rather than a qualifier
+    # applied to another humidity base.
+    aliases: []
+    kind: scalar
   residual:
     aliases: []
     kind: scalar
