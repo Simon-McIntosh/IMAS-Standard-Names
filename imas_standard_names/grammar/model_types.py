@@ -248,7 +248,6 @@ class Qualifier(StrEnum):
     ENHANCEMENT = "enhancement"
     REQUESTED = "requested"
     EJIMA = "ejima"
-    BETA_INCLINATION = "beta_inclination"
     MHD = "mhd"
     WAVE = "wave"
     FAST_WAVE = "fast_wave"
