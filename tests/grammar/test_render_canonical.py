@@ -21,6 +21,8 @@ Each test states the rendering rule it verifies.
 
 import pytest
 
+from imas_standard_names import parse
+from imas_standard_names.grammar import parse_standard_name
 from imas_standard_names.grammar.ir import (
     AxisProjection,
     BaseKind,
@@ -386,18 +388,28 @@ def test_render_nested_indexed_operator_at_pedestal() -> None:
     )
 
 
-def test_render_maximum_power_flux_density_at_target() -> None:
-    """Render maximum power flux density at the inner divertor target."""
+def test_render_maximum_energy_flux_at_target() -> None:
+    """Render the peak deposited-energy surface load at a divertor target."""
     ir = StandardNameIR(
         operators=[OperatorApplication(kind=OperatorKind.UNARY_PREFIX, op="maximum")],
-        base=QuantityOrCarrier(token="power_flux_density", kind=BaseKind.QUANTITY),
+        qualifiers=[Qualifier(token="energy")],
+        base=QuantityOrCarrier(token="flux", kind=BaseKind.QUANTITY),
         locus=LocusRef(
             relation=LocusRelation.AT,
             token="inner_divertor_target",
             type=LocusType.POSITION,
         ),
     )
-    assert compose(ir) == "power_flux_density_maximum_at_inner_divertor_target"
+    rendered = compose(ir)
+    assert rendered == "energy_flux_maximum_at_inner_divertor_target"
+
+    parsed = parse(rendered, strict=True)
+    assert compose(parsed.ir) == rendered
+
+    flat = parse_standard_name(rendered)
+    assert flat.physical_base == "flux"
+    assert flat.channel is not None
+    assert flat.channel.value == "energy"
 
 
 # ---------------------------------------------------------------------------
