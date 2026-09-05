@@ -1,6 +1,6 @@
 """Closed-vocabulary coverage for DD-backed quantity families.
 
-Three accepted additions are intentionally additive, while the strain-gauge
+Two accepted additions are intentionally additive, while the strain-gauge
 candidate is rejected on positive evidence:
 
 * Rejected: ``measurement_direction_unit_vector``. Accepted alternatives:
@@ -21,16 +21,10 @@ candidate is rejected on positive evidence:
 * ``relative_humidity`` is the dimensionless fraction of humidity from zero to
   one measured at the X-ray detector, as documented for
   ``camera_x_rays/detector_humidity`` (unit ``1``).
-* ``beta_inclination`` qualifies ``angle`` for the beta-labelled second
-  inclination of an oblique iron-core segment. DD documents counter-clockwise
-  inclination from upward ``grad Z``; its unit history corrects ``m`` to
-  ``rad``. The corresponding sibling pattern is ``alpha_inclination``.
-
 The shipped catalog snapshot contains none of the representative identities for
-the three accepted additions or an equivalent token in those families.
+the two accepted additions or an equivalent token in those families.
 Unindexed ``stokes_parameter`` erases which polarization coordinate is stored;
-generic fractions do not say relative humidity; and bare ``beta`` denotes
-normalized plasma pressure rather than an iron-core geometric inclination.
+generic fractions do not say relative humidity.
 """
 
 from dataclasses import replace
@@ -44,7 +38,6 @@ from imas_standard_names.grammar.parser import load_default_vocabularies
 @pytest.mark.parametrize(
     ("registry", "tokens"),
     [
-        ("qualifiers", {"beta_inclination"}),
         ("component_axes", {"s0", "s1", "s2", "s3"}),
         ("bases", {"relative_humidity"}),
     ],
@@ -52,11 +45,6 @@ from imas_standard_names.grammar.parser import load_default_vocabularies
 def test_dd_backed_tokens_are_registered(registry: str, tokens: set[str]) -> None:
     vocabularies = load_default_vocabularies()
     assert tokens <= getattr(vocabularies, registry)
-
-
-def test_beta_inclination_joins_the_geometry_qualifier_family() -> None:
-    vocabularies = load_default_vocabularies()
-    assert vocabularies.qualifier_categories["beta_inclination"] == "geometry"
 
 
 @pytest.mark.parametrize(
@@ -67,7 +55,6 @@ def test_beta_inclination_joins_the_geometry_qualifier_family() -> None:
         "s2_stokes_parameter_of_fiber_optic_current_sensor",
         "s3_stokes_parameter_of_fiber_optic_current_sensor",
         "relative_humidity_of_detector",
-        "beta_inclination_angle_of_iron_core_segment",
     ],
 )
 def test_dd_backed_vocabulary_name_round_trips_through_render(name: str) -> None:
@@ -78,11 +65,6 @@ def test_dd_backed_vocabulary_name_round_trips_through_render(name: str) -> None
 @pytest.mark.parametrize(
     ("registry", "token", "name"),
     [
-        (
-            "qualifiers",
-            "beta_inclination",
-            "beta_inclination_angle_of_iron_core_segment",
-        ),
         (
             "component_axes",
             "s0",

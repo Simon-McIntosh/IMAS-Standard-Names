@@ -208,7 +208,6 @@
 
 # --- Named parameters ---
 - ejima                         # Ejima (volt-second consumption coefficient)
-- beta_inclination              # beta angle of an oblique iron-core segment
 
 # --- Physics regime / type ---
 # NOTE: 'internal' removed — internal_inductance and internal_energy are now

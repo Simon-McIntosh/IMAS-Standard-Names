@@ -39,7 +39,6 @@ qualifier_categories:
 
   # Geometric, directional, and tensor qualifiers
   geometry:
-    - beta_inclination
     - contravariant
     - covariant
     - cross_field
