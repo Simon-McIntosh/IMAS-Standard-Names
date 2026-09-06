@@ -329,9 +329,7 @@ def test_render_mechanism_with_locus() -> None:
 def test_render_operator_between_projected_base_and_locus() -> None:
     """Render ``<axis>_<qual>_<base>_<op>_<locus>`` canonically."""
     ir = StandardNameIR(
-        operators=[
-            OperatorApplication(kind=OperatorKind.UNARY_PREFIX, op="root_mean_square")
-        ],
+        operators=[OperatorApplication(kind=OperatorKind.UNARY_PREFIX, op="maximum")],
         projection=AxisProjection(axis="radial", shape=ProjectionShape.COMPONENT),
         qualifiers=[Qualifier(token="electron")],
         base=QuantityOrCarrier(token="pressure", kind=BaseKind.QUANTITY),
@@ -341,9 +339,7 @@ def test_render_operator_between_projected_base_and_locus() -> None:
             type=LocusType.POSITION,
         ),
     )
-    assert compose(ir) == (
-        "radial_electron_pressure_root_mean_square_at_plasma_boundary"
-    )
+    assert compose(ir) == ("radial_electron_pressure_maximum_at_plasma_boundary")
 
 
 def test_render_nested_operators_outer_first() -> None:
