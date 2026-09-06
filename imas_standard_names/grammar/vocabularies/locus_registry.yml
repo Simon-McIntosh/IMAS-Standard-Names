@@ -646,7 +646,10 @@ loci:
   measurement_position:
     type: position
     allowed_relations: [at, of]
-    definition: The spatial location identified as the measurement position in the relevant plasma, diagnostic, or plant context.
+    definition: >-
+      The position in the cylindrical frame at which a diagnostic channel
+      samples, used for the coordinates of that position where the coordinate
+      serves many instrument families.
   midplane:
     type: position
     allowed_relations: [at, of]
@@ -841,6 +844,45 @@ loci:
     type: position
     allowed_relations: [at, of]
     definition: The center of curvature of a circular arc.
+
+  # ── diagnostic measurement-destination loci ─────────────────────────
+  # Per-instrument sampling positions: the locations at which individual
+  # diagnostic channels measure. Distinct from the generic
+  # measurement_position locus, which survives only for the shared coordinate
+  # triple that many instrument families evaluate; a quantity whose
+  # instrument is known carries that instrument's own locus instead. Each
+  # accepts both _of_ (a claim about the location as an object) and _at_
+  # (a field value evaluated there).
+  reflectometer_cutoff_position:
+    type: position
+    allowed_relations: [of, at]
+    definition: >-
+      The plasma layer at which a reflectometer channel samples: where the
+      probing frequency meets the local cutoff, or for Doppler reflectometry
+      the backscatter resonance condition.
+  charge_exchange_channel:
+    type: position
+    allowed_relations: [of, at]
+    definition: >-
+      The sample volume of a charge-exchange recombination spectroscopy
+      channel, where beam-induced charge-exchange emission is collected.
+  thomson_scattering_channel_position:
+    type: position
+    allowed_relations: [of, at]
+    definition: The scattering volume assigned to one Thomson-scattering channel.
+  langmuir_probe_position:
+    type: position
+    allowed_relations: [of, at]
+    definition: >-
+      The location at which a Langmuir probe tip samples the local plasma,
+      embedded or reciprocating. Distinct from langmuir_probe, the probe
+      itself as an entity.
+  calorimetry_component:
+    type: position
+    allowed_relations: [of, at]
+    definition: >-
+      A discrete element of a calorimetry group whose extracted thermal
+      energy and power are measured.
 
   # ====================================================================
   # Geometry-typed loci (shape/region boundary: _at_, _of_, _over_)
