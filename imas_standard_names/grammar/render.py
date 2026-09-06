@@ -299,6 +299,19 @@ def _has_repositioning_tail(ir: StandardNameIR) -> bool:
     return ir.locus is not None and ir.locus.relation.value in {"of", "at"}
 
 
+# The accumulation family (accumulated, cumulative, cumulative_inside_flux_surface)
+# are bare-prefix tokens that modify the quantity as a whole and lead their name.
+# They are NOT relocated between base and locus the way a joiner-taking operator
+# is: the relocated spelling (``neutral_count_accumulated_at_wall``) would fold
+# the aggregation into the base group and contradict the leading canonical form.
+# Sibling reductions already lead via the operator stack; these stay qualifiers
+# and simply keep their leading seat, so ``_leading_bare_operators`` must not
+# extract them into the relocatable operator-qualifier bucket.
+_ACCUMULATION_LEADING_QUALIFIERS: frozenset[str] = frozenset(
+    {"accumulated", "cumulative", "cumulative_inside_flux_surface"}
+)
+
+
 def _leading_bare_operators(
     ir: StandardNameIR,
 ) -> tuple[list[Qualifier], list[Qualifier]]:
@@ -306,7 +319,11 @@ def _leading_bare_operators(
 
     operator_qualifiers: list[Qualifier] = []
     ordinary_qualifiers = list(ir.qualifiers)
-    while ordinary_qualifiers and ordinary_qualifiers[0].token in BARE_PREFIX_OPERATORS:
+    while (
+        ordinary_qualifiers
+        and ordinary_qualifiers[0].token in BARE_PREFIX_OPERATORS
+        and ordinary_qualifiers[0].token not in _ACCUMULATION_LEADING_QUALIFIERS
+    ):
         operator_qualifiers.append(ordinary_qualifiers.pop(0))
     return operator_qualifiers, ordinary_qualifiers
 

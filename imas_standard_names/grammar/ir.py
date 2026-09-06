@@ -172,6 +172,7 @@ BARE_PREFIX_OPERATORS: frozenset[str] = frozenset(
         "per_toroidal_and_poloidal_mode_number",
         "per_toroidal_mode",
         "perturbed",
+        "root_mean_square",
         "surface_integrated",
         "time_averaged",
         "volume_averaged",

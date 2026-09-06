@@ -675,6 +675,7 @@ def _peel_outer_operator(
         for name, meta in v.operators.items()
         if meta.get("kind") == OperatorKind.BINARY.value
     }
+    reductions = _reduction_prefix_operators(v)
 
     # a) unary postfix: s ends with "_<op>", longest op first. A postfix at the
     # tail of an explicit prefix or binary form belongs to that operator's
@@ -701,8 +702,17 @@ def _peel_outer_operator(
     if prefix_match is not None:
         new_s = s[len(prefix_match) + len("_of_") :]
         if new_s:
+            # A _of_-authored domain reduction converges on the bare leading
+            # spelling: the reduction collapses the whole operand, so the
+            # joiner would state the same scope under a second canonical
+            # string. Carry the bare flag so every spelling of one quantity
+            # shares a single representation and one canonical form.
             return (
-                OperatorApplication(kind=OperatorKind.UNARY_PREFIX, op=prefix_match),
+                OperatorApplication(
+                    kind=OperatorKind.UNARY_PREFIX,
+                    op=prefix_match,
+                    bare_prefix=prefix_match in reductions,
+                ),
                 new_s,
                 [],
             )
