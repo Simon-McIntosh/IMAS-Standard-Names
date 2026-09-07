@@ -10,10 +10,6 @@ from imas_standard_names.grammar.render import compose
     ("current", "canonical"),
     [
         (
-            "root_mean_square_of_wave_current_of_antenna_strap",
-            "wave_current_root_mean_square_of_antenna_strap",
-        ),
-        (
             "voltage_of_ion_cyclotron_heating_antenna_amplitude",
             "voltage_amplitude_of_ion_cyclotron_heating_antenna",
         ),
@@ -62,10 +58,6 @@ from imas_standard_names.grammar.render import compose
             "electron_density_inverse_maximum_at_magnetic_axis",
         ),
         (
-            "root_mean_square_of_radial_electron_pressure_at_plasma_boundary",
-            "radial_electron_pressure_root_mean_square_at_plasma_boundary",
-        ),
-        (
             "maximum_of_derivative_of_pressure_at_pedestal",
             "pressure_derivative_maximum_at_pedestal",
         ),
@@ -98,6 +90,14 @@ def test_tailed_operator_moves_between_base_and_locus(
             "toroidal_argon_velocity_flux_surface_averaged_at_plasma_boundary",
             "flux_surface_averaged_toroidal_argon_velocity_at_plasma_boundary",
         ),
+        (
+            "wave_current_root_mean_square_of_antenna_strap",
+            "root_mean_square_wave_current_of_antenna_strap",
+        ),
+        (
+            "radial_electron_pressure_root_mean_square_at_plasma_boundary",
+            "root_mean_square_radial_electron_pressure_at_plasma_boundary",
+        ),
     ],
 )
 def test_bare_operator_leads_instead_of_moving_before_the_locus(
@@ -109,6 +109,36 @@ def test_bare_operator_leads_instead_of_moving_before_the_locus(
     with pytest.raises(ValueError, match="not canonical") as rejection:
         parse(misplaced, strict=True)
     assert canonical in str(rejection.value)
+
+
+@pytest.mark.parametrize(
+    ("authored", "canonical"),
+    [
+        (
+            "root_mean_square_of_wave_current_of_antenna_strap",
+            "root_mean_square_wave_current_of_antenna_strap",
+        ),
+        (
+            "spectral_width_root_mean_square_of_spectrometer_channel",
+            "root_mean_square_spectral_width_of_spectrometer_channel",
+        ),
+    ],
+)
+def test_reduction_of_form_converges_on_the_leading_spelling(
+    authored: str, canonical: str
+) -> None:
+    """An ``_of_``-authored domain reduction renders to the bare leading form.
+
+    root_mean_square is a precedence-30 reduction: it collapses the whole
+    operand, so the joiner states the same scope under a second string. The
+    authored ``_of_`` spelling must share one representation with the canonical
+    bare form and draw the same rendered string.
+    """
+    ir = parse(authored).ir
+    assert parse(canonical, strict=True).ir == ir
+    assert compose(ir) == canonical
+    with pytest.raises(ValueError):
+        parse(authored, strict=True)
 
 
 def test_an_outer_operator_cannot_move_past_a_leading_reduction() -> None:

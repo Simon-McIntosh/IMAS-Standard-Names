@@ -217,6 +217,7 @@ def test_every_flux_surface_reduction_wraps_a_binary_form(reduction: str) -> Non
         "volume_averaged",
         "line_averaged",
         "time_averaged",
+        "root_mean_square",
         "normalized",
         "perturbed",
         "change_in",
@@ -225,7 +226,6 @@ def test_every_flux_surface_reduction_wraps_a_binary_form(reduction: str) -> Non
         "inverse_of",
         "time_derivative_of",
         "maximum_of",
-        "root_mean_square_of",
     ],
 )
 def test_no_other_transformation_wraps_a_binary_form(prefix: str) -> None:

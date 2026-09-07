@@ -1,4 +1,4 @@
-"""Round-trip test battery for grammar (plan 38 §A10, item 1).
+"""Round-trip test battery for the grammar compose invariant.
 
 Synthesises ≥ 5 000 valid IR instances via seeded random, composes each to
 a canonical string, parses the string back, and asserts the re-parsed IR is
@@ -40,6 +40,7 @@ from imas_standard_names.grammar.ir import (
 )
 from imas_standard_names.grammar.parser import (
     Vocabularies,
+    _reduction_prefix_operators,
     load_default_vocabularies,
     parse,
 )
@@ -138,7 +139,16 @@ def _make_base_ir(
 
 
 def _prefix_op(op: str) -> OperatorApplication:
-    return OperatorApplication(kind=OperatorKind.UNARY_PREFIX, op=op)
+    """Build a canonical prefix application.
+
+    A domain reduction carries the bare flag (``flux_surface_averaged_<x>``),
+    so its composed spelling re-parses to the same IR; every other prefix
+    operator keeps the ``_of_`` joiner and the default bare_prefix=False.
+    """
+    reductions = _reduction_prefix_operators(load_default_vocabularies())
+    return OperatorApplication(
+        kind=OperatorKind.UNARY_PREFIX, op=op, bare_prefix=op in reductions
+    )
 
 
 def _postfix_op(op: str) -> OperatorApplication:
@@ -484,7 +494,7 @@ def test_round_trip_mechanisms(vocabs: Vocabularies) -> None:
 def test_round_trip_combined_large(vocabs: Vocabularies) -> None:
     """Combinatorial sweep targeting ≥ 5 000 unique IR instances.
 
-    Validates that the A10 target of 5 000 synthetic round-trips is met.
+    Validates that 5 000 synthetic round-trips are exercised.
     Uses a seeded RNG for reproducibility.
     """
     rng = random.Random(1234)

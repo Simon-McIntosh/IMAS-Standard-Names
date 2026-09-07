@@ -33,7 +33,7 @@ def test_rms_reduction_scalar():
         {
             "kind": "scalar",
             "physics_domain": "core_plasma_physics",
-            "name": "root_mean_square_of_electron_temperature",
+            "name": "root_mean_square_electron_temperature",
             "description": "RMS",
             "documentation": "Root mean square of electron temperature.",
             "unit": "eV",
