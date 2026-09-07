@@ -1,0 +1,69 @@
+- name: coolant_mass_flow_rate
+  description: |-
+    Coolant mass throughput across a fluid-flow boundary, representing the rate
+    at which coolant mass passes through a port or cooling loop.
+  documentation: |-
+    Coolant mass flow rate is the rate of coolant mass crossing a reference
+    section of a fluid-flow path. It represents fluid throughput for cooling
+    loops and plant-component ports without selecting one particular physical
+    location.
+
+    The defining mass flow rate is
+
+    $$
+    \dot{m} = \frac{\mathrm{d}m}{\mathrm{d}t}
+    $$
+
+    where $\dot{m}$ is the coolant mass flow rate, $m$ is the coolant mass
+    crossing the reference section, and $t$ is time.
+
+    This quantity applies to the aggregate coolant stream and is not a
+    volumetric flow rate, coolant temperature, transit time, or thermal power.
+    The enthalpy transport associated with the flow is
+    $\dot{m}(h_{\mathrm{out}}-h_{\mathrm{in}})$, where $h_{\mathrm{out}}$ and
+    $h_{\mathrm{in}}$ are the specific enthalpies of the coolant at the outlet
+    and inlet; the [coolant temperature at
+    outlet](name:coolant_temperature_at_outlet) helps characterize the outlet
+    state. The [coolant transit time of a plant component
+    port](name:coolant_transit_time_of_plant_component_port) is a related
+    elapsed-time quantity, not part of the mass flow rate itself.
+
+    Sign convention: Positive when coolant crosses the reference section in the
+    designated positive flow direction from inlet toward outlet.
+  unit: kg.s^-1
+
+- name: coolant_transit_time_of_plant_component_port
+  description: |-
+    Elapsed time for coolant to traverse the associated plant component from
+    inlet to outlet, defining the thermal delay between the two coolant states.
+  documentation: |-
+    Coolant transit time is the elapsed travel time for the coolant stream to
+    pass through the plant component associated with the specified port, from
+    its inlet to its outlet. It represents the transport delay between the inlet
+    and outlet thermal states.
+
+    The transit time is defined as
+
+    $$
+    \tau_{\mathrm{c}} = t_{\mathrm{out}} - t_{\mathrm{in}}
+    $$
+
+    where $\tau_{\mathrm{c}}$ is the coolant transit time, $t_{\mathrm{in}}$ is
+    the instant when the coolant crosses the component inlet, and
+    $t_{\mathrm{out}}$ is the instant when the same coolant stream crosses the
+    component outlet.
+
+    The quantity applies to the coolant path through one associated plant
+    component and uses the inlet-to-outlet interval as its aggregation
+    convention. It is not a plant-wide sum over components or ports, and it
+    excludes transport outside the component, instrumentation or network
+    latency, and a thermal time constant of the component material.
+
+    The transit time establishes the temporal correspondence between inlet
+    conditions and the delayed outlet state represented by the [coolant
+    temperature at outlet](name:coolant_temperature_at_outlet). It is distinct
+    from the [coolant mass flow rate](name:coolant_mass_flow_rate), which
+    describes transported mass per time rather than travel duration, and it
+    provides the thermal-delay correction relevant to [total thermal coolant
+    absorbed power at wall](name:total_thermal_coolant_absorbed_power_at_wall).
+  unit: s

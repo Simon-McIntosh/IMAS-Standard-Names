@@ -1,0 +1,32 @@
+- name: radial_outline_of_limiter_tile
+  description: |-
+    Major-radius coordinate R locating each point on the boundary outline of a
+    plasma-facing limiter tile in the right-handed cylindrical (R, φ, Z) frame.
+  documentation: |-
+    The radial outline coordinate is the major-radius value $R$ of each point on
+    the geometric boundary outline of a plasma-facing limiter tile. It describes
+    tile geometry rather than a plasma field or a flux-surface coordinate.
+
+    In a right-handed cylindrical $(R,\phi,Z)$ frame, the major-radius
+    coordinate is defined from Cartesian coordinates by
+
+    $$
+    R = \sqrt{x^2+y^2}
+    $$
+
+    where $R$ is the perpendicular distance from the toroidal symmetry axis, and
+    $x$ and $y$ are Cartesian coordinate values along the $\hat{x}$ and
+    $\hat{y}$ axes of the right-handed $(\hat{x},\hat{y},\hat{z})$ basis.
+
+    The quantity is evaluated pointwise for every contour point of the
+    limiter-tile outline. It is not an average, maximum, area, or integrated
+    boundary measure; for a closed contour, the first point is not repeated at
+    the end.
+
+    Together with the [vertical outline of the limiter
+    tile](name:vertical_outline_of_limiter_tile), it supplies the complementary
+    radial and vertical coordinates that locate the outline in a poloidal
+    cross-section. The related [radial coordinate](name:radial_coordinate)
+    expresses the same geometric coordinate concept without specifying the
+    limiter-tile outline locus.
+  unit: m

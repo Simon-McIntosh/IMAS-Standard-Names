@@ -1,0 +1,108 @@
+- name: electron_density_at_divertor_target
+  description: |-
+    Number density of the electron species at the divertor target is the local
+    particle count per volume for free electrons at the sheath entrance
+    immediately upstream of the target-facing plasma boundary.
+  documentation: |-
+    Number density of the electron species at the divertor target is the local
+    particle count per volume at the sheath entrance immediately upstream of the
+    target-facing plasma boundary. It is the electron-specific member of
+    [density_at_divertor_target](name:density_at_divertor_target).
+
+    The local electron number density is defined by the differential particle
+    count:
+
+    $$
+    n_e = \frac{dN_e}{dV}
+    $$
+
+    where $N_e$ is the number of free electrons in a small plasma volume $V$
+    whose center approaches the sheath entrance from the plasma side at the
+    divertor target.
+
+    This quantity applies to the free-electron population immediately adjacent
+    to the divertor target and counts each free electron once, without
+    charge-state weighting. Electrons bound in atoms or molecules, ions, and
+    other neutral particles are excluded.
+
+    Unlike
+    [total_ion_density_at_divertor_target](name:total_ion_density_at_divertor_target),
+    which sums positive-ion densities over ion species and charge states, this
+    quantity describes the electron population and is not an ionic density or a
+    charge density.
+  unit: m^-3
+
+- name: electron_temperature_at_divertor_target
+  description: |-
+    Electron temperature at the divertor target is the thermal energy per
+    particle of the electron population evaluated at the plasma side of a
+    divertor-target sheath, distinct from the target material temperature.
+  documentation: |-
+    Electron temperature at the divertor target is the thermal energy per
+    particle of the electron population evaluated at the plasma side of a
+    divertor-target sheath. It is a plasma boundary quantity for electrons at
+    the downstream end of the scrape-off layer, not a thermodynamic property of
+    the solid target material.
+
+    For the electron population, the target temperature is the one-third trace
+    of the kinetic thermal-energy moment at the sheath edge:
+
+    $$
+    T_{e,t} = \frac{m_e}{3 n_{e,t}} \int |\mathbf{v} - \mathbf{u}_{e,t}|^2 f_{e,t}(\mathbf{v})\,d^3v
+    $$
+
+    where $T_{e,t}$ is the electron temperature at the divertor target, $m_e$ is
+    the electron mass, $n_{e,t}$ is the free-electron number density at the
+    sheath edge, $\mathbf{v}$ is electron velocity, $\mathbf{u}_{e,t}$ is the
+    mean electron flow velocity at the sheath edge, $f_{e,t}(\mathbf{v})$ is the
+    electron velocity distribution there, and $d^3v$ is the velocity-space
+    volume element.
+
+    This quantity applies exclusively to the free-electron population at a
+    specified divertor target and represents a density-weighted per-particle
+    thermal energy scale rather than an extensive sum. It excludes ion,
+    neutral-particle, and solid-target temperatures, and it is not an average
+    over multiple plasma populations.
+
+    It is the electron-specific component of [temperature at the divertor
+    target](name:temperature_at_divertor_target). The electron density at the
+    same locus, [electron density at divertor
+    target](name:electron_density_at_divertor_target), supplies the local
+    population density appearing in the defining moment but is a distinct
+    quantity.
+  unit: eV
+
+- name: energy_flux_maximum_at_divertor_target
+  description: |-
+    Peak local energy-deposition rate per unit area on one divertor target
+    surface, combining incident plasma-particle and radiative energy-carrying
+    channels.
+  documentation: |-
+    This quantity is the greatest local energy-deposition flux on the
+    plasma-facing surface of one divertor target. It represents the peak heat
+    load per unit area from the combined incident particle and radiative
+    energy-carrying channels.
+
+    The peak is defined from the local [energy flux at a divertor
+    target](name:energy_flux_at_divertor_target) by
+
+    $$
+    q_{E,\mathrm{peak}} = \max_{\mathbf{x}\in S_t} q_E(\mathbf{x})
+    $$
+
+    where $q_{E,\mathrm{peak}}$ is the peak energy flux, $q_E(\mathbf{x})$ is
+    the local deposited energy flux at surface position $\mathbf{x}$, and $S_t$
+    is the plasma-facing surface of one divertor target.
+
+    The maximum is taken over surface locations on a single divertor target.
+    This quantity is not an integral over the target or divertor assembly, and
+    it does not select only the inner or outer target; those distinctions are
+    separate physical or positional scopes. It includes the combined local
+    contribution of the applicable particle and radiative channels.
+
+    The parent quantity [energy flux at a divertor
+    target](name:energy_flux_at_divertor_target) describes the local field from
+    which this peak is obtained, whereas [power at a divertor
+    target](name:power_at_divertor_target) is an integrated deposition rate
+    rather than a per-area maximum.
+  unit: W.m^-2

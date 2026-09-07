@@ -1,0 +1,5152 @@
+catalog_name: imas-standard-names-catalog
+cocos_convention: 17
+grammar_version: 0.9.0
+isn_model_version: 0.9.0
+dd_version_lineage:
+- 4.0.0
+generated_by: imas-codex sn export
+generated_at: '2026-09-07T10:50:56+02:00'
+min_score_applied: 0.65
+min_description_score_applied: null
+include_unreviewed: false
+candidate_count: 214
+published_count: 196
+excluded_below_score_count: 0
+excluded_unreviewed_count: 0
+source_repo: imas-codex
+source_commit_sha: 3c668ff2014828669f03358f02e10bc3eb6e6dd8
+export_scope: review
+domains_included:
+- auxiliary_heating
+- divertor_physics
+- edge_plasma_physics
+- electromagnetic_wave_diagnostics
+- equilibrium
+- general
+- machine_operations
+- magnetic_field_diagnostics
+- magnetic_field_systems
+- magnetohydrodynamics
+- mechanical_measurement_diagnostics
+- particle_measurement_diagnostics
+- plant_systems
+- plasma_wall_interactions
+- radiation_measurement_diagnostics
+- structural_components
+- transport
+review_batch:
+- area_of_diagnostic_aperture
+- area_of_poloidal_magnetic_field_probe
+- area_of_toroidal_magnetic_field_probe
+- atomic_count
+- atomic_mass
+- atomic_number
+- breakdown_initial_time
+- capacitance_of_ion_cyclotron_heating_antenna
+- cold_neutral_fraction
+- cold_neutral_temperature
+- coolant_mass_flow_rate
+- coolant_temperature_at_inlet
+- coolant_temperature_at_outlet
+- coolant_transit_time_of_plant_component_port
+- current_of_passive_loop
+- current_of_poloidal_field_coil
+- derivative_of_area_of_flux_surface_with_respect_to_toroidal_flux_coordinate
+- derivative_of_volume_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate
+- derivative_of_volume_of_flux_surface_with_respect_to_toroidal_flux_coordinate
+- difference_of_total_plasma_heating_power_and_time_derivative_of_plasma_stored_energy
+- difference_of_vacuum_poloidal_current_function_and_initial_vacuum_poloidal_current_function
+- effective_charge
+- effective_turn_count_of_coil_conductor_element
+- effective_turn_count_of_passive_loop
+- electron_density_at_divertor_target
+- electron_density_at_magnetic_axis
+- electron_density_at_plasma_boundary
+- electron_temperature
+- electron_temperature_at_divertor_target
+- electron_temperature_at_magnetic_axis
+- elongation_of_flux_surface
+- elongation_of_plasma_boundary
+- energy_confinement_enhancement_factor
+- energy_confinement_time
+- energy_flux_maximum_at_divertor_target
+- etendue_of_hard_xray_detector
+- etendue_of_spectrometer_channel
+- faraday_angle
+- flux_surface_averaged_inverse_of_major_radius
+- flux_surface_averaged_inverse_of_square_of_magnetic_field_magnitude
+- flux_surface_averaged_inverse_of_square_of_major_radius
+- flux_surface_averaged_magnetic_field_magnitude
+- flux_surface_averaged_major_radius
+- flux_surface_averaged_ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_magnetic_field_magnitude
+- flux_surface_averaged_ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_major_radius
+- flux_surface_averaged_square_of_magnetic_field_magnitude
+- flux_surface_averaged_square_of_toroidal_flux_coordinate_gradient_magnitude
+- flux_surface_averaged_toroidal_current_density
+- flux_surface_averaged_toroidal_flux_coordinate_gradient_magnitude
+- forward_power_of_ion_cyclotron_heating_antenna
+- forward_wave_phase_of_ion_cyclotron_heating_antenna
+- frequency_of_ion_cyclotron_heating_antenna
+- frequency_of_wave_diagnostic_channel
+- gap_at_outboard_midplane
+- gas_flow
+- hard_xray_brightness
+- height_of_poloidal_field_coil
+- hot_neutral_fraction
+- hot_neutral_temperature
+- incident_soft_xray_radiance
+- initial_polarization_ellipticity_of_polarimeter_beam
+- inner_normalized_toroidal_flux_coordinate_hard_xray_emissivity_peak_half_width
+- intensity_at_spectral_line
+- ion_current_of_mass_spectrometer_channel
+- ipb98y2_confinement_time
+- launched_power_of_lower_hybrid_antenna
+- length_of_poloidal_magnetic_field_probe
+- length_of_toroidal_magnetic_field_probe
+- length_variation_of_interferometer_beam
+- line_averaged_effective_charge
+- line_averaged_electron_density
+- line_integrated_electron_number_density
+- loop_voltage_at_plasma_boundary
+- lower_bound_photon_energy
+- lower_triangularity_of_flux_surface
+- lower_triangularity_of_plasma_boundary
+- lower_wavelength_of_filter
+- magnetic_shear_at_flux_surface
+- maximum_magnetic_field_magnitude
+- mhd_energy
+- minimum_over_flux_surface_magnetic_field_magnitude
+- minimum_safety_factor
+- minor_radius_of_plasma_boundary
+- normalized_plasma_internal_inductance
+- normalized_poloidal_flux_coordinate
+- normalized_poloidal_flux_coordinate_of_plasma_boundary
+- normalized_toroidal_beta
+- normalized_toroidal_flux_coordinate
+- normalized_toroidal_flux_coordinate_at_measurement_position
+- normalized_toroidal_flux_coordinate_at_minimum_absolute_safety_factor
+- photon_radiance_at_spectral_line
+- plasma_current
+- plasma_pressure
+- poloidal_angle_of_flux_surface
+- poloidal_angle_of_measurement_position
+- poloidal_angle_of_toroidal_magnetic_field_probe
+- poloidal_beta
+- poloidal_length_of_flux_surface
+- poloidal_magnetic_field
+- poloidal_magnetic_flux_at_flux_surface
+- poloidal_magnetic_flux_at_magnetic_axis
+- poloidal_magnetic_flux_at_measurement_position
+- poloidal_magnetic_flux_at_plasma_boundary
+- poloidal_magnetic_flux_of_flux_loop
+- poloidal_plane_cross_sectional_area_of_flux_surface
+- poloidal_plane_cross_sectional_area_of_plasma_boundary
+- power_due_to_ion_cyclotron_heating
+- power_of_soft_xray_detector
+- pressure_of_ion_cyclotron_heating_antenna
+- product_of_poloidal_current_function_and_derivative_of_poloidal_current_function_with_respect_to_poloidal_magnetic_flux_coordinate
+- pulse_duration
+- radial_coordinate_at_inboard_midplane
+- radial_coordinate_at_outboard_midplane
+- radial_coordinate_of_camera
+- radial_coordinate_of_conductor_cross_section
+- radial_coordinate_of_detector_pixel
+- radial_coordinate_of_flux_loop
+- radial_coordinate_of_geometric_axis
+- radial_coordinate_of_line_of_sight
+- radial_coordinate_of_magnetic_axis
+- radial_coordinate_of_measurement_position
+- radial_coordinate_of_poloidal_magnetic_field_probe
+- radial_coordinate_of_strike_point
+- radial_coordinate_of_x_point
+- radial_derivative_of_poloidal_magnetic_flux
+- radial_outline_of_antenna_strap
+- radial_outline_of_limiter_tile
+- radial_outline_of_plasma_boundary
+- radial_outline_of_wall
+- radiated_power_over_core_region
+- radiative_temperature_at_ece_channel
+- radiative_temperature_at_magnetic_axis
+- ratio_of_line_averaged_electron_density_to_greenwald_density
+- ratio_of_line_averaged_hydrogen_density_to_line_averaged_total_hydrogenic_density
+- ratio_of_neutral_density_of_isotope_to_difference_of_total_neutral_density_and_neutral_density_of_isotope
+- reference_major_radius
+- reflected_phase_of_ion_cyclotron_heating_antenna
+- reflected_power_of_ion_cyclotron_heating_antenna
+- safety_factor
+- safety_factor_at_magnetic_axis
+- safety_factor_at_normalized_poloidal_magnetic_flux_equal_to_0_95
+- spectral_bremsstrahlung_photon_radiance
+- spectral_calibration_factor_at_line_of_sight
+- spectral_photon_radiance
+- spectral_rate_of_spectrometer_channel
+- spectral_wavelength_of_optical_element
+- surface_area_of_flux_surface
+- temperature_of_soft_xray_detector
+- thermal_electron_density
+- thermal_electron_pressure_at_post_sawtooth_crash
+- thickness_of_filter
+- toroidal_angle_of_antenna_strap
+- toroidal_angle_of_measurement_position
+- toroidal_angle_of_poloidal_magnetic_field_probe
+- toroidal_angle_of_toroidal_magnetic_field_probe
+- toroidal_angular_width_of_limiter_tile
+- toroidal_beta
+- toroidal_coordinate_at_detector_pixel
+- toroidal_coordinate_of_aperture
+- toroidal_coordinate_of_camera
+- toroidal_coordinate_of_line_of_sight
+- toroidal_flux_coordinate
+- toroidal_magnetic_field
+- toroidal_magnetic_field_at_magnetic_axis
+- toroidal_magnetic_flux
+- toroidal_magnetic_flux_due_to_diamagnetic_drift
+- toroidal_vacuum_magnetic_field
+- total_electron_count
+- total_electron_density
+- total_electron_pressure
+- total_external_heating_power
+- total_neutral_source_rate_due_to_gas_injection
+- total_plasma_radiated_power
+- total_power_at_separatrix
+- total_power_due_to_ion_cyclotron_heating
+- total_power_due_to_ohmic_dissipation
+- triangularity_of_plasma_boundary
+- turn_count_of_poloidal_magnetic_field_probe
+- turn_count_of_toroidal_magnetic_field_probe
+- upper_photon_energy
+- upper_triangularity_of_flux_surface
+- upper_triangularity_of_plasma_boundary
+- upper_wavelength_of_filter
+- vacuum_poloidal_current_function
+- vertical_coordinate_of_camera
+- vertical_coordinate_of_conductor_cross_section
+- vertical_coordinate_of_detector_pixel
+- vertical_coordinate_of_ece_channel
+- vertical_coordinate_of_flux_loop
+- vertical_coordinate_of_geometric_axis
+- vertical_coordinate_of_line_of_sight
+- vertical_coordinate_of_magnetic_axis
+- vertical_coordinate_of_measurement_position
+- vertical_coordinate_of_poloidal_magnetic_field_probe
+- vertical_coordinate_of_primary_x_point
+- vertical_coordinate_of_strike_point
+- vertical_coordinate_of_toroidal_magnetic_field_probe
+- vertical_outline_of_antenna_strap
+- vertical_outline_of_limiter_tile
+- vertical_outline_of_plasma_boundary
+- vertical_outline_of_plasma_facing_component
+- voltage_amplitude_of_ion_cyclotron_heating_antenna
+- voltage_of_mass_spectrometer_channel
+- voltage_of_poloidal_magnetic_field_probe
+- volume_averaged_electron_density
+- volume_of_flux_surface
+- volume_of_plasma_boundary
+- wave_current_amplitude_of_antenna_strap
+- wave_phase_of_antenna_strap
+- wave_phase_of_ion_cyclotron_heating_antenna
+- wave_phase_of_wave_beam
+- wavelength_of_spectral_line
+- wavelength_of_wave_beam
+- width_of_poloidal_field_coil
+catalog_commit_sha: 3c668ff2014828669f03358f02e10bc3eb6e6dd8
+exported_at: '2026-09-07T10:50:56+02:00'
+edge_model_version: v2
+names:
+  area_of_diagnostic_aperture:
+    kind: scalar
+    status: draft
+    physics_domain: radiation_measurement_diagnostics
+    links: []
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: bolometer/camera/channel/aperture/surface
+      version: 4.1.0
+    - kind: imas-dd
+      ref: bolometer/camera/channel/detector/surface
+      version: 4.1.0
+    - kind: imas-dd
+      ref: camera_visible/channel/aperture/surface
+      version: 4.1.0
+    - kind: imas-dd
+      ref: camera_x_rays/aperture/surface
+      version: 4.1.0
+    - kind: imas-dd
+      ref: charge_exchange/aperture/surface
+      version: 4.1.0
+    - kind: imas-dd
+      ref: charge_exchange/channel/aperture/surface
+      version: 4.1.0
+    - kind: imas-dd
+      ref: hard_x_rays/channel/aperture/surface
+      version: 4.1.0
+    - kind: imas-dd
+      ref: hard_x_rays/channel/detector/surface
+      version: 4.1.0
+    - kind: imas-dd
+      ref: mse/channel/aperture/surface
+      version: 4.1.0
+    - kind: imas-dd
+      ref: nbi/unit/aperture/surface
+      version: 4.1.0
+    - kind: imas-dd
+      ref: neutron_diagnostic/detector/aperture/surface
+      version: 4.1.0
+    - kind: imas-dd
+      ref: reflectometer_fluctuation/channel/antenna_detection_static/surface
+      version: 4.1.0
+    - kind: imas-dd
+      ref: reflectometer_fluctuation/channel/antenna_emission_static/surface
+      version: 4.1.0
+    - kind: imas-dd
+      ref: reflectometer_profile/channel/antenna_detection/surface
+      version: 4.1.0
+    - kind: imas-dd
+      ref: reflectometer_profile/channel/antenna_emission/surface
+      version: 4.1.0
+    - kind: imas-dd
+      ref: soft_x_rays/channel/aperture/surface
+      version: 4.1.0
+    - kind: imas-dd
+      ref: soft_x_rays/channel/detector/surface
+      version: 4.1.0
+    - kind: imas-dd
+      ref: spectrometer_uv/channel/aperture/surface
+      version: 4.1.0
+    - kind: imas-dd
+      ref: spectrometer_uv/channel/detector/surface
+      version: 4.1.0
+    - kind: imas-dd
+      ref: spectrometer_visible/channel/aperture/surface
+      version: 4.1.0
+    - kind: imas-dd
+      ref: spectrometer_visible/channel/detector/surface
+      version: 4.1.0
+    - kind: imas-dd
+      ref: spectrometer_x_ray_crystal/channel/aperture/surface
+      version: 4.1.0
+    - kind: imas-dd
+      ref: spectrometer_x_ray_crystal/channel/reflector/surface
+      version: 4.1.0
+  area_of_poloidal_magnetic_field_probe:
+    kind: scalar
+    status: draft
+    physics_domain: magnetic_field_diagnostics
+    links:
+    - name:turn_count_of_poloidal_magnetic_field_probe
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: magnetics/b_field_pol_probe/area
+      version: 4.1.0
+  area_of_toroidal_magnetic_field_probe:
+    kind: scalar
+    status: draft
+    physics_domain: magnetic_field_diagnostics
+    links:
+    - name:turn_count_of_toroidal_magnetic_field_probe
+    - name:area_of_poloidal_magnetic_field_probe
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: magnetics/b_field_phi_probe/area
+      version: 4.1.0
+  atomic_count:
+    kind: scalar
+    status: draft
+    physics_domain: transport
+    links:
+    - name:atomic_number
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: amns_data/process/products/element/atoms_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: amns_data/process/reactants/element/atoms_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: core_profiles/profiles_1d/ion/element/atoms_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: core_profiles/profiles_1d/neutral/element/atoms_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: core_profiles/profiles_2d/ion/element/atoms_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: core_sources/source/profiles_1d/ion/element/atoms_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: core_sources/source/profiles_1d/neutral/element/atoms_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: core_sources/source/species/ion/element/atoms_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: core_sources/source/species/neutral/element/atoms_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: core_transport/model/profiles_1d/ion/element/atoms_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: core_transport/model/profiles_1d/neutral/element/atoms_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: distribution_sources/source/species/ion/element/atoms_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: distribution_sources/source/species/neutral/element/atoms_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: distributions/distribution/global_quantities/collisions/ion/element/atoms_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: distributions/distribution/profiles_1d/co_passing/collisions/ion/element/atoms_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: distributions/distribution/profiles_1d/collisions/ion/element/atoms_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: distributions/distribution/profiles_1d/counter_passing/collisions/ion/element/atoms_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: distributions/distribution/profiles_1d/trapped/collisions/ion/element/atoms_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: distributions/distribution/profiles_2d/co_passing/collisions/ion/element/atoms_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: distributions/distribution/profiles_2d/collisions/ion/element/atoms_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: distributions/distribution/profiles_2d/counter_passing/collisions/ion/element/atoms_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: distributions/distribution/profiles_2d/trapped/collisions/ion/element/atoms_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: distributions/distribution/species/ion/element/atoms_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: distributions/distribution/species/neutral/element/atoms_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: edge_profiles/ggd/ion/element/atoms_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: edge_profiles/ggd/neutral/element/atoms_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: edge_profiles/profiles_1d/ion/element/atoms_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: edge_profiles/profiles_1d/neutral/element/atoms_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: edge_sources/source/ggd/ion/element/atoms_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: edge_sources/source/ggd/neutral/element/atoms_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: edge_sources/source/species/ion/element/atoms_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: edge_sources/source/species/neutral/element/atoms_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: edge_transport/model/ggd/ion/element/atoms_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: edge_transport/model/ggd/neutral/element/atoms_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: gas_injection/pipe/species/element/atoms_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: gas_injection/valve/species/element/atoms_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: gas_pumping/duct/species/element/atoms_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: pellets/time_slice/pellet/propellant_gas/element/atoms_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_initiation/global_quantities/ion/element/atoms_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_initiation/global_quantities/neutral/element/atoms_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_profiles/ggd/ion/element/atoms_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_profiles/ggd/neutral/element/atoms_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_profiles/profiles_1d/ion/element/atoms_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_profiles/profiles_1d/neutral/element/atoms_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_profiles/profiles_2d/ion/element/atoms_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_sources/source/ggd/ion/element/atoms_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_sources/source/ggd/neutral/element/atoms_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_sources/source/profiles_1d/ion/element/atoms_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_sources/source/profiles_1d/neutral/element/atoms_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_sources/source/species/ion/element/atoms_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_sources/source/species/neutral/element/atoms_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_transport/model/ggd/ion/element/atoms_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_transport/model/ggd/neutral/element/atoms_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_transport/model/profiles_1d/ion/element/atoms_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_transport/model/profiles_1d/neutral/element/atoms_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: pulse_schedule/density_control/ion/element/atoms_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: pulse_schedule/density_control/valve/species/element/atoms_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: pulse_schedule/nbi/unit/species/element/atoms_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: radiation/process/ggd/neutral/element/atoms_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: radiation/process/profiles_1d/neutral/element/atoms_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: spectrometer_visible/channel/isotope_ratios/isotope/element/atoms_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: turbulence/profiles_2d/ion/element/atoms_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: turbulence/profiles_2d/neutral/element/atoms_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: wall/description_ggd/ggd/energy_fluxes/kinetic/ion/element/atoms_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: wall/description_ggd/ggd/energy_fluxes/kinetic/neutral/element/atoms_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: wall/description_ggd/ggd/energy_fluxes/recombination/ion/element/atoms_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: wall/description_ggd/ggd/energy_fluxes/recombination/neutral/element/atoms_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: wall/description_ggd/ggd/particle_fluxes/ion/element/atoms_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: wall/description_ggd/ggd/particle_fluxes/neutral/element/atoms_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: wall/description_ggd/ggd/recycling/ion/element/atoms_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: wall/description_ggd/ggd/recycling/neutral/element/atoms_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: wall/global_quantities/neutral/element/atoms_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: wall/global_quantities/neutral/incident_species/element/atoms_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: waves/coherent_wave/beam_tracing/beam/ion/element/atoms_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: waves/coherent_wave/global_quantities/ion/element/atoms_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: waves/coherent_wave/profiles_1d/ion/element/atoms_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: waves/coherent_wave/profiles_2d/ion/element/atoms_n
+      version: 4.1.0
+  atomic_mass:
+    kind: scalar
+    status: draft
+    physics_domain: transport
+    links: []
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: amns_data/a
+      version: 4.1.0
+    - kind: imas-dd
+      ref: core_profiles/profiles_1d/ion/element/a
+      version: 4.1.0
+    - kind: imas-dd
+      ref: core_profiles/profiles_2d/ion/element/a
+      version: 4.1.0
+    - kind: imas-dd
+      ref: core_sources/source/profiles_1d/ion/element/a
+      version: 4.1.0
+    - kind: imas-dd
+      ref: core_sources/source/species/ion/element/a
+      version: 4.1.0
+    - kind: imas-dd
+      ref: distribution_sources/source/species/ion/element/a
+      version: 4.1.0
+    - kind: imas-dd
+      ref: distributions/distribution/global_quantities/collisions/ion/element/a
+      version: 4.1.0
+    - kind: imas-dd
+      ref: distributions/distribution/profiles_1d/co_passing/collisions/ion/element/a
+      version: 4.1.0
+    - kind: imas-dd
+      ref: distributions/distribution/profiles_1d/collisions/ion/element/a
+      version: 4.1.0
+    - kind: imas-dd
+      ref: distributions/distribution/profiles_1d/counter_passing/collisions/ion/element/a
+      version: 4.1.0
+    - kind: imas-dd
+      ref: distributions/distribution/profiles_1d/trapped/collisions/ion/element/a
+      version: 4.1.0
+    - kind: imas-dd
+      ref: distributions/distribution/profiles_2d/co_passing/collisions/ion/element/a
+      version: 4.1.0
+    - kind: imas-dd
+      ref: distributions/distribution/profiles_2d/collisions/ion/element/a
+      version: 4.1.0
+    - kind: imas-dd
+      ref: distributions/distribution/profiles_2d/counter_passing/collisions/ion/element/a
+      version: 4.1.0
+    - kind: imas-dd
+      ref: distributions/distribution/profiles_2d/trapped/collisions/ion/element/a
+      version: 4.1.0
+    - kind: imas-dd
+      ref: distributions/distribution/species/ion/element/a
+      version: 4.1.0
+    - kind: imas-dd
+      ref: edge_profiles/ggd/ion/element/a
+      version: 4.1.0
+    - kind: imas-dd
+      ref: edge_profiles/profiles_1d/ion/element/a
+      version: 4.1.0
+    - kind: imas-dd
+      ref: edge_sources/source/ggd/ion/element/a
+      version: 4.1.0
+    - kind: imas-dd
+      ref: edge_sources/source/species/ion/element/a
+      version: 4.1.0
+    - kind: imas-dd
+      ref: edge_transport/model/ggd/ion/element/a
+      version: 4.1.0
+    - kind: imas-dd
+      ref: gas_injection/pipe/species/element/a
+      version: 4.1.0
+    - kind: imas-dd
+      ref: gas_injection/valve/species/element/a
+      version: 4.1.0
+    - kind: imas-dd
+      ref: gas_pumping/duct/species/element/a
+      version: 4.1.0
+    - kind: imas-dd
+      ref: nbi/unit/species/a
+      version: 4.1.0
+    - kind: imas-dd
+      ref: pellets/time_slice/pellet/species/a
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_profiles/ggd/ion/element/a
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_profiles/profiles_1d/ion/element/a
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_profiles/profiles_2d/ion/element/a
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_sources/source/ggd/ion/element/a
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_sources/source/profiles_1d/ion/element/a
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_sources/source/species/ion/element/a
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_transport/model/ggd/ion/element/a
+      version: 4.1.0
+    - kind: imas-dd
+      ref: pulse_schedule/density_control/ion/element/a
+      version: 4.1.0
+    - kind: imas-dd
+      ref: pulse_schedule/density_control/valve/species/element/a
+      version: 4.1.0
+    - kind: imas-dd
+      ref: spectrometer_mass/channel/a
+      version: 4.1.0
+    - kind: imas-dd
+      ref: spectrometer_mass/residual_spectrum/a
+      version: 4.1.0
+    - kind: imas-dd
+      ref: spectrometer_visible/channel/isotope_ratios/isotope/element/a
+      version: 4.1.0
+    - kind: imas-dd
+      ref: spi/injector/fragment/species/a
+      version: 4.1.0
+    - kind: imas-dd
+      ref: spi/injector/fragmentation_gas/species/a
+      version: 4.1.0
+    - kind: imas-dd
+      ref: spi/injector/pellet/core/species/a
+      version: 4.1.0
+    - kind: imas-dd
+      ref: spi/injector/pellet/shell/species/a
+      version: 4.1.0
+    - kind: imas-dd
+      ref: spi/injector/propellant_gas/species/a
+      version: 4.1.0
+    - kind: imas-dd
+      ref: wall/description_ggd/ggd/energy_fluxes/kinetic/ion/element/a
+      version: 4.1.0
+    - kind: imas-dd
+      ref: wall/description_ggd/ggd/energy_fluxes/kinetic/neutral/element/a
+      version: 4.1.0
+    - kind: imas-dd
+      ref: wall/description_ggd/ggd/energy_fluxes/recombination/ion/element/a
+      version: 4.1.0
+    - kind: imas-dd
+      ref: wall/description_ggd/ggd/energy_fluxes/recombination/neutral/element/a
+      version: 4.1.0
+    - kind: imas-dd
+      ref: wall/description_ggd/ggd/particle_fluxes/ion/element/a
+      version: 4.1.0
+    - kind: imas-dd
+      ref: wall/description_ggd/ggd/particle_fluxes/neutral/element/a
+      version: 4.1.0
+    - kind: imas-dd
+      ref: wall/description_ggd/ggd/recycling/ion/element/a
+      version: 4.1.0
+    - kind: imas-dd
+      ref: wall/description_ggd/ggd/recycling/neutral/element/a
+      version: 4.1.0
+    - kind: imas-dd
+      ref: wall/global_quantities/neutral/element/a
+      version: 4.1.0
+    - kind: imas-dd
+      ref: wall/global_quantities/neutral/incident_species/element/a
+      version: 4.1.0
+    - kind: imas-dd
+      ref: waves/coherent_wave/beam_tracing/beam/ion/element/a
+      version: 4.1.0
+    - kind: imas-dd
+      ref: waves/coherent_wave/global_quantities/ion/element/a
+      version: 4.1.0
+  atomic_number:
+    kind: scalar
+    status: draft
+    physics_domain: transport
+    links: []
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: core_profiles/profiles_1d/ion/element/z_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: core_profiles/profiles_1d/neutral/element/z_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: core_profiles/profiles_2d/ion/element/z_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: edge_profiles/ggd/ion/element/z_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: edge_profiles/ggd/neutral/element/z_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: edge_profiles/profiles_1d/ion/element/z_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: edge_profiles/profiles_1d/neutral/element/z_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: edge_sources/source/ggd/ion/element/z_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: edge_sources/source/ggd/neutral/element/z_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: edge_sources/source/species/ion/element/z_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: edge_sources/source/species/neutral/element/z_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: gas_injection/pipe/species/element/z_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: gas_injection/valve/species/element/z_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: gas_pumping/duct/species/element/z_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: pellets/time_slice/pellet/species/z_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_initiation/global_quantities/ion/element/z_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_initiation/global_quantities/neutral/element/z_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_profiles/ggd/ion/element/z_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_profiles/ggd/neutral/element/z_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_profiles/profiles_1d/ion/element/z_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_profiles/profiles_1d/neutral/element/z_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_profiles/profiles_2d/ion/element/z_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: pulse_schedule/density_control/ion/element/z_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: pulse_schedule/density_control/valve/species/element/z_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: pulse_schedule/nbi/unit/species/element/z_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: spectrometer_visible/channel/isotope_ratios/isotope/element/z_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: spi/injector/fragmentation_gas/species/z_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: summary/heating_current_drive/nbi/species/z_n/value
+      version: 4.1.0
+    - kind: imas-dd
+      ref: turbulence/profiles_2d/ion/element/z_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: turbulence/profiles_2d/neutral/element/z_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: wall/description_ggd/ggd/energy_fluxes/kinetic/ion/element/z_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: wall/description_ggd/ggd/energy_fluxes/kinetic/neutral/element/z_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: wall/description_ggd/ggd/energy_fluxes/recombination/ion/element/z_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: wall/description_ggd/ggd/energy_fluxes/recombination/neutral/element/z_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: wall/description_ggd/ggd/particle_fluxes/ion/element/z_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: wall/description_ggd/ggd/particle_fluxes/neutral/element/z_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: wall/description_ggd/ggd/recycling/ion/element/z_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: wall/description_ggd/ggd/recycling/neutral/element/z_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: wall/global_quantities/neutral/element/z_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: wall/global_quantities/neutral/incident_species/element/z_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: waves/coherent_wave/beam_tracing/beam/ion/element/z_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: waves/coherent_wave/global_quantities/ion/element/z_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: waves/coherent_wave/profiles_1d/ion/element/z_n
+      version: 4.1.0
+    - kind: imas-dd
+      ref: waves/coherent_wave/profiles_2d/ion/element/z_n
+      version: 4.1.0
+  breakdown_initial_time:
+    kind: scalar
+    status: draft
+    physics_domain: machine_operations
+    links:
+    - name:pulse_duration
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: summary/time_breakdown/value
+      version: 4.1.0
+  capacitance_of_ion_cyclotron_heating_antenna:
+    kind: scalar
+    status: draft
+    physics_domain: auxiliary_heating
+    links:
+    - name:frequency_of_ion_cyclotron_heating_antenna
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: ic_antennas/antenna/module/matching_element/capacitance
+      version: 4.1.0
+  cold_neutral_fraction:
+    kind: scalar
+    status: draft
+    physics_domain: radiation_measurement_diagnostics
+    links:
+    - name:hot_neutral_fraction
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: spectrometer_visible/channel/isotope_ratios/isotope/cold_neutrals_fraction
+      version: 4.1.0
+  cold_neutral_temperature:
+    kind: scalar
+    status: draft
+    physics_domain: radiation_measurement_diagnostics
+    links: []
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: spectrometer_visible/channel/isotope_ratios/isotope/cold_neutrals_temperature
+      version: 4.1.0
+    - kind: imas-dd
+      ref: spectrometer_visible/channel/polarization_spectroscopy/temperature_cold_neutrals
+      version: 4.1.0
+  coolant_mass_flow_rate:
+    kind: scalar
+    status: draft
+    physics_domain: mechanical_measurement_diagnostics
+    links:
+    - name:coolant_temperature_at_outlet
+    - name:coolant_transit_time_of_plant_component_port
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: balance_of_plant/power_plant/system/component/port/mass_flow
+      version: 4.1.0
+    - kind: imas-dd
+      ref: calorimetry/cooling_loop/mass_flow
+      version: 4.1.0
+    - kind: imas-dd
+      ref: calorimetry/group/component/mass_flow
+      version: 4.1.0
+  coolant_temperature_at_inlet:
+    kind: scalar
+    status: draft
+    physics_domain: plant_systems
+    links:
+    - name:coolant_temperature_at_outlet
+    - name:coolant_mass_flow_rate
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: breeding_blanket/module/cooling/time_slice/temperature_inlet
+      version: 4.1.0
+    - kind: imas-dd
+      ref: calorimetry/cooling_loop/temperature_in
+      version: 4.1.0
+    - kind: imas-dd
+      ref: calorimetry/group/component/temperature_in
+      version: 4.1.0
+  coolant_temperature_at_outlet:
+    kind: scalar
+    status: draft
+    physics_domain: plant_systems
+    links:
+    - name:coolant_temperature_at_inlet
+    - name:coolant_mass_flow_rate
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: breeding_blanket/module/cooling/time_slice/temperature_outlet
+      version: 4.1.0
+    - kind: imas-dd
+      ref: calorimetry/cooling_loop/temperature_out
+      version: 4.1.0
+    - kind: imas-dd
+      ref: calorimetry/group/component/temperature_out
+      version: 4.1.0
+  coolant_transit_time_of_plant_component_port:
+    kind: scalar
+    status: draft
+    physics_domain: mechanical_measurement_diagnostics
+    links:
+    - name:coolant_temperature_at_outlet
+    - name:coolant_mass_flow_rate
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: calorimetry/group/component/transit_time
+      version: 4.1.0
+  current_of_passive_loop:
+    kind: scalar
+    status: draft
+    physics_domain: magnetic_field_systems
+    links:
+    - name:effective_turn_count_of_passive_loop
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: pf_passive/loop/current
+      version: 4.1.0
+  current_of_poloidal_field_coil:
+    kind: scalar
+    status: draft
+    physics_domain: equilibrium
+    links: []
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: pf_active/coil/current
+      version: 4.1.0
+  difference_of_total_plasma_heating_power_and_time_derivative_of_plasma_stored_energy:
+    kind: scalar
+    status: draft
+    physics_domain: transport
+    links:
+    - name:radiated_power_over_core_region
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: summary/global_quantities/power_steady/value
+      version: 4.1.0
+  difference_of_vacuum_poloidal_current_function_and_initial_vacuum_poloidal_current_function:
+    kind: scalar
+    status: draft
+    physics_domain: magnetic_field_systems
+    links:
+    - name:vacuum_poloidal_current_function
+    arguments:
+    - name: vacuum_poloidal_current_function
+      operator: difference
+      operator_kind: binary
+      role: a
+      separator: and
+      axis: null
+      shape: null
+    sources:
+    - kind: imas-dd
+      ref: tf/delta_b_field_phi_vacuum_r
+      version: 4.1.0
+  effective_charge:
+    kind: scalar
+    status: draft
+    physics_domain: magnetohydrodynamics
+    links:
+    - name:line_averaged_effective_charge
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: core_profiles/global_quantities/z_eff_resistive
+      version: 4.1.0
+    - kind: imas-dd
+      ref: core_profiles/profiles_1d/zeff
+      version: 4.1.0
+    - kind: imas-dd
+      ref: core_profiles/profiles_2d/zeff
+      version: 4.1.0
+    - kind: imas-dd
+      ref: edge_profiles/ggd/zeff/values
+      version: 4.1.0
+    - kind: imas-dd
+      ref: edge_profiles/profiles_1d/zeff
+      version: 4.1.0
+    - kind: imas-dd
+      ref: mhd/ggd/zeff/values
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_profiles/ggd/zeff/values
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_profiles/global_quantities/z_eff_resistive
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_profiles/profiles_1d/zeff
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_profiles/profiles_2d/zeff
+      version: 4.1.0
+    - kind: imas-dd
+      ref: sawteeth/profiles_1d/zeff
+      version: 4.1.0
+  effective_turn_count_of_coil_conductor_element:
+    kind: scalar
+    status: draft
+    physics_domain: magnetic_field_systems
+    links:
+    - name:turn_count_of_poloidal_magnetic_field_probe
+    - name:turn_count_of_toroidal_magnetic_field_probe
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: pf_active/coil/element/turns_with_sign
+      version: 4.1.0
+  effective_turn_count_of_passive_loop:
+    kind: scalar
+    status: draft
+    physics_domain: magnetic_field_systems
+    links:
+    - name:turn_count_of_poloidal_magnetic_field_probe
+    - name:turn_count_of_toroidal_magnetic_field_probe
+    - name:effective_turn_count_of_coil_conductor_element
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: pf_passive/loop/element/turns_with_sign
+      version: 4.1.0
+  electron_density_at_divertor_target:
+    kind: scalar
+    status: draft
+    physics_domain: divertor_physics
+    links: []
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: divertors/divertor/target/two_point_model/n_e_target
+      version: 4.1.0
+    - kind: imas-dd
+      ref: summary/local/divertor_target/n_e/value
+      version: 4.1.0
+  electron_density_at_magnetic_axis:
+    kind: scalar
+    status: draft
+    physics_domain: transport
+    links:
+    - name:electron_temperature_at_magnetic_axis
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: summary/local/magnetic_axis/n_e/value
+      version: 4.1.0
+  electron_density_at_plasma_boundary:
+    kind: scalar
+    status: draft
+    physics_domain: edge_plasma_physics
+    links: []
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: summary/local/separatrix/n_e/value
+      version: 4.1.0
+    - kind: imas-dd
+      ref: summary/pedestal_fits/linear/n_e/offset/value
+      version: 4.1.0
+    - kind: imas-dd
+      ref: summary/pedestal_fits/linear/n_e/separatrix/value
+      version: 4.1.0
+    - kind: imas-dd
+      ref: summary/pedestal_fits/mtanh/n_e/separatrix/value
+      version: 4.1.0
+  electron_temperature:
+    kind: scalar
+    status: draft
+    physics_domain: magnetohydrodynamics
+    links: []
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: core_profiles/profiles_1d/electrons/temperature
+      version: 4.1.0
+    - kind: imas-dd
+      ref: edge_profiles/ggd/electrons/temperature/values
+      version: 4.1.0
+    - kind: imas-dd
+      ref: edge_profiles/profiles_1d/electrons/temperature
+      version: 4.1.0
+    - kind: imas-dd
+      ref: langmuir_probes/embedded/multi_temperature_fits/t_e
+      version: 4.1.0
+    - kind: imas-dd
+      ref: langmuir_probes/embedded/t_e
+      version: 4.1.0
+    - kind: imas-dd
+      ref: langmuir_probes/reciprocating/plunge/collector/t_e
+      version: 4.1.0
+    - kind: imas-dd
+      ref: mhd/ggd/electrons/temperature/values
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_profiles/ggd/electrons/temperature/values
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_profiles/profiles_1d/electrons/temperature
+      version: 4.1.0
+    - kind: imas-dd
+      ref: sawteeth/profiles_1d/t_e
+      version: 4.1.0
+    - kind: imas-dd
+      ref: spectrometer_x_ray_crystal/channel/profiles_line_integrated/t_e
+      version: 4.1.0
+    - kind: imas-dd
+      ref: thomson_scattering/channel/t_e
+      version: 4.1.0
+    - kind: imas-dd
+      ref: turbulence/profiles_2d/electrons/temperature
+      version: 4.1.0
+  electron_temperature_at_divertor_target:
+    kind: scalar
+    status: draft
+    physics_domain: divertor_physics
+    links:
+    - name:electron_density_at_divertor_target
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: divertors/divertor/target/two_point_model/t_e_target
+      version: 4.1.0
+    - kind: imas-dd
+      ref: summary/local/divertor_target/t_e/value
+      version: 4.1.0
+  electron_temperature_at_magnetic_axis:
+    kind: scalar
+    status: draft
+    physics_domain: transport
+    links: []
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: camera_x_rays/t_e_magnetic_axis
+      version: 4.1.0
+    - kind: imas-dd
+      ref: summary/local/magnetic_axis/t_e/value
+      version: 4.1.0
+  elongation_of_flux_surface:
+    kind: scalar
+    status: draft
+    physics_domain: equilibrium
+    links:
+    - name:elongation_of_plasma_boundary
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: equilibrium/time_slice/profiles_1d/elongation
+      version: 4.1.0
+    - kind: imas-dd
+      ref: gyrokinetics_local/flux_surface/elongation
+      version: 4.1.0
+  elongation_of_plasma_boundary:
+    kind: scalar
+    status: draft
+    physics_domain: equilibrium
+    links:
+    - name:elongation_of_flux_surface
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: equilibrium/time_slice/boundary/elongation
+      version: 4.1.0
+    - kind: imas-dd
+      ref: summary/boundary/elongation/value
+      version: 4.1.0
+  energy_confinement_enhancement_factor:
+    kind: scalar
+    status: draft
+    physics_domain: general
+    links: []
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: summary/global_quantities/h_98/value
+      version: 4.1.0
+  energy_confinement_time:
+    kind: scalar
+    status: draft
+    physics_domain: transport
+    links: []
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: summary/global_quantities/tau_energy/value
+      version: 4.1.0
+  energy_flux_maximum_at_divertor_target:
+    kind: scalar
+    status: draft
+    physics_domain: divertor_physics
+    links: []
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: divertors/divertor/target/power_flux_peak
+      version: 4.1.0
+    - kind: imas-dd
+      ref: summary/local/divertor_target/power_flux_peak/value
+      version: 4.1.0
+    - kind: imas-dd
+      ref: wall/global_quantities/power_density_inner_target_max
+      version: 4.1.0
+    - kind: imas-dd
+      ref: wall/global_quantities/power_density_outer_target_max
+      version: 4.1.0
+  etendue_of_hard_xray_detector:
+    kind: scalar
+    status: draft
+    physics_domain: radiation_measurement_diagnostics
+    links:
+    - name:hard_xray_brightness
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: hard_x_rays/channel/etendue
+      version: 4.1.0
+  etendue_of_spectrometer_channel:
+    kind: scalar
+    status: draft
+    physics_domain: radiation_measurement_diagnostics
+    links: []
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: soft_x_rays/channel/etendue
+      version: 4.1.0
+  faraday_angle:
+    kind: scalar
+    status: draft
+    physics_domain: equilibrium
+    links: []
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: equilibrium/time_slice/constraints/faraday_angle/measured
+      version: 4.1.0
+    - kind: imas-dd
+      ref: equilibrium/time_slice/constraints/faraday_angle/reconstructed
+      version: 4.1.0
+    - kind: imas-dd
+      ref: polarimeter/channel/faraday_angle
+      version: 4.1.0
+  flux_surface_averaged_inverse_of_major_radius:
+    kind: scalar
+    status: draft
+    physics_domain: equilibrium
+    links:
+    - name:flux_surface_averaged_inverse_of_square_of_major_radius
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: equilibrium/time_slice/profiles_1d/gm9
+      version: 4.1.0
+  flux_surface_averaged_inverse_of_square_of_magnetic_field_magnitude:
+    kind: scalar
+    status: draft
+    physics_domain: equilibrium
+    links:
+    - name:flux_surface_averaged_magnetic_field_magnitude
+    - name:flux_surface_averaged_square_of_magnetic_field_magnitude
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: equilibrium/time_slice/profiles_1d/gm4
+      version: 4.1.0
+  flux_surface_averaged_inverse_of_square_of_major_radius:
+    kind: scalar
+    status: draft
+    physics_domain: equilibrium
+    links:
+    - name:flux_surface_averaged_inverse_of_major_radius
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: equilibrium/time_slice/profiles_1d/gm1
+      version: 4.1.0
+  flux_surface_averaged_magnetic_field_magnitude:
+    kind: scalar
+    status: draft
+    physics_domain: equilibrium
+    links:
+    - name:flux_surface_averaged_square_of_magnetic_field_magnitude
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: equilibrium/time_slice/profiles_1d/b_field_average
+      version: 4.1.0
+  flux_surface_averaged_major_radius:
+    kind: scalar
+    status: draft
+    physics_domain: equilibrium
+    links:
+    - name:flux_surface_averaged_inverse_of_major_radius
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: equilibrium/time_slice/profiles_1d/gm8
+      version: 4.1.0
+  flux_surface_averaged_ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_magnetic_field_magnitude:
+    kind: scalar
+    status: draft
+    physics_domain: equilibrium
+    links:
+    - name:flux_surface_averaged_square_of_toroidal_flux_coordinate_gradient_magnitude
+    - name:flux_surface_averaged_ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_major_radius
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: equilibrium/time_slice/profiles_1d/gm6
+      version: 4.1.0
+  flux_surface_averaged_ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_major_radius:
+    kind: scalar
+    status: draft
+    physics_domain: equilibrium
+    links:
+    - name:flux_surface_averaged_square_of_toroidal_flux_coordinate_gradient_magnitude
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: equilibrium/time_slice/profiles_1d/gm2
+      version: 4.1.0
+  flux_surface_averaged_square_of_magnetic_field_magnitude:
+    kind: scalar
+    status: draft
+    physics_domain: equilibrium
+    links:
+    - name:flux_surface_averaged_magnetic_field_magnitude
+    - name:flux_surface_averaged_inverse_of_square_of_magnetic_field_magnitude
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: equilibrium/time_slice/profiles_1d/gm5
+      version: 4.1.0
+  flux_surface_averaged_square_of_toroidal_flux_coordinate_gradient_magnitude:
+    kind: scalar
+    status: draft
+    physics_domain: equilibrium
+    links:
+    - name:flux_surface_averaged_inverse_of_major_radius
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: equilibrium/time_slice/profiles_1d/gm3
+      version: 4.1.0
+  flux_surface_averaged_toroidal_flux_coordinate_gradient_magnitude:
+    kind: scalar
+    status: draft
+    physics_domain: equilibrium
+    links:
+    - name:flux_surface_averaged_square_of_toroidal_flux_coordinate_gradient_magnitude
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: equilibrium/time_slice/profiles_1d/gm7
+      version: 4.1.0
+  forward_power_of_ion_cyclotron_heating_antenna:
+    kind: scalar
+    status: draft
+    physics_domain: auxiliary_heating
+    links:
+    - name:reflected_power_of_ion_cyclotron_heating_antenna
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: ic_antennas/antenna/module/power_forward
+      version: 4.1.0
+    - kind: imas-dd
+      ref: ic_antennas/antenna/power_forward
+      version: 4.1.0
+  forward_wave_phase_of_ion_cyclotron_heating_antenna:
+    kind: scalar
+    status: draft
+    physics_domain: auxiliary_heating
+    links:
+    - name:wave_phase_of_ion_cyclotron_heating_antenna
+    - name:reflected_phase_of_ion_cyclotron_heating_antenna
+    - name:wave_phase_of_antenna_strap
+    arguments:
+    - name: wave_phase_of_ion_cyclotron_heating_antenna
+      operator: forward
+      operator_kind: qualifier
+      role: null
+      separator: null
+      axis: null
+      shape: null
+    sources:
+    - kind: imas-dd
+      ref: ic_antennas/antenna/module/phase_forward
+      version: 4.1.1
+  frequency_of_ion_cyclotron_heating_antenna:
+    kind: scalar
+    status: draft
+    physics_domain: auxiliary_heating
+    links: []
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: ic_antennas/antenna/frequency
+      version: 4.1.0
+    - kind: imas-dd
+      ref: ic_antennas/antenna/module/frequency
+      version: 4.1.0
+    - kind: imas-dd
+      ref: summary/heating_current_drive/ic/frequency/value
+      version: 4.1.0
+  frequency_of_wave_diagnostic_channel:
+    kind: scalar
+    status: draft
+    physics_domain: electromagnetic_wave_diagnostics
+    links: []
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: ece/channel/frequency
+      version: 4.1.0
+    - kind: imas-dd
+      ref: reflectometer_fluctuation/channel/frequencies
+      version: 4.1.0
+    - kind: imas-dd
+      ref: reflectometer_profile/channel/frequencies
+      version: 4.1.0
+  gap_at_outboard_midplane:
+    kind: scalar
+    status: draft
+    physics_domain: equilibrium
+    links:
+    - name:radial_coordinate_at_outboard_midplane
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: langmuir_probes/embedded/distance_separatrix_midplane
+      version: 4.1.0
+    - kind: imas-dd
+      ref: langmuir_probes/reciprocating/plunge/distance_separatrix_midplane
+      version: 4.1.0
+    - kind: imas-dd
+      ref: summary/boundary/distance_inner_outer_separatrices/value
+      version: 4.1.0
+    - kind: imas-dd
+      ref: thomson_scattering/channel/distance_separatrix_midplane
+      version: 4.1.0
+  gas_flow:
+    kind: scalar
+    status: draft
+    physics_domain: plant_systems
+    links: []
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: gas_injection/pipe/flow_rate
+      version: 4.1.0
+    - kind: imas-dd
+      ref: gas_injection/valve/flow_rate
+      version: 4.1.0
+    - kind: imas-dd
+      ref: gas_injection/valve/response_curve/flow_rate
+      version: 4.1.0
+    - kind: imas-dd
+      ref: gas_pumping/duct/flow_rate
+      version: 4.1.0
+    - kind: imas-dd
+      ref: spi/injector/fragmentation_gas/flow_rate
+      version: 4.1.0
+  hard_xray_brightness:
+    kind: scalar
+    status: draft
+    physics_domain: radiation_measurement_diagnostics
+    links:
+    - name:etendue_of_hard_xray_detector
+    - name:incident_soft_xray_radiance
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: hard_x_rays/channel/radiance
+      version: 4.1.0
+  height_of_poloidal_field_coil:
+    kind: scalar
+    status: draft
+    physics_domain: magnetic_field_systems
+    links:
+    - name:width_of_poloidal_field_coil
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: pf_active/coil/element/geometry/rectangle/height
+      version: 4.1.0
+    - kind: imas-dd
+      ref: pf_active/coil/geometry/rectangle/height
+      version: 4.1.0
+  hot_neutral_fraction:
+    kind: scalar
+    status: draft
+    physics_domain: radiation_measurement_diagnostics
+    links:
+    - name:cold_neutral_fraction
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: spectrometer_visible/channel/isotope_ratios/isotope/hot_neutrals_fraction
+      version: 4.1.0
+  incident_soft_xray_radiance:
+    kind: scalar
+    status: draft
+    physics_domain: radiation_measurement_diagnostics
+    links:
+    - name:power_of_soft_xray_detector
+    - name:hard_xray_brightness
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: soft_x_rays/channel/brightness
+      version: 4.1.0
+  initial_polarization_ellipticity_of_polarimeter_beam:
+    kind: scalar
+    status: draft
+    physics_domain: electromagnetic_wave_diagnostics
+    links:
+    - name:faraday_angle
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: polarimeter/channel/ellipticity_initial
+      version: 4.1.0
+    - kind: imas-dd
+      ref: polarimeter/channel/polarization_initial
+      version: 4.1.0
+  intensity_at_spectral_line:
+    kind: scalar
+    status: draft
+    physics_domain: radiation_measurement_diagnostics
+    links:
+    - name:photon_radiance_at_spectral_line
+    - name:spectral_rate_of_spectrometer_channel
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: spectrometer_visible/channel/grating_spectrometer/processed_line/intensity
+      version: 4.1.0
+  ion_current_of_mass_spectrometer_channel:
+    kind: scalar
+    status: draft
+    physics_domain: particle_measurement_diagnostics
+    links:
+    - name:voltage_of_mass_spectrometer_channel
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: spectrometer_mass/channel/current
+      version: 4.1.0
+    - kind: imas-dd
+      ref: spectrometer_mass/residual_spectrum/current
+      version: 4.1.0
+  ipb98y2_confinement_time:
+    kind: scalar
+    status: draft
+    physics_domain: general
+    links:
+    - name:energy_confinement_enhancement_factor
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: summary/global_quantities/tau_energy_98/value
+      version: 4.1.0
+  launched_power_of_lower_hybrid_antenna:
+    kind: scalar
+    status: draft
+    physics_domain: auxiliary_heating
+    links: []
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: lh_antennas/antenna/module/power_launched
+      version: 4.1.0
+    - kind: imas-dd
+      ref: lh_antennas/antenna/power_launched
+      version: 4.1.0
+    - kind: imas-dd
+      ref: lh_antennas/power_launched
+      version: 4.1.0
+    - kind: imas-dd
+      ref: summary/heating_current_drive/lh/power/value
+      version: 4.1.0
+    - kind: imas-dd
+      ref: summary/heating_current_drive/lh/power_launched/value
+      version: 4.1.0
+    - kind: imas-dd
+      ref: summary/heating_current_drive/power_launched_lh/value
+      version: 4.1.0
+    - kind: imas-dd
+      ref: summary/heating_current_drive/power_lh/value
+      version: 4.1.0
+  length_of_poloidal_magnetic_field_probe:
+    kind: scalar
+    status: draft
+    physics_domain: magnetic_field_diagnostics
+    links:
+    - name:area_of_poloidal_magnetic_field_probe
+    - name:turn_count_of_poloidal_magnetic_field_probe
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: magnetics/b_field_pol_probe/length
+      version: 4.1.0
+  length_of_toroidal_magnetic_field_probe:
+    kind: scalar
+    status: draft
+    physics_domain: magnetic_field_diagnostics
+    links:
+    - name:area_of_toroidal_magnetic_field_probe
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: magnetics/b_field_phi_probe/length
+      version: 4.1.0
+  line_averaged_effective_charge:
+    kind: scalar
+    status: draft
+    physics_domain: particle_measurement_diagnostics
+    links:
+    - name:effective_charge
+    arguments:
+    - name: effective_charge
+      operator: line_averaged
+      operator_kind: unary_prefix
+      role: null
+      separator: null
+      axis: null
+      shape: null
+    sources:
+    - kind: imas-dd
+      ref: bremsstrahlung_visible/channel/zeff_line_average
+      version: 4.1.1
+    - kind: imas-dd
+      ref: charge_exchange/channel/zeff_line_average
+      version: 4.1.1
+    - kind: imas-dd
+      ref: summary/line_average/zeff/value
+      version: 4.1.0
+  line_averaged_electron_density:
+    kind: scalar
+    status: draft
+    physics_domain: electromagnetic_wave_diagnostics
+    links:
+    - name:line_integrated_electron_number_density
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: interferometer/channel/n_e_line_average
+      version: 4.1.0
+    - kind: imas-dd
+      ref: summary/line_average/n_e/value
+      version: 4.1.0
+  line_integrated_electron_number_density:
+    kind: scalar
+    status: draft
+    physics_domain: electromagnetic_wave_diagnostics
+    links:
+    - name:line_averaged_electron_density
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: equilibrium/time_slice/constraints/n_e_line/measured
+      version: 4.1.0
+    - kind: imas-dd
+      ref: equilibrium/time_slice/constraints/n_e_line/reconstructed
+      version: 4.1.0
+    - kind: imas-dd
+      ref: interferometer/channel/n_e_line
+      version: 4.1.0
+    - kind: imas-dd
+      ref: refractometer/channel/bandwidth/n_e_line
+      version: 4.1.0
+    - kind: imas-dd
+      ref: refractometer/channel/n_e_line
+      version: 4.1.0
+  loop_voltage_at_plasma_boundary:
+    kind: scalar
+    status: draft
+    physics_domain: transport
+    links: []
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: core_profiles/global_quantities/v_loop
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_profiles/global_quantities/v_loop
+      version: 4.1.0
+    - kind: imas-dd
+      ref: summary/global_quantities/v_loop/value
+      version: 4.1.0
+  lower_bound_photon_energy:
+    kind: scalar
+    status: draft
+    physics_domain: radiation_measurement_diagnostics
+    links: []
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: camera_x_rays/energy_threshold_lower
+      version: 4.1.0
+    - kind: imas-dd
+      ref: hard_x_rays/channel/energy_band/lower_bound
+      version: 4.1.0
+    - kind: imas-dd
+      ref: hard_x_rays/emissivity_profile_1d/lower_bound
+      version: 4.1.0
+    - kind: imas-dd
+      ref: soft_x_rays/channel/energy_band/lower_bound
+      version: 4.1.0
+  lower_triangularity_of_flux_surface:
+    kind: scalar
+    status: draft
+    physics_domain: equilibrium
+    links:
+    - name:lower_triangularity_of_plasma_boundary
+    - name:upper_triangularity_of_flux_surface
+    - name:elongation_of_flux_surface
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: equilibrium/time_slice/profiles_1d/triangularity_lower
+      version: 4.1.0
+  lower_triangularity_of_plasma_boundary:
+    kind: scalar
+    status: draft
+    physics_domain: equilibrium
+    links:
+    - name:upper_triangularity_of_plasma_boundary
+    - name:triangularity_of_plasma_boundary
+    arguments:
+    - name: triangularity_of_plasma_boundary
+      operator: lower
+      operator_kind: qualifier
+      role: null
+      separator: null
+      axis: null
+      shape: null
+    sources:
+    - kind: imas-dd
+      ref: equilibrium/time_slice/boundary/triangularity_lower
+      version: 4.1.0
+    - kind: imas-dd
+      ref: summary/boundary/triangularity_lower/value
+      version: 4.1.0
+  lower_wavelength_of_filter:
+    kind: scalar
+    status: draft
+    physics_domain: radiation_measurement_diagnostics
+    links:
+    - name:upper_wavelength_of_filter
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: bremsstrahlung_visible/channel/filter/wavelength_lower
+      version: 4.1.0
+    - kind: imas-dd
+      ref: camera_x_rays/filter_window/wavelength_lower
+      version: 4.1.0
+    - kind: imas-dd
+      ref: hard_x_rays/channel/filter_window/wavelength_lower
+      version: 4.1.0
+    - kind: imas-dd
+      ref: soft_x_rays/channel/filter_window/wavelength_lower
+      version: 4.1.0
+    - kind: imas-dd
+      ref: spectrometer_x_ray_crystal/channel/filter_window/wavelength_lower
+      version: 4.1.0
+  magnetic_shear_at_flux_surface:
+    kind: scalar
+    status: draft
+    physics_domain: equilibrium
+    links: []
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: core_profiles/profiles_1d/magnetic_shear
+      version: 4.1.0
+    - kind: imas-dd
+      ref: edge_profiles/profiles_1d/magnetic_shear
+      version: 4.1.0
+    - kind: imas-dd
+      ref: equilibrium/time_slice/profiles_1d/magnetic_shear
+      version: 4.1.0
+    - kind: imas-dd
+      ref: gyrokinetics_local/flux_surface/magnetic_shear_r_minor
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_profiles/profiles_1d/magnetic_shear
+      version: 4.1.0
+    - kind: imas-dd
+      ref: sawteeth/profiles_1d/magnetic_shear
+      version: 4.1.0
+  maximum_magnetic_field_magnitude:
+    kind: scalar
+    status: draft
+    physics_domain: equilibrium
+    links: []
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: equilibrium/time_slice/profiles_1d/b_field_max
+      version: 4.1.0
+    - kind: imas-dd
+      ref: pf_active/coil/b_field_max
+      version: 4.1.0
+    - kind: imas-dd
+      ref: pf_active/coil/b_field_max_timed
+      version: 4.1.0
+  mhd_energy:
+    kind: scalar
+    status: draft
+    physics_domain: equilibrium
+    links: []
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: equilibrium/time_slice/global_quantities/energy_mhd
+      version: 4.1.0
+    - kind: imas-dd
+      ref: summary/global_quantities/energy_mhd
+      version: 4.1.1
+    - kind: imas-dd
+      ref: summary/global_quantities/energy_mhd/value
+      version: 4.1.0
+  minimum_over_flux_surface_magnetic_field_magnitude:
+    kind: scalar
+    status: draft
+    physics_domain: equilibrium
+    links:
+    - name:flux_surface_averaged_inverse_of_square_of_magnetic_field_magnitude
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: equilibrium/time_slice/profiles_1d/b_field_min
+      version: 4.1.0
+  minimum_safety_factor:
+    kind: scalar
+    status: draft
+    physics_domain: equilibrium
+    links:
+    - name:safety_factor
+    arguments:
+    - name: safety_factor
+      operator: minimum
+      operator_kind: qualifier
+      role: null
+      separator: null
+      axis: null
+      shape: null
+    sources:
+    - kind: imas-dd
+      ref: equilibrium/time_slice/global_quantities/q_min/value
+      version: 4.1.0
+  minor_radius_of_plasma_boundary:
+    kind: scalar
+    status: draft
+    physics_domain: equilibrium
+    links:
+    - name:radial_coordinate_at_outboard_midplane
+    - name:elongation_of_plasma_boundary
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: equilibrium/time_slice/boundary/minor_radius
+      version: 4.1.0
+    - kind: imas-dd
+      ref: summary/boundary/minor_radius/value
+      version: 4.1.0
+  normalized_plasma_internal_inductance:
+    kind: scalar
+    status: draft
+    physics_domain: equilibrium
+    links: []
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: core_profiles/global_quantities/li_3
+      version: 4.1.0
+    - kind: imas-dd
+      ref: equilibrium/time_slice/global_quantities/li_3
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_profiles/global_quantities/li_3
+      version: 4.1.0
+    - kind: imas-dd
+      ref: summary/global_quantities/li_3/value
+      version: 4.1.0
+    - kind: imas-dd
+      ref: summary/global_quantities/li_3_mhd/value
+      version: 4.1.0
+  normalized_poloidal_flux_coordinate:
+    kind: scalar
+    status: draft
+    physics_domain: magnetohydrodynamics
+    links:
+    - name:normalized_poloidal_flux_coordinate_of_plasma_boundary
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: core_profiles/profiles_1d/grid/rho_pol_norm
+      version: 4.1.0
+    - kind: imas-dd
+      ref: core_sources/source/profiles_1d/grid/rho_pol_norm
+      version: 4.1.0
+    - kind: imas-dd
+      ref: core_transport/model/profiles_1d/grid_d/rho_pol_norm
+      version: 4.1.0
+    - kind: imas-dd
+      ref: core_transport/model/profiles_1d/grid_flux/rho_pol_norm
+      version: 4.1.0
+    - kind: imas-dd
+      ref: core_transport/model/profiles_1d/grid_v/rho_pol_norm
+      version: 4.1.0
+    - kind: imas-dd
+      ref: disruption/profiles_1d/grid/rho_pol_norm
+      version: 4.1.1
+    - kind: imas-dd
+      ref: distribution_sources/source/profiles_1d/grid/rho_pol_norm
+      version: 4.1.0
+    - kind: imas-dd
+      ref: distributions/distribution/profiles_1d/grid/rho_pol_norm
+      version: 4.1.0
+    - kind: imas-dd
+      ref: edge_profiles/profiles_1d/electrons/density_fit/rho_pol_norm
+      version: 4.1.0
+    - kind: imas-dd
+      ref: edge_profiles/profiles_1d/electrons/temperature_fit/rho_pol_norm
+      version: 4.1.0
+    - kind: imas-dd
+      ref: edge_profiles/profiles_1d/grid/rho_pol_norm
+      version: 4.1.1
+    - kind: imas-dd
+      ref: edge_profiles/profiles_1d/ion/density_fit/rho_pol_norm
+      version: 4.1.0
+    - kind: imas-dd
+      ref: edge_profiles/profiles_1d/ion/temperature_fit/rho_pol_norm
+      version: 4.1.0
+    - kind: imas-dd
+      ref: edge_profiles/profiles_1d/t_i_average_fit/rho_pol_norm
+      version: 4.1.0
+    - kind: imas-dd
+      ref: edge_profiles/profiles_1d/zeff_fit/rho_pol_norm
+      version: 4.1.1
+    - kind: imas-dd
+      ref: neutron_diagnostic/reconstructed_emissivity/psi_norm
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_profiles/profiles_1d/electrons/density_fit/rho_pol_norm
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_profiles/profiles_1d/electrons/temperature_fit/rho_pol_norm
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_profiles/profiles_1d/grid/rho_pol_norm
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_profiles/profiles_1d/ion/density_fit/rho_pol_norm
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_profiles/profiles_1d/ion/temperature_fit/rho_pol_norm
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_profiles/profiles_1d/t_i_average_fit/rho_pol_norm
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_profiles/profiles_1d/zeff_fit/rho_pol_norm
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_sources/source/profiles_1d/grid/rho_pol_norm
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_transport/model/profiles_1d/grid_d/rho_pol_norm
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_transport/model/profiles_1d/grid_flux/rho_pol_norm
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_transport/model/profiles_1d/grid_v/rho_pol_norm
+      version: 4.1.0
+    - kind: imas-dd
+      ref: reflectometer_profile/position/rho_pol_norm
+      version: 4.1.1
+    - kind: imas-dd
+      ref: runaway_electrons/profiles_1d/grid/rho_pol_norm
+      version: 4.1.0
+    - kind: imas-dd
+      ref: sawteeth/profiles_1d/grid/rho_pol_norm
+      version: 4.1.1
+    - kind: imas-dd
+      ref: transport_solver_numerics/solver_1d/grid/rho_pol_norm
+      version: 4.1.1
+    - kind: imas-dd
+      ref: waves/coherent_wave/profiles_1d/grid/rho_pol_norm
+      version: 4.1.1
+  normalized_poloidal_flux_coordinate_of_plasma_boundary:
+    kind: scalar
+    status: draft
+    physics_domain: equilibrium
+    links:
+    - name:normalized_poloidal_flux_coordinate
+    - name:poloidal_magnetic_flux_at_magnetic_axis
+    arguments:
+    - name: normalized_poloidal_flux_coordinate
+      operator: plasma_boundary
+      operator_kind: locus
+      role: null
+      separator: null
+      axis: null
+      shape: null
+    sources:
+    - kind: imas-dd
+      ref: equilibrium/time_slice/boundary/psi_norm
+      version: 4.1.0
+  normalized_toroidal_flux_coordinate:
+    kind: scalar
+    status: draft
+    physics_domain: equilibrium
+    links:
+    - name:normalized_toroidal_flux_coordinate_at_measurement_position
+    - name:toroidal_flux_coordinate
+    - name:normalized_poloidal_flux_coordinate
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: core_profiles/profiles_1d/grid/rho_tor_norm
+      version: 4.1.0
+    - kind: imas-dd
+      ref: core_sources/source/profiles_1d/grid/rho_tor_norm
+      version: 4.1.0
+    - kind: imas-dd
+      ref: core_transport/model/profiles_1d/grid_d/rho_tor_norm
+      version: 4.1.0
+    - kind: imas-dd
+      ref: core_transport/model/profiles_1d/grid_flux/rho_tor_norm
+      version: 4.1.0
+    - kind: imas-dd
+      ref: core_transport/model/profiles_1d/grid_v/rho_tor_norm
+      version: 4.1.0
+    - kind: imas-dd
+      ref: disruption/profiles_1d/grid/rho_tor_norm
+      version: 4.1.1
+    - kind: imas-dd
+      ref: distribution_sources/source/profiles_1d/grid/rho_tor_norm
+      version: 4.1.0
+    - kind: imas-dd
+      ref: distributions/distribution/profiles_1d/grid/rho_tor_norm
+      version: 4.1.0
+    - kind: imas-dd
+      ref: distributions/distribution/profiles_2d/grid/rho_tor_norm
+      version: 4.1.0
+    - kind: imas-dd
+      ref: edge_profiles/profiles_1d/grid/rho_tor_norm
+      version: 4.1.1
+    - kind: imas-dd
+      ref: equilibrium/time_slice/profiles_1d/rho_tor_norm
+      version: 4.1.0
+    - kind: imas-dd
+      ref: hard_x_rays/emissivity_profile_1d/rho_tor_norm
+      version: 4.1.1
+    - kind: imas-dd
+      ref: neutron_diagnostic/reconstructed_emissivity/rho_tor_norm
+      version: 4.1.1
+    - kind: imas-dd
+      ref: plasma_profiles/profiles_1d/grid/rho_tor_norm
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_sources/source/profiles_1d/grid/rho_tor_norm
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_transport/model/profiles_1d/grid_d/rho_tor_norm
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_transport/model/profiles_1d/grid_flux/rho_tor_norm
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_transport/model/profiles_1d/grid_v/rho_tor_norm
+      version: 4.1.0
+    - kind: imas-dd
+      ref: reflectometer_profile/position/rho_tor_norm
+      version: 4.1.1
+    - kind: imas-dd
+      ref: runaway_electrons/profiles_1d/grid/rho_tor_norm
+      version: 4.1.0
+    - kind: imas-dd
+      ref: sawteeth/profiles_1d/grid/rho_tor_norm
+      version: 4.1.1
+    - kind: imas-dd
+      ref: transport_solver_numerics/solver_1d/grid/rho_tor_norm
+      version: 4.1.1
+    - kind: imas-dd
+      ref: waves/coherent_wave/profiles_1d/grid/rho_tor_norm
+      version: 4.1.1
+    - kind: imas-dd
+      ref: waves/coherent_wave/profiles_2d/grid/rho_tor_norm
+      version: 4.1.1
+  normalized_toroidal_flux_coordinate_at_measurement_position:
+    kind: scalar
+    status: draft
+    physics_domain: electromagnetic_wave_diagnostics
+    links:
+    - name:normalized_toroidal_flux_coordinate
+    arguments:
+    - name: normalized_toroidal_flux_coordinate
+      operator: measurement_position
+      operator_kind: locus
+      role: null
+      separator: null
+      axis: null
+      shape: null
+    sources:
+    - kind: imas-dd
+      ref: ece/channel/position/rho_tor_norm
+      version: 4.1.1
+    - kind: imas-dd
+      ref: ece/t_radiation_central_o/rho_tor_norm
+      version: 4.1.0
+    - kind: imas-dd
+      ref: ece/t_radiation_central_x/rho_tor_norm
+      version: 4.1.0
+    - kind: imas-dd
+      ref: hard_x_rays/emissivity_profile_1d/peak_position
+      version: 4.1.0
+    - kind: imas-dd
+      ref: reflectometer_fluctuation/channel/fluctuations_level/position/rho_tor_norm
+      version: 4.1.1
+    - kind: imas-dd
+      ref: reflectometer_profile/channel/position/rho_tor_norm
+      version: 4.1.1
+  photon_radiance_at_spectral_line:
+    kind: scalar
+    status: draft
+    physics_domain: radiation_measurement_diagnostics
+    links: []
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: spectrometer_uv/channel/processed_line/radiance
+      version: 4.1.0
+    - kind: imas-dd
+      ref: spectrometer_visible/channel/grating_spectrometer/processed_line/radiance
+      version: 4.1.0
+  plasma_current:
+    kind: scalar
+    status: draft
+    physics_domain: equilibrium
+    links: []
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: core_profiles/global_quantities/ip
+      version: 4.1.0
+    - kind: imas-dd
+      ref: equilibrium/time_slice/constraints/ip/measured
+      version: 4.1.0
+    - kind: imas-dd
+      ref: equilibrium/time_slice/constraints/ip/reconstructed
+      version: 4.1.0
+    - kind: imas-dd
+      ref: equilibrium/time_slice/global_quantities/ip
+      version: 4.1.0
+    - kind: imas-dd
+      ref: focs/current
+      version: 4.1.0
+    - kind: imas-dd
+      ref: magnetics/ip
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_initiation/global_quantities/ip
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_profiles/global_quantities/ip
+      version: 4.1.0
+    - kind: imas-dd
+      ref: summary/global_quantities/ip/value
+      version: 4.1.0
+  plasma_pressure:
+    kind: scalar
+    status: draft
+    physics_domain: equilibrium
+    links: []
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: equilibrium/time_slice/constraints/pressure/measured
+      version: 4.1.0
+    - kind: imas-dd
+      ref: equilibrium/time_slice/constraints/pressure/reconstructed
+      version: 4.1.0
+    - kind: imas-dd
+      ref: equilibrium/time_slice/profiles_1d/pressure
+      version: 4.1.0
+  poloidal_angle_of_flux_surface:
+    kind: scalar
+    status: draft
+    physics_domain: equilibrium
+    links:
+    - name:poloidal_magnetic_flux_at_flux_surface
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: equilibrium/time_slice/ggd/theta/values
+      version: 4.1.0
+    - kind: imas-dd
+      ref: equilibrium/time_slice/profiles_2d/theta
+      version: 4.1.0
+    - kind: imas-dd
+      ref: gyrokinetics_local/linear/wavevector/eigenmode/angle_pol
+      version: 4.1.0
+    - kind: imas-dd
+      ref: gyrokinetics_local/non_linear/angle_pol
+      version: 4.1.0
+    - kind: imas-dd
+      ref: magnetics/b_field_pol_probe/poloidal_angle
+      version: 4.1.0
+  poloidal_angle_of_measurement_position:
+    kind: scalar
+    status: draft
+    physics_domain: electromagnetic_wave_diagnostics
+    links:
+    - name:poloidal_angle_of_flux_surface
+    - name:toroidal_angle_of_measurement_position
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: ece/channel/beam_tracing/beam/position/theta
+      version: 4.1.0
+    - kind: imas-dd
+      ref: ece/channel/position/theta
+      version: 4.1.1
+    - kind: imas-dd
+      ref: reflectometer_fluctuation/channel/doppler/position/theta
+      version: 4.1.0
+    - kind: imas-dd
+      ref: reflectometer_fluctuation/channel/fluctuations_level/position/theta
+      version: 4.1.0
+    - kind: imas-dd
+      ref: reflectometer_profile/channel/position/theta
+      version: 4.1.0
+    - kind: imas-dd
+      ref: reflectometer_profile/position/theta
+      version: 4.1.0
+  poloidal_angle_of_toroidal_magnetic_field_probe:
+    kind: scalar
+    status: draft
+    physics_domain: magnetic_field_diagnostics
+    links:
+    - name:poloidal_angle_of_flux_surface
+    - name:toroidal_angle_of_toroidal_magnetic_field_probe
+    - name:poloidal_angle_of_measurement_position
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: magnetics/b_field_phi_probe/poloidal_angle
+      version: 4.1.0
+  poloidal_beta:
+    kind: scalar
+    status: draft
+    physics_domain: equilibrium
+    links:
+    - name:toroidal_beta
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: core_profiles/global_quantities/beta_pol
+      version: 4.1.0
+    - kind: imas-dd
+      ref: equilibrium/time_slice/global_quantities/beta_pol
+      version: 4.1.0
+    - kind: imas-dd
+      ref: equilibrium/time_slice/profiles_1d/beta_pol
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_profiles/global_quantities/beta_pol
+      version: 4.1.0
+    - kind: imas-dd
+      ref: summary/global_quantities/beta_pol/value
+      version: 4.1.0
+    - kind: imas-dd
+      ref: summary/global_quantities/beta_pol_mhd/value
+      version: 4.1.0
+  poloidal_length_of_flux_surface:
+    kind: scalar
+    status: draft
+    physics_domain: equilibrium
+    links:
+    - name:normalized_poloidal_flux_coordinate
+    - name:elongation_of_flux_surface
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: equilibrium/time_slice/global_quantities/length_pol
+      version: 4.1.0
+  poloidal_magnetic_field:
+    kind: scalar
+    status: draft
+    physics_domain: equilibrium
+    links:
+    - name:toroidal_magnetic_field
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: edge_profiles/ggd/b_field/poloidal
+      version: 4.1.0
+    - kind: imas-dd
+      ref: equilibrium/time_slice/constraints/b_field_pol_probe/measured
+      version: 4.1.0
+    - kind: imas-dd
+      ref: equilibrium/time_slice/constraints/b_field_pol_probe/reconstructed
+      version: 4.1.0
+    - kind: imas-dd
+      ref: magnetics/b_field_pol_probe/field
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_profiles/ggd/b_field/poloidal
+      version: 4.1.0
+  poloidal_magnetic_flux_at_flux_surface:
+    kind: scalar
+    status: draft
+    physics_domain: equilibrium
+    links:
+    - name:poloidal_magnetic_flux_of_flux_loop
+    - name:normalized_poloidal_flux_coordinate
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: core_profiles/profiles_1d/grid/psi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: core_transport/model/profiles_1d/grid_flux/psi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: equilibrium/time_slice/contour_tree/node/psi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: equilibrium/time_slice/profiles_1d/psi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: reflectometer_profile/channel/position/psi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: sawteeth/profiles_1d/grid/psi
+      version: 4.1.0
+  poloidal_magnetic_flux_at_magnetic_axis:
+    kind: scalar
+    status: draft
+    physics_domain: equilibrium
+    links:
+    - name:vertical_coordinate_of_magnetic_axis
+    - name:poloidal_magnetic_flux_at_plasma_boundary
+    - name:normalized_poloidal_flux_coordinate
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: core_profiles/profiles_1d/grid/psi_magnetic_axis
+      version: 4.1.0
+    - kind: imas-dd
+      ref: core_sources/source/profiles_1d/grid/psi_magnetic_axis
+      version: 4.1.0
+    - kind: imas-dd
+      ref: core_transport/model/profiles_1d/grid_d/psi_magnetic_axis
+      version: 4.1.0
+    - kind: imas-dd
+      ref: core_transport/model/profiles_1d/grid_flux/psi_magnetic_axis
+      version: 4.1.0
+    - kind: imas-dd
+      ref: core_transport/model/profiles_1d/grid_v/psi_magnetic_axis
+      version: 4.1.0
+    - kind: imas-dd
+      ref: disruption/profiles_1d/grid/psi_magnetic_axis
+      version: 4.1.0
+    - kind: imas-dd
+      ref: distribution_sources/source/profiles_1d/grid/psi_magnetic_axis
+      version: 4.1.0
+    - kind: imas-dd
+      ref: distributions/distribution/profiles_1d/grid/psi_magnetic_axis
+      version: 4.1.0
+    - kind: imas-dd
+      ref: ece/psi_normalization/psi_magnetic_axis
+      version: 4.1.0
+    - kind: imas-dd
+      ref: edge_profiles/profiles_1d/grid/psi_magnetic_axis
+      version: 4.1.0
+    - kind: imas-dd
+      ref: equilibrium/time_slice/global_quantities/psi_axis
+      version: 4.1.0
+    - kind: imas-dd
+      ref: equilibrium/time_slice/global_quantities/psi_magnetic_axis
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_profiles/profiles_1d/grid/psi_magnetic_axis
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_sources/source/profiles_1d/grid/psi_magnetic_axis
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_transport/model/profiles_1d/grid_d/psi_magnetic_axis
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_transport/model/profiles_1d/grid_flux/psi_magnetic_axis
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_transport/model/profiles_1d/grid_v/psi_magnetic_axis
+      version: 4.1.0
+    - kind: imas-dd
+      ref: reflectometer_fluctuation/psi_normalization/psi_magnetic_axis
+      version: 4.1.0
+    - kind: imas-dd
+      ref: reflectometer_profile/psi_normalization/psi_magnetic_axis
+      version: 4.1.0
+    - kind: imas-dd
+      ref: runaway_electrons/profiles_1d/grid/psi_magnetic_axis
+      version: 4.1.0
+    - kind: imas-dd
+      ref: sawteeth/profiles_1d/grid/psi_magnetic_axis
+      version: 4.1.0
+    - kind: imas-dd
+      ref: summary/local/magnetic_axis/position/psi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: transport_solver_numerics/solver_1d/grid/psi_magnetic_axis
+      version: 4.1.0
+    - kind: imas-dd
+      ref: waves/coherent_wave/profiles_1d/grid/psi_magnetic_axis
+      version: 4.1.0
+  poloidal_magnetic_flux_at_measurement_position:
+    kind: scalar
+    status: draft
+    physics_domain: electromagnetic_wave_diagnostics
+    links: []
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: ece/channel/beam_tracing/beam/position/psi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: ece/channel/position/psi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: reflectometer_fluctuation/channel/doppler/position/psi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: reflectometer_fluctuation/channel/fluctuations_level/position/psi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: reflectometer_profile/position/psi
+      version: 4.1.0
+  poloidal_magnetic_flux_at_plasma_boundary:
+    kind: scalar
+    status: draft
+    physics_domain: equilibrium
+    links:
+    - name:poloidal_magnetic_flux_at_magnetic_axis
+    - name:normalized_poloidal_flux_coordinate
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: core_profiles/profiles_1d/grid/psi_boundary
+      version: 4.1.0
+    - kind: imas-dd
+      ref: core_sources/source/profiles_1d/grid/psi_boundary
+      version: 4.1.0
+    - kind: imas-dd
+      ref: core_transport/model/profiles_1d/grid_d/psi_boundary
+      version: 4.1.0
+    - kind: imas-dd
+      ref: core_transport/model/profiles_1d/grid_flux/psi_boundary
+      version: 4.1.0
+    - kind: imas-dd
+      ref: core_transport/model/profiles_1d/grid_v/psi_boundary
+      version: 4.1.0
+    - kind: imas-dd
+      ref: disruption/profiles_1d/grid/psi_boundary
+      version: 4.1.0
+    - kind: imas-dd
+      ref: distribution_sources/source/profiles_1d/grid/psi_boundary
+      version: 4.1.0
+    - kind: imas-dd
+      ref: distributions/distribution/profiles_1d/grid/psi_boundary
+      version: 4.1.0
+    - kind: imas-dd
+      ref: ece/psi_normalization/psi_boundary
+      version: 4.1.0
+    - kind: imas-dd
+      ref: edge_profiles/profiles_1d/grid/psi_boundary
+      version: 4.1.0
+    - kind: imas-dd
+      ref: equilibrium/time_slice/boundary/psi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: equilibrium/time_slice/global_quantities/psi_boundary
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_profiles/profiles_1d/grid/psi_boundary
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_sources/source/profiles_1d/grid/psi_boundary
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_transport/model/profiles_1d/grid_d/psi_boundary
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_transport/model/profiles_1d/grid_flux/psi_boundary
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_transport/model/profiles_1d/grid_v/psi_boundary
+      version: 4.1.0
+    - kind: imas-dd
+      ref: reflectometer_fluctuation/psi_normalization/psi_boundary
+      version: 4.1.0
+    - kind: imas-dd
+      ref: reflectometer_profile/psi_normalization/psi_boundary
+      version: 4.1.0
+    - kind: imas-dd
+      ref: runaway_electrons/profiles_1d/grid/psi_boundary
+      version: 4.1.0
+    - kind: imas-dd
+      ref: sawteeth/profiles_1d/grid/psi_boundary
+      version: 4.1.0
+    - kind: imas-dd
+      ref: summary/local/separatrix/position/psi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: summary/local/separatrix_average/position/psi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: transport_solver_numerics/solver_1d/grid/psi_boundary
+      version: 4.1.0
+    - kind: imas-dd
+      ref: waves/coherent_wave/profiles_1d/grid/psi_boundary
+      version: 4.1.0
+  poloidal_magnetic_flux_of_flux_loop:
+    kind: scalar
+    status: draft
+    physics_domain: equilibrium
+    links:
+    - name:toroidal_magnetic_flux
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: equilibrium/time_slice/constraints/flux_loop/measured
+      version: 4.1.0
+    - kind: imas-dd
+      ref: equilibrium/time_slice/constraints/flux_loop/reconstructed
+      version: 4.1.0
+    - kind: imas-dd
+      ref: magnetics/flux_loop/flux
+      version: 4.1.0
+  poloidal_plane_cross_sectional_area_of_flux_surface:
+    kind: scalar
+    status: draft
+    physics_domain: equilibrium
+    links:
+    - name:surface_area_of_flux_surface
+    - name:poloidal_plane_cross_sectional_area_of_plasma_boundary
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: core_profiles/profiles_1d/grid/area
+      version: 4.1.0
+    - kind: imas-dd
+      ref: core_sources/source/profiles_1d/grid/area
+      version: 4.1.0
+    - kind: imas-dd
+      ref: core_transport/model/profiles_1d/grid_d/area
+      version: 4.1.0
+    - kind: imas-dd
+      ref: core_transport/model/profiles_1d/grid_flux/area
+      version: 4.1.0
+    - kind: imas-dd
+      ref: core_transport/model/profiles_1d/grid_v/area
+      version: 4.1.0
+    - kind: imas-dd
+      ref: disruption/profiles_1d/grid/area
+      version: 4.1.0
+    - kind: imas-dd
+      ref: distribution_sources/source/profiles_1d/grid/area
+      version: 4.1.0
+    - kind: imas-dd
+      ref: distributions/distribution/profiles_1d/grid/area
+      version: 4.1.0
+    - kind: imas-dd
+      ref: distributions/distribution/profiles_2d/grid/area
+      version: 4.1.0
+    - kind: imas-dd
+      ref: edge_profiles/profiles_1d/grid/area
+      version: 4.1.0
+    - kind: imas-dd
+      ref: equilibrium/time_slice/profiles_1d/area
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_profiles/profiles_1d/grid/area
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_sources/source/profiles_1d/grid/area
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_transport/model/profiles_1d/grid_d/area
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_transport/model/profiles_1d/grid_flux/area
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_transport/model/profiles_1d/grid_v/area
+      version: 4.1.0
+    - kind: imas-dd
+      ref: runaway_electrons/profiles_1d/grid/area
+      version: 4.1.0
+    - kind: imas-dd
+      ref: sawteeth/profiles_1d/grid/area
+      version: 4.1.0
+    - kind: imas-dd
+      ref: transport_solver_numerics/solver_1d/grid/area
+      version: 4.1.0
+    - kind: imas-dd
+      ref: waves/coherent_wave/profiles_1d/grid/area
+      version: 4.1.0
+    - kind: imas-dd
+      ref: waves/coherent_wave/profiles_2d/grid/area
+      version: 4.1.0
+  poloidal_plane_cross_sectional_area_of_plasma_boundary:
+    kind: scalar
+    status: draft
+    physics_domain: equilibrium
+    links:
+    - name:poloidal_plane_cross_sectional_area_of_flux_surface
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: equilibrium/time_slice/global_quantities/area
+      version: 4.1.0
+  power_due_to_ion_cyclotron_heating:
+    kind: scalar
+    status: draft
+    physics_domain: auxiliary_heating
+    links:
+    - name:forward_power_of_ion_cyclotron_heating_antenna
+    - name:total_power_due_to_ion_cyclotron_heating
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: ic_antennas/antenna/power_launched
+      version: 4.1.0
+    - kind: imas-dd
+      ref: summary/heating_current_drive/ic/power/value
+      version: 4.1.0
+  power_of_soft_xray_detector:
+    kind: scalar
+    status: draft
+    physics_domain: radiation_measurement_diagnostics
+    links:
+    - name:hard_xray_brightness
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: soft_x_rays/channel/power
+      version: 4.1.0
+  pressure_of_ion_cyclotron_heating_antenna:
+    kind: scalar
+    status: draft
+    physics_domain: auxiliary_heating
+    links: []
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: ic_antennas/antenna/module/pressure
+      version: 4.1.1
+    - kind: imas-dd
+      ref: ic_antennas/antenna/module/pressure/amplitude
+      version: 4.1.0
+  pulse_duration:
+    kind: scalar
+    status: draft
+    physics_domain: machine_operations
+    links:
+    - name:breakdown_initial_time
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: summary/plasma_duration/value
+      version: 4.1.0
+  radial_coordinate_at_inboard_midplane:
+    kind: scalar
+    status: draft
+    physics_domain: equilibrium
+    links:
+    - name:radial_coordinate_at_outboard_midplane
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: equilibrium/time_slice/profiles_1d/r_inboard
+      version: 4.1.0
+  radial_coordinate_at_outboard_midplane:
+    kind: scalar
+    status: draft
+    physics_domain: equilibrium
+    links:
+    - name:radial_coordinate_at_inboard_midplane
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: equilibrium/time_slice/profiles_1d/r_outboard
+      version: 4.1.0
+  radial_coordinate_of_camera:
+    kind: scalar
+    status: draft
+    physics_domain: radiation_measurement_diagnostics
+    links:
+    - name:vertical_coordinate_of_camera
+    - name:toroidal_coordinate_of_camera
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: camera_x_rays/camera/centre/r
+      version: 4.1.0
+  radial_coordinate_of_conductor_cross_section:
+    kind: scalar
+    status: draft
+    physics_domain: equilibrium
+    links: []
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: ic_antennas/antenna/module/strap/geometry/rectangle/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: pf_active/coil/element/geometry/rectangle/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: pf_active/coil/geometry/rectangle/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: pf_passive/loop/element/geometry/rectangle/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: pf_plasma/element/geometry/rectangle/r
+      version: 4.1.0
+  radial_coordinate_of_detector_pixel:
+    kind: scalar
+    status: draft
+    physics_domain: radiation_measurement_diagnostics
+    links:
+    - name:vertical_coordinate_of_detector_pixel
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: camera_x_rays/camera/pixel_position/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: spectrometer_x_ray_crystal/channel/camera/pixel_position/r
+      version: 4.1.0
+  radial_coordinate_of_flux_loop:
+    kind: scalar
+    status: draft
+    physics_domain: magnetic_field_diagnostics
+    links: []
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: magnetics/flux_loop/position/r
+      version: 4.1.0
+  radial_coordinate_of_geometric_axis:
+    kind: scalar
+    status: draft
+    physics_domain: equilibrium
+    links:
+    - name:vertical_coordinate_of_geometric_axis
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: equilibrium/time_slice/boundary/geometric_axis/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: equilibrium/time_slice/profiles_1d/geometric_axis/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: summary/boundary/geometric_axis_r/value
+      version: 4.1.0
+  radial_coordinate_of_line_of_sight:
+    kind: scalar
+    status: draft
+    physics_domain: radiation_measurement_diagnostics
+    links: []
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: bolometer/camera/channel/line_of_sight/first_point/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: bolometer/camera/channel/line_of_sight/second_point/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: bolometer/camera/channel/line_of_sight/third_point/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: bremsstrahlung_visible/channel/line_of_sight/first_point/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: bremsstrahlung_visible/channel/line_of_sight/second_point/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: camera_x_rays/camera/line_of_sight/first_point/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: camera_x_rays/camera/line_of_sight/second_point/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: ece/channel/line_of_sight/first_point/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: ece/channel/line_of_sight/second_point/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: ece/line_of_sight/first_point/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: ece/line_of_sight/second_point/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: gas_injection/pipe/second_point/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: hard_x_rays/channel/line_of_sight/first_point/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: hard_x_rays/channel/line_of_sight/second_point/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: interferometer/channel/line_of_sight/first_point/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: interferometer/channel/line_of_sight/second_point/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: interferometer/channel/line_of_sight/third_point/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: interferometer/channel/n_e/positions/r
+      version: 4.1.1
+    - kind: imas-dd
+      ref: mse/channel/line_of_sight/first_point/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: mse/channel/line_of_sight/second_point/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: pellets/time_slice/pellet/path_geometry/first_point/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: pellets/time_slice/pellet/path_geometry/second_point/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: polarimeter/channel/line_of_sight/first_point/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: polarimeter/channel/line_of_sight/second_point/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: polarimeter/channel/line_of_sight/third_point/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: pulse_schedule/density_control/n_e_line_of_sight/first_point/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: pulse_schedule/density_control/n_e_line_of_sight/second_point/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: pulse_schedule/density_control/n_e_line_of_sight/third_point/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: pulse_schedule/density_control/zeff_line_of_sight/first_point/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: pulse_schedule/density_control/zeff_line_of_sight/second_point/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: pulse_schedule/density_control/zeff_line_of_sight/third_point/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: reflectometer_fluctuation/channel/antennas_orientation/line_of_sight_detection/first_point/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: reflectometer_fluctuation/channel/antennas_orientation/line_of_sight_detection/second_point/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: reflectometer_fluctuation/channel/antennas_orientation/line_of_sight_emission/first_point/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: reflectometer_fluctuation/channel/antennas_orientation/line_of_sight_emission/second_point/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: reflectometer_profile/channel/line_of_sight_detection/first_point/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: reflectometer_profile/channel/line_of_sight_detection/second_point/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: reflectometer_profile/channel/line_of_sight_emission/first_point/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: reflectometer_profile/channel/line_of_sight_emission/second_point/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: refractometer/channel/line_of_sight/first_point/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: refractometer/channel/line_of_sight/second_point/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: soft_x_rays/channel/line_of_sight/first_point/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: soft_x_rays/channel/line_of_sight/second_point/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: spectrometer_uv/channel/line_of_sight/first_point/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: spectrometer_uv/channel/line_of_sight/second_point/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: spectrometer_visible/channel/line_of_sight/first_point/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: spectrometer_visible/channel/line_of_sight/second_point/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: spectrometer_x_ray_crystal/channel/bin/line_of_sight/first_point/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: spectrometer_x_ray_crystal/channel/bin/line_of_sight/second_point/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: spectrometer_x_ray_crystal/channel/camera/line_of_sight/first_point/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: spectrometer_x_ray_crystal/channel/camera/line_of_sight/second_point/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: spectrometer_x_ray_crystal/channel/profiles_line_integrated/lines_of_sight_second_point/r
+      version: 4.1.1
+    - kind: imas-dd
+      ref: thomson_scattering/channel/line_of_sight/first_point/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: thomson_scattering/channel/line_of_sight/second_point/r
+      version: 4.1.0
+  radial_coordinate_of_magnetic_axis:
+    kind: scalar
+    status: draft
+    physics_domain: equilibrium
+    links:
+    - name:radial_coordinate_at_inboard_midplane
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: distribution_sources/magnetic_axis/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: distributions/magnetic_axis/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: equilibrium/time_slice/contour_tree/node/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: equilibrium/time_slice/global_quantities/magnetic_axis/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: summary/boundary/magnetic_axis_r/value
+      version: 4.1.0
+    - kind: imas-dd
+      ref: summary/local/magnetic_axis/position/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: waves/magnetic_axis/r
+      version: 4.1.0
+  radial_coordinate_of_measurement_position:
+    kind: scalar
+    status: draft
+    physics_domain: equilibrium
+    links:
+    - name:radial_coordinate_of_line_of_sight
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: barometry/gauge/position/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: bolometer/camera/channel/aperture/centre/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: bolometer/camera/channel/detector/centre/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: camera_ir/optical_element/geometry/centre/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: camera_visible/channel/fibre_bundle/geometry/centre/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: camera_x_rays/aperture/centre/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: disruption/halo_currents/area/end_point/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: ece/channel/beam_tracing/beam/position/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: ece/channel/position/r
+      version: 4.1.1
+    - kind: imas-dd
+      ref: equilibrium/time_slice/constraints/j_phi/position/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: equilibrium/time_slice/constraints/n_e/position/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: equilibrium/time_slice/constraints/pressure/position/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: equilibrium/time_slice/constraints/pressure_rotational/position/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: equilibrium/time_slice/constraints/q/position/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: hard_x_rays/channel/aperture/centre/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: ic_antennas/antenna/module/current/position/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: ic_antennas/antenna/module/voltage/position/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: ic_antennas/reference_point/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: langmuir_probes/embedded/position/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: langmuir_probes/reciprocating/plunge/collector/position/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: langmuir_probes/reciprocating/plunge/position_average/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: lh_antennas/antenna/row/position/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: lh_antennas/reference_point/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: magnetics/b_field_phi_probe/position/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: mse/channel/detector/centre/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: nbi/unit/aperture/centre/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: nbi/unit/beamlets_group/position/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: nbi/unit/source/centre/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: neutron_diagnostic/detector/aperture/centre/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: neutron_diagnostic/detector/geometry/centre/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: reflectometer_fluctuation/channel/doppler/position/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: reflectometer_fluctuation/channel/fluctuations_level/position/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: reflectometer_profile/position/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: soft_x_rays/channel/aperture/centre/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: soft_x_rays/channel/detector/centre/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: spectrometer_uv/channel/detector/centre/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: spectrometer_uv/channel/grating/centre/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: spectrometer_uv/channel/grating/image_field/centre/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: spectrometer_visible/channel/aperture/centre/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: spectrometer_visible/channel/detector/centre/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: spectrometer_visible/channel/fibre_bundle/geometry/centre/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: spectrometer_visible/channel/polarizer/centre/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: spectrometer_x_ray_crystal/channel/camera/centre/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: spi/injector/fragment/position/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: spi/injector/optical_pellet_diagnostic/position/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: spi/injector/pellet/position/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: thomson_scattering/channel/position_per_laser/r
+      version: 4.1.1
+    - kind: imas-dd
+      ref: waves/coherent_wave/beam_tracing/beam/position/r
+      version: 4.1.0
+  radial_coordinate_of_poloidal_magnetic_field_probe:
+    kind: scalar
+    status: draft
+    physics_domain: magnetic_field_diagnostics
+    links:
+    - name:vertical_coordinate_of_poloidal_magnetic_field_probe
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: magnetics/b_field_pol_probe/position/r
+      version: 4.1.0
+  radial_coordinate_of_strike_point:
+    kind: scalar
+    status: draft
+    physics_domain: equilibrium
+    links:
+    - name:vertical_coordinate_of_strike_point
+    - name:radial_coordinate_of_x_point
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: equilibrium/time_slice/constraints/strike_point/position_measured/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: summary/boundary/strike_point_inner_r/value
+      version: 4.1.0
+    - kind: imas-dd
+      ref: summary/boundary/strike_point_outer_r/value
+      version: 4.1.0
+  radial_coordinate_of_x_point:
+    kind: scalar
+    status: draft
+    physics_domain: equilibrium
+    links:
+    - name:radial_coordinate_of_magnetic_axis
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: equilibrium/time_slice/constraints/x_point/position_measured/r
+      version: 4.1.0
+    - kind: imas-dd
+      ref: summary/boundary/x_point_main/r
+      version: 4.1.0
+  radial_derivative_of_poloidal_magnetic_flux:
+    kind: scalar
+    status: draft
+    physics_domain: equilibrium
+    links: []
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: equilibrium/time_slice/profiles_1d/dpsi_drho_tor
+      version: 4.1.0
+  radial_outline_of_antenna_strap:
+    kind: scalar
+    status: draft
+    physics_domain: auxiliary_heating
+    links:
+    - name:toroidal_angle_of_antenna_strap
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: ic_antennas/antenna/module/strap/geometry/outline/r
+      version: 4.1.1
+    - kind: imas-dd
+      ref: ic_antennas/antenna/module/strap/outline/r
+      version: 4.1.1
+  radial_outline_of_limiter_tile:
+    kind: scalar
+    status: draft
+    physics_domain: plasma_wall_interactions
+    links:
+    - name:vertical_outline_of_limiter_tile
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: wall/description_2d/limiter/unit/outline/r
+      version: 4.1.1
+  radiated_power_over_core_region:
+    kind: scalar
+    status: draft
+    physics_domain: radiation_measurement_diagnostics
+    links:
+    - name:total_plasma_radiated_power
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: bolometer/power_radiated_inside_lcfs
+      version: 4.1.0
+    - kind: imas-dd
+      ref: summary/global_quantities/power_radiated_inside_lcfs/value
+      version: 4.1.0
+  radiative_temperature_at_ece_channel:
+    kind: scalar
+    status: draft
+    physics_domain: electromagnetic_wave_diagnostics
+    links:
+    - name:radiative_temperature_at_magnetic_axis
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: ece/channel/t_radiation
+      version: 4.1.0
+  radiative_temperature_at_magnetic_axis:
+    kind: scalar
+    status: draft
+    physics_domain: electromagnetic_wave_diagnostics
+    links:
+    - name:electron_temperature_at_magnetic_axis
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: ece/t_radiation_central
+      version: 4.1.0
+    - kind: imas-dd
+      ref: ece/t_radiation_central_o
+      version: 4.1.0
+    - kind: imas-dd
+      ref: ece/t_radiation_central_x
+      version: 4.1.0
+  ratio_of_line_averaged_electron_density_to_greenwald_density:
+    kind: scalar
+    status: draft
+    physics_domain: transport
+    links:
+    - name:line_averaged_electron_density
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: summary/global_quantities/greenwald_fraction/value
+      version: 4.1.0
+  ratio_of_line_averaged_hydrogen_density_to_line_averaged_total_hydrogenic_density:
+    kind: scalar
+    status: draft
+    physics_domain: transport
+    links: []
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: summary/line_average/isotope_fraction_hydrogen/value
+      version: 4.1.0
+  ratio_of_neutral_density_of_isotope_to_difference_of_total_neutral_density_and_neutral_density_of_isotope:
+    kind: scalar
+    status: draft
+    physics_domain: radiation_measurement_diagnostics
+    links: []
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: spectrometer_visible/channel/isotope_ratios/isotope/density_ratio
+      version: 4.1.0
+  reference_major_radius:
+    kind: scalar
+    status: draft
+    physics_domain: equilibrium
+    links:
+    - name:toroidal_vacuum_magnetic_field
+    - name:flux_surface_averaged_major_radius
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: core_profiles/vacuum_toroidal_field/r0
+      version: 4.1.0
+    - kind: imas-dd
+      ref: core_sources/vacuum_toroidal_field/r0
+      version: 4.1.0
+    - kind: imas-dd
+      ref: core_transport/vacuum_toroidal_field/r0
+      version: 4.1.0
+    - kind: imas-dd
+      ref: disruption/vacuum_toroidal_field/r0
+      version: 4.1.0
+    - kind: imas-dd
+      ref: distribution_sources/vacuum_toroidal_field/r0
+      version: 4.1.0
+    - kind: imas-dd
+      ref: distributions/vacuum_toroidal_field/r0
+      version: 4.1.0
+    - kind: imas-dd
+      ref: edge_profiles/vacuum_toroidal_field/r0
+      version: 4.1.0
+    - kind: imas-dd
+      ref: equilibrium/vacuum_toroidal_field/r0
+      version: 4.1.0
+    - kind: imas-dd
+      ref: mhd_linear/vacuum_toroidal_field/r0
+      version: 4.1.0
+    - kind: imas-dd
+      ref: ntms/vacuum_toroidal_field/r0
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_profiles/vacuum_toroidal_field/r0
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_sources/vacuum_toroidal_field/r0
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_transport/vacuum_toroidal_field/r0
+      version: 4.1.0
+    - kind: imas-dd
+      ref: radiation/vacuum_toroidal_field/r0
+      version: 4.1.0
+    - kind: imas-dd
+      ref: runaway_electrons/vacuum_toroidal_field/r0
+      version: 4.1.0
+    - kind: imas-dd
+      ref: sawteeth/vacuum_toroidal_field/r0
+      version: 4.1.0
+    - kind: imas-dd
+      ref: summary/global_quantities/r0/value
+      version: 4.1.0
+    - kind: imas-dd
+      ref: tf/r0
+      version: 4.1.0
+    - kind: imas-dd
+      ref: transport_solver_numerics/vacuum_toroidal_field/r0
+      version: 4.1.0
+    - kind: imas-dd
+      ref: waves/vacuum_toroidal_field/r0
+      version: 4.1.0
+  reflected_phase_of_ion_cyclotron_heating_antenna:
+    kind: scalar
+    status: draft
+    physics_domain: auxiliary_heating
+    links:
+    - name:wave_phase_of_ion_cyclotron_heating_antenna
+    - name:reflected_power_of_ion_cyclotron_heating_antenna
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: ic_antennas/antenna/module/phase_reflected
+      version: 4.1.1
+  reflected_power_of_ion_cyclotron_heating_antenna:
+    kind: scalar
+    status: draft
+    physics_domain: auxiliary_heating
+    links:
+    - name:forward_power_of_ion_cyclotron_heating_antenna
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: ic_antennas/antenna/module/power_reflected
+      version: 4.1.0
+    - kind: imas-dd
+      ref: ic_antennas/antenna/power_reflected
+      version: 4.1.0
+  safety_factor:
+    kind: scalar
+    status: draft
+    physics_domain: transport
+    links:
+    - name:safety_factor_at_magnetic_axis
+    - name:minimum_safety_factor
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: core_profiles/profiles_1d/q
+      version: 4.1.0
+    - kind: imas-dd
+      ref: edge_profiles/profiles_1d/q
+      version: 4.1.0
+    - kind: imas-dd
+      ref: equilibrium/time_slice/constraints/q/measured
+      version: 4.1.0
+    - kind: imas-dd
+      ref: equilibrium/time_slice/constraints/q/reconstructed
+      version: 4.1.0
+    - kind: imas-dd
+      ref: equilibrium/time_slice/profiles_1d/q
+      version: 4.1.0
+    - kind: imas-dd
+      ref: gyrokinetics_local/flux_surface/q
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_profiles/profiles_1d/q
+      version: 4.1.0
+    - kind: imas-dd
+      ref: sawteeth/profiles_1d/q
+      version: 4.1.0
+  safety_factor_at_magnetic_axis:
+    kind: scalar
+    status: draft
+    physics_domain: equilibrium
+    links:
+    - name:safety_factor
+    arguments:
+    - name: safety_factor
+      operator: magnetic_axis
+      operator_kind: locus
+      role: null
+      separator: null
+      axis: null
+      shape: null
+    sources:
+    - kind: imas-dd
+      ref: equilibrium/time_slice/global_quantities/q_axis
+      version: 4.1.0
+    - kind: imas-dd
+      ref: summary/local/magnetic_axis/q/value
+      version: 4.1.0
+  safety_factor_at_normalized_poloidal_magnetic_flux_equal_to_0_95:
+    kind: scalar
+    status: draft
+    physics_domain: equilibrium
+    links:
+    - name:safety_factor
+    - name:safety_factor_at_magnetic_axis
+    arguments:
+    - name: safety_factor
+      operator: normalized_poloidal_magnetic_flux
+      operator_kind: locus
+      role: null
+      separator: null
+      axis: null
+      shape: null
+    sources:
+    - kind: imas-dd
+      ref: equilibrium/time_slice/global_quantities/q_95
+      version: 4.1.0
+    - kind: imas-dd
+      ref: summary/global_quantities/q_95/value
+      version: 4.1.0
+  spectral_bremsstrahlung_photon_radiance:
+    kind: scalar
+    status: draft
+    physics_domain: radiation_measurement_diagnostics
+    links:
+    - name:spectral_photon_radiance
+    - name:photon_radiance_at_spectral_line
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: bremsstrahlung_visible/channel/radiance_spectral
+      version: 4.1.0
+    - kind: imas-dd
+      ref: charge_exchange/channel/spectrum/radiance_continuum
+      version: 4.1.0
+  spectral_calibration_factor_at_line_of_sight:
+    kind: scalar
+    status: draft
+    physics_domain: electromagnetic_wave_diagnostics
+    links:
+    - name:line_integrated_electron_number_density
+    - name:line_averaged_electron_density
+    - name:wavelength_of_wave_beam
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: interferometer/channel/wavelength/phase_to_n_e_line
+      version: 4.1.0
+  spectral_photon_radiance:
+    kind: scalar
+    status: draft
+    physics_domain: radiation_measurement_diagnostics
+    links:
+    - name:photon_radiance_at_spectral_line
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: charge_exchange/channel/spectrum/radiance_spectral
+      version: 4.1.0
+    - kind: imas-dd
+      ref: spectrometer_uv/channel/radiance_spectral
+      version: 4.1.0
+    - kind: imas-dd
+      ref: spectrometer_visible/channel/grating_spectrometer/radiance_spectral
+      version: 4.1.0
+  spectral_rate_of_spectrometer_channel:
+    kind: scalar
+    status: draft
+    physics_domain: radiation_measurement_diagnostics
+    links:
+    - name:intensity_at_spectral_line
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: spectrometer_visible/channel/grating_spectrometer/intensity_spectrum
+      version: 4.1.0
+  spectral_wavelength_of_optical_element:
+    kind: scalar
+    status: draft
+    physics_domain: radiation_measurement_diagnostics
+    links:
+    - name:thickness_of_filter
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: bremsstrahlung_visible/channel/filter/wavelengths
+      version: 4.1.0
+    - kind: imas-dd
+      ref: camera_ir/optical_element/material_properties/wavelengths
+      version: 4.1.0
+    - kind: imas-dd
+      ref: camera_visible/channel/optical_element/material_properties/wavelengths
+      version: 4.1.0
+    - kind: imas-dd
+      ref: camera_x_rays/filter_window/wavelengths
+      version: 4.1.0
+    - kind: imas-dd
+      ref: charge_exchange/channel/spectrum/wavelengths
+      version: 4.1.0
+    - kind: imas-dd
+      ref: hard_x_rays/channel/filter_window/wavelengths
+      version: 4.1.0
+    - kind: imas-dd
+      ref: soft_x_rays/channel/filter_window/wavelengths
+      version: 4.1.0
+    - kind: imas-dd
+      ref: spectrometer_uv/channel/wavelengths
+      version: 4.1.0
+    - kind: imas-dd
+      ref: spectrometer_visible/channel/filter_spectrometer/wavelengths
+      version: 4.1.0
+    - kind: imas-dd
+      ref: spectrometer_visible/channel/grating_spectrometer/wavelengths
+      version: 4.1.0
+    - kind: imas-dd
+      ref: spectrometer_visible/channel/optical_element/material_properties/wavelengths
+      version: 4.1.0
+    - kind: imas-dd
+      ref: spectrometer_x_ray_crystal/channel/bin/instrument_function/wavelengths
+      version: 4.1.0
+    - kind: imas-dd
+      ref: spectrometer_x_ray_crystal/channel/bin/wavelength
+      version: 4.1.0
+    - kind: imas-dd
+      ref: spectrometer_x_ray_crystal/channel/filter_window/wavelengths
+      version: 4.1.0
+    - kind: imas-dd
+      ref: spectrometer_x_ray_crystal/channel/instrument_function/wavelengths
+      version: 4.1.0
+  surface_area_of_flux_surface:
+    kind: scalar
+    status: draft
+    physics_domain: equilibrium
+    links:
+    - name:poloidal_plane_cross_sectional_area_of_flux_surface
+    - name:volume_of_flux_surface
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: core_profiles/profiles_1d/grid/surface
+      version: 4.1.0
+    - kind: imas-dd
+      ref: core_sources/source/profiles_1d/grid/surface
+      version: 4.1.0
+    - kind: imas-dd
+      ref: core_transport/model/profiles_1d/grid_d/surface
+      version: 4.1.0
+    - kind: imas-dd
+      ref: core_transport/model/profiles_1d/grid_flux/surface
+      version: 4.1.0
+    - kind: imas-dd
+      ref: core_transport/model/profiles_1d/grid_v/surface
+      version: 4.1.0
+    - kind: imas-dd
+      ref: disruption/profiles_1d/grid/surface
+      version: 4.1.0
+    - kind: imas-dd
+      ref: distribution_sources/source/profiles_1d/grid/surface
+      version: 4.1.0
+    - kind: imas-dd
+      ref: distributions/distribution/profiles_1d/grid/surface
+      version: 4.1.0
+    - kind: imas-dd
+      ref: edge_profiles/profiles_1d/grid/surface
+      version: 4.1.0
+    - kind: imas-dd
+      ref: equilibrium/time_slice/global_quantities/surface
+      version: 4.1.0
+    - kind: imas-dd
+      ref: equilibrium/time_slice/profiles_1d/surface
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_profiles/profiles_1d/grid/surface
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_sources/source/profiles_1d/grid/surface
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_transport/model/profiles_1d/grid_d/surface
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_transport/model/profiles_1d/grid_flux/surface
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_transport/model/profiles_1d/grid_v/surface
+      version: 4.1.0
+    - kind: imas-dd
+      ref: runaway_electrons/profiles_1d/grid/surface
+      version: 4.1.0
+    - kind: imas-dd
+      ref: sawteeth/profiles_1d/grid/surface
+      version: 4.1.0
+    - kind: imas-dd
+      ref: transport_solver_numerics/solver_1d/grid/surface
+      version: 4.1.0
+    - kind: imas-dd
+      ref: waves/coherent_wave/profiles_1d/grid/surface
+      version: 4.1.0
+  temperature_of_soft_xray_detector:
+    kind: scalar
+    status: draft
+    physics_domain: radiation_measurement_diagnostics
+    links: []
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: camera_x_rays/detector_temperature
+      version: 4.1.0
+  thermal_electron_density:
+    kind: scalar
+    status: draft
+    physics_domain: transport
+    links:
+    - name:total_electron_density
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: core_profiles/profiles_1d/electrons/density_thermal
+      version: 4.1.0
+    - kind: imas-dd
+      ref: edge_profiles/profiles_1d/electrons/density_thermal
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_profiles/profiles_1d/electrons/density_thermal
+      version: 4.1.0
+    - kind: imas-dd
+      ref: turbulence/profiles_2d/electrons/density_thermal
+      version: 4.1.0
+  thermal_electron_pressure_at_post_sawtooth_crash:
+    kind: scalar
+    status: draft
+    physics_domain: transport
+    links:
+    - name:total_electron_pressure
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: core_profiles/profiles_1d/electrons/pressure_thermal
+      version: 4.1.0
+    - kind: imas-dd
+      ref: edge_profiles/profiles_1d/electrons/pressure_thermal
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_profiles/ggd/electrons/pressure/values
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_profiles/profiles_1d/electrons/pressure_thermal
+      version: 4.1.0
+    - kind: imas-dd
+      ref: sawteeth/profiles_1d/p_e
+      version: 4.1.0
+  thickness_of_filter:
+    kind: scalar
+    status: draft
+    physics_domain: radiation_measurement_diagnostics
+    links: []
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: camera_x_rays/filter_window/thickness
+      version: 4.1.0
+    - kind: imas-dd
+      ref: hard_x_rays/channel/filter_window/thickness
+      version: 4.1.0
+    - kind: imas-dd
+      ref: soft_x_rays/channel/filter_window/thickness
+      version: 4.1.0
+    - kind: imas-dd
+      ref: spectrometer_x_ray_crystal/channel/filter_window/thickness
+      version: 4.1.0
+  toroidal_angle_of_antenna_strap:
+    kind: scalar
+    status: draft
+    physics_domain: auxiliary_heating
+    links:
+    - name:vertical_outline_of_antenna_strap
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: ic_antennas/antenna/module/strap/outline/phi
+      version: 4.1.0
+  toroidal_angle_of_measurement_position:
+    kind: scalar
+    status: draft
+    physics_domain: equilibrium
+    links:
+    - name:toroidal_coordinate_of_aperture
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: barometry/gauge/position/phi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: ece/channel/position/phi
+      version: 4.1.1
+    - kind: imas-dd
+      ref: equilibrium/time_slice/constraints/j_parallel/position/phi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: equilibrium/time_slice/constraints/j_phi/position/phi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: equilibrium/time_slice/constraints/n_e/position/phi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: equilibrium/time_slice/constraints/pressure/position/phi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: equilibrium/time_slice/constraints/pressure_rotational/position/phi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: equilibrium/time_slice/constraints/q/position/phi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: ic_antennas/antenna/module/current/position/phi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: ic_antennas/antenna/module/pressure/position/phi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: ic_antennas/antenna/module/voltage/position/phi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: langmuir_probes/embedded/position/phi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: langmuir_probes/reciprocating/plunge/collector/position/phi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: magnetics/b_field_phi_probe/position/phi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: magnetics/b_field_pol_probe/position/phi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: magnetics/flux_loop/position/phi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: magnetics/rogowski_coil/position/phi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: reflectometer_fluctuation/channel/doppler/position/phi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: reflectometer_fluctuation/channel/fluctuations_level/position/phi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: reflectometer_profile/position/phi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: spectrometer_visible/channel/light_collection_efficiencies/positions/phi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: spectrometer_x_ray_crystal/channel/reflector/centre/phi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: spi/injector/optical_pellet_diagnostic/position/phi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: summary/heating_current_drive/nbi/position/phi/value
+      version: 4.1.0
+    - kind: imas-dd
+      ref: thomson_scattering/channel/position/phi
+      version: 4.1.0
+  toroidal_angle_of_poloidal_magnetic_field_probe:
+    kind: scalar
+    status: draft
+    physics_domain: magnetic_field_diagnostics
+    links:
+    - name:toroidal_angle_of_toroidal_magnetic_field_probe
+    - name:poloidal_angle_of_toroidal_magnetic_field_probe
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: magnetics/b_field_pol_probe/toroidal_angle
+      version: 4.1.0
+  toroidal_angle_of_toroidal_magnetic_field_probe:
+    kind: scalar
+    status: draft
+    physics_domain: magnetic_field_diagnostics
+    links:
+    - name:poloidal_angle_of_toroidal_magnetic_field_probe
+    - name:toroidal_angle_of_poloidal_magnetic_field_probe
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: magnetics/b_field_phi_probe/toroidal_angle
+      version: 4.1.0
+  toroidal_angular_width_of_limiter_tile:
+    kind: scalar
+    status: draft
+    physics_domain: structural_components
+    links:
+    - name:vertical_outline_of_limiter_tile
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: wall/description_2d/limiter/unit/phi_extensions
+      version: 4.1.0
+  toroidal_beta:
+    kind: scalar
+    status: draft
+    physics_domain: general
+    links:
+    - name:poloidal_beta
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: core_profiles/global_quantities/beta_tor
+      version: 4.1.0
+    - kind: imas-dd
+      ref: equilibrium/time_slice/global_quantities/beta_tor
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_profiles/global_quantities/beta_tor
+      version: 4.1.0
+    - kind: imas-dd
+      ref: summary/global_quantities/beta_tor/value
+      version: 4.1.0
+    - kind: imas-dd
+      ref: summary/global_quantities/beta_tor_mhd/value
+      version: 4.1.0
+  toroidal_coordinate_at_detector_pixel:
+    kind: scalar
+    status: draft
+    physics_domain: radiation_measurement_diagnostics
+    links:
+    - name:vertical_coordinate_of_detector_pixel
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: camera_x_rays/camera/pixel_position/phi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: spectrometer_x_ray_crystal/channel/camera/pixel_position/phi
+      version: 4.1.0
+  toroidal_coordinate_of_aperture:
+    kind: scalar
+    status: draft
+    physics_domain: particle_measurement_diagnostics
+    links:
+    - name:toroidal_coordinate_of_camera
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: bolometer/camera/channel/aperture/centre/phi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: camera_visible/channel/aperture/centre/phi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: camera_x_rays/aperture/centre/phi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: charge_exchange/aperture/centre/phi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: charge_exchange/channel/aperture/centre/phi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: hard_x_rays/channel/aperture/centre/phi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: mse/channel/aperture/centre/phi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: neutron_diagnostic/detector/aperture/centre/phi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: soft_x_rays/channel/aperture/centre/phi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: spectrometer_uv/channel/aperture/centre/phi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: spectrometer_visible/channel/aperture/centre/phi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: spectrometer_x_ray_crystal/channel/aperture/centre/phi
+      version: 4.1.0
+  toroidal_coordinate_of_camera:
+    kind: scalar
+    status: draft
+    physics_domain: radiation_measurement_diagnostics
+    links:
+    - name:radial_coordinate_of_camera
+    - name:vertical_coordinate_of_camera
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: camera_x_rays/camera/centre/phi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: spectrometer_x_ray_crystal/channel/camera/centre/phi
+      version: 4.1.0
+  toroidal_coordinate_of_line_of_sight:
+    kind: scalar
+    status: draft
+    physics_domain: radiation_measurement_diagnostics
+    links: []
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: bolometer/camera/channel/line_of_sight/first_point/phi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: bolometer/camera/channel/line_of_sight/second_point/phi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: bolometer/camera/channel/line_of_sight/third_point/phi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: bremsstrahlung_visible/channel/line_of_sight/first_point/phi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: bremsstrahlung_visible/channel/line_of_sight/second_point/phi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: camera_x_rays/camera/line_of_sight/first_point/phi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: camera_x_rays/camera/line_of_sight/second_point/phi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: ece/channel/line_of_sight/first_point/phi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: ece/channel/line_of_sight/second_point/phi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: ece/line_of_sight/first_point/phi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: ece/line_of_sight/second_point/phi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: hard_x_rays/channel/line_of_sight/first_point/phi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: hard_x_rays/channel/line_of_sight/second_point/phi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: interferometer/channel/line_of_sight/first_point/phi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: interferometer/channel/line_of_sight/second_point/phi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: interferometer/channel/line_of_sight/third_point/phi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: interferometer/channel/n_e/positions/phi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: mse/channel/line_of_sight/first_point/phi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: mse/channel/line_of_sight/second_point/phi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: polarimeter/channel/line_of_sight/first_point/phi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: polarimeter/channel/line_of_sight/second_point/phi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: polarimeter/channel/line_of_sight/third_point/phi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: pulse_schedule/density_control/n_e_line_of_sight/first_point/phi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: pulse_schedule/density_control/n_e_line_of_sight/second_point/phi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: pulse_schedule/density_control/n_e_line_of_sight/third_point/phi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: pulse_schedule/density_control/zeff_line_of_sight/first_point/phi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: pulse_schedule/density_control/zeff_line_of_sight/second_point/phi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: pulse_schedule/density_control/zeff_line_of_sight/third_point/phi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: reflectometer_fluctuation/channel/antennas_orientation/line_of_sight_detection/first_point/phi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: reflectometer_fluctuation/channel/antennas_orientation/line_of_sight_detection/second_point/phi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: reflectometer_fluctuation/channel/antennas_orientation/line_of_sight_emission/first_point/phi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: reflectometer_fluctuation/channel/antennas_orientation/line_of_sight_emission/second_point/phi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: reflectometer_profile/channel/line_of_sight_detection/first_point/phi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: reflectometer_profile/channel/line_of_sight_detection/second_point/phi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: reflectometer_profile/channel/line_of_sight_emission/first_point/phi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: reflectometer_profile/channel/line_of_sight_emission/second_point/phi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: refractometer/channel/line_of_sight/first_point/phi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: refractometer/channel/line_of_sight/second_point/phi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: soft_x_rays/channel/line_of_sight/first_point/phi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: soft_x_rays/channel/line_of_sight/second_point/phi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: spectrometer_uv/channel/line_of_sight/first_point/phi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: spectrometer_visible/channel/line_of_sight/first_point/phi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: spectrometer_visible/channel/line_of_sight/second_point/phi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: spectrometer_x_ray_crystal/channel/bin/line_of_sight/first_point/phi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: spectrometer_x_ray_crystal/channel/bin/line_of_sight/second_point/phi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: spectrometer_x_ray_crystal/channel/camera/line_of_sight/first_point/phi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: spectrometer_x_ray_crystal/channel/camera/line_of_sight/second_point/phi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: spectrometer_x_ray_crystal/channel/profiles_line_integrated/lines_of_sight_second_point/phi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: thomson_scattering/channel/line_of_sight/first_point/phi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: thomson_scattering/channel/line_of_sight/second_point/phi
+      version: 4.1.0
+  toroidal_flux_coordinate:
+    kind: scalar
+    status: draft
+    physics_domain: equilibrium
+    links:
+    - name:normalized_toroidal_flux_coordinate_at_measurement_position
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: core_profiles/profiles_1d/grid/rho_tor
+      version: 4.1.0
+    - kind: imas-dd
+      ref: core_sources/source/profiles_1d/grid/rho_tor
+      version: 4.1.0
+    - kind: imas-dd
+      ref: core_transport/model/profiles_1d/grid_d/rho_tor
+      version: 4.1.0
+    - kind: imas-dd
+      ref: core_transport/model/profiles_1d/grid_flux/rho_tor
+      version: 4.1.0
+    - kind: imas-dd
+      ref: core_transport/model/profiles_1d/grid_v/rho_tor
+      version: 4.1.0
+    - kind: imas-dd
+      ref: disruption/profiles_1d/grid/rho_tor
+      version: 4.1.0
+    - kind: imas-dd
+      ref: distribution_sources/source/profiles_1d/grid/rho_tor
+      version: 4.1.0
+    - kind: imas-dd
+      ref: distributions/distribution/profiles_1d/grid/rho_tor
+      version: 4.1.0
+    - kind: imas-dd
+      ref: distributions/distribution/profiles_2d/grid/rho_tor
+      version: 4.1.0
+    - kind: imas-dd
+      ref: edge_profiles/profiles_1d/grid/rho_tor
+      version: 4.1.0
+    - kind: imas-dd
+      ref: equilibrium/time_slice/profiles_1d/rho_tor
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_profiles/profiles_1d/grid/rho_tor
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_sources/source/profiles_1d/grid/rho_tor
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_transport/model/profiles_1d/grid_d/rho_tor
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_transport/model/profiles_1d/grid_flux/rho_tor
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_transport/model/profiles_1d/grid_v/rho_tor
+      version: 4.1.0
+    - kind: imas-dd
+      ref: runaway_electrons/profiles_1d/grid/rho_tor
+      version: 4.1.0
+    - kind: imas-dd
+      ref: sawteeth/profiles_1d/grid/rho_tor
+      version: 4.1.0
+    - kind: imas-dd
+      ref: transport_solver_numerics/solver_1d/grid/rho_tor
+      version: 4.1.0
+    - kind: imas-dd
+      ref: waves/coherent_wave/profiles_1d/grid/rho_tor
+      version: 4.1.0
+    - kind: imas-dd
+      ref: waves/coherent_wave/profiles_2d/grid/rho_tor
+      version: 4.1.0
+  toroidal_magnetic_field:
+    kind: scalar
+    status: draft
+    physics_domain: equilibrium
+    links:
+    - name:poloidal_magnetic_field
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: edge_profiles/ggd/b_field/phi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: equilibrium/time_slice/ggd/b_field_phi/values
+      version: 4.1.0
+    - kind: imas-dd
+      ref: magnetics/b_field_phi_probe/field
+      version: 4.1.0
+    - kind: imas-dd
+      ref: magnetics/b_field_phi_probe/non_linear_response/b_field_linear
+      version: 4.1.0
+    - kind: imas-dd
+      ref: magnetics/b_field_phi_probe/non_linear_response/b_field_non_linear
+      version: 4.1.0
+    - kind: imas-dd
+      ref: mhd/ggd/b_field_phi/values
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_profiles/ggd/b_field/phi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: tf/field_map/b_field_tor/values
+      version: 4.1.0
+    - kind: imas-dd
+      ref: wall/description_ggd/ggd/b_field/phi
+      version: 4.1.0
+  toroidal_magnetic_field_at_magnetic_axis:
+    kind: scalar
+    status: draft
+    physics_domain: equilibrium
+    links:
+    - name:toroidal_vacuum_magnetic_field
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: equilibrium/time_slice/global_quantities/magnetic_axis/b_field_phi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: summary/local/magnetic_axis/b_field_phi/value
+      version: 4.1.0
+    - kind: imas-dd
+      ref: summary/local/magnetic_axis/b_field_tor/value
+      version: 4.1.0
+  toroidal_magnetic_flux:
+    kind: scalar
+    status: draft
+    physics_domain: equilibrium
+    links:
+    - name:normalized_toroidal_flux_coordinate
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: equilibrium/time_slice/profiles_1d/phi
+      version: 4.1.0
+    - kind: imas-dd
+      ref: sawteeth/profiles_1d/phi
+      version: 4.1.0
+  toroidal_magnetic_flux_due_to_diamagnetic_drift:
+    kind: scalar
+    status: draft
+    physics_domain: equilibrium
+    links: []
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: equilibrium/time_slice/constraints/diamagnetic_flux/measured
+      version: 4.1.0
+    - kind: imas-dd
+      ref: equilibrium/time_slice/constraints/diamagnetic_flux/reconstructed
+      version: 4.1.0
+    - kind: imas-dd
+      ref: magnetics/diamagnetic_flux
+      version: 4.1.0
+  toroidal_vacuum_magnetic_field:
+    kind: scalar
+    status: draft
+    physics_domain: equilibrium
+    links: []
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: core_profiles/vacuum_toroidal_field/b0
+      version: 4.1.0
+    - kind: imas-dd
+      ref: core_sources/vacuum_toroidal_field/b0
+      version: 4.1.0
+    - kind: imas-dd
+      ref: core_transport/vacuum_toroidal_field/b0
+      version: 4.1.0
+    - kind: imas-dd
+      ref: disruption/vacuum_toroidal_field/b0
+      version: 4.1.0
+    - kind: imas-dd
+      ref: distribution_sources/vacuum_toroidal_field/b0
+      version: 4.1.0
+    - kind: imas-dd
+      ref: distributions/vacuum_toroidal_field/b0
+      version: 4.1.0
+    - kind: imas-dd
+      ref: edge_profiles/vacuum_toroidal_field/b0
+      version: 4.1.0
+    - kind: imas-dd
+      ref: equilibrium/vacuum_toroidal_field/b0
+      version: 4.1.0
+    - kind: imas-dd
+      ref: mhd_linear/vacuum_toroidal_field/b0
+      version: 4.1.0
+    - kind: imas-dd
+      ref: ntms/vacuum_toroidal_field/b0
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_profiles/vacuum_toroidal_field/b0
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_sources/vacuum_toroidal_field/b0
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_transport/vacuum_toroidal_field/b0
+      version: 4.1.0
+    - kind: imas-dd
+      ref: radiation/vacuum_toroidal_field/b0
+      version: 4.1.0
+    - kind: imas-dd
+      ref: runaway_electrons/vacuum_toroidal_field/b0
+      version: 4.1.0
+    - kind: imas-dd
+      ref: sawteeth/vacuum_toroidal_field/b0
+      version: 4.1.0
+    - kind: imas-dd
+      ref: summary/global_quantities/b0/value
+      version: 4.1.0
+    - kind: imas-dd
+      ref: tf/field_map/b_field_tor
+      version: 4.1.1
+    - kind: imas-dd
+      ref: transport_solver_numerics/vacuum_toroidal_field/b0
+      version: 4.1.0
+    - kind: imas-dd
+      ref: waves/vacuum_toroidal_field/b0
+      version: 4.1.0
+  total_electron_density:
+    kind: scalar
+    status: draft
+    physics_domain: transport
+    links:
+    - name:thermal_electron_density
+    - name:line_averaged_electron_density
+    - name:volume_averaged_electron_density
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: core_profiles/profiles_1d/electrons/density
+      version: 4.1.0
+    - kind: imas-dd
+      ref: edge_profiles/ggd/electrons/density/values
+      version: 4.1.0
+    - kind: imas-dd
+      ref: edge_profiles/profiles_1d/electrons/density
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_profiles/ggd/electrons/density/values
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_profiles/profiles_1d/electrons/density
+      version: 4.1.0
+    - kind: imas-dd
+      ref: turbulence/profiles_2d/electrons/density
+      version: 4.1.0
+  total_electron_pressure:
+    kind: scalar
+    status: draft
+    physics_domain: transport
+    links: []
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: core_profiles/profiles_1d/electrons/pressure
+      version: 4.1.0
+    - kind: imas-dd
+      ref: edge_profiles/ggd/electrons/pressure/values
+      version: 4.1.0
+    - kind: imas-dd
+      ref: edge_profiles/profiles_1d/electrons/pressure
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_profiles/profiles_1d/electrons/pressure
+      version: 4.1.0
+  total_external_heating_power:
+    kind: scalar
+    status: draft
+    physics_domain: auxiliary_heating
+    links:
+    - name:total_power_due_to_ion_cyclotron_heating
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: summary/heating_current_drive/power_additional/value
+      version: 4.1.0
+  total_neutral_source_rate_due_to_gas_injection:
+    kind: scalar
+    status: draft
+    physics_domain: plant_systems
+    links: []
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: summary/gas_injection_rates/total/value
+      version: 4.1.0
+  total_plasma_radiated_power:
+    kind: scalar
+    status: draft
+    physics_domain: radiation_measurement_diagnostics
+    links:
+    - name:radiated_power_over_core_region
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: bolometer/power_radiated_total
+      version: 4.1.0
+    - kind: imas-dd
+      ref: summary/global_quantities/power_radiated/value
+      version: 4.1.0
+  total_power_at_separatrix:
+    kind: scalar
+    status: draft
+    physics_domain: edge_plasma_physics
+    links:
+    - name:radiated_power_over_core_region
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: summary/global_quantities/power_loss/value
+      version: 4.1.0
+  total_power_due_to_ion_cyclotron_heating:
+    kind: scalar
+    status: draft
+    physics_domain: auxiliary_heating
+    links:
+    - name:power_due_to_ion_cyclotron_heating
+    arguments:
+    - name: power_due_to_ion_cyclotron_heating
+      operator: total
+      operator_kind: qualifier
+      role: null
+      separator: null
+      axis: null
+      shape: null
+    sources:
+    - kind: imas-dd
+      ref: ic_antennas/power_launched
+      version: 4.1.0
+    - kind: imas-dd
+      ref: summary/heating_current_drive/power_ic/value
+      version: 4.1.0
+  total_power_due_to_ohmic_dissipation:
+    kind: scalar
+    status: draft
+    physics_domain: magnetohydrodynamics
+    links: []
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: disruption/global_quantities/power_ohm
+      version: 4.1.0
+    - kind: imas-dd
+      ref: disruption/global_quantities/power_ohm_halo
+      version: 4.1.0
+    - kind: imas-dd
+      ref: summary/global_quantities/power_ohm/value
+      version: 4.1.0
+  triangularity_of_plasma_boundary:
+    kind: scalar
+    status: draft
+    physics_domain: equilibrium
+    links:
+    - name:upper_triangularity_of_plasma_boundary
+    - name:lower_triangularity_of_plasma_boundary
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: equilibrium/time_slice/boundary/triangularity
+      version: 4.1.0
+  turn_count_of_poloidal_magnetic_field_probe:
+    kind: scalar
+    status: draft
+    physics_domain: magnetic_field_diagnostics
+    links:
+    - name:effective_turn_count_of_passive_loop
+    - name:area_of_poloidal_magnetic_field_probe
+    - name:turn_count_of_toroidal_magnetic_field_probe
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: magnetics/b_field_pol_probe/turns
+      version: 4.1.0
+  turn_count_of_toroidal_magnetic_field_probe:
+    kind: scalar
+    status: draft
+    physics_domain: magnetic_field_diagnostics
+    links:
+    - name:area_of_toroidal_magnetic_field_probe
+    - name:effective_turn_count_of_passive_loop
+    - name:turn_count_of_poloidal_magnetic_field_probe
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: magnetics/b_field_phi_probe/turns
+      version: 4.1.0
+  upper_photon_energy:
+    kind: scalar
+    status: draft
+    physics_domain: radiation_measurement_diagnostics
+    links: []
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: hard_x_rays/channel/energy_band/upper_bound
+      version: 4.1.0
+    - kind: imas-dd
+      ref: hard_x_rays/emissivity_profile_1d/upper_bound
+      version: 4.1.0
+    - kind: imas-dd
+      ref: soft_x_rays/channel/energy_band/upper_bound
+      version: 4.1.0
+  upper_triangularity_of_flux_surface:
+    kind: scalar
+    status: draft
+    physics_domain: equilibrium
+    links:
+    - name:lower_triangularity_of_flux_surface
+    - name:upper_triangularity_of_plasma_boundary
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: equilibrium/time_slice/profiles_1d/triangularity_upper
+      version: 4.1.0
+  upper_triangularity_of_plasma_boundary:
+    kind: scalar
+    status: draft
+    physics_domain: equilibrium
+    links:
+    - name:triangularity_of_plasma_boundary
+    - name:lower_triangularity_of_plasma_boundary
+    arguments:
+    - name: triangularity_of_plasma_boundary
+      operator: upper
+      operator_kind: qualifier
+      role: null
+      separator: null
+      axis: null
+      shape: null
+    sources:
+    - kind: imas-dd
+      ref: equilibrium/time_slice/boundary/triangularity_upper
+      version: 4.1.0
+    - kind: imas-dd
+      ref: summary/boundary/triangularity_upper/value
+      version: 4.1.0
+  upper_wavelength_of_filter:
+    kind: scalar
+    status: draft
+    physics_domain: radiation_measurement_diagnostics
+    links:
+    - name:lower_wavelength_of_filter
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: bremsstrahlung_visible/channel/filter/wavelength_upper
+      version: 4.1.0
+    - kind: imas-dd
+      ref: camera_x_rays/filter_window/wavelength_upper
+      version: 4.1.0
+    - kind: imas-dd
+      ref: hard_x_rays/channel/filter_window/wavelength_upper
+      version: 4.1.0
+    - kind: imas-dd
+      ref: soft_x_rays/channel/filter_window/wavelength_upper
+      version: 4.1.0
+    - kind: imas-dd
+      ref: spectrometer_x_ray_crystal/channel/filter_window/wavelength_upper
+      version: 4.1.0
+  vacuum_poloidal_current_function:
+    kind: scalar
+    status: draft
+    physics_domain: magnetic_field_systems
+    links:
+    - name:toroidal_vacuum_magnetic_field
+    - name:difference_of_vacuum_poloidal_current_function_and_initial_vacuum_poloidal_current_function
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: tf/b_field_phi_vacuum_r
+      version: 4.1.0
+  vertical_coordinate_of_camera:
+    kind: scalar
+    status: draft
+    physics_domain: radiation_measurement_diagnostics
+    links:
+    - name:vertical_coordinate_of_measurement_position
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: camera_x_rays/camera/centre/z
+      version: 4.1.0
+    - kind: imas-dd
+      ref: spectrometer_x_ray_crystal/channel/camera/centre/z
+      version: 4.1.0
+  vertical_coordinate_of_conductor_cross_section:
+    kind: scalar
+    status: draft
+    physics_domain: magnetic_field_systems
+    links: []
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: ferritic/object/axisymmetric/rectangle/z
+      version: 4.1.0
+    - kind: imas-dd
+      ref: pf_active/coil/element/geometry/rectangle/z
+      version: 4.1.0
+    - kind: imas-dd
+      ref: pf_active/coil/geometry/rectangle/z
+      version: 4.1.0
+    - kind: imas-dd
+      ref: pf_passive/loop/element/geometry/rectangle/z
+      version: 4.1.0
+  vertical_coordinate_of_detector_pixel:
+    kind: scalar
+    status: draft
+    physics_domain: radiation_measurement_diagnostics
+    links:
+    - name:radial_coordinate_of_detector_pixel
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: camera_x_rays/camera/pixel_position/z
+      version: 4.1.0
+    - kind: imas-dd
+      ref: spectrometer_x_ray_crystal/channel/camera/pixel_position/z
+      version: 4.1.0
+  vertical_coordinate_of_flux_loop:
+    kind: scalar
+    status: draft
+    physics_domain: magnetic_field_diagnostics
+    links:
+    - name:vertical_coordinate_of_measurement_position
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: magnetics/flux_loop/position/z
+      version: 4.1.0
+  vertical_coordinate_of_geometric_axis:
+    kind: scalar
+    status: draft
+    physics_domain: equilibrium
+    links: []
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: equilibrium/time_slice/boundary/geometric_axis/z
+      version: 4.1.0
+    - kind: imas-dd
+      ref: summary/boundary/geometric_axis_z/value
+      version: 4.1.0
+  vertical_coordinate_of_magnetic_axis:
+    kind: scalar
+    status: draft
+    physics_domain: equilibrium
+    links:
+    - name:vertical_coordinate_of_geometric_axis
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: distribution_sources/magnetic_axis/z
+      version: 4.1.0
+    - kind: imas-dd
+      ref: distributions/magnetic_axis/z
+      version: 4.1.0
+    - kind: imas-dd
+      ref: equilibrium/time_slice/global_quantities/magnetic_axis/z
+      version: 4.1.0
+    - kind: imas-dd
+      ref: summary/boundary/magnetic_axis_z/value
+      version: 4.1.0
+    - kind: imas-dd
+      ref: summary/local/magnetic_axis/position/z
+      version: 4.1.0
+    - kind: imas-dd
+      ref: waves/magnetic_axis/z
+      version: 4.1.0
+  vertical_coordinate_of_measurement_position:
+    kind: scalar
+    status: draft
+    physics_domain: equilibrium
+    links:
+    - name:vertical_coordinate_of_camera
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: barometry/gauge/position/z
+      version: 4.1.0
+    - kind: imas-dd
+      ref: bolometer/camera/channel/aperture/centre/z
+      version: 4.1.0
+    - kind: imas-dd
+      ref: camera_x_rays/aperture/centre/z
+      version: 4.1.0
+    - kind: imas-dd
+      ref: ece/channel/beam_tracing/beam/position/z
+      version: 4.1.0
+    - kind: imas-dd
+      ref: ece/channel/delta_position_suprathermal/z
+      version: 4.1.0
+    - kind: imas-dd
+      ref: ece/polarizer/centre/z
+      version: 4.1.0
+    - kind: imas-dd
+      ref: equilibrium/time_slice/constraints/n_e/position/z
+      version: 4.1.0
+    - kind: imas-dd
+      ref: equilibrium/time_slice/constraints/pressure_rotational/position/z
+      version: 4.1.0
+    - kind: imas-dd
+      ref: equilibrium/time_slice/constraints/q/position/z
+      version: 4.1.0
+    - kind: imas-dd
+      ref: hard_x_rays/channel/aperture/centre/z
+      version: 4.1.0
+    - kind: imas-dd
+      ref: ic_antennas/antenna/module/current/position/z
+      version: 4.1.0
+    - kind: imas-dd
+      ref: ic_antennas/antenna/module/voltage/position/z
+      version: 4.1.0
+    - kind: imas-dd
+      ref: interferometer/channel/n_e/positions/z
+      version: 4.1.0
+    - kind: imas-dd
+      ref: langmuir_probes/embedded/position/z
+      version: 4.1.0
+    - kind: imas-dd
+      ref: langmuir_probes/reciprocating/plunge/collector/position/z
+      version: 4.1.0
+    - kind: imas-dd
+      ref: langmuir_probes/reciprocating/plunge/position_average/z
+      version: 4.1.0
+    - kind: imas-dd
+      ref: nbi/unit/beamlets_group/beamlets/positions/z
+      version: 4.1.0
+    - kind: imas-dd
+      ref: nbi/unit/beamlets_group/position/z
+      version: 4.1.0
+    - kind: imas-dd
+      ref: reflectometer_fluctuation/channel/doppler/position/z
+      version: 4.1.0
+    - kind: imas-dd
+      ref: reflectometer_fluctuation/channel/fluctuations_level/position/z
+      version: 4.1.0
+    - kind: imas-dd
+      ref: reflectometer_profile/position/z
+      version: 4.1.0
+    - kind: imas-dd
+      ref: spectrometer_visible/channel/active_spatial_resolution/centre/z
+      version: 4.1.0
+    - kind: imas-dd
+      ref: spectrometer_visible/channel/light_collection_efficiencies/positions/z
+      version: 4.1.0
+    - kind: imas-dd
+      ref: spi/injector/optical_pellet_diagnostic/position/z
+      version: 4.1.0
+    - kind: imas-dd
+      ref: thomson_scattering/channel/position/z
+      version: 4.1.0
+  vertical_coordinate_of_poloidal_magnetic_field_probe:
+    kind: scalar
+    status: draft
+    physics_domain: magnetic_field_diagnostics
+    links:
+    - name:radial_coordinate_of_poloidal_magnetic_field_probe
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: magnetics/b_field_pol_probe/position/z
+      version: 4.1.0
+  vertical_coordinate_of_primary_x_point:
+    kind: scalar
+    status: draft
+    physics_domain: equilibrium
+    links:
+    - name:radial_coordinate_of_x_point
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: summary/boundary/x_point_main/z
+      version: 4.1.0
+  vertical_coordinate_of_strike_point:
+    kind: scalar
+    status: draft
+    physics_domain: equilibrium
+    links:
+    - name:radial_coordinate_of_strike_point
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: equilibrium/time_slice/constraints/strike_point/position_measured/z
+      version: 4.1.0
+    - kind: imas-dd
+      ref: summary/boundary/strike_point_inner_z/value
+      version: 4.1.0
+    - kind: imas-dd
+      ref: summary/boundary/strike_point_outer_z/value
+      version: 4.1.0
+  vertical_coordinate_of_toroidal_magnetic_field_probe:
+    kind: scalar
+    status: draft
+    physics_domain: magnetic_field_diagnostics
+    links:
+    - name:vertical_coordinate_of_poloidal_magnetic_field_probe
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: magnetics/b_field_phi_probe/position/z
+      version: 4.1.0
+  vertical_outline_of_antenna_strap:
+    kind: scalar
+    status: draft
+    physics_domain: auxiliary_heating
+    links: []
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: ic_antennas/antenna/module/strap/outline/z
+      version: 4.1.0
+  vertical_outline_of_limiter_tile:
+    kind: scalar
+    status: draft
+    physics_domain: structural_components
+    links:
+    - name:radial_outline_of_limiter_tile
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: wall/description_2d/limiter/unit/outline/z
+      version: 4.1.0
+  vertical_outline_of_plasma_facing_component:
+    kind: scalar
+    status: draft
+    physics_domain: structural_components
+    links:
+    - name:vertical_outline_of_limiter_tile
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: wall/description_2d/mobile/unit/outline/z
+      version: 4.1.0
+  voltage_of_mass_spectrometer_channel:
+    kind: scalar
+    status: draft
+    physics_domain: particle_measurement_diagnostics
+    links:
+    - name:ion_current_of_mass_spectrometer_channel
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: spectrometer_mass/channel/photomultiplier_voltage
+      version: 4.1.0
+  voltage_of_poloidal_magnetic_field_probe:
+    kind: scalar
+    status: draft
+    physics_domain: magnetic_field_diagnostics
+    links:
+    - name:area_of_poloidal_magnetic_field_probe
+    - name:toroidal_angle_of_poloidal_magnetic_field_probe
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: magnetics/b_field_pol_probe/voltage
+      version: 4.1.0
+  volume_averaged_electron_density:
+    kind: scalar
+    status: draft
+    physics_domain: transport
+    links:
+    - name:line_averaged_electron_density
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: core_profiles/global_quantities/n_e_volume_average
+      version: 4.1.0
+    - kind: imas-dd
+      ref: interferometer/n_e_volume_average
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_initiation/global_quantities/n_e_volume_average
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_profiles/global_quantities/n_e_volume_average
+      version: 4.1.0
+    - kind: imas-dd
+      ref: summary/volume_average/n_e/value
+      version: 4.1.0
+  volume_of_flux_surface:
+    kind: scalar
+    status: draft
+    physics_domain: equilibrium
+    links:
+    - name:surface_area_of_flux_surface
+    - name:poloidal_plane_cross_sectional_area_of_flux_surface
+    - name:volume_of_plasma_boundary
+    - name:flux_surface_averaged_inverse_of_major_radius
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: core_profiles/profiles_1d/grid/volume
+      version: 4.1.0
+    - kind: imas-dd
+      ref: core_sources/source/profiles_1d/grid/volume
+      version: 4.1.0
+    - kind: imas-dd
+      ref: core_transport/model/profiles_1d/grid_d/volume
+      version: 4.1.0
+    - kind: imas-dd
+      ref: core_transport/model/profiles_1d/grid_flux/volume
+      version: 4.1.0
+    - kind: imas-dd
+      ref: core_transport/model/profiles_1d/grid_v/volume
+      version: 4.1.0
+    - kind: imas-dd
+      ref: disruption/profiles_1d/grid/volume
+      version: 4.1.0
+    - kind: imas-dd
+      ref: distribution_sources/source/profiles_1d/grid/volume
+      version: 4.1.0
+    - kind: imas-dd
+      ref: distributions/distribution/profiles_1d/grid/volume
+      version: 4.1.0
+    - kind: imas-dd
+      ref: distributions/distribution/profiles_2d/grid/volume
+      version: 4.1.0
+    - kind: imas-dd
+      ref: edge_profiles/profiles_1d/grid/volume
+      version: 4.1.0
+    - kind: imas-dd
+      ref: equilibrium/time_slice/global_quantities/volume
+      version: 4.1.0
+    - kind: imas-dd
+      ref: equilibrium/time_slice/profiles_1d/volume
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_profiles/profiles_1d/grid/volume
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_sources/source/profiles_1d/grid/volume
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_transport/model/profiles_1d/grid_d/volume
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_transport/model/profiles_1d/grid_flux/volume
+      version: 4.1.0
+    - kind: imas-dd
+      ref: plasma_transport/model/profiles_1d/grid_v/volume
+      version: 4.1.0
+    - kind: imas-dd
+      ref: runaway_electrons/profiles_1d/grid/volume
+      version: 4.1.0
+    - kind: imas-dd
+      ref: sawteeth/profiles_1d/grid/volume
+      version: 4.1.0
+    - kind: imas-dd
+      ref: transport_solver_numerics/solver_1d/grid/volume
+      version: 4.1.0
+    - kind: imas-dd
+      ref: waves/coherent_wave/profiles_1d/grid/volume
+      version: 4.1.0
+    - kind: imas-dd
+      ref: waves/coherent_wave/profiles_2d/grid/volume
+      version: 4.1.0
+  volume_of_plasma_boundary:
+    kind: scalar
+    status: draft
+    physics_domain: equilibrium
+    links:
+    - name:volume_of_flux_surface
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: summary/global_quantities/volume/value
+      version: 4.1.0
+  wave_phase_of_antenna_strap:
+    kind: scalar
+    status: draft
+    physics_domain: auxiliary_heating
+    links:
+    - name:forward_wave_phase_of_ion_cyclotron_heating_antenna
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: ic_antennas/antenna/module/strap/phase
+      version: 4.1.1
+  wave_phase_of_ion_cyclotron_heating_antenna:
+    kind: scalar
+    status: draft
+    physics_domain: auxiliary_heating
+    links:
+    - name:forward_wave_phase_of_ion_cyclotron_heating_antenna
+    - name:reflected_phase_of_ion_cyclotron_heating_antenna
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: ic_antennas/antenna/module/voltage/phase
+      version: 4.1.1
+  wave_phase_of_wave_beam:
+    kind: scalar
+    status: draft
+    physics_domain: electromagnetic_wave_diagnostics
+    links:
+    - name:line_integrated_electron_number_density
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: interferometer/channel/wavelength/phase_corrected
+      version: 4.1.0
+    - kind: imas-dd
+      ref: refractometer/channel/bandwidth/phase
+      version: 4.1.0
+  wavelength_of_spectral_line:
+    kind: scalar
+    status: draft
+    physics_domain: radiation_measurement_diagnostics
+    links: []
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: charge_exchange/channel/bes/transition_wavelength
+      version: 4.1.0
+    - kind: imas-dd
+      ref: charge_exchange/channel/ion_fast/transition_wavelength
+      version: 4.1.0
+    - kind: imas-dd
+      ref: charge_exchange/channel/spectrum/processed_line/wavelength_central
+      version: 4.1.0
+    - kind: imas-dd
+      ref: spectrometer_uv/channel/processed_line/wavelength_central
+      version: 4.1.0
+    - kind: imas-dd
+      ref: spectrometer_visible/channel/filter_spectrometer/processed_line/wavelength_central
+      version: 4.1.0
+    - kind: imas-dd
+      ref: spectrometer_visible/channel/grating_spectrometer/processed_line/wavelength_central
+      version: 4.1.0
+  wavelength_of_wave_beam:
+    kind: scalar
+    status: draft
+    physics_domain: electromagnetic_wave_diagnostics
+    links: []
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: interferometer/channel/wavelength/value
+      version: 4.1.0
+    - kind: imas-dd
+      ref: polarimeter/channel/wavelength
+      version: 4.1.0
+    - kind: imas-dd
+      ref: thomson_scattering/laser/wavelength
+      version: 4.1.0
+  width_of_poloidal_field_coil:
+    kind: scalar
+    status: draft
+    physics_domain: magnetic_field_systems
+    links: []
+    arguments: null
+    sources:
+    - kind: imas-dd
+      ref: pf_active/coil/element/geometry/rectangle/width
+      version: 4.1.0
+    - kind: imas-dd
+      ref: pf_active/coil/geometry/rectangle/width
+      version: 4.1.0

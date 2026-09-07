@@ -1,0 +1,2586 @@
+- name: current_of_poloidal_field_coil
+  description: |-
+    Conventional electrical current through a poloidal-field coil winding, with
+    sign set by winding orientation and distinct from the winding’s ampere-turn
+    product.
+  documentation: |-
+    This quantity is the conventional current carried by the conductor forming a
+    poloidal-field coil winding. It describes the circuit current itself,
+    independent of the number of turns in the winding, and is the
+    poloidal-field-coil counterpart of [current of a toroidal-field
+    coil](name:current_of_toroidal_field_coil).
+
+    The current is defined by the rate of conventional charge flow:
+
+    $$
+    I = \frac{dQ}{dt}
+    $$
+
+    where $I$ is the winding current, $Q$ is the net transported electric
+    charge, and $t$ is time. For a winding with $N$ series-connected turns, its
+    magnetomotive effect is proportional to the ampere-turn product $NI$; $N$ is
+    the dimensionless number of turns. This quantity is not the coil resistance
+    or the resulting voltage drop, which is related to [poloidal-field-coil
+    resistance](name:resistance_of_poloidal_field_coil).
+
+    Sign convention: Positive when conventional current follows the positive
+    reference direction assigned around the poloidal-field-coil winding.
+  unit: A
+
+- name: elongation_of_flux_surface
+  description: |-
+    Ratio of the vertical to horizontal semi-axes of a nested magnetic flux
+    surface’s poloidal cross-section, independent of its overall size.
+  documentation: |-
+    Elongation is the shape ratio of an individual nested magnetic flux surface,
+    describing how extended its poloidal cross-section is vertically relative to
+    horizontally.
+
+    For a given flux surface, the elongation is defined by
+
+    $$
+    \kappa = \frac{a_v}{a_h}
+    $$
+
+    where $\kappa$ is the elongation, $a_v$ is the vertical semi-axis of the
+    poloidal cross-section, and $a_h$ is its horizontal semi-axis.
+
+    The quantity applies separately to each nested magnetic flux surface and is
+    a shape ratio rather than an integrated, summed, or averaged quantity. It is
+    not restricted to the outermost surface; the distinct [elongation of the
+    plasma boundary](name:elongation_of_plasma_boundary) refers specifically to
+    the last closed plasma boundary.
+
+    The [radial derivative of elongation of a flux surface] describes the change
+    of $\kappa$ across nested surfaces, whereas this quantity gives the
+    elongation at one surface.
+  unit: '1'
+
+- name: elongation_of_plasma_boundary
+  description: |-
+    Dimensionless ratio of the plasma boundary’s vertical half-height to its
+    minor radius, quantifying the elongation of its cross-sectional shape.
+  documentation: |-
+    Plasma-boundary elongation is the ratio of the vertical half-height to the
+    minor radius of the outermost closed plasma cross-section, describing its
+    vertical shaping relative to a circular cross-section.
+
+    In the right-handed cylindrical $(R,\phi,Z)$ frame, where $R$ is major
+    radius, $\phi$ is toroidal angle, and $Z$ is vertical height, the elongation
+    is defined by
+
+    $$
+    \kappa = \frac{Z_{\max}-Z_{\min}}{2a}
+    $$
+
+    where $\kappa$ is the plasma-boundary elongation, $Z_{\max}$ and $Z_{\min}$
+    are the maximum and minimum vertical coordinates of the boundary, and $a$ is
+    the minor radius, defined as the radial half-width of the boundary
+    cross-section.
+
+    This quantity applies specifically to the plasma boundary rather than to an
+    arbitrary nested magnetic flux surface. Its geometric aggregation uses the
+    full vertical extent and radial half-width of the boundary cross-section; it
+    is not a local field value and is not averaged over the boundary. It
+    therefore excludes the corresponding elongation of an interior flux surface.
+
+    The quantity is the boundary-locus specialization of [elongation of a flux
+    surface](name:elongation_of_flux_surface), which applies the same geometric
+    ratio to a general nested magnetic flux-surface cross-section.
+  unit: '1'
+
+- name: faraday_angle
+  description: |-
+    Faraday rotation of a probing wave’s polarization plane caused by electron
+    density and the magnetic-field component along its plasma path.
+  documentation: |-
+    The Faraday angle is the signed rotation of a probing electromagnetic wave’s
+    polarization plane caused by propagation through magnetized plasma. For an
+    equilibrium state, it is the angle predicted from the electron density and
+    magnetic field encountered along the beam path.
+
+    In the cold, weakly dispersive magnetoionic approximation, the
+    plasma-induced rotation is defined by
+
+    $$
+    \theta_F = \frac{e^3\lambda^2}{8\pi^2\epsilon_0 m_e^2 c^3} \int_{\mathcal{L}} n_e(\ell) B_{\parallel}(\ell)\,d\ell
+    $$
+
+    where $\theta_F$ is the Faraday rotation angle, $e$ is the elementary-charge
+    magnitude, $\lambda$ is the probing-wave vacuum wavelength, $\pi$ is the
+    circle constant, $\epsilon_0$ is the vacuum permittivity, $m_e$ is the
+    electron mass, $c$ is the speed of light, $\mathcal{L}$ is the segment of
+    the beam path crossing the plasma, $\ell$ is distance along that path,
+    $n_e(\ell)$ is the local electron number density, and $B_{\parallel}(\ell)$
+    is the signed magnetic-field component along the beam direction.
+
+    The quantity applies to the electron contribution accumulated along one
+    probing beam through the plasma. Its aggregation is a line integral along
+    that path, not a local rotation rate, flux-surface average, or sum over
+    multiple beams; optical rotation produced outside the plasma is excluded.
+    The equilibrium-derived value is the rotation predicted by the reconstructed
+    plasma state and is distinct from a directly observed angle or from a
+    residual between prediction and observation.
+
+    Faraday angle describes rotation of the polarization plane, whereas
+    [polarization ellipticity of a polarimeter
+    beam](name:polarization_ellipticity_of_polarimeter_beam) describes the
+    signed shape of the polarization ellipse through its axis ratio; the two
+    quantities are not interchangeable.
+
+    Sign convention: Positive when the polarization plane rotates according to
+    the right-hand rule about the beam propagation direction from its incident
+    reference orientation.
+  unit: rad
+
+- name: flux_surface_averaged_inverse_of_major_radius
+  description: |-
+    Flux-surface average of reciprocal major radius, providing a geometric
+    equilibrium coefficient for toroidal geometry in flux-coordinate equations.
+  documentation: |-
+    This quantity is the geometric average of the reciprocal major radius over a
+    complete magnetic flux surface. It is an equilibrium metric coefficient
+    independent of plasma species, population, magnetic-field component, and
+    physical transport process.
+
+    For a magnetic flux surface identified by the label $\psi$, the defining
+    flux-surface average is:
+
+    $$
+    g_{1/R}(\psi) =
+    \left\langle \frac{1}{R} \right\rangle_\psi =
+    \frac{\displaystyle\oint_{\mathcal{S}(\psi)}
+    \frac{dS}{|\nabla\psi|}\,\frac{1}{R}}
+    {\displaystyle\oint_{\mathcal{S}(\psi)}
+    \frac{dS}{|\nabla\psi|}}
+    $$
+
+    Here $g_{1/R}$ denotes the metric coefficient, $R$ is the major-radius
+    coordinate, $\psi$ is the magnetic flux-surface label, $\mathcal{S}(\psi)$
+    is the corresponding closed magnetic flux surface, $dS$ is its surface-area
+    element, and $\nabla\psi$ is the spatial gradient of the flux-surface label.
+    The coordinate $R$ belongs to the right-handed cylindrical $(R,\phi,Z)$
+    frame, where $\phi$ is the toroidal angle and $Z$ is the vertical
+    coordinate.
+
+    The aggregation is over the entire closed flux surface using the
+    flux-surface weighting shown in the defining relation; this is not the local
+    reciprocal radius at a point. The quantity is distinct from the flux-surface
+    average of reciprocal squared major radius, [flux-surface-averaged inverse
+    square of major
+    radius](name:flux_surface_averaged_inverse_of_square_of_major_radius).
+
+    It is the flux-surface-averaged specialization of [inverse major
+    radius](name:inverse_of_major_radius): the averaging operator is applied to
+    the local reciprocal-major-radius quantity without introducing a species,
+    field-component, or process restriction.
+  unit: m^-1
+
+- name: flux_surface_averaged_inverse_of_square_of_magnetic_field_magnitude
+  description: |-
+    Flux-surface average of the reciprocal square of total magnetic-field
+    strength, a geometric coefficient in neoclassical and flux-surface-averaged
+    transport relations.
+  documentation: |-
+    This quantity is the flux-surface average of the reciprocal square of the
+    total magnetic-field strength on a nested magnetic surface. It captures
+    field-strength geometry independently of the magnetic-field direction.
+
+    The defining relation is
+
+    $$
+    \left\langle \frac{1}{|\mathbf{B}|^2} \right\rangle_\psi
+    =
+    \frac{\displaystyle \int_{S(\psi)} |\mathbf{B}|^{-2}\,\frac{dS}{|\nabla\psi|}}
+    {\displaystyle \int_{S(\psi)} \frac{dS}{|\nabla\psi|}}
+    $$
+
+    where $\mathbf{B}$ is the total magnetic-field vector, $|\mathbf{B}|$ is its
+    magnitude, $\psi$ is the flux-surface label, $S(\psi)$ is the magnetic
+    surface labeled by $\psi$, $dS$ is its surface-area element, and
+    $\nabla\psi$ is the spatial gradient of the flux-surface label.
+
+    The quantity applies to the complete magnetic flux surface and uses the
+    inverse-$|\nabla\psi|$ weighting shown in the defining relation. It is not a
+    pointwise inverse-square field value and has no selection by magnetic-field
+    direction, component, species, or source.
+
+    It is the flux-surface-averaged transformation of the parent [inverse square
+    of magnetic-field
+    magnitude](name:inverse_of_square_of_magnetic_field_magnitude), with the
+    reciprocal square formed locally before averaging. It is distinct from
+    [flux-surface-averaged magnetic-field
+    magnitude](name:flux_surface_averaged_magnetic_field_magnitude) and
+    [flux-surface-averaged square of magnetic-field
+    magnitude](name:flux_surface_averaged_square_of_magnetic_field_magnitude),
+    because nonlinear inversion and squaring do not commute with surface
+    averaging.
+  unit: T^-2
+
+- name: flux_surface_averaged_inverse_of_square_of_major_radius
+  description: |-
+    Flux-surface average of reciprocal squared major radius, providing a
+    geometric metric coefficient for parallel-gradient and neoclassical
+    transport calculations.
+  documentation: |-
+    This quantity is the flux-surface average of the reciprocal square of the
+    major radius on a nested equilibrium magnetic flux surface. It is a positive
+    geometric metric coefficient used in parallel-gradient operators and
+    neoclassical and gyrokinetic transport equations.
+
+    It is defined by
+
+    $$
+    g_{m1}(\psi)=\left\langle \frac{1}{R^2}\right\rangle_{\psi}
+    $$
+
+    where $g_{m1}$ denotes this metric coefficient, $R$ is the major radius
+    measured from the toroidal symmetry axis, $\psi$ is the poloidal magnetic
+    flux labeling the surface, and $\langle\cdot\rangle_{\psi}$ denotes the
+    flux-surface average on that surface.
+
+    The quantity applies to the entire magnetic flux surface and has no species,
+    field-component, or source-process restriction. Its aggregation convention
+    is a flux-surface average of the local reciprocal-square geometric factor;
+    it is not the reciprocal square of a flux-surface-averaged major radius.
+
+    It is the flux-surface-averaged form of the pointwise [inverse of square of
+    major radius](name:inverse_of_square_of_major_radius). It differs from the
+    related [flux-surface-averaged inverse of major
+    radius](name:flux_surface_averaged_inverse_of_major_radius), which averages
+    the first reciprocal power of $R$ rather than its reciprocal square.
+  unit: m^-2
+
+- name: flux_surface_averaged_major_radius
+  description: |-
+    Flux-surface-averaged nonnegative perpendicular distance from the toroidal
+    symmetry axis to points on a nested magnetic flux surface, giving the mean
+    major-radius coordinate in the right-handed cylindrical (R, φ, Z) frame.
+  documentation: |-
+    Major radius is the nonnegative perpendicular distance from the toroidal
+    symmetry axis to a geometric point or specified location. For this
+    flux-surface-averaged quantity, that distance is averaged over each nested
+    magnetic flux surface in the right-handed cylindrical $(R,\phi,Z)$ frame,
+    where $R$ is major radius, $\phi$ is toroidal angle, and $Z$ is vertical
+    height.
+
+    The flux-surface average of major radius is defined by
+
+    $$
+    \langle R\rangle_\psi = \frac{\oint_\psi R\,dl/B_p}{\oint_\psi dl/B_p}
+    $$
+
+    where $\langle R\rangle_\psi$ is the averaged major-radius coordinate,
+    $\psi$ is the magnetic-flux label identifying the surface, $l$ is poloidal
+    arc length along that surface, and $B_p$ is the magnitude of the poloidal
+    magnetic field. The contour integral extends around the complete poloidal
+    intersection of the nested magnetic flux surface.
+
+    This quantity applies to a complete magnetic flux surface and aggregates the
+    local [major radius] using the flux-surface weighting defined by the inverse
+    poloidal-field magnitude. It is therefore distinct from pointwise major
+    radius and contains no point-specific or localized evaluation.
+
+    The quantity is the flux-surface-averaged counterpart of [major radius]. It
+    must not be confused with [flux-surface-averaged inverse of major
+    radius](name:flux_surface_averaged_inverse_of_major_radius), which averages
+    the reciprocal $1/R$ rather than averaging $R$ itself; consequently, it is
+    not generally the reciprocal of that neighboring average.
+  unit: m
+
+- name: flux_surface_averaged_ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_magnetic_field_magnitude
+  description: |-
+    Flux-surface average of the squared toroidal-flux-coordinate gradient
+    magnitude divided by the squared local magnetic-field magnitude, a metric
+    coefficient for equilibrium geometry.
+  documentation: |-
+    This coefficient describes the flux-surface-averaged geometric weighting of
+    a toroidal-flux radial coordinate by the inverse square of the local
+    magnetic-field magnitude.
+
+    The defining relation is
+
+    $$
+    \mathcal{G}_B = \left\langle \frac{|\nabla \rho_{\mathrm{tor}}|^2}{|\mathbf{B}|^2} \right\rangle_{\mathrm{FS}}
+    $$
+
+    where $\mathcal{G}_B$ is the averaged metric coefficient,
+    $\rho_{\mathrm{tor}}$ is the toroidal-flux radial coordinate, $\nabla$ is
+    the spatial gradient, $\mathbf{B}$ is the magnetic-field vector, and
+    $\langle\cdot\rangle_{\mathrm{FS}}$ denotes the average over a magnetic flux
+    surface.
+
+    The quantity applies to nested equilibrium magnetic flux surfaces and uses
+    the average of the pointwise ratio, not the ratio of separately averaged
+    numerator and denominator. It is nonnegative because both the gradient
+    magnitude and magnetic-field magnitude are squared.
+
+    It is the flux-surface-averaged form of the local [ratio of squared
+    toroidal-flux-coordinate gradient magnitude to squared magnetic-field
+    magnitude](name:ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_magnetic_field_magnitude).
+    It shares the gradient-squared geometric factor with the
+    [flux-surface-averaged squared toroidal-flux-coordinate gradient
+    magnitude](name:flux_surface_averaged_square_of_toroidal_flux_coordinate_gradient_magnitude),
+    but additionally applies the pointwise inverse-square magnetic-field
+    weighting before averaging. It is distinct from the corresponding
+    major-radius denominator variant, [flux-surface-averaged ratio of squared
+    toroidal-flux-coordinate gradient magnitude to squared major
+    radius](name:flux_surface_averaged_ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_major_radius).
+  unit: T^-2
+
+- name: flux_surface_averaged_ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_major_radius
+  description: |-
+    Flux-surface-averaged magnetic-geometry coefficient measuring the squared
+    toroidal-flux-coordinate gradient relative to the squared major radius.
+  documentation: |-
+    This quantity is a magnetic-geometry metric coefficient that characterizes
+    how a toroidal-flux radial coordinate varies across nested magnetic
+    surfaces, with the variation weighted by inverse squared major radius.
+
+    It is defined by
+
+    $$
+    g_2 = \left\langle \frac{|\nabla \rho|^2}{R^2} \right\rangle_{\mathrm{FS}}
+    $$
+
+    where $g_2$ is the flux-surface-averaged metric coefficient, $\rho$ is the
+    toroidal-flux radial coordinate, $\nabla\rho$ is its spatial gradient,
+    $|\nabla\rho|$ is the gradient magnitude, $R$ is the major radius, and the
+    subscript $\mathrm{FS}$ denotes the prescribed average over a complete
+    magnetic flux surface.
+
+    The quantity applies to an equilibrium magnetic flux surface and represents
+    an aggregate over that surface rather than a pointwise local value. It has
+    no species, population, or transport-channel restriction.
+
+    It is the flux-surface average of the local ratio defined by [ratio of
+    square of toroidal flux coordinate gradient magnitude to square of major
+    radius](name:ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_major_radius).
+    Unlike [flux-surface-averaged square of toroidal flux coordinate gradient
+    magnitude](name:flux_surface_averaged_square_of_toroidal_flux_coordinate_gradient_magnitude),
+    it retains the inverse-square-major-radius weighting; the numerator is
+    constructed from the [toroidal flux coordinate gradient
+    magnitude](name:toroidal_flux_coordinate_gradient_magnitude).
+  unit: m^-2
+
+- name: flux_surface_averaged_square_of_magnetic_field_magnitude
+  description: |-
+    Flux-surface average of the squared magnitude of the total equilibrium
+    magnetic field, providing a geometric coefficient for equilibrium and
+    neoclassical transport relations.
+  documentation: |-
+    This quantity is the surface-averaged squared strength of the total magnetic
+    field on a nested magnetic flux surface. It is a geometric metric
+    coefficient used in equilibrium descriptions and in bounce-averaged and
+    neoclassical transport relations.
+
+    The flux-surface average is defined by
+
+    $$
+    \left\langle B^2 \right\rangle_\psi = \frac{\displaystyle\oint_{S(\psi)} \frac{B^2}{\lvert\nabla\psi\rvert}\,dS}{\displaystyle\oint_{S(\psi)} \frac{1}{\lvert\nabla\psi\rvert}\,dS}
+    $$
+
+    where $B^2$ is the [square of the magnetic-field
+    magnitude](name:square_of_magnetic_field_magnitude), $\psi$ is the poloidal
+    magnetic-flux label of the surface, $S(\psi)$ is the closed magnetic flux
+    surface with that label, $\nabla\psi$ is the gradient of the flux label, and
+    $dS$ is the surface-area element.
+
+    The quantity applies to the total equilibrium magnetic field, including all
+    of its components, and is aggregated over each closed flux surface with the
+    inverse-$\lvert\nabla\psi\rvert$ weighting shown above. It is not the
+    pointwise value of $B^2$, the square of a flux-surface-averaged
+    magnetic-field magnitude, or a single magnetic-field component.
+
+    It is the flux-surface-averaged form of
+    [square_of_magnetic_field_magnitude](name:square_of_magnetic_field_magnitude).
+    It differs from
+    [flux_surface_averaged_magnetic_field_magnitude](name:flux_surface_averaged_magnetic_field_magnitude),
+    which averages the field magnitude before squaring, and from
+    [flux_surface_averaged_inverse_of_square_of_magnetic_field_magnitude](name:flux_surface_averaged_inverse_of_square_of_magnetic_field_magnitude),
+    which averages its reciprocal.
+  unit: T^2
+
+- name: flux_surface_averaged_square_of_toroidal_flux_coordinate_gradient_magnitude
+  description: |-
+    Flux-surface average of the squared magnitude of the gradient of the
+    normalized toroidal-flux radius. It is the averaged contravariant radial
+    metric coefficient for the flux coordinate rho_tor.
+  documentation: |-
+    Flux-surface average of the squared magnitude of the gradient of the
+    toroidal flux coordinate is the average, over one magnetic flux surface, of
+    the squared norm of $\nabla \rho_\mathrm{tor}$. It is the
+    flux-surface-averaged contravariant radial metric coefficient associated
+    with the radial coordinate in the flux-coordinate system
+    $(\rho_\mathrm{tor}, \theta, \phi)$, where $\theta$ is a poloidal angle
+    label and $\phi$ is the toroidal angle.
+
+    The quantity is defined by the flux-surface average of the local radial
+    metric component:
+
+    $$
+    G_{\rho\rho}(\rho_\mathrm{tor}) = \left\langle |\nabla \rho_\mathrm{tor}|^2 \right\rangle_{\rho_\mathrm{tor}} = \frac{\int_{S(\rho_\mathrm{tor})} |\nabla \rho_\mathrm{tor}|^2\, dA / |\nabla \rho_\mathrm{tor}|}{\int_{S(\rho_\mathrm{tor})} dA / |\nabla \rho_\mathrm{tor}|}
+    $$
+
+    where $G_{\rho\rho}$ denotes this flux-surface-averaged metric coefficient,
+    $\rho_\mathrm{tor}$ is the normalized toroidal-flux radius,
+    $S(\rho_\mathrm{tor})$ is the magnetic flux surface with that label,
+    $\nabla$ is the spatial gradient operator, $dA$ is the surface-area element,
+    and $\langle\cdot\rangle_{\rho_\mathrm{tor}}$ denotes averaging over that
+    flux surface.
+
+    The coordinate $\rho_\mathrm{tor}$ is constituted by
+    $\rho_\mathrm{tor}=\sqrt{\Phi/\Phi_b}$, where $\Phi$ is the toroidal
+    magnetic flux enclosed by the flux surface and $\Phi_b$ is its value at the
+    plasma boundary. The scope is closed nested equilibrium flux surfaces; the
+    aggregation convention is an average over the entire surface at fixed
+    $\rho_\mathrm{tor}$.
+
+    This is not the pointwise quantity $|\nabla \rho_\mathrm{tor}|^2$, not the
+    flux-surface average of $|\nabla \rho_\mathrm{tor}|$, and not a volume or
+    time average. It belongs to the same flux-surface-averaged geometric-metric
+    family as the [flux-surface-averaged inverse major
+    radius](name:flux_surface_averaged_inverse_of_major_radius), but it
+    characterizes the radial metric of the normalized toroidal-flux radius
+    rather than a major-radius factor.
+  unit: '1'
+
+- name: flux_surface_averaged_toroidal_flux_coordinate_gradient_magnitude
+  description: |-
+    Geometric metric coefficient formed by averaging the local magnitude of the
+    toroidal-flux-coordinate gradient over each nested magnetic flux surface.
+  documentation: |-
+    This quantity is the flux-surface average of the local geometric rate at
+    which the toroidal flux coordinate changes through physical space. It is a
+    scalar metric coefficient associated with nested magnetic surfaces.
+
+    The defining relation is
+
+    $$
+    \mathcal{G}(\mathcal{S}) = \left\langle \left|\nabla \rho_{\mathrm{tor}}\right| \right\rangle_{\mathcal{S}}
+    $$
+
+    where $\mathcal{G}(\mathcal{S})$ is the averaged metric coefficient,
+    $\mathcal{S}$ is a magnetic flux surface, $\rho_{\mathrm{tor}}$ is the
+    toroidal flux coordinate labeling nested magnetic surfaces, $\nabla$ is the
+    spatial gradient, and the angle brackets with subscript $\mathcal{S}$ denote
+    averaging over that surface.
+
+    The quantity applies to the complete nested magnetic flux surface and is
+    aggregated over the surface rather than evaluated at a point, along a line,
+    or over a volume. It represents the average of the gradient magnitude, not a
+    directional component and not the local unaveraged value.
+
+    It is obtained by applying flux-surface averaging to the local [toroidal
+    flux coordinate gradient
+    magnitude](name:toroidal_flux_coordinate_gradient_magnitude). Unlike
+    [flux-surface-averaged square of toroidal flux coordinate gradient
+    magnitude](name:flux_surface_averaged_square_of_toroidal_flux_coordinate_gradient_magnitude),
+    it averages the magnitude itself rather than its square.
+  unit: '1'
+
+- name: gap_at_outboard_midplane
+  description: |-
+    Signed major-radius separation between a measurement position and the
+    magnetic separatrix, mapped along its flux surface to the outboard midplane;
+    positive outside the separatrix.
+  documentation: |-
+    This quantity is the signed major-radius separation between a measurement
+    position and the magnetic separatrix after the position is mapped along its
+    flux surface to the outboard midplane. It applies pointwise to the selected
+    position and separatrix rather than to an average or to the separation
+    between two separatrices.
+
+    With the mapped position and separatrix evaluated at the outboard midplane,
+    the separation is defined by
+
+    $$
+    \Delta R_{\mathrm{sep,mid}} = R_{\mathrm{pos,mid}} - R_{\mathrm{sep,mid}}
+    $$
+
+    where $\Delta R_{\mathrm{sep,mid}}$ is the mapped separatrix distance,
+    $R_{\mathrm{pos,mid}}$ is the major-radius coordinate of the mapped
+    measurement position, and $R_{\mathrm{sep,mid}}$ is the major-radius
+    coordinate of the separatrix at the outboard midplane.
+
+    The quantity refers to one measurement position, its associated magnetic
+    flux surface, and one selected separatrix. It is a signed major-radius
+    separation in the right-handed cylindrical $(R, \phi, Z)$ frame, with no
+    flux-surface, spatial, species, or time aggregation. It is not the shortest
+    geometric distance, a plasma-wall clearance, or the distance between inner
+    and outer separatrices.
+
+    The flux-surface assignment can be expressed through the [normalized
+    poloidal flux coordinate at measurement position], while the two terms in
+    the difference are outboard-midplane radial coordinates of the type defined
+    by [radial coordinate at outboard
+    midplane](name:radial_coordinate_at_outboard_midplane). The mapping
+    therefore converts the original position into a common outboard-midplane
+    comparison before the major-radius difference is taken.
+  unit: m
+
+- name: lower_triangularity_of_flux_surface
+  description: |-
+    Dimensionless lower triangularity shape parameter for a nested magnetic flux
+    surface, given by the normalized inward radial displacement of its lower
+    vertical extremum.
+  documentation: |-
+    Lower triangularity of a flux surface is the dimensionless triangularity
+    shape parameter defined at the lower vertical extremum of a nested magnetic
+    flux surface. It is the normalized inward displacement in major radius $R$
+    of that lower extremum relative to the magnetic-axis reference.
+
+    For the lower vertical extremum, the defining relation is:
+
+    $$
+    \delta_{\mathrm{lower}} = \frac{R_{\mathrm{axis}} - R_{\mathrm{lower}}}{a}
+    $$
+
+    where $\delta_{\mathrm{lower}}$ is lower triangularity, $R_{\mathrm{axis}}$
+    is the major-radius coordinate of the magnetic axis, $R_{\mathrm{lower}}$ is
+    the major-radius coordinate of the lower vertical extremum, and $a$ is the
+    minor radius of the same flux surface. These coordinates are defined in the
+    right-handed cylindrical $(R,\phi,Z)$ frame, where $R$ is major radius
+    measured from the machine symmetry axis, $\phi$ is toroidal angle, and $Z$
+    is vertical height.
+
+    This quantity applies independently to each nested magnetic flux surface and
+    is a geometrical property of the surface rather than a plasma-population
+    quantity. It resolves the lower vertical extremum only; it is not averaged
+    over flux surfaces or combined with the upper extremum. It is distinct from
+    [lower triangularity of a flux surface
+    boundary](name:lower_triangularity_of_plasma_boundary), which describes the
+    outer plasma boundary rather than an arbitrary nested surface.
+
+    It is the lower-extremum branch of [triangularity of a flux
+    surface](name:triangularity_of_flux_surface), whose parent quantity permits
+    the relevant upper or lower vertical extremum. The corresponding [upper
+    triangularity of a flux surface](name:upper_triangularity_of_flux_surface)
+    uses the upper vertical extremum, while [elongation of a flux
+    surface](name:elongation_of_flux_surface) describes vertical-to-horizontal
+    shaping rather than triangular displacement.
+
+    Sign convention: Positive when the lower vertical extremum lies at smaller
+    major radius $R$ than the magnetic-axis reference, corresponding to an
+    inward displacement.
+  unit: '1'
+
+- name: magnetic_shear_at_flux_surface
+  description: |-
+    Dimensionless logarithmic radial gradient of the safety factor on a magnetic
+    flux surface, measuring how magnetic-field-line pitch changes across
+    neighboring surfaces.
+  documentation: |-
+    Magnetic shear at a magnetic flux surface is the local logarithmic radial
+    variation of the safety factor, expressing the change in magnetic-field-line
+    pitch between neighboring nested surfaces.
+
+    It is defined by
+
+    $$
+    s(\rho_\mathrm{tor}) = \frac{\rho_\mathrm{tor}}{q(\rho_\mathrm{tor})}\frac{dq(\rho_\mathrm{tor})}{d\rho_\mathrm{tor}}
+    $$
+
+    where $s$ is magnetic shear, $\rho_\mathrm{tor}$ is the toroidal-flux radial
+    coordinate labeling the magnetic flux surface, and $q$ is the safety factor
+    on that surface.
+
+    The quantity applies to the equilibrium magnetic geometry of the specified
+    magnetic flux surface without restricting the surface to a particular plasma
+    region, species, or particle population. It is a local value associated with
+    one surface, not a sum, volume integral, or average over multiple surfaces.
+
+    It is distinct from the corresponding values at special loci such as the
+    [magnetic axis](name:magnetic_shear_at_magnetic_axis), [plasma
+    boundary](name:magnetic_shear_at_plasma_boundary), or [internal transport
+    barrier](name:magnetic_shear_at_internal_transport_barrier). The expression
+    relates magnetic shear directly to the logarithmic derivative of the safety
+    factor with respect to the toroidal-flux radial coordinate.
+  unit: '1'
+
+- name: maximum_magnetic_field_magnitude
+  description: |-
+    Largest magnitude of the magnetic-field vector over a specified evaluation
+    domain, distinguishing total field strength from any signed field component.
+  documentation: |-
+    The maximum magnetic-field magnitude is the greatest total field strength
+    attained within the physical evaluation domain associated with the quantity.
+
+    The defining extremum is
+
+    $$
+    B_{\max} = \max_{\mathbf{x}\in D} \left\lVert \mathbf{B}(\mathbf{x}) \right\rVert
+    $$
+
+    where $B_{\max}$ is the maximum magnetic-field magnitude,
+    $\mathbf{B}(\mathbf{x})$ is the magnetic-field vector at spatial point
+    $\mathbf{x}$, and $D$ is the specified evaluation domain.
+
+    The domain may be a nested magnetic flux surface or a coil-conductor
+    surface, as established by the physical context. The maximum operation
+    aggregates the field magnitude over all points in $D$ and returns its
+    largest value; it does not represent a spatial average or a particular field
+    component.
+
+    This quantity selects the modulus of the magnetic-field vector before
+    applying the maximum operation. It is therefore the magnitude-specific child
+    of [maximum magnetic field](name:maximum_magnetic_field), whose parent
+    concept leaves the scalar field being maximized unspecified. It excludes
+    maxima of signed toroidal, poloidal, radial, or other individual
+    magnetic-field components.
+  unit: T
+
+- name: mhd_energy
+  description: |-
+    Global plasma stored energy obtained from the volume integral of total
+    kinetic pressure, including thermal and fast-particle pressure
+    contributions.
+  documentation: |-
+    MHD plasma stored energy is the global energy content assigned to the plasma
+    by integrating its equilibrium-reconstructed total kinetic pressure over the
+    full plasma volume. It includes thermal and fast-particle contributions
+    rather than representing only one pressure population.
+
+    The defining relation is
+
+    $$
+    W_{\mathrm{MHD}} = \frac{3}{2}\int_{V_{\mathrm{plasma}}} p_{\mathrm{tot}}\,dV
+    $$
+
+    where $W_{\mathrm{MHD}}$ is the MHD plasma stored energy, $p_{\mathrm{tot}}$
+    is the total kinetic pressure determined by the equilibrium reconstruction,
+    $V_{\mathrm{plasma}}$ is the complete plasma volume, and $dV$ is the
+    differential volume element.
+
+    This is a global volume-integrated quantity over all included plasma
+    populations. It is distinct from [thermal plasma
+    energy](name:thermal_plasma_energy), which integrates thermal pressure only,
+    and from [diamagnetic energy](name:diamagnetic_energy), which is restricted
+    to pressure perpendicular to the local magnetic field. The factor $3/2$
+    defines the stored-energy convention used for the total kinetic-pressure
+    integral.
+  unit: J
+
+- name: minor_radius_of_plasma_boundary
+  description: |-
+    Half the difference between the maximum and minimum major-radius coordinates
+    of the last closed plasma-boundary contour, defining its horizontal
+    cross-sectional size.
+  documentation: |-
+    The minor radius is the effective horizontal semi-axis of the last closed
+    plasma-boundary contour and characterizes the radial extent of the plasma
+    cross-section.
+
+    The minor radius $a$ is defined by
+
+    $$
+    a = \frac{R_{\max} - R_{\min}}{2}
+    $$
+
+    where $a$ is the minor radius, $R_{\max}$ is the maximum major-radius
+    coordinate on the boundary contour, and $R_{\min}$ is the minimum
+    major-radius coordinate on that contour.
+
+    This quantity applies to the complete last closed plasma-boundary contour
+    and is determined from its global major-radius extrema. It is a nonnegative
+    geometric size parameter, not a local major-radius coordinate such as the
+    [radial coordinate at the outboard
+    midplane](name:radial_coordinate_at_outboard_midplane) and not a
+    flux-surface average.
+
+    The [elongation of the plasma boundary](name:elongation_of_plasma_boundary)
+    uses this minor radius as the horizontal reference semi-axis when forming
+    the boundary's vertical-to-horizontal shape ratio.
+  unit: m
+
+- name: normalized_plasma_internal_inductance
+  description: |-
+    Dimensionless li_3 parameter measuring poloidal magnetic-field peaking
+    through a plasma-volume integral normalized by total plasma current and a
+    reference major radius.
+  documentation: |-
+    The quantity is the normalized internal inductance of the plasma current
+    distribution. It characterizes the peaking of the poloidal magnetic field
+    generated by the total plasma current, rather than a ratio formed only from
+    a boundary field.
+
+    Under the li_3 definition,
+
+    $$
+    l_i = \frac{2}{R_0\mu_0^2 I_p^2} \int_{V_p} B_p^2\,dV
+    $$
+
+    where $l_i$ is the normalized internal inductance, $R_0$ is the reference
+    major radius, $\mu_0$ is the vacuum permeability, $I_p$ is the total signed
+    plasma current, $B_p$ is the magnitude of the poloidal magnetic field, $V_p$
+    is the plasma volume, and $dV$ is a differential volume element.
+
+    This is a global equilibrium quantity. The aggregation is a volume integral
+    of the squared poloidal-field magnitude over the entire plasma volume,
+    normalized by the square of the total plasma current; it does not select a
+    separate species, charge state, orbit class, or localized position.
+
+    It is distinct from the dimensional [plasma inductance]: the present
+    quantity includes the reference-radius and vacuum-permeability normalization
+    in the defining expression and is not a local inductance, a flux-surface
+    average, or a boundary-field ratio.
+
+    If $L_p$ denotes the [plasma inductance], the normalized quantity is related
+    by $l_i = 2L_p/(R_0\mu_0)$. Thus, under the same reference normalization, a
+    larger value indicates a more strongly concentrated poloidal-field energy
+    distribution associated with the plasma current.
+  unit: '1'
+
+- name: normalized_toroidal_flux_coordinate
+  description: |-
+    Dimensionless radial label equal to the square root of toroidal magnetic
+    flux normalized between the magnetic axis and equilibrium boundary.
+  documentation: |-
+    The normalized toroidal flux coordinate is a dimensionless label for nested
+    magnetic surfaces, increasing outward from the magnetic axis toward the
+    equilibrium boundary. It is a magnetic-surface coordinate, not a cylindrical
+    distance or a local vector component.
+
+    $$
+    \rho_{\mathrm{tor,norm}} = \left(\frac{\Phi_{\mathrm{tor}} - \Phi_{\mathrm{tor,axis}}}{\Phi_{\mathrm{tor,boundary}} - \Phi_{\mathrm{tor,axis}}}\right)^{1/2}
+    $$
+
+    where $\rho_{\mathrm{tor,norm}}$ is the normalized toroidal flux coordinate,
+    $\Phi_{\mathrm{tor}}$ is the toroidal magnetic flux enclosed by the labeled
+    surface, $\Phi_{\mathrm{tor,axis}}$ is its value at the magnetic axis, and
+    $\Phi_{\mathrm{tor,boundary}}$ is its value at the equilibrium boundary used
+    for normalization.
+
+    The coordinate applies to nested magnetic surfaces and to mapped physical
+    locations assigned to those surfaces. It is zero at the magnetic axis and
+    one at the chosen equilibrium boundary; each value is a single surface
+    label, with no summation, averaging, species aggregation, or mode
+    aggregation. Locus-specific quantities such as the [normalized toroidal flux
+    coordinate at a beam-tracing
+    point](name:normalized_toroidal_flux_coordinate_at_beam_tracing_point) and
+    the [normalized toroidal flux coordinate at a measurement
+    position](name:normalized_toroidal_flux_coordinate_at_measurement_position)
+    are evaluations of this same coordinate.
+
+    This quantity is distinct from the dimensionful [toroidal flux
+    coordinate](name:toroidal_flux_coordinate), because it is normalized to the
+    axis-to-boundary interval and transformed by a square root. It also differs
+    from the [normalized poloidal flux
+    coordinate](name:normalized_poloidal_flux_coordinate), which uses poloidal
+    rather than toroidal magnetic flux, and from the [normalized minor radius of
+    a flux surface](name:normalized_minor_radius_of_flux_surface), which is
+    based on geometric extent rather than enclosed toroidal flux.
+  unit: '1'
+
+- name: plasma_current
+  description: |-
+    Net toroidal electric current carried by the entire plasma column, obtained
+    by integrating toroidal current density over its enclosed poloidal
+    cross-section.
+  documentation: |-
+    Plasma current is the net electric current carried by the full plasma
+    population, represented as the toroidal current crossing a poloidal
+    cross-section in the right-handed cylindrical $(R,\phi,Z)$ frame, where $R$
+    is major radius, $\phi$ is toroidal angle, and $Z$ is vertical height.
+
+    $$
+    I_p = \int_{A_p} j_\phi\,\mathrm{d}A
+    $$
+
+    where $I_p$ is the total plasma current, $A_p$ is the enclosed poloidal
+    cross-sectional area, $j_\phi$ is the toroidal component of the electric
+    current density, and $\mathrm{d}A$ is the differential area element.
+
+    The quantity includes the algebraic sum of toroidal currents from all
+    charged plasma species and charge states over the complete enclosed plasma
+    cross-section. It is a global total rather than a local current density, a
+    species-resolved contribution, or a current restricted to a particular
+    physical mechanism.
+
+    It is the area integral of the toroidal projection of [current
+    density](name:current_density). The narrower [toroidal total
+    runaway-electron current](name:toroidal_total_runaway_electron_current)
+    represents only the runaway-electron contribution and is not the full plasma
+    current.
+
+    Sign convention: Positive when the net plasma current flows in the direction
+    of increasing toroidal angle $\phi$ in the right-handed cylindrical
+    $(R,\phi,Z)$ frame.
+  unit: A
+
+- name: plasma_pressure
+  description: |-
+    Plasma pressure is the isotropic kinetic pressure of the plasma, the scalar
+    part of the kinetic pressure tensor used in equilibrium force balance. The
+    unqualified quantity denotes an equilibrium scalar pressure, not a
+    first-order pressure perturbation.
+  documentation: |-
+    Plasma pressure is the isotropic kinetic pressure of the plasma, the scalar
+    part of the kinetic pressure tensor in a fluid or magnetohydrodynamic
+    description. It represents equilibrium mechanical stress from the plasma
+    populations included in the pressure model and is not a perturbation
+    amplitude.
+
+    The scalar pressure is the one-third trace of the kinetic pressure tensor:
+
+    $$
+    p = \frac{1}{3}\operatorname{tr}\mathbf{P}
+    $$
+
+    where $p$ is the plasma pressure, $\mathbf{P}$ is the kinetic pressure
+    tensor, and $\operatorname{tr}$ denotes the tensor trace. For locally
+    isotropic Maxwellian populations, an included population $s$ contributes
+    $n_s k_B T_s$, where $n_s$ is the number density of population $s$, $T_s$ is
+    its temperature, and $k_B$ is the Boltzmann constant.
+
+    The unqualified quantity applies to equilibrium scalar kinetic pressure; it
+    is additive over the included plasma populations and does not imply
+    normalization, volume integration, or selection of only a bulk-thermal,
+    fast-particle, or perturbed population subset. It excludes magnetic
+    pressure, dynamic ram pressure, anisotropic pressure components, and any
+    individual component of the pressure tensor.
+
+    [Total plasma pressure](name:total_plasma_pressure) is the specialization in
+    which all represented equilibrium kinetic pressure contributions are
+    included, while [thermal plasma pressure](name:thermal_plasma_pressure) is
+    restricted to bulk thermal electron and ion populations. [Perturbed plasma
+    pressure](name:perturbed_plasma_pressure) denotes a first-order variation
+    about an equilibrium pressure and is not part of the equilibrium quantity
+    defined here. In magnetohydrostatic equilibrium, the pressure gradient
+    satisfies $\nabla p = \mathbf{j} \times \mathbf{B}$, where $\nabla p$ is the
+    spatial gradient of plasma pressure, $\mathbf{j}$ is the electric current
+    density, and $\mathbf{B}$ is the magnetic field; on nested magnetic flux
+    surfaces this pressure may be expressed as a function of the [poloidal
+    magnetic flux](name:poloidal_magnetic_flux) $\psi$, where $\psi$ is the
+    poloidal magnetic flux.
+  unit: Pa
+
+- name: poloidal_angle_of_flux_surface
+  description: |-
+    Pointwise geometric angle locating a position around a magnetic flux-surface
+    cross-section, measured clockwise from its low-field-side midplane.
+  documentation: |-
+    Poloidal angle is the geometric angular coordinate assigned pointwise to
+    each position on the poloidal cross-section of a specified magnetic flux
+    surface. It is measured from the geometric center of that cross-section
+    rather than from magnetic-field-line distance.
+
+    At a point on the surface, the angle $\theta$ is defined by
+
+    $$
+    \theta = \operatorname{atan2}\!\left(-(Z-Z_0),\,R-R_0\right)
+    $$
+
+    where $\theta$ is the poloidal angle, $\operatorname{atan2}$ returns the
+    signed principal angle, $R$ is the major-radius coordinate, $Z$ is the
+    vertical coordinate, and $(R_0,Z_0)$ is the geometric center of the
+    flux-surface cross-section. These coordinates belong to the right-handed
+    cylindrical $(R,\phi,Z)$ frame, where $\phi$ is the toroidal angle.
+
+    The quantity applies to individual points on one magnetic flux surface and
+    has no averaging or summation over the surface. The surface is identified by
+    a constant [poloidal magnetic flux at a flux
+    surface](name:poloidal_magnetic_flux_at_flux_surface) value; the angle
+    therefore parameterizes position around that surface rather than assigning
+    one unique angle to the entire surface. It is a geometric angle, distinct
+    from a straight-field-line poloidal angle.
+
+    This quantity specializes [poloidal
+    angle](name:poloidal_angle_of_flux_surface) by making the flux-surface locus
+    explicit and provides the angular coordinate used to distinguish positions
+    around the surface's poloidal cross-section.
+
+    Sign convention: Positive when the point advances clockwise from the
+    low-field-side midplane in the right-handed cylindrical $(R,\phi,Z)$ frame.
+  unit: rad
+
+- name: poloidal_beta
+  description: |-
+    Poloidal beta is a dimensionless measure of total plasma pressure relative
+    to the magnetic-pressure scale of the plasma-current-generated poloidal
+    field.
+  documentation: |-
+    Poloidal beta is a dimensionless equilibrium measure of the total pressure
+    content of the confined plasma relative to the magnetic-pressure scale
+    generated by the plasma current. It characterizes pressure relative to the
+    poloidal magnetic field rather than the toroidal magnetic field.
+
+    The defining relation is
+
+    $$
+    \beta_p = \frac{4\int_V p\,dV}{R_0\,\mu_0\,I_p^2}
+    $$
+
+    where $\beta_p$ is poloidal beta, $p$ is the total plasma pressure, $V$ is
+    the confined plasma volume, $dV$ is a differential volume element, $R_0$ is
+    the reference major radius, $\mu_0$ is the vacuum permeability, and $I_p$ is
+    the total toroidal plasma current.
+
+    The pressure integral extends over the entire confined plasma volume and
+    aggregates the pressure of all included plasma populations, so this quantity
+    is global rather than local or species-resolved. It excludes any separate
+    normalization based on minor radius or reference toroidal magnetic-field
+    strength.
+
+    As the poloidal-field member of the [beta](name:beta) family, poloidal beta
+    uses a current- and major-radius-based poloidal magnetic-pressure scale. It
+    is distinct from [toroidal_beta](name:toroidal_beta), which normalizes
+    pressure to a toroidal magnetic-field scale, and from
+    normalized_toroidal_plasma_beta, which applies an additional engineering
+    normalization.
+  unit: '1'
+
+- name: poloidal_length_of_flux_surface
+  description: |-
+    Poloidal arc length of a closed magnetic-flux-surface contour in an
+    equilibrium poloidal cross-section, measuring the perimeter of that selected
+    surface.
+  documentation: |-
+    The poloidal length is the perimeter of the closed contour formed by one
+    selected magnetic flux surface in a poloidal cross-section. It is a
+    geometric property of the surface boundary, rather than its enclosed area,
+    volume, or toroidal circumference.
+
+    The contour length is defined in the right-handed cylindrical $(R,\phi,Z)$
+    frame, where $R$ is major radius, $\phi$ is toroidal angle, and $Z$ is
+    vertical height:
+
+    $$
+    L_{\mathrm{pol}} = \int_{\theta_a}^{\theta_b} \sqrt{\left(\frac{dR(\theta)}{d\theta}\right)^2 + \left(\frac{dZ(\theta)}{d\theta}\right)^2}\,d\theta
+    $$
+
+    Here $L_{\mathrm{pol}}$ is the poloidal length, $\theta$ is any smooth
+    parameter along the contour, $R(\theta)$ and $Z(\theta)$ are its cylindrical
+    coordinate functions, and $\theta_a$ and $\theta_b$ are parameter values at
+    the same contour point after one complete circuit. The contour is taken at
+    fixed toroidal angle $\phi$.
+
+    The quantity applies to one magnetic flux surface and includes the complete
+    closed poloidal contour, with no averaging or summation over multiple
+    surfaces. It excludes local arc segments and geometric quantities associated
+    with the enclosed region. The selected surface may be labeled by the
+    [normalized poloidal flux
+    coordinate](name:normalized_poloidal_flux_coordinate).
+
+    Unlike [elongation of a flux surface](name:elongation_of_flux_surface),
+    which describes a scale-independent cross-sectional shape ratio, the
+    poloidal length retains the absolute geometric scale of the contour.
+  unit: m
+
+- name: poloidal_magnetic_field
+  description: |-
+    Poloidal magnetic-field strength of the local total induction, formed from
+    radial and vertical components in the right-handed cylindrical (R, φ, Z)
+    frame.
+  documentation: |-
+    Local total poloidal magnetic induction is the magnitude of the total
+    magnetic-field vector projected into the poloidal plane spanned by the
+    radial and vertical directions. It represents the local poloidal field
+    strength without selecting a source contribution, perturbation state, or
+    named evaluation locus.
+
+    In the right-handed cylindrical $(R, \phi, Z)$ frame, where $R$ is major
+    radius, $\phi$ is toroidal angle, and $Z$ is vertical height, the defining
+    relation is
+
+    $$
+    B_p = \sqrt{B_R^2 + B_Z^2}
+    $$
+
+    where $B_p$ is the poloidal magnetic-field strength, $B_R$ is the radial
+    component of the local total [magnetic induction](name:magnetic_field), and
+    $B_Z$ is its vertical component. The radial direction follows increasing
+    $R$, and the vertical direction follows increasing $Z$.
+
+    The quantity is pointwise and applies wherever the local total magnetic
+    induction is defined, including confined plasma and surrounding vacuum. It
+    has no particle-species or population aggregation and is not spatially
+    averaged, integrated, or summed over a region. When associated with a
+    field-sensing location, it denotes the local measured field strength rather
+    than a value defined as a reconstructed equilibrium estimate.
+
+    Unlike the signed [radial magnetic-field
+    component](name:radial_magnetic_field) and [vertical magnetic-field
+    component](name:vertical_magnetic_field), this quantity is the nonnegative
+    magnitude of their combined poloidal projection. Together with the [toroidal
+    magnetic-field component](name:toroidal_magnetic_field), it specifies the
+    decomposition of the local total magnetic induction into poloidal and
+    toroidal parts.
+  unit: T
+
+- name: poloidal_magnetic_flux_at_flux_surface
+  description: |-
+    Signed poloidal magnetic flux assigned to a nested magnetic surface, serving
+    as the equilibrium label for its position in the plasma.
+  documentation: |-
+    Poloidal magnetic flux at a flux surface is the signed magnetic flux through
+    a horizontal disk centered on the toroidal symmetry axis and bounded by that
+    surface. In an axisymmetric equilibrium, it is constant over each nested
+    magnetic surface and provides its absolute, unnormalized flux label.
+
+    The poloidal flux at cylindrical coordinates $(R,Z)$ is defined by
+
+    $$
+    \psi(R,Z) = \int_0^R B_Z(R',Z)\,2\pi R'\,dR'
+    $$
+
+    where $\psi$ is the poloidal magnetic flux, $R$ is major radius, $Z$ is
+    vertical height, $R'$ is the integration radius, and $B_Z$ is the vertical
+    magnetic-field component, all expressed in the right-handed cylindrical
+    $(R,\phi,Z)$ frame.
+
+    This quantity applies to nested equilibrium magnetic surfaces within the
+    plasma and represents the signed physical flux itself, not a flux-surface
+    average, species sum, or normalized radial coordinate. It is distinct from
+    the magnetic flux linked by a [poloidal magnetic flux of a flux
+    loop](name:poloidal_magnetic_flux_of_flux_loop), which is defined by an
+    oriented diagnostic-loop surface rather than by an equilibrium flux surface.
+
+    The [normalized poloidal flux
+    coordinate](name:normalized_poloidal_flux_coordinate) is obtained by
+    shifting and scaling this poloidal-flux label between its magnetic-axis and
+    plasma-boundary values; the present quantity retains the absolute label.
+
+    Sign convention: Positive when $B_Z$ points in the $+Z$ direction through
+    the integration disk.
+  unit: Wb
+
+- name: poloidal_magnetic_flux_at_magnetic_axis
+  description: |-
+    Signed poloidal magnetic flux evaluated at the magnetic axis, providing the
+    inner reference value for normalized poloidal-flux coordinates.
+  documentation: |-
+    Poloidal magnetic flux at the magnetic axis is the signed value of the
+    poloidal flux function at the central extremum associated with nested
+    magnetic surfaces.
+
+    The defining evaluation is
+
+    $$
+    \psi_\mathrm{axis} = \psi(R_\mathrm{axis}, Z_\mathrm{axis})
+    $$
+
+    where $\psi_\mathrm{axis}$ is the poloidal magnetic flux at the magnetic
+    axis, $\psi$ is the poloidal magnetic-flux function, $R_\mathrm{axis}$ is
+    the major-radius coordinate of the magnetic axis, and $Z_\mathrm{axis}$ is
+    its vertical coordinate. The coordinates are expressed in the right-handed
+    cylindrical $(R, \phi, Z)$ frame, where $R$ is major radius, $\phi$ is
+    toroidal angle, and $Z$ is vertical height; $Z_\mathrm{axis}$ is the
+    [vertical coordinate of the magnetic
+    axis](name:vertical_coordinate_of_magnetic_axis).
+
+    This quantity applies specifically to the equilibrium magnetic field at the
+    magnetic axis rather than to an arbitrary point or a plasma region. It is a
+    single point evaluation with no species selection, regional aggregation, or
+    flux-surface averaging.
+
+    The value is an unnormalized flux reference and is distinct from [poloidal
+    magnetic flux at the plasma
+    boundary](name:poloidal_magnetic_flux_at_plasma_boundary), which supplies
+    the outer reference value. Together, these two endpoint values define the
+    flux interval used by the [normalized poloidal flux
+    coordinate](name:normalized_poloidal_flux_coordinate).
+
+    Sign convention: Positive when the poloidal flux is oriented so that the
+    vertical magnetic field through the defining horizontal disk points in the
+    $+Z$ direction.
+  unit: Wb
+
+- name: poloidal_magnetic_flux_at_plasma_boundary
+  description: |-
+    Signed poloidal magnetic flux evaluated on the last closed flux surface,
+    providing the outer reference for normalized poloidal-flux coordinates.
+  documentation: |-
+    The poloidal magnetic flux at the plasma boundary is the signed magnetic
+    flux through a horizontal disk whose edge lies on the last closed flux
+    surface. It is the outer boundary value of the poloidal magnetic-flux
+    function for the confined plasma.
+
+    In the right-handed cylindrical $(R,\phi,Z)$ frame, where $R$ is major
+    radius, $\phi$ is toroidal angle, and $Z$ is vertical height, the boundary
+    value for an axisymmetric equilibrium is
+
+    $$
+    \psi_b = \psi(R_b,Z_b) = \int_0^{R_b} B_Z(R',Z_b)\,2\pi R'\,dR'
+    $$
+
+    where $\psi_b$ is the poloidal magnetic flux at the plasma boundary,
+    $\psi(R_b,Z_b)$ is the poloidal magnetic-flux function at a selected
+    boundary point, $(R_b,Z_b)$ are that point's cylindrical coordinates, $B_Z$
+    is the vertical magnetic-field component, $R'$ is the integration variable
+    representing major radius, and $\pi$ is the circle constant.
+
+    This quantity applies specifically to the last closed flux surface bounding
+    the confined plasma. It is a single boundary value of the flux function,
+    with no averaging over the boundary or enclosed plasma implied; it is
+    distinct from the value at the magnetic axis given by [poloidal magnetic
+    flux at the magnetic axis](name:poloidal_magnetic_flux_at_magnetic_axis).
+
+    The boundary value supplies the outer endpoint for [normalized poloidal flux
+    coordinate](name:normalized_poloidal_flux_coordinate), while the
+    magnetic-axis value supplies the corresponding inner endpoint. The poloidal
+    flux function is constant along a given closed flux surface in the
+    axisymmetric equilibrium description.
+
+    Sign convention: Positive when $B_Z$ on the defining horizontal disk points
+    in the $+Z$ direction.
+  unit: Wb
+
+- name: poloidal_magnetic_flux_of_flux_loop
+  description: |-
+    Signed poloidal magnetic flux linked by an individual flux loop, defined by
+    the magnetic field threading an oriented surface bounded by that loop.
+  documentation: |-
+    Signed poloidal magnetic flux of a flux loop is the magnetic flux linked by
+    an individual flux loop and threading an oriented surface whose boundary is
+    that loop. It is the finite-surface flux linkage associated with the loop as
+    a whole, not a local magnetic-field component.
+
+    The loop-linked flux is defined by the surface integral of the
+    magnetic-field vector over a spanning surface of the loop:
+
+    $$
+    \Phi_{\mathrm{loop}} = \int_{S_{\mathrm{loop}}} \mathbf{B} \cdot d\mathbf{S}
+    $$
+
+    where $\Phi_{\mathrm{loop}}$ is the signed poloidal magnetic flux of the
+    flux loop, $S_{\mathrm{loop}}$ is an oriented spanning surface bounded by
+    the flux loop, $\mathbf{B}$ is the magnetic-field vector, and $d\mathbf{S}$
+    is the directed surface element on that surface.
+
+    The scope is one specified flux loop and the total flux through its complete
+    spanning surface; no averaging over multiple loops or loop segments is
+    implied. The quantity is distinct from a point-locus evaluation such as
+    [poloidal magnetic flux at a sensor attachment
+    point](name:poloidal_magnetic_flux_of_flux_loop), which evaluates a flux
+    function at a specified position rather than integrating over a finite
+    loop-bounded surface.
+
+    The defining surface is any oriented spanning surface with the same loop
+    boundary and orientation; the absence of magnetic monopoles makes the linked
+    flux independent of the particular spanning surface. This quantity is
+    related to [poloidal magnetic flux](name:poloidal_magnetic_flux) as a
+    loop-bounded flux linkage, and it must not be identified with [toroidal
+    magnetic flux](name:toroidal_magnetic_flux), which uses a different
+    flux-surface geometry; a reconstructed counterpart, [reconstructed poloidal
+    magnetic flux of flux loop], shares the same magnetic quantity but
+    represents a distinct value type when that distinction is made.
+
+    Sign convention: Positive when the magnetic-field vector has a positive net
+    projection on the oriented surface element selected as positive for the flux
+    loop.
+  unit: Wb
+
+- name: poloidal_plane_cross_sectional_area_of_flux_surface
+  description: |-
+    Geometric area enclosed by a closed magnetic-flux-surface contour in a
+    fixed-toroidal-angle poloidal plane of the right-handed cylindrical (R, φ,
+    Z) frame.
+  documentation: |-
+    Geometric area enclosed by a closed magnetic-flux-surface contour in a
+    fixed-toroidal-angle poloidal plane of the right-handed cylindrical $(R,
+    \phi, Z)$ frame is the poloidal-plane cross-sectional area of that flux
+    surface. It characterizes the planar section enclosed by one closed magnetic
+    flux surface.
+
+    The area is defined by the planar contour integral
+
+    $$
+    A_{\mathrm{pol}} = \frac{1}{2}\left|\oint_{\mathcal{C}} \left(R\,dZ - Z\,dR\right)\right|
+    $$
+
+    where $A_{\mathrm{pol}}$ is the poloidal-plane cross-sectional area,
+    $\mathcal{C}$ is the closed poloidal contour of the flux surface at fixed
+    toroidal angle $\phi$, $R$ is major radius measured from the toroidal
+    symmetry axis, $Z$ is vertical height, $\phi$ is the toroidal angle in the
+    right-handed cylindrical $(R, \phi, Z)$ frame, and $dR$ and $dZ$ are
+    differentials along the contour. The absolute value makes the area
+    independent of the contour traversal orientation.
+
+    This quantity applies to the nested family of closed magnetic flux surfaces
+    from the magnetic axis to the plasma boundary; its limiting value at the
+    magnetic axis is zero. It is an individual-surface geometric measure at
+    fixed toroidal angle, not an average over toroidal angle, not an aggregate
+    over multiple flux surfaces, and not a measure of open field-line regions.
+
+    It is distinct from the [surface area of flux
+    surface](name:surface_area_of_flux_surface), which is the area of the
+    toroidal surface generated by the flux-surface contour. At the last closed
+    flux surface, the corresponding boundary quantity is the [poloidal-plane
+    cross-sectional area of plasma
+    boundary](name:poloidal_plane_cross_sectional_area_of_plasma_boundary); it
+    is also distinct from the [volume of flux
+    surface](name:volume_of_flux_surface), which measures the toroidal volume
+    enclosed by the same nested surface.
+  unit: m^2
+
+- name: poloidal_plane_cross_sectional_area_of_plasma_boundary
+  description: |-
+    Area enclosed by the last closed magnetic flux surface in a poloidal plane,
+    defining the equilibrium plasma cross-sectional size at the plasma boundary.
+  documentation: |-
+    This quantity is the geometric area enclosed by the last closed magnetic
+    flux surface (LCFS), which forms the plasma boundary, in a poloidal
+    cross-section.
+
+    In the right-handed cylindrical $(R,\phi,Z)$ frame, the enclosed area is
+    defined by
+
+    $$
+    A_{\rm LCFS} = \iint_{\mathcal{S}_{\rm LCFS}} dR\,dZ
+    $$
+
+    where $A_{\rm LCFS}$ is the LCFS cross-sectional area, $\mathcal{S}_{\rm
+    LCFS}$ is the region enclosed by the LCFS contour at fixed toroidal angle
+    $\phi$, $R$ is major radius, $\phi$ is toroidal angle, $Z$ is vertical
+    height, and $dR\,dZ$ is the poloidal-plane area element.
+
+    This is a global equilibrium quantity for the complete plasma-boundary
+    contour. It is not a local surface element, a flux-surface average, or the
+    area of a toroidal surface formed by revolving the contour.
+
+    It is the plasma-boundary specialization of [poloidal plane cross-sectional
+    area of a flux
+    surface](name:poloidal_plane_cross_sectional_area_of_flux_surface), whose
+    corresponding area is defined for an arbitrary closed magnetic flux surface;
+    the LCFS is the outermost such surface enclosing the plasma.
+  unit: m^2
+
+- name: radial_coordinate_at_inboard_midplane
+  description: |-
+    Major-radius coordinate of a magnetic flux surface at its inboard midplane
+    intersection, locating the high-field-side point relative to the toroidal
+    symmetry axis.
+  documentation: |-
+    This quantity is the major-radius coordinate of the point where a magnetic
+    flux surface intersects the inboard midplane, identifying the
+    high-field-side location of that surface relative to the toroidal symmetry
+    axis. It is a locus-specific form of the [radial
+    coordinate](name:radial_coordinate).
+
+    For a magnetic flux surface $\mathcal{S}$, the inboard-midplane radial
+    coordinate is defined by
+
+    $$
+    R_{\mathrm{in}}(\mathcal{S}) = R\!\left(\mathbf{x}_{\mathrm{in}}(\mathcal{S})\right)
+    $$
+
+    where $R_{\mathrm{in}}(\mathcal{S})$ is the quantity defined here,
+    $R(\mathbf{x})$ is the major-radius coordinate of spatial position
+    $\mathbf{x}$, $\mathcal{S}$ is the specified magnetic flux surface, and
+    $\mathbf{x}_{\mathrm{in}}(\mathcal{S})$ is its inboard midplane
+    intersection. The coordinates are expressed in the right-handed cylindrical
+    $(R,\phi,Z)$ frame, where $R$ is major radius, $\phi$ is toroidal angle, and
+    $Z$ is vertical height.
+
+    The scope is one coordinate value for each specified magnetic flux surface
+    at its inboard, high-field-side midplane intersection. It is not a
+    flux-surface average, a poloidal or toroidal average, or the corresponding
+    outboard-midplane coordinate; the latter is represented by [radial
+    coordinate at outboard
+    midplane](name:radial_coordinate_at_outboard_midplane). Unlike [radial
+    magnetic field](name:radial_magnetic_field), this quantity describes the
+    location of a surface and not a magnetic-field component.
+
+    This quantity specializes [radial coordinate](name:radial_coordinate) by
+    fixing the evaluation locus to the inboard midplane. Comparing it with the
+    outboard-midplane value characterizes the horizontal extent and radial
+    placement of the same magnetic flux surface.
+  unit: m
+
+- name: radial_coordinate_at_outboard_midplane
+  description: |-
+    Major-radius coordinate of the low-field-side intersection between a
+    magnetic flux surface and the equatorial midplane.
+  documentation: |-
+    This quantity is the major-radius coordinate $R$ of the point where a
+    specified magnetic flux surface intersects the equatorial midplane on its
+    outboard, low-field side. It gives the outboard radial extent of that
+    surface rather than a distance across the plasma or an average over the
+    surface.
+
+    In the right-handed cylindrical $(R,\phi,Z)$ frame, with unit-vector basis
+    $(\hat{R},\hat{\phi},\hat{Z})$, the major-radius coordinate is related to
+    the right-handed Cartesian basis $(\hat{x},\hat{y},\hat{z})$ by:
+
+    $$
+    R = \sqrt{x^2+y^2}
+    $$
+
+    Here $R$ is the perpendicular distance from the toroidal symmetry axis,
+    $\phi$ is the toroidal angle, $Z$ is the vertical coordinate, and $x$ and
+    $y$ are the horizontal Cartesian coordinates measured from that axis.
+
+    The quantity applies to one specified magnetic flux surface, identified by
+    its poloidal magnetic-flux label $\psi$, where $\psi$ denotes the flux
+    function labeling nested magnetic surfaces. It is evaluated only at the
+    outboard intersection with the equatorial midplane; it excludes the inboard
+    intersection and any flux-surface average.
+
+    It is a locus-specific specialization of the [radial
+    coordinate](name:radial_coordinate), obtained by evaluating $R$ at the
+    outboard midplane. The corresponding [inboard-midplane radial
+    coordinate](name:radial_coordinate_at_inboard_midplane) describes the
+    distinct high-field-side intersection of the same type of magnetic surface.
+  unit: m
+
+- name: radial_coordinate_of_conductor_cross_section
+  description: |-
+    Major-radius coordinate of the designated reference point associated with a
+    conductor cross-section, measured from the toroidal symmetry axis.
+  documentation: |-
+    This quantity is the major-radius coordinate $R$ assigned to the designated
+    reference point of a conductor cross-section. It locates the cross-section
+    in the right-handed cylindrical $(R, \phi, Z)$ frame without describing the
+    cross-section's shape or extent.
+
+    The coordinate is defined from the horizontal Cartesian coordinates of the
+    reference point:
+
+    $$
+    R = \sqrt{x^2+y^2}
+    $$
+
+    where $R$ is the perpendicular distance from the toroidal symmetry axis, and
+    $x$ and $y$ are the horizontal coordinates in the right-handed Cartesian
+    $(\hat{x},\hat{y},\hat{z})$ basis, with $\hat{z}$ aligned with the vertical
+    direction.
+
+    The quantity applies to one conductor cross-section and represents one
+    designated reference location for that cross-section. It is not summed over
+    conductors, averaged over the cross-sectional area, or resolved pointwise
+    along the cross-sectional outline.
+
+    Unlike the [radial outline of a coil conductor
+    element](name:radial_outline_of_coil_conductor_element), which assigns
+    radial coordinates to outline points, this quantity identifies the
+    cross-section's reference geometry. It does not specify the reference
+    point's vertical coordinate, toroidal angle, dimensions, or outline shape.
+
+    This is a conductor-cross-section specialization of the parent [radial
+    coordinate](name:radial_coordinate); the parent definition supplies the
+    general major-radius meaning, while this name fixes the locus to a conductor
+    cross-section.
+  unit: m
+
+- name: radial_coordinate_of_geometric_axis
+  description: |-
+    Major-radius coordinate locating the midpoint of the plasma boundary's
+    radial extrema, thereby specifying the horizontal position of its geometric
+    axis.
+  documentation: |-
+    The radial coordinate of the geometric axis is the major-radius position of
+    the plasma cross-section's geometric center, defined from the extrema of the
+    plasma boundary in the right-handed cylindrical $(R, \phi, Z)$ frame.
+
+    The geometric-axis coordinate is defined by
+
+    $$
+    R_{\mathrm{geo}} = \frac{R_{\max} + R_{\min}}{2}
+    $$
+
+    where $R_{\mathrm{geo}}$ is the major-radius coordinate of the geometric
+    axis, and $R_{\max}$ and $R_{\min}$ are the maximum and minimum major-radius
+    coordinates of the plasma boundary, respectively.
+
+    This quantity applies specifically to the geometric axis of the plasma
+    cross-section and uses the midpoint aggregation of the boundary's radial
+    extrema. It is distinct from the [radial_coordinate](name:radial_coordinate)
+    of an arbitrary point or reference position and from the radial coordinate
+    of the magnetic axis; its vertical counterpart is the [vertical coordinate
+    of the geometric axis](name:vertical_coordinate_of_geometric_axis).
+  unit: m
+
+- name: radial_coordinate_of_magnetic_axis
+  description: |-
+    Major-radius coordinate locating the magnetic-axis O-point in the
+    right-handed cylindrical (R, φ, Z) frame around which nested closed flux
+    surfaces are organized.
+  documentation: |-
+    The radial coordinate of the magnetic axis is the major-radius location of
+    the O-point, the local extremum of the poloidal magnetic flux around which
+    nested closed magnetic flux surfaces are organized.
+
+    In terms of a right-handed Cartesian basis $(\hat{x},\hat{y},\hat{z})$ with
+    $\hat{z}$ vertical, its major-radius coordinate is defined by
+
+    $$
+    R = \sqrt{x^2+y^2}
+    $$
+
+    where $R$ is the major-radius coordinate in the right-handed cylindrical
+    $(R, \phi, Z)$ frame, and $x$ and $y$ are the Cartesian coordinates
+    perpendicular to the toroidal symmetry axis.
+
+    This is a point value evaluated at the magnetic axis in the plasma poloidal
+    cross-section; it is not a flux-surface average, region integral, or
+    coordinate of an arbitrary magnetic or physical contour. It is distinct from
+    [radial_coordinate_at_inboard_midplane](name:radial_coordinate_at_inboard_midplane),
+    which locates a flux-surface intersection with the inboard midplane.
+
+    This quantity is the magnetic-axis specialization of
+    [radial_coordinate](name:radial_coordinate): the parent applies to general
+    points or reference positions, whereas this quantity fixes the locus to the
+    magnetic-axis O-point.
+  unit: m
+
+- name: radial_coordinate_of_measurement_position
+  description: |-
+    Major-radius coordinate locating a measurement position by perpendicular
+    distance from the toroidal symmetry axis in the right-handed cylindrical (R,
+    φ, Z) frame.
+  documentation: |-
+    The radial coordinate of a measurement position is the major-radius location
+    of that position, defined by its perpendicular separation from the toroidal
+    symmetry axis. It identifies a single generic measurement location,
+    independent of the instrument or plasma quantity associated with that
+    location.
+
+    The defining geometric relation is
+
+    $$
+    R_{\mathrm{meas}} = \left|\mathbf{r}_{\perp,\mathrm{meas}}\right|
+    $$
+
+    where $R_{\mathrm{meas}}$ is the major-radius coordinate of the measurement
+    position, $\mathbf{r}_{\perp,\mathrm{meas}}$ is its perpendicular
+    displacement from the toroidal symmetry axis, and the vertical bars denote
+    the magnitude of that displacement. The coordinate is expressed in the
+    right-handed cylindrical $(R,\phi,Z)$ frame, where $R$ is major radius,
+    $\phi$ is toroidal angle, and $Z$ is vertical height.
+
+    The scope is one measurement position; no averaging, summation, or
+    integration over positions is implied. This quantity applies to a generic
+    measurement position and does not identify a particular diagnostic object,
+    line of sight, toroidal angle, or vertical coordinate. Unlike
+    [radial_coordinate_of_line_of_sight](name:radial_coordinate_of_line_of_sight),
+    it is not restricted to a line-of-sight reference point.
+
+    This quantity is the measurement-position specialization of the broader
+    [radial_coordinate](name:radial_coordinate); the same perpendicular-distance
+    definition is used, with the locus narrowed to a measurement position.
+  unit: m
+
+- name: radial_coordinate_of_strike_point
+  description: |-
+    Major-radius location of an individual magnetic strike point where a
+    separatrix leg intersects a divertor target, expressed in the right-handed
+    cylindrical (R, φ, Z) frame.
+  documentation: |-
+    The radial coordinate of a strike point is its major-radius location
+    relative to the toroidal symmetry axis, at the intersection of a separatrix
+    leg with a divertor target.
+
+    The major-radius coordinate is defined from the strike point's horizontal
+    Cartesian position by
+
+    $$
+    R_{\mathrm{sp}}=\sqrt{x_{\mathrm{sp}}^2+y_{\mathrm{sp}}^2}
+    $$
+
+    where $R_{\mathrm{sp}}$ is the strike-point major-radius coordinate, and
+    $x_{\mathrm{sp}}$ and $y_{\mathrm{sp}}$ are its horizontal Cartesian
+    coordinates in the right-handed Cartesian $(\hat{x},\hat{y},\hat{z})$ basis,
+    with $\hat{z}$ vertical and coincident with $\hat{Z}$.
+
+    This quantity applies to one specified magnetic strike point at a time, with
+    no summation, averaging, or other aggregation. The same definition covers
+    inner and outer divertor strike points without combining them or selecting
+    one branch by the name alone.
+
+    It excludes the vertical location of the strike point, which is given by the
+    [vertical coordinate of the strike
+    point](name:vertical_coordinate_of_strike_point). As a component of
+    [radial_coordinate](name:radial_coordinate), it supplies the major-radius
+    coordinate needed with the vertical coordinate to locate the strike point in
+    the poloidal $(R,Z)$ plane. The related [radial coordinate of the
+    X-point](name:radial_coordinate_of_x_point) instead identifies the
+    separatrix's magnetic null rather than its divertor intersection.
+  unit: m
+
+- name: radial_coordinate_of_x_point
+  description: |-
+    Major-radius coordinate locating the main X-point, the poloidal
+    magnetic-field null that defines the separatrix in an equilibrium.
+  documentation: |-
+    The major-radius coordinate of the main X-point is the perpendicular
+    distance from the toroidal symmetry axis to the poloidal magnetic-field null
+    that defines the separatrix. It identifies the radial location of this
+    specific equilibrium feature in the right-handed cylindrical $(R, \phi, Z)$
+    frame.
+
+    The coordinate is defined geometrically by
+
+    $$
+    R_{\mathrm{X}} = \sqrt{x_{\mathrm{X}}^2 + y_{\mathrm{X}}^2}
+    $$
+
+    where $R_{\mathrm{X}}$ is the major-radius coordinate of the main X-point,
+    and $x_{\mathrm{X}}$ and $y_{\mathrm{X}}$ are its horizontal Cartesian
+    coordinates in the right-handed $(\hat{x}, \hat{y}, \hat{z})$ basis, with
+    $\hat{z}$ aligned with the vertical direction $\hat{Z}$. The subscript
+    $\mathrm{X}$ identifies the main X-point.
+
+    This quantity applies specifically to the main X-point and represents one
+    coordinate of that point rather than its complete position. It is a single
+    geometric value, not an average, integral, or sum over a flux surface or
+    region; it excludes coordinates of secondary X-points and other equilibrium
+    features.
+
+    It is a locus-specific specialization of the [radial
+    coordinate](name:radial_coordinate), which assigns the same major-radius
+    concept to arbitrary geometric positions. The X-point condition
+    distinguishes it from the [radial coordinate of the magnetic
+    axis](name:radial_coordinate_of_magnetic_axis), which locates the
+    poloidal-field O-point rather than the separatrix-defining null.
+  unit: m
+
+- name: radial_derivative_of_poloidal_magnetic_flux
+  description: |-
+    Rate of change of signed poloidal magnetic flux with the dimensionful
+    toroidal-flux radius labeling nested equilibrium flux surfaces.
+  documentation: |-
+    The radial derivative of poloidal magnetic flux is the rate at which the
+    signed poloidal magnetic flux changes across nested equilibrium magnetic
+    flux surfaces. It is a metric coefficient relating the poloidal-flux and
+    toroidal-flux coordinate descriptions.
+
+    The defining relation is
+
+    $$
+    \frac{d\psi}{d\rho_{\mathrm{tor}}}
+    $$
+
+    where $\psi$ is the [poloidal magnetic flux](name:poloidal_magnetic_flux),
+    and $\rho_{\mathrm{tor}}$ is the dimensionful toroidal-flux radius that
+    labels the nested surfaces.
+
+    This quantity is evaluated as a function of the toroidal-flux radius, with
+    one derivative value associated with each nested equilibrium surface. It is
+    not a surface integral or average, and it is distinct from a derivative with
+    respect to the cylindrical major radius, minor radius, or a normalized flux
+    coordinate.
+
+    Relative to [poloidal magnetic flux](name:poloidal_magnetic_flux), this
+    quantity describes how the flux label changes in the outward
+    toroidal-flux-radial direction. It has the same independent coordinate as
+    the [derivative with respect to toroidal flux coordinate of area of flux
+    surface], but differentiates poloidal magnetic flux rather than enclosed
+    surface area.
+
+    Sign convention: Positive when the poloidal magnetic flux increases as
+    $\rho_{\mathrm{tor}}$ increases outward from the magnetic axis toward the
+    plasma boundary.
+  unit: Wb.m^-1
+
+- name: reference_major_radius
+  description: |-
+    Nonnegative perpendicular distance from the toroidal symmetry axis to a
+    designated reference location, serving as the major-radius coordinate where
+    the vacuum toroidal magnetic field is specified in the right-handed
+    cylindrical (R, φ, Z) frame.
+  documentation: |-
+    Major radius is the nonnegative perpendicular distance from the toroidal
+    symmetry axis to a geometric point or specified location. For this reference
+    quantity, the designated location is the radius at which the vacuum toroidal
+    magnetic field is specified, making it the reference specialization of
+    major_radius.
+
+    At the designated reference location, the major radius is defined
+    geometrically by:
+
+    $$
+    R_0 = \sqrt{X_0^2 + Y_0^2}
+    $$
+
+    where $R_0$ is the reference major radius, and $X_0$ and $Y_0$ are the
+    Cartesian coordinates of the reference location perpendicular to the
+    toroidal symmetry axis. The Cartesian basis is right-handed
+    $(\hat{x},\hat{y},\hat{z})$ with $\hat{z}=\hat{Z}$; the corresponding
+    cylindrical frame is right-handed $(R,\phi,Z)$ with
+    $\hat{R}\times\hat{\phi}=\hat{Z}$.
+
+    This quantity is a single designated geometric reference value associated
+    with the vacuum toroidal magnetic field, represented by [toroidal vacuum
+    magnetic field](name:toroidal_vacuum_magnetic_field). It is not a pointwise
+    plasma-radius field, a flux-surface average, or a region integral, and it
+    has no species or plasma-population scope.
+
+    Unlike [flux-surface-averaged major
+    radius](name:flux_surface_averaged_major_radius), which averages the radius
+    over a nested magnetic flux surface, this quantity identifies one reference
+    radius. It is also distinct from a [radial
+    coordinate](name:radial_coordinate) assigned to an arbitrary geometric point
+    or measurement location.
+
+    The reference radius and the vacuum toroidal magnetic field form the
+    reference pair $R_0$ and $B_0$, where $B_0$ is the vacuum toroidal magnetic
+    field specified at the reference radius. Their product $R_0B_0$ supplies the
+    geometric-field scale used in normalized toroidal-flux and current-density
+    definitions.
+  unit: m
+
+- name: surface_area_of_flux_surface
+  description: |-
+    Geometric area of a closed toroidal magnetic flux surface formed by
+    revolving its poloidal contour through one complete toroidal revolution in
+    the right-handed cylindrical (R, φ, Z) frame.
+  documentation: |-
+    This quantity is the geometric area of a complete closed toroidal magnetic
+    flux surface. It includes the full surface swept out by the corresponding
+    poloidal contour during one toroidal revolution.
+
+    For an axisymmetric surface, the area is defined by
+
+    $$
+    A_{\mathrm{surf}}(\xi) = \oint_{C(\xi)} 2\pi R\,dl_p
+    $$
+
+    where $A_{\mathrm{surf}}(\xi)$ is the toroidal-surface area, $\xi$ is the
+    magnetic flux-surface label, $C(\xi)$ is the closed poloidal contour for
+    that surface, $R$ is the major radius, $dl_p$ is differential arc length
+    along the contour, and $\pi$ is the circular constant. The contour is
+    expressed in the right-handed cylindrical $(R,\phi,Z)$ frame, where $R$ is
+    major radius, $\phi$ is toroidal angle, and $Z$ is vertical height.
+
+    The scope is one selected nested magnetic flux surface, with local surface
+    elements aggregated over the complete toroidal revolution. This is distinct
+    from the area enclosed by a poloidal contour, represented by the
+    [poloidal-plane cross-sectional area of a flux
+    surface](name:poloidal_plane_cross_sectional_area_of_flux_surface), and from
+    the enclosed [volume of a flux surface](name:volume_of_flux_surface).
+
+    As a specialization of the broader [area measure associated with a flux
+    surface], this quantity selects the total toroidal-surface area rather than
+    a poloidal cross-sectional area or an area derivative with respect to a flux
+    coordinate.
+  unit: m^2
+
+- name: toroidal_angle_of_measurement_position
+  description: |-
+    Toroidal angular coordinate locating a measurement position around the
+    machine symmetry axis in the right-handed cylindrical (R, φ, Z) frame.
+  documentation: |-
+    The toroidal angle is the azimuthal coordinate of a geometric point
+    designated as a measurement position, locating that point around the machine
+    symmetry axis in the right-handed cylindrical $(R, \phi, Z)$ frame.
+
+    The angle may be defined from the transverse Cartesian coordinates by:
+
+    $$
+    \phi = \operatorname{atan2}(y,x)
+    $$
+
+    where $\phi$ is the toroidal angle, $x$ and $y$ are the transverse Cartesian
+    coordinates in the right-handed $(\hat{x}, \hat{y}, \hat{z})$ basis, and
+    $\operatorname{atan2}$ returns the oriented azimuth relative to the defined
+    zero-angle direction. In the cylindrical frame, $R$ is major radius and $Z$
+    is vertical height.
+
+    This quantity applies to one geometric measurement position and has no
+    plasma-population, field, or region weighting. It is a point coordinate
+    rather than a line-of-sight integral, spatial average, or toroidal
+    displacement from a reference position.
+
+    The absolute angular coordinate differs from the signed displacement
+    represented by [toroidal offset at measurement position]. The same
+    toroidal-coordinate concept applied to another geometric locus is
+    represented by [toroidal coordinate of
+    aperture](name:toroidal_coordinate_of_aperture).
+
+    Sign convention: Positive when measured counter-clockwise from the defined
+    zero-toroidal-angle half-plane when viewed from above along $+\hat{Z}$.
+  unit: rad
+
+- name: toroidal_flux_coordinate
+  description: |-
+    Non-negative, radius-like label of a nested magnetic flux surface, derived
+    from enclosed toroidal magnetic flux using a positive reference vacuum
+    toroidal field.
+  documentation: |-
+    The toroidal flux coordinate is a non-negative, radius-like label assigned
+    to each nested magnetic flux surface. It orders surfaces outward from the
+    magnetic axis and approximates an effective minor radius without being a
+    geometric distance.
+
+    The coordinate is defined from the enclosed toroidal magnetic flux:
+
+    $$
+    \rho_{\rm tor} = \sqrt{\frac{\Phi_{\rm tor}}{\pi B_0}}
+    $$
+
+    where $\rho_{\rm tor}$ is the toroidal flux coordinate, $\Phi_{\rm tor}$ is
+    the toroidal magnetic flux enclosed by the surface relative to the magnetic
+    axis, $B_0$ is the positive reference vacuum toroidal magnetic field, and
+    $\pi$ is the circle constant.
+
+    The quantity applies to arbitrary nested magnetic flux surfaces, including
+    the magnetic axis, internal characteristic surfaces, and the plasma
+    boundary. Each value labels one surface; it has no species or population
+    scope and involves no population summation, charge-state aggregation, or
+    averaging convention. It is a flux-derived coordinate rather than a direct
+    geometric minor-radius measurement.
+
+    At the magnetic axis, the enclosed relative toroidal flux vanishes and the
+    coordinate is zero. Evaluations at particular loci, such as the [toroidal
+    flux coordinate at the plasma
+    boundary](name:toroidal_flux_coordinate_at_plasma_boundary) and the
+    [toroidal flux coordinate of the magnetic
+    axis](name:toroidal_flux_coordinate_of_magnetic_axis), are instances of this
+    same surface-labeling quantity. A [normalized toroidal flux coordinate at a
+    measurement
+    position](name:normalized_toroidal_flux_coordinate_at_measurement_position)
+    is a dimensionless rescaling of a toroidal-flux label and is distinct from
+    this dimensional coordinate.
+  unit: m
+
+- name: toroidal_magnetic_field
+  description: |-
+    Signed toroidal component of the local total magnetic induction, resolved
+    along increasing toroidal angle in the right-handed cylindrical (R, φ, Z)
+    frame.
+  documentation: |-
+    The toroidal magnetic field $B_\\phi$ is the signed component of the local
+    total [magnetic induction](name:magnetic_field) resolved along the toroidal
+    direction. It represents directional field strength at a point before any
+    source selection, perturbation selection, spatial aggregation, magnitude
+    reduction, or locus restriction.
+
+    In the right-handed cylindrical $(R, \\phi, Z)$ frame, the component is
+    defined by
+
+    $$
+    B_\\phi = \\mathbf{B} \\cdot \\hat{\\boldsymbol{\\phi}}
+    $$
+
+    where $B_\\phi$ is the toroidal magnetic-field component, $\\mathbf{B}$ is
+    the local total magnetic-induction vector, and $\\hat{\\boldsymbol{\\phi}}$
+    is the toroidal unit vector. Here, $R$ is major radius measured from the
+    symmetry axis, $\\phi$ is toroidal angle, and $Z$ is vertical height; the
+    basis is right-handed with $\\hat{\\mathbf{R}} \\times
+    \\hat{\\boldsymbol{\\phi}} = \\hat{\\mathbf{Z}}$.
+
+    The quantity applies pointwise wherever the local total magnetic induction
+    is defined, including plasma and surrounding vacuum regions. It includes all
+    represented magnetic-field contributions and is neither a source-specific
+    field nor a perturbation-only field; it is also distinct from the unsigned
+    [poloidal magnetic-field strength](name:poloidal_magnetic_field).
+
+    Together with the [radial magnetic-field
+    component](name:radial_magnetic_field) and vertical component, $B_\\phi$
+    determines the local magnetic-induction vector in the cylindrical frame. The
+    toroidal component is one directional projection of the parent [magnetic
+    field](name:magnetic_field), not its full vector or magnitude.
+
+    Sign convention: Positive when $B_\\phi$ points in the direction of
+    increasing toroidal angle $\\phi`.
+  unit: T
+
+- name: toroidal_magnetic_field_at_magnetic_axis
+  description: |-
+    Toroidal magnetic field at the magnetic axis is the signed toroidal
+    component of the total equilibrium magnetic field at the magnetic axis in
+    the right-handed cylindrical (R, φ, Z) frame. It includes externally applied
+    vacuum-field and plasma-current-generated contributions.
+  documentation: |-
+    Toroidal magnetic field at the magnetic axis is the signed toroidal
+    component of the total equilibrium magnetic field evaluated at the magnetic
+    axis in the right-handed cylindrical $(R, \phi, Z)$ frame, where $R$ is
+    major radius, $\phi$ is toroidal angle, and $Z$ is vertical height. The
+    magnetic axis is the locus of the equilibrium flux surface with the
+    magnetic-axis value of poloidal magnetic flux. The total field includes
+    externally produced vacuum-field and plasma-current-generated contributions.
+
+    In an axisymmetric equilibrium, using the poloidal-current function
+    $F(\psi)=R B_\phi$, the defining relation is
+
+    $$
+    B_{\phi,\mathrm{axis}} = \mathbf{B}_{\mathrm{total}}(R_{\mathrm{axis}}, Z_{\mathrm{axis}}) \cdot \hat{\phi} = B_\phi(R_{\mathrm{axis}}, Z_{\mathrm{axis}}) = \frac{F(\psi_0)}{R_{\mathrm{axis}}}
+    $$
+
+    where $B_{\phi,\mathrm{axis}}$ is this quantity,
+    $\mathbf{B}_{\mathrm{total}}$ is the total equilibrium magnetic field,
+    $B_\phi$ is the [toroidal magnetic field](name:toroidal_magnetic_field),
+    $\hat{\phi}$ is the unit vector in the direction of increasing toroidal
+    angle $\phi$, $R_{\mathrm{axis}}$ and $Z_{\mathrm{axis}}$ are the
+    major-radius and vertical coordinates of the magnetic axis, $F(\psi)$ is the
+    [poloidal-current function](name:poloidal_current_function), and $\psi_0$ is
+    the [poloidal magnetic flux at the magnetic
+    axis](name:poloidal_magnetic_flux_at_magnetic_axis).
+
+    The scope is the local magnetic-axis value for the equilibrium state; it is
+    not an average over a flux surface, poloidal angle, toroidal angle, or
+    plasma volume. Because it is a component, not a magnitude, it retains the
+    sign of the toroidal projection and does not represent the absolute
+    magnetic-field strength.
+
+    This quantity is the on-axis specialization of [toroidal magnetic
+    field](name:toroidal_magnetic_field). It is distinct from [toroidal vacuum
+    magnetic field](name:toroidal_vacuum_magnetic_field), which excludes
+    plasma-current-generated contributions, and from [toroidal reference
+    magnetic field](name:toroidal_reference_magnetic_field), which denotes a
+    prescribed reference field rather than the local total field at the magnetic
+    axis even when numerical values coincide.
+
+    Sign convention: Positive when the total magnetic field at the magnetic axis
+    has a toroidal component in the direction of increasing toroidal angle
+    $\phi$ in the right-handed cylindrical $(R, \phi, Z)$ frame.
+  unit: T
+
+- name: toroidal_magnetic_flux
+  description: |-
+    Toroidal magnetic flux is the signed surface integral of the magnetic field
+    over the poloidal cross-section enclosed by a nested magnetic flux surface.
+  documentation: |-
+    Toroidal magnetic flux is the signed surface integral of the magnetic field
+    over the poloidal cross-section enclosed by a nested magnetic flux surface.
+    It is the toroidal member of the [magnetic flux](name:magnetic_flux) family
+    and is defined as a function of nested magnetic surfaces in axisymmetric
+    equilibrium.
+
+    The defining surface integral is:
+
+    $$
+    \Phi_{\mathrm{tor}}(\mathcal{S}) = \int_{S_{\mathrm{pol}}(\mathcal{S})} \mathbf{B} \cdot d\mathbf{A}
+    $$
+
+    where $\Phi_{\mathrm{tor}}(\mathcal{S})$ is the toroidal magnetic flux
+    associated with the nested magnetic flux surface $\mathcal{S}$,
+    $S_{\mathrm{pol}}(\mathcal{S})$ is the poloidal cross-section bounded by
+    that surface at fixed toroidal angle $\phi$ in the right-handed cylindrical
+    $(R, \phi, Z)$ frame, $R$ is major radius, $\phi$ is toroidal angle, $Z$ is
+    vertical height, $\mathbf{B}$ is the magnetic-field vector, and
+    $d\mathbf{A}$ is the oriented area element whose positive normal is
+    $+\hat{\phi}$.
+
+    The scope is the total toroidal projection of magnetic flux through the
+    entire enclosed poloidal cross-section for each nested magnetic surface. It
+    is not a local magnetic-field value, not a flux-surface average, and not a
+    source-separated contribution; [toroidal magnetic flux at the plasma
+    boundary](name:toroidal_magnetic_flux_at_plasma_boundary) is the
+    boundary-specific value of the same quantity.
+
+    At the magnetic axis the enclosed poloidal cross-section shrinks to zero
+    area, so $\Phi_{\mathrm{tor}}=0$ there. Together with [poloidal magnetic
+    flux](name:poloidal_magnetic_flux) $\psi$, it provides a radial flux-surface
+    label; the [safety factor](name:safety_factor) $q$ is related to the two
+    fluxes by the differential relation $q = d\Phi_{\mathrm{tor}}/d\psi$ for
+    consistent flux definitions.
+
+    Sign convention: Positive when the net magnetic flux through the poloidal
+    cross-section is directed along increasing toroidal angle $\phi$ in the
+    right-handed cylindrical $(R, \phi, Z)$ frame.
+  unit: Wb
+
+- name: toroidal_magnetic_flux_due_to_diamagnetic_drift
+  description: |-
+    Measured toroidal projection of the magnetic-flux contribution produced by
+    plasma diamagnetism relative to a reference field without the
+    pressure-gradient response.
+  documentation: |-
+    The toroidal diamagnetic flux is the global magnetic-flux contribution
+    associated with the plasma pressure-gradient-driven diamagnetic response,
+    resolved along the toroidal direction.
+
+    Its defining projection from the [magnetic-flux contribution due to
+    diamagnetic drift](name:magnetic_flux_due_to_diamagnetic_drift) is
+
+    $$
+    \Phi_{\mathrm{dia},\phi} = \boldsymbol{\Phi}_{\mathrm{dia}} \cdot \hat{\boldsymbol{\phi}}
+    $$
+
+    where $\Phi_{\mathrm{dia},\phi}$ is the toroidal diamagnetic-flux component,
+    $\boldsymbol{\Phi}_{\mathrm{dia}}$ is the vector diamagnetic magnetic-flux
+    contribution relative to the corresponding reference field without the
+    diamagnetic response, and $\hat{\boldsymbol{\phi}}$ is the toroidal unit
+    vector in the right-handed cylindrical $(R, \phi, Z)$ frame.
+
+    This quantity represents one global toroidal projection of the complete
+    diamagnetic-flux contribution, rather than a local current density, a
+    flux-surface-resolved quantity, or the total toroidal magnetic flux. It
+    denotes the measured diamagnetic-flux value and is distinct from a value
+    calculated from a reconstructed equilibrium.
+
+    The parent vector quantity retains all spatial components; this quantity is
+    obtained by resolving that vector along $\hat{\boldsymbol{\phi}}$.
+
+    Sign convention: Positive when the diamagnetic-flux vector has a component
+    in the direction of increasing toroidal angle $\phi$.
+  unit: Wb
+
+- name: toroidal_vacuum_magnetic_field
+  description: |-
+    Signed toroidal component of the current-free vacuum magnetic field at a
+    reference major radius, defining the nominal externally generated field
+    strength.
+  documentation: |-
+    The vacuum toroidal magnetic field $B_0$ is the signed toroidal component of
+    the equilibrium magnetic-field vector in the current-free region surrounding
+    the plasma, evaluated at a reference major radius.
+
+    The reference value is defined by
+
+    $$
+    B_0 = B_{\\phi,\mathrm{vac}}(R_0)
+    $$
+
+    where $B_0$ is the vacuum toroidal field at the reference major radius,
+    $B_{\phi,\mathrm{vac}}$ is the toroidal component of the vacuum magnetic
+    field, and $R_0$ is the major-radius coordinate of the reference location in
+    the right-handed cylindrical $(R,\phi,Z)$ frame.
+
+    This quantity applies to the equilibrium vacuum field generated by external
+    sources, with contributions from plasma currents omitted. It is a single
+    signed reference value rather than a spatial average, surface integral,
+    local total field, or Fourier perturbation coefficient. The vector quantity
+    it specializes is the [vacuum magnetic field](name:vacuum_magnetic_field);
+    it is distinct from the [toroidal perturbed vacuum magnetic field real
+    part](name:toroidal_perturbed_vacuum_magnetic_field_real_part), which
+    describes a first-order perturbation. The normalization product $R_0 B_0$
+    represents the conserved major-radius-weighted toroidal field of an
+    axisymmetric vacuum field, for which $R B_{\phi,\mathrm{vac}}(R) = R_0 B_0$,
+    where $R$ is the major-radius coordinate.
+
+    Sign convention: Positive when the associated vacuum magnetic-field vector
+    has a toroidal component in the direction of increasing toroidal angle
+    $\phi$ in the right-handed cylindrical $(R,\phi,Z)$ frame.
+  unit: T
+
+- name: triangularity_of_plasma_boundary
+  description: |-
+    Dimensionless shape parameter for the plasma-boundary poloidal
+    cross-section, expressing the aggregate inward radial displacement of its
+    upper and lower extrema relative to the geometric center.
+  documentation: |-
+    Plasma-boundary triangularity is a dimensionless shaping parameter
+    describing the asymmetry of the boundary’s poloidal cross-section through
+    the inward displacement of its upper and lower radial extrema relative to
+    the geometric center. It characterizes the complete boundary rather than
+    either half-plane extremum alone.
+
+    For the upper and lower boundary extrema, the aggregate triangularity is
+    defined as
+
+    $$
+    \delta = \frac{1}{2}\left(\frac{R_0-R_u}{a}+\frac{R_0-R_l}{a}\right)
+    $$
+
+    where $\delta$ is the plasma-boundary triangularity, $R_0$ is the
+    major-radius coordinate of the geometric center, $R_u$ and $R_l$ are the
+    major-radius coordinates of the upper and lower boundary extrema, and $a$ is
+    the boundary minor radius. The coordinates refer to the right-handed
+    cylindrical $(R, \phi, Z)$ frame.
+
+    This quantity applies to the entire plasma boundary and aggregates the upper
+    and lower extremal displacements into one shape parameter. It excludes the
+    separately resolved [upper triangularity of the plasma
+    boundary](name:upper_triangularity_of_plasma_boundary) and [lower
+    triangularity of the plasma
+    boundary](name:lower_triangularity_of_plasma_boundary), which retain only
+    one extremum. It also differs from [triangularity of a flux
+    surface](name:triangularity_of_flux_surface), which describes an individual
+    nested magnetic flux surface rather than the outer plasma boundary.
+  unit: '1'
+
+- name: lower_triangularity_of_plasma_boundary
+  description: |-
+    Dimensionless shaping parameter equal to the normalized inward radial
+    displacement of the lower plasma-boundary extremum from the geometric
+    center.
+  documentation: |-
+    Lower triangularity of the plasma boundary is a signed dimensionless measure
+    of the horizontal displacement of its lower poloidal extremum relative to
+    the geometric center. This component selects the lower extremum rather than
+    averaging the upper and lower contributions.
+
+    $$
+    \delta_l = \frac{R_0-R_l}{a}
+    $$
+
+    Here, $\delta_l$ is the lower triangularity; $R_0$ is the major-radius
+    coordinate of the geometric center; $R_l$ is the major-radius coordinate of
+    the lower vertical extremum; and $a$ is the minor radius of the plasma
+    boundary. These coordinates are defined in the right-handed cylindrical $(R,
+    \phi, Z)$ frame, where $R$ is major radius, $\phi$ is toroidal angle, and
+    $Z$ is vertical height.
+
+    This quantity applies only to the lower extremum of the plasma boundary and
+    represents one term in the boundary-shaping description. It is not the upper
+    contribution or an average over both extrema; the corresponding upper
+    contribution is [upper
+    triangularity](name:upper_triangularity_of_plasma_boundary).
+
+    The parent [triangularity of the plasma
+    boundary](name:triangularity_of_plasma_boundary) is the arithmetic mean of
+    the upper and lower contributions: $\delta=(\delta_u+\delta_l)/2$, where
+    $\delta$ is the parent triangularity and $\delta_u$ is the upper
+    triangularity.
+
+    Sign convention: Positive when the lower extremum is displaced inward,
+    toward decreasing major radius $R$, relative to the geometric center.
+  unit: '1'
+
+- name: upper_triangularity_of_flux_surface
+  description: |-
+    Dimensionless upper triangularity shape parameter for a nested magnetic flux
+    surface, given by the normalized inward radial displacement of its upper
+    vertical extremum.
+  documentation: |-
+    Upper triangularity of a flux surface is the dimensionless triangularity
+    shape parameter defined at the upper vertical extremum of a nested magnetic
+    flux surface. It is the normalized inward radial displacement of that upper
+    extremum in a poloidal cross-section.
+
+    For the upper vertical extremum, the defining relation is:
+
+    $$
+    \delta_u = \frac{R_{\mathrm{axis}} - R_u}{a}
+    $$
+
+    where $\delta_u$ is upper triangularity, $R_{\mathrm{axis}}$ is the
+    major-radius coordinate of the magnetic axis, $R_u$ is the major-radius
+    coordinate of the upper vertical extremum, and $a$ is the minor radius of
+    the flux surface. These coordinates are defined in the right-handed
+    cylindrical $(R,\phi,Z)$ frame, where $R$ is major radius, $\phi$ is
+    toroidal angle, and $Z$ is vertical height.
+
+    This quantity applies separately to each nested magnetic flux surface
+    identified by its poloidal magnetic-flux label. It represents only the upper
+    extremum and is not an aggregate over the upper and lower extrema or over
+    multiple flux surfaces.
+
+    It is distinct from [lower triangularity of a flux
+    surface](name:lower_triangularity_of_flux_surface), which uses the lower
+    vertical extremum. It also differs from [upper triangularity of the plasma
+    boundary](name:upper_triangularity_of_plasma_boundary), which applies only
+    to the outer plasma boundary rather than to an arbitrary nested flux
+    surface.
+
+    Upper triangularity is the upper-extremum branch of [triangularity of a flux
+    surface](name:triangularity_of_flux_surface), whose definition permits the
+    relevant upper or lower vertical extremum. The upper and lower quantities
+    together describe the asymmetric triangular shaping of a flux-surface
+    cross-section.
+  unit: '1'
+
+- name: upper_triangularity_of_plasma_boundary
+  description: |-
+    Dimensionless shape parameter for the plasma-boundary poloidal
+    cross-section, expressing the inward radial displacement of its upper
+    extremum relative to the geometric center.
+  documentation: |-
+    Upper triangularity of the plasma boundary is a dimensionless shaping
+    parameter describing the inward radial displacement of the upper extremum of
+    the boundary’s poloidal cross-section relative to its geometric center. It
+    selects the upper extremum rather than combining the two vertical halves.
+
+    For the upper boundary extremum, it is defined as
+
+    $$
+    \delta_u = \frac{R_0-R_u}{a}
+    $$
+
+    where $\delta_u$ is the upper triangularity, $R_0$ is the major-radius
+    coordinate of the geometric center, $R_u$ is the major-radius coordinate of
+    the upper boundary extremum, and $a$ is the boundary minor radius. These
+    coordinates refer to the right-handed cylindrical $(R,\phi,Z)$ frame, where
+    $R$ is major radius, $\phi$ is toroidal angle, and $Z$ is vertical height.
+
+    This quantity applies to the outer plasma boundary and uses only its upper
+    poloidal extremum; it is not averaged over the upper and lower extrema. It
+    is a boundary-shape parameter rather than a local field value or the
+    triangularity of an individual nested magnetic flux surface.
+
+    The [triangularity of the plasma
+    boundary](name:triangularity_of_plasma_boundary) aggregates the upper and
+    lower components, with $\delta = (\delta_u+\delta_l)/2$, where $\delta$ is
+    the aggregate boundary triangularity and $\delta_l$ is the [lower
+    triangularity of the plasma
+    boundary](name:lower_triangularity_of_plasma_boundary). It differs from
+    [triangularity of a flux surface](name:triangularity_of_flux_surface), which
+    describes a nested magnetic flux surface rather than the outer plasma
+    boundary.
+  unit: '1'
+
+- name: vertical_coordinate_of_geometric_axis
+  description: |-
+    Signed Z height of the plasma boundary’s geometric axis, computed as the
+    midpoint of its maximum and minimum vertical extents.
+  documentation: |-
+    The vertical coordinate of the geometric axis is the signed height of the
+    plasma boundary’s geometric center in the right-handed cylindrical $(R,
+    \phi, Z)$ frame. It characterizes the vertical placement of the boundary
+    rather than the location of a magnetic axis or another selected boundary
+    point.
+
+    The geometric-axis coordinate is defined from the extrema of the boundary’s
+    vertical extent:
+
+    $$
+    Z_{\mathrm{axis}} = \frac{Z_{\max} + Z_{\min}}{2}
+    $$
+
+    where $Z_{\mathrm{axis}}$ is the vertical coordinate of the geometric axis,
+    $Z_{\max}$ is the greatest vertical coordinate on the plasma boundary, and
+    $Z_{\min}$ is the smallest vertical coordinate on the plasma boundary.
+
+    This quantity applies to the entire plasma boundary and uses an
+    extrema-based midpoint aggregation. It is distinct from the vertical
+    coordinate of a localized boundary feature, such as the [vertical coordinate
+    of the plasma-boundary gap reference
+    point](name:vertical_coordinate_of_plasma_boundary_gap_reference_point),
+    which identifies a specific reference location rather than the boundary-wide
+    geometric axis.
+
+    The geometric axis is paired with the corresponding radial midpoint of the
+    same boundary; together these coordinates define the center of the
+    boundary’s overall radial and vertical extents.
+
+    Sign convention: Positive when the geometric axis lies in the direction of
+    increasing vertical coordinate $Z$.
+  unit: m
+
+- name: vertical_coordinate_of_magnetic_axis
+  description: |-
+    Signed vertical Z coordinate of the magnetic axis in the right-handed
+    cylindrical (R, φ, Z) frame, marking the interior extremum organizing nested
+    magnetic flux surfaces.
+  documentation: |-
+    The quantity is the signed vertical coordinate $Z_\mathrm{axis}$ of the
+    magnetic-axis point in a poloidal cross-section. The magnetic axis is the
+    interior extremum of the poloidal magnetic-flux function around which nested
+    magnetic flux surfaces are organized.
+
+    For an equilibrium with poloidal flux function $\psi(R,Z)$, the
+    magnetic-axis point satisfies the stationary-point condition
+
+    $$
+    \left.\frac{\partial \psi}{\partial R}\right|_{\mathrm{axis}}
+    =
+    \left.\frac{\partial \psi}{\partial Z}\right|_{\mathrm{axis}}
+    =0
+    $$
+
+    where $\psi$ is the poloidal magnetic-flux function, $R$ is the major-radius
+    coordinate, $Z$ is the vertical coordinate, and the subscript
+    $\mathrm{axis}$ denotes evaluation at the magnetic-axis point. The
+    derivatives are taken in the poloidal cross-section, and $0$ denotes a
+    vanishing derivative.
+
+    The coordinate is defined in the right-handed cylindrical $(R, \phi, Z)$
+    frame, where $\phi$ is the toroidal angle. It applies to the single interior
+    magnetic-axis point, has no species or particle-population scope, and is
+    neither averaged nor integrated over a surface, region, or volume. It
+    records only the vertical coordinate; the corresponding radial coordinate is
+    required to locate the point fully.
+
+    This quantity is distinct from the [vertical coordinate of the geometric
+    axis](name:vertical_coordinate_of_geometric_axis), which describes a
+    boundary-derived geometric center, and from the [vertical coordinate of the
+    X-point](name:vertical_coordinate_of_x_point), which identifies a magnetic
+    null where separatrix branches meet.
+
+    Sign convention: Positive when the magnetic axis lies in the direction of
+    increasing vertical coordinate $Z$ from the origin of the right-handed
+    cylindrical $(R, \phi, Z)$ frame.
+  unit: m
+
+- name: vertical_coordinate_of_measurement_position
+  description: |-
+    Signed vertical coordinate of a generic measurement location, measured from
+    the machine midplane along the Z direction of the right-handed cylindrical
+    (R, φ, Z) frame.
+  documentation: |-
+    The vertical coordinate of a measurement position is its signed height
+    relative to the machine midplane in the right-handed cylindrical
+    $(R,\phi,Z)$ frame. Here $R$ is major radius, $\phi$ is toroidal angle, and
+    $Z$ is vertical height.
+
+    The coordinate is defined by
+
+    $$
+    Z_{\mathrm{meas}} = \mathbf{r}_{\mathrm{meas}} \cdot \hat{\mathbf{Z}}
+    $$
+
+    where $Z_{\mathrm{meas}}$ is the vertical coordinate,
+    $\mathbf{r}_{\mathrm{meas}}$ is the position vector of the measurement
+    location relative to the machine-midplane origin, and $\hat{\mathbf{Z}}$ is
+    the vertical unit vector.
+
+    This quantity applies to the geometric measurement position independently of
+    the diagnostic type or physical quantity measured there. It represents one
+    coordinate of one position, with no averaging over positions, populations,
+    or physical regions, and it is not the value of a plasma field evaluated at
+    that location.
+
+    The generic position coordinate has the same geometric meaning as the
+    object-specific [vertical coordinate of a
+    camera](name:vertical_coordinate_of_camera) and [vertical coordinate of a
+    diagnostic aperture](name:vertical_coordinate_of_diagnostic_aperture); those
+    quantities differ only in the object whose position is identified.
+  unit: m
+
+- name: vertical_coordinate_of_primary_x_point
+  description: |-
+    Signed vertical position of the primary magnetic X-point, the poloidal-field
+    null where separatrix branches meet, in the right-handed cylindrical (R, φ,
+    Z) frame.
+  documentation: |-
+    The primary X-point is the main poloidal magnetic-field null on the plasma
+    boundary, where separatrix branches meet. This quantity gives that point’s
+    vertical coordinate in the right-handed cylindrical $(R,\phi,Z)$ frame.
+
+    $$
+    Z_{\mathrm{X,primary}} = \mathbf{r}_{\mathrm{X,primary}} \cdot \hat{\mathbf{Z}}
+    $$
+
+    Here, $Z_{\mathrm{X,primary}}$ is the vertical coordinate of the primary
+    X-point, $\mathbf{r}_{\mathrm{X,primary}}$ is its position vector relative
+    to the coordinate origin, and $\hat{\mathbf{Z}}$ is the vertical unit vector
+    of the cylindrical frame.
+
+    The locus is specifically the primary, or main, boundary X-point rather than
+    an unspecified or secondary X-point. This is a pointwise geometric
+    coordinate with no spatial averaging, surface integration, population
+    aggregation, or species dependence; it excludes the radial coordinate of the
+    same point.
+
+    The generic [vertical coordinate of an
+    X-point](name:vertical_coordinate_of_x_point) represents the same signed Z
+    coordinate without restricting the locus to the primary X-point, while the
+    [radial coordinate of an X-point](name:radial_coordinate_of_x_point)
+    supplies the corresponding major-radius coordinate.
+
+    Sign convention: Positive when the primary X-point lies in the direction of
+    increasing vertical coordinate $Z$.
+  unit: m
+
+- name: vertical_coordinate_of_strike_point
+  description: |-
+    Signed vertical (Z) coordinate of the inner divertor strike point, where the
+    inner separatrix leg intersects the divertor target in the right-handed
+    cylindrical (R, φ, Z) frame.
+  documentation: |-
+    The vertical coordinate of the inner divertor strike point is the signed Z
+    location where the inner leg of the plasma separatrix intersects the
+    divertor target. It identifies a boundary contact point in the poloidal
+    geometry, rather than the magnetic null.
+
+    This quantity applies specifically to the inner strike point and represents
+    one geometric coordinate value; it is not an average over strike points, a
+    target-surface extent, or a toroidal aggregation. It is distinct from the
+    corresponding outer strike-point location, which describes the outer
+    separatrix leg.
+
+    Together with the [major-radius coordinate of a magnetic strike
+    point](name:radial_coordinate_of_strike_point), this coordinate locates the
+    same strike point in the poloidal cross-section of the right-handed
+    cylindrical $(R,\phi,Z)$ frame. It must not be interpreted as the [vertical
+    coordinate of an X-point](name:vertical_coordinate_of_x_point), because an
+    X-point is a magnetic null rather than a separatrix–target intersection.
+  unit: m
+
+- name: volume_of_flux_surface
+  description: |-
+    Geometric volume contained within a nested magnetic flux surface, cumulative
+    from the magnetic axis toward the outermost closed surface.
+  documentation: |-
+    The quantity is the three-dimensional volume enclosed inside a nested
+    magnetic flux surface. It characterizes the geometry of the region interior
+    to that magnetic surface.
+
+    The enclosed volume is defined by
+
+    $$
+    V(\chi) = \int_{\Omega_\chi} d^3x
+    $$
+
+    where $V(\chi)$ is the volume associated with flux-surface label $\chi$,
+    $\Omega_\chi$ is the region inside the corresponding magnetic surface
+    $S_\chi$, and $d^3x$ is the three-dimensional volume element.
+
+    The quantity applies to each nested magnetic surface across the modeled
+    plasma region, including confined-plasma and scrape-off-layer surfaces where
+    such surfaces are defined. It is a cumulative volume over the complete
+    interior of the surface, increasing outward from the magnetic axis; it is
+    not the volume of an infinitesimal shell.
+
+    It is distinct from [surface area of a flux
+    surface](name:surface_area_of_flux_surface) and from [poloidal-plane
+    cross-sectional area of a flux
+    surface](name:poloidal_plane_cross_sectional_area_of_flux_surface). The
+    [volume of the plasma boundary](name:volume_of_plasma_boundary) is the
+    boundary value of this enclosed-volume function, while [the derivative with
+    respect to poloidal magnetic flux coordinate of volume of flux
+    surface](name:derivative_of_volume_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate)
+    and [the derivative with respect to toroidal flux coordinate of volume of
+    flux surface](name:flux_surface_averaged_inverse_of_major_radius) describe
+    its local change with different flux labels.
+  unit: m^3
+
+- name: volume_of_plasma_boundary
+  description: |-
+    Volume enclosed by the plasma boundary, representing the total
+    confined-plasma region inside the last closed magnetic flux surface.
+  documentation: |-
+    This quantity is the geometric volume of the confined plasma enclosed by the
+    plasma boundary, identified with the last closed magnetic flux surface. It
+    represents the full enclosed region rather than a local flux-surface shell
+    or material volume.
+
+    The volume is defined by
+
+    $$
+    V = \int_{\Omega_{\mathrm{plasma}}} d^3\mathbf{x}
+    $$
+
+    where $V$ is the enclosed plasma volume, $\Omega_{\mathrm{plasma}}$ is the
+    spatial domain inside the plasma boundary, and $d^3\mathbf{x}$ is the
+    differential volume element at position $\mathbf{x}$.
+
+    The integration domain is the entire confined-plasma region bounded by the
+    last closed magnetic flux surface, and the result is the total volume
+    aggregated over that domain. It excludes regions outside the plasma boundary
+    and volumes belonging to material structures or other non-confined regions.
+
+    This quantity is the terminal enclosed value of [volume of a flux
+    surface](name:volume_of_flux_surface) when the flux surface coincides with
+    the plasma boundary. It provides the integration domain for volume-averaged
+    quantities such as [volume-averaged ion
+    temperature](name:volume_averaged_ion_temperature).
+  unit: m^3
+
+- name: flux_surface_averaged_magnetic_field_magnitude
+  description: |-
+    Flux-surface average of the local magnetic-field strength, retaining the
+    pointwise modulus before averaging over each magnetic surface.
+  documentation: |-
+    This quantity is the flux-surface average of the magnitude of the total
+    equilibrium magnetic-field vector. It represents the mean field strength on
+    a magnetic surface, rather than a component or a vector average.
+
+    The flux-surface average is defined by
+
+    $$
+    \left\langle \lvert\mathbf{B}\rvert \right\rangle_{\psi} = \frac{\oint_{\psi} \lvert\mathbf{B}\rvert\,\mathrm{d}S/\lvert\nabla\psi\rvert}{\oint_{\psi} \mathrm{d}S/\lvert\nabla\psi\rvert}
+    $$
+
+    where $\mathbf{B}$ is the total equilibrium magnetic-field vector, $\psi$ is
+    the scalar label of the magnetic flux surface, $\mathrm{d}S$ is the
+    surface-area element, and $\nabla\psi$ is the spatial gradient of that
+    surface label. The aggregation is the normalized surface integral with
+    weighting $\mathrm{d}S/\lvert\nabla\psi\rvert$.
+
+    The quantity applies to all components of the equilibrium field on the
+    selected magnetic flux surface and is non-negative. It excludes any signed
+    field component, any species or source decomposition, and the magnitude of a
+    vector obtained by averaging $\mathbf{B}$ before taking its modulus.
+
+    It is the flux-surface-averaged transformation of [magnetic-field
+    magnitude]. It differs from [flux-surface-averaged square of magnetic-field
+    magnitude](name:flux_surface_averaged_square_of_magnetic_field_magnitude),
+    which averages the squared field strength rather than the field strength
+    itself.
+  unit: T
+
+- name: minimum_over_flux_surface_magnetic_field_magnitude
+  description: |-
+    Smallest total magnetic-field strength attained along a specified nested
+    magnetic flux surface, using the field magnitude rather than a signed
+    component.
+  documentation: |-
+    The minimum magnetic-field magnitude is the smallest total field strength
+    attained anywhere on a specified nested magnetic flux surface. It is
+    sign-invariant because it uses the modulus of the magnetic-field vector
+    rather than a signed component.
+
+    For a surface labeled by the magnetic-flux coordinate $\psi$, the quantity
+    is defined by
+
+    $$
+    B_{\min}(\psi) = \min_{\mathbf{x} \in S(\psi)} \left|\mathbf{B}(\mathbf{x})\right|
+    $$
+
+    where $B_{\min}(\psi)$ is the minimum magnetic-field magnitude, $\mathbf{x}$
+    is a position on the surface, $S(\psi)$ is the set of positions belonging to
+    the flux surface labeled by $\psi$, and $\mathbf{B}(\mathbf{x})$ is the
+    total magnetic-field vector at that position.
+
+    The minimum is taken over all positions on each nested magnetic flux surface
+    and includes the complete equilibrium field, including its poloidal and
+    toroidal contributions. It is not a signed component minimum, a flux-surface
+    average, or a minimum taken across multiple flux surfaces.
+
+    Unlike the [flux-surface-averaged inverse square of magnetic-field
+    magnitude](name:flux_surface_averaged_inverse_of_square_of_magnetic_field_magnitude),
+    this quantity reduces the field magnitude itself by a pointwise minimum
+    rather than averaging its reciprocal square.
+  unit: T
+
+- name: minimum_safety_factor
+  description: |-
+    Signed safety-factor value on the closed magnetic flux surface where the
+    magnitude of field-line winding is smallest, distinct from that surface’s
+    location.
+  documentation: |-
+    The minimum safety factor is the signed field-line winding number evaluated
+    on the nested closed magnetic flux surface where the magnitude of the safety
+    factor is smallest. It represents the extremal value of the safety-factor
+    function within the confined closed-surface domain.
+
+    The minimizing value is defined by
+
+    $$
+    q_{\min} = q(\rho_\ast), \qquad \rho_\ast \in \operatorname*{arg\,min}_{0 \leq \rho \leq 1} |q(\rho)|
+    $$
+
+    where $q(\rho)$ is the signed [safety factor](name:safety_factor) on the
+    flux surface labeled by $\rho$, $\rho_\ast$ is the label of a surface at
+    which the magnitude $|q(\rho)|$ is minimized, and $q_{\min}$ is the signed
+    value evaluated there. The label $\rho$ is a monotonic flux-surface
+    coordinate whose endpoints denote the magnetic axis and the last closed flux
+    surface. In flux coordinates $(\rho,\theta,\phi)$, $\theta$ is the poloidal
+    angle and $\phi$ is the toroidal angle of the right-handed cylindrical
+    $(R,\phi,Z)$ frame, where $R$ is major radius and $Z$ is vertical height.
+
+    The extremum is taken over all nested closed magnetic flux surfaces and is
+    neither a flux-surface average nor a sum. The location-defining quantity is
+    separate: [poloidal magnetic flux at minimum safety factor] identifies the
+    corresponding surface, while this quantity reports only the signed safety
+    factor. It is also distinct from a safety factor evaluated at a prescribed
+    locus, such as the magnetic axis.
+
+    Sign convention: Positive when the toroidal angle advance of a magnetic
+    field line is in the direction of increasing $\phi$ as the poloidal angle
+    $\theta$ increases.
+  unit: '1'
+
+- name: normalized_poloidal_flux_coordinate_of_plasma_boundary
+  description: |-
+    Radial flux-surface location of the selected plasma boundary, expressed by
+    the normalized poloidal flux coordinate. It is the linear normalized
+    poloidal flux value, increasing from zero at the magnetic axis to one at the
+    separatrix, of the closed flux surface taken as the plasma boundary;
+    fixed-boundary equilibrium calculations commonly set it slightly below one
+    to select a surface just inside the separatrix.
+  documentation: |-
+    The normalized poloidal flux coordinate of the plasma boundary is the value
+    of the [normalized poloidal flux
+    coordinate](name:normalized_poloidal_flux_coordinate) on the closed flux
+    surface selected as the plasma boundary. It is the linear normalized
+    poloidal flux, labeling the boundary's radial position between the magnetic
+    axis and the last closed flux surface.
+
+    Its value is the poloidal flux difference from the magnetic axis normalized
+    to the axis-to-separatrix flux difference:
+
+    $$
+    \psi_{\mathrm{N}}^{\mathrm{boundary}} = \frac{\psi_{\mathrm{boundary}} - \psi_{\mathrm{axis}}}{\psi_{\mathrm{sep}} - \psi_{\mathrm{axis}}}
+    $$
+
+    where $\psi_{\mathrm{boundary}}$ is the [poloidal magnetic
+    flux](name:poloidal_magnetic_flux) on the selected plasma-boundary surface,
+    $\psi_{\mathrm{axis}}$ is the [poloidal magnetic flux at the magnetic
+    axis](name:poloidal_magnetic_flux_at_magnetic_axis), and
+    $\psi_{\mathrm{sep}}$ is the poloidal magnetic flux at the separatrix (last
+    closed flux surface).
+
+    The label equals zero at the magnetic axis and equals one when the selected
+    plasma boundary coincides with the separatrix; a value below one selects an
+    internal closed flux surface. Its defining role is to specify, for
+    fixed-boundary equilibrium representations, which closed flux surface is
+    taken as the plasma boundary, commonly a surface just inside the separatrix
+    so that the boundary remains strictly closed.
+
+    This is the linear normalized poloidal flux value itself, not its square
+    root, and it is a flux-surface label rather than a signed poloidal-flux
+    value or a geometric minor-radius measure. It is distinct from the
+    toroidal-flux-based boundary label [normalized toroidal flux coordinate at
+    the plasma
+    boundary](name:normalized_toroidal_flux_coordinate_at_plasma_boundary), and
+    it belongs to the same locus-valued family as the [normalized poloidal flux
+    coordinate at minimum safety factor] and the [normalized poloidal flux
+    coordinate of the
+    pedestal](name:normalized_poloidal_flux_coordinate_of_pedestal).
+  unit: '1'
+
+- name: safety_factor_at_magnetic_axis
+  description: |-
+    Limiting signed field-line winding number on the innermost closed flux
+    surface, giving toroidal turns per poloidal circuit at the magnetic axis.
+  documentation: |-
+    The safety factor at the magnetic axis is the limiting signed field-line
+    winding number as nested closed magnetic flux surfaces contract toward the
+    magnetic axis. It gives the toroidal transits per complete poloidal circuit
+    in that limit.
+
+    The axis value is defined by
+
+    $$
+    q_{\rm axis} = \lim_{\psi \to \psi_{\rm axis}} q(\psi)
+    $$
+
+    where $q_{\rm axis}$ is the safety factor at the magnetic axis, $q(\psi)$ is
+    the safety factor on the flux surface labeled by $\psi$, and $\psi_{\rm
+    axis}$ is the value of that flux-surface label at the magnetic axis.
+
+    This quantity applies only to the magnetic-axis limit of nested closed flux
+    surfaces in an equilibrium. It is a single equilibrium winding value with no
+    species, population, or charge-state aggregation, and it is distinct from
+    safety factor values on finite-radius surfaces such as the [safety factor at
+    the plasma boundary](name:safety_factor_at_plasma_boundary).
+
+    It is the magnetic-axis specialization of the [safety
+    factor](name:safety_factor): the parent quantity describes field-line
+    winding as a function of flux-surface label, while this quantity selects its
+    limiting value at $\psi_{\rm axis}$. The parent relation is the signed
+    flux-increment ratio $q = d\Phi_{\rm tor}/(d\Phi_{\rm pol}/2\pi)$, where
+    $\Phi_{\rm tor}$ is toroidal magnetic flux and $\Phi_{\rm pol}$ is poloidal
+    magnetic flux.
+
+    Sign convention: Positive when the toroidal magnetic-flux increment
+    $d\Phi_{\rm tor}$ and poloidal magnetic-flux increment $d\Phi_{\rm pol}$
+    have the same sign for the positively oriented field-line circuit, with
+    $\phi$ increasing in the right-handed cylindrical $(R,\phi,Z)$ frame, where
+    $R$ is major radius, $\phi$ is toroidal angle, and $Z$ is vertical height.
+  unit: '1'
+
+- name: safety_factor_at_normalized_poloidal_magnetic_flux_equal_to_0_95
+  description: |-
+    Signed field-line winding number on the closed magnetic flux surface labeled
+    by normalized poloidal magnetic flux 0.95, near but inside the plasma
+    boundary.
+  documentation: |-
+    This quantity is the signed field-line winding number on the closed magnetic
+    flux surface labeled by normalized poloidal magnetic flux 0.95. It gives the
+    toroidal transits per complete poloidal circuit on that specific surface.
+
+    The locus-specific evaluation is
+
+    $$
+    q_{95}=q(\psi_N=0.95)
+    $$
+
+    where $q_{95}$ is the safety factor at the specified locus, $q$ is the
+    [safety factor](name:safety_factor), and $\psi_N$ is the normalized poloidal
+    magnetic-flux coordinate. The value 0.95 selects the surface at 95% of the
+    normalized poloidal-flux interval, with the magnetic axis and plasma
+    boundary serving as the inner and outer reference surfaces.
+
+    The quantity applies only to that single closed flux surface. It is a scalar
+    flux-surface value, with no summation, integration, or averaging over
+    neighboring surfaces. It is distinct from the [safety factor at the magnetic
+    axis](name:safety_factor_at_magnetic_axis) and the [safety factor at the
+    plasma boundary](name:safety_factor_at_plasma_boundary), which use different
+    evaluation loci.
+
+    Thus, this quantity is the normalized-poloidal-flux-locus specialization of
+    the parent [safety factor](name:safety_factor); the field-line winding
+    definition is unchanged, and only the evaluation surface differs. The
+    right-handed cylindrical $(R,\phi,Z)$ frame has $R$ as major radius, $\phi$
+    as toroidal angle, and $Z$ as vertical height.
+
+    Sign convention: Positive when the signed toroidal and poloidal
+    magnetic-flux increments defining the field-line winding ratio have the same
+    sign in the right-handed cylindrical $(R,\phi,Z)$ frame.
+  unit: '1'

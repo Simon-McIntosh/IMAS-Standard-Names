@@ -1,0 +1,152 @@
+- name: ion_current_of_mass_spectrometer_channel
+  description: |-
+    Collected conventional electrical current carried by the ion population
+    assigned to one mass-resolved channel.
+  documentation: |-
+    The collected ion current is the conventional electrical current delivered
+    to a detector by ions assigned to one selected atomic-mass or mass-to-charge
+    channel. It represents the channel-specific ion population rather than the
+    complete detector signal across all mass channels.
+
+    The defining charge-collection relation is
+
+    $$
+    I_{\mathrm{ion}} = \frac{dQ_{\mathrm{ion}}}{dt} = \sum_{k \in \mathcal{C}} q_k\frac{dN_k}{dt}
+    $$
+
+    where $I_{\mathrm{ion}}$ is the collected ion current, $Q_{\mathrm{ion}}$ is
+    the charge delivered by collected ions, $t$ is time, $\mathcal{C}$ is the
+    set of ion populations assigned to the selected channel, $q_k$ is the charge
+    carried by an ion in population $k$, and $N_k$ is the cumulative number of
+    ions from population $k$ collected by the detector.
+
+    The aggregation is over all ion arrivals assigned to the selected channel
+    and species, including any charge states represented by that channel; it is
+    not an aggregate over the full mass spectrum or over unrelated channels. The
+    quantity excludes neutral-gas pressure and the detector-bias potential
+    represented by the [voltage of a mass-spectrometer
+    channel](name:voltage_of_mass_spectrometer_channel).
+
+    Unlike [ion current density](name:ion_current_density), which is a local
+    vector charge flux per area, this quantity is the total collected current
+    associated with one channel. Its channel-specific value can therefore
+    contribute to determining the corresponding species abundance, while
+    remaining distinct from a current density.
+
+    Sign convention: Positive when positive ion charge is collected by the
+    detector channel.
+  unit: A
+
+- name: toroidal_coordinate_of_aperture
+  description: |-
+    Azimuthal position of an aperture’s geometric center around the machine
+    symmetry axis, measured as the toroidal angle in the right-handed (R, φ, Z)
+    frame.
+  documentation: |-
+    The toroidal coordinate of an aperture is the azimuthal angle locating the
+    geometric center of a collimating aperture about the machine symmetry axis.
+    It identifies the aperture’s toroidal placement in the right-handed
+    cylindrical $(R, \phi, Z)$ frame, where $\phi$ increases with toroidal
+    angle.
+
+    For Cartesian coordinates of the aperture center in the plane perpendicular
+    to the symmetry axis, the toroidal angle is defined by
+
+    $$
+    \phi = \operatorname{atan2}(y,x)
+    $$
+
+    where $x$ and $y$ are the center coordinates in the right-handed Cartesian
+    $(\hat{x},\hat{y},\hat{z})$ basis, and $\phi$ is the toroidal angular
+    coordinate. The angular origin and equivalent $2\pi$ representation follow
+    the adopted toroidal-angle convention.
+
+    This quantity applies to the geometric center of one aperture. For a
+    circular aperture, the center is the circle center; for a planar aperture,
+    it is the origin of the local coordinate system describing the aperture
+    plane. It is not an area average, a boundary coordinate, or the toroidal
+    coordinate of a measurement position along the associated line of sight.
+
+    Together with the corresponding radial and vertical center coordinates, it
+    locates the aperture in space. The same geometric convention is used for the
+    [toroidal coordinate of an optical
+    element](name:toroidal_coordinate_of_optical_element) and the [toroidal
+    coordinate of a camera](name:toroidal_coordinate_of_camera), which locate
+    other diagnostic components by their geometric centers.
+  unit: rad
+
+- name: voltage_of_mass_spectrometer_channel
+  description: |-
+    Signed bias potential applied between the photomultiplier detector electrode
+    and its electronics reference for one mass-resolved channel, setting
+    ion-signal gain.
+  documentation: |-
+    The mass-spectrometer channel voltage is the detector-bias potential
+    difference associated with one channel assigned to a selected atomic mass.
+    It is an instrumental operating parameter of the photomultiplier detector
+    that controls the gain applied to the collected ion signal, rather than a
+    plasma thermodynamic or field quantity.
+
+    The defining potential difference is
+
+    $$
+    V_{\mathrm{ch}} = \phi_{\mathrm{det}} - \phi_{\mathrm{ref}}
+    $$
+
+    where $V_{\mathrm{ch}}$ is the channel detector-bias voltage,
+    $\phi_{\mathrm{det}}$ is the electric potential of the photomultiplier
+    detector electrode, and $\phi_{\mathrm{ref}}$ is the electronics reference
+    potential.
+
+    This quantity applies to one mass-resolved channel and its associated
+    detector circuit. It is not summed or averaged across channels, mass
+    assignments, detector electrodes, or ion populations, and it does not
+    represent a local plasma voltage.
+
+    The channel-level quantity specializes the device-level [mass-spectrometer
+    detector bias voltage](name:voltage_of_mass_spectrometer) to one channel. It
+    is distinct from the [ion current of a mass-spectrometer
+    channel](name:ion_current_of_mass_spectrometer_channel), which is the
+    collected electrical signal, and from the [voltage of a spectrometer
+    channel](name:voltage_of_spectrometer_channel), which denotes an electrical
+    output signal rather than the detector-bias potential.
+
+    Sign convention: Positive when the detector electrode potential exceeds the
+    electronics reference potential.
+  unit: V
+
+- name: line_averaged_effective_charge
+  description: |-
+    Dimensionless line-averaged effective ionic charge of a plasma mixture,
+    obtained by averaging local effective charge along a prescribed plasma line
+    of sight.
+  documentation: |-
+    Line-averaged effective ionic charge characterizes the charge composition of
+    a plasma mixture through the average of its local effective charge along a
+    prescribed line of sight.
+
+    The line average is defined by
+
+    $$
+    \overline{Z}_{\mathrm{eff}} = \frac{1}{L} \int_{0}^{L} Z_{\mathrm{eff}}(\ell)\,d\ell
+    $$
+
+    where $\overline{Z}_{\mathrm{eff}}$ is the line-averaged effective ionic
+    charge, $L$ is the total path length through the plasma, $\ell$ is distance
+    along the line of sight, and $Z_{\mathrm{eff}}(\ell)$ is the local effective
+    charge at position $\ell$.
+
+    This quantity applies to the complete included ion mixture along the line of
+    sight. At each position, the ionic contribution is summed over all
+    represented ion species and charge states, while the line aggregation is a
+    uniform average over physical path length.
+
+    The local integrand is the [effective charge](name:effective_charge),
+    defined from the second ionic charge moment divided by free-electron
+    density. This quantity is distinct from a local effective charge at a single
+    position and from the [volume-averaged effective
+    charge](name:volume_averaged_effective_charge), which uses volume weighting
+    rather than line-of-sight path-length weighting; it also differs from the
+    [flux-surface-averaged effective charge at the plasma boundary], which
+    averages over a boundary surface.
+  unit: '1'

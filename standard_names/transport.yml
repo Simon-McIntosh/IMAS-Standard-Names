@@ -1,0 +1,556 @@
+- name: atomic_count
+  description: |-
+    Stoichiometric multiplicity of a selected element within the chemical
+    formula of an atomic or molecular species.
+  documentation: |-
+    This quantity is the number of atoms belonging to a selected element in one
+    atomic or molecular species, as specified by its composition. It is a
+    composition property rather than a particle population or field quantity.
+
+    For an atomic species, the count is one for its constituent element; for a
+    molecular species, it is the element's stoichiometric coefficient in the
+    molecular formula. The count applies to the selected species composition and
+    is not a number density, abundance, or present/absent flag. It is not summed
+    over particles or charge states, and changing the ionization state does not
+    change the elemental atom count.
+
+    The selected element is identified independently by its [atomic
+    number](name:atomic_number), while this quantity gives the number of atoms
+    of that element in the species. The same composition count can therefore be
+    used for neutral or ionized forms of a species and for elemental
+    constituents of reaction participants.
+  unit: '1'
+
+- name: atomic_mass
+  description: |-
+    Mass parameter assigned to a specified ion or neutral particle species,
+    encoding its isotope or constituent composition for inertial and transport
+    calculations.
+  documentation: |-
+    Atomic mass is the intrinsic mass parameter assigned to one specified ion or
+    neutral particle species. It identifies an isotope for an atomic species or
+    the constituent composition for a molecular or compound neutral, and
+    provides the inertial scale used in collisional and transport physics.
+
+    The mass is represented relative to the atomic mass unit by
+
+    $$
+    m_s = A_s m_u
+    $$
+
+    where $m_s$ is the atomic mass of the specified species, $A_s$ is its
+    relative atomic mass, and $m_u$ is the atomic mass unit.
+
+    The scope is one species definition at a time: either an ion species or a
+    neutral particle species. No aggregation over separate species, charge
+    states, or plasma populations is implied; for a molecular or compound
+    neutral, combining constituent masses is part of that species definition.
+    The ion-specific form [ion atomic mass](name:ion_atomic_mass) and
+    neutral-specific form [neutral species atomic
+    mass](name:neutral_species_atomic_mass) are corresponding instances of this
+    quantity.
+
+    Atomic masses provide the species-dependent weighting used when forming
+    aggregate quantities such as [total plasma mass
+    density](name:total_plasma_mass_density); they are not themselves densities,
+    particle counts, or aggregate plasma masses.
+  unit: u
+
+- name: atomic_number
+  description: |-
+    Nuclear proton count identifying the selected element in a plasma or
+    neutral-particle species, independent of isotope and ionization state.
+  documentation: |-
+    Atomic number identifies an element through the number of protons in its
+    nucleus. It is an intrinsic element identifier that remains unchanged when
+    the element is bound in a molecule or changes ionization state.
+
+    The atomic number $Z$ is defined by
+
+    $$
+    Z = N_p
+    $$
+
+    where $N_p$ is the number of protons in the element's nucleus.
+
+    This quantity applies to the selected element constituent of a neutral or
+    charged species, including an element within a compound or molecule. It
+    identifies one element and is not summed over constituent elements,
+    isotopes, or charge states.
+
+    Atomic number is distinct from [ion charge](name:ion_charge), which
+    describes the net electric charge of an ion and may change while $Z$ remains
+    fixed. Unlike [fast ion atomic number](name:fast_ion_atomic_number), this
+    generic identifier carries no fixed fast-ion role or diagnostic context.
+  unit: '1'
+
+- name: difference_of_total_plasma_heating_power_and_time_derivative_of_plasma_stored_energy
+  description: |-
+    Instantaneous plasma power available for confinement losses after correcting
+    total coupled heating for the rate of change of stored plasma energy.
+  documentation: |-
+    This quantity is the instantaneous global power-balance residual available
+    to account for energy leaving the plasma confinement system. It corrects the
+    total plasma heating power for transient changes in the plasma’s stored
+    energy.
+
+    It is defined by
+
+    $$
+    P_{\mathrm{loss}} = P_{\mathrm{heat,total}} - \frac{dW_{\mathrm{plasma}}}{dt}
+    $$
+
+    where $P_{\mathrm{loss}}$ is the power-balance residual represented by this
+    quantity, $P_{\mathrm{heat,total}}$ is the [total plasma heating power],
+    $W_{\mathrm{plasma}}$ is the total stored energy of the plasma, and $t$ is
+    time.
+
+    The quantity is global and aggregated over all heating contributions
+    included in total plasma heating power and over the complete stored
+    plasma-energy reservoir. It is not the heating input itself, a single-source
+    heating contribution, or a regional radiation measurement; [radiated power
+    over the core region](name:radiated_power_over_core_region) is a specific
+    loss channel rather than this balance residual. A positive value means
+    heating exceeds the instantaneous increase in stored energy, while a
+    negative value means stored energy is increasing faster than the heating
+    input.
+
+    This residual is the loss-power term in the conventional energy-confinement
+    relation $\tau_E = W_{\mathrm{plasma}}/P_{\mathrm{loss}}$, where $\tau_E$ is
+    the energy confinement time; transient storage changes are therefore
+    excluded from the inferred loss power rather than counted as losses.
+  unit: W
+
+- name: electron_density_at_magnetic_axis
+  description: |-
+    Particle number density of the electron population evaluated at the magnetic
+    axis is the local electron count per physical volume at that location.
+  documentation: |-
+    Particle number density of the electron population evaluated at the magnetic
+    axis is the local electron count per physical volume at that location. It
+    represents electrons specifically, rather than ions, neutrals, or another
+    plasma population.
+
+    The defining relation is
+
+    $$
+    n_{e,\mathrm{axis}} = \left.\frac{dN_e}{dV}\right|_{\mathrm{axis}}
+    $$
+
+    where $n_{e,\mathrm{axis}}$ is the electron number density at the magnetic
+    axis, $N_e$ is the number of electrons, and $V$ is physical volume.
+
+    The quantity is local to the magnetic axis, the innermost location of nested
+    closed poloidal magnetic-flux surfaces where the poloidal-flux gradient
+    vanishes. It applies to the complete electron population at that location
+    and is neither a flux-surface or volume integral nor an ion or neutral
+    density.
+
+    This is the electron-specific realization of the population-independent
+    [density at the magnetic axis](name:density_at_magnetic_axis). It must be
+    distinguished from [total ion density at the magnetic
+    axis](name:total_ion_density_at_magnetic_axis), which counts ions, and from
+    [electron temperature at the magnetic
+    axis](name:electron_temperature_at_magnetic_axis), which characterizes
+    electron energy rather than particle count.
+  unit: m^-3
+
+- name: electron_temperature_at_magnetic_axis
+  description: |-
+    Thermal energy per particle of the electron population, expressed as an
+    energy-equivalent temperature and evaluated at the magnetic axis.
+  documentation: |-
+    Thermal energy per particle of the electron population, expressed as an
+    energy-equivalent temperature and evaluated at the magnetic axis. The
+    magnetic axis is the degenerate innermost magnetic surface of the
+    equilibrium, where the gradient of the poloidal magnetic flux vanishes;
+    evaluation at this locus does not imply that the electron temperature has an
+    extremum there.
+
+    For a thermal electron population with a well-defined absolute thermodynamic
+    temperature, the energy-equivalent electron temperature is defined by:
+
+    $$
+    T_e = k_\mathrm{B}\,\Theta_e
+    $$
+
+    where $T_e$ is the electron temperature expressed as energy per particle,
+    $\Theta_e$ is the absolute thermodynamic temperature of the electrons, and
+    $k_\mathrm{B}$ is the Boltzmann constant.
+
+    This quantity applies specifically to the electron population at the
+    magnetic axis and is an intensive, per-particle quantity rather than a
+    charge-state sum, volume average, or volume-integrated electron energy. It
+    excludes ion temperatures, radiative temperature-equivalent scales, and the
+    total thermal energy content of the electron population.
+
+    It is the electron-specific member of the broader [temperature at the
+    magnetic axis](name:temperature_at_magnetic_axis), which also encompasses
+    other populations and radiative temperature interpretations. The
+    corresponding electron temperature at another locus is [electron temperature
+    at the outboard midplane](name:electron_temperature_at_outboard_midplane),
+    while [thermal electron energy](name:thermal_electron_energy) denotes an
+    integrated energy content rather than this local temperature.
+  unit: eV
+
+- name: energy_confinement_time
+  description: |-
+    Characteristic timescale for loss of confined plasma thermal energy, defined
+    as stored thermal energy divided by the net power leaving that energy
+    reservoir.
+  documentation: |-
+    Energy confinement time is the characteristic timescale on which the
+    confined plasma loses its stored thermal energy through net outward energy
+    transport and other thermal-energy loss channels. The stored energy is the
+    volume-integrated quantity defined by [thermal plasma
+    energy](name:thermal_plasma_energy), not a particle confinement time or the
+    duration of plasma confinement.
+
+    $$
+    \tau_E = \frac{W_{\mathrm{th}}}{P_{\mathrm{loss}}}
+    $$
+
+    where $\tau_E$ is the energy confinement time, $W_{\mathrm{th}}$ is the
+    stored thermal energy in J, and $P_{\mathrm{loss}}$ is the net power loss
+    from that thermal-energy reservoir in W. In a stationary power balance,
+    $P_{\mathrm{loss}}$ equals the net heating power deposited in the plasma. It
+    is distinct from [plasma confinement time], which denotes the elapsed
+    duration of confinement rather than an energy-loss timescale.
+  unit: s
+
+- name: loop_voltage_at_plasma_boundary
+  description: |-
+    Toroidal electromotive force evaluated on the last closed flux surface that
+    drives the conventionally signed ohmic plasma current.
+  documentation: |-
+    The loop voltage at the plasma boundary is the toroidal electromotive force
+    associated with the inductive electric field around the last closed
+    magnetic-flux surface. It is the net voltage available to drive the ohmic
+    component of the confined plasma current.
+
+    For a closed toroidal contour $C$ on the last closed flux surface, the loop
+    voltage is defined by
+
+    $$
+    V_{\mathrm{loop}} = \oint_C \mathbf{E} \cdot d\boldsymbol{\ell}
+    $$
+
+    where $V_{\mathrm{loop}}$ is the loop voltage, $\mathbf{E}$ is the
+    electric-field vector, $d\boldsymbol{\ell}$ is the directed line element,
+    and $C$ is oriented in the direction of increasing toroidal angle. The
+    quantity is a contour-integrated scalar evaluated at the plasma boundary,
+    not a local electric-field component or an external-coil terminal voltage.
+
+    This boundary quantity represents the total loop voltage driving plasma
+    current, including the inductive contribution associated with changing
+    poloidal magnetic flux. It excludes no plasma-current-driving contribution
+    merely because it is externally generated; the narrower [external loop
+    voltage](name:external_loop_voltage) denotes only the externally generated
+    contribution and is therefore not equivalent to the total boundary loop
+    voltage.
+
+    The loop voltage is related to the ohmic plasma-current drive through the
+    toroidal component of the electric field and the plasma conductivity. The
+    right-handed cylindrical $(R,\phi,Z)$ frame uses $R$ for major radius,
+    $\phi$ for toroidal angle, and $Z$ for vertical height.
+
+    Sign convention: Positive when the electromotive force drives conventional
+    plasma current in the direction of increasing toroidal angle $\phi$,
+    counter-clockwise when viewed from above along $+\hat{Z}$.
+  unit: V
+
+- name: safety_factor
+  description: |-
+    Signed ratio of toroidal to poloidal field-line winding on a magnetic flux
+    surface, equal to the toroidal turns made during one poloidal circuit.
+  documentation: |-
+    The safety factor $q$ is the signed field-line winding ratio on a magnetic
+    flux surface. It gives the toroidal winding associated with one poloidal
+    circuit and is a property of the magnetic equilibrium; when derived from an
+    equilibrium, it is the value calculated from the reconstructed
+    magnetic-field geometry.
+
+    The defining differential relation is:
+
+    $$
+    q = \frac{d\Phi_{\mathrm{tor}}}{d\Phi_{\mathrm{pol}}}
+    $$
+
+    Here, $q$ is the safety factor, $\Phi_{\mathrm{tor}}$ is the toroidal
+    magnetic flux associated with the flux surface, $\Phi_{\mathrm{pol}}$ is the
+    poloidal magnetic flux associated with the flux surface, and $d$ denotes an
+    infinitesimal differential between neighboring surfaces.
+
+    The quantity applies to the magnetic field on each relevant closed or
+    limiting flux surface in the plasma, without restriction to a species, axis,
+    or transport channel. This general form represents one value for a selected
+    flux surface and is neither summed nor averaged over surfaces.
+
+    It is distinct from a locus-specific evaluation or an extremum selected over
+    multiple surfaces. For example, [safety factor at magnetic
+    axis](name:safety_factor_at_magnetic_axis) and [safety factor at plasma
+    boundary](name:safety_factor_at_plasma_boundary) are evaluations of this
+    quantity at specified surfaces, whereas [minimum safety
+    factor](name:minimum_safety_factor) applies an additional minimum-selection
+    criterion.
+
+    The [rotational transform](name:rotational_transform) describes the
+    reciprocal field-line winding convention, counting poloidal turns per
+    toroidal circuit rather than toroidal turns per poloidal circuit. Rational
+    safety-factor values identify surfaces on which field-line winding can close
+    after a finite number of toroidal and poloidal turns.
+
+    Sign convention: Positive when a magnetic field line advances in the
+    direction of increasing toroidal angle $\phi$ during the positive poloidal
+    circuit, with orientations defined in the right-handed cylindrical $(R,
+    \phi, Z)$ frame.
+  unit: '1'
+
+- name: thermal_electron_pressure_at_post_sawtooth_crash
+  description: |-
+    Isotropic kinetic pressure produced by random motion of bulk thermal
+    electrons, evaluated in the plasma state immediately after a sawtooth crash.
+  documentation: |-
+    Thermal electron pressure is the isotropic scalar stress contribution
+    produced by random motion of the bulk electron population in the designated
+    post-sawtooth-crash plasma state. It represents the thermal electron
+    contribution rather than the pressure of the full electron population.
+
+    For an isotropic thermal population, the pressure is defined by
+
+    $$
+    p_{e,\mathrm{th}} = \frac{2}{3} n_{e,\mathrm{th}}\langle E_{e,\mathrm{rand}}\rangle
+    $$
+
+    where $p_{e,\mathrm{th}}$ is the thermal electron pressure,
+    $n_{e,\mathrm{th}}$ is the number density of thermal electrons, and $\langle
+    E_{e,\mathrm{rand}}\rangle$ is their mean random kinetic energy; the
+    subscripts $e$ and $\mathrm{th}$ identify electrons and the thermal
+    population, respectively.
+
+    The quantity applies only to bulk thermal electrons and is evaluated in the
+    plasma state immediately following a sawtooth crash. It is an isotropic
+    scalar contribution, aggregated over the included thermal electrons, and
+    excludes fast or otherwise nonthermal electron contributions.
+
+    It is the thermal component of [total electron
+    pressure](name:total_electron_pressure), which combines thermal and
+    suprathermal electron contributions. A fast-particle pressure quantity such
+    as [fast particle pressure](name:fast_particle_pressure) represents a
+    distinct nonthermal population and must not be included in this thermal
+    contribution.
+  unit: Pa
+
+- name: total_electron_pressure
+  description: |-
+    Kinetic pressure associated with the entire electron population, combining
+    thermal and suprathermal contributions in the isotropic electron stress.
+  documentation: |-
+    Total electron pressure is the isotropic kinetic part of the electron
+    pressure tensor, representing random electron momentum transport for the
+    complete electron population.
+
+    For the combined electron distribution function, its defining relation is
+
+    $$
+    p_e = \frac{m_e}{3} \int |\mathbf{v}-\mathbf{u}_e|^2 f_e(\mathbf{v})\,d^3v
+    $$
+
+    where $p_e$ is total electron pressure, $m_e$ is electron mass, $\mathbf{v}$
+    is electron velocity, $\mathbf{u}_e$ is mean electron velocity, and
+    $f_e(\mathbf{v})$ is the combined electron velocity distribution function
+    normalized so its velocity integral gives the electron number density.
+
+    The aggregation includes both bulk thermal and suprathermal electrons and
+    applies across core, edge, and scrape-off-layer plasma. It excludes
+    anisotropic stress components and is not restricted to the thermal electron
+    population alone.
+
+    This quantity makes the total aggregation explicit within [electron
+    pressure](name:electron_pressure): it is the sum of the thermal contribution
+    and the [fast electron pressure](name:fast_electron_pressure) contribution.
+    The parent name denotes the same isotropic pressure concept without
+    requiring the total qualifier.
+
+    Sign convention: Positive when the isotropic electron stress is compressive
+    rather than tensile.
+  unit: Pa
+
+- name: ratio_of_line_averaged_electron_density_to_greenwald_density
+  description: |-
+    Dimensionless Greenwald fraction comparing the electron number density
+    averaged along a plasma chord with the empirical density limit set by plasma
+    current and effective minor radius.
+  documentation: |-
+    The Greenwald fraction measures the proximity of a confined plasma's
+    line-averaged electron density to its empirical Greenwald density limit.
+
+    It is defined by:
+
+    $$
+    f_G = \frac{\bar{n}_e}{n_G}
+    $$
+
+    where $f_G$ is the Greenwald fraction, $\bar{n}_e$ is the [line-averaged
+    electron density](name:line_averaged_electron_density), and $n_G$ is the
+    [Greenwald density](name:greenwald_density) determined from the
+    plasma-current magnitude and effective minor radius.
+
+    The numerator represents the electron population averaged along a plasma
+    chord; the denominator is the empirical density reference for the confined
+    plasma. This quantity is a global normalized ratio, not a local electron
+    density, a density limit itself, or an average over charge states or spatial
+    regions.
+
+    The fraction is the direct normalization of line-averaged electron density
+    by Greenwald density: values near unity indicate proximity to the empirical
+    reference limit, while values above or below unity indicate a line-averaged
+    density respectively above or below that reference.
+  unit: '1'
+
+- name: ratio_of_line_averaged_hydrogen_density_to_line_averaged_total_hydrogenic_density
+  description: |-
+    Dimensionless line-averaged protium fraction among hydrogenic ions, obtained
+    by dividing the protium density by the total hydrogenic density along the
+    same chord.
+  documentation: |-
+    This quantity is the fraction of hydrogenic ion content carried by protium
+    along a specified chord through the plasma. It is a ratio of consistently
+    line-averaged densities, rather than a local fraction or a volume-averaged
+    fraction.
+
+    $$
+    f_{\rm H}^{\rm line} = \frac{\bar{n}_{\rm H}^{\rm line}}{\bar{n}_{\rm H}^{\rm line}+\bar{n}_{\rm D}^{\rm line}+\bar{n}_{\rm T}^{\rm line}}
+    $$
+
+    where $f_{\rm H}^{\rm line}$ is the line-averaged protium fraction,
+    $\bar{n}_{\rm H}^{\rm line}$ is the line-averaged protium-ion number
+    density, $\bar{n}_{\rm D}^{\rm line}$ is the corresponding deuterium-ion
+    number density, and $\bar{n}_{\rm T}^{\rm line}$ is the corresponding
+    tritium-ion number density. The symbols H, D, and T denote protium,
+    deuterium, and tritium, respectively.
+
+    The quantity applies to the hydrogenic ion population along one common chord
+    and aggregates the isotope densities through the total hydrogenic
+    denominator. Neutral atomic hydrogen and non-hydrogenic species are
+    excluded. The numerator is the [line-averaged hydrogen
+    density](name:line_averaged_hydrogen_density), while the denominator is the
+    [total hydrogenic density](name:total_hydrogenic_density) under the same
+    line-averaging convention.
+
+    This ratio differs from the [ratio of volume-averaged hydrogen density to
+    volume-averaged total hydrogenic
+    density](name:ratio_of_volume_averaged_hydrogen_density_to_volume_averaged_total_hydrogenic_density),
+    because the latter uses volume-averaged rather than chord-averaged isotope
+    densities.
+  unit: '1'
+
+- name: thermal_electron_density
+  description: |-
+    Number density of free electrons per physical volume for the local thermal
+    electron population, excluding fast and suprathermal electron contributions.
+  documentation: |-
+    Number density of free electrons per physical volume for the local thermal
+    electron population is the local continuum count density of electrons not
+    bound to atoms, molecules, or ions that belong to the bulk Maxwellian
+    electron component.
+
+    For the thermal electron distribution, the defining relation is:
+
+    $$
+    n_{e,\mathrm{th}}(\mathbf{x}) = \int f_{e,\mathrm{th}}(\mathbf{x},\mathbf{v})\,d^3\mathbf{v}
+    $$
+
+    where $n_{e,\mathrm{th}}(\mathbf{x})$ is the local thermal electron number
+    density, $f_{e,\mathrm{th}}(\mathbf{x},\mathbf{v})$ is the thermal-electron
+    velocity distribution, $\mathbf{x}$ is position, $\mathbf{v}$ is electron
+    velocity, and $d^3\mathbf{v}$ is the volume element in velocity space.
+
+    This quantity applies only to the local bulk thermal electron population.
+    Fast and suprathermal electrons are excluded, and the quantity is neither a
+    chord average nor a volume average. The parent [electron
+    density](name:electron_density) denotes the unqualified local free-electron
+    density without this population restriction.
+
+    The complete local [total electron density](name:total_electron_density) is
+    the sum of this thermal component and the corresponding [fast electron
+    density](name:fast_electron_density) when those components are resolved
+    separately.
+  unit: m^-3
+
+- name: total_electron_density
+  description: |-
+    Number density of free electrons per physical volume for the complete local
+    population, combining thermal and fast electrons rather than selecting one
+    population component.
+  documentation: |-
+    Number density of free electrons per physical volume for the complete local
+    electron population is the local continuum count density of electrons not
+    bound to atoms, molecules, or ions, including both thermal and fast
+    nonthermal contributions.
+
+    The complete local electron density is defined by:
+
+    $$
+    n_e^{\mathrm{total}} = n_e^{\mathrm{thermal}} + n_e^{\mathrm{fast}}
+    $$
+
+    where $n_e^{\mathrm{total}}$ is the complete local free-electron number
+    density, $n_e^{\mathrm{thermal}}$ is the density of the local thermal
+    electron population represented by [thermal electron
+    density](name:thermal_electron_density), and $n_e^{\mathrm{fast}}$ is the
+    density of the local fast, nonthermal electron population represented by
+    [fast electron density](name:fast_electron_density).
+
+    This quantity applies locally to the full free-electron population and is
+    aggregated over its thermal and fast components. It excludes electrons bound
+    in atoms, molecules, or ions, and it is not restricted to either population
+    component. It is also distinct from [line-averaged electron
+    density](name:line_averaged_electron_density) and [volume-averaged electron
+    density](name:volume_averaged_electron_density), which apply spatial
+    averaging rather than a local evaluation.
+
+    As the complete-population form of [electron
+    density](name:electron_density), it includes both thermal and nonthermal
+    contributions. Integrating this local quantity over a specified plasma
+    volume gives [volume-integrated total electron density], whereas the
+    component names retain only one electron population.
+  unit: m^-3
+
+- name: volume_averaged_electron_density
+  description: |-
+    Number density of free electrons per physical volume averaged over the
+    plasma volume enclosed by the last closed flux surface, giving the global
+    mean free-electron density.
+  documentation: |-
+    Number density of free electrons per physical volume averaged over the
+    plasma volume enclosed by the last closed flux surface is the global mean of
+    the unqualified free-electron density.
+
+    For local [electron density](name:electron_density) $n_e(\mathbf{x})$, the
+    defining relation is:
+
+    $$
+    \langle n_e\rangle_{\rm LCFS} = \frac{1}{V_{\rm LCFS}}\int_{V_{\rm LCFS}} n_e(\mathbf{x})\,\mathrm{d}V
+    $$
+
+    where $\langle n_e\rangle_{\rm LCFS}$ is the volume-averaged electron
+    density, $n_e(\mathbf{x})$ is the local free-electron number density at
+    spatial position $\mathbf{x}$, $V_{\rm LCFS}$ is the plasma volume enclosed
+    by the last closed flux surface, and $\mathrm{d}V$ is a differential volume
+    element.
+
+    The average includes the complete unqualified free-electron population
+    within the last-closed-flux-surface volume and is not restricted to thermal
+    or fast electrons. It is a global volume mean rather than a local value and
+    excludes plasma volume outside that boundary; unlike [line-averaged electron
+    density](name:line_averaged_electron_density), it is not averaged along a
+    chord.
+
+    This quantity is the volume-averaging transformation of [electron
+    density](name:electron_density). It provides the common denominator for
+    volume-averaged elemental abundance ratios, such as the [volume-averaged
+    argon-to-electron density
+    ratio](name:ratio_of_volume_averaged_argon_density_to_volume_averaged_electron_density),
+    whose numerator and denominator are averaged over the same plasma volume.
+  unit: m^-3

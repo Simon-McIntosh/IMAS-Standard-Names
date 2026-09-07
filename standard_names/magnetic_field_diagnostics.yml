@@ -1,0 +1,561 @@
+- name: area_of_poloidal_magnetic_field_probe
+  description: |-
+    Geometric cross-sectional area enclosed by one winding turn of a poloidal
+    magnetic-field probe coil, defining its per-turn magnetic-flux coupling.
+  documentation: |-
+    The quantity is the geometric cross-sectional area enclosed by one winding
+    turn of a poloidal magnetic-field probe coil. It represents the
+    magnetic-flux coupling area of an individual pickup-coil turn and is
+    nonnegative.
+
+    For a winding composed of identical turns, the ideal effective flux-sensing
+    area is
+
+    $$
+    A_{\mathrm{eff}} = N A_{\mathrm{turn}}
+    $$
+
+    where $A_{\mathrm{eff}}$ is the signed effective geometric flux-sensing area
+    of the complete winding, $N$ is the signed number of winding turns, and
+    $A_{\mathrm{turn}}$ is the area of one turn.
+
+    This quantity is defined per turn and applies only to the probe-coil
+    geometry; it does not include the number of turns, winding orientation, or
+    calibration factors. Consequently, it is distinct from the complete
+    effective area of a flux-loop sensor, such as [area of a flux
+    loop](name:area_of_flux_loop). The corresponding [turn count of a poloidal
+    magnetic-field probe](name:turn_count_of_poloidal_magnetic_field_probe)
+    combines with this area to determine the winding's ideal effective
+    flux-sensing area.
+  unit: m^2
+
+- name: area_of_toroidal_magnetic_field_probe
+  description: |-
+    Geometric area enclosed by one complete winding turn of a toroidal
+    magnetic-field probe coil, setting its single-turn magnetic-flux
+    sensitivity.
+  documentation: |-
+    The quantity is the geometric area enclosed by one complete winding turn of
+    a toroidal magnetic-field probe coil. It characterizes the coil’s
+    single-turn coupling to magnetic flux and is independent of the number of
+    winding turns.
+
+    For a coil with multiple turns, the effective flux-coupling area is related
+    to the single-turn area by
+
+    $$
+    A_{\mathrm{eff}} = N A_{\mathrm{turn}}
+    $$
+
+    where $A_{\mathrm{eff}}$ is the effective flux-coupling area of the complete
+    winding, $N$ is the signed [turn count of the toroidal magnetic-field
+    probe](name:turn_count_of_toroidal_magnetic_field_probe), and
+    $A_{\mathrm{turn}}$ is the area enclosed by one turn represented by this
+    quantity.
+
+    The scope is limited to the physical area of one turn of the toroidal
+    magnetic-field probe coil; no summation over turns, orientation sign, or
+    additional calibration factor is included. It is distinct from the
+    corresponding [area of a poloidal magnetic-field
+    probe](name:area_of_poloidal_magnetic_field_probe) and from the probe’s
+    induced [voltage](name:voltage_of_toroidal_magnetic_field_probe), which
+    results from time-varying linked magnetic flux. Together with the winding
+    count, this area determines the probe’s magnetic-flux sensitivity.
+  unit: m^2
+
+- name: length_of_poloidal_magnetic_field_probe
+  description: |-
+    Physical extent of a poloidal magnetic-field probe coil measured along its
+    assigned local normal sensing axis, contributing to the coil’s magnetic-flux
+    response.
+  documentation: |-
+    The length of a poloidal magnetic-field probe is the physical extent of its
+    sensing coil along the coil’s assigned local normal sensing axis. It
+    describes the coil geometry rather than the length of a signal lead or the
+    distance between mounting points.
+
+    This quantity applies to one poloidal magnetic-field probe coil as a whole.
+    It is distinct from the [area of the poloidal magnetic-field
+    probe](name:area_of_poloidal_magnetic_field_probe), which describes the area
+    enclosed by one winding turn, and from the [turn count of the poloidal
+    magnetic-field probe](name:turn_count_of_poloidal_magnetic_field_probe),
+    which describes the number and orientation of complete turns.
+
+    The coil length, its enclosed per-turn area, and its winding-turn count
+    jointly characterize the probe’s magnetic-flux coupling and effective
+    sensing geometry. The length does not itself specify the coil area, winding
+    count, or magnetic-field orientation.
+  unit: m
+
+- name: length_of_toroidal_magnetic_field_probe
+  description: |-
+    Physical length of a toroidal magnetic-field probe is the non-negative axial
+    extent of the probe coil along its local normal sensing axis. It
+    characterizes sensor geometry and effective sensing volume; magnetic-flux
+    sensitivity is associated with enclosed coil area and winding turn count
+    rather than this length alone.
+  documentation: |-
+    Physical length of a toroidal magnetic-field probe is the non-negative axial
+    extent of the probe coil along its local normal sensing axis. The probe coil
+    is oriented so that its normal senses the toroidal magnetic-field component
+    $B_\phi$ in the right-handed cylindrical $(R, \phi, Z)$ frame, where $R$ is
+    major radius, $\phi$ is toroidal angle, and $Z$ is vertical height; the
+    length refers to sensor geometry, not to an extent of the magnetic field.
+
+    Using projection onto the local sensing axis, the length is the span of the
+    active winding region along that axis:
+
+    $$
+    L_\phi = \max_{\mathbf{r} \in \mathcal{C}} (\mathbf{r}\cdot\hat{\mathbf{n}}) - \min_{\mathbf{r} \in \mathcal{C}} (\mathbf{r}\cdot\hat{\mathbf{n}})
+    $$
+
+    where $L_\phi$ is the physical length of the toroidal magnetic-field probe,
+    $\mathcal{C}$ is the active winding region of the probe coil, $\mathbf{r}$
+    is the position vector of a point in that region, and $\hat{\mathbf{n}}$ is
+    the normalized local normal sensing-axis direction.
+
+    This quantity applies to one physical toroidal magnetic-field probe coil; it
+    is not summed, averaged, or otherwise aggregated over a set of probes. As a
+    scalar span, it is non-negative and is not a signed displacement along
+    $\hat{\mathbf{n}}$. It excludes the probe's [enclosed
+    area](name:area_of_toroidal_magnetic_field_probe), winding turn count, body
+    diameter, lead length, installation position, and any path length around the
+    device.
+
+    The product of this length with the [enclosed
+    area](name:area_of_toroidal_magnetic_field_probe) characterizes the probe's
+    effective sensing volume. Magnetic-flux sensitivity of the pickup coil is
+    associated with enclosed area and winding turn count, while the [probe
+    voltage](name:voltage_of_toroidal_magnetic_field_probe) is the response
+    quantity produced by changing magnetic flux; the corresponding
+    [poloidal-probe length](name:length_of_poloidal_magnetic_field_probe) uses
+    the same projected-span convention for its probe orientation.
+  unit: m
+
+- name: toroidal_angle_of_poloidal_magnetic_field_probe
+  description: |-
+    Signed azimuthal orientation angle of a poloidal magnetic-field probe’s
+    sensitive-axis normal in the right-handed cylindrical (R, φ, Z) frame.
+  documentation: |-
+    This quantity is the signed toroidal orientation of the sensitive-axis
+    normal of a poloidal magnetic-field probe coil. It measures the normal’s
+    departure from the poloidal plane through the orientation of its horizontal
+    projection.
+
+    In the right-handed cylindrical $(R,\phi,Z)$ frame, the angle is defined by
+
+    $$
+    \alpha_{\mathrm{tor}} = \operatorname{atan2}(n_\phi,n_R), \qquad n_R=\mathbf{n}\cdot\hat{\mathbf{R}}, \quad n_\phi=\mathbf{n}\cdot\hat{\boldsymbol{\phi}}
+    $$
+
+    where $\alpha_{\mathrm{tor}}$ is the toroidal orientation angle,
+    $\mathbf{n}$ is the probe’s sensitive-axis unit normal, $n_R$ and $n_\phi$
+    are its cylindrical radial and toroidal components, and $\hat{\mathbf{R}}$
+    and $\hat{\boldsymbol{\phi}}$ are the radial and toroidal unit vectors. Here
+    $R$ is major radius, $\phi$ is toroidal angle, and $Z$ is vertical height;
+    $\operatorname{atan2}$ returns the signed angle from the positive radial
+    direction to the horizontal projection of $\mathbf{n}$.
+
+    The quantity applies to the geometric orientation of each poloidal
+    magnetic-field probe coil. It is not the local plasma magnetic field, a
+    field component, or an angle averaged over probes, turns, or field samples.
+    The angle determines how the probe’s sensitive direction is related to the
+    local magnetic-field vector and therefore how the measured component is
+    projected. The corresponding toroidal orientation for a toroidal probe is
+    defined by
+    [toroidal_angle_of_toroidal_magnetic_field_probe](name:toroidal_angle_of_toroidal_magnetic_field_probe),
+    while its independent poloidal tilt is represented by
+    [poloidal_angle_of_toroidal_magnetic_field_probe](name:poloidal_angle_of_toroidal_magnetic_field_probe).
+
+    Sign convention: Positive when rotation from the positive radial direction
+    toward the horizontal projection of the sensitive-axis normal is toward
+    increasing toroidal angle $\phi$ in the right-handed cylindrical
+    $(R,\phi,Z)$ frame.
+  unit: rad
+
+- name: toroidal_angle_of_toroidal_magnetic_field_probe
+  description: |-
+    The toroidal angle of a toroidal magnetic-field probe is the signed
+    azimuthal orientation of the probe sensitive-axis normal projected onto the
+    horizontal plane, measured from +R toward increasing φ in the right-handed
+    cylindrical (R, φ, Z) frame. Opposite projected normals are folded into the
+    same principal orientation.
+  documentation: |-
+    The toroidal angle of a toroidal magnetic-field probe is the signed
+    azimuthal orientation of the probe sensitive-axis normal after projection
+    onto the horizontal plane spanned by $\hat R$ and $\hat\phi$ in the
+    right-handed cylindrical $(R, \phi, Z)$ frame, where $R$ is major radius,
+    $\phi$ is toroidal angle, and $Z$ is vertical height. Its zero direction is
+    the outward radial direction, and the projected normal is treated as an
+    orientation axis rather than a directed vector.
+
+    The angle is defined by the two-argument arctangent of the horizontal normal
+    components, folded modulo $\pi$ into the principal interval $(-\pi/2,
+    \pi/2]$:
+
+    $$
+    \alpha_\phi = \mathcal{F}_{(-\pi/2,\pi/2]}\!\left(\operatorname{atan2}(n_\phi,n_R)\right)
+    $$
+
+    where $\alpha_\phi$ is this toroidal angle, $n_R$ and $n_\phi$ are the
+    radial and toroidal scalar components of the normalized probe sensitive-axis
+    normal vector in the right-handed cylindrical $(R, \phi, Z)$ frame, and
+    $\mathcal{F}_{(-\pi/2,\pi/2]}(\beta)$ denotes the representative of an angle
+    $\beta$ after adding an integer multiple of $\pi$ that lies in $(-\pi/2,
+    \pi/2]$.
+
+    This quantity applies only to toroidal magnetic-field probes and is defined
+    separately for each probe. It describes sensor orientation, not the
+    [toroidal angle](name:toroidal_angle) that locates a point and not the probe
+    position; no aggregation over multiple probes is implied.
+
+    With the modulo-$\pi$ folding, projections parallel or antiparallel to
+    $+\hat R$ have $\alpha_\phi=0$, and projections parallel or antiparallel to
+    $+\hat\phi$ have the principal value $\alpha_\phi=\pi/2$. Together with the
+    [poloidal angle of a toroidal magnetic-field
+    probe](name:poloidal_angle_of_toroidal_magnetic_field_probe), it specifies
+    the orientation of the same sensitive-axis normal; it is the
+    toroidal-field-probe-specific counterpart of the [toroidal angle of a
+    magnetic-field probe](name:toroidal_angle_of_poloidal_magnetic_field_probe).
+
+    Sign convention: Positive when the horizontal orientation is tilted from the
+    radial basis line toward increasing toroidal angle $\phi$ in the
+    right-handed cylindrical $(R, \phi, Z)$ frame.
+  unit: rad
+
+- name: turn_count_of_poloidal_magnetic_field_probe
+  description: |-
+    Signed count of complete winding turns in a poloidal magnetic-field probe
+    coil, fixing the orientation and magnitude of its magnetic-flux linkage.
+  documentation: |-
+    The quantity is the signed number of complete winding turns in a poloidal
+    magnetic-field probe coil. Its magnitude counts the turns, while its sign
+    records the winding orientation used to define magnetic-flux linkage.
+
+    For turns with a common flux orientation, the total flux linkage is
+
+    $$
+    \Lambda = N\Phi_1
+    $$
+
+    where $\Lambda$ is the total magnetic flux linkage of the coil, $N$ is the
+    signed winding-turn count, and $\Phi_1$ is the magnetic flux through one
+    turn using the probe's reference orientation.
+
+    This quantity applies to one physical poloidal magnetic-field probe coil and
+    aggregates all of its complete winding turns, assigning one signed
+    contribution to each turn. It is a literal coil-turn count, not the local
+    poloidal magnetic-field value and not the geometric area enclosed by a turn.
+
+    For this probe, the literal winding count provides the physical
+    specialization of the equivalent coupling count represented by
+    [effective_turn_count_of_passive_loop](name:effective_turn_count_of_passive_loop);
+    unlike that broader quantity, it is not a homogenized or equivalent
+    passive-loop count that may be fractional. Together with the
+    [area_of_poloidal_magnetic_field_probe](name:area_of_poloidal_magnetic_field_probe),
+    it determines the probe's per-turn magnetic-flux coupling. The corresponding
+    toroidal-coil quantity is
+    [turn_count_of_toroidal_magnetic_field_probe](name:turn_count_of_toroidal_magnetic_field_probe).
+  unit: '1'
+
+- name: turn_count_of_toroidal_magnetic_field_probe
+  description: |-
+    Signed number of complete winding turns in a toroidal magnetic-field probe
+    coil, with orientation referenced to the positive toroidal direction.
+  documentation: |-
+    This quantity is the signed number of complete winding turns in a toroidal
+    magnetic-field probe coil. It represents the coil's oriented electromagnetic
+    coupling to the toroidal magnetic-field component, rather than a
+    magnetic-field value.
+
+    The scope is one toroidal magnetic-field probe coil. The count refers to its
+    physical complete windings, includes their common orientation, and does not
+    aggregate turns over multiple probes or channels. It excludes the coil's
+    enclosed area, length, induced voltage, and any calibration factor.
+
+    Reversing the winding orientation reverses the sign. Together with the [area
+    of the toroidal magnetic-field
+    probe](name:area_of_toroidal_magnetic_field_probe), this count sets the
+    ideal flux-linkage sensitivity to the toroidal magnetic field. It is the
+    literal winding-count specialization related to the [effective turn count of
+    a passive loop](name:effective_turn_count_of_passive_loop), which can
+    represent equivalent or homogenized windings and may therefore differ from a
+    complete-turn count. The corresponding poloidal-orientation quantity is the
+    [turn count of a poloidal magnetic-field
+    probe](name:turn_count_of_poloidal_magnetic_field_probe).
+
+    The orientation is defined in the right-handed cylindrical $(R,\phi,Z)$
+    frame, where $R$ is major radius, $\phi$ is toroidal angle, and $Z$ is
+    vertical height.
+  unit: '1'
+
+- name: vertical_coordinate_of_flux_loop
+  description: |-
+    Vertical Z coordinate of a position point associated with one flux loop in
+    the right-handed cylindrical (R, φ, Z) frame.
+  documentation: |-
+    The quantity is the vertical coordinate $Z$ of a position point associated
+    with one flux loop. It locates that point along the vertical direction in
+    the right-handed cylindrical $(R, \phi, Z)$ frame.
+
+    Here $Z$ denotes vertical height, $R$ denotes major radius from the symmetry
+    axis, and $\phi$ denotes toroidal angle. The value applies to an individual
+    position point of a single flux loop; it is not a loop-area quantity,
+    magnetic flux, voltage, or an aggregate over turns, points, or multiple
+    loops. No population or plasma-region restriction is implied.
+
+    Together with the corresponding radial and toroidal position coordinates,
+    this coordinate locates the flux-loop point in space. It is the
+    flux-loop-specific counterpart of the [vertical coordinate of a measurement
+    position](name:vertical_coordinate_of_measurement_position), which applies
+    the same geometric concept to a generic measurement location.
+
+    Sign convention: Positive when the flux-loop position lies in the +Z
+    direction of the right-handed cylindrical $(R, \phi, Z)$ frame.
+  unit: m
+
+- name: vertical_coordinate_of_poloidal_magnetic_field_probe
+  description: |-
+    Vertical position of the geometric center of a poloidal magnetic-field
+    probe, expressed as its signed Z coordinate in the right-handed cylindrical
+    (R, φ, Z) frame.
+  documentation: |-
+    The vertical position of the geometric center of a poloidal magnetic-field
+    probe is the signed height coordinate of the probe center in the
+    right-handed cylindrical $(R,\phi,Z)$ frame. It locates the probe center
+    along the vertical direction and does not define the orientation of the
+    probe's sensitive axis or the magnetic-field component measured by the
+    probe.
+
+    In the right-handed cylindrical $(R,\phi,Z)$ frame, with $R$ the major
+    radius from the toroidal symmetry axis, $\phi$ the toroidal angle, and $Z$
+    the vertical coordinate, the probe-center coordinate is defined by
+
+    $$
+    Z_{\mathrm{probe}} = \mathbf{r}_{\mathrm{probe}} \cdot \hat{Z}
+    $$
+
+    where $Z_{\mathrm{probe}}$ is the vertical coordinate of the poloidal
+    magnetic-field probe center, $\mathbf{r}_{\mathrm{probe}}$ is the position
+    vector of that geometric center relative to the coordinate origin, and
+    $\hat{Z}$ is the vertical unit vector.
+
+    This quantity applies to the geometric center of a poloidal magnetic-field
+    probe as a physical object. For a probe with finite extent, it refers to the
+    center position rather than to the probe size, winding distribution, support
+    structure, or any spatial average of the measured magnetic field.
+
+    Together with the [radial coordinate of a poloidal magnetic-field
+    probe](name:radial_coordinate_of_poloidal_magnetic_field_probe), it
+    specifies the probe-center position in the $(R,Z)$ poloidal cross-section at
+    a given toroidal angle. The same signed-coordinate concept is used for other
+    magnetic diagnostic objects, such as the [vertical coordinate of a toroidal
+    magnetic-field
+    probe](name:vertical_coordinate_of_toroidal_magnetic_field_probe), the
+    [vertical coordinate of a flux loop](name:vertical_coordinate_of_flux_loop),
+    and the [vertical coordinate of a Rogowski
+    coil](name:vertical_coordinate_of_rogowski_coil), but those names apply to
+    different objects.
+
+    Sign convention: Positive when the probe-center position lies above the
+    machine midplane in the $+Z$ direction.
+  unit: m
+
+- name: vertical_coordinate_of_toroidal_magnetic_field_probe
+  description: |-
+    Vertical position of the geometric center of a toroidal magnetic-field probe
+    coil, expressed as the signed Z coordinate in the right-handed cylindrical
+    (R, φ, Z) frame.
+  documentation: |-
+    The vertical coordinate identifies the geometric center of an individual
+    toroidal magnetic-field probe coil in the right-handed cylindrical basis
+    $(\hat{R},\hat{\phi},\hat{Z})$, with coordinates $(R,\phi,Z)$. It locates
+    the coil and does not represent the magnetic field sensed by the probe.
+
+    The coordinate is the projection of the center position onto the vertical
+    basis direction:
+
+    $$
+    Z_{\mathrm{probe}} = \mathbf{r}_{\mathrm{center}} \cdot \hat{Z}
+    $$
+
+    where $Z_{\mathrm{probe}}$ is the probe-center vertical coordinate,
+    $\mathbf{r}_{\mathrm{center}}$ is the position vector from the
+    cylindrical-frame origin to the geometric center of the coil, and $\hat{Z}$
+    is the vertical unit vector. Here $R$ denotes major radius, $\phi$ denotes
+    toroidal angle, and $Z$ denotes vertical coordinate.
+
+    The quantity applies to one toroidal magnetic-field probe coil center. It is
+    not summed, averaged, or weighted over windings, probes, or a spatial
+    region. It excludes the probe's sensitive-axis orientation and the local
+    magnetic-field value, and is distinct from the corresponding position
+    coordinate for a [poloidal magnetic-field
+    probe](name:vertical_coordinate_of_poloidal_magnetic_field_probe).
+
+    As the $Z$ component of the coil-center position, this coordinate
+    complements the radial and toroidal position coordinates in locating the
+    probe within the right-handed cylindrical $(R,\phi,Z)$ frame.
+
+    Sign convention: Positive when the probe-coil center lies in the $+Z$
+    direction of the right-handed cylindrical $(R,\phi,Z)$ frame.
+  unit: m
+
+- name: voltage_of_poloidal_magnetic_field_probe
+  description: |-
+    Terminal voltage at a poloidal magnetic-field probe is the inductive voltage
+    at the coil terminals caused by time variation of the local poloidal
+    magnetic-field component in the R-Z plane of the right-handed cylindrical
+    (R, φ, Z) frame threading the probe windings.
+  documentation: |-
+    Terminal voltage at a poloidal magnetic-field probe is the signed
+    coil-terminal electromotive force associated with the probe winding that
+    senses the local poloidal magnetic field. The sensed field component lies in
+    the $R$-$Z$ plane of the right-handed cylindrical $(R, \phi, Z)$ frame and
+    is projected along the probe sensitive-axis normal.
+
+    For a probe with algebraic turn count $N$ and geometric per-turn area $A$,
+    Faraday's law relates the terminal voltage to the local poloidal field
+    component $B_p$ as:
+
+    $$
+    V = -N A \frac{dB_p}{dt}
+    $$
+
+    where $V$ is the terminal voltage at the coil terminals, $B_p$ is the local
+    poloidal magnetic-field component along the positive sensitive-axis normal,
+    $N$ is the algebraic turn count including winding direction, $A$ is the
+    [area of poloidal magnetic-field
+    probe](name:area_of_poloidal_magnetic_field_probe), and $t$ is time.
+
+    The quantity applies to one poloidal-field probe coil and is not aggregated
+    over multiple probes. Its locus is specified by the [major radius of
+    poloidal magnetic-field probe], [toroidal angle of poloidal magnetic-field
+    probe](name:toroidal_angle_of_poloidal_magnetic_field_probe), and [poloidal
+    angle of poloidal magnetic-field probe]; these position quantities identify
+    where the local field component is sampled and are not themselves voltages.
+
+    This quantity is distinct from the derived local poloidal magnetic field. It
+    is the poloidal-field-probe counterpart of [voltage of toroidal
+    magnetic-field probe](name:voltage_of_toroidal_magnetic_field_probe), for a
+    coil oriented to sense the toroidal field, and is distinct from [voltage of
+    flux loop](name:voltage_of_flux_loop), which corresponds to a loop enclosing
+    magnetic flux rather than a local magnetic-field probe winding.
+
+    Sign convention: Positive when the poloidal magnetic flux threading the coil
+    in the direction of the probe's positive sensitive-axis normal is decreasing
+    with time.
+  unit: V
+
+- name: poloidal_angle_of_toroidal_magnetic_field_probe
+  description: |-
+    Signed poloidal tilt angle of a toroidal magnetic-field probe’s
+    sensitive-axis normal in the right-handed cylindrical (R, φ, Z) frame,
+    measured clockwise from +R.
+  documentation: |-
+    The quantity is the signed orientation angle of the normal defining a
+    toroidal magnetic-field probe’s sensitive axis. It specifies the probe’s
+    tilt in the poloidal cross-section, rather than the spatial angle of the
+    probe center.
+
+    In the right-handed cylindrical $(R,\phi,Z)$ frame, where $R$ is major
+    radius, $\phi$ is toroidal angle, and $Z$ is vertical height, let $n_R$ and
+    $n_Z$ denote the components of the probe’s oriented sensitive-axis normal
+    along the increasing-$R$ and increasing-$Z$ directions. The poloidal angle
+    $\theta_{\rm pol}$ is defined by:
+
+    $$
+    \theta_{\rm pol} = \operatorname{atan2}(-n_Z,n_R)
+    $$
+
+    where $\operatorname{atan2}$ is the two-argument arctangent that preserves
+    the quadrant of the projected normal.
+
+    The scope is one toroidal magnetic-field probe and its oriented
+    sensitive-axis normal. This is a geometric sensor-orientation quantity, not
+    the poloidal coordinate of the probe center, the direction of the measured
+    magnetic field, or a plasma flux-surface coordinate; it has no
+    plasma-population or region aggregation and is not summed over probes or
+    coil windings.
+
+    It is a probe-specific application of the parent [poloidal
+    angle](name:poloidal_angle_of_flux_surface): the parent defines the
+    geometric angular measure, while this quantity applies it to the probe’s
+    oriented normal. The complementary
+    [toroidal_angle_of_toroidal_magnetic_field_probe](name:toroidal_angle_of_toroidal_magnetic_field_probe)
+    describes the toroidal orientation of the same probe normal, whereas
+    [poloidal_angle_of_measurement_position](name:poloidal_angle_of_measurement_position)
+    describes the angular location of a measurement point.
+
+    Sign convention: Positive when the sensitive-axis normal points from the
+    outward radial direction toward decreasing $Z$ in the right-handed
+    cylindrical $(R,\phi,Z)$ frame, following the clockwise direction in the
+    poloidal plane.
+  unit: rad
+
+- name: radial_coordinate_of_flux_loop
+  description: |-
+    Major-radius coordinate of each geometric point defining a flux-loop
+    position, measured as perpendicular distance from the toroidal symmetry axis
+    in the right-handed cylindrical (R, φ, Z) frame.
+  documentation: |-
+    The quantity is the non-negative major-radius coordinate $R$ of each
+    geometric point defining a flux-loop position. In the right-handed
+    cylindrical $(R,\phi,Z)$ frame, $R$ is the distance from the toroidal
+    symmetry axis, $\phi$ is toroidal angle, and $Z$ is vertical height.
+
+    For horizontal Cartesian coordinates $X$ and $Y$ in a right-handed Cartesian
+    $(\hat{x},\hat{y},\hat{z})$ basis whose vertical direction coincides with
+    cylindrical $\hat{Z}$, the coordinate is defined by:
+
+    $$
+    R = \sqrt{X^2 + Y^2}
+    $$
+
+    where $X$ and $Y$ are the point's Cartesian coordinates along $\hat{x}$ and
+    $\hat{y}$, and $R$ is its major-radius coordinate.
+
+    The quantity applies separately to every geometric point defining one
+    flux-loop position, including a partial loop; it is not a loop-wide average,
+    centroid, or other aggregation of those points. It is a geometric coordinate
+    only and does not represent the loop's other position coordinates, linked
+    magnetic flux, induced voltage, or [effective flux-loop
+    area](name:area_of_flux_loop).
+
+    This quantity is the flux-loop-specific specialization of the general
+    [radial coordinate](name:radial_coordinate): it retains the same
+    major-radius definition while identifying the point as part of flux-loop
+    geometry. The complete point position requires its corresponding toroidal
+    and vertical coordinates.
+  unit: m
+
+- name: radial_coordinate_of_poloidal_magnetic_field_probe
+  description: |-
+    Major-radius coordinate locating the center of a poloidal magnetic-field
+    probe in the right-handed cylindrical (R, φ, Z) frame.
+  documentation: |-
+    The radial coordinate of a poloidal magnetic-field probe is the major-radius
+    location of the probe center relative to the toroidal symmetry axis,
+    expressed in the right-handed cylindrical $(R, c6, Z)$ frame.
+
+    The coordinate is defined by the magnitude of the displacement perpendicular
+    to the toroidal symmetry axis:
+
+    $$
+    R = \left|\mathbf{r}_{\perp}\right|
+    $$
+
+    where $R$ is the major-radius coordinate and $\mathbf{r}_{\perp}$ is the
+    displacement from the toroidal symmetry axis within the plane perpendicular
+    to that axis.
+
+    This quantity applies specifically to the geometric center of one poloidal
+    magnetic-field probe and is not an aggregate over multiple probes or a
+    coordinate of the measured magnetic field. It identifies the radial location
+    only; the corresponding vertical location is given by the [vertical
+    coordinate of the poloidal magnetic-field
+    probe](name:vertical_coordinate_of_poloidal_magnetic_field_probe).
+
+    It is the probe-specific specialization of the general [radial
+    coordinate](name:radial_coordinate), obtained by evaluating that coordinate
+    at the probe center.
+  unit: m

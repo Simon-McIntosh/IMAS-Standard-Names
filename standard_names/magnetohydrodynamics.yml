@@ -1,0 +1,149 @@
+- name: effective_charge
+  description: |-
+    Dimensionless effective ionic charge of a plasma mixture, given by the
+    second ionic charge moment divided by free-electron density and indicating
+    impurity content.
+  documentation: |-
+    Effective charge $Z_\mathrm{eff}$ is the charge-weighted mean ionic charge
+    of a plasma mixture, formed from the second moment of the ionic charge
+    distribution and normalized by the free-electron density.
+
+    The defining relation is
+
+    $$
+    Z_\mathrm{eff} = \frac{\sum_s n_s Z_s^2}{n_e}
+    $$
+
+    where $n_s$ is the number density of ions in species and charge-state
+    category $s$, $Z_s$ is the positive ionic charge number for that category,
+    and $n_e$ is the free-electron number density. For a quasineutral mixture,
+    $n_e$ equals the sum of $n_s Z_s$ over the same ion population.
+
+    This quantity applies to the complete included ion mixture, with
+    contributions summed over all represented ion species and charge states; it
+    is not restricted to one species, charge state, plasma region, or spatial
+    averaging geometry. A local value and a prescribed spatially averaged value
+    share this same charge aggregation convention.
+
+    Effective charge is distinct from the charge number of an individual ion and
+    from the [square of an ion charge number](name:square_of_ion_charge_number),
+    which describes a single-species charge moment rather than the mixture-level
+    ratio. Spatially averaged instances retain the local definition:
+    [line-averaged effective charge](name:line_averaged_effective_charge)
+    averages this quantity along a line, whereas [volume-averaged effective
+    charge](name:volume_averaged_effective_charge) averages it over a plasma
+    volume.
+  unit: '1'
+
+- name: electron_temperature
+  description: |-
+    Energy-equivalent measure of the random kinetic energy of the bulk electron
+    population, defined through its second velocity moment.
+  documentation: |-
+    Electron temperature is the intensive kinetic-temperature measure of the
+    bulk electron population, expressed as energy per particle rather than as a
+    volume-integrated energy.
+
+    For an isotropic electron population, the energy-equivalent temperature is
+    defined by
+
+    $$
+    T_e = \frac{2}{3}\left\langle E_{e,\mathrm{kin}}\right\rangle
+    $$
+
+    where $T_e$ is the electron temperature and $\left\langle
+    E_{e,\mathrm{kin}}\right\rangle$ is the mean random kinetic energy of one
+    bulk electron; the angle brackets denote averaging over the electron
+    population.
+
+    This quantity applies at any specified plasma location or over an explicitly
+    defined spatial sampling domain, without imposing a particular spatial
+    aggregation. A local value is neither line-averaged nor volume-averaged
+    unless that operation is stated explicitly. [Line-averaged electron
+    temperature](name:line_averaged_electron_temperature) is the corresponding
+    chord-averaged quantity, while [volume-averaged electron
+    temperature](name:volume_averaged_electron_temperature) is averaged over the
+    confined plasma volume.
+
+    The definition concerns the bulk thermal electron population and does not
+    represent the total energy carried by all electrons. It is therefore
+    distinct from [thermal electron energy](name:thermal_electron_energy), which
+    is an extensive volume-integrated energy, and from temperatures assigned to
+    other particle populations or selected charge states.
+  unit: eV
+
+- name: normalized_poloidal_flux_coordinate
+  description: |-
+    Normalized poloidal flux coordinate is a radial label for nested magnetic
+    flux surfaces based on poloidal magnetic flux. It is zero at the magnetic
+    axis and one at the last closed flux surface; for a line-of-sight locus, it
+    denotes the minimum value reached along the line.
+  documentation: |-
+    Normalized poloidal flux coordinate $\rho_{\mathrm{pol,norm}}$ is a radial
+    label for nested magnetic flux surfaces based on the [poloidal magnetic
+    flux](name:poloidal_magnetic_flux). It is defined to be $0$ at the magnetic
+    axis and $1$ at the last closed flux surface, and it identifies the flux
+    surface associated with a local point, a measurement locus, or a
+    flux-surface function.
+
+    The coordinate is defined from the normalized poloidal-flux difference:
+
+    $$
+    \rho_{\mathrm{pol,norm}} = \sqrt{\frac{\psi - \psi_{\mathrm{axis}}}{\psi_{\mathrm{LCFS}} - \psi_{\mathrm{axis}}}}
+    $$
+
+    where $\psi$ is the [poloidal magnetic flux](name:poloidal_magnetic_flux) at
+    the local point or flux surface being labeled, $\psi_{\mathrm{axis}}$ is the
+    [poloidal magnetic flux at magnetic
+    axis](name:poloidal_magnetic_flux_at_magnetic_axis), and
+    $\psi_{\mathrm{LCFS}}$ is the value of poloidal magnetic flux at the last
+    closed flux surface; all values refer to the same equilibrium.
+
+    The supported region is the closed-flux-surface region from the magnetic
+    axis to the last closed flux surface, giving $0 \le \rho_{\mathrm{pol,norm}}
+    \le 1$ for loci in that region. For a local locus, the quantity is the local
+    value; for a line-of-sight locus, the aggregation convention is the minimum
+    value attained along the line within the supported region. The line-of-sight
+    value is not a path average, chord integral, or endpoint value.
+
+    The square of $\rho_{\mathrm{pol,norm}}$ is the normalized poloidal-flux
+    fraction, so the square-root form preserves poloidal-flux surface ordering
+    while giving a radius-like label. This quantity is distinct from
+    unnormalized poloidal magnetic flux, from a geometric minor-radius
+    coordinate, and from the [normalized toroidal flux
+    coordinate](name:normalized_toroidal_flux_coordinate), which is based on
+    normalized toroidal magnetic flux rather than normalized poloidal magnetic
+    flux.
+  unit: '1'
+
+- name: total_power_due_to_ohmic_dissipation
+  description: |-
+    Aggregate rate of irreversible electrical-energy conversion into heat by
+    resistive current flow across the applicable conducting plasma or structure.
+  documentation: |-
+    Total ohmic-dissipation power is the rate of irreversible conversion of
+    electrical work into heat by finite-resistivity currents. The total
+    aggregation covers the complete applicable conducting domain rather than one
+    selected surface, component, or region.
+
+    For a conducting domain $V$, the power is defined by
+
+    $$
+    P_{\mathrm{ohm}} = \int_V \mathbf{J} \cdot \mathbf{E}_{\mathrm{res}}\,dV
+    $$
+
+    where $P_{\mathrm{ohm}}$ is the total ohmic-dissipation power, $\mathbf{J}$
+    is electric-current density, $\mathbf{E}_{\mathrm{res}}$ is the resistive
+    electric field, and $V$ is the conducting volume over which dissipation is
+    aggregated.
+
+    For the global plasma quantity, the domain is the full plasma region and the
+    result includes the total resistive heating associated with the plasma
+    current, not only a local contribution or the halo-region contribution. The
+    same physical definition applies to an explicitly named conducting locus:
+    [power at the wall](name:power_at_wall_due_to_ohmic_dissipation) restricts
+    the domain to wall and vessel structures, while [power of the
+    divertor](name:power_of_divertor_due_to_ohmic_dissipation) restricts it to
+    all divertor targets. These locus-specific quantities are distinct from the
+    global total and exclude radiated or externally launched power.
+  unit: W

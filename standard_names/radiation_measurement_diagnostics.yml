@@ -1,0 +1,1117 @@
+- name: area_of_diagnostic_aperture
+  description: |-
+    Geometric area of the designated diagnostic aperture surface that admits or
+    collects radiation or particles.
+  documentation: |-
+    Diagnostic aperture area is the geometric extent of the designated limiting
+    surface through which radiation or particles are admitted or collected. It
+    may describe a clear aperture opening or a collecting face when that face
+    defines the aperture.
+
+    The area is defined by the surface integral
+
+    $$
+    A = \int_S dS
+    $$
+
+    where $A$ is the diagnostic aperture area, $S$ is the designated aperture
+    surface, and $dS$ is the differential area element on that surface.
+
+    This quantity applies to the specified aperture surface of the diagnostic
+    and is not an automatically aggregated area for unrelated apertures. It is a
+    geometric area, excluding surrounding housing, supports, and other
+    structures unless they form the designated aperture surface; it is not an
+    effective area weighted by transmission, sensitivity, or angular response.
+
+    The area is distinct from the [radius of a diagnostic
+    aperture](name:radius_of_diagnostic_aperture) and the [width of a diagnostic
+    aperture], which describe linear dimensions. For a circular aperture of
+    radius $r$, where $r$ is the geometric distance from the aperture center to
+    its boundary, the area satisfies $A = \pi r^2$, with $\pi$ denoting the
+    circle constant.
+  unit: m^2
+
+- name: cold_neutral_fraction
+  description: |-
+    Dimensionless fraction of the cold recycled component of a hydrogen-isotope
+    neutral population relative to the total neutral atom population.
+  documentation: |-
+    The cold neutral fraction is a dimensionless ratio bounded in $[0, 1]$
+    expressing the relative abundance of the cold, low-energy recycled component
+    of a hydrogen-isotope neutral population. It is a component of the broader
+    [neutral
+    fraction](name:ratio_of_neutral_state_density_to_total_hydrogenic_density),
+    distinct from the hot charge-exchange-born component.
+
+    The fraction is defined as:
+
+    $$
+    f_{\mathrm{cold}} = \frac{n_{\mathrm{cold}}}{n_{\mathrm{cold}} + n_{\mathrm{hot}}}
+    $$
+
+    where $f_{\mathrm{cold}}$ is the cold neutral fraction, $n_{\mathrm{cold}}$
+    is the number density of cold recycled neutral atoms, and $n_{\mathrm{hot}}$
+    is the number density of hot charge-exchange-born neutral atoms.
+
+    The quantity applies to a specified hydrogen isotope and uses the
+    two-component neutral-population model. Its denominator is the total neutral
+    population formed by the cold and hot components for that isotope; it is not
+    summed across different isotopes and does not represent the hot component
+    itself.
+
+    Within this model, the cold and hot fractions are complementary and sum to
+    unity. The [hot neutral fraction](name:hot_neutral_fraction) gives the
+    corresponding charge-exchange-born component, with the energy threshold
+    separating the two components defined by the applicable population model.
+  unit: '1'
+
+- name: etendue_of_hard_xray_detector
+  description: |-
+    Geometric optical throughput of a hard X-ray detector’s optical system,
+    determined by its effective collecting area and accepted solid angle.
+  documentation: |-
+    Étendue is the geometric throughput of the optical system associated with a
+    hard X-ray detector. It characterizes the angular and spatial acceptance
+    that determines how incident radiation is coupled into the detector.
+
+    The defining relation is
+
+    $$
+    G = A\Omega
+    $$
+
+    where $G$ is the detector étendue, $A$ is the effective collecting area, and
+    $\Omega$ is the accepted solid angle.
+
+    This quantity applies to the detector-level optical system and uses
+    effective area and angular acceptance for the associated detector; it does
+    not specify whether those properties arise from one or multiple optical
+    elements. It is distinct from the detector’s linear dimensions, such as its
+    [height](name:height_of_hard_xray_detector) and width, which do not
+    determine optical throughput alone.
+
+    Étendue provides the geometric factor relating incident [hard X-ray
+    brightness](name:hard_xray_brightness) to radiation coupled into the
+    detector and is the same physical optical-throughput concept represented by
+    [etendue_of_spectrometer](name:etendue_of_spectrometer), with the owning
+    optical system changed from a spectrometer to a hard X-ray detector.
+  unit: m^2.sr
+
+- name: etendue_of_spectrometer_channel
+  description: |-
+    Optical phase-space acceptance of a radiation-collection system, determined
+    by effective collecting area and accepted ray directions and optionally
+    weighted by spectral response.
+  documentation: |-
+    Optical étendue is the geometric phase-space acceptance of a
+    radiation-collection system. It describes how the collecting area and range
+    of accepted ray directions jointly determine the system's throughput for
+    radiation from an observed source.
+
+    For an effective area and accepted solid angle, the étendue $G$ is defined
+    by:
+
+    $$
+    G = A_{\mathrm{eff}}\Omega_{\mathrm{eff}}
+    $$
+
+    where $G$ is the optical étendue, $A_{\mathrm{eff}}$ is the effective
+    collecting area, and $\Omega_{\mathrm{eff}}$ is the accepted solid angle.
+
+    The quantity applies to radiation entering an optical collection system from
+    a plasma or other observed source and aggregates acceptance over the
+    collecting area and accepted ray directions. It is non-negative and does not
+    itself represent radiance, collected power, detector signal, or spectral
+    intensity. The [spectral étendue of a spectrometer
+    channel](name:spectral_etendue_of_spectrometer_channel) is a narrower
+    response-weighted form in which the optical acceptance is weighted by the
+    channel's wavelength response, while [étendue of a
+    spectrometer](name:etendue_of_spectrometer) represents the corresponding
+    unweighted spectrometer-level acceptance.
+  unit: m^2.sr
+
+- name: hard_xray_brightness
+  description: |-
+    Band-integrated hard X-ray photon radiance received by a channel, normalized
+    by projected collecting area and accepted solid angle.
+  documentation: |-
+    Hard X-ray brightness is the photon radiance received from a viewing
+    direction by a channel. It represents photon arrival rate with the
+    photon-energy dependence integrated over the selected hard X-ray band.
+
+    The band-integrated photon radiance is defined by
+
+    $$
+    B_{\mathrm{HX}} = \frac{dN_\gamma}{dt\,dA_{\mathrm{proj}}\,d\Omega}
+    $$
+
+    where $B_{\mathrm{HX}}$ is the hard X-ray brightness, $N_\gamma$ is the
+    number of received photons in the selected energy band, $t$ is time,
+    $A_{\mathrm{proj}}$ is projected collecting area, and $\Omega$ is accepted
+    solid angle.
+
+    This quantity applies to hard X-ray photons received by a channel and is
+    evaluated separately for each selected energy band. Its aggregation
+    convention is integration over photon energy within that band while
+    retaining normalization by projected area and solid angle. It is a received
+    radiometric quantity, not a local volumetric source term, and it counts
+    photons rather than their deposited or carried energy.
+
+    The local production counterpart is [hard X-ray emissivity], which describes
+    photon generation per unit volume and solid angle before propagation to the
+    channel. Integrating this brightness over the collecting geometry
+    represented by the [etendue of a hard X-ray
+    detector](name:etendue_of_hard_xray_detector) gives the received photon rate
+    under the corresponding angular and area acceptance. Unlike [incident soft
+    X-ray radiance](name:incident_soft_xray_radiance), which is energy-weighted,
+    this quantity is photon-count radiance; photon registration probability is a
+    separate detector property described by [spectral efficiency of a hard X-ray
+    detector](name:spectral_efficiency_of_hard_xray_detector).
+  unit: m^-2.s^-1.sr^-1
+
+- name: hot_neutral_fraction
+  description: |-
+    Dimensionless fraction of the hot charge-exchange-born component of a
+    hydrogen-isotope neutral population relative to the total neutral atom
+    population.
+  documentation: |-
+    The hot neutral fraction is a dimensionless ratio bounded in $[0, 1]$
+    expressing the relative abundance of the hot, charge-exchange-born component
+    of a hydrogen-isotope neutral population. It is a component of the broader
+    [neutral
+    fraction](name:ratio_of_neutral_state_density_to_total_hydrogenic_density),
+    distinct from the cold recycled component.
+
+    The fraction is defined as:
+
+    $$
+    f_{\mathrm{hot}} = \frac{n_{\mathrm{hot}}}{n_{\mathrm{cold}} + n_{\mathrm{hot}}}
+    $$
+
+    where $f_{\mathrm{hot}}$ is the hot neutral fraction, $n_{\mathrm{hot}}$ is
+    the number density of hot charge-exchange-born neutral atoms, and
+    $n_{\mathrm{cold}}$ is the number density of cold recycled neutral atoms.
+
+    The quantity applies to a specified hydrogen isotope and uses the
+    two-component neutral-population model. Its denominator is the total neutral
+    population formed by the cold and hot components for that isotope; it is not
+    summed across different isotopes and does not represent the cold component
+    itself.
+
+    Within this model, the hot and cold fractions are complementary and sum to
+    unity. The [cold neutral fraction](name:cold_neutral_fraction) gives the
+    corresponding recycled component, with the energy threshold separating the
+    two components defined by the applicable population model.
+  unit: '1'
+
+- name: incident_soft_xray_radiance
+  description: |-
+    Incident soft X-ray power radiance gives received electromagnetic power per
+    projected detector area and solid angle, integrated over the selected energy
+    band.
+  documentation: |-
+    Incident soft-X-ray power radiance is the energy-integrated radiant power
+    arriving at a receiving surface from the viewing direction, expressed per
+    projected area and per solid angle.
+
+    $$
+    L_{\rm inc} = \int_{\mathcal{E}} L_E^{\rm inc}\,dE = \frac{dP_{\rm inc}}{dA_\perp\,d\Omega}
+    $$
+
+    where $L_{\rm inc}$ is the incident power radiance, $L_E^{\rm inc}$ is the
+    incident spectral power radiance at photon energy $E$, $\mathcal{E}$ is the
+    selected photon-energy band or collection of bands, $P_{\rm inc}$ is
+    incident radiant power, $A_\perp$ is projected receiving area, and $\Omega$
+    is accepted solid angle.
+
+    The quantity applies to soft X-ray radiation incident on a detector channel,
+    with spectral dependence integrated over the selected energy band or bands.
+    It is an incoming radiometric quantity per area and solid angle, not a total
+    power integrated over the detector aperture or viewing directions, and it is
+    distinct from detector-registration efficiency.
+
+    Integrating this radiance over the relevant projected area and solid angle
+    gives the band-integrated received power represented by [power of soft X-ray
+    detector](name:power_of_soft_xray_detector). Unlike [hard X-ray
+    brightness](name:hard_xray_brightness), which is photon-number radiance,
+    this quantity is power radiance; [spectral efficiency of soft X-ray
+    detector](name:spectral_efficiency_of_soft_xray_detector) instead describes
+    the probability that incident photons are registered.
+  unit: W.m^-2.sr^-1
+
+- name: intensity_at_spectral_line
+  description: |-
+    Uncalibrated photoelectron detection rate obtained by integrating the
+    measured emission signal across an identified spectral line.
+  documentation: |-
+    This quantity is the uncalibrated photoelectron count rate associated with
+    one identified emission line. It represents the detector signal integrated
+    across the wavelength interval assigned to that line, rather than an
+    absolutely calibrated photon radiance.
+
+    The line-integrated count rate is defined by
+
+    $$
+    I_{\rm line} = \int_{\lambda_1}^{\lambda_2} i(\lambda)\,d\lambda
+    $$
+
+    where $I_{\rm line}$ is the integrated photoelectron count rate,
+    $i(\lambda)$ is the spectral photoelectron count-rate density, $\lambda$ is
+    wavelength, and $\lambda_1$ and $\lambda_2$ delimit the interval assigned to
+    the identified emission line.
+
+    The quantity applies to a single identified spectral line and uses line
+    integration as its aggregation convention. It is non-calibrated and is not
+    background-subtracted; no aggregation over multiple spectral lines or
+    conversion to absolute photon radiance is included.
+
+    It is the uncalibrated line-integrated counterpart of [photon-count radiance
+    at a spectral line](name:photon_radiance_at_spectral_line), which
+    additionally represents an absolutely calibrated radiance and includes
+    background subtraction. Unlike [spectral flux of a spectrometer
+    channel](name:spectral_rate_of_spectrometer_channel), this quantity is
+    resolved at one identified line rather than describing the channel-level
+    spectral signal.
+  unit: s^-1
+
+- name: lower_bound_photon_energy
+  description: |-
+    Lower boundary of an X-ray photon-energy band, specifying the minimum photon
+    energy included in the defined detection or emission band.
+  documentation: |-
+    Lower boundary of an X-ray photon-energy band is the minimum photon energy
+    included in the specified detection or emission band. It defines the
+    low-energy cutoff of that band.
+
+    The photon-energy band defined by this lower boundary and its complementary
+    upper boundary satisfies:
+
+    $$
+    E_\mathrm{low} \le E \le E_\mathrm{up}
+    $$
+
+    where $E_\mathrm{low}$ is the lower-bound photon energy, $E$ is the photon
+    energy being classified, and $E_\mathrm{up}$ is the [upper photon
+    energy](name:upper_photon_energy).
+
+    The scope is an X-ray spectral band for photon detection, photon counting,
+    or energy-resolved emissivity. This quantity is a band boundary, not an
+    observed photon energy, photon-energy width, photon flux, count rate,
+    emissivity, or detector-response amplitude; it is a single boundary for one
+    specified band and implies no averaging or summation over photons.
+
+    Together with the [upper photon energy](name:upper_photon_energy), it
+    specifies the spectral interval of the band. The lower boundary must not
+    exceed the upper boundary, and any derived band width is their difference.
+  unit: eV
+
+- name: lower_wavelength_of_filter
+  description: |-
+    Lower wavelength of a filter is the spectral coordinate, expressed as vacuum
+    wavelength, that identifies the short-wavelength boundary of a diagnostic
+    filter's transmitted spectral band.
+  documentation: |-
+    Lower wavelength of a filter is the vacuum-wavelength spectral coordinate
+    that identifies the short-wavelength boundary of a diagnostic filter's
+    transmitted spectral band. It marks the high-photon-energy edge of the
+    interval selected by the filter transmission response.
+
+    For a lower-bound characteristic associated with temporal frequency
+    $\nu_\mathrm{lower}$, the vacuum wavelength is defined by:
+
+    $$
+    \lambda_\mathrm{lower} = \frac{c}{\nu_\mathrm{lower}}
+    $$
+
+    where $\lambda_\mathrm{lower}$ is the lower filter-boundary vacuum
+    wavelength, $c$ is the speed of light in vacuum, and $\nu_\mathrm{lower}$ is
+    the temporal frequency corresponding to that boundary.
+
+    This quantity applies to the transmitted spectral band of the filter and is
+    a single lower-edge value, not a wavelength average, an integrated spectral
+    quantity, or the complete transmission function. It is distinct from a
+    spectral-line rest wavelength and from a wavelength defined inside a
+    material medium.
+
+    As the lower-bound member of [wavelength of a
+    filter](name:wavelength_of_filter), it identifies one characteristic point
+    of the filter response. Together with the [upper wavelength of a
+    filter](name:upper_wavelength_of_filter), it defines the passband span
+    represented by the [width of a filter].
+  unit: m
+
+- name: photon_radiance_at_spectral_line
+  description: |-
+    Photon-count radiance from an identified emission transition, integrated
+    over its spectral line interval and resolved by projected area and viewing
+    solid angle.
+  documentation: |-
+    Photon-count line radiance is the photon emission rate from one identified
+    transition accumulated along the emitting line of sight, resolved by
+    projected collecting area and viewing solid angle.
+
+    The defining photon-count radiance is
+
+    $$
+    L_{\gamma,\ell} = \frac{d^3 N_{\gamma,\ell}}{dt\,dA_{\perp}\,d\Omega}
+    $$
+
+    where $L_{\gamma,\ell}$ is the line radiance, $N_{\gamma,\ell}$ is the
+    number of photons from transition $\ell$, $\ell$ identifies the emission
+    transition, $t$ is time, $A_{\perp}$ is collecting area projected normal to
+    the viewing direction, and $\Omega$ is viewing solid angle.
+
+    The quantity applies to one identified emission transition without imposing
+    a particular emitting species, charge state, or line-splitting mechanism.
+    Photon counts are integrated across the selected spectral-line interval and
+    accumulated along the viewing path; the result is not resolved per
+    wavelength.
+
+    Integrating [photon-number spectral radiance] over wavelength across the
+    selected line interval gives this line radiance under matching
+    projected-area and solid-angle conventions. The qualified [motional-Stark
+    photon radiance at a spectral
+    line](name:motional_stark_photon_radiance_at_spectral_line) is a specialized
+    instance restricted to an identified motional-Stark-split component. Unlike
+    energy radiance, this quantity counts photons without weighting them by
+    photon energy; conversion to energy radiance requires applying that energy
+    weighting before integration.
+  unit: m^-2.s^-1.sr^-1
+
+- name: power_of_soft_xray_detector
+  description: |-
+    Band-integrated radiant power received by a soft X-ray detector channel over
+    its selected photon-energy band or bands.
+  documentation: |-
+    Soft X-ray detector power is the radiant power carried by incident soft
+    X-ray photons and received by one detector channel after spectral selection.
+    It represents radiation power rather than the detector’s electrical output.
+
+    For a selected photon-energy band, the received power is defined by:
+
+    $$
+    P_{\mathcal{B}} = \int_{\mathcal{B}} E\,\Phi_E(E)\,dE
+    $$
+
+    where $P_{\mathcal{B}}$ is the received power for band $\mathcal{B}$, $E$ is
+    photon energy, $\Phi_E(E)$ is the photon arrival-rate density as a function
+    of photon energy, $\mathcal{B}$ is the selected energy interval, and $dE$ is
+    an infinitesimal photon-energy interval.
+
+    The quantity applies to soft X-ray radiation received by a particular
+    detector channel and is integrated over photon energy within its selected
+    bandpass. It is not summed over detector channels, viewing directions, or
+    distinct energy bands; when multiple bands are resolved, each band has its
+    own band-integrated received-power value. It excludes plasma-emitted power
+    before arrival at the detector and electrical power generated by detector
+    electronics.
+
+    The quantity is distinct from
+    [spectral_efficiency_of_soft_xray_detector](name:spectral_efficiency_of_soft_xray_detector),
+    which describes the probability of registering an incident photon rather
+    than the received radiant power. It is also distinct from
+    [hard_xray_brightness](name:hard_xray_brightness), which describes photon
+    radiance rather than the power collected by a channel over its energy band
+    and collection geometry.
+  unit: W
+
+- name: radiated_power_over_core_region
+  description: |-
+    Total electromagnetic power radiated by plasma inside the last closed flux
+    surface, representing the core-region contribution to global radiative
+    energy loss.
+  documentation: |-
+    Radiated power over the core region is the total electromagnetic energy-loss
+    rate carried away by radiation emitted within the plasma volume inside the
+    last closed flux surface (LCFS). It is a regional integral rather than a
+    local radiated-power density.
+
+    The defining volume integral is
+
+    $$
+    P_{\rm core} = \int_{V_{\rm core}} p_{\rm rad}(\mathbf{r})\,dV
+    $$
+
+    where $P_{\rm core}$ is the core-region radiated power, $p_{\rm
+    rad}(\mathbf{r})$ is the local volumetric radiated-power density at position
+    $\mathbf{r}$, $V_{\rm core}$ is the plasma volume inside the LCFS, and $dV$
+    is the differential volume element.
+
+    The quantity includes the aggregate electromagnetic radiation from all
+    emission channels within the LCFS. It excludes radiation emitted in the
+    scrape-off layer, divertor, and other plasma regions outside the LCFS; it is
+    therefore distinct from [total plasma radiated
+    power](name:total_plasma_radiated_power), which integrates radiation over
+    the full plasma volume.
+
+    The integrand is the local [power density due to
+    radiation](name:power_density_due_to_radiation), and integration over the
+    core region gives its corresponding regional total.
+  unit: W
+
+- name: ratio_of_neutral_density_of_isotope_to_difference_of_total_neutral_density_and_neutral_density_of_isotope
+  description: |-
+    Odds ratio of the neutral density of a selected hydrogen isotope to the
+    summed neutral density of all other hydrogen isotopes, distinguishing
+    composition odds from total isotope fraction.
+  documentation: |-
+    This quantity is the neutral-population odds ratio for one selected hydrogen
+    isotope relative to all other hydrogen isotopes. It characterizes isotope
+    composition using neutral atoms only, with the comparison population
+    aggregated across every other isotope.
+
+    $$
+    R_i = \frac{n_i}{\sum_{j \ne i} n_j}
+    $$
+
+    Here, $R_i$ is the isotope density ratio, $i$ identifies the selected
+    hydrogen isotope, $n_i$ is its neutral number density, and $n_j$ is the
+    neutral number density of another hydrogen isotope. The summation includes
+    all hydrogen isotopes other than the selected isotope.
+
+    The denominator is a total over the other neutral isotope populations, while
+    the numerator contains only the selected isotope. This quantity excludes
+    ionized populations and differs from
+    [total_hydrogenic_density](name:total_hydrogenic_density), which includes
+    the hydrogenic population across its applicable charge states and isotopes.
+    It is an odds ratio rather than the selected isotope's fraction of the total
+    neutral population; if $f_i$ denotes that corresponding neutral isotope
+    fraction, then $f_i = R_i/(1+R_i)$.
+  unit: '1'
+
+- name: spectral_bremsstrahlung_photon_radiance
+  description: |-
+    Spectrally resolved photon-number radiance of free-free bremsstrahlung,
+    giving the directional photon emission rate per projected area and
+    wavelength interval.
+  documentation: |-
+    This quantity is the photon-number radiance of the continuum produced by
+    free-free electron–ion interactions in a plasma. It describes the
+    directional spectral brightness of bremsstrahlung rather than the emitted
+    electromagnetic energy.
+
+    The spectral photon radiance is defined by
+
+    $$
+    L_{\lambda}^{\mathrm{ff}} = \frac{\mathrm{d}^{4}N_{\gamma}}{\mathrm{d}A_{\mathrm{proj}}\,\mathrm{d}t\,\mathrm{d}\Omega\,\mathrm{d}\lambda}
+    $$
+
+    where $L_{\lambda}^{\mathrm{ff}}$ is the free-free spectral photon radiance,
+    $N_{\gamma}$ is the photon number, $A_{\mathrm{proj}}$ is projected
+    collecting area normal to the viewing direction, $t$ is time, $\Omega$ is
+    solid angle, and $\lambda$ is photon wavelength.
+
+    The quantity applies to the bremsstrahlung continuum, is differential in
+    wavelength and viewing solid angle, and counts photons rather than weighting
+    them by photon energy. It is not integrated over an identified spectral line
+    and does not represent total bremsstrahlung power.
+
+    The broader [spectral photon radiance](name:spectral_photon_radiance)
+    includes spectral photon emission without restricting the source to
+    bremsstrahlung, while [photon radiance at a spectral
+    line](name:photon_radiance_at_spectral_line) represents emission integrated
+    over a discrete transition interval. Integrating this quantity over a
+    selected wavelength band gives the corresponding band-integrated photon
+    radiance, such as [brightness of a visible
+    camera](name:brightness_of_visible_camera).
+  unit: m^-3.s^-1.sr^-1
+
+- name: spectral_photon_radiance
+  description: |-
+    Calibrated spectral photon radiance of plasma emission, giving photon rate
+    per projected area, solid angle, and wavelength interval along a viewing
+    direction.
+  documentation: |-
+    Spectral photon radiance is the photon-number emission rate associated with
+    a specified viewing direction, projected emitting area, and wavelength
+    interval. It describes the angular and spectral distribution of plasma
+    radiation before integration over wavelength or solid angle.
+
+    The defining differential relation is
+
+    $$
+    L_\lambda(\lambda,\Omega) = \frac{d^3 N_\gamma}{dA_\perp\,dt\,d\Omega\,d\lambda}
+    $$
+
+    where $L_\lambda$ is the spectral photon radiance, $N_\gamma$ is the number
+    of emitted photons, $A_\perp$ is the projected emitting area, $t$ is time,
+    $\Omega$ is solid angle about the viewing direction, and $\lambda$ is photon
+    wavelength.
+
+    This generic quantity includes the photon-number contributions from all
+    unresolved emitting populations and mechanisms within the specified spectral
+    and angular element. Its aggregation is differential in wavelength and solid
+    angle, and it is not restricted to a particular species, reaction, or plasma
+    region. It is not a volumetric photon-production rate and is not integrated
+    over a spectral line, wavelength band, or viewing solid angle.
+
+    Integrating the spectral radiance over a selected emission-line interval
+    gives the corresponding [photon radiance at a spectral
+    line](name:photon_radiance_at_spectral_line). The free-free contribution is
+    represented by the mechanism-specific [spectral bremsstrahlung rate], while
+    this quantity includes that contribution only as part of the total emission
+    when no mechanism qualifier is present.
+  unit: m^-3.s^-1.sr^-1
+
+- name: spectral_rate_of_spectrometer_channel
+  description: |-
+    Detected photoelectron rate assigned to each wavelength pixel of a
+    spectrometer channel after electronic gain compensation and relative
+    calibration, but before absolute radiometric calibration.
+  documentation: |-
+    This quantity is the spectrally resolved detection rate of photoelectrons
+    produced by a spectrometer channel. It represents the channel response at an
+    individual wavelength pixel rather than an absolutely calibrated optical
+    emission quantity.
+
+    The rate for wavelength pixel $p$ is defined by
+
+    $$
+    R_p = \frac{dN_{\mathrm{pe},p}}{dt}
+    $$
+
+    where $R_p$ is the detected photoelectron rate for pixel $p$,
+    $N_{\mathrm{pe},p}$ is the detected photoelectron count assigned to that
+    pixel, and $t$ is time.
+
+    The quantity applies separately to each wavelength pixel of the spectrometer
+    channel, with electronic gain compensation and relative channel calibration
+    applied. It is not summed over the spectral range, and it is not an absolute
+    radiance or photon-flux measurement.
+
+    Summing the rates over pixels that contain an identified spectral feature
+    produces the corresponding line-integrated signal, represented by [intensity
+    at spectral line](name:intensity_at_spectral_line). The electrical output
+    [voltage of spectrometer channel](name:voltage_of_spectrometer_channel) is a
+    distinct signal quantity and is not this photoelectron rate.
+  unit: s^-1
+
+- name: spectral_wavelength_of_optical_element
+  description: |-
+    Photon vacuum wavelength values defining the spectral coordinate for a soft
+    X-ray filter window’s wavelength-dependent optical response.
+  documentation: |-
+    This quantity is the vacuum wavelength of photons at which the optical
+    response of a soft X-ray filter window is specified. It identifies the
+    spectral position of each response value.
+
+    The wavelength–frequency relation is
+
+    $$
+    \lambda = \frac{c}{\nu}
+    $$
+
+    where $\lambda$ is the photon vacuum wavelength, $c$ is the speed of light
+    in vacuum, and $\nu$ is the photon frequency.
+
+    The quantity applies to the spectral response of the filter window and uses
+    one wavelength coordinate at a time; it is not a band-integrated response or
+    a nominal filter-center value. It is distinct from the geometric [thickness
+    of the filter](name:thickness_of_filter) and from the nominal [wavelength of
+    the filter](name:wavelength_of_filter).
+
+    Wavelength-dependent response quantities, including [spectral absorptivity
+    of the filter](name:spectral_absorptivity_of_filter) and [spectral
+    efficiency of the filter](name:spectral_efficiency_of_filter), are functions
+    evaluated at this wavelength coordinate.
+  unit: m
+
+- name: temperature_of_soft_xray_detector
+  description: |-
+    Thermodynamic temperature of the soft X-ray detector assembly, describing
+    its physical thermal state for calibration and monitoring rather than a
+    plasma temperature inferred from radiation.
+  documentation: |-
+    The quantity is the thermodynamic temperature of the physical soft X-ray
+    detector assembly and describes the thermal state of its hardware.
+
+    It applies to the detector object as a whole, with no implied plasma
+    population, spatial subcomponent, or charge-state aggregation. It is
+    distinct from the plasma electron temperature inferred from detected soft
+    X-ray radiation and does not represent a photon-energy or spectral-response
+    quantity.
+
+    The temperature is the thermal operating state relevant to calibration and
+    hardware-condition monitoring. It is conceptually analogous to [temperature
+    of neutron detector](name:temperature_of_neutron_detector), while [spectral
+    efficiency of soft X-ray
+    detector](name:spectral_efficiency_of_soft_xray_detector) describes
+    photon-registration probability rather than detector hardware temperature.
+  unit: K
+
+- name: thickness_of_filter
+  description: |-
+    Geometric thickness of one diagnostic filter window, determining the amount
+    of material available for photon attenuation and spectral selection.
+  documentation: |-
+    Filter thickness is the geometric separation of the two opposing surfaces of
+    one filter window, measured locally along the material normal. It represents
+    the material thickness itself rather than a photon path length through the
+    window.
+
+    For corresponding points on the opposing surfaces, the local thickness is
+    defined by
+
+    $$
+    d = \left| (\mathbf{r}_2 - \mathbf{r}_1) \cdot \hat{\mathbf{n}} \right|
+    $$
+
+    where $d$ is the filter thickness, $\mathbf{r}_1$ and $\mathbf{r}_2$ are the
+    position vectors of the corresponding surface points, and $\hat{\mathbf{n}}$
+    is the local unit normal to the filter surface.
+
+    This quantity applies to the material of a single filter window used for
+    X-ray spectral selection, including soft-X-ray, hard-X-ray, and
+    crystal-spectrometer filter windows. It is not a sum over multiple windows,
+    diagnostic channels, or detector elements, and it is distinct from the
+    longer oblique photon path through the material.
+
+    For homogeneous material at normal incidence, thickness enters the
+    attenuation relation $T(E) = \exp[-\mu(E)d]$, where $T(E)$ is photon
+    transmission at energy $E$, $E$ is photon energy, and $\mu(E)$ is the
+    material attenuation coefficient. Thus, thickness is a geometric input to
+    [spectral absorptivity of the filter](name:spectral_absorptivity_of_filter),
+    whereas [filter width] describes the wavelength span of the transmitted
+    passband rather than the material dimension.
+  unit: m
+
+- name: toroidal_coordinate_at_detector_pixel
+  description: |-
+    Azimuthal coordinate locating the geometric center of each detector pixel in
+    the right-handed cylindrical (R, φ, Z) frame.
+  documentation: |-
+    The toroidal coordinate at a detector pixel is the azimuthal angle of that
+    pixel's geometric center about the machine symmetry axis. It identifies the
+    center position, not the pixel's orientation, size, or angular extent.
+
+    The center position is represented in the right-handed cylindrical
+    $(R,\phi,Z)$ frame by
+
+    $$
+    \mathbf{r}_{\rm pix}=R_{\rm pix}\hat{\mathbf{R}}(\phi_{\rm pix})+Z_{\rm pix}\hat{\mathbf{Z}}
+    $$
+
+    where $\mathbf{r}_{\rm pix}$ is the position vector of the pixel center,
+    $R_{\rm pix}$ is its major-radius coordinate, $\phi_{\rm pix}$ is its
+    toroidal coordinate, $Z_{\rm pix}$ is its vertical coordinate, and
+    $\hat{\mathbf{R}}$ and $\hat{\mathbf{Z}}$ are the radial and vertical unit
+    vectors. The basis is right-handed, with
+    $\hat{\mathbf{R}}\times\hat{\boldsymbol\phi}=\hat{\mathbf{Z}}$, where
+    $\hat{\boldsymbol\phi}$ is the toroidal unit vector.
+
+    The quantity is defined separately at the geometric center of each detector
+    pixel; it is not averaged over pixels or assigned to the detector as a
+    whole. It describes a position coordinate rather than a ray direction, pixel
+    orientation, or pixel angular width. The [vertical coordinate of the
+    detector pixel](name:vertical_coordinate_of_detector_pixel) supplies the
+    corresponding vertical location, while the [toroidal coordinate of the
+    detector](name:toroidal_coordinate_of_detector) refers to the detector
+    center and is not a substitute for this pixel-resolved coordinate.
+
+    Sign convention: Positive when $\phi_{\rm pix}$ increases in the
+    $+\hat{\boldsymbol\phi}$ direction of the right-handed cylindrical
+    $(R,\phi,Z)$ frame.
+  unit: rad
+
+- name: toroidal_coordinate_of_camera
+  description: |-
+    Toroidal coordinate of a camera's geometric center in the right-handed
+    cylindrical (R, φ, Z) frame, where φ is the toroidal angle about the machine
+    symmetry axis.
+  documentation: |-
+    Toroidal coordinate of a camera is the angular coordinate $\phi_c$ of the
+    camera's geometric center in the right-handed cylindrical $(R, \phi, Z)$
+    frame. It specifies the position of that center around the machine symmetry
+    axis.
+
+    The camera center has cylindrical coordinates $(R_c, \phi_c, Z_c)$:
+
+    $$
+    \mathbf{r}_c \leftrightarrow (R_c, \phi_c, Z_c)
+    $$
+
+    where $\mathbf{r}_c$ is the position vector of the camera's geometric
+    center, $R_c$ is the [radial coordinate of the
+    camera](name:radial_coordinate_of_camera), and $Z_c$ is the [vertical
+    coordinate of the camera](name:vertical_coordinate_of_camera).
+
+    This quantity locates the camera center only; it is not an orientation
+    angle, viewing direction, or field-of-view angle of the camera.
+
+    Sign convention: Positive when the camera center is displaced in the
+    direction of increasing toroidal angle $\phi$, counter-clockwise when viewed
+    from above $+\hat{Z}$.
+  unit: rad
+
+- name: toroidal_coordinate_of_line_of_sight
+  description: |-
+    Toroidal angular coordinate of the first reference point on a diagnostic
+    line of sight, locating that point around the machine symmetry axis.
+  documentation: |-
+    The toroidal coordinate of a line of sight is the azimuthal angle of its
+    first reference point about the machine symmetry axis. It specifies the
+    point's circumferential location in the right-handed cylindrical $(R, \phi,
+    Z)$ frame.
+
+    For a point expressed in the right-handed Cartesian $(\hat{x}, \hat{y},
+    \hat{z})$ basis, the toroidal angle is defined by
+
+    $$
+    \phi = \operatorname{atan2}(y,x)
+    $$
+
+    where $x$ and $y$ are the horizontal Cartesian coordinates of the first
+    reference point, and $\phi=0$ is the facility-defined toroidal reference
+    direction.
+
+    This quantity applies specifically to the first reference point of a
+    diagnostic line of sight. It is a point coordinate, not an angle describing
+    the line-of-sight direction, and it is not an aggregate over the line or
+    over multiple reference points. Unlike
+    [toroidal_coordinate_of_optical_element](name:toroidal_coordinate_of_optical_element),
+    which locates an optical-element center, it locates the designated first
+    line-of-sight point.
+
+    Sign convention: Positive when the angular displacement from the $\phi=0$
+    reference direction is counter-clockwise when viewed from above the
+    $+\hat{Z}$ axis.
+  unit: rad
+
+- name: total_plasma_radiated_power
+  description: |-
+    Total plasma radiated power is the electromagnetic power emitted by the full
+    plasma, summed over all photon-emission mechanisms and integrated over the
+    plasma volume.
+  documentation: |-
+    Total plasma radiated power is the total rate at which electromagnetic
+    radiation carries energy away from the plasma. It is the full-plasma
+    radiation loss quantity formed from all photon-emission mechanisms,
+    including line radiation, bremsstrahlung, recombination, synchrotron, and
+    any other radiative emission present.
+
+    The defining relation is the volume integral of the local radiation power
+    density over the plasma volume:
+
+    $$
+    P_{\mathrm{rad}} = \int_{V_{\mathrm{plasma}}} p_{\mathrm{rad}}(\mathbf{r})\, dV
+    $$
+
+    where $P_{\mathrm{rad}}$ is total plasma radiated power,
+    $V_{\mathrm{plasma}}$ is the full plasma volume,
+    $p_{\mathrm{rad}}(\mathbf{r})$ is the [power density due to
+    radiation](name:power_density_due_to_radiation) at position $\mathbf{r}$,
+    and $dV$ is the volume element.
+
+    The scope is the plasma as a whole; the aggregation convention is
+    integration over the full plasma volume together with summation over all
+    electromagnetic emission mechanisms and spectral contributions. It is not a
+    region-restricted quantity such as [radiated power over core
+    region](name:radiated_power_over_core_region), and it is not a
+    diagnostic-channel signal or line-of-sight quantity.
+
+    [Bremsstrahlung power](name:bremsstrahlung_power) is one radiative
+    contribution when defined for the same plasma population, whereas total
+    plasma radiated power includes all radiative contributions. [Total neutron
+    power] is distinct because it is kinetic energy carried by neutrons rather
+    than electromagnetic radiation. In an energy balance, total plasma radiated
+    power is a non-negative emitted power that enters as a loss according to the
+    balance convention; it is not itself a signed source term.
+  unit: W
+
+- name: upper_photon_energy
+  description: |-
+    High-energy boundary of an X-ray photon-acceptance band, defining the
+    maximum photon energy included in a selected spectral window.
+  documentation: |-
+    Upper photon energy is the high-energy edge of an X-ray spectral band used
+    to select photons or define an energy-resolved emissivity interval. It
+    identifies a band boundary, not a representative photon energy for the band.
+
+    For a band bounded by lower and upper photon energies, the accepted interval
+    is defined by
+
+    $$
+    E_{\rm lower} \leq E_\gamma \leq E_{\rm upper}
+    $$
+
+    where $E_\gamma$ is the photon energy, $E_{\rm lower}$ is the lower
+    photon-energy boundary, and $E_{\rm upper}$ is this quantity.
+
+    The quantity applies to one selected X-ray spectral band used for channel
+    counting or for an emissivity quantity. It is one upper boundary for that
+    band; no summation or averaging over channels, bands, or photon energies is
+    implied.
+
+    Together with the corresponding lower boundary, it fixes the spectral
+    window. It is distinct from [energy of detector
+    pixel](name:energy_of_detector_pixel), which denotes a central or
+    representative energy, while [upper bound energy of detector
+    pixel](name:upper_bound_energy_of_detector_pixel) applies the same
+    upper-edge concept specifically to an individual detector pixel.
+  unit: eV
+
+- name: upper_wavelength_of_filter
+  description: |-
+    Upper wavelength of a filter is the vacuum-wavelength coordinate marking the
+    long-wavelength, low-frequency edge of its transmitted spectral band.
+  documentation: |-
+    Upper wavelength of a filter is the spectral coordinate, expressed as vacuum
+    wavelength, that identifies the long-wavelength boundary of a filter's
+    transmitted spectral band. It is a property of the filter transmission
+    response, rather than the rest-frame wavelength of a spectral line or the
+    wavelength inside a material medium.
+
+    For the upper boundary associated with the lower temporal frequency, the
+    vacuum wavelength is defined by:
+
+    $$
+    \lambda_{\mathrm{upper}} = \frac{c}{\nu_{\mathrm{low}}}
+    $$
+
+    where $\lambda_{\mathrm{upper}}$ is the upper boundary vacuum wavelength,
+    $c$ is the speed of light in vacuum, and $\nu_{\mathrm{low}}$ is the lower
+    temporal frequency corresponding to that boundary.
+
+    This quantity applies specifically to the long-wavelength boundary of the
+    transmitted passband and is not a band-average or a full transmission
+    function. It complements the [lower wavelength of a
+    filter](name:lower_wavelength_of_filter), which marks the short-wavelength
+    boundary; together, the two boundaries determine the [width of a filter].
+    The parent [wavelength of a filter](name:wavelength_of_filter) also includes
+    nominal characteristic wavelengths such as a reference wavelength.
+  unit: m
+
+- name: vertical_coordinate_of_camera
+  description: |-
+    Signed vertical coordinate of the camera's geometric center, measured along
+    Z in the right-handed cylindrical (R, φ, Z) frame.
+  documentation: |-
+    The quantity is the vertical position of the geometric center of a camera
+    used in a radiation-measurement system. It identifies the camera center as a
+    physical location in the machine coordinate frame, rather than as a property
+    of the observed plasma.
+
+    The vertical coordinate is the projection of the camera-center position
+    vector onto the vertical basis direction:
+
+    $$
+    z_{\rm cam} = \mathbf{r}_{\rm cam} \cdot \hat{Z}
+    $$
+
+    where $z_{\rm cam}$ is the camera-center vertical coordinate,
+    $\mathbf{r}_{\rm cam}$ is the position vector of the camera's geometric
+    center, and $\hat{Z}$ is the vertical unit vector in the right-handed
+    cylindrical $(R, \phi, Z)$ frame, with $R$ the major-radius direction,
+    $\phi$ the toroidal-angle direction, and $Z$ the vertical direction.
+
+    This quantity applies to the camera hardware as a whole and refers
+    specifically to its geometric center. It is a single positional coordinate,
+    not a surface average, line-of-sight coordinate, image coordinate, or
+    coordinate of the plasma region being observed. It must be distinguished
+    from the analogous aperture location described by [vertical coordinate of an
+    aperture](name:vertical_coordinate_of_aperture) and from the vertical
+    coordinate of a generic measurement location described by [vertical
+    coordinate of a measurement
+    position](name:vertical_coordinate_of_measurement_position).
+
+    Together with the camera center's radial and toroidal coordinates, this
+    quantity specifies its location in the right-handed cylindrical $(R, \phi,
+    Z)$ frame. It does not describe the camera's vertical angular coverage,
+    which is a separate geometric property.
+
+    Sign convention: Positive when the camera center lies in the direction of
+    increasing $Z$.
+  unit: m
+
+- name: vertical_coordinate_of_detector_pixel
+  description: |-
+    Vertical coordinate locating the geometric center of an individual detector
+    pixel in the right-handed cylindrical (R, φ, Z) frame.
+  documentation: |-
+    This quantity is the vertical position of the geometric center of one
+    detector pixel. It locates that center along the cylindrical $Z$ direction
+    rather than describing a pixel dimension, boundary, or radiation signal.
+
+    The coordinate is defined in the right-handed cylindrical $(R, \phi, Z)$
+    frame, where $R$ is major radius, $\phi$ is toroidal angle, and $Z$ is
+    vertical height. It applies separately to each detector pixel and is neither
+    summed nor averaged over pixels, channels, detectors, or cameras.
+
+    The quantity describes the center point of the pixel and excludes pixel
+    span, edge coordinates, detector response, and any detector-local coordinate
+    components. Together with the [radial coordinate of a detector
+    pixel](name:radial_coordinate_of_detector_pixel), it locates the same pixel
+    center in the cylindrical $R$-$Z$ plane. Its generic detector-pixel scope
+    distinguishes it from the corresponding coordinate defined for a
+    specifically identified [soft X-ray
+    detector](name:vertical_coordinate_of_soft_xray_detector).
+  unit: m
+
+- name: cold_neutral_temperature
+  description: |-
+    Translational kinetic temperature, expressed as energy per particle, of the
+    cold neutral population, based on random translational motion after removal
+    of its bulk flow.
+  documentation: |-
+    Translational kinetic temperature, expressed as energy per particle, of the
+    cold neutral population, based on random translational motion after removal
+    of its bulk flow. It characterizes the low-energy neutral component
+    associated with a selected hydrogen isotope.
+
+    For the cold neutral population, the translational temperature is defined by
+
+    $$
+    T_c = \frac{2}{3 n_c}\int \frac{1}{2}m_c \lvert\mathbf{v}-\mathbf{u}_c\rvert^2 f_c(\mathbf{v})\,d^3v
+    $$
+
+    Here $T_c$ is the cold-neutral translational temperature, $n_c$ is the
+    cold-neutral number density, $m_c$ is the mass of a cold neutral atom,
+    $\mathbf{v}$ is particle velocity, $\mathbf{u}_c$ is the bulk velocity of
+    the cold neutral population, $f_c(\mathbf{v})$ is its velocity distribution,
+    and $d^3v$ is differential volume in velocity space. The distribution is
+    normalized by $n_c=\int f_c(\mathbf{v})\,d^3v$.
+
+    The quantity applies to the low-energy neutral-atom population in the plasma
+    edge or scrape-off layer and is specific to the selected hydrogen isotope.
+    It is averaged over particles in that cold population, not summed with the
+    energetic neutral population or with other isotopes. It excludes bulk flow
+    energy and does not represent a temperature associated with an internal
+    quantum or excitation state.
+
+    This quantity is the cold-population specialization of [neutral
+    temperature](name:neutral_temperature), while [hot neutral
+    temperature](name:hot_neutral_temperature) applies the same translational
+    definition to the energetic neutral population. Unlike [volume-averaged
+    neutral temperature](name:volume_averaged_neutral_temperature), it is not
+    defined by averaging the temperature over a plasma volume.
+  unit: eV
+
+- name: radial_coordinate_of_camera
+  description: |-
+    Major-radius location of a camera’s geometric center, measured from the
+    toroidal symmetry axis in the right-handed cylindrical (R, φ, Z) frame.
+  documentation: |-
+    The radial coordinate of a camera is the major-radius position of its
+    geometric center, measured perpendicular to the toroidal symmetry axis. It
+    identifies the camera center rather than any individual detector pixel,
+    aperture, or line-of-sight point.
+
+    The coordinate is defined from the Cartesian coordinates of the camera
+    center:
+
+    $$
+    R_{\mathrm{cam}} = \sqrt{x_{\mathrm{cam}}^2 + y_{\mathrm{cam}}^2}
+    $$
+
+    where $R_{\mathrm{cam}}$ is the camera-center radial coordinate, and
+    $x_{\mathrm{cam}}$ and $y_{\mathrm{cam}}$ are the camera-center coordinates
+    in the right-handed Cartesian $(\hat{x},\hat{y},\hat{z})$ basis. The
+    corresponding cylindrical frame is the right-handed $(R,\phi,Z)$ frame,
+    where $R$ is major radius, $\phi$ is toroidal angle, and $Z$ is vertical
+    height.
+
+    This quantity applies to the geometric center of the camera as a whole and
+    is not an average over pixels, viewing directions, or detector elements. It
+    is the camera-specific specialization of the parent [radial
+    coordinate](name:radial_coordinate). Together with the [vertical coordinate
+    of the camera](name:vertical_coordinate_of_camera) and [toroidal coordinate
+    of the camera](name:toroidal_coordinate_of_camera), it specifies the
+    camera-center position.
+  unit: m
+
+- name: radial_coordinate_of_detector_pixel
+  description: |-
+    Major-radius coordinate of a detector pixel’s geometric center, locating the
+    pixel relative to the machine symmetry axis in the right-handed cylindrical
+    (R, φ, Z) frame.
+  documentation: |-
+    This quantity is the major-radius coordinate of the geometric center of an
+    individual detector pixel. It identifies the pixel center’s perpendicular
+    distance from the toroidal symmetry axis in the right-handed cylindrical
+    $(R, \phi, Z)$ frame.
+
+    Using the corresponding right-handed Cartesian basis $(x, y, z)$, with the
+    symmetry axis at $x=y=0$, the coordinate is defined by
+
+    $$
+    R_{\mathrm{pix}} = \sqrt{x_{\mathrm{pix}}^2+y_{\mathrm{pix}}^2}
+    $$
+
+    where $R_{\mathrm{pix}}$ is the pixel-center major-radius coordinate, and
+    $x_{\mathrm{pix}}$ and $y_{\mathrm{pix}}$ are the Cartesian coordinates of
+    that center perpendicular to the symmetry axis.
+
+    The quantity applies to each detector-pixel center individually; it is not
+    an average over pixels, a radiation-weighted position, or the radial
+    coordinate of the camera as a whole. It is the detector-pixel specialization
+    of the [radial coordinate](name:radial_coordinate), while the corresponding
+    vertical location is given by the [vertical coordinate of detector
+    pixel](name:vertical_coordinate_of_detector_pixel).
+  unit: m
+
+- name: radial_coordinate_of_line_of_sight
+  description: |-
+    Major-radius coordinate of a specified geometric point associated with a
+    line of sight, measured from the toroidal symmetry axis in the right-handed
+    cylindrical (R, φ, Z) frame.
+  documentation: |-
+    This quantity is the major-radius coordinate of a specified geometric point
+    associated with a line of sight. It locates that point by its perpendicular
+    distance from the toroidal symmetry axis in the right-handed cylindrical
+    $(R,\phi,Z)$ frame.
+
+    $$
+    R_{\mathrm{los}} = \sqrt{x_{\mathrm{los}}^2+y_{\mathrm{los}}^2}
+    $$
+
+    where $R_{\mathrm{los}}$ is the radial coordinate of the specified
+    line-of-sight point, and $x_{\mathrm{los}}$ and $y_{\mathrm{los}}$ are the
+    horizontal Cartesian coordinate values of that point in the right-handed
+    Cartesian $(\hat{x},\hat{y},\hat{z})$ basis, whose origin lies on the
+    toroidal symmetry axis.
+
+    The quantity is geometric and pointwise: it applies to a designated point
+    associated with a line of sight and has no plasma-population or regional
+    aggregation. A line of sight can contain multiple such points, so this name
+    alone does not select a first point, second point, third point, endpoint,
+    line-integrated radius, or averaged radius.
+
+    It is a locus-specific instance of the general [radial
+    coordinate](name:radial_coordinate) quantity, with the line of sight
+    identifying the associated geometric locus rather than defining a new
+    radial-coordinate concept.
+  unit: m
+
+- name: wavelength_of_spectral_line
+  description: |-
+    Characteristic vacuum wavelength assigned to an atomic, ionic, molecular, or
+    nuclear spectral transition, identifying its central line position.
+  documentation: |-
+    The wavelength of a spectral line is the characteristic vacuum spectral
+    coordinate of an emission or absorption transition. It identifies the
+    central line position associated with the transition or processed spectral
+    feature.
+
+    For an unshifted transition, the vacuum wavelength is related to the
+    transition energy by:
+
+    $$
+    \lambda_0 = \frac{hc}{\Delta E}
+    $$
+
+    where $\lambda_0$ is the unshifted vacuum wavelength, $h$ is Planck's
+    constant, $c$ is the speed of light in vacuum, and $\Delta E$ is the energy
+    difference between the transition's quantum states.
+
+    The quantity applies to one identified atomic, ionic, molecular, or nuclear
+    spectral line and is a central wavelength, not a wavelength interval,
+    spectral width, or aggregate over multiple lines. Depending on the
+    spectral-line definition, it may denote the unshifted transition reference
+    or a central wavelength that includes a physical shift of the observed
+    feature; it is not inherently a wavelength displacement.
+
+    This quantity specializes the broader wavelength concept by locating a
+    spectral transition. A displacement from a specified reference wavelength is
+    represented separately by
+    [difference_of_fast_neutral_beam_motional_stark_wavelength_and_fast_neutral_beam_reference_wavelength_of_spectral_line](name:difference_of_fast_neutral_beam_motional_stark_wavelength_and_fast_neutral_beam_reference_wavelength_of_spectral_line).
+  unit: m

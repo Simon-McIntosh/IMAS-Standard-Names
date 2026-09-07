@@ -1,0 +1,104 @@
+- name: toroidal_angular_width_of_limiter_tile
+  description: |-
+    Full toroidal angular span of one limiter tile between its minimum and
+    maximum φ coordinates in the right-handed cylindrical (R, φ, Z) frame.
+  documentation: |-
+    The toroidal angular width of an individual limiter tile is the full angular
+    span occupied by that tile around the machine symmetry axis. It is a
+    non-negative geometric extent in the right-handed cylindrical $(R, \phi, Z)$
+    frame, where $R$ is major radius, $\phi$ is toroidal angle, and $Z$ is
+    vertical height.
+
+    The width is defined from the extrema of the tile's toroidal-angle extent:
+
+    $$
+    \Delta\phi_{\mathrm{tile}} = \phi_{\max} - \phi_{\min}
+    $$
+
+    where $\Delta\phi_{\mathrm{tile}}$ is the tile's toroidal angular width, and
+    $\phi_{\max}$ and $\phi_{\min}$ are the maximum and minimum toroidal-angle
+    coordinates of the tile, evaluated on a continuous angular branch when the
+    extent crosses the angular periodic boundary.
+
+    This quantity applies to one individual limiter tile and represents its
+    complete toroidal span; it is not summed over tiles, limiter units, or
+    periodic repetitions. It is distinct from a toroidal-angle coordinate, a
+    tile-center angle, and the angular width of an entire limiter assembly.
+
+    The toroidal extent complements the boundary geometry described by the
+    [vertical outline of the limiter
+    tile](name:vertical_outline_of_limiter_tile), while the analogous camera
+    field-of-view quantity [toroidal angular width of a
+    camera](name:toroidal_angular_width_of_camera) applies to an optical viewing
+    extent rather than a structural tile.
+  unit: rad
+
+- name: vertical_outline_of_limiter_tile
+  description: |-
+    Signed vertical (Z) coordinate of each point on a limiter-tile boundary
+    contour in the right-handed cylindrical (R, φ, Z) frame.
+  documentation: |-
+    The vertical outline of a limiter tile gives the signed vertical coordinate
+    of each point on the tile’s geometric boundary contour. It describes the
+    contour geometry rather than a material property, thickness, or surface-load
+    quantity.
+
+    For contour point $i$, the vertical coordinate is defined by
+
+    $$
+    Z_i = \mathbf{r}_i \cdot \hat{\mathbf{Z}}
+    $$
+
+    where $Z_i$ is the vertical coordinate of point $i$, $\mathbf{r}_i$ is its
+    position vector, and $\hat{\mathbf{Z}}$ is the vertical unit vector in the
+    right-handed cylindrical $(R,\phi,Z)$ frame. Here, $R$ is major radius,
+    $\phi$ is toroidal angle, and $Z$ is vertical height.
+
+    The quantity applies pointwise to the irregular outline of one limiter tile
+    in its poloidal cross section. The contour is closed by connecting its final
+    point to its initial point, without duplicating the initial point; no
+    averaging, summation, or other aggregation over contour points is implied.
+    Unlike the [radial outline of a limiter
+    tile](name:radial_outline_of_limiter_tile), this quantity gives the vertical
+    coordinate rather than the major-radius coordinate of the boundary.
+
+    The same geometric carrier and coordinate meaning apply to the [vertical
+    outline of a divertor tile](name:vertical_outline_of_divertor_tile), but
+    that related quantity belongs to a divertor tile rather than a limiter tile.
+
+    Sign convention: Positive when the contour point lies toward increasing $Z$
+    in the right-handed cylindrical $(R,\phi,Z)$ frame.
+  unit: m
+
+- name: vertical_outline_of_plasma_facing_component
+  description: |-
+    The vertical coordinate of each point on a plasma-facing component boundary
+    outline is the signed height in the right-handed cylindrical (R, φ, Z)
+    frame.
+  documentation: |-
+    The vertical outline coordinate is the signed height $Z$ of each
+    boundary-contour point belonging to a plasma-facing component. It describes
+    the component boundary in the right-handed cylindrical $(R, \phi, Z)$ frame.
+
+    For outline point $i$, the coordinate is defined by
+
+    $$
+    Z_i = \mathbf{r}_i \cdot \hat{\mathbf{Z}}
+    $$
+
+    where $Z_i$ is the vertical coordinate of point $i$, $\mathbf{r}_i$ is that
+    point's position vector relative to the cylindrical coordinate origin, and
+    $\hat{\mathbf{Z}}$ is the unit vector in the vertical direction. The
+    quantity applies pointwise to one component boundary outline and is not an
+    average, extremum, centroid coordinate, or integrated geometric measure. A
+    closed outline does not repeat its first point as a closing point.
+
+    This coordinate has the same geometric meaning as the corresponding outline
+    coordinate for a limiter tile or divertor tile, such as [vertical outline of
+    limiter tile](name:vertical_outline_of_limiter_tile) and [vertical outline
+    of divertor tile](name:vertical_outline_of_divertor_tile), but its locus is
+    the plasma-facing component boundary in general.
+
+    Sign convention: Positive when $Z_i$ increases in the $+\hat{\mathbf{Z}}$
+    direction of the right-handed cylindrical $(R, \phi, Z)$ frame.
+  unit: m

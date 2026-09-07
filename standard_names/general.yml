@@ -1,0 +1,101 @@
+- name: energy_confinement_enhancement_factor
+  description: |-
+    Dimensionless ratio comparing the plasma energy confinement time with the
+    IPB98(y,2) reference scaling prediction.
+  documentation: |-
+    The energy confinement enhancement factor is the multiplicative departure of
+    a plasma’s global energy confinement time from the IPB98(y,2) reference
+    scaling prediction. It indicates whether energy is retained longer or
+    shorter than the reference predicts for the corresponding scaling inputs.
+
+    The factor is defined by:
+
+    $$
+    h_{98} = \frac{\tau_E}{\tau_{E,\mathrm{IPB98(y,2)}}}
+    $$
+
+    where $h_{98}$ is the energy confinement enhancement factor, $\tau_E$ is the
+    plasma energy confinement time, and $\tau_{E,\mathrm{IPB98(y,2)}}$ is the
+    energy confinement time predicted by the IPB98(y,2) reference scaling.
+
+    This is a global plasma quantity: the numerator represents the confinement
+    of the total stored plasma energy relative to the corresponding net
+    energy-loss power, aggregated over the plasma rather than assigned to a
+    local region or individual transport channel. It is not itself an energy
+    confinement time, stored energy, power, or local transport coefficient.
+
+    A value of one denotes agreement with the reference scaling; a value greater
+    than one denotes longer confinement, and a value less than one denotes
+    shorter confinement than the reference prediction.
+  unit: '1'
+
+- name: ipb98y2_confinement_time
+  description: |-
+    IPB98(y,2) empirical-scaling reference for global energy confinement time,
+    providing the denominator for the H98 confinement enhancement factor.
+  documentation: |-
+    The IPB98(y,2) energy confinement time is the global energy-confinement
+    timescale predicted by the IPB98(y,2) empirical scaling law. It is an
+    energy-channel performance benchmark rather than a species-resolved or local
+    transport time.
+
+    The underlying global energy confinement time is defined by
+
+    $$
+    \tau_E = \frac{W}{P_{\mathrm{loss}}}
+    $$
+
+    where $\tau_E$ is the global energy confinement time, $W$ is the total
+    thermal energy stored in the plasma, and $P_{\mathrm{loss}}$ is the net
+    power leaving the plasma. The quantity documented here is the IPB98(y,2)
+    scaling prediction of this timescale, not the directly evaluated confinement
+    time for a particular plasma state.
+
+    The value applies to the complete plasma energy content and its global loss
+    balance; it is not a local profile quantity, a particle confinement time, or
+    a confinement time assigned to an individual species. It is a single
+    empirical reference value for the energy channel.
+
+    The [energy confinement enhancement
+    factor](name:energy_confinement_enhancement_factor) compares the actual
+    global energy confinement time with this reference through $H_{98} = \tau_E
+    / \tau_{E,98}$, where $H_{98}$ is the dimensionless confinement enhancement
+    factor and $\tau_{E,98}$ is this IPB98(y,2) scaling prediction.
+  unit: s
+
+- name: toroidal_beta
+  description: |-
+    Toroidal beta is a dimensionless equilibrium ratio of volume-averaged total
+    perpendicular plasma pressure to the magnetic pressure of a reference
+    toroidal field.
+  documentation: |-
+    Toroidal beta is a dimensionless equilibrium measure of the total pressure
+    content of the confined plasma relative to the magnetic-pressure scale of a
+    reference toroidal field. It characterizes pressure relative to the toroidal
+    magnetic field rather than the plasma-current-generated poloidal field.
+
+    The defining relation is
+
+    $$
+    \beta_{\mathrm{tor}} = \frac{2\mu_0}{V B_0^2}\int_V p_\perp\,dV
+    $$
+
+    where $\beta_{\mathrm{tor}}$ is toroidal beta, $p_\perp$ is the total
+    perpendicular plasma pressure, $V$ is the confined plasma volume, $dV$ is a
+    differential volume element, $B_0$ is the reference toroidal magnetic-field
+    strength, and $\mu_0$ is the vacuum permeability.
+
+    The volume integral aggregates the perpendicular pressure of all included
+    plasma populations over the entire confined plasma volume, so this quantity
+    is global rather than local or species-resolved. It is distinct from the
+    current- and major-radius-based normalization of
+    [poloidal_beta](name:poloidal_beta), and it does not include the additional
+    engineering normalization applied by
+    [normalized_toroidal_beta](name:normalized_toroidal_beta).
+
+    As the toroidal member of the [beta](name:beta) family, toroidal beta uses
+    the reference toroidal magnetic pressure $B_0^2/(2\mu_0)$ as its
+    denominator. The [beta](name:beta) parent represents this same toroidal
+    pressure ratio at the family level, while the explicitly named toroidal form
+    identifies the magnetic-field normalization.
+  unit: '1'

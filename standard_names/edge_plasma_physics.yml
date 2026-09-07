@@ -1,0 +1,73 @@
+- name: electron_density_at_plasma_boundary
+  description: |-
+    Number density of electrons at the plasma boundary, evaluated as the local,
+    intensive particle count per physical volume on the last closed magnetic
+    flux surface.
+  documentation: |-
+    Number density of electrons at the plasma boundary is the local, intensive
+    particle count per physical volume for the electron population evaluated on
+    the last closed magnetic flux surface. The plasma boundary is the limiting
+    closed magnetic flux surface separating confined plasma from the
+    open-field-line scrape-off-layer region.
+
+    The local electron number density is the zeroth velocity moment of the
+    electron distribution function at a boundary point:
+
+    $$
+    n_e(\mathbf{x}_b,t) = \int f_e(\mathbf{x}_b,\mathbf{v},t)\,d^3v
+    $$
+
+    where $n_e$ is the electron number density, $\mathbf{x}_b$ is a point on the
+    last closed magnetic flux surface, $t$ is time, $\mathbf{v}$ is electron
+    velocity, $f_e$ is the electron phase-space distribution function, and
+    $d^3v$ is the velocity-space volume element.
+
+    This quantity applies specifically to electrons and is not an ion or
+    neutral-particle density. It is a local boundary value, with no averaging
+    over the boundary surface or over a volume; because electrons are not
+    resolved here into atomic ionization states, no charge-state aggregation is
+    applied.
+
+    It is the electron-specific instance of
+    [density_at_plasma_boundary](name:density_at_plasma_boundary). The related
+    flux_surface_averaged_electron_density_at_plasma_boundary instead represents
+    the average of electron density over the same last closed magnetic flux
+    surface, rather than the local value.
+  unit: m^-3
+
+- name: total_power_at_separatrix
+  description: |-
+    Net energy power leaving the confined plasma through the last closed
+    magnetic flux surface and entering the scrape-off layer.
+  documentation: |-
+    Separatrix power is the net global energy loss from the confined plasma into
+    the scrape-off layer across the last closed magnetic flux surface. It
+    represents the aggregate power crossing the entire separatrix rather than a
+    local surface value.
+
+    The defining boundary integral is
+
+    $$
+    P_{\rm sep} = \oint_{S_{\rm sep}} \mathbf{S}_E \cdot \hat{\mathbf{n}}\, dA
+    $$
+
+    where $P_{\rm sep}$ is the separatrix power, $S_{\rm sep}$ is the last
+    closed magnetic flux surface, $\mathbf{S}_E$ is the net plasma-energy flux
+    density, $\hat{\mathbf{n}}$ is the unit normal directed from the confined
+    plasma toward the scrape-off layer, and $dA$ is an element of separatrix
+    area.
+
+    This is a total, net quantity integrated over the complete separatrix. It
+    applies to the confined plasma as a whole, with no selection of species,
+    reaction channel, or individual transport mechanism; outward energy transfer
+    is the plasma loss represented by the quantity. It is not a pointwise
+    energy-flux density or a power associated with a single surface location.
+
+    The boundary total is distinct from [radiated power over the core
+    region](name:radiated_power_over_core_region), which describes
+    electromagnetic power emitted within the core and is not necessarily equal
+    to power crossing the separatrix. It is also distinct from [power due to
+    conduction](name:power_due_to_conduction), which describes
+    conduction-mediated power deposited on plasma-facing surfaces downstream of
+    the separatrix.
+  unit: W

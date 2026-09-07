@@ -1,0 +1,17 @@
+- name: breakdown_initial_time
+  description: |-
+    Timestamp at which plasma breakdown begins and discharge current starts to
+    flow.
+  documentation: |-
+    Timestamp at which plasma breakdown begins and discharge current starts to
+    flow.
+  unit: s
+
+- name: pulse_duration
+  description: |-
+    Elapsed duration of the confined-plasma phase in a single discharge, from
+    plasma breakdown until termination of the confined plasma.
+  documentation: |-
+    Elapsed duration from plasma breakdown until termination of auxiliary
+    heating in a single discharge.
+  unit: s

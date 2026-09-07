@@ -1,0 +1,555 @@
+- name: capacitance_of_ion_cyclotron_heating_antenna
+  description: |-
+    Effective capacitance of an impedance-matching element in an ion-cyclotron
+    heating antenna, relating stored charge to the RF voltage used for circuit
+    tuning.
+  documentation: |-
+    This quantity is the non-negative lumped capacitance associated with an
+    impedance-matching element in an ion-cyclotron heating antenna module. It
+    represents the element's ability to store electric charge and participate in
+    tuning the radio-frequency transmission circuit.
+
+    For an ideal lumped capacitive element, the capacitance is defined by
+
+    $$
+    C = \frac{Q}{V}
+    $$
+
+    where $C$ is the capacitance, $Q$ is the charge stored on the element, and
+    $V$ is the electric potential difference across the element.
+
+    The quantity applies to the specified matching element of the antenna and
+    does not represent the capacitance of an unrelated circuit component or the
+    entire transmission system. It is a circuit parameter rather than a power,
+    current, or operating-frequency quantity.
+
+    Together with the [resistance of an ion-cyclotron heating
+    antenna](name:resistance_of_ion_cyclotron_heating_antenna), it characterizes
+    the antenna's effective RF impedance; the [frequency of an ion-cyclotron
+    heating antenna](name:frequency_of_ion_cyclotron_heating_antenna) identifies
+    the RF operating frequency at which the matching condition is evaluated.
+  unit: F
+
+- name: forward_power_of_ion_cyclotron_heating_antenna
+  description: |-
+    Forward RF power of an ion-cyclotron heating antenna is the incident power
+    traveling from the generator toward the antenna before reflection and
+    coupling to the plasma.
+  documentation: |-
+    Forward power of an ion-cyclotron heating antenna is the forward-traveling
+    RF power at a defined reference plane on the feed line, directed from the
+    generator toward the antenna. It is the incident power arriving at the
+    antenna before reflection at the antenna–plasma interface and before power
+    is coupled into the plasma.
+
+    The quantity applies to one antenna or antenna module at its feed-line
+    reference plane and includes only the forward-traveling component; it is not
+    summed over an antenna system. It excludes backward-traveling [reflected
+    power](name:reflected_power_of_ion_cyclotron_heating_antenna) and power
+    already coupled into the plasma.
+
+    At a common reference plane, forward and reflected power determine the net
+    [launched power]: the launched component is the forward power less the
+    reflected power when intervening feed-line losses are excluded.
+  unit: W
+
+- name: frequency_of_ion_cyclotron_heating_antenna
+  description: |-
+    Radio-frequency drive frequency of an ion-cyclotron heating antenna,
+    averaged over its modules. This non-negative scalar sets the ion-cyclotron
+    resonance layer locations and the ion species and harmonics accessible for
+    wave absorption.
+  documentation: |-
+    Radio-frequency drive frequency of an ion-cyclotron heating antenna is the
+    non-negative cycle frequency of the electromagnetic drive applied to the
+    antenna. It is an antenna-level setting that enters the ion-cyclotron
+    resonance condition for wave absorption by ions in the plasma.
+
+    For an ion species resonating at harmonic $n$, the defining resonance
+    relation is:
+
+    $$
+    2\pi f = n\Omega_{ci} = n\frac{Z_i e B}{m_i}
+    $$
+
+    where $f$ is this radio-frequency drive frequency, $n$ is the positive
+    integer ion-cyclotron harmonic number, $i$ labels the resonant ion species,
+    $\Omega_{ci}$ is the ion cyclotron angular frequency of species $i$, $Z_i$
+    is the charge number of species $i$, $e$ is the elementary charge, $B$ is
+    the magnetic-field magnitude at the resonant location, and $m_i$ is the mass
+    of species $i$.
+
+    This quantity applies to a complete ion-cyclotron heating antenna, not to a
+    single antenna module; if module frequencies differ, its aggregation
+    convention is the arithmetic mean over the modules. It is the ordinary cycle
+    frequency $f$, not the angular frequency $2\pi f$, and it is distinct from
+    the spatially varying local ion cyclotron frequency in the plasma.
+
+    The frequency, together with the selected ion species, harmonic number, and
+    magnetic-field magnitude, determines which resonance layers are accessible,
+    but it does not by itself identify a unique absorption channel when several
+    species or harmonics satisfy the resonance relation. It is separate from
+    total_power_of_ion_cyclotron_heating_antenna, from the RF-circuit quantity
+    [resistance_of_ion_cyclotron_heating_antenna](name:resistance_of_ion_cyclotron_heating_antenna),
+    and from voltage_amplitude_of_ion_cyclotron_heating_antenna; the analogous
+    electron-cyclotron quantity is
+    [frequency_of_electron_cyclotron_heating_antenna](name:frequency_of_electron_cyclotron_beam).
+  unit: Hz
+
+- name: launched_power_of_lower_hybrid_antenna
+  description: |-
+    Launched power of a lower-hybrid antenna is the net RF power entering the
+    vacuum vessel after reflection at the antenna input reference plane.
+  documentation: |-
+    Launched power of a lower-hybrid antenna is the nonnegative net RF power
+    propagating from the antenna input reference plane into the vacuum vessel
+    toward the plasma. It is one per-antenna component of the wave-power budget
+    represented by [power of a lower-hybrid antenna].
+
+    The net launched power is defined by:
+
+    $$
+    P_\mathrm{launched} = P_\mathrm{forward} - P_\mathrm{reflected}
+    $$
+
+    where $P_\mathrm{forward}$ is the incident RF power arriving at the antenna
+    input reference plane and $P_\mathrm{reflected}$ is the RF power returning
+    toward the transmission line. The quantity applies to one lower-hybrid
+    antenna and is not an aggregate over multiple antennas.
+
+    Launched power is distinct from [forward power of a lower-hybrid
+    antenna](name:forward_power_of_lower_hybrid_antenna), which includes power
+    subsequently reflected, and from [reflected power of a lower-hybrid
+    antenna](name:reflected_power_of_lower_hybrid_antenna). It denotes power
+    entering the vacuum vessel, not generator output or power subsequently
+    absorbed by the plasma. Mode-resolved representations, including [per
+    toroidal mode launched power of a lower-hybrid antenna], resolve this same
+    per-antenna quantity by wave-number interval.
+  unit: W
+
+- name: power_due_to_ion_cyclotron_heating
+  description: |-
+    Net ion-cyclotron radio-frequency power launched through a heating antenna
+    into the vacuum vessel, equal to forward power minus reflected power at the
+    antenna boundary.
+  documentation: |-
+    Net ion-cyclotron radio-frequency power is the power delivered through an
+    ion-cyclotron heating antenna into the vacuum vessel toward the plasma. It
+    is a launcher-boundary quantity, not the generator output or the power
+    ultimately absorbed by plasma particles.
+
+    The defining net-power relation is:
+
+    $$
+    P_{\rm net}=P_{\rm forward}-P_{\rm reflected}
+    $$
+
+    where $P_{\rm net}$ is the net ion-cyclotron power launched toward the
+    plasma, $P_{\rm forward}$ is the incident radio-frequency power traveling
+    toward the antenna as described by [forward power of an ion-cyclotron
+    heating antenna](name:forward_power_of_ion_cyclotron_heating_antenna), and
+    $P_{\rm reflected}$ is the radio-frequency power returned from the antenna
+    toward the source.
+
+    At launcher resolution, the quantity applies to a specified ion-cyclotron
+    heating antenna and has no species, charge-state, or volumetric deposition
+    resolution. The unqualified form represents the launcher-associated value;
+    the system-level aggregation is represented separately by [total power due
+    to ion-cyclotron heating](name:total_power_due_to_ion_cyclotron_heating).
+
+    Reflected power and losses upstream of the antenna boundary are excluded.
+    The quantity therefore describes power launched toward the plasma rather
+    than forward incident power before reflection or the fraction subsequently
+    absorbed by plasma particles. The total-power variant is obtained by summing
+    the corresponding launcher-resolved values over all ion-cyclotron heating
+    antennas, while [launched power of an ion-cyclotron heating
+    antenna](name:launched_power_of_ion_cyclotron_heating_antenna) provides the
+    antenna-oriented expression of the same net boundary power.
+  unit: W
+
+- name: pressure_of_ion_cyclotron_heating_antenna
+  description: |-
+    Pressure associated with an ion-cyclotron-heating antenna module,
+    representing mechanical normal loading or contained-gas pressure at hardware
+    components.
+  documentation: |-
+    Pressure associated with an ion-cyclotron-heating antenna module represents
+    the compressive normal stress or contained-gas pressure acting at its
+    hardware components.
+
+    At a surface, pressure is defined as the normal force distributed over the
+    loaded area:
+
+    $$
+    p = \frac{F_n}{A}
+    $$
+
+    where $p$ is pressure, $F_n$ is the force normal to the surface, and $A$ is
+    the area over which that force acts. For contained gas, the same scalar
+    represents the isotropic normal stress exerted by the gas.
+
+    The scope is the antenna module and its associated hardware components,
+    including local mechanical or gas-pressure conditions at individual sensing
+    locations. The quantity is not a plasma pressure, a pressure amplitude, a
+    pressure variation, or an aggregate sum or average over the module.
+
+    Pressure is a mechanical or fluid-state property and is independent of
+    electrical properties such as the antenna's
+    [resistance](name:resistance_of_ion_cyclotron_heating_antenna) and [strap
+    current].
+  unit: Pa
+
+- name: radial_outline_of_antenna_strap
+  description: |-
+    Major-radius coordinate of each point on an antenna-strap outline in the
+    right-handed cylindrical (R, φ, Z) frame.
+  documentation: |-
+    This quantity gives the major-radius coordinate of a point on the geometric
+    outline of an antenna strap. It identifies the point's perpendicular
+    distance from the toroidal symmetry axis in the right-handed cylindrical
+    $(R, \phi, Z)$ frame.
+
+    The quantity is pointwise and unaggregated over the antenna-strap outline:
+    each value applies to one outline point. It does not represent the strap's
+    reference-point coordinate, center coordinate, radial extent, or
+    outer-radius bound.
+
+    The complementary [toroidal angle of the antenna
+    strap](name:toroidal_angle_of_antenna_strap) specifies the angular location
+    of the same outline point. The [radial coordinate of the antenna
+    strap](name:radial_coordinate_of_antenna_strap) instead locates a specified
+    strap geometry reference point and is therefore not interchangeable with
+    this outline coordinate.
+  unit: m
+
+- name: reflected_phase_of_ion_cyclotron_heating_antenna
+  description: |-
+    Relative phase angle of a reflected radio-frequency power-wave phasor at an
+    antenna element in an ion-cyclotron heating launcher, measured relative to
+    the forward power-wave phasor of that same element.
+  documentation: |-
+    This quantity is the relative phase of a complex reflected radio-frequency
+    power-wave phasor at a selected antenna strap or module with respect to the
+    complex forward radio-frequency power-wave phasor of the same strap or
+    module. It specifies the element-local reflection phase of an ion-cyclotron
+    heating launcher rather than an absolute phase or an inter-element phase.
+
+    For element $i$, the reflected phase is defined by
+
+    $$
+    \phi_{\mathrm{ref},i} = \arg\!\left(b_i^{\mathrm{ref}} (a_i^{\mathrm{fwd}})^*\right) \pmod{2\pi}
+    $$
+
+    where $\phi_{\mathrm{ref},i}$ is this reflected phase, $b_i^{\mathrm{ref}}$
+    is the complex reflected power-wave phasor at element $i$,
+    $a_i^{\mathrm{fwd}}$ is the complex forward power-wave phasor at the same
+    element, $(a_i^{\mathrm{fwd}})^*$ is its complex conjugate, and $\arg$
+    extracts the phase angle. The phase is defined modulo $2\pi$.
+
+    The scope is a single selected launcher strap or module and the pair of
+    forward and reflected traveling power waves at the same element reference
+    plane. The forward wave propagates toward the antenna element, and the
+    reflected wave propagates away from the antenna element toward the feeding
+    network. The first launcher element is not the phase reference for this
+    quantity, and the quantity is not averaged or summed over launcher elements.
+
+    This quantity is a reflected-wave member of the broader [phase of the
+    ion-cyclotron heating antenna] family. It is distinct from the [wave phase
+    of the ion-cyclotron heating
+    antenna](name:wave_phase_of_ion_cyclotron_heating_antenna), which describes
+    inter-element phasing, and together with the [reflected power of the
+    ion-cyclotron heating
+    antenna](name:reflected_power_of_ion_cyclotron_heating_antenna) it specifies
+    the phase-and-magnitude state of the reflected power wave without including
+    the magnitude itself.
+
+    Sign convention: Positive when the reflected-wave phasor at the selected
+    element leads the forward-wave phasor at the same element in phase under the
+    adopted temporal phasor convention.
+  unit: rad
+
+- name: reflected_power_of_ion_cyclotron_heating_antenna
+  description: |-
+    Reflected power of an ion-cyclotron heating antenna is the
+    backward-traveling radio-frequency power returned from one antenna toward
+    the transmission-line source rather than coupled into the plasma.
+  documentation: |-
+    Reflected power of an ion-cyclotron heating antenna is the
+    backward-traveling radio-frequency wave power at a defined reference plane
+    on the feed line, directed away from the antenna toward the source. It is
+    the returned component of the antenna-associated power and represents
+    incident power rejected by antenna-plasma coupling.
+
+    At a common reference plane, the reflected and forward traveling-wave powers
+    are related by
+
+    $$
+    P_{\mathrm{ref}} = |\Gamma|^2 P_{\mathrm{fwd}}
+    $$
+
+    where $P_{\mathrm{ref}}$ is the reflected power, $\Gamma$ is the complex
+    wave reflection coefficient, and $P_{\mathrm{fwd}}$ is the [forward
+    power](name:forward_power_of_ion_cyclotron_heating_antenna) traveling toward
+    the antenna.
+
+    This quantity applies to one ion-cyclotron heating antenna and represents
+    the aggregate returned power associated with that antenna at the defined
+    reference plane. When an antenna contains multiple modules, it is distinct
+    from reflected power assigned to an individual module; it also excludes
+    forward power, power coupled into the plasma, and source power not present
+    at the reference plane.
+
+    It complements [forward
+    power](name:forward_power_of_ion_cyclotron_heating_antenna) as the opposite
+    traveling-wave component at the feed-line reference plane. The [launched
+    power] is power delivered from the antenna into the plasma, so it is
+    physically distinct from returned reflected power; the two quantities must
+    not be identified or substituted for one another.
+  unit: W
+
+- name: toroidal_angle_of_antenna_strap
+  description: |-
+    Toroidal angular coordinate of each antenna-strap outline point around the
+    machine symmetry axis in the right-handed cylindrical (R, φ, Z) frame.
+  documentation: |-
+    The toroidal angle is the azimuthal coordinate assigned to each point on the
+    geometric outline of an antenna strap. It identifies the point’s
+    circumferential location in the right-handed cylindrical $(R,\phi,Z)$ frame,
+    where $R$ is major radius measured from the machine symmetry axis, $\phi$ is
+    toroidal angle, and $Z$ is vertical height.
+
+    This quantity applies to individual strap-outline points and is not a mean,
+    sum, nominal center coordinate, or mechanical orientation angle. No
+    aggregation over the outline is implied; each point retains its own $\phi$
+    value.
+
+    Together with the other coordinates of the outline, this angle locates the
+    strap geometry. It is distinct from the [radial coordinate of the antenna
+    strap](name:radial_coordinate_of_antenna_strap), which locates a strap
+    reference point, while [vertical outline of the antenna
+    strap](name:vertical_outline_of_antenna_strap) provides the corresponding
+    signed vertical coordinate for outline points. The same angular-coordinate
+    concept is used for a different object by [toroidal angle of a coil
+    conductor element](name:toroidal_angle_of_coil_conductor_element).
+
+    Sign convention: Positive when the angular displacement from the chosen
+    $\phi=0$ reference is toward increasing toroidal angle $\phi$,
+    counter-clockwise when viewed from above $+Z$.
+  unit: rad
+
+- name: total_external_heating_power
+  description: |-
+    Total non-inductive power coupled from external neutral-beam and
+    radio-frequency heating systems to the plasma, summed over auxiliary sources
+    and excluding Ohmic heating.
+  documentation: |-
+    Total external heating power is the aggregate non-inductive power coupled to
+    the plasma by auxiliary heating systems. It includes neutral-beam injection
+    and electron-cyclotron, ion-cyclotron, and lower-hybrid systems, while
+    excluding power associated with Ohmic induction.
+
+    The defining aggregate relation is
+
+    $$
+    P_{\mathrm{ext}} = \sum_{s \in \mathcal{S}_{\mathrm{aux}}} P_s
+    $$
+
+    where $P_{\mathrm{ext}}$ is the total external heating power,
+    $\mathcal{S}_{\mathrm{aux}}$ is the set of included auxiliary heating
+    systems, and $P_s$ is the power coupled to the plasma by auxiliary source
+    $s$.
+
+    The quantity applies to the whole plasma and is summed over all included
+    auxiliary sources rather than resolved by source, species, or spatial
+    region. It represents external power input that may contribute to both
+    plasma heating and non-inductive current drive; it is distinct from Ohmic
+    heating and from generator power that is not coupled to the plasma.
+    Source-specific contributions include [total power due to electron-cyclotron
+    heating](name:total_power_due_to_electron_cyclotron_heating), [total power
+    due to ion-cyclotron
+    heating](name:total_power_due_to_ion_cyclotron_heating), and power absorbed
+    from a [neutral-beam
+    injector](name:absorbed_power_of_neutral_beam_injector), whose aggregate
+    forms contribute to the sum.
+  unit: W
+
+- name: total_power_due_to_ion_cyclotron_heating
+  description: |-
+    Total ion-cyclotron radio-frequency power launched into the vacuum vessel by
+    the complete heating-antenna system, summed over all antennas.
+  documentation: |-
+    Total ion-cyclotron radio-frequency power is the aggregate power launched
+    into the vacuum vessel by the complete ion-cyclotron heating-antenna system.
+    It represents the net launcher-array power directed toward the plasma,
+    rather than power ultimately absorbed by plasma particles.
+
+    The system total is defined by summing the launched power from each antenna:
+
+    $$
+    P_{\rm total}=\sum_{i=1}^{N_{\rm ant}} P_i
+    $$
+
+    where $P_{\rm total}$ is the total ion-cyclotron radio-frequency power
+    launched by the system, $N_{\rm ant}$ is the number of contributing
+    ion-cyclotron heating antennas, $i$ is an antenna index, and $P_i$ is the
+    net power launched by antenna $i$, corresponding to the antenna-resolved
+    [ion-cyclotron heating power](name:power_due_to_ion_cyclotron_heating).
+
+    The quantity applies to the complete heating system and is aggregated over
+    all ion-cyclotron heating antennas. It has no individual-antenna, species,
+    charge-state, or volumetric deposition resolution. Reflected power and
+    losses upstream of the vacuum-vessel launch boundary are excluded, and the
+    quantity does not represent the portion subsequently absorbed by plasma
+    particles.
+
+    This system-level total is the aggregate counterpart of [launched power due
+    to ion-cyclotron heating](name:launched_power_due_to_ion_cyclotron_heating),
+    while [launched power of an ion-cyclotron heating
+    antenna](name:launched_power_of_ion_cyclotron_heating_antenna) represents
+    the corresponding launcher-oriented power for an individual antenna.
+  unit: W
+
+- name: vertical_outline_of_antenna_strap
+  description: |-
+    Signed vertical coordinate of each contour point defining an ion-cyclotron
+    antenna strap boundary, distinguishing the strap outline from its
+    geometric-center location.
+  documentation: |-
+    The vertical outline coordinate is the signed height of one contour point on
+    the geometric boundary of an ion-cyclotron antenna strap, expressed in the
+    right-handed cylindrical $(R, \phi, Z)$ frame. It describes boundary
+    geometry rather than a field or thermodynamic quantity.
+
+    The quantity applies pointwise to the strap outline: each value belongs to
+    one boundary contour point. Values are not summed, averaged, or integrated
+    over the outline, and the quantity does not represent the strap's
+    geometric-center location.
+
+    The geometric-center location is represented separately by the [vertical
+    coordinate of the antenna strap](name:vertical_coordinate_of_antenna_strap).
+    Collectively, the coordinates of corresponding outline points define the
+    strap boundary geometry.
+  unit: m
+
+- name: wave_phase_of_antenna_strap
+  description: |-
+    Phase angle of the radio-frequency current phasor carried by one
+    ion-cyclotron-heating antenna strap, defined relative to a specified RF
+    phase reference.
+  documentation: |-
+    Wave phase of an antenna strap is the phase angle of the oscillatory
+    radio-frequency current phasor carried by that strap. It describes the
+    strap-level excitation phase used in the antenna's toroidal phasing
+    configuration.
+
+    The complex strap-current phasor may be represented as
+
+    $$
+    I_s = |I_s|e^{i\phi_s}
+    $$
+
+    where $I_s$ is the complex radio-frequency current phasor, $|I_s|$ is its
+    current amplitude, and $\phi_s$ is the wave phase represented by this
+    quantity. The phase is defined modulo $2\pi$ relative to a specified RF
+    reference phase.
+
+    This quantity applies to one antenna strap and is not summed or averaged
+    over multiple straps. It refers to the phase of the strap current, not the
+    phase of a forward power-wave phasor, which is represented by [forward wave
+    phase of an ion-cyclotron-heating
+    antenna](name:forward_wave_phase_of_ion_cyclotron_heating_antenna), or the
+    phase associated with a complete antenna element.
+
+    The associated [wave current of antenna strap] provides the phasor whose
+    phase is specified, while [wave current of antenna strap amplitude]
+    determines its magnitude rather than its phase. Relative phases between
+    straps determine the toroidal phasing of the antenna excitation and
+    therefore influence the launched wave excitation spectrum. The
+    phase-reference plane and any phase-unwrapping convention must be specified
+    separately when comparing values.
+  unit: rad
+
+- name: wave_phase_of_ion_cyclotron_heating_antenna
+  description: |-
+    Relative phase angle of a radio-frequency phasor at an antenna element in an
+    ion-cyclotron heating launcher, measured relative to the first element for
+    inter-element phasing.
+  documentation: |-
+    This quantity is the relative phase of a complex radio-frequency phasor at a
+    selected antenna strap or module feed with respect to the first reference
+    element. It specifies inter-element phasing of an ion-cyclotron heating
+    launcher rather than an absolute phase.
+
+    For selected element $i$, the relative phase is defined by
+
+    $$
+    \Delta\phi_i = \arg\left(A_i A_1^*\right) \pmod{2\pi}
+    $$
+
+    where $\Delta\phi_i$ is the relative phase of element $i$, $A_i$ is its
+    complex radio-frequency voltage or wave phasor, $A_1$ is the phasor of the
+    first reference element, $A_1^*$ is the complex conjugate of that reference
+    phasor, and $\arg$ extracts the phase angle. The reference element has zero
+    relative phase, and the result is defined modulo $2\pi$.
+
+    The quantity applies independently to one selected antenna element or module
+    feed and is not summed or averaged over modules. It describes the
+    radio-frequency signal associated with the antenna feed, not a phase
+    belonging to a plasma population or integrated over a plasma region. It
+    excludes absolute phase, amplitude, power, and reflection coefficient,
+    although the phase may characterize a complex feed voltage or traveling-wave
+    quantity.
+
+    The family parent [phase of the ion-cyclotron heating antenna] provides the
+    common relative-phase meaning. Propagation-specific instances retain this
+    definition while selecting the wave direction, as in the [forward wave phase
+    of the ion-cyclotron heating
+    antenna](name:forward_wave_phase_of_ion_cyclotron_heating_antenna) and the
+    [reflected phase of the ion-cyclotron heating
+    antenna](name:reflected_phase_of_ion_cyclotron_heating_antenna).
+
+    Sign convention: Positive when the selected element's radio-frequency phasor
+    leads the first reference element in phase under the adopted temporal phasor
+    convention.
+  unit: rad
+
+- name: forward_wave_phase_of_ion_cyclotron_heating_antenna
+  description: |-
+    Relative phase of the forward radio-frequency power-wave phasor at an
+    ion-cyclotron-heating antenna module, referenced to the first module for
+    inter-module toroidal phasing.
+  documentation: |-
+    The forward-wave phase is the relative phase angle of the complex
+    radio-frequency power-wave phasor associated with one ion-cyclotron-heating
+    antenna module. It describes inter-module phasing rather than an absolute
+    phase.
+
+    For selected module $i$, the relative forward-wave phase is defined by
+
+    $$
+    \theta_i^{+} = \arg\left(\tilde{a}_i^{+}\right) - \arg\left(\tilde{a}_1^{+}\right)
+    $$
+
+    where $\theta_i^{+}$ is the relative forward-wave phase, $i$ identifies the
+    selected antenna module, module $1$ is the first reference module,
+    $\tilde{a}_i^{+}$ is the complex phasor of the forward radio-frequency power
+    wave associated with module $i$, and $\arg$ returns a phasor's phase angle.
+
+    The quantity applies only to the forward wave at an antenna module and is
+    defined relative to the first module; no absolute phase relative to a
+    generator or external reference is implied. It concerns the electromagnetic
+    power-wave phasor, not a plasma-particle quantity or a spatially distributed
+    plasma field.
+
+    This is the forward-wave specialization of the relative antenna phasor phase
+    defined by [wave phase of an ion-cyclotron-heating
+    antenna](name:wave_phase_of_ion_cyclotron_heating_antenna). It is distinct
+    from the relative phase of the reflected wave, [reflected phase of an
+    ion-cyclotron-heating
+    antenna](name:reflected_phase_of_ion_cyclotron_heating_antenna), and from
+    the phase of the RF current carried by an antenna strap, [wave phase of an
+    antenna strap](name:wave_phase_of_antenna_strap).
+
+    Sign convention: Positive when the selected module's forward-wave phasor
+    leads the first reference module in phase.
+  unit: rad

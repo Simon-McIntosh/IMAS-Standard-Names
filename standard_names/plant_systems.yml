@@ -1,0 +1,115 @@
+- name: coolant_temperature_at_inlet
+  description: |-
+    Absolute thermodynamic temperature of coolant entering a cooling loop or
+    plant component, establishing the upstream state for enthalpy-based
+    heat-transfer balances.
+  documentation: |-
+    The coolant inlet temperature is the absolute thermodynamic temperature of
+    the coolant or working fluid at the entrance to a cooling loop, plant
+    component, or cooling module. It specifies the upstream thermal state of the
+    fluid before heat transfer through the associated cooled volume.
+
+    The quantity is a local boundary value at the relevant inlet and is not an
+    average or aggregate over multiple components, loops, or inlet streams. It
+    applies to the coolant population crossing that inlet, rather than to the
+    cooled solid or the plasma.
+
+    It is distinct from the downstream [coolant temperature at
+    outlet](name:coolant_temperature_at_outlet) and does not represent the
+    temperature change across the cooled component or loop.
+
+    In an enthalpy balance, the inlet temperature supplies the upstream thermal
+    state and is used with the outlet temperature and [coolant mass flow
+    rate](name:coolant_mass_flow_rate) to determine thermal power transferred to
+    the coolant. The quantity itself is a temperature, not a power or a
+    coolant-flow measurement.
+  unit: K
+
+- name: coolant_temperature_at_outlet
+  description: |-
+    Absolute thermodynamic temperature of coolant leaving a cooling component or
+    loop, specifying the fluid’s outlet thermal state for enthalpy-based heat
+    balance.
+  documentation: |-
+    This quantity is the absolute thermodynamic temperature of the coolant fluid
+    at the outlet of a cooling component, cooling loop, or comparable coolant
+    circuit. It describes the bulk fluid state at the exit boundary.
+
+    The scope is limited to coolant at an outlet and does not represent the
+    inlet temperature, a wall temperature, or an aggregate temperature over the
+    entire cooling system. It is an outlet state value for the selected cooling
+    path, not a mass-flow rate or a deposited-power quantity.
+
+    Together with the [coolant temperature at the
+    inlet](name:coolant_temperature_at_inlet) and the [coolant mass flow
+    rate](name:coolant_mass_flow_rate), this temperature determines the coolant
+    enthalpy change used to assess heat transferred into the fluid. The enthalpy
+    balance distinguishes thermal power deposited in the coolant from the outlet
+    temperature itself.
+  unit: K
+
+- name: gas_flow
+  description: |-
+    Pressure-volume throughput of a gas stream, expressed as the product of gas
+    pressure and volumetric flow rate at a flow boundary.
+  documentation: |-
+    Gas flow is the pressure-volume throughput of a gas stream crossing a
+    defined flow boundary. It represents the aggregate gas stream rather than a
+    particular molecular species, charge state, mass flow, or particle-number
+    rate.
+
+    The defining pressure-volume throughput is
+
+    $$
+    Q_g = p_g \frac{dV_g}{dt}
+    $$
+
+    where $Q_g$ is gas pressure-volume throughput, $p_g$ is the gas pressure at
+    the flow boundary, $V_g$ is the volume of gas crossing that boundary, and
+    $t$ is time.
+
+    This quantity applies to the gas stream delivered through an injection
+    system and is not itself restricted to an upper or lower operating limit.
+    The [maximum gas flow](name:maximum_gas_flow) is the largest reliably
+    deliverable value of this throughput, while the [minimum gas
+    flow](name:minimum_gas_flow) is the smallest reliably deliverable value;
+    both are limiting instances of the general quantity.
+  unit: Pa.m^3.s^-1
+
+- name: total_neutral_source_rate_due_to_gas_injection
+  description: |-
+    Instantaneous equivalent-electron source rate of neutral gas introduced into
+    the vessel by gas injection, summed over all injected species.
+  documentation: |-
+    This quantity is the instantaneous neutral-gas throughput supplied to the
+    vessel by gas injection, expressed as an equivalent-electron rate. It
+    combines all injected neutral species rather than representing one gas
+    species.
+
+    For the set of injected species, the equivalent-electron rate is defined by:
+
+    $$
+    \dot{N}_{\mathrm{eq}} = \sum_{s \in \mathcal{S}} Z_s\,\dot{N}_s
+    $$
+
+    where $\dot{N}_{\mathrm{eq}}$ is the total equivalent-electron source rate,
+    $\mathcal{S}$ is the set of injected neutral gas species, $\dot{N}_s$ is the
+    particle injection rate of species $s$, and $Z_s$ is the equivalent-electron
+    weighting per injected particle. For an atomic species, $Z_s$ is its atomic
+    number; for a molecule, it is the sum of the atomic numbers of its
+    constituent atoms.
+
+    The quantity applies to the vessel-level gas input and is aggregated by
+    summing over all injected neutral species. It is an instantaneous rate, not
+    a time-integrated inventory, and excludes ionization and subsequent plasma
+    particle sources. Species-resolved rates such as the [hydrogen source rate
+    due to gas injection](name:hydrogen_source_rate_due_to_gas_injection)
+    provide individual contributions to this total. Unlike the [total lower gas
+    source rate of the vacuum vessel due to gas
+    injection](name:total_lower_gas_source_rate_of_vacuum_vessel_due_to_gas_injection),
+    it is not restricted to the lower vessel region.
+
+    The corresponding accumulated quantity, such as the [accumulated hydrogen
+    count due to gas injection], is obtained by time integration and represents
+    delivered inventory rather than instantaneous throughput.
+  unit: s^-1
