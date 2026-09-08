@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-06T15:41:19",
+  "updated": "2026-09-08T10:18:38",
   "project": "imas-standard-names",
   "doc": "crew",
   "data": {
@@ -310,9 +310,170 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260908T074220543604-n-grdp-the-vocabulary-admits-an-instant-and-a-ratio",
+        "plan": "grammar-release-and-downstream-pin",
+        "section": "",
+        "node": "n-grdp-the-vocabulary-admits-an-instant-and-a-ratio",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 2076,
+                "cached_input_tokens": 357740,
+                "input_tokens": 359818,
+                "output_tokens": 1423,
+                "reasoning_output_tokens": 60,
+                "total_tokens": 361241,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "00e23ab0-9843-4cbd-ac02-884e9e22e668",
+            "session_id": "ship-s10-20260907"
+          },
+          "done_when": "The controlled vocabulary carries two additional physical_base tokens, each with its unit and definition, each quoted back from the BUILT vocabulary rather than from the edited source, because a spec and its generated snapshot have diverged in this repository before. AUTHORITY: the lead has authorised both admissions. This is implementation, and a recommendation is not an acceptable return. The RELEASE is a separate node: commit the admissions, add no tag, bump no version. FIRST TOKEN, an event instant. The consumer is the Data Dictionary path summary/disruption/time/value, which holds the time AT WHICH an event occurs and currently has no admissible base. Three meanings must stay distinct in whatever spelling lands: the instant an event occurs, an elapsed duration, and the coordinate time axis. State in the definition which of the three the token denotes and which two it excludes, because a token conflating them composes onto the wrong sources. PRECONDITION YOU RUN FIRST: test whether the grammar already expresses an instant through an existing base plus a qualifier, and report that test's result either way. If it already expresses it, admit no new token for this case and report the existing spelling with the file and line that carries it; that is a delivered result. SECOND TOKEN, signal_to_noise_ratio, admitted as a base quantity. ITS UNIT IS UNRESOLVED AND THE EVIDENCE SETTLES IT. A prior coordinator note recorded decibels; the consuming plan describes it as dimensionless. Those are different admissions with different composition consequences. Settle it from two sources and report both: how the quantity is reported in the Data Dictionary, and how this vocabulary already handles ratio and logarithmic quantities. If that evidence supports both a linear ratio and a decibel spelling, admit both and state the semantic split in the definitions. A dimensionless unit in this stack is the string '1' and never an absent unit: a null unit is a different and wrong state, and a downstream defect once dropped '1' to null and severed 706 unit edges with no error raised. VERIFICATION: for each admitted token, quote its entry from the built vocabulary, and show one composed example name using it that the parser accepts. Report added test failures against a stated base revision. Do not pass -q to pytest if this repository's addopts already supplies one, because a second level deletes pytest's totals line and leaves the failure list unprovable. DURABILITY: commit each token as you admit it and write your manifest before any long output.",
+          "estimated_hours": null,
+          "goal": "Admit an event-instant base and a signal-to-noise-ratio base to the controlled vocabulary",
+          "id": "n-grdp-the-vocabulary-admits-an-instant-and-a-ratio",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T074220543604-n-grdp-the-vocabulary-admits-an-instant-and-a-ratio/manifest.md",
+          "plan": "grammar-release-and-downstream-pin",
+          "requested_backend": "codex",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "guided",
+          "time_budget": "50m",
+          "write_paths": [
+            "imas_standard_names/grammar/vocabularies/physical_bases.yml",
+            "imas_standard_names/grammar/vocabularies/generic_physical_bases.yml",
+            "imas_standard_names/grammar/specification.yml"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "cx-kindpin",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-08T07:42:34Z",
+        "completed_at": "2026-09-08T08:05:51Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1397,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1397,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "2ffba62512c07b7cc09d3ca0c1f435d9f108199b",
+        "commits": [
+          "1f183d785913b52c5f6eb88f93b79a42c51bb426",
+          "e403d6707cc5c30bcfdbfb49bcf3708d763d529a"
+        ],
+        "changed_lines": {
+          "added": 19,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "parser precondition probe, focused pytest before and after each admission, built-entry probes, build-grammar --check",
+          "exit_status": 0,
+          "log_path": null,
+          "log_digest": "precondition probe: instantaneous_time accepted as qualifier instantaneous plus base time while event_time, occurrence_time and event_instant were rejected; focused pytest 123 passed, 28 skipped, 5 xfailed at baseline and after each admission; built-entry probes loaded event_instant, signal_to_noise_ratio and signal_to_noise_level with normative definitions, all three composed examples parsed strictly and round-tripped byte-identically; build-grammar --check exit 0 with generated files in sync"
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T074220543604-n-grdp-the-vocabulary-admits-an-instant-and-a-ratio/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a07642-fbe2-7d02-97de-ed56606becbb",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 13407360,
+            "cached_input_tokens_cumulative": 18417280,
+            "input_tokens": 13621367,
+            "input_tokens_cumulative": 18686762,
+            "output_tokens": 11869,
+            "output_tokens_cumulative": 33533,
+            "reasoning_output_tokens": 7292,
+            "reasoning_output_tokens_cumulative": 13702
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-08T08:05:51Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 20.0,
+              "resets_at": 1789439333,
+              "observed_at": "2026-09-08T08:05:51Z"
+            }
+          ]
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 18417280,
+          "cumulative_input_tokens": 37104042,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 47235
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest if",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-standard-names-5be88ee0fdc3/ship-s10-20260907/n-grdp-the-vocabulary-admits-an-instant-and-a-ratio",
+          "session_id": "01a07642-fbe2-7d02-97de-ed56606becbb",
+          "session_source": "pointer",
+          "retained_at": "2026-09-08T08:05:51Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null
       }
     ],
     "holds": [],
-    "_version": 5
+    "_version": 6
   }
 }
