@@ -163,6 +163,14 @@ bases:
     aliases: []
     kind: scalar
     inherently_dimensional: true
+  event_instant:
+    aliases: []
+    kind: scalar
+    inherently_dimensional: true
+    definition: >
+      The instant on a time coordinate at which a discrete event occurs,
+      expressed in seconds with unit `s`. It is neither the elapsed duration
+      of the event nor the time coordinate axis over which a signal is sampled.
   # NOTE: energy_flux / heat_flux / momentum_flux / particle_flux are NOT
   # lexical bases. They decompose as channel + base: energy_flux = channel=energy
   # + base=flux (see channels.yml). energy and momentum remain bases for their
