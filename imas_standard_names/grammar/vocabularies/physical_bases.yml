@@ -163,6 +163,14 @@ bases:
     aliases: []
     kind: scalar
     inherently_dimensional: true
+  event_instant:
+    aliases: []
+    kind: scalar
+    inherently_dimensional: true
+    definition: >
+      The instant on a time coordinate at which a discrete event occurs,
+      expressed in seconds with unit `s`. It is neither the elapsed duration
+      of the event nor the time coordinate axis over which a signal is sampled.
   # NOTE: energy_flux / heat_flux / momentum_flux / particle_flux are NOT
   # lexical bases. They decompose as channel + base: energy_flux = channel=energy
   # + base=flux (see channels.yml). energy and momentum remain bases for their
@@ -392,9 +400,20 @@ bases:
   shearing_rate:
     aliases: []
     kind: scalar
+  signal_to_noise_level:
+    aliases: []
+    kind: scalar
+    definition: >
+      The logarithmic quotient of signal power to noise power reported in
+      decibels with unit `dB`, equal to 10 times the base-10 logarithm of the
+      power ratio. It is distinct from the linear signal-to-noise ratio.
   signal_to_noise_ratio:
     aliases: []
     kind: scalar
+    definition: >
+      The linear quotient of signal power to noise power, expressed with the
+      dimensionless unit `1`. It is distinct from the logarithmic
+      signal-to-noise level reported in decibels.
   size:
     aliases: []
     kind: scalar
