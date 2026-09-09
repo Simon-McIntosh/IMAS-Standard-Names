@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-08T10:18:38",
+  "updated": "2026-09-09T19:12:05",
   "project": "imas-standard-names",
   "doc": "crew",
   "data": {
@@ -15,6 +15,15 @@
           "{\"alias\":\"opus 5\",\"backend\":\"claude-opus\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"claude-opus-5\",\"sandbox\":\"worktree-full\"}": "451f0139-ecb1-41fc-bfc4-ff33f8bff921"
         },
         "created": "2026-09-06"
+      },
+      {
+        "id": "isn-grammar",
+        "harness": "codex-terra",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-09"
       }
     ],
     "runs": [
@@ -471,9 +480,341 @@
         "boundary_waiver": null,
         "resume_waiver": null,
         "watch_override": null
+      },
+      {
+        "run_id": "r-20260909T154352802519-n-grdp-path-qualification-reads-the-wrong-field",
+        "plan": "grammar-release-and-downstream-pin",
+        "section": "\u00a73",
+        "node": "n-grdp-path-qualification-reads-the-wrong-field",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 692,
+                "cached_input_tokens": 512887,
+                "input_tokens": 513581,
+                "output_tokens": 1247,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 514828,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "9a2a0944-44ee-4d69-8147-14071cf6a5e9",
+            "session_id": "ship-s10-20260908"
+          },
+          "done_when": "imas_standard_names/validation/semantic.py accepts a path entity carried in either parsed.object or parsed.geometry so that _check_trajectory_path_qualification stops flagging qualified names, and tests/test_semantic_path_qualification.py proves both directions against run_semantic_checks in the style of the existing tests/test_semantic_unit_vector_locus.py: radial_outline_of_plasma_boundary, radial_outline_of_wall and vertical_outline_of_plasma_boundary each return no path-qualification issue, while a bare unqualified outline and a bare unqualified trajectory each still return the error. docs/evidence/grammar-release-and-downstream-pin/path-qualification-field-selection.md records the before and after issue lists for all five names plus the full pytest result. The measured cause, from imas-codex revision a83b71d6a: PATH_BASES is trajectory, outline and contour, the rule reads parsed.object only, and every qualified outline carries its of-entity target in parsed.geometry while parsed.object is None, so the rule asks for an entity the parser already captured under another field name. Nine live downstream rows carry the issue phrase. Do NOT widen the rule beyond that field selection and do NOT remove the check: an unqualified outline must still fail, and a rule that stops rejecting anything would be worse than the false positive it replaces. Gate with the full ISN pytest suite and report added failures against a stated base revision rather than absolute green; run it with UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-standard-names/.venv PYTHONPATH=$PWD uv run --no-sync pytest -p no:cacheprovider so the worktree reuses the main checkout environment instead of building its own. Commit with a conventional subject and a body, add no AI attribution or co-authored-by trailer of any kind, and do NOT push, merge, tag or release - integration and the patch release are the coordinator's and must be serialised against downstream consumers. Write the manifest before the suite run because your process ends with its turn.",
+          "estimated_hours": null,
+          "goal": "Correct the path-qualification check to read the field the parser actually populates",
+          "id": "n-grdp-path-qualification-reads-the-wrong-field",
+          "lane_declaration": {
+            "backend": "codex-terra",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-09T15:43:53Z",
+            "read_at": "2026-09-09T15:43:53Z",
+            "resolved_backend": "codex-terra",
+            "utilisation_pct": 88.0
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T154352802519-n-grdp-path-qualification-reads-the-wrong-field/manifest.md",
+          "plan": "grammar-release-and-downstream-pin",
+          "requested_backend": "codex-terra",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "guided",
+          "time_budget": "50m",
+          "write_paths": [
+            "imas_standard_names/validation/semantic.py",
+            "tests/test_semantic_path_qualification.py",
+            "docs/evidence/grammar-release-and-downstream-pin/path-qualification-field-selection.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "isn-grammar",
+        "backend": "codex-terra",
+        "local": false,
+        "agent": {
+          "alias": "terra5.6",
+          "backend": "codex-terra",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-terra",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-09T15:44:01Z",
+        "completed_at": "2026-09-09T15:45:23Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 82,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 82,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "e1b96c4bc98469c192dc73b73ab626c426cda9c1",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": 0,
+        "gate": "failed",
+        "gate_check": {
+          "command": "none; the run was stopped once the worktree was identified as the wrong repository",
+          "exit_status": 1,
+          "log_path": null,
+          "log_digest": "worktree git-common-dir resolved to imas-codex/.git; imas_standard_names source absent; imas_codex source present"
+        },
+        "suite_delta": null,
+        "failure_classification": "malformed-node",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T154352802519-n-grdp-path-qualification-reads-the-wrong-field/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a086d7-2622-77f0-a8c0-16004b2df053",
+        "budget": {
+          "cost_usd": null,
+          "detail": "no events yet",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "refusal": false,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-09T15:45:23Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 88.0,
+              "resets_at": 1789439333,
+              "observed_at": "2026-09-09T15:45:23Z"
+            }
+          ],
+          "notional_cost_usd": 1.4889,
+          "rate_basis": {
+            "model_identifier": "gpt-5.6-terra",
+            "input_per_million": 2.0,
+            "output_per_million": 12.0,
+            "as_of": "2026-09-09"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest result.",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "scope_acceptances": null,
+        "no_commit": "the node was dispatched into the wrong repository and produced nothing; there is no work to record",
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260908/n-grdp-path-qualification-reads-the-wrong-field",
+          "session_id": "01a086d7-2622-77f0-a8c0-16004b2df053",
+          "session_source": "stream",
+          "retained_at": "2026-09-09T15:45:23Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null
+      },
+      {
+        "run_id": "r-20260909T154542474100-n-grdp-path-qualification-field-selection",
+        "plan": "grammar-release-and-downstream-pin",
+        "section": "\u00a73",
+        "node": "n-grdp-path-qualification-field-selection",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 843,
+                "cached_input_tokens": 516941,
+                "input_tokens": 517786,
+                "output_tokens": 1282,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 519068,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "9a2a0944-44ee-4d69-8147-14071cf6a5e9",
+            "session_id": "ship-s10-20260908"
+          },
+          "done_when": "imas_standard_names/validation/semantic.py accepts a path entity carried in either parsed.object or parsed.geometry so that _check_trajectory_path_qualification stops flagging qualified names, and tests/test_semantic_path_qualification.py proves both directions against run_semantic_checks in the style of the existing tests/test_semantic_unit_vector_locus.py: radial_outline_of_plasma_boundary, radial_outline_of_wall and vertical_outline_of_plasma_boundary each return no path-qualification issue, while a bare unqualified outline and a bare unqualified trajectory each still return the error. docs/evidence/grammar-release-and-downstream-pin/path-qualification-field-selection.md records the before and after issue lists for all five names plus the full pytest result. The measured cause, from a downstream investigation: PATH_BASES is trajectory, outline and contour, the rule reads parsed.object only, and every qualified outline carries its of-entity target in parsed.geometry while parsed.object is None, so the rule asks for an entity the parser already captured under another field name. Nine live downstream rows carry the issue phrase. Do NOT widen the rule beyond that field selection and do NOT remove the check: an unqualified outline must still fail, and a rule that stops rejecting anything would be worse than the false positive it replaces. Gate with the full ISN pytest suite and report added failures against a stated base revision rather than absolute green; run it with UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-standard-names/.venv PYTHONPATH=$PWD uv run --no-sync pytest -p no:cacheprovider so the worktree reuses the main checkout environment instead of building its own. Commit with a conventional subject and a body, add no AI attribution or co-authored-by trailer of any kind, and do NOT push, merge, tag or release - integration and the patch release are the coordinator's and must be serialised against downstream consumers. Write the manifest before the suite run because your process ends with its turn.",
+          "estimated_hours": null,
+          "goal": "Correct the path-qualification check to read the field the parser actually populates",
+          "id": "n-grdp-path-qualification-field-selection",
+          "lane_declaration": {
+            "backend": "codex-terra",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-09T15:45:42Z",
+            "read_at": "2026-09-09T15:45:43Z",
+            "resolved_backend": "codex-terra",
+            "utilisation_pct": 88.0
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T154542474100-n-grdp-path-qualification-field-selection/manifest.md",
+          "plan": "grammar-release-and-downstream-pin",
+          "requested_backend": "codex-terra",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "guided",
+          "time_budget": "50m",
+          "write_paths": [
+            "imas_standard_names/validation/semantic.py",
+            "tests/test_semantic_path_qualification.py",
+            "docs/evidence/grammar-release-and-downstream-pin/path-qualification-field-selection.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "isn-grammar",
+        "backend": "codex-terra",
+        "local": false,
+        "agent": {
+          "alias": "terra5.6",
+          "backend": "codex-terra",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-terra",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-09T15:45:48Z",
+        "completed_at": "2026-09-09T16:10:26Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1478,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1478,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "2a4584d82537f3339e9c87294048ca4feb658495",
+        "commits": [
+          "ec1fd50dbccdaf2761f8df93ae216489f489a9e7",
+          "7b3e3c15f3f8cbde1e10a0e4059d50c8bb9e499d"
+        ],
+        "changed_lines": {
+          "added": 82,
+          "removed": 2,
+          "files": 3
+        },
+        "tests_added": 5,
+        "gate": "passed",
+        "gate_check": {
+          "command": "focused tests/test_semantic_path_qualification.py then the full ISN pytest suite, both against the main checkout environment with --no-sync",
+          "exit_status": 0,
+          "log_path": null,
+          "log_digest": "focused 5 passed exit 0; full 2139 passed, 34 skipped, 82 xfailed, 0 failures exit 0"
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T154542474100-n-grdp-path-qualification-field-selection/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a086d8-c8c3-7330-895f-2b2582b00271",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 5830912,
+            "cached_input_tokens_cumulative": 5830912,
+            "input_tokens": 5972529,
+            "input_tokens_cumulative": 5972529,
+            "output_tokens": 22954,
+            "output_tokens_cumulative": 22954,
+            "reasoning_output_tokens": 4869,
+            "reasoning_output_tokens_cumulative": 4869
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-09T16:10:26Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 90.0,
+              "resets_at": 1789439333,
+              "observed_at": "2026-09-09T16:10:26Z"
+            }
+          ],
+          "notional_cost_usd": 12.2205,
+          "rate_basis": {
+            "model_identifier": "gpt-5.6-terra",
+            "input_per_million": 2.0,
+            "output_per_million": 12.0,
+            "as_of": "2026-09-09"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 5830912,
+          "cumulative_input_tokens": 11803441,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 27823
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest result.",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-standard-names-5be88ee0fdc3/ship-s10-20260908/n-grdp-path-qualification-field-selection",
+          "session_id": "01a086d8-c8c3-7330-895f-2b2582b00271",
+          "session_source": "stream",
+          "retained_at": "2026-09-09T16:10:26Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 80.0,
+        "orientation_input_tokens": null
       }
     ],
     "holds": [],
-    "_version": 6
+    "_version": 9
   }
 }

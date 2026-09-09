@@ -22,8 +22,8 @@
   <title>Grammar Release And Downstream Pin | imas-standard-names</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-09-08">
-<meta name="plan-version" content="3">
+<meta name="plan-modified" content="2026-09-09">
+<meta name="plan-version" content="5">
 </head>
 <body>
   <main class="plan-doc">
@@ -162,6 +162,12 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-run-r-20260908T074220543604-n-grdp-the-vocabulary-admits-an-instant-and-a-ratio" data-who="cx-kindpin" data-when="2026-09-08T08:05:51Z">
     <div class="r-comment-body"><p>Three physical_base tokens admitted, and the unit question settled by splitting rather than choosing. signal_to_noise_ratio is the linear dimensionless power quotient and signal_to_noise_level its logarithmic decibel representation, kept as separate bases because collapsing them would either lose the decibel form diagnostics actually report or hang a decibel unit on a ratio. event_instant is a scalar for the time-coordinate value at which a discrete event occurs, excluding elapsed duration and the sampled axis. The node ran the precondition and reported honestly that instantaneous_time already parses as qualifier plus base; the lead reviewed that and kept the new base, because base time IS the coordinate axis so instantaneous_time reads as the axis sampled instantaneously rather than the instant an event occurred. Verified by reading the built vocabulary rather than the edited source, which matters because a spec and its generated snapshot have diverged in this repository before.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20260909T154352802519-n-grdp-path-qualification-reads-the-wrong-field" data-who="isn-grammar" data-when="2026-09-09T15:45:23Z">
+    <div class="r-comment-body"><p>My dispatch error, caught before it cost anything. I passed --checkout-path pointing at imas-standard-names and assumed that selected the worktree repository; it selects the flight config layer only, so reckon cut the worktree from the enclosing repo - imas-codex - and the node landed in a checkout containing no imas_standard_names source at all. The fix is --repo, and the node was stopped and re-dispatched as n-grdp-path-qualification-field-selection against the correct repository, whose worktree now sits under the imas-standard-names root and links ISN's own environment. Nothing was written and no ISN file was touched</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20260909T154542474100-n-grdp-path-qualification-field-selection" data-who="isn-grammar" data-when="2026-09-09T16:10:26Z">
+    <div class="r-comment-body"><p>One line, and the check got no weaker. The rule now reads entity = getattr(parsed,&#x27;object&#x27;,None) or getattr(parsed,&#x27;geometry&#x27;,None), which is the field the parser actually populates for a qualified outline, so radial_outline_of_plasma_boundary and its siblings stop being rejected for an entity they always carried. Two parametrised tests cover all five required cases: the three qualified outlines return no path-qualification issue, and bare outline and bare trajectory still return the error, so the guard is proved to fire rather than merely to stop complaining. Full ISN suite 2139 passed, 34 skipped, 82 xfailed, 0 failures against a clean base. This unblocks nine live downstream rows carrying the same issue phrase, three of them WEST batch members the lead identified as correctly named. Note for the ledger: the manifest cited commit ec1fd50c7e53a4d97f67e8c97eb8a7b8e643a812, which does not exist - the real commit is ec1fd50dbccdaf2761f8df93ae216489f489a9e7, sharing only the seven-character prefix</p></div>
 </div>
 </section>
 </main>
