@@ -361,8 +361,10 @@ def _check_trajectory_path_qualification(
         geometric_base = getattr(parsed, "geometric_base", None)
 
         if geometric_base in PATH_BASES:
-            obj = getattr(parsed, "object", None)
-            if not obj:
+            entity = getattr(parsed, "object", None) or getattr(
+                parsed, "geometry", None
+            )
+            if not entity:
                 example_obj = (
                     "neutral_beam" if geometric_base == "trajectory" else "limiter_tile"
                 )
