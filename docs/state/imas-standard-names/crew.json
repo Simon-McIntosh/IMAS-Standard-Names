@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-14T13:41:51",
+  "updated": "2026-09-14T15:00:57",
   "project": "imas-standard-names",
   "doc": "crew",
   "data": {
@@ -24,6 +24,15 @@
         "session_model": null,
         "sessions": {},
         "created": "2026-09-09"
+      },
+      {
+        "id": "session-2a6f0db8b3e75a382796",
+        "harness": "codex-terra",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-14"
       }
     ],
     "runs": [
@@ -981,9 +990,209 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260914T114606733122-n-grdp-a-half-width-can-name-its-subject",
+        "plan": "grammar-release-and-downstream-pin",
+        "section": "",
+        "node": "n-grdp-a-half-width-can-name-its-subject",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1040,
+                "cached_input_tokens": 361789,
+                "input_tokens": 362831,
+                "output_tokens": 565,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 363396,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "9a2a0944-44ee-4d69-8147-14071cf6a5e9",
+            "session_id": "ship-s10-20260908"
+          },
+          "done_when": "A hard X-ray emissivity half-width can be spelled as one standard name that round-trips through the grammar, where today no spelling binding a half-width to an emissivity subject parses. DO NOT START BY ADDING half_width: IT ALREADY EXISTS, and a prior report claiming otherwise was wrong. Verified against the vocabulary this repository loads: bases holds 179 entries including half_width, base_kinds holds 214 including it, and half_width, inner_half_width and hard_xray_emissivity each parse successfully on their own today. REPRODUCE THAT FIRST and quote what you get, because everything below depends on it being true. THE ACTUAL LIMITATION, which you must confirm before designing around it: a name carries ONE physical_base, and half_width and emissivity are BOTH bases, so the quantity cannot name its subject. Measured refusals, each returning Unknown physical_base token, not in closed vocabulary: emissivity_half_width, half_width_of_hard_xray_emissivity_peak, half_width_of_emissivity_peak, hard_xray_emissivity_half_width, and half_width_of_normalized_toroidal_flux_coordinate. Meanwhile the analogous detector form first_local_tangential_width_of_hard_xray_detector parses, so the of-construction works when its object is admitted. THE QUANTITY TO SERVE is DD path hard_x_rays/emissivity_profile_1d/half_width_internal: the inward half-width of the hard X-ray emissivity peak, dimensionless because it is measured in normalized toroidal flux coordinate, and normalized_toroidal_flux_coordinate is already a registered carrier. THREE ROUTES ARE AVAILABLE and the grammar's own rules select among them; record which you took and why. Route one, admit a geometry carrier naming the peaked profile so the of-construction reaches it, following first_local_tangential_width_of_hard_xray_detector. Route two, admit a qualifier route by which an emissivity subject qualifies a half_width base. Route three, establish that an existing construction already expresses this and we have simply not found it, which is the preferred outcome and requires no vocabulary change at all; test route three before either other route and report the spellings you tried. Prefer the option that generalises: a half-width of a peaked profile is not unique to hard X-rays, so whatever you admit should serve any peaked emission profile rather than being shaped around one DD path. EVIDENCE THIS NODE MUST EMIT: the parse result for every spelling listed above before your change and after it, read from the BUILT vocabulary rather than the edited source because a spec and its generated snapshot have diverged in this repository before; at least one spelling that parses AND round-trips, carrying the half-width, the emissivity subject and the inner qualifier together, quoted with its round-tripped form; the full ISN suite reported as added failures against the base revision you were dispatched at, naming that sha and both failure id lists, where the recent recorded baseline is 2139 passed, 34 skipped, 82 xfailed, 0 failed; and before-and-after counts for whichever vocabulary containers you touch, from the 179 bases, 35 carriers and 342 qualifiers measured now. The kind-pin contract is pinned by named keys so an ADDED entry passes while a CHANGED kind fails; if your addition breaks it, that is a finding about the contract to report, never a reason to refresh a digest. DO NOT CUT THE RELEASE OR CREATE ANY TAG: the release CLI requires branch main and refuses a detached worktree, which is why an earlier node here could not do it, and tag cutting belongs to the coordinator in the main checkout. Do not touch any downstream pin or any consumer repository, and stay inside imas-standard-names. Never pipe, tee or redirect CLI output; capture the suite to a log file once and read it afterwards.",
+          "estimated_hours": 1.5,
+          "goal": "A hard X-ray emissivity half-width becomes spellable as one standard name that round-trips, where no spelling binding a half-width to an emissivity subject parses today.",
+          "id": "n-grdp-a-half-width-can-name-its-subject",
+          "lane_declaration": {
+            "backend": "codex-terra",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-14T11:46:07Z",
+            "read_at": "2026-09-14T11:46:08Z",
+            "resolved_backend": "codex-terra",
+            "utilisation_pct": 10.0
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T114606733122-n-grdp-a-half-width-can-name-its-subject/manifest.md",
+          "plan": "grammar-release-and-downstream-pin",
+          "requested_backend": "codex-terra",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "imas_standard_names/grammar/vocabularies/geometry_carriers.yml",
+            "imas_standard_names/grammar/vocabularies/qualifiers.yml",
+            "imas_standard_names/grammar/vocabularies/physical_bases.yml",
+            "tests/grammar/test_half_width_subject.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "session-2a6f0db8b3e75a382796",
+        "backend": "codex-terra",
+        "local": false,
+        "agent": {
+          "alias": "terra5.6",
+          "backend": "codex-terra",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-terra",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-14T11:46:19Z",
+        "completed_at": "2026-09-14T12:50:33Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 3854,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 3854,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "bd8c80711e0297fd9ab512e6ab32d2c62871ed26",
+        "commits": [
+          "cadaaab50aea1bb12b1c5ed9806170c29e19fe7c"
+        ],
+        "changed_lines": {
+          "added": 21,
+          "removed": 10,
+          "files": 5
+        },
+        "tests_added": 3,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run pytest full ISN suite on all_debug job 1270459",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T114606733122-n-grdp-a-half-width-can-name-its-subject/stream.jsonl",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T114606733122-n-grdp-a-half-width-can-name-its-subject/manifest.md",
+        "scope_changed": true,
+        "session_id": "01a09fbd-520e-77a1-bb7d-e981810f4a45",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 18161664,
+            "cached_input_tokens_cumulative": 18161664,
+            "input_tokens": 18240846,
+            "input_tokens_cumulative": 18240846,
+            "output_tokens": 25142,
+            "output_tokens_cumulative": 25142,
+            "reasoning_output_tokens": 5847,
+            "reasoning_output_tokens_cumulative": 5847
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-14T12:50:33Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 14.0,
+              "resets_at": 1789970251,
+              "observed_at": "2026-09-14T12:50:33Z"
+            }
+          ],
+          "notional_cost_usd": 119.44,
+          "rate_basis": {
+            "model_identifier": "gpt-5.6-terra",
+            "input_per_million": 2.0,
+            "output_per_million": 12.0,
+            "as_of": "2026-09-09"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 18161664,
+          "cumulative_input_tokens": 36402510,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 30989
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 4,
+        "duration_measurement": {
+          "status": "underivable",
+          "reason": "model_span_unavailable_at_promotion"
+        },
+        "scope_acceptances": [
+          {
+            "path": "imas_standard_names/grammar/model_types.py",
+            "reason": "Coordinator granted this mid-flight: it is a tracked generated companion that the codegen drift gate requires to travel with any vocabulary change, and it was regenerated rather than hand-edited."
+          },
+          {
+            "path": "imas_standard_names/grammar/vocabularies/locus_registry.yml",
+            "reason": "Coordinator granted this mid-flight to implement route one after the qualifier route proved inadmissible under the cross-segment uniqueness guard; it carries the emissivity_peak position locus that makes the of-construction parse."
+          },
+          {
+            "path": "imas_standard_names/grammar/vocabularies/qualifier_categories.yml",
+            "reason": "Coordinator granted this mid-flight when the qualifier route required every qualifiers.yml token to be categorised; the file was subsequently restored byte-for-byte to base when that route was abandoned."
+          }
+        ],
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-standard-names-5be88ee0fdc3/ship-s10-20260908/n-grdp-a-half-width-can-name-its-subject",
+          "session_id": "01a09fbd-520e-77a1-bb7d-e981810f4a45",
+          "session_source": "stream",
+          "retained_at": "2026-09-14T12:50:33Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 49.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [],
-    "_version": 10
+    "_version": 12
   }
 }
