@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-09T19:12:05",
+  "updated": "2026-09-14T13:41:51",
   "project": "imas-standard-names",
   "doc": "crew",
   "data": {
@@ -812,9 +812,178 @@
         "watch_override": null,
         "tool_steps": 80.0,
         "orientation_input_tokens": null
+      },
+      {
+        "run_id": "r-20260908T081922860258-n-grdp-the-grammar-cuts-a-stable-patch-release",
+        "plan": "grammar-release-and-downstream-pin",
+        "section": "",
+        "node": "n-grdp-the-grammar-cuts-a-stable-patch-release",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 450,
+                "cached_input_tokens": 457532,
+                "input_tokens": 457984,
+                "output_tokens": 1104,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 459088,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "00e23ab0-9843-4cbd-ac02-884e9e22e668",
+            "session_id": "ship-s10-20260907"
+          },
+          "done_when": "A stable patch release is cut and tagged carrying the three physical_base tokens admitted at commits 1f183d7 and e403d67 \u2014 event_instant, signal_to_noise_ratio and signal_to_noise_level \u2014 with the version and the tag reported. THE RELEASE LEVEL IS SETTLED: the lead has locked this as patch-final rather than a release candidate, closing the plan's open release-level decision. The reason is that the consuming catalog records isn_model_version and grammar_version in its published manifest and a real publication must not reference a pre-release, so do not cut an rc and do not raise the question again. FOLLOW THE REPOSITORY'S OWN DOCUMENTED RELEASE PROCEDURE, which you read before starting, and invent no steps: this repository versions from the git tag through hatch-vcs, so the tag IS the version and the order of operations matters. WHAT TO REPORT: the new version, the tag as it exists after pushing, and the three tokens quoted from the BUILT vocabulary at that tag rather than from the source files, because a spec and its generated snapshot have diverged in this repository before. NEVER ORDER VERSIONS AS STRINGS when selecting the previous or next version: rc9 sorts above rc65 lexically and that has caused a real mis-selection here, so use the packaging version ordering the repository already uses. VERIFY THE TAG IS VISIBLE TO CONSUMERS rather than merely local, because a downstream pin resolves against what was pushed: confirm the tag exists on the remote and say so. Do not bump any consumer pin; the downstream pin is a separate node in this plan. Report added test failures against a stated base revision. Do not pass -q to pytest if this repository's addopts already supplies one, because a second level deletes pytest's totals line and leaves the failure list unprovable. DURABILITY: write your manifest before any long output, and record the tag in it as soon as it exists rather than after the verification, because a tag that was pushed and not recorded is the outcome hardest to reconstruct.",
+          "estimated_hours": null,
+          "goal": "Cut and tag a stable patch release carrying the three newly admitted bases",
+          "id": "n-grdp-the-grammar-cuts-a-stable-patch-release",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T081922860258-n-grdp-the-grammar-cuts-a-stable-patch-release/manifest.md",
+          "plan": "grammar-release-and-downstream-pin",
+          "requested_backend": "codex",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "guided",
+          "time_budget": "40m",
+          "write_paths": [
+            "CHANGELOG.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "cx-kindpin",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-08T08:19:33Z",
+        "completed_at": "2026-09-08T08:28:58Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 565,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 565,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "3905b92a23a24ad53c630ef94327709de7789b32",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": "malformed-node",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T081922860258-n-grdp-the-grammar-cuts-a-stable-patch-release/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a07642-fbe2-7d02-97de-ed56606becbb",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 6958336,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 7077354,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 11278,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 3673
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-08T08:28:58Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 22.0,
+              "resets_at": 1789439333,
+              "observed_at": "2026-09-08T08:28:58Z"
+            }
+          ],
+          "notional_cost_usd": 155.9829,
+          "rate_basis": {
+            "model_identifier": "gpt-5.6-sol",
+            "input_per_million": 4.0,
+            "output_per_million": 20.0,
+            "as_of": "2026-09-09"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 31529344,
+          "cumulative_input_tokens": 31875439,
+          "detail": "model span bounded from the client rollout's tool spans; input cumulative summed across resets",
+          "generated_tokens": 14951,
+          "generation_seconds": 165274.673,
+          "machine_seconds": 366.113,
+          "tokens_per_second": 0.09
+        },
+        "follow_on_paths": [
+          "v0.9.1"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest if",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": "The node could not produce a commit: it was asked to cut a release from a detached worktree, and the release CLI requires branch main.",
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-standard-names-5be88ee0fdc3/ship-s10-20260907/n-grdp-the-grammar-cuts-a-stable-patch-release",
+          "session_id": "01a07642-fbe2-7d02-97de-ed56606becbb",
+          "session_source": "pointer",
+          "retained_at": "2026-09-08T08:28:58Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": {
+          "session_id": "01a07642-fbe2-7d02-97de-ed56606becbb",
+          "source": "pointer",
+          "reason": "Six days stale and blocked on a structural impossibility rather than a recoverable step: a detached worktree can never satisfy the release CLI's branch-main requirement, so resuming this session would re-derive the same refusal. Tag cutting moves to the coordinator on main."
+        },
+        "watch_override": null,
+        "tool_steps": 37.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [],
-    "_version": 9
+    "_version": 10
   }
 }
