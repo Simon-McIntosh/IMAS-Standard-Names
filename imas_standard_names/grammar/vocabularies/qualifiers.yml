@@ -249,7 +249,6 @@
 - breakdown                     # plasma breakdown phase (breakdown_voltage, breakdown_electric_field)
 
 # --- Diagnostic / measurement band & method ---
-- emissivity                    # emissivity profile quantity
 - soft_xray                     # soft X-ray spectral band (soft_xray_emissivity, soft_xray_power)
 - doppler                       # Doppler-shifted/broadened (doppler_frequency, doppler_velocity)
 - viewing                       # line-of-sight viewing geometry (viewing_angle, viewing_direction)

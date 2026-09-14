@@ -1,5 +1,6 @@
 import pytest
 
+from imas_standard_names.grammar.ir import LocusRelation, LocusType
 from imas_standard_names.grammar.parser import ParseError, parse
 from imas_standard_names.grammar.render import compose
 
@@ -7,15 +8,14 @@ from imas_standard_names.grammar.render import compose
 @pytest.mark.parametrize(
     "name, expected_qualifiers",
     [
-        ("emissivity_half_width", ["emissivity"]),
-        ("hard_xray_emissivity_half_width", ["hard_xray", "emissivity"]),
+        ("half_width_of_emissivity_peak", []),
         (
-            "inner_hard_xray_emissivity_half_width",
-            ["inner", "hard_xray", "emissivity"],
+            "inner_hard_xray_half_width_of_emissivity_peak",
+            ["inner", "hard_xray"],
         ),
     ],
 )
-def test_emissivity_half_width_round_trips(
+def test_half_width_of_emissivity_peak_round_trips(
     name: str, expected_qualifiers: list[str]
 ) -> None:
     result = parse(name, strict=True)
@@ -24,10 +24,14 @@ def test_emissivity_half_width_round_trips(
     assert [
         qualifier.token for qualifier in result.ir.qualifiers
     ] == expected_qualifiers
+    assert result.ir.locus is not None
+    assert result.ir.locus.token == "emissivity_peak"
+    assert result.ir.locus.type is LocusType.POSITION
+    assert result.ir.locus.relation is LocusRelation.OF
     assert compose(result.ir) == name
 
 
-def test_terminal_emissivity_retains_physical_base_role() -> None:
+def test_emissivity_remains_only_a_physical_base() -> None:
     name = "hard_xray_emissivity"
 
     result = parse(name, strict=True)
@@ -36,12 +40,15 @@ def test_terminal_emissivity_retains_physical_base_role() -> None:
     assert [qualifier.token for qualifier in result.ir.qualifiers] == ["hard_xray"]
     assert compose(result.ir) == name
 
+    with pytest.raises(ParseError):
+        parse("emissivity_half_width", strict=True)
+
 
 @pytest.mark.parametrize(
     "name",
     [
         "half_width_of_hard_xray_emissivity_peak",
-        "half_width_of_emissivity_peak",
+        "hard_xray_emissivity_half_width",
         "half_width_of_normalized_toroidal_flux_coordinate",
     ],
 )

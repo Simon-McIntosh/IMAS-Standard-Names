@@ -567,6 +567,12 @@ loci:
     type: position
     allowed_relations: [at, of]
     definition: The spatial location identified as the ece channel emission position in the relevant plasma, diagnostic, or plant context.
+  emissivity_peak:
+    type: position
+    allowed_relations: [at, of]
+    definition: >-
+      The position at which a spatial emissivity profile attains its peak
+      value, used as the reference location for profile-width descriptors.
   ferritic_element_centroid:
     type: position
     allowed_relations: [at, of]
