@@ -549,6 +549,7 @@ class Position(StrEnum):
     DIVERTOR_TARGET = "divertor_target"
     ECE_CHANNEL = "ece_channel"
     ECE_CHANNEL_EMISSION_POSITION = "ece_channel_emission_position"
+    EMISSIVITY_PEAK = "emissivity_peak"
     FERRITIC_ELEMENT_CENTROID = "ferritic_element_centroid"
     FERRITIC_INSERT_CENTROID = "ferritic_insert_centroid"
     FIRST_WALL = "first_wall"
