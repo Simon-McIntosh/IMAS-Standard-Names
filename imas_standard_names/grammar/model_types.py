@@ -260,6 +260,7 @@ class Qualifier(StrEnum):
     STRAY = "stray"
     EXTERNAL = "external"
     BREAKDOWN = "breakdown"
+    EMISSIVITY = "emissivity"
     SOFT_XRAY = "soft_xray"
     DOPPLER = "doppler"
     VIEWING = "viewing"

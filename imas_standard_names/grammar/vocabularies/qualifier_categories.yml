@@ -104,6 +104,7 @@ qualifier_categories:
     - bragg
     - calibration
     - doppler
+    - emissivity
     - extraordinary_mode
     - faraday
     - fitted
