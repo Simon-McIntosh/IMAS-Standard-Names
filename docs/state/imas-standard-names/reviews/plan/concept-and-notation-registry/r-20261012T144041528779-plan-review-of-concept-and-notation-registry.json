@@ -1,0 +1,101 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-12T14:48:12.216Z",
+  "dispatched_at": "2026-10-12T14:40:44Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/concept-and-notation-registry.html:21",
+      "id": "wiring-1",
+      "reason": "without the section dependency (or a decision to drop \u00a73 here), a build dispatch can start \u00a73 with no prerequisite and cannot order it against the authoring it defers to.",
+      "text": "\u00a73 is the same work as `imas-codex:sn-house-style` \u00a73 (whose own done-when says it \"lands them in ISN under concept-and-notation-registry \u00a73\"), yet this plan records no section dependency for it and its sole edge, `plan-blocks=imas-codex:sn-house-style`, asserts the reverse direction; a scheduler reading only the declared edges sees \u00a72 feed sn-house-style while \u00a73 silently consumes that same plan's \u00a73, which reads as a cycle.",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/concept-and-notation-registry.html:143",
+      "id": "done_when-1",
+      "reason": "an accessor that always returns an empty missing-list passes this done-when unchanged; adopting the sibling's control is what makes the node's gate able to show the worklist detects a gap.",
+      "text": "\u00a73 asserts \"every concept, symbol and pattern used by the 220 names \u2026 has an entry\" with no negative control, while the section it names as the authoring authority, `imas-codex:sn-house-style` \u00a73, already carries one (\"with one entry removed from a scratch copy \u2026 it lists that token as missing\") for the identical accessor run.",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/concept-and-notation-registry.html:107",
+      "id": "reasoning-1",
+      "reason": "a builder implementing the stated rule literally fails the template file, and the measured refusal in the done-when does not cover the file the rule mis-states; the plan needs the token-key refusal scoped to the two token-keyed files with `templates.yml` validated by its own pattern rule.",
+      "text": "\u00a72 states generally that \"the loader refuses any key that is not a real token in the current vocabularies\", but `templates.yml` is keyed by name patterns written in grammar segments (as \u00a72 itself says two paragraphs later), not by tokens, so the rule as written would reject every template key and the done-when's unknown-token test (\"one entry keyed by a token that does not exist\") exercises only `concepts.yml`/`notation.yml`.",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "019e6f4a4ebf5b46cd0ba6e5d7975dc8dda5e4bbb48f9b5437fe9b108a0f9a69",
+  "plan_slug": "concept-and-notation-registry",
+  "plan_version": 1,
+  "project": "imas-standard-names",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "wiring-1",
+      "reason": "",
+      "when": "2026-10-12T14:51:42.600978+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "done_when-1",
+      "reason": "",
+      "when": "2026-10-12T14:51:43.818799+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "reasoning-1",
+      "reason": "",
+      "when": "2026-10-12T14:51:45.050613+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-12T14:51:43.818799+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-12T14:51:45.050613+00:00"
+    },
+    "wiring-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-12T14:51:42.600978+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-standard-names/plan-concept-and-notation-registry.v1.json",
+  "review_run_id": "r-20261012T144041528779-plan-review-of-concept-and-notation-registry",
+  "reviewed_blob_sha": "93f8b92d61d83cf8596af1a132dad010964ed031",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 every cited target resolves: `vocab_loaders.py` (LocusEntry/PhysicalBaseDef/GeometryCarrierDef carry `definition`; OperatorDef carries none, so \"operators have none today\" holds), `terms.py` (`fetch_standard_terms`), `specification.yml` `entry_schema:\u2026documentation.guidance`, the generated `field_schemas.py`, `docs/guidelines.md` (the `flux-surface-average` tag), `imas_codex/definitions/clusters/concepts.yaml`, the shipped `sn-symbol-definition-policy`, and the census (resolving to the `docs/research/` record, not a plan).",
+    "done_when": "a finding \u2014 \u00a73's done-when names no negative control, although the sibling section it defers to (`imas-codex:sn-house-style` \u00a73) already carries one for the same worklist.",
+    "evidence_paths": "pass \u2014 no section places its evidence or gate logs on a scratchpad or node-local temporary path; the plan names no evidence path at all, so nothing is misplaced.",
+    "naming": "pass \u2014 `concepts.yml`, `notation.yml`, `templates.yml` and the `terms.py` accessor carry no plan labels, stage names, ticket numbers or version tags, and no changelog prose.",
+    "reasoning": "a finding \u2014 \u00a72's loader rule \"refuses any key that is not a real token in the current vocabularies\" cannot hold for `templates.yml`, whose keys are grammar-segment patterns rather than tokens, so the stated mechanism does not produce the done-when's single unknown-token refusal across all three files.",
+    "single_goal": "pass \u2014 \u00a72 lands the registry and its loader, \u00a73 lands the entries, \u00a74 cuts the release; each is one deliverable with its own done-when.",
+    "wiring": "a finding \u2014 \u00a73 declares its content authored under `imas-codex:sn-house-style` \u00a73 while the plan's only declared edge, `plan-blocks=imas-codex:sn-house-style`, points the opposite way, and no section dependency records the \u00a73 relationship."
+  },
+  "section_digests": {
+    "_document": "392df941e669b18f529dbc8551e945967eb68b8309f64d53cca91c3d9a1a02ba",
+    "s1": "30a14d1b0da016d94a775f6d1085956ddc7deec1c03f5b5f600083f6120bf711",
+    "s2": "2e539c0df0374bc6ec9f2a485a57bee875475cb9b9bf59194782df235134f888",
+    "s3": "606605355549ce9fd36753859121959d9888c324b647e944b25e172a750a3745",
+    "s4": "3a28fbf118b9fc1daa60b9e41d42866cbcd951b116da2f37eb7123b2b556746e"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T14:51:30.099960+00:00"
+}
