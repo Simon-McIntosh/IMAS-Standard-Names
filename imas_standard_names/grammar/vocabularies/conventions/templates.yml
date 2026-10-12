@@ -1,0 +1,19 @@
+# One description opening and one documentation opening per name pattern.
+#
+# A pattern key is written in grammar segments: a base plus the segment kinds
+# the name fills (e.g. base ``density`` with the ``subject`` segment filled).
+# The pattern is selected from the parse, never from a text search.
+#
+# The section order of the documentation body and the generic sign-convention
+# form stay in ``specification.yml`` (``entry_schema.fields.documentation``);
+# a template references them rather than restating them. The
+# ``sign_convention`` field names the COCOS transformation type the rule
+# belongs to, or ``none`` when the quantity is not COCOS-dependent.
+templates:
+
+  - base: density
+    segments:
+      - subject
+    description: 'Number density of {subject}'
+    documentation: 'Number density of {subject}'
+    sign_convention: none

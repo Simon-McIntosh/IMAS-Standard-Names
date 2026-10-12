@@ -1,0 +1,20 @@
+# One symbol per quantity or coordinate, keyed by the grammar token it names.
+#
+# A key is a base, subject, component or coordinate token. Each entry carries
+# the canonical symbol, the meaning of any symbol parameter, and the forbidden
+# spellings for that quantity.
+#
+# The loader refuses a forbidden spelling that equals one of the same token's
+# registered aliases or abbreviations, so this file and the vocabulary entries
+# cannot disagree about how a token may be written.
+notation:
+
+  density:
+    symbol: n_s
+    parameters:
+      s: >-
+        species label, substituted with the species named in the entry
+        (n_e for electrons)
+    forbidden_spellings:
+      - '\rho'
+      - 'N_s'
