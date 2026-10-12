@@ -23,7 +23,7 @@
   <title>One Definition Per Concept, Published With The Grammar | imas-standard-names</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="2">
+<meta name="plan-version" content="3">
 <meta name="plan-modified" content="2026-10-12">
 </head>
 <body>
@@ -94,11 +94,13 @@
         <code>aliases</code> or <code>abbreviations</code>, so the two owners cannot
         disagree.</li>
       <li><code>templates.yml</code> — one description opening and one documentation opening
-        per name pattern, and the sign-convention rule by COCOS transformation type. A pattern
-        key is written in grammar segments (a base and the segment kinds the name fills), so
-        it is selected from the parse. The section order and the generic sign-convention form
-        stay in <code>specification.yml</code>, and a template references them rather than
-        restating them. Per-pattern openings are not added to <code>specification.yml</code>,
+        per name pattern. A pattern key is written in grammar segments (a base and the segment
+        kinds the name fills), so it is selected from the parse. The section order and the
+        generic sign-convention form stay in <code>specification.yml</code>, and a template
+        references them rather than restating them. Whether an entry carries a sign-convention
+        paragraph depends on its COCOS transformation type, an entry field the parse does not
+        yield, so that rule is not in the registry: the consumer decides it where the entry is
+        known (imas-codex's documentation gates). Per-pattern openings are not added to <code>specification.yml</code>,
         whose guidance is the generic rubric every entry's schema carries.</li>
     </ul>
     <p>
