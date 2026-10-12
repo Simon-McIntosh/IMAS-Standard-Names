@@ -103,7 +103,42 @@ templates:
     description: Number density of {subject}
 """,
     )
-    with pytest.raises(ValueError, match="templates.yml"):
+    with pytest.raises(ValueError, match="entry 0 is malformed"):
+        load_templates(scratch)
+
+
+def test_template_naming_unknown_segment_kinds_is_refused(tmp_path):
+    scratch = _scratch_conventions(
+        tmp_path,
+        "templates.yml",
+        """
+templates:
+  - base: density
+    segments:
+      - not_a_segment
+    description: Number density of {subject}
+    documentation: Number density of {subject}
+""",
+    )
+    with pytest.raises(ValueError, match="unknown segment kinds"):
+        load_templates(scratch)
+
+
+def test_template_entry_carrying_sign_convention_is_refused(tmp_path):
+    scratch = _scratch_conventions(
+        tmp_path,
+        "templates.yml",
+        """
+templates:
+  - base: density
+    segments:
+      - subject
+    description: Number density of {subject}
+    documentation: Number density of {subject}
+    sign_convention: none
+""",
+    )
+    with pytest.raises(ValueError, match="sign_convention"):
         load_templates(scratch)
 
 

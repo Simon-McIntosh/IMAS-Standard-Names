@@ -30,16 +30,9 @@ _VOCAB_DIR = Path(__file__).parent / "vocabularies"
 _CONVENTIONS_DIR = _VOCAB_DIR / "conventions"
 
 
-def _load_yaml(filename: str) -> dict:
-    """Load a YAML file from the vocabularies directory."""
-    path = _VOCAB_DIR / filename
-    with path.open(encoding="utf-8") as fh:
-        return yaml.safe_load(fh) or {}
-
-
-def _load_conventions_yaml(filename: str, directory: Path | None = None) -> dict:
-    """Load a YAML file from ``vocabularies/conventions/`` (or ``directory``)."""
-    path = (directory or _CONVENTIONS_DIR) / filename
+def _load_yaml(filename: str, directory: Path | None = None) -> dict:
+    """Load a YAML file from ``directory`` (default the vocabularies directory)."""
+    path = (directory or _VOCAB_DIR) / filename
     with path.open(encoding="utf-8") as fh:
         return yaml.safe_load(fh) or {}
 
@@ -677,10 +670,6 @@ class TemplateEntry(BaseModel, extra="forbid"):
     segments: list[str] = []
     description: str = Field(min_length=1)
     documentation: str = Field(min_length=1)
-    sign_convention: str = "none"
-    """The COCOS transformation type this sign rule belongs to, or ``none``
-    when the quantity is not COCOS-dependent. The generic form itself stays in
-    ``specification.yml``."""
 
 
 class TemplatesRegistry(BaseModel, extra="forbid"):
@@ -767,7 +756,7 @@ def load_concepts(directory: Path | None = None) -> ConceptsRegistry:
     entry already holds. ``directory`` overrides the conventions directory (for
     a scratch copy).
     """
-    data = _load_conventions_yaml("concepts.yml", directory)
+    data = _load_yaml("concepts.yml", directory or _CONVENTIONS_DIR)
     raw = data.get("concepts") or {}
     known = _known_grammar_tokens()
     definitions = _vocabulary_definitions()
@@ -797,7 +786,7 @@ def load_notation(directory: Path | None = None) -> NotationRegistry:
     registered aliases or abbreviations. ``directory`` overrides the
     conventions directory (for a scratch copy).
     """
-    data = _load_conventions_yaml("notation.yml", directory)
+    data = _load_yaml("notation.yml", directory or _CONVENTIONS_DIR)
     raw = data.get("notation") or {}
     known = _known_grammar_tokens()
     registered = _token_registered_aliases()
@@ -830,7 +819,7 @@ def load_templates(directory: Path | None = None) -> TemplatesRegistry:
     have. ``directory`` overrides the conventions directory (for a scratch
     copy).
     """
-    data = _load_conventions_yaml("templates.yml", directory)
+    data = _load_yaml("templates.yml", directory or _CONVENTIONS_DIR)
     raw = data.get("templates") or []
     known = _known_grammar_tokens()
     entries: list[TemplateEntry] = []

@@ -6,9 +6,7 @@
 #
 # The section order of the documentation body and the generic sign-convention
 # form stay in ``specification.yml`` (``entry_schema.fields.documentation``);
-# a template references them rather than restating them. The
-# ``sign_convention`` field names the COCOS transformation type the rule
-# belongs to, or ``none`` when the quantity is not COCOS-dependent.
+# a template references them rather than restating them.
 templates:
 
   - base: density
@@ -16,4 +14,3 @@ templates:
       - subject
     description: 'Number density of {subject}'
     documentation: 'Number density of {subject}'
-    sign_convention: none
