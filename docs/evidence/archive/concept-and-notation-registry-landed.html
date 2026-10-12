@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-standard-names">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="concept-and-notation-registry-landed">
+  <meta name="plan-title" content="One Definition Per Concept, Published With The Grammar — landed record">
+  <meta name="plan-summary" content="Closure synthesis for One Definition Per Concept, Published With The Grammar: 0 committed run(s), 0 section-anchored comment(s), and 0 landed commit(s).">
+  <meta name="plan-evidence-for" content="concept-and-notation-registry">
+  <meta name="plan-verdict" content="qualified">
+  <title>One Definition Per Concept, Published With The Grammar — landed record | imas-standard-names</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+ <main class="plan-doc">
+  <h1>One Definition Per Concept, Published With The Grammar — landed record</h1>
+  <p>Closure synthesis for One Definition Per Concept, Published With The Grammar: 0 committed run(s), 0 section-anchored comment(s), and 0 landed commit(s).</p>
+
+
+   <section id="s2-registry-loader">
+    <h2>§2 — registry, loaders and accessor landed</h2>
+    <p>Commit <code>1e12625</code> adds <code>vocabularies/conventions/concepts.yml</code>, <code>notation.yml</code> and <code>templates.yml</code>, their token-validating loaders in <code>grammar/vocab_loaders.py</code>, and <code>select_conventions</code> in <code>grammar/terms.py</code>. For <code>flux_surface_averaged_argon_density_at_plasma_boundary</code> the accessor returns exactly two concepts (flux-surface average, plasma boundary), one notation (density) and one template (density with subject). The loader refuses a malformed entry per file, an unknown token key and a forbidden spelling equal to a registered alias, each by name. Gate: 481 passed against 469 at base; removing the flux-surface-average entry from a scratch copy turns the accessor test red. Independent review 102/120, no added failures. Open in this section: the templates still carry a <code>sign_convention</code> field the plan removed, the conventions YAML reader copies <code>_load_yaml</code>, and one refusal test matches too loosely; a follow-up node narrows all three.</p>
+  </section>
+
+</main>
+</body>
+</html>
