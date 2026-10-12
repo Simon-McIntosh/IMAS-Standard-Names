@@ -1,0 +1,46 @@
+# Shared concept definitions, keyed by the grammar token that carries them.
+#
+# Each entry holds one canonical phrase, exactly one canonical LaTeX equation,
+# its symbol table, forbidden variants as patterns, and whether a name using
+# the token restates the equation or only names the concept.
+#
+# A one-sentence definition is carried here only for a token whose vocabulary
+# entry has none (operators carry none today). Where the token's entry already
+# defines it (a locus, base or carrier), the definition stays on that entry:
+# the accessor returns it, and the loader refuses an entry that restates it.
+concepts:
+
+  flux_surface_averaged:
+    phrase: flux-surface average
+    definition: >-
+      The average of a quantity over a closed magnetic flux surface, weighted
+      by the inverse magnitude of the poloidal flux gradient.
+    equation: '\langle f\rangle = \oint f\,dS/|\nabla\psi| \,/\, \oint dS/|\nabla\psi|'
+    symbols:
+      - symbol: f
+        meaning: the averaged quantity
+      - symbol: S
+        meaning: the flux surface
+      - symbol: '\psi'
+        meaning: poloidal magnetic flux
+    forbidden_variants:
+      # The line form may be named as equivalent in prose, never written as a
+      # second display equation.
+      - '\$\$[^$]*(dl_p/B_p|dl/B)[^$]*\$\$'
+    restates_equation: false
+
+  plasma_boundary:
+    # The locus registry already defines this token; the definition is not
+    # restated here and the accessor returns the locus entry's definition.
+    phrase: plasma boundary
+    equation: '\psi = \psi_{\mathrm{LCFS}}'
+    symbols:
+      - symbol: '\psi'
+        meaning: poloidal magnetic flux
+      - symbol: '\psi_{\mathrm{LCFS}}'
+        meaning: its value on the last closed flux surface
+    forbidden_variants:
+      # The plasma boundary is the last closed flux surface; the separatrix is
+      # a different surface, named only for a diverted configuration.
+      - the separatrix
+    restates_equation: false

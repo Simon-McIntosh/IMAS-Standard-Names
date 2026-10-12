@@ -1,0 +1,18 @@
+<!-- Landing record for the conventions registry, its loader and its accessor. -->
+<section id="cnr-registry-loader-landing">
+  <p>
+    Added <code>vocabularies/conventions/{concepts,notation,templates}.yml</code>,
+    their token-validating loaders in <code>grammar/vocab_loaders.py</code>, and
+    the parse-selecting <code>select_conventions</code> accessor in
+    <code>grammar/terms.py</code>.
+  </p>
+  <p id="cnr-registry-loader-measure">
+    Measure: gate 481 passed, 28 skipped, 5 xfailed (EXIT=0);
+    <code>select_conventions("flux_surface_averaged_argon_density_at_plasma_boundary")</code>
+    returns exactly 2 concepts (flux_surface_averaged, plasma_boundary), 1
+    notation (density) and 1 template (density). The loader refuses a malformed
+    entry per file, an unknown token key and a forbidden spelling equal to a
+    registered alias, each by name. With the flux-surface-average entry removed
+    from a scratch copy the accessor test fails (EXIT=1).
+  </p>
+</section>

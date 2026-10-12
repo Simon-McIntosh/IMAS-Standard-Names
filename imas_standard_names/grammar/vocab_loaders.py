@@ -19,7 +19,7 @@ from pathlib import Path
 from typing import Literal
 
 import yaml
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field, ValidationError, model_validator
 
 # ---------------------------------------------------------------------------
 # Paths
@@ -27,10 +27,19 @@ from pydantic import BaseModel, Field, model_validator
 
 _VOCAB_DIR = Path(__file__).parent / "vocabularies"
 
+_CONVENTIONS_DIR = _VOCAB_DIR / "conventions"
+
 
 def _load_yaml(filename: str) -> dict:
     """Load a YAML file from the vocabularies directory."""
     path = _VOCAB_DIR / filename
+    with path.open(encoding="utf-8") as fh:
+        return yaml.safe_load(fh) or {}
+
+
+def _load_conventions_yaml(filename: str, directory: Path | None = None) -> dict:
+    """Load a YAML file from ``vocabularies/conventions/`` (or ``directory``)."""
+    path = (directory or _CONVENTIONS_DIR) / filename
     with path.open(encoding="utf-8") as fh:
         return yaml.safe_load(fh) or {}
 
@@ -358,6 +367,16 @@ def load_geometry_representations() -> frozenset[str]:
     )
 
 
+def load_subjects() -> frozenset[str]:
+    """Load species subject tokens from ``subjects.yml``."""
+    return _load_flat_token_list("subjects.yml", "subjects")
+
+
+def load_components() -> frozenset[str]:
+    """Load component tokens from ``components.yml``."""
+    return _load_flat_token_list("components.yml", "components")
+
+
 def load_zones() -> tuple[str, ...]:
     """Load zone tokens from ``zones.yml`` in canonical intra-order.
 
@@ -554,4 +573,289 @@ def validate_no_cross_registry_duplicates() -> None:
         operators=load_operators(),
         bases=load_physical_bases(),
         carriers=load_geometry_carriers(),
+    )
+
+
+# ---------------------------------------------------------------------------
+# conventions/ — concepts, notation, templates
+# ---------------------------------------------------------------------------
+#
+# Three files under ``vocabularies/conventions/`` hold the shared layer the
+# grammar does not: one canonical equation per concept, one symbol per
+# quantity, and one opening per pattern. They are keyed by grammar tokens so
+# they cannot drift from the vocabularies beside them.
+
+# Segment-kind vocabulary for template patterns — the flat standard-name
+# segment names a pattern may require a name to fill.
+TEMPLATE_SEGMENT_KINDS: frozenset[str] = frozenset(
+    {
+        "component",
+        "coordinate",
+        "section_plane",
+        "aggregation",
+        "orbit",
+        "population",
+        "subject",
+        "state",
+        "device",
+        "zone",
+        "qualifier",
+        "channel_qualifier",
+        "channel",
+        "geometry_representation",
+        "geometric_base",
+        "physical_base",
+        "object",
+        "geometry",
+        "position",
+        "position_value",
+        "region",
+        "path",
+        "locus_qualifiers",
+        "process",
+        "transformation",
+        "decomposition",
+        "binary_operator",
+        "secondary_base",
+    }
+)
+
+
+class ConceptSymbol(BaseModel, extra="forbid"):
+    """One symbol in a shared concept's symbol table."""
+
+    symbol: str = Field(min_length=1)
+    meaning: str = Field(min_length=1)
+
+
+class ConceptEntry(BaseModel, extra="forbid"):
+    """A shared-concept entry keyed by the grammar token that carries it."""
+
+    phrase: str = Field(min_length=1)
+    definition: str = ""
+    """One-sentence definition; empty when the token's vocabulary entry holds
+    one, in which case the loader refuses a definition restated here."""
+    equation: str = Field(min_length=1)
+    """The single canonical LaTeX equation for the concept."""
+    symbols: list[ConceptSymbol] = []
+    forbidden_variants: list[str] = []
+    """Patterns for spellings that must not be used."""
+    restates_equation: bool
+    """True when a name using the token restates the equation; false when it
+    only names the concept and links to it."""
+
+
+class ConceptsRegistry(BaseModel, extra="forbid"):
+    """Top-level structure of ``concepts.yml``."""
+
+    concepts: dict[str, ConceptEntry] = {}
+
+
+class NotationEntry(BaseModel, extra="forbid"):
+    """A notation entry keyed by base, subject, component or coordinate token."""
+
+    symbol: str = Field(min_length=1)
+    parameters: dict[str, str] = {}
+    """Meaning of each parameter appearing in ``symbol``."""
+    forbidden_spellings: list[str] = []
+
+
+class NotationRegistry(BaseModel, extra="forbid"):
+    """Top-level structure of ``notation.yml``."""
+
+    notation: dict[str, NotationEntry] = {}
+
+
+class TemplateEntry(BaseModel, extra="forbid"):
+    """One description/documentation opening keyed by a name pattern.
+
+    The pattern is a ``base`` plus the ``segments`` (segment-kind names from
+    :data:`TEMPLATE_SEGMENT_KINDS`) a matching name must fill.
+    """
+
+    base: str = Field(min_length=1)
+    segments: list[str] = []
+    description: str = Field(min_length=1)
+    documentation: str = Field(min_length=1)
+    sign_convention: str = "none"
+    """The COCOS transformation type this sign rule belongs to, or ``none``
+    when the quantity is not COCOS-dependent. The generic form itself stays in
+    ``specification.yml``."""
+
+
+class TemplatesRegistry(BaseModel, extra="forbid"):
+    """Top-level structure of ``templates.yml``."""
+
+    templates: list[TemplateEntry] = []
+
+
+class ConventionsRegistry(BaseModel, extra="forbid"):
+    """The three convention files loaded together."""
+
+    concepts: ConceptsRegistry
+    notation: NotationRegistry
+    templates: TemplatesRegistry
+
+
+def _known_grammar_tokens() -> frozenset[str]:
+    """Every token the current vocabularies define, across all segments."""
+    tokens: set[str] = set()
+    tokens |= set(load_coordinate_axes().axes)
+    tokens |= set(load_locus_registry().loci)
+    tokens |= set(load_operators().operators)
+    tokens |= set(load_physical_bases().bases)
+    tokens |= set(load_geometry_carriers().carriers)
+    tokens |= set(load_subjects())
+    tokens |= set(load_components())
+    for group in (
+        load_qualifiers(),
+        load_populations(),
+        load_states(),
+        load_orbits(),
+        load_aggregations(),
+        load_section_planes(),
+        load_geometry_representations(),
+    ):
+        tokens |= set(group)
+    tokens |= set(load_zones())
+    tokens |= set(load_channels())
+    tokens |= set(load_channel_qualifiers())
+    return frozenset(tokens)
+
+
+def _vocabulary_definitions() -> dict[str, str]:
+    """Token → definition for the vocabulary entries that carry one."""
+    definitions: dict[str, str] = {}
+    for token, entry in load_locus_registry().loci.items():
+        definitions[token] = entry.definition
+    for token, entry in load_physical_bases().bases.items():
+        definitions[token] = entry.definition
+    for token, entry in load_geometry_carriers().carriers.items():
+        definitions[token] = entry.definition
+    return {token: text for token, text in definitions.items() if text}
+
+
+def _token_registered_aliases() -> dict[str, frozenset[str]]:
+    """Token → its registered aliases and abbreviations."""
+    aliases: dict[str, frozenset[str]] = {}
+    for token, entry in load_coordinate_axes().axes.items():
+        aliases[token] = frozenset(entry.aliases)
+    for token, entry in load_locus_registry().loci.items():
+        aliases[token] = frozenset(getattr(entry, "aliases", [])) | frozenset(
+            entry.abbreviations
+        )
+    for token, entry in load_physical_bases().bases.items():
+        aliases[token] = frozenset(entry.aliases)
+    for token, entry in load_geometry_carriers().carriers.items():
+        aliases[token] = frozenset(entry.aliases)
+    return aliases
+
+
+def _validate_convention_key(filename: str, token: str, known: frozenset[str]) -> None:
+    if token not in known:
+        raise ValueError(
+            f"{filename}: key {token!r} is not a token in the current grammar "
+            f"vocabularies"
+        )
+
+
+def load_concepts(directory: Path | None = None) -> ConceptsRegistry:
+    """Load and validate ``concepts.yml``.
+
+    Refuses, by name, a key that is not a real grammar token, an entry that is
+    malformed, and an entry that restates a definition its token's vocabulary
+    entry already holds. ``directory`` overrides the conventions directory (for
+    a scratch copy).
+    """
+    data = _load_conventions_yaml("concepts.yml", directory)
+    raw = data.get("concepts") or {}
+    known = _known_grammar_tokens()
+    definitions = _vocabulary_definitions()
+    entries: dict[str, ConceptEntry] = {}
+    for token, payload in raw.items():
+        _validate_convention_key("concepts.yml", token, known)
+        try:
+            entry = ConceptEntry(**(payload or {}))
+        except ValidationError as exc:
+            raise ValueError(
+                f"concepts.yml: entry {token!r} is malformed: {exc}"
+            ) from exc
+        if entry.definition and definitions.get(token):
+            raise ValueError(
+                f"concepts.yml: entry {token!r} restates a definition its "
+                f"vocabulary entry already holds"
+            )
+        entries[token] = entry
+    return ConceptsRegistry(concepts=entries)
+
+
+def load_notation(directory: Path | None = None) -> NotationRegistry:
+    """Load and validate ``notation.yml``.
+
+    Refuses, by name, a key that is not a real grammar token, an entry that is
+    malformed, and a forbidden spelling equal to one of the same token's
+    registered aliases or abbreviations. ``directory`` overrides the
+    conventions directory (for a scratch copy).
+    """
+    data = _load_conventions_yaml("notation.yml", directory)
+    raw = data.get("notation") or {}
+    known = _known_grammar_tokens()
+    registered = _token_registered_aliases()
+    entries: dict[str, NotationEntry] = {}
+    for token, payload in raw.items():
+        _validate_convention_key("notation.yml", token, known)
+        try:
+            entry = NotationEntry(**(payload or {}))
+        except ValidationError as exc:
+            raise ValueError(
+                f"notation.yml: entry {token!r} is malformed: {exc}"
+            ) from exc
+        collisions = sorted(
+            set(entry.forbidden_spellings) & registered.get(token, frozenset())
+        )
+        if collisions:
+            raise ValueError(
+                f"notation.yml: entry {token!r} forbids {collisions!r}, a "
+                f"registered alias or abbreviation of the same token"
+            )
+        entries[token] = entry
+    return NotationRegistry(notation=entries)
+
+
+def load_templates(directory: Path | None = None) -> TemplatesRegistry:
+    """Load and validate ``templates.yml``.
+
+    Refuses, by name, a malformed entry, a pattern whose base is not a real
+    grammar token, and a pattern naming a segment kind the grammar does not
+    have. ``directory`` overrides the conventions directory (for a scratch
+    copy).
+    """
+    data = _load_conventions_yaml("templates.yml", directory)
+    raw = data.get("templates") or []
+    known = _known_grammar_tokens()
+    entries: list[TemplateEntry] = []
+    for index, payload in enumerate(raw):
+        try:
+            entry = TemplateEntry(**(payload or {}))
+        except ValidationError as exc:
+            raise ValueError(
+                f"templates.yml: entry {index} is malformed: {exc}"
+            ) from exc
+        _validate_convention_key("templates.yml", entry.base, known)
+        unknown = sorted(set(entry.segments) - TEMPLATE_SEGMENT_KINDS)
+        if unknown:
+            raise ValueError(
+                f"templates.yml: entry {entry.base!r} names unknown segment "
+                f"kinds {unknown!r}"
+            )
+        entries.append(entry)
+    return TemplatesRegistry(templates=entries)
+
+
+def load_conventions(directory: Path | None = None) -> ConventionsRegistry:
+    """Load and validate the three convention files together."""
+    return ConventionsRegistry(
+        concepts=load_concepts(directory),
+        notation=load_notation(directory),
+        templates=load_templates(directory),
     )
