@@ -1,0 +1,80 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-12T15:04:49.195Z",
+  "dispatched_at": "2026-10-12T14:54:43Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/concept-and-notation-registry.html:96",
+      "id": "reasoning-1",
+      "reason": "a worker building the accessor to \u00a72's stated signature cannot return the COCOS rule its own file spec requires, so it would either drop that entry class or invent a keying the plan does not name, and the two changed sections' done-when never exercises it.",
+      "text": "\u00a72 says `templates.yml` holds \"the sign-convention rule by COCOS transformation type\" and that a pattern \"is selected from the parse\", with the accessor taking \"a parsed name\" (:113); but `cocos_transformation_type` is an attribute of a catalog entry, not a token a name's parse yields (`imas_standard_names/grammar/specification.yml:838` \u2014 `allowed_values: [psi_like, ip_like, b0_like, f_like, q_like]`; generated `field_schemas.py:187`), and \u00a72 elsewhere puts the generic sign-convention form in `specification.yml`, so the registry's COCOS rule is keyed by something the named accessor signature cannot reach.",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/concept-and-notation-registry.html:96",
+      "id": "reasoning-2",
+      "reason": "ISN owns these files and \u00a72 states the placement explicitly, so this plan's build instructions are unambiguous; the divergence is in the sibling plan's table, which is outside this plan's read scope and does not alter what this plan asks a node to build.",
+      "text": "the changed \u00a72 states the section order and the generic sign-convention form \"stay in specification.yml\", while the consumer plan's own table for the same three files (`imas-codex` `sn-house-style.html:83`) lists \"the section order, and the sign-convention rule by COCOS transformation type\" as held by `templates.yml`.",
+      "type": "reasoning",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "d25582a49e38ca1ef70778e8f5ce44f209e4c593c9aabccecf771508e01fd93e",
+  "plan_slug": "concept-and-notation-registry",
+  "plan_version": 2,
+  "project": "imas-standard-names",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "reasoning-1",
+      "reason": "",
+      "when": "2026-10-12T15:07:27.966361+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "reasoning-2",
+      "reason": "",
+      "when": "2026-10-12T15:07:29.636449+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-12T15:07:27.966361+00:00"
+    },
+    "reasoning-2": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-12T15:07:29.636449+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-standard-names/plan-concept-and-notation-registry.v2.json",
+  "review_run_id": "r-20261012T145440543606-plan-review-of-concept-and-notation-registry",
+  "reviewed_blob_sha": "79f017707b8dc5e88d87a2d6d39b0054c91532e7",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the cited `docs/guidelines.md` `flux-surface-average` tag, `imas_standard_names/grammar/vocab_loaders.py` (`LocusEntry.definition`, `PhysicalBaseDef.definition`, `GeometryCarrierDef.definition`), `specification.yml` (`entry_schema` rubric, `documentation.sign_conventions`), `field_schemas.py`, `terms.py` (`fetch_standard_terms` at :49), and `imas_codex/definitions/clusters/concepts.yaml` all resolve; the example name `flux_surface_averaged_argon_density_at_plasma_boundary` parses strictly and yields operator `flux_surface_averaged`, base `density`, locus `plasma_boundary`, so the \u00a72 accessor's worked example runs on the real parse path.",
+    "done_when": "pass \u2014 \u00a72 names a negative control (one deliberately malformed entry per file plus an entry keyed by a non-existent token, each failing by name) and \u00a73 names one (remove one entry from a scratch copy and the run lists that token as missing), so neither measure holds however the code behaves.",
+    "evidence_paths": "pass \u2014 no section directs evidence or a gate log to a session scratchpad or node-local temporary path.",
+    "naming": "pass \u2014 `concepts.yml`, `conventions/`, and the accessor carry no plan label, stage name, ticket number or version tag; the followup id `f-cnr-001` is record data.",
+    "reasoning": "a finding \u2014 \u00a72 assigns templates.yml \"the sign-convention rule by COCOS transformation type\" selected from the parse, but COCOS transformation type is an entry-level field the parse does not produce, so the accessor as specified cannot select it.",
+    "single_goal": "pass \u2014 \u00a72 is the registry, loader and accessor; \u00a73 the authored entries; \u00a74 the release.",
+    "wiring": "pass \u2014 \u00a73 now states it is the landing of `imas-codex:sn-house-style` \u00a73 and closes with that section, which matches the consumer's own declaration (`sn-house-style.html:23` records `plan-section-depends-on s2: [imas-standard-names:concept-and-notation-registry#s2`] and `:102` records the entries land in ISN \u00a73); the sole edge `plan-blocks=imas-codex:sn-house-style` matches the direction the consumer needs."
+  },
+  "section_digests": {
+    "_document": "392df941e669b18f529dbc8551e945967eb68b8309f64d53cca91c3d9a1a02ba",
+    "s1": "30a14d1b0da016d94a775f6d1085956ddc7deec1c03f5b5f600083f6120bf711",
+    "s2": "eb281329f5ffaa60407ca96bb6fdce2320c6c91cdcc1703fd7863b6e1e39950c",
+    "s3": "dbbc4175f8a714330ed9bfb7402d0ebe8acc2802fc51746f56dae6d178b35434",
+    "s4": "3a28fbf118b9fc1daa60b9e41d42866cbcd951b116da2f37eb7123b2b556746e"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T15:07:25.988089+00:00"
+}
