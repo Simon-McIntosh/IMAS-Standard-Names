@@ -25,6 +25,11 @@
     <p>Commit <code>1e12625</code> adds <code>vocabularies/conventions/concepts.yml</code>, <code>notation.yml</code> and <code>templates.yml</code>, their token-validating loaders in <code>grammar/vocab_loaders.py</code>, and <code>select_conventions</code> in <code>grammar/terms.py</code>. For <code>flux_surface_averaged_argon_density_at_plasma_boundary</code> the accessor returns exactly two concepts (flux-surface average, plasma boundary), one notation (density) and one template (density with subject). The loader refuses a malformed entry per file, an unknown token key and a forbidden spelling equal to a registered alias, each by name. Gate: 481 passed against 469 at base; removing the flux-surface-average entry from a scratch copy turns the accessor test red. Independent review 102/120, no added failures. Open in this section: the templates still carry a <code>sign_convention</code> field the plan removed, the conventions YAML reader copies <code>_load_yaml</code>, and one refusal test matches too loosely; a follow-up node narrows all three.</p>
   </section>
 
+  <section id="s2">
+    <h2>§2 — registry narrowed to openings and its existing YAML owner</h2>
+    <p>Commit <code>0a977ee</code> removes the template <code>sign_convention</code> field from the model, <code>templates.yml</code> and the <code>select_conventions</code> output, folds <code>_load_conventions_yaml</code> into <code>_load_yaml</code>, and makes each refusal test assert its own message. <code>rg</code> finds neither name in the registry code. Gate: 44 passed, 5 xfailed against 42 passed, 5 xfailed at base; re-adding <code>sign_convention</code> to the template model turns the refusal test red. Independent review 118/120, no added failures. With the loader landing (<a href="#s2-registry-loader">s2-registry-loader</a>), the section's deliverable is in the tree.</p>
+  </section>
+
 </main>
 </body>
 </html>
