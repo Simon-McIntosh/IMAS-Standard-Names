@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"   content="imas-standard-names">
+  <meta name="reckon-type"    content="plan">
+  <meta name="plan-slug"      content="concept-and-notation-registry">
+  <meta name="plan-title"     content="One Definition Per Concept, Published With The Grammar">
+  <meta name="plan-summary"   content="A registry of shared concept definitions, notation and documentation templates, keyed by grammar tokens and released with the grammar.">
+  <meta name="plan-status"    content="active">
+  <meta name="plan-roi"       content="high">
+  <meta name="plan-effort-hours" content="5">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="orchestrator">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-capability-risk" content="moderate">
+  <meta name="plan-owner"     content="Simon McIntosh">
+  <meta name="plan-tags"      content="grammar,vocabulary,release">
+  <meta name="plan-blocks"    content="imas-codex:sn-house-style">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;}">
+  <title>One Definition Per Concept, Published With The Grammar | imas-standard-names</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <header>
+      <p class="eyebrow">Plan &middot; grammar &middot; consumer: imas-codex S18</p>
+      <h1>One definition per concept</h1>
+      <p class="lead">
+        The grammar says how a name is spelled. Nothing says how the shared ideas inside a
+        name are defined. So the catalog writes the flux-surface average five ways and glosses
+        the plasma boundary as the separatrix. This plan adds that missing layer beside the
+        vocabularies it is keyed by, and releases it with them.
+      </p>
+    </header>
+
+    <h2 id="s1">§1 — Why here, and why now</h2>
+    <p>
+      The imas-codex consistency census of 2026-10-12
+      (<code>imas-codex:sn-catalog-consistency-census</code>) measured 72 accepted entries
+      re-deriving the flux-surface average, in five notations and with one wrong. 24 boundary
+      entries call the plasma boundary the separatrix, and the WEST batch opens its
+      documentation in four styles. The consumer plan <code>imas-codex:sn-house-style</code>
+      authors a single house style to fix this. On 2026-10-12 the lead ruled that the house
+      style lives in ISN now, released before the WEST re-cut, rather than in imas-codex
+      first. A definition belongs with the grammar that names the thing defined, and every
+      consumer of the standard should see it, not only the generator.
+    </p>
+    <p>
+      Existing guidance is the base, not a competitor. <code>docs/guidelines.md</code> states
+      naming rules and the <code>flux-surface-average</code> tag. The shipped symbol
+      definition policy requires every symbol to be defined by identity and name link. The
+      locus registry already carries a definition per locus. The new layer adds what none of
+      them hold: one canonical equation per concept, one symbol per quantity, and one opening
+      template per name pattern.
+    </p>
+
+    <h2 id="s2">§2 — The registry and its loader</h2>
+    <section data-reckon="section" data-id="s2" data-effort-hours="2.00" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+    <p>
+      Three files under <code>imas_standard_names/grammar/vocabularies/conventions/</code>:
+    </p>
+    <ul>
+      <li><code>concepts.yml</code> — one entry per shared concept, keyed by the operator,
+        locus, coordinate or base token that carries it. Each entry holds a canonical phrase,
+        a one-sentence definition, exactly one canonical LaTeX equation, its symbol table,
+        forbidden variants as patterns, and whether a name using it restates the equation or
+        only names the concept.</li>
+      <li><code>notation.yml</code> — one symbol per quantity or coordinate, keyed by base,
+        subject, component or coordinate token, with its forbidden spellings.</li>
+      <li><code>templates.yml</code> — one description opening and one documentation opening
+        per name pattern, the section order, and the sign-convention rule by COCOS
+        transformation type.</li>
+    </ul>
+    <p>
+      A pydantic model and a loader live beside the existing vocabulary loaders. The loader
+      refuses any key that is not a real token in the current vocabularies, so the registry
+      cannot drift from the grammar. A public accessor takes a parsed name and returns
+      exactly the entries that apply to it.
+    </p>
+    <p>
+      <strong>Done when:</strong> the loader validates all three files and refuses one
+      deliberately malformed entry per file, plus one entry keyed by a token that does not
+      exist, each failing by name. For
+      <code>flux_surface_averaged_argon_density_at_plasma_boundary</code>, the accessor returns
+      the flux-surface-average concept, the plasma-boundary entry, the density notation and
+      the species-density template, and nothing else.
+    </p>
+
+    <h2 id="s3">§3 — The entries the WEST batch needs</h2>
+    <section data-reckon="section" data-id="s3" data-effort-hours="2.00" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <p>
+      Content is authored by the coordinator under <code>imas-codex:sn-house-style</code> §3
+      and lands here. The lead's rulings of 2026-10-12 fix three entries before any other is
+      written:
+    </p>
+    <ul>
+      <li>The flux-surface average is defined by the surface form,
+        <code>\langle f\rangle = \oint f\,dS/|\nabla\psi| \,/\, \oint dS/|\nabla\psi|</code>.
+        The line form may be named as equivalent in prose and is never written as a second
+        equation.</li>
+      <li>The plasma boundary is "the last closed flux surface". The separatrix is named only
+        where a quantity is defined for a diverted configuration.</li>
+      <li>Every documentation entry opens with a defining noun phrase, the same shape as its
+        description.</li>
+    </ul>
+    <p>
+      <strong>Done when:</strong> every concept, symbol and pattern used by the 220 names of the
+      frozen WEST roster has an entry. The worklist is produced by running the §2 accessor
+      over that roster and listing the tokens it finds with no entry, so the list is
+      measured, not guessed. The lead has read <code>concepts.yml</code>.
+    </p>
+
+    <h2 id="s4">§4 — Released before the WEST re-cut</h2>
+    <section data-reckon="section" data-id="s4" data-effort-hours="1.00" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <p>
+      imas-codex already consumes this repository as an editable path source, so the registry
+      is usable there the moment it lands on <code>main</code>. The release is what makes it
+      part of the published standard. Cut it with <code>standard-names release</code> before
+      the WEST candidate is cut. In imas-codex, both <code>imas-standard-names</code> pin
+      occurrences move together, and the graph's grammar snapshot is verified to carry the
+      release rather than assumed, since a scoped run does not resync it.
+    </p>
+    <p>
+      <strong>Done when:</strong> the tag is published and installable from the package
+      index. Both imas-codex pin lines name it. A read of the graph's grammar snapshot reports
+      the released version.
+    </p>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+      <h2><span class="sec">§</span> Followups</h2>
+      <article class="r-fu" data-id="f-cnr-001" data-status="open"
+               data-capability-version="1.0" data-capability-class="general"
+               data-written-by="reckon-review" data-written-at="2026-10-12"
+               data-recommends-skill="/reckon-build concept-and-notation-registry §2">
+        <h4 class="r-fu-title">Land the loader and accessor first; content follows from the WEST worklist</h4>
+        <div class="r-fu-body">
+          <p>§2 is self-contained code in this repository. §3's worklist comes from running the §2 accessor over the WEST roster, so §3 cannot start before §2. §4 is a coordinator act from the main checkout.</p>
+        </div>
+        <pre class="r-fu-prompt">/reckon-build concept-and-notation-registry §2</pre>
+      </article>
+    </section>
+  </main>
+</body>
+</html>
