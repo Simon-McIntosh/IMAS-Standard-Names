@@ -1,0 +1,22 @@
+<!-- Landing record: the conventions templates narrowed to openings-only. -->
+<section id="cnr-template-scope-landing">
+  <p>
+    Removed the <code>sign_convention</code> field from the template model,
+    <code>templates.yml</code> and its header comment, and from the
+    <code>select_conventions</code> output in <code>grammar/terms.py</code>.
+    Whether an entry carries a sign-convention paragraph depends on its COCOS
+    transformation type, which a name's parse does not yield, so the consumer
+    decides it where the entry is known. Folded the duplicate
+    <code>_load_conventions_yaml</code> into <code>_load_yaml</code> and gave the
+    conventions refusals their own asserted messages.
+  </p>
+  <p id="cnr-template-scope-measure">
+    Measure: rg finds no <code>sign_convention</code> or
+    <code>_load_conventions_yaml</code> in the registry code (no matches);
+    the gate files run 44 passed, 5 xfailed against 42 passed, 5 xfailed at
+    base (no added failures, EXIT=0). With <code>sign_convention</code>
+    re-added to the <code>TemplateEntry</code> model the refusal test fails
+    (<code>test_template_entry_carrying_sign_convention_is_refused</code>,
+    EXIT=1).
+  </p>
+</section>

@@ -139,7 +139,6 @@ class AppliedTemplate(BaseModel, frozen=True):
     segments: tuple[str, ...]
     description: str
     documentation: str
-    sign_convention: str
 
 
 class AppliedConventions(BaseModel, frozen=True):
@@ -280,7 +279,6 @@ def select_conventions(
             segments=tuple(entry.segments),
             description=entry.description,
             documentation=entry.documentation,
-            sign_convention=entry.sign_convention,
         )
         for entry in conventions.templates.templates
         if entry.base == ir.base.token and set(entry.segments) <= segments
