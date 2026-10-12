@@ -23,8 +23,9 @@
   <title>One Definition Per Concept, Published With The Grammar | imas-standard-names</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="3">
+<meta name="plan-version" content="5">
 <meta name="plan-modified" content="2026-10-12">
+<meta name="plan-commits" content="1e12625694cf66cc85f90c6fe6383b5369c3427b">
 </head>
 <body>
   <main class="plan-doc">
@@ -179,6 +180,14 @@
     <pre class="r-fu-prompt">/reckon-build concept-and-notation-registry §2</pre>
     </article>
 </section>
-  </main>
+  <section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s2" data-id="c-20261012-s2-loader" data-who="reckon-build" data-when="2026-10-12T15:40:00Z">
+    <div class="r-comment-body"><p>Registry, loaders and accessor landed (commit <code>1e12625</code>); 481 passed vs 469 base, negative control red, review 102/120. Section stays open for the template-scope follow-up. <a href="/imas-standard-names/evidence/archive/concept-and-notation-registry-landed.html#s2-registry-loader">evidence</a></p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261012T145518269054-cnr-registry-loader" data-who="reckon-build" data-when="2026-10-12T15:31:51.504Z">
+    <div class="r-comment-body"><p>Added the conventions registry (vocabularies/conventions/concepts.yml, notation.yml, templates.yml) with its token-validating loaders in grammar/vocab_loaders.py and the parse-selecting select_conventions accessor in grammar/terms.py; for flux_surface_averaged_argon_density_at_plasma_boundary the accessor returns exactly 2 concepts (flux_surface_averaged, plasma_boundary), 1 notation (density) and 1 template (density), and the loader refuses a malformed entry per file, an unknown token key and a forbidden spelling equal to a registered alias, each by name.</p></div>
+</div>
+</section>
+</main>
 </body>
 </html>
