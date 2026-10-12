@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-14T15:00:57",
+  "updated": "2026-10-12T16:23:18",
   "project": "imas-standard-names",
   "doc": "crew",
   "data": {
@@ -24,22 +24,77 @@
         "session_model": null,
         "sessions": {},
         "created": "2026-09-09"
-      },
-      {
-        "id": "session-2a6f0db8b3e75a382796",
-        "harness": "codex-terra",
-        "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
-        "created": "2026-09-14"
       }
     ],
     "runs": [
       {
-        "run_id": "r-20260906T102805767185-n-grdp-the-kind-pin-tolerates-new-bases",
-        "plan": "grammar-release-and-downstream-pin",
-        "section": "\u00a72",
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "backend": "codex",
+        "base_sha": "c632a5316ac80aed01f1503dbf519f090adf1f32",
+        "budget": {
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "refusal": false,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 5009920,
+            "cached_input_tokens_cumulative": 5009920,
+            "input_tokens": 5065395,
+            "input_tokens_cumulative": 5065395,
+            "output_tokens": 21664,
+            "output_tokens_cumulative": 21664,
+            "reasoning_output_tokens": 6410,
+            "reasoning_output_tokens_cumulative": 6410
+          },
+          "utilisation_pct": null
+        },
+        "changed_lines": {
+          "added": 205,
+          "files": 1,
+          "removed": 19
+        },
+        "commits": [
+          "81cc5c2761f2a5c253697a8486f3d179580a3045"
+        ],
+        "completed_at": "2026-09-06T10:46:05Z",
+        "completed_at_source": "stream_mtime",
+        "dispatched_at": "2026-09-06T10:28:15Z",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "uv run pytest tests/test_physical_base_kinds.py",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        },
+        "failure_classification": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run pytest tests/test_physical_base_kinds.py -p no:cacheprovider",
+          "exit_status": 0,
+          "log_digest": null,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T102805767185-n-grdp-the-kind-pin-tolerates-new-bases/after-physical-base-kinds.log"
+        },
+        "lineage": null,
+        "local": false,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T102805767185-n-grdp-the-kind-pin-tolerates-new-bases/manifest.md",
+        "member": "cx-kindpin",
         "node": "n-grdp-the-kind-pin-tolerates-new-bases",
         "node_definition": {
           "coordinator": {
@@ -75,109 +130,111 @@
             "tests/test_physical_base_kinds.py"
           ]
         },
-        "role": "implement",
-        "spec_level": "exact",
-        "member": "cx-kindpin",
-        "backend": "codex",
-        "local": false,
-        "agent": {
-          "alias": "sol5.6",
-          "backend": "codex",
-          "effort": "high",
-          "launch": "cli",
-          "model": "gpt-5.6-sol",
-          "sandbox": "worktree-full"
-        },
-        "dispatched_at": "2026-09-06T10:28:15Z",
-        "completed_at": "2026-09-06T10:46:05Z",
-        "completed_at_source": "stream_mtime",
-        "worker_seconds": 1070,
-        "worker_seconds_source": "wall_fallback",
-        "wall_seconds": 1070,
-        "stalled": false,
-        "time_budget": "40m",
-        "base_sha": "c632a5316ac80aed01f1503dbf519f090adf1f32",
-        "commits": [
-          "81cc5c2761f2a5c253697a8486f3d179580a3045"
-        ],
-        "changed_lines": {
-          "added": 205,
-          "removed": 19,
-          "files": 1
-        },
-        "tests_added": 2,
-        "gate": "passed",
-        "gate_check": {
-          "command": "uv run pytest tests/test_physical_base_kinds.py -p no:cacheprovider",
-          "exit_status": 0,
-          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T102805767185-n-grdp-the-kind-pin-tolerates-new-bases/after-physical-base-kinds.log",
-          "log_digest": null
-        },
-        "suite_delta": null,
-        "failure_classification": null,
         "outcome": "",
-        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T102805767185-n-grdp-the-kind-pin-tolerates-new-bases/manifest.md",
+        "plan": "grammar-release-and-downstream-pin",
+        "role": "implement",
+        "run_id": "r-20260906T102805767185-n-grdp-the-kind-pin-tolerates-new-bases",
         "scope_changed": false,
+        "section": "\u00a72",
         "session_id": "01a07642-fbe2-7d02-97de-ed56606becbb",
-        "budget": {
-          "headroom": "unknown",
-          "utilisation_pct": null,
-          "rate_limit_type": null,
-          "rate_limit_period_minutes": null,
-          "resets_at": null,
-          "threshold_status": null,
-          "surpassed_threshold": null,
-          "tokens": {
-            "cache_write_input_tokens": 0,
-            "cache_write_input_tokens_cumulative": 0,
-            "cached_input_tokens": 5009920,
-            "cached_input_tokens_cumulative": 5009920,
-            "input_tokens": 5065395,
-            "input_tokens_cumulative": 5065395,
-            "output_tokens": 21664,
-            "output_tokens_cumulative": 21664,
-            "reasoning_output_tokens": 6410,
-            "reasoning_output_tokens_cumulative": 6410
-          },
-          "cost_usd": null,
-          "refusal": false,
-          "detail": "backend reports token usage but no headroom"
-        },
-        "lineage": null,
         "shadow_controlled": null,
         "shadow_patch": "",
-        "unreconciled_override": {
-          "grace": "5m",
-          "requested": true,
-          "waived_runs": []
-        },
+        "spec_level": "exact",
+        "stalled": false,
+        "suite_delta": null,
+        "tests_added": 2,
         "throughput": {
           "detail": "turn tokens recorded, but no span was supplied to rate them",
           "generated_tokens": 28074,
           "peak_input_tokens": 10075315
         },
-        "attempt": 2,
-        "attempt_kind": "resume",
+        "time_budget": "40m",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "wall_seconds": 1070,
+        "worker_seconds": 1070,
+        "worker_seconds_source": "wall_fallback",
         "worktree_retention": {
           "classification": "retained-for-resume",
-          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-standard-names-5be88ee0fdc3/ship-s10-20260905/n-grdp-the-kind-pin-tolerates-new-bases",
+          "retained_at": "2026-09-06T10:46:05Z",
           "session_id": "01a07642-fbe2-7d02-97de-ed56606becbb",
           "session_source": "pointer",
-          "retained_at": "2026-09-06T10:46:05Z"
-        },
-        "execution_fit": {
-          "allowed": true,
-          "execution_capable": true,
-          "matched_measure": "uv run pytest tests/test_physical_base_kinds.py",
-          "override": false,
-          "role": "implement",
-          "status": "compatible"
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-standard-names-5be88ee0fdc3/ship-s10-20260905/n-grdp-the-kind-pin-tolerates-new-bases"
         }
       },
       {
-        "run_id": "r-20260906T114004346214-n-grdp-the-reduction-operator-leads-the-name",
-        "plan": "grammar-release-and-downstream-pin",
-        "section": "\u00a71",
+        "agent": {
+          "alias": "opus 5",
+          "backend": "claude-opus",
+          "effort": "high",
+          "launch": "cli",
+          "model": "claude-opus-5",
+          "sandbox": "worktree-full"
+        },
+        "attempt": 3,
+        "attempt_kind": "resume",
+        "backend": "claude-opus",
+        "base_sha": "a2e4ae80605dfec68d37bfc2f52abe199978cb26",
+        "budget": {
+          "cost_usd": 3.8788165,
+          "cost_usd_cumulative": 3.8788165,
+          "detail": "backend reports utilisation and reset time",
+          "headroom": "known",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": "five_hour",
+          "refusal": false,
+          "resets_at": "2026-09-06T16:00:00Z",
+          "surpassed_threshold": 1,
+          "threshold_status": "allowed_warning",
+          "tokens": {
+            "cache_creation_input_tokens": 32959,
+            "cache_creation_input_tokens_cumulative": 32959,
+            "cache_read_input_tokens": 5975113,
+            "cache_read_input_tokens_cumulative": 5975113,
+            "inference_geo": "not_available",
+            "input_tokens": 54,
+            "input_tokens_cumulative": 54,
+            "output_tokens": 22456,
+            "output_tokens_cumulative": 22456,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "utilisation_pct": 67.0
+        },
+        "changed_lines": {
+          "added": 60,
+          "files": 3,
+          "removed": 50
+        },
+        "commits": [
+          "0357c9321ae4c975ca65efd69b88258f1ee1d992"
+        ],
+        "completed_at": "2026-09-06T13:31:28.078Z",
+        "completed_at_source": "terminal_event",
+        "dispatched_at": "2026-09-06T11:40:13Z",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "uv run pytest tests/",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        },
+        "failure_classification": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run pytest tests/ -p no:cacheprovider",
+          "exit_status": 0,
+          "log_digest": null,
+          "log_path": "/tmp/isn-grdp/after.log"
+        },
+        "lineage": null,
+        "local": false,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T114004346214-n-grdp-the-reduction-operator-leads-the-name/manifest.md",
+        "member": "cx-kindpin",
         "node": "n-grdp-the-reduction-operator-leads-the-name",
         "node_definition": {
           "coordinator": {
@@ -215,84 +272,25 @@
             "tests/grammar/test_reduction_operator_scope.py"
           ]
         },
-        "role": "implement",
-        "spec_level": "guided",
-        "member": "cx-kindpin",
-        "backend": "claude-opus",
-        "local": false,
-        "agent": {
-          "alias": "opus 5",
-          "backend": "claude-opus",
-          "effort": "high",
-          "launch": "cli",
-          "model": "claude-opus-5",
-          "sandbox": "worktree-full"
-        },
-        "dispatched_at": "2026-09-06T11:40:13Z",
-        "completed_at": "2026-09-06T13:31:28.078Z",
-        "completed_at_source": "terminal_event",
-        "worker_seconds": 6667,
-        "worker_seconds_source": "stream_events",
-        "wall_seconds": 6675,
-        "stalled": true,
-        "time_budget": "55m",
-        "base_sha": "a2e4ae80605dfec68d37bfc2f52abe199978cb26",
-        "commits": [
-          "0357c9321ae4c975ca65efd69b88258f1ee1d992"
-        ],
-        "changed_lines": {
-          "added": 60,
-          "removed": 50,
-          "files": 3
-        },
-        "tests_added": 22,
-        "gate": "passed",
-        "gate_check": {
-          "command": "uv run pytest tests/ -p no:cacheprovider",
-          "exit_status": 0,
-          "log_path": "/tmp/isn-grdp/after.log",
-          "log_digest": null
-        },
-        "suite_delta": null,
-        "failure_classification": null,
         "outcome": "",
-        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260906T114004346214-n-grdp-the-reduction-operator-leads-the-name/manifest.md",
+        "plan": "grammar-release-and-downstream-pin",
+        "role": "implement",
+        "run_id": "r-20260906T114004346214-n-grdp-the-reduction-operator-leads-the-name",
+        "scope_acceptances": [
+          {
+            "path": "tests/grammar/test_tail_gated_operator_order.py",
+            "reason": "contract pinning the trailing spelling the lead reversed; repointing authorised by ruling"
+          }
+        ],
         "scope_changed": true,
+        "section": "\u00a71",
         "session_id": "451f0139-ecb1-41fc-bfc4-ff33f8bff921",
-        "budget": {
-          "headroom": "known",
-          "utilisation_pct": 67.0,
-          "rate_limit_type": "five_hour",
-          "rate_limit_period_minutes": null,
-          "resets_at": "2026-09-06T16:00:00Z",
-          "threshold_status": "allowed_warning",
-          "surpassed_threshold": 1,
-          "tokens": {
-            "cache_creation_input_tokens": 32959,
-            "cache_creation_input_tokens_cumulative": 32959,
-            "cache_read_input_tokens": 5975113,
-            "cache_read_input_tokens_cumulative": 5975113,
-            "inference_geo": "not_available",
-            "input_tokens": 54,
-            "input_tokens_cumulative": 54,
-            "output_tokens": 22456,
-            "output_tokens_cumulative": 22456,
-            "service_tier": "standard",
-            "speed": "standard"
-          },
-          "cost_usd": 3.8788165,
-          "refusal": false,
-          "detail": "backend reports utilisation and reset time",
-          "cost_usd_cumulative": 3.8788165
-        },
-        "lineage": null,
         "shadow_controlled": null,
         "shadow_patch": "",
-        "unreconciled_override": {
-          "grace": "5m",
-          "requested": true,
-          "waived_runs": []
-        },
+        "spec_level": "guided",
+        "stalled": true,
+        "suite_delta": null,
+        "tests_added": 22,
         "throughput": {
           "detail": "generation and wall clock reported separately by the backend",
           "elapsed_seconds": 728.43,
@@ -305,34 +303,110 @@
           "tokens_per_second": 73.77,
           "wall_tokens_per_second": 30.83
         },
-        "attempt": 3,
-        "attempt_kind": "resume",
-        "scope_acceptances": [
-          {
-            "path": "tests/grammar/test_tail_gated_operator_order.py",
-            "reason": "contract pinning the trailing spelling the lead reversed; repointing authorised by ruling"
-          }
-        ],
+        "time_budget": "55m",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "wall_seconds": 6675,
+        "worker_seconds": 6667,
+        "worker_seconds_source": "stream_events",
         "worktree_retention": {
           "classification": "retained-for-resume",
-          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-standard-names-5be88ee0fdc3/ship-s10-20260905/n-grdp-the-reduction-operator-leads-the-name",
+          "retained_at": "2026-09-06T13:31:28.078Z",
           "session_id": "451f0139-ecb1-41fc-bfc4-ff33f8bff921",
           "session_source": "pointer",
-          "retained_at": "2026-09-06T13:31:28.078Z"
-        },
-        "execution_fit": {
-          "allowed": true,
-          "execution_capable": true,
-          "matched_measure": "uv run pytest tests/",
-          "override": false,
-          "role": "implement",
-          "status": "compatible"
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-standard-names-5be88ee0fdc3/ship-s10-20260905/n-grdp-the-reduction-operator-leads-the-name"
         }
       },
       {
-        "run_id": "r-20260908T074220543604-n-grdp-the-vocabulary-admits-an-instant-and-a-ratio",
-        "plan": "grammar-release-and-downstream-pin",
-        "section": "",
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "backend": "codex",
+        "base_sha": "2ffba62512c07b7cc09d3ca0c1f435d9f108199b",
+        "boundary_waiver": null,
+        "budget": {
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "refusal": false,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 13407360,
+            "cached_input_tokens_cumulative": 18417280,
+            "input_tokens": 13621367,
+            "input_tokens_cumulative": 18686762,
+            "output_tokens": 11869,
+            "output_tokens_cumulative": 33533,
+            "reasoning_output_tokens": 7292,
+            "reasoning_output_tokens_cumulative": 13702
+          },
+          "utilisation_pct": null
+        },
+        "changed_lines": {
+          "added": 19,
+          "files": 1,
+          "removed": 0
+        },
+        "commit_resolution": null,
+        "commits": [
+          "1f183d785913b52c5f6eb88f93b79a42c51bb426",
+          "e403d6707cc5c30bcfdbfb49bcf3708d763d529a"
+        ],
+        "completed_at": "2026-09-08T08:05:51Z",
+        "completed_at_source": "stream_mtime",
+        "dispatched_at": "2026-09-08T07:42:34Z",
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest if",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        },
+        "failure_classification": null,
+        "follow_on_paths": [],
+        "gate": "passed",
+        "gate_check": {
+          "command": "parser precondition probe, focused pytest before and after each admission, built-entry probes, build-grammar --check",
+          "exit_status": 0,
+          "log_digest": "precondition probe: instantaneous_time accepted as qualifier instantaneous plus base time while event_time, occurrence_time and event_instant were rejected; focused pytest 123 passed, 28 skipped, 5 xfailed at baseline and after each admission; built-entry probes loaded event_instant, signal_to_noise_ratio and signal_to_noise_level with normative definitions, all three composed examples parsed strictly and round-tripped byte-identically; build-grammar --check exit 0 with generated files in sync",
+          "log_path": null
+        },
+        "lane_receipt": {
+          "effective_context_window": 380000,
+          "observed_at": "2026-09-08T08:05:51Z",
+          "quota_state": "measured",
+          "quota_windows": [
+            {
+              "observed_at": "2026-09-08T08:05:51Z",
+              "resets_at": 1789439333,
+              "used_percent": 20.0,
+              "window_minutes": 10080
+            }
+          ]
+        },
+        "lineage": null,
+        "local": false,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T074220543604-n-grdp-the-vocabulary-admits-an-instant-and-a-ratio/manifest.md",
+        "member": "cx-kindpin",
+        "no_commit": null,
         "node": "n-grdp-the-vocabulary-admits-an-instant-and-a-ratio",
         "node_definition": {
           "coordinator": {
@@ -371,129 +445,118 @@
             "imas_standard_names/grammar/specification.yml"
           ]
         },
-        "role": "implement",
-        "spec_level": "guided",
-        "member": "cx-kindpin",
-        "backend": "codex",
-        "local": false,
-        "agent": {
-          "alias": "sol5.6",
-          "backend": "codex",
-          "effort": "high",
-          "launch": "cli",
-          "model": "gpt-5.6-sol",
-          "sandbox": "worktree-full"
-        },
-        "dispatched_at": "2026-09-08T07:42:34Z",
-        "completed_at": "2026-09-08T08:05:51Z",
-        "completed_at_source": "stream_mtime",
-        "worker_seconds": 1397,
-        "worker_seconds_source": "wall_fallback",
-        "wall_seconds": 1397,
-        "stalled": false,
-        "time_budget": "50m",
-        "base_sha": "2ffba62512c07b7cc09d3ca0c1f435d9f108199b",
-        "commits": [
-          "1f183d785913b52c5f6eb88f93b79a42c51bb426",
-          "e403d6707cc5c30bcfdbfb49bcf3708d763d529a"
-        ],
-        "changed_lines": {
-          "added": 19,
-          "removed": 0,
-          "files": 1
-        },
-        "tests_added": null,
-        "gate": "passed",
-        "gate_check": {
-          "command": "parser precondition probe, focused pytest before and after each admission, built-entry probes, build-grammar --check",
-          "exit_status": 0,
-          "log_path": null,
-          "log_digest": "precondition probe: instantaneous_time accepted as qualifier instantaneous plus base time while event_time, occurrence_time and event_instant were rejected; focused pytest 123 passed, 28 skipped, 5 xfailed at baseline and after each admission; built-entry probes loaded event_instant, signal_to_noise_ratio and signal_to_noise_level with normative definitions, all three composed examples parsed strictly and round-tripped byte-identically; build-grammar --check exit 0 with generated files in sync"
-        },
-        "suite_delta": null,
-        "failure_classification": null,
         "outcome": "",
-        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T074220543604-n-grdp-the-vocabulary-admits-an-instant-and-a-ratio/manifest.md",
+        "plan": "grammar-release-and-downstream-pin",
+        "predecessor_run": null,
+        "resume_waiver": null,
+        "role": "implement",
+        "run_id": "r-20260908T074220543604-n-grdp-the-vocabulary-admits-an-instant-and-a-ratio",
+        "scope_acceptances": null,
         "scope_changed": false,
+        "section": "",
         "session_id": "01a07642-fbe2-7d02-97de-ed56606becbb",
-        "budget": {
-          "headroom": "unknown",
-          "utilisation_pct": null,
-          "rate_limit_type": null,
-          "rate_limit_period_minutes": null,
-          "resets_at": null,
-          "threshold_status": null,
-          "surpassed_threshold": null,
-          "tokens": {
-            "cache_write_input_tokens": 0,
-            "cache_write_input_tokens_cumulative": 0,
-            "cached_input_tokens": 13407360,
-            "cached_input_tokens_cumulative": 18417280,
-            "input_tokens": 13621367,
-            "input_tokens_cumulative": 18686762,
-            "output_tokens": 11869,
-            "output_tokens_cumulative": 33533,
-            "reasoning_output_tokens": 7292,
-            "reasoning_output_tokens_cumulative": 13702
-          },
-          "cost_usd": null,
-          "refusal": false,
-          "detail": "backend reports token usage but no headroom"
-        },
-        "lane_receipt": {
-          "quota_state": "measured",
-          "observed_at": "2026-09-08T08:05:51Z",
-          "effective_context_window": 380000,
-          "quota_windows": [
-            {
-              "window_minutes": 10080,
-              "used_percent": 20.0,
-              "resets_at": 1789439333,
-              "observed_at": "2026-09-08T08:05:51Z"
-            }
-          ]
-        },
-        "lineage": null,
         "shadow_controlled": null,
         "shadow_patch": "",
-        "unreconciled_override": null,
+        "spec_level": "guided",
+        "stalled": false,
+        "suite_delta": null,
+        "tests_added": null,
         "throughput": {
           "cumulative_cached_input_tokens": 18417280,
           "cumulative_input_tokens": 37104042,
           "detail": "turn tokens recorded, but no span was supplied to rate them",
           "generated_tokens": 47235
         },
-        "follow_on_paths": [],
+        "time_budget": "50m",
+        "unreconciled_override": null,
+        "wall_seconds": 1397,
+        "watch_override": null,
+        "worker_seconds": 1397,
+        "worker_seconds_source": "wall_fallback",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "retained_at": "2026-09-08T08:05:51Z",
+          "session_id": "01a07642-fbe2-7d02-97de-ed56606becbb",
+          "session_source": "pointer",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-standard-names-5be88ee0fdc3/ship-s10-20260907/n-grdp-the-vocabulary-admits-an-instant-and-a-ratio"
+        }
+      },
+      {
+        "agent": {
+          "alias": "terra5.6",
+          "backend": "codex-terra",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-terra",
+          "sandbox": "worktree-full"
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "backend": "codex-terra",
+        "base_sha": "e1b96c4bc98469c192dc73b73ab626c426cda9c1",
+        "boundary_waiver": null,
+        "budget": {
+          "cost_usd": null,
+          "detail": "no events yet",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "refusal": false,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "changed_lines": null,
+        "commit_resolution": null,
+        "commits": [],
+        "completed_at": "2026-09-09T15:45:23Z",
+        "completed_at_source": "stream_mtime",
+        "dispatched_at": "2026-09-09T15:44:01Z",
         "dispute_count": 0,
         "execution_fit": {
           "allowed": true,
           "execution_capable": true,
-          "matched_measure": "pytest if",
+          "matched_measure": "pytest result.",
           "override": false,
           "role": "implement",
           "status": "compatible"
         },
-        "attempt_kind": "dispatch",
-        "attempt": 1,
-        "scope_acceptances": null,
-        "no_commit": null,
-        "commit_resolution": null,
-        "worktree_retention": {
-          "classification": "retained-for-resume",
-          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-standard-names-5be88ee0fdc3/ship-s10-20260907/n-grdp-the-vocabulary-admits-an-instant-and-a-ratio",
-          "session_id": "01a07642-fbe2-7d02-97de-ed56606becbb",
-          "session_source": "pointer",
-          "retained_at": "2026-09-08T08:05:51Z"
+        "failure_classification": "malformed-node",
+        "follow_on_paths": [],
+        "gate": "failed",
+        "gate_check": {
+          "command": "none; the run was stopped once the worktree was identified as the wrong repository",
+          "exit_status": 1,
+          "log_digest": "worktree git-common-dir resolved to imas-codex/.git; imas_standard_names source absent; imas_codex source present",
+          "log_path": null
         },
-        "predecessor_run": null,
-        "boundary_waiver": null,
-        "resume_waiver": null,
-        "watch_override": null
-      },
-      {
-        "run_id": "r-20260909T154352802519-n-grdp-path-qualification-reads-the-wrong-field",
-        "plan": "grammar-release-and-downstream-pin",
-        "section": "\u00a73",
+        "lane_receipt": {
+          "effective_context_window": 380000,
+          "notional_cost_usd": 1.4889,
+          "observed_at": "2026-09-09T15:45:23Z",
+          "quota_state": "measured",
+          "quota_windows": [
+            {
+              "observed_at": "2026-09-09T15:45:23Z",
+              "resets_at": 1789439333,
+              "used_percent": 88.0,
+              "window_minutes": 10080
+            }
+          ],
+          "rate_basis": {
+            "as_of": "2026-09-09",
+            "input_per_million": 2.0,
+            "model_identifier": "gpt-5.6-terra",
+            "output_per_million": 12.0
+          }
+        },
+        "lineage": null,
+        "local": false,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T154352802519-n-grdp-path-qualification-reads-the-wrong-field/manifest.md",
+        "member": "isn-grammar",
+        "no_commit": "the node was dispatched into the wrong repository and produced nothing; there is no work to record",
         "node": "n-grdp-path-qualification-reads-the-wrong-field",
         "node_definition": {
           "coordinator": {
@@ -541,11 +604,37 @@
             "docs/evidence/grammar-release-and-downstream-pin/path-qualification-field-selection.md"
           ]
         },
+        "outcome": "",
+        "plan": "grammar-release-and-downstream-pin",
+        "predecessor_run": null,
+        "resume_waiver": null,
         "role": "implement",
+        "run_id": "r-20260909T154352802519-n-grdp-path-qualification-reads-the-wrong-field",
+        "scope_acceptances": null,
+        "scope_changed": false,
+        "section": "\u00a73",
+        "session_id": "01a086d7-2622-77f0-a8c0-16004b2df053",
+        "shadow_controlled": null,
+        "shadow_patch": "",
         "spec_level": "guided",
-        "member": "isn-grammar",
-        "backend": "codex-terra",
-        "local": false,
+        "stalled": false,
+        "suite_delta": null,
+        "tests_added": 0,
+        "time_budget": "50m",
+        "unreconciled_override": null,
+        "wall_seconds": 82,
+        "watch_override": null,
+        "worker_seconds": 82,
+        "worker_seconds_source": "wall_fallback",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "retained_at": "2026-09-09T15:45:23Z",
+          "session_id": "01a086d7-2622-77f0-a8c0-16004b2df053",
+          "session_source": "stream",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260908/n-grdp-path-qualification-reads-the-wrong-field"
+        }
+      },
+      {
         "agent": {
           "alias": "terra5.6",
           "backend": "codex-terra",
@@ -554,34 +643,14 @@
           "model": "gpt-5.6-terra",
           "sandbox": "worktree-full"
         },
-        "dispatched_at": "2026-09-09T15:44:01Z",
-        "completed_at": "2026-09-09T15:45:23Z",
-        "completed_at_source": "stream_mtime",
-        "worker_seconds": 82,
-        "worker_seconds_source": "wall_fallback",
-        "wall_seconds": 82,
-        "stalled": false,
-        "time_budget": "50m",
-        "base_sha": "e1b96c4bc98469c192dc73b73ab626c426cda9c1",
-        "commits": [],
-        "changed_lines": null,
-        "tests_added": 0,
-        "gate": "failed",
-        "gate_check": {
-          "command": "none; the run was stopped once the worktree was identified as the wrong repository",
-          "exit_status": 1,
-          "log_path": null,
-          "log_digest": "worktree git-common-dir resolved to imas-codex/.git; imas_standard_names source absent; imas_codex source present"
-        },
-        "suite_delta": null,
-        "failure_classification": "malformed-node",
-        "outcome": "",
-        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T154352802519-n-grdp-path-qualification-reads-the-wrong-field/manifest.md",
-        "scope_changed": false,
-        "session_id": "01a086d7-2622-77f0-a8c0-16004b2df053",
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "backend": "codex-terra",
+        "base_sha": "2a4584d82537f3339e9c87294048ca4feb658495",
+        "boundary_waiver": null,
         "budget": {
           "cost_usd": null,
-          "detail": "no events yet",
+          "detail": "backend reports token usage but no headroom",
           "headroom": "unknown",
           "rate_limit_period_minutes": null,
           "rate_limit_type": null,
@@ -589,34 +658,33 @@
           "resets_at": null,
           "surpassed_threshold": null,
           "threshold_status": null,
-          "tokens": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 5830912,
+            "cached_input_tokens_cumulative": 5830912,
+            "input_tokens": 5972529,
+            "input_tokens_cumulative": 5972529,
+            "output_tokens": 22954,
+            "output_tokens_cumulative": 22954,
+            "reasoning_output_tokens": 4869,
+            "reasoning_output_tokens_cumulative": 4869
+          },
           "utilisation_pct": null
         },
-        "lane_receipt": {
-          "quota_state": "measured",
-          "observed_at": "2026-09-09T15:45:23Z",
-          "effective_context_window": 380000,
-          "quota_windows": [
-            {
-              "window_minutes": 10080,
-              "used_percent": 88.0,
-              "resets_at": 1789439333,
-              "observed_at": "2026-09-09T15:45:23Z"
-            }
-          ],
-          "notional_cost_usd": 1.4889,
-          "rate_basis": {
-            "model_identifier": "gpt-5.6-terra",
-            "input_per_million": 2.0,
-            "output_per_million": 12.0,
-            "as_of": "2026-09-09"
-          }
+        "changed_lines": {
+          "added": 82,
+          "files": 3,
+          "removed": 2
         },
-        "lineage": null,
-        "shadow_controlled": null,
-        "shadow_patch": "",
-        "unreconciled_override": null,
-        "follow_on_paths": [],
+        "commit_resolution": null,
+        "commits": [
+          "ec1fd50dbccdaf2761f8df93ae216489f489a9e7",
+          "7b3e3c15f3f8cbde1e10a0e4059d50c8bb9e499d"
+        ],
+        "completed_at": "2026-09-09T16:10:26Z",
+        "completed_at_source": "stream_mtime",
+        "dispatched_at": "2026-09-09T15:45:48Z",
         "dispute_count": 0,
         "execution_fit": {
           "allowed": true,
@@ -626,27 +694,40 @@
           "role": "implement",
           "status": "compatible"
         },
-        "attempt_kind": "dispatch",
-        "attempt": 1,
-        "scope_acceptances": null,
-        "no_commit": "the node was dispatched into the wrong repository and produced nothing; there is no work to record",
-        "commit_resolution": null,
-        "worktree_retention": {
-          "classification": "retained-for-resume",
-          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260908/n-grdp-path-qualification-reads-the-wrong-field",
-          "session_id": "01a086d7-2622-77f0-a8c0-16004b2df053",
-          "session_source": "stream",
-          "retained_at": "2026-09-09T15:45:23Z"
+        "failure_classification": null,
+        "follow_on_paths": [],
+        "gate": "passed",
+        "gate_check": {
+          "command": "focused tests/test_semantic_path_qualification.py then the full ISN pytest suite, both against the main checkout environment with --no-sync",
+          "exit_status": 0,
+          "log_digest": "focused 5 passed exit 0; full 2139 passed, 34 skipped, 82 xfailed, 0 failures exit 0",
+          "log_path": null
         },
-        "predecessor_run": null,
-        "boundary_waiver": null,
-        "resume_waiver": null,
-        "watch_override": null
-      },
-      {
-        "run_id": "r-20260909T154542474100-n-grdp-path-qualification-field-selection",
-        "plan": "grammar-release-and-downstream-pin",
-        "section": "\u00a73",
+        "lane_receipt": {
+          "effective_context_window": 380000,
+          "notional_cost_usd": 12.2205,
+          "observed_at": "2026-09-09T16:10:26Z",
+          "quota_state": "measured",
+          "quota_windows": [
+            {
+              "observed_at": "2026-09-09T16:10:26Z",
+              "resets_at": 1789439333,
+              "used_percent": 90.0,
+              "window_minutes": 10080
+            }
+          ],
+          "rate_basis": {
+            "as_of": "2026-09-09",
+            "input_per_million": 2.0,
+            "model_identifier": "gpt-5.6-terra",
+            "output_per_million": 12.0
+          }
+        },
+        "lineage": null,
+        "local": false,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T154542474100-n-grdp-path-qualification-field-selection/manifest.md",
+        "member": "isn-grammar",
+        "no_commit": null,
         "node": "n-grdp-path-qualification-field-selection",
         "node_definition": {
           "coordinator": {
@@ -694,138 +775,129 @@
             "docs/evidence/grammar-release-and-downstream-pin/path-qualification-field-selection.md"
           ]
         },
-        "role": "implement",
-        "spec_level": "guided",
-        "member": "isn-grammar",
-        "backend": "codex-terra",
-        "local": false,
-        "agent": {
-          "alias": "terra5.6",
-          "backend": "codex-terra",
-          "effort": "high",
-          "launch": "cli",
-          "model": "gpt-5.6-terra",
-          "sandbox": "worktree-full"
-        },
-        "dispatched_at": "2026-09-09T15:45:48Z",
-        "completed_at": "2026-09-09T16:10:26Z",
-        "completed_at_source": "stream_mtime",
-        "worker_seconds": 1478,
-        "worker_seconds_source": "wall_fallback",
-        "wall_seconds": 1478,
-        "stalled": false,
-        "time_budget": "50m",
-        "base_sha": "2a4584d82537f3339e9c87294048ca4feb658495",
-        "commits": [
-          "ec1fd50dbccdaf2761f8df93ae216489f489a9e7",
-          "7b3e3c15f3f8cbde1e10a0e4059d50c8bb9e499d"
-        ],
-        "changed_lines": {
-          "added": 82,
-          "removed": 2,
-          "files": 3
-        },
-        "tests_added": 5,
-        "gate": "passed",
-        "gate_check": {
-          "command": "focused tests/test_semantic_path_qualification.py then the full ISN pytest suite, both against the main checkout environment with --no-sync",
-          "exit_status": 0,
-          "log_path": null,
-          "log_digest": "focused 5 passed exit 0; full 2139 passed, 34 skipped, 82 xfailed, 0 failures exit 0"
-        },
-        "suite_delta": null,
-        "failure_classification": null,
+        "orientation_input_tokens": null,
         "outcome": "",
-        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T154542474100-n-grdp-path-qualification-field-selection/manifest.md",
+        "plan": "grammar-release-and-downstream-pin",
+        "predecessor_run": null,
+        "resume_waiver": null,
+        "role": "implement",
+        "run_id": "r-20260909T154542474100-n-grdp-path-qualification-field-selection",
+        "scope_acceptances": null,
         "scope_changed": false,
+        "section": "\u00a73",
         "session_id": "01a086d8-c8c3-7330-895f-2b2582b00271",
-        "budget": {
-          "headroom": "unknown",
-          "utilisation_pct": null,
-          "rate_limit_type": null,
-          "rate_limit_period_minutes": null,
-          "resets_at": null,
-          "threshold_status": null,
-          "surpassed_threshold": null,
-          "tokens": {
-            "cache_write_input_tokens": 0,
-            "cache_write_input_tokens_cumulative": 0,
-            "cached_input_tokens": 5830912,
-            "cached_input_tokens_cumulative": 5830912,
-            "input_tokens": 5972529,
-            "input_tokens_cumulative": 5972529,
-            "output_tokens": 22954,
-            "output_tokens_cumulative": 22954,
-            "reasoning_output_tokens": 4869,
-            "reasoning_output_tokens_cumulative": 4869
-          },
-          "cost_usd": null,
-          "refusal": false,
-          "detail": "backend reports token usage but no headroom"
-        },
-        "lane_receipt": {
-          "quota_state": "measured",
-          "observed_at": "2026-09-09T16:10:26Z",
-          "effective_context_window": 380000,
-          "quota_windows": [
-            {
-              "window_minutes": 10080,
-              "used_percent": 90.0,
-              "resets_at": 1789439333,
-              "observed_at": "2026-09-09T16:10:26Z"
-            }
-          ],
-          "notional_cost_usd": 12.2205,
-          "rate_basis": {
-            "model_identifier": "gpt-5.6-terra",
-            "input_per_million": 2.0,
-            "output_per_million": 12.0,
-            "as_of": "2026-09-09"
-          }
-        },
-        "lineage": null,
         "shadow_controlled": null,
         "shadow_patch": "",
-        "unreconciled_override": null,
+        "spec_level": "guided",
+        "stalled": false,
+        "suite_delta": null,
+        "tests_added": 5,
         "throughput": {
           "cumulative_cached_input_tokens": 5830912,
           "cumulative_input_tokens": 11803441,
           "detail": "turn tokens recorded, but no span was supplied to rate them",
           "generated_tokens": 27823
         },
-        "follow_on_paths": [],
+        "time_budget": "50m",
+        "tool_steps": 80.0,
+        "unreconciled_override": null,
+        "wall_seconds": 1478,
+        "watch_override": null,
+        "worker_seconds": 1478,
+        "worker_seconds_source": "wall_fallback",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "retained_at": "2026-09-09T16:10:26Z",
+          "session_id": "01a086d8-c8c3-7330-895f-2b2582b00271",
+          "session_source": "stream",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-standard-names-5be88ee0fdc3/ship-s10-20260908/n-grdp-path-qualification-field-selection"
+        }
+      },
+      {
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "backend": "codex",
+        "base_sha": "3905b92a23a24ad53c630ef94327709de7789b32",
+        "boundary_waiver": null,
+        "budget": {
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "refusal": false,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 6958336,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 7077354,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 11278,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 3673
+          },
+          "utilisation_pct": null
+        },
+        "changed_lines": null,
+        "commit_resolution": null,
+        "commits": [],
+        "completed_at": "2026-09-08T08:28:58Z",
+        "completed_at_source": "stream_mtime",
+        "dispatched_at": "2026-09-08T08:19:33Z",
         "dispute_count": 0,
+        "duration_measurement": null,
         "execution_fit": {
           "allowed": true,
           "execution_capable": true,
-          "matched_measure": "pytest result.",
+          "matched_measure": "pytest if",
           "override": false,
           "role": "implement",
           "status": "compatible"
         },
-        "attempt_kind": "dispatch",
-        "attempt": 1,
-        "scope_acceptances": null,
-        "no_commit": null,
-        "commit_resolution": null,
-        "worktree_retention": {
-          "classification": "retained-for-resume",
-          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-standard-names-5be88ee0fdc3/ship-s10-20260908/n-grdp-path-qualification-field-selection",
-          "session_id": "01a086d8-c8c3-7330-895f-2b2582b00271",
-          "session_source": "stream",
-          "retained_at": "2026-09-09T16:10:26Z"
+        "failure_classification": "malformed-node",
+        "follow_on_paths": [
+          "v0.9.1"
+        ],
+        "gate": "failed",
+        "gate_check": null,
+        "lane_receipt": {
+          "effective_context_window": 380000,
+          "notional_cost_usd": 155.9829,
+          "observed_at": "2026-09-08T08:28:58Z",
+          "quota_state": "measured",
+          "quota_windows": [
+            {
+              "observed_at": "2026-09-08T08:28:58Z",
+              "resets_at": 1789439333,
+              "used_percent": 22.0,
+              "window_minutes": 10080
+            }
+          ],
+          "rate_basis": {
+            "as_of": "2026-09-09",
+            "input_per_million": 4.0,
+            "model_identifier": "gpt-5.6-sol",
+            "output_per_million": 20.0
+          }
         },
-        "predecessor_run": null,
-        "boundary_waiver": null,
-        "resume_waiver": null,
-        "watch_override": null,
-        "tool_steps": 80.0,
-        "orientation_input_tokens": null
-      },
-      {
-        "run_id": "r-20260908T081922860258-n-grdp-the-grammar-cuts-a-stable-patch-release",
-        "plan": "grammar-release-and-downstream-pin",
-        "section": "",
+        "lineage": null,
+        "local": false,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T081922860258-n-grdp-the-grammar-cuts-a-stable-patch-release/manifest.md",
+        "member": "cx-kindpin",
+        "no_commit": "The node could not produce a commit: it was asked to cut a release from a detached worktree, and the release CLI requires branch main.",
         "node": "n-grdp-the-grammar-cuts-a-stable-patch-release",
         "node_definition": {
           "coordinator": {
@@ -862,87 +934,30 @@
             "CHANGELOG.md"
           ]
         },
-        "role": "implement",
-        "spec_level": "guided",
-        "member": "cx-kindpin",
-        "backend": "codex",
-        "local": false,
-        "agent": {
-          "alias": "sol5.6",
-          "backend": "codex",
-          "effort": "high",
-          "launch": "cli",
-          "model": "gpt-5.6-sol",
-          "sandbox": "worktree-full"
-        },
-        "dispatched_at": "2026-09-08T08:19:33Z",
-        "completed_at": "2026-09-08T08:28:58Z",
-        "completed_at_source": "stream_mtime",
-        "worker_seconds": 565,
-        "worker_seconds_source": "wall_fallback",
-        "wall_seconds": 565,
-        "stalled": false,
-        "time_budget": "40m",
-        "base_sha": "3905b92a23a24ad53c630ef94327709de7789b32",
-        "commits": [],
-        "changed_lines": null,
-        "tests_added": null,
-        "gate": "failed",
-        "gate_check": null,
-        "suite_delta": null,
-        "failure_classification": "malformed-node",
+        "orientation_input_tokens": null,
         "outcome": "",
-        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T081922860258-n-grdp-the-grammar-cuts-a-stable-patch-release/manifest.md",
+        "plan": "grammar-release-and-downstream-pin",
+        "predecessor_run": null,
+        "resume_waiver": {
+          "reason": "Six days stale and blocked on a structural impossibility rather than a recoverable step: a detached worktree can never satisfy the release CLI's branch-main requirement, so resuming this session would re-derive the same refusal. Tag cutting moves to the coordinator on main.",
+          "session_id": "01a07642-fbe2-7d02-97de-ed56606becbb",
+          "source": "pointer"
+        },
+        "role": "implement",
+        "run_id": "r-20260908T081922860258-n-grdp-the-grammar-cuts-a-stable-patch-release",
+        "scope_acceptances": null,
         "scope_changed": false,
+        "section": "",
         "session_id": "01a07642-fbe2-7d02-97de-ed56606becbb",
-        "budget": {
-          "headroom": "unknown",
-          "utilisation_pct": null,
-          "rate_limit_type": null,
-          "rate_limit_period_minutes": null,
-          "resets_at": null,
-          "threshold_status": null,
-          "surpassed_threshold": null,
-          "tokens": {
-            "cache_write_input_tokens": 0,
-            "cache_write_input_tokens_cumulative": 0,
-            "cached_input_tokens": 0,
-            "cached_input_tokens_cumulative": 6958336,
-            "input_tokens": 0,
-            "input_tokens_cumulative": 7077354,
-            "output_tokens": 0,
-            "output_tokens_cumulative": 11278,
-            "reasoning_output_tokens": 0,
-            "reasoning_output_tokens_cumulative": 3673
-          },
-          "cost_usd": null,
-          "refusal": false,
-          "detail": "backend reports token usage but no headroom"
-        },
-        "lane_receipt": {
-          "quota_state": "measured",
-          "observed_at": "2026-09-08T08:28:58Z",
-          "effective_context_window": 380000,
-          "quota_windows": [
-            {
-              "window_minutes": 10080,
-              "used_percent": 22.0,
-              "resets_at": 1789439333,
-              "observed_at": "2026-09-08T08:28:58Z"
-            }
-          ],
-          "notional_cost_usd": 155.9829,
-          "rate_basis": {
-            "model_identifier": "gpt-5.6-sol",
-            "input_per_million": 4.0,
-            "output_per_million": 20.0,
-            "as_of": "2026-09-09"
-          }
-        },
-        "lineage": null,
         "shadow_controlled": null,
         "shadow_patch": "",
-        "unreconciled_override": null,
+        "spec_level": "guided",
+        "stalled": false,
+        "store_write": {
+          "status": "written"
+        },
+        "suite_delta": null,
+        "tests_added": null,
         "throughput": {
           "cumulative_cached_input_tokens": 31529344,
           "cumulative_input_tokens": 31875439,
@@ -952,49 +967,118 @@
           "machine_seconds": 366.113,
           "tokens_per_second": 0.09
         },
-        "follow_on_paths": [
-          "v0.9.1"
-        ],
-        "dispute_count": 0,
-        "execution_fit": {
-          "allowed": true,
-          "execution_capable": true,
-          "matched_measure": "pytest if",
-          "override": false,
-          "role": "implement",
-          "status": "compatible"
-        },
-        "attempt_kind": "dispatch",
-        "attempt": 1,
-        "duration_measurement": null,
-        "scope_acceptances": null,
-        "no_commit": "The node could not produce a commit: it was asked to cut a release from a detached worktree, and the release CLI requires branch main.",
-        "commit_resolution": null,
+        "time_budget": "40m",
+        "tool_steps": 37.0,
+        "unreconciled_override": null,
+        "wall_seconds": 565,
+        "watch_override": null,
+        "worker_seconds": 565,
+        "worker_seconds_source": "wall_fallback",
         "worktree_retention": {
           "classification": "retained-for-resume",
-          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-standard-names-5be88ee0fdc3/ship-s10-20260907/n-grdp-the-grammar-cuts-a-stable-patch-release",
+          "retained_at": "2026-09-08T08:28:58Z",
           "session_id": "01a07642-fbe2-7d02-97de-ed56606becbb",
           "session_source": "pointer",
-          "retained_at": "2026-09-08T08:28:58Z"
-        },
-        "predecessor_run": null,
-        "boundary_waiver": null,
-        "resume_waiver": {
-          "session_id": "01a07642-fbe2-7d02-97de-ed56606becbb",
-          "source": "pointer",
-          "reason": "Six days stale and blocked on a structural impossibility rather than a recoverable step: a detached worktree can never satisfy the release CLI's branch-main requirement, so resuming this session would re-derive the same refusal. Tag cutting moves to the coordinator on main."
-        },
-        "watch_override": null,
-        "tool_steps": 37.0,
-        "orientation_input_tokens": null,
-        "store_write": {
-          "status": "written"
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-standard-names-5be88ee0fdc3/ship-s10-20260907/n-grdp-the-grammar-cuts-a-stable-patch-release"
         }
       },
       {
-        "run_id": "r-20260914T114606733122-n-grdp-a-half-width-can-name-its-subject",
-        "plan": "grammar-release-and-downstream-pin",
-        "section": "",
+        "agent": {
+          "alias": "terra5.6",
+          "backend": "codex-terra",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-terra",
+          "sandbox": "worktree-full"
+        },
+        "attempt": 4,
+        "attempt_kind": "resume",
+        "backend": "codex-terra",
+        "base_sha": "bd8c80711e0297fd9ab512e6ab32d2c62871ed26",
+        "boundary_waiver": null,
+        "budget": {
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "refusal": false,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 18161664,
+            "cached_input_tokens_cumulative": 18161664,
+            "input_tokens": 18240846,
+            "input_tokens_cumulative": 18240846,
+            "output_tokens": 25142,
+            "output_tokens_cumulative": 25142,
+            "reasoning_output_tokens": 5847,
+            "reasoning_output_tokens_cumulative": 5847
+          },
+          "utilisation_pct": null
+        },
+        "changed_lines": {
+          "added": 21,
+          "files": 5,
+          "removed": 10
+        },
+        "commit_resolution": null,
+        "commits": [
+          "cadaaab50aea1bb12b1c5ed9806170c29e19fe7c"
+        ],
+        "completed_at": "2026-09-14T12:50:33Z",
+        "completed_at_source": "stream_mtime",
+        "dispatched_at": "2026-09-14T11:46:19Z",
+        "dispute_count": 0,
+        "duration_measurement": {
+          "reason": "model_span_unavailable_at_promotion",
+          "status": "underivable"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "failure_classification": null,
+        "follow_on_paths": [],
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run pytest full ISN suite on all_debug job 1270459",
+          "exit_status": 0,
+          "log_digest": null,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T114606733122-n-grdp-a-half-width-can-name-its-subject/stream.jsonl"
+        },
+        "lane_receipt": {
+          "effective_context_window": 380000,
+          "notional_cost_usd": 119.44,
+          "observed_at": "2026-09-14T12:50:33Z",
+          "quota_state": "measured",
+          "quota_windows": [
+            {
+              "observed_at": "2026-09-14T12:50:33Z",
+              "resets_at": 1789970251,
+              "used_percent": 14.0,
+              "window_minutes": 10080
+            }
+          ],
+          "rate_basis": {
+            "as_of": "2026-09-09",
+            "input_per_million": 2.0,
+            "model_identifier": "gpt-5.6-terra",
+            "output_per_million": 12.0
+          }
+        },
+        "lineage": null,
+        "local": false,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T114606733122-n-grdp-a-half-width-can-name-its-subject/manifest.md",
+        "member": "session-2a6f0db8b3e75a382796",
+        "no_commit": null,
         "node": "n-grdp-a-half-width-can-name-its-subject",
         "node_definition": {
           "coordinator": {
@@ -1044,120 +1128,13 @@
             "tests/grammar/test_half_width_subject.py"
           ]
         },
-        "role": "implement",
-        "spec_level": "exact",
-        "member": "session-2a6f0db8b3e75a382796",
-        "backend": "codex-terra",
-        "local": false,
-        "agent": {
-          "alias": "terra5.6",
-          "backend": "codex-terra",
-          "effort": "high",
-          "launch": "cli",
-          "model": "gpt-5.6-terra",
-          "sandbox": "worktree-full"
-        },
-        "dispatched_at": "2026-09-14T11:46:19Z",
-        "completed_at": "2026-09-14T12:50:33Z",
-        "completed_at_source": "stream_mtime",
-        "worker_seconds": 3854,
-        "worker_seconds_source": "wall_fallback",
-        "wall_seconds": 3854,
-        "stalled": false,
-        "time_budget": "55m",
-        "base_sha": "bd8c80711e0297fd9ab512e6ab32d2c62871ed26",
-        "commits": [
-          "cadaaab50aea1bb12b1c5ed9806170c29e19fe7c"
-        ],
-        "changed_lines": {
-          "added": 21,
-          "removed": 10,
-          "files": 5
-        },
-        "tests_added": 3,
-        "gate": "passed",
-        "gate_check": {
-          "command": "uv run pytest full ISN suite on all_debug job 1270459",
-          "exit_status": 0,
-          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T114606733122-n-grdp-a-half-width-can-name-its-subject/stream.jsonl",
-          "log_digest": null
-        },
-        "suite_delta": null,
-        "failure_classification": null,
+        "orientation_input_tokens": null,
         "outcome": "",
-        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T114606733122-n-grdp-a-half-width-can-name-its-subject/manifest.md",
-        "scope_changed": true,
-        "session_id": "01a09fbd-520e-77a1-bb7d-e981810f4a45",
-        "budget": {
-          "headroom": "unknown",
-          "utilisation_pct": null,
-          "rate_limit_type": null,
-          "rate_limit_period_minutes": null,
-          "resets_at": null,
-          "threshold_status": null,
-          "surpassed_threshold": null,
-          "tokens": {
-            "cache_write_input_tokens": 0,
-            "cache_write_input_tokens_cumulative": 0,
-            "cached_input_tokens": 18161664,
-            "cached_input_tokens_cumulative": 18161664,
-            "input_tokens": 18240846,
-            "input_tokens_cumulative": 18240846,
-            "output_tokens": 25142,
-            "output_tokens_cumulative": 25142,
-            "reasoning_output_tokens": 5847,
-            "reasoning_output_tokens_cumulative": 5847
-          },
-          "cost_usd": null,
-          "refusal": false,
-          "detail": "backend reports token usage but no headroom"
-        },
-        "lane_receipt": {
-          "quota_state": "measured",
-          "observed_at": "2026-09-14T12:50:33Z",
-          "effective_context_window": 380000,
-          "quota_windows": [
-            {
-              "window_minutes": 10080,
-              "used_percent": 14.0,
-              "resets_at": 1789970251,
-              "observed_at": "2026-09-14T12:50:33Z"
-            }
-          ],
-          "notional_cost_usd": 119.44,
-          "rate_basis": {
-            "model_identifier": "gpt-5.6-terra",
-            "input_per_million": 2.0,
-            "output_per_million": 12.0,
-            "as_of": "2026-09-09"
-          }
-        },
-        "lineage": null,
-        "shadow_controlled": null,
-        "shadow_patch": "",
-        "unreconciled_override": null,
-        "throughput": {
-          "cumulative_cached_input_tokens": 18161664,
-          "cumulative_input_tokens": 36402510,
-          "detail": "turn tokens recorded, but no span was supplied to rate them",
-          "generated_tokens": 30989
-        },
-        "follow_on_paths": [],
-        "dispute_count": 0,
-        "execution_fit": {
-          "allowed": true,
-          "execution_capable": true,
-          "matched_measure": null,
-          "override": false,
-          "role": "implement",
-          "status": "no-execution-measure"
-        },
-        "attempt_kind": "resume",
-        "attempt": 4,
-        "duration_measurement": {
-          "status": "underivable",
-          "reason": "model_span_unavailable_at_promotion"
-        },
+        "plan": "grammar-release-and-downstream-pin",
+        "predecessor_run": null,
+        "resume_waiver": null,
+        "role": "implement",
+        "run_id": "r-20260914T114606733122-n-grdp-a-half-width-can-name-its-subject",
         "scope_acceptances": [
           {
             "path": "imas_standard_names/grammar/model_types.py",
@@ -1172,27 +1149,41 @@
             "reason": "Coordinator granted this mid-flight when the qualifier route required every qualifiers.yml token to be categorised; the file was subsequently restored byte-for-byte to base when that route was abandoned."
           }
         ],
-        "no_commit": null,
-        "commit_resolution": null,
-        "worktree_retention": {
-          "classification": "retained-for-resume",
-          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-standard-names-5be88ee0fdc3/ship-s10-20260908/n-grdp-a-half-width-can-name-its-subject",
-          "session_id": "01a09fbd-520e-77a1-bb7d-e981810f4a45",
-          "session_source": "stream",
-          "retained_at": "2026-09-14T12:50:33Z"
-        },
-        "predecessor_run": null,
-        "boundary_waiver": null,
-        "resume_waiver": null,
-        "watch_override": null,
-        "tool_steps": 49.0,
-        "orientation_input_tokens": null,
+        "scope_changed": true,
+        "section": "",
+        "session_id": "01a09fbd-520e-77a1-bb7d-e981810f4a45",
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "spec_level": "exact",
+        "stalled": false,
         "store_write": {
           "status": "written"
+        },
+        "suite_delta": null,
+        "tests_added": 3,
+        "throughput": {
+          "cumulative_cached_input_tokens": 18161664,
+          "cumulative_input_tokens": 36402510,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 30989
+        },
+        "time_budget": "55m",
+        "tool_steps": 49.0,
+        "unreconciled_override": null,
+        "wall_seconds": 3854,
+        "watch_override": null,
+        "worker_seconds": 3854,
+        "worker_seconds_source": "wall_fallback",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "retained_at": "2026-09-14T12:50:33Z",
+          "session_id": "01a09fbd-520e-77a1-bb7d-e981810f4a45",
+          "session_source": "stream",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-standard-names-5be88ee0fdc3/ship-s10-20260908/n-grdp-a-half-width-can-name-its-subject"
         }
       }
     ],
     "holds": [],
-    "_version": 12
+    "_version": 13
   }
 }
