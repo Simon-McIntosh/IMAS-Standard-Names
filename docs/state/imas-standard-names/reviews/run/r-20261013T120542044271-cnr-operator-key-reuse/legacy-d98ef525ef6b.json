@@ -1,0 +1,54 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "9813991edb8f75feb938c12187e819a32bda036b",
+  "call_site_count": 2,
+  "call_sites": [
+    "imas_standard_names/grammar/terms.py:213",
+    "imas_standard_names/grammar/terms.py:262"
+  ],
+  "completed_at": "",
+  "dispatched_at": "2026-10-13T12:05:50Z",
+  "findings": [],
+  "head_log_revision": "e9a47864c352afa46e6f8a1132f56dacc17f31a0",
+  "item_aggregate": 5,
+  "item_verdicts": {
+    "diff": "read against 9813991; the single commit e9a4786 touches three files: terms.py replaces the _operator_keys cache and prefix loop in _operator_token with a call to model._split_fused_indexed_operator, the test file rewrites the ratio/template tests to read the shipped registry and adds a plain-name guard, and the node landing fragment is added.",
+    "done_when": "the done_when asks the fused split, the binary-operator route and the template keying each to have a test that fails when that mechanism is removed, the shipped ratio/difference/product templates each selected for their name and not for a plain name, and the five gate files to add no failures; head-gate.log records 67 passed 5 xfailed EXIT=0 against base-gate.log 66 passed 5 xfailed EXIT=0, and mutationA/B/C logs each end EXIT=1 on the named test.",
+    "goal": "the node goal asks to route the accessor's fused-operator split through the model owner and make its operator tests able to fail; imas_standard_names/grammar/terms.py:190 now calls model._split_fused_indexed_operator and the single prefix loop plus the _operator_keys cache and the load_operators import are deleted, and the rewritten tests each redden under the three declared mutations (mutationA/B/C logs each EXIT=1).",
+    "manifest": "read; it records commits [e9a4786], changed_paths matching the diff, baseline_suite revision 9813991 (0 failures, completed) and after_suite revision e9a4786 (0 failures, completed) with log paths on disk, and negative_control_log mutationA-fused-split.log.",
+    "write_paths": "the source node fences imas_standard_names/grammar/terms.py, tests/grammar/test_conventions_operator_keys.py and docs/evidence/fragments/concept-and-notation-registry/cnr-operator-key-reuse.html; git diff --stat 9813991..e9a4786 lists exactly those three paths and nothing else."
+  },
+  "justifications": {
+    "durability": "tests/grammar/test_conventions_operator_keys.py:27 reddens when binary operators are excluded from _ir_tokens and :36 asserts each shipped template in the shipped registry, but test_indexed_derivative_selects_its_operator_concept:19 predates the change and passes under both this change and the prefix-strip predecessor, so no added assertion distinguishes this behaviour-preserving refactor from its own base.",
+    "evidence": "the manifest's baseline_suite (9813991, 0 failures) and after_suite (e9a4786, 0 failures) are recorded with log paths, and base-gate.log/head-gate.log show 66 then 67 passed EXIT=0, so the delta is zero added failures and the three mutation logs each end EXIT=1.",
+    "fit": "the change sits in the idiom of imas_standard_names/grammar/terms.py:196 and the rewritten test module, ruff check passes on both head files, and no plan, stage or version label appears in any changed name, comment or filename.",
+    "goal_fidelity": "imas_standard_names/grammar/terms.py:190 routes the fused split through model._split_fused_indexed_operator and tests/grammar/test_conventions_operator_keys.py:26,29 each redden under the declared mutations, so both halves of the goal are present.",
+    "reuse": "imas_standard_names/grammar/terms.py:190 extends the sole owner of the fused indexed split, imas_standard_names/grammar/model.py:352 _split_fused_indexed_operator (the only other indexed operators, bessel_0/bessel_1/fourier_coefficient, are postfix-parameter ops and never fused, verified against the registry), introducing no duplicate.",
+    "scope_discipline": "git diff --stat 9813991..e9a4786 touches only imas_standard_names/grammar/terms.py, tests/grammar/test_conventions_operator_keys.py and the node's own evidence fragment, all inside the node's three-path fence."
+  },
+  "project": "imas-standard-names",
+  "raw_text": "VERDICT goal: the node goal asks to route the accessor's fused-operator split through the model owner and make its operator tests able to fail; the node goal asks to route the accessor's fused-operator split through the model owner and make its operator tests able to fail; imas_standard_names/grammar/terms.py:190 now calls model._split_fused_indexed_operator and the single prefix loop plus the _operator_keys cache and the load_operators import are deleted, and the rewritten tests each redden under the three declared mutations (mutationA/B/C logs each EXIT=1).\nVERDICT done_when: the done_when asks the fused split, the binary-operator route and the template keying each to have a test that fails when that mechanism is removed, the shipped ratio/difference/product templates each selected for their name and not for a plain name, and the five gate files to add no failures; head-gate.log records 67 passed 5 xfailed EXIT=0 against base-gate.log 66 passed 5 xfailed EXIT=0, and mutationA/B/C logs each end EXIT=1 on the named test.\nVERDICT write_paths: the source node fences imas_standard_names/grammar/terms.py, tests/grammar/test_conventions_operator_keys.py and docs/evidence/fragments/concept-and-notation-registry/cnr-operator-key-reuse.html; git diff --stat 9813991..e9a4786 lists exactly those three paths and nothing else.\nVERDICT manifest: read; it records commits [e9a4786], changed_paths matching the diff, baseline_suite revision 9813991 (0 failures, completed) and after_suite revision e9a4786 (0 failures, completed) with log paths on disk, and negative_control_log mutationA-fused-split.log.\nVERDICT diff: read against 9813991; the single commit e9a4786 touches three files: terms.py replaces the _operator_keys cache and prefix loop in _operator_token with a call to model._split_fused_indexed_operator, the test file rewrites the ratio/template tests to read the shipped registry and adds a plain-name guard, and the node landing fragment is added.\nCALL_SITES: imas_standard_names/grammar/terms.py:213, imas_standard_names/grammar/terms.py:262\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_standard_names/grammar/terms.py:190 routes the fused split through model._split_fused_indexed_operator and tests/grammar/test_conventions_operator_keys.py:26,29 each redden under the declared mutations, so both halves of the goal are present.\nSCORE evidence: 18\nJUSTIFICATION evidence: the manifest's baseline_suite (9813991, 0 failures) and after_suite (e9a4786, 0 failures) are recorded with log paths, and base-gate.log/head-gate.log show 66 then 67 passed EXIT=0, so the delta is zero added failures and the three mutation logs each end EXIT=1.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat 9813991..e9a4786 touches only imas_standard_names/grammar/terms.py, tests/grammar/test_conventions_operator_keys.py and the node's own evidence fragment, all inside the node's three-path fence.\nSCORE durability: 17\nJUSTIFICATION durability: tests/grammar/test_conventions_operator_keys.py:27 reddens when binary operators are excluded from _ir_tokens and :36 asserts each shipped template in the shipped registry, but test_indexed_derivative_selects_its_operator_concept:19 predates the change and passes under both this change and the prefix-strip predecessor, so no added assertion distinguishes this behaviour-preserving refactor from its own base.\nSCORE fit: 19\nJUSTIFICATION fit: the change sits in the idiom of imas_standard_names/grammar/terms.py:196 and the rewritten test module, ruff check passes on both head files, and no plan, stage or version label appears in any changed name, comment or filename.\nSCORE reuse: 20\nJUSTIFICATION reuse: imas_standard_names/grammar/terms.py:190 extends the sole owner of the fused indexed split, imas_standard_names/grammar/model.py:352 _split_fused_indexed_operator (the only other indexed operators, bessel_0/bessel_1/fourier_coefficient, are postfix-parameter ops and never fused, verified against the registry), introducing no duplicate.\n",
+  "review_run_id": "legacy-d98ef525ef6b",
+  "review_run_id_source": "derived",
+  "reviewed_base_sha": "9813991edb8f75feb938c12187e819a32bda036b",
+  "reviewed_head_sha": "e9a47864c352afa46e6f8a1132f56dacc17f31a0",
+  "reviewed_run_id": "r-20261013T120542044271-cnr-operator-key-reuse",
+  "reviewer": {
+    "model": "deepseek-v4.1-flash"
+  },
+  "scores": {
+    "durability": 17,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T12:34:07.882050+00:00",
+  "total": 113
+}
