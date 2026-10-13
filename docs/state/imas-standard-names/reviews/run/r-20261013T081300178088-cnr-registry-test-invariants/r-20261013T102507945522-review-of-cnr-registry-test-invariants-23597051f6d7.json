@@ -1,0 +1,58 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "18b78cda3cdd0da1a709ba1f99c8b39acb599fa8",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-13T10:35:34.935Z",
+  "dispatched_at": "2026-10-13T10:25:15Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/concept-and-notation-registry/cnr-registry-test-invariants.html",
+      "line": 1,
+      "severity": "follow-on",
+      "text": "the landing fragment is a bare empty anchor `<section id=\"cnr-registry-test-invariants-landing\"></section>` with no comment and no account of the result; the sibling fragments cnr-registry-loader.html and cnr-template-scope.html each carry a leading comment and a <p> landing record, and the brief asked the node to write its landing record to this path, so the versioned artefact carries no record while the account survives only in the run manifest."
+    }
+  ],
+  "head_log_revision": "23597051f6d7a37adad4f66dcbeb1a0ec2031ca8",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "Read commit by commit against 18b78cd: c5bbbfe rewrites the three assertions in tests/grammar/test_conventions.py (adds the parse_standard_name import, subset membership on concepts, membership on forbidden_spellings, and an exact parse-derived notation set pinned by a literal with a substring decoy at :245), and 23597051 adds the one-line landing fragment; nothing else in the tree moved.",
+    "done_when": "The done_when asks for logged runs of the four named test files showing the three pinned failures at base and none at head, plus a scratch-registry run with \\rho restored turning the density test red. baseline-absolute-gate.log records 3 failed 79 passed EXIT=1 naming exactly the three pinned ids, final-head-gate.log records 82 passed EXIT=0, and negative-rho-restored.log (EXIT=1) names test_density_notation_excludes_shared_* red with the \\rho assertion at :53; negative-registry-missing.log and negative-text-selection.log give the other two reds.",
+    "goal": "The node's goal is to rewrite the three registry tests that pin the seed contents so they assert the properties they protect. At head tests/grammar/test_conventions.py:38 (entry presence via subset, three registries non-empty), :50 (density forbids N_s and not \\rho) and :228 (notation selected from the parse, with a substring decoy) each assert a property rather than exact seed membership, so the goal is met.",
+    "manifest": "Read; it records changed_paths matching the diff, base 3 failed 79 passed EXIT=1 and head 82 passed EXIT=0 with log paths on disk, three scratch-mutation logs each EXIT=1, negative_control_log naming negative-rho-restored.log, and baseline_suite/after_suite JSON whose failure ids are the three pinned ids and the empty list respectively.",
+    "write_paths": "The source fence names tests/grammar/test_conventions.py, docs/evidence/fragments/concept-and-notation-registry/cnr-registry-test-invariants.html and docs/figures/concept-and-notation-registry/cnr-registry-test-invariants; git diff --stat 18b78cd..23597051 lists exactly two changed files, both inside that fence, and the source worktree is clean."
+  },
+  "justifications": {
+    "durability": "Each rewritten assertion was shown to redden under a targeted mutation: :38 under a removed seed concept (negative-registry-missing.log EXIT=1), :53 under \\rho restored to density (negative-rho-restored.log EXIT=1), and the :245 substring decoy under text-based selection (negative-text-selection.log EXIT=1, `assert 'ion' not in {'ion'}`); the assertion at :232 (applied.concepts == ()) was kept from the original but is not itself the red the guard demonstrates.",
+    "evidence": "baseline-absolute-gate.log (EXIT=1, 3 failed 79 passed) names exactly test_shipped_registry_loads_all_three_files, test_density_notation_matches_the_seed and test_accessor_selects_from_the_parse_not_from_text, final-head-gate.log records 82 passed EXIT=0, and negative-rho-restored.log shows the density test red on the restored-spelling mutation, so every clause of the done_when has a logged run.",
+    "fit": "the rewritten assertions use the same load_conventions/load_notation/select_conventions helpers the file already imports and the mechanism-named test_bases_are... style of tests/grammar/test_conventions.py:36, and no plan, stage or version label appears in any added name or docstring.",
+    "goal_fidelity": "tests/grammar/test_conventions.py:38 asserts the seed concepts are a subset rather than the whole set, :50 asserts the density spelling policy by membership, and :228 derives the selected notation from parse_standard_name, so all three tests now assert properties instead of pinned seed contents.",
+    "reuse": "the change is test-only and adds no production definition; it reuses the existing owners imas_standard_names/grammar/vocab_loaders.py (load_conventions, load_notation) and imas_standard_names/grammar/terms.py:245 (select_conventions) rather than introducing a parallel mechanism.",
+    "scope_discipline": "git diff --stat 18b78cd..23597051 lists only tests/grammar/test_conventions.py and docs/evidence/fragments/concept-and-notation-registry/cnr-registry-test-invariants.html, both inside the source fence, and no figures path was added or left dirty."
+  },
+  "project": "imas-standard-names",
+  "raw_text": "VERDICT goal: the node's goal is to rewrite the three registry tests that pin the seed contents so they assert the properties they protect; tests/grammar/test_conventions.py:38, :50 and :228 at head each assert a property (entry presence, density spelling policy, parse-selected notation) rather than exact seed membership.\nVERDICT done_when: baseline-absolute-gate.log records 3 failed 79 passed EXIT=1 naming exactly the three pinned ids, final-head-gate.log records 82 passed EXIT=0, and negative-rho-restored.log (EXIT=1) names test_density_notation_excludes_shared_* red with the \\rho assertion at :53; negative-registry-missing.log and negative-text-selection.log give the other two reds.\nVERDICT write_paths: git diff --stat 18b78cd..23597051 lists exactly tests/grammar/test_conventions.py and docs/evidence/fragments/concept-and-notation-registry/cnr-registry-test-invariants.html, both inside the source fence (fence also names docs/figures/concept-and-notation-registry/cnr-registry-test-invariants), and the source worktree is clean.\nVERDICT manifest: read; it records changed_paths matching the manifest, base 3 failed 79 passed EXIT=1 and head 82 passed EXIT=0 with logs on disk, three scratch-mutation logs each EXIT=1, negative_control_log naming negative-rho-restored.log, and baseline_suite/after_suite JSON with failure_ids the three pinned ids and the empty list.\nVERDICT diff: read commit by commit against 18b78cd; c5bbbfe rewrites the three assertions in tests/grammar/test_conventions.py (parse_standard_name import, subset membership on concepts, membership on forbidden_spellings, exact parse-derived notation set pinned by a literal with a substring decoy at :245), and 23597051 adds the one-line landing fragment; nothing else moved.\nCALL_SITES: none\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: tests/grammar/test_conventions.py:38 asserts the seed concepts are a subset rather than the whole set, :50 asserts the density spelling policy by membership, and :228 derives the selected notation from parse_standard_name, so each test asserts a property instead of pinned seed contents.\nSCORE evidence: 20\nJUSTIFICATION evidence: baseline-absolute-gate.log (EXIT=1, 3 failed 79 passed) names exactly test_shipped_registry_loads_all_three_files, test_density_notation_matches_the_seed and test_accessor_selects_from_the_parse_not_from_text, final-head-gate.log records 82 passed EXIT=0, and negative-rho-restored.log shows the density test red on the restored-spelling mutation.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat 18b78cd..23597051 lists only tests/grammar/test_conventions.py and docs/evidence/fragments/concept-and-notation-registry/cnr-registry-test-invariants.html, both inside the source fence, and no other path is dirty.\nSCORE durability: 19\nJUSTIFICATION durability: each rewritten assertion was demonstrated red under a targeted mutation (:38 by a removed seed concept, :53 by \\rho restored to density, the :245 substring decoy by text-based selection, all EXIT=1), though the retained :232 assertion (applied.concepts == ()) is a carried-over guard with no red of its own.\nSCORE fit: 19\nJUSTIFICATION fit: the rewritten assertions use the same load_conventions/load_notation/select_conventions helpers imported by tests/grammar/test_conventions.py and the mechanism-named style of the surrounding tests, with no plan or version label in any added name.\nSCORE reuse: 20\nJUSTIFICATION reuse: the change is test-only and adds no production definition, reusing imas_standard_names/grammar/vocab_loaders.py (load_conventions, load_notation) and imas_standard_names/grammar/terms.py:245 (select_conventions) rather than forking a mechanism.\nFINDING docs/evidence/fragments/concept-and-notation-registry/cnr-registry-test-invariants.html:1 follow-on: the landing fragment is a bare empty anchor, while sibling fragments cnr-registry-loader.html and cnr-template-scope.html carry a leading comment and a <p> landing record, so the versioned artefact carries no account of the result and that account lives only in the run manifest.\n",
+  "review_run_id": "r-20261013T102507945522-review-of-cnr-registry-test-invariants-23597051f6d7",
+  "reviewed_base_sha": "18b78cda3cdd0da1a709ba1f99c8b39acb599fa8",
+  "reviewed_head_sha": "23597051f6d7a37adad4f66dcbeb1a0ec2031ca8",
+  "reviewed_run_id": "r-20261013T081300178088-cnr-registry-test-invariants",
+  "reviewer": {
+    "backend": "clive",
+    "model": "deepseek-v4.1-flash"
+  },
+  "scores": {
+    "durability": 19,
+    "evidence": 20,
+    "fit": 19,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T10:30:00+00:00",
+  "total": 118
+}
