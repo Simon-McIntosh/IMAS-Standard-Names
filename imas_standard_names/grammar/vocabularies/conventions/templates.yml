@@ -7,6 +7,21 @@
 # The section order of the documentation body and the generic sign-convention
 # form stay in ``specification.yml`` (``entry_schema.fields.documentation``);
 # a template references them rather than restating them.
+#
+# Every documentation opens with a defining noun phrase of the same shape as
+# its description, so the two openings of a pattern are the same text. A
+# template with no segments applies to every name with its base; one with
+# segments applies where the name fills them, and an opening need only follow
+# one selected template.
+#
+# Placeholders, written in braces, are filled from the name:
+#   {subject} {object} {component} {coordinate} {qualifier} {zone} {aggregation}
+#   {population}  the words of that segment, in reading order
+#   {modifiers}   the words the name places before its base, in reading order
+#   {locus}       the of, at, over or due-to clause as the name carries it
+#   {operator}    the operator phrase, ending in "of" where English needs it
+# The opening check reads a template as a pattern with each placeholder a
+# wildcard, so its literal text holds no pattern metacharacters.
 templates:
 
   - base: density
@@ -14,3 +29,453 @@ templates:
       - subject
     description: 'Number density of {subject}'
     documentation: 'Number density of {subject}'
+
+  - base: number_density
+    description: '{modifiers} number density {locus}'
+    documentation: '{modifiers} number density {locus}'
+
+  - base: temperature
+    segments:
+      - subject
+    description: 'Temperature of {subject} {locus}'
+    documentation: 'Temperature of {subject} {locus}'
+
+  - base: temperature
+    segments:
+      - object
+    description: 'Temperature of {object}'
+    documentation: 'Temperature of {object}'
+
+  - base: temperature
+    segments:
+      - qualifier
+    description: '{qualifier} temperature {locus}'
+    documentation: '{qualifier} temperature {locus}'
+
+  - base: pressure
+    segments:
+      - subject
+    description: 'Pressure of {subject} {locus}'
+    documentation: 'Pressure of {subject} {locus}'
+
+  - base: pressure
+    segments:
+      - aggregation
+    description: '{aggregation} pressure of {subject}'
+    documentation: '{aggregation} pressure of {subject}'
+
+  - base: pressure
+    segments:
+      - object
+    description: 'Pressure {locus}'
+    documentation: 'Pressure {locus}'
+
+  - base: power
+    description: '{modifiers} power {locus}'
+    documentation: '{modifiers} power {locus}'
+
+  - base: power
+    segments:
+      - object
+    description: 'Power of {object}'
+    documentation: 'Power of {object}'
+
+  - base: heating_power
+    description: '{modifiers} heating power'
+    documentation: '{modifiers} heating power'
+
+  - base: energy
+    segments:
+      - qualifier
+    description: '{qualifier} energy {locus}'
+    documentation: '{qualifier} energy {locus}'
+
+  - base: photon_energy
+    description: '{modifiers} photon energy'
+    documentation: '{modifiers} photon energy'
+
+  - base: current
+    segments:
+      - object
+    description: 'Current {locus}'
+    documentation: 'Current {locus}'
+
+  - base: current
+    segments:
+      - subject
+    description: '{subject} current {locus}'
+    documentation: '{subject} current {locus}'
+
+  - base: current
+    segments:
+      - qualifier
+    description: '{qualifier} current {locus}'
+    documentation: '{qualifier} current {locus}'
+
+  - base: current_density
+    segments:
+      - component
+    description: '{component} current density {locus}'
+    documentation: '{component} current density {locus}'
+
+  - base: magnetic_field
+    segments:
+      - component
+    description: '{component} magnetic field {locus}'
+    documentation: '{component} magnetic field {locus}'
+
+  - base: magnetic_field
+    segments:
+      - transformation
+    description: '{operator} magnetic-field magnitude'
+    documentation: '{operator} magnetic-field magnitude'
+
+  - base: magnetic_flux
+    segments:
+      - component
+    description: '{component} magnetic flux {locus}'
+    documentation: '{component} magnetic flux {locus}'
+
+  - base: poloidal_current_function
+    description: 'Poloidal current function {locus}'
+    documentation: 'Poloidal current function {locus}'
+
+  - base: poloidal_current_function
+    segments:
+      - qualifier
+    description: '{qualifier} poloidal current function'
+    documentation: '{qualifier} poloidal current function'
+
+  - base: safety_factor
+    description: 'Safety factor {locus}'
+    documentation: 'Safety factor {locus}'
+
+  - base: safety_factor
+    segments:
+      - qualifier
+    description: '{qualifier} safety factor'
+    documentation: '{qualifier} safety factor'
+
+  - base: magnetic_shear
+    description: 'Magnetic shear {locus}'
+    documentation: 'Magnetic shear {locus}'
+
+  - base: beta
+    segments:
+      - component
+    description: '{component} beta'
+    documentation: '{component} beta'
+
+  - base: internal_inductance
+    segments:
+      - qualifier
+    description: '{qualifier} internal inductance'
+    documentation: '{qualifier} internal inductance'
+
+  - base: triangularity
+    description: 'Triangularity {locus}'
+    documentation: 'Triangularity {locus}'
+
+  - base: triangularity
+    segments:
+      - zone
+    description: '{zone} triangularity {locus}'
+    documentation: '{zone} triangularity {locus}'
+
+  - base: elongation
+    description: 'Elongation {locus}'
+    documentation: 'Elongation {locus}'
+
+  - base: radius
+    segments:
+      - qualifier
+    description: '{qualifier} radius {locus}'
+    documentation: '{qualifier} radius {locus}'
+
+  - base: area
+    description: 'Area {locus}'
+    documentation: 'Area {locus}'
+
+  - base: area
+    segments:
+      - qualifier
+    description: '{qualifier} area {locus}'
+    documentation: '{qualifier} area {locus}'
+
+  - base: area
+    segments:
+      - transformation
+    description: '{operator} the area {locus}'
+    documentation: '{operator} the area {locus}'
+
+  - base: volume
+    description: 'Volume {locus}'
+    documentation: 'Volume {locus}'
+
+  - base: volume
+    segments:
+      - transformation
+    description: '{operator} the volume {locus}'
+    documentation: '{operator} the volume {locus}'
+
+  - base: length
+    description: 'Length {locus}'
+    documentation: 'Length {locus}'
+
+  - base: length
+    segments:
+      - component
+    description: '{component} length {locus}'
+    documentation: '{component} length {locus}'
+
+  - base: width
+    description: 'Width {locus}'
+    documentation: 'Width {locus}'
+
+  - base: width
+    segments:
+      - component
+    description: '{component} width {locus}'
+    documentation: '{component} width {locus}'
+
+  - base: height
+    description: 'Height {locus}'
+    documentation: 'Height {locus}'
+
+  - base: thickness
+    description: 'Thickness {locus}'
+    documentation: 'Thickness {locus}'
+
+  - base: gap
+    description: 'Gap {locus}'
+    documentation: 'Gap {locus}'
+
+  - base: angle
+    segments:
+      - qualifier
+    description: '{qualifier} angle'
+    documentation: '{qualifier} angle'
+
+  - base: angular_width
+    segments:
+      - component
+    description: '{component} angular width {locus}'
+    documentation: '{component} angular width {locus}'
+
+  - base: wavelength
+    description: 'Wavelength {locus}'
+    documentation: 'Wavelength {locus}'
+
+  - base: wavelength
+    segments:
+      - zone
+    description: '{zone} wavelength {locus}'
+    documentation: '{zone} wavelength {locus}'
+
+  - base: wavelength
+    segments:
+      - qualifier
+    description: '{qualifier} wavelength {locus}'
+    documentation: '{qualifier} wavelength {locus}'
+
+  - base: frequency
+    description: 'Frequency {locus}'
+    documentation: 'Frequency {locus}'
+
+  - base: phase
+    segments:
+      - qualifier
+    description: '{qualifier} phase {locus}'
+    documentation: '{qualifier} phase {locus}'
+
+  - base: voltage
+    description: 'Voltage {locus}'
+    documentation: 'Voltage {locus}'
+
+  - base: loop_voltage
+    description: 'Loop voltage {locus}'
+    documentation: 'Loop voltage {locus}'
+
+  - base: capacitance
+    description: 'Capacitance {locus}'
+    documentation: 'Capacitance {locus}'
+
+  - base: charge
+    segments:
+      - qualifier
+    description: '{qualifier} charge'
+    documentation: '{qualifier} charge'
+
+  - base: atomic_number
+    description: 'Atomic number'
+    documentation: 'Atomic number'
+
+  - base: mass
+    segments:
+      - qualifier
+    description: '{qualifier} mass'
+    documentation: '{qualifier} mass'
+
+  - base: mass_flow_rate
+    segments:
+      - qualifier
+    description: '{qualifier} mass flow rate'
+    documentation: '{qualifier} mass flow rate'
+
+  - base: count
+    description: '{modifiers} count'
+    documentation: '{modifiers} count'
+
+  - base: turn_count
+    description: 'Turn count {locus}'
+    documentation: 'Turn count {locus}'
+
+  - base: turn_count
+    segments:
+      - qualifier
+    description: '{qualifier} turn count {locus}'
+    documentation: '{qualifier} turn count {locus}'
+
+  - base: fraction
+    segments:
+      - subject
+    description: '{population} {subject} fraction'
+    documentation: '{population} {subject} fraction'
+
+  - base: factor
+    segments:
+      - qualifier
+    description: '{qualifier} factor {locus}'
+    documentation: '{qualifier} factor {locus}'
+
+  - base: rate
+    description: '{modifiers} rate {locus}'
+    documentation: '{modifiers} rate {locus}'
+
+  - base: source_rate
+    description: '{modifiers} source rate {locus}'
+    documentation: '{modifiers} source rate {locus}'
+
+  - base: flux
+    segments:
+      - qualifier
+    description: '{qualifier} flux {locus}'
+    documentation: '{qualifier} flux {locus}'
+
+  - base: time
+    segments:
+      - qualifier
+    description: '{qualifier} time'
+    documentation: '{qualifier} time'
+
+  - base: duration
+    segments:
+      - qualifier
+    description: '{qualifier} duration'
+    documentation: '{qualifier} duration'
+
+  - base: transit_time
+    segments:
+      - qualifier
+    description: '{qualifier} transit time {locus}'
+    documentation: '{qualifier} transit time {locus}'
+
+  - base: confinement_time
+    segments:
+      - qualifier
+    description: '{qualifier} confinement time'
+    documentation: '{qualifier} confinement time'
+
+  - base: confinement_enhancement_factor
+    segments:
+      - qualifier
+    description: '{qualifier} confinement enhancement factor'
+    documentation: '{qualifier} confinement enhancement factor'
+
+  - base: etendue
+    description: 'Etendue {locus}'
+    documentation: 'Etendue {locus}'
+
+  - base: emissivity
+    segments:
+      - subject
+    description: '{subject} emissivity'
+    documentation: '{subject} emissivity'
+
+  - base: radiance
+    segments:
+      - qualifier
+    description: '{qualifier} radiance'
+    documentation: '{qualifier} radiance'
+
+  - base: photon_radiance
+    description: 'Photon radiance {locus}'
+    documentation: 'Photon radiance {locus}'
+
+  - base: photon_radiance
+    segments:
+      - qualifier
+    description: '{qualifier} photon radiance'
+    documentation: '{qualifier} photon radiance'
+
+  - base: brightness
+    segments:
+      - subject
+    description: '{subject} brightness'
+    documentation: '{subject} brightness'
+
+  - base: intensity
+    description: 'Intensity {locus}'
+    documentation: 'Intensity {locus}'
+
+  - base: opacity
+    description: 'Opacity {locus}'
+    documentation: 'Opacity {locus}'
+
+  - base: ellipticity
+    segments:
+      - qualifier
+    description: '{qualifier} ellipticity {locus}'
+    documentation: '{qualifier} ellipticity {locus}'
+
+  - base: toroidal_flux_coordinate_gradient
+    segments:
+      - transformation
+    description: '{operator} toroidal-flux-coordinate gradient'
+    documentation: '{operator} toroidal-flux-coordinate gradient'
+
+  - base: coordinate
+    segments:
+      - coordinate
+    description: '{coordinate} coordinate {locus}'
+    documentation: '{coordinate} coordinate {locus}'
+
+  - base: outline
+    segments:
+      - coordinate
+    description: '{coordinate} coordinate of each point on the outline {locus}'
+    documentation: '{coordinate} coordinate of each point on the outline {locus}'
+
+  - base: radial_coordinate
+    description: 'Major-radius coordinate {locus}'
+    documentation: 'Major-radius coordinate {locus}'
+
+  - base: toroidal_angle
+    description: 'Toroidal angle {locus}'
+    documentation: 'Toroidal angle {locus}'
+
+  - base: poloidal_angle
+    description: 'Poloidal angle {locus}'
+    documentation: 'Poloidal angle {locus}'
+
+  - base: toroidal_flux_coordinate
+    description: 'Toroidal flux coordinate'
+    documentation: 'Toroidal flux coordinate'
+
+  - base: normalized_toroidal_flux_coordinate
+    description: 'Normalized toroidal flux coordinate'
+    documentation: 'Normalized toroidal flux coordinate'
+
+  - base: normalized_poloidal_flux_coordinate
+    description: 'Normalized poloidal flux coordinate'
+    documentation: 'Normalized poloidal flux coordinate'

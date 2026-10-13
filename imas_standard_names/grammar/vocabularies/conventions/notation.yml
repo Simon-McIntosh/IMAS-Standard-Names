@@ -7,7 +7,18 @@
 # The loader refuses a forbidden spelling that equals one of the same token's
 # registered aliases or abbreviations, so this file and the vocabulary entries
 # cannot disagree about how a token may be written.
+#
+# A forbidden spelling is matched as a plain substring of the description and
+# documentation, so it is listed only when it can name nothing but the wrong
+# symbol for this quantity. A short symbol shared with another quantity (\rho
+# is also the toroidal flux label) is never forbidden here.
+#
+# Subject, component and coordinate entries give the subscript or symbol that
+# a base symbol's parameter takes, so n_e is density with the electron
+# subscript and B_\phi is the magnetic field with the toroidal subscript.
 notation:
+
+  # --- physical bases -------------------------------------------------------
 
   density:
     symbol: n_s
@@ -16,5 +27,276 @@ notation:
         species label, substituted with the species named in the entry
         (n_e for electrons)
     forbidden_spellings:
-      - '\rho'
       - 'N_s'
+
+  number_density:
+    symbol: n_s
+    parameters:
+      s: species label, as for density
+
+  temperature:
+    symbol: T_s
+    parameters:
+      s: >-
+        species or object label (T_e for electrons); omitted for the
+        thermodynamic temperature of a component or coolant
+
+  pressure:
+    symbol: p_s
+    parameters:
+      s: species label (p_e for electrons); omitted for the total pressure
+
+  power:
+    symbol: P
+
+  heating_power:
+    symbol: P_{\mathrm{heat}}
+
+  energy:
+    symbol: W
+
+  photon_energy:
+    symbol: E_{\gamma}
+
+  current:
+    symbol: I
+
+  current_density:
+    symbol: j_c
+    parameters:
+      c: component label (j_\phi toroidal, j_\parallel parallel)
+
+  magnetic_field:
+    symbol: B_c
+    parameters:
+      c: >-
+        component label (B_\phi toroidal, B_\mathrm{p} poloidal); omitted for
+        the field vector or its magnitude
+    forbidden_spellings:
+      - 'B_t'
+      - 'B_T'
+
+  magnetic_flux:
+    symbol: \Phi
+    parameters: {}
+    # The poloidal magnetic flux is written \psi and the toroidal magnetic
+    # flux \Phi; the component token selects which.
+
+  poloidal_current_function:
+    symbol: F
+
+  safety_factor:
+    symbol: q
+
+  magnetic_shear:
+    symbol: \hat{s}
+
+  beta:
+    symbol: \beta_c
+    parameters:
+      c: >-
+        component label (\beta_\mathrm{t} toroidal, \beta_\mathrm{p} poloidal,
+        \beta_\mathrm{N} normalized toroidal)
+
+  internal_inductance:
+    symbol: l_i
+
+  triangularity:
+    symbol: \delta
+    # Upper and lower triangularity are \delta_\mathrm{u} and \delta_\mathrm{l}.
+
+  elongation:
+    symbol: \kappa
+
+  radius:
+    symbol: R
+    # The major radius is R and the minor radius is a.
+
+  area:
+    symbol: A
+
+  volume:
+    symbol: V
+
+  length:
+    symbol: L
+
+  width:
+    symbol: w
+
+  height:
+    symbol: h
+
+  thickness:
+    symbol: d
+
+  gap:
+    symbol: g
+
+  angle:
+    symbol: \alpha
+
+  angular_width:
+    symbol: \Delta\alpha
+
+  wavelength:
+    symbol: \lambda
+
+  frequency:
+    symbol: f
+
+  phase:
+    symbol: \varphi
+
+  voltage:
+    symbol: U
+
+  loop_voltage:
+    symbol: V_{\mathrm{loop}}
+
+  capacitance:
+    symbol: C
+
+  charge:
+    symbol: Z
+    # The effective charge is Z_\mathrm{eff}.
+
+  atomic_number:
+    symbol: Z
+
+  mass:
+    symbol: m
+
+  mass_flow_rate:
+    symbol: \dot{m}
+
+  count:
+    symbol: N
+
+  turn_count:
+    symbol: N
+
+  fraction:
+    symbol: f
+
+  factor:
+    symbol: k
+
+  rate:
+    symbol: \dot{N}
+
+  source_rate:
+    symbol: S
+
+  flux:
+    symbol: \Gamma
+
+  time:
+    symbol: t
+
+  duration:
+    symbol: \Delta t
+
+  transit_time:
+    symbol: t_{\mathrm{tr}}
+
+  confinement_time:
+    symbol: \tau
+    # The energy confinement time is \tau_E.
+
+  confinement_enhancement_factor:
+    symbol: H
+
+  etendue:
+    symbol: G
+
+  emissivity:
+    symbol: \varepsilon
+
+  radiance:
+    symbol: L
+
+  photon_radiance:
+    symbol: L_{\gamma}
+
+  brightness:
+    symbol: L_{\gamma}
+
+  intensity:
+    symbol: I
+
+  opacity:
+    symbol: \tau
+
+  ellipticity:
+    symbol: e
+
+  toroidal_flux_coordinate_gradient:
+    symbol: \nabla\rho_{\mathrm{tor}}
+
+  # --- geometric bases ------------------------------------------------------
+
+  coordinate:
+    symbol: x_c
+    parameters:
+      c: axis label (R radial, \phi toroidal, Z vertical)
+
+  outline:
+    symbol: x_c
+    parameters:
+      c: axis label of the outline points (R radial, Z vertical)
+
+  radial_coordinate:
+    symbol: R
+
+  toroidal_angle:
+    symbol: \phi
+
+  poloidal_angle:
+    symbol: \theta
+
+  toroidal_flux_coordinate:
+    symbol: \rho_{\mathrm{tor}}
+
+  normalized_toroidal_flux_coordinate:
+    symbol: \rho_{\mathrm{tor,norm}}
+
+  normalized_poloidal_flux_coordinate:
+    symbol: \psi_{\mathrm{N}}
+
+  # --- coordinate and component axes ----------------------------------------
+
+  radial:
+    symbol: R
+
+  vertical:
+    symbol: Z
+
+  toroidal:
+    symbol: \phi
+
+  poloidal:
+    symbol: \mathrm{p}
+
+  parallel:
+    symbol: \parallel
+
+  normalized_toroidal:
+    symbol: \mathrm{N}
+
+  # --- subjects -------------------------------------------------------------
+
+  electron:
+    symbol: e
+
+  ion:
+    symbol: i
+
+  neutral:
+    symbol: '0'
+
+  neutron:
+    symbol: n
+
+  hard_xray:
+    symbol: \mathrm{HXR}

@@ -8,7 +8,18 @@
 # entry has none (operators carry none today). Where the token's entry already
 # defines it (a locus, base or carrier), the definition stays on that entry:
 # the accessor returns it, and the loader refuses an entry that restates it.
+#
+# A token gets an entry here only when a canonical equation defines it. A
+# hardware object or a named location with no defining equation is defined by
+# its vocabulary entry alone and has no concept entry.
+#
+# restates_equation is true where the equation is what the quantity is (a
+# shape parameter, a flux label) and the documentation writes it; false where
+# a name only applies the concept (an average, a derivative, a locus) and the
+# documentation names it and links to it.
 concepts:
+
+  # --- operators ------------------------------------------------------------
 
   flux_surface_averaged:
     phrase: flux-surface average
@@ -29,6 +40,289 @@ concepts:
       - '\$\$[^$]*(dl_p/B_p|dl/B)[^$]*\$\$'
     restates_equation: false
 
+  volume_averaged:
+    phrase: volume average
+    definition: >-
+      The integral of a quantity over a stated volume divided by that volume.
+    equation: '\langle f\rangle_V = \frac{1}{V}\int_V f\,dV'
+    symbols:
+      - symbol: f
+        meaning: the averaged quantity
+      - symbol: V
+        meaning: the volume averaged over, the plasma volume unless stated
+    restates_equation: false
+
+  line_averaged:
+    phrase: line average
+    definition: >-
+      The integral of a quantity along a stated chord divided by the chord
+      length.
+    equation: '\bar{f} = \frac{1}{L}\int_0^L f\,dl'
+    symbols:
+      - symbol: f
+        meaning: the averaged quantity
+      - symbol: L
+        meaning: the length of the chord
+      - symbol: l
+        meaning: distance along the chord
+    restates_equation: false
+
+  line_integrated:
+    phrase: line integral
+    definition: >-
+      The integral of a quantity along a stated path.
+    equation: '\int_0^L f\,dl'
+    symbols:
+      - symbol: f
+        meaning: the integrated quantity
+      - symbol: l
+        meaning: distance along the path, of total length L
+    restates_equation: false
+
+  time_derivative:
+    phrase: time derivative
+    definition: >-
+      The rate of change of a quantity with time at a fixed point or label.
+    equation: '\frac{\partial f}{\partial t}'
+    symbols:
+      - symbol: f
+        meaning: the differentiated quantity
+      - symbol: t
+        meaning: time
+    restates_equation: false
+
+  radial_derivative:
+    phrase: radial derivative
+    definition: >-
+      The derivative of a quantity with respect to the radial flux-surface
+      label named in its documentation.
+    equation: '\frac{\partial f}{\partial \rho}'
+    symbols:
+      - symbol: f
+        meaning: the differentiated quantity
+      - symbol: '\rho'
+        meaning: the radial flux-surface label
+    restates_equation: false
+
+  derivative_with_respect_to:
+    phrase: derivative with respect to a coordinate
+    definition: >-
+      The rate of change of a quantity with respect to the coordinate the name
+      states, the others held fixed.
+    equation: '\frac{\partial f}{\partial x}'
+    symbols:
+      - symbol: f
+        meaning: the differentiated quantity
+      - symbol: x
+        meaning: the coordinate named after "with respect to"
+    restates_equation: false
+
+  magnitude:
+    phrase: magnitude
+    definition: >-
+      The Euclidean norm of a vector quantity, or the modulus of a complex one.
+    equation: '|\mathbf{v}| = \sqrt{\mathbf{v}\cdot\mathbf{v}^{*}}'
+    symbols:
+      - symbol: '\mathbf{v}'
+        meaning: the vector or complex quantity
+    restates_equation: false
+
+  square:
+    phrase: square
+    definition: >-
+      A scalar quantity multiplied by itself, or a vector's dot product with
+      itself.
+    equation: 'f^2 = f\,f'
+    symbols:
+      - symbol: f
+        meaning: the squared quantity
+    restates_equation: false
+
+  inverse:
+    phrase: inverse
+    definition: >-
+      The reciprocal of a quantity.
+    equation: 'f^{-1} = 1/f'
+    symbols:
+      - symbol: f
+        meaning: the inverted quantity
+    restates_equation: false
+
+  amplitude:
+    phrase: amplitude
+    definition: >-
+      The peak magnitude of a sinusoidally varying quantity.
+    equation: 'f(t) = A\cos(\omega t + \varphi)'
+    symbols:
+      - symbol: A
+        meaning: the amplitude
+      - symbol: '\omega'
+        meaning: the angular frequency
+      - symbol: '\varphi'
+        meaning: the phase
+    restates_equation: false
+
+  maximum:
+    phrase: maximum
+    definition: >-
+      The largest value a quantity takes over a stated domain.
+    equation: 'f_{\max} = \max_{D} f'
+    symbols:
+      - symbol: D
+        meaning: the domain the maximum is taken over
+    restates_equation: false
+
+  minimum_over_flux_surface:
+    phrase: minimum over a flux surface
+    definition: >-
+      The smallest value a quantity takes over one closed magnetic flux
+      surface.
+    equation: 'f_{\min} = \min_{S} f'
+    symbols:
+      - symbol: S
+        meaning: the flux surface
+    restates_equation: false
+
+  variation:
+    phrase: variation
+    definition: >-
+      The change of a quantity from a stated reference state.
+    equation: '\delta f = f - f_0'
+    symbols:
+      - symbol: f_0
+        meaning: the value in the reference state
+    restates_equation: false
+
+  ratio:
+    phrase: ratio
+    definition: >-
+      One quantity divided by another.
+    equation: 'a/b'
+    symbols:
+      - symbol: a
+        meaning: the quantity before "to" in the name
+      - symbol: b
+        meaning: the quantity after "to" in the name
+    restates_equation: true
+
+  difference:
+    phrase: difference
+    definition: >-
+      One quantity minus another.
+    equation: 'a - b'
+    symbols:
+      - symbol: a
+        meaning: the quantity before "and" in the name
+      - symbol: b
+        meaning: the quantity after "and" in the name
+    restates_equation: true
+
+  product:
+    phrase: product
+    definition: >-
+      One quantity multiplied by another.
+    equation: 'a\,b'
+    symbols:
+      - symbol: a
+        meaning: the quantity before "and" in the name
+      - symbol: b
+        meaning: the quantity after "and" in the name
+    restates_equation: true
+
+  # --- coordinate axes ------------------------------------------------------
+
+  radial:
+    phrase: major-radius direction
+    definition: >-
+      The direction of increasing distance from the toroidal symmetry axis in
+      the right-handed cylindrical (R, phi, Z) frame.
+    equation: 'R = \sqrt{x^2 + y^2}'
+    symbols:
+      - symbol: R
+        meaning: major radius
+      - symbol: x, y
+        meaning: Cartesian coordinates in the horizontal plane
+    restates_equation: false
+
+  vertical:
+    phrase: vertical direction
+    definition: >-
+      The direction parallel to the toroidal symmetry axis in the right-handed
+      cylindrical (R, phi, Z) frame.
+    equation: 'Z = \mathbf{x}\cdot\hat{\mathbf{z}}'
+    symbols:
+      - symbol: '\hat{\mathbf{z}}'
+        meaning: unit vector along the symmetry axis
+    restates_equation: false
+
+  toroidal:
+    phrase: toroidal direction
+    definition: >-
+      The direction of increasing toroidal angle about the symmetry axis in the
+      right-handed cylindrical (R, phi, Z) frame.
+    equation: '\phi = \operatorname{atan2}(y, x)'
+    symbols:
+      - symbol: '\phi'
+        meaning: toroidal angle
+      - symbol: x, y
+        meaning: Cartesian coordinates in the horizontal plane
+    restates_equation: false
+
+  # --- coordinates and flux labels ------------------------------------------
+
+  radial_coordinate:
+    phrase: major-radius coordinate
+    equation: 'R = \sqrt{x^2 + y^2}'
+    symbols:
+      - symbol: R
+        meaning: major radius
+    restates_equation: false
+
+  toroidal_angle:
+    phrase: toroidal angle
+    definition: >-
+      The azimuthal angle about the toroidal symmetry axis in the right-handed
+      cylindrical (R, phi, Z) frame.
+    equation: '\phi = \operatorname{atan2}(y, x)'
+    symbols:
+      - symbol: '\phi'
+        meaning: toroidal angle
+    restates_equation: false
+
+  toroidal_flux_coordinate:
+    phrase: toroidal flux coordinate
+    equation: '\rho_{\mathrm{tor}} = \sqrt{\Phi/(\pi B_0)}'
+    symbols:
+      - symbol: '\Phi'
+        meaning: toroidal magnetic flux enclosed by the flux surface
+      - symbol: B_0
+        meaning: the vacuum toroidal field at the reference major radius
+    restates_equation: true
+
+  normalized_toroidal_flux_coordinate:
+    phrase: normalized toroidal flux coordinate
+    equation: '\rho_{\mathrm{tor,norm}} = \rho_{\mathrm{tor}}/\rho_{\mathrm{tor,b}}'
+    symbols:
+      - symbol: '\rho_{\mathrm{tor}}'
+        meaning: toroidal flux coordinate of the flux surface
+      - symbol: '\rho_{\mathrm{tor,b}}'
+        meaning: its value at the plasma boundary
+    restates_equation: true
+
+  normalized_poloidal_flux_coordinate:
+    phrase: normalized poloidal flux coordinate
+    equation: '\psi_{\mathrm{N}} = (\psi - \psi_{\mathrm{axis}})/(\psi_{\mathrm{b}} - \psi_{\mathrm{axis}})'
+    symbols:
+      - symbol: '\psi'
+        meaning: poloidal magnetic flux of the flux surface
+      - symbol: '\psi_{\mathrm{axis}}'
+        meaning: its value at the magnetic axis
+      - symbol: '\psi_{\mathrm{b}}'
+        meaning: its value at the plasma boundary
+    restates_equation: true
+
+  # --- loci defined by the field --------------------------------------------
+
   plasma_boundary:
     # The locus registry already defines this token; the definition is not
     # restated here and the accessor returns the locus entry's definition.
@@ -44,3 +338,184 @@ concepts:
       # a different surface, named only for a diverted configuration.
       - the separatrix
     restates_equation: false
+
+  separatrix:
+    phrase: separatrix
+    equation: '\psi = \psi_{\mathrm{X}}'
+    symbols:
+      - symbol: '\psi_{\mathrm{X}}'
+        meaning: poloidal magnetic flux at the primary X-point
+    restates_equation: false
+
+  flux_surface:
+    phrase: flux surface
+    equation: '\psi(R, Z) = \mathrm{const}'
+    symbols:
+      - symbol: '\psi'
+        meaning: poloidal magnetic flux
+    restates_equation: false
+
+  magnetic_axis:
+    phrase: magnetic axis
+    equation: '\mathbf{B}_{\mathrm{p}}(R_{\mathrm{axis}}, Z_{\mathrm{axis}}) = 0'
+    symbols:
+      - symbol: '\mathbf{B}_{\mathrm{p}}'
+        meaning: poloidal magnetic field
+      - symbol: R_{\mathrm{axis}}, Z_{\mathrm{axis}}
+        meaning: the O-point inside the nested closed flux surfaces
+    restates_equation: false
+
+  x_point:
+    phrase: X-point
+    equation: '\mathbf{B}_{\mathrm{p}}(R_{\mathrm{X}}, Z_{\mathrm{X}}) = 0'
+    symbols:
+      - symbol: '\mathbf{B}_{\mathrm{p}}'
+        meaning: poloidal magnetic field
+      - symbol: R_{\mathrm{X}}, Z_{\mathrm{X}}
+        meaning: the saddle point of the poloidal flux
+    restates_equation: false
+
+  strike_point:
+    phrase: strike point
+    equation: '\psi(R_{\mathrm{s}}, Z_{\mathrm{s}}) = \psi_{\mathrm{X}}'
+    symbols:
+      - symbol: R_{\mathrm{s}}, Z_{\mathrm{s}}
+        meaning: the point on the target surface
+      - symbol: '\psi_{\mathrm{X}}'
+        meaning: poloidal magnetic flux at the primary X-point
+    restates_equation: false
+
+  geometric_axis:
+    phrase: geometric axis
+    equation: 'R_{\mathrm{geo}} = (R_{\max} + R_{\min})/2,\quad Z_{\mathrm{geo}} = (Z_{\max} + Z_{\min})/2'
+    symbols:
+      - symbol: R_{\max}, R_{\min}
+        meaning: the radial extrema of the cross-section
+      - symbol: Z_{\max}, Z_{\min}
+        meaning: its vertical extrema
+    restates_equation: false
+
+  minimum_absolute_safety_factor:
+    phrase: surface of minimum absolute safety factor
+    equation: '|q(\rho_{\min})| = \min_{\rho} |q(\rho)|'
+    symbols:
+      - symbol: q
+        meaning: safety factor
+      - symbol: '\rho'
+        meaning: radial flux-surface label
+    restates_equation: false
+
+  # --- quantities defined by an equation ------------------------------------
+
+  safety_factor:
+    phrase: safety factor
+    equation: 'q = \frac{d\Phi}{d\Psi}'
+    symbols:
+      - symbol: '\Phi'
+        meaning: toroidal magnetic flux enclosed by the flux surface
+      - symbol: '\Psi'
+        meaning: poloidal magnetic flux, not divided by 2 pi
+    restates_equation: true
+
+  magnetic_shear:
+    phrase: magnetic shear
+    definition: >-
+      The logarithmic derivative of the safety factor with respect to a radial
+      flux-surface label.
+    equation: '\hat{s} = \frac{\rho}{q}\frac{dq}{d\rho}'
+    symbols:
+      - symbol: q
+        meaning: safety factor
+      - symbol: '\rho'
+        meaning: the radial flux-surface label named in the documentation
+    restates_equation: true
+
+  triangularity:
+    phrase: triangularity
+    definition: >-
+      A shape parameter equal to the radial offset of a cross-section's
+      vertical extremum from its geometric axis, divided by its minor radius.
+    equation: '\delta_{\mathrm{u,l}} = (R_{\mathrm{geo}} - R_{\mathrm{u,l}})/a,\quad \delta = (\delta_{\mathrm{u}} + \delta_{\mathrm{l}})/2'
+    symbols:
+      - symbol: R_{\mathrm{geo}}
+        meaning: major radius of the geometric axis
+      - symbol: R_{\mathrm{u,l}}
+        meaning: major radius of the upper or lower vertical extremum
+      - symbol: a
+        meaning: minor radius
+    restates_equation: true
+
+  elongation:
+    phrase: elongation
+    definition: >-
+      A shape parameter equal to a cross-section's vertical extent divided by
+      its radial extent.
+    equation: '\kappa = (Z_{\max} - Z_{\min})/(R_{\max} - R_{\min})'
+    symbols:
+      - symbol: Z_{\max}, Z_{\min}
+        meaning: vertical extrema of the cross-section
+      - symbol: R_{\max}, R_{\min}
+        meaning: radial extrema of the cross-section
+    restates_equation: true
+
+  beta:
+    phrase: plasma beta
+    equation: '\beta = \frac{2\mu_0 \langle p\rangle}{B^2}'
+    symbols:
+      - symbol: '\langle p\rangle'
+        meaning: volume-averaged plasma pressure
+      - symbol: B
+        meaning: the reference magnetic field the component names
+      - symbol: '\mu_0'
+        meaning: vacuum permeability
+    restates_equation: true
+
+  poloidal_current_function:
+    phrase: poloidal current function
+    equation: 'F = R B_{\phi}'
+    symbols:
+      - symbol: R
+        meaning: major radius
+      - symbol: B_{\phi}
+        meaning: toroidal magnetic field
+    restates_equation: true
+
+  confinement_time:
+    phrase: confinement time
+    definition: >-
+      The content of a confined quantity divided by the net rate at which it
+      is lost.
+    equation: '\tau = \frac{W}{P_{\mathrm{loss}}}'
+    symbols:
+      - symbol: W
+        meaning: the confined content, the stored energy for the energy confinement time
+      - symbol: P_{\mathrm{loss}}
+        meaning: the net loss rate of that content
+    restates_equation: true
+
+  etendue:
+    phrase: etendue
+    definition: >-
+      The geometric throughput of an optical system: its collecting area
+      weighted by the solid angle it accepts.
+    equation: 'G = \int_A \int_{\Omega} \cos\theta \, d\Omega \, dA'
+    symbols:
+      - symbol: A
+        meaning: collecting area
+      - symbol: '\Omega'
+        meaning: accepted solid angle
+      - symbol: '\theta'
+        meaning: angle between a ray and the surface normal
+    restates_equation: true
+
+  loop_voltage:
+    phrase: loop voltage
+    definition: >-
+      The electromotive force around a closed toroidal loop.
+    equation: 'V_{\mathrm{loop}} = \oint_C \mathbf{E}\cdot d\mathbf{l}'
+    symbols:
+      - symbol: C
+        meaning: the closed toroidal loop
+      - symbol: '\mathbf{E}'
+        meaning: electric field
+    restates_equation: true
