@@ -701,6 +701,64 @@
   "plan_link": null,
   "promoted_by": null,
   "promoted_revision": "64b51002225a65db566b9cf452f16f19ddde8a42",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "gate verdict 'failed' is not passing; cited arms retained as evidence",
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_bytes": 5022,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261013T081403384041-cnr-accessor-operator-keys",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 5022,
+        "path": "/tmp/reckon-crew-scratch/r-20261013T081403384041-cnr-accessor-operator-keys"
+      }
+    ],
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 1,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "artifact_classification": "unintegrated",
+          "available": true,
+          "claimed_by_live_runs": [],
+          "classification": "retained-for-resume",
+          "commits_unmeasured_reason": "release_residue is false: this caller did not ask for the commits beyond the integration head to be measured",
+          "dirty": [],
+          "head": "64b51002225a65db566b9cf452f16f19ddde8a42",
+          "integrated_into": "HEAD",
+          "non_equivalent_commits": null,
+          "patch_equivalent_commits": null,
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-standard-names-5be88ee0fdc3/4f554c2d-3a28-4c55-8645-67a1e8a30dea/cnr-accessor-operator-keys",
+          "reclaimable": false,
+          "retention": {
+            "classification": "retained-for-resume",
+            "retained_at": "2026-10-13T08:26:47Z",
+            "session_id": "01a13453-b593-7561-ba63-92ea81fa3de2",
+            "session_source": "stream",
+            "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-standard-names-5be88ee0fdc3/4f554c2d-3a28-4c55-8645-67a1e8a30dea/cnr-accessor-operator-keys"
+          },
+          "shadow_patch": "",
+          "shadow_run_id": "",
+          "status_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "status_entries": [],
+          "withheld": "this worktree is the working directory of recoverable session 01a13453-b593-7561-ba63-92ea81fa3de2"
+        }
+      ]
+    },
+    "worktree_released": false,
+    "worktree_withheld": "gate verdict 'failed' is not passing; worktree retained for recovery"
+  },
   "resume_waiver": null,
   "review": {
     "absent": [],
