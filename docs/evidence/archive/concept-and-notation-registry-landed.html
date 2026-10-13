@@ -40,6 +40,11 @@
     <p>Run <code>r-20261013T081403384041-cnr-accessor-operator-keys</code>, merged at <code>757e2f5</code>. <code>select_conventions</code> in <code>imas_standard_names/grammar/terms.py</code> now handles operators by their registry token. An indexed derivative such as <code>derivative_of_X_with_respect_to_Y</code> selects the <code>derivative_with_respect_to</code> concept. A binary ratio name selects the <code>ratio</code> concept and the ratio-keyed templates. The placeholder token is excluded. Four new tests in <code>tests/grammar/test_conventions_operator_keys.py</code> each fail when the selection mechanisms are removed. The five-file gate adds no failures against its base. Its three base failures are the registry-test breakages the test-invariants node fixed.</p><p>The review scored 10 to 20 with no added failures and left two notes for the templates node. First, <code>_operator_token</code> splits a fused indexed operator by prefix stripping, duplicating <code>model._split_fused_indexed_operator</code>, which also validates the bound index. Second, <code>test_ratio_selects_its_operator_concept</code> already passes at base, so it guards nothing this change added.</p>
   </section>
 
+  <section id="s3-binary-operators">
+    <h2>§3 — binary-operator templates, and one fused-operator splitter</h2>
+    <p>The registry's template set gained an <code>{operand}</code> placeholder and three binary-operator templates (commit <code>9813991</code>):</p><ul><li><code>ratio</code>: <em>Ratio of {operand} to {operand}</em>;</li><li><code>difference</code>: <em>Difference of {operand} and {operand}</em>;</li><li><code>product</code>: <em>Product of {operand} and {operand}</em>.</li></ul><p>The conventions selector now splits a fused indexed operator through <code>model._split_fused_indexed_operator</code>. It drops its own prefix loop and the <code>_operator_keys</code> cache, and binary operators are keyed to those templates. Three mutations each turn the operator tests red: a raw operator token, binary operators excluded from the IR tokens, and binary keying dropped from the template bases. The five-file gate went from 66 passed at base to 67 passed at head (merge <code>440942e</code>; review 113/120).</p>
+  </section>
+
 </main>
 </body>
 </html>
