@@ -20,6 +20,8 @@
 #   {modifiers}   the words the name places before its base, in reading order
 #   {locus}       the of, at, over or due-to clause as the name carries it
 #   {operator}    the operator phrase, ending in "of" where English needs it
+#   {operand}     the words of one operand of a binary operator, in the order
+#                 the name gives them
 # The opening check reads a template as a pattern with each placeholder a
 # wildcard, so its literal text holds no pattern metacharacters.
 templates:
@@ -479,3 +481,18 @@ templates:
   - base: normalized_poloidal_flux_coordinate
     description: 'Normalized poloidal flux coordinate'
     documentation: 'Normalized poloidal flux coordinate'
+
+  # A binary-operator name parses with no base of its own, so its template is
+  # keyed on the operator token. The connecting word is the one the grammar
+  # writes between the operands.
+  - base: ratio
+    description: 'Ratio of {operand} to {operand}'
+    documentation: 'Ratio of {operand} to {operand}'
+
+  - base: difference
+    description: 'Difference of {operand} and {operand}'
+    documentation: 'Difference of {operand} and {operand}'
+
+  - base: product
+    description: 'Product of {operand} and {operand}'
+    documentation: 'Product of {operand} and {operand}'
