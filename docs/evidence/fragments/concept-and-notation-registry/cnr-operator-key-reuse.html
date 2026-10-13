@@ -1,0 +1,34 @@
+<!-- Landing record: one owner for the fused-operator split, and operator tests that can fail. -->
+<section id="cnr-operator-key-reuse-landing">
+  <p>
+    <code>_operator_token</code> in <code>grammar/terms.py</code> now resolves a
+    fused indexed application through
+    <code>model.py:_split_fused_indexed_operator</code> instead of re-deriving
+    the boundary against its own copy of the operator registry. The prefix loop
+    and the cache that only it used (<code>_operator_keys</code>, the
+    <code>load_operators</code> import) are gone. The model is asked only for
+    the split it already owns, so the accessor and the model agree on exactly
+    which fused tokens round-trip.
+  </p>
+  <p>
+    Rewrote the ratio test so it guards the binary-operator route into
+    <code>_ir_tokens</code>: it asserts the ratio key is collected from the
+    parse and selects its concept, and it fails when binary operators are
+    excluded from the token set. Replaced the scratch-copy template test with
+    one that reads the shipped registry: a ratio, a difference and a product
+    name each select their own template, and a plain name selects none of the
+    three.
+  </p>
+  <p id="cnr-operator-key-reuse-measure">
+    Measure: the five gate files run
+    <code>67 passed, 5 xfailed, EXIT=0</code> against
+    <code>66 passed, 5 xfailed, EXIT=0</code> at base (no added failures).
+    Three mutations each fail with <code>EXIT=1</code>: routing
+    <code>_operator_token</code> back to the raw string fails
+    <code>test_indexed_derivative_selects_its_operator_concept</code>;
+    excluding binary operators from <code>_ir_tokens</code> fails
+    <code>test_binary_operator_key_reaches_the_convention_tokens</code>;
+    dropping the binary-operator keying from <code>template_bases</code> fails
+    <code>test_shipped_templates_are_selected_for_their_operator_names</code>.
+  </p>
+</section>

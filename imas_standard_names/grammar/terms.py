@@ -13,6 +13,7 @@ from imas_standard_names.grammar.ir import (
     ProjectionShape,
     StandardNameIR,
 )
+from imas_standard_names.grammar.model import _split_fused_indexed_operator
 from imas_standard_names.grammar.parser import parse
 from imas_standard_names.grammar.vocab_loaders import (
     ConventionsRegistry,
@@ -22,7 +23,6 @@ from imas_standard_names.grammar.vocab_loaders import (
     load_geometry_carriers,
     load_geometry_representations,
     load_locus_registry,
-    load_operators,
     load_orbits,
     load_populations,
     load_section_planes,
@@ -180,28 +180,15 @@ def _iter_operators(
             yield from _iter_operators(argument.operators)
 
 
-@lru_cache(maxsize=1)
-def _operator_keys() -> tuple[frozenset[str], tuple[str, ...]]:
-    operators = load_operators().operators
-    indexed = tuple(
-        sorted(
-            (key for key, entry in operators.items() if entry.indexed),
-            key=len,
-            reverse=True,
-        )
-    )
-    return frozenset(operators), indexed
-
-
 def _operator_token(operator: OperatorApplication) -> str:
-    """Resolve a fused indexed application to its registered operator key."""
-    registered, indexed = _operator_keys()
-    if operator.op in registered:
-        return operator.op
-    for key in indexed:
-        if operator.op.startswith(f"{key}_"):
-            return key
-    return operator.op
+    """Resolve a fused indexed application to its registered operator key.
+
+    The model owns the split of a fused indexed token into its base operator
+    and coordinate index, so the accessor asks it rather than re-deriving the
+    boundary against a second copy of the operator registry.
+    """
+    split = _split_fused_indexed_operator(operator.op)
+    return split[0] if split is not None else operator.op
 
 
 def _qualifier_segment_kind(token: str) -> str:
