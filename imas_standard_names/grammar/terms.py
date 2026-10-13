@@ -9,6 +9,7 @@ from imas_standard_names.grammar.ir import (
     BaseKind,
     LocusType,
     OperatorApplication,
+    OperatorKind,
     ProjectionShape,
     StandardNameIR,
 )
@@ -21,6 +22,7 @@ from imas_standard_names.grammar.vocab_loaders import (
     load_geometry_carriers,
     load_geometry_representations,
     load_locus_registry,
+    load_operators,
     load_orbits,
     load_populations,
     load_section_planes,
@@ -178,6 +180,30 @@ def _iter_operators(
             yield from _iter_operators(argument.operators)
 
 
+@lru_cache(maxsize=1)
+def _operator_keys() -> tuple[frozenset[str], tuple[str, ...]]:
+    operators = load_operators().operators
+    indexed = tuple(
+        sorted(
+            (key for key, entry in operators.items() if entry.indexed),
+            key=len,
+            reverse=True,
+        )
+    )
+    return frozenset(operators), indexed
+
+
+def _operator_token(operator: OperatorApplication) -> str:
+    """Resolve a fused indexed application to its registered operator key."""
+    registered, indexed = _operator_keys()
+    if operator.op in registered:
+        return operator.op
+    for key in indexed:
+        if operator.op.startswith(f"{key}_"):
+            return key
+    return operator.op
+
+
 def _qualifier_segment_kind(token: str) -> str:
     for kind, tokens in _segment_vocabularies().items():
         if token in tokens:
@@ -196,9 +222,12 @@ def _locus_segment_kind(locus_type: LocusType) -> str:
 
 def _ir_tokens(ir: StandardNameIR) -> frozenset[str]:
     """Every grammar token named by the parse of a name."""
-    tokens: set[str] = {operator.op for operator in _iter_operators(ir.operators)}
+    tokens: set[str] = {
+        _operator_token(operator) for operator in _iter_operators(ir.operators)
+    }
     tokens |= {qualifier.token for qualifier in ir.qualifiers}
-    tokens.add(ir.base.token)
+    if ir.base.token != "placeholder":
+        tokens.add(ir.base.token)
     if ir.projection is not None:
         tokens.add(ir.projection.axis)
     if ir.locus is not None:
@@ -246,6 +275,11 @@ def select_conventions(
     tokens = _ir_tokens(ir)
     segments = _ir_segments(ir)
     definitions = _vocabulary_definitions()
+    template_bases = {
+        operator.op for operator in ir.operators if operator.kind is OperatorKind.BINARY
+    }
+    if ir.base.token != "placeholder":
+        template_bases.add(ir.base.token)
 
     concepts = tuple(
         AppliedConcept(
@@ -281,6 +315,6 @@ def select_conventions(
             documentation=entry.documentation,
         )
         for entry in conventions.templates.templates
-        if entry.base == ir.base.token and set(entry.segments) <= segments
+        if entry.base in template_bases and set(entry.segments) <= segments
     )
     return AppliedConventions(concepts=concepts, notation=notation, templates=templates)
