@@ -30,6 +30,11 @@
     <p>Commit <code>0a977ee</code> removes the template <code>sign_convention</code> field from the model, <code>templates.yml</code> and the <code>select_conventions</code> output, folds <code>_load_conventions_yaml</code> into <code>_load_yaml</code>, and makes each refusal test assert its own message. <code>rg</code> finds neither name in the registry code. Gate: 44 passed, 5 xfailed against 42 passed, 5 xfailed at base; re-adding <code>sign_convention</code> to the template model turns the refusal test red. Independent review 118/120, no added failures. With the loader landing (<a href="#s2-registry-loader">s2-registry-loader</a>), the section's deliverable is in the tree.</p>
   </section>
 
+  <section id="s3-registry-test-invariants">
+    <h2>§3 — the registry tests check the registry&#x27;s own invariants</h2>
+    <p>Run <code>r-20261013T081300178088-cnr-registry-test-invariants</code>, merged at <code>448d2b9</code>. Authoring the conventions registry had broken three tests in <code>tests/grammar/test_conventions.py</code>, because they pinned entries and spellings the authored registry no longer had. The rewrite tests what the registry promises instead: every declared entry is present, the density spelling follows the notation policy, and notation is selected from the parse. The four-file gate went from 3 failed and 79 passed at base to 82 passed at head. Three targeted mutations of a scratch registry each fail a test (exit 1). The independent review scored every dimension 19 or 20 with no added failures. Its one note: the node's fragment is an empty anchor, so this record carries the account.</p>
+  </section>
+
 </main>
 </body>
 </html>
