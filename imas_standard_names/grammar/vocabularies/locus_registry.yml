@@ -783,7 +783,9 @@ loci:
     allowed_relations: [at, of]
     qualifiable: true
     definition: >-
-      Last closed flux surface / separatrix. For a flux-surface-averaged
+      The flux surface through the primary X-point, where the poloidal flux
+      equals its X-point value; it bounds the confined plasma only in a
+      diverted configuration. For a flux-surface-averaged
       quantity apply the flux_surface_averaged operator (DD
       summary/local/separatrix_average/*); for a bare point value at the
       outboard midplane use outboard_midplane_separatrix. DD:

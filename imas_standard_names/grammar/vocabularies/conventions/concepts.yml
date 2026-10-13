@@ -321,6 +321,18 @@ concepts:
         meaning: its value at the plasma boundary
     restates_equation: true
 
+  poloidal_angle:
+    phrase: poloidal angle
+    definition: >-
+      The angle about the magnetic axis in a poloidal cross-section, zero on
+      the outboard midplane and increasing clockwise when the cross-section is
+      viewed with R to the right and Z upward.
+    equation: '\theta = \operatorname{atan2}(Z_{\mathrm{axis}} - Z,\; R - R_{\mathrm{axis}})'
+    symbols:
+      - symbol: R_{\mathrm{axis}}, Z_{\mathrm{axis}}
+        meaning: position of the magnetic axis
+    restates_equation: false
+
   # --- loci defined by the field --------------------------------------------
 
   plasma_boundary:
@@ -405,16 +417,38 @@ concepts:
         meaning: radial flux-surface label
     restates_equation: false
 
+  outboard_midplane:
+    phrase: outboard midplane
+    equation: '\left.\frac{dR}{dZ}\right|_{\mathrm{sep}} = 0,\quad R > R_{\mathrm{axis}}'
+    symbols:
+      - symbol: R(Z)|_{\mathrm{sep}}
+        meaning: the major radius of the separatrix contour as a function of height
+      - symbol: R_{\mathrm{axis}}
+        meaning: major radius of the magnetic axis
+    restates_equation: false
+
+  inboard_midplane:
+    phrase: inboard midplane
+    equation: '\left.\frac{dR}{dZ}\right|_{\mathrm{sep}} = 0,\quad R < R_{\mathrm{axis}}'
+    symbols:
+      - symbol: R(Z)|_{\mathrm{sep}}
+        meaning: the major radius of the separatrix contour as a function of height
+      - symbol: R_{\mathrm{axis}}
+        meaning: major radius of the magnetic axis
+    restates_equation: false
+
   # --- quantities defined by an equation ------------------------------------
 
   safety_factor:
     phrase: safety factor
-    equation: 'q = \frac{d\Phi}{d\Psi}'
+    equation: 'q = \frac{1}{2\pi}\oint \frac{\mathbf{B}\cdot\nabla\phi}{\mathbf{B}\cdot\nabla\theta}\,d\theta'
     symbols:
-      - symbol: '\Phi'
-        meaning: toroidal magnetic flux enclosed by the flux surface
-      - symbol: '\Psi'
-        meaning: poloidal magnetic flux, not divided by 2 pi
+      - symbol: '\mathbf{B}'
+        meaning: magnetic field
+      - symbol: '\phi'
+        meaning: toroidal angle
+      - symbol: '\theta'
+        meaning: poloidal angle, the integral taken once around the flux surface
     restates_equation: true
 
   magnetic_shear:
@@ -518,4 +552,22 @@ concepts:
         meaning: the closed toroidal loop
       - symbol: '\mathbf{E}'
         meaning: electric field
+    restates_equation: true
+
+  internal_inductance:
+    phrase: internal inductance
+    definition: >-
+      The volume integral of the squared poloidal magnetic field over the
+      plasma, normalized by the plasma current and the major radius of the
+      plasma's geometric axis.
+    equation: 'l_i = \frac{2\int_V B_{\mathrm{p}}^2\,dV}{\mu_0^2 I_{\mathrm{p}}^2 R_{\mathrm{geo}}}'
+    symbols:
+      - symbol: B_{\mathrm{p}}
+        meaning: poloidal magnetic field
+      - symbol: I_{\mathrm{p}}
+        meaning: plasma current
+      - symbol: R_{\mathrm{geo}}
+        meaning: major radius of the geometric axis
+      - symbol: V
+        meaning: plasma volume
     restates_equation: true
