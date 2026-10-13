@@ -8,7 +8,7 @@ from pathlib import Path
 import pytest
 
 from imas_standard_names.grammar import vocab_loaders
-from imas_standard_names.grammar.model import StandardName
+from imas_standard_names.grammar.model import StandardName, parse_standard_name
 from imas_standard_names.grammar.terms import select_conventions
 from imas_standard_names.grammar.vocab_loaders import (
     TEMPLATE_SEGMENT_KINDS,
@@ -36,18 +36,21 @@ def _scratch_conventions(tmp_path: Path, filename: str, text: str) -> Path:
 
 def test_shipped_registry_loads_all_three_files():
     registry = load_conventions()
-    assert set(registry.concepts.concepts) == {
+    assert registry.concepts.concepts
+    assert registry.notation.notation
+    assert registry.templates.templates
+    assert {
         "flux_surface_averaged",
         "plasma_boundary",
-    }
-    assert set(registry.notation.notation) == {"density"}
-    assert [template.base for template in registry.templates.templates] == ["density"]
+    } <= registry.concepts.concepts.keys()
 
 
-def test_density_notation_matches_the_seed():
+def test_density_notation_excludes_shared_flux_coordinate_spelling():
+    r"""A substring ban on \rho would also reject the toroidal flux coordinate."""
     entry = load_notation().notation["density"]
     assert entry.symbol == "n_s"
-    assert entry.forbidden_spellings == ["\\rho", "N_s"]
+    assert "N_s" in entry.forbidden_spellings
+    assert "\\rho" not in entry.forbidden_spellings
     assert "s" in entry.parameters
 
 
@@ -227,5 +230,18 @@ def test_accessor_selects_from_the_parse_not_from_text():
     # concept phrases are words a text search would find elsewhere.
     applied = select_conventions("electron_density")
     assert applied.concepts == ()
-    assert [entry.token for entry in applied.notation] == ["density"]
+    parsed = parse_standard_name("electron_density")
+    expected = {parsed.physical_base, parsed.subject} & load_notation().notation.keys()
+    assert (
+        {entry.token for entry in applied.notation}
+        == expected
+        == {
+            "density",
+            "electron",
+        }
+    )
     assert [template.base for template in applied.templates] == ["density"]
+    assert "ion" in "fusion_gain"
+    assert "ion" not in {
+        entry.token for entry in select_conventions("fusion_gain").notation
+    }
