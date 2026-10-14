@@ -751,7 +751,7 @@ loci:
   plasma_boundary:
     type: position
     allowed_relations: [at, of]
-    definition: The surface used to delimit the plasma domain for the quantity being described.
+    definition: 'The last closed magnetic flux surface: the outermost flux surface on which field lines close on themselves, bounding the confined plasma.'
   plasma_boundary_gap:
     type: position
     allowed_relations: [at, of]
