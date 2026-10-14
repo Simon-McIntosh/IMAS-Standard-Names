@@ -1,0 +1,38 @@
+<!-- Landing record for the plasma_boundary locus definition. -->
+<section id="cnr-plasma-boundary-definition-landing">
+  <p>
+    Replaced the <code>plasma_boundary</code> definition in
+    <code>grammar/vocabularies/locus_registry.yml</code> with the lead-approved
+    text naming the last closed flux surface. The old text named a domain rather
+    than the surface; the new text names the surface itself. Nothing else
+    changed: <code>plasma_boundary_gap</code>, the other locus entries and the
+    conventions concept entry are untouched, and the definition deliberately
+    does not name the separatrix, which the conventions entry forbids for the
+    general case.
+  </p>
+  <p id="cnr-plasma-boundary-definition-before">
+    Before:
+    <code>The surface used to delimit the plasma domain for the quantity being described.</code>
+  </p>
+  <p id="cnr-plasma-boundary-definition-after">
+    After:
+    <code>The last closed magnetic flux surface: the outermost flux surface on which field lines close on themselves, bounding the confined plasma.</code>
+  </p>
+  <p id="cnr-plasma-boundary-definition-accessor">
+    The concept entry in
+    <code>conventions/concepts.yml</code> does not restate the definition, so the
+    <code>select_conventions</code> accessor joins the locus definition to the
+    conventions equation. Its output for
+    <code>poloidal_flux_at_plasma_boundary</code> is:
+  </p>
+  <pre id="cnr-plasma-boundary-definition-accessor-output">token:      plasma_boundary
+definition: The last closed magnetic flux surface: the outermost flux surface on which field lines close on themselves, bounding the confined plasma.
+phrase:     plasma boundary
+equation:   \psi = \psi_{\mathrm{LCFS}}
+forbidden:  ['the separatrix']</pre>
+  <p id="cnr-plasma-boundary-definition-measure">
+    Measure: the five-file gate ran 39 passed (EXIT=0) at head against 39 passed
+    (EXIT=0) at base — zero added failures. The accessor's pre-change output
+    quoted the old definition, so the comparison distinguishes the two texts.
+  </p>
+</section>
