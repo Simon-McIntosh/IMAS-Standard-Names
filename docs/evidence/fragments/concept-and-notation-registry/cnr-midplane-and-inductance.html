@@ -1,0 +1,50 @@
+<section id="cnr-midplane-and-inductance">
+  <h2>Midplane and internal-inductance entries made consistent with the DD</h2>
+  <p>The <code>load_conventions</code> accessor was run before and after the
+     change; both quotes are recorded on disk under the run directory.</p>
+
+  <h3 id="cnr-midplane-and-inductance-midplane">Midplane entries</h3>
+
+  <p><strong>Before.</strong> Both entries fixed the midplane as the point on the
+     separatrix contour where the tangent is vertical:</p>
+  <pre><code>outboard_midplane equation: \left.\frac{dR}{dZ}\right|_{\mathrm{sep}} = 0,\quad R &gt; R_{\mathrm{axis}}
+inboard_midplane  equation: \left.\frac{dR}{dZ}\right|_{\mathrm{sep}} = 0,\quad R &lt; R_{\mathrm{axis}}
+symbols:  R(Z)|_{\mathrm{sep}} = the major radius of the separatrix contour as a function of height
+          R_{\mathrm{axis}} = major radius of the magnetic axis</code></pre>
+
+  <p><strong>Reason.</strong> The point is undefined for a limited plasma, which
+     has no separatrix, and it disagrees with <code>poloidal_angle</code>, whose
+     zero lies on the outboard side of the horizontal plane through the magnetic
+     axis.</p>
+
+  <p><strong>After.</strong> The accessor returns:</p>
+  <pre><code>outboard_midplane equation: Z = Z_{\mathrm{mid}},\quad R &gt; R_{\mathrm{axis}}
+inboard_midplane  equation: Z = Z_{\mathrm{mid}},\quad R &lt; R_{\mathrm{axis}}
+symbols:  Z_{\mathrm{mid}} = the midplane height the data's midplane identifier selects,
+                             the magnetic-axis height when none is given
+          R_{\mathrm{axis}} = major radius of the magnetic axis</code></pre>
+
+  <p>The DD makes the midplane a per-dataset choice:
+     <code>equilibrium/time_slice/profiles_1d/midplane_identifier</code> takes
+     <code>1 magnetic_axis</code>, <code>2 dr_dz_zero_sep</code>,
+     <code>3 z_zero</code> or <code>4 ggd_subset</code>. The general height
+     <code>Z_{\mathrm{mid}}</code> replaces the hard-coded
+     <code>dr_dz_zero_sep</code> condition.</p>
+
+  <h3 id="cnr-midplane-and-inductance-inductance">Internal inductance</h3>
+
+  <p><strong>Before.</strong> The definition named no form, while the DD carries
+     several (<code>l_i(1)</code>, <code>l_i(2)</code>, <code>l_i(3)</code>,
+     differing in the denominator radius and the leading factor).</p>
+  <p><strong>After.</strong> The accessor returns the <code>l_i(3)</code> form:
+     "The l_i(3) form of the plasma's internal inductance: the volume integral of
+     the squared poloidal magnetic field over the plasma, normalized by the plasma
+     current and the major radius of the plasma's geometric axis." The equation and
+     symbols are unchanged.</p>
+
+  <h3 id="cnr-midplane-and-inductance-measure">Measure</h3>
+  <p>Gate <code>tests/grammar/test_conventions.py</code> and
+     <code>tests/test_vocabulary_consistency_regressions.py</code>: 20 passed,
+     EXIT=0 at base <code>d0b7eafb</code>, and 20 passed, EXIT=0 at head; zero
+     added failures.</p>
+</section>
