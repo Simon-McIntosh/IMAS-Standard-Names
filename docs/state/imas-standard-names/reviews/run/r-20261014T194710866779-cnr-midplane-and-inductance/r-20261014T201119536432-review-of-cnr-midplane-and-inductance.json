@@ -1,0 +1,64 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "d0b7eafb24df336313e170fe1fa08a123c5b152c",
+  "call_site_count": 2,
+  "call_sites": [
+    "imas_standard_names/grammar/terms.py:250",
+    "imas_standard_names/grammar/vocab_loaders.py:844"
+  ],
+  "completed_at": "2026-10-14T20:19:14.110Z",
+  "dispatched_at": "2026-10-14T20:11:22Z",
+  "findings": [
+    {
+      "file": "imas_standard_names/grammar/vocabularies/conventions/concepts.yml",
+      "line": 422,
+      "severity": "follow-on",
+      "text": "the reworded midplane equations and the l_i(3) definition have no regression guard; the two named gate suites pass identically at base d0b7eaf and head 0e43cde, so reverting this text reddens no test."
+    },
+    {
+      "file": "docs/evidence/fragments/concept-and-notation-registry/cnr-midplane-and-inductance.html",
+      "line": 4,
+      "severity": "follow-on",
+      "text": "the fragment claims both the before and after accessor quotes are recorded on disk, but only accessor_after.log exists; the before quote matches the base blob yet was not captured by an accessor run."
+    }
+  ],
+  "head_log_revision": "0e43cde1a7918313fe2585175e665bde74e17260",
+  "item_aggregate": 5,
+  "item_verdicts": {
+    "diff": "read commit by commit against d0b7eaf; the single commit 0e43cde changes the outboard_midplane and inboard_midplane equations and the Z_{mid} symbol meaning, prepends the l_i(3) clause to the internal_inductance definition, and adds the landing fragment, with no other line in the file touched.",
+    "done_when": "the done_when asks the loader to accept the file, the accessor to return the new entries with its output quoted in the fragment, the two named gate files at base and head judged by delta, and the fragment to show before/after with the reason citing midplane_identifier; baseline.log and head.log each record 20 passed EXIT=0, accessor_after.log quotes the new equations and definition, and the fragment carries the accessor output and cites equilibrium/time_slice/profiles_1d/midplane_identifier.",
+    "goal": "the node goal is to replace the midplane equations and reword the internal-inductance definition with the coordinator-authored text; imas_standard_names/grammar/vocabularies/conventions/concepts.yml:422,432 now read Z = Z_{mid}, R >/< R_{axis} and :559 opens with the l_i(3) form, verbatim as authored.",
+    "manifest": "read; it records status complete, commits [0e43cde], changed_paths matching the diff, test_logs naming baseline.log/head.log/accessor_after.log, baseline_suite and after_suite both exit_status 0 with failure_count 0 and empty failure_ids, and measurement_module/measurement_cwd; negative_control_log is none because the fence reaches no test path.",
+    "write_paths": "the source node fences imas_standard_names/grammar/vocabularies/conventions/concepts.yml and docs/evidence/fragments/concept-and-notation-registry/cnr-midplane-and-inductance.html; git show --stat 0e43cde lists exactly those two paths (yml 9+/9-, fragment 50+) and nothing else."
+  },
+  "justifications": {
+    "durability": "both gate files pass identically at base d0b7eaf and head 0e43cde (20 passed EXIT=0 each), and neither test references a midplane equation or the internal_inductance definition, so reverting the reworded text reddens nothing.",
+    "evidence": "baseline.log and head.log record 20 passed EXIT=0 and accessor_after.log quotes the new entries, but the manifest's baseline_suite/after_suite are a plain (non-armed) pair and the fragment at line 4 claims a before-quote on disk that no accessor_before.log backs.",
+    "fit": "the edited scalars at concepts.yml:422,432,559 keep the file's single-quoted and folded-block idiom, and no plan, stage or version label appears in any changed name, comment or filename.",
+    "goal_fidelity": "imas_standard_names/grammar/vocabularies/conventions/concepts.yml:422 and :432 carry the authored equations and :559 the authored l_i(3) definition, a byte-for-byte application of the goal text.",
+    "reuse": "the diff adds no function, class or module; it edits four data values in the existing concepts registry, so no capability is forked or duplicated.",
+    "scope_discipline": "git show --stat 0e43cde touches only imas_standard_names/grammar/vocabularies/conventions/concepts.yml and the node's own docs/evidence/fragments/concept-and-notation-registry/cnr-midplane-and-inductance.html, both inside the two-path fence."
+  },
+  "project": "imas-standard-names",
+  "raw_text": "VERDICT goal: the node goal is to replace the midplane equations and reword the internal-inductance definition with the coordinator-authored text; imas_standard_names/grammar/vocabularies/conventions/concepts.yml:422,432 now read Z = Z_{mid}, R >/< R_{axis} and :559 opens with the l_i(3) form, verbatim as authored.\nVERDICT done_when: the done_when asks the loader to accept the file, the accessor to return the new entries with its output quoted in the fragment, the two named gate files at base and head judged by delta, and the fragment to show before/after with the reason citing midplane_identifier; baseline.log and head.log each record 20 passed EXIT=0, accessor_after.log quotes the new equations and definition, and the fragment carries the accessor output and cites equilibrium/time_slice/profiles_1d/midplane_identifier.\nVERDICT write_paths: the source node fences imas_standard_names/grammar/vocabularies/conventions/concepts.yml and docs/evidence/fragments/concept-and-notation-registry/cnr-midplane-and-inductance.html; git show --stat 0e43cde lists exactly those two paths (yml 9+/9-, fragment 50+) and nothing else.\nVERDICT manifest: read; it records status complete, commits [0e43cde], changed_paths matching the diff, test_logs naming baseline.log/head.log/accessor_after.log, baseline_suite and after_suite both exit_status 0 with failure_count 0 and empty failure_ids, and measurement_module/measurement_cwd; negative_control_log is none because the fence reaches no test path.\nVERDICT diff: read commit by commit against d0b7eaf; the single commit 0e43cde changes the outboard_midplane and inboard_midplane equations and the Z_{mid} symbol meaning, prepends the l_i(3) clause to the internal_inductance definition, and adds the landing fragment, with no other line in the file touched.\nCALL_SITES: imas_standard_names/grammar/terms.py:250, imas_standard_names/grammar/vocab_loaders.py:844\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: imas_standard_names/grammar/vocabularies/conventions/concepts.yml:422 and :432 carry the authored equations and :559 the authored l_i(3) definition, a byte-for-byte application of the goal text.\nSCORE evidence: 17\nJUSTIFICATION evidence: baseline.log and head.log record 20 passed EXIT=0 and accessor_after.log quotes the new entries, but the manifest's baseline_suite/after_suite are a plain (non-armed) pair and the fragment at line 4 claims a before-quote on disk that no accessor_before.log backs.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git show --stat 0e43cde touches only imas_standard_names/grammar/vocabularies/conventions/concepts.yml and the node's own docs/evidence/fragments/concept-and-notation-registry/cnr-midplane-and-inductance.html, both inside the two-path fence.\nSCORE durability: 5\nJUSTIFICATION durability: both gate files pass identically at base d0b7eaf and head 0e43cde (20 passed each), and no test in tests/grammar/test_conventions.py or tests/test_vocabulary_consistency_regressions.py references a midplane equation or the internal_inductance definition, so reverting the reworded text reddens nothing.\nSCORE fit: 20\nJUSTIFICATION fit: the edited scalars at concepts.yml:422,432,559 keep the file's single-quoted and folded-block idiom, and no plan, stage or version label appears in any changed name, comment or filename.\nSCORE reuse: 20\nJUSTIFICATION reuse: the diff adds no function, class or module; it edits four data values in the existing concepts registry, so no capability is forked or duplicated.\nFINDING imas_standard_names/grammar/vocabularies/conventions/concepts.yml:422 follow-on: the reworded midplane equations and the l_i(3) definition have no regression guard \u2014 the two gate suites pass identically at base and head, so a revert of this text leaves every named test green.\nFINDING docs/evidence/fragments/concept-and-notation-registry/cnr-midplane-and-inductance.html:4 follow-on: the fragment states both the before and after accessor quotes are recorded on disk under the run directory, but only accessor_after.log exists; the before quote is consistent with the base blob at d0b7eaf yet was not captured by an accessor run.",
+  "review_run_id": "r-20261014T201119536432-review-of-cnr-midplane-and-inductance",
+  "reviewed_base_sha": "d0b7eafb24df336313e170fe1fa08a123c5b152c",
+  "reviewed_head_sha": "0e43cde1a7918313fe2585175e665bde74e17260",
+  "reviewed_run_id": "r-20261014T194710866779-cnr-midplane-and-inductance",
+  "reviewer": "review-of-cnr-midplane-and-inductance",
+  "scores": {
+    "durability": 5,
+    "evidence": 17,
+    "fit": 20,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-14T20:16:30Z",
+  "total": 102
+}
