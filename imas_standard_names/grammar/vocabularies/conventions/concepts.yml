@@ -419,20 +419,20 @@ concepts:
 
   outboard_midplane:
     phrase: outboard midplane
-    equation: '\left.\frac{dR}{dZ}\right|_{\mathrm{sep}} = 0,\quad R > R_{\mathrm{axis}}'
+    equation: 'Z = Z_{\mathrm{mid}},\quad R > R_{\mathrm{axis}}'
     symbols:
-      - symbol: R(Z)|_{\mathrm{sep}}
-        meaning: the major radius of the separatrix contour as a function of height
+      - symbol: Z_{\mathrm{mid}}
+        meaning: the midplane height the data's midplane identifier selects, the magnetic-axis height when none is given
       - symbol: R_{\mathrm{axis}}
         meaning: major radius of the magnetic axis
     restates_equation: false
 
   inboard_midplane:
     phrase: inboard midplane
-    equation: '\left.\frac{dR}{dZ}\right|_{\mathrm{sep}} = 0,\quad R < R_{\mathrm{axis}}'
+    equation: 'Z = Z_{\mathrm{mid}},\quad R < R_{\mathrm{axis}}'
     symbols:
-      - symbol: R(Z)|_{\mathrm{sep}}
-        meaning: the major radius of the separatrix contour as a function of height
+      - symbol: Z_{\mathrm{mid}}
+        meaning: the midplane height the data's midplane identifier selects, the magnetic-axis height when none is given
       - symbol: R_{\mathrm{axis}}
         meaning: major radius of the magnetic axis
     restates_equation: false
@@ -557,9 +557,9 @@ concepts:
   internal_inductance:
     phrase: internal inductance
     definition: >-
-      The volume integral of the squared poloidal magnetic field over the
-      plasma, normalized by the plasma current and the major radius of the
-      plasma's geometric axis.
+      The l_i(3) form of the plasma's internal inductance: the volume integral
+      of the squared poloidal magnetic field over the plasma, normalized by the
+      plasma current and the major radius of the plasma's geometric axis.
     equation: 'l_i = \frac{2\int_V B_{\mathrm{p}}^2\,dV}{\mu_0^2 I_{\mathrm{p}}^2 R_{\mathrm{geo}}}'
     symbols:
       - symbol: B_{\mathrm{p}}
