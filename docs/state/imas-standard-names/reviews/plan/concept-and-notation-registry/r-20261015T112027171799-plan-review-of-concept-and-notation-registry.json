@@ -1,0 +1,51 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-15T11:41:45.117Z",
+  "dispatched_at": "2026-10-15T11:30:30Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/concept-and-notation-registry.html:177",
+      "id": "reasoning-1",
+      "reason": "as written the only compliant placement puts prose about a different quantity into every sibling's documentation, so the node cannot satisfy the section's own purpose without a token-keyed placement mechanism (or an explicit family-wide scope) that the plan does not name.",
+      "text": "\u00a75 places each sentence \"in the documentation of the template that renders the unqualified or total quantity\", but a template is keyed by base plus segment kinds and selected by subset match (`grammar/terms.py:297-306`), so a whole pattern shares it: at HEAD `cba614f`, `select_conventions` returns `temperature/[subject]` for `electron_temperature`, `neutral_temperature` and `cold_neutral_temperature` alike, `density/[subject]` for `total_electron_density`, `fast_electron_density` and `thermal_electron_density`, and the bare `triangularity` template for both `triangularity_of_plasma_boundary` and `upper_triangularity_of_plasma_boundary` \u2014 so the neutral-population sentence would render into `electron_temperature`'s documentation and the \"unqualified triangularity\" sentence onto `upper_triangularity_of_plasma_boundary`; the plan's own done-when renders one name per ruling and so cannot see the leak",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/concept-and-notation-registry.html:177",
+      "id": "reasoning-2",
+      "reason": "the plan names the ruling field as the wording authority, so a builder that opens the JSON gets the right text; only a builder copying the visible list would inherit the truncation, and tightening the claim costs one edit rather than redirecting a node.",
+      "text": "\u00a75 states \"The exact wording is each ruling's `template_sentence`\" while quoting three shortened variants beside it (`\"Total density is the sum of the thermal and fast populations.\"` for the field's `\"\u2026populations of the species; thermal excludes the suprathermal particles that fast names.\"`, and the first clause only for the triangularity ruling)",
+      "type": "reasoning",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "333f9a4796883ae10126dce9a027ffd3bb19bcca1bd635b5c442e832e2e7ea41",
+  "plan_slug": "concept-and-notation-registry",
+  "plan_version": 24,
+  "project": "imas-standard-names",
+  "responses": {},
+  "review_run_id": "r-20261015T112027171799-plan-review-of-concept-and-notation-registry",
+  "reviewed_blob_sha": "a568f6a1522610253293069a3fb6f97e5b2df354",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the cited ruling file exists and carries `template_sentence` on the three rulings \u00a75 names; `imas_standard_names/grammar/vocabularies/conventions/templates.yml` exists and each entry carries `description` and `documentation` fields; the undocumented \"existing template accessor\" resolves to `select_conventions` in `grammar/terms.py`.",
+    "done_when": "pass \u2014 \u00a75 names a measurement (three sentences findable through `select_conventions` over one rendered name per ruling) and a declared negative control (the test fails with the sentence removed); the over-broad placement it cannot detect is filed under `reasoning`.",
+    "evidence_paths": "pass \u2014 the cited ruling JSON sits in a committed tree (`imas-codex docs/evidence/fragments/sn-catalog-grouping/scg-near-duplicate-rulings.json`), not a scratchpad, and can be opened by a later reader.",
+    "naming": "pass \u2014 the sentences and the template keys carry no plan label, stage name, ticket number or version tag; the page's \"consumer: imas-codex S18\" eyebrow is plan-document prose, not code.",
+    "reasoning": "a finding \u2014 \u00a75's placement rule sends each sentence into a template that every sibling name of the pattern also selects, so the sentence renders on the names it is written to tell apart.",
+    "single_goal": "pass \u2014 \u00a75 carries one deliverable (three separating sentences in `templates.yml`) with one test.",
+    "wiring": "pass \u2014 `s5` adds no inter-plan edge and its only dependency (\u00a72's `templates.yml`) is already `done`; the plan's sole relationship, `plan-blocks=imas-codex:sn-house-style`, is unchanged and was answered in an earlier review."
+  },
+  "section_digests": {
+    "_document": "56db984e00cd2309e7e694664d4cbace4f656b10090119718b19f465995d9e59",
+    "s1": "30a14d1b0da016d94a775f6d1085956ddc7deec1c03f5b5f600083f6120bf711",
+    "s2": "62e226b5e5ae9709dcab01f287af1164b128950199d32d6795f6a9f6bf3dbda9",
+    "s3": "dbbc4175f8a714330ed9bfb7402d0ebe8acc2802fc51746f56dae6d178b35434",
+    "s4": "3a28fbf118b9fc1daa60b9e41d42866cbcd951b116da2f37eb7123b2b556746e",
+    "s5": "5c299c161cf71de5da832ebbe4c29ab7ee417e7e0a7ee85b9d1b7cbcb0252e43"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-15T12:13:21.497045+00:00"
+}
