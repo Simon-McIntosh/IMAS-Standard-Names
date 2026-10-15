@@ -1,0 +1,59 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-15T12:25:06.037Z",
+  "dispatched_at": "2026-10-15T12:13:58Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/concept-and-notation-registry.html:177",
+      "id": "reasoning-1",
+      "reason": "the plan presents this as a mechanism \"the registry already offers\"; it does not, so a node following it would search for a definition field that is never there and stall on the first sentence.",
+      "text": "\u00a75 tells the worker to place each sentence on \"the definition of the component, zone or population token that only those names carry\", but no such definition exists: `_vocabulary_definitions()` (imas_standard_names/grammar/vocab_loaders.py:715-724) returns definitions only for locus, physical_base and geometry_carrier tokens, and a `concepts.yml` entry (which must carry exactly one canonical equation and is keyed by an operator/locus/coordinate/base token, \u00a72 and the file's own header) cannot be keyed by `cold`, `thermal`, `upper` or `total` \u2014 so a population, zone or aggregation token has nowhere to carry the sentence, and `select_conventions` returns nothing at all for `cold_neutral_temperature` and `total_electron_density`",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/concept-and-notation-registry.html:177",
+      "id": "done_when-1",
+      "reason": "the control the done-when advertises (\"fails again with a sentence moved to the shared template\") is not uniform; the density sentence needs a density sibling outside the trio, exactly as the neutral sentence has electron/ion temperature, or the test proves nothing for that sentence.",
+      "text": "the electron-density sentence cannot be rendered on exactly {total_electron_density, thermal_electron_density, fast_electron_density} by any template: `total_electron_density` fills the `aggregation` segment while `thermal`/`fast` fill `population` (two different segment kinds), and `select_conventions` matches templates by segment kind through a subset test (`templates.py`/`grammar/terms.py:305`, `set(entry.segments) <= segments`), so any template that reaches all three also reaches every other density name; and because the done-when adds a sibling outside the family (\"at least electron_temperature and ion_temperature\") only beside the neutral pair, its \"on no other name\" half can never fail for the electron-density sentence, so a sentence dropped onto the shared `density`/`[subject]` template passes both halves",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/concept-and-notation-registry.html:177",
+      "id": "reasoning-2",
+      "reason": "the two triangularity rulings share a sentence and one base family, so the plan's three-sentence list still covers every name that carries a sentence; the count is descriptive, not a coverage contract.",
+      "text": "\u00a75 states \"Three of those rulings carry a `template_sentence`\", but the cited JSON carries four rulings with a non-null `template_sentence` (overlap-296b9d67a4a5, overlap-370569d04611, overlap-7f2595983ef6, overlap-ff9acc486ea4), the two triangularity rulings sharing one sentence",
+      "type": "reasoning",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "1bbeb0f3cc8d46b0e5e1323b538e72212383d105eab4e9246c659d09727b3a71",
+  "plan_slug": "concept-and-notation-registry",
+  "plan_version": 25,
+  "project": "imas-standard-names",
+  "responses": {},
+  "review_run_id": "r-20261015T121343029198-plan-review-of-concept-and-notation-registry",
+  "reviewed_blob_sha": "cbd782cc5c2565243217535f4f36657e35bb073a",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `scg-near-duplicate-rulings.json`, `templates.yml`, `grammar/terms.py` and commit `cba614f` all resolve; the cited JSON is in the imas-codex checkout the plan names.",
+    "done_when": "a finding \u2014 \u00a75's test adds a sibling name (electron_temperature, ion_temperature) only beside the neutral pair, so its \"on no other name\" assertion cannot fail for the electron-density sentence.",
+    "evidence_paths": "pass \u2014 \u00a75 names no scratch path; the registry and template tests it requires run from the repository tree and the fragment convention is the durable record.",
+    "naming": "pass \u2014 \u00a75 introduces no plan labels, ticket numbers, stage names or version tags.",
+    "reasoning": "a finding \u2014 the first of the two mechanisms \u00a75 offers (\"the definition of the component, zone or population token\") is not one the registry holds.",
+    "single_goal": "pass \u2014 \u00a75 carries one deliverable (render the three ruled sentences on exactly the names each describes).",
+    "wiring": "pass \u2014 \u00a75 declares no new relationship; the plan's sole edge `plan-blocks=imas-codex:sn-house-style` resolves and the earlier direction concern was addressed."
+  },
+  "section_digests": {
+    "_document": "56db984e00cd2309e7e694664d4cbace4f656b10090119718b19f465995d9e59",
+    "s1": "30a14d1b0da016d94a775f6d1085956ddc7deec1c03f5b5f600083f6120bf711",
+    "s2": "62e226b5e5ae9709dcab01f287af1164b128950199d32d6795f6a9f6bf3dbda9",
+    "s3": "dbbc4175f8a714330ed9bfb7402d0ebe8acc2802fc51746f56dae6d178b35434",
+    "s4": "3a28fbf118b9fc1daa60b9e41d42866cbcd951b116da2f37eb7123b2b556746e",
+    "s5": "46602bc09d497d37a37b4d8df6c1f6c06b7f550ab2342f25b645ef70ec85bdfe"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-15T19:31:11.119992+00:00"
+}
