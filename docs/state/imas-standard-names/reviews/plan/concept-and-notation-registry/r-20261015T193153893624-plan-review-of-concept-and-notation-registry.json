@@ -1,0 +1,61 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-15T19:45:29.350Z",
+  "dispatched_at": "2026-10-15T19:33:55Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/concept-and-notation-registry.html:177",
+      "id": "reasoning-1",
+      "reason": "the node would edit the three vocabulary files and watch the rendering assertion of its own gate stay red, or add concept entries with invented equations for modifier tokens, a scope and content decision the plan never authorises.",
+      "text": "\u00a75 states a population/zone/aggregation definition renders \"through `_vocabulary_definitions` as locus definitions are\", but `select_conventions` emits an `AppliedConcept` only for a token already keyed in `concepts.yml` and uses the vocabulary definition merely as fallback text for that key (terms.py:280-287), so editing the three vocabulary files renders nothing; verified at HEAD a5f2e2b that `_vocabulary_definitions()` holds no `cold`, `hot`, `total` or `upper` key, and that `select_conventions(\"cold_neutral_temperature\")` and `select_conventions(\"total_electron_density\")` both return zero concepts, making the done-when's \"definition appears in a rendered name carrying the token\" unreachable by the stated mechanism",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/concept-and-notation-registry.html:177",
+      "id": "done_when-1",
+      "reason": "the node flips zones.yml to keyed entries, passes its own gate on token sets, and silently changes the intra-order invariant `load_zones` exists to preserve.",
+      "text": "\u00a75's first done-when tests that \"the three loaders return the same token sets at base and at head\", but `load_zones` returns an ordered tuple whose order is the canonical intra-order (\"MUST appear in the order returned here\", vocab_loaders.py:380), and \u00a75 converts `zones.yml` from a list to keyed entries; a set comparison cannot detect a reordering that breaks rendering and validation while the gate stays green",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/concept-and-notation-registry.html:181",
+      "id": "reasoning-2",
+      "reason": "\u00a76 already requires the fragment to state how a conditioned entry and an unconditioned sibling combine or take precedence, so the node defines the rule it cannot inherit; the mis-citation costs a lookup, not a wrong implementation.",
+      "text": "\u00a76 says \"apply the existing order rule\" when several template entries match, but no such rule exists: templates are an unordered `list[TemplateEntry]` (vocab_loaders.py:678) returned in file order with no precedence, and `templates.yml`'s own header states only that \"an opening need only follow one selected template\"",
+      "type": "reasoning",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "618431f94c22c4410c7f06cb79a0cc24f2348d0aaff6035cda0917fab35d1945",
+  "plan_slug": "concept-and-notation-registry",
+  "plan_version": 27,
+  "project": "imas-standard-names",
+  "responses": {},
+  "review_run_id": "r-20261015T193153893624-plan-review-of-concept-and-notation-registry",
+  "reviewed_blob_sha": "def70d56bfc4b572c42c7728d09804f8f6ccaaeb",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `imas_standard_names/grammar/vocab_loaders.py` (~715), `imas_standard_names/grammar/terms.py` (~297), the three cited vocabulary files and imas-codex `docs/evidence/fragments/sn-catalog-grouping/scg-near-duplicate-rulings.json` all resolve, extensionless hrefs resolving as `<path>.html`.",
+    "done_when": "a finding \u2014 \u00a75's first done-when measures \"the same token sets\" from all three loaders, but `load_zones` returns an ordered tuple whose order is itself the measure.",
+    "evidence_paths": "pass \u2014 no unit names a session scratchpad or node-local path; \u00a77 directs the placement record into the durable evidence fragment beside the registry.",
+    "naming": "pass \u2014 no plan label, stage name, ticket number or version tag reaches a symbol, file or comment in these units.",
+    "reasoning": "a finding \u2014 \u00a75's mechanism edits the three vocabulary files, but the stated render path surfaces a definition only for a token already keyed in concepts.yml, so the mechanism cannot produce its own done-when's rendered-name assertion.",
+    "single_goal": "pass \u2014 each of \u00a75 (token definitions), \u00a76 (template conditions) and \u00a77 (sentence placement) carries one deliverable with its own gate.",
+    "wiring": "pass \u2014 \u00a77's declared section links (s5, s6) match its stated \"After \u00a75 and \u00a76\" precondition, \u00a75 and \u00a76 both build on the landed \u00a72 registry with no undeclared dependency, and the plan-blocks edge to imas-codex:sn-house-style is the reverse relationship \u00a73 documents."
+  },
+  "section_digests": {
+    "_document": "cd4ef8b509f6911b6028d3fe30ec58adf657b2baa762d2934c92ef96444c8b86",
+    "s1": "30a14d1b0da016d94a775f6d1085956ddc7deec1c03f5b5f600083f6120bf711",
+    "s2": "62e226b5e5ae9709dcab01f287af1164b128950199d32d6795f6a9f6bf3dbda9",
+    "s3": "dbbc4175f8a714330ed9bfb7402d0ebe8acc2802fc51746f56dae6d178b35434",
+    "s4": "3a28fbf118b9fc1daa60b9e41d42866cbcd951b116da2f37eb7123b2b556746e",
+    "s5": "e8407bc447ae7bd810722fdc2c20103c156f90a46af7e1d9b391fc1a337c00fa",
+    "s6": "e0ddea9b2d567560ba19fb781fc68608b96c3ae09913d07981ab3addb588aa48",
+    "s7": "2cdde7d71460f7ee7423b9b18ef3572f1b4b091423f1542048fbdfa74bda1b5c"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-15T19:57:20.648168+00:00"
+}
