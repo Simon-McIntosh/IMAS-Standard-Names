@@ -125,6 +125,23 @@ class AppliedConcept(BaseModel, frozen=True):
     restates_equation: bool
 
 
+_DEFINITION_SEGMENTS: frozenset[str] = frozenset({"population", "zone", "aggregation"})
+
+
+class AppliedDefinition(BaseModel, frozen=True):
+    """A definition carried by a vocabulary token in a name.
+
+    A population, zone or aggregation token states what it means but names no
+    shared phrase or equation, so it applies as a definition alone rather than
+    as an ``AppliedConcept``, whose phrase and equation a token definition does
+    not have.
+    """
+
+    token: str
+    segment: str
+    definition: str
+
+
 class AppliedNotation(BaseModel, frozen=True):
     """The notation entry for a token appearing in a name."""
 
@@ -147,6 +164,7 @@ class AppliedConventions(BaseModel, frozen=True):
     """The convention entries that apply to one parsed name."""
 
     concepts: tuple[AppliedConcept, ...] = ()
+    definitions: tuple[AppliedDefinition, ...] = ()
     notation: tuple[AppliedNotation, ...] = ()
     templates: tuple[AppliedTemplate, ...] = ()
 
@@ -284,6 +302,17 @@ def select_conventions(
         for token, entry in sorted(conventions.concepts.concepts.items())
         if token in tokens
     )
+    definitions_applied = tuple(
+        AppliedDefinition(
+            token=token,
+            segment=kind,
+            definition=definitions[token],
+        )
+        for token in sorted(tokens)
+        if (kind := _qualifier_segment_kind(token)) in _DEFINITION_SEGMENTS
+        and kind in segments
+        and token in definitions
+    )
     notation = tuple(
         AppliedNotation(
             token=token,
@@ -304,4 +333,9 @@ def select_conventions(
         for entry in conventions.templates.templates
         if entry.base in template_bases and set(entry.segments) <= segments
     )
-    return AppliedConventions(concepts=concepts, notation=notation, templates=templates)
+    return AppliedConventions(
+        concepts=concepts,
+        definitions=definitions_applied,
+        notation=notation,
+        templates=templates,
+    )
