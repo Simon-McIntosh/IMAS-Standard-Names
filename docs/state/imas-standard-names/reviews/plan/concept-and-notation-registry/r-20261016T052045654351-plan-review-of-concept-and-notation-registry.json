@@ -1,0 +1,53 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-16T05:30:33.889Z",
+  "dispatched_at": "2026-10-16T05:20:54Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-standard-names/docs/plans/concept-and-notation-registry.html:185",
+      "id": "reasoning-1",
+      "reason": "without the RULE for a condition that spans kinds, the worker must either invent a union semantics \u00a76 does not state or duplicate the note across two entries \u00a77 does not authorise, and either choice changes what \u00a76 is.",
+      "text": "\u00a77 says each sentence goes in \"the `note` of a conditioned template (\u00a76) whose conditions name exactly that combination\", but the total-density sentence must render on `total_electron_density` (aggregation=total, aggregations.yml) and on `thermal_electron_density`/`fast_electron_density` (population=thermal/fast, populations.yml), two different segment kinds, while \u00a76 offers only \"required tokens per segment kind\" (its own examples `population: [cold, hot]` and `aggregation: [total]` each name one kind) \u2014 under the natural conjunctive reading no single entry matches all three names, and \u00a76's done-when tests neither a cross-kind union nor a multi-entry split",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-standard-names/docs/plans/concept-and-notation-registry.html:181",
+      "id": "reasoning-2",
+      "reason": "\u00a72 already fixes imas-codex as the consumer that renders the returned entries, so naming the render site is a one-line clarification that does not move the mechanism.",
+      "text": "\u00a76 says a `note` is \"rendered after the documentation opening\", but `select_conventions` (terms.py:250) has no caller in this repository outside its tests and ISN ships no documentation renderer that consumes `templates`, so the only named site that renders the note is \u00a77's own test, and no production caller is named",
+      "type": "reasoning",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "46c813a039531200a762440a898ec94de201c3ccdd0f472c35e04d6540da6abc",
+  "plan_slug": "concept-and-notation-registry",
+  "plan_version": 30,
+  "project": "imas-standard-names",
+  "responses": {},
+  "review_run_id": "r-20261016T052045654351-plan-review-of-concept-and-notation-registry",
+  "reviewed_blob_sha": "ca85a66375ececf4a8af52f59540cb5d81963587",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `terms.py ~297` is exactly the template-selection block (terms.py:297), `vocab_loaders.py ~662`/`~678` are `TemplateEntry`/`TemplatesRegistry`, `conventions/templates.yml` exists, and the cited rulings JSON `imas-codex docs/evidence/fragments/sn-catalog-grouping/scg-near-duplicate-rulings.json` opens.",
+    "done_when": "pass \u2014 \u00a76 and \u00a77 each name a negative control (mechanism removed with `EXIT=`; sentence removed and sentence moved to the shared template with `EXIT=`), so both gates can fail and both are stated measurably.",
+    "evidence_paths": "pass \u2014 both units' gates are repo tests recorded with `EXIT=` on the run record; neither sends evidence to a scratchpad or node-local path.",
+    "naming": "pass \u2014 the units add a `note` field and condition keys only; no plan labels, ticket numbers or changelog prose reach a symbol or comment.",
+    "reasoning": "a finding \u2014 \u00a77's total-density sentence must render on names whose separating token is drawn from two different segment kinds, but \u00a76 states only a per-kind required-token condition, so the single-entry placement \u00a77 prescribes is not expressible under \u00a76 as written.",
+    "single_goal": "pass \u2014 \u00a76 delivers one mechanism (selective templates that can carry a separating note) and \u00a77 delivers one (placing the three sentences), each closeable on one verdict.",
+    "wiring": "pass \u2014 \u00a77's `data-links=\"concept-and-notation-registry#s5,concept-and-notation-registry#s6\"` resolves to the two sections it consumes and \u00a76 declares no dangling edge; the sole plan edge (`plan-blocks=imas-codex:sn-house-style`) is unchanged by these units."
+  },
+  "section_digests": {
+    "_document": "cd4ef8b509f6911b6028d3fe30ec58adf657b2baa762d2934c92ef96444c8b86",
+    "s1": "30a14d1b0da016d94a775f6d1085956ddc7deec1c03f5b5f600083f6120bf711",
+    "s2": "62e226b5e5ae9709dcab01f287af1164b128950199d32d6795f6a9f6bf3dbda9",
+    "s3": "dbbc4175f8a714330ed9bfb7402d0ebe8acc2802fc51746f56dae6d178b35434",
+    "s4": "3a28fbf118b9fc1daa60b9e41d42866cbcd951b116da2f37eb7123b2b556746e",
+    "s5": "e3e419e7263996f386d85bc2c61b8a4e66310aafa7f80b0fbd7a58542f437ebb",
+    "s6": "d6c899960389590d810c511386e34ba7ee133af91a946fa601a71df17dca431c",
+    "s7": "b914db58a5221e8a3c600c1f4e377650078a95973ad6d7c94b04acd3cfe2e7c9"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-16T06:17:03.649296+00:00"
+}
