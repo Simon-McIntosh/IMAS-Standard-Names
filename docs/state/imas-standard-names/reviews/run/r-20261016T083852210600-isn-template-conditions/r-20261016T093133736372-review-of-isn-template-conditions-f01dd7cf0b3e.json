@@ -1,0 +1,65 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-16T09:40:36.237Z",
+  "dispatched_at": "2026-10-16T09:31:47Z",
+  "findings": [
+    {
+      "file": "tests/grammar/test_template_conditions.py",
+      "line": 42,
+      "severity": "follow-on",
+      "text": "the done-when's 'a note renders after the documentation opening' is demonstrated only through the test-local helper _rendered_documentation, which joins template.documentation and template.note itself; no production consumer of AppliedTemplate.note exists in this repository (select_conventions at imas_standard_names/grammar/terms.py:345 is called only from test modules), so the landed change exposes the note but no runtime path renders it. The rendering belongs to a downstream consumer or to the note-placement section that follows this one, so it is recorded rather than repaired."
+    },
+    {
+      "file": "tests/grammar/test_template_conditions.py",
+      "line": 249,
+      "severity": "follow-on",
+      "text": "_legacy_selection and its docstring ('the subset test the selector applied before conditions existed') name the oracle by the revision it precedes rather than by the mechanism it computes, which the repository's naming rules forbid in comments and symbols. The function is a correct independent reimplementation of the plain subset selection test_every_existing_template_selects_as_before compares against; naming it for the mechanism (the plain subset selection) would read the same and carry no reference to a prior revision."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261016T083852210600-isn-template-conditions/negative-control.log",
+      "line": 1,
+      "severity": "follow-on",
+      "text": "the negative-control gate log's first line records 'revision: d2713d498529590cce708f7fc925a10922732ce8' (the base), yet the run collected tests/grammar/test_template_conditions.py, which does not exist at that revision and is added by ea6ea2c; the log therefore names a revision other than the one it ran at, while the sibling mutation logs (mutation-note.log, mutation-precedence.log) correctly record ea6ea2c."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "read commit by commit against d2713d4; ea6ea2c adds requires/excludes/note to TemplateEntry with loader validation in vocab_loaders.py, refactors _ir_tokens through the new _ir_segment_tokens and adds _template_conditions_met/_select_templates in terms.py, and adds the test file; f01dd7c adds only the landing fragment.",
+    "done_when": "each of the section 6 clauses is matched by a named test or log: tests/grammar/test_template_conditions.py:64 shows a required token admits only names carrying it, :107 an excluded kind admits only names without it, :152 a note renders on a selecting name and no other, :263 the shipped registry selects as before against the independent reimplementation at :249, :214 fixes the precedence rule and reddens on the reversed rule (mutation-precedence.log 1 failed EXIT=1); base-grammar.log reads 1204 passed EXIT=0 against head-grammar.log 1212 passed EXIT=0, zero added failures.",
+    "goal": "the node goal is that a template may require or exclude tokens and carry a note; imas_standard_names/grammar/terms.py:306 _select_templates applies TemplateEntry.requires/excludes (terms.py:292 _template_conditions_met) after the subset test and exposes TemplateEntry.note on AppliedTemplate (terms.py:159, populated at terms.py:404), so a conditioned entry admits only names satisfying its conditions and a note rides the entry that selects the name.",
+    "manifest": "read; it records status complete, commits ea6ea2c and f01dd7c, changed_paths matching the diff, test_logs naming base-grammar.log and head-grammar.log, an armed baseline_suite/after_suite JSON (both zero failures) and a bare negative_control_log path.",
+    "write_paths": "the node fences imas_standard_names/grammar/vocab_loaders.py, imas_standard_names/grammar/terms.py, tests/grammar/test_template_conditions.py and the landing fragment; git diff --stat d2713d4..f01dd7c lists exactly those four paths and nothing else."
+  },
+  "justifications": {
+    "durability": "the recorded mutations redden the conditions filter (negative-control.log 3 failed EXIT=1), the note propagation (mutation-note.log 3 failed EXIT=1) and the precedence rule (mutation-precedence.log 1 failed EXIT=1), but the two loader-refusal tests at tests/grammar/test_template_conditions.py:74 and :119 and the shipped-registry comparison at :263 have no recorded red.",
+    "evidence": "the base and head grammar gates (1204 and 1212 passed, EXIT=0) and the three mutation logs are recorded and agree, but negative-control.log:1 names the base revision while collecting a test file that exists only at head, and the note rendering has no production consumer.",
+    "fit": "terms.py:292 follows the frozen-BaseModel and _ir_segments idiom already in terms.py, and the naming checks over the four changed paths find no plan, section, stage or version label, but _legacy_selection at tests/grammar/test_template_conditions.py:249 is named for a prior revision rather than its mechanism.",
+    "goal_fidelity": "terms.py:306 _select_templates and terms.py:292 _template_conditions_met implement the required-token, excluded-kind and note behaviour the goal states, and terms.py:404 carries the note onto AppliedTemplate.",
+    "reuse": "_select_templates extends select_conventions (terms.py:345, the owner of template selection) and _ir_tokens is now derived from the new _ir_segment_tokens rather than a second IR walk; a search over imas_standard_names/grammar for an existing precedence or conditioned-selection mechanism found none, and the folded-in follow-on replaces _entry_definitions' private YAML read with the registry's _load_yaml (vocab_loaders.py:33).",
+    "scope_discipline": "git diff --stat d2713d4..f01dd7c changes only imas_standard_names/grammar/terms.py, imas_standard_names/grammar/vocab_loaders.py, tests/grammar/test_template_conditions.py and the landing fragment, all inside the declared write paths."
+  },
+  "project": "imas-standard-names",
+  "raw_text": "VERDICT goal: the node goal is that a template may require or exclude tokens and carry a note; imas_standard_names/grammar/terms.py:306 _select_templates applies TemplateEntry.requires/excludes (terms.py:292) after the subset test and exposes TemplateEntry.note on AppliedTemplate (terms.py:159, populated at terms.py:404), so a conditioned entry admits only names satisfying its conditions and a note rides the entry that selects the name.\nVERDICT done_when: each section 6 clause is matched by a named test or log; tests/grammar/test_template_conditions.py:64 shows a required token admits only names carrying it, :107 an excluded kind admits only names without it, :152 a note renders on a selecting name and no other, :263 the shipped registry selects as before against the independent reimplementation at :249, :214 fixes the precedence rule and reddens on the reversed rule (mutation-precedence.log 1 failed EXIT=1); base-grammar.log 1204 passed EXIT=0 against head-grammar.log 1212 passed EXIT=0, zero added failures.\nVERDICT write_paths: the node fences imas_standard_names/grammar/vocab_loaders.py, imas_standard_names/grammar/terms.py, tests/grammar/test_template_conditions.py and the landing fragment; git diff --stat d2713d4..f01dd7c lists exactly those four paths and nothing else.\nVERDICT manifest: read; it records status complete, commits ea6ea2c and f01dd7c, changed_paths matching the diff, test_logs naming base-grammar.log and head-grammar.log, an armed baseline_suite/after_suite JSON (both zero failures) and a bare negative_control_log path.\nVERDICT diff: read commit by commit against d2713d4; ea6ea2c adds requires/excludes/note to TemplateEntry with loader validation in vocab_loaders.py, refactors _ir_tokens through the new _ir_segment_tokens and adds _template_conditions_met/_select_templates in terms.py, and adds the test file; f01dd7c adds only the landing fragment.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: terms.py:306 _select_templates and terms.py:292 _template_conditions_met implement the required-token, excluded-kind and note behaviour the goal states, and terms.py:404 carries the note onto AppliedTemplate.\nSCORE evidence: 17\nJUSTIFICATION evidence: the base and head grammar gates (1204 and 1212 passed, EXIT=0) and the three mutation logs are recorded and agree, but negative-control.log:1 names the base revision while collecting a test file that exists only at head, and the note rendering has no production consumer.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat d2713d4..f01dd7c changes only imas_standard_names/grammar/terms.py, imas_standard_names/grammar/vocab_loaders.py, tests/grammar/test_template_conditions.py and the landing fragment, all inside the declared write paths.\nSCORE durability: 16\nJUSTIFICATION durability: the recorded mutations redden the conditions filter (negative-control.log 3 failed EXIT=1), the note propagation (mutation-note.log 3 failed EXIT=1) and the precedence rule (mutation-precedence.log 1 failed EXIT=1), but the two loader-refusal tests at tests/grammar/test_template_conditions.py:74 and :119 and the shipped-registry comparison at :263 have no recorded red.\nSCORE fit: 18\nJUSTIFICATION fit: terms.py:292 follows the frozen-BaseModel and _ir_segments idiom already in terms.py, and the naming checks over the four changed paths find no plan, section, stage or version label, but _legacy_selection at tests/grammar/test_template_conditions.py:249 is named for a prior revision rather than its mechanism.\nSCORE reuse: 20\nJUSTIFICATION reuse: _select_templates extends select_conventions (terms.py:345, the owner of template selection) and _ir_tokens is now derived from the new _ir_segment_tokens rather than a second IR walk; a search over imas_standard_names/grammar for an existing precedence or conditioned-selection mechanism found none, and the folded-in follow-on replaces _entry_definitions' private YAML read with the registry's _load_yaml (vocab_loaders.py:33).\nFINDING tests/grammar/test_template_conditions.py:42 follow-on: the note rendering is demonstrated only by the test-local helper _rendered_documentation; no production consumer of AppliedTemplate.note exists in this repository, so no runtime path renders the note.\nFINDING tests/grammar/test_template_conditions.py:249 follow-on: _legacy_selection and its docstring reference a prior revision instead of the mechanism they compute (the plain subset selection), which the naming rules forbid.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261016T083852210600-isn-template-conditions/negative-control.log:1 follow-on: the log header records the base revision d2713d4 while the run collected tests/grammar/test_template_conditions.py, a file that exists only at head ea6ea2c, so the recorded revision is not the one the log ran at.",
+  "review_run_id": "r-20261016T093133736372-review-of-isn-template-conditions-f01dd7cf0b3e",
+  "reviewed_base_sha": "d2713d498529590cce708f7fc925a10922732ce8",
+  "reviewed_head_sha": "f01dd7cf0b3ef40d808084bc468a9118179285a6",
+  "reviewed_run_id": "r-20261016T083852210600-isn-template-conditions",
+  "reviewer": "review-of-isn-template-conditions-f01dd7cf0b3e",
+  "scores": {
+    "durability": 16,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-16T09:45:00Z",
+  "total": 109
+}
