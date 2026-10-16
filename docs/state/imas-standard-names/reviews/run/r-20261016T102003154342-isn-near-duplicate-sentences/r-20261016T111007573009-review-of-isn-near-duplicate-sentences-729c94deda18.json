@@ -1,0 +1,47 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-16T11:15:38Z",
+  "dispatched_at": "2026-10-16T11:10:21Z",
+  "findings": [],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "against a5ced68975780bd2a2834d366bbe58fc336ed452, commit 29dc66845632dc7aacb24169e0a4a11f7da8d01a adds conditioned notes, template_sentences and tests, and commit 729c94deda18e631190c0c91284797917b382f51 adds the placement and control fragment only.",
+    "done_when": "tests/grammar/test_near_duplicate_sentences.py:28-91 enumerates 62 temperature, triangularity and density names and asserts exact counts; the five control logs each end EXIT=1, while baseline-grammar-verified.log records 1212 passed EXIT=0 and after-grammar.log records 1275 passed EXIT=0 with zero added failures.",
+    "goal": "the source brief and plan \u00a77 require three exact near-duplicate sentences through one accessor; imas_standard_names/grammar/vocabularies/conventions/templates.yml:35-241 places them on conditioned entries and imas_standard_names/grammar/terms.py:417 returns the selected openings and distinct notes.",
+    "manifest": "the source manifest.md reports complete, names both commits and five changed paths, and supplies the two readable grammar-suite receipts plus five red-control logs that agree with their recorded EXIT values.",
+    "write_paths": "the source brief declares terms.py, templates.yml, the two grammar tests and the landing fragment; git show --stat for 29dc66845632dc7aacb24169e0a4a11f7da8d01a and 729c94deda18e631190c0c91284797917b382f51 changes exactly those five paths."
+  },
+  "justifications": {
+    "durability": "test_near_duplicate_sentences.py:91 has fixed sentence constants that fail on removal, duplication or leakage as the five red logs show, while :97-106 catches omitted or reordered openings and notes but derives opening wording from the same selected registry and therefore serves only as an ordering check.",
+    "evidence": "tests/grammar/test_near_duplicate_sentences.py:91 measures exact-once and absence over 62 names, all five mutation logs show the expected failure, and the two grammar-suite receipts show zero added failures; after-grammar.log:2 identifies a tested working tree before its content was committed.",
+    "fit": "terms.py:417 adds the accessor beside select_conventions and delegates selection to it, and test_template_conditions.py:249 names the subset-only oracle by its mechanism.",
+    "goal_fidelity": "templates.yml:35-241 carries the three verbatim ruling sentences on the required conditioned entries, and terms.py:417-428 exposes the ordered, distinct-note accessor the plan requests.",
+    "reuse": "a capability search in imas_standard_names/grammar found select_conventions in terms.py:346 as the existing selection owner and TemplateEntry in vocab_loaders.py:667 as the note schema; terms.py:423 extends that owner without a second renderer or selector.",
+    "scope_discipline": "the two commit stats show only imas_standard_names/grammar/terms.py, templates.yml, the two declared grammar tests and the declared evidence fragment."
+  },
+  "project": "imas-standard-names",
+  "raw_text": "VERDICT goal: the source brief and plan \u00a77 require three exact near-duplicate sentences through one accessor; imas_standard_names/grammar/vocabularies/conventions/templates.yml:35-241 places them on conditioned entries and imas_standard_names/grammar/terms.py:417 returns the selected openings and distinct notes.\nVERDICT done_when: tests/grammar/test_near_duplicate_sentences.py:28-91 enumerates 62 temperature, triangularity and density names and asserts exact counts; the five control logs each end EXIT=1, while baseline-grammar-verified.log records 1212 passed EXIT=0 and after-grammar.log records 1275 passed EXIT=0 with zero added failures.\nVERDICT write_paths: the source brief declares terms.py, templates.yml, the two grammar tests and the landing fragment; git show --stat for 29dc66845632dc7aacb24169e0a4a11f7da8d01a and 729c94deda18e631190c0c91284797917b382f51 changes exactly those five paths.\nVERDICT manifest: the source manifest.md reports complete, names both commits and five changed paths, and supplies the two readable grammar-suite receipts plus five red-control logs that agree with their recorded EXIT values.\nVERDICT diff: against a5ced68975780bd2a2834d366bbe58fc336ed452, commit 29dc66845632dc7aacb24169e0a4a11f7da8d01a adds conditioned notes, template_sentences and tests, and commit 729c94deda18e631190c0c91284797917b382f51 adds the placement and control fragment only.\nCALL_SITES: none\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: templates.yml:35-241 carries the three verbatim ruling sentences on the required conditioned entries, and terms.py:417-428 exposes the ordered, distinct-note accessor the plan requests.\nSCORE evidence: 19\nJUSTIFICATION evidence: tests/grammar/test_near_duplicate_sentences.py:91 measures exact-once and absence over 62 names, all five mutation logs show the expected failure, and the two grammar-suite receipts show zero added failures; after-grammar.log:2 identifies a tested working tree before its content was committed.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the two commit stats show only imas_standard_names/grammar/terms.py, templates.yml, the two declared grammar tests and the declared evidence fragment.\nSCORE durability: 19\nJUSTIFICATION durability: test_near_duplicate_sentences.py:91 has fixed sentence constants that fail on removal, duplication or leakage as the five red logs show, while :97-106 catches omitted or reordered openings and notes but derives opening wording from the same selected registry and therefore serves only as an ordering check.\nSCORE fit: 20\nJUSTIFICATION fit: terms.py:417 adds the accessor beside select_conventions and delegates selection to it, and test_template_conditions.py:249 names the subset-only oracle by its mechanism.\nSCORE reuse: 20\nJUSTIFICATION reuse: a capability search in imas_standard_names/grammar found select_conventions in terms.py:346 as the existing selection owner and TemplateEntry in vocab_loaders.py:667 as the note schema; terms.py:423 extends that owner without a second renderer or selector.\n",
+  "review_run_id": "r-20261016T111007573009-review-of-isn-near-duplicate-sentences-729c94deda18",
+  "reviewed_base_sha": "a5ced68975780bd2a2834d366bbe58fc336ed452",
+  "reviewed_head_sha": "729c94deda18e631190c0c91284797917b382f51",
+  "reviewed_run_id": "r-20261016T102003154342-isn-near-duplicate-sentences",
+  "reviewer": "review-of-isn-near-duplicate-sentences-729c94deda18",
+  "scores": {
+    "durability": 19,
+    "evidence": 19,
+    "fit": 20,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-16T11:14:29.062072+00:00",
+  "total": 118
+}
