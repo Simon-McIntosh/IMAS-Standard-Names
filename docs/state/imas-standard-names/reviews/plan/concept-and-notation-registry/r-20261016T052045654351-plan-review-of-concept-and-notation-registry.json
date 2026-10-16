@@ -31,6 +31,13 @@
       "finding": "reasoning-1",
       "reason": "",
       "when": "2026-10-16T06:17:30.812885+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "reasoning-2",
+      "reason": "the note's production renderer is the imas-codex documentation pipeline, which consumes select_conventions through the pinned grammar; section 2 fixes that consumer, and this plan's test asserts the rendering contract the consumer reads",
+      "when": "2026-10-16T06:17:34.723040+00:00"
     }
   ],
   "responses": {
@@ -39,6 +46,12 @@
       "by": "",
       "reason": "",
       "when": "2026-10-16T06:17:30.812885+00:00"
+    },
+    "reasoning-2": {
+      "action": "declined",
+      "by": "",
+      "reason": "the note's production renderer is the imas-codex documentation pipeline, which consumes select_conventions through the pinned grammar; section 2 fixes that consumer, and this plan's test asserts the rendering contract the consumer reads",
+      "when": "2026-10-16T06:17:34.723040+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-standard-names/docs/state/imas-standard-names/reviews/plan/concept-and-notation-registry/r-20261016T052045654351-plan-review-of-concept-and-notation-registry.json",
