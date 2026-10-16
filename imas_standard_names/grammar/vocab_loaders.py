@@ -668,13 +668,24 @@ class TemplateEntry(BaseModel, extra="forbid"):
     """One description/documentation opening keyed by a name pattern.
 
     The pattern is a ``base`` plus the ``segments`` (segment-kind names from
-    :data:`TEMPLATE_SEGMENT_KINDS`) a matching name must fill.
+    :data:`TEMPLATE_SEGMENT_KINDS`) a matching name must fill. A pattern may
+    narrow itself with ``requires`` and ``excludes``: an entry with neither
+    selects by the pattern alone.
+
+    ``requires`` names, per segment kind, the tokens a name must carry (at
+    least one of the listed tokens) to select the entry. ``excludes`` names
+    the segment kinds a name must not fill. ``note`` is one sentence the
+    consumer renders after the entry's documentation opening on every name
+    that selects the entry.
     """
 
     base: str = Field(min_length=1)
     segments: list[str] = []
     description: str = Field(min_length=1)
     documentation: str = Field(min_length=1)
+    requires: dict[str, list[str]] = {}
+    excludes: list[str] = []
+    note: str = ""
 
 
 class TemplatesRegistry(BaseModel, extra="forbid"):
@@ -722,8 +733,7 @@ def _entry_definitions(filename: str, dict_key: str) -> dict[str, str]:
     path = _VOCAB_DIR / filename
     if not path.exists():
         return {}
-    with path.open(encoding="utf-8") as fh:
-        data = yaml.safe_load(fh)
+    data = _load_yaml(filename, _VOCAB_DIR)
     if not isinstance(data, dict):
         return {}
     entries = data.get(dict_key) if dict_key in data else data
@@ -866,6 +876,22 @@ def load_templates(directory: Path | None = None) -> TemplatesRegistry:
             raise ValueError(
                 f"templates.yml: entry {entry.base!r} names unknown segment "
                 f"kinds {unknown!r}"
+            )
+        condition_kinds = (set(entry.requires) | set(entry.excludes)) - (
+            TEMPLATE_SEGMENT_KINDS
+        )
+        if condition_kinds:
+            raise ValueError(
+                f"templates.yml: entry {entry.base!r} conditions name unknown "
+                f"segment kinds {sorted(condition_kinds)!r}"
+            )
+        required_tokens = sorted(
+            {token for tokens in entry.requires.values() for token in tokens} - known
+        )
+        if required_tokens:
+            raise ValueError(
+                f"templates.yml: entry {entry.base!r} requires tokens that are "
+                f"not in the current grammar {required_tokens!r}"
             )
         entries.append(entry)
     return TemplatesRegistry(templates=entries)

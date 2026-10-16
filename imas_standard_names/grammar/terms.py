@@ -17,6 +17,7 @@ from imas_standard_names.grammar.model import _split_fused_indexed_operator
 from imas_standard_names.grammar.parser import parse
 from imas_standard_names.grammar.vocab_loaders import (
     ConventionsRegistry,
+    TemplateEntry,
     _vocabulary_definitions as _load_vocabulary_definitions,
     load_aggregations,
     load_conventions,
@@ -158,6 +159,7 @@ class AppliedTemplate(BaseModel, frozen=True):
     segments: tuple[str, ...]
     description: str
     documentation: str
+    note: str = ""
 
 
 class AppliedConventions(BaseModel, frozen=True):
@@ -225,22 +227,44 @@ def _locus_segment_kind(locus_type: LocusType) -> str:
     }[locus_type]
 
 
+def _ir_segment_tokens(ir: StandardNameIR) -> dict[str, set[str]]:
+    """The grammar tokens the parse of a name fills, grouped by segment kind."""
+    tokens: dict[str, set[str]] = {}
+
+    def add(kind: str, token: str) -> None:
+        tokens.setdefault(kind, set()).add(token)
+
+    for operator in _iter_operators(ir.operators):
+        add("transformation", _operator_token(operator))
+    for qualifier in ir.qualifiers:
+        add(_qualifier_segment_kind(qualifier.token), qualifier.token)
+    if ir.projection is not None:
+        add(
+            "component"
+            if ir.projection.shape is ProjectionShape.COMPONENT
+            else "coordinate",
+            ir.projection.axis,
+        )
+    if ir.base.token != "placeholder":
+        add(
+            "physical_base" if ir.base.kind is BaseKind.QUANTITY else "geometric_base",
+            ir.base.token,
+        )
+    if ir.locus is not None:
+        kind = _locus_segment_kind(ir.locus.type)
+        add(kind, ir.locus.token)
+        for qualifier in ir.locus.qualifiers:
+            add(kind, qualifier)
+    if ir.mechanism is not None:
+        add("process", ir.mechanism.token)
+    return tokens
+
+
 def _ir_tokens(ir: StandardNameIR) -> frozenset[str]:
     """Every grammar token named by the parse of a name."""
-    tokens: set[str] = {
-        _operator_token(operator) for operator in _iter_operators(ir.operators)
-    }
-    tokens |= {qualifier.token for qualifier in ir.qualifiers}
-    if ir.base.token != "placeholder":
-        tokens.add(ir.base.token)
-    if ir.projection is not None:
-        tokens.add(ir.projection.axis)
-    if ir.locus is not None:
-        tokens.add(ir.locus.token)
-        tokens |= set(ir.locus.qualifiers)
-    if ir.mechanism is not None:
-        tokens.add(ir.mechanism.token)
-    return frozenset(tokens)
+    return frozenset(
+        token for tokens in _ir_segment_tokens(ir).values() for token in tokens
+    )
 
 
 def _ir_segments(ir: StandardNameIR) -> frozenset[str]:
@@ -265,6 +289,59 @@ def _ir_segments(ir: StandardNameIR) -> frozenset[str]:
     return frozenset(kinds)
 
 
+def _template_conditions_met(
+    entry: TemplateEntry,
+    segment_tokens: dict[str, set[str]],
+    segments: frozenset[str],
+) -> bool:
+    """Whether a name filling ``segments`` satisfies an entry's conditions."""
+    if set(entry.excludes) & segments:
+        return False
+    return all(
+        set(required) & segment_tokens.get(kind, set())
+        for kind, required in entry.requires.items()
+    )
+
+
+def _select_templates(
+    entries: list[TemplateEntry],
+    ir: StandardNameIR,
+    segments: frozenset[str],
+) -> list[TemplateEntry]:
+    """The templates a parsed name selects, in file order.
+
+    A conditioned entry takes precedence over an unconditioned sibling: among
+    entries sharing a base and the same required segment kinds, a matching
+    conditioned entry supersedes its unconditioned siblings for that name, so
+    the unconditioned openings and the conditioned one never both render. An
+    entry with no conditions selects exactly as before.
+    """
+    segment_tokens = _ir_segment_tokens(ir)
+    template_bases = {
+        operator.op for operator in ir.operators if operator.kind is OperatorKind.BINARY
+    }
+    if ir.base.token != "placeholder":
+        template_bases.add(ir.base.token)
+    matched = [
+        entry
+        for entry in entries
+        if entry.base in template_bases
+        and set(entry.segments) <= segments
+        and _template_conditions_met(entry, segment_tokens, segments)
+    ]
+    conditioned = {
+        (entry.base, tuple(entry.segments))
+        for entry in matched
+        if entry.requires or entry.excludes
+    }
+    return [
+        entry
+        for entry in matched
+        if entry.requires or entry.excludes
+        or (entry.base, tuple(entry.segments)) not in conditioned
+    ]
+
+
 def select_conventions(
     name: str, *, registry: ConventionsRegistry | None = None
 ) -> AppliedConventions:
@@ -280,11 +357,6 @@ def select_conventions(
     tokens = _ir_tokens(ir)
     segments = _ir_segments(ir)
     definitions = _vocabulary_definitions()
-    template_bases = {
-        operator.op for operator in ir.operators if operator.kind is OperatorKind.BINARY
-    }
-    if ir.base.token != "placeholder":
-        template_bases.add(ir.base.token)
 
     concepts = tuple(
         AppliedConcept(
@@ -329,9 +401,9 @@ def select_conventions(
             segments=tuple(entry.segments),
             description=entry.description,
             documentation=entry.documentation,
+            note=entry.note,
         )
-        for entry in conventions.templates.templates
-        if entry.base in template_bases and set(entry.segments) <= segments
+        for entry in _select_templates(conventions.templates.templates, ir, segments)
     )
     return AppliedConventions(
         concepts=concepts,

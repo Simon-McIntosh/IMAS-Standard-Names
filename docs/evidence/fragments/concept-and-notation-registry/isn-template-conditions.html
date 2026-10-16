@@ -1,0 +1,87 @@
+<!-- Landing record for conditioned template entries and template notes. -->
+<section id="isn-template-conditions-landing">
+  <p>
+    A template entry may now narrow its pattern and carry a note.
+    <code>TemplateEntry</code> gains <code>requires</code> (per segment kind,
+    the tokens a name must carry), <code>excludes</code> (segment kinds a name
+    must not fill) and <code>note</code> (one sentence). The accessor exposes
+    the note on <code>AppliedTemplate.note</code>; the consumer renders it
+    after the entry's documentation opening.
+  </p>
+  <p id="isn-template-conditions-shape">
+    <code>requires</code> is satisfied when the name carries at least one of
+    the listed tokens for that segment kind. The population, aggregation and
+    state segments are closed single-token segments, so the intersection test
+    reduces to membership; stated as an intersection it also holds for a
+    segment that admits several tokens. <code>excludes</code> is satisfied when
+    the name fills none of the listed segment kinds. The name's tokens per
+    segment kind come from the parse: the accessor groups them once in
+    <code>_ir_segment_tokens</code>, and <code>_ir_tokens</code> is now that
+    grouping's union rather than a second walk of the IR.
+  </p>
+  <p id="isn-template-conditions-precedence">
+    Precedence rule. Selection runs the subset test, then the conditions, then
+    precedence: <strong>among matching entries that share a base and the same
+    required segment kinds, a conditioned entry supersedes its unconditioned
+    siblings — the conditioned entry is selected and the unconditioned sibling
+    is dropped for that name.</strong> A conditioned entry and an unconditioned
+    sibling therefore never both render for one name, so a note placed on the
+    conditioned entry reaches only the names it admits. An entry with no
+    conditions selects exactly as before, and entries that share a base but
+    differ in their required segment kinds (the several
+    <code>temperature</code> openings) are not siblings and all still apply.
+    Reversing the rule — the unconditioned sibling wins when both match — makes
+    <code>test_conditioned_entry_supersedes_its_unconditioned_sibling</code>
+    fail.
+  </p>
+  <p id="isn-template-conditions-note">
+    The note rides the template, not the applied name: it is emitted on every
+    name that selects the entry and on no other. Because a name that selects
+    two openings of the same base (a species and an aggregation opening) may
+    carry a note from each, a note is written on the single entry whose pattern
+    it separates, so it still renders once per name.
+  </p>
+  <p id="isn-template-conditions-existing">
+    Every shipped template selects as before. The shipped
+    <code>templates.yml</code> carries no condition and no note, so the new
+    branch is a no-op.
+    <code>test_every_existing_template_selects_as_before</code> asserts all
+    shipped entries are unconditioned and, for the names the existing
+    convention tests render, that the selected
+    <code>(base, segments)</code> tuples equal an independent reimplementation
+    of the plain subset test.
+  </p>
+  <p id="isn-template-conditions-followon">
+    Follow-on folded in: <code>_entry_definitions</code> in
+    <code>vocab_loaders.py</code> no longer opens and parses its YAML itself;
+    it reads through <code>_load_yaml</code> like the other loaders.
+  </p>
+  <p id="isn-template-conditions-measure">
+    Measure. <code>tests/grammar/test_template_conditions.py</code> (new)
+    exercises a required token, an excluded kind, a note on a selecting and a
+    non-selecting name, a name selecting two openings, the loader refusals for
+    an unknown required token and an unknown excluded kind, the precedence
+    rule, and the shipped-registry no-op.
+    Gate: <code>PYTHONPATH=$PWD uv run --no-sync pytest -p no:cacheprovider
+    tests/grammar -q</code> ran 1212 passed, 32 skipped (EXIT=0) at head
+    versus 1204 passed, 32 skipped (EXIT=0) at base — eight added tests, zero
+    added failures, judged by delta.
+  </p>
+  <p id="isn-template-conditions-negative-control">
+    Negative control, declared as dropping the condition filter from
+    <code>_select_templates</code> and holding everything else fixed. With that
+    filter removed, <code>tests/grammar/test_template_conditions.py</code> ran
+    3 failed, 5 passed (EXIT=1), failing the required-token test, the
+    excluded-kind test and the precedence test — all passing at head. Two
+    additional mutations were run and are recorded in the run directory: drop
+    <code>note=entry.note</code> from the applied template (3 failed, EXIT=1,
+    including both note tests), and reverse the precedence rule (1 failed,
+    EXIT=1, the precedence test). Log:
+    <code>negative-control.log</code> in the run directory.
+  </p>
+  <p id="isn-template-conditions-no-figure">
+    No figure accompanies this fragment: the change is a selection rule and a
+    field, and the tests above carry it. The figure directory given to this
+    node is left empty.
+  </p>
+</section>
