@@ -1,0 +1,73 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 1,
+  "call_sites": [
+    "imas_standard_names/grammar/vocab_loaders.py:792"
+  ],
+  "completed_at": "2026-10-16T06:13:54.741Z",
+  "dispatched_at": "2026-10-16T06:04:37Z",
+  "findings": [
+    {
+      "file": "imas_standard_names/grammar/vocabularies/populations.yml",
+      "line": 24,
+      "severity": "follow-on",
+      "text": "the three vocabularies use a token-keyed double-nested shape (fast: / two-space fast: <definition>), not the root-keyed entry shape with a definition field that section 5 names (the shape physical_bases.yml `bases:` and locus_registry use). The deviation is forced and documented: the codegen token extractor (grammar_codegen/spec.py _extract_vocab_tokens) recognises a root key only for loci, carriers, bases, operators and axes, so a `populations:` root key would extract as the single token 'populations' and break the generated enums and the drift gate, and tests/grammar/test_vocab_uniqueness.py reads a bare mapping's keys as its token list. Adopting the plan's shape needs a one-line change to that tuple in spec.py, a method outside this node's write scope. Recorded rather than repaired: the loaders return the same sets, load_zones the same ordered tuple, and test_vocab_uniqueness.py and test_codegen_drift.py pass at head."
+    },
+    {
+      "file": "imas_standard_names/grammar/vocab_loaders.py",
+      "line": 720,
+      "severity": "follow-on",
+      "text": "_entry_definitions opens the vocabulary file and calls yaml.safe_load itself instead of reusing _load_yaml (vocab_loaders.py:33), which section 2 of the plan names as the registry's YAML reader and which an earlier review already required another loader to fold into. The duplicate read is three lines and its only added behaviour is the missing-file guard, which can be kept ahead of a _load_yaml call."
+    },
+    {
+      "file": "tests/grammar/test_token_definitions.py",
+      "line": 15,
+      "severity": "follow-on",
+      "text": "the plan's done-when asks that each test fail with its mechanism removed; the recorded control removes only the emission (definitions=definitions_applied dropped from the AppliedConventions construction) and reddens the two rendering tests, leaving test_loaders_return_the_recorded_token_sets, test_definitions_carry_a_population_a_zone_and_an_aggregation and test_a_token_without_a_definition_loads_and_contributes_nothing green. Each of those three does name a condition under which it fails \u2014 dropping the all-dicts branch of _load_flat_token_list empties load_populations, and adding a definition to the core zone reddens the last \u2014 but none was exercised, so coverage of the loader-shape mechanism rests on reading, not on a recorded red."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261016T052029421979-isn-token-definitions/manifest.md",
+      "line": 19,
+      "severity": "follow-on",
+      "text": "the reviewed run's manifest records baseline_suite, after_suite and negative_control_log as prose (e.g. 'negative-control.log (2 failed, 3 passed, EXIT=1)') rather than the armed JSON shape and the bare log path the dispatch contract requires, so those fields cannot be parsed by an admission check even though the logs they name exist and agree with them."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "read commit by commit against 7161a3b; the single commit ffd17ca changes the three vocabularies from lists to token-keyed entries, adds _entry_definitions and its call in _vocabulary_definitions in vocab_loaders.py, adds AppliedDefinition and the definitions field with its selection loop in terms.py, adds the test file and the landing fragment, and touches no other line.",
+    "done_when": "section 5's five clauses are each matched by a named test or log: tests/grammar/test_token_definitions.py:15 holds load_populations/load_aggregations against the Population/Aggregation StrEnums and load_zones against the ordered Zone enum, :26 and :33 show a definition returned for a population, a zone and an aggregation token and that it renders for names carrying them, :55 shows a token without a definition loading and contributing nothing, negative-control.log records 2 failed 3 passed EXIT=1 with the emission removed, and gate-base.log reads 66 passed 7 xfailed EXIT=0 against gate-head.log 71 passed 7 xfailed EXIT=0 with zero added failures.",
+    "goal": "the node goal is to give population, zone and aggregation tokens definitions that render; imas_standard_names/grammar/vocabularies/populations.yml:30-38, aggregations.yml:24-27 and zones.yml:41-52 now carry per-token definitions moved from the three files' comments, _vocabulary_definitions (vocab_loaders.py:739) reads them, and select_conventions (terms.py:305) emits them through the definition-only sibling AppliedDefinition (terms.py:131) on AppliedConventions.definitions (terms.py:167), so a definition renders for a name carrying the token.",
+    "manifest": "read; it records status complete, commit ffd17ca, changed_paths matching the diff, test_logs naming gate-base.log/gate-head.log/negative-control.log, and a landing at docs/evidence/fragments/concept-and-notation-registry/isn-token-definitions.html; its baseline_suite, after_suite and negative_control_log are prose rather than the armed JSON and bare path the contract requires.",
+    "write_paths": "the source node fences the three vocabularies, vocab_loaders.py, terms.py, tests/grammar/test_token_definitions.py and the landing fragment; git show --stat ffd17ca lists exactly those seven paths, each inside the fence."
+  },
+  "justifications": {
+    "durability": "the recorded control removing the emission at terms.py:305 reddens tests/grammar/test_token_definitions.py:33 and :47, but the loader-shape and token-presence guards at :15, :26 and :55 were not exercised, so only part of the file's coverage is a demonstrated red.",
+    "evidence": "gate-base.log and gate-head.log record 66 passed 7 xfailed and 71 passed 7 xfailed at EXIT=0 and negative-control.log records 2 failed 3 passed EXIT=1, but the manifest's baseline_suite/after_suite/negative_control_log are non-armed prose at manifest.md:19.",
+    "fit": "terms.py:131 follows the frozen-BaseModel idiom of AppliedConcept at terms.py:110, and no plan, section, stage or version label appears in any changed name, comment or filename.",
+    "goal_fidelity": "the three vocabularies carry per-token definitions and terms.py:305 emits them, but imas_standard_names/grammar/vocabularies/populations.yml:24 uses a shape section 5 did not name, a documented deviation forced by readers outside the node's scope.",
+    "reuse": "imas_standard_names/grammar/vocab_loaders.py:720 re-opens and yaml.safe_loads the vocabulary file instead of reusing _load_yaml (vocab_loaders.py:33), the reader section 2 names as the registry's owner.",
+    "scope_discipline": "git show --stat ffd17ca touches only the seven declared paths (three vocabularies, vocab_loaders.py, terms.py, the new test file, the landing fragment) and writes no other file."
+  },
+  "project": "imas-standard-names",
+  "raw_text": "VERDICT goal: the node goal is to give population, zone and aggregation tokens definitions that render; imas_standard_names/grammar/vocabularies/populations.yml:30-38, aggregations.yml:24-27 and zones.yml:41-52 now carry per-token definitions moved from the comments, _vocabulary_definitions (vocab_loaders.py:739) reads them, and select_conventions (terms.py:305) emits them through the definition-only sibling AppliedDefinition (terms.py:131), so a definition renders for a name carrying the token.\nVERDICT done_when: section 5's five clauses are each matched by a named test or log; tests/grammar/test_token_definitions.py:15 holds the loaders against the StrEnums, :33 shows a definition rendering for names carrying fast/lower/total, :55 shows a token without a definition contributing nothing, negative-control.log reads 2 failed 3 passed EXIT=1 with the emission removed, and gate-base.log 66 passed 7 xfailed EXIT=0 against gate-head.log 71 passed 7 xfailed EXIT=0 with zero added failures.\nVERDICT write_paths: the source node fences the three vocabularies, vocab_loaders.py, terms.py, tests/grammar/test_token_definitions.py and the landing fragment; git show --stat ffd17ca lists exactly those seven paths and nothing else.\nVERDICT manifest: read; it records status complete, commit ffd17ca, changed_paths matching the diff, test_logs naming gate-base.log/gate-head.log/negative-control.log, and the landing fragment; its baseline_suite, after_suite and negative_control_log are prose rather than the armed JSON and bare log path the contract requires.\nVERDICT diff: read commit by commit against 7161a3b; the single commit ffd17ca changes the three vocabularies from lists to token-keyed entries, adds _entry_definitions and its call in _vocabulary_definitions, adds AppliedDefinition and the definitions field with its selection loop in select_conventions, and adds the test file and landing fragment, touching no other line.\nCALL_SITES: imas_standard_names/grammar/vocab_loaders.py:792\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: the three vocabularies carry per-token definitions and terms.py:305 emits them, but imas_standard_names/grammar/vocabularies/populations.yml:24 uses an entry shape section 5 did not name, a deviation forced by readers outside the node's scope.\nSCORE evidence: 16\nJUSTIFICATION evidence: gate-base.log and gate-head.log record 66 passed 7 xfailed and 71 passed 7 xfailed at EXIT=0 and negative-control.log records 2 failed 3 passed EXIT=1, but the manifest's baseline_suite/after_suite are non-armed prose at manifest.md:19.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git show --stat ffd17ca touches only the seven declared paths (three vocabularies, vocab_loaders.py, terms.py, the test file, the landing fragment) and writes nothing else.\nSCORE durability: 15\nJUSTIFICATION durability: the recorded control removing the emission at terms.py:305 reddens tests/grammar/test_token_definitions.py:33 and :47, but the loader-shape and token-presence guards at :15, :26 and :55 were not exercised by any recorded mutation.\nSCORE fit: 18\nJUSTIFICATION fit: terms.py:131 follows the frozen-BaseModel idiom of AppliedConcept at terms.py:110, and no plan, section, stage or version label appears in any changed name, comment or filename.\nSCORE reuse: 15\nJUSTIFICATION reuse: imas_standard_names/grammar/vocab_loaders.py:720 re-opens and yaml.safe_loads the vocabulary file instead of reusing _load_yaml (vocab_loaders.py:33), the reader section 2 names as the registry's owner.\nFINDING imas_standard_names/grammar/vocabularies/populations.yml:24 follow-on: the entry shape is not the root-keyed shape section 5 names; the deviation is forced by readers outside the node's scope and is documented, and test_vocab_uniqueness.py and test_codegen_drift.py pass at head.\nFINDING imas_standard_names/grammar/vocab_loaders.py:720 follow-on: _entry_definitions duplicates the YAML read that _load_yaml (vocab_loaders.py:33) owns, rather than reusing it.\nFINDING tests/grammar/test_token_definitions.py:15 follow-on: only the emission mechanism was removed in the recorded control; the loader-shape and token-presence tests at :15, :26 and :55 have no recorded red.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261016T052029421979-isn-token-definitions/manifest.md:19 follow-on: baseline_suite, after_suite and negative_control_log are recorded as prose rather than the armed JSON shape and the bare log path the contract requires.",
+  "review_run_id": "r-20261016T060429895496-review-of-isn-token-definitions-ffd17ca86b7b",
+  "reviewed_base_sha": "7161a3ba98e360308214e708f7f45f21c8b9cef0",
+  "reviewed_head_sha": "ffd17ca86b7b637ca02f643f8c40b28ceb70ed74",
+  "reviewed_run_id": "r-20261016T052029421979-isn-token-definitions",
+  "reviewer": "review-of-isn-token-definitions-ffd17ca86b7b",
+  "scores": {
+    "durability": 15,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 15,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-16T06:22:00Z",
+  "total": 101
+}
