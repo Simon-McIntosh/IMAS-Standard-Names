@@ -396,6 +396,8 @@ def load_zones() -> tuple[str, ...]:
         return tuple(str(token) for token in data)
     if isinstance(data, dict) and "zones" in data:
         return tuple(str(token) for token in (data["zones"] or []))
+    if isinstance(data, dict):
+        return tuple(str(token) for token in data)
     return ()
 
 
@@ -454,7 +456,8 @@ def load_channel_qualifiers() -> tuple[str, ...]:
 
 
 def _load_flat_token_list(filename: str, dict_key: str) -> frozenset[str]:
-    """Load a flat YAML token list (or ``{<dict_key>: [...]}``)."""
+    """Load a flat YAML token list, a ``{<dict_key>: [...]}`` mapping, or a
+    token-keyed entries mapping."""
     path = _VOCAB_DIR / filename
     if not path.exists():
         return frozenset()
@@ -466,6 +469,8 @@ def _load_flat_token_list(filename: str, dict_key: str) -> frozenset[str]:
         return frozenset(str(token) for token in data)
     if isinstance(data, dict) and dict_key in data:
         return frozenset(str(token) for token in (data[dict_key] or []))
+    if isinstance(data, dict) and all(isinstance(v, dict) for v in data.values()):
+        return frozenset(data.keys())
     return frozenset()
 
 
@@ -712,6 +717,25 @@ def _known_grammar_tokens() -> frozenset[str]:
     return frozenset(tokens)
 
 
+def _entry_definitions(filename: str, dict_key: str) -> dict[str, str]:
+    """Token → definition for a vocabulary whose entries map the token to it."""
+    path = _VOCAB_DIR / filename
+    if not path.exists():
+        return {}
+    with path.open(encoding="utf-8") as fh:
+        data = yaml.safe_load(fh)
+    if not isinstance(data, dict):
+        return {}
+    entries = data.get(dict_key) if dict_key in data else data
+    definitions: dict[str, str] = {}
+    if isinstance(entries, dict):
+        for token, entry in entries.items():
+            text = entry.get(str(token), "") if isinstance(entry, dict) else entry
+            if text:
+                definitions[str(token)] = str(text).strip()
+    return definitions
+
+
 def _vocabulary_definitions() -> dict[str, str]:
     """Token → definition for the vocabulary entries that carry one."""
     definitions: dict[str, str] = {}
@@ -721,6 +745,12 @@ def _vocabulary_definitions() -> dict[str, str]:
         definitions[token] = entry.definition
     for token, entry in load_geometry_carriers().carriers.items():
         definitions[token] = entry.definition
+    for filename, dict_key in (
+        ("populations.yml", "populations"),
+        ("zones.yml", "zones"),
+        ("aggregations.yml", "aggregations"),
+    ):
+        definitions.update(_entry_definitions(filename, dict_key))
     return {token: text for token, text in definitions.items() if text}
 
 

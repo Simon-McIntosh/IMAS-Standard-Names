@@ -21,5 +21,8 @@
 # reduction-provenance metadata (see specification.yml `region` segment and the
 # reduction provenance schema). Do not add spatial-reduction tokens here.
 
-- total            # summed over sub-populations / species / additive contributions
-- net              # signed net of opposing contributions (e.g. net current drive)
+# Each entry maps its token to that token's definition, as populations.yml does.
+total:
+  total: Summed over sub-populations, species or additive contributions.
+net:
+  net: Signed net of opposing contributions (e.g. net current drive).
