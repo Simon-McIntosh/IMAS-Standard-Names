@@ -17,7 +17,11 @@ import pytest
 from imas_standard_names.grammar import vocab_loaders
 from imas_standard_names.grammar.ir import OperatorKind
 from imas_standard_names.grammar.parser import parse
-from imas_standard_names.grammar.terms import _ir_segments, select_conventions
+from imas_standard_names.grammar.terms import (
+    _ir_segments,
+    select_conventions,
+    template_sentences,
+)
 from imas_standard_names.grammar.vocab_loaders import (
     load_conventions,
     load_templates,
@@ -37,11 +41,6 @@ def _scratch_templates(tmp_path: Path, text: str) -> Path:
 def _selected_bases(scratch: Path, name: str) -> list[str]:
     registry = load_conventions(scratch)
     return [t.base for t in select_conventions(name, registry=registry).templates]
-
-
-def _rendered_documentation(template) -> str:
-    """The documentation body as the consumer renders it: opening, then note."""
-    return "\n\n".join(part for part in (template.documentation, template.note) if part)
 
 
 # ---------------------------------------------------------------------------
@@ -157,13 +156,10 @@ def test_note_renders_after_the_opening_on_selecting_names_only(tmp_path):
     assert len(applied.templates) == 1
     template = applied.templates[0]
     assert template.note == note
-    rendered = _rendered_documentation(template)
-    assert rendered.startswith(template.documentation)
-    assert rendered.endswith(note)
-    assert rendered.count(note) == 1
+    rendered = template_sentences("electron_density", registry=registry)
+    assert rendered == (template.documentation, note)
     # A name the entry does not select renders no note, on the same base.
-    other = select_conventions("electron_temperature", registry=registry)
-    assert all(t.note == "" for t in other.templates)
+    assert note not in template_sentences("electron_temperature", registry=registry)
 
 
 def test_note_appears_once_when_a_name_selects_two_openings(tmp_path):
@@ -185,11 +181,12 @@ templates:
 """,
     )
     registry = load_conventions(scratch)
-    applied = select_conventions("total_electron_density", registry=registry)
-    rendered = [_rendered_documentation(t) for t in applied.templates]
+    rendered = template_sentences("total_electron_density", registry=registry)
     assert sum("Total density sums" in text for text in rendered) == 1
-    applied = select_conventions("electron_density", registry=registry)
-    assert all(t.note == "" for t in applied.templates)
+    assert all(
+        "Total density sums" not in text
+        for text in template_sentences("electron_density", registry=registry)
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -233,11 +230,11 @@ def test_conditioned_entry_supersedes_its_unconditioned_sibling(tmp_path):
 
 
 # ---------------------------------------------------------------------------
-# The shipped registry selects as before
+# Unconditioned templates follow the subset selection
 # ---------------------------------------------------------------------------
 
-# The names the existing convention tests render.
-_EXISTING_TEMPLATE_NAMES = (
+# Names selected by unconditioned templates.
+_UNCONDITIONED_TEMPLATE_NAMES = (
     "flux_surface_averaged_argon_density_at_plasma_boundary",
     "electron_density",
     "ratio_of_line_averaged_electron_density_to_greenwald_density",
@@ -246,8 +243,8 @@ _EXISTING_TEMPLATE_NAMES = (
 )
 
 
-def _legacy_selection(name: str) -> list[tuple[str, tuple[str, ...]]]:
-    """The subset test the selector applied before conditions existed."""
+def _subset_only_selection(name: str) -> list[tuple[str, tuple[str, ...]]]:
+    """Select templates by base and segment-kind subset, without conditions."""
     ir = parse(name, strict=True).ir
     segments = _ir_segments(ir)
     bases = {op.op for op in ir.operators if op.kind is OperatorKind.BINARY}
@@ -256,18 +253,18 @@ def _legacy_selection(name: str) -> list[tuple[str, tuple[str, ...]]]:
     return [
         (entry.base, tuple(entry.segments))
         for entry in load_templates().templates
-        if entry.base in bases and set(entry.segments) <= segments
+        if not entry.requires
+        and not entry.excludes
+        and entry.base in bases
+        and set(entry.segments) <= segments
     ]
 
 
-def test_every_existing_template_selects_as_before():
+def test_unconditioned_templates_follow_subset_selection():
     shipped = load_templates()
-    assert all(
-        not entry.requires and not entry.excludes and not entry.note
-        for entry in shipped.templates
-    )
-    for name in _EXISTING_TEMPLATE_NAMES:
+    assert any(entry.requires or entry.excludes for entry in shipped.templates)
+    for name in _UNCONDITIONED_TEMPLATE_NAMES:
         applied = select_conventions(name)
         assert [(t.base, t.segments) for t in applied.templates] == (
-            _legacy_selection(name)
+            _subset_only_selection(name)
         ), name
