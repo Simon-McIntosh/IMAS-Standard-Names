@@ -1,0 +1,45 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-15T20:32:38.832Z",
+  "dispatched_at": "2026-10-15T20:15:33Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/concept-and-notation-registry.html:185",
+      "id": "reasoning-1",
+      "reason": "",
+      "text": "\u2014 \u00a77 says each non-token sentence \"goes on a conditioned template (\u00a76)\", but \u00a76 adds only selection conditions and `TemplateEntry` (imas_standard_names/grammar/vocab_loaders.py:662-672, cited by \u00a76 at ~678) carries just `base`, `segments`, `description` and `documentation`, and \u00a72 defines both text fields as the pattern's *opening* noun phrase (\"one description opening and one documentation opening per name pattern\"). The token-definition carrier does not help: `ConceptEntry.definition` (vocab_loaders.py:628) is keyed by a single token, which \u00a77 itself rules out for a combination sentence. So \u00a77 names where each sentence is *selected* but not where it is *stored* or *rendered*; a worker cannot place the sentence without adding a field the plan does not declare, and appending it to `documentation` makes the opening no longer an opening. \u2014 WOULD_CHANGE_THE_PLAN: yes \u2014 without a declared sentence field the node implementing \u00a76/\u00a77 must invent the storage and rendering path, and \u00a77's done-when (\"each sentence appears on every name it describes\") cannot be satisfied through the two mechanisms the plan declares.",
+      "type": "reasoning",
+      "would_change": null
+    }
+  ],
+  "plan_fingerprint": "0f2507f755df8542b6a460e88b6cb0af66cc2933e33deb0849686737ef088d5a",
+  "plan_slug": "concept-and-notation-registry",
+  "plan_version": 29,
+  "project": "imas-standard-names",
+  "responses": {},
+  "review_run_id": "r-20261015T201525098181-plan-review-of-concept-and-notation-registry",
+  "reviewed_blob_sha": "846ff2919a30567fba71a4e5ff637ac077459139",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `AppliedConcept` resolves at `terms.py:116`, the concept emission at `terms.py:~280` and the template subset test at `terms.py:~297`, `_vocabulary_definitions` at `vocab_loaders.py:~715`, the zone order at `~380` and the template list at `~678`; `imas-codex docs/evidence/fragments/sn-catalog-grouping/scg-near-duplicate-rulings.json` exists and carries the sentences.",
+    "done_when": "pass \u2014 \u00a75 and \u00a76 each name a negative control (\"each test fails with its mechanism removed, recorded with `EXIT=`\") and \u00a77 names two (\"fails with a sentence removed, and fails again with a sentence moved to its family's shared template\"), each of which can fail as asserted.",
+    "evidence_paths": "pass \u2014 the changed sections name no scratch path; gate evidence follows the dispatch contract to the run's own records, and \u00a77's test is an in-repo suite, not a node-local temporary.",
+    "naming": "pass \u2014 no plan labels, stage names, ticket numbers or version tags reach any symbol or path named by the three sections.",
+    "reasoning": "a finding \u2014 \u00a77 assigns each separating sentence to \"a conditioned template\", but no section declares a field on a template that can hold a sentence, so the mechanism \u00a77 relies on has no place to store its text.",
+    "single_goal": "pass \u2014 \u00a75 (definitions on population/zone/aggregation tokens), \u00a76 (template token conditions) and \u00a77 (placing the separating sentences) each carry one deliverable.",
+    "wiring": "pass \u2014 \u00a77's `data-links` (\"concept-and-notation-registry#s5,concept-and-notation-registry#s6\") resolve to the two sections it depends on, and the plan-level `plan-blocks=imas-codex:sn-house-style` edge is unchanged."
+  },
+  "section_digests": {
+    "_document": "cd4ef8b509f6911b6028d3fe30ec58adf657b2baa762d2934c92ef96444c8b86",
+    "s1": "30a14d1b0da016d94a775f6d1085956ddc7deec1c03f5b5f600083f6120bf711",
+    "s2": "62e226b5e5ae9709dcab01f287af1164b128950199d32d6795f6a9f6bf3dbda9",
+    "s3": "dbbc4175f8a714330ed9bfb7402d0ebe8acc2802fc51746f56dae6d178b35434",
+    "s4": "3a28fbf118b9fc1daa60b9e41d42866cbcd951b116da2f37eb7123b2b556746e",
+    "s5": "e3e419e7263996f386d85bc2c61b8a4e66310aafa7f80b0fbd7a58542f437ebb",
+    "s6": "b4c33ba21b8285b9a0d4c42438ca9c92726b9db9e2636bb717dbcb6f67eed5a5",
+    "s7": "a90ee890c389fc5de560c5c9e02f2a4c898a76c5b4b2cf4edc3b19c995297717"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-16T05:13:00.744590+00:00"
+}
