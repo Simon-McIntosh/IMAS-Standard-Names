@@ -32,6 +32,28 @@ templates:
     description: 'Number density of {subject}'
     documentation: 'Number density of {subject}'
 
+  - base: density
+    segments:
+      - subject
+    requires:
+      subject: [electron]
+      aggregation: [total]
+    description: 'Number density of {subject}'
+    documentation: 'Number density of {subject}'
+    note: >-
+      Total density is the sum of the thermal and fast populations of the species; thermal excludes the suprathermal particles that fast names.
+
+  - base: density
+    segments:
+      - subject
+    requires:
+      subject: [electron]
+      population: [thermal, fast]
+    description: 'Number density of {subject}'
+    documentation: 'Number density of {subject}'
+    note: >-
+      Total density is the sum of the thermal and fast populations of the species; thermal excludes the suprathermal particles that fast names.
+
   - base: number_density
     description: '{modifiers} number density {locus}'
     documentation: '{modifiers} number density {locus}'
@@ -41,6 +63,29 @@ templates:
       - subject
     description: 'Temperature of {subject} {locus}'
     documentation: 'Temperature of {subject} {locus}'
+
+  - base: temperature
+    segments:
+      - subject
+    requires:
+      subject: [neutral]
+    excludes:
+      - population
+    description: 'Temperature of {subject} {locus}'
+    documentation: 'Temperature of {subject} {locus}'
+    note: >-
+      A cold or hot neutral temperature is that of the named component alone; without the component it covers the whole neutral population of the selected species.
+
+  - base: temperature
+    segments:
+      - subject
+    requires:
+      subject: [neutral]
+      population: [cold, hot]
+    description: 'Temperature of {subject} {locus}'
+    documentation: 'Temperature of {subject} {locus}'
+    note: >-
+      A cold or hot neutral temperature is that of the named component alone; without the component it covers the whole neutral population of the selected species.
 
   - base: temperature
     segments:
@@ -177,6 +222,22 @@ templates:
   - base: triangularity
     description: 'Triangularity {locus}'
     documentation: 'Triangularity {locus}'
+
+  - base: triangularity
+    excludes:
+      - zone
+    description: 'Triangularity {locus}'
+    documentation: 'Triangularity {locus}'
+    note: >-
+      Triangularity without a qualifier is the mean of the upper and lower triangularities; upper and lower triangularity each use one extremum of the cross-section.
+
+  - base: triangularity
+    requires:
+      zone: [upper, lower]
+    description: 'Triangularity {locus}'
+    documentation: 'Triangularity {locus}'
+    note: >-
+      Triangularity without a qualifier is the mean of the upper and lower triangularities; upper and lower triangularity each use one extremum of the cross-section.
 
   - base: triangularity
     segments:

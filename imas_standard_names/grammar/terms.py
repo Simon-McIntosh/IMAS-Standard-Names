@@ -337,7 +337,8 @@ def _select_templates(
     return [
         entry
         for entry in matched
-        if entry.requires or entry.excludes
+        if entry.requires
+        or entry.excludes
         or (entry.base, tuple(entry.segments)) not in conditioned
     ]
 
@@ -411,3 +412,17 @@ def select_conventions(
         notation=notation,
         templates=templates,
     )
+
+
+def template_sentences(
+    name: str, *, registry: ConventionsRegistry | None = None
+) -> tuple[str, ...]:
+    """Return selected documentation openings and distinct notes in order."""
+    sentences: list[str] = []
+    seen_notes: set[str] = set()
+    for template in select_conventions(name, registry=registry).templates:
+        sentences.append(template.documentation)
+        if template.note and template.note not in seen_notes:
+            sentences.append(template.note)
+            seen_notes.add(template.note)
+    return tuple(sentences)
