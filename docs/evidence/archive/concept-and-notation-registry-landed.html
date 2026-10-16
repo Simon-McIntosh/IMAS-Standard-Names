@@ -55,6 +55,11 @@
     <p>The population, zone and aggregation vocabularies now carry a definition per token, moved from the files' comments, with nothing invented. <code>select_conventions</code> emits each through a definition-only shape. The loaders return the same token sets, and <code>load_zones</code> the same ordered tuple (merge <code>903e8e4</code>, 5 tests; review 101/120). Follow-ons for §6: the vocabularies use a token-keyed nested shape rather than the locus registry's entry shape, and a second YAML reader sits beside <code>_load_yaml</code>.</p>
   </section>
 
+  <section id="s6-template-conditions">
+    <h2>§6 — A template may require or exclude tokens</h2>
+    <p>A template entry may now require tokens, exclude segment kinds and carry a <code>note</code>. Selection applies the conditions after the subset test, and a conditioned entry supersedes an unconditioned sibling (same base, same segment kinds) when both match. The shipped registry carries no conditions, so selection over it is unchanged. <code>tests/grammar/test_template_conditions.py</code> adds 8 tests, covering the required token, the excluded kind, the note, the precedence rule and the shipped-registry no-op. <code>tests/grammar</code> passes at base <code>d2713d4</code> and at head. Commits <code>ea6ea2c</code> and <code>f01dd7c</code>. The review scored 109 with three follow-ons. Nothing in production renders <code>AppliedTemplate.note</code> yet, so the test proves the note only through its own helper. The test oracle <code>_legacy_selection</code> is named by revision rather than mechanism. And one negative-control log header names the base revision. The first two go to §7.</p><p><a href="/imas-standard-names/evidence/fragments/concept-and-notation-registry/isn-template-conditions.html">fragment</a></p>
+  </section>
+
 </main>
 </body>
 </html>
