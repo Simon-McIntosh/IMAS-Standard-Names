@@ -21,15 +21,27 @@
 # the subject; placing them in the generic qualifier segment would mis-order
 # them (ion_molecular_density) and scatter physical_base families.
 
+# Each entry maps its token to that token's definition. The token is repeated
+# as the entry key because the codegen token extractor reads a bare mapping's
+# keys as the token list, while the cross-segment uniqueness lint reads each
+# entry's keys; an entry's token is what both then sees.
+
 # === Energy-state / thermalisation tier ===
-- fast            # non-thermal / energetic population
-- thermal         # thermalised (Maxwellian) population
-- cold            # cold population (e.g. recycled wall neutrals)
-- hot             # hot population (e.g. charge-exchange neutrals)
-- suprathermal    # suprathermal tail (ECRH/LH-driven)
+fast:
+  fast: Non-thermal / energetic population.
+thermal:
+  thermal: Thermalised (Maxwellian) population.
+cold:
+  cold: Cold population (e.g. recycled wall neutrals).
+hot:
+  hot: Hot population (e.g. charge-exchange neutrals).
+suprathermal:
+  suprathermal: Suprathermal tail (ECRH/LH-driven).
 
 # === Molecularity ===
-- molecular       # molecular species (e.g. D2+, D2)
+molecular:
+  molecular: Molecular species (e.g. D2+, D2).
 
 # === Bulk core ===
-- bulk            # bulk (thermal core) population
+bulk:
+  bulk: Bulk (thermal core) population.

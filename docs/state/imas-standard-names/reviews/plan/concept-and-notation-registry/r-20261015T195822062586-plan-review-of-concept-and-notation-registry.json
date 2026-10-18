@@ -1,0 +1,104 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-15T20:13:40.036Z",
+  "dispatched_at": "2026-10-15T19:59:20Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/concept-and-notation-registry.html:185",
+      "id": "reasoning-1",
+      "reason": "the plan's placement instruction and its test are mutually unsatisfiable, so the node must either relocate the cold/hot sentence to a conditioned `population: [cold, hot]` template or rescope the density family, and a plan that does not say which sends the node into a test it wrote to fail.",
+      "text": "\u00a77 tells the worker to place the cold/hot neutral-temperature sentence on \"the meaning of `cold`\" (a token definition, \u00a75), but `cold` is a population token that also fills `cold_electron_density` (verified: `_segment_vocabularies()['population']` contains `cold`, and `cold_electron_density` parses strict), which \u00a77's own done-when counts in the density family (\"each population and aggregation form of it the registry composes\"); the sentence rendered verbatim there is about neutral temperature, so the assertion \"appears \u2026 on no other name in any of the three families\" cannot pass with that placement",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/concept-and-notation-registry.html:181",
+      "id": "done_when-1",
+      "reason": "the rule \u00a77's separation depends on can be defined arbitrarily and left unmeasured while the gate stays green, which is exactly the failure mode the done-when exists to prevent.",
+      "text": "\u00a76's body requires the worker to \"Define how a conditioned entry and an unconditioned sibling combine or take precedence when both match, state the rule in the fragment, and test it\", but none of the five done-when bullets names a precedence/combine test, and bullet 5 only inherits the existing grammar and template suites",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/concept-and-notation-registry.html:177",
+      "id": "reasoning-2",
+      "reason": "the stated mechanism does not produce its own done-when from the inputs the section authorises, so the worker must choose between inventing concept fields and changing a shared model, neither of which the plan sanctions.",
+      "text": "\u00a75 says the accessor \"must also emit an applied definition for a population, zone or aggregation token that carries one, through the same `AppliedConcept` shape\", but `AppliedConcept` (terms.py:116-127) requires `phrase`, `equation` and `restates_equation` with no defaults, while \u00a75 gives these entries only a `definition` and forbids inventing content (\"Do not invent definitions for tokens whose meaning no comment records\"), so the emission either fabricates a phrase and equation for `cold`/`total` or widens a model \u00a72 landed as complete",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "712a472e20ee1f026477461aacb9212802a30d4d2059bf0e7d2203bd0270af76",
+  "plan_slug": "concept-and-notation-registry",
+  "plan_version": 28,
+  "project": "imas-standard-names",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "reasoning-1",
+      "reason": "",
+      "when": "2026-10-15T20:15:18.861492+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "done_when-1",
+      "reason": "",
+      "when": "2026-10-15T20:15:21.302509+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "reasoning-2",
+      "reason": "",
+      "when": "2026-10-15T20:15:23.438193+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-15T20:15:21.302509+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-15T20:15:18.861492+00:00"
+    },
+    "reasoning-2": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-15T20:15:23.438193+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-standard-names/docs/state/imas-standard-names/reviews/plan/concept-and-notation-registry/r-20261015T195822062586-plan-review-of-concept-and-notation-registry.json",
+  "review_run_id": "r-20261015T195822062586-plan-review-of-concept-and-notation-registry",
+  "reviewed_blob_sha": "c1b1a6e90a91af082d9d43172fd8840ba3b554b1",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `_vocabulary_definitions` resolves at vocab_loaders.py:715, `load_zones` at :373 with its order comment at ~380, the templates list at :678, `select_conventions`' template subset test at terms.py:297, and the cited `scg-near-duplicate-rulings.json` opens and carries the `template_sentence` field.",
+    "done_when": "a finding \u2014 \u00a76's body requires a tested combine-or-precedence rule for a conditioned entry matching beside an unconditioned sibling, but none of \u00a76's five done-when bullets measures that rule.",
+    "evidence_paths": "pass \u2014 \u00a75 and \u00a76 name no session-scratchpad or node-local path for their gate logs; the `EXIT=` records and the fragment they name follow the plan's existing landing convention.",
+    "naming": "pass \u2014 \u00a75 and \u00a76 introduce no plan labels, stage names, ticket numbers or version tags; the `\u00a75`/`\u00a76` references are plan-internal section pointers, and the mechanism names (`_vocabulary_definitions`, `select_conventions`, `AppliedConcept`) are the real symbol names that appear in a later node's code.",
+    "reasoning": "a finding \u2014 \u00a75's chosen mechanism, emitting a population/zone/aggregation definition \"through the same `AppliedConcept` shape\", names a shape whose required fields the entries \u00a75 defines do not supply; and \u00a77's placement guidance for the cold/hot sentence contradicts the family its own test asserts against.",
+    "single_goal": "pass \u2014 \u00a75 delivers one thing (population/zone/aggregation tokens carry definitions that render) and \u00a76 one thing (a template may require or exclude tokens), each with a node element of its own.",
+    "wiring": "pass \u2014 \u00a75 and \u00a76 declare no forward edges of their own, and \u00a77 declares the only dependency either needs (`data-links=\"concept-and-notation-registry#s5,concept-and-notation-registry#s6\"`, plan.html:184), each target resolving to a section that exists."
+  },
+  "section_digests": {
+    "_document": "cd4ef8b509f6911b6028d3fe30ec58adf657b2baa762d2934c92ef96444c8b86",
+    "s1": "30a14d1b0da016d94a775f6d1085956ddc7deec1c03f5b5f600083f6120bf711",
+    "s2": "62e226b5e5ae9709dcab01f287af1164b128950199d32d6795f6a9f6bf3dbda9",
+    "s3": "dbbc4175f8a714330ed9bfb7402d0ebe8acc2802fc51746f56dae6d178b35434",
+    "s4": "3a28fbf118b9fc1daa60b9e41d42866cbcd951b116da2f37eb7123b2b556746e",
+    "s5": "a59b2f56bccd12d0f6f83264833cf65bf4bba05426c5d73102a9bab045b15af5",
+    "s6": "a286d7fa28dbb29c7ec502ccc74836749d165e886e9cd881b21e8d8de2399e4c",
+    "s7": "2cdde7d71460f7ee7423b9b18ef3572f1b4b091423f1542048fbdfa74bda1b5c"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-15T20:14:58.282358+00:00"
+}

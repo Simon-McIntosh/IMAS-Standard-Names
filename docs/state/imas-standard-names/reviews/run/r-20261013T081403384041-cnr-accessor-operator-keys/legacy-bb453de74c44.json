@@ -1,0 +1,68 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "18b78cda3cdd0da1a709ba1f99c8b39acb599fa8",
+  "call_site_count": 1,
+  "call_sites": [
+    "imas_standard_names/grammar/terms.py:246"
+  ],
+  "completed_at": "",
+  "dispatched_at": "2026-10-13T08:14:15Z",
+  "findings": [
+    {
+      "file": "tests/grammar/test_conventions_operator_keys.py",
+      "line": "25",
+      "severity": "follow-on",
+      "text": "follow-on: test_ratio_selects_its_operator_concept passes at the reviewed base \u2014 new-tests-before-fix.log records F.FF, that assertion green at 18b78cd \u2014 because a binary name's operator token already reached _ir_tokens before this change, so reverting the change leaves it true; its red in negative-control.log:32 came only by additionally removing the pre-existing binary-operator-token inclusion, a mechanism this change did not add."
+    },
+    {
+      "file": "imas_standard_names/grammar/terms.py",
+      "line": "196",
+      "severity": "follow-on",
+      "text": "follow-on: _operator_token resolves a fused indexed operator to its key by string-prefix stripping operator.op (startswith(f\"{key}_\")), which the brief told the node not to do and which duplicates model.py:352 _split_fused_indexed_operator, the owner that performs the same longest-prefix split and additionally validates the bound index against the coordinate universe; the addition neither wraps nor extends that owner."
+    }
+  ],
+  "head_log_revision": "64b51002225a65db566b9cf452f16f19ddde8a42",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 1 production call site(s)",
+    "diff": "read against 18b78cd; the single commit 64b5100 touches three files \u2014 terms.py adds _operator_keys/_operator_token and rewrites the _ir_tokens operator and base handling and the template predicate, adds tests/grammar/test_conventions_operator_keys.py, and adds the node landing fragment.",
+    "done_when": "the done_when names tests/grammar/test_conventions_operator_keys.py; focused-head.log records 4 passed EXIT=0 at 64b5100 and the base arm new-tests-before-fix.log records 3 failed 1 passed EXIT=1 at 18b78cd.",
+    "goal": "the node goal asks that an indexed or binary operator's entries be selected by its operator key; imas_standard_names/grammar/terms.py:196 _operator_token resolves an indexed application through load_operators()'s registered keys and terms.py:278 template_bases keys templates on a binary operator's token, so both halves of the goal are present.",
+    "manifest": "read; it records changed_paths matching the diff, base 3 failed 59 passed 5 xfailed EXIT=1 and head 3 failed 63 passed 5 xfailed EXIT=1 with log paths on disk, baseline_suite.failure_ids and after_suite.failure_ids both naming the same three test_conventions ids.",
+    "write_paths": "the brief fences imas_standard_names/grammar/terms.py, tests/grammar/test_conventions_operator_keys.py and the node's evidence fragment; git diff --stat 18b78cd..64b5100 lists exactly those three paths and nothing else."
+  },
+  "justifications": {
+    "durability": "tests/grammar/test_conventions_operator_keys.py:18, :30 and :54 fail at the reviewed base (new-tests-before-fix.log shows F.FF and EXIT=1) and pass at head, but test at :25 passes at base too, so only three of the four added assertions guard this change.",
+    "evidence": "the reviewed manifest's baseline_suite and after_suite carry the same three test_conventions.py failure_ids, and committed-gate.log confirms 3 failed 63 passed 5 xfailed against baseline-gate.log's 3 failed 59 passed 5 xfailed, a zero-failure delta.",
+    "fit": "the new helpers sit in the idiom of imas_standard_names/grammar/terms.py:167 lru_cache and the surrounding _vocabulary_definitions style, and no plan, stage or version label appears in any changed name or comment.",
+    "goal_fidelity": "imas_standard_names/grammar/terms.py:226 feeds _operator_token into _ir_tokens and terms.py:318 matches templates against template_bases, so an indexed name now reaches its derivative_with_respect_to concept and a ratio name its ratio-keyed template.",
+    "reuse": "imas_standard_names/grammar/terms.py:196 _operator_token prefix-strips a fused indexed token, duplicating the registry-validated split already owned by imas_standard_names/grammar/model.py:352 _split_fused_indexed_operator without extending it.",
+    "scope_discipline": "git diff --stat 18b78cd..64b5100 touches only imas_standard_names/grammar/terms.py, tests/grammar/test_conventions_operator_keys.py and the node's own evidence fragment, all inside the brief's three-path fence."
+  },
+  "project": "imas-standard-names",
+  "raw_text": "VERDICT goal: the node goal asks that an indexed or binary operator's entries be selected by its operator key; imas_standard_names/grammar/terms.py:196 _operator_token resolves an indexed application through load_operators()'s registered keys and terms.py:278 template_bases keys templates on a binary operator's token, so both halves of the goal are present.\nVERDICT done_when: the done_when names tests/grammar/test_conventions_operator_keys.py; focused-head.log records 4 passed EXIT=0 at 64b5100 and the base arm new-tests-before-fix.log records 3 failed 1 passed EXIT=1 at 18b78cd.\nVERDICT write_paths: the brief fences imas_standard_names/grammar/terms.py, tests/grammar/test_conventions_operator_keys.py and the node's evidence fragment; git diff --stat 18b78cd..64b5100 lists exactly those three paths and nothing else.\nVERDICT manifest: read; it records changed_paths matching the diff, base 3 failed 59 passed 5 xfailed EXIT=1 and head 3 failed 63 passed 5 xfailed EXIT=1 with log paths on disk, baseline_suite.failure_ids and after_suite.failure_ids both naming the same three test_conventions ids.\nVERDICT diff: read against 18b78cd; the single commit 64b5100 touches three files \u2014 terms.py adds _operator_keys/_operator_token and rewrites the _ir_tokens operator and base handling and the template predicate, adds tests/grammar/test_conventions_operator_keys.py, and adds the node landing fragment.\nCALL_SITES: imas_standard_names/grammar/terms.py:246\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: imas_standard_names/grammar/terms.py:226 feeds _operator_token into _ir_tokens and terms.py:318 matches templates against template_bases, so an indexed name now reaches its derivative_with_respect_to concept and a ratio name its ratio-keyed template.\nSCORE evidence: 17\nJUSTIFICATION evidence: the reviewed manifest's baseline_suite and after_suite carry the same three test_conventions.py failure_ids, and committed-gate.log confirms 3 failed 63 passed 5 xfailed against baseline-gate.log's 3 failed 59 passed 5 xfailed, a zero-failure delta.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat 18b78cd..64b5100 touches only imas_standard_names/grammar/terms.py, tests/grammar/test_conventions_operator_keys.py and the node's own evidence fragment, all inside the brief's three-path fence.\nSCORE durability: 14\nJUSTIFICATION durability: tests/grammar/test_conventions_operator_keys.py:18, :30 and :54 fail at the reviewed base (new-tests-before-fix.log shows F.FF and EXIT=1) and pass at head, but test at :25 passes at base too, so only three of the four added assertions guard this change.\nSCORE fit: 18\nJUSTIFICATION fit: the new helpers sit in the idiom of imas_standard_names/grammar/terms.py:167 lru_cache and the surrounding _vocabulary_definitions style, and no plan, stage or version label appears in any changed name or comment.\nSCORE reuse: 10\nJUSTIFICATION reuse: imas_standard_names/grammar/terms.py:196 _operator_token prefix-strips a fused indexed token, duplicating the registry-validated split already owned by imas_standard_names/grammar/model.py:352 _split_fused_indexed_operator without extending it.\nFINDING tests/grammar/test_conventions_operator_keys.py:25 follow-on: test_ratio_selects_its_operator_concept passes at the reviewed base \u2014 new-tests-before-fix.log records F.FF, that assertion green at 18b78cd \u2014 because a binary name's operator token already reached _ir_tokens before this change, so reverting the change leaves it true; its red in negative-control.log:32 came only by additionally removing the pre-existing binary-operator-token inclusion, a mechanism this change did not add.\nFINDING imas_standard_names/grammar/terms.py:196 follow-on: _operator_token resolves a fused indexed operator to its key by string-prefix stripping operator.op (startswith(f\"{key}_\")), which the brief told the node not to do and which duplicates model.py:352 _split_fused_indexed_operator, the owner that performs the same longest-prefix split and additionally validates the bound index against the coordinate universe; the addition neither wraps nor extends that owner.",
+  "review_run_id": "legacy-bb453de74c44",
+  "review_run_id_source": "derived",
+  "reviewed_base_sha": "18b78cda3cdd0da1a709ba1f99c8b39acb599fa8",
+  "reviewed_head_sha": "64b51002225a65db566b9cf452f16f19ddde8a42",
+  "reviewed_run_id": "r-20261013T081403384041-cnr-accessor-operator-keys",
+  "reviewer": {
+    "backend": "clive",
+    "model": "deepseek-v4.1-flash"
+  },
+  "scores": {
+    "durability": 14,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 10,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T10:39:02.966595+00:00",
+  "total": 97
+}

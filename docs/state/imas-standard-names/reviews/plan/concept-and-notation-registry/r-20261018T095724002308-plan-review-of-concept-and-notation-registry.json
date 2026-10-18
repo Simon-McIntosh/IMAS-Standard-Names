@@ -1,0 +1,126 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-18T10:08:21.492Z",
+  "dispatched_at": "2026-10-18T09:57:31Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/concept-and-notation-registry.html:189",
+      "id": "reasoning-1",
+      "reason": "a worker implementing the text verbatim reintroduces the limited-plasma undefinedness the earlier commit fixed and leaves the registry internally inconsistent, so the section's own goal (physics-terms wording) is met at the cost of the meaning it was corrected to carry.",
+      "text": "\u00a78 bullet 2 tells the worker to rewrite `outboard_midplane` in `locus_registry.yml` as \"the low-field-side equatorial midplane, taken at the outboard point of the separatrix where dR/dZ = 0\", but that is the definition commit `0e43cde` (2026-10-14) removed: its message reads \"The midplane entries defined the midplane as the point where dR/dZ = 0 on the separatrix contour. That point is undefined for a limited plasma, which has no separatrix, and it disagrees with poloidal_angle\", and the same token's canonical equation in `conventions/concepts.yml:423-431` now reads `Z = Z_{\\mathrm{mid}},\\quad R > R_{\\mathrm{axis}}` with `Z_{\\mathrm{mid}}` meaning \"the midplane height the data's midplane identifier selects, the magnetic-axis height when none is given\" \u2014 so the proposed text makes `locus_registry.yml` and `concepts.yml` disagree on one token and reverts a physics correction",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/concept-and-notation-registry.html:187",
+      "id": "single_goal-1",
+      "reason": "one review verdict must cover a one-line vocabulary addition and an unbounded text sweep over `locus_registry.yml`, and a failure in either invalidates the whole section's gate.",
+      "text": "\u00a78's title is \"A separatrix-distance base, and an outboard midplane defined in physics terms\" and its done-when covers three separable outcomes (add base `separatrix_distance`; rewrite `outboard_midplane`; audit and rewrite every other locus definition carrying a DD name), so one verdict cannot close both the base addition and the locus-text audit",
+      "type": "single_goal",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/concept-and-notation-registry.html:189",
+      "id": "reasoning-2",
+      "reason": "as written the node's gate is unsatisfiable without an unstated sweep of eight further definitions whose DD pointers the plan says downstream requires, so the section cannot be built and closed on one verdict as stated.",
+      "text": "\u00a78 bullet 2 instructs \"Read every other locus definition for DD field or option names, rewrite any that carry one in the same way\", and its done-when asserts \"no locus definition names a DD field or option\", yet `locus_registry.yml` carries DD references in about eight definitions besides `outboard_midplane` (e.g. `inboard_midplane`:612, `outboard_midplane_separatrix`:698, `pedestal`:716, `pedestal_maximum`:724, `pedestal_top`:732, `separatrix`:791, and an at-limiter entry:832), while \u00a78 itself states the imas-codex documentation gate \"requires that text\" \u2014 so the test the plan declares must fail on definitions the plan never justifies rewriting, and the rewrite it does justify is justified against a gate the plan says demands the very text it removes",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/concept-and-notation-registry.html:189",
+      "id": "reasoning-3",
+      "reason": "the zone reading does not express a distance from the separatrix, so the base addition stands on its own terms; only the justification's absolute wording is wrong, and the plan's own done-when (base `separatrix_distance`) already discriminates against this existing parse.",
+      "text": "\u00a78 bullet 1's premise \"every relational spelling fails as an unknown base, and only radial_distance_at_outboard_midplane parses\" does not match the grammar as observed at HEAD `0181e96`: `radial_separatrix_distance_at_outboard_midplane` and `separatrix_distance_at_outboard_midplane` both parse and round-trip today, decomposing as `zone=[\"separatrix\"]`, `physical_base=\"distance\"`, `position=\"outboard_midplane\"`",
+      "type": "reasoning",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "9a5d5bbd778338973d9a727f547216b6bc8228a4004c50ffef454bab1cce84a2",
+  "plan_slug": "concept-and-notation-registry",
+  "plan_version": 43,
+  "project": "imas-standard-names",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "reasoning-1",
+      "reason": "",
+      "when": "2026-10-18T10:11:23.351626+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "single_goal-1",
+      "reason": "",
+      "when": "2026-10-18T10:11:25.565639+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "reasoning-2",
+      "reason": "",
+      "when": "2026-10-18T10:11:27.774135+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "reasoning-3",
+      "reason": "",
+      "when": "2026-10-18T10:11:29.975932+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-18T10:11:23.351626+00:00"
+    },
+    "reasoning-2": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-18T10:11:27.774135+00:00"
+    },
+    "reasoning-3": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-18T10:11:29.975932+00:00"
+    },
+    "single_goal-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-18T10:11:25.565639+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-standard-names/docs/state/imas-standard-names/reviews/plan/concept-and-notation-registry/r-20261018T095724002308-plan-review-of-concept-and-notation-registry.json",
+  "review_run_id": "r-20261018T095724002308-plan-review-of-concept-and-notation-registry",
+  "reviewed_blob_sha": "1dc6037742f31203101db7e7f054ef0293535b43",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `locus_registry.yml`, `physical_bases.yml` (`decay_length`, `connection_length`), `conventions/concepts.yml`, `outboard_midplane_separatrix`, and all three cited DD paths (`langmuir_probes/embedded/distance_separatrix_midplane`, `langmuir_probes/reciprocating/plunge/distance_separatrix_midplane`, `thomson_scattering/channel/distance_separatrix_midplane`) resolve.",
+    "done_when": "pass \u2014 \u00a78 names measurable controls: base `separatrix_distance` and position `outboard_midplane` in the decomposition (fails without the base), a failing assertion on the old `outboard_midplane` text, `EXIT=` recording, and a delta-judged grammar suite.",
+    "evidence_paths": "pass \u2014 \u00a78's gates are recorded with `EXIT=` and its findings land in the run fragment; it names no session scratchpad or node-local temporary path.",
+    "naming": "pass \u2014 \u00a78 carries no plan labels, ticket numbers or version tags; `l_i(3)` names a physics form, not a plan stage.",
+    "reasoning": "a finding \u2014 \u00a78's rewrite of `outboard_midplane` reinstates the `dR/dZ = 0` definition that a recorded decision removed, and its DD-name sweep asserts a property the plan says a downstream gate requires.",
+    "single_goal": "a finding \u2014 \u00a78 carries at least two deliverables (a new physical base, and a rewrite of locus definitions that the plan itself extends to a repo-wide DD-name audit).",
+    "wiring": "pass \u2014 \u00a78's `data-links=\"concept-and-notation-registry#s4\"` resolves to \u00a74, the release section whose done-when \u00a78 says carries this work; no dependency \u00a78 needs is undeclared (`decay_length`/`connection_length` exist at `vocabularies/physical_bases.yml:554,584`, the DD paths resolve, `outboard_midplane_separatrix` exists at `locus_registry.yml:691`)."
+  },
+  "section_digests": {
+    "_document": "ab5bfb423759226cff7bc7ca1cfeaeeb9a959a1f5fe9f127343a3b85edd95271",
+    "s1": "30a14d1b0da016d94a775f6d1085956ddc7deec1c03f5b5f600083f6120bf711",
+    "s2": "62e226b5e5ae9709dcab01f287af1164b128950199d32d6795f6a9f6bf3dbda9",
+    "s3": "dbbc4175f8a714330ed9bfb7402d0ebe8acc2802fc51746f56dae6d178b35434",
+    "s4": "3a28fbf118b9fc1daa60b9e41d42866cbcd951b116da2f37eb7123b2b556746e",
+    "s5": "e3e419e7263996f386d85bc2c61b8a4e66310aafa7f80b0fbd7a58542f437ebb",
+    "s6": "d6c899960389590d810c511386e34ba7ee133af91a946fa601a71df17dca431c",
+    "s7": "aa0c472d531855bdcd98e4c973fe4d5dcbd7c3f7755f96886e5fb2a1d77ce38b",
+    "s8": "8f513749ca8acf6ad48ebf96f337da47866e086ced50d765e79f8d6eb877928e"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-18T10:09:44.095039+00:00"
+}

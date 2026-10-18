@@ -1,0 +1,55 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "6a9a94332c9dd39d33d36cbc3d2311cf83097e13",
+  "call_site_count": 2,
+  "call_sites": [
+    "imas_standard_names/catalog/dataset.py:1198",
+    "imas_standard_names/grammar/terms.py:245"
+  ],
+  "completed_at": "2026-10-12T15:57:48.550Z",
+  "dispatched_at": "2026-10-12T15:50:10Z",
+  "findings": [],
+  "head_log_revision": "0a977eefa2270d91ab5facee948e16fc2da28b96",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "Two production call sites reach the change: imas_standard_names/catalog/dataset.py:1198 calls vocab_loaders._load_yaml(filename) with one positional argument, which the new optional directory parameter keeps valid; imas_standard_names/grammar/terms.py:245 select_conventions calls load_conventions(), which reaches the changed load_templates and the Edited AppliedTemplate output. select_conventions, load_conventions and AppliedTemplate are not re-exported from grammar/__init__.py or the package __init__.py, so no further production site exists in-repo.",
+    "diff": "read commit by commit against 6a9a943; the single commit 0a977ee removes sign_convention from TemplateEntry (vocab_loaders.py:665) and AppliedTemplate (terms.py:139) and from the select_conventions construction (terms.py:279), deletes the duplicate _load_conventions_yaml and gives _load_yaml an optional directory (vocab_loaders.py:33), drops the field and its header sentence from templates.yml, and splits the two template refusal assertions in tests/grammar/test_conventions.py; nothing else in the tree moved.",
+    "done_when": "the done_when's three clauses are each asserted: rg -n sign_convention over vocab_loaders.py, terms.py and conventions/ returns no match (exit 1, re-run by this review); tests/grammar/test_conventions.py:127 asserts a sign_convention-carrying template entry is refused and the manifest's negative-control log shows that id failing DID NOT RAISE with EXIT=1 when the field was re-added; the gate files run 44 passed 5 xfailed against 42 passed 5 xfailed at base, both EXIT=0.",
+    "goal": "the node's goal is one sentence: narrow the conventions registry to openings-only templates read through the existing YAML owner. The landed change removes sign_convention from the template model, templates.yml and the AppliedTemplate the select_conventions accessor returns, and reads all three conventions files through _load_yaml at vocab_loaders.py:33, so both halves of the goal are present.",
+    "manifest": "read; it records changed_paths matching the diff exactly, base 42 passed 5 xfailed EXIT=0 and head 44 passed 5 xfailed EXIT=0 with log paths on disk, the negative control 1 failed 13 passed EXIT=1 naming the red test id, and baseline_suite/after_suite JSON whose failure_ids are both empty.",
+    "write_paths": "the dispatch fence names six paths (vocab_loaders.py, terms.py, templates.yml, tests/grammar/test_conventions.py, docs/evidence/fragments/concept-and-notation-registry/cnr-template-scope.html, docs/figures/concept-and-notation-registry/cnr-template-scope); git diff --stat 6a9a943..0a977ee lists five changed files and every one lies inside that fence, and the source worktree status is clean."
+  },
+  "justifications": {
+    "durability": "tests/grammar/test_conventions.py:127 reddens when sign_convention is re-added to TemplateEntry (negative_control.log, DID NOT RAISE, EXIT=1), the regression the node set out to prevent; the other two added assertions at :110 (\"entry 0 is malformed\") and :118 (\"unknown segment kinds\") each fail only if their named refusal stops firing, but neither was given a demonstrated red.",
+    "evidence": "the reviewed manifest records the gate at 44 passed 5 xfailed EXIT=0 against a base arm of 42 passed 5 xfailed EXIT=0, with both logs on disk under the run directory carrying their revision headers; the negative-control log shows one failing id EXIT=1; and the done-when rg was re-run by this review over the three named paths and returned no match.",
+    "fit": "the removed field and the generalised _load_yaml sit in the idiom of vocab_loaders.py:33 and terms.py:139, the refined assertions match the pytest.raises(match=...) form used by the surrounding refusal tests, and no plan, stage or version label appears in any changed name or comment.",
+    "goal_fidelity": "imas_standard_names/grammar/vocabularies/conventions/templates.yml now carries only base, segments, description and documentation, and imas_standard_names/grammar/vocab_loaders.py:33 reads every conventions file through the single _load_yaml owner, so the registry is narrowed to openings-only templates read through the existing YAML owner exactly as the goal states.",
+    "reuse": "the change removes a duplicate rather than forking one: vocab_loaders.py:33 generalises the existing _load_yaml owner with an optional directory and deletes the copied _load_conventions_yaml body, so YAML reading across the module now has one owner reached by every caller including imas_standard_names/catalog/dataset.py:1198.",
+    "scope_discipline": "git diff --stat 6a9a943..0a977ee lists five paths and each lies inside the six-path fence; the only non-source entry is the node's own landing fragment at docs/evidence/fragments/concept-and-notation-registry/cnr-template-scope.html, which the fence grants."
+  },
+  "project": "imas-standard-names",
+  "raw_text": "VERDICT goal: the node's goal is one sentence: narrow the conventions registry to openings-only templates read through the existing YAML owner. The landed change removes sign_convention from the template model, templates.yml and the AppliedTemplate the select_conventions accessor returns, and reads all three conventions files through _load_yaml at vocab_loaders.py:33, so both halves of the goal are present.\nVERDICT done_when: the done_when's three clauses are each asserted: rg -n sign_convention over vocab_loaders.py, terms.py and conventions/ returns no match (exit 1, re-run by this review); tests/grammar/test_conventions.py:127 asserts a sign_convention-carrying template entry is refused and the manifest's negative-control log shows that id failing DID NOT RAISE with EXIT=1 when the field was re-added; the gate files run 44 passed 5 xfailed against 42 passed 5 xfailed at base, both EXIT=0.\nVERDICT write_paths: the dispatch fence names six paths; git diff --stat 6a9a943..0a977ee lists five changed files and every one lies inside that fence, and the source worktree status is clean.\nVERDICT manifest: read; it records changed_paths matching the diff exactly, base 42 passed 5 xfailed EXIT=0 and head 44 passed 5 xfailed EXIT=0 with log paths on disk, the negative control 1 failed 13 passed EXIT=1 naming the red test id, and baseline_suite/after_suite JSON whose failure_ids are both empty.\nVERDICT diff: read commit by commit against 6a9a943; the single commit 0a977ee removes sign_convention from TemplateEntry (vocab_loaders.py:665) and AppliedTemplate (terms.py:139) and from the select_conventions construction (terms.py:279), deletes the duplicate _load_conventions_yaml and gives _load_yaml an optional directory (vocab_loaders.py:33), drops the field and its header sentence from templates.yml, and splits the two template refusal assertions in tests/grammar/test_conventions.py; nothing else in the tree moved.\nCALL_SITES: imas_standard_names/catalog/dataset.py:1198, imas_standard_names/grammar/terms.py:245\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: imas_standard_names/grammar/vocabularies/conventions/templates.yml now carries only base, segments, description and documentation, and imas_standard_names/grammar/vocab_loaders.py:33 reads every conventions file through the single _load_yaml owner, so the registry is narrowed to openings-only templates read through the existing YAML owner exactly as the goal states.\nSCORE evidence: 20\nJUSTIFICATION evidence: the reviewed manifest records the gate at 44 passed 5 xfailed EXIT=0 against a base arm of 42 passed 5 xfailed EXIT=0, with both logs on disk under the run directory carrying their revision headers; the negative-control log shows one failing id EXIT=1; and the done-when rg was re-run by this review over the goal's three paths and returned no match.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat 6a9a943..0a977ee lists five paths and each lies inside the six-path fence, the only non-source entry being the node's own landing fragment at docs/evidence/fragments/concept-and-notation-registry/cnr-template-scope.html which the fence grants.\nSCORE durability: 19\nJUSTIFICATION durability: tests/grammar/test_conventions.py:127 reddens when sign_convention is re-added to TemplateEntry (negative_control.log, DID NOT RAISE, EXIT=1), the regression the node set out to prevent; the other two added assertions at :110 and :118 each fail only if their named refusal stops firing, but neither was given a demonstrated red.\nSCORE fit: 19\nJUSTIFICATION fit: the removed field and the generalised _load_yaml sit in the idiom of vocab_loaders.py:33 and terms.py:139, the refined assertions match the pytest.raises(match=...) form used by the surrounding refusal tests, and no plan, stage or version label appears in any changed name or comment.\nSCORE reuse: 20\nJUSTIFICATION reuse: vocab_loaders.py:33 generalises the existing _load_yaml owner with an optional directory and deletes the copied _load_conventions_yaml body, so YAML reading across the module now has one owner reached by every caller including imas_standard_names/catalog/dataset.py:1198.\n",
+  "review_run_id": "r-20261012T155007681710-review-of-cnr-template-scope",
+  "reviewed_base_sha": "6a9a94332c9dd39d33d36cbc3d2311cf83097e13",
+  "reviewed_head_sha": "0a977eefa2270d91ab5facee948e16fc2da28b96",
+  "reviewed_run_id": "r-20261012T153955809358-cnr-template-scope",
+  "reviewer": {
+    "backend": "clive",
+    "model": "deepseek-v4.1-flash"
+  },
+  "scores": {
+    "durability": 19,
+    "evidence": 20,
+    "fit": 19,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T15:55:20.962942+00:00",
+  "total": 118
+}

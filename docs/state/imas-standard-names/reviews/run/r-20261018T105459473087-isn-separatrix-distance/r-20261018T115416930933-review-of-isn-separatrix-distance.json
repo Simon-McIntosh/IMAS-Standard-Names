@@ -1,0 +1,59 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 4,
+  "call_sites": [
+    "imas_standard_names/grammar/vocab_loaders.py:205 load_physical_bases",
+    "imas_standard_names/grammar/parser.py:163 _build_vocabularies",
+    "imas_standard_names/grammar/__init__.py parse",
+    "imas_standard_names/grammar/model.py parse_standard_name"
+  ],
+  "completed_at": "2026-10-18T12:10:34.283Z",
+  "dispatched_at": "2026-10-18T11:54:26Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T105459473087-isn-separatrix-distance/logs/negative-control.log",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the red-control log's header names revision 1e9d01f while the command it records collected tests/grammar/test_separatrix_distance_base.py, a file added only at 9968547 and absent at that revision, and it omits the physical_bases sha256 line the suite arms carry, so a reader cannot tell which vocabulary produced the 2-failed result nor reconcile the named revision with the files collected."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 4 production call site(s)",
+    "diff": "read commit by commit against 1e9d01f, where 9968547 adds the base entry and the test file, eabe10b adds a trailing newline, and 3bbcf0d and fffa20c add the evidence fragment; no commit touches a path outside the declared scope.",
+    "done_when": "done_when requires that decomposition and round-trip, a test that fails with the base removed recorded with EXIT=, every other fixture name keeping its parse, the separatrix zone and locus names tested explicitly, and the grammar suite passing at head judged by delta against base; tests/grammar/test_separatrix_distance_base.py:16-42 asserts all of this, and the manifest records logs/negative-control.log (2 failed, 2 passed, EXIT=1), logs/full-base-grammar.log:53 (2 failed, 1277 passed, EXIT=1) and logs/full-head-grammar.log:25 (1279 passed, EXIT=0), with zero added failures.",
+    "goal": "the node goal is to add a separatrix_distance physical base so that radial_separatrix_distance_at_outboard_midplane decomposes as component radial, base separatrix_distance and position outboard_midplane and round-trips; imas_standard_names/grammar/vocabularies/physical_bases.yml:557 adds the base (kind: scalar, aliases: []) beside decay_length and connection_length, and an independent parse at the reviewed head returns base=separatrix_distance, component=radial, position=outboard_midplane, round-trip true, strict parse ok.",
+    "manifest": "the source manifest.md reports status complete and names commits 9968547, eabe10b, 3bbcf0d, fffa20c, the three changed paths, the four test logs, the negative-control log, the two suite arms and the fixture dumps, and states 4 passed, EXIT=0 for the node's own gate.",
+    "write_paths": "the source brief declares physical_bases.yml, parser.py only if base matching needs it, tests/grammar/test_separatrix_distance_base.py and the landing fragment; git show --stat of the four commits changes only imas_standard_names/grammar/vocabularies/physical_bases.yml, tests/grammar/test_separatrix_distance_base.py and docs/evidence/fragments/concept-and-notation-registry/isn-separatrix-distance.html, so parser.py is untouched and every changed path is inside the declared scope."
+  },
+  "justifications": {
+    "durability": "the two target tests fail on removal of the base as logs/negative-control.log:15 records (2 failed, EXIT=1) and would redden if separatrix_distance left v.bases, while the fixtures-unchanged clause rests on a one-off dump (logs/fixtures-base.json against logs/fixtures-head.json) rather than a committed guard.",
+    "evidence": "tests/grammar/ was run in two scratch trees whose logs (logs/full-base-grammar.log:53 2 failed and 1277 passed, logs/full-head-grammar.log:25 1279 passed) carry EXIT lines and vocabulary digests, and the node's own gate log logs/node-tests-head.log records 4 passed EXIT=0.",
+    "fit": "the entry at physical_bases.yml:557 matches the surrounding decay_length and connection_length shape (aliases: [], kind: scalar) and its comment states the mechanism, and the test module carries no plan or ticket identifier.",
+    "goal_fidelity": "imas_standard_names/grammar/vocabularies/physical_bases.yml:557 adds separatrix_distance and an independent parse at the reviewed head returns base=separatrix_distance, component=radial, position=outboard_midplane, round-trip true and strict parse ok.",
+    "reuse": "the diff adds no function, class or module, extending instead the closed physical-bases vocabulary owned by imas_standard_names/grammar/vocabularies/physical_bases.yml:554, and a search of the grammar vocabulary found no existing distance-from-separatrix base or alias.",
+    "scope_discipline": "git diff 1e9d01f..fffa20c changes only physical_bases.yml, tests/grammar/test_separatrix_distance_base.py and the landing fragment, all inside the declared write paths, with parser.py left untouched as the brief permits."
+  },
+  "project": "imas-standard-names",
+  "raw_text": "VERDICT goal: the node goal is to add a separatrix_distance physical base so that radial_separatrix_distance_at_outboard_midplane decomposes as component radial, base separatrix_distance and position outboard_midplane and round-trips; imas_standard_names/grammar/vocabularies/physical_bases.yml:557 adds the base (kind: scalar, aliases: []) beside decay_length and connection_length, and an independent parse at the reviewed head returns base=separatrix_distance, component=radial, position=outboard_midplane, round-trip true, strict parse ok.\nVERDICT done_when: done_when requires that decomposition and round-trip, a test that fails with the base removed recorded with EXIT=, every other fixture name keeping its parse, the separatrix zone and locus names tested explicitly, and the grammar suite passing at head judged by delta against base; tests/grammar/test_separatrix_distance_base.py:16-42 asserts all of this, and the manifest records logs/negative-control.log (2 failed, 2 passed, EXIT=1), logs/full-base-grammar.log:53 (2 failed, 1277 passed, EXIT=1) and logs/full-head-grammar.log:25 (1279 passed, EXIT=0), with zero added failures.\nVERDICT write_paths: the source brief declares physical_bases.yml, parser.py only if base matching needs it, tests/grammar/test_separatrix_distance_base.py and the landing fragment; git show --stat of the four commits changes only imas_standard_names/grammar/vocabularies/physical_bases.yml, tests/grammar/test_separatrix_distance_base.py and docs/evidence/fragments/concept-and-notation-registry/isn-separatrix-distance.html, so parser.py is untouched and every changed path is inside the declared scope.\nVERDICT manifest: the source manifest.md reports status complete and names commits 9968547, eabe10b, 3bbcf0d, fffa20c, the three changed paths, the four test logs, the negative-control log, the two suite arms and the fixture dumps, and states 4 passed, EXIT=0 for the node's own gate.\nVERDICT diff: read commit by commit against 1e9d01f, where 9968547 adds the base entry and the test file, eabe10b adds a trailing newline, and 3bbcf0d and fffa20c add the evidence fragment; no commit touches a path outside the declared scope.\nCALL_SITES: imas_standard_names/grammar/vocab_loaders.py:205 load_physical_bases, imas_standard_names/grammar/parser.py:163 _build_vocabularies, imas_standard_names/grammar/__init__.py parse, imas_standard_names/grammar/model.py parse_standard_name\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: imas_standard_names/grammar/vocabularies/physical_bases.yml:557 adds separatrix_distance and an independent parse at the reviewed head returns base=separatrix_distance, component=radial, position=outboard_midplane, round-trip true and strict parse ok.\nSCORE evidence: 18\nJUSTIFICATION evidence: tests/grammar/ was run in two scratch trees whose logs (logs/full-base-grammar.log:53 2 failed and 1277 passed, logs/full-head-grammar.log:25 1279 passed) carry EXIT lines and vocabulary digests, and the node's own gate log logs/node-tests-head.log records 4 passed EXIT=0.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff 1e9d01f..fffa20c changes only physical_bases.yml, tests/grammar/test_separatrix_distance_base.py and the landing fragment, all inside the declared write paths, with parser.py left untouched as the brief permits.\nSCORE durability: 17\nJUSTIFICATION durability: the two target tests fail on removal of the base as logs/negative-control.log:15 records (2 failed, EXIT=1) and would redden if separatrix_distance left v.bases, while the fixtures-unchanged clause rests on a one-off dump (logs/fixtures-base.json against logs/fixtures-head.json) rather than a committed guard.\nSCORE fit: 19\nJUSTIFICATION fit: the entry at physical_bases.yml:557 matches the surrounding decay_length and connection_length shape (aliases: [], kind: scalar) and its comment states the mechanism, and the test module carries no plan or ticket identifier.\nSCORE reuse: 20\nJUSTIFICATION reuse: the diff adds no function, class or module, extending instead the closed physical-bases vocabulary owned by imas_standard_names/grammar/vocabularies/physical_bases.yml:554, and a search of the grammar vocabulary found no existing distance-from-separatrix base or alias.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T105459473087-isn-separatrix-distance/logs/negative-control.log:1 follow-on: the red-control log's header names revision 1e9d01f while the command it records collected tests/grammar/test_separatrix_distance_base.py, a file added only at 9968547 and absent at that revision, and it omits the physical_bases sha256 line the suite arms carry, so a reader cannot tell which vocabulary produced the 2-failed result nor reconcile the named revision with the files collected.\n",
+  "review_run_id": "r-20261018T115416930933-review-of-isn-separatrix-distance",
+  "reviewed_base_sha": "1e9d01f9557e7a2a4fa8966cc15d55aef61e7077",
+  "reviewed_head_sha": "fffa20c062a3773b0060f77c20bfccc783cc7d7c",
+  "reviewed_run_id": "r-20261018T105459473087-isn-separatrix-distance",
+  "reviewer": "review-of-isn-separatrix-distance",
+  "scores": {
+    "durability": 17,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-18T12:05:26.889833+00:00",
+  "total": 114
+}

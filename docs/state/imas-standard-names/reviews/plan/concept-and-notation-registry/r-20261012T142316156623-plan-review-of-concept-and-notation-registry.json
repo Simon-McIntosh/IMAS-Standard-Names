@@ -1,0 +1,162 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-12T14:28:21.304Z",
+  "dispatched_at": "2026-10-12T14:23:21Z",
+  "findings": [
+    {
+      "anchor": "imas_standard_names/grammar/specification.yml:522",
+      "id": "reuse_search-1",
+      "reason": "naming these owners lets the author extend them (make `structure_templates` pattern-keyed; reuse or retire `concepts.yaml`) instead of shipping a third parallel vocabulary, and the plan's \"what none of them hold\" claim is only true if it has read them.",
+      "text": "the prior-art search is incomplete: \u00a72 proposes `templates.yml` holding \"one description opening and one documentation opening per name pattern, the section order, and the sign-convention rule\", but the repo already ships that guidance under `entry_schema.fields.documentation.guidance` (`structure_templates.opening_paragraph` at specification.yml:587-606, `equations.symbols` at :639, `sign_conventions` at :659-668), code-generated into `imas_standard_names/grammar/field_schemas.py:57` and served to consumers; and \u00a72 proposes `notation.yml`/`concepts.yml` without citing `imas_codex/definitions/clusters/concepts.yaml`, the consumer's existing physics-concept vocabulary that already carries `symbol:` and `units:` annotations per concept (concepts.yaml:26-41; `symbol: Te` at concepts.yaml:30). Neither is named in \u00a71 or \u00a72.",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_standard_names/grammar/vocab_loaders.py:81",
+      "id": "duplicate_owner-1",
+      "reason": "the plan should add the equation/symbol fields to the existing `vocab_loaders.py` entry models and key off those, or state explicitly how the two definitions reconcile; a second definition string per token drifts.",
+      "text": "`concepts.yml` carries \"a one-sentence definition\" keyed by the operator, locus, coordinate or base token, which is a second owner of definitions that three existing vocabulary entries already hold and the codebase already exposes: `LocusEntry.definition` (vocab_loaders.py:81, 187 entries in `locus_registry.yml`), `PhysicalBaseDef.definition` (vocab_loaders.py:194, 24 entries in `physical_bases.yml`), `GeometryCarrierDef.definition` (vocab_loaders.py:231), consumed by `imas_standard_names/grammar/terms.py:29` and `:41` and `imas_standard_names/grammar/context.py:908`. The ISN plan \u00a72 omits the caveat its imas-codex sibling `sn-house-style` \u00a72 carries (\"Where ISN already defines a token \u2026 the entry builds on that definition rather than restating it\"), so as written the definition is restated.",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_standard_names/grammar/vocab_loaders.py:83",
+      "id": "duplicate_owner-2",
+      "reason": "a forbidden-spelling registry that does not name the existing `aliases`/`abbreviations` owners will let a token be forbidden in one place and aliased in another, with no gate to catch it.",
+      "text": "`notation.yml` (\"one symbol per quantity or coordinate \u2026 keyed by base, subject, component or coordinate token, with its forbidden spellings\") is a second owner of alternate spellings already held at `LocusEntry.abbreviations` (vocab_loaders.py:83), `PhysicalBaseDef.aliases` (vocab_loaders.py:189) and `GeometryCarrierDef.aliases` (vocab_loaders.py:229), and of symbols already held per quantity at `imas_standard_names/resources/tokamak_parameters/jet.yml:18` (`symbol: R_0`) and imas-codex `imas_codex/definitions/clusters/concepts.yaml:30` (`symbol: Te`).",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_standard_names/grammar/loader.py:108",
+      "id": "duplicate_owner-3",
+      "reason": "extending `vocab_loaders.py` with the new entries and adding the parse-selection function to `terms.py` reuses the existing refusal and accessor instead of adding a third loader module beside two.",
+      "text": "the plan adds \"a pydantic model and a loader\" plus \"a public accessor [that] takes a parsed name and returns exactly the entries that apply\", a second owner of machinery that already exists twice here: `grammar/loader.py:108` `load_advisory_aliases` is a keyed-by-segment registry loader that refuses unknown segment keys (loader.py:120-144), and `grammar/vocab_loaders.py:546` `validate_no_cross_registry_duplicates` already owns \"refuse a key that is not a real token\"; `grammar/terms.py:22,49,63` (`standard_terms`/`fetch_standard_terms`/`search_standard_terms`) already owns the governed-token\u2192definition accessor.",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_standard_names/grammar/specification.yml:587",
+      "id": "thin_wrapper-1",
+      "reason": "the honest change is to key `structure_templates` by pattern family in `specification.yml` (one owner, regenerated into `field_schemas.py`), not to fork a second template source that the two will drift between.",
+      "text": "`templates.yml` is a thin layer over existing machinery: `entry_schema.fields.documentation.guidance.structure_templates` already holds the opening template (specification.yml:588-591 \u2192 field_schemas.py:58) and the section order (specification.yml:592-598 \u2192 field_schemas.py:63), and `sign_conventions` holds the sign-convention rule (specification.yml:659-668); the plan adds a parallel file rather than making that guidance pattern-keyed, and does not say why the existing guidance cannot be extended.",
+      "type": "thin_wrapper",
+      "would_change": true
+    },
+    {
+      "anchor": "imas-standard-names#s2",
+      "id": "interface_budget-1",
+      "reason": "the section must account for the public surface it adds against the supplied counts; here it can name the retirement concretely \u2014 the accessor and refusal reuse `terms.py`/`vocab_loaders.py` and the `templates.yml` content merges into `specification.yml` \u2014 so the accounting is available and simply absent.",
+      "text": "public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a72 adds a public accessor, a pydantic model and loader, and a new refusal family (the loader \"refuses any key that is not a real token in the current vocabularies\", per file, by name), without naming in its own text what it retires or merges, or stating why nothing can be.",
+      "type": "interface_budget",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "248ec3955e0f27a960c47d9980ba5e7cfd919f66eb57c97ce4e6e24d6fb86ab5",
+  "plan_slug": "concept-and-notation-registry",
+  "plan_version": 0,
+  "project": "imas-standard-names",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "reuse_search-1",
+      "reason": "",
+      "when": "2026-10-12T14:32:50.722853+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "duplicate_owner-1",
+      "reason": "",
+      "when": "2026-10-12T14:32:51.740906+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "duplicate_owner-2",
+      "reason": "",
+      "when": "2026-10-12T14:32:52.532233+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "duplicate_owner-3",
+      "reason": "",
+      "when": "2026-10-12T14:32:53.317822+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "interface_budget-1",
+      "reason": "",
+      "when": "2026-10-12T14:32:54.104195+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "thin_wrapper-1",
+      "reason": "per-pattern openings are data selected from a name's parse, while specification.yml documentation guidance is the generic writer rubric generated into field_schemas.py and carried by every entry's schema, so keying it by pattern would put per-pattern data into a schema every consumer loads; templates.yml now references the section order and the generic sign-convention form in specification.yml rather than restating them, so the two sources cannot drift",
+      "when": "2026-10-12T14:32:54.907362+00:00"
+    }
+  ],
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-12T14:32:51.740906+00:00"
+    },
+    "duplicate_owner-2": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-12T14:32:52.532233+00:00"
+    },
+    "duplicate_owner-3": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-12T14:32:53.317822+00:00"
+    },
+    "interface_budget-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-12T14:32:54.104195+00:00"
+    },
+    "reuse_search-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-12T14:32:50.722853+00:00"
+    },
+    "thin_wrapper-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "per-pattern openings are data selected from a name's parse, while specification.yml documentation guidance is the generic writer rubric generated into field_schemas.py and carried by every entry's schema, so keying it by pattern would put per-pattern data into a schema every consumer loads; templates.yml now references the section order and the generic sign-convention form in specification.yml rather than restating them, so the two sources cannot drift",
+      "when": "2026-10-12T14:32:54.907362+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-standard-names/plan-concept-and-notation-registry.v0.json",
+  "review_run_id": "r-20261012T142316156623-plan-review-of-concept-and-notation-registry",
+  "reviewed_blob_sha": "0abf17e90c6dda53799e8af5ceba0e66da8e9256",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the single accessor hides the three files, the three key-spaces (token kind, quantity kind, pattern family) and the selection behind one call, so the complexity sits behind an interface smaller than what it hides.",
+    "duplicate_owner": "a finding \u2014 `concepts.yml` and `notation.yml` are a second owner of per-token definitions and alternate spellings already held in `grammar/vocab_loaders.py`, and the loader/accessor are a second owner of machinery in `grammar/loader.py` and `grammar/terms.py`; the finding names each site below.",
+    "interface_budget": "a finding \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a72 adds a public accessor, a loader and a token-key refusal family without naming what it retires or merges, or why nothing can be.",
+    "reuse_search": "a finding \u2014 the plan cites `docs/guidelines.md`, the locus registry and the shipped symbol-definition policy, but does not cite two of the three owners its new files would duplicate: `imas_standard_names/grammar/specification.yml` `entry_schema` documentation guidance and imas-codex `imas_codex/definitions/clusters/concepts.yaml`.",
+    "thin_wrapper": "a finding \u2014 `templates.yml` re-adds the documentation opening, section order and sign-convention rule that `specification.yml` already generates, and the plan says nothing about extending that mechanism to be pattern-keyed."
+  },
+  "section_digests": {
+    "_document": "392df941e669b18f529dbc8551e945967eb68b8309f64d53cca91c3d9a1a02ba",
+    "s1": "bc608b783fd02f7b3c58bc2a15b88a27f9cd6b25f2e0b9831ee9fd50bba985a8",
+    "s2": "31ca95f1283eb814a1d5cb5cbe3d55e67eb3689e6818f129318241abffc1d0b1",
+    "s3": "606605355549ce9fd36753859121959d9888c324b647e944b25e172a750a3745",
+    "s4": "3a28fbf118b9fc1daa60b9e41d42866cbcd951b116da2f37eb7123b2b556746e"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T14:32:18.468779+00:00"
+}

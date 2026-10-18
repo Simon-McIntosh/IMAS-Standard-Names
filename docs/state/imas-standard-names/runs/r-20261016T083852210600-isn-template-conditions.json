@@ -1,0 +1,489 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "clive",
+  "base_sha": "d2713d498529590cce708f7fc925a10922732ce8",
+  "boundary_waiver": null,
+  "brief": {
+    "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261016T083852210600-isn-template-conditions/brief.md",
+    "sha256": "08b133fa28ff51a7a7707de4323c4dabb35143c754bf1d06cddd6099b59135fc"
+  },
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 9304565,
+      "input_tokens_cumulative": 9304565,
+      "output_tokens": 40272,
+      "output_tokens_cumulative": 40272,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 481,
+    "files": 4,
+    "removed": 23
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 119,
+        "name": "test_excluded_kind_that_is_not_a_segment_kind_is_refused",
+        "path": "tests/grammar/test_template_conditions.py"
+      },
+      "run_function": {
+        "line": 74,
+        "name": "test_required_token_that_is_not_a_grammar_token_is_refused",
+        "path": "tests/grammar/test_template_conditions.py"
+      },
+      "window_line": 75
+    },
+    {
+      "existing_function": {
+        "line": 74,
+        "name": "test_required_token_that_is_not_a_grammar_token_is_refused",
+        "path": "tests/grammar/test_template_conditions.py"
+      },
+      "run_function": {
+        "line": 119,
+        "name": "test_excluded_kind_that_is_not_a_segment_kind_is_refused",
+        "path": "tests/grammar/test_template_conditions.py"
+      },
+      "window_line": 120
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "ea6ea2c5a157474ad0daf0f614392f0443e7dede",
+    "f01dd7cf0b3ef40d808084bc468a9118179285a6"
+  ],
+  "completed_at": "2026-10-16T09:30:00.610Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-16T08:39:12Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [],
+  "gate": "passed",
+  "gate_check": {
+    "command": "PYTHONPATH=$PWD uv run --no-sync pytest -p no:cacheprovider tests/grammar -q",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261016T083852210600-isn-template-conditions/head-grammar.log"
+  },
+  "impl_move": {
+    "at_complete": 0.7142857142857143,
+    "at_dispatch": 0.5714285714285714,
+    "plan": "concept-and-notation-registry",
+    "verdict": "moved"
+  },
+  "lane": "clive",
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-16T09:38:52.415108+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": "clive",
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-16T08:38:52Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 2,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 10,
+    "headroom": 1,
+    "mean_context": 127273,
+    "observed_at": "2026-10-16T08:38:50Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 2,
+      "aggregate_tokens_per_second": 364.319,
+      "detail": "",
+      "mean_tokens_per_second": 38.757,
+      "observed_at": "2026-10-16T08:38:50Z",
+      "runs": 9.4,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-16T09:30:00.610Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261016T083852210600-isn-template-conditions/manifest.md",
+  "member": "disposable-r-20261016T083852210600-isn-template-conditions",
+  "model_key": "flash",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/grammar/test_template_conditions.py::test_conditioned_entry_supersedes_its_unconditioned_sibling",
+      "tests/grammar/test_template_conditions.py::test_excluded_segment_kind_admits_only_names_without_it",
+      "tests/grammar/test_template_conditions.py::test_required_token_admits_only_names_carrying_the_token"
+    ],
+    "baseline_failure_ids": [],
+    "comparison_arm": "after_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/grammar/test_template_conditions.py::test_conditioned_entry_supersedes_its_unconditioned_sibling",
+      "tests/grammar/test_template_conditions.py::test_excluded_segment_kind_admits_only_names_without_it",
+      "tests/grammar/test_template_conditions.py::test_required_token_admits_only_names_carrying_the_token"
+    ],
+    "declaration": "drop the condition filter and the required-token test fails",
+    "head_failure_ids": [],
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261016T083852210600-isn-template-conditions/negative-control.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261016T083852210600-isn-template-conditions/negative-control.log",
+    "test_paths": [
+      "tests/grammar/test_template_conditions.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "isn-template-conditions",
+  "node_definition": {
+    "brief": "/home/ITER/mcintos/.cache/imas-codex-s18/briefs/isn-template-conditions.md",
+    "brief_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261016T083852210600-isn-template-conditions/brief.md",
+    "brief_sha256": "08b133fa28ff51a7a7707de4323c4dabb35143c754bf1d06cddd6099b59135fc",
+    "capability": {
+      "class": "general",
+      "requirements": {
+        "reasoning": "deep",
+        "risk": "moderate",
+        "verification": "strict"
+      },
+      "version": "1.0"
+    },
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1233,
+          "cached_input_tokens": 816876,
+          "input_tokens": 818111,
+          "output_tokens": 1483,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 819594,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "4f554c2d-3a28-4c55-8645-67a1e8a30dea",
+      "session_id": "4f554c2d-3a28-4c55-8645-67a1e8a30dea"
+    },
+    "done_when": "a required-token condition admits only names carrying the token, an excluded kind only names without it, a note renders after the documentation opening exactly on the names selecting its entry, every existing template selects as before, a precedence test fails when the rule is reversed, each test fails with its mechanism removed, and the grammar and template tests add 0 failures against base",
+    "estimated_hours": null,
+    "goal": "Let a template require or exclude tokens and carry a note",
+    "id": "isn-template-conditions",
+    "images": [],
+    "lane_declaration": {
+      "backend": "clive",
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-16T08:38:52Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 2,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 10,
+      "headroom": 1,
+      "mean_context": 127273,
+      "observed_at": "2026-10-16T08:38:50Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 2,
+        "aggregate_tokens_per_second": 364.319,
+        "detail": "",
+        "mean_tokens_per_second": 38.757,
+        "observed_at": "2026-10-16T08:38:50Z",
+        "runs": 9.4,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261016T083852210600-isn-template-conditions/manifest.md",
+    "negative_control": "drop the condition filter and the required-token test fails",
+    "plan": "concept-and-notation-registry",
+    "requested_backend": "clive",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§6",
+    "spec_level": "guided",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "imas_standard_names/grammar/vocab_loaders.py",
+      "imas_standard_names/grammar/terms.py",
+      "tests/grammar/test_template_conditions.py",
+      "docs/evidence/fragments/concept-and-notation-registry/isn-template-conditions.html",
+      "docs/figures/concept-and-notation-registry/isn-template-conditions"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 1810689.0,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "lift_id": null,
+    "member": null,
+    "node": "isn-template-conditions",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-16T08:39:04.246311+00:00",
+    "score": 0.6625,
+    "session": null,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "section 6 is covered by the latest content review; only section 7, rewritten as a property, owes one",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout in pick:state-render",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5000.596,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "stage_ms": {
+      "budget-snapshot": 347.958,
+      "context-estimate": 77.183,
+      "records": 90.01,
+      "verdict-inputs": 133.079
+    }
+  },
+  "plan": null,
+  "plan_impl_at_dispatch": 0.5714285714285714,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "f01dd7cf0b3ef40d808084bc468a9118179285a6",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "",
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_bytes": 3021785,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261016T083852210600-isn-template-conditions",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 3021785,
+        "path": "/tmp/reckon-crew-scratch/r-20261016T083852210600-isn-template-conditions"
+      }
+    ],
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 1
+      },
+      "worktrees": [
+        {
+          "available": true,
+          "claimed_by_live_runs": [],
+          "classification": "unintegrated",
+          "commits_unmeasured_reason": "release_residue is false: this caller did not ask for the commits beyond the integration head to be measured",
+          "dirty": [],
+          "head": "f01dd7cf0b3ef40d808084bc468a9118179285a6",
+          "integrated_into": "HEAD",
+          "non_equivalent_commits": null,
+          "patch_equivalent_commits": null,
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-standard-names-5be88ee0fdc3/4f554c2d-3a28-4c55-8645-67a1e8a30dea/isn-template-conditions",
+          "reclaimable": false,
+          "shadow_patch": "",
+          "shadow_run_id": "",
+          "status_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "status_entries": [],
+          "withheld": "its HEAD is not reachable from the integration revision, so removing it would destroy the only copy of that commit; merge it or discard it deliberately"
+        }
+      ]
+    },
+    "worktree_released": false,
+    "worktree_withheld": "its HEAD is not reachable from the integration revision, so removing it would destroy the only copy of that commit; merge it or discard it deliberately"
+  },
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "d2713d498529590cce708f7fc925a10922732ce8",
+    "reviewed_head_sha": "f01dd7cf0b3ef40d808084bc468a9118179285a6",
+    "scores": {
+      "durability": 16,
+      "evidence": 17,
+      "fit": 18,
+      "goal_fidelity": 18,
+      "reuse": 20,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 109
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "shadow",
+  "run_id": "r-20261016T083852210600-isn-template-conditions",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§6",
+  "session": "4f554c2d-3a28-4c55-8645-67a1e8a30dea",
+  "session_harness": "claude",
+  "session_id": "fcbb8993-8f6a-481a-b8b2-af1fda253d1f",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": 8,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 9304565,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 3030.839,
+    "generated_tokens": 40272,
+    "generation_seconds": 902.384,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 66.9,
+    "machine_seconds": 2128.455,
+    "peak_input_tokens": 153999,
+    "tokens_per_second": 44.63,
+    "wall_tokens_per_second": 13.29
+  },
+  "time_budget": "60m",
+  "tool_steps": 80.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 3048,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-10-16T09:30:04Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-16T08:39:24Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261016T083852210600-isn-template-conditions",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 6054,
+    "worker_pid": 410275
+  },
+  "worker_seconds": 3015,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}

@@ -1,0 +1,65 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "264aa2ed114a3557a7f820af4720dd36480ccac8",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-12T15:38:21.067Z",
+  "dispatched_at": "2026-10-12T15:32:10Z",
+  "findings": [
+    {
+      "file": "imas_standard_names/grammar/vocab_loaders.py",
+      "line": "40",
+      "severity": "follow-on",
+      "text": "follow-on: _load_conventions_yaml copies the body of the existing _load_yaml owner at vocab_loaders.py:33 rather than reusing it, so YAML reading has two owners three lines apart; the brief asked for reuse of _load_yaml."
+    },
+    {
+      "file": "tests/grammar/test_conventions.py",
+      "line": "106",
+      "severity": "follow-on",
+      "text": "follow-on: test_malformed_template_entry_is_refused matches only \"templates.yml\", a substring every templates refusal message carries, so it cannot distinguish the malformed-entry path from the unknown-segment-kind refusal and asserts less than the done-when's failing-by-name."
+    }
+  ],
+  "head_log_revision": "1e12625694cf66cc85f90c6fe6383b5369c3427b",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read one by one; the single commit 1e12625 adds the three YAML files, the conventions loaders and their pydantic models in vocab_loaders.py, the select_conventions accessor and its Applied* models in terms.py, tests/grammar/test_conventions.py, and the evidence fragment, with no change to any existing entry's definition.",
+    "done_when": "the done_when names refusal of one malformed entry per file, one unknown token key and one forbidden spelling equal to a registered alias, plus the accessor returning exactly the seed entries, plus a scratch-copy removal that fails the accessor test; tests/grammar/test_conventions.py:64,79,94,110,126,143 assert every refusal, :166 asserts the exact entry sets, and the manifest's negative-control log shows the scratch removal failing that test with EXIT=1.",
+    "goal": "the node's goal is the conventions registry (three files under imas_standard_names/grammar/vocabularies/conventions/), its token-validating loader in imas_standard_names/grammar/vocab_loaders.py:762-843, and the parse-selecting select_conventions accessor in imas_standard_names/grammar/terms.py:235; every seed entry (flux_surface_averaged, plasma_boundary, the density notation and the density template) is transcribed exactly as briefed.",
+    "manifest": "read; it records base 469 passed EXIT=0 and head 481 passed EXIT=0, the negative control 1 failed EXIT=1, the measurement module under /tmp scratch, and its changed_paths match the diff exactly.",
+    "write_paths": "the declared scope is the source and test paths plus pyproject.toml if needed and the evidence fragment/figure paths; git diff --name-only 264aa2e..1e12625 lists seven paths, every one inside the declaration, each new file created rather than overwriting a cumulative record."
+  },
+  "justifications": {
+    "durability": "tests/grammar/test_conventions.py:166 reddens when the flux_surface_averaged concept entry is removed (negative_control.log EXIT=1), and :110/:126/:143 each fail only if their named refusal stops firing, but :106 matches only the filename every templates.yml refusal carries.",
+    "evidence": "the reviewed manifest records tests/grammar/test_conventions.py plus the eighteen importers found by rg and tests/test_codegen_drift.py at 481 passed EXIT=0, a base arm at 469 passed EXIT=0, and a negative-control log EXIT=1 whose header names the scratch tree and module path.",
+    "fit": "the loaders sit on vocab_loaders.py beside _load_yaml and reuse _load_flat_token_list, the accessor sits on terms.py beside fetch_standard_terms, and no plan or stage label appears, though terms.py:18 imports the private _vocabulary_definitions across modules.",
+    "goal_fidelity": "imas_standard_names/grammar/terms.py:235 select_conventions selects entries from the parse via _ir_tokens at terms.py:143, and vocab_loaders.py:762-843 enforce the token, alias, restatement and malformed refusals the goal names.",
+    "reuse": "vocab_loaders.py:40 _load_conventions_yaml duplicates the body of the existing owner _load_yaml at vocab_loaders.py:33 instead of reusing or generalising it, while the remaining additions extend existing owners.",
+    "scope_discipline": "every path in git diff --name-only 264aa2e..1e12625 lies inside the declared write paths, though docs/evidence/fragments/concept-and-notation-registry/cnr-registry-loader.html was written although the brief stated no evidence fragment was required."
+  },
+  "project": "imas-standard-names",
+  "raw_text": "VERDICT goal: the node's goal is the conventions registry (three files under imas_standard_names/grammar/vocabularies/conventions/), its token-validating loader in imas_standard_names/grammar/vocab_loaders.py:762-843, and the parse-selecting select_conventions accessor in imas_standard_names/grammar/terms.py:235; every seed entry (flux_surface_averaged, plasma_boundary, the density notation and the density template) is transcribed exactly as briefed.\nVERDICT done_when: the done_when names refusal of one malformed entry per file, one unknown token key and one forbidden spelling equal to a registered alias, plus the accessor returning exactly the seed entries, plus a scratch-copy removal that fails the accessor test; tests/grammar/test_conventions.py:64,79,94,110,126,143 assert every refusal, :166 asserts the exact entry sets, and the manifest's negative-control log shows the scratch removal failing that test with EXIT=1.\nVERDICT write_paths: the declared scope is the source and test paths plus pyproject.toml if needed and the evidence fragment/figure paths; git diff --name-only 264aa2e..1e12625 lists seven paths, every one inside the declaration, each new file created rather than overwriting a cumulative record.\nVERDICT manifest: read; it records base 469 passed EXIT=0 and head 481 passed EXIT=0, the negative control 1 failed EXIT=1, the measurement module under /tmp scratch, and its changed_paths match the diff exactly.\nVERDICT diff: read one by one; the single commit 1e12625 adds the three YAML files, the conventions loaders and their pydantic models in vocab_loaders.py, the select_conventions accessor and its Applied* models in terms.py, tests/grammar/test_conventions.py, and the evidence fragment, with no change to any existing entry's definition.\nCALL_SITES: none\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: imas_standard_names/grammar/terms.py:235 select_conventions selects entries from the parse via _ir_tokens at terms.py:143, and vocab_loaders.py:762-843 enforce the token, alias, restatement and malformed refusals the goal names.\nSCORE evidence: 20\nJUSTIFICATION evidence: the reviewed manifest records tests/grammar/test_conventions.py plus the eighteen importers found by rg and tests/test_codegen_drift.py at 481 passed EXIT=0, a base arm at 469 passed EXIT=0, and a negative-control log EXIT=1 whose header names the scratch tree and module path.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: every path in git diff --name-only 264aa2e..1e12625 lies inside the declared write paths, though docs/evidence/fragments/concept-and-notation-registry/cnr-registry-loader.html was written although the brief stated no evidence fragment was required.\nSCORE durability: 17\nJUSTIFICATION durability: tests/grammar/test_conventions.py:166 reddens when the flux_surface_averaged concept entry is removed (negative_control.log EXIT=1), and :110/:126/:143 each fail only if their named refusal stops firing, but :106 matches only the filename every templates.yml refusal carries.\nSCORE fit: 17\nJUSTIFICATION fit: the loaders sit on vocab_loaders.py beside _load_yaml and reuse _load_flat_token_list, the accessor sits on terms.py beside fetch_standard_terms, and no plan or stage label appears, though terms.py:18 imports the private _vocabulary_definitions across modules.\nSCORE reuse: 10\nJUSTIFICATION reuse: vocab_loaders.py:40 _load_conventions_yaml duplicates the body of the existing owner _load_yaml at vocab_loaders.py:33 instead of reusing or generalising it, while the remaining additions extend existing owners.\nFINDING imas_standard_names/grammar/vocab_loaders.py:40 follow-on: _load_conventions_yaml copies the body of the existing _load_yaml owner at vocab_loaders.py:33 rather than reusing it, so YAML reading has two owners three lines apart; the brief asked for reuse of _load_yaml.\nFINDING tests/grammar/test_conventions.py:106 follow-on: test_malformed_template_entry_is_refused matches only \"templates.yml\", a substring every templates refusal message carries, so it cannot distinguish the malformed-entry path from the unknown-segment-kind refusal and asserts less than the done-when's failing-by-name.\n",
+  "review_run_id": "r-20261012T153207355503-review-of-cnr-registry-loader",
+  "reviewed_base_sha": "264aa2ed114a3557a7f820af4720dd36480ccac8",
+  "reviewed_head_sha": "1e12625694cf66cc85f90c6fe6383b5369c3427b",
+  "reviewed_run_id": "r-20261012T145518269054-cnr-registry-loader",
+  "reviewer": {
+    "backend": "clive",
+    "model": "deepseek-v4-flash"
+  },
+  "scores": {
+    "durability": 17,
+    "evidence": 20,
+    "fit": 17,
+    "goal_fidelity": 20,
+    "reuse": 10,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T15:37:49.491595+00:00",
+  "total": 102
+}

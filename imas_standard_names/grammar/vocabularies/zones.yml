@@ -33,23 +33,31 @@
 # The zone parser-acceptance union strips these as prefixes; the StandardName
 # model retains them (multiple, in canonical intra-order) in the ``zone`` field.
 
+# Each entry may map its token to that token's definition, as populations.yml
+# does. Only the tokens whose comment states a meaning carry one; a token
+# without a definition still loads.
+
 # --- vertical position ---
-- upper
-- lower
+upper:
+  upper: Upper vertical position.
+lower:
+  lower: Lower vertical position.
 
 # --- radial position ---
-- inner
-- outer
+inner:
+  inner: Inner radial position.
+outer:
+  outer: Outer radial position.
 
 # --- plasma region ---
-- core
-- edge
-- pedestal
-- separatrix
-- divertor
-- scrape_off_layer
+core:
+edge:
+pedestal:
+separatrix:
+divertor:
+scrape_off_layer:
 
 # --- PFC / optical-element face ---
-- front_surface
-- back_surface
-- wetted
+front_surface:
+back_surface:
+wetted:

@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-standard-names">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="concept-and-notation-registry-landed">
+  <meta name="plan-title" content="One Definition Per Concept, Published With The Grammar — landed record">
+  <meta name="plan-summary" content="Closure synthesis for One Definition Per Concept, Published With The Grammar: 0 committed run(s), 0 section-anchored comment(s), and 0 landed commit(s).">
+  <meta name="plan-evidence-for" content="concept-and-notation-registry">
+  <meta name="plan-verdict" content="qualified">
+  <title>One Definition Per Concept, Published With The Grammar — landed record | imas-standard-names</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+ <main class="plan-doc">
+  <h1>One Definition Per Concept, Published With The Grammar — landed record</h1>
+  <p>Closure synthesis for One Definition Per Concept, Published With The Grammar: 0 committed run(s), 0 section-anchored comment(s), and 0 landed commit(s).</p>
+
+
+   <section id="s2-registry-loader">
+    <h2>§2 — registry, loaders and accessor landed</h2>
+    <p>Commit <code>1e12625</code> adds <code>vocabularies/conventions/concepts.yml</code>, <code>notation.yml</code> and <code>templates.yml</code>, their token-validating loaders in <code>grammar/vocab_loaders.py</code>, and <code>select_conventions</code> in <code>grammar/terms.py</code>. For <code>flux_surface_averaged_argon_density_at_plasma_boundary</code> the accessor returns exactly two concepts (flux-surface average, plasma boundary), one notation (density) and one template (density with subject). The loader refuses a malformed entry per file, an unknown token key and a forbidden spelling equal to a registered alias, each by name. Gate: 481 passed against 469 at base; removing the flux-surface-average entry from a scratch copy turns the accessor test red. Independent review 102/120, no added failures. Open in this section: the templates still carry a <code>sign_convention</code> field the plan removed, the conventions YAML reader copies <code>_load_yaml</code>, and one refusal test matches too loosely; a follow-up node narrows all three.</p>
+  </section>
+
+  <section id="s2">
+    <h2>§2 — registry narrowed to openings and its existing YAML owner</h2>
+    <p>Commit <code>0a977ee</code> removes the template <code>sign_convention</code> field from the model, <code>templates.yml</code> and the <code>select_conventions</code> output, folds <code>_load_conventions_yaml</code> into <code>_load_yaml</code>, and makes each refusal test assert its own message. <code>rg</code> finds neither name in the registry code. Gate: 44 passed, 5 xfailed against 42 passed, 5 xfailed at base; re-adding <code>sign_convention</code> to the template model turns the refusal test red. Independent review 118/120, no added failures. With the loader landing (<a href="#s2-registry-loader">s2-registry-loader</a>), the section's deliverable is in the tree.</p>
+  </section>
+
+  <section id="s3-registry-test-invariants">
+    <h2>§3 — the registry tests check the registry&#x27;s own invariants</h2>
+    <p>Run <code>r-20261013T081300178088-cnr-registry-test-invariants</code>, merged at <code>448d2b9</code>. Authoring the conventions registry had broken three tests in <code>tests/grammar/test_conventions.py</code>, because they pinned entries and spellings the authored registry no longer had. The rewrite tests what the registry promises instead: every declared entry is present, the density spelling follows the notation policy, and notation is selected from the parse. The four-file gate went from 3 failed and 79 passed at base to 82 passed at head. Three targeted mutations of a scratch registry each fail a test (exit 1). The independent review scored every dimension 19 or 20 with no added failures. Its one note: the node's fragment is an empty anchor, so this record carries the account.</p>
+  </section>
+
+  <section id="s3-accessor-operator-keys">
+    <h2>§3 — convention selection keys operators by their registry token</h2>
+    <p>Run <code>r-20261013T081403384041-cnr-accessor-operator-keys</code>, merged at <code>757e2f5</code>. <code>select_conventions</code> in <code>imas_standard_names/grammar/terms.py</code> now handles operators by their registry token. An indexed derivative such as <code>derivative_of_X_with_respect_to_Y</code> selects the <code>derivative_with_respect_to</code> concept. A binary ratio name selects the <code>ratio</code> concept and the ratio-keyed templates. The placeholder token is excluded. Four new tests in <code>tests/grammar/test_conventions_operator_keys.py</code> each fail when the selection mechanisms are removed. The five-file gate adds no failures against its base. Its three base failures are the registry-test breakages the test-invariants node fixed.</p><p>The review scored 10 to 20 with no added failures and left two notes for the templates node. First, <code>_operator_token</code> splits a fused indexed operator by prefix stripping, duplicating <code>model._split_fused_indexed_operator</code>, which also validates the bound index. Second, <code>test_ratio_selects_its_operator_concept</code> already passes at base, so it guards nothing this change added.</p>
+  </section>
+
+  <section id="s3-binary-operators">
+    <h2>§3 — binary-operator templates, and one fused-operator splitter</h2>
+    <p>The registry's template set gained an <code>{operand}</code> placeholder and three binary-operator templates (commit <code>9813991</code>):</p><ul><li><code>ratio</code>: <em>Ratio of {operand} to {operand}</em>;</li><li><code>difference</code>: <em>Difference of {operand} and {operand}</em>;</li><li><code>product</code>: <em>Product of {operand} and {operand}</em>.</li></ul><p>The conventions selector now splits a fused indexed operator through <code>model._split_fused_indexed_operator</code>. It drops its own prefix loop and the <code>_operator_keys</code> cache, and binary operators are keyed to those templates. Three mutations each turn the operator tests red: a raw operator token, binary operators excluded from the IR tokens, and binary keying dropped from the template bases. The five-file gate went from 66 passed at base to 67 passed at head (merge <code>440942e</code>; review 113/120).</p>
+  </section>
+
+  <section id="s3-concept-corrections">
+    <h2>§3 — The coordinator&#x27;s read of concepts.yml, and its three corrections</h2>
+    <p>The lead delegated the read of <code>conventions/concepts.yml</code> to the coordinator on 2026-10-14. All 46 entries were read. They are correct and consistent with the catalog's convention, and none names a COCOS. Three corrections landed.</p><ul><li><strong>Plasma boundary</strong> (node <code>cnr-plasma-boundary-definition</code>, commit <code>f9965fd</code>, merge <code>5bc8735</code>, review 101/120). The locus definition in <code>locus_registry.yml</code> now reads, in the lead's words: <em>The last closed magnetic flux surface: the outermost flux surface on which field lines close on themselves, bounding the confined plasma.</em> The accessor returns it beside the equation ψ = ψ<sub>LCFS</sub>. Gate: 39 passed at base and head.</li><li><strong>Outboard and inboard midplane</strong> (node <code>cnr-midplane-and-inductance</code>, commit <code>0e43cde</code>, review 102/120). Both were defined by dR/dZ = 0 on the separatrix, which is undefined for a limited plasma and disagrees with the poloidal angle's zero. They are now <code>Z = Z_mid</code> with <code>R</code> beyond or inside the magnetic axis, where <code>Z_mid</code> is the height the data's <code>midplane_identifier</code> selects, the magnetic-axis height by default.</li><li><strong>Internal inductance</strong> (same node) now names its l<sub>i</sub>(3) form, matching its equation.</li></ul><p>Both reviews asked for a test pinning the new wording. That is declined: a test pinning approved text is a change detector, and the accessor tests already show the registry is what renders. The midplane fragment says a before-capture of the accessor is on disk. Only the after-capture exists; the before text was checked against the base blob instead.</p>
+  </section>
+
+  <section id="s5-token-definitions">
+    <h2>§5 — population, zone and aggregation tokens carry definitions</h2>
+    <p>The population, zone and aggregation vocabularies now carry a definition per token, moved from the files' comments, with nothing invented. <code>select_conventions</code> emits each through a definition-only shape. The loaders return the same token sets, and <code>load_zones</code> the same ordered tuple (merge <code>903e8e4</code>, 5 tests; review 101/120). Follow-ons for §6: the vocabularies use a token-keyed nested shape rather than the locus registry's entry shape, and a second YAML reader sits beside <code>_load_yaml</code>.</p>
+  </section>
+
+  <section id="s6-template-conditions">
+    <h2>§6 — A template may require or exclude tokens</h2>
+    <p>A template entry may now require tokens, exclude segment kinds and carry a <code>note</code>. Selection applies the conditions after the subset test, and a conditioned entry supersedes an unconditioned sibling (same base, same segment kinds) when both match. The shipped registry carries no conditions, so selection over it is unchanged. <code>tests/grammar/test_template_conditions.py</code> adds 8 tests, covering the required token, the excluded kind, the note, the precedence rule and the shipped-registry no-op. <code>tests/grammar</code> passes at base <code>d2713d4</code> and at head. Commits <code>ea6ea2c</code> and <code>f01dd7c</code>. The review scored 109 with three follow-ons. Nothing in production renders <code>AppliedTemplate.note</code> yet, so the test proves the note only through its own helper. The test oracle <code>_legacy_selection</code> is named by revision rather than mechanism. And one negative-control log header names the base revision. The first two go to §7.</p><p><a href="/imas-standard-names/evidence/fragments/concept-and-notation-registry/isn-template-conditions.html">fragment</a></p>
+  </section>
+
+  <section id="s7-near-duplicate-sentences">
+    <h2>§7 — The sentences that keep near-duplicates apart</h2>
+    <p>The three ruled sentences are notes on conditioned template entries in <code>templates.yml</code>:</p><ul><li>the cold-or-hot neutral temperature sentence, on <code>temperature</code> with subject <code>neutral</code>, in one entry excluding population and one requiring <code>cold</code> or <code>hot</code>;</li><li>the triangularity sentence, in one entry excluding zone and one requiring <code>upper</code> or <code>lower</code>;</li><li>the total-density sentence, on electron <code>density</code>, in one entry requiring aggregation <code>total</code> and one requiring population <code>thermal</code> or <code>fast</code>.</li></ul><p>A new accessor, <code>template_sentences</code> beside <code>select_conventions</code>, returns each selected template's opening and then its note. It emits each distinct note once, so <code>total_thermal_electron_density</code>, which selects both density entries, renders the sentence once. <code>select_conventions</code> is unchanged. <code>tests/grammar/test_near_duplicate_sentences.py</code> checks all three sentences on 62 family names: 10 temperature, 28 triangularity and all 24 electron-density combinations. Five red controls each fail (EXIT=1): a sentence removed, deduplication removed, and each sentence moved to a broad entry. <code>tests/grammar</code> has 1,275 passed against 1,212 at base, with no added failures. <code>_legacy_selection</code> is renamed by what it computes. Review 118/120. Commits <code>29dc668</code> and <code>729c94d</code>.</p><p><a href="/imas-standard-names/evidence/fragments/concept-and-notation-registry/isn-near-duplicate-sentences.html">fragment</a></p>
+  </section>
+
+  <section id="s8-separatrix-distance">
+    <h2>§8 — a base for a distance from the separatrix</h2>
+    <p><code>separatrix_distance</code> is a physical base: the distance of a position from the magnetic separatrix, positive outside it (merge <code>089f55e</code>, review 114/120, zero added failures). <code>radial_separatrix_distance_at_outboard_midplane</code> now decomposes as component <code>radial</code>, base <code>separatrix_distance</code>, position <code>outboard_midplane</code> and round-trips. Before, it parsed as a distance in the separatrix zone. Names that use <code>separatrix</code> as a zone or a locus keep their parse, and the decomposition test fails with the base removed. The grammar suite passes at head. Record: <code>docs/evidence/fragments/concept-and-notation-registry/isn-separatrix-distance.html</code>.</p>
+  </section>
+
+  <section id="s9-locus-definitions">
+    <h2>§9 — locus definitions in physics terms</h2>
+    <p>Every locus definition that named a DD field, an IDS path or an option value now states what <code>concepts.yml</code> states (merge <code>785e858</code>, review 117/120, zero added failures). <code>outboard_midplane</code> reads: the low-field-side equatorial midplane, points at the midplane height with major radius greater than the magnetic-axis radius; the data's midplane identifier selects that height, or it is the magnetic-axis height when none is given. <code>outboard_midplane_separatrix</code> is the crossing of the separatrix with that height on the low-field side, with no gradient wording. <code>dr_dz_zero_point</code> keeps its geometric definition and loses its DD references. One test fails on the old midplane texts. A second fails when a midplane definition drops either its height or its side of the axis. Record: <code>docs/evidence/fragments/concept-and-notation-registry/isn-locus-definitions-physics.html</code>.</p>
+  </section>
+
+</main>
+</body>
+</html>

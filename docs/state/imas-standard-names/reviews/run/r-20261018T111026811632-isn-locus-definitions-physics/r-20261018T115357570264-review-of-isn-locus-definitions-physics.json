@@ -1,0 +1,60 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "ab55103ab168cb6e433b22caffde2643bc5330d6",
+  "call_site_count": 3,
+  "call_sites": [
+    "imas_standard_names/grammar/terms.py:47 (standard_terms reads entry.definition for every locus)",
+    "imas_standard_names/grammar/context.py:880",
+    "imas_standard_names/catalog/dataset.py:1240"
+  ],
+  "completed_at": "2026-10-18T12:12:18.989Z",
+  "dispatched_at": "2026-10-18T11:54:08Z",
+  "findings": [
+    {
+      "file": "tests/grammar/test_locus_definitions_physics_only.py",
+      "line": "29",
+      "severity": "follow-on",
+      "text": "follow-on: the two red-control logs print tracebacks at file lines 30, 36, 46, 48 and 49 where the committed assertions sit at 29, 35, 45, 47 and 48, so the recorded controls ran a working copy one line longer than the committed file; the assertion text is identical and the gate at the committed revision still passes, so the evidence is sound but the receipts do not name the committed revision's exact file."
+    }
+  ],
+  "head_log_revision": "88f9ae8f12b64750ce3ef6cd2033897e3444d888",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 3 production call site(s)",
+    "diff": "against ab55103ab168cb6e433b22caffde2643bc5330d6, commit 88f9ae8 rewrites ten locus definitions and adds the 48-line test file, and commit 6f5782aa adds only the evidence fragment; no other path is touched.",
+    "done_when": "\u00a79's done_when names a DD/derivative detector and a midplane-relation checker plus a grammar-suite delta; tests/grammar/test_locus_definitions_physics_only.py:21-48 adds both, the manifest's grammar-base.log header records revision ab55103ab168cb6e433b22caffde2643bc5330d6 with 1275 passed and EXIT=0 and grammar-head.log records revision 88f9ae8f12b64750ce3ef6cd2033897e3444d888 with 1278 passed and EXIT=0, so the gate is the done-when's measure and its result is recorded.",
+    "goal": "the node goal is plan \u00a79 \u2014 rewrite every locus_registry.yml definition that names a DD field, an IDS path or an option value so it states in words what its concepts.yml entry states, redefining outboard_midplane_separatrix from the midplane and leaving dr_dz_zero_point its derivative geometry without DD wording; commit 88f9ae8 does exactly that at imas_standard_names/grammar/vocabularies/locus_registry.yml:605-845.",
+    "manifest": "read; it reports status complete, both commits, the three changed paths, and its logs locus-old-text-red.log and locus-planted-red.log both end EXIT=1 while grammar-base.log and grammar-head.log both end EXIT=0, matching every value it states.",
+    "write_paths": "the source brief fences imas_standard_names/grammar/vocabularies/locus_registry.yml, tests/grammar/test_locus_definitions_physics_only.py and docs/evidence/fragments/concept-and-notation-registry/isn-locus-definitions-physics.html; git show --stat for 88f9ae8f12b64750ce3ef6cd2033897e3444d888 and 6f5782aa63ab688a5e212e4d60e1bd6c0a8e6da1 changes exactly those three paths and no other."
+  },
+  "justifications": {
+    "durability": "tests/grammar/test_locus_definitions_physics_only.py:29 fails on reinstated DD wording and :33 on reinstated derivative wording, both shown red in locus-old-text-red.log, and :47-48 fail when either part of the midplane relation is dropped, shown red in locus-planted-red.log.",
+    "evidence": "tests/grammar/ and its delta are the done-when's own measure and both suite receipts are recorded at grammar-base.log and grammar-head.log, but the two red-control tracebacks cite test-file line numbers one below the committed assertions, so those receipts were captured on a working copy that differs from the committed file by one line.",
+    "fit": "test_locus_definitions_physics_only.py:1-18 follows the sibling gate idiom of tests/grammar/test_vocabulary_gates.py and names its detector and locus set by mechanism, with no plan label anywhere in the file or the registry edits.",
+    "goal_fidelity": "locus_registry.yml:608-845 rewrites ten definitions to the concepts.yml relation, outboard_midplane_separatrix is redefined from the title midplane at :690-693 with no dR/dZ, and dR/dZ appears only in dr_dz_zero_point at :830 as \u00a79 requires.",
+    "reuse": "a capability search over imas_standard_names/ and tests/grammar/ found no existing detector for schema wording in vocabulary definitions, and the test reads the registry through the existing owner load_locus_registry in imas_standard_names/grammar/vocab_loaders.py rather than forking a loader.",
+    "scope_discipline": "the two commit stats show only the declared locus_registry.yml, the declared grammar test and the declared evidence fragment."
+  },
+  "project": "imas-standard-names",
+  "raw_text": "VERDICT goal: the node goal is plan \u00a79 \u2014 rewrite every locus_registry.yml definition that names a DD field, an IDS path or an option value so it states in words what its concepts.yml entry states, redefining outboard_midplane_separatrix from the midplane and leaving dr_dz_zero_point its derivative geometry without DD wording; commit 88f9ae8 does exactly that at imas_standard_names/grammar/vocabularies/locus_registry.yml:605-845.\nVERDICT done_when: \u00a79's done_when names a DD/derivative detector and a midplane-relation checker plus a grammar-suite delta; tests/grammar/test_locus_definitions_physics_only.py:21-48 adds both, the manifest's grammar-base.log header records revision ab55103ab168cb6e433b22caffde2643bc5330d6 with 1275 passed and EXIT=0 and grammar-head.log records revision 88f9ae8f12b64750ce3ef6cd2033897e3444d888 with 1278 passed and EXIT=0, so the gate is the done-when's measure and its result is recorded.\nVERDICT write_paths: the source brief fences imas_standard_names/grammar/vocabularies/locus_registry.yml, tests/grammar/test_locus_definitions_physics_only.py and docs/evidence/fragments/concept-and-notation-registry/isn-locus-definitions-physics.html; git show --stat for 88f9ae8f12b64750ce3ef6cd2033897e3444d888 and 6f5782aa63ab688a5e212e4d60e1bd6c0a8e6da1 changes exactly those three paths and no other.\nVERDICT manifest: read; it reports status complete, both commits, the three changed paths, and its logs locus-old-text-red.log and locus-planted-red.log both end EXIT=1 while grammar-base.log and grammar-head.log both end EXIT=0, matching every value it states.\nVERDICT diff: against ab55103ab168cb6e433b22caffde2643bc5330d6, commit 88f9ae8 rewrites ten locus definitions and adds the 48-line test file, and commit 6f5782aa adds only the evidence fragment; no other path is touched.\nCALL_SITES: imas_standard_names/grammar/terms.py:47 (standard_terms reads entry.definition for every locus), imas_standard_names/grammar/context.py:880, imas_standard_names/catalog/dataset.py:1240\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: locus_registry.yml:608-845 rewrites ten definitions to the concepts.yml relation, outboard_midplane_separatrix is redefined from the title midplane at :690-693 with no dR/dZ, and dR/dZ appears only in dr_dz_zero_point at :830 as \u00a79 requires.\nSCORE evidence: 18\nJUSTIFICATION evidence: tests/grammar/ and its delta are the done-when's own measure and both suite receipts are recorded at grammar-base.log and grammar-head.log, but the two red-control tracebacks cite test-file line numbers one below the committed assertions, so those receipts were captured on a working copy that differs from the committed file by one line.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the two commit stats show only the declared locus_registry.yml, the declared grammar test and the declared evidence fragment.\nSCORE durability: 19\nJUSTIFICATION durability: tests/grammar/test_locus_definitions_physics_only.py:29 fails on reinstated DD wording and :33 on reinstated derivative wording, both shown red in locus-old-text-red.log, and :47-48 fail when either part of the midplane relation is dropped, shown red in locus-planted-red.log.\nSCORE fit: 20\nJUSTIFICATION fit: test_locus_definitions_physics_only.py:1-18 follows the sibling gate idiom of tests/grammar/test_vocabulary_gates.py and names its detector and locus set by mechanism, with no plan label anywhere in the file or the registry edits.\nSCORE reuse: 20\nJUSTIFICATION reuse: a capability search over imas_standard_names/ and tests/grammar/ found no existing detector for schema wording in vocabulary definitions, and the test reads the registry through the existing owner load_locus_registry in imas_standard_names/grammar/vocab_loaders.py rather than forking a loader.\nFINDING tests/grammar/test_locus_definitions_physics_only.py:29 follow-on: the two red-control logs print tracebacks at file lines 30, 36, 46, 48 and 49 where the committed assertions sit at 29, 35, 45, 47 and 48, so the recorded controls ran a working copy one line longer than the committed file; the assertion text is identical and the gate at the committed revision still passes, so the evidence is sound but the receipts do not name the committed revision's exact file.",
+  "review_run_id": "r-20261018T115357570264-review-of-isn-locus-definitions-physics",
+  "reviewed_base_sha": "ab55103ab168cb6e433b22caffde2643bc5330d6",
+  "reviewed_head_sha": "6f5782aa63ab688a5e212e4d60e1bd6c0a8e6da1",
+  "reviewed_run_id": "r-20261018T111026811632-isn-locus-definitions-physics",
+  "reviewer": "review-of-isn-locus-definitions-physics-6f5782aa63ab",
+  "scores": {
+    "durability": 19,
+    "evidence": 18,
+    "fit": 20,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-18T12:14:38.039791+00:00",
+  "total": 117
+}

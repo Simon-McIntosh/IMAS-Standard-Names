@@ -1,0 +1,83 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-16T06:25:07.538Z",
+  "dispatched_at": "2026-10-16T06:17:57Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/concept-and-notation-registry.html:185",
+      "id": "reasoning-1",
+      "reason": "a worker following \"one entry per kind\" cannot satisfy the exactly-once assertion on any stacked aggregation+population name the density family composes, and SPEC says implement as written, so the node would be blocked or would silently ship a double render.",
+      "text": "\u00a77 tells the worker to place the total-density sentence \"in one conditioned entry per kind\" \u2014 `aggregation: [total]` for `total_electron_density` and `population: [thermal, fast]` for `thermal_electron_density`/`fast_electron_density` \u2014 but the parser's segments are a superset test (`set(entry.segments) <= segments`, `imas_standard_names/grammar/terms.py:334`) and the condition kinds stack, so `total_thermal_electron_density` parses to `aggregation=total + population=thermal` (verified: base `density`, segments `['aggregation','physical_base','population','subject']`). That name matches both conditioned entries, so under \u00a76 (\"a `note`: one sentence rendered after the documentation opening of every name that selects the entry\") both notes render and the sentence appears twice, failing \u00a77's own \"each name it describes renders it exactly once\". \u00a76 only asks for a precedence rule between a conditioned entry and an unconditioned sibling, so no rule resolves two conditioned entries both matching",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/concept-and-notation-registry.html:185",
+      "id": "done_when-1",
+      "reason": "\u00a77's measure rests on a control that cannot go red for one of its three sentences, so the node's evidence for the triangularity case would report safety it does not provide; the plan needs a discriminating control for that sentence (or a stated per-family control).",
+      "text": "\u00a77 declares the test \"fails again with a sentence moved to its family's shared template\", but for the triangularity sentence this control is silent: the unconditioned triangularity template selects every triangularity name (`set([]) <= segments`), and \u00a76 itself records that \"a sentence about the unqualified triangularity reaches `upper_triangularity_of_plasma_boundary`\", so moving that sentence to the shared template still places it on exactly the names \u00a77 says it describes (`triangularity_of_plasma_boundary`, upper and lower forms). The test therefore passes and the guard is never shown to fire",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "3f3df429650ee825759aea6558e21cdf372ee03238506f749dd6396603126367",
+  "plan_slug": "concept-and-notation-registry",
+  "plan_version": 34,
+  "project": "imas-standard-names",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "reasoning-1",
+      "reason": "",
+      "when": "2026-10-16T08:38:19.938673+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "done_when-1",
+      "reason": "",
+      "when": "2026-10-16T08:38:26.607064+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-16T08:38:26.607064+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-16T08:38:19.938673+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-standard-names/docs/state/imas-standard-names/reviews/plan/concept-and-notation-registry/r-20261016T061738100813-plan-review-of-concept-and-notation-registry.json",
+  "review_run_id": "r-20261016T061738100813-plan-review-of-concept-and-notation-registry",
+  "reviewed_blob_sha": "328f26ff7bf9fc1c6148ee87b7c6d5264dbb988c",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the cited `imas-codex docs/evidence/fragments\u2026/scg-near-duplicate-rulings.json` resolves and its `template_sentence` fields carry the three sentences, and the in-plan \u00a75/\u00a76 anchors resolve.",
+    "done_when": "a finding \u2014 \u00a77's declared negative control (\"a sentence moved to its family's shared template\") is silent for the triangularity sentence, whose shared template already reaches exactly the names that sentence describes, so that third sentence's guard cannot be shown to fire.",
+    "evidence_paths": "pass \u2014 \u00a77 names no scratchpad or node-local path; its red arms are recorded with `EXIT=`, as elsewhere in the plan.",
+    "naming": "pass \u2014 no plan labels, stage names or ticket numbers are introduced by \u00a77.",
+    "reasoning": "a finding \u2014 \u00a77's rule \"place it in one conditioned entry per kind\" renders the total-density sentence twice on a name that fills both kinds (`total_thermal_electron_density`), which contradicts \u00a77's own assertion that each described name renders it exactly once.",
+    "single_goal": "pass \u2014 \u00a77 carries one deliverable (place the three separating sentences where each renders only on its names).",
+    "wiring": "pass \u2014 \u00a77's `data-links` name `concept-and-notation-registry#s5 and ...#s6` and both sections resolve in this plan, and its only plan-level edge (`plan-blocks=imas-codex:sn-house-style`) is unchanged from the earlier reviewed revision."
+  },
+  "section_digests": {
+    "_document": "cd4ef8b509f6911b6028d3fe30ec58adf657b2baa762d2934c92ef96444c8b86",
+    "s1": "30a14d1b0da016d94a775f6d1085956ddc7deec1c03f5b5f600083f6120bf711",
+    "s2": "62e226b5e5ae9709dcab01f287af1164b128950199d32d6795f6a9f6bf3dbda9",
+    "s3": "dbbc4175f8a714330ed9bfb7402d0ebe8acc2802fc51746f56dae6d178b35434",
+    "s4": "3a28fbf118b9fc1daa60b9e41d42866cbcd951b116da2f37eb7123b2b556746e",
+    "s5": "e3e419e7263996f386d85bc2c61b8a4e66310aafa7f80b0fbd7a58542f437ebb",
+    "s6": "d6c899960389590d810c511386e34ba7ee133af91a946fa601a71df17dca431c",
+    "s7": "146eae452bcd7de9467a1e7dca9759f4d22c7b0ee3528491b4985c08ebc1ddc8"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-16T08:37:51.900532+00:00"
+}

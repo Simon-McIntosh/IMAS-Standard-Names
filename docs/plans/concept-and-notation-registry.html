@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"   content="imas-standard-names">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="concept-and-notation-registry">
+  <meta name="plan-title" content="One Definition Per Concept, Published With The Grammar">
+  <meta name="plan-summary" content="A registry of shared concept definitions, notation and documentation templates, keyed by grammar tokens and released with the grammar.">
+  <meta name="plan-status" content="active">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort-hours" content="5.0">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="orchestrator">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-capability-risk" content="moderate">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-tags" content="grammar,vocabulary,release">
+  <meta name="plan-blocks" content="imas-codex:sn-house-style">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;done&quot;,&quot;s8&quot;:&quot;done&quot;,&quot;s9&quot;:&quot;done&quot;}">
+  <title>One Definition Per Concept, Published With The Grammar | imas-standard-names</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-version" content="53">
+<meta name="plan-modified" content="2026-10-18">
+<meta name="plan-commits" content="1e12625694cf66cc85f90c6fe6383b5369c3427b,0a977eefa2270d91ab5facee948e16fc2da28b96,9813991edb8f75feb938c12187e819a32bda036b,440942ec59eddbcc7b4313b100e4fcea7ca105d9,f9965fd4aef6a9f9dd139f23dbf32a033243a2f2,0e43cde1a7918313fe2585175e665bde74e17260">
+</head>
+<body>
+  <main class="plan-doc">
+    <header>
+      <p class="eyebrow">Plan &middot; grammar &middot; consumer: imas-codex S18</p>
+      <h1>One definition per concept</h1>
+      <p class="lead">
+        The grammar says how a name is spelled. Nothing says how the shared ideas inside a
+        name are defined. So the catalog writes the flux-surface average five ways and glosses
+        the plasma boundary as the separatrix. This plan adds that missing layer beside the
+        vocabularies it is keyed by, and releases it with them.
+      </p>
+    </header>
+
+    <h2 id="s1">§1 — Why here, and why now</h2>
+    <p>
+      The imas-codex consistency census of 2026-10-12
+      (<code>imas-codex:sn-catalog-consistency-census</code>) measured 72 accepted entries
+      re-deriving the flux-surface average, in five notations and with one wrong. 24 boundary
+      entries call the plasma boundary the separatrix, and the WEST batch opens its
+      documentation in four styles. The consumer plan <code>imas-codex:sn-house-style</code>
+      authors a single house style to fix this. On 2026-10-12 the lead ruled that the house
+      style lives in ISN now, released before the WEST re-cut, rather than in imas-codex
+      first. A definition belongs with the grammar that names the thing defined, and every
+      consumer of the standard should see it, not only the generator.
+    </p>
+    <p>
+      Existing guidance is the base, not a competitor. <code>docs/guidelines.md</code> states
+      naming rules and the <code>flux-surface-average</code> tag. The shipped symbol
+      definition policy requires every symbol to be defined by identity and name link. The
+      locus registry already carries a definition per locus. The new layer adds what none of
+      them hold: one canonical equation per concept, one symbol per quantity, and one opening
+      template per name pattern.
+    </p>
+    <p>
+      Four existing owners are extended or referenced rather than restated. Per-token
+      definitions live on the vocabulary entries (<code>LocusEntry.definition</code>,
+      <code>PhysicalBaseDef.definition</code>, <code>GeometryCarrierDef.definition</code> in
+      <code>imas_standard_names/grammar/vocab_loaders.py</code>). Alternate spellings live on
+      their <code>aliases</code> and <code>abbreviations</code>. The writer's rubric (section
+      order, the generic sign-convention form, equation and symbol rules) is
+      <code>entry_schema.fields.documentation.guidance</code> in
+      <code>imas_standard_names/grammar/specification.yml</code>, generated into
+      <code>field_schemas.py</code>. The governed-term accessor is <code>terms.py</code>.
+      imas-codex's cluster vocabulary
+      (<code>imas_codex/definitions/clusters/concepts.yaml</code>) carries symbols for cluster
+      labels; it is a consumer of this layer, recorded there rather than changed here.
+    </p>
+
+    <h2 id="s2">§2 — The registry and its loader</h2>
+    <section data-reckon="section" data-id="s2" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="low" data-status="done" data-links=""></section>
+    <p>
+      Three files under <code>imas_standard_names/grammar/vocabularies/conventions/</code>:
+    </p>
+    <ul>
+      <li><code>concepts.yml</code> — one entry per shared concept, keyed by the operator,
+        locus, coordinate or base token that carries it. Each entry holds a canonical phrase,
+        exactly one canonical LaTeX equation, its symbol table, forbidden variants as patterns,
+        and whether a name using it restates the equation or only names the concept. It
+        carries a one-sentence definition only for a token whose vocabulary entry has none
+        (operators have none today). Where the token's entry already defines it, the
+        accessor returns that definition, and a lead ruling that changes it is made on the
+        token's own entry, so there is one definition per token.</li>
+      <li><code>notation.yml</code> — one symbol per quantity or coordinate, keyed by base,
+        subject, component or coordinate token, with its forbidden spellings. The loader
+        refuses a forbidden spelling that equals one of the same token's registered
+        <code>aliases</code> or <code>abbreviations</code>, so the two owners cannot
+        disagree.</li>
+      <li><code>templates.yml</code> — one description opening and one documentation opening
+        per name pattern. A pattern key is written in grammar segments (a base and the segment
+        kinds the name fills), so it is selected from the parse. The section order and the
+        generic sign-convention form stay in <code>specification.yml</code>, and a template
+        references them rather than restating them. Whether an entry carries a sign-convention
+        paragraph depends on its COCOS transformation type, an entry field the parse does not
+        yield, so that rule is not in the registry: the consumer decides it where the entry is
+        known (imas-codex's documentation gates). Per-pattern openings are not added to <code>specification.yml</code>,
+        whose guidance is the generic rubric every entry's schema carries.</li>
+    </ul>
+    <p>
+      The models and loaders go into <code>imas_standard_names/grammar/vocab_loaders.py</code>
+      beside the existing ones, reusing <code>_load_yaml</code> and the registries it already
+      loads. For <code>concepts.yml</code> and <code>notation.yml</code>, which are keyed by
+      tokens, the loader refuses any key that is not a real token in the current vocabularies,
+      so the registry cannot drift from the grammar. <code>templates.yml</code> is keyed by
+      patterns, so its rule is that every token and segment kind a pattern names exists in the
+      current grammar. The public accessor goes into
+      <code>imas_standard_names/grammar/terms.py</code> beside <code>fetch_standard_terms</code>:
+      it takes a parsed name and returns exactly the entries that apply to it. No new loader
+      module is added.
+      Surface: one accessor and one refusal family (an unknown token key, or a forbidden
+      spelling that equals a registered alias) are added. Nothing is retired, because no
+      per-token equation, per-quantity symbol or per-pattern opening exists to merge with.
+    </p>
+    <p>
+      <strong>Done when:</strong> the loader validates all three files and refuses one
+      deliberately malformed entry per file, plus one entry keyed by a token that does not
+      exist, each failing by name. For
+      <code>flux_surface_averaged_argon_density_at_plasma_boundary</code>, the accessor returns
+      the flux-surface-average concept, the plasma-boundary entry, the density notation and
+      the species-density template, and nothing else.
+    </p>
+
+    <h2 id="s3">§3 — The entries the WEST batch needs</h2>
+    <section data-reckon="section" data-id="s3" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="done" data-links=""></section>
+    <p>
+      Content is authored by the coordinator under <code>imas-codex:sn-house-style</code> §3
+      and lands here. The lead's rulings of 2026-10-12 fix three entries before any other is
+      written:
+    </p>
+    <ul>
+      <li>The flux-surface average is defined by the surface form,
+        <code>\langle f\rangle = \oint f\,dS/|\nabla\psi| \,/\, \oint dS/|\nabla\psi|</code>.
+        The line form may be named as equivalent in prose and is never written as a second
+        equation.</li>
+      <li>The plasma boundary is "the last closed flux surface". The separatrix is named only
+        where a quantity is defined for a diverted configuration.</li>
+      <li>Every documentation entry opens with a defining noun phrase, the same shape as its
+        description.</li>
+    </ul>
+    <p>
+      <strong>Done when:</strong> every concept, symbol and pattern used by the 220 names of the
+      frozen WEST roster has an entry. The worklist is produced by running the §2 accessor
+      over that roster and listing the tokens it finds with no entry, so the list is
+      measured, not guessed. The run is shown able to report a gap: with one entry removed from
+      a scratch copy of the registry, it lists that token as missing. The lead has read
+      <code>concepts.yml</code>. This section is the landing of
+      <code>imas-codex:sn-house-style</code> §3, where the coordinator authors the entries; it
+      closes when that section does, and is not built separately.
+    </p>
+
+    <h2 id="s4">§4 — Released before the WEST re-cut</h2>
+    <section data-reckon="section" data-id="s4" data-effort-hours="1.0" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <p>
+      imas-codex already consumes this repository as an editable path source, so the registry
+      is usable there the moment it lands on <code>main</code>. The release is what makes it
+      part of the published standard. Cut it with <code>standard-names release</code> before
+      the WEST candidate is cut. In imas-codex, both <code>imas-standard-names</code> pin
+      occurrences move together, and the graph's grammar snapshot is verified to carry the
+      release rather than assumed, since a scoped run does not resync it.
+    </p>
+    <p>
+      <strong>Done when:</strong> the tag is published and installable from the package
+      index. Both imas-codex pin lines name it. A read of the graph's grammar snapshot reports
+      the released version.
+    </p>
+
+    <h2 id="s5">§5 — Population, zone and aggregation tokens carry definitions</h2>
+<section data-reckon="section" data-id="s5" data-effort-hours="1.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="done" data-links=""></section>
+<p>Three near-duplicate rulings carry a separating sentence (§7) that must render only on the names it describes. The registry cannot do that today. <code>_vocabulary_definitions</code> (<code>imas_standard_names/grammar/vocab_loaders.py</code> ~715) returns definitions only for locus, physical-base and geometry-carrier tokens. The population (<code>populations.yml</code>), zone (<code>zones.yml</code>) and aggregation (<code>aggregations.yml</code>) vocabularies are plain token lists, with any meaning in comments. The lead ruled on 2026-10-15 that the registry gains both mechanisms: definitions on these tokens (this section), and token conditions on templates (§6).</p><p>Each token in those three vocabularies may carry a <code>definition</code>, held in <code>_vocabulary_definitions</code>. Holding it is not enough. <code>select_conventions</code> (<code>grammar/terms.py</code> ~280) emits an applied definition only for a token keyed in <code>concepts.yml</code>, and uses the vocabulary text merely as fallback for such a key. So it must also emit an applied definition for a population, zone or aggregation token that carries one. <code>AppliedConcept</code> (<code>terms.py</code> ~116) requires <code>phrase</code>, <code>equation</code> and <code>restates_equation</code>, which a token definition does not have. Either make those fields optional for a definition-only entry, or add a sibling definition-only shape that renders beside concepts. Never invent a phrase or an equation to fill a required field. Say which you chose in the fragment. Change the files from lists to entries in the shape the locus registry and physical bases already use, so a token without a definition still loads. <code>load_populations</code> and <code>load_aggregations</code> return exactly the token sets they return today. <code>load_zones</code> returns exactly the same ordered tuple, because its order is the canonical intra-order rendering and validation rely on (<code>vocab_loaders.py</code> ~380). No consumer changes. Move the meanings now held in comments into definitions where a comment states one. Do not invent definitions for tokens whose meaning no comment records.</p><p><strong>Done when:</strong></p><ul><li>a test shows <code>load_populations</code> and <code>load_aggregations</code> return the same token sets at base and at head, and <code>load_zones</code> the same ordered tuple;</li><li><code>_vocabulary_definitions</code> returns a definition for a population, a zone and an aggregation token, and that definition appears in a rendered name carrying the token;</li><li>a token without a definition loads and contributes nothing;</li><li>each test fails with its mechanism removed, recorded with <code>EXIT=</code>;</li><li>the grammar, vocabulary and template tests pass at head, judged by delta against base.</li></ul>
+
+    <h2 id="s6">§6 — A template may require or exclude tokens</h2>
+<section data-reckon="section" data-id="s6" data-effort-hours="1.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="done" data-links=""></section>
+<p><code>select_conventions</code> (<code>imas_standard_names/grammar/terms.py</code> ~297) selects a template from <code>conventions/templates.yml</code> by the name's base and the segment kinds present, through a subset test. So a template reaches every name of its pattern. A sentence about cold neutrals reaches <code>electron_temperature</code>, and a sentence about the unqualified triangularity reaches <code>upper_triangularity_of_plasma_boundary</code>.</p><p>A template entry may carry optional conditions:</p><ul><li>required tokens per segment kind, for example <code>population: [cold, hot]</code> or <code>aggregation: [total]</code>;</li><li>excluded segment kinds, for example a template for the unqualified quantity that excludes <code>zone</code>.</li></ul><p><code>select_conventions</code> applies the conditions after its subset test. An entry with no conditions selects exactly as it does today. A template entry may also carry an optional <code>note</code>: one sentence rendered after the documentation opening of every name that selects the entry. <code>TemplateEntry</code> (<code>vocab_loaders.py</code> ~662) has no field for such a sentence today, because its <code>description</code> and <code>documentation</code> are the pattern's openings. §7 places the separating sentences in notes. No precedence among templates exists today: they are an unordered list returned in file order (<code>vocab_loaders.py</code> ~678). Define how a conditioned entry and an unconditioned sibling combine or take precedence when both match, state the rule in the fragment, and test it.</p><p><strong>Done when:</strong></p><ul><li>tests show a required-token condition admits only names carrying the token;</li><li>an excluded segment kind admits only names without it;</li><li>a note renders after the documentation opening on every name that selects its entry and on no other name;</li><li>every existing template selects as before, shown over the names the existing template tests render;</li><li>a test fixes the precedence rule: when a conditioned entry and an unconditioned sibling both match one name, the result is exactly what the stated rule says, and the test fails when the rule is reversed;</li><li>each test fails with its mechanism removed, recorded with <code>EXIT=</code>;</li><li>the grammar and template tests pass at head, judged by delta against base.</li></ul>
+
+    <h2 id="s7">§7 — The sentences that keep near-duplicates apart</h2>
+<section data-reckon="section" data-id="s7" data-effort-hours="1.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="done" data-links="concept-and-notation-registry#s5,concept-and-notation-registry#s6"></section>
+<p>The coordinator ruled every near-duplicate overlap that touches the WEST roster as distinct (imas-codex <code>docs/evidence/fragments/sn-catalog-grouping/scg-near-duplicate-rulings.json</code>, 2026-10-13). Three of those rulings carry a <code>template_sentence</code> that separates two names which otherwise read alike. Use each sentence verbatim from that field:</p><ul><li>cold or hot neutral temperature against neutral temperature;</li><li>unqualified triangularity against upper and lower triangularity;</li><li>total electron density against thermal and fast electron density.</li></ul><p>After §5 and §6, place each sentence with the mechanisms those sections built: token definitions and conditioned template notes. The placement is the worker's to choose, and the done-when below is the contract. Two constraints are known. A token definition carries only what the token means in <em>every</em> name it fills, so a neutral-temperature sentence cannot go on <code>cold</code>, which also fills <code>cold_electron_density</code>. And a name can fill several segment kinds at once, as <code>total_thermal_electron_density</code> does, so a sentence placed in more than one entry must still render once per name. Say in the fragment where each sentence went and why.</p><p><strong>Done when:</strong> a test renders the documentation of every name in each family that the graph-free registry can name:</p><ul><li>temperature: <code>electron_temperature</code>, <code>ion_temperature</code>, <code>neutral_temperature</code>, and cold and hot neutral temperature;</li><li>density: <code>electron_density</code> and each population and aggregation form of it the registry composes;</li><li>triangularity: <code>triangularity_of_plasma_boundary</code> and its upper and lower forms.</li></ul><p>The test asserts that each sentence appears <strong>exactly once</strong> on every name it describes, and on no other name in any of the three families, including names that fill more than one segment kind. It fails with any sentence removed, and fails when any sentence is duplicated so that some described name renders it twice. Both are recorded with <code>EXIT=</code>. For each sentence, a further control moves it to a placement that reaches a name it does not describe, and the test must then fail. Where no such placement exists for a sentence, say so in the fragment. The registry and template tests pass at head, judged by delta against base.</p><p><strong>Render through one owner, not a test helper.</strong> Nothing in production yet reads <code>AppliedTemplate.note</code>. The only renderer is imas-codex, which inserts <code>template.documentation</code> alone (<code>imas_codex/standard_names/workers.py</code> ~9661 and <code>imas_codex/standard_names/docs_gates.py</code> ~983). Add one accessor beside <code>select_conventions</code> in <code>imas_standard_names/grammar/terms.py</code>. It returns, in order, the sentences that a name's selected templates contribute: each template's opening, then its note. The test asserts through that accessor. Switching the imas-codex writer and gate to it is a separate node in that repository. In <code>tests/grammar/test_template_conditions.py</code>, rename <code>_legacy_selection</code> and its docstring by what the oracle computes, a selection by the subset test alone with no conditions.</p>
+
+    <h2 id="s8">§8 — A base for a distance from the separatrix</h2>
+<section data-reckon="section" data-id="s8" data-effort-hours="1.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="done" data-links="concept-and-notation-registry#s4"></section>
+<p>A harmonize run in imas-codex (2026-10-18) exposed two registry defects through one WEST name, <code>gap_at_outboard_midplane</code>, and the lead ruled on both the same day. This section is the first; §9 is the second.</p><p>Three DD quantities are a measurement position's radial distance from the separatrix, mapped along flux surfaces to the outboard midplane, positive in the scrape-off layer: <code>langmuir_probes/embedded/distance_separatrix_midplane</code>, <code>langmuir_probes/reciprocating/plunge/distance_separatrix_midplane</code> and <code>thomson_scattering/channel/distance_separatrix_midplane</code>. The grammar cannot say "distance from the separatrix". Relational spellings (<code>distance_from_separatrix_…</code>) fail as unknown bases, and <code>radial_separatrix_distance_at_outboard_midplane</code> parses today only as a distance in the separatrix <em>zone</em> (<code>zone=[separatrix]</code>, base <code>distance</code>), which says where the quantity sits, not what it is measured from. Add one physical base, <code>separatrix_distance</code>, beside <code>decay_length</code> and <code>connection_length</code>: the distance of a position from the magnetic separatrix, positive outside it. That spelling, an existing identity in imas-codex, then decomposes as what it means and can be revived there.</p><p><strong>Done when:</strong> <code>radial_separatrix_distance_at_outboard_midplane</code> parses and round-trips with component <code>radial</code>, base <code>separatrix_distance</code> and position <code>outboard_midplane</code>, and a test fails with the base removed, recorded with <code>EXIT=</code>. Every other name in the grammar's fixtures keeps its parse; names that use <code>separatrix</code> as a zone or locus are tested explicitly. The grammar suite passes at head, judged by delta against base. The release in §4 carries this section with §7 and §9.</p>
+
+    <h2 id="s9">§9 — Locus definitions say what the concept registry says, and name no DD field</h2>
+<section data-reckon="section" data-id="s9" data-effort-hours="1.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="done" data-links="concept-and-notation-registry#s4"></section>
+<p><code>locus_registry.yml</code> defines <code>outboard_midplane</code> as "follows the DD midplane_identifier (default option 'dr_dz_zero_sep': the outboard separatrix point where dr/dz = 0)". The imas-codex documentation gate copies a locus definition into every documentation that uses the locus, and its reviewer docks the DD field and option names as implementation leakage. So every outboard-midplane name loses points whichever way it is written. The gate requires whatever text the registry carries, so rewriting the registry changes what it requires; the two are not in conflict.</p><p>The physics is already settled in this repository. Commit <code>0e43cde</code> (2026-10-14) removed the dR/dZ = 0 definition, which is undefined for a limited plasma with no separatrix and disagreed with <code>poloidal_angle</code>. <code>conventions/concepts.yml</code> now defines the outboard midplane as Z = Z<sub>mid</sub>, R &gt; R<sub>axis</sub>, with Z<sub>mid</sub> the midplane height the data's midplane identifier selects, or the magnetic-axis height when none is given. The locus definitions never followed.</p><p>Rewrite each <code>locus_registry.yml</code> definition that names a DD field, an IDS path or an option value so it states, in words, what its <code>concepts.yml</code> entry states. Do not reinstate dR/dZ = 0 or any definition a recorded decision removed. At least these carry DD references: <code>outboard_midplane</code>, <code>inboard_midplane</code>, <code>outboard_midplane_separatrix</code>, <code>pedestal</code>, <code>pedestal_maximum</code>, <code>pedestal_top</code>, <code>separatrix</code> and an at-limiter entry. A locus with no <code>concepts.yml</code> entry keeps its physics and loses only the DD reference, unless that physics is the dR/dZ = 0 point. <code>outboard_midplane_separatrix</code> is such a locus: today it is "the outboard separatrix point where dr/dz = 0". Redefine it from the midplane, as the point where the separatrix crosses the midplane height on the low-field side (R &gt; R<sub>axis</sub>), with no dR/dZ wording. Where the default midplane height is the one the data selects at the separatrix's outermost point, that is the same point, so no consumer's meaning moves. The one locus whose meaning <em>is</em> that point, <code>dr_dz_zero_point</code>, keeps its geometric definition (the outboard separatrix point where dR/dZ = 0) and loses every DD reference it carries: its IDS path, the <code>midplane_identifier</code> field and the option value; it and <code>outboard_midplane_separatrix</code> coincide under the default midplane height, which the fragment notes as a question for a later vocabulary ruling, not this section. Keep each pointer from one locus to a sibling, such as <code>outboard_midplane</code> to <code>outboard_midplane_separatrix</code> for a value at the intersection. List every definition changed, before and after, in the fragment.</p><p><strong>Done when:</strong> a test asserts that no locus definition names a DD field, an IDS path or an option value, and that none of the midplane loci (<code>outboard_midplane</code>, <code>inboard_midplane</code>, <code>outboard_midplane_separatrix</code>) contains dR/dZ or dr/dz in any case. It fails on the old <code>outboard_midplane</code> text and on the old <code>outboard_midplane_separatrix</code> text, recorded with <code>EXIT=</code>. A second test asserts that the <code>outboard_midplane</code> and <code>inboard_midplane</code> definitions state both parts of their <code>concepts.yml</code> relation: the midplane height, with its magnetic-axis default, and the side of the magnetic axis (R greater or less than R<sub>axis</sub>). It fails on a planted definition that drops either part. The grammar suite passes at head, judged by delta against base.</p>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-cnr-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-review" data-written-at="2026-10-12" data-recommends-skill="/reckon-build concept-and-notation-registry §2" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Land the loader and accessor first; content follows from the WEST worklist</h4>
+    <div class="r-fu-body"><p>§2 is self-contained code in this repository. §3's worklist comes from running the §2 accessor over the WEST roster, so §3 cannot start before §2. §4 is a coordinator act from the main checkout.</p></div>
+    <pre class="r-fu-prompt">/reckon-build concept-and-notation-registry §2</pre>
+    </article>
+</section>
+  <section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s2" data-id="c-20261012-s2-loader" data-who="reckon-build" data-when="2026-10-12T15:40:00Z">
+    <div class="r-comment-body"><p>Registry, loaders and accessor landed (commit <code>1e12625</code>); 481 passed vs 469 base, negative control red, review 102/120. Section stays open for the template-scope follow-up. <a href="/imas-standard-names/evidence/archive/concept-and-notation-registry-landed.html#s2-registry-loader">evidence</a></p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261012T145518269054-cnr-registry-loader" data-who="reckon-build" data-when="2026-10-12T15:31:51.504Z">
+    <div class="r-comment-body"><p>Added the conventions registry (vocabularies/conventions/concepts.yml, notation.yml, templates.yml) with its token-validating loaders in grammar/vocab_loaders.py and the parse-selecting select_conventions accessor in grammar/terms.py; for flux_surface_averaged_argon_density_at_plasma_boundary the accessor returns exactly 2 concepts (flux_surface_averaged, plasma_boundary), 1 notation (density) and 1 template (density), and the loader refuses a malformed entry per file, an unknown token key and a forbidden spelling equal to a registered alias, each by name.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-close-s2" data-who="reckon-build" data-when="2026-10-12T16:00:00Z">
+    <div class="r-comment-body"><p>§2 landed: registry, loaders and <code>select_conventions</code> (commit <code>1e12625</code>), narrowed to openings-only templates read through <code>_load_yaml</code> (commit <code>0a977ee</code>); reviews 102/120 and 118/120, no added failures. <a href="/imas-standard-names/evidence/archive/concept-and-notation-registry-landed.html#s2">evidence</a></p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261012T153955809358-cnr-template-scope" data-who="reckon-build" data-when="2026-10-12T15:48:50.797Z">
+    <div class="r-comment-body"><p>cnr-template-scope: removed the template sign_convention field from the model, templates.yml and the select_conventions output and folded _load_conventions_yaml into _load_yaml; rg finds neither name in the registry code, the gate files run 44 passed 5 xfailed vs 42 passed 5 xfailed at base (no added failures, EXIT=0), and re-adding sign_convention to TemplateEntry makes the refusal test fail (EXIT=1).</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261012T153207355503-review-of-cnr-registry-loader" data-who="reckon-build" data-when="2026-10-12T15:38:21.067Z">
+    <div class="r-comment-body"><p>Independent review of run r-20261012T145518269054-cnr-registry-loader at head 1e12625 (base 264aa2e) is stored as a parsed record scoring all six dimensions (goal_fidelity 20, evidence 20, scope_discipline 18, durability 17, fit 17, reuse 10; total 102) with added_failure_count 0 and two follow-on findings, both non-blocking: _load_conventions_yaml duplicating _load_yaml, and a non-discriminating templates.yml refusal match.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261012T155007681710-review-of-cnr-template-scope" data-who="reckon-build" data-when="2026-10-12T15:57:48.550Z">
+    <div class="r-comment-body"><p>review-of-cnr-template-scope: reviewed run r-20261012T153955809358-cnr-template-scope at base 6a9a943 head 0a977ee; the openings-only template narrowing and the _load_conventions_yaml fold both landed and are guarded; read all six checklist items and scored 6 dimensions 118/120 (goal_fidelity 20, evidence 20, scope_discipline 20, durability 19, fit 19, reuse 20) with no findings; the previously recorded follow-ons (_load_conventions_yaml duplicate, filename-only templates refusal match) are both repaired.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261013T081300178088-cnr-registry-test-invariants" data-who="reckon-build" data-when="2026-10-13T08:26:04Z">
+    <div class="r-comment-body"><p>Rewrote the three registry tests around entry presence, density spelling policy and parse-selected notation; the four-file gate moved from 3 failed and 79 passed at base to 82 passed at final head, and three targeted scratch mutations each failed (EXIT=1); [landing anchor](/imas-standard-names/evidence/fragments/concept-and-notation-registry/cnr-registry-test-invariants.html#cnr-registry-test-invariants-landing).</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-land-s3-registry-test-invariants" data-who="reckon-build" data-when="2026-10-13T10:40:00Z">
+    <div class="r-comment-body"><p>The three registry tests now check the registry's invariants rather than pinned entries (merge <code>448d2b9</code>); the gate went from 3 failed to 82 passed. Section stays open for the accessor operator keys and the binary-operator templates. <a href="/imas-standard-names/evidence/archive/concept-and-notation-registry-landed.html#s3-registry-test-invariants">evidence</a></p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261013T102507945522-review-of-cnr-registry-test-invariants-23597051f6d7" data-who="reckon-build" data-when="2026-10-13T10:35:34.935Z">
+    <div class="r-comment-body"><p>review of run r-20261013T081300178088-cnr-registry-test-invariants at head 23597051: all six checklist items read and all six dimensions scored (goal_fidelity 20, evidence 20, scope_discipline 20, durability 19, fit 19, reuse 20; total 118); added_failure_count 0; one follow-on finding (landing fragment is an empty anchor); record stored at reviews/imas-standard-names/r-20261013T081300178088-cnr-registry-test-invariants.at-23597051f6d7a37adad4f66dcbeb1a0ec2031ca8.json.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261013T102523432565-review-of-cnr-accessor-operator-keys-64b51002225a" data-who="reckon-build" data-when="2026-10-13T10:40:57.908Z">
+    <div class="r-comment-body"><p>review-of-cnr-accessor-operator-keys-64b51002225a: stored a parsed six-dimension review of cnr-accessor-operator-keys at head 64b51002 (base 18b78cd), total 97 (goal_fidelity 18, evidence 17, scope_discipline 20, durability 14, fit 18, reuse 10), zero added failures against the reviewed run's own baseline, two follow-on findings — the ratio-concept test is green at base so it does not guard this change, and _operator_token prefix-strips a fused indexed token instead of reusing model.py:_split_fused_indexed_operator.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261013T081403384041-cnr-accessor-operator-keys" data-who="reckon-build" data-when="2026-10-13T08:26:47Z">
+    <div class="r-comment-body"><p>cnr-accessor-operator-keys: indexed derivatives now select derivative_with_respect_to; ratio names select the ratio concept and ratio-keyed templates, and placeholder is excluded; the five-file gate ran 3 failed, 63 passed, 5 xfailed against 3 failed, 59 passed, 5 xfailed at base (zero added failure ids); removing all four selection mechanisms makes all four new tests fail (EXIT=1).</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-land-s3-accessor-operator-keys" data-who="reckon-build" data-when="2026-10-13T10:47:00Z">
+    <div class="r-comment-body"><p>Convention selection keys indexed derivatives and ratio names by their registry tokens (merge <code>757e2f5</code>). Next in this section: the binary-operator templates (ratio, difference, product), which also replace the copied fused-operator split with the model's owner and make the ratio test one that can fail. <a href="/imas-standard-names/evidence/archive/concept-and-notation-registry-landed.html#s3-accessor-operator-keys">evidence</a></p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261013T122054016568-review-of-cnr-operator-key-reuse-e9a47864c352" data-who="reckon-build" data-when="2026-10-13T12:38:51.694Z">
+    <div class="r-comment-body"><p>review-of-cnr-operator-key-reuse-e9a47864c352: independent review of r-20261013T120542044271-cnr-operator-key-reuse at base 9813991 head e9a4786 scores goal_fidelity 19 evidence 18 scope_discipline 20 durability 17 fit 19 reuse 20 (total 113), zero added failures, no blocking findings.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261013T120542044271-cnr-operator-key-reuse" data-who="reckon-build" data-when="2026-10-13T12:19:30.741Z">
+    <div class="r-comment-body"><p>cnr-operator-key-reuse: the fused-operator split is routed through model._split_fused_indexed_operator (prefix loop and _operator_keys cache deleted) and the operator tests can fail; five-file gate 67 passed, 5 xfailed, EXIT=0 against 66 passed at base, and three mutations (raw _operator_token, binary ops excluded from _ir_tokens, binary keying dropped from template_bases) each fail EXIT=1 — fragment [cnr-operator-key-reuse](/imas-standard-names/evidence/fragments/concept-and-notation-registry/cnr-operator-key-reuse.html#cnr-operator-key-reuse-landing)</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-s3-binary-operators" data-who="reckon-build" data-when="2026-10-13T14:15:00Z">
+    <div class="r-comment-body"><p>Binary-operator templates landed (commit <code>9813991</code>), and the selector uses the model's one fused-operator splitter (merge <code>440942e</code>). §3 closes with the registry census re-run on the WEST roster in imas-codex. That run must select entries through <code>select_conventions</code>, not a copied segment or template lookup. <a href="/imas-standard-names/evidence/archive/concept-and-notation-registry-landed.html#s3-binary-operators">evidence</a></p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261014T200250066889-review-of-cnr-plasma-boundary-definition" data-who="reckon-build" data-when="2026-10-14T20:08:26.136Z">
+    <div class="r-comment-body"><p>review-of-cnr-plasma-boundary-definition: independent review of r-20261014T194406258201-cnr-plasma-boundary-definition at base d0b7eaf head f9965fd scores goal_fidelity 20 evidence 17 scope_discipline 20 durability 5 fit 19 reuse 20 (total 101), zero added failures, no blocking findings; record stored at reviews/imas-standard-names/r-20261014T194406258201-cnr-plasma-boundary-definition.at-f9965fd4aef6a9f9dd139f23dbf32a033243a2f2.json</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261014T194406258201-cnr-plasma-boundary-definition" data-who="reckon-build" data-when="2026-10-14T19:53:54.334Z">
+    <div class="r-comment-body"><p>plasma_boundary now defined as the last closed magnetic flux surface in locus_registry.yml; the five-file gate ran 39 passed (EXIT=0) at head against 39 passed (EXIT=0) at base, zero added failures; landing record docs/evidence/fragments/concept-and-notation-registry/cnr-plasma-boundary-definition.html</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261014T201119536432-review-of-cnr-midplane-and-inductance" data-who="reckon-build" data-when="2026-10-14T20:19:14.110Z">
+    <div class="r-comment-body"><p>Independent review of r-20261014T194710866779-cnr-midplane-and-inductance at base d0b7eafb head 0e43cde1 scores goal_fidelity 20 evidence 17 scope_discipline 20 durability 5 fit 20 reuse 20 (total 102), zero added failures, no blocking findings; the two midplane equations and the l_i(3) definition match the coordinator-authored text verbatim and the diff stays inside the two-path fence, but no test asserts the reworded text so a rollback reddens nothing; record stored at reviews/imas-standard-names/r-20261014T194710866779-cnr-midplane-and-inductance.at-0e43cde1a7918313fe2585175e665bde74e17260.json</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-close-s3" data-who="reckon-build" data-when="2026-10-14T20:25:00Z">
+    <div class="r-comment-body"><p>§3 closed, together with imas-codex:sn-house-style §3. The registry worklist over the 220-name WEST roster is closed (every pattern selects a template). The coordinator read all 46 concept entries under the lead's delegation, and the three corrections landed: plasma boundary as the last closed magnetic flux surface (<code>f9965fd</code>, review 101/120), and the midplanes at the data's midplane height plus internal inductance as l<sub>i</sub>(3) (<code>0e43cde</code>, review 102/120). <a href="/imas-standard-names/evidence/archive/concept-and-notation-registry-landed.html#s3-concept-corrections">evidence</a></p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261014T194710866779-cnr-midplane-and-inductance" data-who="reckon-build" data-when="2026-10-14T19:59:28.615Z">
+    <div class="r-comment-body"><p>The midplane entries now take the height the data midplane identifier selects (the magnetic-axis height when none is given) instead of the point where dR/dZ = 0 on the separatrix contour, which is undefined for a limited plasma; the internal-inductance definition names the l_i(3) form explicitly. Gate: 20 passed EXIT=0 at base d0b7eafb and 20 passed EXIT=0 at head 0e43cde, 0 added failures. [cnr-midplane-and-inductance]</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-s5-lead-ruling-mechanism" data-who="reckon-build" data-when="2026-10-15T19:45:00Z">
+    <div class="r-comment-body"><p><strong>Lead ruling, 2026-10-15.</strong> The registry gains both mechanisms: definitions on population, zone and aggregation tokens (§5), and token conditions on templates (§6). The near-duplicate sentences (§7) then render only on the names they describe.</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261016T060429895496-review-of-isn-token-definitions-ffd17ca86b7b" data-who="reckon-build" data-when="2026-10-16T06:13:54.741Z">
+    <div class="r-comment-body"><p>review of r-20261016T052029421979-isn-token-definitions at base 7161a3b head ffd17ca stored as a parsed six-dimension record (101/120) with four follow-on findings and zero added failures.</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261016T052029421979-isn-token-definitions" data-who="reckon-build" data-when="2026-10-16T06:04:13.221Z">
+    <div class="r-comment-body"><p>docs/evidence/fragments/concept-and-notation-registry/isn-token-definitions.html</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-close-s5" data-who="reckon-build" data-when="2026-10-16T06:20:00Z">
+    <div class="r-comment-body"><p>§5 closed. Population, zone and aggregation tokens carry definitions that render (merge <code>903e8e4</code>, review 101/120). <a href="/imas-standard-names/evidence/archive/concept-and-notation-registry-landed.html#s5-token-definitions">evidence</a></p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-run-r-20261016T093133736372-review-of-isn-template-conditions-f01dd7cf0b3e" data-who="reckon-build" data-when="2026-10-16T09:40:36.237Z">
+    <div class="r-comment-body"><p>independent review of r-20261016T083852210600-isn-template-conditions at f01dd7cf0b3ef40d808084bc468a9118179285a6 scored goal_fidelity 18, evidence 17, scope_discipline 20, durability 16, fit 18, reuse 20 (total 109 of 120), zero added failures, three follow-on findings and no blocking finding; the landed change implements §6 conditioned template entries and template notes.</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-close-s6" data-who="reckon-build" data-when="2026-10-16T09:58:00Z">
+    <div class="r-comment-body"><p>§6 closed. Template entries carry conditions and a note, and a conditioned entry wins over its unconditioned sibling (commit <code>f01dd7c</code>, review 109/120). §7 must render the note through the production documentation path, not a test helper, and rename <code>_legacy_selection</code> by what it computes. <a href="/imas-standard-names/evidence/archive/concept-and-notation-registry-landed.html#s6-template-conditions">evidence</a></p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-run-r-20261016T083852210600-isn-template-conditions" data-who="reckon-build" data-when="2026-10-16T09:30:00.610Z">
+    <div class="r-comment-body"><p>docs/evidence/fragments/concept-and-notation-registry/isn-template-conditions.html — a template entry may require tokens or exclude segment kinds and carry a note; selection applies the conditions after the subset test, a conditioned entry superseding its unconditioned sibling when both match; tests/grammar/test_template_conditions.py (8 tests) exercises the required token, the excluded kind, the note, the precedence rule and the shipped-registry no-op</p></div>
+</div>
+<div class="r-comment" data-section="s7" data-id="c-run-r-20261016T111007573009-review-of-isn-near-duplicate-sentences-729c94deda18" data-who="reckon-build" data-when="2026-10-16T11:15:38Z">
+    <div class="r-comment-body"><p>/home/ITER/mcintos/.config/reckon/crew/reviews/imas-standard-names/r-20261016T102003154342-isn-near-duplicate-sentences.at-729c94deda18e631190c0c91284797917b382f51.json — parsed review of a5ced68975780bd2a2834d366bbe58fc336ed452..729c94deda18e631190c0c91284797917b382f51 with six scores and zero added failures</p></div>
+</div>
+<div class="r-comment" data-section="s7" data-id="c-close-s7" data-who="reckon-build" data-when="2026-10-16T11:25:00Z">
+    <div class="r-comment-body"><p>§7 closed. The three near-duplicate sentences render exactly once on the names they describe, through <code>template_sentences</code> (commit <code>729c94d</code>, review 118/120). imas-codex <code>sn-house-style</code> §14 switches the writer and the gate to the accessor. <a href="/imas-standard-names/evidence/archive/concept-and-notation-registry-landed.html#s7-near-duplicate-sentences">evidence</a></p></div>
+</div>
+<div class="r-comment" data-section="s7" data-id="c-run-r-20261016T102003154342-isn-near-duplicate-sentences" data-who="reckon-build" data-when="2026-10-16T11:08:37Z">
+    <div class="r-comment-body"><p>docs/evidence/fragments/concept-and-notation-registry/isn-near-duplicate-sentences.html#isn-near-duplicate-sentences-landing — 62 family names checked, five red controls EXIT=1, full grammar 1275 passed versus 1212 base with zero added failures</p></div>
+</div>
+<div class="r-comment" data-section="s8" data-id="c-run-r-20261018T115416930933-review-of-isn-separatrix-distance" data-who="reckon-build" data-when="2026-10-18T12:10:34.283Z">
+    <div class="r-comment-body"><p>Independent review of the separatrix_distance base node scored goal_fidelity 20, evidence 18, scope_discipline 20, durability 17, fit 19, reuse 20 against the diff 1e9d01f..fffa20c, with one follow-on finding on the red-control log header; the landing fragment is docs/evidence/fragments/concept-and-notation-registry/isn-separatrix-distance.html and the node is promote-ready.</p></div>
+</div>
+<div class="r-comment" data-section="s8" data-id="c-run-r-20261018T105459473087-isn-separatrix-distance" data-who="reckon-build" data-when="2026-10-18T11:53:04.151Z">
+    <div class="r-comment-body"><p>The separatrix_distance physical base landed in physical_bases.yml; radial_separatrix_distance_at_outboard_midplane now decomposes as component radial with base separatrix_distance and position outboard_midplane and round-trips, while the separatrix zone and locus readings are unchanged.</p></div>
+</div>
+<div class="r-comment" data-section="s8" data-id="c-close-s8" data-who="reckon-build" data-when="2026-10-18T12:20:00Z">
+    <div class="r-comment-body"><p>§8 closed. <code>separatrix_distance</code> is a base, and <code>radial_separatrix_distance_at_outboard_midplane</code> now decomposes as what it measures (merge <code>089f55e</code>, review 114). <a href="/imas-standard-names/evidence/archive/concept-and-notation-registry-landed.html#s8-separatrix-distance">evidence</a></p></div>
+</div>
+<div class="r-comment" data-section="s9" data-id="c-run-r-20261018T111026811632-isn-locus-definitions-physics" data-who="reckon-build" data-when="2026-10-18T11:41:04Z">
+    <div class="r-comment-body"><p>docs/evidence/fragments/concept-and-notation-registry/isn-locus-definitions-physics.html#isn-locus-definitions-physics-landing — 10 definitions revised; grammar 1275 passed at base and 1278 passed at head, zero added failures, both red controls EXIT=1</p></div>
+</div>
+<div class="r-comment" data-section="s9" data-id="c-run-r-20261018T115357570264-review-of-isn-locus-definitions-physics" data-who="reckon-build" data-when="2026-10-18T12:12:18.989Z">
+    <div class="r-comment-body"><p>reviewed run r-20261018T111026811632-isn-locus-definitions-physics at head 6f5782aa63ab688a5e212e4d60e1bd6c0a8e6da1 — approve; six dimensions scored total 117, zero blocking findings, one follow-on</p></div>
+</div>
+<div class="r-comment" data-section="s9" data-id="c-close-s9" data-who="reckon-build" data-when="2026-10-18T12:20:00Z">
+    <div class="r-comment-body"><p>§9 closed. Locus definitions state the concept registry and name no DD field, IDS path or option; the midplane loci carry no gradient wording (merge <code>785e858</code>, review 117). The release in §4 now carries §7, §8 and §9. <a href="/imas-standard-names/evidence/archive/concept-and-notation-registry-landed.html#s9-locus-definitions">evidence</a></p></div>
+</div>
+</section>
+</main>
+</body>
+</html>

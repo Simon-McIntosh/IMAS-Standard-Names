@@ -1,0 +1,109 @@
+<!-- Landing record for population, zone and aggregation token definitions. -->
+<section id="isn-token-definitions-landing">
+  <p>
+    Population, zone and aggregation tokens now carry definitions that render.
+    <code>_vocabulary_definitions</code> reads the three vocabularies as well as
+    the locus registry, the physical bases and the geometry carriers, and
+    <code>select_conventions</code> emits an applied definition for a
+    population, zone or aggregation token that carries one.
+  </p>
+  <p id="isn-token-definitions-shape-choice">
+    Shape chosen for the definition-only entry: a <strong>sibling shape</strong>,
+    <code>AppliedDefinition(token, segment, definition)</code>, carried on
+    <code>AppliedConventions.definitions</code> beside
+    <code>concepts</code>. <code>AppliedConcept</code> keeps its required
+    <code>phrase</code>, <code>equation</code> and
+    <code>restates_equation</code>; no phrase or equation was invented to fill
+    a required field. The sibling also lets the two be told apart: a concept
+    names a shared phrase or equation, a token definition states only what the
+    token means.
+  </p>
+  <p id="isn-token-definitions-entry-shape">
+    The three files changed from lists to token-keyed entries in which each
+    entry maps its token to that token's definition, so a token without a
+    definition still loads. This is not the root-keyed shape the locus registry
+    and physical bases use: the codegen token extractor recognises a root key
+    only for <code>loci</code>, <code>carriers</code>, <code>bases</code>,
+    <code>operators</code> and <code>axes</code>
+    (<code>grammar_codegen/spec.py</code>), and the cross-segment uniqueness
+    lint reads a bare mapping's keys as its token list
+    (<code>tests/grammar/test_vocab_uniqueness.py</code>). A root key
+    <code>populations:</code> is extracted as the single token
+    <code>populations</code>, which would have broken the generated enums and
+    the drift gate — measured by loading a scratch spec through
+    <code>IncludeLoader</code>. The token-keyed shape satisfies both readers
+    unchanged. Adopting the root-keyed shape is a one-line addition to that
+    root-key tuple, in a file outside this node's write scope; it is recorded
+    as a follow-on rather than made here.
+  </p>
+  <p id="isn-token-definitions-tokens">
+    Definitions moved from comments, not invented. Seven populations carry one
+    (<code>fast</code>: <code>Non-thermal / energetic population.</code>), two
+    aggregations (<code>total</code>: <code>Summed over sub-populations, species
+    or additive contributions.</code>), and four zones whose comment states a
+    position (<code>upper</code>, <code>lower</code>, <code>inner</code>,
+    <code>outer</code>). The nine remaining zone tokens
+    (<code>core</code>, <code>edge</code>, <code>pedestal</code>,
+    <code>separatrix</code>, <code>divertor</code>,
+    <code>scrape_off_layer</code>, <code>front_surface</code>,
+    <code>back_surface</code>, <code>wetted</code>) record no meaning in a
+    comment, so they were left undefined rather than filled in.
+  </p>
+  <p id="isn-token-definitions-rendered">
+    The level of the corpus these tokens are read from — the conventions
+    accessor — emits the definition for a name carrying the token. Its output
+    for <code>lower_outer_squareness_of_flux_surface</code> is:
+  </p>
+  <pre id="isn-token-definitions-rendered-output">token:      lower
+segment:    zone
+definition: Lower vertical position.
+
+token:      outer
+segment:    zone
+definition: Outer radial position.</pre>
+  <p id="isn-token-definitions-rendered-population">
+    And for <code>total_plasma_current</code>, whose only defined token is the
+    outer aggregation:
+  </p>
+  <pre id="isn-token-definitions-rendered-output-aggregation">token:      total
+segment:    aggregation
+definition: Summed over sub-populations, species or additive contributions.</pre>
+  <p id="isn-token-definitions-contributes-nothing">
+    A token without a definition loads and contributes nothing:
+    <code>core_electron_temperature</code> parses, and
+    <code>select_conventions</code> returns an empty
+    <code>definitions</code> tuple for it.
+  </p>
+  <p id="isn-token-definitions-measure">
+    Measure. <code>tests/grammar/test_token_definitions.py</code> asserts the
+    loaders against <code>Population</code>, <code>Aggregation</code> and
+    <code>Zone</code> — the enums are the token record the plain lists held —
+    so <code>load_populations</code> and <code>load_aggregations</code> return
+    the same sets and <code>load_zones</code> the same ordered tuple. The gate
+    (this file plus <code>test_vocab_uniqueness</code>,
+    <code>test_conventions</code>, <code>test_codegen_drift</code>,
+    <code>test_segment_vocabulary_additions</code>,
+    <code>test_model_grammar_sync</code>) ran 71 passed, 7 xfailed
+    (EXIT=0) at head against 66 passed, 7 xfailed (EXIT=0) at base — five
+    added tests, zero added failures. The codegen gate passing is the direct
+    check that the entries shape still yields the full token list.
+  </p>
+  <p id="isn-token-definitions-negative-control">
+    Negative control, declared as removing the definition emission. With
+    <code>definitions=definitions_applied</code> dropped from the
+    <code>AppliedConventions</code> construction and everything else held
+    fixed, <code>tests/grammar/test_token_definitions.py</code> ran 2 failed, 3
+    passed (EXIT=1), failing
+    <code>test_a_definition_renders_for_a_name_carrying_the_token</code> and
+    <code>test_a_zone_definition_names_the_segment_the_token_was_used_in</code>
+    — both of which pass at head. The three that still pass are the loader
+    identity tests, the definition-presence test and the
+    contributes-nothing test, none of which routes through the emission. Log:
+    <code>negative-control.log</code> in the run directory.
+  </p>
+  <p id="isn-token-definitions-no-figure">
+    No figure accompanies this fragment: the change is a data shape and an
+    accessor field, and the rendered definitions above carry it. The figure
+    directory given to this node is left empty.
+  </p>
+</section>

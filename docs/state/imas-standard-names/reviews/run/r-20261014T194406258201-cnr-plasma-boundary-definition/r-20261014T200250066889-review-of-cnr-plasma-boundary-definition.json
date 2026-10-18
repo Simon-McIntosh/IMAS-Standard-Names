@@ -1,0 +1,63 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "d0b7eafb24df336313e170fe1fa08a123c5b152c",
+  "call_site_count": 5,
+  "call_sites": [
+    "imas_standard_names/grammar/terms.py:250",
+    "imas_standard_names/grammar/vocab_loaders.py:109",
+    "imas_standard_names/grammar/vocab_loaders.py:715",
+    "imas_standard_names/models.py:142",
+    "imas_standard_names/catalog/dataset.py:1240"
+  ],
+  "completed_at": "2026-10-14T20:08:26.136Z",
+  "dispatched_at": "2026-10-14T20:02:54Z",
+  "findings": [
+    {
+      "file": "tests/grammar/test_conventions.py",
+      "line": 225,
+      "severity": "follow-on",
+      "text": "the only assertion that touches the plasma_boundary definition reads it back from the same locus_registry the accessor reads, so it holds under any definition text and does not redden if the definition reverts; the node adds no test asserting the new text, so the change has no regression guard."
+    }
+  ],
+  "head_log_revision": "d0b7eafb24df336313e170fe1fa08a123c5b152c + working-tree edit at 2026-10-14T19:48:15Z",
+  "item_aggregate": 5,
+  "item_verdicts": {
+    "diff": "read against d0b7eaf; the single commit f9965fd touches two files: locus_registry.yml changes only the plasma_boundary definition line to the new single-quoted text (keeping the ': ' that forces the quoting) and adds the landing fragment HTML showing before/after and the accessor output; plasma_boundary_gap and the conventions concepts.yml entry are untouched.",
+    "done_when": "the done_when asks the loader and accessor to return the new definition (shown with select_conventions joining it to the conventions equation), the five named gate files run at base and head judged by delta, and the landing fragment to show old and new definitions plus the accessor output; base-gate.log and after-gate.log each record 39 passed EXIT=0 with zero failures, accessor_before.log/accessor_after.log quote the old and new text, and docs/evidence/fragments.../cnr-plasma-boundary-definition.html carries all three.",
+    "goal": "the node goal asks to replace the one plasma_boundary definition in imas_standard_names/grammar/vocabularies/locus_registry.yml with the lead-approved text naming the last closed magnetic flux surface; line 754 now carries exactly 'The last closed magnetic flux surface: the outermost flux surface on which field lines close on themselves, bounding the confined plasma.' and the committed blob at f9965fd parses to that string.",
+    "manifest": "read; it records status complete, commits [f9965fd], changed_paths matching the diff, test_logs naming base-gate.log/after-gate.log/accessor_before.log/accessor_after.log, tests recording 39 passed EXIT=0 at head against 39 passed EXIT=0 at base, and measurement_module/measurement_cwd; baseline_suite and after_suite are left empty because the node's write paths reach no test file (armed-only fields).",
+    "write_paths": "the source node fences imas_standard_names/grammar/vocabularies/locus_registry.yml and docs/evidence/fragments/concept-and-notation-registry/cnr-plasma-boundary-definition.html; git show --stat f9965fd lists exactly those two paths (yml 1 line changed, fragment 38 lines) and nothing else."
+  },
+  "justifications": {
+    "durability": "tests/grammar/test_conventions.py:225 asserts boundary.definition == vocab_loaders.load_locus_registry().loci['plasma_boundary'].definition, an assertion whose two sides both come from the registry under test, so any definition text keeps it green and no test reddens if the new text reverts.",
+    "evidence": "base-gate.log and after-gate.log show 39 passed EXIT=0 with zero FAILED/ERROR lines and accessor_before.log/accessor_after.log quote the old then new definition; the manifest's baseline_suite/after_suite are empty and the head gate ran against a working-tree edit rather than the committed head, so the delta is read from the two named logs rather than a recorded armed pair.",
+    "fit": "the single-quoted YAML scalar at imas_standard_names/grammar/vocabularies/locus_registry.yml:754 follows the file's idiom for a value containing ': ', the fragment matches the sibling fragments under docs/evidence/fragments/concept-and-notation-registry/, and no plan, stage or version label appears in any changed name, comment or filename.",
+    "goal_fidelity": "imas_standard_names/grammar/vocabularies/locus_registry.yml:754 carries the exact replacement text and the committed blob parses to it, so the landed change is the goal verbatim.",
+    "reuse": "the change adds no function, class or module; it edits one data value in the existing locus registry, so no capability is forked or duplicated.",
+    "scope_discipline": "git show --stat f9965fd lists only imas_standard_names/grammar/vocabularies/locus_registry.yml and the node's own docs/evidence/fragments/concept-and-notation-registry/cnr-plasma-boundary-definition.html, both inside the two-path fence."
+  },
+  "project": "imas-standard-names",
+  "raw_text": "VERDICT goal: the node goal asks to replace the one plasma_boundary definition in imas_standard_names/grammar/vocabularies/locus_registry.yml with the lead-approved text naming the last closed magnetic flux surface; line 754 now carries exactly 'The last closed magnetic flux surface: the outermost flux surface on which field lines close on themselves, bounding the confined plasma.' and the committed blob at f9965fd parses to that string.\nVERDICT done_when: the done_when asks the loader and accessor to return the new definition (shown with select_conventions joining it to the conventions equation), the five named gate files run at base and head judged by delta, and the landing fragment to show old and new definitions plus the accessor output; base-gate.log and after-gate.log each record 39 passed EXIT=0 with zero failures, accessor_before.log/accessor_after.log quote the old and new text, and the landing fragment carries all three.\nVERDICT write_paths: the source node fences imas_standard_names/grammar/vocabularies/locus_registry.yml and docs/evidence/fragments/concept-and-notation-registry/cnr-plasma-boundary-definition.html; git show --stat f9965fd lists exactly those two paths and nothing else.\nVERDICT manifest: read; it records status complete, commits [f9965fd], changed_paths matching the diff, test_logs naming base-gate.log/after-gate.log/accessor_before.log/accessor_after.log, tests recording 39 passed EXIT=0 at head against 39 passed EXIT=0 at base, and measurement_module/measurement_cwd.\nVERDICT diff: read against d0b7eaf; the single commit f9965fd touches two files: locus_registry.yml changes only the plasma_boundary definition line and adds the landing fragment HTML; plasma_boundary_gap and the conventions concepts.yml entry are untouched.\nCALL_SITES: imas_standard_names/grammar/terms.py:250, imas_standard_names/grammar/vocab_loaders.py:109, imas_standard_names/grammar/vocab_loaders.py:715, imas_standard_names/models.py:142, imas_standard_names/catalog/dataset.py:1240\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: imas_standard_names/grammar/vocabularies/locus_registry.yml:754 carries the exact replacement text and the committed blob parses to it, so the landed change is the accessor-visible definition the goal states.\nSCORE evidence: 17\nJUSTIFICATION evidence: base-gate.log and after-gate.log show 39 passed EXIT=0 with zero FAILED lines and accessor_before.log/accessor_after.log quote the old then new definition, though the manifest's baseline_suite/after_suite are empty and the head gate ran on a working-tree edit.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git show --stat f9965fd lists only imas_standard_names/grammar/vocabularies/locus_registry.yml and the node's own landing fragment, both inside the two-path fence.\nSCORE durability: 5\nJUSTIFICATION durability: tests/grammar/test_conventions.py:225 compares the accessor definition against the same registry it reads, so no assertion reddens if the new text reverts.\nSCORE fit: 19\nJUSTIFICATION fit: the single-quoted scalar at imas_standard_names/grammar/vocabularies/locus_registry.yml:754 follows the file idiom for a value containing ': ' and the fragment matches its siblings.\nSCORE reuse: 20\nJUSTIFICATION reuse: the change adds no definition, editing one data value in the existing locus registry, so no capability is forked.\nFINDING tests/grammar/test_conventions.py:225 follow-on: the only assertion touching the plasma_boundary definition reads it from the same registry the accessor reads, so it holds under any text and does not guard the change; the node adds no test asserting the new text.\n",
+  "review_run_id": "r-20261014T200250066889-review-of-cnr-plasma-boundary-definition",
+  "reviewed_base_sha": "d0b7eafb24df336313e170fe1fa08a123c5b152c",
+  "reviewed_head_sha": "f9965fd4aef6a9f9dd139f23dbf32a033243a2f2",
+  "reviewed_run_id": "r-20261014T194406258201-cnr-plasma-boundary-definition",
+  "reviewer": {
+    "model": "deepseek-v4.1-flash"
+  },
+  "scores": {
+    "durability": 5,
+    "evidence": 17,
+    "fit": 19,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-14T20:06:00Z",
+  "total": 101
+}

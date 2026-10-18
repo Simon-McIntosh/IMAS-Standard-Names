@@ -1,0 +1,61 @@
+<section id="isn-near-duplicate-sentences-landing">
+  <h2>The near-duplicate sentences render through one accessor</h2>
+  <p id="isn-near-duplicate-sentences-owner">
+    <code>grammar/terms.py:template_sentences</code> returns each selected
+    template's documentation opening followed by its note. It emits each
+    distinct note once, in selection order. This is necessary because
+    <code>total_thermal_electron_density</code> selects both a total entry and
+    a thermal entry. The selector orders conditioned entries only against
+    unconditioned siblings, so neither conditioned entry suppresses the other.
+    The accessor keeps both openings and emits their shared sentence once;
+    <code>select_conventions</code> is unchanged.
+  </p>
+  <table id="isn-near-duplicate-sentences-placement">
+    <thead><tr><th>Sentence from the ruling</th><th>Placement in <code>templates.yml</code></th><th>Reason and boundary</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>A cold or hot neutral temperature is that of the named component alone; without the component it covers the whole neutral population of the selected species.</td>
+        <td><code>temperature</code> with <code>subject: neutral</code>: one entry excludes <code>population</code>, the other requires <code>cold</code> or <code>hot</code>.</td>
+        <td>It describes <code>neutral_temperature</code> and the cold and hot forms. A population-token definition would also reach unrelated quantities such as <code>cold_electron_density</code>; a broad neutral template would reach other neutral populations.</td>
+      </tr>
+      <tr>
+        <td>Triangularity without a qualifier is the mean of the upper and lower triangularities; upper and lower triangularity each use one extremum of the cross-section.</td>
+        <td><code>triangularity</code>: one entry excludes <code>zone</code>, the other requires <code>upper</code> or <code>lower</code>.</td>
+        <td>It covers the unqualified and vertical forms at the plasma boundary and flux surface; other zone forms, such as <code>inner_triangularity_of_plasma_boundary</code>, do not receive it.</td>
+      </tr>
+      <tr>
+        <td>Total density is the sum of the thermal and fast populations of the species; thermal excludes the suprathermal particles that fast names.</td>
+        <td><code>density</code> with <code>subject: electron</code>: one entry requires <code>aggregation: total</code>, the other requires <code>population: thermal</code> or <code>fast</code>.</td>
+        <td>It covers total and thermal/fast electron-density forms, including stacked forms. Other electron-density forms and other species do not receive it.</td>
+      </tr>
+    </tbody>
+  </table>
+  <p id="isn-near-duplicate-sentences-measure">
+    The test enumerates 10 temperature names, 28 triangularity names and all
+    24 electron-density combinations of registered population and aggregation
+    tokens. It checks all three sentences on every name through
+    <code>template_sentences</code>, plus opening and note order on
+    <code>total_thermal_electron_density</code>. The focused registry and
+    template gate passed 85 tests (EXIT=0) against 22 passed (EXIT=0) at base.
+    The full grammar suite passed 1275 tests with 32 skipped (EXIT=0) against
+    1212 passed and 32 skipped (EXIT=0) from the extracted base revision:
+    63 added passes and zero added failures. The base log records its
+    imported module path under the extraction, rather than this worktree.
+  </p>
+  <p id="isn-near-duplicate-sentences-controls">
+    Five temporary mutations each made a test that passes at head fail.
+    Removing the neutral sentence from its conditioned entry made
+    <code>neutral_temperature</code> render zero copies (EXIT=1).
+    Removing note deduplication made <code>total_thermal_electron_density</code>
+    render two copies of the density sentence (EXIT=1). Moving the neutral
+    sentence to the broad subject-temperature entry reached
+    <code>electron_temperature</code> (EXIT=1); moving the triangularity
+    sentence there did the same (EXIT=1); moving the density sentence to the
+    broad subject-density entry reached <code>electron_density</code>
+    (EXIT=1). Their logs are <code>control-removed-neutral.log</code>,
+    <code>control-duplicated-density.log</code>,
+    <code>control-misplaced-neutral.log</code>,
+    <code>control-misplaced-triangularity.log</code> and
+    <code>control-misplaced-density.log</code> in the run directory.
+  </p>
+</section>

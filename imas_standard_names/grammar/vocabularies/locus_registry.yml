@@ -605,12 +605,10 @@ loci:
     type: position
     allowed_relations: [at, of]
     definition: >-
-      High-field-side (inboard) equatorial midplane - the inner-midplane
-      counterpart of outboard_midplane. The inner-midplane reference is the
-      inboard intersection of the horizontal plane through the magnetic axis
-      (or the DD midplane_identifier) with the plasma boundary / first wall.
-      DD: e.g. equilibrium/time_slice/profiles_1d/r_inboard (inboard major
-      radius of the flux surface at the midplane).
+      The high-field-side equatorial midplane: points at the midplane height
+      with major radius less than the magnetic-axis radius. The data's midplane
+      identifier selects that height, or it is the magnetic-axis height when
+      none is given.
   inlet:
     type: position
     allowed_relations: [at, of]
@@ -637,14 +635,11 @@ loci:
     type: position
     allowed_relations: [at, of, along]
     definition: >-
-      Plasma-facing limiter. As a measurement locus, 'at_limiter' denotes the
-      scrape-off-layer plasma immediately adjacent to the limiter surface; the
-      DD provides only the limiter surface geometry
-      (wall/description_2d/limiter) and the precise plasma evaluation point is
-      not yet standardised (IMAS_3226). For the separatrix-limiter tangency
-      CONTACT point use active_limiter_point; for a quantity distributed OVER
-      the limiter surface (e.g. a peak power density) use the 'along' relation
-      (along_limiter).
+      A plasma-facing limiter. At the limiter, a measurement refers to the
+      scrape-off-layer plasma immediately adjacent to its surface; the precise
+      plasma evaluation point is not specified. For the separatrix-limiter
+      contact point use active_limiter_point; for a quantity distributed along
+      the limiter surface use along_limiter.
   magnetic_axis:
     type: position
     allowed_relations: [at, of]
@@ -684,20 +679,20 @@ loci:
     type: position
     allowed_relations: [at, of]
     definition: >-
-      Low-field-side (outboard) equatorial midplane. The outer-midplane
-      reference follows the DD midplane_identifier (default option
-      'dr_dz_zero_sep': the outboard separatrix point where dr/dz = 0). For a
-      value at the separatrix intersection use outboard_midplane_separatrix.
+      The low-field-side equatorial midplane: points at the midplane height
+      with major radius greater than the magnetic-axis radius. The data's
+      midplane identifier selects that height, or it is the magnetic-axis
+      height when none is given. For a value at the separatrix intersection
+      use outboard_midplane_separatrix.
   outboard_midplane_separatrix:
     type: position
     allowed_relations: [at, of]
     definition: >-
-      Intersection of the separatrix with the outboard (low-field-side)
-      midplane - the outboard separatrix point where dr/dz = 0 (the local
-      major-radius maximum of the separatrix). This is where a separatrix
-      POINT value is evaluated. DD:
-      equilibrium/time_slice/boundary_separatrix/dr_dz_zero_point; outer-midplane
-      reference per the midplane_identifier.
+      The point where the separatrix crosses the midplane height on the
+      low-field side, at a major radius greater than the magnetic-axis radius.
+      The data's midplane identifier selects that height, or it is the
+      magnetic-axis height when none is given. A separatrix point value at the
+      outboard midplane is evaluated here.
   outer:
     type: position
     allowed_relations: [at, of]
@@ -711,9 +706,9 @@ loci:
     allowed_relations: [at, of]
     definition: >-
       H-mode edge transport-barrier (pedestal) region. Ambiguous as a single
-      point: for a profile VALUE use pedestal_top; for a maximum-gradient or
-      fit POSITION use pedestal_maximum. Prefer the more specific token over
-      this bare one. DD: summary/local/pedestal, summary/pedestal_fits/*.
+      point: for a profile value use pedestal_top; for a maximum-gradient or
+      fit position use pedestal_maximum. Prefer the more specific token over
+      this bare one.
     defining_quantity: normalized_poloidal_flux_coordinate_of_pedestal
   pedestal_maximum:
     type: position
@@ -721,16 +716,14 @@ loci:
     definition: >-
       Location of the maximum pedestal gradient (the steep mid-pedestal), i.e.
       the peak-gradient / fit position of the edge barrier. Distinct from the
-      pedestal top. DD: summary/pedestal_fits/*/d_dpsi_norm_max_position,
-      summary/local/pedestal/position/psi.
+      pedestal top.
     defining_quantity: normalized_poloidal_flux_coordinate_of_pedestal
   pedestal_top:
     type: position
     allowed_relations: [at, of]
     definition: >-
       Top of the H-mode edge pedestal (the barrier's inner shoulder), where
-      'the pedestal value' of a profile is conventionally reported. DD:
-      summary/pedestal_fits/* pedestal-top fit outputs.
+      the pedestal value of a profile is conventionally reported.
     defining_quantity: normalized_poloidal_flux_coordinate_of_pedestal
   pedestal_top_high_field_side:
     type: position
@@ -751,7 +744,7 @@ loci:
   plasma_boundary:
     type: position
     allowed_relations: [at, of]
-    definition: The surface used to delimit the plasma domain for the quantity being described.
+    definition: 'The last closed magnetic flux surface: the outermost flux surface on which field lines close on themselves, bounding the confined plasma.'
   plasma_boundary_gap:
     type: position
     allowed_relations: [at, of]
@@ -783,11 +776,11 @@ loci:
     allowed_relations: [at, of]
     qualifiable: true
     definition: >-
-      Last closed flux surface / separatrix. For a flux-surface-averaged
-      quantity apply the flux_surface_averaged operator (DD
-      summary/local/separatrix_average/*); for a bare point value at the
-      outboard midplane use outboard_midplane_separatrix. DD:
-      summary/local/separatrix/*, equilibrium/time_slice/boundary_separatrix.
+      The flux surface through the primary X-point, where the poloidal flux
+      equals its X-point value; it bounds the confined plasma only in a
+      diverted configuration. For a flux-surface-averaged
+      quantity apply the flux_surface_averaged operator; for a bare point value
+      at the outboard midplane use outboard_midplane_separatrix.
   shattering_position:
     type: position
     allowed_relations: [at, of]
@@ -826,18 +819,16 @@ loci:
     definition: >-
       The point where the last closed flux surface of a limited plasma is
       tangent to (makes contact with) the limiter surface - the
-      separatrix-limiter tangency point. Distinct from the SOL-adjacent
-      'at_limiter' locus. DD: pulse_schedule/position_control/active_limiter_point.
+      separatrix-limiter tangency point. Distinct from at_limiter, the
+      scrape-off-layer plasma immediately adjacent to the limiter.
   dr_dz_zero_point:
     # plasma boundary location where dr/dz = 0 — the outboard local
     # major-radius maximum (widest point of the separatrix)
     type: position
     allowed_relations: [at, of]
     definition: >-
-      Outboard point on the separatrix where dr/dz = 0 (the local maximum of
-      the separatrix major radius) - the geometric outer-midplane reference
-      selected by the DD midplane_identifier option 'dr_dz_zero_sep'. DD:
-      equilibrium/time_slice/boundary_separatrix/dr_dz_zero_point.
+      The outboard separatrix point where dR/dZ = 0, at a local maximum of
+      the separatrix major radius.
   rectangle_center:
     type: position
     allowed_relations: [at, of]

@@ -1,0 +1,64 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-18T10:52:50.988Z",
+  "dispatched_at": "2026-10-18T10:38:51Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-standard-names/docs/plans/concept-and-notation-registry.html:193",
+      "id": "reasoning-1",
+      "reason": "the instruction and the done-when disagree about the same locus, and a worker implementing per the instruction ships a definition the gate the section names will still dock.",
+      "text": "\u00a79 tells the worker `dr_dz_zero_point` \"loses only its IDS path\", but its registered definition (`imas_standard_names/grammar/vocabularies/locus_registry.yml:838-842`) carries three DD references, not one: the IDS path (\"DD: equilibrium/time_slice/boundary_separatrix/dr_dz_zero_point\"), the DD field `midplane_identifier`, and the option value `'dr_dz_zero_sep'`; the same section's first done-when asserts \"no locus definition names a DD field, an IDS path or an option value\", so an edit made exactly as instructed leaves a DD field and an option value and fails the section's own test",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "eaac9389df72a419912b0a029a09b543f5bc19dc4b7517fc416741604ef71616",
+  "plan_slug": "concept-and-notation-registry",
+  "plan_version": 47,
+  "project": "imas-standard-names",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "reasoning-1",
+      "reason": "",
+      "when": "2026-10-18T10:54:23.286206+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-18T10:54:23.286206+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-standard-names/docs/state/imas-standard-names/reviews/plan/concept-and-notation-registry/r-20261018T103840281645-plan-review-of-concept-and-notation-registry.json",
+  "review_run_id": "r-20261018T103840281645-plan-review-of-concept-and-notation-registry",
+  "reviewed_blob_sha": "747eee89969fda2440d2aef132ba65813213b2c2",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 commit `0e43cde` resolves and its message matches \u00a79's account (\"undefined for a limited plasma \u2026 disagrees with poloidal_angle\"); `conventions/concepts.yml` relation and the `poloidal_angle`, `outboard_midplane`, `inboard_midplane`, `outboard_midplane_separatrix` and `dr_dz_zero_point` referents all resolve.",
+    "done_when": "pass \u2014 both of \u00a79's done-whens are measurable and each names a negative control: test 1 must fail on the old `outboard_midplane` and the old `outboard_midplane_separatrix` text, and test 2 on a planted definition that drops the midplane-height or the axis-side part; the `dR/dZ`/`dr/dz` clause is scoped to the three midplane loci, so `dr_dz_zero_point` is exempt, which is the correction the prior `done_when-1` asked for.",
+    "evidence_paths": "pass \u2014 \u00a79's done-when names no scratch path; its runs record `EXIT=` under the node's evidence grant, not a temporary directory.",
+    "naming": "pass \u2014 \u00a79 introduces no plan label, stage name, ticket number or version tag into code, and its new test carries no plan identifier.",
+    "reasoning": "a finding \u2014 \u00a79's instruction for `dr_dz_zero_point` (\"loses only its IDS path\") under-scopes the edit, so the mechanism the section names cannot produce the section's own done-when.",
+    "single_goal": "pass \u2014 \u00a79 carries one deliverable, that every locus definition states its concept and names no DD field.",
+    "wiring": "pass \u2014 \u00a79's declared link `concept-and-notation-registry#s4` resolves and matches \u00a78's done-when (\"The release in \u00a74 carries this section with \u00a77 and \u00a79\"); the dependent\u2192release direction is the plan's one convention, already settled by an earlier review."
+  },
+  "section_digests": {
+    "_document": "82c98284e29159f2f0f5d76c4aafe4d50e89db00f6fa28f26c9084cbe3319550",
+    "s1": "30a14d1b0da016d94a775f6d1085956ddc7deec1c03f5b5f600083f6120bf711",
+    "s2": "62e226b5e5ae9709dcab01f287af1164b128950199d32d6795f6a9f6bf3dbda9",
+    "s3": "dbbc4175f8a714330ed9bfb7402d0ebe8acc2802fc51746f56dae6d178b35434",
+    "s4": "3a28fbf118b9fc1daa60b9e41d42866cbcd951b116da2f37eb7123b2b556746e",
+    "s5": "e3e419e7263996f386d85bc2c61b8a4e66310aafa7f80b0fbd7a58542f437ebb",
+    "s6": "d6c899960389590d810c511386e34ba7ee133af91a946fa601a71df17dca431c",
+    "s7": "aa0c472d531855bdcd98e4c973fe4d5dcbd7c3f7755f96886e5fb2a1d77ce38b",
+    "s8": "4820dc589f1a489dca0b3ed5bad067fc735808b8d4c9c39c80dd71eb63349c3c",
+    "s9": "d872563ba5edc9ef7a61d9c1415cf17814f72ad93044147293a9da2182c44a00"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-18T10:54:09.299751+00:00"
+}
