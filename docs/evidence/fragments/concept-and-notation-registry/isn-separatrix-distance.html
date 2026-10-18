@@ -1,0 +1,79 @@
+<section id="isn-separatrix-distance-landing">
+  <h2>A base for a distance from the separatrix</h2>
+  <p id="isn-separatrix-distance-base">
+    <code>grammar/vocabularies/physical_bases.yml</code> gains one base,
+    <code>separatrix_distance</code>, beside <code>decay_length</code> and
+    <code>connection_length</code>; the entry is <code>kind: scalar</code> with
+    no aliases, and its comment states what it measures: a measurement
+    position's distance from the magnetic separatrix, positive outside it in
+    the scrape-off layer. It is the quantity the DD stores at
+    <code>langmuir_probes/embedded/distance_separatrix_midplane</code>,
+    <code>langmuir.../reciprocating/plunge/distance_separatrix_midplane</code>
+    and <code>thomson_scattering/channel/distance_separatrix_midplane</code>.
+    It names what a distance is measured from, which is a different statement
+    from the <code>separatrix</code> zone, which says where a quantity sits.
+  </p>
+  <p id="isn-separatrix-distance-parse">
+    The parse before and after. Before, the residue of
+    <code>radial_separatrix_distance_at_outboard_midplane</code> resolved
+    through the zone segment: component <code>radial</code>, base
+    <code>distance</code>, zone <code>[separatrix]</code>, position
+    <code>outboard_midplane</code>, round trip true. After, it resolves as the
+    base itself: component <code>radial</code>, base
+    <code>separatrix_distance</code>, no zone, position
+    <code>outboard_midplane</code>, round trip true.
+  </p>
+  <p id="isn-separatrix-distance-parser">
+    No parser change was needed. In
+    <code>grammar/parser.py:_match_base_with_qualifiers</code> the residue is
+    tested against the closed base set (<code>s in v.bases</code>) before the
+    split loop that strips a zone or qualifier prefix. For the target name the
+    projection stage recurses on the residue <code>separatrix_distance</code>,
+    which now returns the base directly, so the longer base match wins over
+    the zone reading <code>separatrix</code> + base <code>distance</code>.
+    The parser file is unchanged.
+  </p>
+  <p id="isn-separatrix-distance-fixtures">
+    Fixture parse comparison: the 41 names in
+    <code>imas_standard_names/resources/standard_name_examples</code> parse
+    identically at the base vocabulary and at the head vocabulary — the two
+    dumps diff with no line differing. Positive control: the instrument is
+    shown to see a known difference, because the same probe trees parse the
+    target name as base <code>distance</code> (zone <code>[separatrix]</code>)
+    at base and base <code>separatrix_distance</code> (no zone) at head, so the
+    empty fixture diff is a genuine absence and not a blind instrument.
+  </p>
+  <p id="isn-separatrix-distance-zones">
+    Names that use <code>separatrix</code> as a zone or a locus keep their
+    parse and are tested explicitly: <code>separatrix_density</code> stays base
+    <code>density</code> with zone <code>[separatrix]</code>, and
+    <code>temperature_at_separatrix</code> stays base <code>temperature</code>
+    with position <code>separatrix</code>. Both round-trip.
+  </p>
+  <p id="isn-separatrix-distance-control">
+    Negative control. With the <code>separatrix_distance</code> base removed
+    from the vocabulary, the decomposition test
+    (<code>test_radial_separatrix_distance_decomposes_to_component_base_and_position</code>)
+    and the round-trip test (<code>test_radial_separatrix_distance_round_trips</code>)
+    both fail, while the separatrix zone and locus tests still pass: 2 failed,
+    2 passed, <code>EXIT=1</code>. The log is
+    <code>negative-control.log</code> in the run directory.
+  </p>
+  <p id="isn-separatrix-distance-measure">
+    Gate: the two arms below ran the whole <code>tests/grammar/</code> suite,
+    each in its own scratch copy of the tree with its own basetemp, so neither
+    arm reads a file the other writes. The base arm ran 6 failed, 1273 passed,
+    32 skipped (<code>EXIT=1</code>); the head arm ran 4 failed, 1275 passed,
+    32 skipped (<code>EXIT=1</code>). Failure ids added at head: none. The base
+    arm's two extra failures are this node's own new tests
+    (<code>test_radial_separatrix_distance_decomposes_to_component_base_and_position</code>
+    and <code>test_radial_separatrix_distance_round_trips</code>), which is the
+    red control reproduced at suite scope. The four failures common to both
+    arms are <code>test_documented_examples.py</code> checks that read the
+    repository's <code>docs/</code>, absent from those first scratch copies —
+    scaffolding, present equally in both arms and so outside the delta. The
+    logs are <code>base-grammar.log</code> and <code>head-grammar.log</code> in
+    the run directory, each naming its own <code>module.__file__</code>,
+    working directory and vocabulary digest.
+  </p>
+</section>
