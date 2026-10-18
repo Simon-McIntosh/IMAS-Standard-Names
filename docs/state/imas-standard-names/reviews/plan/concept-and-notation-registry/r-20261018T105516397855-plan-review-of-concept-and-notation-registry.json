@@ -16,7 +16,24 @@
   "plan_slug": "concept-and-notation-registry",
   "plan_version": 48,
   "project": "imas-standard-names",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "reasoning-1",
+      "reason": "the operative instructions are unambiguous: outboard_midplane_separatrix is redefined from the midplane and dr_dz_zero_point keeps its geometric definition; 'the one locus whose meaning is that point' refers to the locus that is defined as that point after the rewrite, so no instruction changes",
+      "when": "2026-10-18T11:10:23.950420+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "the operative instructions are unambiguous: outboard_midplane_separatrix is redefined from the midplane and dr_dz_zero_point keeps its geometric definition; 'the one locus whose meaning is that point' refers to the locus that is defined as that point after the rewrite, so no instruction changes",
+      "when": "2026-10-18T11:10:23.950420+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-standard-names/docs/state/imas-standard-names/reviews/plan/concept-and-notation-registry/r-20261018T105516397855-plan-review-of-concept-and-notation-registry.json",
   "review_run_id": "r-20261018T105516397855-plan-review-of-concept-and-notation-registry",
   "reviewed_blob_sha": "b7801a7241dfc3e03ab972beac840039f3698ab6",
   "rubric": "content",
