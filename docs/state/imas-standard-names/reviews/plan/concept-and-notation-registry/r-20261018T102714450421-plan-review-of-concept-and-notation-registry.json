@@ -1,0 +1,55 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-18T10:36:47.204Z",
+  "dispatched_at": "2026-10-18T10:27:23Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/concept-and-notation-registry.html:193",
+      "id": "done_when-1",
+      "reason": "without naming `dr_dz_zero_point`'s fate the worker must either delete a generated vocabulary token (touching `model_types.py:600` and the codegen drift gate) or deviate from an \"exact\" done-when, and the recorded decision `0e43cde` removed the dR/dZ = 0 *midplane* entries, not this locus, so \"do not reinstate\" does not settle it either.",
+      "text": "\u00a79's first done-when asserts that no locus definition \"contains dR/dZ or dr/dz in any case\", but the registered locus `dr_dz_zero_point` (`imas_standard_names/grammar/vocabularies/locus_registry.yml:833-842`) defines itself as \"Outboard point on the separatrix where dr/dz = 0 \u2026\" and carries the IDS path `equilibrium/time_slice/boundary_separatrix/dr_dz_zero_point`; \u00a79's \"at least these\" list of loci with DD references omits it, and the clause \"A locus with no `concepts.yml` entry keeps its physics and loses only the DD reference, unless that physics is the dR/dZ = 0 point\" names only `outboard_midplane_separatrix` as the exception, so the assertion cannot pass while the token exists and \u00a79 gives no replacement for it",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/concept-and-notation-registry.html:193",
+      "id": "reasoning-1",
+      "reason": "the plan asserts a case it does not resolve, sending a node into a blocker on a section whose spec is \"exact \u2014 implement as written\"; the plan needs one line saying whether `dr_dz_zero_point` is redefined from the midplane like `outboard_midplane_separatrix`, exempted in the test, or removed with the grammar codegen it implies.",
+      "text": "\u00a79 scopes the rewrite to \"each `locus_registry.yml` definition that names a DD field, an IDS path or an option value\" and carves out only `outboard_midplane_separatrix`, yet `dr_dz_zero_point` is a second registered locus whose entire meaning is the dR/dZ = 0 point (it and `outboard_midplane_separatrix` name the same geometric point) and which has no `concepts.yml` entry to state \"in words\", so the section's mechanism cannot reach the measure it asserts",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "b61c6fd9d665a65681863d66501b4c5622bb3fc1ce9c20bffc4cc22902d0bb7e",
+  "plan_slug": "concept-and-notation-registry",
+  "plan_version": 46,
+  "project": "imas-standard-names",
+  "responses": {},
+  "review_run_id": "r-20261018T102714450421-plan-review-of-concept-and-notation-registry",
+  "reviewed_blob_sha": "808fe1085cb0543ef97200ebe759c5a0dd7f69e8",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `locus_registry.yml` and `conventions/concepts.yml` exist; commit `0e43cde` resolves and is the commit that changed the midplane entries in `concepts.yml` (`git show --stat 0e43cde` = `concepts.yml` + one evidence fragment); the extensionless link `concept-and-notation-registry#s4` resolves to `.html`.",
+    "done_when": "a finding \u2014 \u00a79's first done-when asserts that no locus definition \"contains dR/dZ or dr/dz in any case\", an assertion the registered `dr_dz_zero_point` locus (`locus_registry.yml:833-842`) falsifies at head, and \u00a79 neither lists it for rewrite nor says what becomes of it.",
+    "evidence_paths": "pass \u2014 \u00a79 asks for the before/after list in the section's fragment, the committed `docs/evidence/fragments/concept-and-notation-registry/` area used by \u00a75, \u00a76 and \u00a77; no scratchpad path is named.",
+    "naming": "pass \u2014 \u00a79 introduces no symbol, filename or comment carrying a plan label, stage name, ticket number or version tag; the definitions it rewrites are data.",
+    "reasoning": "a finding \u2014 the stated root cause matches the evidence (verified below) and the caller is named, but the rewrite \u00a79 scopes cannot produce the done-when it declares, because `dr_dz_zero_point` is out of the plan's treatment; \u00a79's mechanism is therefore incomplete against its own measure.",
+    "single_goal": "pass \u2014 \u00a79 is one outcome (locus definitions re-expressed from `concepts.yml`, with one specifically redefined), carried by two assertions on the same registry file.",
+    "wiring": "pass \u2014 \u00a78 and \u00a79 both link to `#s4`, which resolves as `concept-and-notation-registry.html#s4`, and \u00a78's own text says \"The release in \u00a74 carries this section with \u00a77 and \u00a79\", so the reference direction is the one already ruled acceptable for this plan."
+  },
+  "section_digests": {
+    "_document": "82c98284e29159f2f0f5d76c4aafe4d50e89db00f6fa28f26c9084cbe3319550",
+    "s1": "30a14d1b0da016d94a775f6d1085956ddc7deec1c03f5b5f600083f6120bf711",
+    "s2": "62e226b5e5ae9709dcab01f287af1164b128950199d32d6795f6a9f6bf3dbda9",
+    "s3": "dbbc4175f8a714330ed9bfb7402d0ebe8acc2802fc51746f56dae6d178b35434",
+    "s4": "3a28fbf118b9fc1daa60b9e41d42866cbcd951b116da2f37eb7123b2b556746e",
+    "s5": "e3e419e7263996f386d85bc2c61b8a4e66310aafa7f80b0fbd7a58542f437ebb",
+    "s6": "d6c899960389590d810c511386e34ba7ee133af91a946fa601a71df17dca431c",
+    "s7": "aa0c472d531855bdcd98e4c973fe4d5dcbd7c3f7755f96886e5fb2a1d77ce38b",
+    "s8": "4820dc589f1a489dca0b3ed5bad067fc735808b8d4c9c39c80dd71eb63349c3c",
+    "s9": "23f2342e5f7ffdfa6826694e15dac6ca5ff971c3d2b5d1131a6bc1500cdf7e17"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-18T10:38:07.324216+00:00"
+}
