@@ -46,6 +46,13 @@
       "finding": "done_when-1",
       "reason": "",
       "when": "2026-10-18T10:27:06.310628+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "wiring-1",
+      "reason": "links are read as references, not waits, and the release section names what it carries in its text, so the direction changes no schedule; the plan keeps one convention rather than editing typed records for a reference",
+      "when": "2026-10-18T10:27:08.867586+00:00"
     }
   ],
   "responses": {
@@ -60,6 +67,12 @@
       "by": "",
       "reason": "",
       "when": "2026-10-18T10:27:03.696250+00:00"
+    },
+    "wiring-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "links are read as references, not waits, and the release section names what it carries in its text, so the direction changes no schedule; the plan keeps one convention rather than editing typed records for a reference",
+      "when": "2026-10-18T10:27:08.867586+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-standard-names/docs/state/imas-standard-names/reviews/plan/concept-and-notation-registry/r-20261018T101148573199-plan-review-of-concept-and-notation-registry.json",
