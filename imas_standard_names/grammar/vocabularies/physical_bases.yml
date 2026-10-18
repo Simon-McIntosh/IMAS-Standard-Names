@@ -554,6 +554,13 @@ bases:
   decay_length:
     aliases: []
     kind: scalar
+  # A measurement position's distance from the magnetic separatrix, positive
+  # outside it (in the scrape-off layer); negative inside the confined plasma.
+  # Distinct from a distance measured in the separatrix zone: this base names
+  # what the distance is measured from, not where the quantity sits.
+  separatrix_distance:
+    aliases: []
+    kind: scalar
   resistive_diffusion_time:
     aliases: []
     kind: scalar
