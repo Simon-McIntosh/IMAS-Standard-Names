@@ -1,0 +1,62 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-16T10:18:40.049Z",
+  "dispatched_at": "2026-10-16T10:09:56Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/concept-and-notation-registry.html:185",
+      "id": "reasoning-1",
+      "reason": "\u00a77 quotes the field verbatim and lists the three distinct sentences by topic, so a worker reaches the same three placements whether it reads \"three\" or \"four\"; only the surrounding count is imprecise.",
+      "text": "\u00a77 states \"Three of those rulings carry a `template_sentence`\", but `scg-near-duplicate-rulings.json` has four of its six rulings with a non-null `template_sentence` (overlap-296b9d67a4a5, overlap-370569d04611, overlap-7f2595983ef6, overlap-ff9acc486ea4 \u2014 the two triangularity rulings sharing one sentence), which is three distinct sentences from four rulings; the count of *rulings* is wrong though the three sentences \u00a77 lists are right",
+      "type": "reasoning",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "e7e66c8ee7b2f32ba8dd447f05fa38a161e695f4a0ccbd3eb6560a00477f3aa7",
+  "plan_slug": "concept-and-notation-registry",
+  "plan_version": 39,
+  "project": "imas-standard-names",
+  "response_events": [
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "reasoning-1",
+      "reason": "the finding is about the count of rulings, not of sentences: four rulings carry the field and two share one sentence. Section 7 quotes the field verbatim and lists the three distinct sentences by topic, so every placement it asks for is unchanged",
+      "when": "2026-10-16T10:19:29.734509+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "the finding is about the count of rulings, not of sentences: four rulings carry the field and two share one sentence. Section 7 quotes the field verbatim and lists the three distinct sentences by topic, so every placement it asks for is unchanged",
+      "when": "2026-10-16T10:19:29.734509+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-standard-names/plan-concept-and-notation-registry.v39.json",
+  "review_run_id": "r-20261016T100949742590-plan-review-of-concept-and-notation-registry",
+  "reviewed_blob_sha": "982f1bb6c185ecbd77a570d14c4718c7a731b5ff",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the cited `scg-near-duplicate-rulings.json` (ruled_at 2026-10-13), `imas_codex/standard_names/workers.py:~9661`, `imas_codex/standard_names/docs_gates.py:~983` and the named test file all resolve.",
+    "done_when": "pass \u2014 \u00a77's done-when carries red controls (each sentence removed, each sentence duplicated, each sentence relocated to reach an undescribed name) and records them with `EXIT=`, and it stores the escape (no such placement) in the fragment explicitly.",
+    "evidence_paths": "pass \u2014 \u00a77 names a repository test path (`tests/grammar/test_template_conditions.py`) and a fragment; the report is a run artifact, not a node-local temp.",
+    "naming": "pass \u2014 \u00a77 introduces no plan labels into symbols and, conversely, instructs the worker to rename `_legacy_selection` (whose docstring is changelog prose, \"before conditions existed\") by what the oracle computes.",
+    "reasoning": "a finding \u2014 \u00a77's claim that \"Three of those rulings carry a `template_sentence`\" does not match its cited evidence, which carries four rulings with the field (two sharing one sentence) and three distinct sentences.",
+    "single_goal": "pass \u2014 \u00a77 has one goal, placing the three separating sentences on the \u00a75/\u00a76 mechanisms and rendering them through one accessor.",
+    "wiring": "pass \u2014 \u00a77's `data-links` name `#s5` and `#s6`, the two sections whose mechanisms it builds on, and both h2 anchors resolve; the sole declared edge `plan-blocks=imas-codex:sn-house-style` points at the consumer plan, unchanged."
+  },
+  "section_digests": {
+    "_document": "cd4ef8b509f6911b6028d3fe30ec58adf657b2baa762d2934c92ef96444c8b86",
+    "s1": "30a14d1b0da016d94a775f6d1085956ddc7deec1c03f5b5f600083f6120bf711",
+    "s2": "62e226b5e5ae9709dcab01f287af1164b128950199d32d6795f6a9f6bf3dbda9",
+    "s3": "dbbc4175f8a714330ed9bfb7402d0ebe8acc2802fc51746f56dae6d178b35434",
+    "s4": "3a28fbf118b9fc1daa60b9e41d42866cbcd951b116da2f37eb7123b2b556746e",
+    "s5": "e3e419e7263996f386d85bc2c61b8a4e66310aafa7f80b0fbd7a58542f437ebb",
+    "s6": "d6c899960389590d810c511386e34ba7ee133af91a946fa601a71df17dca431c",
+    "s7": "aa0c472d531855bdcd98e4c973fe4d5dcbd7c3f7755f96886e5fb2a1d77ce38b"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-16T10:19:29.484692+00:00"
+}
