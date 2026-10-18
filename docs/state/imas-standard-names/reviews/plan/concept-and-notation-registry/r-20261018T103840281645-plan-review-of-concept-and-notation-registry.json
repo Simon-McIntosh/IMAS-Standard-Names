@@ -16,7 +16,24 @@
   "plan_slug": "concept-and-notation-registry",
   "plan_version": 47,
   "project": "imas-standard-names",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "reasoning-1",
+      "reason": "",
+      "when": "2026-10-18T10:54:23.286206+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-18T10:54:23.286206+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-standard-names/docs/state/imas-standard-names/reviews/plan/concept-and-notation-registry/r-20261018T103840281645-plan-review-of-concept-and-notation-registry.json",
   "review_run_id": "r-20261018T103840281645-plan-review-of-concept-and-notation-registry",
   "reviewed_blob_sha": "747eee89969fda2440d2aef132ba65813213b2c2",
   "rubric": "content",
