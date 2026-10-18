@@ -47,6 +47,13 @@
       "finding": "reasoning-1",
       "reason": "",
       "when": "2026-10-18T10:11:23.351626+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "single_goal-1",
+      "reason": "",
+      "when": "2026-10-18T10:11:25.565639+00:00"
     }
   ],
   "responses": {
@@ -55,6 +62,12 @@
       "by": "",
       "reason": "",
       "when": "2026-10-18T10:11:23.351626+00:00"
+    },
+    "single_goal-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-18T10:11:25.565639+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-standard-names/docs/state/imas-standard-names/reviews/plan/concept-and-notation-registry/r-20261018T095724002308-plan-review-of-concept-and-notation-registry.json",
