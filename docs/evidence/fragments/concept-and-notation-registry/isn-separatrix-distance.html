@@ -60,20 +60,18 @@
     <code>negative-control.log</code> in the run directory.
   </p>
   <p id="isn-separatrix-distance-measure">
-    Gate: the two arms below ran the whole <code>tests/grammar/</code> suite,
-    each in its own scratch copy of the tree with its own basetemp, so neither
-    arm reads a file the other writes. The base arm ran 6 failed, 1273 passed,
-    32 skipped (<code>EXIT=1</code>); the head arm ran 4 failed, 1275 passed,
-    32 skipped (<code>EXIT=1</code>). Failure ids added at head: none. The base
-    arm's two extra failures are this node's own new tests
-    (<code>test_radial_separatrix_distance_decomposes_to_component_base_and_position</code>
-    and <code>test_radial_separatrix_distance_round_trips</code>), which is the
-    red control reproduced at suite scope. The four failures common to both
-    arms are <code>test_documented_examples.py</code> checks that read the
-    repository's <code>docs/</code>, absent from those first scratch copies —
-    scaffolding, present equally in both arms and so outside the delta. The
-    logs are <code>base-grammar.log</code> and <code>head-grammar.log</code> in
+    Gate: the whole <code>tests/grammar/</code> suite, run twice, each arm in
+    its own scratch copy of the tree with its own basetemp, so neither arm
+    reads a file the other writes. The base arm (base vocabulary, head tests)
+    ran 2 failed, 1277 passed, 32 skipped (<code>EXIT=1</code>); the head arm
+    ran 0 failed, 1279 passed, 32 skipped (<code>EXIT=0</code>). Failure ids
+    added at head: none. The base arm's only two failures are this node's own
+    new tests — <code>test_radial_separatrix_distance_decomposes_to_component_base_and_position</code>
+    and <code>test_radial_separatrix_distance_round_trips</code> — which is the
+    red control reproduced at suite scope, and both pass at head. The logs are
+    <code>full-base-grammar.log</code> and <code>full-head-grammar.log</code> in
     the run directory, each naming its own <code>module.__file__</code>,
-    working directory and vocabulary digest.
+    working directory and vocabulary digest (sha256 <code>3374bc40…</code> base,
+    <code>93b066b3…</code> head).
   </p>
 </section>
