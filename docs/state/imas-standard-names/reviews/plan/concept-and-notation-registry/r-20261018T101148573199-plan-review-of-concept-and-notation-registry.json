@@ -1,0 +1,63 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-18T10:24:52.644Z",
+  "dispatched_at": "2026-10-18T10:11:57Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/concept-and-notation-registry.html:193",
+      "id": "reasoning-1",
+      "reason": "a worker following \"keep its physics\" leaves dr/dz = 0 in the registry while \u00a79's second done-when plants dr/dz = 0 as the failing control, so the node cannot satisfy both and the section authors the contradiction the test is meant to catch.",
+      "text": "\u00a79 tells the worker \"A locus with no `concepts.yml` entry keeps its physics\" and to \"Keep each pointer to a sibling locus, such as `outboard_midplane_separatrix` for a value at the intersection\", but `outboard_midplane_separatrix` (locus_registry.yml:691-700) defines itself as \"the outboard separatrix point where dr/dz = 0\" \u2014 the same geometric definition \u00a79 says a recorded decision removed and forbids reinstating \u2014 and its first reading, \"intersection of the separatrix with the outboard (low-field-side) midplane\", no longer denotes that point now that \u00a79 adopts the `Z = Z_mid` midplane (concepts.yml:420-428), so the section's rule and its stated physics disagree",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/concept-and-notation-registry.html:193",
+      "id": "done_when-1",
+      "reason": "the worker must invent an unstated comparison (the `meaning` prose is the only candidate), and a done-when that carries two readings is not the contract it claims to be.",
+      "text": "\u00a79's second done-when asserts that each rewritten locus definition \"agrees with that entry's `concepts.yml` symbols\", but `locus_registry.yml` carries no LaTeX and no `symbols` key (checked: no `\\` and no `symbol` in the file), while a `concepts.yml` entry's `symbols` are LaTeX symbol/`meaning` pairs, so a test cannot compare the two as the done-when states",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/concept-and-notation-registry.html:188",
+      "id": "wiring-1",
+      "reason": "`links` is parsed into the section record and read as a reference (reckon/_plan_html.py:1032), not dispatched on as a wait, so the inversion misleads a reader without rescheduling the node.",
+      "text": "\u00a78 and \u00a79 each link to `#s4`, but \u00a78's own text says \"The release in \u00a74 carries this section\", so the declared link runs from the dependent change to the release it feeds, opposite to \u00a77's links, which point at its prerequisites (\u00a75, \u00a76)",
+      "type": "wiring",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "6c5eef1613d7c00e9dc5a002ab5f79bd8b0066b7dd75e2008d41df1d3febdde3",
+  "plan_slug": "concept-and-notation-registry",
+  "plan_version": 45,
+  "project": "imas-standard-names",
+  "responses": {},
+  "review_run_id": "r-20261018T101148573199-plan-review-of-concept-and-notation-registry",
+  "reviewed_blob_sha": "ca1b62dcd85008093c3a9d75a8718717927fa5d7",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the three DD paths \u00a78 cites exist in the DD, commit `0e43cde` and `conventions/concepts.yml` resolve, and the quoted `locus_registry.yml` text is verbatim.",
+    "done_when": "a finding \u2014 \u00a79's second done-when (\"each rewritten locus definition with a `concepts.yml` entry agrees with that entry's symbols\") names a comparison between LaTeX symbols and prose that no locus definition carries.",
+    "evidence_paths": "pass \u2014 every gate in \u00a78 and \u00a79 is recorded with `EXIT=` on the run's own record; no gate is pointed at a scratchpad or node-local path.",
+    "naming": "pass \u2014 the new `separatrix_distance` base carries no plan label, ticket number or version tag, and neither section adds a changelog comment.",
+    "reasoning": "a finding \u2014 \u00a79 keeps the physics of the sibling locus it also tells the worker to point at, and that locus's physics is the `dr/dz = 0` definition \u00a79 forbids, so the rewrite rule and its own planted control contradict each other.",
+    "single_goal": "pass \u2014 \u00a78 now carries only the base addition and \u00a79 only the locus-definition rewrite, so the earlier three-deliverable \u00a78 has been split and each section closes on one verdict.",
+    "wiring": "a finding \u2014 \u00a78 and \u00a79 each declare `data-links=\"concept-and-notation-registry#s4\"`, the one relation in the plan that reads in the opposite direction to \u00a77's own links, which point at \u00a77's prerequisites (s5, s6)."
+  },
+  "section_digests": {
+    "_document": "82c98284e29159f2f0f5d76c4aafe4d50e89db00f6fa28f26c9084cbe3319550",
+    "s1": "30a14d1b0da016d94a775f6d1085956ddc7deec1c03f5b5f600083f6120bf711",
+    "s2": "62e226b5e5ae9709dcab01f287af1164b128950199d32d6795f6a9f6bf3dbda9",
+    "s3": "dbbc4175f8a714330ed9bfb7402d0ebe8acc2802fc51746f56dae6d178b35434",
+    "s4": "3a28fbf118b9fc1daa60b9e41d42866cbcd951b116da2f37eb7123b2b556746e",
+    "s5": "e3e419e7263996f386d85bc2c61b8a4e66310aafa7f80b0fbd7a58542f437ebb",
+    "s6": "d6c899960389590d810c511386e34ba7ee133af91a946fa601a71df17dca431c",
+    "s7": "aa0c472d531855bdcd98e4c973fe4d5dcbd7c3f7755f96886e5fb2a1d77ce38b",
+    "s8": "4820dc589f1a489dca0b3ed5bad067fc735808b8d4c9c39c80dd71eb63349c3c",
+    "s9": "c0b6bbefc782520fea236c2f6f245f2ce44993b16c9ca646e8ee4c1b48e89131"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-18T10:26:37.952919+00:00"
+}
