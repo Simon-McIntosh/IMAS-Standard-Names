@@ -75,6 +75,11 @@
     <p>Every locus definition that named a DD field, an IDS path or an option value now states what <code>concepts.yml</code> states (merge <code>785e858</code>, review 117/120, zero added failures). <code>outboard_midplane</code> reads: the low-field-side equatorial midplane, points at the midplane height with major radius greater than the magnetic-axis radius; the data's midplane identifier selects that height, or it is the magnetic-axis height when none is given. <code>outboard_midplane_separatrix</code> is the crossing of the separatrix with that height on the low-field side, with no gradient wording. <code>dr_dz_zero_point</code> keeps its geometric definition and loses its DD references. One test fails on the old midplane texts. A second fails when a midplane definition drops either its height or its side of the axis. Record: <code>docs/evidence/fragments/concept-and-notation-registry/isn-locus-definitions-physics.html</code>.</p>
   </section>
 
+  <section id="s10-one-midplane">
+    <h2>§10 — one midplane definition</h2>
+    <p>The midplane loci are defined once, by the flux surface's major-radius extremum (review 112/120):</p><ul><li><code>outboard_midplane</code>: the maximum of R on the low-field side;</li><li><code>inboard_midplane</code>: the minimum of R on the high-field side;</li><li><code>outboard_midplane_separatrix</code>: the separatrix's maximum of R.</li></ul><p>These replace the per-dataset midplane-identifier wording. <code>poloidal_angle</code> keeps its zero on the horizontal plane through the magnetic axis, and now states that it coincides with the outboard midplane only for up-down-symmetric equilibria. The relation test asserts R = max_S R and R = min_S R, and fails on the previous wording. <code>tests/grammar/</code>: 1285 passed against 1282 at base, with zero added failures. <a href="/imas-standard-names/evidence/fragments/concept-and-notation-registry/isn-one-midplane.html">fragment</a></p>
+  </section>
+
 </main>
 </body>
 </html>

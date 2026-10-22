@@ -605,10 +605,8 @@ loci:
     type: position
     allowed_relations: [at, of]
     definition: >-
-      The high-field-side equatorial midplane: points at the midplane height
-      with major radius less than the magnetic-axis radius. The data's midplane
-      identifier selects that height, or it is the magnetic-axis height when
-      none is given.
+      The high-field-side equatorial midplane: the point of minimum major
+      radius on the flux surface in question.
   inlet:
     type: position
     allowed_relations: [at, of]
@@ -679,20 +677,16 @@ loci:
     type: position
     allowed_relations: [at, of]
     definition: >-
-      The low-field-side equatorial midplane: points at the midplane height
-      with major radius greater than the magnetic-axis radius. The data's
-      midplane identifier selects that height, or it is the magnetic-axis
-      height when none is given. For a value at the separatrix intersection
-      use outboard_midplane_separatrix.
+      The low-field-side equatorial midplane: the point of maximum major
+      radius on the flux surface in question. For a value at the separatrix
+      intersection use outboard_midplane_separatrix.
   outboard_midplane_separatrix:
     type: position
     allowed_relations: [at, of]
     definition: >-
-      The point where the separatrix crosses the midplane height on the
-      low-field side, at a major radius greater than the magnetic-axis radius.
-      The data's midplane identifier selects that height, or it is the
-      magnetic-axis height when none is given. A separatrix point value at the
-      outboard midplane is evaluated here.
+      The point where the separatrix reaches its maximum major radius, on the
+      low-field side. A separatrix point value at the outboard midplane is
+      evaluated here.
   outer:
     type: position
     allowed_relations: [at, of]

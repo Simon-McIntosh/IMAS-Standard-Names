@@ -1,0 +1,31 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-22T11:29:27.728Z",
+  "dispatched_at": "2026-10-22T11:21:20Z",
+  "findings": [
+    {
+      "file": "imas_standard_names/grammar/vocabularies/conventions/concepts.yml",
+      "line": 324,
+      "severity": "follow-on",
+      "summary": "the reworded poloidal_angle definition, including the added sentence that its zero coincides with the outboard midplane only for up-down-symmetric equilibria, is unguarded: no test in tests/ asserts the entry's definition text or that its equation stayed unchanged, so deleting the sentence leaves tests/grammar/ green"
+    }
+  ],
+  "project": "imas-standard-names",
+  "review_run_id": "r-20261022T104221990348-review-of-isn-one-midplane-88d7af70c0c3",
+  "reviewed_base_sha": "2451ab498b0e84b42c390e7ee4a052cdb59795c2",
+  "reviewed_head_sha": "88d7af70c0c3c6a7bbd4ac04d68e2ae15ec4039a",
+  "reviewed_run_id": "r-20261022T093735018238-isn-one-midplane",
+  "scores": {
+    "durability": 15,
+    "evidence": 19,
+    "fit": 19,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-22T12:37:43.852921+00:00",
+  "total": 112
+}

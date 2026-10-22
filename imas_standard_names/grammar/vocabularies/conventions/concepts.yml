@@ -325,8 +325,10 @@ concepts:
     phrase: poloidal angle
     definition: >-
       The angle about the magnetic axis in a poloidal cross-section, zero on
-      the outboard midplane and increasing clockwise when the cross-section is
-      viewed with R to the right and Z upward.
+      the outboard side of the horizontal plane through the magnetic axis and
+      increasing clockwise when the cross-section is viewed with R to the right
+      and Z upward. That zero coincides with the outboard midplane only for
+      up-down-symmetric equilibria.
     equation: '\theta = \operatorname{atan2}(Z_{\mathrm{axis}} - Z,\; R - R_{\mathrm{axis}})'
     symbols:
       - symbol: R_{\mathrm{axis}}, Z_{\mathrm{axis}}
@@ -419,20 +421,20 @@ concepts:
 
   outboard_midplane:
     phrase: outboard midplane
-    equation: 'Z = Z_{\mathrm{mid}},\quad R > R_{\mathrm{axis}}'
+    equation: 'R = \max_{S} R,\quad R > R_{\mathrm{axis}}'
     symbols:
-      - symbol: Z_{\mathrm{mid}}
-        meaning: the midplane height the data's midplane identifier selects, the magnetic-axis height when none is given
+      - symbol: S
+        meaning: the magnetic flux surface the point lies on
       - symbol: R_{\mathrm{axis}}
         meaning: major radius of the magnetic axis
     restates_equation: false
 
   inboard_midplane:
     phrase: inboard midplane
-    equation: 'Z = Z_{\mathrm{mid}},\quad R < R_{\mathrm{axis}}'
+    equation: 'R = \min_{S} R,\quad R < R_{\mathrm{axis}}'
     symbols:
-      - symbol: Z_{\mathrm{mid}}
-        meaning: the midplane height the data's midplane identifier selects, the magnetic-axis height when none is given
+      - symbol: S
+        meaning: the magnetic flux surface the point lies on
       - symbol: R_{\mathrm{axis}}
         meaning: major radius of the magnetic axis
     restates_equation: false
