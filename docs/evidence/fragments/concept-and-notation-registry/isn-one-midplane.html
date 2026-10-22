@@ -1,0 +1,124 @@
+<!-- Landing record for the one maximum-major-radius midplane definition. -->
+<section id="isn-one-midplane-landing">
+  <p>
+    The outboard and inboard midplane loci carried a per-dataset height: the
+    height the data's midplane identifier selected, and the magnetic-axis
+    height when none was given. A name whose quantity is taken at a stated
+    height therefore read two heights. Under the lead ruling in
+    <code>concept-and-notation-registry</code> §10 the midplane is now defined
+    once, by the major-radius extremum of the flux surface in question:
+    maximum on the low-field side for the outboard midplane, minimum on the
+    high-field side for the inboard midplane.
+  </p>
+  <p>
+    Changed paths:
+    <code>imas_standard_names/grammar/vocabularies/conventions/concepts.yml</code>,
+    <code>imas_standard_names/grammar/vocabularies/locus_registry.yml</code>,
+    <code>tests/grammar/test_locus_definitions_physics_only.py</code>.
+    Commit <code>4c044f1</code>, base <code>2451ab4</code>.
+  </p>
+
+  <h3 id="isn-one-midplane-changed">Definitions changed</h3>
+  <ul>
+    <li>
+      <code>concepts.yml</code> <code>outboard_midplane</code> — before the
+      equation <code>Z = Z_mid, R &gt; R_axis</code> with
+      <code>Z_mid</code> "the midplane height the data's midplane identifier
+      selects, the magnetic-axis height when none is given"; after
+      <code>R = \max_{S} R,\quad R &gt; R_{\mathrm{axis}}</code> with
+      <code>S</code> "the magnetic flux surface the point lies on".
+    </li>
+    <li>
+      <code>concepts.yml</code> <code>inboard_midplane</code> — the same
+      before, with <code>R &lt; R_axis</code>; after
+      <code>R = \min_{S} R,\quad R &lt; R_{\mathrm{axis}}</code> with the same
+      symbols.
+    </li>
+    <li>
+      <code>concepts.yml</code> <code>poloidal_angle</code> — before "zero on
+      the outboard midplane and increasing clockwise …"; after "zero on the
+      outboard side of the horizontal plane through the magnetic axis and
+      increasing clockwise … That zero coincides with the outboard midplane
+      only for up-down-symmetric equilibria." The equation
+      <code>\theta = \operatorname{atan2}(Z_{\mathrm{axis}} - Z,\; R -
+      R_{\mathrm{axis}})</code> is unchanged; the added sentence states where
+      the zero of that equation meets the redefined outboard midplane. The
+      zero stays on the horizontal plane through the axis, as COCOS 17
+      requires.
+    </li>
+    <li>
+      <code>locus_registry.yml</code> <code>outboard_midplane</code> — before
+      "The low-field-side equatorial midplane: points at the midplane height
+      with major radius greater than the magnetic-axis radius. The data's
+      midplane identifier selects that height, or it is the magnetic-axis
+      height when none is given. For a value at the separatrix intersection use
+      outboard_midplane_separatrix."; after "The low-field-side equatorial
+      midplane: the point of maximum major radius on the flux surface in
+      question. For a value at the separatrix intersection use
+      outboard_midplane_separatrix."
+    </li>
+    <li>
+      <code>locus_registry.yml</code> <code>inboard_midplane</code> — before
+      "The high-field-side equatorial midplane: points at the midplane height
+      with major radius less than the magnetic-axis radius. The data's midplane
+      identifier selects that height, or it is the magnetic-axis height when
+      none is given."; after "The high-field-side equatorial midplane: the
+      point of minimum major radius on the flux surface in question."
+    </li>
+    <li>
+      <code>locus_registry.yml</code> <code>outboard_midplane_separatrix</code>
+      — before "The point where the separatrix crosses the midplane height on
+      the low-field side, at a major radius greater than the magnetic-axis
+      radius. The data's midplane identifier selects that height, or it is the
+      magnetic-axis height when none is given. A separatrix point value at the
+      outboard midplane is evaluated here."; after "The point where the
+      separatrix reaches its maximum major radius, on the low-field side. A
+      separatrix point value at the outboard midplane is evaluated here."
+    </li>
+  </ul>
+  <p>
+    Every other locus definition was read. None restates the midplane height.
+    <code>midplane</code> defines the reference plane itself on which the
+    vertical coordinate is zero, not a selected height, and is unchanged.
+    <code>first_wall_midplane</code> names the specified tokamak midplane
+    without a height. <code>dr_dz_zero_point</code> keeps its geometric
+    definition. <code>separatrix</code> keeps its pointer to
+    <code>outboard_midplane_separatrix</code>.
+  </p>
+
+  <h3 id="isn-one-midplane-red">Red controls</h3>
+  <ul>
+    <li id="isn-one-midplane-red-0e43cde">
+      The previous per-dataset height wording restored in both vocabulary files
+      (base <code>2451ab4</code>) makes the relation tests fail 5 of 6
+      (<code>EXIT=1</code>): outboard and inboard
+      <code>test_midplane_definitions_state_the_major_radius_relation</code>,
+      <code>test_outboard_midplane_separatrix_is_the_maximum_radius_point</code>,
+      and both <code>test_midplane_concepts_state_the_major_radius_relation</code>
+      arms. The physics-only no-DD test passes on that wording, which is why
+      the relation test is the guard:
+      <code>logs/negative-control-0e43cde.log</code>.
+    </li>
+    <li id="isn-one-midplane-red-planted">
+      A planted <code>outboard_midplane</code> definition that drops the
+      maximum-major-radius relation ("points at the midplane height of the flux
+      surface in question") fails 1 of 6 (<code>EXIT=1</code>):
+      <code>logs/negative-control-planted-drop-relation.log</code>.
+    </li>
+  </ul>
+  <p>
+    Each test fails when the code it guards is removed, shown above; the two new
+    relation tests pass at head
+    (<code>logs/focused-head.log</code>: 6 passed, <code>EXIT=0</code>).
+  </p>
+
+  <h3 id="isn-one-midplane-gate">Gate</h3>
+  <p id="isn-one-midplane-gate-counts">
+    <code>tests/grammar/</code> at base <code>2451ab4</code>: 1282 passed, 32
+    skipped <code>EXIT=0</code>
+    (<code>logs/base-tests-grammar.log</code>). At head <code>4c044f1</code>:
+    1285 passed, 32 skipped <code>EXIT=0</code>
+    (<code>logs/head-tests-grammar.log</code>). Zero added failures; the three
+    extra passes are the relation tests this node added.
+  </p>
+</section>

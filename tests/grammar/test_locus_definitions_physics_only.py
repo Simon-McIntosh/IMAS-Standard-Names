@@ -4,7 +4,10 @@ import re
 
 import pytest
 
-from imas_standard_names.grammar.vocab_loaders import load_locus_registry
+from imas_standard_names.grammar.vocab_loaders import (
+    load_concepts,
+    load_locus_registry,
+)
 
 DICTIONARY_REFERENCE = re.compile(
     r"\bDD\b|\bmidplane_identifier\b|\bdr_dz_zero_sep\b|"
@@ -36,13 +39,38 @@ def test_locus_definitions_exclude_dictionary_references() -> None:
 
 
 @pytest.mark.parametrize(
-    ("name", "side"),
-    (("outboard_midplane", "greater"), ("inboard_midplane", "less")),
+    ("name", "side", "extremum"),
+    (
+        ("outboard_midplane", "low-field", "maximum"),
+        ("inboard_midplane", "high-field", "minimum"),
+    ),
 )
-def test_midplane_definitions_state_height_and_side(name: str, side: str) -> None:
-    """Each midplane uses the selected height and its side of the axis."""
+def test_midplane_definitions_state_the_major_radius_relation(
+    name: str, side: str, extremum: str
+) -> None:
+    """Each midplane is the extremum of the major radius on its field side."""
     definition = load_locus_registry().loci[name].definition.casefold()
-    assert "midplane height" in definition
-    assert "data's midplane identifier" in definition
-    assert "magnetic-axis height when none is given" in definition
-    assert f"major radius {side} than the magnetic-axis radius" in definition
+    assert f"{side}-side equatorial midplane" in definition
+    assert f"point of {extremum} major radius" in definition
+
+
+def test_outboard_midplane_separatrix_is_the_maximum_radius_point() -> None:
+    """The separatrix locus is where the separatrix reaches its largest radius."""
+    definition = load_locus_registry().loci["outboard_midplane_separatrix"]
+    lowered = definition.definition.casefold()
+    assert "separatrix" in lowered
+    assert "maximum major radius" in lowered
+
+
+@pytest.mark.parametrize(
+    ("name", "relation"),
+    (
+        ("outboard_midplane", r"R = \max_{S} R,\quad R > R_{\mathrm{axis}}"),
+        ("inboard_midplane", r"R = \min_{S} R,\quad R < R_{\mathrm{axis}}"),
+    ),
+)
+def test_midplane_concepts_state_the_major_radius_relation(
+    name: str, relation: str
+) -> None:
+    """Each midplane concept equation states its major-radius extremum."""
+    assert load_concepts().concepts[name].equation == relation
