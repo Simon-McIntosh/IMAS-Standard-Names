@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="dd-gap-vocabulary">
   <meta name="plan-title" content="The Vocabulary The DD&#x27;s Unnamed Sources Need">
   <meta name="plan-summary" content="Add the lead-accepted vocabulary that 86 DD sources lack, rework seven doubtful additions, and release the grammar for imas-codex to pin.">
-  <meta name="plan-status" content="active">
+  <meta name="plan-status" content="shipped">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort-hours" content="8.5">
   <meta name="plan-capability-version" content="1.0">
@@ -20,12 +20,12 @@
   <meta name="plan-tags" content="grammar,vocabulary,release">
   <meta name="plan-blocks" content="imas-codex:sn-integrity-backlog">
   <meta name="plan-section-depends-on" content="{&quot;s3&quot;: [&quot;dd-gap-vocabulary#s2&quot;], &quot;s4&quot;: [&quot;dd-gap-vocabulary#s2&quot;, &quot;dd-gap-vocabulary#s5&quot;], &quot;s6&quot;: [&quot;dd-gap-vocabulary#s3&quot;, &quot;dd-gap-vocabulary#s4&quot;]}">
-  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;implementable&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;}">
   <title>The Vocabulary The DD's Unnamed Sources Need | imas-standard-names</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="13">
-<meta name="plan-modified" content="2026-11-11">
+<meta name="plan-version" content="15">
+<meta name="plan-modified" content="2026-11-14">
 </head>
 <body>
   <main class="plan-doc">
@@ -83,7 +83,7 @@
     </ul>
 
     <h2 id="s6">§6 — The reworked spellings the lead accepts enter the grammar</h2>
-    <section data-reckon="section" data-id="s6" data-effort-hours="1.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <section data-reckon="section" data-id="s6" data-effort-hours="1.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="done" data-links=""></section>
     <p>Once §3 lands and the lead rules on its new-token list, the accepted tokens are added the way §2 adds its own and released in a patch release. Sources whose rework needs no new token are named by imas-codex directly after the §4 release.</p>
     <p><strong>Done when:</strong> every token the lead accepts from <code>doubtful-rework.json</code> is in its vocabulary with a parse and round-trip test of the row's spelling and a planted-removal control, and a patch tag carrying them is pushed to upstream and published.</p>
 
@@ -91,10 +91,11 @@
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-dgv-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-create" data-written-at="2026-11-09" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-dgv-001" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-create" data-written-at="2026-11-09" data-recommends-skill="" data-resolved-at="2026-11-14T14:34:54+00:00" data-resolved-by="reckon-build">
     <h4 class="r-fu-title">Add the accepted vocabulary, rework the doubtful seven, release</h4>
     <div class="r-fu-body"><p>Build §2 and §5 in parallel. §3 follows §2, §4 follows §2 and §5, and §6 follows §3 and the lead’s ruling.</p></div>
     <pre class="r-fu-prompt">/reckon-build dd-gap-vocabulary</pre>
+    <p class="r-fu-outcome">done — no followup: every section landed and shipped in v0.11.0 and v0.11.1; imas-codex pins 0.11.1.</p>
     </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">
@@ -136,6 +137,9 @@
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261110T210440922543-dgv-rework-tokens" data-who="reckon-build" data-when="2026-11-11T04:08:20Z">
     <div class="r-comment-body"><p>Five accepted tokens retained; six spellings and removal controls consolidated into the existing 40-case registration owner with literal spelling and independent IR expectations. Base 1399 passed/32 skipped, repaired head 1413 passed/32 skipped, both EXIT=0 with zero added failure IDs; 95 focused and 6 repair checks pass; answering-commit reversal yields 5 failed/1 passed, and all token/scope removals fail as intended. Evidence /imas-standard-names/evidence/fragments/dd-gap-vocabulary/dgv-rework-tokens.html#dgv-rework-tokens-shared-contract</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-close-s6" data-who="reckon-build" data-when="2026-11-14T15:00:00Z">
+    <div class="r-comment-body"><p>§6 done: the five lead-accepted tokens (<code>pellet_species</code>, <code>plateau_factor</code>, <code>current_profile_alignment</code>, <code>breakdown_candidate</code>, <code>sourced</code>) landed in <code>5b5289b</code> with the review repair <code>c5dbf50</code>, and shipped in patch tag <code>v0.11.1</code>, which is on upstream and published on PyPI. Each token is present in the vocabularies at that tag. <a href="/imas-standard-names/evidence/archive/dd-gap-vocabulary-landed.html#dgv-landed-summary">evidence</a></p></div>
 </div>
 </section>
 </main>
