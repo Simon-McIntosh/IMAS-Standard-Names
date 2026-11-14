@@ -20,11 +20,11 @@
   <meta name="plan-tags" content="grammar,vocabulary,release">
   <meta name="plan-blocks" content="imas-codex:sn-definitions-by-construction">
   <meta name="plan-section-depends-on" content="{&quot;s3&quot;: [&quot;equivalent-electron-counting-qualifier#s2&quot;]}">
-  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;}">
   <title>A Name Can Say It Counts Equivalent Electrons | imas-standard-names</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="7">
+<meta name="plan-version" content="8">
 <meta name="plan-modified" content="2026-11-14">
 </head>
 <body>
@@ -36,7 +36,7 @@
     <p>The grammar cannot spell that today. On 2026-11-13 imas-codex's signed rename refused <code>accumulated_argon_equivalent_electron_count</code>: the spelling matches no physical base. The lead authorised a new token and a grammar release the same day. The flagged names include both counts (<code>…_count</code>, <code>…_prefill_count</code>) and rates (<code>…_source_rate</code>), so one word must serve both.</p>
 
     <h2 id="s2">§2 — One word for the equivalent-electron convention</h2>
-    <section data-reckon="section" data-id="s2" data-effort-hours="1.75" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <section data-reckon="section" data-id="s2" data-effort-hours="1.75" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="done" data-links=""></section>
     <p>The grammar gains the vocabulary a name needs to say that its count or rate is expressed in equivalent electrons. It is one addition that composes with the existing count and source-rate bases and with the species, accumulation, prefill and process tokens those names already use. It is not a new base per quantity. The lead ruled the spelling on 2026-11-13: the word reads <code>equivalent_electron</code> and is the word next to the base, after any other word that forms the kind of count, so the argon inventory is <code>accumulated_argon_equivalent_electron_count</code>, a prefill inventory is <code>neon_prefill_equivalent_electron_count</code>, and the lithium rate is <code>lithium_equivalent_electron_source_rate_due_to_gas_injection</code>. The repository already records this convention under the spelling <code>electron_equivalent</code>, as a transformation its tests expect to be absent; that record is retired in the same change, so one convention has one spelling and no test asserts the feature does not exist. The change adds one public vocabulary word and no refusal: no word of this kind is restricted to particular bases today, and this one is not made the exception.</p>
     <p>The word is a unit convention, which none of the grammar's present presentation groups for such words names, so the group it is filed under is stated in the change and in the landing record.</p>
     <p>Done when:</p>
@@ -68,6 +68,12 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261113T124343172148-eecq-equivalent-electron-word" data-who="reckon-build" data-when="2026-11-13T13:55:29Z">
     <div class="r-comment-body"><p>Added equivalent_electron in normalized presentation group with one shared convention definition and generated enum; six names round-trip, six plain names unchanged, 5600 corpus parses unchanged; head 1672 passed, 32 skipped, 15 xfailed in 545.17s (0:09:05); baseline 1652 passed, 32 skipped, 17 xfailed in 541.48s (0:09:01); zero added failures; vocabulary-removal mutation 14 failed 6 passed EXIT=1.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-close-s2" data-who="reckon-build" data-when="2026-11-14T08:45:00Z">
+    <div class="r-comment-body"><p>§2 closed (<code>eecq-equivalent-electron-word</code>, commits <code>135c42e</code> and <code>c2ea022</code>, merge <code>d475341</code>; review 114 of 120, no added failure). <code>equivalent_electron</code> is a kind-forming qualifier that sits next to the base, after <code>prefill</code>. The six names of the section parse and render back unchanged, the six plain names parse as before, 5,600 corpus parses are unchanged, and removing the word fails fourteen tests. The older placeholder spelling <code>electron_equivalent</code> is retired. Limit the review recorded: the test that pins the order against <code>prefill</code> assembles a literal string, so the order is guarded by the parse assertion on the six names and not by that test.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-s3-release-candidate" data-who="reckon-build" data-when="2026-11-14T08:45:00Z">
+    <div class="r-comment-body"><p>Release candidate <code>v0.12.0rc1</code> was cut from <code>f3af360</code> with the release CLI on 2026-11-14, after <code>main</code> was pushed to upstream and its test and docs runs passed there. The CLI sends a candidate's tag to the fork and only a final release to upstream and PyPI, so this section's done-when (a tag on upstream, PyPI listing the version, the two contrasted installs) is not yet met and the section stays open. imas-codex reads this checkout through its editable source, and its environment parses the equivalent-electron names now. The final release is cut once imas-codex's renames have run against the candidate, so a spelling fault found there can still be fixed before the version is public.</p></div>
 </div>
 </section>
 </main>
