@@ -24,6 +24,8 @@
 <title>The Physics-Domain Vocabulary Names Physics | imas-standard-names</title>
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-version" content="3">
+<meta name="plan-modified" content="2026-11-23">
 </head>
 <body>
 <main class="plan-doc">
@@ -32,7 +34,7 @@
 <section data-reckon="section" data-id="s1" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
 <p>Lead ruling, 2026-11-23: a physics domain names an area of physics, judged from the quantity a name describes, and is never named from a data-dictionary path or data structure. The ruling came from imas-codex, where 1,042 live names carried <code>transport</code> because they were inherited from the IDS they came from. Read by their physics, they are 587 transport quantities and 310 quantities of the plasma's state, with the rest spread over fast particles, runaway electrons, equilibrium, current drive, MHD and auxiliary heating. The proposal for five data-structure domains was rejected. The vocabulary changes in five ways, all ruled the same day:</p>
 <ul>
-<li><code>core_plasma_physics</code> is renamed <code>plasma_state</code>. Its description covers the state of the plasma wherever it applies: densities, temperatures, pressures, velocities, current densities, fields, energies, composition, and global and local parameters. Many of these quantities are neutral or edge quantities with no core locus.</li>
+<li><code>core_plasma_physics</code> is renamed <code>plasma_state</code>. Its description covers the state of the plasma wherever it applies: densities, temperatures, pressures, velocities, current densities, fields, energies, composition, and global and local parameters. Many of these quantities are neutral or edge quantities with no core locus. The boundary with the edge domains is read from the name. If a quantity's name states a scrape-off-layer, divertor or wall locus, the quantity belongs to <code>edge_plasma_physics</code>, <code>divertor_physics</code> or <code>plasma_wall_interactions</code>. Otherwise, a state quantity belongs to <code>plasma_state</code>.</li>
 <li><code>transport</code>'s description covers how particles, energy and momentum move: fluxes, transport coefficients, convection velocities, flux limiters, damping rates, confinement times, neoclassical currents, and the source and exchange terms of the particle, energy and momentum balance. A source whose name states its origin belongs to that origin's domain.</li>
 <li><code>plasma_measurement_diagnostics</code> is retired. It carries no name and no path.</li>
 <li><code>computational_workflow</code> is merged into <code>data_management</code>, whose description covers both. Neither carries a live standard name.</li>
@@ -45,7 +47,7 @@
 <li>No domain entry carries an IDS list.</li>
 <li>Validation accepts <code>plasma_state</code> and refuses each of the three removed values by name.</li>
 <li>No file in the package names a removed value, and that includes the standard-name examples resource.</li>
-<li>The vocabulary contract test pins the new set. Restoring <code>core_plasma_physics</code> in a copy of the vocabulary makes that test fail, and the log of that run is kept.</li>
+<li>The vocabulary contract test pins the new set. Restoring <code>core_plasma_physics</code> in a copy of the vocabulary makes that test fail. The log of that run is committed at <code>docs/evidence/fragments/physics-domain-vocabulary/negative-control.log</code>.</li>
 <li>The whole test suite adds no failure at head against base.</li>
 </ul>
 
@@ -56,16 +58,16 @@
 <ul>
 <li>A release candidate newer than <code>v0.12.0rc1</code> is tagged through the repository's release recipe, from the head that carries §1.</li>
 <li>Its release notes name the rename, the retirement, the merge and the removal of the IDS lists.</li>
-<li>An install of the tagged candidate into a clean environment reports the 30 values of §1.</li>
+<li>An install of the tagged candidate into a clean environment reports the 30 values of §1. Its output is committed at <code>docs/evidence/fragments/physics-domain-vocabulary/clean-install.log</code>.</li>
 </ul>
 
 <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-pdv-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-11-23">
-<h4 class="r-fu-title">Change the vocabulary as ruled</h4>
-<div class="r-fu-body"><p>Build §1, then §2.</p></div>
-<pre class="r-fu-prompt">/reckon-build physics-domain-vocabulary §1</pre>
-</article>
+<article class="r-fu" data-id="f-pdv-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-11-23" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Change the vocabulary as ruled</h4>
+    <div class="r-fu-body"><p>Build §1, then §2.</p></div>
+    <pre class="r-fu-prompt">/reckon-build physics-domain-vocabulary §1</pre>
+    </article>
 </section>
 
 </main>
