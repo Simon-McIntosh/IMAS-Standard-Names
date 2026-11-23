@@ -1,0 +1,58 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-23T07:00:15.523Z",
+  "dispatched_at": "2026-11-23T06:44:38Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/physics-domain-vocabulary.html:35",
+      "id": "reasoning-1",
+      "reason": "the blocked imas-codex plan that applies these descriptions needs a stated boundary (or precedence) between `plasma_state` and the edge/divertor/wall domains, or its relabelling of 310 names has no single right answer and the descriptions themselves disagree with the ruling's own \"judged from the quantity\" principle.",
+      "text": "the `core_plasma_physics` \u2192 `plasma_state` description is defined as covering \"densities, temperatures, pressures, velocities, current densities, fields, energies, composition \u2026 wherever it applies\" and explicitly \"neutral or edge quantities with no core locus\", while the surviving `edge_plasma_physics` (\"Scrape-off layer, divertor physics, plasma-wall interactions, recycling\"), `divertor_physics` (\"Divertor target loads, detachment, particle and heat exhaust\") and `plasma_wall_interactions` (\"First wall \u2026 erosion, deposition, material migration\") descriptions are left untouched; the same section constrains only the transport/origin boundary and says nothing about an edge/SOL density, temperature or neutral pressure that fits both, so the downstream re-domaining of the 310 names this plan counts cannot pick a domain deterministically",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/physics-domain-vocabulary.html:52",
+      "id": "done_when-1",
+      "reason": "the clean-install check pins the exact count of 30, which a release that did not carry \u00a71 (the current 32 values) fails, so the measure is already discriminating even though no control is written as such.",
+      "text": "\u00a72's done-when declares no negative control: it names a tag, release notes and a clean install reporting the 30 values, but no mutation showing the install check can fail",
+      "type": "done_when",
+      "would_change": false
+    },
+    {
+      "anchor": "docs/plans/physics-domain-vocabulary.html:48",
+      "id": "evidence_paths-1",
+      "reason": "the only evidence either done-when requires is unaddressed on disk, and a node that writes it under a session scratchpad or `/tmp` satisfies the plan's wording while leaving nothing a reviewer can open, which is exactly the failure the evidence-path requirement exists to prevent.",
+      "text": "\u00a71's declared negative control says \"the log of that run is kept\" and names no path, and \u00a72's clean-install report (line 59) names no receipt path either, so a later reader cannot open either artifact without trusting the implementing node to have chosen a durable location",
+      "type": "evidence_paths",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "1a168543623b62fcc24f98d5be4538ab82c52c22",
+  "plan_fingerprint": "c216640d6bbedf8daf38f84d1def754733b341c2f2944978261f7bf29c48a94b",
+  "plan_slug": "physics-domain-vocabulary",
+  "plan_version": 0,
+  "project": "imas-standard-names",
+  "responses": {},
+  "review_run_id": "r-20261123T063009665657-plan-review-of-physics-domain-vocabulary",
+  "reviewed_blob_sha": "36264eb4fb83da4f0a6cdda1bdf20a60d02f1cf5",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `v0.12.0rc1` is the latest tag, `physics_domains.yml` and `tag_types.py` exist with 32 domain values (32 \u2212 2 removed = the stated 30), the examples resource `imas_standard_names/resources/standard_name_examples/` exists, and the 1,042/587/310 counts cited in line 33 do resolve in the blocked imas-codex plan.",
+    "done_when": "a finding \u2014 \u00a72's done-when (lines 57\u201359) declares no negative control; \u00a71's declared control (line 48) is sound and falsifiable.",
+    "evidence_paths": "a finding \u2014 the only evidence artifact the plan names, the negative-control log at line 48, is placed at no path.",
+    "naming": "pass \u2014 the plan proposes no symbol names; `plasma_state` and `data_management` are controlled vocabulary tokens, not plan labels, and no ticket or version tag reaches a proposed symbol.",
+    "reasoning": "a finding \u2014 \u00a71's `plasma_state` description (line 35) claims neutral and edge quantities, which overlap the surviving edge domains' descriptions left unchanged at lines 36\u201338 of the same section.",
+    "single_goal": "pass \u2014 \u00a71 delivers one vocabulary change (rename, retire, merge, drop IDS lists) under one gate, and \u00a72 delivers one release.",
+    "wiring": "pass \u2014 the snapshot's `plan-section-depends-on` declares `s2 \u2192 physics-domain-vocabulary#s1`, both section anchors resolve, and the declared `plan-blocks` target (`imas-codex:domains-follow-the-physics`) resolves to `/home/ITER/mcintos/Code/imas-codex/docs/plans/domains-follow-the-physics.html.`"
+  },
+  "section_digests": {
+    "_document": "9ff054e9103e57c6592f2d218705a71b33f18350ac9343a5033ecb50d6ac679a",
+    "s1": "14f74682615ddcc46a0a7df690a02e1034958156d41ebcd656e28e1dad60c679",
+    "s2": "fdf1b61ec6aca7b3324a3caaa4008e753196c70dcd5168ca452ce54a71ebf25d"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T07:00:18.888599+00:00",
+  "total": null
+}
