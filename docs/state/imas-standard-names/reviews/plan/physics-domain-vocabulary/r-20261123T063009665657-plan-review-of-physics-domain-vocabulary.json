@@ -33,7 +33,30 @@
   "plan_slug": "physics-domain-vocabulary",
   "plan_version": 0,
   "project": "imas-standard-names",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "1a168543623b62fcc24f98d5be4538ab82c52c22",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "\u00a71 now states the boundary: a quantity whose name states a scrape-off-layer, divertor or wall locus belongs to edge_plasma_physics, divertor_physics or plasma_wall_interactions; plasma_state holds the state quantity wherever the name states no such locus",
+      "reason": "",
+      "when": "2026-11-23T07:03:18.329829+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "1a168543623b62fcc24f98d5be4538ab82c52c22",
+      "commit_basis": "edit",
+      "note": "\u00a71 now states the boundary: a quantity whose name states a scrape-off-layer, divertor or wall locus belongs to edge_plasma_physics, divertor_physics or plasma_wall_interactions; plasma_state holds the state quantity wherever the name states no such locus",
+      "reason": "",
+      "when": "2026-11-23T07:03:18.329829+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-standard-names/docs/state/imas-standard-names/reviews/plan/physics-domain-vocabulary/r-20261123T063009665657-plan-review-of-physics-domain-vocabulary.json",
   "review_run_id": "r-20261123T063009665657-plan-review-of-physics-domain-vocabulary",
   "reviewed_blob_sha": "36264eb4fb83da4f0a6cdda1bdf20a60d02f1cf5",
   "rubric": "content",
