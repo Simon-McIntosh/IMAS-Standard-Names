@@ -50,6 +50,16 @@
       "finding": "done_when-1",
       "reason": "the clean-install check pins exactly 30 values, which any release without \u00a71 (32 values) fails, so it already discriminates",
       "when": "2026-11-23T07:03:20.022319+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "1a168543623b62fcc24f98d5be4538ab82c52c22",
+      "commit_basis": "edit",
+      "finding": "evidence_paths-1",
+      "note": "\u00a71's negative-control log and \u00a72's clean-install report are named under docs/evidence/fragments/physics-domain-vocabulary/",
+      "reason": "",
+      "when": "2026-11-23T07:03:21.707142+00:00"
     }
   ],
   "responses": {
@@ -58,6 +68,15 @@
       "by": "",
       "reason": "the clean-install check pins exactly 30 values, which any release without \u00a71 (32 values) fails, so it already discriminates",
       "when": "2026-11-23T07:03:20.022319+00:00"
+    },
+    "evidence_paths-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "1a168543623b62fcc24f98d5be4538ab82c52c22",
+      "commit_basis": "edit",
+      "note": "\u00a71's negative-control log and \u00a72's clean-install report are named under docs/evidence/fragments/physics-domain-vocabulary/",
+      "reason": "",
+      "when": "2026-11-23T07:03:21.707142+00:00"
     },
     "reasoning-1": {
       "action": "acted",
