@@ -43,9 +43,22 @@
       "note": "\u00a71 now states the boundary: a quantity whose name states a scrape-off-layer, divertor or wall locus belongs to edge_plasma_physics, divertor_physics or plasma_wall_interactions; plasma_state holds the state quantity wherever the name states no such locus",
       "reason": "",
       "when": "2026-11-23T07:03:18.329829+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "done_when-1",
+      "reason": "the clean-install check pins exactly 30 values, which any release without \u00a71 (32 values) fails, so it already discriminates",
+      "when": "2026-11-23T07:03:20.022319+00:00"
     }
   ],
   "responses": {
+    "done_when-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "the clean-install check pins exactly 30 values, which any release without \u00a71 (32 values) fails, so it already discriminates",
+      "when": "2026-11-23T07:03:20.022319+00:00"
+    },
     "reasoning-1": {
       "action": "acted",
       "by": "",
